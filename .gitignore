@@ -1,2 +1,6 @@
-~
+*.pyc
+*~
 .idea
+dist/
+AutoSklearn.egg-info
+

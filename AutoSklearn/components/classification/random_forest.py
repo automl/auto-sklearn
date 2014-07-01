@@ -26,7 +26,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
             self.max_depth = int(self.max_depth)
         self.min_samples_split = int(self.min_samples_split)
         self.min_samples_leaf = int(self.min_samples_leaf)
-        if self.max_features not in ("sqrt", ("log2")):
+        if self.max_features not in ("sqrt", "log2", "auto"):
             self.max_features = float(self.max_features)
 
         self.estimator = sklearn.ensemble.RandomForestClassifier(
@@ -71,6 +71,11 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
                 "max_features": max_features, "min_samples_split":
                 min_samples_split, "min_samples_leaf": min_samples_leaf,
                 "bootstrap": bootstrap}
+
+    @staticmethod
+    def get_all_accepted_hyperparameter_names():
+        return (["n_estimators", "criterion", "max_features",
+                 "min_samples_split", "min_samples_leaf", "bootstrap"])
 
     def __str__(self):
         return "AutoSklearn LibSVM Classifier"

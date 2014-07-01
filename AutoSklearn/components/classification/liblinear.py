@@ -4,7 +4,8 @@ from ...util import hp_uniform, hp_choice
 from ..classification_base import AutoSklearnClassificationAlgorithm
 
 class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
-     # TODO: maybe add dual and crammer-singer?
+    # Liblinear is not deterministic as it uses a RNG inside
+    # TODO: maybe add dual and crammer-singer?
     def __init__(self, penalty="l2", loss="l2", C=1.0, LOG2_C=None, random_state=None):
         self.penalty = penalty
         self.loss = loss
@@ -51,6 +52,10 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
         LOG2_C = hp_uniform("LOG2_C", -5, 15)
         return {"name": "liblinear", "penalty_and_loss": penalty_and_loss,
                 "LOG2_C": LOG2_C}
+
+    @staticmethod
+    def get_all_accepted_hyperparameter_names():
+        return (["LOG2_C", "C", "penalty", "loss"])
 
     def __str__(self):
         return "AutoSklearn Liblinear Classifier"

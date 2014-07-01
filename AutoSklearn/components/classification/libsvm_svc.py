@@ -48,8 +48,13 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space():
         LOG2_C = hp_uniform("LOG2_C", -5, 15)
-        LOG2_gamma = hp_uniform("LOG2_gamma", -15, 5)
-        return {"name": "libsmv_scv", "LOG2_C": LOG2_C, "LOG2_gamma": LOG2_gamma}
+        LOG2_gamma = hp_uniform("LOG2_gamma", -15, 3)
+        return {"name": "libsvm_svc", "LOG2_C": LOG2_C, "LOG2_gamma":
+            LOG2_gamma}
+
+    @staticmethod
+    def get_all_accepted_hyperparameter_names():
+        return (["LOG2_C", "C", "LOG2_gamma", "gamma"])
 
     def __str__(self):
         return "AutoSklearn LibSVM Classifier"

@@ -87,17 +87,17 @@ class TestAllCombinations(unittest.TestCase):
         #for n_components, whiten in itertools.product(pca_n_components):
                                                       #pca_whiten):
         for n_components in pca_n_components:
-            pca.append({"pca:n_components": n_components,
+            pca.append({"pca:keep_variance": n_components,
                         #"pca:whiten": whiten,
-                        "preprocessor": "pca"})
+                        "preprocessing": "pca"})
         print "Parameter configurations PCA", len(pca)
 
         classifiers = [liblinear, libsvm_svc, random_forest]
-        preprocessors = [pca, [{"preprocessor": None}]]
+        preprocessors = [pca, [{"preprocessing": None}]]
 
         for classifier, preprocessor in itertools.product(classifiers,
                                                           preprocessors):
-            print classifier[0]["classifier"], preprocessor[0]["preprocessor"]
+            print classifier[0]["classifier"], preprocessor[0]["preprocessing"]
             for classifier_params, preprocessor_params in itertools.product(
                     classifier, preprocessor):
                 params = {}
@@ -110,7 +110,12 @@ class TestAllCombinations(unittest.TestCase):
         for i, parameter_combination in enumerate(parameter_combinations):
             auto = AutoSklearnClassifier(parameters=parameter_combination)
             X_train, Y_train, X_test, Y_test = self.get_iris()
-            auto = auto.fit(X_train, Y_train)
+            try:
+                auto = auto.fit(X_train, Y_train)
+            except Exception as e:
+                print parameter_combination
+                print (parameter_combination['random_forest:max_features'] * X_train.shape[1])
+                raise e
             predictions = auto.predict(X_test)
             accuracy = sklearn.metrics.accuracy_score(Y_test, predictions)
 

@@ -70,7 +70,7 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             assert classifier is None
             assert preprocessor is None
             classifier = parameters.get("classifier")
-            preprocessor = parameters.get("preprocessor")
+            preprocessor = parameters.get("preprocessing")
             if preprocessor == "None":
                 preprocessor = None
 
@@ -82,10 +82,35 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
 
         # TODO: make sure that there are no duplicate classifiers
         self._available_classifiers = classification_components._classifiers
+        classifier_parameters = set()
+        for _classifier in self._available_classifiers:
+            accepted_hyperparameter_names = self._available_classifiers[_classifier] \
+                .get_all_accepted_hyperparameter_names()
+            name = self._available_classifiers[_classifier].get_hyperparameter_search_space()['name']
+            for key in accepted_hyperparameter_names:
+                classifier_parameters.add("%s:%s" % (name, key))
+
         self._available_preprocessors = preprocessing_components._preprocessors
+        preprocessor_parameters = set()
+        for _preprocessor in self._available_preprocessors:
+            accepted_hyperparameter_names = self._available_preprocessors[_preprocessor] \
+                .get_all_accepted_hyperparameter_names()
+            name = self._available_preprocessors[_preprocessor].get_hyperparameter_search_space()['name']
+            for key in accepted_hyperparameter_names:
+                preprocessor_parameters.add("%s:%s" % (name, key))
+
+        for parameter in self.parameters:
+            if parameter not in classifier_parameters and \
+                    parameter not in preprocessor_parameters and \
+                    parameter not in ("preprocessing", "classifier", "name"):
+                print "Classifier parameters %s" % str(classifier_parameters)
+                print "Preprocessing parameters %s" % str(preprocessor_parameters)
+                raise ValueError("Parameter %s is unknown." % parameter)
 
         if random_state is None:
-            random_state = check_random_state(1)
+            self.random_state = check_random_state(1)
+        else:
+            self.random_state = check_random_state(random_state)
 
         self._estimator_class = self._available_classifiers.get(classifier)
         if classifier is not None and self._estimator_class is None:
@@ -98,6 +123,8 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             raise KeyError("The preprocessor %s is not in the list "
                            "of preprocessors found on this system: %s" %
                            (preprocessor, self._available_preprocessors))
+
+
 
     def fit(self, X, Y):
         # TODO: perform input validation

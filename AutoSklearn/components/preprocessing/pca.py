@@ -9,8 +9,12 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
         self.whiten = whiten
 
     def fit(self, X, Y):
+        # TODO: implement that keep_variance can be a percentage (in int)
         self.preprocessor = sklearn.decomposition.PCA(whiten=self.whiten,
                                                       copy=True)
+                                                      # num components is
+                                                      # selected further down
+                                                      #  the code
         self.preprocessor.fit(X, Y)
 
         sum_ = 0.
@@ -42,10 +46,14 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space():
-        keep_variance = hp_uniform("n_components", 0.5, 1.0)
+        keep_variance = hp_uniform("keep_variance", 0.5, 1.0)
         whiten = hp_choice("whiten", ["False", "True"])
         return {"name": "pca", "keep_variance": keep_variance,
                 "whiten": whiten}
+
+    @staticmethod
+    def get_all_accepted_hyperparameter_names():
+        return (["keep_variance", "whiten"])
 
     def __str__(self):
         return "AutoSklearn Principle Component Analysis preprocessor."
