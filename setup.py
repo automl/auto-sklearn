@@ -11,5 +11,5 @@ setuptools.setup(name="AutoSklearn",
                  author_email="feurerm@informatik.uni-freiburg.de",
                  license="BSD",
                  platforms=['Linux'],
-                 classifiers=[]
+                 classifiers=[],
                  url="github.com/mfeurer/autosklearn")
