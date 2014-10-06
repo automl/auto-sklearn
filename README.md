@@ -1,4 +1,4 @@
 ### Build the documentation ###
 
     make html
-    firefox build/index.html
+    firefox `pwd`/build/html/index.html
