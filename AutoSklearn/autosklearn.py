@@ -12,15 +12,7 @@ from .util import NoModelException, hp_choice
 task_types = set(["classification"])
 
 class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
-    """AutoSklearn
-
-    AutoSklearn provides a search space covering a (work in progress) huge
-    part of the scikit-learn models and the possibility to evaluate them.
-    Together with a hyperparameter optimization package, AutoSklearn solves
-    the Combined algorithm selection and Hyperparameter optimization problem
-    (CASH).
-
-    This class implements the classification task. It can perform
+    """This class implements the classification task. It can perform
     preprocessing. It can render a search space for all known classification
     and preprocessing problems.
 
@@ -50,6 +42,7 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
 
     Examples
     --------
+
     """
     def __init__(self,
                  classifier=None,
@@ -112,17 +105,24 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         else:
             self.random_state = check_random_state(random_state)
 
-        self._estimator_class = self._available_classifiers.get(classifier)
-        if classifier is not None and self._estimator_class is None:
-            raise KeyError("The classifier %s is not in the list "
-                           "of classifiers found on this system: %s" %
-                           (classifier, self._available_classifiers))
+        if classifier is not None and 'name' in classifier:
+            self._estimator_class = self._available_classifiers.get(classifier['name'])
+            if self._estimator_class is None:
+                raise KeyError("The classifier %s is not in the list "
+                               "of classifiers found on this system: %s" %
+                               (classifier, self._available_classifiers))
+        else:
+            self._estimator_class = None
 
-        self._preprocessor_class = self._available_preprocessors.get(preprocessor)
-        if preprocessor is not None and self._preprocessor_class is None:
-            raise KeyError("The preprocessor %s is not in the list "
-                           "of preprocessors found on this system: %s" %
-                           (preprocessor, self._available_preprocessors))
+        if preprocessor is not None and 'name' in preprocessor:
+            self._preprocessor_class = self._available_preprocessors.get(preprocessor['name'])
+            if self._preprocessor_class is None:
+                raise KeyError("The preprocessor %s is not in the list "
+                               "of preprocessors found on this system: %s" %
+                               (preprocessor, self._available_preprocessors))
+        else:
+            self._preprocessor_class = None
+
 
 
 
@@ -134,8 +134,9 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             raise NoModelException(self, "fit(X, Y)")
 
         # Extract Hyperparameters from the parameters dict...
-        space = self._estimator_class.get_hyperparameter_search_space()
-        name = space["name"]
+        #space = self._estimator_class.get_hyperparameter_search_space()
+        space = self._estimator_class.get_all_accepted_hyperparameter_names()
+        name = self._estimator_class.get_hyperparameter_search_space()['name']
 
         parameters = {}
         for key in space:

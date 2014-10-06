@@ -17,10 +17,15 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
 
     def fit(self, X, Y):
         if self.LOG2_C is not None:
+            self.LOG2_C = float(self.LOG2_C)
             self.C = 2 ** self.LOG2_C
         if self.LOG2_gamma is not None:
+            self.LOG2_gamma = float(self.LOG2_gamma)
             self.gamma = 2 ** self.LOG2_gamma
 
+        self.C = float(self.C)
+        self.gamma = float(self.gamma)
+        print self.C, self.gamma
         self.estimator = sklearn.svm.SVC(C=self.C, gamma=self.gamma,
                                          random_state=self.random_state,
                                          cache_size=2000)

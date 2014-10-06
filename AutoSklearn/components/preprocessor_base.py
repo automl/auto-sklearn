@@ -17,7 +17,7 @@ class AutoSklearnPreprocessingAlgorithm(object):
     def get_hyperparameter_search_space(self):
         raise NotImplementedError()
 
-    def get_all_accepted_hyperparameter_names():
+    def get_all_accepted_hyperparameter_names(self):
         raise NotImplementedError()
 
     def fit(self, X, Y):

@@ -64,6 +64,12 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
         self.assertRaises(KeyError, AutoSklearnClassifier,
                           "qufrpdvltromeaiudtroembdtaiubo", None)
 
+    def test_init_unknown_parameter(self):
+        self.assertRaises(KeyError, AutoSklearnClassifier,
+                          None, None,parameters={"classifier": "liblinear",
+                                                 "preprocessing": None,
+                                                 "libsvm_svc:gamma": 0.025})
+
     @unittest.skip("test_init_parameters_as_dict_or_as_keywords Not yet Implemented")
     def test_init_parameters_as_dict_or_as_keywords(self):
         pass

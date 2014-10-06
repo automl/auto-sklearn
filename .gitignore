@@ -2,5 +2,6 @@
 *~
 .idea
 dist/
+build/
 AutoSklearn.egg-info
 

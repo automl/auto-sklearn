@@ -16,10 +16,14 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
 
     def fit(self, X, Y):
         if self.LOG2_C is not None:
+            self.LOG2_C = float(self.LOG2_C)
             self.C = 2 ** self.LOG2_C
+
+        self.C = float(self.C)
         self.estimator = sklearn.svm.LinearSVC(penalty=self.penalty,
                                                loss=self.loss, C=self.C,
-                                               random_state=self.random_state)
+                                               random_state=self.random_state,
+                                               dual=False)
         self.estimator.fit(X, Y)
 
     def predict(self, X):
