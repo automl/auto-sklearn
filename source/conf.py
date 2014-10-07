@@ -37,6 +37,10 @@ extensions = [
     'numpydoc',             # Important for get headings like Parameters...
 ]
 
+autosummary_generate = True
+autodoc_default_flags = ['members', 'inherited-members', 'undoc-members',
+                         'show-inheritance']
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

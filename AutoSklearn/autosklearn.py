@@ -13,21 +13,40 @@ task_types = set(["classification"])
 
 class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
     """This class implements the classification task. It can perform
-    preprocessing. It can render a search space for all known classification
-    and preprocessing problems.
+    preprocessing. It can render a search space including all known
+    classification and preprocessing algorithms.
 
     Contrary to the sklearn API it is not possible to enumerate the
     possible parameters in the __init__ function because we only know the
     available classifiers at runtime. For this reason the user must
     specifiy the parameters via set_params.
 
+    The user can specify the hyperparameters of the AutoSklearnClassifier
+    either by giving the classifier and the preprocessor argument or the
+    parameters argument.
+
     Parameters
     ----------
+    classifier: dict
+        A dictionary which contains at least the name of the classification
+        algorithm. It can also contain {parameter : value} pairs.
+
+    preprocessor: dict
+        A dictionary which contains at least the name of the preprocessing
+        algorithm. It can also contain {parameter : value} pairs.
+
     random_state : int, RandomState instance or None, optional (default=None)
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance
-       used by `np.random`.
+        used by `np.random`.
+
+    parameters: dict
+        A dictionary which contains at least {'classifier' : name}. It can
+        also contain the classifiers hyperparameters in the form of {name +
+        ':hyperparametername' : value}. To also use a preprocessing algorithm
+        you must specify {'preprocessing': name}, then you can also add its
+        hyperparameters in the form {name + ':hyperparametername' : value}.
 
     Attributes
     ----------
@@ -123,13 +142,32 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         else:
             self._preprocessor_class = None
 
-
-
-
     def fit(self, X, Y):
+        """Fit the selected algorithm to the training data.
+
+        Parameters
+        ----------
+        X : array-like, shape = (n_samples, n_features)
+            Training data
+
+        y : array-like, shape = [n_samples]
+            Targets
+
+        Returns
+        -------
+        self : returns an instance of self.
+
+        Raises
+        ------
+        NoModelException
+            NoModelException is raised if fit() is called without specifying
+            a classification algorithm first.
+        """
         # TODO: perform input validation
         # TODO: look if X.shape[0] == y.shape[0]
         # TODO: check if the hyperparameters have been set...
+        # TODO: this is an example of the antipattern of not properly
+        #       initializing a class in the init function!
         if self._estimator_class is None:
             raise NoModelException(self, "fit(X, Y)")
 
@@ -170,6 +208,17 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         return self
 
     def predict(self, X):
+        """Predict the classes using the selected model..
+
+        Parameters
+        ----------
+        X : array-like, shape = (n_samples, n_features)
+
+        Returns
+        -------
+        C : array, shape = (n_samples,)
+            Returns the predicted values"""
+        # TODO check if fit() was called before...
         if self._preprocessor is not None:
             X = self._preprocessor.transform(X)
         self._validate_input_X(X)
@@ -221,14 +270,26 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             raise NotImplementedError()
 
     def add_model_class(self, model):
+        """
+        Raises
+        ------
+            NotImplementedError
+        """
         raise NotImplementedError()
 
     def get_hyperparameter_search_space(self):
+        """Return the configuration space for the CASH problem.
+
+        Returns
+        -------
+        cs : dict
+            A dictionary with all hyperparameters as hyperopt.pyll objects.
+
+        """
         classifiers = {}
         for name in self._available_classifiers:
             classifier_parameters = self._available_classifiers[name]\
                 .get_hyperparameter_search_space()
-            print classifier_parameters
             classifier_parameters["name"] = name
             classifiers["classifier:" + name] = classifier_parameters
 

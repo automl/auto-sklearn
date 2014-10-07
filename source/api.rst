@@ -16,7 +16,8 @@ Extension Interfaces
 ====================
 
 .. autoclass:: AutoSklearn.components.classification_base.AutoSklearnClassificationAlgorithm
-    :members:
+
+  .. automethod:: AutoSklearn.components.classification_base.AutoSklearnClassificationAlgorithm.__init__
     
 .. autoclass:: AutoSklearn.components.preprocessor_base.AutoSklearnPreprocessingAlgorithm
-    :members:
+
