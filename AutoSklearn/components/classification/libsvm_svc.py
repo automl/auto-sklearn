@@ -25,7 +25,6 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
 
         self.C = float(self.C)
         self.gamma = float(self.gamma)
-        print self.C, self.gamma
         self.estimator = sklearn.svm.SVC(C=self.C, gamma=self.gamma,
                                          random_state=self.random_state,
                                          cache_size=2000)

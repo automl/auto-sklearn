@@ -1,6 +1,6 @@
 class AutoSklearnPreprocessingAlgorithm(object):
     def __init__(self):
-        self.estimator = None
+        self.preprocessor = None
 
     def handles_missing_values(self):
         """Can the underlying algorithm handle missing values itself?
@@ -131,7 +131,7 @@ class AutoSklearnPreprocessingAlgorithm(object):
         -------
         preprocessor : the underlying preprocessor object
         """
-        return self.estimator
+        return self.preprocessor
 
     def __str__(self):
         raise NotImplementedError()

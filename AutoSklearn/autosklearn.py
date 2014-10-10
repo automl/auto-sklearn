@@ -69,31 +69,87 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
                  random_state=None,
                  parameters=None):
 
-        # Test that either the classifier or the parameters
-        if classifier is not None:
-            assert parameters is None
-            # TODO: Somehow assemble a parameters dictionary
-
-        if preprocessor is not None:
-            assert classifier is not None
-            assert parameters is None
-
-        if parameters is not None:
-            assert classifier is None
-            assert preprocessor is None
-            classifier = parameters.get("classifier")
-            preprocessor = parameters.get("preprocessing")
-            if preprocessor == "None":
-                preprocessor = None
-
         self.random_state = random_state
         self._estimator = None
         self._preprocessor = None
-        self.parameters = parameters if parameters is not None else {}
-        # TODO: add valid parameters to the parameters dictionary
+        self._available_classifiers = classification_components._classifiers
+        self._available_preprocessors = preprocessing_components._preprocessors
+        self.parameters = parameters
+
+        # One can only use the parameters dict if the classifier dict and the
+        #  preprocessor dict are not used.
+        if parameters is not None:
+            if classifier is not None:
+                raise ValueError("Illegal Arguments: You are not allowed to "
+                                 "use both parameters and classifier.")
+            if preprocessor is not None:
+                raise ValueError("Illegal Arguments: You are not allowed to "
+                                 "use both parameters and preprocessor.")
+
+            if not isinstance(parameters, dict):
+                raise ValueError("Illegal Arguments: The argument preprocessor "
+                                 "must be a dictionary.")
+
+            if 'classifier' not in self.parameters:
+                raise ValueError("Illegal Arguments: You must specify a "
+                                 "classification algorithm.")
+
+            if 'preprocessing' in self.parameters and \
+                    self.parameters['preprocessing'] in [None, "None"]:
+                del self.parameters['preprocessing']
+
+        else:
+            self.parameters = {}
+
+        # Test that either the classifier or the parameters are specified
+        if classifier is not None:
+            if not isinstance(classifier, dict):
+                raise ValueError("Illegal Arguments: The argument classifier "
+                                 "must be a dictionary.")
+            if 'name' not in classifier:
+                raise ValueError("Illegal Arguments: The dictionary holding "
+                                 "the parameters for the classification "
+                                 "algorithm must have a key 'name'.")
+
+            # Add all hyperparameters to the parameters dict
+            classifier_name = classifier['name']
+            self.parameters['classifier'] = classifier_name
+            for key in classifier:
+                if key == 'name':
+                    continue
+
+                self.parameters[classifier_name + ":" + key] = classifier[key]
+
+        # If there is a preprocessor, there must also be a classifier,
+        # but no parameters dictionary
+        if preprocessor is not None:
+            if classifier is None:
+                raise ValueError("Illegal Arguments: You must specifiy a "
+                                 "classification algorithm if you specifiy a "
+                                 "preprocessing algorithm.")
+            if not isinstance(preprocessor, dict):
+                raise ValueError("Illegal Arguments: The argument preprocessor "
+                                 "must be a dictionary.")
+
+            # Only continue if the dictionary is populated
+            if len(preprocessor) != 0:
+                if 'name' not in preprocessor:
+                    raise ValueError("Illegal Arguments: The dictionary holding "
+                                     "the parameters for the preprocessing "
+                                     "algorithm must have a key 'name'.")
+
+                # Add all hyperparameters to the parameters dict
+                preprocessor_name = preprocessor['name']
+                self.parameters['preprocessing'] = preprocessor_name
+                for key in preprocessor:
+                    if key == 'name':
+                        continue
+
+                    self.parameters[preprocessor_name + ":" + key] = preprocessor[key]
+
 
         # TODO: make sure that there are no duplicate classifiers
-        self._available_classifiers = classification_components._classifiers
+        # Get all available classifiers and their hyperparameters
         classifier_parameters = set()
         for _classifier in self._available_classifiers:
             accepted_hyperparameter_names = self._available_classifiers[_classifier] \
@@ -102,7 +158,7 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             for key in accepted_hyperparameter_names:
                 classifier_parameters.add("%s:%s" % (name, key))
 
-        self._available_preprocessors = preprocessing_components._preprocessors
+        # Get all available preprocessors and their hyperparameters
         preprocessor_parameters = set()
         for _preprocessor in self._available_preprocessors:
             accepted_hyperparameter_names = self._available_preprocessors[_preprocessor] \
@@ -111,6 +167,31 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             for key in accepted_hyperparameter_names:
                 preprocessor_parameters.add("%s:%s" % (name, key))
 
+        # Check if the specified classifier is a legal classifier
+        if 'classifier' in self.parameters:
+            self._estimator_class = self._available_classifiers.get(
+                self.parameters['classifier'])
+            if self._estimator_class is None:
+                raise KeyError("The classifier %s is not in the list "
+                               "of classifiers found on this system: %s" %
+                               (self.parameters['classifier'],
+                                self._available_classifiers))
+        else:
+            self._estimator_class = None
+
+        # Check if the specified preprocessor is a legal one
+        if 'preprocessing' in self.parameters:
+            self._preprocessor_class = self._available_preprocessors.get(
+                self.parameters['preprocessing'])
+            if self._preprocessor_class is None:
+                raise KeyError("The preprocessor %s is not in the list "
+                               "of preprocessors found on this system: %s" %
+                               (self.parameters['preprocessing'],
+                                self._available_preprocessors))
+        else:
+            self._preprocessor_class = None
+
+        # Check if all hyperparameters specified are valid hyperparameters
         for parameter in self.parameters:
             if parameter not in classifier_parameters and \
                     parameter not in preprocessor_parameters and \
@@ -123,24 +204,6 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             self.random_state = check_random_state(1)
         else:
             self.random_state = check_random_state(random_state)
-
-        if classifier is not None and 'name' in classifier:
-            self._estimator_class = self._available_classifiers.get(classifier['name'])
-            if self._estimator_class is None:
-                raise KeyError("The classifier %s is not in the list "
-                               "of classifiers found on this system: %s" %
-                               (classifier, self._available_classifiers))
-        else:
-            self._estimator_class = None
-
-        if preprocessor is not None and 'name' in preprocessor:
-            self._preprocessor_class = self._available_preprocessors.get(preprocessor['name'])
-            if self._preprocessor_class is None:
-                raise KeyError("The preprocessor %s is not in the list "
-                               "of preprocessors found on this system: %s" %
-                               (preprocessor, self._available_preprocessors))
-        else:
-            self._preprocessor_class = None
 
     def fit(self, X, Y):
         """Fit the selected algorithm to the training data.
