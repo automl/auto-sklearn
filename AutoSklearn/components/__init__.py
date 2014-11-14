@@ -11,3 +11,6 @@ Classification
 
 Preprocessing
 ============="""
+
+from . import classification as classification_components
+from . import preprocessing as preprocessing_components

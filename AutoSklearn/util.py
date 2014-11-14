@@ -1,4 +1,10 @@
-import hyperopt.pyll as pyll
+import importlib
+import inspect
+import os
+import pkgutil
+import sklearn
+import sklearn.base
+import sys
 
 
 class NoModelException(Exception):
@@ -11,96 +17,34 @@ class NoModelException(Exception):
                     % (type(self.cls), self.method))
 
 
-def hp_pchoice(label, p_options):
-    """
-    label: string
-    p_options: list of (probability, option) pairs
-    """
-    if not isinstance(label, basestring):
-        raise TypeError('require string label')
-    p, options = zip(*p_options)
-    n_options = len(options)
-    ch = pyll.scope.hyperopt_param(label,
-                              pyll.scope.categorical(
-                                  p,
-                                  upper=n_options))
-    return pyll.scope.switch(ch, *options)
+def find_sklearn_classifiers():
+    classifiers = []
+    all_subdirectories = []
+    sklearn_path = sklearn.__path__[0]
+    for root, dirs, files in os.walk(sklearn_path):
+        all_subdirectories.append(root)
 
+    for module_loader, module_name, ispkg in \
+            pkgutil.iter_modules(all_subdirectories):
 
-def hp_choice(label, options):
-    if not isinstance(label, basestring):
-        raise TypeError('require string label')
-    ch = pyll.scope.hyperopt_param(label,
-        pyll.scope.randint(len(options)))
-    return pyll.scope.switch(ch, *options)
+        # Work around some issues...
+        if module_name in ["hmm", "mixture"]:
+            print "Skipping %s" % module_name
+            continue
 
+        module_file = module_loader.__dict__["path"]
+        sklearn_module = module_file.replace(sklearn_path, "").replace("/", ".")
+        full_module_name = "sklearn" + sklearn_module + "." + module_name
 
-def hp_randint(label, *args, **kwargs):
-    if not isinstance(label, basestring):
-        raise TypeError('require string label')
-    return pyll.scope.hyperopt_param(label,
-        pyll.scope.randint(*args, **kwargs))
+        pkg = importlib.import_module(full_module_name)
 
+        for member_name, obj in inspect.getmembers(pkg):
+            if inspect.isclass(obj) and \
+                    issubclass(obj, sklearn.base.ClassifierMixin):
+                classifier = obj
+                print member_name, obj
+                classifiers.append(classifier)
 
-def hp_uniform(label, *args, **kwargs):
-    if not isinstance(label, basestring):
-        raise TypeError('require string label')
-    return pyll.scope.float(
-            pyll.scope.hyperopt_param(label,
-                pyll.scope.uniform(*args, **kwargs)))
+    print classifiers
 
-
-def hp_quniform(label, *args, **kwargs):
-    if not isinstance(label, basestring):
-        raise TypeError('require string label')
-    return pyll.scope.float(
-            pyll.scope.hyperopt_param(label,
-                pyll.scope.quniform(*args, **kwargs)))
-
-
-def hp_loguniform(label, *args, **kwargs):
-    if not isinstance(label, basestring):
-        raise TypeError('require string label')
-    return pyll.scope.float(
-            pyll.scope.hyperopt_param(label,
-                pyll.scope.loguniform(*args, **kwargs)))
-
-
-def hp_qloguniform(label, *args, **kwargs):
-    if not isinstance(label, basestring):
-        raise TypeError('require string label')
-    return pyll.scope.float(
-            pyll.scope.hyperopt_param(label,
-                pyll.scope.qloguniform(*args, **kwargs)))
-
-
-def hp_normal(label, *args, **kwargs):
-    if not isinstance(label, basestring):
-        raise TypeError('require string label')
-    return pyll.scope.float(
-            pyll.scope.hyperopt_param(label,
-                pyll.scope.normal(*args, **kwargs)))
-
-
-def hp_qnormal(label, *args, **kwargs):
-    if not isinstance(label, basestring):
-        raise TypeError('require string label')
-    return pyll.scope.float(
-            pyll.scope.hyperopt_param(label,
-                pyll.scope.qnormal(*args, **kwargs)))
-
-
-def hp_lognormal(label, *args, **kwargs):
-    if not isinstance(label, basestring):
-        raise TypeError('require string label')
-    return pyll.scope.float(
-            pyll.scope.hyperopt_param(label,
-                pyll.scope.lognormal(*args, **kwargs)))
-
-
-def hp_qlognormal(label, *args, **kwargs):
-    if not isinstance(label, basestring):
-        raise TypeError('require string label')
-    return pyll.scope.float(
-            pyll.scope.hyperopt_param(label,
-                pyll.scope.qlognormal(*args, **kwargs)))
+find_sklearn_classifiers()

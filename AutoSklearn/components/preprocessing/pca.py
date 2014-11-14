@@ -1,10 +1,15 @@
 import sklearn.decomposition
 
-from ...util import hp_uniform, hp_choice
+from HPOlibConfigSpace.configuration_space import ConfigurationSpace, \
+    Configuration
+from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
+    CategoricalHyperparameter
+
 from ..preprocessor_base import AutoSklearnPreprocessingAlgorithm
 
+
 class PCA(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, keep_variance=1.0, whiten=False, random_state=None):
+    def __init__(self, keep_variance, whiten, random_state=None):
         self.keep_variance = keep_variance
         self.whiten = whiten
 
@@ -25,11 +30,13 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
             idx += 1
 
         components = self.preprocessor.components_
+        print components
         self.preprocessor.components_ = components[:idx]
 
     def transform(self, X):
         if self.preprocessor is None:
             raise NotImplementedError()
+        print "Transform"
         return self.preprocessor.transform(X)
 
     def handles_missing_values(self):
@@ -46,10 +53,12 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space():
-        keep_variance = hp_uniform("keep_variance", 0.5, 1.0)
-        whiten = hp_choice("whiten", ["False", "True"])
-        return {"name": "pca", "keep_variance": keep_variance,
-                "whiten": whiten}
+        keep_variance = UniformFloatHyperparameter("keep_variance", 0.5, 1.0)
+        whiten = CategoricalHyperparameter("whiten", ["False", "True"])
+        cs = ConfigurationSpace()
+        cs.add_hyperparameter(keep_variance)
+        cs.add_hyperparameter(whiten)
+        return cs
 
     @staticmethod
     def get_all_accepted_hyperparameter_names():

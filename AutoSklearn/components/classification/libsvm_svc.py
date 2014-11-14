@@ -1,27 +1,25 @@
 import sklearn.svm
 
-from ...util import hp_uniform
+from HPOlibConfigSpace.configuration_space import ConfigurationSpace
+from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
+
 from ..classification_base import AutoSklearnClassificationAlgorithm
 
 class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
     # TODO: maybe ad shrinking to the parameters?
-    def __init__(self, C=1.0, gamma=0.0,
-                 LOG2_C=None, LOG2_gamma=None,
-                 random_state=None):
+    def __init__(self, C, gamma, random_state=None):
         self.C = C
         self.gamma = gamma
-        self.LOG2_C = LOG2_C
-        self.LOG2_gamma = LOG2_gamma
         self.random_state = random_state
         self.estimator = None
 
     def fit(self, X, Y):
-        if self.LOG2_C is not None:
-            self.LOG2_C = float(self.LOG2_C)
-            self.C = 2 ** self.LOG2_C
-        if self.LOG2_gamma is not None:
-            self.LOG2_gamma = float(self.LOG2_gamma)
-            self.gamma = 2 ** self.LOG2_gamma
+        # if self.LOG2_C is not None:
+        #     self.LOG2_C = float(self.LOG2_C)
+        #     self.C = 2 ** self.LOG2_C
+        # if self.LOG2_gamma is not None:
+        #     self.LOG2_gamma = float(self.LOG2_gamma)
+        #     self.gamma = 2 ** self.LOG2_gamma
 
         self.C = float(self.C)
         self.gamma = float(self.gamma)
@@ -50,11 +48,19 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         return True
 
     @staticmethod
+    def get_meta_information():
+        return {'shortname': 'LibSVM-SVC',
+                'name': 'LibSVM Support Vector Classification'}
+
+    @staticmethod
     def get_hyperparameter_search_space():
-        LOG2_C = hp_uniform("LOG2_C", -5, 15)
-        LOG2_gamma = hp_uniform("LOG2_gamma", -15, 3)
-        return {"name": "libsvm_svc", "LOG2_C": LOG2_C, "LOG2_gamma":
-            LOG2_gamma}
+        C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True)
+        gamma = UniformFloatHyperparameter("gamma", 3.0517578125e-05, 8,
+                                           log=True)
+        cs = ConfigurationSpace()
+        cs.add_hyperparameter(C)
+        cs.add_hyperparameter(gamma)
+        return cs
 
     @staticmethod
     def get_all_accepted_hyperparameter_names():

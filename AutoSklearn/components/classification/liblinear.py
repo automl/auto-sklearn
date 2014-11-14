@@ -1,23 +1,33 @@
 import sklearn.svm
 
-from ...util import hp_uniform, hp_choice
+from HPOlibConfigSpace.configuration_space import ConfigurationSpace
+from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
+    CategoricalHyperparameter, Constant
+from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, \
+    ForbiddenAndConjunction
+
 from ..classification_base import AutoSklearnClassificationAlgorithm
 
 class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
     # TODO: maybe add dual and crammer-singer?
-    def __init__(self, penalty="l2", loss="l2", C=1.0, LOG2_C=None, random_state=None):
+    def __init__(self, penalty, loss, C, dual, random_state=None,):
         self.penalty = penalty
         self.loss = loss
         self.C = C
-        self.LOG2_C = LOG2_C
+        self.dual = dual
         self.random_state = random_state
         self.estimator = None
 
     def fit(self, X, Y):
-        if self.LOG2_C is not None:
-            self.LOG2_C = float(self.LOG2_C)
-            self.C = 2 ** self.LOG2_C
+        #if self.LOG2_C is not None:
+        #    self.LOG2_C = float(self.LOG2_C)
+        #    self.C = 2 ** self.LOG2_C
+
+        if self.dual == "__False__":
+            self.dual = False
+        elif self.dual == "__True__":
+            self.dual = True
 
         self.C = float(self.C)
         self.estimator = sklearn.svm.LinearSVC(penalty=self.penalty,
@@ -46,16 +56,33 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
         return True
 
     @staticmethod
+    def get_meta_information():
+        return {'shortname': 'Liblinear-SVC',
+                'name': 'Liblinear Support Vector Classification'}
+
+    @staticmethod
     def get_hyperparameter_search_space():
-        # penalty l1 and loss l1 together are forbidden
-        penalty_and_loss = hp_choice("penalty_and_loss",
-                                     [{"penalty": "l1", "loss": "l2"},
-                                      {"penalty": "l2", "loss": "l1"},
-                                      {"penalty": "l2", "loss": "l2"}])
-        loss = hp_choice("loss", ["l1", "l2"])
-        LOG2_C = hp_uniform("LOG2_C", -5, 15)
-        return {"name": "liblinear", "penalty_and_loss": penalty_and_loss,
-                "LOG2_C": LOG2_C}
+        penalty = CategoricalHyperparameter("penalty", ["l1", "l2"])
+        loss = CategoricalHyperparameter("loss", ["l1", "l2"])
+        C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True)
+        dual = Constant("dual", "__False__")
+        cs = ConfigurationSpace()
+        cs.add_hyperparameter(penalty)
+        cs.add_hyperparameter(loss)
+        cs.add_hyperparameter(C)
+        cs.add_hyperparameter(dual)
+        penalty_and_loss = ForbiddenAndConjunction(
+            ForbiddenEqualsClause(penalty, "l1"),
+            ForbiddenEqualsClause(loss, "l1")
+        )
+        constant_penalty_and_loss = ForbiddenAndConjunction(
+            ForbiddenEqualsClause(dual, "__False__"),
+            ForbiddenEqualsClause(penalty, "l2"),
+            ForbiddenEqualsClause(loss, "l1")
+        )
+        cs.add_forbidden_clause(penalty_and_loss)
+        cs.add_forbidden_clause(constant_penalty_and_loss)
+        return cs
 
     @staticmethod
     def get_all_accepted_hyperparameter_names():

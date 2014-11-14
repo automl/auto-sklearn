@@ -1,14 +1,16 @@
 import sklearn.ensemble
 
-from hyperopt.pyll import scope
+from HPOlibConfigSpace.configuration_space import ConfigurationSpace
+from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
+    UniformIntegerHyperparameter, CategoricalHyperparameter, \
+    UnParametrizedHyperparameter
 
-from ...util import hp_uniform, hp_choice, hp_quniform
 from ..classification_base import AutoSklearnClassificationAlgorithm
 
 class RandomForest(AutoSklearnClassificationAlgorithm):
-    def __init__(self, n_estimators=10, criterion='gini', max_features='auto',
-                 max_depth=None, min_samples_split=2, min_samples_leaf=1,
-                 bootstrap=True, random_state=None, n_jobs=1):
+    def __init__(self, n_estimators, criterion, max_features,
+                 max_depth, min_samples_split, min_samples_leaf,
+                 bootstrap, random_state=None, n_jobs=1):
         self.n_estimators = n_estimators
         self.criterion = criterion
         self.max_features = max_features
@@ -22,7 +24,9 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
 
     def fit(self, X, Y):
         self.n_estimators = int(self.n_estimators)
-        if self.max_depth is not None:
+        if self.max_depth == "__None__":
+            self.max_depth = None
+        elif self.max_depth is not None:
             self.max_depth = int(self.max_depth)
         self.min_samples_split = int(self.min_samples_split)
         self.min_samples_leaf = int(self.min_samples_leaf)
@@ -56,21 +60,33 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         return True
 
     @staticmethod
+    def get_meta_information():
+        return {'shortname': 'RF',
+                'name': 'Random Forest'}
+
+    @staticmethod
     def get_hyperparameter_search_space():
-        n_estimators = scope.int(hp_quniform("n_estimators", 10, 100, 1))
-        criterion = hp_choice("criterion", ["gini", "entropy"])
-        max_features = hp_uniform("max_features", 0.01, 1.0)
+        n_estimators = UniformIntegerHyperparameter("n_estimators", 10, 100)
+        criterion = CategoricalHyperparameter("criterion", ["gini", "entropy"])
+        max_features = UniformFloatHyperparameter("max_features", 0.01, 1.0)
         # Don't know how to parametrize this...RF should rather be
         # regularized by the other parameters
         # max_depth = hp_uniform("max_depth", lower, upper)
-        min_samples_split = scope.int(hp_quniform("min_samples_split", 1, 20, 1))
-        min_samples_leaf = scope.int(hp_quniform("min_samples_leaf", 1, 20, 1))
-        bootstrap = hp_choice("bootstrap", [True, False])
-        return {"name": "random_forest",
-                "n_estimators": n_estimators, "criterion": criterion,
-                "max_features": max_features, "min_samples_split":
-                min_samples_split, "min_samples_leaf": min_samples_leaf,
-                "bootstrap": bootstrap}
+        max_depth = UnParametrizedHyperparameter("max_depth", "__None__")
+        min_samples_split = UniformIntegerHyperparameter("min_samples_split",
+                                                         1, 20)
+        min_samples_leaf = UniformIntegerHyperparameter("min_samples_leaf",
+                                                        1, 20)
+        bootstrap = CategoricalHyperparameter("bootstrap", ["True", "False"])
+        cs = ConfigurationSpace()
+        cs.add_hyperparameter(n_estimators)
+        cs.add_hyperparameter(criterion)
+        cs.add_hyperparameter(max_features)
+        cs.add_hyperparameter(max_depth)
+        cs.add_hyperparameter(min_samples_split)
+        cs.add_hyperparameter(min_samples_leaf)
+        cs.add_hyperparameter(bootstrap)
+        return cs
 
     @staticmethod
     def get_all_accepted_hyperparameter_names():

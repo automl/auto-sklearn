@@ -5,35 +5,33 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import safe_asarray, assert_all_finite
 
-from .components import classification as classification_components
-from .components import preprocessing as preprocessing_components
-from .util import NoModelException, hp_choice
+from HPOlibConfigSpace.configuration_space import ConfigurationSpace
+from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
+    InactiveHyperparameter
+from HPOlibConfigSpace.conditions import EqualsCondition
+
+from . import components as components
+from .util import NoModelException
 
 task_types = set(["classification"])
 
 class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
-    """This class implements the classification task. It can perform
-    preprocessing. It can render a search space including all known
+    """This class implements the classification task.
+
+    It implements a pipeline, which includes one preprocessing step and one
+    classification algorithm. It can render a search space including all known
     classification and preprocessing algorithms.
 
     Contrary to the sklearn API it is not possible to enumerate the
     possible parameters in the __init__ function because we only know the
     available classifiers at runtime. For this reason the user must
-    specifiy the parameters via set_params.
-
-    The user can specify the hyperparameters of the AutoSklearnClassifier
-    either by giving the classifier and the preprocessor argument or the
-    parameters argument.
+    specifiy the parameters by passing an instance of
+    HPOlibConfigSpace.configuration_space.Configuration.
 
     Parameters
     ----------
-    classifier: dict
-        A dictionary which contains at least the name of the classification
-        algorithm. It can also contain {parameter : value} pairs.
-
-    preprocessor: dict
-        A dictionary which contains at least the name of the preprocessing
-        algorithm. It can also contain {parameter : value} pairs.
+    configuration : HPOlibConfigSpace.configuration_space.Configuration
+        The configuration to evaluate.
 
     random_state : int, RandomState instance or None, optional (default=None)
         If int, random_state is the seed used by the random number generator;
@@ -41,17 +39,16 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         If None, the random number generator is the RandomState instance
         used by `np.random`.
 
-    parameters: dict
-        A dictionary which contains at least {'classifier' : name}. It can
-        also contain the classifiers hyperparameters in the form of {name +
-        ':hyperparametername' : value}. To also use a preprocessing algorithm
-        you must specify {'preprocessing': name}, then you can also add its
-        hyperparameters in the form {name + ':hyperparametername' : value}.
-
     Attributes
     ----------
-    _estimator : An underlying scikit-learn target model specified by a call to
-        set_parames
+    _estimator : The underlying scikit-learn classification model. This
+        variable is assigned after a call to the
+        :ref:`AutoSklearn.autosklearn.AutoSklearnClassifier.fit` method.
+
+    _preprocessor : The underlying scikit-learn preprocessing algorithm. This
+        variable is only assigned if a preprocessor is specified and
+        after a call to the
+        :ref:`AutoSklearn.autosklearn.AutoSklearnClassifier.fit` method.
 
     See also
     --------
@@ -63,142 +60,18 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
     --------
 
     """
-    def __init__(self,
-                 classifier=None,
-                 preprocessor=None,
-                 random_state=None,
-                 parameters=None):
+    def __init__(self, configuration, random_state=None):
+
+        # TODO check sklearn version!
 
         self.random_state = random_state
+        self.configuration = configuration
+
+        cs = self.get_hyperparameter_search_space()
+        cs.check_configuration(configuration)
+
         self._estimator = None
         self._preprocessor = None
-        self._available_classifiers = classification_components._classifiers
-        self._available_preprocessors = preprocessing_components._preprocessors
-        self.parameters = parameters
-
-        # One can only use the parameters dict if the classifier dict and the
-        #  preprocessor dict are not used.
-        if parameters is not None:
-            if classifier is not None:
-                raise ValueError("Illegal Arguments: You are not allowed to "
-                                 "use both parameters and classifier.")
-            if preprocessor is not None:
-                raise ValueError("Illegal Arguments: You are not allowed to "
-                                 "use both parameters and preprocessor.")
-
-            if not isinstance(parameters, dict):
-                raise ValueError("Illegal Arguments: The argument preprocessor "
-                                 "must be a dictionary.")
-
-            if 'classifier' not in self.parameters:
-                raise ValueError("Illegal Arguments: You must specify a "
-                                 "classification algorithm.")
-
-            if 'preprocessing' in self.parameters and \
-                    self.parameters['preprocessing'] in [None, "None"]:
-                del self.parameters['preprocessing']
-
-        else:
-            self.parameters = {}
-
-        # Test that either the classifier or the parameters are specified
-        if classifier is not None:
-            if not isinstance(classifier, dict):
-                raise ValueError("Illegal Arguments: The argument classifier "
-                                 "must be a dictionary.")
-            if 'name' not in classifier:
-                raise ValueError("Illegal Arguments: The dictionary holding "
-                                 "the parameters for the classification "
-                                 "algorithm must have a key 'name'.")
-
-            # Add all hyperparameters to the parameters dict
-            classifier_name = classifier['name']
-            self.parameters['classifier'] = classifier_name
-            for key in classifier:
-                if key == 'name':
-                    continue
-
-                self.parameters[classifier_name + ":" + key] = classifier[key]
-
-        # If there is a preprocessor, there must also be a classifier,
-        # but no parameters dictionary
-        if preprocessor is not None:
-            if classifier is None:
-                raise ValueError("Illegal Arguments: You must specifiy a "
-                                 "classification algorithm if you specifiy a "
-                                 "preprocessing algorithm.")
-            if not isinstance(preprocessor, dict):
-                raise ValueError("Illegal Arguments: The argument preprocessor "
-                                 "must be a dictionary.")
-
-            # Only continue if the dictionary is populated
-            if len(preprocessor) != 0:
-                if 'name' not in preprocessor:
-                    raise ValueError("Illegal Arguments: The dictionary holding "
-                                     "the parameters for the preprocessing "
-                                     "algorithm must have a key 'name'.")
-
-                # Add all hyperparameters to the parameters dict
-                preprocessor_name = preprocessor['name']
-                self.parameters['preprocessing'] = preprocessor_name
-                for key in preprocessor:
-                    if key == 'name':
-                        continue
-
-                    self.parameters[preprocessor_name + ":" + key] = preprocessor[key]
-
-
-        # TODO: make sure that there are no duplicate classifiers
-        # Get all available classifiers and their hyperparameters
-        classifier_parameters = set()
-        for _classifier in self._available_classifiers:
-            accepted_hyperparameter_names = self._available_classifiers[_classifier] \
-                .get_all_accepted_hyperparameter_names()
-            name = self._available_classifiers[_classifier].get_hyperparameter_search_space()['name']
-            for key in accepted_hyperparameter_names:
-                classifier_parameters.add("%s:%s" % (name, key))
-
-        # Get all available preprocessors and their hyperparameters
-        preprocessor_parameters = set()
-        for _preprocessor in self._available_preprocessors:
-            accepted_hyperparameter_names = self._available_preprocessors[_preprocessor] \
-                .get_all_accepted_hyperparameter_names()
-            name = self._available_preprocessors[_preprocessor].get_hyperparameter_search_space()['name']
-            for key in accepted_hyperparameter_names:
-                preprocessor_parameters.add("%s:%s" % (name, key))
-
-        # Check if the specified classifier is a legal classifier
-        if 'classifier' in self.parameters:
-            self._estimator_class = self._available_classifiers.get(
-                self.parameters['classifier'])
-            if self._estimator_class is None:
-                raise KeyError("The classifier %s is not in the list "
-                               "of classifiers found on this system: %s" %
-                               (self.parameters['classifier'],
-                                self._available_classifiers))
-        else:
-            self._estimator_class = None
-
-        # Check if the specified preprocessor is a legal one
-        if 'preprocessing' in self.parameters:
-            self._preprocessor_class = self._available_preprocessors.get(
-                self.parameters['preprocessing'])
-            if self._preprocessor_class is None:
-                raise KeyError("The preprocessor %s is not in the list "
-                               "of preprocessors found on this system: %s" %
-                               (self.parameters['preprocessing'],
-                                self._available_preprocessors))
-        else:
-            self._preprocessor_class = None
-
-        # Check if all hyperparameters specified are valid hyperparameters
-        for parameter in self.parameters:
-            if parameter not in classifier_parameters and \
-                    parameter not in preprocessor_parameters and \
-                    parameter not in ("preprocessing", "classifier", "name"):
-                print "Classifier parameters %s" % str(classifier_parameters)
-                print "Preprocessing parameters %s" % str(preprocessor_parameters)
-                raise ValueError("Parameter %s is unknown." % parameter)
 
         if random_state is None:
             self.random_state = check_random_state(1)
@@ -211,7 +84,7 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         Parameters
         ----------
         X : array-like, shape = (n_samples, n_features)
-            Training data
+            Training data. All values must be in the range [0,1].
 
         y : array-like, shape = [n_samples]
             Targets
@@ -231,39 +104,54 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         # TODO: check if the hyperparameters have been set...
         # TODO: this is an example of the antipattern of not properly
         #       initializing a class in the init function!
-        if self._estimator_class is None:
+        # TODO: can this happen now that a configuration is specified at
+        # instantiation time
+        if "classifier" not in self.configuration:
             raise NoModelException(self, "fit(X, Y)")
 
-        # Extract Hyperparameters from the parameters dict...
-        #space = self._estimator_class.get_hyperparameter_search_space()
-        space = self._estimator_class.get_all_accepted_hyperparameter_names()
-        name = self._estimator_class.get_hyperparameter_search_space()['name']
+        # Extract Hyperparameters from the configuration object
+        name = self.configuration["classifier"].value
 
         parameters = {}
-        for key in space:
-            if "%s:%s" % (name, key) in self.parameters:
-                parameters[key] = self.parameters["%s:%s" % (name, key)]
+        for instantiated_hyperparameter in self.configuration:
+            if not instantiated_hyperparameter.hyperparameter.name.startswith(
+                    name):
+                continue
+            if isinstance(instantiated_hyperparameter, InactiveHyperparameter):
+                continue
 
+            print instantiated_hyperparameter.hyperparameter.name
+            name_ = instantiated_hyperparameter.hyperparameter.name.\
+                split(":")[1]
+            parameters[name_] = instantiated_hyperparameter.value
+
+        print parameters
         random_state = check_random_state(self.random_state)
-        self._estimator = self._estimator_class(random_state=random_state,
-                                                **parameters)
+        self._estimator = components.classification_components._classifiers\
+            [name](random_state=random_state, **parameters)
 
         self._validate_input_X(X)
         self._validate_input_Y(Y)
 
-        if self._preprocessor_class is not None:
-            # TODO: copy everything or not?
-            parameters = {}
-            preproc_space = self._preprocessor_class\
-                    .get_hyperparameter_search_space()
-            preproc_name = preproc_space["name"]
+        preprocessor = self.configuration['preprocessor']
+        if preprocessor.value != "__None__":
+            preproc_name = preprocessor.value
+            preproc_params = {}
 
-            for key in preproc_space:
-                if "%s:%s" % (preproc_name, key) in self.parameters:
-                    parameters[key] = self.parameters["%s:%s" % (preproc_name, key)]
+            for instantiated_hyperparameter in self.configuration:
+                if not instantiated_hyperparameter.hyperparameter.name\
+                        .startswith(preproc_name):
+                    continue
+                if isinstance(instantiated_hyperparameter, InactiveHyperparameter):
+                    continue
 
-            self._preprocessor = self._preprocessor_class(
-                random_state=random_state, **parameters)
+                name_ = instantiated_hyperparameter.hyperparameter.name. \
+                    split(":")[1]
+                preproc_params[name_] = instantiated_hyperparameter.value
+
+            print preproc_params
+            self._preprocessor = components.preprocessing_components.\
+                _preprocessors[preproc_name](random_state=random_state, **preproc_params)
             self._preprocessor.fit(X, Y)
             X = self._preprocessor.transform(X)
 
@@ -340,31 +228,90 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         """
         raise NotImplementedError()
 
-    def get_hyperparameter_search_space(self):
+    @staticmethod
+    def get_hyperparameter_search_space():
         """Return the configuration space for the CASH problem.
 
         Returns
         -------
-        cs : dict
-            A dictionary with all hyperparameters as hyperopt.pyll objects.
+        cs : HPOlibConfigSpace.configuration_space.Configuration
+            The configuration space describing the AutoSklearnClassifier.
 
         """
-        classifiers = {}
-        for name in self._available_classifiers:
-            classifier_parameters = self._available_classifiers[name]\
-                .get_hyperparameter_search_space()
-            classifier_parameters["name"] = name
-            classifiers["classifier:" + name] = classifier_parameters
+        cs = ConfigurationSpace()
 
-        preprocessors = {}
-        preprocessors[None] = {}
-        for name in self._available_preprocessors:
-            preprocessor_parameters = self._available_preprocessors[name]\
-                .get_hyperparameter_search_space()
-            preprocessor_parameters["name"] = name
-            preprocessors["preprocessing:" + name] = preprocessor_parameters
-        return {"classifier": hp_choice("classifier", classifiers.values()),
-                "preprocessing": hp_choice("preprocessing", preprocessors.values())}
+        available_classifiers = \
+            components.classification_components._classifiers
+        available_preprocessors = \
+            components.preprocessing_components._preprocessors
+
+        classifier = CategoricalHyperparameter(
+            "classifier", [name for name in available_classifiers])
+        cs.add_hyperparameter(classifier)
+
+        for name in available_classifiers:
+            # We have to retrieve the configuration space every time because
+            # we change the objects it returns. If we reused it, we could not
+            #  retrieve the conditions further down
+            # TODO implement copy for hyperparameters and forbidden and
+            # conditions!
+            for parameter in available_classifiers[name].\
+                    get_hyperparameter_search_space().get_hyperparameters():
+                parameter.name = "%s:%s" % (name, parameter.name)
+                cs.add_hyperparameter(parameter)
+                condition = EqualsCondition(parameter, classifier, name)
+                cs.add_condition(condition)
+
+            for condition in available_classifiers[name]. \
+                    get_hyperparameter_search_space().get_conditions():
+                dlcs = condition.get_descendent_literal_clauses()
+                for dlc in dlcs:
+                    if not dlc.hyperparameter.name.startswith(name):
+                        dlc.hyperparameter.name = "%s:%s" % (name,
+                            dlc.hyperparameter.name)
+                cs.add_condition(condition)
+
+            for forbidden_clause in available_classifiers[name]. \
+                    get_hyperparameter_search_space().forbidden_clauses:
+                dlcs = forbidden_clause.get_descendant_literal_clauses()
+                for dlc in dlcs:
+                    if not dlc.hyperparameter.name.startswith(name):
+                        dlc.hyperparameter.name = "%s:%s" % (name,
+                            dlc.hyperparameter.name)
+                cs.add_forbidden_clause(forbidden_clause)
+
+        preprocessor = CategoricalHyperparameter(
+            "preprocessor", [name for name in available_preprocessors] + [
+                "__None__"])
+        cs.add_hyperparameter(preprocessor)
+        for name in available_preprocessors:
+            for parameter in available_preprocessors[name].\
+                    get_hyperparameter_search_space().get_hyperparameters():
+                parameter.name = "%s:%s" % (name, parameter.name)
+                cs.add_hyperparameter(parameter)
+                condition = EqualsCondition(parameter, preprocessor, name)
+                cs.add_condition(condition)
+
+            for condition in available_preprocessors[name]. \
+                    get_hyperparameter_search_space().get_conditions():
+                dlcs = condition.get_descendent_literal_clauses()
+                for dlc in dlcs:
+                    if not dlc.hyperparameter.startwith(name):
+                        dlc.hyperparameter.name = "%s:%s" % (name,
+                            dlc.hyperparameter.name)
+                cs.add_condition(condition)
+
+            for forbidden_clause in available_preprocessors[name]. \
+                    get_hyperparameter_search_space().forbidden_clauses:
+                dlcs = forbidden_clause.get_descendant_literal_clauses()
+                for dlc in dlcs:
+                    if not dlc.hyperparameter.startwith(name):
+                        dlc.hyperparameter.name = "%s:%s" % (name,
+                            dlc.hyperparameter.name)
+                print forbidden_clause
+                cs.add_forbidden_clause(forbidden_clause)
+
+        return cs
 
     # TODO: maybe provide an interface to the underlying predictor like
     # decision_function or predict_proba
