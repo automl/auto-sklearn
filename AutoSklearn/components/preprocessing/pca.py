@@ -30,13 +30,11 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
             idx += 1
 
         components = self.preprocessor.components_
-        print components
         self.preprocessor.components_ = components[:idx]
 
     def transform(self, X):
         if self.preprocessor is None:
             raise NotImplementedError()
-        print "Transform"
         return self.preprocessor.transform(X)
 
     def handles_missing_values(self):
@@ -53,8 +51,10 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space():
-        keep_variance = UniformFloatHyperparameter("keep_variance", 0.5, 1.0)
-        whiten = CategoricalHyperparameter("whiten", ["False", "True"])
+        keep_variance = UniformFloatHyperparameter(
+            "keep_variance", 0.5, 1.0, default=1.0)
+        whiten = CategoricalHyperparameter(
+            "whiten", ["False", "True"], default="False")
         cs = ConfigurationSpace()
         cs.add_hyperparameter(keep_variance)
         cs.add_hyperparameter(whiten)

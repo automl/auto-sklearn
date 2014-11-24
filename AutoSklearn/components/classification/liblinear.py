@@ -62,10 +62,12 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space():
-        penalty = CategoricalHyperparameter("penalty", ["l1", "l2"])
-        loss = CategoricalHyperparameter("loss", ["l1", "l2"])
-        C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True)
-        dual = Constant("dual", "__False__")
+        penalty = CategoricalHyperparameter("penalty", ["l1", "l2"],
+                                            default="l2")
+        loss = CategoricalHyperparameter("loss", ["l1", "l2"], default="l2")
+        C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True,
+                                       default=1.0)
+        dual = Constant("dual", "False")
         cs = ConfigurationSpace()
         cs.add_hyperparameter(penalty)
         cs.add_hyperparameter(loss)
@@ -76,7 +78,7 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
             ForbiddenEqualsClause(loss, "l1")
         )
         constant_penalty_and_loss = ForbiddenAndConjunction(
-            ForbiddenEqualsClause(dual, "__False__"),
+            ForbiddenEqualsClause(dual, "False"),
             ForbiddenEqualsClause(penalty, "l2"),
             ForbiddenEqualsClause(loss, "l1")
         )

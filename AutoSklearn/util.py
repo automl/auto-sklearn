@@ -47,4 +47,6 @@ def find_sklearn_classifiers():
 
     print classifiers
 
-find_sklearn_classifiers()
+
+if __name__ == "__main__":
+    find_sklearn_classifiers()

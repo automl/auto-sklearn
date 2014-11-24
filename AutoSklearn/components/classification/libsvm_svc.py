@@ -54,9 +54,10 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space():
-        C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True)
+        C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True,
+                                       default=1.0)
         gamma = UniformFloatHyperparameter("gamma", 3.0517578125e-05, 8,
-                                           log=True)
+                                           log=True, default=0.1)
         cs = ConfigurationSpace()
         cs.add_hyperparameter(C)
         cs.add_hyperparameter(gamma)

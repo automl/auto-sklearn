@@ -4,12 +4,12 @@ import numpy as np
 import StringIO
 import unittest
 
-import hyperopt
-
 import sklearn.datasets
 import sklearn.decomposition
 import sklearn.ensemble
 import sklearn.svm
+
+from HPOlibConfigSpace.configuration_space import Configuration, ConfigurationSpace
 
 from AutoSklearn.autosklearn import AutoSklearnClassifier
 from AutoSklearn.components.classification_base import AutoSklearnClassificationAlgorithm
@@ -75,8 +75,23 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
         pass
 
     def test_predict_iris(self):
-        auto = AutoSklearnClassifier(parameters={"classifier": "liblinear",
-                                                 "preprocessing": None})
+        cs = AutoSklearnClassifier.get_hyperparameter_search_space()
+        hyperparameters = {}
+        hyperparameters['classifier'] = cs.get_hyperparameter(
+            "classifier").instantiate("liblinear")
+        hyperparameters['liblinear:C'] = cs.get_hyperparameter("liblinear:C").\
+            instantiate(1.0)
+        hyperparameters['liblinear:dual'] = cs.get_hyperparameter(
+            'liblinear:dual').instantiate('False')
+        hyperparameters['liblinear:loss'] = cs.get_hyperparameter(
+            'liblinear:loss').instantiate('l2')
+        hyperparameters['liblinear:penalty'] = cs.get_hyperparameter(
+            'liblinear:penalty').instantiate('l2')
+        hyperparameters['preprocessor'] = cs.get_hyperparameter(
+            'preprocessor').instantiate('None')
+        config = Configuration(cs, hyperparameters=hyperparameters)
+
+        auto = AutoSklearnClassifier(config)
         X_train, Y_train, X_test, Y_test = self.get_iris()
         auto = auto.fit(X_train, Y_train)
         predictions = auto.predict(X_test)
@@ -86,32 +101,28 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
         self.assertIsInstance(auto._estimator.estimator, sklearn.svm.LinearSVC)
         self.assertAlmostEqual(accuracy, 1.0)
 
-    def test_predict_svm(self):
-        auto = AutoSklearnClassifier(parameters={"classifier": "libsvm_svc",
-                                                 "preprocessing": None})
-        X_train, Y_train, X_test, Y_test = self.get_iris()
-        auto = auto.fit(X_train, Y_train)
-        predictions = auto.predict(X_test)
-        accuracy = sklearn.metrics.accuracy_score(Y_test, predictions)
-        self.assertIsInstance(auto, AutoSklearnClassifier)
-        self.assertIsInstance(auto._estimator, AutoSklearnClassificationAlgorithm)
-        self.assertIsInstance(auto._estimator.estimator, sklearn.svm.SVC)
-        self.assertAlmostEqual(accuracy, 0.959999999999)
-
-    def test_predict_iris_rf(self):
-        auto = AutoSklearnClassifier(parameters={"classifier": "random_forest",
-                                                 "preprocessing": None})
-        X_train, Y_train, X_test, Y_test = self.get_iris()
-        auto = auto.fit(X_train, Y_train)
-        predictions = auto.predict(X_test)
-        accuracy = sklearn.metrics.accuracy_score(Y_test, predictions)
-        self.assertIsInstance(auto, AutoSklearnClassifier)
-        self.assertIsInstance(auto._estimator, AutoSklearnClassificationAlgorithm)
-        self.assertIsInstance(auto._estimator.estimator, sklearn.ensemble.RandomForestClassifier)
-        self.assertAlmostEqual(accuracy, 0.959999999999)
-
     def test_fit_with_preproc(self):
-        auto = AutoSklearnClassifier("liblinear", "pca")
+        cs = AutoSklearnClassifier.get_hyperparameter_search_space()
+        hyperparameters = {}
+        hyperparameters['classifier'] = cs.get_hyperparameter(
+            "classifier").instantiate("liblinear")
+        hyperparameters['liblinear:C'] = cs.get_hyperparameter("liblinear:C"). \
+            instantiate(1.0)
+        hyperparameters['liblinear:dual'] = cs.get_hyperparameter(
+            'liblinear:dual').instantiate('False')
+        hyperparameters['liblinear:loss'] = cs.get_hyperparameter(
+            'liblinear:loss').instantiate('l2')
+        hyperparameters['liblinear:penalty'] = cs.get_hyperparameter(
+            'liblinear:penalty').instantiate('l2')
+        hyperparameters['preprocessor'] = cs.get_hyperparameter(
+            'preprocessor').instantiate('pca')
+        hyperparameters['pca:keep_variance'] = cs.get_hyperparameter(
+            'pca:keep_variance').instantiate(1.0)
+        hyperparameters['pca:whiten'] = cs.get_hyperparameter(
+            'pca:whiten').instantiate('False')
+        config = Configuration(cs, hyperparameters=hyperparameters)
+
+        auto = AutoSklearnClassifier(config)
         X_train, Y_train, X_test, Y_test = self.get_iris()
         auto = auto.fit(X_train, Y_train)
         self.assertIsInstance(auto, AutoSklearnClassifier)
@@ -119,49 +130,11 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
         self.assertIsInstance(auto._preprocessor.preprocessor, sklearn
                               .decomposition.PCA)
 
-    def test_predict_with_preproc(self):
-        auto = AutoSklearnClassifier("liblinear", "pca")
-        X_train, Y_train, X_test, Y_test = self.get_iris()
-        auto = auto.fit(X_train, Y_train)
         prediction = auto.predict(X_test)
-        self.assertIsInstance(auto, AutoSklearnClassifier)
-        self.assertIsInstance(auto._preprocessor, AutoSklearnPreprocessingAlgorithm)
-
-    def test_specify_hyperparameters(self):
-        auto = AutoSklearnClassifier(random_state=1,
-            parameters={"classifier": "random_forest", "preprocessing":
-                "pca", "random_forest:n_estimators": 1,
-                "random_forest:max_features": 1.0})
-        X_train, Y_train, X_test, Y_test = self.get_iris()
-        auto = auto.fit(X_train, Y_train)
-        self.assertIsNotNone(auto._preprocessor)
-        self.assertIsNotNone(auto._preprocessor.preprocessor)
-        self.assertIsNotNone(auto._estimator)
-        self.assertIsNotNone(auto._estimator.estimator)
-        predictions = auto.predict(X_test)
-        accuracy = sklearn.metrics.accuracy_score(Y_test, predictions)
-        self.assertAlmostEqual(accuracy, 0.92)
-        self.assertEqual(auto._estimator.estimator.n_estimators, 1)
-
-    def test_specify_unknown_hyperparameters(self):
-        self.assertRaisesRegexp(ValueError,
-                          "Parameter random_forest:blablabla is unknown.",
-                          AutoSklearnClassifier, random_state=1,
-                          parameters={"classifier": "random_forest",
-                                      "preprocessing": "pca",
-                                      "random_forest:blablabla": 1})
-        self.assertRaisesRegexp(ValueError,
-                          "Parameter pca:blablabla is unknown.",
-                          AutoSklearnClassifier, random_state=1,
-                          parameters={"classifier": "random_forest",
-                                      "preprocessing": "pca",
-                                      "pca:blablabla": 1})
 
     def test_get_hyperparameter_search_space(self):
-        auto = AutoSklearnClassifier(None, None)
-        space = auto.get_hyperparameter_search_space()
-        space = hyperopt.pyll.base.as_apply(space)
-        print space
+        config = AutoSklearnClassifier.get_hyperparameter_search_space()
+        self.assertIsInstance(config, ConfigurationSpace)
 
     @unittest.skip("test_check_random_state Not yet Implemented")
     def test_check_random_state(self):

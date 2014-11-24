@@ -1,5 +1,12 @@
+from . import __version__
+
 import numpy as np
 from numpy import float64
+
+import sklearn
+if sklearn.__version__ != "0.15.2":
+    raise ValueError("AutoSklearn supports only sklearn version 0.15.2, "
+                     "you installed %s." % sklearn.__version__)
 
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils import check_random_state
@@ -120,12 +127,10 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             if isinstance(instantiated_hyperparameter, InactiveHyperparameter):
                 continue
 
-            print instantiated_hyperparameter.hyperparameter.name
             name_ = instantiated_hyperparameter.hyperparameter.name.\
                 split(":")[1]
             parameters[name_] = instantiated_hyperparameter.value
 
-        print parameters
         random_state = check_random_state(self.random_state)
         self._estimator = components.classification_components._classifiers\
             [name](random_state=random_state, **parameters)
@@ -134,7 +139,7 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         self._validate_input_Y(Y)
 
         preprocessor = self.configuration['preprocessor']
-        if preprocessor.value != "__None__":
+        if preprocessor.value != "None":
             preproc_name = preprocessor.value
             preproc_params = {}
 
@@ -149,7 +154,6 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
                     split(":")[1]
                 preproc_params[name_] = instantiated_hyperparameter.value
 
-            print preproc_params
             self._preprocessor = components.preprocessing_components.\
                 _preprocessors[preproc_name](random_state=random_state, **preproc_params)
             self._preprocessor.fit(X, Y)
@@ -248,7 +252,6 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         classifier = CategoricalHyperparameter(
             "classifier", [name for name in available_classifiers])
         cs.add_hyperparameter(classifier)
-
         for name in available_classifiers:
             # We have to retrieve the configuration space every time because
             # we change the objects it returns. If we reused it, we could not
@@ -282,7 +285,7 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
 
         preprocessor = CategoricalHyperparameter(
             "preprocessor", [name for name in available_preprocessors] + [
-                "__None__"])
+                "None"])
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors:
             for parameter in available_preprocessors[name].\
@@ -308,7 +311,6 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
                     if not dlc.hyperparameter.startwith(name):
                         dlc.hyperparameter.name = "%s:%s" % (name,
                             dlc.hyperparameter.name)
-                print forbidden_clause
                 cs.add_forbidden_clause(forbidden_clause)
 
         return cs
