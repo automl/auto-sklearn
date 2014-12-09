@@ -1,7 +1,9 @@
+:orphan:
+
 .. _components:
 
-Components
-**********
+Available Components
+********************
 
 Classification
 ==============

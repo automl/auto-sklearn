@@ -24,7 +24,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
 
     def fit(self, X, Y):
         self.n_estimators = int(self.n_estimators)
-        if self.max_depth == "Non_":
+        if self.max_depth == "None":
             self.max_depth = None
         elif self.max_depth is not None:
             self.max_depth = int(self.max_depth)
@@ -43,7 +43,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
             .min_samples_split, min_samples_leaf=self.min_samples_leaf,
             max_features=self.max_features, random_state=self.random_state,
             n_jobs=self.n_jobs)
-        self.estimator.fit(X, Y)
+        return self.estimator.fit(X, Y)
 
     def predict(self, X):
         if self.estimator is None:

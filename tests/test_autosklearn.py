@@ -16,26 +16,12 @@ from AutoSklearn.components.classification_base import AutoSklearnClassification
 from AutoSklearn.components.preprocessor_base import AutoSklearnPreprocessingAlgorithm
 import AutoSklearn.components.classification as classification_components
 import AutoSklearn.components.preprocessing as preprocessing_components
-from AutoSklearn.util import NoModelException
+from AutoSklearn.util import get_iris
 
 class TestAutoSKlearnClassifier(unittest.TestCase):
     # TODO: test for both possible ways to initialize AutoSklearn
     # parameters and other...
 
-    def get_iris(self):
-        iris = sklearn.datasets.load_iris()
-        X = iris.data
-        Y = iris.target
-        rs = np.random.RandomState(42)
-        indices = np.arange(X.shape[0])
-        rs.shuffle(indices)
-        X = X[indices]
-        Y = Y[indices]
-        X_train = X[:100]
-        Y_train = Y[:100]
-        X_test = X[100:]
-        Y_test = Y[100:]
-        return X_train, Y_train, X_test, Y_test
 
     def test_find_classifiers(self):
         classifiers = classification_components._classifiers
@@ -50,29 +36,6 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
         for key in preprocessors:
             self.assertIn(AutoSklearnPreprocessingAlgorithm,
                             preprocessors[key].__bases__)
-
-    def test_init_no_classifier(self):
-        try:
-            AutoSklearnClassifier(None, None)
-        except NoModelException as e:
-            self.assertEqual(e.__str__(),
-            '"You called <class \'AutoSklearn.autosklearn'
-            '.AutoSklearnClassifier\'>.__init__() without '
-            'specifying a model first."')
-
-    def test_init_unknown_classifier(self):
-        self.assertRaises(KeyError, AutoSklearnClassifier,
-                          "qufrpdvltromeaiudtroembdtaiubo", None)
-
-    def test_init_unknown_parameter(self):
-        self.assertRaises(KeyError, AutoSklearnClassifier,
-                          None, None,parameters={"classifier": "liblinear",
-                                                 "preprocessing": None,
-                                                 "libsvm_svc:gamma": 0.025})
-
-    @unittest.skip("test_init_parameters_as_dict_or_as_keywords Not yet Implemented")
-    def test_init_parameters_as_dict_or_as_keywords(self):
-        pass
 
     def test_predict_iris(self):
         cs = AutoSklearnClassifier.get_hyperparameter_search_space()
@@ -92,7 +55,7 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
         config = Configuration(cs, hyperparameters=hyperparameters)
 
         auto = AutoSklearnClassifier(config)
-        X_train, Y_train, X_test, Y_test = self.get_iris()
+        X_train, Y_train, X_test, Y_test = get_iris()
         auto = auto.fit(X_train, Y_train)
         predictions = auto.predict(X_test)
         accuracy = sklearn.metrics.accuracy_score(Y_test, predictions)
@@ -123,7 +86,7 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
         config = Configuration(cs, hyperparameters=hyperparameters)
 
         auto = AutoSklearnClassifier(config)
-        X_train, Y_train, X_test, Y_test = self.get_iris()
+        X_train, Y_train, X_test, Y_test = get_iris()
         auto = auto.fit(X_train, Y_train)
         self.assertIsInstance(auto, AutoSklearnClassifier)
         self.assertIsInstance(auto._preprocessor, AutoSklearnPreprocessingAlgorithm)

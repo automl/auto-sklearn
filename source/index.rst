@@ -21,6 +21,6 @@ Indices and Tables
 ==================
 
 * :ref:`API <api>`
-* :ref:`Components <components>`
+* :ref:`Available Components <components>`
 * :ref:`search`
 

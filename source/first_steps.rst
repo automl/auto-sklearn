@@ -15,13 +15,14 @@ configuration on the iris dataset.
     >>> X = iris.data
     >>> Y = iris.target
     >>> indices = np.arange(X.shape[0])
+    >>> np.random.seed(1)
     >>> np.random.shuffle(indices)
     >>> configuration_space = AutoSklearnClassifier.get_hyperparameter_search_space()
     >>> sampler = RandomSampler(configuration_space, 1)
     >>> configuration = sampler.sample_configuration()
-    >>> print configuration
-    >>> auto = AutoSklearnClassifier(configuration)
+    >>> auto = AutoSklearnClassifier(configuration, random_state=1)
     >>> auto = auto.fit(X[indices[:100]], Y[indices[:100]])
     >>> predictions = auto.predict(X[indices[100:]])
     >>> sklearn.metrics.accuracy_score(predictions, Y[indices[100:]])
+    0.88
     

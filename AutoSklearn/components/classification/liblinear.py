@@ -34,7 +34,7 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
                                                loss=self.loss, C=self.C,
                                                random_state=self.random_state,
                                                dual=False)
-        self.estimator.fit(X, Y)
+        return self.estimator.fit(X, Y)
 
     def predict(self, X):
         if self.estimator is None:

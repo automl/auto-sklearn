@@ -26,7 +26,7 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         self.estimator = sklearn.svm.SVC(C=self.C, gamma=self.gamma,
                                          random_state=self.random_state,
                                          cache_size=2000)
-        self.estimator.fit(X, Y)
+        return self.estimator.fit(X, Y)
 
     def predict(self, X):
         if self.estimator is None:

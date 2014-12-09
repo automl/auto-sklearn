@@ -2,19 +2,13 @@ import importlib
 import inspect
 import os
 import pkgutil
+
+import numpy as np
 import sklearn
 import sklearn.base
-import sys
+import sklearn.datasets
 
-
-class NoModelException(Exception):
-    def __init__(self, cls, method):
-        self.cls = cls
-        self.method = method
-
-    def __str__(self):
-        return repr("You called %s.%s without specifying a model first."
-                    % (type(self.cls), self.method))
+from .autosklearn import AutoSklearnClassifier
 
 
 def find_sklearn_classifiers():
@@ -46,6 +40,45 @@ def find_sklearn_classifiers():
                 classifiers.append(classifier)
 
     print classifiers
+
+
+def get_iris():
+    iris = sklearn.datasets.load_iris()
+    X = iris.data
+    Y = iris.target
+    rs = np.random.RandomState(42)
+    indices = np.arange(X.shape[0])
+    rs.shuffle(indices)
+    X = X[indices]
+    Y = Y[indices]
+    X_train = X[:100]
+    Y_train = Y[:100]
+    X_test = X[100:]
+    Y_test = Y[100:]
+    return X_train, Y_train, X_test, Y_test
+
+
+def test_classifier_with_iris(Classifier):
+    X_train, Y_train, X_test, Y_test = get_iris()
+    configuration_space = Classifier.get_hyperparameter_search_space()
+    default = configuration_space.get_default_configuration()
+    classifier = Classifier(random_state=1,
+                            **{hp.hyperparameter.name: hp.value for hp in
+                             default.values.values()})
+    predictor = classifier.fit(X_train, Y_train)
+    predictions = predictor.predict(X_test)
+    return predictions, Y_test
+
+
+def test_preprocessing_with_iris(Preprocessor):
+    X_train, Y_train, X_test, Y_test = get_iris()
+    configuration_space = Preprocessor.get_hyperparameter_search_space()
+    default = configuration_space.get_default_configuration()
+    preprocessor = Preprocessor(random_state=1,
+                                **{hp.hyperparameter.name: hp.value for hp in
+                                default.values.values()})
+    transformer = preprocessor.fit(X_train, Y_train)
+    return transformer.transform(X_test), X_test
 
 
 if __name__ == "__main__":

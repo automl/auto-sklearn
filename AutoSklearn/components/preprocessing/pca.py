@@ -31,6 +31,7 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
 
         components = self.preprocessor.components_
         self.preprocessor.components_ = components[:idx]
+        return self
 
     def transform(self, X):
         if self.preprocessor is None:

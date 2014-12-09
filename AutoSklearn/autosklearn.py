@@ -18,9 +18,7 @@ from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
 from HPOlibConfigSpace.conditions import EqualsCondition
 
 from . import components as components
-from .util import NoModelException
 
-task_types = set(["classification"])
 
 class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
     """This class implements the classification task.
@@ -50,12 +48,12 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
     ----------
     _estimator : The underlying scikit-learn classification model. This
         variable is assigned after a call to the
-        :ref:`AutoSklearn.autosklearn.AutoSklearnClassifier.fit` method.
+        :meth:`AutoSklearn.autosklearn.AutoSklearnClassifier.fit` method.
 
     _preprocessor : The underlying scikit-learn preprocessing algorithm. This
         variable is only assigned if a preprocessor is specified and
         after a call to the
-        :ref:`AutoSklearn.autosklearn.AutoSklearnClassifier.fit` method.
+        :meth:`AutoSklearn.autosklearn.AutoSklearnClassifier.fit` method.
 
     See also
     --------
@@ -113,8 +111,6 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         #       initializing a class in the init function!
         # TODO: can this happen now that a configuration is specified at
         # instantiation time
-        if "classifier" not in self.configuration:
-            raise NoModelException(self, "fit(X, Y)")
 
         # Extract Hyperparameters from the configuration object
         name = self.configuration["classifier"].value
