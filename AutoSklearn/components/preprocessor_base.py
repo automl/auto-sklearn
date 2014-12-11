@@ -16,10 +16,18 @@ class AutoSklearnPreprocessingAlgorithm(object):
           (handles_nominal_features : {True, False})
         * Can the algorithm handle numerical features
           (handles_numerical_features : {True, False})
-        * Can the algorithm handle multiclass-classification problems
-          (handles_multiclass : {True, False})
         * Can preprocess classification data
           (handles_classification_data : {True, False}
+        * Can the algorithm handle multiclass-classification problems
+          (handles_multiclass : {True, False})
+        * Can the algorithm handle multilabel-classification problems?
+          (handles_multilabel : {True, False}
+        * Is the algorithm deterministic for a given seed?
+          (is_deterministic : {True, False)
+        * Can the algorithm handle sparse data?
+          (handles_sparse : {True, False}
+        * What are the preferred types of the data array?
+          (preferred_dtype : list of tuples)
 
         Returns
         -------

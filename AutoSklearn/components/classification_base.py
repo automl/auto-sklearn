@@ -11,14 +11,22 @@ class AutoSklearnClassificationAlgorithm(object):
     def get_properties(self):
         """Get the properties of the underlying algorithm. These are:
 
-        * Can the algorithm handle missing values
+        * Can the algorithm handle missing values?
           (handles_missing_values : {True, False})
-        * Can the algorithm handle nominal features
+        * Can the algorithm handle nominal features?
           (handles_nominal_features : {True, False})
-        * Can the algorithm handle numerical features
+        * Can the algorithm handle numerical features?
           (handles_numerical_features : {True, False})
-        * Can the algorithm handle multiclass-classification problems
+        * Can the algorithm handle multiclass-classification problems?
           (handles_multiclass : {True, False})
+        * Can the algorithm handle multilabel-classification problems?
+          (handles_multilabel : {True, False}
+        * Is the algorithm deterministic for a given seed?
+          (is_deterministic : {True, False)
+        * Can the algorithm handle sparse data?
+          (handles_sparse : {True, False}
+        * What are the preferred types of the data array?
+          (preferred_dtype : list of tuples)
 
         Returns
         -------
