@@ -7,6 +7,7 @@ if sklearn.__version__ != "0.15.2":
                      "you installed %s." % sklearn.__version__)
 
 from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.pipeline import Pipeline
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import safe_asarray, assert_all_finite
 
@@ -73,8 +74,7 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         cs = self.get_hyperparameter_search_space()
         cs.check_configuration(configuration)
 
-        self._estimator = None
-        self._preprocessor = None
+        self._pipeline = None
 
         if random_state is None:
             self.random_state = check_random_state(1)
@@ -86,10 +86,11 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
 
         Parameters
         ----------
-        X : array-like, shape = (n_samples, n_features)
-            Training data. All values must be in the range [0,1].
+        X : array-like or sparse, shape = (n_samples, n_features)
+            Training data. The preferred type of the matrix (dense or sparse)
+            depends on the classifier selected.
 
-        y : array-like, shape = [n_samples]
+        y : array-like
             Targets
 
         Returns
@@ -110,27 +111,7 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         # TODO: can this happen now that a configuration is specified at
         # instantiation time
 
-        # Extract Hyperparameters from the configuration object
-        name = self.configuration["classifier"].value
-
-        parameters = {}
-        for instantiated_hyperparameter in self.configuration:
-            if not instantiated_hyperparameter.hyperparameter.name.startswith(
-                    name):
-                continue
-            if isinstance(instantiated_hyperparameter, InactiveHyperparameter):
-                continue
-
-            name_ = instantiated_hyperparameter.hyperparameter.name.\
-                split(":")[1]
-            parameters[name_] = instantiated_hyperparameter.value
-
-        random_state = check_random_state(self.random_state)
-        self._estimator = components.classification_components._classifiers\
-            [name](random_state=random_state, **parameters)
-
-        self._validate_input_X(X)
-        self._validate_input_Y(Y)
+        steps = []
 
         preprocessor = self.configuration['preprocessor']
         if preprocessor.value != "None":
@@ -138,26 +119,50 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             preproc_params = {}
 
             for instantiated_hyperparameter in self.configuration:
-                if not instantiated_hyperparameter.hyperparameter.name\
+                if not instantiated_hyperparameter.hyperparameter.name \
                         .startswith(preproc_name):
                     continue
-                if isinstance(instantiated_hyperparameter, InactiveHyperparameter):
+                if isinstance(instantiated_hyperparameter,
+                              InactiveHyperparameter):
                     continue
 
                 name_ = instantiated_hyperparameter.hyperparameter.name. \
                     split(":")[1]
                 preproc_params[name_] = instantiated_hyperparameter.value
 
-            self._preprocessor = components.preprocessing_components.\
-                _preprocessors[preproc_name](random_state=random_state, **preproc_params)
-            self._preprocessor.fit(X, Y)
-            X = self._preprocessor.transform(X)
+            preprocessor_object = components.preprocessing_components. \
+                _preprocessors[preproc_name](random_state=self.random_state,
+                                             **preproc_params)
+            steps.append((preproc_name, preprocessor_object))
 
-        self._estimator.fit(X, Y)
+        # Extract Hyperparameters from the configuration object
+        classifier_name = self.configuration["classifier"].value
+        classifier_parameters = {}
+        for instantiated_hyperparameter in self.configuration:
+            if not instantiated_hyperparameter.hyperparameter.name.startswith(
+                    classifier_name):
+                continue
+            if isinstance(instantiated_hyperparameter, InactiveHyperparameter):
+                continue
+
+            name_ = instantiated_hyperparameter.hyperparameter.name.\
+                split(":")[1]
+            classifier_parameters[name_] = instantiated_hyperparameter.value
+
+        classifier_object = components.classification_components._classifiers\
+            [classifier_name](random_state=self.random_state,
+                              **classifier_parameters)
+        steps.append((classifier_name, classifier_object))
+
+        self._validate_input_X(X)
+        self._validate_input_Y(Y)
+
+        self._pipeline = Pipeline(steps)
+        self._pipeline.fit(X, Y)
         return self
 
     def predict(self, X):
-        """Predict the classes using the selected model..
+        """Predict the classes using the selected model.
 
         Parameters
         ----------
@@ -165,18 +170,35 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
 
         Returns
         -------
-        C : array, shape = (n_samples,)
+        array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)
             Returns the predicted values"""
         # TODO check if fit() was called before...
-        if self._preprocessor is not None:
-            X = self._preprocessor.transform(X)
         self._validate_input_X(X)
-        return self._estimator.predict(X)
+        return self._pipeline.predict(X)
+
+    def scores(self, X):
+        """Predict confidence scores for samples using the selected model.
+
+        Parameters
+        ----------
+        X : array-like, shape = (n_samples, n_features)
+
+        Returns
+        -------
+        array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)
+        """
+        self._validate_input_X(X)
+
+        Xt = X
+        for name, transform in self._pipeline.steps[:-1]:
+            Xt = transform.transform(Xt)
+        return self._pipeline.steps[-1].scores(Xt)
 
     def _validate_input_X(self, X):
         # TODO: think of all possible states which can occur and how to
         # handle them
-        if not self._estimator.handles_missing_values() or \
+        """
+        if not self._pipeline[-1].handles_missing_values() or \
                 (self._preprocessor is not None and not\
                 self._preprocessor.handles_missing_value()):
             assert_all_finite(X)
@@ -201,8 +223,11 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             if X.dtype not in (np.float64, float64, np.float32, float):
                 raise ValueError("Data type of X matrix is not float but %s!"
                                  % X.dtype)
+        """
+        pass
 
     def _validate_input_Y(self, Y):
+        """
         Y = np.atleast_1d(Y)
         if not self._estimator.handles_non_binary_classes() or \
                 (self._preprocessor is not None and not \
@@ -217,6 +242,8 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
 
         if len(Y.shape) > 1:
             raise NotImplementedError()
+        """
+        pass
 
     def add_model_class(self, model):
         """
@@ -244,7 +271,8 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             components.preprocessing_components._preprocessors
 
         classifier = CategoricalHyperparameter(
-            "classifier", [name for name in available_classifiers])
+            "classifier", [name for name in available_classifiers],
+            default='random_forest')
         cs.add_hyperparameter(classifier)
         for name in available_classifiers:
             # We have to retrieve the configuration space every time because
@@ -283,7 +311,7 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
 
         preprocessor = CategoricalHyperparameter(
             "preprocessor", [name for name in available_preprocessors] + [
-                "None"])
+                "None"], default='None')
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors:
             for parameter in available_preprocessors[name].\

@@ -40,6 +40,18 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
         config = AutoSklearnClassifier.get_hyperparameter_search_space()
         self.assertIsInstance(config, ConfigurationSpace)
 
+    def test_default_configuration(self):
+        for i in range(10):
+            cs = AutoSklearnClassifier.get_hyperparameter_search_space()
+            default = cs.get_default_configuration()
+            print default
+            X_train, Y_train, X_test, Y_test = get_iris()
+            auto = AutoSklearnClassifier(default)
+            auto = auto.fit(X_train, Y_train)
+            predictions = auto.predict(X_test)
+            self.assertAlmostEqual(0.94,
+                sklearn.metrics.accuracy_score(predictions, Y_test))
+
     @unittest.skip("test_check_random_state Not yet Implemented")
     def test_check_random_state(self):
         raise NotImplementedError()
