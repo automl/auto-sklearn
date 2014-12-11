@@ -8,11 +8,9 @@ import sklearn
 import sklearn.base
 import sklearn.datasets
 
-from .autosklearn import AutoSklearnClassifier
-
 
 def find_sklearn_classifiers():
-    classifiers = []
+    classifiers = set()
     all_subdirectories = []
     sklearn_path = sklearn.__path__[0]
     for root, dirs, files in os.walk(sklearn_path):
@@ -37,7 +35,7 @@ def find_sklearn_classifiers():
                     issubclass(obj, sklearn.base.ClassifierMixin):
                 classifier = obj
                 print member_name, obj
-                classifiers.append(classifier)
+                classifiers.add(classifier)
 
     print classifiers
 
