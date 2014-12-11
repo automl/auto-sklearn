@@ -10,16 +10,18 @@ from ..preprocessor_base import AutoSklearnPreprocessingAlgorithm
 
 class PCA(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, keep_variance, whiten, random_state=None):
+        # TODO document that this implementation does not allow the number of
+        #  components to be specified, but rather the amount of variance to
+        # be kept!
+        # TODO it would also be possible to use a heuristic for the number of
+        #  PCA components!
         self.keep_variance = keep_variance
         self.whiten = whiten
+        self.random_state = random_state
 
     def fit(self, X, Y):
-        # TODO: implement that keep_variance can be a percentage (in int)
         self.preprocessor = sklearn.decomposition.PCA(whiten=self.whiten,
                                                       copy=True)
-                                                      # num components is
-                                                      # selected further down
-                                                      #  the code
         self.preprocessor.fit(X, Y)
 
         sum_ = 0.
@@ -38,17 +40,26 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
             raise NotImplementedError()
         return self.preprocessor.transform(X)
 
-    def handles_missing_values(self):
-        return False
-
-    def handles_nominal_features(self):
-        return False
-
-    def handles_numeric_features(self):
-        return True
-
-    def handles_non_binary_classes(self):
-        return True
+    @staticmethod
+    def get_meta_information():
+        return {'shortname': 'PCA',
+                'name': 'Principle Component Analysis',
+                'handles_missing_values': False,
+                'handles_nominal_values': False,
+                'handles_numerical_features': True,
+                # TODO write a test to make sure that the PCA scales data itself
+                'prefers_data_scaled': False,
+                # TODO find out if this is good because of sparsity...
+                'prefers_data_normalized': False,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': True,
+                # TODO document that we have to be very careful
+                'is_deterministic': False,
+                # TODO find out of this is right!
+                'handles_sparse': False,
+                # TODO find out what is best used here!
+                'preferred_dtype': None}
 
     @staticmethod
     def get_hyperparameter_search_space():
@@ -60,10 +71,6 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
         cs.add_hyperparameter(keep_variance)
         cs.add_hyperparameter(whiten)
         return cs
-
-    @staticmethod
-    def get_all_accepted_hyperparameter_names():
-        return (["keep_variance", "whiten"])
 
     def __str__(self):
         return "AutoSklearn Principle Component Analysis preprocessor."

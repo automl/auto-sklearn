@@ -1,5 +1,3 @@
-from . import __version__
-
 import numpy as np
 from numpy import float64
 
@@ -258,16 +256,20 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
                     get_hyperparameter_search_space().get_hyperparameters():
                 parameter.name = "%s:%s" % (name, parameter.name)
                 cs.add_hyperparameter(parameter)
-                condition = EqualsCondition(parameter, classifier, name)
-                cs.add_condition(condition)
+                # We must only add a condition if the hyperparameter is not
+                # conditional on something else
+                if cs.get_parents_of(parameter):
+                    condition = EqualsCondition(parameter, classifier, name)
+                    cs.add_condition(condition)
 
             for condition in available_classifiers[name]. \
                     get_hyperparameter_search_space().get_conditions():
-                dlcs = condition.get_descendent_literal_clauses()
+                dlcs = condition.get_descendant_literal_conditions()
                 for dlc in dlcs:
-                    if not dlc.hyperparameter.name.startswith(name):
-                        dlc.hyperparameter.name = "%s:%s" % (name,
-                            dlc.hyperparameter.name)
+                    if not dlc.child.name.startswith(name):
+                        dlc.child.name = "%s:%s" % (name, dlc.child.name)
+                    if not dlc.parent.name.startswith(name):
+                        dlc.parent.name = "%s:%s" % (name, dlc.parent.name)
                 cs.add_condition(condition)
 
             for forbidden_clause in available_classifiers[name]. \
@@ -288,16 +290,20 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
                     get_hyperparameter_search_space().get_hyperparameters():
                 parameter.name = "%s:%s" % (name, parameter.name)
                 cs.add_hyperparameter(parameter)
-                condition = EqualsCondition(parameter, preprocessor, name)
-                cs.add_condition(condition)
+                # We must only add a condition if the hyperparameter is not
+                # conditional on something else
+                if cs.get_parents_of(parameter):
+                    condition = EqualsCondition(parameter, preprocessor, name)
+                    cs.add_condition(condition)
 
             for condition in available_preprocessors[name]. \
                     get_hyperparameter_search_space().get_conditions():
-                dlcs = condition.get_descendent_literal_clauses()
+                dlcs = condition.get_descendent_literal_conditions()
                 for dlc in dlcs:
-                    if not dlc.hyperparameter.startwith(name):
-                        dlc.hyperparameter.name = "%s:%s" % (name,
-                            dlc.hyperparameter.name)
+                    if not dlc.child.name.startswith(name):
+                        dlc.child.name = "%s:%s" % (name, dlc.child.name)
+                    if not dlc.parent.name.startswith(name):
+                        dlc.parent.name = "%s:%s" % (name, dlc.parent.name)
                 cs.add_condition(condition)
 
             for forbidden_clause in available_preprocessors[name]. \

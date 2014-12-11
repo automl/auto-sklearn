@@ -10,15 +10,21 @@ class AutoSklearnPreprocessingAlgorithm(object):
     def get_properties(self):
         """Get the properties of the underlying algorithm. These are:
 
-        * Can the algorithm handle missing values
+        * Short name
+        * Full name
+        * Can the algorithm handle missing values?
           (handles_missing_values : {True, False})
-        * Can the algorithm handle nominal features
+        * Can the algorithm handle nominal features?
           (handles_nominal_features : {True, False})
-        * Can the algorithm handle numerical features
+        * Can the algorithm handle numerical features?
           (handles_numerical_features : {True, False})
-        * Can preprocess classification data
-          (handles_classification_data : {True, False}
-        * Can the algorithm handle multiclass-classification problems
+        * Does the algorithm prefer data scaled in [0,1]?
+          (prefers_data_scaled : {True, False}
+        * Does the algorithm prefer data normalized to 0-mean, 1std?
+          (prefers_data_normalized : {True, False}
+        * Can preprocess classification data?
+          (handles_classification : {True, False}
+        * Can the algorithm handle multiclass-classification problems?
           (handles_multiclass : {True, False})
         * Can the algorithm handle multilabel-classification problems?
           (handles_multilabel : {True, False}

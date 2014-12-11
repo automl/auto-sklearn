@@ -11,12 +11,18 @@ class AutoSklearnClassificationAlgorithm(object):
     def get_properties(self):
         """Get the properties of the underlying algorithm. These are:
 
+        * Short name
+        * Full name
         * Can the algorithm handle missing values?
           (handles_missing_values : {True, False})
         * Can the algorithm handle nominal features?
           (handles_nominal_features : {True, False})
         * Can the algorithm handle numerical features?
           (handles_numerical_features : {True, False})
+        * Does the algorithm prefer data scaled in [0,1]?
+          (prefers_data_scaled : {True, False}
+        * Does the algorithm prefer data normalized to 0-mean, 1std?
+          (prefers_data_normalized : {True, False}
         * Can the algorithm handle multiclass-classification problems?
           (handles_multiclass : {True, False})
         * Can the algorithm handle multilabel-classification problems?
@@ -77,7 +83,7 @@ class AutoSklearnClassificationAlgorithm(object):
 
         Returns
         -------
-        C : array, shape = (n_samples,)
+        array, shape = (n_samples,)
             Returns the predicted values
 
         Notes
@@ -85,6 +91,19 @@ class AutoSklearnClassificationAlgorithm(object):
         Please see the `scikit-learn API documentation
         <http://scikit-learn.org/dev/developers/index.html#apis-of-scikit
         -learn-objects>`_ for further information."""
+        raise NotImplementedError()
+
+    def scores(self, X):
+        """Predict confidence scores for samples.
+
+        Parameters
+        ----------
+        X : array-like, shape = (n_samples, n_features)
+
+        Returns
+        -------
+        array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)
+        """
         raise NotImplementedError()
 
     def get_estimator(self):
