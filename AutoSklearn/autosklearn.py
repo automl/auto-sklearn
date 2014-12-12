@@ -192,7 +192,7 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         Xt = X
         for name, transform in self._pipeline.steps[:-1]:
             Xt = transform.transform(Xt)
-        return self._pipeline.steps[-1].scores(Xt)
+        return self._pipeline.steps[-1][-1].scores(Xt)
 
     def _validate_input_X(self, X):
         # TODO: think of all possible states which can occur and how to
