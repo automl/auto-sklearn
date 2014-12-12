@@ -18,79 +18,79 @@ from scipy.sparse import *
 # Note: to check for nan values np.any(map(np.isnan,X_train))
 
 def file_to_array (filename, verbose=False):
-	''' Converts a file to a list of list of STRING
-	It differs from np.genfromtxt in that the number of columns doesn't need to be constant'''
-	data =[]
-	with open(filename, "r") as data_file:
-		if verbose: print ("Reading {}...".format(filename))
-		lines = data_file.readlines()
-		if verbose: print ("Converting {} to correct array...".format(filename))
-		data = [lines[i].strip().split() for i in range (len(lines))]
-	return data
+    ''' Converts a file to a list of list of STRING
+    It differs from np.genfromtxt in that the number of columns doesn't need to be constant'''
+    data =[]
+    with open(filename, "r") as data_file:
+        if verbose: print ("Reading {}...".format(filename))
+        lines = data_file.readlines()
+        if verbose: print ("Converting {} to correct array...".format(filename))
+        data = [lines[i].strip().split() for i in range (len(lines))]
+    return data
 
 def read_first_line (filename):
-	''' Read fist line of file'''
-	data =[]
-	with open(filename, "r") as data_file:
-		line = data_file.readline()
-		data = line.strip().split()
-	return data  
+    ''' Read fist line of file'''
+    data =[]
+    with open(filename, "r") as data_file:
+        line = data_file.readline()
+        data = line.strip().split()
+    return data  
  
 def num_lines (filename):
-	''' Count the number of lines of file'''
-	return sum(1 for line in open(filename))
+    ''' Count the number of lines of file'''
+    return sum(1 for line in open(filename))
 
 def binarization (array):
-	''' Takes a binary-class datafile and turn the max value (positive class) into 1 and the min into 0'''
-	array = np.array(array, dtype=float) # conversion needed to use np.inf after
-	if len(np.unique(array)) > 2:
-		raise ValueError ("The argument must be a binary-class datafile. {} classes detected".format(len(np.unique(array))))
-	
-	# manipulation which aims at avoid error in data with for example classes '1' and '2'.
-	array[array == np.amax(array)] = np.inf
-	array[array == np.amin(array)] = 0
-	array[array == np.inf] = 1
-	return np.array(array, dtype=int)
+    ''' Takes a binary-class datafile and turn the max value (positive class) into 1 and the min into 0'''
+    array = np.array(array, dtype=float) # conversion needed to use np.inf after
+    if len(np.unique(array)) > 2:
+        raise ValueError ("The argument must be a binary-class datafile. {} classes detected".format(len(np.unique(array))))
+    
+    # manipulation which aims at avoid error in data with for example classes '1' and '2'.
+    array[array == np.amax(array)] = np.inf
+    array[array == np.amin(array)] = 0
+    array[array == np.inf] = 1
+    return np.array(array, dtype=int)
 
 def sparse_file_to_sparse_list (filename, verbose=True):
-	''' Converts a sparse data file to a sparse list, so that :
-	sparse_list[i][j] = (a,b) means matrix[i][a]=b'''
-	data_file = open(filename, "r")
-	if verbose: print ("Reading {}...".format(filename))
-	lines = data_file.readlines()
-	if verbose: print ("Converting {} to correct array")
-	data = [lines[i].split(' ') for i in range (len(lines))]
-	if verbose: print ("Converting {} to sparse list".format (filename))
-	return [[tuple(map(int, data[i][j].rstrip().split(':'))) for j in range(len(data[i])) if data[i][j] != '\n'] for i in range (len(data))] 
+    ''' Converts a sparse data file to a sparse list, so that :
+    sparse_list[i][j] = (a,b) means matrix[i][a]=b'''
+    data_file = open(filename, "r")
+    if verbose: print ("Reading {}...".format(filename))
+    lines = data_file.readlines()
+    if verbose: print ("Converting {} to correct array")
+    data = [lines[i].split(' ') for i in range (len(lines))]
+    if verbose: print ("Converting {} to sparse list".format (filename))
+    return [[tuple(map(int, data[i][j].rstrip().split(':'))) for j in range(len(data[i])) if data[i][j] != '\n'] for i in range (len(data))] 
 
 def sparse_list_to_csr_sparse (sparse_list, nbr_features, verbose=True):
-	''' This function takes as argument a matrix of tuple representing a sparse matrix and the number of features. 
-	sparse_list[i][j] = (a,b) means matrix[i][a]=b
-	It converts it into a scipy csr sparse matrix'''
-	nbr_samples = len(sparse_list)
-	dok_sparse = dok_matrix ((nbr_samples, nbr_features)) # construction easier w/ dok_sparse...
-	if verbose: print ("\tConverting sparse list to dok sparse matrix")
-	for row in range (nbr_samples):
-		for column in range (len(sparse_list[row])):
-			(feature,value) = sparse_list[row][column]
-			dok_sparse[row, feature-1] = value
-	if verbose: print ("\tConverting dok sparse matrix to csr sparse matrix")
-	return dok_sparse.tocsr() # ... but csr better for shuffling data or other tricks
+    ''' This function takes as argument a matrix of tuple representing a sparse matrix and the number of features. 
+    sparse_list[i][j] = (a,b) means matrix[i][a]=b
+    It converts it into a scipy csr sparse matrix'''
+    nbr_samples = len(sparse_list)
+    dok_sparse = dok_matrix ((nbr_samples, nbr_features)) # construction easier w/ dok_sparse...
+    if verbose: print ("\tConverting sparse list to dok sparse matrix")
+    for row in range (nbr_samples):
+        for column in range (len(sparse_list[row])):
+            (feature,value) = sparse_list[row][column]
+            dok_sparse[row, feature-1] = value
+    if verbose: print ("\tConverting dok sparse matrix to csr sparse matrix")
+    return dok_sparse.tocsr() # ... but csr better for shuffling data or other tricks
 
 def multilabel_to_multiclass (array):
-	array = binarization (array)
-	return np.array([np.nonzero(array[i,:])[0][0] for i in range (len(array))])
-	
+    array = binarization (array)
+    return np.array([np.nonzero(array[i,:])[0][0] for i in range (len(array))])
+    
 def convert_to_num(Ybin, verbose=True):
-	''' Convert binary targets to numeric vector (typically classification target values)'''
-	if verbose: print("\tConverting to numeric vector")
-	Ybin = np.array(Ybin)
-	if len(Ybin.shape) ==1:
+    ''' Convert binary targets to numeric vector (typically classification target values)'''
+    if verbose: print("\tConverting to numeric vector")
+    Ybin = np.array(Ybin)
+    if len(Ybin.shape) ==1:
          return Ybin
-	classid=range(Ybin.shape[1])
-	Ycont = np.dot(Ybin, classid)
-	if verbose: print Ycont
-	return Ycont
+    classid=range(Ybin.shape[1])
+    Ycont = np.dot(Ybin, classid)
+    if verbose: print Ycont
+    return Ycont
  
 def convert_to_bin(Ycont, nval, verbose=True):
     ''' Convert numeric vector to binary (typically classification target values)'''

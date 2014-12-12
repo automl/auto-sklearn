@@ -116,7 +116,7 @@ debug_mode = 0
 # The code should keep track of time spent and NOT exceed the time limit 
 # in the dataset "info" file, stored in D.info['time_budget'], see code below.
 # If debug >=1, you can decrease the maximum time (in sec) with this variable:
-max_time = 90 
+max_time = 30
 
 # Maximum number of cycles
 ##########################
@@ -168,12 +168,14 @@ lib_dir = os.path.join(run_dir, "lib")
 res_dir = os.path.join(run_dir, "res")
 
 # Our libraries  
-path.append (run_dir)
-path.append (lib_dir)
-import data_io                       # general purpose input/output functions
-from data_io import vprint           # print only in verbose mode
-from data_manager import DataManager # load/save data and get info about them
-from models import MyAutoML          # example model from scikit learn 
+path.append(run_dir)
+path.append(lib_dir)
+import data.data_io as data_io            # general purpose input/output functions
+from data.data_io import vprint           # print only in verbose mode
+from data.data_manager import DataManager # load/save data and get info about them
+import scores.libscores
+from AutoSklearn.autosklearn import AutoSklearnClassifier
+from HPOlibConfigSpace.random_sampler import RandomSampler
 
 if debug_mode >= 4 or running_on_codalab: # Show library version and directory structure
     data_io.show_version()
@@ -255,9 +257,16 @@ if __name__=="__main__" and debug_mode<4:
         # ========= Creating a model, knowing its assigned task from D.info['task'].
         # The model can also select its hyper-parameters based on other elements of info.  
         vprint( verbose,  "======== Creating model ==========")
-        M = MyAutoML(D.info, verbose, debug_mode)
-        print M
-        
+        configuration_space = AutoSklearnClassifier.get_hyperparameter_search_space()
+        sampler = RandomSampler(configuration_space, 2)
+        vprint( verbose, configuration_space)
+
+        # ========= Getting task and metric
+        metric = D.info['metric']
+        scoring_func = getattr(scores.libscores, metric)
+        task_type = D.info['task']
+
+
         # ========= Iterating over learning cycles and keeping track of time
         # Preferably use a method that iteratively improves the model and
         # regularly saves predictions results gradually getting better
@@ -276,17 +285,31 @@ if __name__=="__main__" and debug_mode<4:
         time_spent = 0                   # Initialize time spent learning
         cycle = 0
         
-        while time_spent <= time_budget/2 and cycle <= max_cycle:
+        while time_spent <= time_budget and cycle <= max_cycle:
             vprint( verbose,  "=========== " + basename.capitalize() +" Training cycle " + str(cycle) +" ================") 
-            # Exponentially scale the number of base estimators
-            M.model.n_estimators = int(np.exp2(cycle))
-            # Fit base estimators
-            M.fit(D.data['X_train'], D.data['Y_train'])
+
+            configuration = sampler.sample_configuration()
+            vprint( verbose, configuration)
+            model = AutoSklearnClassifier(configuration)
+            model.fit(D.data['X_train'], D.data['Y_train'])
             vprint( verbose,  "[+] Fitting success, time spent so far %5.2f sec" % (time.clock() - start))
-            # Make predictions
-            Y_valid = M.predict(D.data['X_valid'])
-            Y_test = M.predict(D.data['X_test'])   
-            vprint( verbose,  "[+] Prediction success, time spent so far %5.2f sec" % (time.clock() - start))
+
+            # Make predictions, take only the score of the second class
+            Y_train = model.scores(D.data['X_train'])
+            Y_train = np.hstack([Y_train[i][:, 1].reshape((-1, 1))
+                                 for i in range(len(Y_train))])
+            Y_valid = model.scores(D.data['X_valid'])
+            Y_valid = np.hstack([Y_valid[i][:,1].reshape((-1, 1))
+                                 for i in range(len(Y_valid))])
+            Y_test = model.scores(D.data['X_test'])
+            Y_test = np.hstack([Y_test[i][:, 1].reshape((-1, 1))
+                                 for i in range(len(Y_test))])
+
+            score = scoring_func(D.data['Y_train'], Y_train, task=task_type)
+            vprint(verbose, score)
+
+            vprint(verbose, "[+] Prediction success, time spent so far %5.2f sec" % (time.clock() - start))
+
             # Write results
             filename_valid = basename + '_valid_' + str(cycle).zfill(3) + '.predict'
             data_io.write(os.path.join(output_dir,filename_valid), Y_valid)
