@@ -11,13 +11,17 @@ from ..classification_base import AutoSklearnClassificationAlgorithm
 class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
     # TODO: maybe add dual and crammer-singer?
-    def __init__(self, penalty, loss, dual, tol, C, class_weight,
-            random_state=None):
+    def __init__(self, penalty, loss, dual, tol, C, multi_class,
+                 fit_intercept, intercept_scaling, class_weight,
+                 random_state=None):
         self.penalty = penalty
         self.loss = loss
         self.dual = dual
         self.tol = tol
         self.C = C
+        self.multi_class = multi_class
+        self.fit_intercept = fit_intercept
+        self.intercept_scaling = intercept_scaling
         self.class_weight = class_weight
         self.random_state = random_state
         self.estimator = None
@@ -26,13 +30,9 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
         self.C = float(self.C)
         self.tol = float(self.tol)
 
-        if self.dual == "False":
-            self.dual = False
-        elif self.dual == "True":
-            self.dual = True
-        else:
-            raise ValueError("Parameter dual '%s' not in ['True', 'False']" %
-                             (self.dual))
+        self.dual = bool(self.dual)
+        self.fit_intercept = bool(self.fit_intercept)
+        self.intercept_scaling = float(self.intercept_scaling)
 
         if self.class_weight == "None":
             self.class_weight = None
@@ -113,8 +113,13 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
             ForbiddenEqualsClause(penalty, "l2"),
             ForbiddenEqualsClause(loss, "l1")
         )
+        penalty_and_dual = ForbiddenAndConjunction(
+            ForbiddenEqualsClause(dual, "False"),
+            ForbiddenEqualsClause(penalty, "l1")
+        )
         cs.add_forbidden_clause(penalty_and_loss)
         cs.add_forbidden_clause(constant_penalty_and_loss)
+        cs.add_forbidden_clause(penalty_and_dual)
         return cs
 
     def __str__(self):

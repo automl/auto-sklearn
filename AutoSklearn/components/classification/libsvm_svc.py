@@ -9,8 +9,8 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter,\
 from ..classification_base import AutoSklearnClassificationAlgorithm
 
 class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
-    def __init__(self, C, kernel, degree, gamma, coef0, shrinking, tol,
-                 class_weight, max_iter, random_state=None):
+    def __init__(self, C, kernel, shrinking, tol, class_weight, max_iter,
+                 degree=3, gamma=0.1, coef0=0, random_state=None):
         self.C = C
         self.kernel = kernel
         self.degree = degree

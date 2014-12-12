@@ -113,27 +113,29 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
 
         steps = []
 
-        preprocessor = self.configuration['preprocessor']
-        if preprocessor.value != "None":
-            preproc_name = preprocessor.value
-            preproc_params = {}
+        preprocessors_names = ["imputation", "rescaling",
+                               self.configuration['preprocessor'].value]
 
-            for instantiated_hyperparameter in self.configuration:
-                if not instantiated_hyperparameter.hyperparameter.name \
-                        .startswith(preproc_name):
-                    continue
-                if isinstance(instantiated_hyperparameter,
-                              InactiveHyperparameter):
-                    continue
+        for preproc_name in preprocessors_names:
+            if preproc_name != "None":
+                preproc_params = {}
 
-                name_ = instantiated_hyperparameter.hyperparameter.name. \
-                    split(":")[1]
-                preproc_params[name_] = instantiated_hyperparameter.value
+                for instantiated_hyperparameter in self.configuration:
+                    if not instantiated_hyperparameter.hyperparameter.name \
+                            .startswith(preproc_name):
+                        continue
+                    if isinstance(instantiated_hyperparameter,
+                                  InactiveHyperparameter):
+                        continue
 
-            preprocessor_object = components.preprocessing_components. \
-                _preprocessors[preproc_name](random_state=self.random_state,
-                                             **preproc_params)
-            steps.append((preproc_name, preprocessor_object))
+                    name_ = instantiated_hyperparameter.hyperparameter.name. \
+                        split(":")[1]
+                    preproc_params[name_] = instantiated_hyperparameter.value
+
+                preprocessor_object = components.preprocessing_components. \
+                    _preprocessors[preproc_name](random_state=self.random_state,
+                                                 **preproc_params)
+                steps.append((preproc_name, preprocessor_object))
 
         # Extract Hyperparameters from the configuration object
         classifier_name = self.configuration["classifier"].value
@@ -263,6 +265,8 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             The configuration space describing the AutoSklearnClassifier.
 
         """
+        always_active = ["imputation", "rescaling"]
+
         cs = ConfigurationSpace()
 
         available_classifiers = \
@@ -270,8 +274,8 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         available_preprocessors = \
             components.preprocessing_components._preprocessors
 
-        classifier = CategoricalHyperparameter(
-            "classifier", [name for name in available_classifiers],
+        classifier = CategoricalHyperparameter("classifier",
+            [name for name in available_classifiers if name not in always_active],
             default='random_forest')
         cs.add_hyperparameter(classifier)
         for name in available_classifiers:
@@ -309,9 +313,9 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
                             dlc.hyperparameter.name)
                 cs.add_forbidden_clause(forbidden_clause)
 
-        preprocessor = CategoricalHyperparameter(
-            "preprocessor", [name for name in available_preprocessors] + [
-                "None"], default='None')
+        preprocessor = CategoricalHyperparameter("preprocessor",
+            [name for name in available_preprocessors if name not in always_active]
+            + ["None"], default='None')
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors:
             for parameter in available_preprocessors[name].\

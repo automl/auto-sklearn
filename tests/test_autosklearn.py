@@ -41,10 +41,9 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
         self.assertIsInstance(config, ConfigurationSpace)
 
     def test_default_configuration(self):
-        for i in range(10):
+        for i in range(2):
             cs = AutoSklearnClassifier.get_hyperparameter_search_space()
             default = cs.get_default_configuration()
-            print default
             X_train, Y_train, X_test, Y_test = get_iris()
             auto = AutoSklearnClassifier(default)
             auto = auto.fit(X_train, Y_train)
