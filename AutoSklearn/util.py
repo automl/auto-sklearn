@@ -56,7 +56,7 @@ def get_iris():
     return X_train, Y_train, X_test, Y_test
 
 
-def test_classifier_with_iris(Classifier):
+def _test_classifier_with_iris(Classifier):
     X_train, Y_train, X_test, Y_test = get_iris()
     configuration_space = Classifier.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
@@ -68,7 +68,7 @@ def test_classifier_with_iris(Classifier):
     return predictions, Y_test
 
 
-def test_preprocessing_with_iris(Preprocessor):
+def _test_preprocessing_with_iris(Preprocessor):
     X_train, Y_train, X_test, Y_test = get_iris()
     configuration_space = Preprocessor.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()

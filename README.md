@@ -1,5 +1,6 @@
 ### Download and build the documentation ###
 
+    pip install scikit-learn==0.15.2
     pip install git+https://github.com/mfeurer/HPOlibConfigSpace#egg=HPOlibConfigSpace0.1dev
     git clone https://bitbucket.org/mfeurer/autosklearn.git
     cd autosklearn
