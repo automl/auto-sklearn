@@ -67,8 +67,6 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
     def __init__(self, configuration, random_state=None):
 
         # TODO check sklearn version!
-
-        self.random_state = random_state
         self.configuration = configuration
 
         cs = self.get_hyperparameter_search_space()

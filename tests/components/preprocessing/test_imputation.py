@@ -1,6 +1,6 @@
 import unittest
 
-from AutoSklearn.components.static_preprocessing.imputation import Imputation
+from AutoSklearn.components.preprocessing.imputation import Imputation
 from AutoSklearn.util import test_preprocessing_with_iris
 
 

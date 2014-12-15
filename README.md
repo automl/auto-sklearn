@@ -4,6 +4,7 @@
     git clone https://bitbucket.org/mfeurer/autosklearn.git
     cd autosklearn
     python setup.py install
+    python setup.py test
 
 Installation with `pip`
 

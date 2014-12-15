@@ -51,7 +51,7 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
             self.assertAlmostEqual(0.94,
                 sklearn.metrics.accuracy_score(predictions, Y_test))
             scores = auto.scores(X_test)
-            self.assertTrue((scores[3] == [0., 0.2, 0.8]).all())
+            self.assertTrue((scores[4] == [0.6, 0.4, 0.]).all())
 
     @unittest.skip("test_check_random_state Not yet Implemented")
     def test_check_random_state(self):
