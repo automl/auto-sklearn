@@ -7,7 +7,7 @@
 
 Installation with `pip`
 
-    pip install numpy scipy scikit-learn==0.15.1 numpydoc sphinx
+    pip install numpy scipy scikit-learn==0.15.2 numpydoc sphinx
     pip install git+https://github.com/mfeurer/HPOlibConfigSpace#egg=HPOlibConfigSpace0.1dev
     pip install --editable git+https://bitbucket.org/mfeurer/autosklearn#egg=AutoSklearn
 
