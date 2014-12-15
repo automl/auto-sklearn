@@ -61,7 +61,7 @@ def _transform_selected(X, transform, selected="all", copy=True):
         X_not_sel = X[:, ind[not_sel]]
 
         if sparse.issparse(X_sel) or sparse.issparse(X_not_sel):
-            return sparse.hstack((X_sel, X_not_sel))
+            return sparse.hstack((X_sel, X_not_sel)).tocsr()
         else:
             return np.hstack((X_sel, X_not_sel))
 
@@ -80,13 +80,6 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
 
     Parameters
     ----------
-    n_values : 'auto', int or array of ints
-        Number of values per feature.
-
-        - 'auto' : determine value range from training data.
-        - int : maximum value for all features.
-        - array : maximum value per feature.
-
     categorical_features: "all" or array of indices or mask
         Specify what features are treated as categorical.
 
@@ -144,9 +137,8 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
       encoding of dictionary items or strings.
     """
 
-    def __init__(self, n_values="auto", categorical_features="all",
+    def __init__(self, categorical_features="all",
                  dtype=np.float, sparse=True):
-        self.n_values = n_values
         self.categorical_features = categorical_features
         self.dtype = dtype
         self.sparse = sparse
@@ -173,46 +165,39 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
         uniques = [np.unique(X[:,i], False, True, False)
                    for i in range(n_features)]
         n_values = [0]
+
         column_indices = []
+        data = []
         feature_indices = []
 
         for idx, values_ in enumerate(uniques):
             unique_elements, inverse = values_
-
-            feature_indices_idx = dict()
 
             # Number of unique elements in that column (without np.NaN)
             n_uniques = np.sum(np.isfinite(unique_elements))
             n_values.append(n_uniques)
             offset = np.sum(n_values[:-1])
 
-            # Transform the inverse to proper indices, where all np.NaN are
-            # indexed by a -1.
-            column_indices_idx = [-1 if index > n_uniques else index
+            column_indices_idx = [offset if index >= n_uniques
+                                  else index + offset
                                   for index in inverse]
-            feature_indices_idx = {unique: index + offset for index, unique in
-                                   enumerate(unique_elements)}
-
-            column_indices_idx = np.array(column_indices_idx) + offset
+            data_idx = [0 if index >= n_uniques else 1 for index in inverse]
+            feature_indices_idx = {unique: index + offset
+                                   for index, unique in enumerate(unique_elements)
+                                   if np.isfinite(unique)}
 
             column_indices.extend(column_indices_idx)
+            data.extend(data_idx)
             feature_indices.append(feature_indices_idx)
 
         row_indices = np.tile(np.arange(n_samples, dtype=np.int32),
                                     n_features)
 
         self.feature_indices_ = feature_indices
-        self.n_values_ = n_values
-        data = np.ones(n_samples * n_features)
+        self.n_values = n_values
         out = sparse.coo_matrix((data, (row_indices, column_indices)),
                                 shape=(n_samples, np.sum(n_values)),
                                 dtype=self.dtype).tocsr()
-
-        if self.n_values == 'auto':
-            mask = np.array(out.sum(axis=0)).ravel() != 0
-            active_features = np.where(mask)[0]
-            out = out[:, active_features]
-            self.active_features_ = active_features
 
         return out if self.sparse else out.toarray()
 
@@ -227,9 +212,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
 
     def _transform(self, X):
         """Assumes X contains only categorical features."""
-        X = check_arrays(X, sparse_format='dense', dtype=np.int)[0]
-        if np.any(X < 0):
-            raise ValueError("X needs to contain only non-negative integers.")
+        X = check_arrays(X, sparse_format='dense', allow_nans=True)[0]
         n_samples, n_features = X.shape
 
         indices = self.feature_indices_
@@ -238,29 +221,27 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
                              " Expected %d, got %d."
                              % (len(indices), n_features))
 
-        #if (np.max(X, axis=0) >= self.n_values_).any():
-        #    raise ValueError("Feature out of bounds. Try setting n_values.")
-
         #column_indices = (X + indices[:-1]).ravel()
         row_indices = np.tile(np.arange(n_samples, dtype=np.int32),
                               n_features)
 
+        data = []
         column_indices = []
-        max_n_features = 0
-        for idx, feature in enumerate(range(n_features)):
-            # TODO
-            indices_idx = indices[idx]
-            column_indices.extend([indices_idx[value] for value in X[:,idx]])
-            max_n_features = max(max_n_features, max(column_indices))
-        # The highest index we find is zero-based...
-        max_n_features += 1
 
-        data = np.ones(n_samples * n_features)
+        for idx, feature in enumerate(range(n_features)):
+            offset = np.sum(self.n_values[:idx+1])
+            feature_indices_idx = self.feature_indices_[idx]
+            column_indices_idx = [feature_indices_idx.get(x, offset)
+                                  for x in X[:,idx]]
+            data_idx = [1 if feature_indices_idx.get(x) is not None else 0
+                        for x in X[:, idx]]
+
+            column_indices.extend(column_indices_idx)
+            data.extend(data_idx)
+
         out = sparse.coo_matrix((data, (row_indices, column_indices)),
-                                shape=(n_samples, max_n_features),
+                                shape=(n_samples, np.sum(self.n_values)),
                                 dtype=self.dtype).tocsr()
-        if self.n_values == 'auto':
-            out = out[:, self.active_features_]
 
         return out if self.sparse else out.toarray()
 
