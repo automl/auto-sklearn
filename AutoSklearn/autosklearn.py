@@ -253,8 +253,39 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         raise NotImplementedError()
 
     @staticmethod
-    def get_hyperparameter_search_space():
+    def get_hyperparameter_search_space(include_classifiers=None,
+                                        exclude_classifiers=None,
+                                        include_preprocessors=None,
+                                        exclude_preprocessors=None):
         """Return the configuration space for the CASH problem.
+
+        Parameters
+        ----------
+        include_classifiers : list of str
+            If include_classifiers is given, only the classifiers specified
+            are used. Specify them by their module name; e.g., to include
+            only the SVM use :python:`include_classifiers=['libsvm_svc']`.
+            Cannot be used together with :python:`exclude_classifiers`.
+
+        exclude_classifiers : list of str
+            If exclude_classifiers is given, only the classifiers specified
+            are used. Specify them by their module name; e.g., to include
+            all classifiers except the SVM use
+            :python:`exclude_classifiers=['libsvm_svc']`.
+            Cannot be used together with :python:`include_classifiers`.
+
+        include_preprocessors : list of str
+            If include_preprocessors is given, only the preprocessors specified
+            are used. Specify them by their module name; e.g., to include
+            only the PCA use :python:`include_preprocessors=['pca']`.
+            Cannot be used together with :python:`exclude_preprocessors`.
+
+        exclude_preprocessors : list of str
+            If include_preprocessors is given, only the preprocessors specified
+            are used. Specify them by their module name; e.g., to include
+            all preprocessors except the PCA use
+            :python:`exclude_preprocessors=['pca']`.
+            Cannot be used together with :python:`include_preprocessors`.
 
         Returns
         -------
@@ -262,6 +293,14 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             The configuration space describing the AutoSklearnClassifier.
 
         """
+        if include_classifiers is not None and exclude_classifiers is not None:
+            raise ValueError("The arguments include_classifiers and "
+                             "exclude_classifiers cannot be used together.")
+
+        if include_preprocessors is not None and exclude_preprocessors is not None:
+            raise ValueError("The arguments include_preprocessors and "
+                             "exclude_preprocessors cannot be used together.")
+
         always_active = ["imputation", "rescaling"]
 
         cs = ConfigurationSpace()
@@ -271,11 +310,29 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         available_preprocessors = \
             components.preprocessing_components._preprocessors
 
-        classifier = CategoricalHyperparameter("classifier",
-            [name for name in available_classifiers if name not in always_active],
-            default='random_forest')
-        cs.add_hyperparameter(classifier)
+        names = []
+        names_ = []
         for name in available_classifiers:
+            if name in always_active:
+                names_.append(name)
+                continue
+            elif include_classifiers is not None and \
+                            name not in include_classifiers:
+                continue
+            elif exclude_classifiers is not None and \
+                            name in exclude_classifiers:
+                continue
+            names.append(name)
+
+        if len(names + names_) == 0:
+            raise ValueError("No classifier to build a configuration space "
+                             "for...")
+
+        classifier = CategoricalHyperparameter("classifier", names,
+            default='random_forest' if 'random_forest' in names else names[0])
+        cs.add_hyperparameter(classifier)
+        for name in names + names_:
+
             # We have to retrieve the configuration space every time because
             # we change the objects it returns. If we reused it, we could not
             #  retrieve the conditions further down
@@ -314,11 +371,26 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
                             dlc.hyperparameter.name)
                 cs.add_forbidden_clause(forbidden_clause)
 
-        preprocessor = CategoricalHyperparameter("preprocessor",
-            [name for name in available_preprocessors if name not in always_active]
-            + ["None"], default='None')
-        cs.add_hyperparameter(preprocessor)
+
+        names = []
+        names_ = []
         for name in available_preprocessors:
+            if name in always_active:
+                names_.append(name)
+                continue
+            elif include_preprocessors is not None and \
+                            name not in include_preprocessors:
+                continue
+            elif exclude_preprocessors is not None and \
+                            name in exclude_preprocessors:
+                continue
+            names.append(name)
+
+        preprocessor = CategoricalHyperparameter("preprocessor",
+                                                 ["None"] + names,
+                                                 default='None')
+        cs.add_hyperparameter(preprocessor)
+        for name in names + names_:
             preprocessor_configuration_space = available_preprocessors[name]. \
                 get_hyperparameter_search_space()
             for parameter in preprocessor_configuration_space.get_hyperparameters():

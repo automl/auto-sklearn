@@ -9,7 +9,8 @@ import sklearn.decomposition
 import sklearn.ensemble
 import sklearn.svm
 
-from HPOlibConfigSpace.configuration_space import Configuration, ConfigurationSpace
+from HPOlibConfigSpace.configuration_space import ConfigurationSpace
+from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from AutoSklearn.autosklearn import AutoSklearnClassifier
 from AutoSklearn.components.classification_base import AutoSklearnClassificationAlgorithm
@@ -59,6 +60,27 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
         hyperparameters = cs.get_hyperparameters()
         self.assertEqual(74, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 4, len(conditions))
+
+    def test_get_hyperparameter_search_space_include_exclude_models(self):
+        cs = AutoSklearnClassifier.get_hyperparameter_search_space(
+            include_classifiers=['libsvm_svc'])
+        self.assertEqual(cs.get_hyperparameter('classifier'),
+            CategoricalHyperparameter('classifier', ['libsvm_svc']))
+
+        cs = AutoSklearnClassifier.get_hyperparameter_search_space(
+            exclude_classifiers=['libsvm_svc'])
+        self.assertNotIn('libsvm_svc', str(cs))
+
+        cs = AutoSklearnClassifier.get_hyperparameter_search_space(
+            include_preprocessors=['pca'])
+        self.assertEqual(cs.get_hyperparameter('preprocessor'),
+            CategoricalHyperparameter('preprocessor', ["None", 'pca']))
+
+        cs = AutoSklearnClassifier.get_hyperparameter_search_space(
+            exclude_preprocessors=['pca'])
+        self.assertNotIn('pca', str(cs))
+
+
 
     @unittest.skip("test_check_random_state Not yet Implemented")
     def test_check_random_state(self):
