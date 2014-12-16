@@ -67,7 +67,7 @@ class SGD(AutoSklearnClassificationAlgorithm):
         return self.estimator.decision_function(X)
 
     @staticmethod
-    def get_meta_information():
+    def get_properties():
         return {'shortname': 'SGD Classifier',
                 'name': 'Stochastic Gradient Descent Classifier',
                 'handles_missing_values': False,

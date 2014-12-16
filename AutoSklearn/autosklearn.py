@@ -256,7 +256,10 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
     def get_hyperparameter_search_space(include_classifiers=None,
                                         exclude_classifiers=None,
                                         include_preprocessors=None,
-                                        exclude_preprocessors=None):
+                                        exclude_preprocessors=None,
+                                        multiclass=False,
+                                        multilabel=False,
+                                        sparse=False):
         """Return the configuration space for the CASH problem.
 
         Parameters
@@ -321,6 +324,16 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
                 continue
             elif exclude_classifiers is not None and \
                             name in exclude_classifiers:
+                continue
+
+            if multiclass is True and available_classifiers[name]. \
+                    get_properties()['handles_multiclass'] == False:
+                continue
+            if multilabel is True and available_classifiers[name]. \
+                    get_properties()['handles_multilabel'] == False:
+                continue
+            if sparse is True and available_classifiers[name]. \
+                    get_properties()['handles_sparse'] == False:
                 continue
             names.append(name)
 

@@ -80,7 +80,34 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
             exclude_preprocessors=['pca'])
         self.assertNotIn('pca', str(cs))
 
+    def test_get_hyperparameter_search_space_dataset_properties(self):
+        full_cs = AutoSklearnClassifier.get_hyperparameter_search_space()
+        cs_mc = AutoSklearnClassifier.get_hyperparameter_search_space(
+            multiclass=True)
+        self.assertEqual(full_cs, cs_mc)
 
+        cs_ml = AutoSklearnClassifier.get_hyperparameter_search_space(
+            multilabel=True)
+        self.assertNotIn('k_nearest_neighbors', str(cs_ml))
+        self.assertNotIn('liblinear', str(cs_ml))
+        self.assertNotIn('libsvm_svc', str(cs_ml))
+        self.assertNotIn('sgd', str(cs_ml))
+
+        cs_sp = AutoSklearnClassifier.get_hyperparameter_search_space(
+            sparse=True)
+        self.assertNotIn('extra_trees', str(cs_sp))
+        self.assertNotIn('gradient_boosting', str(cs_sp))
+        self.assertNotIn('random_forest', str(cs_sp))
+
+        cs_mc_ml = AutoSklearnClassifier.get_hyperparameter_search_space(
+            multiclass=True, multilabel=True)
+        self.assertEqual(cs_ml, cs_mc_ml)
+
+        self.assertRaisesRegexp(ValueError,
+                                "No classifier to build a configuration space "
+                                "for...", AutoSklearnClassifier.
+                                get_hyperparameter_search_space,
+                                multiclass=True, multilabel=True, sparse=True)
 
     @unittest.skip("test_check_random_state Not yet Implemented")
     def test_check_random_state(self):
