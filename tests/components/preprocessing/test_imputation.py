@@ -1,14 +1,14 @@
 import unittest
 
 from AutoSklearn.components.preprocessing.imputation import Imputation
-from AutoSklearn.util import _test_preprocessing_with_iris
+from AutoSklearn.util import _test_preprocessing
 
 
 class LibLinearComponentTest(unittest.TestCase):
     def test_default_configuration(self):
         transformations = []
         for i in range(10):
-            transformation, original = _test_preprocessing_with_iris(Imputation)
+            transformation, original = _test_preprocessing(Imputation)
             self.assertEqual(transformation.shape, original.shape)
             self.assertTrue((transformation == original).all())
             transformations.append(transformation)
