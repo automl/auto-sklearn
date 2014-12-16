@@ -57,7 +57,7 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
         cs = AutoSklearnClassifier.get_hyperparameter_search_space()
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(43, len(hyperparameters))
+        self.assertEqual(74, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 4, len(conditions))
 
     @unittest.skip("test_check_random_state Not yet Implemented")

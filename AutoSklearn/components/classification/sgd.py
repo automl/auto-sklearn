@@ -119,7 +119,7 @@ class SGD(AutoSklearnClassificationAlgorithm):
 
         # TODO add passive/aggressive here, although not properly documented?
         elasticnet = EqualsCondition(l1_ratio, penalty, "elasticnet")
-        epsilon_condition = EqualsCondition(epsilon, loss, "huber")
+        epsilon_condition = EqualsCondition(epsilon, loss, "modified_huber")
         # eta0 seems to be always active according to the source code; when
         # learning_rate is set to optimial, eta0 is the starting value:
         # https://github.com/scikit-learn/scikit-learn/blob/0.15.X/sklearn/linear_model/sgd_fast.pyx

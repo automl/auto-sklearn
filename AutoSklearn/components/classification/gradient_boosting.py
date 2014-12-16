@@ -106,8 +106,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         # Unparametrized
         max_leaf_nodes_or_max_depth = UnParametrizedHyperparameter(
             name="max_leaf_nodes_or_max_depth", value="max_depth")
-            # CategoricalHyperparameter(
-            # "max_leaf_nodes_or_max_depth",
+            # CategoricalHyperparameter("max_leaf_nodes_or_max_depth",
             # choices=["max_leaf_nodes", "max_depth"], default="max_depth")
         max_leaf_nodes = UnParametrizedHyperparameter(name="max_leaf_nodes",
                                                       value="None")
@@ -138,17 +137,17 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         cs.add_hyperparameter(subsample)
 
         # Conditions
-        cond_max_leaf_nodes_or_max_depth = \
-            EqualsCondition(child=max_leaf_nodes,
-                            parent=max_leaf_nodes_or_max_depth,
-                            value="max_leaf_nodes")
+        #cond_max_leaf_nodes_or_max_depth = \
+        #    EqualsCondition(child=max_leaf_nodes,
+        #                    parent=max_leaf_nodes_or_max_depth,
+        #                    value="max_leaf_nodes")
 
         cond2_max_leaf_nodes_or_max_depth = \
             EqualsCondition(child=max_depth,
                             parent=max_leaf_nodes_or_max_depth,
                             value="max_depth")
 
-        cs.add_condition(cond_max_leaf_nodes_or_max_depth)
+        #cs.add_condition(cond_max_leaf_nodes_or_max_depth)
         cs.add_condition(cond2_max_leaf_nodes_or_max_depth)
         return cs
 
