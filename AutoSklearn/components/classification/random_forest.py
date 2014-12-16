@@ -111,4 +111,4 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         return cs
 
     def __str__(self):
-        return "AutoSklearn LibSVM Classifier"
+        return "AutoSklearn Random Forest"

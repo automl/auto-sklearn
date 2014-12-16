@@ -1,8 +1,9 @@
 import sklearn.svm
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.conditions import EqualsCondition, OrConjunction
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter,\
+from HPOlibConfigSpace.conditions import EqualsCondition, OrConjunction, \
+    InCondition
+from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter
 
@@ -117,11 +118,9 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         cs.add_hyperparameter(max_iter)
 
         degree_depends_on_poly = EqualsCondition(degree, kernel, "poly")
-        coef0_depends_on_poly = EqualsCondition(coef0, kernel, "poly")
-        coef0_depends_on_sigmoid = EqualsCondition(coef0, kernel, "sigmoid")
-        coe0_conditions = OrConjunction(coef0_depends_on_poly, coef0_depends_on_sigmoid)
+        coef0_condition = InCondition(coef0, kernel, ["poly", "sigmoid"])
         cs.add_condition(degree_depends_on_poly)
-        cs.add_condition(coe0_conditions)
+        cs.add_condition(coef0_condition)
 
         return cs
 

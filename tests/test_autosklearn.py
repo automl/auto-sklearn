@@ -16,7 +16,7 @@ from AutoSklearn.components.classification_base import AutoSklearnClassification
 from AutoSklearn.components.preprocessor_base import AutoSklearnPreprocessingAlgorithm
 import AutoSklearn.components.classification as classification_components
 import AutoSklearn.components.preprocessing as preprocessing_components
-from AutoSklearn.util import get_iris
+from AutoSklearn.util import get_dataset
 
 class TestAutoSKlearnClassifier(unittest.TestCase):
     # TODO: test for both possible ways to initialize AutoSklearn
@@ -44,7 +44,7 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
         for i in range(2):
             cs = AutoSklearnClassifier.get_hyperparameter_search_space()
             default = cs.get_default_configuration()
-            X_train, Y_train, X_test, Y_test = get_iris()
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
             auto = AutoSklearnClassifier(default)
             auto = auto.fit(X_train, Y_train)
             predictions = auto.predict(X_test)

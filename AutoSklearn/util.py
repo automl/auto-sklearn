@@ -40,12 +40,13 @@ def find_sklearn_classifiers():
     print classifiers
 
 
-def get_iris():
-    iris = sklearn.datasets.load_iris()
+def get_dataset(dataset='iris'):
+    iris = getattr(sklearn.datasets, "load_%s" % dataset)()
     X = iris.data
     Y = iris.target
     rs = np.random.RandomState(42)
     indices = np.arange(X.shape[0])
+    train_size = len(indices) / 3. * 2.
     rs.shuffle(indices)
     X = X[indices]
     Y = Y[indices]
@@ -56,8 +57,8 @@ def get_iris():
     return X_train, Y_train, X_test, Y_test
 
 
-def _test_classifier_with_iris(Classifier):
-    X_train, Y_train, X_test, Y_test = get_iris()
+def _test_classifier(Classifier, dataset='iris'):
+    X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset)
     configuration_space = Classifier.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
     classifier = Classifier(random_state=1,
@@ -68,8 +69,8 @@ def _test_classifier_with_iris(Classifier):
     return predictions, Y_test
 
 
-def _test_preprocessing_with_iris(Preprocessor):
-    X_train, Y_train, X_test, Y_test = get_iris()
+def _test_preprocessing(Preprocessor, dataset='iris'):
+    X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset)
     configuration_space = Preprocessor.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
     preprocessor = Preprocessor(random_state=1,
