@@ -1,4 +1,4 @@
-Name,class,added,
+Name,class,added
 ,<class 'sklearn.linear_model.tests.test_sgd.SparseSGDClassifier'>,
 ,<class 'sklearn.linear_model.perceptron.Perceptron'>,
 ,<class 'sklearn.lda.LDA'>,
@@ -20,7 +20,7 @@ RandomForestClassifier,<class 'sklearn.ensemble.forest.RandomForestClassifier'>,
 ,<class 'sklearn.covariance.outlier_detection.EllipticEnvelope'>,
 ,<class 'sklearn.multiclass.OutputCodeClassifier'>,
 ,<class 'sklearn.neighbors.classification.KNeighborsClassifier'>,
-,<class 'sklearn.ensemble.gradient_boosting.GradientBoostingClassifier'>,
+GradientBoostingClassifier,<class 'sklearn.ensemble.gradient_boosting.GradientBoostingClassifier'>,TRUE
 ,<class 'sklearn.naive_bayes.BernoulliNB'>,
 ,<class 'sklearn.tree.tree.ExtraTreeClassifier'>,
 ,<class 'sklearn.tree.tree.DecisionTreeClassifier'>,
