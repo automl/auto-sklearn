@@ -116,4 +116,5 @@ class AutoSklearnClassificationAlgorithm(object):
         return self.estimator
 
     def __str__(self):
-        raise NotImplementedError()
+        name = self.get_properties()['name']
+        return "AutoSklearn %" % name

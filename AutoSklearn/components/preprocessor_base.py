@@ -103,4 +103,5 @@ class AutoSklearnPreprocessingAlgorithm(object):
         return self.preprocessor
 
     def __str__(self):
-        raise NotImplementedError()
+        name = self.get_properties()['name']
+        return "AutoSklearn %" % name

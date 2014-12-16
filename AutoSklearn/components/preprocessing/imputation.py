@@ -49,4 +49,5 @@ class Imputation(AutoSklearnPreprocessingAlgorithm):
         return cs
 
     def __str__(self):
-        return "AutoSklearn Imputer to replace missing values."
+        name = self.get_properties()['name']
+        return "AutoSklearn %" % name

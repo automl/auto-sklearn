@@ -43,7 +43,7 @@ class KNearestNeighborsClassifier(AutoSklearnClassificationAlgorithm):
         return self.estimator.decision_function(X)
 
     @staticmethod
-    def get_meta_information():
+    def get_properties():
         return {'shortname': 'KNN',
                 'name': 'K-Nearest Neighbor Classification',
                 'handles_missing_values': False,
@@ -89,6 +89,3 @@ class KNearestNeighborsClassifier(AutoSklearnClassificationAlgorithm):
         cs.add_condition(metric_p)
 
         return cs
-
-    def __str__(self):
-        return "AutoSklearn K-Neighbors Classifier"

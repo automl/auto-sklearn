@@ -66,7 +66,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         return self.estimator.predict_proba(X)
 
     @staticmethod
-    def get_meta_information():
+    def get_properties():
         return {'shortname': 'RF',
                 'name': 'Random Forest Classifier',
                 'handles_missing_values': False,
@@ -109,6 +109,3 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         cs.add_hyperparameter(max_leaf_nodes)
         cs.add_hyperparameter(bootstrap)
         return cs
-
-    def __str__(self):
-        return "AutoSklearn Random Forest"

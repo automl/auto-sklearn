@@ -73,4 +73,5 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
         return cs
 
     def __str__(self):
-        return "AutoSklearn Principle Component Analysis preprocessor."
+        name = self.get_properties()['name']
+        return "AutoSklearn %" % name

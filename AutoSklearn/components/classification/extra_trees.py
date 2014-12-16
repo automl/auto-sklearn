@@ -31,7 +31,10 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
             elif use_max_depth == "False":
                 self.max_depth = None
         else:
-            self.max_leaf_nodes = int(max_leaf_nodes)
+            if max_leaf_nodes == "None":
+                self.max_leaf_nodes = None
+            else:
+                self.max_leaf_nodes = int(max_leaf_nodes)
             self.max_depth = None
 
         self.min_samples_leaf = int(min_samples_leaf)
@@ -78,7 +81,7 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
         return self.estimator.predict_proba(X)
 
     @staticmethod
-    def get_meta_information():
+    def get_properties():
         return {'shortname': 'ET',
                 'name': 'Extra Trees Classifier',
                 'handles_missing_values': False,
@@ -124,7 +127,10 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
                                                       value="None")
             # UniformIntegerHyperparameter(
             # name="max_leaf_nodes", lower=10, upper=1000, default=)
-        max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
+
+        #max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
+        # TODO these are very random guesses
+        max_depth = UniformIntegerHyperparameter("max_depth", 5, 50)
 
         cs = ConfigurationSpace()
         cs.add_hyperparameter(n_estimators)
@@ -156,6 +162,3 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
         cs.add_condition(cond_max_depth)
 
         return cs
-
-    def __str__(self):
-        return "AutoSklearn Extra Trees"

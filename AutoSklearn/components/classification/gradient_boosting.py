@@ -15,18 +15,24 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
 
     def __init__(self, learning_rate, n_estimators, subsample,
                  min_samples_split, min_samples_leaf, max_features,
-                 max_leaf_nodes_or_max_depth, max_depth,
+                 max_leaf_nodes_or_max_depth, max_depth=None,
                  max_leaf_nodes=None, loss='deviance',
                  warm_start=False, init=None, random_state=None, verbose=0):
 
         self.max_leaf_nodes_or_max_depth = str(max_leaf_nodes_or_max_depth)
 
         if self.max_leaf_nodes_or_max_depth == "max_depth":
-            self.max_depth = int(max_depth)
+            if max_depth == 'None':
+                self.max_depth = None
+            else:
+                self.max_depth = int(max_depth)
             self.max_leaf_nodes = None
         elif self.max_leaf_nodes_or_max_depth == "max_leaf_nodes":
             self.max_depth = None
-            self.max_leaf_nodes = int(max_leaf_nodes)
+            if max_leaf_nodes == 'None':
+                self.max_leaf_nodes = None
+            else:
+                self.max_leaf_nodes = int(max_leaf_nodes)
         else:
             raise ValueError("max_leaf_nodes_or_max_depth sould be in "
                              "('max_leaf_nodes', 'max_depth'): %s" %
@@ -79,7 +85,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         return self.estimator.predict_proba(X)
 
     @staticmethod
-    def get_meta_information():
+    def get_properties():
         return {'shortname': 'GB',
                 'name': 'Gradient Boosting Classifier',
                 'handles_missing_values': False,
@@ -101,7 +107,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         learning_rate = UniformFloatHyperparameter(
             name="learning_rate", lower=0.0001, upper=1, default=0.1, log=True)
         subsample = UniformFloatHyperparameter(
-            name="subsample", lower=0.1, upper=2, default=1.0, log=False)
+            name="subsample", lower=0.01, upper=1.0, default=1.0, log=False)
 
         # Unparametrized
         max_leaf_nodes_or_max_depth = UnParametrizedHyperparameter(
@@ -151,5 +157,3 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         cs.add_condition(cond2_max_leaf_nodes_or_max_depth)
         return cs
 
-    def __str__(self):
-        return "AutoSklearn GradientBoosting Classifier"

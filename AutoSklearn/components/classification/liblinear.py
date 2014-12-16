@@ -57,7 +57,7 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
         return self.estimator.decision_function(X)
 
     @staticmethod
-    def get_meta_information():
+    def get_properties():
         return {'shortname': 'Liblinear-SVC',
                 'name': 'Liblinear Support Vector Classification',
                 'handles_missing_values': False,
@@ -121,6 +121,3 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
         cs.add_forbidden_clause(constant_penalty_and_loss)
         cs.add_forbidden_clause(penalty_and_dual)
         return cs
-
-    def __str__(self):
-        return "AutoSklearn Liblinear Classifier"
