@@ -42,10 +42,10 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                              max_features)
         self.max_features = float(max_features)
         if self.max_features > 1:
-            raise ValueError("'max features' in should be < 1, you set %f" %
+            raise ValueError("'max features' in should be < 1: %f" %
                              self.max_features)
         self.loss = loss
-        self.warm_start = bool(warm_start)
+        self.warm_start = warm_start
         self.init = init
         self.random_state = random_state
         self.verbose = int(verbose)
@@ -143,8 +143,13 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                             parent=max_leaf_nodes_or_max_depth,
                             value="max_leaf_nodes")
 
-        cs.add_condition(cond_max_leaf_nodes_or_max_depth)
+        cond2_max_leaf_nodes_or_max_depth = \
+            EqualsCondition(child=max_depth,
+                            parent=max_leaf_nodes_or_max_depth,
+                            value="max_depth")
 
+        cs.add_condition(cond_max_leaf_nodes_or_max_depth)
+        cs.add_condition(cond2_max_leaf_nodes_or_max_depth)
         return cs
 
     def __str__(self):

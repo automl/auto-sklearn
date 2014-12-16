@@ -3,7 +3,7 @@ Name,class,added,comment
 ,<class 'sklearn.covariance.outlier_detection.EllipticEnvelope'>,False,Outlier detection
 ,<class 'sklearn.dummy.DummyClassifier'>,False,Please read the module name;)
 ,<class 'sklearn.ensemble.bagging.BaggingClassifier'>,False,This can blow up the configuration space, because we need to define a configured base object. Maybe consider later.
-,<class 'sklearn.ensemble.forest.ExtraTreesClassifier'>,,
+,ExtraTreesClassifier,<class 'sklearn.ensemble.forest.ExtraTreesClassifier'>,True,
 ,<class 'sklearn.ensemble.forest.ForestClassifier'>,False,Scikit-learn source code says: This class should not be used directly
 RandomForestClassifier,<class 'sklearn.ensemble.forest.RandomForestClassifier'>,True,
 GradientBoostingClassifier,<class 'sklearn.ensemble.gradient_boosting.GradientBoostingClassifier'>,True,
