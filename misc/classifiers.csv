@@ -3,7 +3,7 @@ Name,class,added
 ,<class 'sklearn.covariance.outlier_detection.EllipticEnvelope'>,
 ,<class 'sklearn.dummy.DummyClassifier'>,
 ,<class 'sklearn.ensemble.bagging.BaggingClassifier'>,
-,<class 'sklearn.ensemble.forest.ExtraTreesClassifier'>,
+ExtraTreesClassifier,<class 'sklearn.ensemble.forest.ExtraTreesClassifier'>,True
 ,<class 'sklearn.ensemble.forest.ForestClassifier'>,
 RandomForestClassifier,<class 'sklearn.ensemble.forest.RandomForestClassifier'>,True
 GradientBoostingClassifier,<class 'sklearn.ensemble.gradient_boosting.GradientBoostingClassifier'>,True
