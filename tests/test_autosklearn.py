@@ -53,6 +53,13 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
             scores = auto.scores(X_test)
             self.assertTrue((scores[4] == [0.6, 0.4, 0.]).all())
 
+    def test_get_hyperparameter_search_space(self):
+        cs = AutoSklearnClassifier.get_hyperparameter_search_space()
+        conditions = cs.get_conditions()
+        hyperparameters = cs.get_hyperparameters()
+        self.assertEqual(43, len(hyperparameters))
+        self.assertEqual(len(hyperparameters) - 4, len(conditions))
+
     @unittest.skip("test_check_random_state Not yet Implemented")
     def test_check_random_state(self):
         raise NotImplementedError()

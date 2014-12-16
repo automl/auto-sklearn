@@ -1,5 +1,4 @@
-import numpy as np
-from numpy import float64
+import copy
 
 import sklearn
 if sklearn.__version__ != "0.15.2":
@@ -282,14 +281,18 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             #  retrieve the conditions further down
             # TODO implement copy for hyperparameters and forbidden and
             # conditions!
-            for parameter in available_classifiers[name].\
-                    get_hyperparameter_search_space().get_hyperparameters():
-                parameter.name = "%s:%s" % (name, parameter.name)
-                cs.add_hyperparameter(parameter)
+
+            classifier_configuration_space = available_classifiers[name]. \
+                get_hyperparameter_search_space()
+            for parameter in classifier_configuration_space.get_hyperparameters():
+                new_parameter = copy.deepcopy(parameter)
+                new_parameter.name = "%s:%s" % (name, new_parameter.name)
+                cs.add_hyperparameter(new_parameter)
                 # We must only add a condition if the hyperparameter is not
                 # conditional on something else
-                if cs.get_parents_of(parameter):
-                    condition = EqualsCondition(parameter, classifier, name)
+                if len(classifier_configuration_space.
+                        get_parents_of(parameter)) == 0:
+                    condition = EqualsCondition(new_parameter, classifier, name)
                     cs.add_condition(condition)
 
             for condition in available_classifiers[name]. \
@@ -316,14 +319,17 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             + ["None"], default='None')
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors:
-            for parameter in available_preprocessors[name].\
-                    get_hyperparameter_search_space().get_hyperparameters():
-                parameter.name = "%s:%s" % (name, parameter.name)
-                cs.add_hyperparameter(parameter)
+            preprocessor_configuration_space = available_preprocessors[name]. \
+                get_hyperparameter_search_space()
+            for parameter in preprocessor_configuration_space.get_hyperparameters():
+                new_parameter = copy.deepcopy(parameter)
+                new_parameter.name = "%s:%s" % (name, new_parameter.name)
+                cs.add_hyperparameter(new_parameter)
                 # We must only add a condition if the hyperparameter is not
                 # conditional on something else
-                if cs.get_parents_of(parameter):
-                    condition = EqualsCondition(parameter, preprocessor, name)
+                if len(preprocessor_configuration_space.
+                        get_parents_of(parameter)) == 0 and name not in always_active:
+                    condition = EqualsCondition(new_parameter, preprocessor, name)
                     cs.add_condition(condition)
 
             for condition in available_preprocessors[name]. \
