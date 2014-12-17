@@ -4,7 +4,10 @@ Created on Dec 16, 2014
 @author: Aaron Klein
 '''
 
-from HPOlib.benchmark_util import parse_cli
+try:
+    from HPOlib.benchmark_util import parse_cli
+except:
+    from HPOlib.benchmarks.benchmark_util import parse_cli
 
 from AutoSklearn.autosklearn import AutoSklearnClassifier
 
@@ -24,12 +27,14 @@ def main(params, **kwargs):
             params[key] = float(params[key])
         except:
             pass
-    print 'Params: ', params,
+    print params
     basename = "digits"
     input_dir = "/home/kleinaa/devel/git/automl2015/"
     cs = AutoSklearnClassifier.get_hyperparameter_search_space()
     configuration = configuration_space.Configuration(cs, **params)
-    D = DataManager(basename, input_dir, replace_missing=True, filter_features=True, verbose=True)
+    print configuration
+
+    D = DataManager(basename, input_dir, verbose=True)
     model = AutoSklearnClassifier(configuration)
 
     X_train, X_valid, Y_train, Y_valid = split_data(D.data['X_train'], D.data['Y_train'])
