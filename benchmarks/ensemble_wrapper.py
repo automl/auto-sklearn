@@ -30,7 +30,7 @@ def main(params, **kwargs):
     print params
 
     basename = "digits"
-    input_dir = "/home/kleinaa/devel/git/automl2015/"
+    input_dir = "/home/feurerm/projects/automl_competition_2015/datasets/000"
     cs = AutoSklearnClassifier.get_hyperparameter_search_space()
     configuration = configuration_space.Configuration(cs, **params)
     print configuration
@@ -54,10 +54,10 @@ def main(params, **kwargs):
         Y_valid = Y_valid_binary
 
     scoring_func = getattr(libscores, metric)
-    score = scoring_func(Y_valid, Y_pred, task=task_type)
+    csolution, cprediction = libscores.normalize_array(Y_valid, Y_pred)
+    score = scoring_func(csolution, cprediction, task=task_type)
     all_scores = libscores.compute_all_scores(Y_valid, Y_pred)
     print all_scores
-
     return 1 - score
 
 
