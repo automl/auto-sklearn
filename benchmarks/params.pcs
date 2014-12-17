@@ -1,0 +1,53 @@
+classifier {sgd, random_forest, libsvm_svc, liblinear} [random_forest]
+imputation:strategy {mean, median, most_frequent} [mean]
+liblinear:C [0.03125, 32768.0] [1.0]l
+liblinear:class_weight {None, auto} [None]
+liblinear:dual {False} [False]
+liblinear:fit_intercept {True} [True]
+liblinear:intercept_scaling {1} [1]
+liblinear:loss {l1, l2} [l2]
+liblinear:multi_class {ovr} [ovr]
+liblinear:penalty {l1, l2} [l2]
+liblinear:tol [1e-05, 0.1] [0.0001]l
+libsvm_svc:C [0.03125, 32768.0] [1.0]l
+libsvm_svc:class_weight {None, auto} [None]
+libsvm_svc:gamma [3.0517578125e-05, 8.0] [0.1]l
+libsvm_svc:kernel {rbf, poly, sigmoid} [rbf]
+libsvm_svc:coef0 [-1.0, 1.0] [0]
+libsvm_svc:degree [1, 5] [3]i
+libsvm_svc:max_iter {-1} [-1]
+libsvm_svc:shrinking {True, False} [True]
+libsvm_svc:tol [1e-05, 0.1] [0.0001]l
+pca:keep_variance [0.5, 1.0] [1.0]
+pca:whiten {False, True} [False]
+preprocessor {pca, None} [None]
+random_forest:bootstrap {True, False} [True]
+random_forest:criterion {gini, entropy} [gini]
+random_forest:max_depth {None} [None]
+random_forest:max_features [0.01, 1.0] [1.0]
+random_forest:max_leaf_nodes {None} [None]
+random_forest:min_samples_leaf [1, 20] [1]i
+random_forest:min_samples_split [1, 20] [2]i
+random_forest:n_estimators [10, 1000] [10]i
+rescaling:strategy {min/max, standard} [min/max]
+sgd:alpha [1e-07, 0.1] [0.0001]l
+sgd:class_weight {None, auto} [None]
+sgd:eta0 [1e-07, 0.1] [0.01]
+sgd:fit_intercept {True} [True]
+sgd:learning_rate {optimal, invscaling, constant} [optimal]
+sgd:power_t [1e-05, 1.0] [0.5]
+sgd:loss {hinge, log, modified_huber, squared_hinge, perceptron} [hinge]
+sgd:epsilon [1e-05, 0.1] [0.0001]l
+sgd:n_iter [5, 1000] [20]i
+sgd:penalty {l1, l2, elasticnet} [l2]
+sgd:l1_ratio [0.0, 1.0] [0.15]
+
+libsvm_svc:degree | libsvm_svc:kernel in {poly}
+libsvm_svc:coef0 | libsvm_svc:kernel in {poly,sigmoid}
+sgd:power_t | sgd:learning_rate in {invscaling}
+sgd:epsilon | sgd:loss in {modified_huber}
+sgd:l1_ratio | sgd:penalty in {elasticnet}
+
+{liblinear:penalty=l1, liblinear:loss=l1}
+{liblinear:dual=False, liblinear:penalty=l2, liblinear:loss=l1}
+{liblinear:dual=False, liblinear:penalty=l1}
