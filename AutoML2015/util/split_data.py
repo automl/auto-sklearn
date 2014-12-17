@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.cross_validation import train_test_split
 
 
-def split_data(X, Y, folds, cv=False, shuffle=True):
+def split_data(X, Y, cv=False, shuffle=True):
 
     #if fold >= folds:
     #    raise ValueError((fold, folds))

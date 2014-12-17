@@ -40,13 +40,13 @@ def main(params, **kwargs):
     X_train, X_valid, Y_train, Y_valid = split_data(D.data['X_train'], D.data['Y_train'])
 
     model.fit(X_train, Y_train)
-    Y_pred = model.predict(X_valid)
+    Y_pred = model.scores(X_valid)
 
     metric = D.info['metric']
     task_type = D.info['task']
 
     scoring_func = getattr(libscores, metric)
-    score = scoring_func(Y_pred, Y_valid, task=task_type)
+    score = scoring_func(Y_valid, Y_pred, task=task_type)
 
     return 1 - score
 
