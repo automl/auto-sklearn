@@ -19,9 +19,11 @@ def split_data(X, Y, cv=False, shuffle=True):
 
     X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.33, random_state=42)
 #     if(cv):
-#         kf = StratifiedKFold(Y_train, n_folds=folds, indices=True)
-#         for train_index, test_index in skf:
-#             X_train, X_test = X_train[train_index], X[test_index]
-#             y_train, y_test = y[train_index], y[test_index]
-
+# #         kf = StratifiedKFold(Y_train, n_folds=folds, indices=True)
+# #         for train_index, test_index in skf:
+# #             X_train, X_test = X_train[train_index], X[test_index]
+# #             y_train, y_test = y[train_index], y[test_index]
+#
+#     else:
+#         return X_train, X_valid, Y_train, Y_valid
     return X_train, X_valid, Y_train, Y_valid

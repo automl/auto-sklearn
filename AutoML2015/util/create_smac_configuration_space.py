@@ -2,6 +2,8 @@
 Created on Dec 16, 2014
 
 @author: Aaron Klein
+
+     Simple script to write an AutoSklearn configuration space for a classifier to a .pcs file
 '''
 
 
