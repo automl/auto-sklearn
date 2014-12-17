@@ -1,0 +1,63 @@
+extra_trees:criterion {gini, entropy} [gini]
+gradient_boosting:min_samples_split [1, 20] [2]i
+rescaling:strategy {min/max, standard} [min/max]
+gradient_boosting:max_leaf_nodes_or_max_depth {max_depth} [max_depth]
+extra_trees:min_samples_split [1, 20] [2]i
+extra_trees:bootstrap {True, False} [False]
+gradient_boosting:subsample [0.01, 1.0] [1.0]
+random_forest:max_leaf_nodes {None} [None]
+extra_trees:max_depth [5, 50] [27]i
+random_forest:max_features [0.01, 1.0] [0.1]
+random_forest:min_samples_leaf [1, 20] [1]i
+gradient_boosting:min_samples_leaf [1, 20] [1]i
+imputation:strategy {mean, median, most_frequent} [mean]
+random_forest:min_samples_split [1, 20] [2]i
+random_forest:n_estimators [10, 1000] [10]i
+gradient_boosting:max_depth [1, 10] [3]i
+gradient_boosting:max_leaf_nodes {None} [None]
+random_forest:max_depth {None} [None]
+random_forest:criterion {gini, entropy} [gini]
+extra_trees:max_leaf_nodes_or_max_depth {max_depth} [max_depth]
+gradient_boosting:learning_rate [0.0001, 1.0] [0.1]l
+extra_trees:max_leaf_nodes {None} [None]
+extra_trees:n_estimators [10, 1000] [10]i
+pca:whiten {False, True} [False]
+pca:keep_variance [0.5, 1.0] [1.0]
+extra_trees:use_max_depth {True, False} [False]
+extra_trees:max_features [0.01, 1.0] [1.0]
+gradient_boosting:n_estimators [10, 1000] [10]i
+random_forest:bootstrap {True, False} [True]
+extra_trees:min_samples_leaf [1, 20] [1]i
+gradient_boosting:max_features [0.01, 1.0] [1.0]
+classifier {extra_trees, random_forest, gradient_boosting} [random_forest]
+preprocessor {None, pca} [None]
+
+gradient_boosting:max_depth | gradient_boosting:max_leaf_nodes_or_max_depth in {max_depth}
+extra_trees:use_max_depth | extra_trees:max_leaf_nodes_or_max_depth in {max_depth}
+extra_trees:max_depth | extra_trees:use_max_depth in {True}
+extra_trees:criterion | classifier in {extra_trees}
+gradient_boosting:min_samples_split | classifier in {gradient_boosting}
+gradient_boosting:max_leaf_nodes_or_max_depth | classifier in {gradient_boosting}
+extra_trees:min_samples_split | classifier in {extra_trees}
+extra_trees:bootstrap | classifier in {extra_trees}
+gradient_boosting:subsample | classifier in {gradient_boosting}
+random_forest:max_leaf_nodes | classifier in {random_forest}
+random_forest:max_features | classifier in {random_forest}
+random_forest:min_samples_leaf | classifier in {random_forest}
+gradient_boosting:min_samples_leaf | classifier in {gradient_boosting}
+random_forest:min_samples_split | classifier in {random_forest}
+random_forest:n_estimators | classifier in {random_forest}
+gradient_boosting:max_leaf_nodes | classifier in {gradient_boosting}
+random_forest:max_depth | classifier in {random_forest}
+random_forest:criterion | classifier in {random_forest}
+extra_trees:max_leaf_nodes_or_max_depth | classifier in {extra_trees}
+gradient_boosting:learning_rate | classifier in {gradient_boosting}
+extra_trees:max_leaf_nodes | classifier in {extra_trees}
+extra_trees:n_estimators | classifier in {extra_trees}
+extra_trees:max_features | classifier in {extra_trees}
+gradient_boosting:n_estimators | classifier in {gradient_boosting}
+random_forest:bootstrap | classifier in {random_forest}
+extra_trees:min_samples_leaf | classifier in {extra_trees}
+gradient_boosting:max_features | classifier in {gradient_boosting}
+pca:keep_variance | preprocessor in {pca}
+pca:whiten | preprocessor in {pca}

@@ -11,11 +11,11 @@ def split_data(X, Y, cv=False, shuffle=True):
         raise ValueError("The first dimension of the X and Y array must "
                          "be equal.")
 
-    if shuffle == True:
-        rs = np.random.RandomState(42)
-        indices = np.arange(X.shape[0])
-        rs.shuffle(indices)
-        Y = Y[indices]
+    #if shuffle == True:
+    #    rs = np.random.RandomState(42)
+    #    indices = np.arange(X.shape[0])
+    #    rs.shuffle(indices)
+    #    Y = Y[indices]
 
     X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.33, random_state=42)
 #     if(cv):
