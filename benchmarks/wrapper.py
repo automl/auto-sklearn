@@ -36,6 +36,7 @@ def main(params, **kwargs):
     configuration = configuration_space.Configuration(cs, **params)
 
     D = DataManager(basename, input_dir, verbose=True)
+    print D
 
     X_train, X_valid, Y_train, Y_valid = split_data(D.data['X_train'],
                                                     D.data['Y_train'])
@@ -54,8 +55,10 @@ def main(params, **kwargs):
         Y_valid = Y_valid_binary
 
     scoring_func = getattr(libscores, metric)
-    score = scoring_func(Y_valid, Y_pred, task=task_type)
-
+    csolution, cprediction = libscores.normalize_array(Y_valid, Y_pred)
+    score = scoring_func(csolution, cprediction, task=task_type)
+    all_scores = libscores.compute_all_scores(Y_valid, Y_pred)
+    print all_scores
     return 1 - score
 
 
