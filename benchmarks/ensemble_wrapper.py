@@ -17,8 +17,8 @@ from AutoML2015.util.split_data import split_data
 from AutoML2015.data.data_manager import DataManager
 from AutoML2015.scores import libscores
 
-import ast
 import time
+import numpy as np
 
 
 def main(params, **kwargs):
@@ -28,6 +28,7 @@ def main(params, **kwargs):
         except:
             pass
     print params
+
     basename = "digits"
     input_dir = "/home/kleinaa/devel/git/automl2015/"
     cs = AutoSklearnClassifier.get_hyperparameter_search_space()
@@ -35,18 +36,27 @@ def main(params, **kwargs):
     print configuration
 
     D = DataManager(basename, input_dir, verbose=True)
-    model = AutoSklearnClassifier(configuration)
+    print D
+    X_train, X_valid, Y_train, Y_valid = split_data(D.data['X_train'],
+                                                    D.data['Y_train'])
 
-    X_train, X_valid, Y_train, Y_valid = split_data(D.data['X_train'], D.data['Y_train'])
-
+    model = AutoSklearnClassifier(configuration, 1)
     model.fit(X_train, Y_train)
-    Y_pred = model.scores(X_valid)
-
     metric = D.info['metric']
     task_type = D.info['task']
+    Y_pred = model.scores(X_valid)
+
+    if task_type == "multiclass.classification":
+        Y_valid_binary = np.zeros((Y_pred.shape))
+        for i in range(Y_valid_binary.shape[0]):
+            label = Y_valid[i]
+            Y_valid_binary[i,label] = 1
+        Y_valid = Y_valid_binary
 
     scoring_func = getattr(libscores, metric)
     score = scoring_func(Y_valid, Y_pred, task=task_type)
+    all_scores = libscores.compute_all_scores(Y_valid, Y_pred)
+    print all_scores
 
     return 1 - score
 
