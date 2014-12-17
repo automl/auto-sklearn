@@ -90,7 +90,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default="gini")
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.01, 1.0, default=1.0)
+            "max_features", 0.01, 1.0, default=0.1)
         max_depth = UnParametrizedHyperparameter("max_depth", "None")
         min_samples_split = UniformIntegerHyperparameter(
             "min_samples_split", 1, 20, default=2)

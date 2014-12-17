@@ -40,7 +40,7 @@ class KNearestNeighborsClassifier(AutoSklearnClassificationAlgorithm):
     def scores(self, X):
         if self.estimator is None:
             raise NotImplementedError()
-        return self.estimator.decision_function(X)
+        return self.estimator.predict_proba(X)
 
     @staticmethod
     def get_properties():
@@ -69,8 +69,8 @@ class KNearestNeighborsClassifier(AutoSklearnClassificationAlgorithm):
         metric = UnParametrizedHyperparameter(name="metric", value="minkowski")
         algorithm = Constant(name='algorithm', value="auto")
         p = CategoricalHyperparameter(
-            name="p", choices=["1", "2", "5"], default="2")
-        leaf_size = Constant(name="leaf_size", value="30")
+            name="p", choices=[1, 2, 5], default=2)
+        leaf_size = Constant(name="leaf_size", value=30)
 
         # Unparametrized
         # TODO: If we further parametrize 'metric' we need more metric params
