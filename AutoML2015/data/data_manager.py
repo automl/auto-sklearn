@@ -24,6 +24,12 @@ except:
 import os
 import time
 
+import scipy.sparse
+
+from AutoSklearn.implementations.OneHotEncoder import OneHotEncoder
+
+import input_routines
+
 class DataManager:
     ''' This class aims at loading and saving data easily with a cache and at generating a dictionary (self.info) in which each key is a feature (e.g. : name, format, feat_num,...).
     Methods defined here are :
@@ -53,7 +59,7 @@ class DataManager:
         Get the kind of problem ('binary.classification', 'multiclass.classification', 'multilabel.classification', 'regression'), using the solution file given.
     '''
     
-    def __init__(self, basename, input_dir, verbose=False, replace_missing=True, filter_features=False):
+    def __init__(self, basename, input_dir, verbose=False):
         '''Constructor'''
         self.use_pickle = False # Turn this to true to save data as pickle (inefficient)
         self.basename = basename
@@ -69,25 +75,39 @@ class DataManager:
             else:
                 os.makedirs("tmp")
                 self.tmp_dir = "tmp"
+
         info_file = os.path.join (self.input_dir, basename + '_public.info')
         self.info = {}
         self.getInfo (info_file)
         self.feat_type = self.loadType (os.path.join(self.input_dir, basename + '_feat.type'), verbose=verbose)
-        self.data = {}  
-        Xtr = self.loadData (os.path.join(self.input_dir, basename + '_train.data'), verbose=verbose, replace_missing=replace_missing)
-        Ytr = self.loadLabel (os.path.join(self.input_dir, basename + '_train.solution'), verbose=verbose)
-        Xva = self.loadData (os.path.join(self.input_dir, basename + '_valid.data'), verbose=verbose, replace_missing=replace_missing)
-        Xte = self.loadData (os.path.join(self.input_dir, basename + '_test.data'), verbose=verbose, replace_missing=replace_missing)
-        # Normally, feature selection should be done as part of a pipeline.
-        # However, here we do it as a preprocessing for efficiency reason
-        idx=[]
-        if filter_features: # add hoc feature selection, for the example...
-            fn = min(Xtr.shape[1], 1000)       
-            idx = data_converter.tp_filter(Xtr, Ytr, feat_num=fn, verbose=verbose)
-            Xtr = Xtr[:,idx]
-            Xva = Xva[:,idx]
-            Xte = Xte[:,idx]  
-        self.feat_idx = np.array(idx).ravel()
+        self.data = {}
+
+        Xtr = self.loadData(os.path.join(self.input_dir, basename + '_train.data'),
+                            self.feat_type, verbose=verbose)
+
+        # For simplicity, we convert the loaded file
+        # TODO what happens with sparse matrices here?
+        if 'Categorical' in self.feat_type:
+            mask = np.array([bool('Categorical' == feat)
+                             for feat in self.feat_type])
+
+            encoder = OneHotEncoder(categorical_features=mask,
+                                    dtype=np.float64, sparse=True)
+            Xtr = encoder.fit_transform(Xtr)
+
+        Ytr = self.loadLabel(os.path.join(self.input_dir, basename + '_train.solution'),
+                             verbose=verbose)
+
+        Xva = self.loadData(os.path.join(self.input_dir, basename + '_valid.data'),
+                            self.feat_type, verbose=verbose)
+        if 'Categorical' in self.feat_type:
+            Xva = encoder.transform(Xva)
+
+        Xte = self.loadData(os.path.join(self.input_dir, basename + '_test.data'),
+                            self.feat_type, verbose=verbose)
+        if 'Categorical' in self.feat_type:
+            Xte = encoder.transform(Xte)
+
         self.data['X_train'] = Xtr
         self.data['Y_train'] = Ytr
         self.data['X_valid'] = Xva
@@ -101,36 +121,39 @@ class DataManager:
         for item in self.info:
             val = val + "\t" + item + " = " + str(self.info[item]) + "\n"
         val = val + "data:\n"
-        val = val + "\tX_train = array"  + str(self.data['X_train'].shape) + "\n"
-        val = val + "\tY_train = array"  + str(self.data['Y_train'].shape) + "\n"
-        val = val + "\tX_valid = array"  + str(self.data['X_valid'].shape) + "\n"
-        val = val + "\tX_test = array"  + str(self.data['X_test'].shape) + "\n"
+
+        for subset in ['X_train', 'Y_train', 'X_valid', 'X_test']:
+            val = val + "\t%s = %s" % (subset, type(self.data[subset])) \
+                  + str(self.data[subset].shape) + "\n"
+            if isinstance(self.data[subset], scipy.sparse.spmatrix):
+                val = val + "\tdensity: %f\n" % \
+                            (float(len(self.data[subset].data)) /
+                             self.data[subset].shape[0] /
+                             self.data[subset].shape[1])
         val = val + "feat_type:\tarray" + str(self.feat_type.shape) + "\n"
-        val = val + "feat_idx:\tarray" + str(self.feat_idx.shape) + "\n"
         return val
                 
-    def loadData (self, filename, verbose=True, replace_missing=True):
+    def loadData (self, filename, feat_type, verbose=True):
         ''' Get the data from a text file in one of 3 formats: matrix, sparse, binary_sparse'''
         if verbose:  print("========= Reading " + filename)
         start = time.time()
+
         if self.use_pickle and os.path.exists (os.path.join (self.tmp_dir, os.path.basename(filename) + ".pickle")):
             with open (os.path.join (self.tmp_dir, os.path.basename(filename) + ".pickle"), "r") as pickle_file:
                 vprint (verbose, "Loading pickle file : " + os.path.join(self.tmp_dir, os.path.basename(filename) + ".pickle"))
                 return pickle.load(pickle_file)
-        if 'format' not in self.info.keys():
+
+        if 'format' not in self.info:
             self.getFormatData(filename)
-        if 'feat_num' not in self.info.keys():
+        if 'feat_num' not in self.info:
             self.getNbrFeatures(filename)
-            
-        data_func = {'dense':data_io.data, 'sparse':data_io.data_sparse, 'sparse_binary':data_io.data_binary_sparse}
+
+        data_func = {'dense': input_routines.convert_file_to_array,
+                     'sparse': data_io.data_sparse,
+                     'sparse_binary': data_io.data_binary_sparse}
         
-        data = data_func[self.info['format']](filename, self.info['feat_num'])
-  
-        # INPORTANT: when we replace missing values we double the number of variables
-  
-        if self.info['format']=='dense' and replace_missing and np.any(map(np.isnan,data)):
-            vprint (verbose, "Replace missing values by 0 (slow, sorry)")
-            data = data_converter.replace_missing(data)
+        data = data_func[self.info['format']](filename, feat_type)
+
         if self.use_pickle:
             with open (os.path.join (self.tmp_dir, os.path.basename(filename) + ".pickle"), "wb") as pickle_file:
                 vprint (verbose, "Saving pickle file : " + os.path.join (self.tmp_dir, os.path.basename(filename) + ".pickle"))
@@ -167,6 +190,7 @@ class DataManager:
                 p = pickle.Pickler(pickle_file) 
                 p.fast = True 
                 p.dump(label)
+
         end = time.time()
         if verbose:  print( "[+] Success in %5.2f sec" % (end - start))
         return label

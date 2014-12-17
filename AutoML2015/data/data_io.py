@@ -143,27 +143,29 @@ def check_dataset(dirname, name):
         exit(1)
     return True
 
-def data(filename, nbr_features=None, verbose = False):
+def data(filename, feat_type=None, verbose = False):
     ''' The 2nd parameter makes possible a using of the 3 functions of data reading (data, data_sparse, data_binary_sparse) without changing parameters'''
     if verbose: print (np.array(data_converter.file_to_array(filename)))
     return np.array(data_converter.file_to_array(filename), dtype=float)
             
-def data_sparse (filename, nbr_features):
+def data_sparse (filename, feat_type):
     ''' This function takes as argument a file representing a sparse matrix
     sparse_matrix[i][j] = "a:b" means matrix[i][a] = b
     It converts it into a numpy array, using sparse_list_to_array function, and returns this array'''
     sparse_list = data_converter.sparse_file_to_sparse_list(filename)
-    return data_converter.sparse_list_to_csr_sparse (sparse_list, nbr_features)
+    return data_converter.sparse_list_to_csr_sparse (sparse_list,
+                                                     len(feat_type))
     #return data_converter.sparse_list_to_array (sparse_list, nbr_features)
 
-def data_binary_sparse (filename, nbr_features):    
+def data_binary_sparse (filename, feat_type):
     ''' This function takes as an argument a file representing a binary sparse matrix
     binary_sparse_matrix[i][j] = a means matrix[i][j] = 1
     It converts it into a numpy array an returns this array. '''
     
     data = data_converter.file_to_array (filename)
     nbr_samples = len(data)
-    dok_sparse = dok_matrix ((nbr_samples, nbr_features)) # the construction is easier w/ dok_sparse
+    # the construction is easier w/ dok_sparse
+    dok_sparse = dok_matrix ((nbr_samples, len(feat_type)))
     print ("Converting {} to dok sparse matrix".format(filename))
     for row in range (nbr_samples):
         for feature in data[row]:
