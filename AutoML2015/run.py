@@ -110,6 +110,12 @@ verbose = True # outputs messages to stdout and stderr for debug purposes
 # 4: just list the directories and program version
 debug_mode = 0
 
+# Sample model:
+####################
+# True: run the sample model from the starter kit
+# False: run the own code
+sample_model = False
+
 # Time budget
 #############
 # Maximum time of training in seconds PER DATASET (there are 5 datasets). 
@@ -174,6 +180,8 @@ import data.data_io as data_io            # general purpose input/output functio
 from data.data_io import vprint           # print only in verbose mode
 from data.data_manager import DataManager # load/save data and get info about them
 import scores.libscores
+import scipy.sparse
+from data.models import MyAutoML
 from AutoSklearn.autosklearn import AutoSklearnClassifier
 from HPOlibConfigSpace.random_sampler import RandomSampler
 
@@ -238,7 +246,7 @@ if __name__=="__main__" and debug_mode<4:
         
         # ======== Creating a data object with data, informations about it
         vprint( verbose,  "======== Reading and converting data ==========")
-        D = DataManager(basename, input_dir, replace_missing=True, filter_features=True, verbose=verbose)
+        D = DataManager(basename, input_dir, verbose=verbose)
         print D
         
         # ======== Keeping track of time
@@ -253,72 +261,158 @@ if __name__=="__main__" and debug_mode<4:
             vprint( verbose,  "[-] Sorry, time budget exceeded, skipping this task")
             execution_success = False
             continue
-        
-        # ========= Creating a model, knowing its assigned task from D.info['task'].
-        # The model can also select its hyper-parameters based on other elements of info.  
-        vprint( verbose,  "======== Creating model ==========")
-        configuration_space = AutoSklearnClassifier.get_hyperparameter_search_space()
-        sampler = RandomSampler(configuration_space, 2)
-        vprint( verbose, configuration_space)
 
-        # ========= Getting task and metric
-        metric = D.info['metric']
-        scoring_func = getattr(scores.libscores, metric)
-        task_type = D.info['task']
+        if sample_model:
+            # ========= Creating a model, knowing its assigned task from D.info['task'].
+            # The model can also select its hyper-parameters based on other elements of info.
+            vprint(verbose, "======== Creating model ==========")
+            M = MyAutoML(D.info, verbose, debug_mode)
+            print M
 
-
-        # ========= Iterating over learning cycles and keeping track of time
-        # Preferably use a method that iteratively improves the model and
-        # regularly saves predictions results gradually getting better
-        # until the time budget is exceeded.
-        # The example model we provide we use just votes on an increasingly 
-        # large number of "base estimators".
-        time_spent = time.clock() - start
-        vprint( verbose,  "[+] Remaining time after building model %5.2f sec" % (time_budget-time_spent))        
-        if time_spent >= time_budget:
-            vprint( verbose,  "[-] Sorry, time budget exceeded, skipping this task")
-            execution_success = False
-            continue
-
-        time_budget = time_budget - time_spent # Remove time spent so far
-        start = time.clock()              # Reset the counter
-        time_spent = 0                   # Initialize time spent learning
-        cycle = 0
-        
-        while time_spent <= time_budget and cycle <= max_cycle:
-            vprint( verbose,  "=========== " + basename.capitalize() +" Training cycle " + str(cycle) +" ================") 
-
-            configuration = sampler.sample_configuration()
-            vprint( verbose, configuration)
-            model = AutoSklearnClassifier(configuration)
-            model.fit(D.data['X_train'], D.data['Y_train'])
-            vprint( verbose,  "[+] Fitting success, time spent so far %5.2f sec" % (time.clock() - start))
-
-            # Make predictions, take only the score of the second class
-            Y_train = model.scores(D.data['X_train'])
-            Y_train = np.hstack([Y_train[i][:, 1].reshape((-1, 1))
-                                 for i in range(len(Y_train))])
-            Y_valid = model.scores(D.data['X_valid'])
-            Y_valid = np.hstack([Y_valid[i][:,1].reshape((-1, 1))
-                                 for i in range(len(Y_valid))])
-            Y_test = model.scores(D.data['X_test'])
-            Y_test = np.hstack([Y_test[i][:, 1].reshape((-1, 1))
-                                 for i in range(len(Y_test))])
-
-            score = scoring_func(D.data['Y_train'], Y_train, task=task_type)
-            vprint(verbose, score)
-
-            vprint(verbose, "[+] Prediction success, time spent so far %5.2f sec" % (time.clock() - start))
-
-            # Write results
-            filename_valid = basename + '_valid_' + str(cycle).zfill(3) + '.predict'
-            data_io.write(os.path.join(output_dir,filename_valid), Y_valid)
-            filename_test = basename + '_test_' + str(cycle).zfill(3) + '.predict'
-            data_io.write(os.path.join(output_dir,filename_test), Y_test)
-            vprint( verbose,  "[+] Results saved, time spent so far %5.2f sec" % (time.clock() - start))
+            # ========= Iterating over learning cycles and keeping track of time
+            # Preferably use a method that iteratively improves the model and
+            # regularly saves predictions results gradually getting better
+            # until the time budget is exceeded.
+            # The example model we provide we use just votes on an increasingly
+            # large number of "base estimators".
             time_spent = time.clock() - start
-            vprint( verbose,  "[+] End cycle, remaining time %5.2f sec" % (time_budget-time_spent))
-            cycle += 1
+            vprint(verbose, "[+] Remaining time after building model %5.2f sec" % (
+                time_budget - time_spent))
+            if time_spent >= time_budget:
+                vprint(verbose,
+                       "[-] Sorry, time budget exceeded, skipping this task")
+                execution_success = False
+                continue
+
+            time_budget = time_budget - time_spent  # Remove time spent so far
+            start = time.clock()  # Reset the counter
+            time_spent = 0  # Initialize time spent learning
+            cycle = 0
+
+            while time_spent <= time_budget / 2 and cycle <= max_cycle:
+                vprint(verbose,
+                       "=========== " + basename.capitalize() + " Training cycle " + str(
+                           cycle) + " ================")
+
+                # Densify data if necessary:
+                if isinstance(D.data['X_train'], scipy.sparse.spmatrix) and \
+                        int(D.info['is_sparse']) == 0:
+                    D.data['X_train'] = D.data['X_train'].todense()
+                    D.data['X_valid'] = D.data['X_valid'].todense()
+                    D.data['X_test'] = D.data['X_test'].todense()
+
+                # Exponentially scale the number of base estimators
+                M.model.n_estimators = int(np.exp2(cycle))
+                # Fit base estimators
+                M.fit(D.data['X_train'], D.data['Y_train'])
+                vprint(verbose,
+                       "[+] Fitting success, time spent so far %5.2f sec" % (
+                           time.clock() - start))
+                # Make predictions
+                Y_valid = M.predict(D.data['X_valid'])
+                Y_test = M.predict(D.data['X_test'])
+                vprint(verbose,
+                       "[+] Prediction success, time spent so far %5.2f sec" % (
+                           time.clock() - start))
+                # Write results
+                filename_valid = basename + '_valid_' + str(cycle).zfill(
+                    3) + '.predict'
+                data_io.write(os.path.join(output_dir, filename_valid), Y_valid)
+                filename_test = basename + '_test_' + str(cycle).zfill(
+                    3) + '.predict'
+                data_io.write(os.path.join(output_dir, filename_test), Y_test)
+                vprint(verbose, "[+] Results saved, time spent so far %5.2f sec" % (
+                    time.clock() - start))
+                time_spent = time.clock() - start
+                vprint(verbose, "[+] End cycle, remaining time %5.2f sec" % (
+                    time_budget - time_spent))
+                cycle += 1
+
+        else:
+            # ========= Getting task and metric
+            metric = D.info['metric']
+            scoring_func = getattr(scores.libscores, metric)
+            task_type = D.info['task']
+
+            target_type = D.info['target_type']
+
+            model_type = None
+            multilabel = False
+            multiclass = False
+            sparse = False
+
+            if task_type.lower() == 'multilabel.classification':
+                multilabel = True
+                model_type = AutoSklearnClassifier
+            if task_type.lower() == 'regression':
+                model_type = None
+            if task_type.lower() == 'multiclass.classification':
+                multiclass = True
+                model_type = AutoSklearnClassifier
+            if task_type.lower() == 'binary.classification':
+                model_type = AutoSklearnClassifier
+
+            if D.info['is_sparse'] == 1:
+                sparse = True
+
+            # ========= Creating a model, knowing its assigned task from D.info['task'].
+            vprint( verbose,  "======== Creating model ==========")
+            configuration_space = AutoSklearnClassifier.\
+                get_hyperparameter_search_space(multiclass=multiclass,
+                                                multilabel=multilabel,
+                                                sparse=sparse)
+            sampler = RandomSampler(configuration_space, 3)
+            vprint( verbose, configuration_space)
+
+            # ========= Iterating over learning cycles and keeping track of time
+            time_spent = time.clock() - start
+            vprint( verbose,  "[+] Remaining time after building model %5.2f sec" % (time_budget-time_spent))
+            if time_spent >= time_budget:
+                vprint( verbose,  "[-] Sorry, time budget exceeded, skipping this task")
+                execution_success = False
+                continue
+
+            time_budget = time_budget - time_spent # Remove time spent so far
+            start = time.clock()              # Reset the counter
+            time_spent = 0                   # Initialize time spent learning
+
+            iteration = 0
+            while time_spent <= time_budget:
+                vprint( verbose,  "=========== " + basename.capitalize() +
+                        " Training iteration " + str(iteration) +" ================")
+
+                configuration = sampler.sample_configuration()
+                vprint( verbose, configuration)
+                model = AutoSklearnClassifier(configuration)
+
+                model.fit(D.data['X_train'], D.data['Y_train'])
+                vprint( verbose,  "[+] Fitting success, time spent so far %5.2f sec" % (time.clock() - start))
+
+                # Make predictions, take only the score of the second class
+                Y_train = model.scores(D.data['X_train'])
+                Y_train = np.hstack([Y_train[i][:, 1].reshape((-1, 1))
+                                     for i in range(len(Y_train))])
+                Y_valid = model.scores(D.data['X_valid'])
+                Y_valid = np.hstack([Y_valid[i][:,1].reshape((-1, 1))
+                                     for i in range(len(Y_valid))])
+                Y_test = model.scores(D.data['X_test'])
+                Y_test = np.hstack([Y_test[i][:, 1].reshape((-1, 1))
+                                     for i in range(len(Y_test))])
+
+                score = scoring_func(D.data['Y_train'], Y_train, task=task_type)
+                vprint(verbose, score)
+
+                vprint(verbose, "[+] Prediction success, time spent so far %5.2f sec" % (time.clock() - start))
+
+                # Write results
+                filename_valid = basename + '_valid_' + str(cycle).zfill(3) + '.predict'
+                data_io.write(os.path.join(output_dir,filename_valid), Y_valid)
+                filename_test = basename + '_test_' + str(cycle).zfill(3) + '.predict'
+                data_io.write(os.path.join(output_dir,filename_test), Y_test)
+                vprint( verbose,  "[+] Results saved, time spent so far %5.2f sec" % (time.clock() - start))
+                time_spent = time.clock() - start
+                vprint( verbose,  "[+] End cycle, remaining time %5.2f sec" % (time_budget-time_spent))
+                iteration += 1
             
     if zipme:
         vprint( verbose,  "========= Zipping this directory to prepare for submit ==============")

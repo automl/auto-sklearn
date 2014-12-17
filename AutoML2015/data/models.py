@@ -38,6 +38,7 @@ class MyAutoML:
         self.task = info['task']
         self.metric = info['metric']
         self.postprocessor = None
+        self.seed = 1
         #self.postprocessor = MultiLabelEnsemble(LogisticRegression(), balance=True) # To calibrate proba
         self.postprocessor = MultiLabelEnsemble(LogisticRegression(), balance=False) # To calibrate proba
         if debug_mode>=2:
@@ -48,18 +49,18 @@ class MyAutoML:
         if info['task']=='regression':
             if info['is_sparse']==True:
                 self.name = "BaggingRidgeRegressor"
-                self.model = BaggingRegressor(base_estimator=Ridge(), n_estimators=1, verbose=verbose) # unfortunately, no warm start...
+                self.model = BaggingRegressor(base_estimator=Ridge(), n_estimators=1, verbose=verbose, random_state=self.seed) # unfortunately, no warm start...
             else:
                 self.name = "GradientBoostingRegressor"
-                self.model = GradientBoostingRegressor(n_estimators=1, verbose=verbose, warm_start = True)
+                self.model = GradientBoostingRegressor(n_estimators=1, verbose=verbose, warm_start = True, random_state=self.seed)
             self.predict_method = self.model.predict # Always predict probabilities
         else:
             if info['has_categorical']: # Out of lazziness, we do not convert categorical variables...
                 self.name = "RandomForestClassifier"
-                self.model = RandomForestClassifier(n_estimators=1, verbose=verbose) # unfortunately, no warm start...
+                self.model = RandomForestClassifier(n_estimators=1, verbose=verbose, random_state=self.seed) # unfortunately, no warm start...
             elif info['is_sparse']:                
                 self.name = "BaggingNBClassifier"
-                self.model = BaggingClassifier(base_estimator=BernoulliNB(), n_estimators=1, verbose=verbose) # unfortunately, no warm start...                          
+                self.model = BaggingClassifier(base_estimator=BernoulliNB(), n_estimators=1, verbose=verbose, random_state=self.seed) # unfortunately, no warm start...
             else:
                 self.name = "GradientBoostingClassifier"
                 self.model = eval(self.name + "(n_estimators=1, verbose=" + str(verbose) + ", min_samples_split=10, random_state=1, warm_start = True)")
@@ -140,6 +141,7 @@ class MultiLabelEnsemble:
             for i in range(1,self.n_target):
                 self.predictors.append(copy.copy(predictorInstance))
         # Fit all predictors
+        np.random.seed(1)
         for i in range(self.n_target):
             # Update the number of desired prodictos
             if hasattr(self.predictors[i], 'n_estimators'):
