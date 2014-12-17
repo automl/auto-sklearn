@@ -17,9 +17,6 @@ from AutoML2015.scores import libscores
 import ast
 import time
 
-__authors__ = ["Katharina Eggensperger", "Matthias Feurer"]
-__contact__ = "automl.org"
-
 
 def main(params, **kwargs):
     for key in params:
