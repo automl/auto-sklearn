@@ -82,17 +82,16 @@ class DataManager:
         self.feat_type = self.loadType (os.path.join(self.input_dir, basename + '_feat.type'), verbose=verbose)
         self.data = {}
 
+        sparse = True if self.info['is_sparse'] == 1 else False
+
         Xtr = self.loadData(os.path.join(self.input_dir, basename + '_train.data'),
                             self.feat_type, verbose=verbose)
-
-        # For simplicity, we convert the loaded file
-        # TODO what happens with sparse matrices here?
         if 'Categorical' in self.feat_type:
             mask = np.array([bool('Categorical' == feat)
                              for feat in self.feat_type])
 
             encoder = OneHotEncoder(categorical_features=mask,
-                                    dtype=np.float64, sparse=True)
+                                    dtype=np.float64, sparse=sparse)
             Xtr = encoder.fit_transform(Xtr)
 
         Ytr = self.loadLabel(os.path.join(self.input_dir, basename + '_train.solution'),
