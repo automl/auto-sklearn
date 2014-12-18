@@ -114,7 +114,7 @@ debug_mode = 0
 ####################
 # True: run the sample model from the starter kit
 # False: run the own code
-sample_model = False
+example_model = False
 
 # Time budget
 #############
@@ -181,7 +181,7 @@ from data.data_io import vprint           # print only in verbose mode
 from data.data_manager import DataManager # load/save data and get info about them
 import scores.libscores
 import scipy.sparse
-from data.models import MyAutoML
+from models.models import MyAutoML
 from AutoSklearn.autosklearn import AutoSklearnClassifier
 from HPOlibConfigSpace.random_sampler import RandomSampler
 
@@ -262,7 +262,7 @@ if __name__=="__main__" and debug_mode<4:
             execution_success = False
             continue
 
-        if sample_model:
+        if example_model:
             # ========= Creating a model, knowing its assigned task from D.info['task'].
             # The model can also select its hyper-parameters based on other elements of info.
             vprint(verbose, "======== Creating model ==========")
