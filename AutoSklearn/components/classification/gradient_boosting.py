@@ -95,7 +95,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 # TODO find out if this is good because of sparcity...
                 'prefers_data_normalized': False,
                 'handles_multiclass': True,
-                'handles_multilabel': True,
+                'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
                 # TODO find out what is best used here!

@@ -1,5 +1,3 @@
-import numbers
-
 import numpy as np
 from scipy import sparse
 
@@ -67,7 +65,9 @@ def _transform_selected(X, transform, selected="all", copy=True):
 
 
 class OneHotEncoder(BaseEstimator, TransformerMixin):
-    """Encode categorical integer features using a one-hot aka one-of-K scheme.
+    """Don't trust the documentation of this module!
+
+    Encode categorical integer features using a one-hot aka one-of-K scheme.
 
     The input to this transformer should be a matrix of integers, denoting
     the values taken on by categorical (discrete) features. The output will be
