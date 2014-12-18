@@ -34,7 +34,7 @@ class Test(unittest.TestCase):
         stop = time.time()
         dur = stop - start
         wall_overhead = dur - watch.wall_sum()
-        
+
         self.assertLess(wall_overhead, 0.5)
         self.assertLess(cpu_overhead, wall_overhead)
 
