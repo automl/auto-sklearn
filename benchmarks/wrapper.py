@@ -14,12 +14,10 @@ from AutoSklearn.autosklearn import AutoSklearnClassifier
 
 from HPOlibConfigSpace import configuration_space
 
-from AutoML2015.util.split_data import split_data
 from AutoML2015.data.data_manager import DataManager
-from AutoML2015.scores import libscores
+from AutoML2015.models.evaluate import evaluate
 
 import time
-import numpy as np
 
 
 def main(params, **kwargs):
@@ -36,31 +34,10 @@ def main(params, **kwargs):
     configuration = configuration_space.Configuration(cs, **params)
 
     D = DataManager(basename, input_dir, verbose=True)
-    print D
 
-    X_train, X_valid, Y_train, Y_valid = split_data(D.data['X_train'],
-                                                    D.data['Y_train'])
+    score = evaluate(D, configuration)
 
-    model = AutoSklearnClassifier(configuration, 1)
-    model.fit(X_train, Y_train)
-    metric = D.info['metric']
-    task_type = D.info['task']
-    Y_pred = model.scores(X_valid)
-
-    if task_type == "multiclass.classification":
-        Y_valid_binary = np.zeros((Y_pred.shape))
-        for i in range(Y_valid_binary.shape[0]):
-            label = Y_valid[i]
-            Y_valid_binary[i, label] = 1
-        Y_valid = Y_valid_binary
-
-    scoring_func = getattr(libscores, metric)
-    csolution, cprediction = libscores.normalize_array(Y_valid, Y_pred)
-    score = scoring_func(csolution, cprediction, task=task_type)
-    all_scores = libscores.compute_all_scores(Y_valid, Y_pred)
-    print all_scores
-    return 1 - score
-
+    return score
 
 if __name__ == "__main__":
     starttime = time.time()
