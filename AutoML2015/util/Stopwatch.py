@@ -8,8 +8,6 @@ from collections import OrderedDict
 
 import sys
 import time
-from AutoML2015.data.data_io import vprint
-
 
 
 class TimingTask():
