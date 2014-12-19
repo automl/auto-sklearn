@@ -20,12 +20,10 @@ sgd:loss {hinge, log, modified_huber, squared_hinge, perceptron} [hinge]
 sgd:n_iter [5, 1000] [20]i
 liblinear:tol [1e-05, 0.1] [0.0001]l
 liblinear:dual {False} [False]
-preprocessor {None, pca} [None]
+preprocessor {None} [None]
 sgd:fit_intercept {True} [True]
 liblinear:penalty {l1, l2} [l2]
 liblinear:C [0.03125, 32768.0] [1.0]l
-pca:whiten {False, True} [False]
-pca:keep_variance [0.5, 1.0] [1.0]
 k_nearest_neighbors:algorithm {auto} [auto]
 liblinear:loss {l1, l2} [l2]
 sgd:learning_rate {optimal, invscaling, constant} [optimal]
@@ -34,8 +32,6 @@ classifier {sgd, k_nearest_neighbors, liblinear} [sgd]
 k_nearest_neighbors:p | k_nearest_neighbors:metric in {minkowski}
 sgd:l1_ratio | sgd:penalty in {elasticnet}
 sgd:epsilon | sgd:loss in {modified_huber}
-pca:keep_variance | preprocessor in {pca}
-pca:whiten | preprocessor in {pca}
 sgd:power_t | sgd:learning_rate in {invscaling}
 k_nearest_neighbors:n_neighbors | classifier in {k_nearest_neighbors}
 sgd:n_iter | classifier in {sgd}
