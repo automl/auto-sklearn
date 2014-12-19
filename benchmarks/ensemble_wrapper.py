@@ -46,7 +46,8 @@ if __name__ == "__main__":
 
     run_info = str(result) + ";"
     for p in predictions:
-        run_info += str(p) + ";"
+        for i in p:
+            run_info += str(i) + ";"
     run_info = run_info[:-1]
 
     print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % \
