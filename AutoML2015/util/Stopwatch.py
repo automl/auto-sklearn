@@ -83,22 +83,44 @@ class StopWatch:
         else:
             sys.stderr.write("You are already timing task: %s\n" % name)
 
+    def wall_elapsed(self, name):
+        tmp = time.time()
+        try:
+            if not self._tasks[name].wall_dur:
+                tsk_start = self._tasks[name].wall_tic
+                return tmp - tsk_start
+            else:
+                return self._tasks[name].wall_dur
+        except KeyError:
+            sys.stderr.write("You are already timing task: %s\n" % name)
+
+    def cpu_elapsed(self, name):
+        tmp = time.clock()
+        try:
+            if not self._tasks[name].cpu_dur:
+                tsk_start = self._tasks[name].cpu_tic
+                return tmp - tsk_start
+            else:
+                return self._tasks[name].cpu_dur
+        except KeyError:
+            sys.stderr.write("You are already timing task: %s\n" % name)
+
     def stop_task(self, name):
-        if name in self._tasks:
+        try:
             self._tasks[name].stop()
-        else:
+        except KeyError:
             sys.stderr.write("There is no such task: %s\n" % name)
 
     def get_cpu_dur(self, name):
-        if name in self._tasks:
+        try:
             return self._tasks[name].cpu_dur
-        else:
+        except KeyError:
             sys.stderr.write("There is no such task: %s\n" % name)
 
     def get_wall_dur(self, name):
-        if name in self._tasks:
+        try:
             return self._tasks[name].wall_dur
-        else:
+        except KeyError:
             sys.stderr.write("There is no such task: %s\n" % name)
 
     def cpu_sum(self):
@@ -121,8 +143,8 @@ class StopWatch:
         for tsk in self._tasks:
             ret_str += "| %10s | %10.5f | %10.5f | %10.5f | %10s | %10s | %10s |\n" % \
                        (tsk, self._tasks[tsk].cpu_tic, self._tasks[tsk].cpu_tac,
-                        self._tasks[tsk].cpu_dur,
+                        self.cpu_elapsed(tsk),
                         self._tasks[tsk].wall_tic, self._tasks[tsk].wall_tac,
-                        self._tasks[tsk].wall_dur)
+                        self.wall_elapsed(tsk))
         return ret_str
 

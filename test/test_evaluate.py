@@ -5,7 +5,6 @@ Created on Dec 18, 2014
 '''
 import unittest
 import numpy as np
-import sklearn.datasets
 
 from AutoML2015.data.data_converter import convert_to_bin
 from AutoML2015.models.evaluate import evaluate
