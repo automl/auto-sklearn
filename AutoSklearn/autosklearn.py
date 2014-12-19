@@ -1,3 +1,4 @@
+from collections import defaultdict
 import copy
 
 import sklearn
@@ -78,7 +79,7 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         else:
             self.random_state = check_random_state(random_state)
 
-    def fit(self, X, Y):
+    def fit(self, X, Y, fit_params=None, init_params=None):
         """Fit the selected algorithm to the training data.
 
         Parameters
@@ -89,6 +90,15 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
 
         y : array-like
             Targets
+
+        fit_params : dict
+            See the documentation of sklearn.pipeline.Pipeline for formatting
+            instructions.
+
+        init_params : dict
+            Pass arguments to the constructors of single methods. To pass
+            arguments to only one of the methods (lets says the
+            OneHotEncoder), seperate the class name from the argument by a ':'.
 
         Returns
         -------
@@ -109,6 +119,11 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         # instantiation time
 
         steps = []
+        init_params_per_method = defaultdict(dict)
+        if init_params is not None:
+            for init_param, value in init_params:
+                method, param = init_param.split(":")
+                init_params_per_method[method][param] = value
 
         preprocessors_names = ["imputation", "rescaling",
                                self.configuration['preprocessor'].value]
@@ -129,6 +144,7 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
                         split(":")[1]
                     preproc_params[name_] = instantiated_hyperparameter.value
 
+                preproc_params.update(init_params_per_method[preproc_name])
                 preprocessor_object = components.preprocessing_components. \
                     _preprocessors[preproc_name](random_state=self.random_state,
                                                  **preproc_params)
@@ -148,6 +164,7 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
                 split(":")[1]
             classifier_parameters[name_] = instantiated_hyperparameter.value
 
+        classifier_parameters.update(init_params_per_method[classifier_name])
         classifier_object = components.classification_components._classifiers\
             [classifier_name](random_state=self.random_state,
                               **classifier_parameters)
