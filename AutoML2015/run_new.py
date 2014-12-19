@@ -184,7 +184,7 @@ from data.data_manager import DataManager # load/save data and get info about th
 from util import Stopwatch, submit_process, split_data
 
 # Define overall timelimit: 20min
-OVERALL_TIMELIMIT = 60*60*20
+OVERALL_TIMELIMIT = 80 #60*60*20
 # And buffer
 BUFFER = 60
 
@@ -289,7 +289,7 @@ if __name__=="__main__" and debug_mode<4:
         time_left_for_this_task = OVERALL_TIMELIMIT - \
                                   stop.wall_elapsed("wholething") - BUFFER
 
-        pid = submit_process.run_smac(time_left_for_this_task)
+        pid = submit_process.run_smac(basename, time_left_for_this_task)
         pid_dict[basename] = pid
         stop.stop_task("start_%s" % basename)
 

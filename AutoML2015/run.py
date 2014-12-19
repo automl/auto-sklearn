@@ -181,7 +181,6 @@ from data.data_io import vprint           # print only in verbose mode
 from data.data_manager import DataManager # load/save data and get info about them
 import scores.libscores
 import scipy.sparse
-from models.models import MyAutoML
 from AutoSklearn.autosklearn import AutoSklearnClassifier
 from HPOlibConfigSpace.random_sampler import RandomSampler
 
@@ -194,7 +193,13 @@ if debug_mode >= 4 or running_on_codalab: # Show library version and directory s
 if __name__=="__main__" and debug_mode<4:	
     #### Check whether everything went well (no time exceeded)
     execution_success = True
-    
+
+    import sklearn
+    print "sklearn", sklearn.__version__
+    print "numpy", np.__version__
+    print "scipy", scipy.__version__
+
+
     #### INPUT/OUTPUT: Get input and output directory names
     if len(argv)==1: # Use the default input and output directories if no arguments are provided
         input_dir = default_input_dir
