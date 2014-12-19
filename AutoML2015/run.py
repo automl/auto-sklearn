@@ -114,7 +114,7 @@ debug_mode = 0
 ####################
 # True: run the sample model from the starter kit
 # False: run the own code
-sample_model = False
+example_model = False
 
 # Time budget
 #############
@@ -267,7 +267,7 @@ if __name__=="__main__" and debug_mode<4:
             execution_success = False
             continue
 
-        if sample_model:
+        if example_model:
             # ========= Creating a model, knowing its assigned task from D.info['task'].
             # The model can also select its hyper-parameters based on other elements of info.
             vprint(verbose, "======== Creating model ==========")

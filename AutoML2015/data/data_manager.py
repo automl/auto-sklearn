@@ -68,50 +68,35 @@ class DataManager:
         else:
             self.input_dir = input_dir + "/" + basename + "/"   
         if self.use_pickle:
-            if os.path.exists ("tmp"):
+            if os.path.exists("tmp"):
                 self.tmp_dir = "tmp"
-            elif os.path.exists ("../tmp"):
+            elif os.path.exists("../tmp"):
                 self.tmp_dir = "../tmp" 
             else:
                 os.makedirs("tmp")
                 self.tmp_dir = "tmp"
 
-        info_file = os.path.join (self.input_dir, basename + '_public.info')
+        info_file = os.path.join(self.input_dir, basename + '_public.info')
         self.info = {}
-        self.getInfo (info_file)
-        self.feat_type = self.loadType (os.path.join(self.input_dir, basename + '_feat.type'), verbose=verbose)
+        self.getInfo(info_file)
+        self.feat_type = self.loadType(os.path.join(self.input_dir, basename + '_feat.type'), verbose=verbose)
         self.data = {}
 
         Xtr = self.loadData(os.path.join(self.input_dir, basename + '_train.data'),
                             self.feat_type, verbose=verbose)
-
-        # For simplicity, we convert the loaded file
-        # TODO what happens with sparse matrices here?
-        if 'Categorical' in self.feat_type:
-            mask = np.array([bool('Categorical' == feat)
-                             for feat in self.feat_type])
-
-            encoder = OneHotEncoder(categorical_features=mask,
-                                    dtype=np.float64, sparse=True)
-            Xtr = encoder.fit_transform(Xtr)
-
         Ytr = self.loadLabel(os.path.join(self.input_dir, basename + '_train.solution'),
                              verbose=verbose)
-
         Xva = self.loadData(os.path.join(self.input_dir, basename + '_valid.data'),
                             self.feat_type, verbose=verbose)
-        if 'Categorical' in self.feat_type:
-            Xva = encoder.transform(Xva)
-
         Xte = self.loadData(os.path.join(self.input_dir, basename + '_test.data'),
                             self.feat_type, verbose=verbose)
-        if 'Categorical' in self.feat_type:
-            Xte = encoder.transform(Xte)
 
         self.data['X_train'] = Xtr
         self.data['Y_train'] = Ytr
         self.data['X_valid'] = Xva
         self.data['X_test'] = Xte
+
+        self.perform1HotEncoding()
           
     def __repr__(self):
         return "DataManager : " + self.basename
@@ -194,6 +179,31 @@ class DataManager:
         end = time.time()
         if verbose:  print( "[+] Success in %5.2f sec" % (end - start))
         return label
+
+    def perform1HotEncoding(self):
+        if not hasattr(self, "data"):
+            raise ValueError("perform1HotEncoding can only be called when "
+                             "data is loaded")
+        if hasattr(self, "encoder"):
+            raise ValueError("perform1HotEncoding can only be called on "
+                             "non-encoded data.")
+
+        sparse = True if self.info['is_sparse'] == 1 else False
+        has_missing = True if self.info['has_missing'] else False
+
+        to_encode = ['Categorical']
+        if has_missing:
+            to_encode += ['Binary']
+        encoding_mask = [feat_type in to_encode for feat_type in self.feat_type]
+
+        if any(encoding_mask):
+            encoder = OneHotEncoder(categorical_features=encoding_mask,
+                                    dtype=np.float64, sparse=sparse)
+            self.data['X_train'] = encoder.fit_transform(self.data['X_train'])
+            self.data['X_valid'] = encoder.transform(self.data['X_valid'])
+            self.data['X_test'] = encoder.transform(self.data['X_test'])
+
+            self.encoder = encoder
 
     def loadType (self, filename, verbose=True):
         ''' Get the variable types'''
