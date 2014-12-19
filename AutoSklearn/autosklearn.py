@@ -401,7 +401,6 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
                             dlc.hyperparameter.name)
                 cs.add_forbidden_clause(forbidden_clause)
 
-
         names = []
         names_ = []
         for name in available_preprocessors:
@@ -414,6 +413,17 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             elif exclude_preprocessors is not None and \
                             name in exclude_preprocessors:
                 continue
+
+            if multiclass is True and available_preprocessors[name]. \
+                    get_properties()['handles_multiclass'] is False:
+                continue
+            if multilabel is True and available_preprocessors[name]. \
+                    get_properties()['handles_multilabel'] is False:
+                continue
+            if sparse is True and available_preprocessors[name]. \
+                    get_properties()['handles_sparse'] is False:
+                continue
+
             names.append(name)
 
         preprocessor = CategoricalHyperparameter("preprocessor",

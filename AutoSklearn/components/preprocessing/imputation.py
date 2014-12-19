@@ -23,7 +23,7 @@ class Imputation(AutoSklearnPreprocessingAlgorithm):
         return self.preprocessor.transform(X)
 
     @staticmethod
-    def get_meta_information():
+    def get_properties():
         return {'shortname': 'Imputation',
                 'name': 'Imputation',
                 'handles_missing_values': True,

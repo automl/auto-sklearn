@@ -27,7 +27,7 @@ class Rescaling(AutoSklearnPreprocessingAlgorithm):
         return self.preprocessor.transform(X)
 
     @staticmethod
-    def get_meta_information():
+    def get_properties():
         return {'shortname': 'Rescaling',
                 'name': 'Rescaling',
                 'handles_missing_values': False,

@@ -41,7 +41,7 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
         return self.preprocessor.transform(X)
 
     @staticmethod
-    def get_meta_information():
+    def get_properties():
         return {'shortname': 'PCA',
                 'name': 'Principle Component Analysis',
                 'handles_missing_values': False,
