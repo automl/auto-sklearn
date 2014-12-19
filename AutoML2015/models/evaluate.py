@@ -16,6 +16,9 @@ from AutoML2015.scores import libscores
 def evaluate(Datamanager, configuration, with_predictions=False):
     X_train, X_valid, Y_train, Y_valid = split_data(Datamanager.data['X_train'],
                                                     Datamanager.data['Y_train'])
+    categorical_or_binary_features = [True if feat_type.lower()
+                                      in ['categorical', 'binary'] else False
+                                      for feat_type in Datamanager.feat_type]
 
     model = AutoSklearnClassifier(configuration, 1)
     model.fit(X_train, Y_train)
@@ -29,6 +32,10 @@ def evaluate(Datamanager, configuration, with_predictions=False):
             label = Y_valid[i]
             Y_valid_binary[i, label] = 1
         Y_valid = Y_valid_binary
+
+    if task_type == "multilabel.classification":
+        Y_pred = np.hstack([Y_pred[i][:, 1].reshape((-1, 1))
+                             for i in range(len(Y_pred))])
 
     scoring_func = getattr(libscores, metric)
     csolution, cprediction = libscores.normalize_array(Y_valid, Y_pred)
