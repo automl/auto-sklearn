@@ -61,23 +61,22 @@ def main(data_dir, basename):
     index_run = 0
     while True:
         #=== Load the true labels of the validation data
-        true_labels = np.load(os.path.join(data_dir, "true_labels.npy"))
+        true_labels = np.load(os.path.join(data_dir, "true_labels_ensemble.npy"))
 
         #=== Load the predictions from the models
         all_predictions_train = []
-        dir = os.path.join(data_dir, "predictions_ensemble/")
-        for f in os.listdir(dir):
-            print f
-            predictions = np.load(os.path.join(dir, f))
+        dir_ensemble = os.path.join(data_dir, "predictions_ensemble/")
+        for f in os.listdir(dir_ensemble):
+            predictions = np.load(os.path.join(dir_ensemble, f))
             all_predictions_train.append(predictions)
 
         #=== Compute the weights for the ensemble
         weights = weighted_ensemble(np.array(all_predictions_train), true_labels)
 
         all_predictions_valid = []
-        dir = os.path.join(data_dir, "predictions_valid/")
-        for f in os.listdir(dir):
-            predictions = np.load(os.path.join(dir, f))
+        dir_valid = os.path.join(data_dir, "predictions_valid/")
+        for f in os.listdir(dir_valid):
+            predictions = np.load(os.path.join(dir_valid, f))
             all_predictions_valid.append(predictions)
 
         #=== Compute the ensemble predictions for the valid data
@@ -87,9 +86,9 @@ def main(data_dir, basename):
         data_io.write(os.path.join(data_dir, filename_test), Y_test)
 
         all_predictions_test = []
-        dir = os.path.join(data_dir, "predictions_test/")
+        dir_test = os.path.join(data_dir, "predictions_test/")
         for f in os.listdir(dir):
-            predictions = np.load(os.path.join(dir, f))
+            predictions = np.load(os.path.join(dir_test, f))
             all_predictions_test.append(predictions)
 
         #=== Compute the ensemble predictions for the test data
@@ -98,6 +97,6 @@ def main(data_dir, basename):
         filename_test = basename + '_test_' + str(index_run) + '.predict'
         data_io.write(os.path.join(data_dir, filename_test), Y_test)
         index_run += 1
-        break
+
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])
