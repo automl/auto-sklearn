@@ -32,7 +32,8 @@ def get_configuration_space(info):
         configuration_space = AutoSklearnClassifier. \
             get_hyperparameter_search_space(multiclass=multiclass,
                                             multilabel=multilabel,
-                                            sparse=sparse)
+                                            sparse=sparse,
+                                            exclude_classifiers=exclude_classifiers)
         return configuration_space
 
 
