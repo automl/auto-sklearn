@@ -1,7 +1,7 @@
 import time
 
 
-def run_smac(limit):
+def run_smac(dataset_name, limit):
     time.sleep(2)
     return limit
 
