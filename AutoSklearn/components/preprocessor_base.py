@@ -7,7 +7,8 @@ class AutoSklearnPreprocessingAlgorithm(object):
     def __init__(self):
         self.preprocessor = None
 
-    def get_properties(self):
+    @staticmethod
+    def get_properties():
         """Get the properties of the underlying algorithm. These are:
 
         * Short name
@@ -41,7 +42,8 @@ class AutoSklearnPreprocessingAlgorithm(object):
         """
         raise NotImplementedError()
 
-    def get_hyperparameter_search_space(self):
+    @staticmethod
+    def get_hyperparameter_search_space():
         """Return the configuration space of this preprocessing algorithm.
 
         Returns

@@ -327,13 +327,13 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
                 continue
 
             if multiclass is True and available_classifiers[name]. \
-                    get_properties()['handles_multiclass'] == False:
+                    get_properties()['handles_multiclass'] is False:
                 continue
             if multilabel is True and available_classifiers[name]. \
-                    get_properties()['handles_multilabel'] == False:
+                    get_properties()['handles_multilabel'] is False:
                 continue
             if sparse is True and available_classifiers[name]. \
-                    get_properties()['handles_sparse'] == False:
+                    get_properties()['handles_sparse'] is False:
                 continue
             names.append(name)
 
