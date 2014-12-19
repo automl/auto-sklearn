@@ -10,5 +10,5 @@ class RandomForestComponentTest(unittest.TestCase):
     def test_default_configuration(self):
         for i in range(10):
             predictions, targets = _test_classifier(RandomForest, dataset='iris')
-            self.assertAlmostEqual(0.94,
+            self.assertAlmostEqual(0.92,
                 sklearn.metrics.accuracy_score(predictions, targets))
