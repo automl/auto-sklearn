@@ -97,6 +97,6 @@ def main(data_dir, basename):
         filename_test = basename + '_test_' + str(index_run) + '.predict'
         data_io.write(os.path.join(data_dir, filename_test), Y_test)
         index_run += 1
-        break
+
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])
