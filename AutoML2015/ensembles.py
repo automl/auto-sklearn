@@ -61,7 +61,7 @@ def main(data_dir, basename):
     index_run = 0
     while True:
         #=== Load the true labels of the validation data
-        true_labels = np.load(os.path.join(data_dir, "true_labels.npy"))
+        true_labels = np.load(os.path.join(data_dir, "true_labels_ensemble.npy"))
 
         #=== Load the predictions from the models
         all_predictions_train = []

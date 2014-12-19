@@ -298,7 +298,7 @@ if __name__=="__main__" and debug_mode<4:
         ensemble_time_limit = OVERALL_TIMELIMIT - \
                               stop.wall_elapsed("wholething") - \
                               BUFFER
-        submit_process.run_ensemble_builder(basename, ensemble_time_limit)
+        submit_process.run_ensemble_builder(D.input_dir, basename, ensemble_time_limit)
         stop.stop_task("start_ensemble_builder_%s" % basename)
         stop.stop_task(basename)
 
