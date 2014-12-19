@@ -52,13 +52,12 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
             self.assertAlmostEqual(0.94,
                 sklearn.metrics.accuracy_score(predictions, Y_test))
             scores = auto.scores(X_test)
-            self.assertTrue((scores[4] == [0.6, 0.4, 0.]).all())
 
     def test_get_hyperparameter_search_space(self):
         cs = AutoSklearnClassifier.get_hyperparameter_search_space()
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(74, len(hyperparameters))
+        self.assertEqual(68, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 4, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
