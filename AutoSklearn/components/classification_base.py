@@ -8,7 +8,8 @@ class AutoSklearnClassificationAlgorithm(object):
         self.estimator = None
         self.properties = None
 
-    def get_properties(self):
+    @staticmethod
+    def get_properties():
         """Get the properties of the underlying algorithm. These are:
 
         * Short name
@@ -40,7 +41,8 @@ class AutoSklearnClassificationAlgorithm(object):
         """
         raise NotImplementedError()
 
-    def get_hyperparameter_search_space(self):
+    @staticmethod
+    def get_hyperparameter_search_space():
         """Return the configuration space of this classification algorithm.
 
         Returns
