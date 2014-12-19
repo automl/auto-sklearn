@@ -4,6 +4,7 @@ import os
 import pkgutil
 
 import numpy as np
+import scipy.sparse
 import sklearn
 import sklearn.base
 import sklearn.datasets
@@ -40,7 +41,7 @@ def find_sklearn_classifiers():
     print classifiers
 
 
-def get_dataset(dataset='iris'):
+def get_dataset(dataset='iris', make_sparse=False):
     iris = getattr(sklearn.datasets, "load_%s" % dataset)()
     X = iris.data
     Y = iris.target
@@ -54,11 +55,23 @@ def get_dataset(dataset='iris'):
     Y_train = Y[:100]
     X_test = X[100:]
     Y_test = Y[100:]
+
+    if make_sparse:
+        X_train[:,0] = 0
+        X_train[np.random.random(X_train.shape) > 0.5] = 0
+        X_train = scipy.sparse.csc_matrix(X_train)
+        X_train.eliminate_zeros()
+        X_test[:,0] = 0
+        X_test[np.random.random(X_test.shape) > 0.5] = 0
+        X_test = scipy.sparse.csc_matrix(X_test)
+        X_test.eliminate_zeros()
+
     return X_train, Y_train, X_test, Y_test
 
 
 def _test_classifier(Classifier, dataset='iris'):
-    X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset)
+    X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
+                                                   make_sparse=False)
     configuration_space = Classifier.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
     classifier = Classifier(random_state=1,
@@ -69,15 +82,18 @@ def _test_classifier(Classifier, dataset='iris'):
     return predictions, Y_test
 
 
-def _test_preprocessing(Preprocessor, dataset='iris'):
-    X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset)
+def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False):
+    X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
+                                                   make_sparse=make_sparse)
+    original_X_train = X_train.copy()
     configuration_space = Preprocessor.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
     preprocessor = Preprocessor(random_state=1,
                                 **{hp.hyperparameter.name: hp.value for hp in
                                 default.values.values()})
+
     transformer = preprocessor.fit(X_train, Y_train)
-    return transformer.transform(X_test), X_test
+    return transformer.transform(X_train), original_X_train
 
 
 if __name__ == "__main__":

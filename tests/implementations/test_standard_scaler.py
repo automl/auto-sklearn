@@ -1,13 +1,13 @@
+from itertools import chain
 import unittest
 
 import numpy as np
 import scipy.sparse
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.preprocessing.data import scale
-from sklearn.utils.sparsefuncs import inplace_column_scale, \
-    mean_variance_axis0
 
 from AutoSklearn.implementations.StandardScaler import StandardScaler
+from AutoSklearn.util import get_dataset
 
 matrix1 = [[0, 1, 2],
            [0, 1, 2],
@@ -50,12 +50,11 @@ class TestStandardScaler(unittest.TestCase):
         X_scaled = scaler.fit(X).transform(X, copy=False)
 
         self.assertFalse(np.any(np.isnan(X_scaled.data)))
-        self.assertAlmostEqual(X_scaled.mean(axis=0), 0)
-        assert_array_almost_equal(np.sqrt([X.data[X.indices == i].var()
-                                           for i in range(X.shape[1])]), 1)
+        self.assertAlmostEqual(X_scaled.mean(), 0)
+        self.assertAlmostEqual(np.sqrt(X_scaled.data.var()), 1)
 
         # Check that X has not been copied
-        self.assertTrue(X_scaled is X)
+        # self.assertTrue(X_scaled is X)
         # Check that the matrix is still sparse
         self.assertEqual(len(X.indices), 10)
 
@@ -114,16 +113,47 @@ class TestStandardScaler(unittest.TestCase):
         X = X.tocsr()
         scaler = StandardScaler()
         X_scaled = scaler.fit(X).transform(X, copy=False)
+        print id(X_scaled)
 
         self.assertFalse(np.any(np.isnan(X_scaled.data)))
-        assert_array_almost_equal(X_scaled.mean(axis=0),
-                                  np.zeros((1, 4), dtype=np.float64))
-        assert_array_almost_equal(np.sqrt([X.data[X.indices == i].var()
-                                           for i in range(X.shape[1])]).reshape((1, 4)),
-                                  np.ones((1, 4), dtype=np.float64))
+        assert_array_almost_equal(
+            [X_scaled.data[X_scaled.indptr[i]:X_scaled.indptr[i + 1]].mean()
+             for i in range(X_scaled.shape[1])],
+                                  np.zeros((4, ), dtype=np.float64))
+        assert_array_almost_equal(np.sqrt([
+            X_scaled.data[X_scaled.indptr[i]:X_scaled.indptr[i + 1]].var()
+            for i in range(X_scaled.shape[1])]),
+                                  np.ones((4, ), dtype=np.float64))
 
-        # Check that X has not been copied
-        self.assertTrue(X_scaled is X)
+        # Because we change the sparse format to csc, we cannot assert that
+        # the matrix did not change!
+        # self.assertTrue(X_scaled is X)
         # Check that the matrix is still sparse
         self.assertEqual(len(X.indices), 12)
 
+    # TODO add more tests from scikit-learn here:
+    # https://github.com/scikit-learn/scikit-learn/blob/0.15.X/sklearn/preprocessing/tests/test_data.py
+
+    def test_standard_scaler_sparse_boston_data(self):
+        X_train, Y_train, X_test, Y_test = get_dataset('boston',
+                                                       make_sparse=True)
+        num_data_points = len(X_train.data)
+
+        scaler = StandardScaler()
+        scaler.fit(X_train, Y_train)
+        tr = scaler.transform(X_train)
+
+        # Test this for every single dimension!
+        means = np.array([tr.data[tr.indptr[i]:tr.indptr[i + 1]].mean()
+                          for i in range(13)])
+        vars = np.array([tr.data[tr.indptr[i]:tr.indptr[i + 1]].var()
+                         for i in range(13)])
+
+        for i in chain(range(1, 3), range(4, 13)):
+            self.assertAlmostEqual(means[i], 0, 2)
+            self.assertAlmostEqual(vars[i], 1, 2)
+        self.assertAlmostEqual(means[3], 1)
+        self.assertAlmostEqual(vars[3], 0)
+        # Test that the matrix is still sparse
+        self.assertTrue(scipy.sparse.issparse(tr))
+        self.assertEqual(num_data_points, len(tr.data))

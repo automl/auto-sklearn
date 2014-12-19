@@ -1,9 +1,8 @@
-import sklearn.preprocessing
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from ...implementations.StandardScaler import StandardScaler
+from ...implementations.MinMaxScaler import MinMaxScaler
 from ..preprocessor_base import AutoSklearnPreprocessingAlgorithm
 
 
@@ -14,7 +13,7 @@ class Rescaling(AutoSklearnPreprocessingAlgorithm):
 
     def fit(self, X, Y):
         if self.strategy == "min/max":
-            self.preprocessor = sklearn.preprocessing.MinMaxScaler(copy=False)
+            self.preprocessor = MinMaxScaler(copy=False)
         elif self.strategy == "standard":
             self.preprocessor = StandardScaler(copy=False)
         else:

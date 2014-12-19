@@ -103,18 +103,33 @@ class StandardScaler(BaseEstimator, TransformerMixin):
             The data used to compute the mean and standard deviation
             used for later scaling along the features axis.
         """
-        X = check_arrays(X, copy=self.copy, sparse_format="csr")[0]
+        X = check_arrays(X, copy=self.copy, sparse_format="csc")[0]
         if warn_if_not_float(X, estimator=self):
             X = X.astype(np.float)
         if sparse.issparse(X):
             if self.center_sparse:
-                # This only works for csr matrices...
-                self.mean_ = [X.data[X.indices == i].mean()
-                              for i in range(X.shape[1])]
-                var = np.array([X.data[X.indices == i].var()
-                                for i in range(X.shape[1])])
-                self.std_ = np.sqrt(var)
-                self.std_[var == 0.0] = 1.0
+                means = []
+                vars = []
+
+                # This only works for csc matrices...
+                for i in range(X.shape[1]):
+                    if X.indptr[i] == X.indptr[i + 1]:
+                        means.append(0)
+                        vars.append(1)
+                    else:
+                        vars.append(
+                            X.data[X.indptr[i]:X.indptr[i + 1]].var())
+                        # If the variance is 0, set all occurences of this
+                        # features to 1
+                        means.append(
+                            X.data[X.indptr[i]:X.indptr[i + 1]].mean())
+                        if 0.0000001 >= vars[-1] >= -0.0000001:
+                            means[-1] -= 1
+
+                self.std_ = np.sqrt(np.array(vars))
+                self.std_[np.array(vars) == 0.0] = 1.0
+                self.mean_ = np.array(means)
+
                 return self
             elif self.with_mean:
                 raise ValueError(
@@ -144,13 +159,13 @@ class StandardScaler(BaseEstimator, TransformerMixin):
             The data used to scale along the features axis.
         """
         copy = copy if copy is not None else self.copy
-        X = check_arrays(X, copy=copy, sparse_format="csr")[0]
+        X = check_arrays(X, copy=copy, sparse_format="csc")[0]
         if warn_if_not_float(X, estimator=self):
             X = X.astype(np.float)
         if sparse.issparse(X):
             if self.center_sparse:
                 for i in range(X.shape[1]):
-                    X.data[X.indices == i] -= self.mean_[i]
+                    X.data[X.indptr[i]:X.indptr[i + 1]] -= self.mean_[i]
             elif self.with_mean:
                 raise ValueError(
                     "Cannot center sparse matrices: pass `with_mean=False` "

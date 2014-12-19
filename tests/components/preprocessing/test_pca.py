@@ -4,7 +4,7 @@ from AutoSklearn.components.preprocessing.pca import PCA
 from AutoSklearn.util import _test_preprocessing
 
 
-class LibLinearComponentTest(unittest.TestCase):
+class PCAComponentTest(unittest.TestCase):
     def test_default_configuration(self):
         transformations = []
         for i in range(10):
