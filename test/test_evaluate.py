@@ -12,7 +12,7 @@ from AutoSklearn.autosklearn import AutoSklearnClassifier
 from AutoSklearn.util import get_dataset
 from HPOlibConfigSpace.random_sampler import RandomSampler
 
-N_TEST_RUNS = 100
+N_TEST_RUNS = 5
 
 
 class Dummy(object):
