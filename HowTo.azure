@@ -11,7 +11,7 @@ bash Anaconda-2.0.0-Linux-x86_64.sh
 
 === Activate Anaconda @Azure
 
-
+export PATH=~/anaconda/bin:$PATH
 
 === Use the right version of numpy,scipy, sklearn
 
