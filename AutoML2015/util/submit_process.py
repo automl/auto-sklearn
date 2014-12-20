@@ -7,7 +7,7 @@ def run_smac(dataset_name, limit):
     return limit
 
 
-def run_ensemble_builder(data_dir, dataset_name, limit):
+def run_ensemble_builder(tmp_dir, dataset_name, limit):
     time.sleep(2)
-    os.system("python ensembles.py " + data_dir + dataset_name)
+    os.system("python ensembles.py " + tmp_dir + dataset_name)
     return limit

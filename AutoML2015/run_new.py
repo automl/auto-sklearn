@@ -181,12 +181,14 @@ import data.data_io as data_io            # general purpose input/output functio
 from data.data_io import vprint           # print only in verbose mode
 from data.data_manager import DataManager # load/save data and get info about them
 
-from util import Stopwatch, submit_process, split_data
+from util import Stopwatch, submit_process, split_data, get_dataset_info
+import cPickle
+import errno
 
-# Define overall timelimit: 20min
-OVERALL_TIMELIMIT = 80 #60*60*20
-# And buffer
-BUFFER = 60
+# DEFINITIONS, CHECK BEFORE EACH SUBMISSION
+BUFFER = 60  # time-left - BUFFER = timilimit for SMAC
+TMP_DIR = "/tmp/"
+
 
 if debug_mode >= 4 or running_on_codalab: # Show library version and directory structure
     data_io.show_version()
@@ -198,6 +200,9 @@ if debug_mode >= 4 or running_on_codalab: # Show library version and directory s
 if __name__=="__main__" and debug_mode<4:
     # Store all pid from running processes to check whether they are still alive
     pid_dict = dict()
+    info_dict = dict()
+    overall_limit = 0
+
     stop = Stopwatch.StopWatch()
     stop.start_task("wholething")
     stop.start_task("inventory")
@@ -248,8 +253,25 @@ if __name__=="__main__" and debug_mode<4:
     stop.start_task("submitcode")
     # ================ @CODE SUBMISSION (SUBTITUTE YOUR CODE) ================= 
     overall_time_budget = 0
+    stop.start_task("get_info")
     for basename in datanames:
-        # Loop over datasets
+        # loop over all datasets to get overall time_budget and create dir in TMP_DIR
+        info_dict[basename] = get_dataset_info.getInfoFromFile(input_dir, basename)
+        overall_limit += info_dict[basename]["time_budget"]
+        try:
+            os.makedirs(os.path.join(TMP_DIR, basename))
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise
+
+    spent = stop.wall_elapsed("wholething")
+    vprint(verbose, "Overall time limit is %f, we already spent %f, left %f" %
+           (overall_limit, spent, overall_limit-spent))
+    stop.stop_task("get_info")
+
+    for basename in datanames:
+        # Loop over datasets and start smac
+        # TODO outsource this and start processes in parallel
         stop.start_task(basename)
         
         vprint( verbose,  "************************************************")
@@ -266,9 +288,12 @@ if __name__=="__main__" and debug_mode<4:
         vprint( verbose,  "======== Reading and converting data ==========")
         D = DataManager(basename, input_dir, verbose=verbose)
         print D
+
+        # ====== Split dataset and store Datamanager
         X_train, X_ensemble, Y_train, Y_ensemble = split_data.split_data(D.data['X_train'], D.data['Y_train'])
         del X_train, X_ensemble, Y_train
-        np.save(os.path.join(D.input_dir, "true_labels_ensemble.npy"), Y_ensemble)
+        np.save(os.path.join(TMP_DIR, basename, "true_labels_ensemble.npy"), Y_ensemble)
+        cPickle.dump(D, open(os.path.join(TMP_DIR, basename, "datamanager.pkl"), 'w'))
 
         # ======== Keeping track of time
         if debug_mode<1:
@@ -286,19 +311,16 @@ if __name__=="__main__" and debug_mode<4:
         stop.stop_task("load_%s" % basename)
         stop.start_task("start_%s" % basename)
 
-        time_left_for_this_task = OVERALL_TIMELIMIT - \
-                                  stop.wall_elapsed("wholething") - BUFFER
+        time_left_for_this_task = overall_limit - stop.wall_elapsed("wholething") - BUFFER
 
-        pid = submit_process.run_smac(basename, time_left_for_this_task)
-        pid_dict[basename] = pid
+        # ========= RUN SMAC
+        pid_dict[basename + "_smac"] = submit_process.run_smac(basename, time_left_for_this_task)
         stop.stop_task("start_%s" % basename)
 
-        # Start the ensemble builder
+        # ========= RUN ensemble builder
         stop.start_task("start_ensemble_builder_%s" % basename)
-        ensemble_time_limit = OVERALL_TIMELIMIT - \
-                              stop.wall_elapsed("wholething") - \
-                              BUFFER
-        submit_process.run_ensemble_builder(D.input_dir, basename, ensemble_time_limit)
+        ensemble_time_limit = overall_limit - stop.wall_elapsed("wholething") - BUFFER
+        pid_dict[basename + "_ensemble"] = submit_process.run_ensemble_builder(TMP_DIR, basename, ensemble_time_limit)
         stop.stop_task("start_ensemble_builder_%s" % basename)
         stop.stop_task(basename)
 
@@ -306,10 +328,10 @@ if __name__=="__main__" and debug_mode<4:
     print stop
     run = True
     while run:
-        print "Nothing to do, wait %fsec" % (OVERALL_TIMELIMIT -
+        print "Nothing to do, wait %fsec" % (overall_limit -
                                              stop.wall_elapsed("wholething"))
         time.sleep(10)
-        if stop.wall_elapsed("wholething") >= OVERALL_TIMELIMIT:
+        if stop.wall_elapsed("wholething") >= overall_limit:
             run = False
     print stop
 
