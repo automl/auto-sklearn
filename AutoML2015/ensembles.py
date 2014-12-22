@@ -65,7 +65,7 @@ def ensemble_prediction(all_predictions, weights):
     return all_predictions.mean(axis=0)
 
 
-def main(predictions_dir, basename, data_dir, limit):
+def main(predictions_dir, basename, data_dir, task_type, metric, limit):
     index_run = 0
 
     watch = AutoML2015.util.Stopwatch.StopWatch()
@@ -117,4 +117,6 @@ def main(predictions_dir, basename, data_dir, limit):
         used_time = watch.wall_elapsed("ensemble_builder")
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    main(predictions_dir=sys.argv[1], basename=sys.argv[2],
+         data_dir=sys.argv[3], task_type=sys.argv[4], metric=sys.argv[5],
+         limit=float(sys.argv[6]))
