@@ -9,6 +9,7 @@ setuptools.setup(name="AutoML2015",
                                    "scipy",
                                    "scikit-learn==0.15.2",
                                    "nose",
+                                   "lockfile"
                                    "HPOlibConfigSpace",
                                    "AutoSklearn",
                                    "cma"],
