@@ -10,7 +10,8 @@ def get_algo_exec():
 
 
 def run_smac(tmp_dir, dataset_name, searchspace, instance_file, limit):
-    call = "/home/eggenspk/HPOlib/HPOlib/optimizers/smac/smac_2_08_00-master_src/smac"
+    # Bad hack to find smac
+    call = os.path.join("smac")
     call = " ".join([call, '--numRun', '2147483647',
                     '--cli-log-all-calls false',
                     '--cutoffTime', '2147483647',
@@ -31,12 +32,12 @@ def run_smac(tmp_dir, dataset_name, searchspace, instance_file, limit):
                     '-p', os.path.abspath(searchspace),
                     '--execDir', tmp_dir,
                     '--instances', instance_file])
-    print call
+    os.system(call)
     time.sleep(2)
     return limit
 
 
 def run_ensemble_builder(tmp_dir, dataset_name, limit):
     time.sleep(2)
-    os.system("python ensembles.py " + tmp_dir + dataset_name)
+    os.system("python ./ensembles.py " + tmp_dir + dataset_name)
     return limit

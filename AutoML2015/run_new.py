@@ -164,6 +164,7 @@ overall_start = time.clock()
 
 # Our directories
 # Note: On cadalab, there is an extra sub-directory called "program"
+
 running_on_codalab = False
 run_dir = os.path.abspath(".")
 codalab_run_dir = os.path.join(run_dir, "program")
@@ -177,9 +178,37 @@ res_dir = os.path.join(run_dir, "res")
 # Our libraries  
 path.append(run_dir)
 path.append(lib_dir)
+
+
+# === Add libraries to path
+import sys
+autosklearn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib")) #, "AutoSklearn"))
+#hpolibconfigspace_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib", "HPOlibConfigSpace"))
+smac_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib", "smac-v2.08.00-master-731"))
+
+# For now:
+sys.path.append(autosklearn_path)
+#sys.path.append(hpolibconfigspace_path)
+
+# And later:
+if "PYTHONPATH" not in os.environ:
+    os.environ["PYTHONPATH"] = ""
+os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"] + os.pathsep + autosklearn_path #+ \
+                           #os.pathsep + hpolibconfigspace_path
+if "PATH" not in os.environ:
+    os.environ["PATH"] = ""
+os.environ["PATH"] = os.environ["PATH"] + os.pathsep + smac_path
+
+print sys.path
+
 import data.data_io as data_io            # general purpose input/output functions
 from data.data_io import vprint           # print only in verbose mode
 from data.data_manager import DataManager # load/save data and get info about them
+
+
+
+
+print sys.path
 
 from util import Stopwatch, submit_process, split_data, get_dataset_info
 from models import autosklearn
