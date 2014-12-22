@@ -199,16 +199,9 @@ if "PATH" not in os.environ:
     os.environ["PATH"] = ""
 os.environ["PATH"] = os.environ["PATH"] + os.pathsep + smac_path
 
-print sys.path
-
 import data.data_io as data_io            # general purpose input/output functions
 from data.data_io import vprint           # print only in verbose mode
 from data.data_manager import DataManager # load/save data and get info about them
-
-
-
-
-print sys.path
 
 from util import Stopwatch, submit_process, split_data, get_dataset_info
 from models import autosklearn
