@@ -108,11 +108,11 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
 
         # Copied from random_forest.py
         n_estimators = UniformIntegerHyperparameter(
-            "n_estimators", 10, 1000, default=10)
+            "n_estimators", 10, 500, default=10)
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default="gini")
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.01, 1.0, default=1.0)
+            "max_features", 0.01, 0.5, default=1.0)
         min_samples_split = UniformIntegerHyperparameter(
             "min_samples_split", 1, 20, default=2)
         min_samples_leaf = UniformIntegerHyperparameter(

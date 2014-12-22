@@ -86,11 +86,11 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space():
         n_estimators = UniformIntegerHyperparameter(
-            "n_estimators", 10, 1000, default=10)
+            "n_estimators", 10, 500, default=10)
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default="gini")
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.01, 1.0, default=0.1)
+            "max_features", 0.01, 0.5, default=0.1)
         max_depth = UnParametrizedHyperparameter("max_depth", "None")
         min_samples_split = UniformIntegerHyperparameter(
             "min_samples_split", 1, 20, default=2)
