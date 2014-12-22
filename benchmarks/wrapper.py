@@ -4,6 +4,20 @@ Created on Dec 17, 2014
 @author: Aaron Klein
 '''
 
+import lockfile
+
+import os
+import time
+
+try:
+    import cPickle as pickle
+except:
+    import pickle
+from AutoSklearn.autosklearn import AutoSklearnClassifier
+
+
+
+from HPOlibConfigSpace import configuration_space
 
 try:
     from HPOlib.benchmark_util import parse_cli
@@ -11,20 +25,35 @@ except:
     from HPOlib.benchmarks.benchmark_util import parse_cli
 from HPOlib.wrapping_util import get_time_string
 
-try:
-    import cPickle as pickle
-except:
-    import pickle
-
-from AutoSklearn.autosklearn import AutoSklearnClassifier
-
-from HPOlibConfigSpace import configuration_space
-
 from AutoML2015.data.data_manager import DataManager
 from AutoML2015.models.evaluate import evaluate
 
-import os
-import time
+
+def store_and_or_load_data(outputdir, dataset, data_dir):
+    save_path = os.path.join(outputdir, dataset + "manager.pkl")
+    if not os.path.exists(save_path):
+        lock = lockfile.LockFile(save_path + ".lock")
+        while not lock.i_am_locking():
+            try:
+                lock.acquire(timeout=60)    # wait up to 60 seconds
+            except lockfile.LockTimeout:
+                lock.break_lock()
+                lock.acquire()
+        print "I locked", lock.path
+        # It is not yet sure, whether the file already exists
+        try:
+            if not os.path.exists(save_path):
+                D = DataManager(dataset, data_dir, verbose=True)
+                fh = open(save_path, 'w')
+                pickle.dump(D, fh, -1)
+                fh.close()
+        except:
+            raise
+        finally:
+            lock.release()
+    else:
+        D = pickle.load(open(save_path, 'r'))
+    return D
 
 
 def main(params, args):
@@ -41,7 +70,8 @@ def main(params, args):
     cs = AutoSklearnClassifier.get_hyperparameter_search_space()
     configuration = configuration_space.Configuration(cs, **params)
 
-    D = DataManager(basename, input_dir, verbose=True)
+    D = store_and_or_load_data(data_dir=input_dir, dataset=basename,
+                               output_dir=output_dir)
 
     err, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
         evaluate(D, configuration, with_predictions=True)
