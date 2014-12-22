@@ -30,9 +30,9 @@ from AutoML2015.models.evaluate import evaluate
 
 
 def store_and_or_load_data(outputdir, dataset, data_dir):
-    save_path = os.path.join(outputdir, dataset + "manager.pkl")
+    save_path = os.path.join(outputdir, dataset + "_Manager.pkl")
     if not os.path.exists(save_path):
-        lock = lockfile.LockFile(save_path + ".lock")
+        lock = lockfile.LockFile(save_path)
         while not lock.i_am_locking():
             try:
                 lock.acquire(timeout=60)    # wait up to 60 seconds
@@ -47,6 +47,8 @@ def store_and_or_load_data(outputdir, dataset, data_dir):
                 fh = open(save_path, 'w')
                 pickle.dump(D, fh, -1)
                 fh.close()
+            else:
+                D = pickle.load(open(save_path, 'r'))
         except:
             raise
         finally:
