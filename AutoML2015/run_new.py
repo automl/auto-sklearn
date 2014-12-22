@@ -363,8 +363,11 @@ if __name__=="__main__" and debug_mode<4:
         stop.start_task("start_ensemble_builder_%s" % basename)
         ensemble_time_limit = overall_limit - stop.wall_elapsed("wholething") - BUFFER
         pid_dict[basename + "_ensemble"] = \
-            submit_process.run_ensemble_builder(tmp_dataset_dir, basename,
-                                                ensemble_time_limit)
+            submit_process.run_ensemble_builder(tmp_dir=tmp_dataset_dir,
+                                                dataset_name=basename,
+                                                task_type=info_dict['task'],
+                                                metric=info_dict['metric'],
+                                                limit=ensemble_time_limit)
         stop.stop_task("start_ensemble_builder_%s" % basename)
         stop.stop_task(basename)
 
