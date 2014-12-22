@@ -13,6 +13,7 @@ from AutoML2015.data import data_io
 from AutoML2015.models import evaluate
 from AutoML2015.scores import libscores
 from AutoML2015.util.get_dataset_info import getInfoFromFile
+import AutoML2015.util.Stopwatch
 
 
 def weighted_ensemble_error(weights, *args):
@@ -64,9 +65,13 @@ def ensemble_prediction(all_predictions, weights):
     return all_predictions.mean(axis=0)
 
 
-def main(predictions_dir, basename, data_dir):
+def main(predictions_dir, basename, data_dir, limit):
     index_run = 0
-    while True:
+
+    watch = AutoML2015.util.Stopwatch.StopWatch()
+    watch.start_task("ensemble_builder")
+    used_time = 0
+    while used_time < limit:
         #=== Load the dataset information
         info = getInfoFromFile(data_dir, basename)
         print info
@@ -99,7 +104,7 @@ def main(predictions_dir, basename, data_dir):
 
         all_predictions_test = []
         dir_test = os.path.join(predictions_dir, "predictions_test/")
-        for f in os.listdir(dir):
+        for f in os.listdir(dir_test):
             predictions = np.load(os.path.join(dir_test, f))
             all_predictions_test.append(predictions)
 
@@ -109,6 +114,7 @@ def main(predictions_dir, basename, data_dir):
         filename_test = basename + '_test_' + str(index_run) + '.predict'
         data_io.write(os.path.join(predictions_dir, filename_test), Y_test)
         index_run += 1
+        used_time = watch.wall_elapsed("ensemble_builder")
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
