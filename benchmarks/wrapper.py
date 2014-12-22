@@ -71,7 +71,7 @@ def main(params, args):
     configuration = configuration_space.Configuration(cs, **params)
 
     D = store_and_or_load_data(data_dir=input_dir, dataset=basename,
-                               output_dir=output_dir)
+                               outputdir=output_dir)
 
     err, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
         evaluate(D, configuration, with_predictions=True)
