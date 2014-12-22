@@ -51,7 +51,7 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
             predictions = auto.predict(X_test)
             self.assertAlmostEqual(0.94,
                 sklearn.metrics.accuracy_score(predictions, Y_test))
-            scores = auto.scores(X_test)
+            scores = auto.predict_proba(X_test)
 
     def test_get_hyperparameter_search_space(self):
         cs = AutoSklearnClassifier.get_hyperparameter_search_space()
