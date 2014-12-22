@@ -112,7 +112,7 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default="gini")
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.01, 0.5, default=1.0)
+            "max_features", 0.01, 0.5, default=0.2)
         min_samples_split = UniformIntegerHyperparameter(
             "min_samples_split", 1, 20, default=2)
         min_samples_leaf = UniformIntegerHyperparameter(
