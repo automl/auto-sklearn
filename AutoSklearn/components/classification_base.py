@@ -95,8 +95,8 @@ class AutoSklearnClassificationAlgorithm(object):
         -learn-objects>`_ for further information."""
         raise NotImplementedError()
 
-    def scores(self, X):
-        """Predict confidence scores for samples.
+    def predict_proba(self, X):
+        """Predict probabilities.
 
         Parameters
         ----------

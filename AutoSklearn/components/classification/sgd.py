@@ -1,3 +1,4 @@
+import numpy as np
 from sklearn.linear_model.stochastic_gradient import SGDClassifier
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
@@ -59,12 +60,21 @@ class SGD(AutoSklearnClassificationAlgorithm):
             raise NotImplementedError()
         return self.estimator.predict(X)
 
-    def scores(self, X):
+    def predict_proba(self, X):
         if self.estimator is None:
             raise NotImplementedError()
-        # TODO figure out if it's better to return proba in the cases where
-        # the loss function allows for this
-        return self.estimator.decision_function(X)
+
+        if self.loss in ["log", "modified_huber"]:
+            return self.estimator.predict_proba(X)
+        else:
+            df = self.estimator.decision_function(X)
+
+            if len(df.shape) == 1:
+                ppositive = 1 / (1 + np.exp(-df))
+                return np.transpose(np.array((1 - ppositive, ppositive)))
+            else:
+                tmp = np.exp(-df)
+                return tmp / np.sum(tmp, axis=1).reshape((-1, 1))
 
     @staticmethod
     def get_properties():

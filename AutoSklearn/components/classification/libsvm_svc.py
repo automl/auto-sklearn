@@ -51,7 +51,8 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
                                          class_weight=self.class_weight,
                                          max_iter=self.max_iter,
                                          random_state=self.random_state,
-                                         cache_size=2000)
+                                         cache_size=2000,
+                                         probability=True)
         return self.estimator.fit(X, Y)
 
     def predict(self, X):
@@ -59,10 +60,10 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
             raise NotImplementedError
         return self.estimator.predict(X)
 
-    def scores(self, X):
+    def predict_proba(self, X):
         if self.estimator is None:
             raise NotImplementedError()
-        return self.estimator.decision_function(X)
+        return self.estimator.predict_proba(X)
 
     @staticmethod
     def get_properties():

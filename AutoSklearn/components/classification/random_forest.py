@@ -60,7 +60,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
             raise NotImplementedError
         return self.estimator.predict(X)
 
-    def scores(self, X):
+    def predict_proba(self, X):
         if self.estimator is None:
             raise NotImplementedError()
         return self.estimator.predict_proba(X)

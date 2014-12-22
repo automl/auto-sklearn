@@ -1,3 +1,4 @@
+import numpy as np
 import sklearn.svm
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
@@ -51,10 +52,18 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
             raise NotImplementedError()
         return self.estimator.predict(X)
 
-    def scores(self, X):
+    def predict_proba(self, X):
         if self.estimator is None:
             raise NotImplementedError()
-        return self.estimator.decision_function(X)
+
+        df = self.estimator.decision_function(X)
+
+        if len(df.shape) == 1:
+            ppositive = 1 / (1 + np.exp(-df))
+            return np.transpose(np.array((1 - ppositive, ppositive)))
+        else:
+            tmp = np.exp(-df)
+            return tmp / np.sum(tmp, axis=1).reshape((-1, 1))
 
     @staticmethod
     def get_properties():
