@@ -38,5 +38,5 @@ def run_smac(tmp_dir, dataset_name, searchspace, instance_file, limit):
 
 def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit):
     time.sleep(2)
-    os.system("python ./ensembles.py " + tmp_dir + dataset_name)
+    os.system("python ./ensembles.py " + tmp_dir + ' ' + dataset_name + ' ' + data_dir + ' ' + limit)
     return limit
