@@ -93,7 +93,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
             "max_features", 0.01, 1.0, default=0.1)
         max_depth = UnParametrizedHyperparameter("max_depth", "None")
         min_samples_split = UniformIntegerHyperparameter(
-            "min_samples_split", 1, 20, default=2)
+            "min_samples_split", 2, 20, default=2)
         min_samples_leaf = UniformIntegerHyperparameter(
             "min_samples_leaf", 1, 20, default=1)
         max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")
