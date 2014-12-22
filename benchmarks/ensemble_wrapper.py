@@ -34,9 +34,9 @@ def main(params, **kwargs):
 
     D = DataManager(basename, input_dir, verbose=True)
 
-    score, predictions = evaluate(D, configuration, with_predictions=True)
+    score, predictions_ensemble, predictions_valid, predictions_test = evaluate(D, configuration, with_predictions=True)
 
-    return score, predictions
+    return score, predictions_ensemble
 
 if __name__ == "__main__":
     starttime = time.time()
