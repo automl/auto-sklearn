@@ -158,7 +158,7 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
         #                    value="max_depth")
 
         #cond_max_depth = EqualsCondition(child=max_depth, parent=use_max_depth,
-                                         value="True")
+                                         #value="True")
         #cs.add_condition(cond_max_leaf_nodes_or_max_depth)
         #cs.add_condition(cond2_max_leaf_nodes_or_max_depth)
         #cs.add_condition(cond_max_depth)
