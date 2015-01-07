@@ -37,4 +37,5 @@ Preprocessing
 ============="""
 
 from . import classification as classification_components
+from . import regression as regression_components
 from . import preprocessing as preprocessing_components

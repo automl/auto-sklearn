@@ -1,0 +1,47 @@
+Name,class,added,comment
+,<class 'sklearn.linear_model.ransac.RANSACRegressor'>,,
+,<class 'sklearn.linear_model.coordinate_descent.ElasticNet'>,,
+,<class 'sklearn.linear_model.ridge.Ridge'>,,
+,<class 'sklearn.linear_model.coordinate_descent.Lasso'>,,
+WeDoNotAddThis,<class 'sklearn.linear_model.coordinate_descent.ElasticNetCV'>,False,we already have this method
+WeDoNotAddThis,<class 'sklearn.dummy.DummyRegressor'>,False,See module name
+,<class 'sklearn.neighbors.regression.KNeighborsRegressor'>,,Crashes when predicting a training input and weighted distances
+Preprocessing,<class 'sklearn.cross_decomposition.pls_.PLSRegression'>,False,Preprocessing
+,<class 'sklearn.isotonic.IsotonicRegression'>,,
+Multitask,<class 'sklearn.linear_model.coordinate_descent.MultiTaskLasso'>,False,MultiTask
+Preprocessing,<class 'sklearn.cross_decomposition.pls_._PLS'>,False,Preprocessing
+,<class 'sklearn.ensemble.forest.ForestRegressor'>,,
+,<class 'sklearn.linear_model.bayes.BayesianRidge'>,,
+WeDoNotAddThis,<class 'sklearn.linear_model.omp.OrthogonalMatchingPursuitCV'>,False,We already have this method
+,<class 'sklearn.svm.classes.SVR'>,,
+,<class 'sklearn.linear_model.omp.OrthogonalMatchingPursuit'>,,
+,<class 'sklearn.ensemble.bagging.BaggingRegressor'>,
+,<class 'sklearn.neighbors.regression.RadiusNeighborsRegressor'>,,Can crash when there is no neighbour within the radius
+WeDoNotAddThis,<class 'sklearn.base.RegressorMixin'>,False,BaseClass
+,<class 'sklearn.ensemble.forest.ExtraTreesRegressor'>,,
+WeDoNotAddThis,<class 'sklearn.linear_model.least_angle.LarsCV'>,False,We alreday have this method
+MultiTask,<class 'sklearn.linear_model.coordinate_descent.MultiTaskLassoCV'>,False,MultiTask
+WeDoNotAddThis,<class 'sklearn.linear_model.coordinate_descent.MultiTaskElasticNetCV'>,False,We already have this method
+MultiTask,<class 'sklearn.linear_model.coordinate_descent.MultiTaskElasticNet'>,False,MultiTask
+,<class 'sklearn.tree.tree.DecisionTreeRegressor'>,,
+,<class 'sklearn.tree.tree.ExtraTreeRegressor'>,,
+WeDoNotAddThis,<class 'sklearn.linear_model.coordinate_descent.LassoCV'>,False, We already have this method
+,<class 'sklearn.ensemble.weight_boosting.AdaBoostRegressor'>,,
+,<class 'sklearn.linear_model.stochastic_gradient.SGDRegressor'>,,
+Preprocessing,<class 'sklearn.cross_decomposition.pls_.PLSCanonical'>,False,Preprocessing
+,<class 'sklearn.linear_model.bayes.ARDRegression'>,,
+,<class 'sklearn.linear_model.stochastic_gradient.BaseSGDRegressor'>,,
+WeDoNotAddThis,<class 'sklearn.linear_model.least_angle.LassoLarsIC'>,False,We already have this method
+WeDoNotAddThis,<class 'sklearn.linear_model.least_angle.LassoLarsCV'>,False,We alreday have this method
+,<class 'sklearn.linear_model.least_angle.Lars'>,,
+,<class 'sklearn.linear_model.base.LinearRegression'>,,
+,<class 'sklearn.linear_model.tests.test_sgd.SparseSGDRegressor'>,,
+,<class 'sklearn.ensemble.gradient_boosting.GradientBoostingRegressor'>,,
+,<class 'sklearn.linear_model.passive_aggressive.PassiveAggressiveRegressor'>,,
+,<class 'sklearn.linear_model.least_angle.LassoLars'>,,
+WeDoNotAddThis,<class 'sklearn.linear_model.ridge.RidgeCV'>,False,We already have this method
+,<class 'sklearn.gaussian_process.gaussian_process.GaussianProcess'>,,Crashes when getting two similar inputs
+,<class 'sklearn.svm.classes.NuSVR'>,,
+,<class 'sklearn.ensemble.forest.RandomForestRegressor'>,,
+Preprocessing,<class 'sklearn.cross_decomposition.cca_.CCA'>,False,Preprocessing
+
