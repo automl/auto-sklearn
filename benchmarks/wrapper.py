@@ -7,6 +7,7 @@ Created on Dec 17, 2014
 import lockfile
 
 import os
+import sys
 import time
 
 try:
@@ -14,8 +15,6 @@ try:
 except:
     import pickle
 from AutoSklearn.autosklearn import AutoSklearnClassifier
-
-
 
 from HPOlibConfigSpace import configuration_space
 
@@ -75,8 +74,11 @@ def main(params, args):
     D = store_and_or_load_data(data_dir=input_dir, dataset=basename,
                                outputdir=output_dir)
 
-    err, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
-        evaluate(D, configuration, with_predictions=True)
+    starttime = time.time()
+    errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
+        evaluate(D, configuration, with_predictions=True,
+                 all_scoring_functions=True)
+    duration = time.time() - starttime
 
     pred_dump_name_template = os.path.join(output_dir, "predictions_%s",
         basename + '_predictions_%s_' + get_time_string() + '.npy')
@@ -99,13 +101,28 @@ def main(params, args):
     with open(pred_dump_name_template % ("test", "test"), "w") as fh:
         pickle.dump(Y_test_pred, fh, -1)
 
-    return err
+    err = errs[D.info['metric']]
+    additional_run_info = ";".join(["%s: %s" % (metric, value
+                                                for metric, value in errs)])
+    additional_run_info += ";" + "duration: " + str(duration)
+    additional_run_info += ";" + "prediction_files_template: " + \
+        pred_dump_name_template
+    return err, additional_run_info
+
 
 if __name__ == "__main__":
     starttime = time.time()
-    args, params = parse_cli()
+    # Change a SMAC call into an HPOlib call, not yet needed!
+    #if not "--params" in sys.argv:
+    #    # Call from SMAC
+    #    # Replace the SMAC seed by --params
+    #    for i in range(len(sys.argv)):
+    #        if sys.argv[i] == "2147483647" and sys.argv[i+1] == "-1":
+    #            sys.argv[i+1] = "--params"
 
-    result = main(params, args)
+    params, args = parse_cli()
+
+    result, additional_run_info = main(params, args)
     duration = time.time() - starttime
     print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % \
-        ("SAT", abs(duration), result, -1, str(__file__))
+        ("SAT", abs(duration), result, -1, additional_run_info)

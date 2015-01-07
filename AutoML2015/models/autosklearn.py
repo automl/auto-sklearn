@@ -1,7 +1,8 @@
 from AutoSklearn.autosklearn import AutoSklearnClassifier
 
 
-def get_configuration_space(info):
+def get_configuration_space(info, include_classifiers=None,
+                            include_preprocessors=None):
     if info['task'] == 'regression':
         raise NotImplementedError()
     else:
@@ -24,16 +25,20 @@ def get_configuration_space(info):
         if info['is_sparse'] == 1:
             sparse = True
 
+        # Todo add a check here if this is useful...
         exclude_classifiers = None
-        if sparse == True:
-            exclude_classifiers = []
-            exclude_classifiers.append('libsvm_svc')
+        if include_classifiers is None:
+            if sparse == True:
+                exclude_classifiers = []
+                exclude_classifiers.append('libsvm_svc')
 
         configuration_space = AutoSklearnClassifier. \
             get_hyperparameter_search_space(multiclass=multiclass,
                                             multilabel=multilabel,
                                             sparse=sparse,
-                                            exclude_classifiers=exclude_classifiers)
+                                            exclude_classifiers=exclude_classifiers,
+                                            include_classifiers=include_classifiers,
+                                            include_preprocessors=include_preprocessors)
         return configuration_space
 
 
