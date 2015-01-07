@@ -12,9 +12,9 @@ from ..classification_base import AutoSklearnClassificationAlgorithm
 
 class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
 
-    def __init__(self, n_estimators, criterion, use_max_depth, min_samples_leaf,
-                 min_samples_split, max_leaf_nodes_or_max_depth, max_features,
-                 bootstrap=False, max_leaf_nodes=None, max_depth=None,
+    def __init__(self, n_estimators, criterion, min_samples_leaf,
+                 min_samples_split,  max_features, max_leaf_nodes_or_max_depth="max_depth", #use_max_depth=False,
+                 bootstrap=False, max_leaf_nodes=None, max_depth="None",
                  oob_score=False, n_jobs=1, random_state=None, verbose=0,
                  min_density=None, compute_importances=None):
 
@@ -26,10 +26,14 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
 
         if max_leaf_nodes_or_max_depth == "max_depth":
             self.max_leaf_nodes = None
-            if use_max_depth == "True":
-                self.max_depth = int(max_depth)
-            elif use_max_depth == "False":
+            if max_depth == "None":
                 self.max_depth = None
+            else:
+                self.max_depth = int(max_depth)
+            #if use_max_depth == "True":
+            #    self.max_depth = int(max_depth)
+            #elif use_max_depth == "False":
+            #    self.max_depth = None
         else:
             if max_leaf_nodes == "None":
                 self.max_leaf_nodes = None
@@ -101,8 +105,8 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space():
 
-        use_max_depth = CategoricalHyperparameter(
-            name="use_max_depth", choices=("True", "False"), default="False")
+        #use_max_depth = CategoricalHyperparameter(
+        #    name="use_max_depth", choices=("True", "False"), default="False")
         bootstrap = CategoricalHyperparameter(
             "bootstrap", ["True", "False"], default="False")
 
@@ -112,36 +116,34 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default="gini")
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.01, 0.5, default=0.2)
+            "max_features", 0.01, 0.5, default=0.1)
         min_samples_split = UniformIntegerHyperparameter(
-            "min_samples_split", 1, 20, default=2)
+            "min_samples_split", 2, 20, default=2)
         min_samples_leaf = UniformIntegerHyperparameter(
             "min_samples_leaf", 1, 20, default=1)
 
         # Unparametrized
-        max_leaf_nodes_or_max_depth = UnParametrizedHyperparameter(
-            name="max_leaf_nodes_or_max_depth", value="max_depth")
+        #max_leaf_nodes_or_max_depth = UnParametrizedHyperparameter(
+        #    name="max_leaf_nodes_or_max_depth", value="max_depth")
             # CategoricalHyperparameter("max_leaf_nodes_or_max_depth",
             # choices=["max_leaf_nodes", "max_depth"], default="max_depth")
-        max_leaf_nodes = UnParametrizedHyperparameter(name="max_leaf_nodes",
-                                                      value="None")
+        #max_leaf_nodes = UnParametrizedHyperparameter(name="max_leaf_nodes",
+        #                                              value="None")
             # UniformIntegerHyperparameter(
             # name="max_leaf_nodes", lower=10, upper=1000, default=)
 
-        #max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
-        # TODO these are very random guesses
-        max_depth = UniformIntegerHyperparameter("max_depth", 5, 50)
+        max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
 
         cs = ConfigurationSpace()
         cs.add_hyperparameter(n_estimators)
         cs.add_hyperparameter(criterion)
         cs.add_hyperparameter(max_features)
-        cs.add_hyperparameter(use_max_depth)
+        #cs.add_hyperparameter(use_max_depth)
         cs.add_hyperparameter(max_depth)
-        cs.add_hyperparameter(max_leaf_nodes_or_max_depth)
+        #cs.add_hyperparameter(max_leaf_nodes_or_max_depth)
         cs.add_hyperparameter(min_samples_split)
         cs.add_hyperparameter(min_samples_leaf)
-        cs.add_hyperparameter(max_leaf_nodes)
+        #cs.add_hyperparameter(max_leaf_nodes)
         cs.add_hyperparameter(bootstrap)
 
         # Conditions
@@ -150,15 +152,15 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
         #    EqualsCondition(child=max_leaf_nodes,
         #                    parent=max_leaf_nodes_or_max_depth,
         #                    value="max_leaf_nodes")
-        cond2_max_leaf_nodes_or_max_depth = \
-            EqualsCondition(child=use_max_depth,
-                            parent=max_leaf_nodes_or_max_depth,
-                            value="max_depth")
+        #cond2_max_leaf_nodes_or_max_depth = \
+        #    EqualsCondition(child=use_max_depth,
+        #                    parent=max_leaf_nodes_or_max_depth,
+        #                    value="max_depth")
 
-        cond_max_depth = EqualsCondition(child=max_depth, parent=use_max_depth,
-                                         value="True")
+        #cond_max_depth = EqualsCondition(child=max_depth, parent=use_max_depth,
+                                         #value="True")
         #cs.add_condition(cond_max_leaf_nodes_or_max_depth)
-        cs.add_condition(cond2_max_leaf_nodes_or_max_depth)
-        cs.add_condition(cond_max_depth)
+        #cs.add_condition(cond2_max_leaf_nodes_or_max_depth)
+        #cs.add_condition(cond_max_depth)
 
         return cs

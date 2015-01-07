@@ -19,7 +19,7 @@ for module_loader, module_name, ispkg in pkgutil.iter_modules([preprocessors_dir
         for member_name, obj in inspect.getmembers(module):
             if inspect.isclass(obj) and AutoSklearnPreprocessingAlgorithm in obj.__bases__:
                 # TODO test if the obj implements the interface
-                # Keep in mind that this only instantiates the wrapper,
+                # Keep in mind that this only instantiates the ensemble_wrapper,
                 # but not the real target classifier
                 preprocessor = obj
                 _preprocessors[module_name] = preprocessor

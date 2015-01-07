@@ -14,8 +14,8 @@ from ..classification_base import AutoSklearnClassificationAlgorithm
 class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
 
     def __init__(self, learning_rate, n_estimators, subsample,
-                 min_samples_split, min_samples_leaf, max_features,
-                 max_leaf_nodes_or_max_depth, max_depth=None,
+                 min_samples_split, min_samples_leaf, max_features, max_depth,
+                 max_leaf_nodes_or_max_depth="max_depth",
                  max_leaf_nodes=None, loss='deviance',
                  warm_start=False, init=None, random_state=None, verbose=0):
 
@@ -110,22 +110,24 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             name="subsample", lower=0.01, upper=1.0, default=1.0, log=False)
 
         # Unparametrized
-        max_leaf_nodes_or_max_depth = UnParametrizedHyperparameter(
-            name="max_leaf_nodes_or_max_depth", value="max_depth")
+        #max_leaf_nodes_or_max_depth = UnParametrizedHyperparameter(
+        #    name="max_leaf_nodes_or_max_depth", value="max_depth")
             # CategoricalHyperparameter("max_leaf_nodes_or_max_depth",
             # choices=["max_leaf_nodes", "max_depth"], default="max_depth")
+
         max_leaf_nodes = UnParametrizedHyperparameter(name="max_leaf_nodes",
                                                       value="None")
+
 
         # Copied from random_forest.py
         n_estimators = UniformIntegerHyperparameter(
             name="n_estimators", lower=10, upper=500, default=10, log=False)
         max_features = UniformFloatHyperparameter(
-            name="max_features", lower=0.01, upper=0.5, default=0.2)
+            name="max_features", lower=0.01, upper=0.5, default=0.1)
         max_depth = UniformIntegerHyperparameter(
-            name="max_depth", lower=1, upper=10, default=3, log=False)
+            name="max_depth", lower=1, upper=10, default=3)
         min_samples_split = UniformIntegerHyperparameter(
-            name="min_samples_split", lower=1, upper=20, default=2, log=False)
+            name="min_samples_split", lower=2, upper=20, default=2, log=False)
         min_samples_leaf = UniformIntegerHyperparameter(
             name="min_samples_leaf", lower=1, upper=20, default=1, log=False)
 
@@ -133,8 +135,8 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         cs.add_hyperparameter(n_estimators)
         cs.add_hyperparameter(learning_rate)
         cs.add_hyperparameter(max_features)
-        cs.add_hyperparameter(max_leaf_nodes_or_max_depth)
-        cs.add_hyperparameter(max_leaf_nodes)
+        #cs.add_hyperparameter(max_leaf_nodes_or_max_depth)
+        #cs.add_hyperparameter(max_leaf_nodes)
         cs.add_hyperparameter(max_depth)
         cs.add_hyperparameter(min_samples_split)
         cs.add_hyperparameter(min_samples_leaf)
@@ -146,12 +148,12 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         #                    parent=max_leaf_nodes_or_max_depth,
         #                    value="max_leaf_nodes")
 
-        cond2_max_leaf_nodes_or_max_depth = \
-            EqualsCondition(child=max_depth,
-                            parent=max_leaf_nodes_or_max_depth,
-                            value="max_depth")
+        #cond2_max_leaf_nodes_or_max_depth = \
+        #    EqualsCondition(child=max_depth,
+        #                    parent=max_leaf_nodes_or_max_depth,
+        #                    value="max_depth")
 
         #cs.add_condition(cond_max_leaf_nodes_or_max_depth)
-        cs.add_condition(cond2_max_leaf_nodes_or_max_depth)
+        #cs.add_condition(cond2_max_leaf_nodes_or_max_depth)
         return cs
 
