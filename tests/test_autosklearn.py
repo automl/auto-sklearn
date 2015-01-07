@@ -1,5 +1,6 @@
 __author__ = 'feurerm'
 
+import copy
 import numpy as np
 import StringIO
 import unittest
@@ -48,10 +49,11 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
             auto = AutoSklearnClassifier(default)
             auto = auto.fit(X_train, Y_train)
-            predictions = auto.predict(X_test)
-            self.assertAlmostEqual(0.94,
-                sklearn.metrics.accuracy_score(predictions, Y_test))
-            scores = auto.scores(X_test)
+            predictions = auto.predict(copy.deepcopy(X_test))
+            accuracy = sklearn.metrics.accuracy_score(predictions, Y_test)
+            self.assertAlmostEqual(0.94, accuracy)
+            model_score = auto.score(copy.deepcopy(X_test), Y_test)
+            self.assertEqual(model_score, accuracy)
 
     def test_get_hyperparameter_search_space(self):
         cs = AutoSklearnClassifier.get_hyperparameter_search_space()
