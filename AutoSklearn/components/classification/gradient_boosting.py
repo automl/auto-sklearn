@@ -55,6 +55,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.init = init
         self.random_state = random_state
         self.verbose = int(verbose)
+        self.estimator = None
 
     def fit(self, X, Y):
         self.estimator = sklearn.ensemble.GradientBoostingClassifier(
