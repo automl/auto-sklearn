@@ -2,16 +2,18 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace, \
     Configuration
 from HPOlibConfigSpace.hyperparameters import UniformIntegerHyperparameter
 
-from ...implementations.SparseFiltering import SparseFiltering
+from ..preprocessor_base import AutoSklearnPreprocessingAlgorithm
+from ...implementations.SparseFiltering import SparseFiltering as SparseFilteringImpl
 
 class SparseFiltering(AutoSklearnPreprocessingAlgorithm):
 
-    def __init__(self, N, maxiter=200):
+    def __init__(self, N, maxiter=100, random_state=None):
         self.N = N
         self.maxiter = maxiter
+        self.random_state = random_state
 
     def fit(self, X, Y):
-        self.preprocessor = SparseFiltering(self.N, self.maxiter)
+        self.preprocessor = SparseFilteringImpl(self.N, self.maxiter, random_state = self.random_state)
         self.preprocessor.fit(X, Y)
         return self
     
@@ -41,9 +43,9 @@ class SparseFiltering(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space():
         N = UniformIntegerHyperparameter(
-            "N", 100, 1000, default=200)
+            "N", 50, 2000, default=100)
         maxiter = UniformIntegerHyperparameter(
-            "maxiter", 50, 500, default=200)
+            "maxiter", 50, 500, default=100)
         cs = ConfigurationSpace()
         cs.add_hyperparameter(N)
         cs.add_hyperparameter(maxiter)
