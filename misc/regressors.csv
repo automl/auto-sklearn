@@ -42,5 +42,5 @@ WeDoNotAddThis,<class 'sklearn.linear_model.least_angle.LassoLarsCV'>,False,We a
 WeDoNotAddThis,<class 'sklearn.linear_model.ridge.RidgeCV'>,False,We already have this method
 ,<class 'sklearn.gaussian_process.gaussian_process.GaussianProcess'>,,Crashes when getting two similar inputs
 ,<class 'sklearn.svm.classes.NuSVR'>,,
-RandomForest,<class 'sklearn.ensemble.forest.RandomForestRegressor'>,,
+RandomForest,<class 'sklearn.ensemble.forest.RandomForestRegressor'>,True,
 Preprocessing,<class 'sklearn.cross_decomposition.cca_.CCA'>,False,Preprocessing
