@@ -24,4 +24,4 @@ configuration on the iris dataset.
     >>> auto = auto.fit(X[indices[:100]], Y[indices[:100]])
     >>> predictions = auto.predict(X[indices[100:]])
     >>> sklearn.metrics.accuracy_score(predictions, Y[indices[100:]])
-    0.90000000000000002
+    0.92000000000000004
