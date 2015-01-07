@@ -57,7 +57,22 @@ def store_and_or_load_data(outputdir, dataset, data_dir):
     return D
 
 
-def main(params, args):
+def get_new_run_num():
+    counter_file = os.path.join(os.getcwd(), "num_run")
+    if not os.path.exists(counter_file):
+        with open(counter_file, "w") as fh:
+            fh.write("0")
+        return 0
+    else:
+        with open(counter_file, "r") as fh:
+            num = int(fh.read())
+        num += 1
+        with open(counter_file, "w") as fh:
+            fh.write(str(num))
+        return num
+
+
+def main(args, params):
     for key in params:
         try:
             params[key] = float(params[key])
@@ -81,7 +96,7 @@ def main(params, args):
     duration = time.time() - starttime
 
     pred_dump_name_template = os.path.join(output_dir, "predictions_%s",
-        basename + '_predictions_%s_' + get_time_string() + '.npy')
+        basename + '_predictions_%s_' + str(get_new_run_num()) + '.npy')
 
     ensemble_output_dir = os.path.join(output_dir, "predictions_ensemble")
     if not os.path.exists(ensemble_output_dir):
@@ -102,8 +117,11 @@ def main(params, args):
         pickle.dump(Y_test_pred, fh, -1)
 
     err = errs[D.info['metric']]
-    additional_run_info = ";".join(["%s: %s" % (metric, value
-                                                for metric, value in errs)])
+    print errs
+    import sys
+    sys.stdout.flush()
+    additional_run_info = ";".join(["%s: %s" % (metric, value)
+                                    for metric, value in errs.items()])
     additional_run_info += ";" + "duration: " + str(duration)
     additional_run_info += ";" + "prediction_files_template: " + \
         pred_dump_name_template
@@ -120,9 +138,9 @@ if __name__ == "__main__":
     #        if sys.argv[i] == "2147483647" and sys.argv[i+1] == "-1":
     #            sys.argv[i+1] = "--params"
 
-    params, args = parse_cli()
+    args, params = parse_cli()
 
-    result, additional_run_info = main(params, args)
+    result, additional_run_info = main(args, params)
     duration = time.time() - starttime
     print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % \
         ("SAT", abs(duration), result, -1, additional_run_info)
