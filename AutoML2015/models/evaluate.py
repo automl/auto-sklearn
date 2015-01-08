@@ -23,8 +23,8 @@ def predict_proba(X, model, task_type):
              for i in range(len(Y_pred))])
 
     elif task_type == "binary.classification":
-        if len(Y_pred.shape) == 1:
-            Y_pred = convert_to_bin(Y_pred, 2)
+        if len(Y_pred.shape) != 1:
+            Y_pred = Y_pred[:,1].reshape(-1, 1)
 
     return Y_pred
 
@@ -40,7 +40,7 @@ def calculate_score(solution, prediction, task_type, metric,
 
     elif task_type == "binary.classification":
         if len(solution.shape) == 1:
-            solution = convert_to_bin(solution, 2)
+            solution = solution.reshape((-1, 1))
 
     scoring_func = getattr(libscores, metric)
 

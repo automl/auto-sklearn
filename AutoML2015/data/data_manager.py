@@ -177,6 +177,7 @@ class DataManager:
                 p.dump(label)
 
         end = time.time()
+        print label, label.shape
         if verbose:  print( "[+] Success in %5.2f sec" % (end - start))
         return label
 

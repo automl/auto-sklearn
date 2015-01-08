@@ -7,7 +7,7 @@ import unittest
 import numpy as np
 
 from AutoML2015.data.data_converter import convert_to_bin
-from AutoML2015.models.evaluate import evaluate
+from AutoML2015.models.evaluate import evaluate, predict_proba
 from AutoML2015.util.split_data import split_data
 from AutoSklearn.autosklearn import AutoSklearnClassifier
 from AutoSklearn.util import get_dataset
@@ -144,6 +144,19 @@ class Test(unittest.TestCase):
 
         print "Number of times it was worse than random guessing:" + str(
             np.sum(err > 1))
+
+    def test_predict_proba_binary_classification(self):
+        class Dummy(object):
+            def predict_proba(self, y):
+                return np.array([[0.1, 0.9], [0.7, 0.3]])
+
+        model = Dummy()
+        task_type = "binary.classification"
+
+        pred = predict_proba(None, model, task_type)
+        expected = [[0.9], [0.3]]
+        for i in range(len(expected)):
+            self.assertEqual(expected[i], pred[i])
 
 
 if __name__ == "__main__":
