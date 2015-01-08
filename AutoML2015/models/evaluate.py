@@ -7,6 +7,7 @@ Created on Dec 18, 2014
 import numpy as np
 
 from AutoSklearn.autosklearn import AutoSklearnClassifier
+from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
 
 from data.data_converter import convert_to_bin
 from scores import libscores
@@ -22,8 +23,8 @@ def predict_proba(X, model, task_type):
              for i in range(len(Y_pred))])
 
     elif task_type == "binary.classification":
-        if len(Y_pred.shape) == 1:
-            Y_pred = convert_to_bin(Y_pred, 2)
+        if len(Y_pred.shape) != 1:
+            Y_pred = Y_pred[:,1].reshape(-1, 1)
 
     return Y_pred
 
@@ -39,7 +40,7 @@ def calculate_score(solution, prediction, task_type, metric,
 
     elif task_type == "binary.classification":
         if len(solution.shape) == 1:
-            solution = convert_to_bin(solution, 2)
+            solution = solution.reshape((-1, 1))
 
     scoring_func = getattr(libscores, metric)
 
@@ -64,13 +65,16 @@ def calculate_score(solution, prediction, task_type, metric,
 
 
 def evaluate(Datamanager, configuration, with_predictions=False,
-        all_scoring_functions=False, splitting_function=split_data):
+        all_scoring_functions=False, splitting_function=split_data, seed=1):
     X_train, X_optimization, Y_train, Y_optimization = \
         splitting_function(Datamanager.data['X_train'], Datamanager.data['Y_train'])
     X_valid = Datamanager.data.get('X_valid')
     X_test = Datamanager.data.get('X_test')
 
-    model = AutoSklearnClassifier(configuration, 1)
+    if Datamanager.info['task'].lower() == 'regression':
+        model = AutoSklearnRegressor(configuration, seed)
+    else:
+        model = AutoSklearnClassifier(configuration, seed)
     model.fit(X_train, Y_train)
     metric = Datamanager.info['metric']
     task_type = Datamanager.info['task']
