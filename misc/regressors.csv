@@ -1,7 +1,7 @@
 Name,class,added,comment
 ,<class 'sklearn.linear_model.ransac.RANSACRegressor'>,,
 ,<class 'sklearn.linear_model.coordinate_descent.ElasticNet'>,,
-,<class 'sklearn.linear_model.ridge.Ridge'>,,
+RidgeRegression,<class 'sklearn.linear_model.ridge.Ridge'>,True,Check range for alpha
 ,<class 'sklearn.linear_model.coordinate_descent.Lasso'>,,
 WeDoNotAddThis,<class 'sklearn.linear_model.coordinate_descent.ElasticNetCV'>,False,we already have this method
 WeDoNotAddThis,<class 'sklearn.dummy.DummyRegressor'>,False,See module name

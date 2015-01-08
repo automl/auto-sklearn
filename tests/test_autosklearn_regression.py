@@ -39,10 +39,6 @@ class TestAutoSKlearnRegressor(unittest.TestCase):
             self.assertIn(AutoSklearnPreprocessingAlgorithm,
                             preprocessors[key].__bases__)
 
-    def test_get_hyperparameter_search_space(self):
-        config = AutoSklearnRegressor.get_hyperparameter_search_space()
-        self.assertIsInstance(config, ConfigurationSpace)
-
     def test_default_configuration(self):
         for i in range(2):
             cs = AutoSklearnRegressor.get_hyperparameter_search_space()
@@ -59,9 +55,10 @@ class TestAutoSKlearnRegressor(unittest.TestCase):
 
     def test_get_hyperparameter_search_space(self):
         cs = AutoSklearnRegressor.get_hyperparameter_search_space()
+        self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(17, len(hyperparameters))
+        self.assertEqual(18, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 4, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):

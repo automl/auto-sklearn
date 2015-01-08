@@ -71,6 +71,7 @@ def find_sklearn_regressor():
 
     print classifiers
 
+
 def get_dataset(dataset='iris', make_sparse=False):
     iris = getattr(sklearn.datasets, "load_%s" % dataset)()
     X = iris.data
@@ -126,5 +127,19 @@ def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False):
     return transformer.transform(X_train), original_X_train
 
 
+def _test_regressor(Regressor, dataset='diabetes'):
+    X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
+                                                   make_sparse=False)
+    configuration_space = Regressor.get_hyperparameter_search_space()
+    default = configuration_space.get_default_configuration()
+    regressor = Regressor(random_state=1,
+                          **{hp.hyperparameter.name: hp.value for hp in
+                          default.values.values()})
+    predictor = regressor.fit(X_train, Y_train)
+    predictions = predictor.predict(X_test)
+    return predictions, Y_test
+
+
 if __name__ == "__main__":
     find_sklearn_classifiers()
+    find_sklearn_regressor()
