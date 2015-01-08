@@ -20,12 +20,6 @@ dense2_partial_1h = [[1., 0., 0., 0., 9.],
                      [0., 0., 0., 1., 9.],
                      [0., 1., 1., 0., 7.]]
 
-with_string = [("Black", 5, 9),
-               ("Blue", 3, 7),
-               ("Red", 2, 5),
-               (np.NaN, 3, 1),
-               ("Black", 1, 1)]
-
 with_string_1h = [[1, 0, 0, 5, 9],
                   [0, 1, 0, 3, 7],
                   [0, 0, 1, 2, 5],
@@ -47,12 +41,6 @@ class OneHotEncoderTest(unittest.TestCase):
                                 categorical_features=[True, True, False])
         self.fit_then_transform_dense(dense2_partial_1h, dense2,
                                       categorical_features=[True, True, False])
-
-    def test_with_string(self):
-        self.fit_then_transform(with_string_1h, with_string,
-                                categorical_features=[True, False, False])
-        self.fit_then_transform_dense(with_string_1h, with_string,
-                                      categorical_features=[True, False, False])
 
     def fit_then_transform(self, expected, input, categorical_features='all'):
         ohe = OneHotEncoder(categorical_features=categorical_features)

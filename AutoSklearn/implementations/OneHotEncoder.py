@@ -175,6 +175,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
 
             # Number of unique elements in that column (without np.NaN)
             n_uniques = np.sum(np.isfinite(unique_elements))
+
             n_values.append(n_uniques)
             offset = np.sum(n_values[:-1])
 
@@ -182,7 +183,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
                                   else index + offset
                                   for index in inverse]
             data_idx = [0 if index >= n_uniques else 1 for index in inverse]
-            feature_indices_idx = {str(unique): index + offset
+            feature_indices_idx = {unique: index + offset
                                    for index, unique in enumerate(unique_elements)
                                    if np.isfinite(unique)}
 
@@ -221,7 +222,6 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
                              " Expected %d, got %d."
                              % (len(indices), n_features))
 
-        #column_indices = (X + indices[:-1]).ravel()
         row_indices = np.tile(np.arange(n_samples, dtype=np.int32),
                               n_features)
 

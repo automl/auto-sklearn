@@ -113,7 +113,6 @@ class TestStandardScaler(unittest.TestCase):
         X = X.tocsr()
         scaler = StandardScaler()
         X_scaled = scaler.fit(X).transform(X, copy=False)
-        print id(X_scaled)
 
         self.assertFalse(np.any(np.isnan(X_scaled.data)))
         assert_array_almost_equal(
