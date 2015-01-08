@@ -7,6 +7,7 @@ Created on Dec 17, 2014
 import lockfile
 
 import os
+import sys
 import time
 
 try:
@@ -14,8 +15,6 @@ try:
 except:
     import pickle
 from AutoSklearn.autosklearn import AutoSklearnClassifier
-
-
 
 from HPOlibConfigSpace import configuration_space
 
@@ -58,7 +57,22 @@ def store_and_or_load_data(outputdir, dataset, data_dir):
     return D
 
 
-def main(params, args):
+def get_new_run_num():
+    counter_file = os.path.join(os.getcwd(), "num_run")
+    if not os.path.exists(counter_file):
+        with open(counter_file, "w") as fh:
+            fh.write("0")
+        return 0
+    else:
+        with open(counter_file, "r") as fh:
+            num = int(fh.read())
+        num += 1
+        with open(counter_file, "w") as fh:
+            fh.write(str(num))
+        return num
+
+
+def main(args, params):
     for key in params:
         try:
             params[key] = float(params[key])
@@ -75,11 +89,14 @@ def main(params, args):
     D = store_and_or_load_data(data_dir=input_dir, dataset=basename,
                                outputdir=output_dir)
 
-    err, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
-        evaluate(D, configuration, with_predictions=True)
+    starttime = time.time()
+    errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
+        evaluate(D, configuration, with_predictions=True,
+                 all_scoring_functions=True)
+    duration = time.time() - starttime
 
     pred_dump_name_template = os.path.join(output_dir, "predictions_%s",
-        basename + '_predictions_%s_' + get_time_string() + '.npy')
+        basename + '_predictions_%s_' + str(get_new_run_num()) + '.npy')
 
     ensemble_output_dir = os.path.join(output_dir, "predictions_ensemble")
     if not os.path.exists(ensemble_output_dir):
@@ -99,13 +116,31 @@ def main(params, args):
     with open(pred_dump_name_template % ("test", "test"), "w") as fh:
         pickle.dump(Y_test_pred, fh, -1)
 
-    return err
+    err = errs[D.info['metric']]
+    print errs
+    import sys
+    sys.stdout.flush()
+    additional_run_info = ";".join(["%s: %s" % (metric, value)
+                                    for metric, value in errs.items()])
+    additional_run_info += ";" + "duration: " + str(duration)
+    additional_run_info += ";" + "prediction_files_template: " + \
+        pred_dump_name_template
+    return err, additional_run_info
+
 
 if __name__ == "__main__":
     starttime = time.time()
+    # Change a SMAC call into an HPOlib call, not yet needed!
+    #if not "--params" in sys.argv:
+    #    # Call from SMAC
+    #    # Replace the SMAC seed by --params
+    #    for i in range(len(sys.argv)):
+    #        if sys.argv[i] == "2147483647" and sys.argv[i+1] == "-1":
+    #            sys.argv[i+1] = "--params"
+
     args, params = parse_cli()
 
-    result = main(params, args)
+    result, additional_run_info = main(args, params)
     duration = time.time() - starttime
     print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % \
-        ("SAT", abs(duration), result, -1, str(__file__))
+        ("SAT", abs(duration), result, -1, additional_run_info)

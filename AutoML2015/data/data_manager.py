@@ -200,8 +200,10 @@ class DataManager:
             encoder = OneHotEncoder(categorical_features=encoding_mask,
                                     dtype=np.float64, sparse=sparse)
             self.data['X_train'] = encoder.fit_transform(self.data['X_train'])
-            self.data['X_valid'] = encoder.transform(self.data['X_valid'])
-            self.data['X_test'] = encoder.transform(self.data['X_test'])
+            if 'X_valid' in self.data:
+                self.data['X_valid'] = encoder.transform(self.data['X_valid'])
+            if 'X_test' in self.data:
+                self.data['X_test'] = encoder.transform(self.data['X_test'])
 
             self.encoder = encoder
 

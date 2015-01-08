@@ -40,14 +40,14 @@ def weighted_ensemble_error(weights, *args):
     return 1 - score
 
 
-def weighted_ensemble(predictions, true_labels, info):
+def weighted_ensemble(predictions, true_labels, task_type, metric):
 
     n_models = predictions.shape[0]
     weights = np.ones([n_models]) / n_models
     if n_models > 1:
         res = cma.fmin(weighted_ensemble_error, weights, sigma0=0.25,
-                       args=(predictions, true_labels, info['metric'],
-                             info['task']), options={'bounds': [0, 1]})
+                       args=(predictions, true_labels, metric,
+                             task_type), options={'bounds': [0, 1]})
         weights = np.array(res[0])
     else:
         # Python-CMA does not work in a 1-D space
@@ -65,7 +65,7 @@ def ensemble_prediction(all_predictions, weights):
     return all_predictions.mean(axis=0)
 
 
-def main(predictions_dir, basename, data_dir, task_type, metric, limit):
+def main(predictions_dir, basename, task_type, metric, limit):
     index_run = 0
 
     watch = AutoML2015.util.Stopwatch.StopWatch()
@@ -73,8 +73,7 @@ def main(predictions_dir, basename, data_dir, task_type, metric, limit):
     used_time = 0
     while used_time < limit:
         #=== Load the dataset information
-        info = getInfoFromFile(data_dir, basename)
-        print info
+
 
         #=== Load the true labels of the validation data
         true_labels = np.load(os.path.join(predictions_dir, "true_labels_ensemble.npy"))
@@ -88,7 +87,7 @@ def main(predictions_dir, basename, data_dir, task_type, metric, limit):
 
         #=== Compute the weights for the ensemble
         weights = weighted_ensemble(np.array(all_predictions_train),
-                                    true_labels, info)
+                                    true_labels, task_type, metric)
 
         all_predictions_valid = []
         dir_valid = os.path.join(predictions_dir, "predictions_valid/")
@@ -118,5 +117,4 @@ def main(predictions_dir, basename, data_dir, task_type, metric, limit):
 
 if __name__ == "__main__":
     main(predictions_dir=sys.argv[1], basename=sys.argv[2],
-         data_dir=sys.argv[3], task_type=sys.argv[4], metric=sys.argv[5],
-         limit=float(sys.argv[6]))
+         task_type=sys.argv[3], metric=sys.argv[4], limit=float(sys.argv[5]))

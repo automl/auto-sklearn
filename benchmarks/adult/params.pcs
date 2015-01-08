@@ -5,20 +5,20 @@ extra_trees:bootstrap {True, False} [False]
 random_forest:min_samples_split [1, 20] [2]i
 random_forest:max_leaf_nodes {None} [None]
 extra_trees:max_depth [5, 50] [27]i
-random_forest:max_features [0.01, 1.0] [0.1]
+random_forest:max_features [0.01, 0.5] [0.2]
 random_forest:min_samples_leaf [1, 20] [1]i
 imputation:strategy {mean, median, most_frequent} [mean]
-random_forest:n_estimators [10, 1000] [10]i
+random_forest:n_estimators [10, 500] [10]i
 preprocessor {None, pca} [None]
 random_forest:max_depth {None} [None]
 random_forest:criterion {gini, entropy} [gini]
 extra_trees:max_leaf_nodes_or_max_depth {max_depth} [max_depth]
 extra_trees:max_leaf_nodes {None} [None]
-extra_trees:n_estimators [10, 1000] [10]i
+extra_trees:n_estimators [10, 500] [10]i
 pca:whiten {False, True} [False]
 pca:keep_variance [0.5, 1.0] [1.0]
 extra_trees:use_max_depth {True, False} [False]
-extra_trees:max_features [0.01, 1.0] [1.0]
+extra_trees:max_features [0.01, 0.5] [0.2]
 random_forest:bootstrap {True, False} [True]
 extra_trees:min_samples_leaf [1, 20] [1]i
 classifier {extra_trees, random_forest} [random_forest]

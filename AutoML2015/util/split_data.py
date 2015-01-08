@@ -1,6 +1,6 @@
 import numpy as np
 
-from sklearn.cross_validation import train_test_split
+from sklearn.cross_validation import train_test_split, StratifiedKFold
 
 
 def split_data(X, Y, cv=False, shuffle=True):
@@ -27,3 +27,28 @@ def split_data(X, Y, cv=False, shuffle=True):
 #     else:
 #         return X_train, X_valid, Y_train, Y_valid
     return X_train, X_valid, Y_train, Y_valid
+
+
+def get_CV_fold(X, Y, fold, folds, shuffle=True):
+    fold = int(fold)
+    folds = int(folds)
+    if fold >= folds:
+        raise ValueError((fold, folds))
+    if X.shape[0] != Y.shape[0]:
+        raise ValueError("The first dimension of the X and Y array must "
+                         "be equal.")
+
+    if shuffle == True:
+        rs = np.random.RandomState(42)
+        indices = np.arange(X.shape[0])
+        rs.shuffle(indices)
+        Y = Y[indices]
+
+    kf = StratifiedKFold(Y, n_folds=folds, indices=True)
+    for idx, split in enumerate(kf):
+        if idx == fold:
+            break
+
+    if shuffle == True:
+        return indices[split[0]], indices[split[1]]
+    return split
