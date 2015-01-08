@@ -182,7 +182,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
                                   else index + offset
                                   for index in inverse]
             data_idx = [0 if index >= n_uniques else 1 for index in inverse]
-            feature_indices_idx = {unique: index + offset
+            feature_indices_idx = {str(unique): index + offset
                                    for index, unique in enumerate(unique_elements)
                                    if np.isfinite(unique)}
 
@@ -191,7 +191,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
             feature_indices.append(feature_indices_idx)
 
         row_indices = np.tile(np.arange(n_samples, dtype=np.int32),
-                                    n_features)
+                                        n_features)
 
         self.feature_indices_ = feature_indices
         self.n_values = n_values
@@ -212,7 +212,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
 
     def _transform(self, X):
         """Assumes X contains only categorical features."""
-        X = check_arrays(X, sparse_format='dense', allow_nans=True)[0]
+        X = check_arrays(X, sparse_format='csc', allow_nans=True)[0]
         n_samples, n_features = X.shape
 
         indices = self.feature_indices_

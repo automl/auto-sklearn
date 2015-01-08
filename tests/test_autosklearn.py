@@ -49,17 +49,16 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
             auto = AutoSklearnClassifier(default)
             auto = auto.fit(X_train, Y_train)
-            predictions = auto.predict(copy.deepcopy(X_test))
-            accuracy = sklearn.metrics.accuracy_score(predictions, Y_test)
-            self.assertAlmostEqual(0.94, accuracy)
-            model_score = auto.score(copy.deepcopy(X_test), Y_test)
-            self.assertEqual(model_score, accuracy)
+            predictions = auto.predict(X_test)
+            self.assertAlmostEqual(0.94,
+                sklearn.metrics.accuracy_score(predictions, Y_test))
+            scores = auto.predict_proba(X_test)
 
     def test_get_hyperparameter_search_space(self):
         cs = AutoSklearnClassifier.get_hyperparameter_search_space()
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(68, len(hyperparameters))
+        self.assertEqual(67, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 4, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):

@@ -126,7 +126,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         max_features = UniformFloatHyperparameter(
             name="max_features", lower=0.01, upper=0.5, default=0.1)
         max_depth = UniformIntegerHyperparameter(
-            name = "max_depth", lower=1, upper=10, default=3)
+            name="max_depth", lower=1, upper=10, default=3)
         min_samples_split = UniformIntegerHyperparameter(
             name="min_samples_split", lower=2, upper=20, default=2, log=False)
         min_samples_leaf = UniformIntegerHyperparameter(
