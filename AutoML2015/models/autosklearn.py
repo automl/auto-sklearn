@@ -7,6 +7,8 @@ def get_configuration_space(info, include_classifiers=None,
     if info['task'] == 'regression':
         if info['is_sparse'] == 1:
             sparse = True
+        else:
+            sparse =False
         configuration_space = AutoSklearnRegressor. \
         get_hyperparameter_search_space(sparse=sparse,
                                         exclude_regressors=None)

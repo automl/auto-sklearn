@@ -197,7 +197,7 @@ os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"] + os.pathsep + autosklearn_p
                            #os.pathsep + hpolibconfigspace_path
 if "PATH" not in os.environ:
     os.environ["PATH"] = ""
-os.environ["PATH"] = os.environ["PATH"] + os.pathsep + smac_path
+os.environ["PATH"] = os.environ["PATH"] + os.pathsep + smac_path + os.pathsep + autosklearn_path
 
 import data.data_io as data_io            # general purpose input/output functions
 from data.data_io import vprint           # print only in verbose mode
@@ -318,7 +318,7 @@ if __name__=="__main__" and debug_mode<4:
         X_train, X_ensemble, Y_train, Y_ensemble = split_data.split_data(D.data['X_train'], D.data['Y_train'])
         del X_train, X_ensemble, Y_train
         np.save(os.path.join(tmp_dataset_dir, "true_labels_ensemble.npy"), Y_ensemble)
-        cPickle.dump(D, open(os.path.join(tmp_dataset_dir, "datamanager.pkl"), 'w'), protocol=-1)
+        cPickle.dump(D, open(os.path.join(tmp_dataset_dir, basename + "_Manager.pkl"), 'w'), protocol=-1)
 
         # ======== Keeping track of time
         # TODO: Check whether we need this and then remove
@@ -337,10 +337,8 @@ if __name__=="__main__" and debug_mode<4:
         stop.stop_task("load_%s" % basename)
         stop.start_task("start_smac_%s" % basename)
 
-        time_left_for_this_task = overall_limit - stop.wall_elapsed("wholething") - BUFFER
-
         # ========= RUN SMAC
-        # == Create empty instance file
+        # == Create an empty instance file
         instance_file = os.path.join(tmp_dataset_dir, "instances.txt")
         fh = open(instance_file, 'w')
         fh.write(os.path.join(input_dir, basename))
@@ -354,20 +352,24 @@ if __name__=="__main__" and debug_mode<4:
         fh.write(sp_string)
         fh.close()
 
+        time_left_for_this_task = max(0, overall_limit - stop.wall_elapsed("wholething") - BUFFER)
         pid_dict[basename + "_smac"] = \
-            submit_process.run_smac(tmp_dataset_dir, basename, searchspace,
-                                    instance_file, time_left_for_this_task)
+            submit_process.run_smac(tmp_dir=tmp_dataset_dir,
+                                    searchspace=searchspace,
+                                    instance_file=instance_file,
+                                    limit=time_left_for_this_task)
         stop.stop_task("start_smac_%s" % basename)
 
         # ========= RUN ensemble builder
         stop.start_task("start_ensemble_builder_%s" % basename)
-        ensemble_time_limit = overall_limit - stop.wall_elapsed("wholething") - BUFFER
+        time_left_for_this_task = max(0, overall_limit - stop.wall_elapsed("wholething") - BUFFER)
         pid_dict[basename + "_ensemble"] = \
             submit_process.run_ensemble_builder(tmp_dir=tmp_dataset_dir,
                                                 dataset_name=basename,
-                                                task_type=info_dict['task'],
-                                                metric=info_dict['metric'],
-                                                limit=ensemble_time_limit)
+                                                task_type=info_dict[basename]['task'],
+                                                metric=info_dict[basename]['metric'],
+                                                limit=time_left_for_this_task,
+                                                output_dir=output_dir)
         stop.stop_task("start_ensemble_builder_%s" % basename)
         stop.stop_task(basename)
 
