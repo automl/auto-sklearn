@@ -1,9 +1,8 @@
 import sklearn.kernel_approximation
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace, \
-    Configuration
+from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    CategoricalHyperparameter
+    UniformIntegerHyperparameter
 
 from ..preprocessor_base import AutoSklearnPreprocessingAlgorithm
 
@@ -20,7 +19,6 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
         self.gamma = gamma
         self.n_components = n_components
         self.random_state = random_state
-    
 
     def fit(self, X, Y):
         self.preprocessor = sklearn.kernel_approximation.RBFSampler(self.gamma, self.n_components, self.random_state)
@@ -44,16 +42,15 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
-                'is_deterministic': False,
-                # JTS TODO: it should handle sparse data but I have not tested it :)
-                'handles_sparse': False,
+                'is_deterministic': True,
+                'handles_sparse': True,
                 'preferred_dtype': None}
 
     @staticmethod
     def get_hyperparameter_search_space():
         gamma = UniformFloatHyperparameter(
             "gamma", 0.3, 2., default=1.0)
-        n_components = UniformFloatHyperparameter(
+        n_components = UniformIntegerHyperparameter(
             "n_components", 50, 10000, default=100, log=True)
         cs = ConfigurationSpace()
         cs.add_hyperparameter(gamma)
