@@ -8,8 +8,8 @@ import cPickle
 import numpy as np
 
 from AutoSklearn.autosklearn import AutoSklearnClassifier
+from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
 
-from AutoML2015.data.data_converter import convert_to_bin
 from AutoML2015.scores import libscores
 from AutoML2015.util.split_data import split_data
 
@@ -65,13 +65,16 @@ def calculate_score(solution, prediction, task_type, metric,
 
 
 def evaluate(Datamanager, configuration, with_predictions=False,
-        all_scoring_functions=False, splitting_function=split_data):
+        all_scoring_functions=False, splitting_function=split_data, seed=1):
     X_train, X_optimization, Y_train, Y_optimization = \
         splitting_function(Datamanager.data['X_train'], Datamanager.data['Y_train'])
     X_valid = Datamanager.data.get('X_valid')
     X_test = Datamanager.data.get('X_test')
 
-    model = AutoSklearnClassifier(configuration, 1)
+    if Datamanager.info['task'].lower() == 'regression':
+        model = AutoSklearnRegressor(configuration, seed)
+    else:
+        model = AutoSklearnClassifier(configuration, seed)
     model.fit(X_train, Y_train)
     metric = Datamanager.info['metric']
     task_type = Datamanager.info['task']
