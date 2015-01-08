@@ -6,19 +6,18 @@ sgd:l1_ratio [0.0, 1.0] [0.15]
 random_forest:criterion {gini, entropy} [gini]
 k_nearest_neighbors:metric {minkowski} [minkowski]
 rescaling:strategy {min/max, standard} [min/max]
-gradient_boosting:max_leaf_nodes_or_max_depth {max_depth} [max_depth]
-extra_trees:min_samples_split [1, 20] [2]i
+extra_trees:min_samples_split [2, 20] [2]i
 libsvm_svc:gamma [3.0517578125e-05, 8.0] [0.1]l
 k_nearest_neighbors:leaf_size {30} [30]
 sgd:penalty {l1, l2, elasticnet} [l2]
 extra_trees:bootstrap {True, False} [False]
-random_forest:min_samples_split [1, 20] [2]i
+random_forest:min_samples_split [2, 20] [2]i
 random_forest:max_leaf_nodes {None} [None]
 libsvm_svc:max_iter {-1} [-1]
 sgd:class_weight {None, auto} [None]
 extra_trees:criterion {gini, entropy} [gini]
 sgd:loss {hinge, log, modified_huber, squared_hinge, perceptron} [hinge]
-extra_trees:max_depth [5, 50] [27]i
+extra_trees:max_depth {None} [None]
 random_forest:max_features [0.01, 0.5] [0.2]
 k_nearest_neighbors:weights {uniform, distance} [uniform]
 pca:whiten {False, True} [False]
@@ -26,8 +25,10 @@ random_forest:min_samples_leaf [1, 20] [1]i
 sgd:power_t [1e-05, 1.0] [0.5]
 liblinear:class_weight {None, auto} [None]
 sgd:eta0 [1e-07, 0.1] [0.01]
+kitchen_sinks:gamma [0.3, 2.0] [1.0]
 sgd:alpha [1e-07, 0.1] [0.0001]l
-gradient_boosting:min_samples_split [1, 20] [2]i
+imputation:strategy {mean, median, most_frequent} [mean]
+sparse_filtering:maxiter [50, 500] [100]i
 libsvm_svc:degree [1, 5] [3]i
 libsvm_svc:shrinking {True, False} [True]
 random_forest:n_estimators [10, 500] [10]i
@@ -39,42 +40,43 @@ libsvm_svc:coef0 [-1.0, 1.0] [0]
 liblinear:tol [1e-05, 0.1] [0.0001]l
 gradient_boosting:max_depth [1, 10] [3]i
 liblinear:dual {False} [False]
-gradient_boosting:max_leaf_nodes {None} [None]
+preprocessor {None, sparse_filtering, pca, kitchen_sinks} [None]
+kitchen_sinks:n_components [50, 10000] [100]il
 random_forest:max_depth {None} [None]
 sgd:fit_intercept {True} [True]
 sgd:n_iter [5, 1000] [20]i
-imputation:strategy {mean, median, most_frequent} [mean]
 liblinear:penalty {l1, l2} [l2]
 sgd:epsilon [1e-05, 0.1] [0.0001]l
 liblinear:C [0.03125, 32768.0] [1.0]l
-extra_trees:max_leaf_nodes_or_max_depth {max_depth} [max_depth]
+gradient_boosting:min_samples_split [2, 20] [2]i
 liblinear:fit_intercept {True} [True]
 gradient_boosting:learning_rate [0.0001, 1.0] [0.1]l
-extra_trees:max_leaf_nodes {None} [None]
 extra_trees:n_estimators [10, 500] [10]i
 liblinear:multi_class {ovr} [ovr]
 pca:keep_variance [0.5, 1.0] [1.0]
-extra_trees:use_max_depth {True, False} [False]
 k_nearest_neighbors:algorithm {auto} [auto]
-extra_trees:max_features [0.01, 0.5] [0.2]
+extra_trees:max_features [0.01, 0.5] [0.1]
 liblinear:loss {l1, l2} [l2]
 gradient_boosting:n_estimators [10, 500] [10]i
 sgd:learning_rate {optimal, invscaling, constant} [optimal]
 random_forest:bootstrap {True, False} [True]
 extra_trees:min_samples_leaf [1, 20] [1]i
 k_nearest_neighbors:p {1, 2, 5} [2]
-gradient_boosting:max_features [0.01, 0.5] [0.2]
+gradient_boosting:max_features [0.01, 0.5] [0.1]
 classifier {libsvm_svc, extra_trees, sgd, random_forest, k_nearest_neighbors, gradient_boosting, liblinear} [random_forest]
-preprocessor {None, pca} [None]
+sparse_filtering:N [50, 2000] [100]i
 
 k_nearest_neighbors:p | k_nearest_neighbors:metric in {minkowski}
-gradient_boosting:max_depth | gradient_boosting:max_leaf_nodes_or_max_depth in {max_depth}
 sgd:l1_ratio | sgd:penalty in {elasticnet}
 sgd:epsilon | sgd:loss in {modified_huber}
 libsvm_svc:degree | libsvm_svc:kernel in {poly}
 libsvm_svc:coef0 | libsvm_svc:kernel in {poly, sigmoid}
-extra_trees:use_max_depth | extra_trees:max_leaf_nodes_or_max_depth in {max_depth}
-extra_trees:max_depth | extra_trees:use_max_depth in {True}
+pca:whiten | preprocessor in {pca}
+pca:keep_variance | preprocessor in {pca}
+kitchen_sinks:gamma | preprocessor in {kitchen_sinks}
+sparse_filtering:N | preprocessor in {sparse_filtering}
+kitchen_sinks:n_components | preprocessor in {kitchen_sinks}
+sparse_filtering:maxiter | preprocessor in {sparse_filtering}
 sgd:power_t | sgd:learning_rate in {invscaling}
 k_nearest_neighbors:n_neighbors | classifier in {k_nearest_neighbors}
 libsvm_svc:tol | classifier in {libsvm_svc}
@@ -82,7 +84,6 @@ libsvm_svc:class_weight | classifier in {libsvm_svc}
 sgd:n_iter | classifier in {sgd}
 random_forest:criterion | classifier in {random_forest}
 k_nearest_neighbors:metric | classifier in {k_nearest_neighbors}
-gradient_boosting:max_leaf_nodes_or_max_depth | classifier in {gradient_boosting}
 extra_trees:min_samples_split | classifier in {extra_trees}
 libsvm_svc:gamma | classifier in {libsvm_svc}
 k_nearest_neighbors:leaf_size | classifier in {k_nearest_neighbors}
@@ -93,7 +94,7 @@ random_forest:max_leaf_nodes | classifier in {random_forest}
 libsvm_svc:max_iter | classifier in {libsvm_svc}
 sgd:class_weight | classifier in {sgd}
 extra_trees:criterion | classifier in {extra_trees}
-liblinear:multi_class | classifier in {liblinear}
+extra_trees:max_depth | classifier in {extra_trees}
 random_forest:max_features | classifier in {random_forest}
 k_nearest_neighbors:weights | classifier in {k_nearest_neighbors}
 random_forest:min_samples_leaf | classifier in {random_forest}
@@ -101,7 +102,6 @@ gradient_boosting:min_samples_leaf | classifier in {gradient_boosting}
 liblinear:class_weight | classifier in {liblinear}
 sgd:eta0 | classifier in {sgd}
 sgd:alpha | classifier in {sgd}
-gradient_boosting:min_samples_split | classifier in {gradient_boosting}
 libsvm_svc:shrinking | classifier in {libsvm_svc}
 random_forest:n_estimators | classifier in {random_forest}
 liblinear:intercept_scaling | classifier in {liblinear}
@@ -110,17 +110,17 @@ gradient_boosting:subsample | classifier in {gradient_boosting}
 libsvm_svc:C | classifier in {libsvm_svc}
 sgd:loss | classifier in {sgd}
 liblinear:tol | classifier in {liblinear}
+gradient_boosting:max_depth | classifier in {gradient_boosting}
 liblinear:dual | classifier in {liblinear}
-gradient_boosting:max_leaf_nodes | classifier in {gradient_boosting}
 random_forest:max_depth | classifier in {random_forest}
 sgd:fit_intercept | classifier in {sgd}
 liblinear:penalty | classifier in {liblinear}
 liblinear:C | classifier in {liblinear}
-extra_trees:max_leaf_nodes_or_max_depth | classifier in {extra_trees}
+gradient_boosting:min_samples_split | classifier in {gradient_boosting}
 liblinear:fit_intercept | classifier in {liblinear}
 gradient_boosting:learning_rate | classifier in {gradient_boosting}
-extra_trees:max_leaf_nodes | classifier in {extra_trees}
 extra_trees:n_estimators | classifier in {extra_trees}
+liblinear:multi_class | classifier in {liblinear}
 k_nearest_neighbors:algorithm | classifier in {k_nearest_neighbors}
 extra_trees:max_features | classifier in {extra_trees}
 liblinear:loss | classifier in {liblinear}
@@ -129,8 +129,6 @@ sgd:learning_rate | classifier in {sgd}
 random_forest:bootstrap | classifier in {random_forest}
 extra_trees:min_samples_leaf | classifier in {extra_trees}
 gradient_boosting:max_features | classifier in {gradient_boosting}
-pca:keep_variance | preprocessor in {pca}
-pca:whiten | preprocessor in {pca}
 
 {liblinear:penalty=l1, liblinear:loss=l1}
 {liblinear:dual=False, liblinear:penalty=l2, liblinear:loss=l1}

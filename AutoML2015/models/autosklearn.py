@@ -35,10 +35,10 @@ def get_configuration_space(info, include_classifiers=None,
 
         # Todo add a check here if this is useful...
         exclude_classifiers = None
-        if include_classifiers is None:
-            if sparse == True:
-                exclude_classifiers = []
-                exclude_classifiers.append('libsvm_svc')
+        #if include_classifiers is None:
+        #    if sparse == True:
+        #        exclude_classifiers = []
+        #        exclude_classifiers.append('libsvm_svc')
 
         configuration_space = AutoSklearnClassifier. \
             get_hyperparameter_search_space(multiclass=multiclass,
