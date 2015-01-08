@@ -197,7 +197,10 @@ os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"] + os.pathsep + autosklearn_p
                            #os.pathsep + hpolibconfigspace_path
 if "PATH" not in os.environ:
     os.environ["PATH"] = ""
-os.environ["PATH"] = os.environ["PATH"] + os.pathsep + smac_path + os.pathsep + autosklearn_path
+os.environ["PATH"] = os.environ["PATH"] + os.pathsep + smac_path +\
+                     os.pathsep + autosklearn_path + \
+                     os.pathsep + os.path.join(lib_dir, "jre1.8.0_25", "bin")
+os.environ["JAVAHOME"] = os.path.join(lib_dir, "jre1.8.0_25", "bin")
 
 import data.data_io as data_io            # general purpose input/output functions
 from data.data_io import vprint           # print only in verbose mode
@@ -313,7 +316,9 @@ if __name__=="__main__" and debug_mode<4:
         vprint( verbose,  "======== Reading and converting data ==========")
         D = DataManager(basename, input_dir, verbose=verbose)
         print D
+        stop.stop_task("load_%s" % basename)
 
+        stop.start_task("dump_%s" % basename)
         # ====== Split dataset and store Data, Datamanager
         X_train, X_ensemble, Y_train, Y_ensemble = split_data.split_data(D.data['X_train'], D.data['Y_train'])
         del X_train, X_ensemble, Y_train
@@ -333,10 +338,9 @@ if __name__=="__main__" and debug_mode<4:
             vprint( verbose,  "[-] Sorry, time budget exceeded, skipping this task")
             execution_success = False
             continue
+        stop.stop_task("dump_%s" % basename)
 
-        stop.stop_task("load_%s" % basename)
         stop.start_task("start_smac_%s" % basename)
-
         # ========= RUN SMAC
         # == Create an empty instance file
         instance_file = os.path.join(tmp_dataset_dir, "instances.txt")

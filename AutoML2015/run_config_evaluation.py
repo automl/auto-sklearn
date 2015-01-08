@@ -12,8 +12,8 @@ from AutoSklearn.autosklearn import AutoSklearnClassifier
 
 from HPOlibConfigSpace import configuration_space
 
-from AutoML2015.data.data_manager import DataManager
-from AutoML2015.models.evaluate import evaluate
+from data.data_manager import DataManager
+from models.evaluate import evaluate
 
 
 def store_and_or_load_data(outputdir, dataset, data_dir):
@@ -144,4 +144,4 @@ if __name__ == "__main__":
     outer_duration = time.time() - outer_starttime
     print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % \
         ("SAT", abs(outer_duration), result, seed, additional_run_info)
-    sys.exit(status=None)
+    sys.exit(0)

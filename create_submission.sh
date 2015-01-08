@@ -16,7 +16,21 @@ pip install git+https://bitbucket.org/mfeurer/autosklearn#egg=AutoSklearn -t .zi
 # Download SMAC
 wget http://www.cs.ubc.ca/labs/beta/Projects/SMAC/smac-v2.08.00-master-731.tar.gz
 tar -xf smac-v2.08.00-master-731.tar.gz
-cp smac-v2.08.00-master-731 .zip/AutoML2015/lib/ -r
+mv smac-v2.08.00-master-731 .zip/AutoML2015/lib/
+rm smac-v2.08.00-master-731.tar.gz
+
+# Get CMA
+wget https://www.lri.fr/~hansen/cma.py
+mv cma.py .zip/AutoML2015/lib/
+
+# Copy Java
+cp jre1.8.0_25 .zip/AutoML2015/lib/ -r
+
+# Copy lockfile
+wget https://pypi.python.org/packages/source/l/lockfile/lockfile-0.10.2.tar.gz#md5=1aa6175a6d57f082cd12e7ac6102ab15
+tar -xf lockfile-0.10.2.tar.gz
+mv lockfile-0.10.2/lockfile .zip/AutoML2015/lib/
+rm lockfile-0.10.2.tar.gz
 
 # Clean up the submission directory
 find -name "*.egg-info" -exec rm -rf {} \;

@@ -42,6 +42,7 @@ unzip submission
 
 === Prepare running the script
 
+cd ..
 mkdir OUTPUT
 cd submission
-python run_new.py /home/azureuser/data /home/azureuser/OUTPUT/  
+python run_new.py /home/azureuser/data/automl_data /home/azureuser/OUTPUT/  

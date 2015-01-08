@@ -35,7 +35,7 @@ def run_smac(tmp_dir, searchspace, instance_file, limit):
     call = " ".join([call, '--numRun', '2147483647',
                     '--cli-log-all-calls false',
                     '--cutoffTime', '2147483647',
-                    '--wallclock-limit', '10',
+                    '--wallclock-limit', str(int(limit)),
                     '--intraInstanceObj', 'MEAN',
                     '--runObj', 'QUALITY',
                     '--algoExec',  get_algo_exec(),

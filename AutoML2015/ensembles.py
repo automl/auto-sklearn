@@ -10,11 +10,9 @@ import cma
 import numpy as np
 import time
 
-from AutoML2015.data import data_io
-from AutoML2015.models import evaluate
-from AutoML2015.scores import libscores
-from AutoML2015.util.get_dataset_info import getInfoFromFile
-import AutoML2015.util.Stopwatch
+from data import data_io
+from models import evaluate
+import util.Stopwatch
 
 
 def weighted_ensemble_error(weights, *args):
@@ -69,7 +67,7 @@ def ensemble_prediction(all_predictions, weights):
 def main(predictions_dir, basename, task_type, metric, limit, output_dir):
     index_run = 0
     current_num_models = 0
-    watch = AutoML2015.util.Stopwatch.StopWatch()
+    watch = util.Stopwatch.StopWatch()
     watch.start_task("ensemble_builder")
     used_time = 0
     while used_time < limit:
@@ -117,7 +115,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
         #=== Compute the ensemble predictions for the valid data
         Y_valid = ensemble_prediction(np.array(all_predictions_valid), weights,)
 
-        filename_test = os.path.join(output_dir, basename + '_valid_' + str(index_run) + '.predict')
+        filename_test = os.path.join(output_dir, basename + '_valid_' + str(index_run).zfill(3) + '.predict')
         data_io.write(os.path.join(predictions_dir, filename_test), Y_valid)
 
         all_predictions_test = []
@@ -129,7 +127,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
         #=== Compute the ensemble predictions for the test data
         Y_test = ensemble_prediction(np.array(all_predictions_test), weights)
 
-        filename_test = os.path.join(output_dir, basename + '_test_' + str(index_run) + '.predict')
+        filename_test = os.path.join(output_dir, basename + '_test_' + str(index_run).zfill(3) + '.predict')
         data_io.write(os.path.join(predictions_dir, filename_test), Y_test)
         index_run += 1
         used_time = watch.wall_elapsed("ensemble_builder")
