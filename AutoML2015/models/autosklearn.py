@@ -1,9 +1,15 @@
 from AutoSklearn.autosklearn import AutoSklearnClassifier
+from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
 
 
 def get_configuration_space(info):
     if info['task'] == 'regression':
-        raise NotImplementedError()
+        if info['is_sparse'] == 1:
+            sparse = True
+        configuration_space = AutoSklearnRegressor. \
+        get_hyperparameter_search_space(sparse=sparse,
+                                        exclude_regressors=None)
+        return configuration_space
     else:
         task_type = info['task']
 
