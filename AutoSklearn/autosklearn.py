@@ -174,7 +174,12 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
         self._validate_input_Y(Y)
 
         self._pipeline = Pipeline(steps)
-        self._pipeline.fit(X, Y)
+        if fit_params is None or not isinstance(fit_params, dict):
+            fit_params = dict()
+        else:
+            fit_params = {key.replace(":", "__"): value for key, value in
+                          fit_params.items()}
+        self._pipeline.fit(X, Y, **fit_params)
         return self
 
     def predict(self, X):
