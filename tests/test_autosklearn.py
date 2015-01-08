@@ -38,10 +38,6 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
             self.assertIn(AutoSklearnPreprocessingAlgorithm,
                             preprocessors[key].__bases__)
 
-    def test_get_hyperparameter_search_space(self):
-        config = AutoSklearnClassifier.get_hyperparameter_search_space()
-        self.assertIsInstance(config, ConfigurationSpace)
-
     def test_default_configuration(self):
         for i in range(2):
             cs = AutoSklearnClassifier.get_hyperparameter_search_space()
@@ -56,6 +52,7 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
 
     def test_get_hyperparameter_search_space(self):
         cs = AutoSklearnClassifier.get_hyperparameter_search_space()
+        self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
         self.assertEqual(67, len(hyperparameters))
