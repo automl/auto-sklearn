@@ -8,7 +8,7 @@ def submit_call(call):
     call = shlex.split(call)
     try:
         proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'))
-        proc_id = proc.pid()
+        proc_id = proc.pid
     except OSError as e:
         print e
         return -1
