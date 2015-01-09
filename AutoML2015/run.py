@@ -198,8 +198,9 @@ os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"] + os.pathsep + autosklearn_p
 if "PATH" not in os.environ:
     os.environ["PATH"] = ""
 os.environ["PATH"] = os.environ["PATH"] + os.pathsep + smac_path +\
-                     os.pathsep + autosklearn_path + \
-                     os.pathsep + os.path.join(lib_dir, "jre1.8.0_25", "bin")
+                     os.pathsep + autosklearn_path +\
+                     os.pathsep + os.path.join(lib_dir, "jre1.8.0_25", "bin") +\
+                     os.pathsep + lib_dir
 os.environ["JAVAHOME"] = os.path.join(lib_dir, "jre1.8.0_25", "bin")
 
 import data.data_io as data_io            # general purpose input/output functions
