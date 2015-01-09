@@ -1,6 +1,7 @@
 import os
 import sys
 
+
 def getInfoFromFile(datadir, dataset):
     ''' Get all information {attribute = value} pairs from the public.info file'''
     dataset_path = os.path.join(datadir, dataset, dataset + "_public.info")
@@ -11,7 +12,7 @@ def getInfoFromFile(datadir, dataset):
 
     info = dict()
 
-    with open (dataset_path, "r") as info_file:
+    with open(dataset_path, "r") as info_file:
         lines = info_file.readlines()
         features_list = list(map(lambda x: tuple(x.strip("\'").split(" = ")), lines))
 

@@ -17,26 +17,16 @@ import AutoML2015.util.Stopwatch
 
 
 def weighted_ensemble_error(weights, *args):
-    predicitons = args[0]
+    predictions = args[0]
     true_labels = args[1]
-    n_points = predicitons.shape[1]
-    n_classes = predicitons.shape[2]
-
-    weighted_predictions = np.zeros([n_points, n_classes])
-
-    # We optimize w' = w/sum(w) instead of w to make sure that the weights are in [0,1]
-    weights_norm = np.array(weights).sum()
-
-    for i, p in enumerate(predicitons):
-
-        weight_prime = weights[i] / weights_norm
-        weighted_predictions += weight_prime * p
-
     metric = args[2]
     task_type = args[3]
+
+    weight_prime = weights / weights.sum()
+    weighted_predictions = ensemble_prediction(predictions, weight_prime)
+
     score = evaluate.calculate_score(true_labels, weighted_predictions,
                                      task_type, metric)
-
     return 1 - score
 
 
@@ -53,16 +43,16 @@ def weighted_ensemble(predictions, true_labels, info):
         # Python-CMA does not work in a 1-D space
         weights = np.ones([1])
     weights = weights / weights.sum()
-    print "weights: " + str(weights)
 
     return weights
 
 
 def ensemble_prediction(all_predictions, weights):
+    pred = np.zeros([all_predictions.shape[1], all_predictions.shape[2]])
     for i, w in enumerate(weights):
-        all_predictions[i] *= w
+        pred += all_predictions[i] * w
 
-    return all_predictions.mean(axis=0)
+    return pred
 
 
 def main(predictions_dir, basename, data_dir, task_type, metric, limit):
@@ -97,10 +87,10 @@ def main(predictions_dir, basename, data_dir, task_type, metric, limit):
             all_predictions_valid.append(predictions)
 
         #=== Compute the ensemble predictions for the valid data
-        Y_test = ensemble_prediction(np.array(all_predictions_valid), weights,)
+        Y_valid = ensemble_prediction(np.array(all_predictions_valid), weights)
 
         filename_test = basename + '_valid_' + str(index_run) + '.predict'
-        data_io.write(os.path.join(predictions_dir, filename_test), Y_test)
+        data_io.write(os.path.join(predictions_dir, filename_test), Y_valid)
 
         all_predictions_test = []
         dir_test = os.path.join(predictions_dir, "predictions_test/")
