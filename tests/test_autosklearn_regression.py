@@ -49,7 +49,7 @@ class TestAutoSKlearnRegressor(unittest.TestCase):
             predictions = auto.predict(copy.deepcopy(X_test))
             # The lower the worse
             r2_score = sklearn.metrics.r2_score(Y_test, predictions)
-            self.assertAlmostEqual(0.30805962106685625, r2_score)
+            self.assertAlmostEqual(0.33244898030453274, r2_score) #0.30805962106685625, r2_score)
             model_score = auto.score(copy.deepcopy(X_test), Y_test)
             self.assertEqual(model_score, r2_score)
 
@@ -68,11 +68,9 @@ class TestAutoSKlearnRegressor(unittest.TestCase):
             CategoricalHyperparameter('regressor', ['random_forest']))
 
         # TODO add this test when more than one regressor is present
-        """
         cs = AutoSklearnRegressor.get_hyperparameter_search_space(
             exclude_regressors=['random_forest'])
         self.assertNotIn('random_forest', str(cs))
-        """
 
         cs = AutoSklearnRegressor.get_hyperparameter_search_space(
             include_preprocessors=['pca'])

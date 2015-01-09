@@ -1,5 +1,6 @@
 from collections import defaultdict
 import copy
+from itertools import product
 
 import sklearn
 #if sklearn.__version__ != "0.15.2":
@@ -11,10 +12,12 @@ from sklearn.pipeline import Pipeline
 from sklearn.utils import check_random_state
 # from sklearn.utils.validation import safe_asarray, assert_all_finite
 
+
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
     InactiveHyperparameter
 from HPOlibConfigSpace.conditions import EqualsCondition
+from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 from . import components as components
 
@@ -363,8 +366,19 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             raise ValueError("No classifier to build a configuration space "
                              "for...")
 
+        # Hardcode the defaults based on some educated guesses
+        classifier_defaults = ['random_forest', 'liblinear', 'sgd',
+                               'libsvm_svc']
+        classifier_default = None
+        for cd_ in classifier_defaults:
+            if cd_ in names:
+                classifier_default = cd_
+                break
+        if classifier_default is None:
+            classifier_default = names[0]
+
         classifier = CategoricalHyperparameter("classifier", names,
-            default='random_forest' if 'random_forest' in names else names[0])
+            default=classifier_default)
         cs.add_hyperparameter(classifier)
         for name in names + names_:
 
@@ -467,6 +481,24 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
                         dlc.hyperparameter.name = "%s:%s" % (name,
                             dlc.hyperparameter.name)
                 cs.add_forbidden_clause(forbidden_clause)
+
+        # And now add forbidden parameter configurations which would take too
+        # long
+
+        # Combinations of tree-based models with feature learning:
+        classifiers_ = ["extra_trees", "gradient_boosting",
+                        "k_nearest_neighbors", "libsvm_svc", "random_forest"]
+        feature_learning_ = ["kitchen_sinks", "sparse_filtering"]
+
+        for c, f in product(classifiers_, feature_learning_):
+            try:
+                cs.add_forbidden_clause(ForbiddenAndConjunction(
+                    ForbiddenEqualsClause(cs.get_hyperparameter(
+                        "classifier"), c),
+                    ForbiddenEqualsClause(cs.get_hyperparameter(
+                        "preprocessor"), f)))
+            except:
+                pass
 
         return cs
 

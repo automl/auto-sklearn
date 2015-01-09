@@ -102,8 +102,7 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
             name="n_estimators", lower=10, upper=100, default=10, log=False)
         max_features = UniformFloatHyperparameter(
             name="max_features", lower=0.01, upper=0.5, default=0.1)
-        max_depth = UniformIntegerHyperparameter(
-            name = "max_depth", lower=1, upper=10, default=3)
+        max_depth = UnParametrizedHyperparameter("max_depth", "None")
         min_samples_split = UniformIntegerHyperparameter(
             name="min_samples_split", lower=2, upper=20, default=2, log=False)
         min_samples_leaf = UniformIntegerHyperparameter(
