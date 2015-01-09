@@ -364,8 +364,19 @@ class AutoSklearnClassifier(BaseEstimator, ClassifierMixin):
             raise ValueError("No classifier to build a configuration space "
                              "for...")
 
+        # Hardcode the defaults based on some educated guesses
+        classifier_defaults = ['random_forest', 'liblinear', 'sgd',
+                               'libsvm_svc']
+        classifier_default = None
+        for cd_ in classifier_defaults:
+            if cd_ in names:
+                classifier_default = cd_
+                break
+        if classifier_default is None:
+            classifier_default = names[0]
+
         classifier = CategoricalHyperparameter("classifier", names,
-            default='random_forest' if 'random_forest' in names else names[0])
+            default=classifier_default)
         cs.add_hyperparameter(classifier)
         for name in names + names_:
 
