@@ -130,7 +130,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
         data_io.write(os.path.join(predictions_dir, filename_test), Y_test)
 
         current_num_models = len(dir_ensemble_list)
-        watch.stop_task("ensemble_iter_" + index_run)
+        watch.stop_task("ensemble_iter_" + str(index_run))
         time_iter = watch.get_wall_dur("ensemble_iter_" + str(index_run))
         used_time = watch.wall_elapsed("ensemble_builder")
         index_run += 1
