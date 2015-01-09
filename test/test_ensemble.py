@@ -6,8 +6,7 @@ Created on Dec 19, 2014
 import unittest
 import numpy as np
 
-from AutoML2015.ensembles import weighted_ensemble
-from AutoML2015.ensembles import ensemble_prediction
+from AutoML2015 import ensembles
 
 from AutoSklearn.util import get_dataset
 
@@ -16,43 +15,67 @@ N_TEST_RUNS = 10
 
 class Test(unittest.TestCase):
 
-    def xtest_weighted_ensemble(self):
+    def setUp(self):
+        self.n_models = 10
+        self.n_points = 20
+        self.n_classes = 5
 
-        X_train, Y_train, X_test, Y_test = get_dataset('iris')
+    def test_weighted_ensemble(self):
 
-        all_predictions = []
-        for i in range(N_TEST_RUNS):
-            predictions = np.load("/home/kleinaa/devel/git/automl2015/test_predictions/predictions_" + str(i) + ".npy")
+        predictions = np.random.rand(self.n_models, self.n_points, self.n_classes)
 
-            all_predictions.append(predictions)
-            weights = weighted_ensemble(np.array(all_predictions), Y_train)
+        true_labels = np.random.randint(self.n_classes, size=self.n_points)
 
-            self.assertEqual(weights.shape[0], i + 1)
-            self.assertAlmostEqual(weights.sum(), 1.0)
-            for w in weights:
+        weights = np.random.randn(self.n_models)
+        weights /= weights.sum()
+
+        metric = "f1_metric"
+        task_type = "multiclass.classification"
+
+        weights = ensembles.weighted_ensemble(predictions, true_labels, task_type, metric)
+
+        self.assertEqual(weights.shape[0], self.n_models)
+
+        self.assertAlmostEqual(weights.sum(), 1.0)
+
+        for w in weights:
                 self.assertLessEqual(w, 1.0)
                 self.assertGreaterEqual(w, 0.0)
 
     def test_ensemble_prediction(self):
-        n_models = 10
-        n_points = 20
-        n_classes = 2
-        pred = np.random.rand(n_models, n_points, n_classes)
-        w = np.ones([n_models]) * (1.0 / float(n_models))
-        p_hat = ensemble_prediction(pred, w)
+
+        pred = np.random.rand(self.n_models, self.n_points, self.n_classes)
+        w = np.ones([self.n_models]) * (1.0 / float(self.n_models))
+        p_hat = ensembles.ensemble_prediction(pred, w)
         p = pred.mean(axis=0)
 
-        for i in range(n_points):
-            for j in range(n_classes):
+        # First test case
+        for i in range(self.n_points):
+            for j in range(self.n_classes):
                 self.assertAlmostEqual(p[i, j], p_hat[i, j])
 
-        w = np.zeros([n_models])
+        # Second test case
+        w = np.zeros([self.n_models])
         w[0] = 1.0
-        p_hat = ensemble_prediction(pred, w)
-        for i in range(n_points):
-            for j in range(n_classes):
+        p_hat = ensembles.ensemble_prediction(pred, w)
+        for i in range(self.n_points):
+            for j in range(self.n_classes):
                 self.assertAlmostEqual(pred[0, i, j], p_hat[i, j])
 
+    def test_weighted_ensemble_error(self):
+        predictions = np.random.rand(self.n_models, self.n_points, self.n_classes)
+
+        true_labels = np.random.randint(self.n_classes, size=self.n_points)
+
+        weights = np.random.randn(self.n_models)
+        weights /= weights.sum()
+
+        metric = "f1_metric"
+        task_type = "multiclass.classification"
+
+        err = ensembles.weighted_ensemble_error(weights, predictions, true_labels, metric, task_type)
+
+        self.assertAlmostEqual(err, 0.9, delta=0.3)
+
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

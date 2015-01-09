@@ -64,22 +64,30 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
     current_num_models = 0
     while (used_time + time_iter) < limit:
 
-        #=== Load the true labels of the validation data
+        # Load the true labels of the validation data
         true_labels = np.load(os.path.join(predictions_dir, "true_labels_ensemble.npy"))
 
-        #=== Load the predictions from the models
+        # Load the predictions from the models
         all_predictions_train = []
         dir_ensemble = os.path.join(predictions_dir, "predictions_ensemble/")
         dir_valid = os.path.join(predictions_dir, "predictions_valid/")
+        dir_test = os.path.join(predictions_dir, "predictions_test/")
+
         if not os.path.isdir(dir_ensemble):
-            # prediction directory does not exist
+            # Prediction directory does not exist
             time.sleep(2)
             continue
 
         dir_ensemble_list = os.listdir(dir_ensemble)
         dir_valid_list = os.listdir(dir_valid)
+        dir_test_list = os.listdir(dir_test)
 
         if len(dir_ensemble_list) != len(dir_valid_list):
+            # Directories are inconsistent
+            time.sleep(2)
+            continue
+
+        if len(dir_ensemble_list) != len(dir_test_list):
             # Directories are inconsistent
             time.sleep(2)
             continue
@@ -95,28 +103,27 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
             predictions = np.load(os.path.join(dir_ensemble, f))
             all_predictions_train.append(predictions)
 
-        #=== Compute the weights for the ensemble
+        # Compute the weights for the ensemble
         weights = weighted_ensemble(np.array(all_predictions_train),
                                     true_labels, task_type, metric)
 
+        # Compute the ensemble predictions for the valid data
         all_predictions_valid = []
         for f in dir_valid_list:
             predictions = np.load(os.path.join(dir_valid, f))
             all_predictions_valid.append(predictions)
 
-        #=== Compute the ensemble predictions for the valid data
         Y_valid = ensemble_prediction(np.array(all_predictions_valid), weights)
 
         filename_test = os.path.join(output_dir, basename + '_valid_' + str(index_run).zfill(3) + '.predict')
         data_io.write(os.path.join(predictions_dir, filename_test), Y_valid)
 
+        # Compute the ensemble predictions for the test data
         all_predictions_test = []
-        dir_test = os.path.join(predictions_dir, "predictions_test/")
-        for f in os.listdir(dir_test):
+        for f in dir_test_list:
             predictions = np.load(os.path.join(dir_test, f))
             all_predictions_test.append(predictions)
 
-        #=== Compute the ensemble predictions for the test data
         Y_test = ensemble_prediction(np.array(all_predictions_test), weights)
 
         filename_test = os.path.join(output_dir, basename + '_test_' + str(index_run).zfill(3) + '.predict')

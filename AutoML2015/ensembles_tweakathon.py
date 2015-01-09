@@ -48,7 +48,7 @@ def main(dataset):
     print "Load labels ..."
     info = getInfoFromFile("/data/aad/automl_data/", dataset)
     true_labels = np.load(os.path.join(path, dataset + ".npy"))
-
+    print info['metric']
     print "Start optimization"
     weights = weighted_ensemble(predictions, true_labels, info)
     print "finished"
