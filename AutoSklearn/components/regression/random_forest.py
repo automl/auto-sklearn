@@ -99,7 +99,7 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
         criterion = Constant(name="criterion", value="mse")
         # Copied from classification/random_forest.py
         n_estimators = UniformIntegerHyperparameter(
-            name="n_estimators", lower=10, upper=500, default=10, log=False)
+            name="n_estimators", lower=10, upper=100, default=10, log=False)
         max_features = UniformFloatHyperparameter(
             name="max_features", lower=0.01, upper=0.5, default=0.1)
         max_depth = UniformIntegerHyperparameter(
