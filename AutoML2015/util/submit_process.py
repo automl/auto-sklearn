@@ -19,15 +19,17 @@ def get_algo_exec(runsolver_limit, target_call_limit):
 
     # Create call to autosklearn
     path_to_wrapper = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    wrapper_exec = os.path.join(path_to_wrapper, "run_config_evaluation.py")
+    path_to_wrapper = os.path.join(path_to_wrapper, "wrapper")
+    path_to_wrapper = os.path.abspath(path_to_wrapper)
+    wrapper_exec = os.path.join(path_to_wrapper, "wrapper_for_SMAC.py")
     if not os.path.exists(wrapper_exec):
-        call = 'python run_config_evaluation.py'
+        call = 'python wrapper_for_SMAC.py'
     else:
         call = 'python %s' % wrapper_exec
     call += " --limit %d" % target_call_limit
 
     # Now add runsolver command
-    runsolver_prefix = "runsolver --watcher-data /dev/null -w %d" % \
+    runsolver_prefix = "runsolver --watcher-data /dev/null -W %d" % \
                        runsolver_limit
     call = '"' + runsolver_prefix + " " + call + '"'
     return call
@@ -71,6 +73,7 @@ def run_smac(tmp_dir, searchspace, instance_file, limit):
                     '--rf-split-min', '10',
                     '--validation', 'false',
                     '--deterministic', 'true',
+                    '--abort-on-first-run-crash', 'false',
                     '-p', os.path.abspath(searchspace),
                     '--execDir', tmp_dir,
                     '--instances', instance_file])

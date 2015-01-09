@@ -33,16 +33,14 @@ tar -xf data.tar.gz
 bash create_submission.sh
 scp submission.zip  azureuser@automl.cloudapp.net:
 
-=== create new directory and unzip submission @Azure
+=== Run script
+# will remove results and outputs from previous experiments
+# prepare folder
+# run run.py
+bash test.sh
 
-mkdir submission
-mv submission.zip  submission
-cd submission
-unzip submission
+=== Analyze Results
 
-=== Prepare running the script
+# results, which will be used to submit are located under ~/OUTPUT
+# results of optimization procedures are locates under submission/TMP/
 
-cd ..
-mkdir OUTPUT
-cd submission
-python run_new.py /home/azureuser/data/automl_data /home/azureuser/OUTPUT/  

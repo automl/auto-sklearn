@@ -74,6 +74,7 @@ class StopWatch:
 
     def __init__(self):
         self._tasks = OrderedDict()
+        self._tasks["stopwatch_time"] = TimingTask("stopwatch_time")
 
     def start_task(self, name):
         if name not in self._tasks:
@@ -138,11 +139,16 @@ class StopWatch:
                   ("Name", "CPUStart", "CPUEnd", "CPUDur", "WallStart", "WallEnd",
                    "WallDur")
         ret_str += "+" + "------------+"*7 + "\n"
+        offset = self._tasks["stopwatch_time"].wall_tic
         for tsk in self._tasks:
+            if not self._tasks[tsk].wall_tac:
+                wall_tac = False
+            else:
+                wall_tac = self._tasks[tsk].wall_tac-offset
             ret_str += "| %10s | %10.5f | %10.5f | %10.5f | %10s | %10s | %10s |\n" % \
                        (tsk, self._tasks[tsk].cpu_tic, self._tasks[tsk].cpu_tac,
                         self.cpu_elapsed(tsk),
-                        self._tasks[tsk].wall_tic, self._tasks[tsk].wall_tac,
+                        self._tasks[tsk].wall_tic-offset, wall_tac,
                         self.wall_elapsed(tsk))
         return ret_str
 
