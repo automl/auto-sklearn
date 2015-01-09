@@ -15,7 +15,8 @@ def submit_call(call):
     return proc_id
 
 
-def get_algo_exec():
+def get_algo_exec(runsolver_limit, target_call_limit):
+
     # Create call to autosklearn
     path_to_wrapper = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     wrapper_exec = os.path.join(path_to_wrapper, "run_config_evaluation.py")
@@ -23,6 +24,12 @@ def get_algo_exec():
         call = '"python run_config_evaluation.py"'
     else:
         call = '"python %s"' % wrapper_exec
+    call += "--limit %d" % target_call_limit
+
+    # Now add runsolver command
+    runsolver_prefix = "runsolver --watcher-data /dev/null -w %d" % \
+                       runsolver_limit
+    call = runsolver_prefix + call
     return call
 
 
@@ -30,15 +37,29 @@ def run_smac(tmp_dir, searchspace, instance_file, limit):
     if limit <= 0:
         # It makes no sense to start building ensembles
         return
+    limit = int(limit)
+    wallclock_limit = int(limit)
+    cutoff_time = int(wallclock_limit/5)
+    if cutoff_time < 10:
+        # It makes no sense to use less than 10sec
+        # We try to do at least one run within the whole runtime
+        cutoff_time = int(wallclock_limit) - 5
+
+    cutoff_time_target_function_sees = cutoff_time - 10
+    cutoff_time_runsolver_respects = cutoff_time - 5
+
+    algo_exec = get_algo_exec(runsolver_limit=cutoff_time_runsolver_respects,
+                              target_call_limit=cutoff_time_target_function_sees)
+
     # Bad hack to find smac
     call = os.path.join("smac")
     call = " ".join([call, '--numRun', '2147483647',
                     '--cli-log-all-calls false',
-                    '--cutoffTime', '2147483647',
-                    '--wallclock-limit', str(int(limit)),
+                    '--cutoffTime', str(cutoff_time),
+                    '--wallclock-limit', str(wallclock_limit),
                     '--intraInstanceObj', 'MEAN',
                     '--runObj', 'QUALITY',
-                    '--algoExec',  get_algo_exec(),
+                    '--algoExec',  algo_exec,
                     '--numIterations', '2147483647',
                     '--totalNumRunsLimit', '2147483647',
                     '--outputDirectory', tmp_dir,
