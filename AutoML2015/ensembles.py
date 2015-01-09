@@ -14,6 +14,8 @@ from data import data_io
 from models import evaluate
 import util.Stopwatch
 
+from AutoML2015.util.get_dataset_info import getInfoFromFile
+
 
 def weighted_ensemble_error(weights, *args):
     predictions = args[0]
@@ -62,8 +64,6 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
     used_time = 0
     while used_time < limit:
         #=== Load the dataset information
-        info = getInfoFromFile(data_dir, basename)
-        print info
 
         #=== Load the true labels of the validation data
         true_labels = np.load(os.path.join(predictions_dir, "true_labels_ensemble.npy"))
@@ -96,7 +96,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
 
         #=== Compute the weights for the ensemble
         weights = weighted_ensemble(np.array(all_predictions_train),
-                                    true_labels, info)
+                                    true_labels, task_type, metric,)
 
         all_predictions_valid = []
         for f in dir_valid_list:
