@@ -10,6 +10,7 @@ from AutoML2015.data.data_converter import convert_to_bin
 from AutoML2015.models.evaluate import evaluate, predict_proba
 from AutoML2015.util.split_data import split_data
 from AutoSklearn.autosklearn import AutoSklearnClassifier
+from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
 from AutoSklearn.util import get_dataset
 from HPOlibConfigSpace.random_sampler import RandomSampler
 
@@ -62,7 +63,7 @@ class Test(unittest.TestCase):
 
             self.assertIsInstance(err[-1], dict)
             for key in err[-1]:
-                self.assertEqual(len(err[-1]), 6)
+                self.assertEqual(len(err[-1]), 4)
                 self.assertTrue(np.isfinite(err[-1][key]))
                 self.assertGreaterEqual(err[-1][key], 0.0)
 
@@ -127,7 +128,7 @@ class Test(unittest.TestCase):
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
         configuration_space = AutoSklearnClassifier. \
-            get_hyperparameter_search_space(multiclass=True)
+            get_hyperparameter_search_space()
 
         sampler = RandomSampler(configuration_space, 1)
 
@@ -136,8 +137,44 @@ class Test(unittest.TestCase):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
 
-            self.assertTrue(np.isfinite(err[i]))
             err[i] = evaluate(D, configuration)
+            self.assertTrue(np.isfinite(err[i]))
+            print err[i]
+
+            self.assertGreaterEqual(err[i], 0.0)
+
+        print "Number of times it was worse than random guessing:" + str(
+            np.sum(err > 1))
+
+    def test_evaluate_regression(self):
+        X_train, Y_train, X_test, Y_test = get_dataset('boston')
+        print len(Y_test)
+
+        X_valid = X_test[:200, ]
+        Y_valid = Y_test[:200, ]
+        X_test = X_test[200:, ]
+        Y_test = Y_test[200:, ]
+
+        D = Dummy()
+        D.info = {'metric': 'r2_metric', 'task': 'regression'}
+        D.data = {'X_train': X_train, 'Y_train': Y_train,
+                  'X_valid': X_valid, 'X_test': X_test}
+        D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical',
+                       'numerical', 'numerical', 'numerical', 'numerical',
+                       'numerical', 'numerical', 'numerical']
+
+        configuration_space = AutoSklearnRegressor. \
+            get_hyperparameter_search_space()
+
+        sampler = RandomSampler(configuration_space, 1)
+
+        err = np.zeros([N_TEST_RUNS])
+        for i in range(N_TEST_RUNS):
+            print "Evaluate configuration: %d; result:" % i,
+            configuration = sampler.sample_configuration()
+
+            err[i] = evaluate(D, configuration)
+            self.assertTrue(np.isfinite(err[i]))
             print err[i]
 
             self.assertGreaterEqual(err[i], 0.0)

@@ -15,6 +15,7 @@ try:
 except:
     import pickle
 from AutoSklearn.autosklearn import AutoSklearnClassifier
+from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
 
 from HPOlibConfigSpace import configuration_space
 
@@ -68,7 +69,7 @@ def get_new_run_num():
             num = int(fh.read())
         num += 1
         with open(counter_file, "w") as fh:
-            fh.write(str(num))
+            fh.write(str(num).zfill(4))
         return num
 
 
@@ -83,11 +84,14 @@ def main(args, params):
     input_dir = args['data_dir']
     output_dir = os.getcwd()
 
-    cs = AutoSklearnClassifier.get_hyperparameter_search_space()
-    configuration = configuration_space.Configuration(cs, **params)
-
     D = store_and_or_load_data(data_dir=input_dir, dataset=basename,
                                outputdir=output_dir)
+
+    if D.info['task'].lower() == 'regression':
+        cs = AutoSklearnRegressor.get_hyperparameter_search_space()
+    else:
+        cs = AutoSklearnClassifier.get_hyperparameter_search_space()
+    configuration = configuration_space.Configuration(cs, **params)
 
     starttime = time.time()
     errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = \

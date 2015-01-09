@@ -5,10 +5,9 @@ from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
 def get_configuration_space(info, include_classifiers=None,
                             include_preprocessors=None):
     if info['task'] == 'regression':
+        sparse = False
         if info['is_sparse'] == 1:
             sparse = True
-        else:
-            sparse =False
         configuration_space = AutoSklearnRegressor. \
         get_hyperparameter_search_space(sparse=sparse,
                                         exclude_regressors=None)
