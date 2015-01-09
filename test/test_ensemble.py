@@ -75,7 +75,7 @@ class Test(unittest.TestCase):
 
         err = ensembles.weighted_ensemble_error(weights, predictions, true_labels, metric, task_type)
 
-        self.assertAlmostEqual(err, 0.9, delta=0.3)
+        self.assertAlmostEqual(err, 1.0, delta=0.3)
 
 if __name__ == "__main__":
     unittest.main()
