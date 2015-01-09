@@ -14,8 +14,6 @@ from data import data_io
 from models import evaluate
 import util.Stopwatch
 
-from AutoML2015.util.get_dataset_info import getInfoFromFile
-
 
 def weighted_ensemble_error(weights, *args):
     predictions = args[0]
@@ -31,14 +29,14 @@ def weighted_ensemble_error(weights, *args):
     return 1 - score
 
 
-def weighted_ensemble(predictions, true_labels, info):
+def weighted_ensemble(predictions, true_labels, task_type, metric):
 
     n_models = predictions.shape[0]
     weights = np.ones([n_models]) / n_models
     if n_models > 1:
         res = cma.fmin(weighted_ensemble_error, weights, sigma0=0.25,
-                       args=(predictions, true_labels, info['metric'],
-                             info['task']), options={'bounds': [0, 1]})
+                       args=(predictions, true_labels, metric,
+                             task_type), options={'bounds': [0, 1]})
         weights = np.array(res[0])
     else:
         # Python-CMA does not work in a 1-D space
@@ -96,7 +94,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
 
         #=== Compute the weights for the ensemble
         weights = weighted_ensemble(np.array(all_predictions_train),
-                                    true_labels, task_type, metric,)
+                                    true_labels, task_type, metric)
 
         all_predictions_valid = []
         for f in dir_valid_list:
