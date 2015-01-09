@@ -15,8 +15,7 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
     def __init__(self, n_estimators, criterion, min_samples_leaf,
                  min_samples_split,  max_features, max_leaf_nodes_or_max_depth="max_depth", #use_max_depth=False,
                  bootstrap=False, max_leaf_nodes=None, max_depth="None",
-                 oob_score=False, n_jobs=1, random_state=None, verbose=0,
-                 min_density=None, compute_importances=None):
+                 oob_score=False, n_jobs=1, random_state=None, verbose=0):
 
         self.n_estimators = int(n_estimators)
         if criterion not in ("gini", "entropy"):
@@ -58,8 +57,7 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
         self.n_jobs = int(n_jobs)
         self.random_state = random_state
         self.verbose = int(verbose)
-        self.min_density = min_density
-        self.compute_importances = compute_importances
+        self.estimator = None
 
     def fit(self, X, Y):
 
@@ -69,8 +67,7 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
             min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,
             max_features=self.max_features, max_leaf_nodes=self.max_leaf_nodes,
             oob_score=self.oob_score, n_jobs=self.n_jobs, verbose=self.verbose,
-            random_state=self.random_state, min_density=self.min_density,
-            compute_importances=self.compute_importances
+            random_state=self.random_state
         )
         return self.estimator.fit(X, Y)
 

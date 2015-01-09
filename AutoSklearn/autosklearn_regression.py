@@ -2,9 +2,9 @@ from collections import defaultdict
 import copy
 
 import sklearn
-if sklearn.__version__ != "0.15.2":
-    raise ValueError("AutoSklearn supports only sklearn version 0.15.2, "
-                     "you installed %s." % sklearn.__version__)
+#if sklearn.__version__ != "0.15.2":
+#    raise ValueError("AutoSklearn supports only sklearn version 0.15.2, "
+#                     "you installed %s." % sklearn.__version__)
 
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.pipeline import Pipeline

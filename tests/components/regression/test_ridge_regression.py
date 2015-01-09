@@ -38,5 +38,5 @@ class RandomForestComponentTest(unittest.TestCase):
             predictor = regressor.fit(X_train_transformed, Y_train)
             predictions = predictor.predict(X_test_transformed)
 
-            self.assertAlmostEqual(0.24658871483206091,
+            self.assertAlmostEqual(0.32731125809612438, #0.24658871483206091
                 sklearn.metrics.r2_score(y_true=Y_test, y_pred=predictions))
