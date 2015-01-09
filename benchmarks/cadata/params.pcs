@@ -1,0 +1,36 @@
+random_forest:n_estimators [10, 100] [10]i
+pca:whiten {False, True} [False]
+random_forest:max_features [0.01, 0.5] [0.1]
+ridge_regression:alpha [0.0001, 10.0] [1.0]l
+pca:keep_variance [0.5, 1.0] [1.0]
+regressor {ridge_regression, random_forest} [random_forest]
+random_forest:min_samples_leaf [1, 20] [1]i
+rescaling:strategy {min/max, standard} [min/max]
+kitchen_sinks:gamma [0.3, 2.0] [1.0]
+sparse_filtering:N [50, 2000] [100]i
+preprocessor {None, sparse_filtering, pca, kitchen_sinks} [None]
+kitchen_sinks:n_components [50, 10000] [100]il
+random_forest:bootstrap {True, False} [True]
+random_forest:max_depth {None} [None]
+random_forest:criterion {mse} [mse]
+imputation:strategy {mean, median, most_frequent} [mean]
+sparse_filtering:maxiter [50, 500] [100]i
+random_forest:min_samples_split [2, 20] [2]i
+
+random_forest:n_estimators | regressor in {random_forest}
+random_forest:max_features | regressor in {random_forest}
+ridge_regression:alpha | regressor in {ridge_regression}
+random_forest:min_samples_leaf | regressor in {random_forest}
+random_forest:bootstrap | regressor in {random_forest}
+random_forest:max_depth | regressor in {random_forest}
+random_forest:criterion | regressor in {random_forest}
+random_forest:min_samples_split | regressor in {random_forest}
+pca:whiten | preprocessor in {pca}
+pca:keep_variance | preprocessor in {pca}
+kitchen_sinks:gamma | preprocessor in {kitchen_sinks}
+sparse_filtering:N | preprocessor in {sparse_filtering}
+kitchen_sinks:n_components | preprocessor in {kitchen_sinks}
+sparse_filtering:maxiter | preprocessor in {sparse_filtering}
+
+{regressor=random_forest, preprocessor=kitchen_sinks}
+{regressor=random_forest, preprocessor=sparse_filtering}

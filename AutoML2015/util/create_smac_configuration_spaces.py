@@ -25,9 +25,6 @@ except:
 
 for basename in datanames:
     D = DataManager(basename, input_dir, verbose=True)
-    if D.info['task'] == 'regression':
-        # Not yet implemented...
-        continue
 
     cs = get_configuration_space(D.info)
     dataset_dir = os.path.join(output_dir, basename)

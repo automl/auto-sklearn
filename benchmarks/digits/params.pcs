@@ -31,7 +31,7 @@ imputation:strategy {mean, median, most_frequent} [mean]
 sparse_filtering:maxiter [50, 500] [100]i
 libsvm_svc:degree [1, 5] [3]i
 libsvm_svc:shrinking {True, False} [True]
-random_forest:n_estimators [10, 500] [10]i
+random_forest:n_estimators [10, 100] [10]i
 liblinear:intercept_scaling {1} [1]
 libsvm_svc:kernel {rbf, poly, sigmoid} [rbf]
 gradient_boosting:subsample [0.01, 1.0] [1.0]
@@ -51,13 +51,13 @@ liblinear:C [0.03125, 32768.0] [1.0]l
 gradient_boosting:min_samples_split [2, 20] [2]i
 liblinear:fit_intercept {True} [True]
 gradient_boosting:learning_rate [0.0001, 1.0] [0.1]l
-extra_trees:n_estimators [10, 500] [10]i
+extra_trees:n_estimators [10, 100] [10]i
 liblinear:multi_class {ovr} [ovr]
 pca:keep_variance [0.5, 1.0] [1.0]
 k_nearest_neighbors:algorithm {auto} [auto]
 extra_trees:max_features [0.01, 0.5] [0.1]
 liblinear:loss {l1, l2} [l2]
-gradient_boosting:n_estimators [10, 500] [10]i
+gradient_boosting:n_estimators [10, 100] [10]i
 sgd:learning_rate {optimal, invscaling, constant} [optimal]
 random_forest:bootstrap {True, False} [True]
 extra_trees:min_samples_leaf [1, 20] [1]i
@@ -133,3 +133,13 @@ gradient_boosting:max_features | classifier in {gradient_boosting}
 {liblinear:penalty=l1, liblinear:loss=l1}
 {liblinear:dual=False, liblinear:penalty=l2, liblinear:loss=l1}
 {liblinear:dual=False, liblinear:penalty=l1}
+{classifier=extra_trees, preprocessor=kitchen_sinks}
+{classifier=extra_trees, preprocessor=sparse_filtering}
+{classifier=gradient_boosting, preprocessor=kitchen_sinks}
+{classifier=gradient_boosting, preprocessor=sparse_filtering}
+{classifier=k_nearest_neighbors, preprocessor=kitchen_sinks}
+{classifier=k_nearest_neighbors, preprocessor=sparse_filtering}
+{classifier=libsvm_svc, preprocessor=kitchen_sinks}
+{classifier=libsvm_svc, preprocessor=sparse_filtering}
+{classifier=random_forest, preprocessor=kitchen_sinks}
+{classifier=random_forest, preprocessor=sparse_filtering}
