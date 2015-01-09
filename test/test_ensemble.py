@@ -16,7 +16,7 @@ N_TEST_RUNS = 10
 
 class Test(unittest.TestCase):
 
-    def test_weighted_ensemble(self):
+    def xtest_weighted_ensemble(self):
 
         X_train, Y_train, X_test, Y_test = get_dataset('iris')
 
@@ -46,6 +46,12 @@ class Test(unittest.TestCase):
             for j in range(n_classes):
                 self.assertAlmostEqual(p[i, j], p_hat[i, j])
 
+        w = np.zeros([n_models])
+        w[0] = 1.0
+        p_hat = ensemble_prediction(pred, w)
+        for i in range(n_points):
+            for j in range(n_classes):
+                self.assertAlmostEqual(pred[0, i, j], p_hat[i, j])
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
