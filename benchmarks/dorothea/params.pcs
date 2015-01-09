@@ -38,7 +38,7 @@ k_nearest_neighbors:algorithm {auto} [auto]
 liblinear:loss {l1, l2} [l2]
 sgd:learning_rate {optimal, invscaling, constant} [optimal]
 k_nearest_neighbors:p {1, 2, 5} [2]
-classifier {libsvm_svc, sgd, k_nearest_neighbors, liblinear} [libsvm_svc]
+classifier {libsvm_svc, sgd, k_nearest_neighbors, liblinear} [liblinear]
 
 k_nearest_neighbors:p | k_nearest_neighbors:metric in {minkowski}
 sgd:l1_ratio | sgd:penalty in {elasticnet}
@@ -81,3 +81,5 @@ sgd:learning_rate | classifier in {sgd}
 {liblinear:penalty=l1, liblinear:loss=l1}
 {liblinear:dual=False, liblinear:penalty=l2, liblinear:loss=l1}
 {liblinear:dual=False, liblinear:penalty=l1}
+{classifier=k_nearest_neighbors, preprocessor=kitchen_sinks}
+{classifier=libsvm_svc, preprocessor=kitchen_sinks}
