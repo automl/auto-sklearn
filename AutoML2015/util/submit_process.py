@@ -24,7 +24,7 @@ def get_algo_exec(runsolver_limit, target_call_limit):
         call = 'python run_config_evaluation.py'
     else:
         call = 'python %s' % wrapper_exec
-    call += "--limit %d" % target_call_limit
+    call += " --limit %d" % target_call_limit
 
     # Now add runsolver command
     runsolver_prefix = "runsolver --watcher-data /dev/null -w %d" % \
