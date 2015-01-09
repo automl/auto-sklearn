@@ -18,10 +18,12 @@ def submit_call(call):
 def get_algo_exec(runsolver_limit, target_call_limit):
 
     # Create call to autosklearn
-    path_to_wrapper = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
-    wrapper_exec = os.path.join(path_to_wrapper, "run_config_evaluation.py")
+    path_to_wrapper = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    path_to_wrapper = os.path.join(path_to_wrapper, "wrapper")
+    path_to_wrapper = os.path.abspath(path_to_wrapper)
+    wrapper_exec = os.path.join(path_to_wrapper, "wrapper_for_SMAC.py")
     if not os.path.exists(wrapper_exec):
-        call = 'python run_config_evaluation.py'
+        call = 'python wrapper_for_SMAC.py'
     else:
         call = 'python %s' % wrapper_exec
     call += " --limit %d" % target_call_limit
