@@ -89,7 +89,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
             time.sleep(2)
             continue
 
-        watch.start_task("ensemble_iter_" + index_run)
+        watch.start_task("ensemble_iter_" + str(index_run))
 
         for f in dir_ensemble_list:
             predictions = np.load(os.path.join(dir_ensemble, f))
@@ -124,7 +124,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
 
         current_num_models = len(dir_ensemble_list)
         watch.stop_task("ensemble_iter_" + index_run)
-        time_iter = watch.get_wall_dur("ensemble_iter_" + index_run)
+        time_iter = watch.get_wall_dur("ensemble_iter_" + str(index_run))
         used_time = watch.wall_elapsed("ensemble_builder")
         index_run += 1
 
