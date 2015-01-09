@@ -9,11 +9,12 @@ try:
 except:
     import pickle
 from AutoSklearn.autosklearn import AutoSklearnClassifier
+from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
 
 from HPOlibConfigSpace import configuration_space
 
-from AutoML2015.data.data_manager import DataManager
-from AutoML2015.models.evaluate import evaluate
+from data.data_manager import DataManager
+from models.evaluate import evaluate
 
 
 def store_and_or_load_data(outputdir, dataset, data_dir):
@@ -42,6 +43,7 @@ def store_and_or_load_data(outputdir, dataset, data_dir):
             lock.release()
     else:
         D = pickle.load(open(save_path, 'r'))
+        print "Loaded data"
     return D
 
 
@@ -69,11 +71,14 @@ def main(basename, input_dir, params, time_limit=sys.maxint):
 
     output_dir = os.getcwd()
 
-    cs = AutoSklearnClassifier.get_hyperparameter_search_space()
-    configuration = configuration_space.Configuration(cs, **params)
-
     D = store_and_or_load_data(data_dir=input_dir, dataset=basename,
                                outputdir=output_dir)
+
+    if D.info["task"].lower() == "regression":
+        cs = AutoSklearnRegressor.get_hyperparameter_search_space()
+    else:
+        cs = AutoSklearnClassifier.get_hyperparameter_search_space()
+    configuration = configuration_space.Configuration(cs, **params)
 
     starttime = time.time()
     errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = evaluate(
@@ -123,11 +128,22 @@ if __name__ == "__main__":
     #    for i in range(len(sys.argv)):
     #        if sys.argv[i] == "2147483647" and sys.argv[i+1] == "-1":
     #            sys.argv[i+1] = "--params"
+
+    limit = None
+    for idx, arg in enumerate(sys.argv):
+        if arg == "--limit":
+            limit = int(float(sys.argv[idx+1]))
+            del sys.argv[idx:idx+2]
+            break
+
     instance_name = sys.argv[1]
-    instance_specific_information = sys.argv[2] # = 0
-    cutoff_time = float(sys.argv[3]) # = inf
-    cutoff_length = int(float(sys.argv[4])) # = 2147483647
+    instance_specific_information = sys.argv[2]  # = 0
+    cutoff_time = float(sys.argv[3])  # = inf
+    cutoff_length = int(float(sys.argv[4]))  # = 2147483647
     seed = int(float(sys.argv[5]))
+
+    if limit is None:
+        limit = cutoff_time
 
     params = dict()
     for i in range(6, len(sys.argv), 2):
@@ -140,8 +156,8 @@ if __name__ == "__main__":
     data_dir = os.path.dirname(instance_name)
 
     result, additional_run_info = main(basename=dataset, input_dir=data_dir,
-                                       params=params, time_limit=cutoff_time)
+                                       params=params, time_limit=limit)
     outer_duration = time.time() - outer_starttime
     print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % \
         ("SAT", abs(outer_duration), result, seed, additional_run_info)
-    sys.exit(status=None)
+    sys.exit(0)

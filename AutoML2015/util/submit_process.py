@@ -8,21 +8,30 @@ def submit_call(call):
     call = shlex.split(call)
     try:
         proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'))
-        proc_id = proc.pid()
+        proc_id = proc.pid
     except OSError as e:
         print e
         return -1
     return proc_id
 
 
-def get_algo_exec():
+def get_algo_exec(runsolver_limit, target_call_limit):
+
     # Create call to autosklearn
     path_to_wrapper = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    wrapper_exec = os.path.join(path_to_wrapper, "run_config_evaluation.py")
+    path_to_wrapper = os.path.join(path_to_wrapper, "wrapper")
+    path_to_wrapper = os.path.abspath(path_to_wrapper)
+    wrapper_exec = os.path.join(path_to_wrapper, "wrapper_for_SMAC.py")
     if not os.path.exists(wrapper_exec):
-        call = '"python run_config_evaluation.py"'
+        call = 'python wrapper_for_SMAC.py'
     else:
-        call = '"python %s"' % wrapper_exec
+        call = 'python %s' % wrapper_exec
+    call += " --limit %d" % target_call_limit
+
+    # Now add runsolver command
+    runsolver_prefix = "runsolver --watcher-data /dev/null -W %d" % \
+                       runsolver_limit
+    call = '"' + runsolver_prefix + " " + call + '"'
     return call
 
 
@@ -30,15 +39,29 @@ def run_smac(tmp_dir, searchspace, instance_file, limit):
     if limit <= 0:
         # It makes no sense to start building ensembles
         return
+    limit = int(limit)
+    wallclock_limit = int(limit)
+    cutoff_time = int(wallclock_limit/5)
+    if cutoff_time < 10:
+        # It makes no sense to use less than 10sec
+        # We try to do at least one run within the whole runtime
+        cutoff_time = int(wallclock_limit) - 5
+
+    cutoff_time_target_function_sees = cutoff_time - 10
+    cutoff_time_runsolver_respects = cutoff_time - 5
+
+    algo_exec = get_algo_exec(runsolver_limit=cutoff_time_runsolver_respects,
+                              target_call_limit=cutoff_time_target_function_sees)
+
     # Bad hack to find smac
     call = os.path.join("smac")
     call = " ".join([call, '--numRun', '2147483647',
                     '--cli-log-all-calls false',
-                    '--cutoffTime', '2147483647',
-                    '--wallclock-limit', '10',
+                    '--cutoffTime', str(cutoff_time),
+                    '--wallclock-limit', str(wallclock_limit),
                     '--intraInstanceObj', 'MEAN',
                     '--runObj', 'QUALITY',
-                    '--algoExec',  get_algo_exec(),
+                    '--algoExec',  algo_exec,
                     '--numIterations', '2147483647',
                     '--totalNumRunsLimit', '2147483647',
                     '--outputDirectory', tmp_dir,
@@ -50,6 +73,7 @@ def run_smac(tmp_dir, searchspace, instance_file, limit):
                     '--rf-split-min', '10',
                     '--validation', 'false',
                     '--deterministic', 'true',
+                    '--abort-on-first-run-crash', 'false',
                     '-p', os.path.abspath(searchspace),
                     '--execDir', tmp_dir,
                     '--instances', instance_file])
