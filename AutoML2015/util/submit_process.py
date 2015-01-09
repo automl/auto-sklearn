@@ -29,7 +29,7 @@ def get_algo_exec(runsolver_limit, target_call_limit):
     # Now add runsolver command
     runsolver_prefix = "runsolver --watcher-data /dev/null -w %d" % \
                        runsolver_limit
-    call = '"' + runsolver_prefix + call + '"'
+    call = '"' + runsolver_prefix + " " + call + '"'
     return call
 
 
