@@ -21,15 +21,15 @@ def get_algo_exec(runsolver_limit, target_call_limit):
     path_to_wrapper = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     wrapper_exec = os.path.join(path_to_wrapper, "run_config_evaluation.py")
     if not os.path.exists(wrapper_exec):
-        call = '"python run_config_evaluation.py"'
+        call = 'python run_config_evaluation.py'
     else:
-        call = '"python %s"' % wrapper_exec
+        call = 'python %s' % wrapper_exec
     call += "--limit %d" % target_call_limit
 
     # Now add runsolver command
     runsolver_prefix = "runsolver --watcher-data /dev/null -w %d" % \
                        runsolver_limit
-    call = runsolver_prefix + call
+    call = '"' + runsolver_prefix + call + '"'
     return call
 
 
