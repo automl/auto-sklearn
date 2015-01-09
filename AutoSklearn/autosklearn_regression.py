@@ -14,6 +14,7 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
     InactiveHyperparameter
 from HPOlibConfigSpace.conditions import EqualsCondition
+from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 from . import components as components
 
@@ -411,6 +412,19 @@ class AutoSklearnRegressor(BaseEstimator, RegressorMixin):
                         dlc.hyperparameter.name = "%s:%s" % (name,
                             dlc.hyperparameter.name)
                 cs.add_forbidden_clause(forbidden_clause)
+
+        # And now add forbidden parameter configurations which would take too
+        #  long
+        cs.add_forbidden_clause(ForbiddenAndConjunction(
+            ForbiddenEqualsClause(cs.get_hyperparameter("regressor"),
+                                  "random_forest"),
+            ForbiddenEqualsClause(cs.get_hyperparameter("preprocessor"),
+                                  "kitchen_sinks")))
+        cs.add_forbidden_clause(ForbiddenAndConjunction(
+            ForbiddenEqualsClause(cs.get_hyperparameter("regressor"),
+                                  "random_forest"),
+            ForbiddenEqualsClause(cs.get_hyperparameter("preprocessor"),
+                                  "sparse_filtering")))
 
         return cs
 
