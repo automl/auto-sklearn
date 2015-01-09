@@ -1,31 +1,20 @@
-'''
-Created on Dec 17, 2014
-
-@author: Aaron Klein
-'''
-
 import lockfile
 
 import os
-import sys
 import time
+import sys
 
 try:
     import cPickle as pickle
 except:
     import pickle
 from AutoSklearn.autosklearn import AutoSklearnClassifier
+from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
 
 from HPOlibConfigSpace import configuration_space
 
-try:
-    from HPOlib.benchmark_util import parse_cli
-except:
-    from HPOlib.benchmarks.benchmark_util import parse_cli
-from HPOlib.wrapping_util import get_time_string
-
-from AutoML2015.data.data_manager import DataManager
-from AutoML2015.models.evaluate import evaluate
+from data.data_manager import DataManager
+from models.evaluate import evaluate
 
 
 def store_and_or_load_data(outputdir, dataset, data_dir):
@@ -54,6 +43,7 @@ def store_and_or_load_data(outputdir, dataset, data_dir):
             lock.release()
     else:
         D = pickle.load(open(save_path, 'r'))
+        print "Loaded data"
     return D
 
 
@@ -72,27 +62,28 @@ def get_new_run_num():
         return num
 
 
-def main(args, params):
+def main(basename, input_dir, params, time_limit=sys.maxint):
     for key in params:
         try:
             params[key] = float(params[key])
         except:
             pass
 
-    basename = args['dataset']
-    input_dir = args['data_dir']
     output_dir = os.getcwd()
-
-    cs = AutoSklearnClassifier.get_hyperparameter_search_space()
-    configuration = configuration_space.Configuration(cs, **params)
 
     D = store_and_or_load_data(data_dir=input_dir, dataset=basename,
                                outputdir=output_dir)
 
+    if D.info["task"].lower() == "regression":
+        cs = AutoSklearnRegressor.get_hyperparameter_search_space()
+    else:
+        cs = AutoSklearnClassifier.get_hyperparameter_search_space()
+    configuration = configuration_space.Configuration(cs, **params)
+
     starttime = time.time()
-    errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
-        evaluate(D, configuration, with_predictions=True,
-                 all_scoring_functions=True)
+    errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = evaluate(
+        Datamanager=D, configuration=configuration, with_predictions=True,
+        all_scoring_functions=True)
     duration = time.time() - starttime
 
     pred_dump_name_template = os.path.join(output_dir, "predictions_%s",
@@ -129,7 +120,7 @@ def main(args, params):
 
 
 if __name__ == "__main__":
-    starttime = time.time()
+    outer_starttime = time.time()
     # Change a SMAC call into an HPOlib call, not yet needed!
     #if not "--params" in sys.argv:
     #    # Call from SMAC
@@ -138,9 +129,35 @@ if __name__ == "__main__":
     #        if sys.argv[i] == "2147483647" and sys.argv[i+1] == "-1":
     #            sys.argv[i+1] = "--params"
 
-    args, params = parse_cli()
+    limit = None
+    for idx, arg in enumerate(sys.argv):
+        if arg == "--limit":
+            limit = int(float(sys.argv[idx+1]))
+            del sys.argv[idx:idx+2]
+            break
 
-    result, additional_run_info = main(args, params)
-    duration = time.time() - starttime
+    instance_name = sys.argv[1]
+    instance_specific_information = sys.argv[2]  # = 0
+    cutoff_time = float(sys.argv[3])  # = inf
+    cutoff_length = int(float(sys.argv[4]))  # = 2147483647
+    seed = int(float(sys.argv[5]))
+
+    if limit is None:
+        limit = cutoff_time
+
+    params = dict()
+    for i in range(6, len(sys.argv), 2):
+        p_name = str(sys.argv[i])
+        if p_name[0].startswith("-"):
+            p_name = p_name[1:]
+        params[p_name] = sys.argv[i+1].strip()
+
+    dataset = os.path.basename(instance_name)
+    data_dir = os.path.dirname(instance_name)
+
+    result, additional_run_info = main(basename=dataset, input_dir=data_dir,
+                                       params=params, time_limit=limit)
+    outer_duration = time.time() - outer_starttime
     print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % \
-        ("SAT", abs(duration), result, -1, additional_run_info)
+        ("SAT", abs(outer_duration), result, seed, additional_run_info)
+    sys.exit(0)

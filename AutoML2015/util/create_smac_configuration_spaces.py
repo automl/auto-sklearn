@@ -8,9 +8,9 @@ Created on Dec 16, 2014
 import os
 import sys
 
-from AutoML2015.models.autosklearn import get_configuration_space
-from AutoML2015.data.data_io import inventory_data
-from AutoML2015.data.data_manager import DataManager
+from models.autosklearn import get_configuration_space
+from data.data_io import inventory_data
+from data.data_manager import DataManager
 from HPOlibConfigSpace.converters import pcs_parser
 
 
