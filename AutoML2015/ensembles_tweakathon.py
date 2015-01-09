@@ -8,11 +8,8 @@ import os
 import glob
 import numpy as np
 
-from AutoML2015.ensembles import weighted_ensemble, ensemble_prediction
-from AutoML2015.util.get_dataset_info import getInfoFromFile
-from AutoML2015.util.split_data import split_data
-from AutoML2015.models import evaluate
-from AutoML2015.data.data_manager import DataManager
+from ensembles import weighted_ensemble, ensemble_prediction
+from util.get_dataset_info import getInfoFromFile
 
 
 def load_predictions(dirs):
@@ -41,24 +38,17 @@ def load_predictions(dirs):
 
 
 def main(dataset):
-    ##=== Load predictions
 
     print "Load predictions ..."
     path = "/home/feurerm/projects/automl_competition_2015/code/benchmarks/" + dataset + "/"
-#     dirs = [path + "smac_2_08_00-master_1000_2014-12-21--15-7-4-367536/", path + "smac_2_08_00-master_10000_2014-12-21--15-7-4-84751/",
-#             path + "smac_2_08_00-master_4000_2014-12-21--15-7-4-370417/", path + "smac_2_08_00-master_8000_2014-12-21--15-7-4-162509/",
-#             path + "smac_2_08_00-master_1000_2014-12-21--15-7-4-367536/", path + "smac_2_08_00-master_5000_2014-12-21--15-7-4-160682/",
-#             path + "smac_2_08_00-master_9000_2014-12-21--15-7-4-83920/", path + "smac_2_08_00-master_2000_2014-12-21--15-7-4-367674/",
-#             path + "smac_2_08_00-master_6000_2014-12-21--15-7-4-164894/", path + "smac_2_08_00-master_3000_2014-12-21--15-7-4-380139/",
-#             path + "smac_2_08_00-master_7000_2014-12-21--15-7-4-169641"]
+
     dirs = glob.glob(path + "smac_2_08_00-*")
     predictions, predictions_valid, predictions_test = load_predictions(dirs)
-    ##=== Load labels
+
     print "Load labels ..."
     info = getInfoFromFile("/data/aad/automl_data/", dataset)
     true_labels = np.load(os.path.join(path, dataset + ".npy"))
 
-    ##=== Optimize weights
     print "Start optimization"
     weights = weighted_ensemble(predictions, true_labels, info)
     print "finished"
@@ -74,6 +64,6 @@ def main(dataset):
     np.savetxt(dataset + "_test_000.predict", Y_test, delimiter=' ')
 
 if __name__ == '__main__':
-    dataset = ["adult"]#, "dorothea", "adult", "newsgroups"]
+    dataset = ["adult"]#, "dorothea", "digits", "newsgroups"]
     for d in dataset:
         main(d)

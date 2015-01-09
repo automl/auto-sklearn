@@ -39,7 +39,7 @@ def weighted_ensemble(predictions, true_labels, task_type, metric):
                              task_type), options={'bounds': [0, 1]})
         weights = np.array(res[0])
     else:
-        # Python-CMA does not work in a 1-D space
+        # Python CMA-ES does not work in a 1-D space
         weights = np.ones([1])
     weights = weights / weights.sum()
 
@@ -55,13 +55,14 @@ def ensemble_prediction(all_predictions, weights):
 
 
 def main(predictions_dir, basename, task_type, metric, limit, output_dir):
-    index_run = 0
-    current_num_models = 0
     watch = util.Stopwatch.StopWatch()
     watch.start_task("ensemble_builder")
+
     used_time = 0
-    while used_time < limit:
-        #=== Load the dataset information
+    time_iter = 0
+    index_run = 0
+    current_num_models = 0
+    while (used_time + time_iter) < limit:
 
         #=== Load the true labels of the validation data
         true_labels = np.load(os.path.join(predictions_dir, "true_labels_ensemble.npy"))
@@ -87,6 +88,8 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
             # Nothing has changed since the last time
             time.sleep(2)
             continue
+
+        watch.start_task("ensemble_iter_" + index_run)
 
         for f in dir_ensemble_list:
             predictions = np.load(os.path.join(dir_ensemble, f))
@@ -118,13 +121,15 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
 
         filename_test = os.path.join(output_dir, basename + '_test_' + str(index_run).zfill(3) + '.predict')
         data_io.write(os.path.join(predictions_dir, filename_test), Y_test)
-        index_run += 1
-        used_time = watch.wall_elapsed("ensemble_builder")
 
         current_num_models = len(dir_ensemble_list)
+        watch.stop_task("ensemble_iter_" + index_run)
+        time_iter = watch.get_wall_dur("ensemble_iter_" + index_run)
+        used_time = watch.wall_elapsed("ensemble_builder")
+        index_run += 1
+
 
 if __name__ == "__main__":
     main(predictions_dir=sys.argv[1], basename=sys.argv[2],
          task_type=sys.argv[3], metric=sys.argv[4], limit=float(sys.argv[5]),
          output_dir=sys.argv[6])
-
