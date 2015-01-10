@@ -2,11 +2,9 @@ import numpy as np
 from scipy import sparse
 
 from sklearn.base import BaseEstimator, TransformerMixin
-# from sklearn.utils import check_arrays, warn_if_not_float
-from ..sklearn_backward_validation import check_arrays, warn_if_not_float
-
+from sklearn.utils import check_arrays, warn_if_not_float
 from sklearn.utils.sparsefuncs import inplace_column_scale, \
-    mean_variance_axis
+    mean_variance_axis0
 
 
 def _mean_and_std(X, axis=0, with_mean=True, with_std=True):
@@ -141,7 +139,7 @@ class StandardScaler(BaseEstimator, TransformerMixin):
                 self.mean_ = None
 
             if self.with_std:
-                var = mean_variance_axis(X=X, axis=0)[1]
+                var = mean_variance_axis0(X)[1]
                 self.std_ = np.sqrt(var)
                 self.std_[var == 0.0] = 1.0
             else:

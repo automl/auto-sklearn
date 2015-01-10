@@ -8,7 +8,7 @@ from HPOlibConfigSpace.conditions import EqualsCondition
 
 from ..classification_base import AutoSklearnClassificationAlgorithm
 # get our own forests to replace the sklearn ones
-import ..implementations.forest as forest
+from ...implementations import forest
 
 class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
 
@@ -45,9 +45,6 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
         self.min_samples_split = int(min_samples_split)
 
         self.max_features = float(max_features)
-        if self.max_features > 1:
-            raise ValueError("'max features' in should be < 1: %f" %
-                             self.max_features)
 
         if bootstrap == "True":
             self.bootstrap = True
@@ -61,20 +58,21 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
-
+        num_features = X.shape[1]
+        max_features = int(float(self.max_features) * (np.log(num_features) + 1))
         self.estimator = forest.ExtraTreesClassifier(
-            n_estimators=self.estimator_increment, criterion=self.criterion,
+            n_estimators=0, criterion=self.criterion,
             max_depth=self.max_depth, min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,
-            max_features=self.max_features, max_leaf_nodes=self.max_leaf_nodes,
+            max_features=max_features, max_leaf_nodes=self.max_leaf_nodes,
             oob_score=self.oob_score, n_jobs=self.n_jobs, verbose=self.verbose,
             random_state=self.random_state,
-            warm_state = True
+            warm_start = True
         )
-                # JTS TODO: I think we might have to copy here if we want self.estimator
+        # JTS TODO: I think we might have to copy here if we want self.estimator
         #           to always be consistent on sigabort
         while len(self.estimator.estimators_) < self.n_estimators:
-            tmp = self.estimator.copy()
+            tmp = self.estimator # TODO copy ?
             tmp.n_estimators += self.estimator_increment
             tmp.fit(X, Y)
             self.estimator = tmp
@@ -121,8 +119,10 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
             "n_estimators", 10, 100, default=10)
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default="gini")
+        #max_features = UniformFloatHyperparameter(
+        #    "max_features", 0.01, 0.5, default=0.1)
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.01, 0.5, default=0.1)
+            "max_features", 0.5, 5, default=1)
         min_samples_split = UniformIntegerHyperparameter(
             "min_samples_split", 2, 20, default=2)
         min_samples_leaf = UniformIntegerHyperparameter(

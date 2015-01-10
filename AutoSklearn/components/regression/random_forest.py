@@ -7,7 +7,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from ..regression_base import AutoSklearnRegressionAlgorithm
 # get our own forests to replace the sklearn ones
-import ..implementations.forest as forest
+from ...implementations import forest
 
 class RandomForest(AutoSklearnRegressionAlgorithm):
     def __init__(self, n_estimators, criterion, max_features,
@@ -28,8 +28,6 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
             raise ValueError("'max_features' should be a float: %s" %
                              str(max_features))
         self.max_features = float(max_features)
-        if self.max_features > 1:
-            raise ValueError("'max_features' > 1: %s" % str(max_features))
 
         self.max_leaf_nodes_or_max_depth = str(max_leaf_nodes_or_max_depth)
         if self.max_leaf_nodes_or_max_depth == "max_depth":
@@ -61,10 +59,12 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
+        num_features = X.shape[1]
+        max_features = int(float(self.max_features) * (np.log(num_features) + 1))
         self.estimator = forest.RandomForestRegressor(
-            n_estimators=self.estimator_increment,
+            n_estimators=0,
             criterion=self.criterion,
-            max_features=self.max_features,
+            max_features=max_features,
             max_depth=self.max_depth,
             min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf,
@@ -76,7 +76,7 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
         # JTS TODO: I think we might have to copy here if we want self.estimator
         #           to always be consistent on sigabort
         while len(self.estimator.estimators_) < self.n_estimators:
-            tmp = self.estimator.copy()
+            tmp = self.estimator # TODO copy ?
             tmp.n_estimators += self.estimator_increment
             tmp.fit(X, Y)
             self.estimator = tmp
@@ -110,7 +110,7 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
         n_estimators = UniformIntegerHyperparameter(
             name="n_estimators", lower=10, upper=100, default=10, log=False)
         max_features = UniformFloatHyperparameter(
-            name="max_features", lower=0.01, upper=0.5, default=0.1)
+            "max_features", 0.5, 5, default=1)
         max_depth = UnParametrizedHyperparameter("max_depth", "None")
         min_samples_split = UniformIntegerHyperparameter(
             name="min_samples_split", lower=2, upper=20, default=2, log=False)

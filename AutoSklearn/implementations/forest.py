@@ -30,7 +30,6 @@ from sklearn.utils.validation import DataConversionWarning
 from sklearn.ensemble.base import BaseEnsemble, _partition_estimators
 
 # bring in all the stuff from forests that we can reuse
-from sklearn.ensemble.forest import _parallel_build_trees
 from sklearn.ensemble.forest import _parallel_predict_proba
 from sklearn.ensemble.forest import _parallel_predict_regression
 from sklearn.ensemble.forest import _parallel_apply
@@ -39,6 +38,32 @@ from sklearn.ensemble.forest import _parallel_apply
 from sklearn.ensemble.forest import BaseForest
 
 MAX_INT = np.iinfo(np.int32).max
+def _parallel_build_trees(tree, forest, X, y, sample_weight, tree_idx, n_trees,
+                          verbose=0):
+    """Private function used to fit a single tree in parallel."""
+    if verbose > 1:
+        print("building tree %d of %d" % (tree_idx + 1, n_trees))
+
+    if forest.bootstrap:
+        n_samples = X.shape[0]
+        if sample_weight is None:
+            curr_sample_weight = np.ones((n_samples,), dtype=np.float64)
+        else:
+            curr_sample_weight = sample_weight.copy()
+
+        random_state = check_random_state(tree.random_state)
+        indices = random_state.randint(0, n_samples, n_samples)
+        sample_counts = np.bincount(indices, minlength=n_samples)
+        curr_sample_weight *= sample_counts
+
+        tree.fit(X, y, sample_weight=curr_sample_weight, check_input=False)
+
+        tree.indices_ = sample_counts > 0.
+
+    else:
+        tree.fit(X, y, sample_weight=sample_weight, check_input=False)
+
+    return tree
 
 
 class MyBaseForest(six.with_metaclass(ABCMeta, BaseForest,
@@ -96,7 +121,7 @@ class MyBaseForest(six.with_metaclass(ABCMeta, BaseForest,
             Returns self.
         """
         # Convert data
-        X = check_arrays(X, dtype=DTYPE, sparse_format="dense")
+        X, = check_arrays(X, dtype=DTYPE, sparse_format="dense")
 
         # Remap output
         n_samples, self.n_features_ = X.shape
@@ -383,7 +408,7 @@ class ForestClassifier(six.with_metaclass(ABCMeta, MyBaseForest,
 
             return proba
 
-class ForestRegressor(six.with_metaclass(ABCMeta, BaseForest, RegressorMixin)):
+class ForestRegressor(six.with_metaclass(ABCMeta, MyBaseForest, RegressorMixin)):
     """Base class for forest of trees-based regressors.
 
     Warning: This class should not be used directly. Use derived classes
@@ -615,7 +640,6 @@ class RandomForestClassifier(ForestClassifier):
                  max_depth=None,
                  min_samples_split=2,
                  min_samples_leaf=1,
-                 min_weight_fraction_leaf=0.,
                  max_features="auto",
                  max_leaf_nodes=None,
                  bootstrap=True,
@@ -628,7 +652,7 @@ class RandomForestClassifier(ForestClassifier):
             base_estimator=DecisionTreeClassifier(),
             n_estimators=n_estimators,
             estimator_params=("criterion", "max_depth", "min_samples_split",
-                              "min_samples_leaf", "min_weight_fraction_leaf",
+                              "min_samples_leaf",
                               "max_features", "max_leaf_nodes",
                               "random_state"),
             bootstrap=bootstrap,
@@ -642,7 +666,6 @@ class RandomForestClassifier(ForestClassifier):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
-        self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.max_features = max_features
         self.max_leaf_nodes = max_leaf_nodes
 
@@ -696,11 +719,6 @@ class RandomForestRegressor(ForestRegressor):
         The minimum number of samples in newly created leaves.  A split is
         discarded if after the split, one of the leaves would contain less then
         ``min_samples_leaf`` samples.
-        Note: this parameter is tree-specific.
-
-    min_weight_fraction_leaf : float, optional (default=0.)
-        The minimum weighted fraction of the input samples required to be at a
-        leaf node.
         Note: this parameter is tree-specific.
 
     max_leaf_nodes : int or None, optional (default=None)
@@ -764,7 +782,6 @@ class RandomForestRegressor(ForestRegressor):
                  max_depth=None,
                  min_samples_split=2,
                  min_samples_leaf=1,
-                 min_weight_fraction_leaf=0.,
                  max_features="auto",
                  max_leaf_nodes=None,
                  bootstrap=True,
@@ -777,7 +794,7 @@ class RandomForestRegressor(ForestRegressor):
             base_estimator=DecisionTreeRegressor(),
             n_estimators=n_estimators,
             estimator_params=("criterion", "max_depth", "min_samples_split",
-                              "min_samples_leaf", "min_weight_fraction_leaf",
+                              "min_samples_leaf", 
                               "max_features", "max_leaf_nodes",
                               "random_state"),
             bootstrap=bootstrap,
@@ -791,7 +808,6 @@ class RandomForestRegressor(ForestRegressor):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
-        self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.max_features = max_features
         self.max_leaf_nodes = max_leaf_nodes
 
@@ -846,11 +862,6 @@ class ExtraTreesClassifier(ForestClassifier):
         The minimum number of samples in newly created leaves.  A split is
         discarded if after the split, one of the leaves would contain less then
         ``min_samples_leaf`` samples.
-        Note: this parameter is tree-specific.
-
-    min_weight_fraction_leaf : float, optional (default=0.)
-        The minimum weighted fraction of the input samples required to be at a
-        leaf node.
         Note: this parameter is tree-specific.
 
     max_leaf_nodes : int or None, optional (default=None)
@@ -928,7 +939,6 @@ class ExtraTreesClassifier(ForestClassifier):
                  max_depth=None,
                  min_samples_split=2,
                  min_samples_leaf=1,
-                 min_weight_fraction_leaf=0.,
                  max_features="auto",
                  max_leaf_nodes=None,
                  bootstrap=False,
@@ -941,7 +951,7 @@ class ExtraTreesClassifier(ForestClassifier):
             base_estimator=ExtraTreeClassifier(),
             n_estimators=n_estimators,
             estimator_params=("criterion", "max_depth", "min_samples_split",
-                              "min_samples_leaf", "min_weight_fraction_leaf",
+                              "min_samples_leaf", 
                               "max_features", "max_leaf_nodes", "random_state"),
             bootstrap=bootstrap,
             oob_score=oob_score,
@@ -954,7 +964,6 @@ class ExtraTreesClassifier(ForestClassifier):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
-        self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.max_features = max_features
         self.max_leaf_nodes = max_leaf_nodes
 
@@ -1009,11 +1018,6 @@ class ExtraTreesRegressor(ForestRegressor):
         The minimum number of samples in newly created leaves.  A split is
         discarded if after the split, one of the leaves would contain less then
         ``min_samples_leaf`` samples.
-        Note: this parameter is tree-specific.
-
-    min_weight_fraction_leaf : float, optional (default=0.)
-        The minimum weighted fraction of the input samples required to be at a
-        leaf node.
         Note: this parameter is tree-specific.
 
     max_leaf_nodes : int or None, optional (default=None)
@@ -1080,7 +1084,6 @@ class ExtraTreesRegressor(ForestRegressor):
                  max_depth=None,
                  min_samples_split=2,
                  min_samples_leaf=1,
-                 min_weight_fraction_leaf=0.,
                  max_features="auto",
                  max_leaf_nodes=None,
                  bootstrap=False,
@@ -1093,7 +1096,7 @@ class ExtraTreesRegressor(ForestRegressor):
             base_estimator=ExtraTreeRegressor(),
             n_estimators=n_estimators,
             estimator_params=("criterion", "max_depth", "min_samples_split",
-                              "min_samples_leaf", "min_weight_fraction_leaf",
+                              "min_samples_leaf",
                               "max_features", "max_leaf_nodes",
                               "random_state"),
             bootstrap=bootstrap,
@@ -1107,7 +1110,6 @@ class ExtraTreesRegressor(ForestRegressor):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
-        self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.max_features = max_features
         self.max_leaf_nodes = max_leaf_nodes
 

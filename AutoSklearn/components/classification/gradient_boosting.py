@@ -17,7 +17,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                  min_samples_split, min_samples_leaf, max_features, max_depth,
                  max_leaf_nodes_or_max_depth="max_depth",
                  max_leaf_nodes=None, loss='deviance',
-                 warm_start=False, init=None, random_state=None, verbose=0):
+                 init=None, random_state=None, verbose=0, estimator_increment=10):
 
         self.max_leaf_nodes_or_max_depth = str(max_leaf_nodes_or_max_depth)
 
@@ -40,6 +40,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
 
         self.learning_rate = float(learning_rate)
         self.n_estimators = int(n_estimators)
+        self.estimator_increment = int(estimator_increment)
         self.subsample = float(subsample)
         self.min_samples_split = int(min_samples_split)
         self.min_samples_leaf = int(min_samples_leaf)
@@ -47,32 +48,39 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             raise ValueError("'max_features' should be a float: %s" %
                              max_features)
         self.max_features = float(max_features)
-        if self.max_features > 1:
-            raise ValueError("'max features' in should be < 1: %f" %
-                             self.max_features)
+
         self.loss = loss
-        self.warm_start = warm_start
         self.init = init
         self.random_state = random_state
         self.verbose = int(verbose)
         self.estimator = None
 
     def fit(self, X, Y):
+        num_features = X.shape[1]
+        max_features = float(self.max_features) * (np.log(num_features) + 1)
+        max_features = min(0.5, max_features)
         self.estimator = sklearn.ensemble.GradientBoostingClassifier(
             learning_rate=self.learning_rate,
-            n_estimators=self.n_estimators,
+            n_estimators=0,
             subsample=self.subsample,
             min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf,
-            max_features=self.max_features,
+            max_features=max_features,
             max_leaf_nodes=self.max_leaf_nodes,
             loss=self.loss,
             max_depth=self.max_depth,
-            warm_start=self.warm_start,
+            warm_start=True,
             init=self.init,
             random_state=self.random_state,
             verbose=self.verbose
         )
+        # JTS TODO: I think we might have to copy here if we want self.estimator
+        #           to always be consistent on sigabort
+        while len(self.estimator.estimators_) < self.n_estimators:
+            tmp = self.estimator # TODO I think we need to copy here!
+            tmp.n_estimators += self.estimator_increment
+            tmp.fit(X, Y)
+            self.estimator = tmp
         return self.estimator.fit(X, Y)
 
     def predict(self, X):
@@ -123,8 +131,10 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         # Copied from random_forest.py
         n_estimators = UniformIntegerHyperparameter(
             name="n_estimators", lower=10, upper=100, default=10, log=False)
+        #max_features = UniformFloatHyperparameter(
+        #    name="max_features", lower=0.01, upper=0.5, default=0.1)
         max_features = UniformFloatHyperparameter(
-            name="max_features", lower=0.01, upper=0.5, default=0.1)
+            "max_features", 0.5, 5, default=1)
         max_depth = UniformIntegerHyperparameter(
             name="max_depth", lower=1, upper=10, default=3)
         min_samples_split = UniformIntegerHyperparameter(

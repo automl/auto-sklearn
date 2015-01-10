@@ -3,14 +3,13 @@ import copy
 from itertools import product
 
 import sklearn
-#if sklearn.__version__ != "0.15.2":
-#    raise ValueError("AutoSklearn supports only sklearn version 0.15.2, "
-#                     "you installed %s." % sklearn.__version__)
+if sklearn.__version__ != "0.15.2":
+    raise ValueError("AutoSklearn supports only sklearn version 0.15.2, "
+                     "you installed %s." % sklearn.__version__)
 
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.pipeline import Pipeline
 from sklearn.utils import check_random_state
-# from sklearn.utils.validation import safe_asarray, assert_all_finite
 
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
