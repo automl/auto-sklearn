@@ -3,10 +3,8 @@ from scipy import sparse
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.externals import six
-#from sklearn.utils import check_arrays
-#from sklearn.utils import atleast2d_or_csc, safe_asarray
-from ..sklearn_backward_validation import check_arrays
-from ..sklearn_backward_validation import atleast2d_or_csc, safe_asarray
+from sklearn.utils import check_arrays
+from sklearn.utils import atleast2d_or_csc, safe_asarray
 
 zip = six.moves.zip
 map = six.moves.map
