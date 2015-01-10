@@ -1,5 +1,4 @@
 from functools import partial
-import os
 import sys
 import time
 
@@ -46,11 +45,22 @@ def main(args, params):
     cs = AutoSklearnClassifier.get_hyperparameter_search_space()
     configuration = configuration_space.Configuration(cs, **params)
 
-    api = APIConnector(authenticate=False)
-    dataset = api.get_cached_dataset(int(dataset))
-    X, Y = dataset.get_pandas(target=dataset.default_target_attribute,
-                              include_row_id=False,
-                              include_ignore_attributes=False)
+    e = None
+    for i in range(60):
+        e = None
+        try:
+            api = APIConnector(authenticate=False)
+            dataset = api.get_cached_dataset(int(dataset))
+            X, Y = dataset.get_pandas(target=dataset.default_target_attribute,
+                                      include_row_id=False,
+                                      include_ignore_attributes=False)
+            break
+        except Exception as e:
+            time.sleep(1)
+    if e is not None:
+        print e
+        sys.exit(1)
+
     feat_type = ['Numerical' if dtype == np.float64 else 'Categorical' for
                  dtype in X.dtypes]
     features = tuple([LabelEncoder().fit_transform(X.values[:,i]).reshape((-1, 1))

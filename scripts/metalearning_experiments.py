@@ -3,9 +3,12 @@ from itertools import product
 import os
 from StringIO import StringIO
 
+import numpy as np
+
 from openml import apiconnector
 
 from AutoML2015.models.autosklearn import get_configuration_space
+from AutoML2015.data.data_converter import predict_RAM_usage
 from AutoSklearn.components.classification import _classifiers
 from AutoSklearn.components.preprocessing import _preprocessors
 from HPOlibConfigSpace.converters import pcs_parser
@@ -120,17 +123,39 @@ print "#classifiers", len(classifiers)
 print "#preprocessors", len(preprocessors)
 print "#metrics", len(metrics)
 print len(datasets) * len(classifiers) * len(preprocessors) * len(metrics)
+print
 
-# Add possibility to restart by classifier or preprocessor...
+# TODO Add possibility to restart by classifier or preprocessor...
 for dataset in datasets:
     commands = []
+
+    X, y, categorical = dataset.get_pandas(
+        target=dataset.default_target_attribute, include_row_id=False,
+        include_ignore_attributes=False)
+    X = X.values
+    y = y.values
+    num_missing_values = np.sum(~np.isfinite(X))
+    num_values = X.shape[0] * X.shape[1]
+    sparsity = float(num_missing_values) / float(num_values)
+    print dataset.id, sparsity,
+
+    estimated_ram = float(predict_RAM_usage(X, categorical)) / 1024 / 1024
+    print "Num categorical:", np.sum(categorical), estimated_ram
+    sparse = False
+    if np.sum(categorical) > 0 and estimated_ram > 1000:
+        sparse = True
+
     for classifier, preprocessor, metric in \
             product(classifiers, preprocessors, metrics):
-        directory_name = "%d-%s-%s-%s" % (dataset.id,
-                                          classifier,
-                                          preprocessor,
-                                          metric)
-        output_dir_ = os.path.join(output_dir, directory_name)
+        clf_pre_met_combination_dir = "%s-%s-%s" % \
+                                      (classifier, preprocessor, metric)
+        combination_directory = os.path.join(output_dir, clf_pre_met_combination_dir)
+        try:
+            os.mkdir(combination_directory)
+        except:
+            pass
+
+        output_dir_ = os.path.join(combination_directory, str(dataset.id))
         if not os.path.exists(output_dir_):
             os.mkdir(output_dir_)
         else:
@@ -138,10 +163,14 @@ for dataset in datasets:
 
         # Create configuration space, we can put everything in here because by
         # default it is not sparse and not multiclass and not multilabel
-        configuration_space = get_configuration_space(
-            {'task': "binary.classification", 'is_sparse': 0},
-            include_classifiers=[classifier],
-            include_preprocessors=[preprocessor])
+        try:
+            configuration_space = get_configuration_space(
+                {'task': "binary.classification", 'is_sparse': sparse},
+                include_classifiers=[classifier],
+                include_preprocessors=[preprocessor])
+        except ValueError as e:
+            print e.message
+            continue
         with open(os.path.join(output_dir_, "params.pcs"), "w") as fh:
             cs = pcs_parser.write(configuration_space)
             fh.write(cs)
@@ -169,6 +198,8 @@ for dataset in datasets:
                         "/tmp/${JOB_ID}.${SGE_TASK_ID}.aad_core.q"
                         % (smac, output_dir_))
 
+    # TODO automatically create scripts, which can start every combination of
+    #  classifiers with preproc and metric and so on...
     for seed in range(1000, 10001, 1000):
         with open(os.path.join(output_dir, "commands_seed-%d_did-%d.txt"
                 % (seed, dataset.id)), "w") as fh:

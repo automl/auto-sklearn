@@ -9,9 +9,14 @@ import numpy as np
 from AutoSklearn.autosklearn import AutoSklearnClassifier
 from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
 
-from data.data_converter import convert_to_bin
-from scores import libscores
-from util.split_data import split_data
+try:
+    from ..data.data_converter import convert_to_bin
+    from ..scores import libscores
+    from ..util.split_data import split_data
+except:
+    from data.data_converter import convert_to_bin
+    from scores import libscores
+    from util.split_data import split_data
 
 
 def predict_proba(X, model, task_type):
@@ -99,6 +104,7 @@ def evaluate(Datamanager, configuration, with_predictions=False,
     else:
         model = AutoSklearnClassifier(configuration, seed)
 
+    print configuration
     model.fit(X_train, Y_train)
 
     if task_type == 'regression':

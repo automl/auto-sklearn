@@ -196,14 +196,29 @@ class DataManager:
             to_encode += ['Binary']
         encoding_mask = [feat_type in to_encode for feat_type in self.feat_type]
 
+        categorical = [True if feat_type.lower() == 'categorical' else False
+                       for feat_type in self.feat_type]
+        predicted_RAM_usage = float(data_converter.predict_RAM_usage(
+            self.data['X_train'], categorical)) / 1024 / 1024
+
+        if predicted_RAM_usage > 1000:
+            sparse = True
+
         if any(encoding_mask):
             encoder = OneHotEncoder(categorical_features=encoding_mask,
-                                    dtype=np.float64, sparse=sparse)
+                                    dtype=np.float64, sparse=False)
             self.data['X_train'] = encoder.fit_transform(self.data['X_train'])
             if 'X_valid' in self.data:
                 self.data['X_valid'] = encoder.transform(self.data['X_valid'])
             if 'X_test' in self.data:
                 self.data['X_test'] = encoder.transform(self.data['X_test'])
+
+            if not sparse and predicted_RAM_usage > 1000:
+                self.data['X_train'] = self.data['X_train'].todense()
+                if 'X_valid' in self.data:
+                    self.data['X_valid'] = self.data['X_valid'].todense()
+                if 'X_test' in self.data:
+                    self.data['X_test'] = self.data['X_test'].todense()
 
             self.encoder = encoder
 
