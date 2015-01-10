@@ -1,5 +1,6 @@
 from collections import defaultdict
 import copy
+from itertools import product
 
 import sklearn
 if sklearn.__version__ != "0.15.2":
@@ -414,17 +415,21 @@ class AutoSklearnRegressor(BaseEstimator, RegressorMixin):
                 cs.add_forbidden_clause(forbidden_clause)
 
         # And now add forbidden parameter configurations which would take too
-        #  long
-        cs.add_forbidden_clause(ForbiddenAndConjunction(
-            ForbiddenEqualsClause(cs.get_hyperparameter("regressor"),
-                                  "random_forest"),
-            ForbiddenEqualsClause(cs.get_hyperparameter("preprocessor"),
-                                  "kitchen_sinks")))
-        cs.add_forbidden_clause(ForbiddenAndConjunction(
-            ForbiddenEqualsClause(cs.get_hyperparameter("regressor"),
-                                  "random_forest"),
-            ForbiddenEqualsClause(cs.get_hyperparameter("preprocessor"),
-                                  "sparse_filtering")))
+        # long
+
+        # Combinations of tree-based models with feature learning:
+        regressors_ = ["random_forest", ]
+        feature_learning_ = ["kitchen_sinks", "sparse_filtering"]
+
+        for c, f in product(regressors_, feature_learning_):
+            try:
+                cs.add_forbidden_clause(ForbiddenAndConjunction(
+                    ForbiddenEqualsClause(cs.get_hyperparameter(
+                        "regressor"), c),
+                    ForbiddenEqualsClause(cs.get_hyperparameter(
+                        "preprocessor"), f)))
+            except:
+                pass
 
         return cs
 

@@ -68,11 +68,9 @@ class TestAutoSKlearnRegressor(unittest.TestCase):
             CategoricalHyperparameter('regressor', ['random_forest']))
 
         # TODO add this test when more than one regressor is present
-        """
         cs = AutoSklearnRegressor.get_hyperparameter_search_space(
             exclude_regressors=['random_forest'])
         self.assertNotIn('random_forest', str(cs))
-        """
 
         cs = AutoSklearnRegressor.get_hyperparameter_search_space(
             include_preprocessors=['pca'])

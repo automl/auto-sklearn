@@ -7,7 +7,7 @@ from AutoSklearn.util import _test_classifier
 import sklearn.metrics
 
 
-class GradientBoostingComponentTest(unittest.TestCase):
+class ExtraTreesComponentTest(unittest.TestCase):
     def test_default_configuration(self):
         for i in range(10):
             predictions, targets = \

@@ -61,9 +61,6 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
         num_features = X.shape[1]
         max_features = float(self.max_features) * (np.log(num_features) + 1)
         max_features = min(0.5, max_features)
-        print max_features
-        import sys
-        sys.stdout.flush()
 
         self.estimator = sklearn.ensemble.RandomForestRegressor(
             n_estimators=self.n_estimators,
