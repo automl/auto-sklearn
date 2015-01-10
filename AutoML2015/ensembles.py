@@ -82,6 +82,11 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
         dir_valid_list = os.listdir(dir_valid)
         dir_test_list = os.listdir(dir_test)
 
+        if len(dir_ensemble_list) == 0:
+            # Directories are empty
+            time.sleep(2)
+            continue
+
         if len(dir_ensemble_list) != len(dir_valid_list):
             # Directories are inconsistent
             time.sleep(2)
