@@ -10,6 +10,7 @@ import numpy as np
 
 from ensembles import weighted_ensemble, ensemble_prediction
 from util.get_dataset_info import getInfoFromFile
+from models import evaluate
 
 
 def load_predictions(dirs):
@@ -37,8 +38,19 @@ def load_predictions(dirs):
     return np.array(pred), np.array(pred_valid), np.array(pred_test)
 
 
-def main(dataset):
+def pick_nbest_models(pred, labels, task_type, metric, n_best=10):
+    perf = np.zeros([pred.shape[0]])
+    for i in range(0, pred.shape[0]):
+        perf[i] = 1 - evaluate.calculate_score(labels, pred[i], task_type, metric)
+        print perf[i]
+    idx = np.argsort(perf)[:n_best]
+    print "perf of best:"
+    print perf[idx]
+    return idx
 
+
+def main(dataset):
+    print dataset
     print "Load predictions ..."
     path = "/home/feurerm/projects/automl_competition_2015/code/benchmarks/" + dataset + "/"
 
@@ -48,9 +60,17 @@ def main(dataset):
     print "Load labels ..."
     info = getInfoFromFile("/data/aad/automl_data/", dataset)
     true_labels = np.load(os.path.join(path, dataset + ".npy"))
-    print info['metric']
+
+    n_best = 10
+    print "Pick best " + str(n_best) + " models"
+    best = pick_nbest_models(predictions, true_labels, info['task'], info['metric'], n_best)
+
+    predictions = predictions[best]
+    predictions_valid = predictions_valid[best]
+    predictions_test = predictions_test[best]
+
     print "Start optimization"
-    weights = weighted_ensemble(predictions, true_labels, info)
+    weights = weighted_ensemble(predictions, true_labels, info['task'], info['metric'])
     print "finished"
 
     print "Compute predictions"
@@ -64,6 +84,7 @@ def main(dataset):
     np.savetxt(dataset + "_test_000.predict", Y_test, delimiter=' ')
 
 if __name__ == '__main__':
-    dataset = ["adult"]#, "dorothea", "digits", "newsgroups"]
+    #dataset = ["adult", "digits", "newsgroups", "dorothea", "cadata"]
+    dataset = ["cadata"]
     for d in dataset:
         main(d)
