@@ -210,9 +210,10 @@ from data.data_manager import DataManager # load/save data and get info about th
 import sklearn
 import scipy
 
-from util import Stopwatch, submit_process, split_data, get_dataset_info
+from util import Stopwatch, submit_process, split_data, get_dataset_info, check_pid
 from models import autosklearn
 from HPOlibConfigSpace.converters import pcs_parser
+
 import cPickle
 import errno
 
@@ -399,8 +400,14 @@ if __name__=="__main__" and debug_mode<4:
     while run:
         print "Nothing to do, wait %fsec" % (overall_limit -
                                              stop.wall_elapsed("wholething"))
+        # Check whether all pids are still running
+        print "+" + "-" * 48 + "+"
+        for key in pid_dict:
+            running = check_pid.check_pid(pid_dict[key])
+            print "|%42s|%5s|" % (key, str(running))
+        print "+" + "-" * 48 + "+"
         time.sleep(10)
-        if stop.wall_elapsed("wholething") >= overall_limit-10:
+        if stop.wall_elapsed("wholething") >= overall_limit-15:
             run = False
     print stop
 

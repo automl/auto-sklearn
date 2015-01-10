@@ -69,7 +69,7 @@ then
     echo "0" > number_submission
 fi
 typeset -i NUMSUB=$(cat number_submission)
-echo $((var+1)) > number_submission
+echo $((NUMSUB+1)) > number_submission
 
 # Zip it
 rm .zip/AutoML2015/lib/ -rf

@@ -143,12 +143,12 @@ class evaluator:
     #        generate output for SMAC
     # We use it as the signal handler so we can recycle the code for the normal usecase and when the runsolver kills us here :)
     def finish_up(self):
-		try:
-			self.duration = time.time() - self.starttime
-			result, additional_run_info =self.file_output();
-			print "Result for ParamILS: %s, %f, 1, %f, %d, %s"%("SAT", abs(self.duration), result, self.seed, additional_run_info);
-		except:
-			print "No results were produced! Probably the training was not finished, and no valid model was generated!"
+        try:
+            self.duration = time.time() - self.starttime
+            result, additional_run_info =self.file_output();
+            print "Result for ParamILS: %s, %f, 1, %f, %d, %s"%("SAT", abs(self.duration), result, self.seed, additional_run_info);
+        except:
+            print "No results were produced! Probably the training was not finished, and no valid model was generated!"
 
     def predict(self):
 
