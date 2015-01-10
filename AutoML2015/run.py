@@ -188,7 +188,8 @@ smac_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib", "smac
 java_path = os.path.join(our_lib_dir, "jre1.8.0_25", "bin")
 
 # To use it within this scope:
-sys.path.insert(0, our_lib_dir, our_root_dir)
+sys.path.insert(0, our_lib_dir)
+sys.path.insert(0, our_root_dir)
 
 # Insert our library path to PYTHONPATH
 if "PYTHONPATH" not in os.environ:
