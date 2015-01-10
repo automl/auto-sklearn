@@ -45,9 +45,6 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
         self.min_samples_split = int(min_samples_split)
 
         self.max_features = float(max_features)
-        if self.max_features > 1:
-            raise ValueError("'max features' in should be < 1: %f" %
-                             self.max_features)
 
         if bootstrap == "True":
             self.bootstrap = True
@@ -62,12 +59,14 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
         self.compute_importances = compute_importances
 
     def fit(self, X, Y):
-
+        num_features = X.shape[1]
+        max_features = float(self.max_features) * (np.log(num_features) + 1)
+        max_features = min(0.5, max_features)
         self.estimator = sklearn.ensemble.ExtraTreesClassifier(
             n_estimators=self.n_estimators, criterion=self.criterion,
             max_depth=self.max_depth, min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,
-            max_features=self.max_features, max_leaf_nodes=self.max_leaf_nodes,
+            max_features=max_features, max_leaf_nodes=self.max_leaf_nodes,
             oob_score=self.oob_score, n_jobs=self.n_jobs, verbose=self.verbose,
             random_state=self.random_state, min_density=self.min_density,
             compute_importances=self.compute_importances
@@ -115,8 +114,10 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
             "n_estimators", 10, 100, default=10)
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default="gini")
+        #max_features = UniformFloatHyperparameter(
+        #    "max_features", 0.01, 0.5, default=0.1)
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.01, 0.5, default=0.1)
+            "max_features", 0.5, 5, default=1)
         min_samples_split = UniformIntegerHyperparameter(
             "min_samples_split", 2, 20, default=2)
         min_samples_leaf = UniformIntegerHyperparameter(

@@ -27,8 +27,6 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
             raise ValueError("'max_features' should be a float: %s" %
                              str(max_features))
         self.max_features = float(max_features)
-        if self.max_features > 1:
-            raise ValueError("'max_features' > 1: %s" % str(max_features))
 
         self.max_leaf_nodes_or_max_depth = str(max_leaf_nodes_or_max_depth)
         if self.max_leaf_nodes_or_max_depth == "max_depth":
@@ -60,10 +58,17 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
+        num_features = X.shape[1]
+        max_features = float(self.max_features) * (np.log(num_features) + 1)
+        max_features = min(0.5, max_features)
+        print max_features
+        import sys
+        sys.stdout.flush()
+
         self.estimator = sklearn.ensemble.RandomForestRegressor(
             n_estimators=self.n_estimators,
             criterion=self.criterion,
-            max_features=self.max_features,
+            max_features=max_features,
             max_depth=self.max_depth,
             min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf,
@@ -101,7 +106,7 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
         n_estimators = UniformIntegerHyperparameter(
             name="n_estimators", lower=10, upper=100, default=10, log=False)
         max_features = UniformFloatHyperparameter(
-            name="max_features", lower=0.01, upper=0.5, default=0.1)
+            "max_features", 0.5, 5, default=1)
         max_depth = UnParametrizedHyperparameter("max_depth", "None")
         min_samples_split = UniformIntegerHyperparameter(
             name="min_samples_split", lower=2, upper=20, default=2, log=False)

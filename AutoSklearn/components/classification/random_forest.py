@@ -34,7 +34,9 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         self.min_samples_split = int(self.min_samples_split)
         self.min_samples_leaf = int(self.min_samples_leaf)
         if self.max_features not in ("sqrt", "log2", "auto"):
-            self.max_features = float(self.max_features)
+            num_features = X.shape[1]
+            max_features = float(self.max_features) * (np.log(num_features) + 1)
+            max_features = min(0.5, max_features)
         if self.bootstrap == "True":
             self.bootstrap = True
         else:
@@ -45,7 +47,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         self.estimator = sklearn.ensemble.RandomForestClassifier(
             n_estimators=self.n_estimators,
             criterion=self.criterion,
-            max_features=self.max_features,
+            max_features=max_features,
             max_depth=self.max_depth,
             min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf,
@@ -89,8 +91,10 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
             "n_estimators", 10, 100, default=10)
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default="gini")
+        #max_features = UniformFloatHyperparameter(
+        #    "max_features", 0.01, 0.5, default=0.2)
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.01, 0.5, default=0.2)
+            "max_features", 0.5, 5, default=1)
         max_depth = UnParametrizedHyperparameter("max_depth", "None")
         min_samples_split = UniformIntegerHyperparameter(
             "min_samples_split", 2, 20, default=2)

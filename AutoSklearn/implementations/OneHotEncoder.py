@@ -6,9 +6,9 @@ from sklearn.externals import six
 from sklearn.utils import check_arrays
 from sklearn.utils import atleast2d_or_csc, safe_asarray
 
-zip = six.moves.zip
-map = six.moves.map
-range = six.moves.range
+#zip = six.moves.zip
+#map = six.moves.map
+#range = six.moves.range
 
 
 def _transform_selected(X, transform, selected="all", copy=True):
