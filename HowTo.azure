@@ -15,7 +15,7 @@ export PATH=~/anaconda/bin:$PATH
 
 === ALREADY DONE: Use the right version of numpy,scipy, sklearn
 
-conda install sklearn==0.15.2
+conda install scikit-learn==0.15.2
 conda install numpy==1.9.0
 conda install scipy==0.14.0
 
@@ -37,7 +37,7 @@ scp submission.zip  azureuser@automl.cloudapp.net:
 # will remove results and outputs from previous experiments
 # prepare folder
 # run run.py
-bash test.sh
+bash test.sh submission_0.zip
 
 === Analyze Results
 

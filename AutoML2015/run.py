@@ -182,30 +182,32 @@ path.append(lib_dir)
 
 # === Add libraries to path
 import sys
-autosklearn_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib")) #, "AutoSklearn"))
-#hpolibconfigspace_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib", "HPOlibConfigSpace"))
+our_root_dir = os.path.abspath(os.path.dirname(__file__))
+our_lib_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib"))
 smac_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib", "smac-v2.08.00-master-731"))
+java_path = os.path.join(our_lib_dir, "jre1.8.0_25", "bin")
 
-# For now:
-sys.path.append(autosklearn_path)
-#sys.path.append(hpolibconfigspace_path)
+# To use it within this scope:
+sys.path.insert(0, our_lib_dir, our_root_dir)
 
-# And later:
+# Insert our library path to PYTHONPATH
 if "PYTHONPATH" not in os.environ:
     os.environ["PYTHONPATH"] = ""
-os.environ["PYTHONPATH"] = os.environ["PYTHONPATH"] + os.pathsep + autosklearn_path #+ \
-                           #os.pathsep + hpolibconfigspace_path
+os.environ["PYTHONPATH"] = our_lib_dir + os.pathsep + our_root_dir + os.environ["PYTHONPATH"]
+
 if "PATH" not in os.environ:
     os.environ["PATH"] = ""
 os.environ["PATH"] = os.environ["PATH"] + os.pathsep + smac_path +\
-                     os.pathsep + autosklearn_path +\
-                     os.pathsep + os.path.join(lib_dir, "jre1.8.0_25", "bin") +\
-                     os.pathsep + lib_dir
-os.environ["JAVAHOME"] = os.path.join(lib_dir, "jre1.8.0_25", "bin")
+                     os.pathsep + our_lib_dir + \
+                     os.pathsep + java_path
+os.environ["JAVAHOME"] = java_path
 
 import data.data_io as data_io            # general purpose input/output functions
 from data.data_io import vprint           # print only in verbose mode
 from data.data_manager import DataManager # load/save data and get info about them
+
+import sklearn
+import scipy
 
 from util import Stopwatch, submit_process, split_data, get_dataset_info
 from models import autosklearn
@@ -234,6 +236,9 @@ if debug_mode >= 4 or running_on_codalab: # Show library version and directory s
 # =========================== BEGIN PROGRAM ================================
 
 if __name__=="__main__" and debug_mode<4:
+    print "sklearn", sklearn.__version__
+    print "numpy", np.__version__
+    print "scipy", scipy.__version__
     # Store all pid from running processes to check whether they are still alive
     pid_dict = dict()
     info_dict = dict()
@@ -309,11 +314,6 @@ if __name__=="__main__" and debug_mode<4:
                 raise
         # Loop over datasets and start smac
         # TODO outsource this and start processes in parallel
-
-        #TODO REMOVE THE FOLLOWING LINES
-        if basename == "cadata":
-            data_io.copy_results([basename, ], res_dir, output_dir, verbose)
-            continue
 
         stop.start_task(basename)
         
@@ -399,7 +399,7 @@ if __name__=="__main__" and debug_mode<4:
         print "Nothing to do, wait %fsec" % (overall_limit -
                                              stop.wall_elapsed("wholething"))
         time.sleep(10)
-        if stop.wall_elapsed("wholething") >= overall_limit:
+        if stop.wall_elapsed("wholething") >= overall_limit-10:
             run = False
     print stop
 
