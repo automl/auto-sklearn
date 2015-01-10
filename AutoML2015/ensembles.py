@@ -134,9 +134,11 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
         time_iter = watch.get_wall_dur("ensemble_iter_" + str(index_run))
         used_time = watch.wall_elapsed("ensemble_builder")
         index_run += 1
+    return
 
 
 if __name__ == "__main__":
     main(predictions_dir=sys.argv[1], basename=sys.argv[2],
          task_type=sys.argv[3], metric=sys.argv[4], limit=float(sys.argv[5]),
          output_dir=sys.argv[6])
+    sys.exit(0)

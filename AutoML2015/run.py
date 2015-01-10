@@ -210,7 +210,7 @@ from data.data_manager import DataManager # load/save data and get info about th
 import sklearn
 import scipy
 
-from util import Stopwatch, submit_process, split_data, get_dataset_info, check_pid
+from util import Stopwatch, submit_process, split_data, get_dataset_info, check_pid, kill_child_processes
 from models import autosklearn
 from HPOlibConfigSpace.converters import pcs_parser
 
@@ -397,6 +397,7 @@ if __name__=="__main__" and debug_mode<4:
     # And now we wait till the jobs are done
     print stop
     run = True
+
     while run:
         print "Nothing to do, wait %fsec" % (overall_limit -
                                              stop.wall_elapsed("wholething"))
@@ -404,7 +405,7 @@ if __name__=="__main__" and debug_mode<4:
         print "+" + "-" * 48 + "+"
         for key in pid_dict:
             running = check_pid.check_pid(pid_dict[key])
-            print "|%42s|%5s|" % (key, str(running))
+            print "|%32s|%10d|%5s|" % (key, pid_dict[key], str(running))
         print "+" + "-" * 48 + "+"
         time.sleep(10)
         if stop.wall_elapsed("wholething") >= overall_limit-15:
