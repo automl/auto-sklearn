@@ -1,5 +1,4 @@
 import numpy as np
-import sklearn.ensemble
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -8,7 +7,8 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from HPOlibConfigSpace.conditions import EqualsCondition
 
 from ..classification_base import AutoSklearnClassificationAlgorithm
-
+# get our own forests to replace the sklearn ones
+import ..implementations.forest as forest
 
 class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
 
@@ -18,6 +18,7 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
                  oob_score=False, n_jobs=1, random_state=None, verbose=0):
 
         self.n_estimators = int(n_estimators)
+        self.estimator_increment = 10
         if criterion not in ("gini", "entropy"):
             raise ValueError("'criterion' is not in ('gini', 'entropy'): "
                              "%s" % criterion)
@@ -61,15 +62,23 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
 
     def fit(self, X, Y):
 
-        self.estimator = sklearn.ensemble.ExtraTreesClassifier(
-            n_estimators=self.n_estimators, criterion=self.criterion,
+        self.estimator = forest.ExtraTreesClassifier(
+            n_estimators=self.estimator_increment, criterion=self.criterion,
             max_depth=self.max_depth, min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,
             max_features=self.max_features, max_leaf_nodes=self.max_leaf_nodes,
             oob_score=self.oob_score, n_jobs=self.n_jobs, verbose=self.verbose,
-            random_state=self.random_state
+            random_state=self.random_state,
+            warm_state = True
         )
-        return self.estimator.fit(X, Y)
+                # JTS TODO: I think we might have to copy here if we want self.estimator
+        #           to always be consistent on sigabort
+        while len(self.estimator.estimators_) < self.n_estimators:
+            tmp = self.estimator.copy()
+            tmp.n_estimators += self.estimator_increment
+            tmp.fit(X, Y)
+            self.estimator = tmp
+        return self.estimator
 
     def predict(self, X):
         if self.estimator is None:

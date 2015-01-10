@@ -1,5 +1,4 @@
 import numpy as np
-import sklearn.ensemble
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -7,7 +6,8 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
 from ..regression_base import AutoSklearnRegressionAlgorithm
-
+# get our own forests to replace the sklearn ones
+import ..implementations.forest as forest
 
 class RandomForest(AutoSklearnRegressionAlgorithm):
     def __init__(self, n_estimators, criterion, max_features,
@@ -17,6 +17,7 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
                  max_leaf_nodes=None, random_state=None,
                  n_jobs=1):
         self.n_estimators = int(n_estimators)
+        self.estimator_increment = 10
         if criterion in ("mse",):
             self.criterion = criterion
         else:
@@ -60,8 +61,8 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
-        self.estimator = sklearn.ensemble.RandomForestRegressor(
-            n_estimators=self.n_estimators,
+        self.estimator = forest.RandomForestRegressor(
+            n_estimators=self.estimator_increment,
             criterion=self.criterion,
             max_features=self.max_features,
             max_depth=self.max_depth,
@@ -70,8 +71,16 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
             bootstrap=self.bootstrap,
             max_leaf_nodes=self.max_leaf_nodes,
             random_state=self.random_state,
-            n_jobs=self.n_jobs)
-        return self.estimator.fit(X, Y)
+            n_jobs=self.n_jobs,
+            warm_start=True)
+        # JTS TODO: I think we might have to copy here if we want self.estimator
+        #           to always be consistent on sigabort
+        while len(self.estimator.estimators_) < self.n_estimators:
+            tmp = self.estimator.copy()
+            tmp.n_estimators += self.estimator_increment
+            tmp.fit(X, Y)
+            self.estimator = tmp
+        return self.estimator
 
     def predict(self, X):
         if self.estimator is None:
