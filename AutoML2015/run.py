@@ -160,6 +160,7 @@ import os
 from sys import argv, path
 import numpy as np
 import time
+loading_overhead = time.time()
 overall_start = time.clock()
 
 # Our directories
@@ -199,9 +200,8 @@ os.environ["PYTHONPATH"] = our_lib_dir + os.pathsep + our_root_dir + os.environ[
 if "PATH" not in os.environ:
     os.environ["PATH"] = ""
 os.environ["PATH"] = os.environ["PATH"] + os.pathsep + smac_path +\
-                     os.pathsep + our_lib_dir + \
-                     os.pathsep + java_path
-os.environ["JAVAHOME"] = java_path
+                     os.pathsep + our_lib_dir + os.pathsep + java_path
+os.environ["JAVA_HOME"] = os.path.join(java_path, "java")
 
 import data.data_io as data_io            # general purpose input/output functions
 from data.data_io import vprint           # print only in verbose mode
@@ -219,33 +219,97 @@ import errno
 
 # DEFINITIONS, CHECK BEFORE EACH SUBMISSION
 BUFFER = 60  # time-left - BUFFER = timilimit for SMAC
-tmp_dir = os.path.join(os.getcwd(), "TMP")
-if not os.path.isdir(tmp_dir):
-    try:
-        os.mkdir(tmp_dir)
-    except os.error as e:
-        print(e)
-        print("Using /tmp/ as output directory")
-        tmp_dir = "/tmp/"
-TMP_DIR = tmp_dir
 
 
 if debug_mode >= 4 or running_on_codalab: # Show library version and directory structure
     data_io.show_version()
     data_io.show_dir(run_dir)
 
+# Get some system information
+try:
+    import platform
+    architecture = platform.architecture()
+    pltfrm = platform.platform()
+    java_ver = platform.java_ver()
+    linux = platform.linux_distribution()
+    env = os.environ
+    vprint(verbose, "Architecture: %s" % str(architecture))
+    vprint(verbose, "Platform: %s" % str(pltfrm))
+    vprint(verbose, "Java_ver: %s" % str(java_ver))
+    vprint(verbose, "Linux: %s" % str(linux))
+    vprint(verbose, "Environment: %s" % str(env))
+    vprint(verbose, "sklearn %s" % str(sklearn.__version__))
+    vprint(verbose, "numpy: %s" % str(np.__version__))
+    vprint(verbose, "scipy: %s" % str(scipy.__version__))
+except:
+    vprint(verbose, "Could not find platform information")
+    pass
+
+try:
+    import subprocess
+    import shlex
+    call = "java -version"
+    call = shlex.split(call)
+    out = subprocess.check_output(call)
+    vprint(verbose, "Java -version: %s" % str(out))
+    call = "which java"
+    call = shlex.split(call)
+    out = subprocess.check_output(call)
+    vprint(verbose, "which java: %s" % str(out))
+except Exception as e:
+    vprint(verbose, "Error while calling 'java -version': %s" % str(e))
+    vprint(verbose, "Could not find java information")
+    pass
+
+try:
+    import subprocess
+    import shlex
+    call = "ls -la %s" % os.path.dirname(os.path.abspath(__file__))
+    call = shlex.split(call)
+    out_1 = subprocess.check_output(call)
+    vprint(verbose, "ls -la here: %s" % str(out_1))
+except Exception as e:
+    vprint(verbose, "Calling: ls -la %s" % os.path.dirname(os.path.abspath(__file__)))
+    vprint(verbose, "Error while calling 'ls -la here': %s" % str(e))
+    pass
+
+try:
+    import subprocess
+    import shlex
+    call = "ls -la %s" % os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib")
+    call = shlex.split(call)
+    out_2 = subprocess.check_output(call)
+    vprint(verbose, "ls -la in /lib/: %s" % str(out_2))
+except Exception as e:
+    vprint(verbose, "Calling: ls -la %s" % os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib"))
+    vprint(verbose, "Error while calling 'ls-la in lib': %s" % str(e))
+    pass
+
+try:
+    import subprocess
+    import shlex
+    call = "ls -la %s" % os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib", "jre1.8.0_25", "bin")
+    call = shlex.split(call)
+    out_2 = subprocess.check_output(call)
+    vprint(verbose, "ls -la in /lib/jre/bin: %s" % str(out_2))
+except Exception as e:
+    vprint(verbose, "Calling: ls -la %s" % os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib"))
+    vprint(verbose, "Error while calling 'ls-la in lib/jre/bin': %s" % str(e))
+    pass
 
 # =========================== BEGIN PROGRAM ================================
 
 if __name__=="__main__" and debug_mode<4:
-    print "sklearn", sklearn.__version__
-    print "numpy", np.__version__
-    print "scipy", scipy.__version__
+
     # Store all pid from running processes to check whether they are still alive
     pid_dict = dict()
     info_dict = dict()
-    overall_limit = 0
 
+    stop_load = time.time()
+    loading_overhead = stop_load - loading_overhead
+    overall_limit = 0-loading_overhead
+
+    print "Loading took %f sec" % loading_overhead
     stop = Stopwatch.StopWatch()
     stop.start_task("wholething")
     stop.start_task("inventory")
@@ -259,8 +323,24 @@ if __name__=="__main__" and debug_mode<4:
         output_dir = default_output_dir
     else:
         input_dir = argv[1]
-        output_dir = os.path.abspath(argv[2]); 
-    # Move old results and create a new output directory 
+        output_dir = os.path.abspath(argv[2]);
+
+    tmp_dir = os.path.abspath(os.path.join(output_dir, "TMP"))
+    vprint(verbose, "Creating temporary output dir %s" % tmp_dir)
+
+    if not os.path.isdir(tmp_dir):
+        try:
+            os.mkdir(tmp_dir)
+        except os.error as e:
+            print(e)
+            vprint( verbose, "Using /tmp/ as output directory")
+            tmp_dir = "/tmp/"
+    TMP_DIR = tmp_dir
+
+    output_dir_list = str(os.listdir(output_dir))
+    vprint(verbose, "Output directory contains: %s" % output_dir_list)
+
+    # Move old results and create a new output directory
     data_io.mvdir(output_dir, output_dir+'_'+the_date) 
     data_io.mkdir(output_dir) 
     
@@ -308,7 +388,14 @@ if __name__=="__main__" and debug_mode<4:
     stop.stop_task("get_info")
 
     for basename in datanames:
+        stop.start_task(basename)
+
+        vprint( verbose,  "************************************************")
+        vprint( verbose,  "******** Processing dataset " + basename.capitalize() + " ********")
+        vprint( verbose,  "************************************************")
+
         tmp_dataset_dir = os.path.join(TMP_DIR, basename)
+        vprint(verbose, "Makedir %s" % tmp_dataset_dir)
         try:
             os.makedirs(tmp_dataset_dir)
         except OSError as exception:
@@ -317,11 +404,7 @@ if __name__=="__main__" and debug_mode<4:
         # Loop over datasets and start smac
         # TODO outsource this and start processes in parallel
 
-        stop.start_task(basename)
-        
-        vprint( verbose,  "************************************************")
-        vprint( verbose,  "******** Processing dataset " + basename.capitalize() + " ********")
-        vprint( verbose,  "************************************************")
+
 
         # ======== Learning on a time budget:
         # Keep track of time not to exceed your time budget.
@@ -365,7 +448,7 @@ if __name__=="__main__" and debug_mode<4:
         fh.write(os.path.join(input_dir, basename))
         fh.close()
 
-        # TODO: We need a searchspace
+        # == Create a searchspace
         searchspace = os.path.join(tmp_dataset_dir, "space.pcs")
         sp = autosklearn.get_configuration_space(info_dict[basename])
         sp_string = pcs_parser.write(sp)
@@ -407,6 +490,8 @@ if __name__=="__main__" and debug_mode<4:
             running = check_pid.check_pid(pid_dict[key])
             print "|%32s|%10d|%5s|" % (key, pid_dict[key], str(running))
         print "+" + "-" * 48 + "+"
+        output_dir_list = str(os.listdir(output_dir))
+        vprint(verbose, "Output directory contains: %s" % output_dir_list)
         time.sleep(10)
         if stop.wall_elapsed("wholething") >= overall_limit-15:
             run = False

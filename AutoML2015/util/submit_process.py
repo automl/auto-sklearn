@@ -55,7 +55,7 @@ def run_smac(tmp_dir, searchspace, instance_file, limit):
 
     # Bad hack to find smac
     call = os.path.join("smac")
-    call = " ".join([call, '--numRun', '2147483647',
+    call = " ".join(['bash', call, '--numRun', '2147483647',
                     '--cli-log-all-calls false',
                     '--cutoffTime', str(cutoff_time),
                     '--wallclock-limit', str(wallclock_limit),
@@ -85,16 +85,16 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit, output
     if limit <= 0:
         # It makes no sense to start building ensembles
         return
-    path_to_wrapper = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    wrapper_exec = os.path.join(path_to_wrapper, "ensembles.py")
+    path_to_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    wrapper_exec = os.path.join(path_to_root, "ensembles.py")
+    runsolver_exec = os.path.join(path_to_root, "lib", "runsolver")
 
     call = " ".join(["python", wrapper_exec, tmp_dir, dataset_name,
                         task_type, metric, str(limit-5), output_dir])
 
     # Now add runsolver command
-    runsolver_prefix = "runsolver --watcher-data /dev/null -W %d" % \
-                       limit
-    call = runsolver_prefix + " " + call
+    runsolver_cmd = "%s --watcher-data /dev/null -W %d" % (runsolver_exec, limit)
+    call = runsolver_cmd + " " + call
 
     pid = submit_call(call)
     return pid

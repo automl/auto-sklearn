@@ -36,11 +36,21 @@ scp submission.zip  azureuser@automl.cloudapp.net:
 === Run script
 # will remove results and outputs from previous experiments
 # prepare folder
-# run run.py
 bash test.sh submission_0.zip
+# or for testing the code on just one dataset (adult)
+bash test_single.sh submission_0.zip
+
+In a second terminal you should make sure, that all scripts terminate
+ps -ef | grep azureuser
 
 === Analyze Results
 
 # results, which will be used to submit are located under ~/OUTPUT
-# results of optimization procedures are locates under submission/TMP/
+# results of optimization procedures are locates under OUTPUT/TMP/
+
+=== If you want to keep the code and results of your submission
+
+mkdir #number_submission_#date
+mv submission_#number.zip #number_submission_#date
+mv OUTPUT #number_submission_#date
 
