@@ -12,5 +12,5 @@ class RandomForestComponentTest(unittest.TestCase):
 
             predictions, targets = _test_regressor(RandomForest,
                                                    dataset='diabetes')
-            self.assertAlmostEqual(0.33509113544178348,
+            self.assertAlmostEqual(0.4343284900648805,
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))

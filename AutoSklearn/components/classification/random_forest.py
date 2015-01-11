@@ -3,7 +3,7 @@ import numpy as np
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter
+    UnParametrizedHyperparameter, Constant
 
 from ..classification_base import AutoSklearnClassificationAlgorithm
 # get our own forests to replace the sklearn ones
@@ -38,6 +38,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         if self.max_features not in ("sqrt", "log2", "auto"):
             num_features = X.shape[1]
             max_features = int(float(self.max_features) * (np.log(num_features) + 1))
+            max_features = min(0.5, max_features)
         if self.bootstrap == "True":
             self.bootstrap = True
         else:
@@ -97,8 +98,9 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space():
-        n_estimators = UniformIntegerHyperparameter(
-            "n_estimators", 10, 100, default=10)
+        #n_estimators = UniformIntegerHyperparameter(
+        #    "n_estimators", 10, 100, default=10)
+        n_estimators = Constant("n_estimators", 100)
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default="gini")
         #max_features = UniformFloatHyperparameter(

@@ -12,5 +12,5 @@ class ExtraTreesComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_classifier(ExtraTreesClassifier)
-            self.assertAlmostEqual(0.93999999999999995,
+            self.assertAlmostEqual(0.95999999999999996,
                 sklearn.metrics.accuracy_score(predictions, targets))

@@ -3,7 +3,7 @@ import numpy as np
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter
+    UnParametrizedHyperparameter, Constant
 from HPOlibConfigSpace.conditions import EqualsCondition
 
 from ..classification_base import AutoSklearnClassificationAlgorithm
@@ -60,6 +60,7 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
     def fit(self, X, Y):
         num_features = X.shape[1]
         max_features = int(float(self.max_features) * (np.log(num_features) + 1))
+        max_features = min(0.5, max_features)
         self.estimator = forest.ExtraTreesClassifier(
             n_estimators=0, criterion=self.criterion,
             max_depth=self.max_depth, min_samples_split=self.min_samples_split,
@@ -115,8 +116,9 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
             "bootstrap", ["True", "False"], default="False")
 
         # Copied from random_forest.py
-        n_estimators = UniformIntegerHyperparameter(
-            "n_estimators", 10, 100, default=10)
+        #n_estimators = UniformIntegerHyperparameter(
+        #    "n_estimators", 10, 100, default=10)
+        n_estimators = Constant("n_estimators", 100)
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default="gini")
         #max_features = UniformFloatHyperparameter(

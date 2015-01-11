@@ -61,6 +61,7 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
     def fit(self, X, Y):
         num_features = X.shape[1]
         max_features = int(float(self.max_features) * (np.log(num_features) + 1))
+        max_features = min(0.5, max_features)
         self.estimator = forest.RandomForestRegressor(
             n_estimators=0,
             criterion=self.criterion,
@@ -107,8 +108,9 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
     def get_hyperparameter_search_space():
         criterion = Constant(name="criterion", value="mse")
         # Copied from classification/random_forest.py
-        n_estimators = UniformIntegerHyperparameter(
-            name="n_estimators", lower=10, upper=100, default=10, log=False)
+        #n_estimators = UniformIntegerHyperparameter(
+        #    name="n_estimators", lower=10, upper=100, default=10, log=False)
+        n_estimators = Constant("n_estimators", 100)
         max_features = UniformFloatHyperparameter(
             "max_features", 0.5, 5, default=1)
         max_depth = UnParametrizedHyperparameter("max_depth", "None")

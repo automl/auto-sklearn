@@ -12,5 +12,5 @@ class GradientBoostingComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_classifier(GradientBoostingClassifier)
-            self.assertAlmostEqual(0.95999999999999996,
+            self.assertAlmostEqual(0.93999999999999995,
                 sklearn.metrics.accuracy_score(predictions, targets))

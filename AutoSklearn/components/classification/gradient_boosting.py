@@ -6,7 +6,7 @@ from HPOlibConfigSpace.conditions import EqualsCondition
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter
+    UnParametrizedHyperparameter, Constant
 
 from ..classification_base import AutoSklearnClassificationAlgorithm
 
@@ -129,8 +129,9 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
 
 
         # Copied from random_forest.py
-        n_estimators = UniformIntegerHyperparameter(
-            name="n_estimators", lower=10, upper=100, default=10, log=False)
+        #n_estimators = UniformIntegerHyperparameter(
+        #    name="n_estimators", lower=10, upper=100, default=10, log=False)
+        n_estimators = Constant("n_estimators", 100)
         #max_features = UniformFloatHyperparameter(
         #    name="max_features", lower=0.01, upper=0.5, default=0.1)
         max_features = UniformFloatHyperparameter(

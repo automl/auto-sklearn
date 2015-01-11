@@ -46,7 +46,7 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
             auto = AutoSklearnClassifier(default)
             auto = auto.fit(X_train, Y_train)
             predictions = auto.predict(X_test)
-            self.assertAlmostEqual(0.94,
+            self.assertAlmostEqual(0.95999999999999996,
                 sklearn.metrics.accuracy_score(predictions, Y_test))
             scores = auto.predict_proba(X_test)
 
