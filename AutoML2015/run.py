@@ -180,9 +180,18 @@ res_dir = os.path.join(run_dir, "res")
 path.append(run_dir)
 path.append(lib_dir)
 
+# ===================================
+# ========== THIS IS WHERE WE START =
+# ===================================
 
 # === Add libraries to path
+# general imports
 import sys
+import sklearn
+import scipy
+import cPickle
+import errno
+
 our_root_dir = os.path.abspath(os.path.dirname(__file__))
 our_lib_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib"))
 smac_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib", "smac-v2.08.00-master-731"))
@@ -203,108 +212,36 @@ os.environ["PATH"] = os.environ["PATH"] + os.pathsep + smac_path +\
                      os.pathsep + our_lib_dir + os.pathsep + java_path
 os.environ["JAVA_HOME"] = os.path.join(java_path, "java")
 
+# Imports from this libray
 import data.data_io as data_io            # general purpose input/output functions
 from data.data_io import vprint           # print only in verbose mode
 from data.data_manager import DataManager # load/save data and get info about them
-
-import sklearn
-import scipy
-
 from util import Stopwatch, submit_process, split_data, get_dataset_info, check_pid, kill_child_processes
 from models import autosklearn
+
+# Import from libraries locates in /lib/
 from HPOlibConfigSpace.converters import pcs_parser
 
-import cPickle
-import errno
-
-# DEFINITIONS, CHECK BEFORE EACH SUBMISSION
-BUFFER = 60  # time-left - BUFFER = timilimit for SMAC
+# ==============================================================================
+# ============ CHECK THIS SECTION BEFORE SUBMITTING ============================
+# Definitions
+BUFFER = 60  # time-left - BUFFER = timilimit for SMAC/ensembles.py
+# Check system
+from util import check_system_info
+check_system_info.check_system_info()
 
 
 if debug_mode >= 4 or running_on_codalab: # Show library version and directory structure
     data_io.show_version()
     data_io.show_dir(run_dir)
 
-# Get some system information
-try:
-    import platform
-    architecture = platform.architecture()
-    pltfrm = platform.platform()
-    java_ver = platform.java_ver()
-    linux = platform.linux_distribution()
-    env = os.environ
-    vprint(verbose, "Architecture: %s" % str(architecture))
-    vprint(verbose, "Platform: %s" % str(pltfrm))
-    vprint(verbose, "Java_ver: %s" % str(java_ver))
-    vprint(verbose, "Linux: %s" % str(linux))
-    vprint(verbose, "Environment: %s" % str(env))
-    vprint(verbose, "sklearn %s" % str(sklearn.__version__))
-    vprint(verbose, "numpy: %s" % str(np.__version__))
-    vprint(verbose, "scipy: %s" % str(scipy.__version__))
-except:
-    vprint(verbose, "Could not find platform information")
-    pass
-
-try:
-    import subprocess
-    import shlex
-    call = "java -version"
-    call = shlex.split(call)
-    out = subprocess.check_output(call)
-    vprint(verbose, "Java -version: %s" % str(out))
-    call = "which java"
-    call = shlex.split(call)
-    out = subprocess.check_output(call)
-    vprint(verbose, "which java: %s" % str(out))
-except Exception as e:
-    vprint(verbose, "Error while calling 'java -version': %s" % str(e))
-    vprint(verbose, "Could not find java information")
-    pass
-
-try:
-    import subprocess
-    import shlex
-    call = "ls -la %s" % os.path.dirname(os.path.abspath(__file__))
-    call = shlex.split(call)
-    out_1 = subprocess.check_output(call)
-    vprint(verbose, "ls -la here: %s" % str(out_1))
-except Exception as e:
-    vprint(verbose, "Calling: ls -la %s" % os.path.dirname(os.path.abspath(__file__)))
-    vprint(verbose, "Error while calling 'ls -la here': %s" % str(e))
-    pass
-
-try:
-    import subprocess
-    import shlex
-    call = "ls -la %s" % os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib")
-    call = shlex.split(call)
-    out_2 = subprocess.check_output(call)
-    vprint(verbose, "ls -la in /lib/: %s" % str(out_2))
-except Exception as e:
-    vprint(verbose, "Calling: ls -la %s" % os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib"))
-    vprint(verbose, "Error while calling 'ls-la in lib': %s" % str(e))
-    pass
-
-try:
-    import subprocess
-    import shlex
-    call = "ls -la %s" % os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib", "jre1.8.0_25", "bin")
-    call = shlex.split(call)
-    out_2 = subprocess.check_output(call)
-    vprint(verbose, "ls -la in /lib/jre/bin: %s" % str(out_2))
-except Exception as e:
-    vprint(verbose, "Calling: ls -la %s" % os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib"))
-    vprint(verbose, "Error while calling 'ls-la in lib/jre/bin': %s" % str(e))
-    pass
-
 # =========================== BEGIN PROGRAM ================================
-
 if __name__=="__main__" and debug_mode<4:
-
     # Store all pid from running processes to check whether they are still alive
     pid_dict = dict()
     info_dict = dict()
 
+    # Get time left after imports
     stop_load = time.time()
     loading_overhead = stop_load - loading_overhead
     overall_limit = 0-loading_overhead
@@ -323,8 +260,9 @@ if __name__=="__main__" and debug_mode<4:
         output_dir = default_output_dir
     else:
         input_dir = argv[1]
-        output_dir = os.path.abspath(argv[2]);
+        output_dir = os.path.abspath(argv[2])
 
+    # ==== Create TMP directory to store our output
     tmp_dir = os.path.abspath(os.path.join(output_dir, "TMP"))
     vprint(verbose, "Creating temporary output dir %s" % tmp_dir)
 
@@ -352,33 +290,34 @@ if __name__=="__main__" and debug_mode<4:
         data_io.show_io(input_dir, output_dir)
         print('\n****** Sample code version ' + str(version) + ' ******\n\n' + '========== DATASETS ==========\n')        	
         data_io.write_list(datanames)      
-        datanames = [] # Do not proceed with learning and testing
+        datanames = []  # Do not proceed with learning and testing
 
     stop.stop_task("inventory")
     stop.start_task("submitresults")
     # ==================== @RESULT SUBMISSION (KEEP THIS) =====================
     # Always keep this code to enable result submission of pre-calculated results
     # deposited in the res/ subdirectory.
-    if len(datanames)>0:
-        vprint( verbose,  "************************************************************************")
-        vprint( verbose,  "****** Attempting to copy files (from res/) for RESULT submission ******")
-        vprint( verbose,  "************************************************************************")
-        OK = data_io.copy_results(datanames, res_dir, output_dir, verbose) # DO NOT REMOVE!
+    if len(datanames) > 0:
+        vprint(verbose,  "************************************************************************")
+        vprint(verbose,  "****** Attempting to copy files (from res/) for RESULT submission ******")
+        vprint(verbose,  "************************************************************************")
+        OK = data_io.copy_results(datanames, res_dir, output_dir, verbose)  # DO NOT REMOVE!
         if OK: 
-            vprint( verbose,  "[+] Success")
-            datanames = [] # Do not proceed with learning and testing
+            vprint(verbose,  "[+] Success")
+            datanames = []  # Do not proceed with learning and testing
         else:
-            vprint( verbose, "======== Some missing results on current datasets!")
-            vprint( verbose, "======== Proceeding to train/test:\n")
+            vprint(verbose, "======== Some missing results on current datasets!")
+            vprint(verbose, "======== Proceeding to train/test:\n")
     # =================== End @RESULT SUBMISSION (KEEP THIS) ==================
     stop.stop_task("submitresults")
 
     stop.start_task("submitcode")
-    # ================ @CODE SUBMISSION (SUBTITUTE YOUR CODE) ================= 
-    overall_time_budget = 0
+    # ================ @CODE SUBMISSION (SUBTITUTE YOUR CODE) =================
+
+    # Get info about all datasets
     stop.start_task("get_info")
     for basename in datanames:
-        # loop over all datasets to get overall time_budget and create dir in TMP_DIR
+        # loop over all datasets to get overall time_budget
         info_dict[basename] = get_dataset_info.getInfoFromFile(input_dir, basename)
         overall_limit += info_dict[basename]["time_budget"]
 
@@ -387,12 +326,17 @@ if __name__=="__main__" and debug_mode<4:
            (overall_limit, spent, overall_limit-spent))
     stop.stop_task("get_info")
 
+    # Loop over all datasets
+    # 1. Create tmp folder
+    # 2. Load dataset, split and store data
+    # 3. Start smac
+    # 4. Start ensembles
     for basename in datanames:
         stop.start_task(basename)
 
-        vprint( verbose,  "************************************************")
-        vprint( verbose,  "******** Processing dataset " + basename.capitalize() + " ********")
-        vprint( verbose,  "************************************************")
+        vprint(verbose,  "************************************************")
+        vprint(verbose,  "******** Processing dataset " + basename.capitalize() + " ********")
+        vprint(verbose,  "************************************************")
 
         tmp_dataset_dir = os.path.join(TMP_DIR, basename)
         vprint(verbose, "Makedir %s" % tmp_dataset_dir)
@@ -401,18 +345,11 @@ if __name__=="__main__" and debug_mode<4:
         except OSError as exception:
             if exception.errno != errno.EEXIST:
                 raise
-        # Loop over datasets and start smac
+
         # TODO outsource this and start processes in parallel
 
-
-
-        # ======== Learning on a time budget:
-        # Keep track of time not to exceed your time budget.
-        # Time spent to inventory data neglected.
-        start = time.clock()
-
         stop.start_task("load_%s" % basename)
-        # ======== Creating a data object with data, informations about it
+        # ======== Creating a data object with data and information about it
         vprint( verbose,  "======== Reading and converting data ==========")
         D = DataManager(basename, input_dir, verbose=verbose)
         print D
@@ -425,22 +362,12 @@ if __name__=="__main__" and debug_mode<4:
         np.save(os.path.join(tmp_dataset_dir, "true_labels_ensemble.npy"), Y_ensemble)
         cPickle.dump(D, open(os.path.join(tmp_dataset_dir, basename + "_Manager.pkl"), 'w'), protocol=-1)
 
-        # ======== Keeping track of time
-        # TODO: Check whether we need this and then remove
-        if debug_mode<1:
-            time_budget = D.info['time_budget']   # <== HERE IS THE TIME BUDGET!
-        else:
-            time_budget = max_time
-        overall_time_budget = overall_time_budget + time_budget
-        time_spent = time.clock() - start
-        vprint( verbose,  "[+] Remaining time after reading data %5.2f sec" % (time_budget-time_spent))
-        if time_spent >= time_budget:
-            vprint( verbose,  "[-] Sorry, time budget exceeded, skipping this task")
-            execution_success = False
-            continue
         stop.stop_task("dump_%s" % basename)
+        vprint(verbose, "Remaining time after reading data %5.2f sec" %
+               (overall_limit - stop.wall_elapsed("wholething")))
 
         stop.start_task("start_smac_%s" % basename)
+
         # ========= RUN SMAC
         # == Create an empty instance file
         instance_file = os.path.join(tmp_dataset_dir, "instances.txt")
@@ -456,6 +383,7 @@ if __name__=="__main__" and debug_mode<4:
         fh.write(sp_string)
         fh.close()
 
+        # == Start SMAC
         time_left_for_this_task = max(0, overall_limit - stop.wall_elapsed("wholething") - BUFFER)
         pid_dict[basename + "_smac"] = \
             submit_process.run_smac(tmp_dir=tmp_dataset_dir,
@@ -482,41 +410,35 @@ if __name__=="__main__" and debug_mode<4:
     run = True
 
     while run:
-        print "Nothing to do, wait %fsec" % (overall_limit -
-                                             stop.wall_elapsed("wholething"))
-        # Check whether all pids are still running
-        print "+" + "-" * 48 + "+"
+        vprint(verbose, "#"*80)
+        vprint(verbose, "# Nothing to do, %fsec left" %
+               (overall_limit - stop.wall_elapsed("wholething")))
+        vprint(verbose, "#"*80 + "\n")
+
+        # == Check whether all pids are still running
+        vprint(verbose, "+" + "-" * 48 + "+")
         for key in pid_dict:
             running = check_pid.check_pid(pid_dict[key])
-            print "|%32s|%10d|%5s|" % (key, pid_dict[key], str(running))
-        print "+" + "-" * 48 + "+"
+            vprint(verbose, "|%32s|%10d|%5s|" % (key, pid_dict[key], str(running)))
+        vprint(verbose, "+" + "-" * 48 + "+")
+
+        # == List results in outputdirectory
         output_dir_list = str(os.listdir(output_dir))
-        vprint(verbose, "Output directory contains: %s" % output_dir_list)
+        vprint(verbose, "\nOutput directory contains: %s" % output_dir_list)
         time.sleep(10)
         if stop.wall_elapsed("wholething") >= overall_limit-15:
             run = False
-    print stop
 
     if zipme:
         vprint( verbose,  "========= Zipping this directory to prepare for submit ==============")
         data_io.zipdir(submission_filename + '.zip', ".")
-    	
-    overall_time_spent = time.clock() - overall_start
-    if execution_success:
-        vprint( verbose,  "[+] Done")
-        vprint( verbose,  "[+] Overall time spent %5.2f sec " % overall_time_spent + "::  Overall time budget %5.2f sec" % overall_time_budget)
-    else:
-        vprint( verbose,  "[-] Done, but some tasks aborted because time limit exceeded")
-        vprint( verbose,  "[-] Overall time spent %5.2f sec " % overall_time_spent + " > Overall time budget %5.2f sec" % overall_time_budget)
 
+    # Finish and show stopwatch
     stop.stop_task("submitcode")
     stop.stop_task("wholething")
-    print stop
+    vprint(verbose, stop)
 
-    if running_on_codalab: 
-        if execution_success:
-            exit(0)
-        else:
-            exit(1)
+    exit(0)
+
 
 
