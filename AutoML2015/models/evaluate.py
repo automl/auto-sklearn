@@ -9,9 +9,14 @@ import numpy as np
 from AutoSklearn.autosklearn import AutoSklearnClassifier
 from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
 
-from data.data_converter import convert_to_bin
-from scores import libscores
-from util.split_data import split_data
+try:
+    from ..data.data_converter import convert_to_bin
+    from ..scores import libscores
+    from ..util.split_data import split_data
+except:
+    from data.data_converter import convert_to_bin
+    from scores import libscores
+    from util.split_data import split_data
 import time
 import os
 
@@ -92,8 +97,6 @@ def calculate_score(solution, prediction, task_type, metric,
     return score
 
 
-
-
 def get_new_run_num():
     counter_file = os.path.join(os.getcwd(), "num_run")
     if not os.path.exists(counter_file):
@@ -109,8 +112,8 @@ def get_new_run_num():
         return num
 
 
-class evaluator:
-    def __init__(self, Datamanager, configuration, with_predictions=False, all_scoring_functions=False, splitting_function=split_data, seed=1):
+class Evaluator(object):
+    def __init__(self,Datamanager, configuration, with_predictions=False, all_scoring_functions=False, splitting_function=split_data, seed=1):
 
         self.starttime = time.time()
 
@@ -146,7 +149,7 @@ class evaluator:
         try:
             self.duration = time.time() - self.starttime
             result, additional_run_info = self.file_output()
-            print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % ("SAT", abs(self.duration), result, self.seed, additional_run_info);
+            print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % ("SAT", abs(self.duration), result, self.seed, additional_run_info)
         except:
             import sys
             e = sys.exc_info()[0]
@@ -226,6 +229,7 @@ def evaluate(Datamanager, configuration, with_predictions=False,
     else:
         model = AutoSklearnClassifier(configuration, seed)
 
+    print configuration
     model.fit(X_train, Y_train)
 
     if task_type == 'regression':

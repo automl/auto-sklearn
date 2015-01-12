@@ -64,10 +64,11 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
     time_iter = 0
     index_run = 0
     current_num_models = 0
+    logging.basicConfig(filename=os.path.join(predictions_dir, "ensemble.log"), level=logging.DEBUG)
 
     while (used_time + time_iter) < limit:
-
-        logging.basicConfig(filename=os.path.join(predictions_dir, "ensemble.log"), level=logging.DEBUG)
+        logging.debug("Time left: %f" % (limit - used_time))
+        logging.debug("Time last iteration: %f" % time_iter)
         # Load the true labels of the validation data
         true_labels = np.load(os.path.join(predictions_dir, "true_labels_ensemble.npy"))
 

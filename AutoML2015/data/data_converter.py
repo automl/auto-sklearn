@@ -149,3 +149,18 @@ def replace_missing(X):
             line2 = [1 if np.isnan(x) else 0 for x in line] # indicator of missingness
             XX[i] = line1 + line2
     return XX
+
+
+def predict_RAM_usage(X, categorical):
+    """Return estimated RAM usage of dataset after OneHotEncoding in bytes."""
+    estimated_columns = 0
+    for i, cat in enumerate(categorical):
+        if cat:
+            unique_values = np.unique(X[:, i])
+            num_unique_values = np.sum(np.isfinite(unique_values))
+            estimated_columns += num_unique_values
+        else:
+            estimated_columns += 1
+    estimated_ram = estimated_columns * X.shape[0] * 8
+    return estimated_ram
+

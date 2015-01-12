@@ -26,7 +26,7 @@ except:
 from HPOlib.wrapping_util import get_time_string
 
 from AutoML2015.data.data_manager import DataManager
-from AutoML2015.models.evaluate import evaluate
+from AutoML2015.models.evaluate import Evaluator
 
 
 def store_and_or_load_data(outputdir, dataset, data_dir):
@@ -94,9 +94,12 @@ def main(args, params):
     configuration = configuration_space.Configuration(cs, **params)
 
     starttime = time.time()
+
+    evaluator = Evaluator(D, configuration, with_predictions=True,
+                          all_scoring_functions=True)
+    evaluator.fit()
     errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
-        evaluate(D, configuration, with_predictions=True,
-                 all_scoring_functions=True)
+        evaluator.predict()
     duration = time.time() - starttime
 
     pred_dump_name_template = os.path.join(output_dir, "predictions_%s",

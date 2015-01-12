@@ -3,16 +3,22 @@ import os
 import subprocess
 
 
-def submit_call(call):
+def submit_call(call, log_dir=None):
     print "Calling: " + call
     call = shlex.split(call)
     try:
-        proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'))
-        proc_id = proc.pid
+        if log_dir is None:
+            proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'),
+                                    preexec_fn=os.setsid)
+        else:
+            proc = subprocess.Popen(call, stdout=open(os.path.join(log_dir, "ensemble_out.log"), 'w'),
+                                    stderr=open(os.path.join(log_dir, "ensemble_err.log"), 'w'),
+                                    preexec_fn=os.setsid)
+        #proc_id = proc.pid
     except OSError as e:
         print e
         return -1
-    return proc_id
+    return proc
 
 
 def get_algo_exec(runsolver_limit, runsolver_delay, target_call_limit):
@@ -29,10 +35,10 @@ def get_algo_exec(runsolver_limit, runsolver_delay, target_call_limit):
     call += " --limit %d" % target_call_limit
 
     # Now add runsolver command
-    runsolver_prefix = "runsolver --watcher-data /dev/null -W %d" % \
-                       (runsolver_limit)
-    #runsolver_prefix = "runsolver --watcher-data /dev/null -W %d -d %d" % \
-    #                   (runsolver_limit, runsolver_delay)
+    #runsolver_prefix = "runsolver --watcher-data /dev/null -W %d" % \
+    #                   (runsolver_limit)
+    runsolver_prefix = "runsolver --watcher-data /dev/null -W %d -d %d" % \
+                       (runsolver_limit, runsolver_delay)
     call = '"' + runsolver_prefix + " " + call + '"'
     return call
 
@@ -49,12 +55,12 @@ def run_smac(tmp_dir, searchspace, instance_file, limit):
         # We try to do at least one run within the whole runtime
         cutoff_time = int(wallclock_limit) - 5
 
-    cutoff_time_target_function_sees = cutoff_time - 10
-    cutoff_time_runsolver_respects = cutoff_time - 5
-    cutoff_time_runsolver_delay = 5
+    cutoff_time_target_function_sees = cutoff_time - 10  # Not needed
+    runsolver_softlimit = cutoff_time - 35
+    runsolver_hardlimit_delay = 30
 
-    algo_exec = get_algo_exec(runsolver_limit=cutoff_time_runsolver_respects,
-                              runsolver_delay=cutoff_time_runsolver_delay,
+    algo_exec = get_algo_exec(runsolver_limit=runsolver_softlimit,
+                              runsolver_delay=runsolver_hardlimit_delay,
                               target_call_limit=cutoff_time_target_function_sees)
 
     # Bad hack to find smac
@@ -81,8 +87,7 @@ def run_smac(tmp_dir, searchspace, instance_file, limit):
                     '-p', os.path.abspath(searchspace),
                     '--execDir', tmp_dir,
                     '--instances', instance_file])
-    pid = submit_call(call)
-    return pid
+    return submit_call(call)
 
 
 def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit, output_dir):
@@ -98,12 +103,11 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit, output
                         task_type, metric, str(limit-5), output_dir])
 
     # Now add runsolver command
-    runsolver_cmd = "%s --watcher-data /dev/null -W %d" % \
-                    (runsolver_exec, limit)
-    #runsolver_cmd = "%s --watcher-data /dev/null -W %d -d %d" % \
-    #                (runsolver_exec, limit, delay)
+    #runsolver_cmd = "%s --watcher-data /dev/null -W %d" % \
+    #                (runsolver_exec, limit)
+    runsolver_cmd = "%s --watcher-data /dev/null -W %d -d %d" % \
+                    (runsolver_exec, limit, delay)
     call = runsolver_cmd + " " + call
 
-    pid = submit_call(call)
-    return pid
+    return submit_call(call, log_dir=tmp_dir)
 

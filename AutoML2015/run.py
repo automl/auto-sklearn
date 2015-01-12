@@ -137,7 +137,6 @@ max_cycle = 20
 # You can create a code submission archive, ready to submit, with zipme = True.
 # This is meant to be used on your LOCAL server.
 import datetime
-zipme = False # use this flag to enable zipping of your code submission
 the_date = datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
 submission_filename = 'automl_sample_submission_' + the_date
 
@@ -185,12 +184,10 @@ path.append(lib_dir)
 # ===================================
 
 # === Add libraries to path
-# general imports
 import sys
-import sklearn
-import scipy
-import cPickle
 import errno
+import multiprocessing
+import Queue
 
 our_root_dir = os.path.abspath(os.path.dirname(__file__))
 our_lib_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib"))
@@ -212,25 +209,11 @@ os.environ["PATH"] = os.environ["PATH"] + os.pathsep + smac_path +\
                      os.pathsep + our_lib_dir + os.pathsep + java_path
 os.environ["JAVA_HOME"] = os.path.join(java_path, "java")
 
-# Imports from this libray
+# Imports from this library
 import data.data_io as data_io            # general purpose input/output functions
 from data.data_io import vprint           # print only in verbose mode
-from data.data_manager import DataManager # load/save data and get info about them
-from util import Stopwatch, submit_process, split_data, get_dataset_info, check_pid
+from util import Stopwatch, get_dataset_info, check_pid, check_system_info
 import start_automl
-from models import autosklearn
-
-# Import from libraries locates in /lib/
-from HPOlibConfigSpace.converters import pcs_parser
-
-# ==============================================================================
-# ============ CHECK THIS SECTION BEFORE SUBMITTING ============================
-# Definitions
-BUFFER = 60  # time-left - BUFFER = timilimit for SMAC/ensembles.py
-# Check system
-from util import check_system_info
-check_system_info.check_system_info()
-
 
 if debug_mode >= 4 or running_on_codalab: # Show library version and directory structure
     data_io.show_version()
@@ -238,16 +221,23 @@ if debug_mode >= 4 or running_on_codalab: # Show library version and directory s
 
 # =========================== BEGIN PROGRAM ================================
 if __name__=="__main__" and debug_mode<4:
-    # Store all pid from running processes to check whether they are still alive
+    # ==========================================================================
+    # ============ CHECK THIS SECTION BEFORE SUBMITTING ========================
+    # == Definitions
+    BUFFER = 60  # time-left - BUFFER = timelimit for SMAC/ensembles.py
+    # == Check system
+    check_system_info.check_system_info()
+
+    # == Some variables
     pid_dict = dict()
     info_dict = dict()
 
-    # Get time left after imports
+    # == Calc time already spent
     stop_load = time.time()
     loading_overhead = stop_load - loading_overhead
     overall_limit = 0-loading_overhead
 
-    print "Loading took %f sec" % loading_overhead
+    vprint(verbose, "Loading took %f sec" % loading_overhead)
     stop = Stopwatch.StopWatch()
     stop.start_task("wholething")
     stop.start_task("inventory")
@@ -256,14 +246,14 @@ if __name__=="__main__" and debug_mode<4:
     execution_success = True
     
     #### INPUT/OUTPUT: Get input and output directory names
-    if len(argv)==1: # Use the default input and output directories if no arguments are provided
+    if len(argv) == 1: # Use the default input and output directories if no arguments are provided
         input_dir = default_input_dir
         output_dir = default_output_dir
     else:
         input_dir = argv[1]
         output_dir = os.path.abspath(argv[2])
 
-    # ==== Create TMP directory to store our output
+    # == Create TMP directory to store our output
     tmp_dir = os.path.abspath(os.path.join(output_dir, "TMP"))
     vprint(verbose, "Creating temporary output dir %s" % tmp_dir)
 
@@ -279,7 +269,7 @@ if __name__=="__main__" and debug_mode<4:
     output_dir_list = str(os.listdir(output_dir))
     vprint(verbose, "Output directory contains: %s" % output_dir_list)
 
-    # Move old results and create a new output directory
+    #### Move old results and create a new output directory
     data_io.mvdir(output_dir, output_dir+'_'+the_date) 
     data_io.mkdir(output_dir) 
     
@@ -315,10 +305,9 @@ if __name__=="__main__" and debug_mode<4:
     stop.start_task("submitcode")
     # ================ @CODE SUBMISSION (SUBTITUTE YOUR CODE) =================
 
-    # Get info about all datasets
+    # == Get info from all datasets to get overall time limit
     stop.start_task("get_info")
     for basename in datanames:
-        # loop over all datasets to get overall time_budget
         info_dict[basename] = get_dataset_info.getInfoFromFile(input_dir, basename)
         overall_limit += info_dict[basename]["time_budget"]
 
@@ -327,18 +316,16 @@ if __name__=="__main__" and debug_mode<4:
            (overall_limit, spent, overall_limit-spent))
     stop.stop_task("get_info")
 
-    # Loop over all datasets
-    # 1. Create tmp folder
-    # 2. Load dataset, split and store data
-    # 3. Start smac
-    # 4. Start ensembles
+    # == Loop over all datasets and start AutoML
+    queue_dict = dict()
     for basename in datanames:
         stop.start_task(basename)
 
-        vprint(verbose,  "************************************************")
-        vprint(verbose,  "******** Processing dataset " + basename.capitalize() + " ********")
-        vprint(verbose,  "************************************************")
+        vprint(verbose, "************************************************")
+        vprint(verbose, "******** Processing dataset " + basename.capitalize() + " ********")
+        vprint(verbose, "************************************************")
 
+        # = Make tmp output directory for this dataset
         tmp_dataset_dir = os.path.join(TMP_DIR, basename)
         vprint(verbose, "Makedir %s" % tmp_dataset_dir)
         try:
@@ -347,21 +334,49 @@ if __name__=="__main__" and debug_mode<4:
             if exception.errno != errno.EEXIST:
                 raise
 
+        # = start AutoML
         time_left_for_this_task = max(0, overall_limit - stop.wall_elapsed("wholething") - BUFFER)
-        pid_smac, pid_ensemble, time_needed_to_load_data = \
-            start_automl.start_automl_on_dataset(basename=basename,
-                                                 input_dir=input_dir,
-                                                 tmp_dataset_dir=tmp_dataset_dir,
-                                                 output_dir=output_dir,
-                                                 time_left_for_this_task=time_left_for_this_task)
-        pid_dict[basename + "_smac"] = pid_smac
-        pid_dict[basename + "_ensemble"] = pid_ensemble
+        queue_dict[basename] = multiprocessing.Queue()
+        p = multiprocessing.Process(target=start_automl.start_automl_on_dataset,
+                                    args=(basename, input_dir,
+                                          tmp_dataset_dir, output_dir,
+                                          time_left_for_this_task, queue_dict[basename]))
+        p.start()
         stop.stop_task(basename)
 
-    # And now we wait till the jobs are done
-    print stop
-    run = True
+    # == Try to get information from all subprocesses, especially pid
+    information_ready = False
+    data_loading_times = dict()
+    while not information_ready:
+        # = We assume all jobs are running
+        information_ready = True
+        # = Loop over all datasets
+        for basename in datanames:
+            # = If this entry does not exist, the process has not yet started
+            if not basename + "_ensemble" in pid_dict:
+                information_ready = False
+                vprint(verbose, "Waiting for run information about %s" % basename)
+                try:
+                    [time_needed_to_load_data, pid_smac, pid_ensembles] = queue_dict[basename].get_nowait()
+                    pid_dict[basename + "_ensemble"] = pid_ensembles
+                    pid_dict[basename + "_smac"] = pid_smac
+                    stop.insert_task(name=basename + "_load",
+                                     cpu_dur=time_needed_to_load_data,
+                                     wall_dur=time_needed_to_load_data)
+                except Queue.Empty:
+                    continue
+        vprint(verbose, "\n")
+        if not information_ready:
+            if stop.wall_elapsed("wholething") >= overall_limit-15:
+                # = We have to stop, as there is no time left
+                continue
+            else:
+                time.sleep(10)
 
+    print stop
+
+    # == And now we wait till we run out of time
+    run = True
     while run:
         vprint(verbose, "#"*80)
         vprint(verbose, "# Nothing to do, %fsec left" %
@@ -376,17 +391,27 @@ if __name__=="__main__" and debug_mode<4:
         vprint(verbose, "+" + "-" * 48 + "+")
 
         # == List results in outputdirectory
-        output_dir_list = str(os.listdir(output_dir))
+        output_dir_list = str(os.listdir(output_dir).sort())
         vprint(verbose, "\nOutput directory contains: %s" % output_dir_list)
         time.sleep(10)
         if stop.wall_elapsed("wholething") >= overall_limit-15:
             run = False
 
-    if zipme:
-        vprint( verbose,  "========= Zipping this directory to prepare for submit ==============")
-        data_io.zipdir(submission_filename + '.zip', ".")
+    # == Now it's time to kill subprocesses
+    for key in pid_dict:
+        try:
+            os.killpg(os.getpgid(pid_dict[key]), 9)
+        except OSError:
+            # This is ok
+            continue
 
-    # Finish and show stopwatch
+    vprint(verbose, "+" + "-" * 48 + "+")
+    for key in pid_dict:
+        running = check_pid.check_pid(pid_dict[key])
+        vprint(verbose, "|%32s|%10d|%5s|" % (key, pid_dict[key], str(running)))
+    vprint(verbose, "+" + "-" * 48 + "+")
+
+    # == Finish and show stopwatch
     stop.stop_task("submitcode")
     stop.stop_task("wholething")
     vprint(verbose, stop)
