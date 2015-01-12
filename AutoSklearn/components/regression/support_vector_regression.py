@@ -11,11 +11,11 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from ..regression_base import AutoSklearnRegressionAlgorithm
 
-
+# Something is wrong here...
+"""
 class SupportVectorRegression(AutoSklearnRegressionAlgorithm):
-    def __init__(self, kernel, gamma, C, epsilon, degree,
-                 coef0, tol, shrinking, probability=False,
-                 cache_size=2000, verbose=False,
+    def __init__(self, kernel, C, epsilon, degree, coef0, tol, shrinking,
+                 gamma=0.0, probability=False, cache_size=2000, verbose=False,
                  max_iter=-1, random_state=None
                  ):
 
@@ -139,3 +139,4 @@ class SupportVectorRegression(AutoSklearnRegressionAlgorithm):
         cs.add_condition(gamma_depends_on_kernel)
         cs.add_condition(coef0_depends_on_kernel)
         return cs
+"""
