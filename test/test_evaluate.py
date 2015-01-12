@@ -7,7 +7,7 @@ import unittest
 import numpy as np
 
 from AutoML2015.data.data_converter import convert_to_bin
-from AutoML2015.models.evaluate import evaluate, predict_proba
+from AutoML2015.models.evaluate import Evaluator, predict_proba
 from AutoML2015.util.split_data import split_data
 from AutoSklearn.autosklearn import AutoSklearnClassifier
 from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
@@ -45,7 +45,10 @@ class Test(unittest.TestCase):
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
-            err[i] = evaluate(D, configuration, splitting_function=split_data)
+            evaluator = Evaluator(D, configuration,
+                                  splitting_function=split_data)
+            evaluator.fit()
+            err[i] = evaluator.predict()
             print err[i]
 
             self.assertTrue(np.isfinite(err[i]))
@@ -58,7 +61,9 @@ class Test(unittest.TestCase):
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
-            err.append(evaluate(D, configuration, all_scoring_functions=True))
+            evaluator = Evaluator(D, configuration, all_scoring_functions=True)
+            evaluator.fit()
+            err.append(evaluator.predict())
             print err[-1]
 
             self.assertIsInstance(err[-1], dict)
@@ -96,7 +101,9 @@ class Test(unittest.TestCase):
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
-            err[i] = evaluate(D, configuration)
+            evaluator = Evaluator(D, configuration)
+            evaluator.fit()
+            err[i] = evaluator.predict()
             print err[i]
 
             self.assertTrue(np.isfinite(err[i]))
@@ -137,7 +144,9 @@ class Test(unittest.TestCase):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
 
-            err[i] = evaluate(D, configuration)
+            evaluator = Evaluator(D, configuration)
+            evaluator.fit()
+            err[i] = evaluator.predict()
             self.assertTrue(np.isfinite(err[i]))
             print err[i]
 
@@ -148,7 +157,6 @@ class Test(unittest.TestCase):
 
     def test_evaluate_regression(self):
         X_train, Y_train, X_test, Y_test = get_dataset('boston')
-        print len(Y_test)
 
         X_valid = X_test[:200, ]
         Y_valid = Y_test[:200, ]
@@ -173,7 +181,9 @@ class Test(unittest.TestCase):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
 
-            err[i] = evaluate(D, configuration)
+            evaluator = Evaluator(D, configuration)
+            evaluator.fit()
+            err[i] = evaluator.predict()
             self.assertTrue(np.isfinite(err[i]))
             print err[i]
 
