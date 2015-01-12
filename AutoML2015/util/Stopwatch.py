@@ -76,6 +76,15 @@ class StopWatch:
         self._tasks = OrderedDict()
         self._tasks["stopwatch_time"] = TimingTask("stopwatch_time")
 
+    def insert_task(self, name, cpu_dur, wall_dur):
+        if name not in self._tasks:
+            self._tasks[name] = TimingTask(name)
+            self._tasks[name].stop()
+            self._tasks[name]._wall_dur = wall_dur
+            self._tasks[name]._cpu_dur = cpu_dur
+        else:
+            sys.stderr.write("You are already timing task: %s\n" % name)
+
     def start_task(self, name):
         if name not in self._tasks:
             self._tasks[name] = TimingTask(name)
