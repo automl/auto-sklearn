@@ -60,7 +60,8 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
     def fit(self, X, Y):
         num_features = X.shape[1]
         max_features = int(float(self.max_features) * (np.log(num_features) + 1))
-        max_features = min(0.5, max_features)
+        # Use at most half of the features
+        max_features = max(1, min(int(X.shape[1] / 2), max_features))
         self.estimator = forest.ExtraTreesClassifier(
             n_estimators=0, criterion=self.criterion,
             max_depth=self.max_depth, min_samples_split=self.min_samples_split,
