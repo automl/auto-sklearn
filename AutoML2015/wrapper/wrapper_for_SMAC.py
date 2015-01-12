@@ -61,15 +61,16 @@ def store_and_or_load_data(outputdir, dataset, data_dir):
 # signal handler seem to work only if they are globally defined
 # to give it access to the evaluator class, the evaluator name has to 
 # be a global name. It's not the cleanest solution, but works for now.
-evaluator = None;
+evaluator = None
 def signal_handler(signum, frame):
     print "Aborting Training!"
-    global evaluator;
-    evaluator.finish_up();
-    exit(0);
+    global evaluator
+    evaluator.finish_up()
+    exit(0)
 
 
 signal.signal(15, signal_handler)
+
 
 def main(basename, input_dir, params, time_limit=sys.maxint):
     for key in params:
@@ -78,7 +79,6 @@ def main(basename, input_dir, params, time_limit=sys.maxint):
         except:
             pass
 
-    
     output_dir = os.getcwd()
     D = store_and_or_load_data(data_dir=input_dir, dataset=basename,
                                outputdir=output_dir)
@@ -89,16 +89,15 @@ def main(basename, input_dir, params, time_limit=sys.maxint):
         cs = AutoSklearnClassifier.get_hyperparameter_search_space()
     configuration = configuration_space.Configuration(cs, **params)
 
-    global evaluator;
-    evaluator = models.evaluate.evaluator(Datamanager=D, configuration=configuration, with_predictions=True,all_scoring_functions=True)
-    evaluator.output_dir = output_dir;
-    evaluator.basename = basename; 
-    evaluator.D = D;
-    evaluator.fit();
-    
-    evaluator.finish_up();
-    
-    
+    global evaluator
+    evaluator = models.evaluate.evaluator(Datamanager=D, configuration=configuration, with_predictions=True, all_scoring_functions=True)
+    evaluator.output_dir = output_dir
+    evaluator.basename = basename
+    evaluator.D = D
+    evaluator.fit()
+
+    evaluator.finish_up()
+
 if __name__ == "__main__":
     outer_starttime = time.time()
     # Change a SMAC call into an HPOlib call, not yet needed!
