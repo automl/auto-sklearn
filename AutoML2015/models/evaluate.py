@@ -37,7 +37,7 @@ def predict_proba(X, model, task_type):
 
     elif task_type == "binary.classification":
         if len(Y_pred.shape) != 1:
-            Y_pred = Y_pred[:,1].reshape(-1, 1)
+            Y_pred = Y_pred[:, 1].reshape(-1, 1)
 
     return Y_pred
 
@@ -114,10 +114,10 @@ def get_new_run_num():
 
 class Evaluator(object):
     def __init__(self,Datamanager, configuration, with_predictions=False, all_scoring_functions=False, splitting_function=split_data, seed=1):
-        
+
         self.starttime = time.time()
-        
-        self.X_train,self.X_optimization,self.Y_train,self.Y_optimization = \
+
+        self.X_train, self.X_optimization, self.Y_train, self.Y_optimization = \
         splitting_function(Datamanager.data['X_train'], Datamanager.data['Y_train'])
 
         self.X_valid = Datamanager.data.get('X_valid')
@@ -125,11 +125,11 @@ class Evaluator(object):
 
         self.metric = Datamanager.info['metric']
         self.task_type = Datamanager.info['task'].lower()
-        self.seed=seed
-        
-        self.with_predictions=with_predictions
-        self.all_scoring_functions=all_scoring_functions
-        
+        self.seed = seed
+
+        self.with_predictions = with_predictions
+        self.all_scoring_functions = all_scoring_functions
+
         if self.task_type == 'regression':
             self.model = AutoSklearnRegressor(configuration, seed)
             self.predict_function = predict_regression
@@ -149,8 +149,11 @@ class Evaluator(object):
         try:
             self.duration = time.time() - self.starttime
             result, additional_run_info = self.file_output()
-            print "Result for ParamILS: %s, %f, 1, %f, %d, %s"%("SAT", abs(self.duration), result, self.seed, additional_run_info)
+            print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % ("SAT", abs(self.duration), result, self.seed, additional_run_info)
         except:
+            import sys
+            e = sys.exc_info()[0]
+            print e
             print "No results were produced! Probably the training was not finished, and no valid model was generated!"
 
     def predict(self):
@@ -165,7 +168,7 @@ class Evaluator(object):
         else:
             Y_test_pred = None
 
-        score = calculate_score(self.Y_optimization, Y_optimization_pred,self.task_type, self.metric, all_scoring_functions=self.all_scoring_functions)
+        score = calculate_score(self.Y_optimization, Y_optimization_pred, self.task_type, self.metric, all_scoring_functions=self.all_scoring_functions)
         
         if hasattr(score, "__len__"):
             err = {key: 1 - score[key] for key in score}
@@ -176,25 +179,23 @@ class Evaluator(object):
             return err, Y_optimization_pred, Y_valid_pred, Y_test_pred
         return err
     
-    
     def file_output(self):
-        output_dir = self.output_dir    # dirty hack so I don't have to replace all the output_dir by self.output_dir below :)
         errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
-        pred_dump_name_template = os.path.join(output_dir, "predictions_%s", self.basename + '_predictions_%s_' + str(get_new_run_num()) + '.npy')
+        pred_dump_name_template = os.path.join(self.output_dir, "predictions_%s", self.basename + '_predictions_%s_' + str(get_new_run_num()) + '.npy')
 
-        ensemble_output_dir = os.path.join(output_dir, "predictions_ensemble")
+        ensemble_output_dir = os.path.join(self.output_dir, "predictions_ensemble")
         if not os.path.exists(ensemble_output_dir):
             os.mkdir(ensemble_output_dir)
         with open(pred_dump_name_template % ("ensemble", "ensemble"), "w") as fh:
             pickle.dump(Y_optimization_pred, fh, -1)
 
-        valid_output_dir = os.path.join(output_dir, "predictions_valid")
+        valid_output_dir = os.path.join(self.output_dir, "predictions_valid")
         if not os.path.exists(valid_output_dir):
             os.mkdir(valid_output_dir)
         with open(pred_dump_name_template % ("valid", "valid"), "w") as fh:
             pickle.dump(Y_valid_pred, fh, -1)
 
-        test_output_dir = os.path.join(output_dir, "predictions_test")
+        test_output_dir = os.path.join(self.output_dir, "predictions_test")
         if not os.path.exists(test_output_dir):
             os.mkdir(test_output_dir)
         with open(pred_dump_name_template % ("test", "test"), "w") as fh:

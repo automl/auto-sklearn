@@ -7,8 +7,9 @@ Created on Dec 19, 2014
 import os
 import sys
 import cma
-import numpy as np
 import time
+import logging
+import numpy as np
 
 from data import data_io
 from models import evaluate
@@ -30,13 +31,14 @@ def weighted_ensemble_error(weights, *args):
 
 
 def weighted_ensemble(predictions, true_labels, task_type, metric):
-
+    seed = np.random.randint(0, 1000)
+    logging.debug("CMA-ES uses seed: " + str(seed))
     n_models = predictions.shape[0]
     weights = np.ones([n_models]) / n_models
     if n_models > 1:
         res = cma.fmin(weighted_ensemble_error, weights, sigma0=0.25,
                        args=(predictions, true_labels, metric,
-                             task_type), options={'bounds': [0, 1]})
+                             task_type), options={'bounds': [0, 1], 'seed': seed})
         weights = np.array(res[0])
     else:
         # Python CMA-ES does not work in a 1-D space
@@ -62,8 +64,10 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
     time_iter = 0
     index_run = 0
     current_num_models = 0
+
     while (used_time + time_iter) < limit:
 
+        logging.basicConfig(filename=os.path.join(predictions_dir, "ensemble.log"), level=logging.DEBUG)
         # Load the true labels of the validation data
         true_labels = np.load(os.path.join(predictions_dir, "true_labels_ensemble.npy"))
 
@@ -74,8 +78,9 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
         dir_test = os.path.join(predictions_dir, "predictions_test/")
 
         if not os.path.isdir(dir_ensemble):
-            # Prediction directory does not exist
+            logging.debug("Prediction directory does not exist")
             time.sleep(2)
+            used_time = watch.wall_elapsed("ensemble_builder")
             continue
 
         dir_ensemble_list = os.listdir(dir_ensemble)
@@ -83,53 +88,73 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
         dir_test_list = os.listdir(dir_test)
 
         if len(dir_ensemble_list) == 0:
-            # Directories are empty
+            logging.debug("Directories are empty")
             time.sleep(2)
+            used_time = watch.wall_elapsed("ensemble_builder")
             continue
 
         if len(dir_ensemble_list) != len(dir_valid_list):
-            # Directories are inconsistent
+            logging.debug("Directories are inconsistent")
             time.sleep(2)
+            used_time = watch.wall_elapsed("ensemble_builder")
             continue
 
         if len(dir_ensemble_list) != len(dir_test_list):
-            # Directories are inconsistent
+            logging.debug("Directories are inconsistent")
             time.sleep(2)
+            used_time = watch.wall_elapsed("ensemble_builder")
             continue
 
         if len(dir_ensemble_list) <= current_num_models:
-            # Nothing has changed since the last time
+            logging.debug("Nothing has changed since the last time")
             time.sleep(2)
+            used_time = watch.wall_elapsed("ensemble_builder")
             continue
 
         watch.start_task("ensemble_iter_" + str(index_run))
 
+        # Load all predictions
         for f in dir_ensemble_list:
             predictions = np.load(os.path.join(dir_ensemble, f))
             all_predictions_train.append(predictions)
 
-        # Compute the weights for the ensemble
-        weights = weighted_ensemble(np.array(all_predictions_train),
-                                    true_labels, task_type, metric)
-
-        # Compute the ensemble predictions for the valid data
         all_predictions_valid = []
         for f in dir_valid_list:
             predictions = np.load(os.path.join(dir_valid, f))
             all_predictions_valid.append(predictions)
 
-        Y_valid = ensemble_prediction(np.array(all_predictions_valid), weights)
-
-        filename_test = os.path.join(output_dir, basename + '_valid_' + str(index_run).zfill(3) + '.predict')
-        data_io.write(os.path.join(predictions_dir, filename_test), Y_valid)
-
-        # Compute the ensemble predictions for the test data
         all_predictions_test = []
         for f in dir_test_list:
             predictions = np.load(os.path.join(dir_test, f))
             all_predictions_test.append(predictions)
 
-        Y_test = ensemble_prediction(np.array(all_predictions_test), weights)
+        if len(dir_test_list) == 1:
+            logging.debug("Only one model so far we just copy its predictions")
+            Y_valid = all_predictions_valid[0]
+            Y_test = all_predictions_test[0]
+        else:
+            try:
+                # Compute the weights for the ensemble
+                weights = weighted_ensemble(np.array(all_predictions_train),
+                                        true_labels, task_type, metric)
+            except (ValueError):
+                logging.error("Caught ValueError!")
+                used_time = watch.wall_elapsed("ensemble_builder")
+                continue
+            except:
+                logging.error("Caught error!")
+                used_time = watch.wall_elapsed("ensemble_builder")
+                continue
+
+            # Compute the ensemble predictions for the valid data
+            Y_valid = ensemble_prediction(np.array(all_predictions_valid), weights)
+
+            # Compute the ensemble predictions for the test data
+            Y_test = ensemble_prediction(np.array(all_predictions_test), weights)
+
+        # Save predictions for valid and test data set
+        filename_test = os.path.join(output_dir, basename + '_valid_' + str(index_run).zfill(3) + '.predict')
+        data_io.write(os.path.join(predictions_dir, filename_test), Y_valid)
 
         filename_test = os.path.join(output_dir, basename + '_test_' + str(index_run).zfill(3) + '.predict')
         data_io.write(os.path.join(predictions_dir, filename_test), Y_test)
