@@ -1,6 +1,6 @@
 random_forest:n_estimators [10, 100] [10]i
 pca:whiten {False, True} [False]
-random_forest:max_features [0.01, 0.5] [0.1]
+random_forest:max_features [0.5, 5.0] [1]
 ridge_regression:alpha [0.0001, 10.0] [1.0]l
 pca:keep_variance [0.5, 1.0] [1.0]
 regressor {ridge_regression, random_forest} [random_forest]

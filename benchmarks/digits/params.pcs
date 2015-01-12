@@ -18,7 +18,7 @@ sgd:class_weight {None, auto} [None]
 extra_trees:criterion {gini, entropy} [gini]
 sgd:loss {hinge, log, modified_huber, squared_hinge, perceptron} [hinge]
 extra_trees:max_depth {None} [None]
-random_forest:max_features [0.01, 0.5] [0.2]
+random_forest:max_features [0.5, 5.0] [1]
 k_nearest_neighbors:weights {uniform, distance} [uniform]
 pca:whiten {False, True} [False]
 random_forest:min_samples_leaf [1, 20] [1]i
@@ -55,14 +55,14 @@ extra_trees:n_estimators [10, 100] [10]i
 liblinear:multi_class {ovr} [ovr]
 pca:keep_variance [0.5, 1.0] [1.0]
 k_nearest_neighbors:algorithm {auto} [auto]
-extra_trees:max_features [0.01, 0.5] [0.1]
+extra_trees:max_features [0.5, 5.0] [1]
 liblinear:loss {l1, l2} [l2]
 gradient_boosting:n_estimators [10, 100] [10]i
 sgd:learning_rate {optimal, invscaling, constant} [optimal]
 random_forest:bootstrap {True, False} [True]
 extra_trees:min_samples_leaf [1, 20] [1]i
 k_nearest_neighbors:p {1, 2, 5} [2]
-gradient_boosting:max_features [0.01, 0.5] [0.1]
+gradient_boosting:max_features [0.5, 5.0] [1]
 classifier {libsvm_svc, extra_trees, sgd, random_forest, k_nearest_neighbors, gradient_boosting, liblinear} [random_forest]
 sparse_filtering:N [50, 2000] [100]i
 
