@@ -45,7 +45,8 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
                                                C=self.C,
                                                class_weight=self.class_weight,
                                                random_state=self.random_state)
-        return self.estimator.fit(X, Y)
+        self.estimator.fit(X, Y)
+        return self
 
     def predict(self, X):
         if self.estimator is None:

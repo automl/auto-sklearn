@@ -33,8 +33,8 @@ class RidgeRegression(AutoSklearnRegressionAlgorithm):
             max_iter=self.max_iter,
             tol=self.tol,
             solver=self.solver)
-
-        return self.estimator.fit(X, Y)
+        self.estimator.fit(X, Y)
+        return self
 
     def predict(self, X):
         if self.estimator is None:

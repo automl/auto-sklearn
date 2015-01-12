@@ -53,7 +53,8 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
                                          random_state=self.random_state,
                                          cache_size=2000,
                                          probability=True)
-        return self.estimator.fit(X, Y)
+        self.estimator.fit(X, Y)
+        return self
 
     def predict(self, X):
         if self.estimator is None:
@@ -90,7 +91,9 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True,
                                        default=1.0)
         # No linear kernel here, because we have liblinear
-        kernel = CategoricalHyperparameter("kernel", ["rbf", "poly", "sigmoid"])
+        kernel = CategoricalHyperparameter(name="kernel",
+                                           choices=["rbf", "poly", "sigmoid"],
+                                           default="rbf")
         degree = UniformIntegerHyperparameter("degree", 1, 5, default=3)
         gamma = UniformFloatHyperparameter("gamma", 3.0517578125e-05, 8,
                                            log=True, default=0.1)

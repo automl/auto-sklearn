@@ -53,7 +53,8 @@ class SGD(AutoSklearnClassificationAlgorithm):
                                        power_t=self.power_t,
                                        shuffle=True,
                                        random_state=self.random_state)
-        return self.estimator.fit(X, Y)
+        self.estimator.fit(X, Y)
+        return self
 
     def predict(self, X):
         if self.estimator is None:

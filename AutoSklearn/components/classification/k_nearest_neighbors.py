@@ -30,7 +30,8 @@ class KNearestNeighborsClassifier(AutoSklearnClassificationAlgorithm):
     def fit(self, X, Y):
         self.estimator = \
             sklearn.neighbors.KNeighborsClassifier()
-        return self.estimator.fit(X, Y)
+        self.estimator.fit(X, Y)
+        return self
 
     def predict(self, X):
         if self.estimator is None:

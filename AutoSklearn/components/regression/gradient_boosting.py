@@ -95,7 +95,7 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
             tmp.n_estimators += self.estimator_increment
             tmp.fit(X, Y)
             self.estimator = tmp
-        return self.estimator.fit(X, Y)
+        return self
 
     def predict(self, X):
         if self.estimator is None:
