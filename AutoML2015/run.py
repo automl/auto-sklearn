@@ -216,7 +216,8 @@ os.environ["JAVA_HOME"] = os.path.join(java_path, "java")
 import data.data_io as data_io            # general purpose input/output functions
 from data.data_io import vprint           # print only in verbose mode
 from data.data_manager import DataManager # load/save data and get info about them
-from util import Stopwatch, submit_process, split_data, get_dataset_info, check_pid, kill_child_processes
+from util import Stopwatch, submit_process, split_data, get_dataset_info, check_pid
+import start_automl
 from models import autosklearn
 
 # Import from libraries locates in /lib/
@@ -346,63 +347,15 @@ if __name__=="__main__" and debug_mode<4:
             if exception.errno != errno.EEXIST:
                 raise
 
-        # TODO outsource this and start processes in parallel
-
-        stop.start_task("load_%s" % basename)
-        # ======== Creating a data object with data and information about it
-        vprint( verbose,  "======== Reading and converting data ==========")
-        D = DataManager(basename, input_dir, verbose=verbose)
-        print D
-        stop.stop_task("load_%s" % basename)
-
-        stop.start_task("dump_%s" % basename)
-        # ====== Split dataset and store Data, Datamanager
-        X_train, X_ensemble, Y_train, Y_ensemble = split_data.split_data(D.data['X_train'], D.data['Y_train'])
-        del X_train, X_ensemble, Y_train
-        np.save(os.path.join(tmp_dataset_dir, "true_labels_ensemble.npy"), Y_ensemble)
-        cPickle.dump(D, open(os.path.join(tmp_dataset_dir, basename + "_Manager.pkl"), 'w'), protocol=-1)
-
-        stop.stop_task("dump_%s" % basename)
-        vprint(verbose, "Remaining time after reading data %5.2f sec" %
-               (overall_limit - stop.wall_elapsed("wholething")))
-
-        stop.start_task("start_smac_%s" % basename)
-
-        # ========= RUN SMAC
-        # == Create an empty instance file
-        instance_file = os.path.join(tmp_dataset_dir, "instances.txt")
-        fh = open(instance_file, 'w')
-        fh.write(os.path.join(input_dir, basename))
-        fh.close()
-
-        # == Create a searchspace
-        searchspace = os.path.join(tmp_dataset_dir, "space.pcs")
-        sp = autosklearn.get_configuration_space(info_dict[basename])
-        sp_string = pcs_parser.write(sp)
-        fh = open(searchspace, 'w')
-        fh.write(sp_string)
-        fh.close()
-
-        # == Start SMAC
         time_left_for_this_task = max(0, overall_limit - stop.wall_elapsed("wholething") - BUFFER)
-        pid_dict[basename + "_smac"] = \
-            submit_process.run_smac(tmp_dir=tmp_dataset_dir,
-                                    searchspace=searchspace,
-                                    instance_file=instance_file,
-                                    limit=time_left_for_this_task)
-        stop.stop_task("start_smac_%s" % basename)
-
-        # ========= RUN ensemble builder
-        stop.start_task("start_ensemble_builder_%s" % basename)
-        time_left_for_this_task = max(0, overall_limit - stop.wall_elapsed("wholething") - BUFFER)
-        pid_dict[basename + "_ensemble"] = \
-            submit_process.run_ensemble_builder(tmp_dir=tmp_dataset_dir,
-                                                dataset_name=basename,
-                                                task_type=info_dict[basename]['task'],
-                                                metric=info_dict[basename]['metric'],
-                                                limit=time_left_for_this_task,
-                                                output_dir=output_dir)
-        stop.stop_task("start_ensemble_builder_%s" % basename)
+        pid_smac, pid_ensemble, time_needed_to_load_data = \
+            start_automl.start_automl_on_dataset(basename=basename,
+                                                 input_dir=input_dir,
+                                                 tmp_dataset_dir=tmp_dataset_dir,
+                                                 output_dir=output_dir,
+                                                 time_left_for_this_task=time_left_for_this_task)
+        pid_dict[basename + "_smac"] = pid_smac
+        pid_dict[basename + "_ensemble"] = pid_ensemble
         stop.stop_task(basename)
 
     # And now we wait till the jobs are done
