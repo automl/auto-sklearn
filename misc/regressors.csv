@@ -13,7 +13,7 @@ Preprocessing,<class 'sklearn.cross_decomposition.pls_._PLS'>,False,Preprocessin
 ,<class 'sklearn.ensemble.forest.ForestRegressor'>,,
 ,<class 'sklearn.linear_model.bayes.BayesianRidge'>,,
 WeDoNotAddThis,<class 'sklearn.linear_model.omp.OrthogonalMatchingPursuitCV'>,False,We already have this method
-,<class 'sklearn.svm.classes.SVR'>,,
+Support_vector_regression,<class 'sklearn.svm.classes.SVR'>,True,Check searchspace
 ,<class 'sklearn.linear_model.omp.OrthogonalMatchingPursuit'>,,
 ,<class 'sklearn.ensemble.bagging.BaggingRegressor'>,,
 ,<class 'sklearn.neighbors.regression.RadiusNeighborsRegressor'>,,Can crash when there is no neighbour within the radius
@@ -36,7 +36,7 @@ WeDoNotAddThis,<class 'sklearn.linear_model.least_angle.LassoLarsCV'>,False,We a
 ,<class 'sklearn.linear_model.least_angle.Lars'>,,
 ,<class 'sklearn.linear_model.base.LinearRegression'>,,
 ,<class 'sklearn.linear_model.tests.test_sgd.SparseSGDRegressor'>,,
-,<class 'sklearn.ensemble.gradient_boosting.GradientBoostingRegressor'>,,
+Gradient_boosting,<class 'sklearn.ensemble.gradient_boosting.GradientBoostingRegressor'>,True,
 ,<class 'sklearn.linear_model.passive_aggressive.PassiveAggressiveRegressor'>,,
 ,<class 'sklearn.linear_model.least_angle.LassoLars'>,,
 WeDoNotAddThis,<class 'sklearn.linear_model.ridge.RidgeCV'>,False,We already have this method
