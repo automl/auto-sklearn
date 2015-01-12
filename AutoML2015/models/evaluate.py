@@ -135,7 +135,6 @@ class evaluator:
             self.predict_function = predict_proba
 
     def fit(self):
-        print "DEBUG: fit model"
         self.model.fit(self.X_train, self.Y_train)
 
     # This function does everything necessary after the fitting is done:
@@ -146,7 +145,6 @@ class evaluator:
     def finish_up(self):
         try:
             self.duration = time.time() - self.starttime
-            print "DEBUG: duration " + str(self.duration)
             result, additional_run_info = self.file_output()
             print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % ("SAT", abs(self.duration), result, self.seed, additional_run_info);
         except:
@@ -179,11 +177,9 @@ class evaluator:
         return err
     
     def file_output(self):
-        print "DEBUG: predict "
         errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
         pred_dump_name_template = os.path.join(self.output_dir, "predictions_%s", self.basename + '_predictions_%s_' + str(get_new_run_num()) + '.npy')
 
-        print "DEBUG: write predictions to file "
         ensemble_output_dir = os.path.join(self.output_dir, "predictions_ensemble")
         if not os.path.exists(ensemble_output_dir):
             os.mkdir(ensemble_output_dir)
@@ -202,7 +198,6 @@ class evaluator:
         with open(pred_dump_name_template % ("test", "test"), "w") as fh:
             pickle.dump(Y_test_pred, fh, -1)
 
-        print "DEBUG: create message for SMAC "
         err = errs[self.D.info['metric']]
         print errs
         import sys
