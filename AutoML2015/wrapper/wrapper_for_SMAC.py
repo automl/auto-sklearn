@@ -90,7 +90,7 @@ def main(basename, input_dir, params, time_limit=sys.maxint):
     configuration = configuration_space.Configuration(cs, **params)
 
     global evaluator
-    evaluator = models.evaluate.evaluator(Datamanager=D, configuration=configuration, with_predictions=True, all_scoring_functions=True)
+    evaluator = models.evaluate.Evaluator(Datamanager=D, configuration=configuration, with_predictions=True, all_scoring_functions=True)
     evaluator.output_dir = output_dir
     evaluator.basename = basename
     evaluator.D = D
