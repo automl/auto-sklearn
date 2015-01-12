@@ -82,6 +82,11 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
         dir_valid_list = os.listdir(dir_valid)
         dir_test_list = os.listdir(dir_test)
 
+        if len(dir_ensemble_list) == 0:
+            # Directories are empty
+            time.sleep(2)
+            continue
+
         if len(dir_ensemble_list) != len(dir_valid_list):
             # Directories are inconsistent
             time.sleep(2)
@@ -130,13 +135,15 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
         data_io.write(os.path.join(predictions_dir, filename_test), Y_test)
 
         current_num_models = len(dir_ensemble_list)
-        watch.stop_task("ensemble_iter_" + index_run)
+        watch.stop_task("ensemble_iter_" + str(index_run))
         time_iter = watch.get_wall_dur("ensemble_iter_" + str(index_run))
         used_time = watch.wall_elapsed("ensemble_builder")
         index_run += 1
+    return
 
 
 if __name__ == "__main__":
     main(predictions_dir=sys.argv[1], basename=sys.argv[2],
          task_type=sys.argv[3], metric=sys.argv[4], limit=float(sys.argv[5]),
          output_dir=sys.argv[6])
+    sys.exit(0)

@@ -87,8 +87,15 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit, output
         return
     path_to_wrapper = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     wrapper_exec = os.path.join(path_to_wrapper, "ensembles.py")
+
     call = " ".join(["python", wrapper_exec, tmp_dir, dataset_name,
-                        task_type, metric, str(limit), output_dir])
+                        task_type, metric, str(limit-5), output_dir])
+
+    # Now add runsolver command
+    runsolver_prefix = "runsolver --watcher-data /dev/null -W %d" % \
+                       limit
+    call = runsolver_prefix + " " + call
+
     pid = submit_call(call)
     return pid
 

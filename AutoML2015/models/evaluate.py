@@ -17,6 +17,14 @@ except:
     from data.data_converter import convert_to_bin
     from scores import libscores
     from util.split_data import split_data
+import time
+import os
+
+try:
+    import cPickle as pickle
+except:
+    import pickle
+
 
 
 def predict_proba(X, model, task_type):
@@ -89,8 +97,124 @@ def calculate_score(solution, prediction, task_type, metric,
     return score
 
 
+def get_new_run_num():
+    counter_file = os.path.join(os.getcwd(), "num_run")
+    if not os.path.exists(counter_file):
+        with open(counter_file, "w") as fh:
+            fh.write("0")
+        return 0
+    else:
+        with open(counter_file, "r") as fh:
+            num = int(fh.read())
+        num += 1
+        with open(counter_file, "w") as fh:
+            fh.write(str(num))
+        return num
+
+
+class Evaluator(object):
+    def __init__(self,Datamanager, configuration, with_predictions=False, all_scoring_functions=False, splitting_function=split_data, seed=1):
+        
+        self.starttime = time.time()
+        
+        self.X_train,self.X_optimization,self.Y_train,self.Y_optimization = \
+        splitting_function(Datamanager.data['X_train'], Datamanager.data['Y_train'])
+
+        self.X_valid = Datamanager.data.get('X_valid')
+        self.X_test = Datamanager.data.get('X_test')
+
+        self.metric = Datamanager.info['metric']
+        self.task_type = Datamanager.info['task'].lower()
+        self.seed=seed
+        
+        self.with_predictions=with_predictions
+        self.all_scoring_functions=all_scoring_functions
+        
+        if self.task_type == 'regression':
+            self.model = AutoSklearnRegressor(configuration, seed)
+            self.predict_function = predict_regression
+        else:
+            self.model = AutoSklearnClassifier(configuration, seed)
+            self.predict_function = predict_proba
+
+    def fit(self):
+        self.model.fit(self.X_train, self.Y_train)
+
+    # This function does everything necessary after the fitting is done:
+    #        predicting
+    #        saving the files for the ensembles
+    #        generate output for SMAC
+    # We use it as the signal handler so we can recycle the code for the normal usecase and when the runsolver kills us here :)
+    def finish_up(self):
+        try:
+            self.duration = time.time() - self.starttime
+            result, additional_run_info = self.file_output()
+            print "Result for ParamILS: %s, %f, 1, %f, %d, %s"%("SAT", abs(self.duration), result, self.seed, additional_run_info)
+        except:
+            print "No results were produced! Probably the training was not finished, and no valid model was generated!"
+
+    def predict(self):
+
+        Y_optimization_pred = self.predict_function(self.X_optimization, self.model, self.task_type)
+        if self.X_valid is not None:
+            Y_valid_pred = self.predict_function(self.X_valid, self.model, self.task_type)
+        else:
+            Y_valid_pred = None
+        if self.X_test is not None:
+            Y_test_pred = self.predict_function(self.X_test, self.model, self.task_type)
+        else:
+            Y_test_pred = None
+
+        score = calculate_score(self.Y_optimization, Y_optimization_pred,self.task_type, self.metric, all_scoring_functions=self.all_scoring_functions)
+        
+        if hasattr(score, "__len__"):
+            err = {key: 1 - score[key] for key in score}
+        else:
+            err = 1 - score
+
+        if self.with_predictions:
+            return err, Y_optimization_pred, Y_valid_pred, Y_test_pred
+        return err
+    
+    
+    def file_output(self):
+        output_dir = self.output_dir    # dirty hack so I don't have to replace all the output_dir by self.output_dir below :)
+        errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
+        pred_dump_name_template = os.path.join(output_dir, "predictions_%s", self.basename + '_predictions_%s_' + str(get_new_run_num()) + '.npy')
+
+        ensemble_output_dir = os.path.join(output_dir, "predictions_ensemble")
+        if not os.path.exists(ensemble_output_dir):
+            os.mkdir(ensemble_output_dir)
+        with open(pred_dump_name_template % ("ensemble", "ensemble"), "w") as fh:
+            pickle.dump(Y_optimization_pred, fh, -1)
+
+        valid_output_dir = os.path.join(output_dir, "predictions_valid")
+        if not os.path.exists(valid_output_dir):
+            os.mkdir(valid_output_dir)
+        with open(pred_dump_name_template % ("valid", "valid"), "w") as fh:
+            pickle.dump(Y_valid_pred, fh, -1)
+
+        test_output_dir = os.path.join(output_dir, "predictions_test")
+        if not os.path.exists(test_output_dir):
+            os.mkdir(test_output_dir)
+        with open(pred_dump_name_template % ("test", "test"), "w") as fh:
+            pickle.dump(Y_test_pred, fh, -1)
+
+        err = errs[self.D.info['metric']]
+        print errs
+        import sys
+        sys.stdout.flush()
+        additional_run_info = ";".join(["%s: %s" % (metric, value)
+                                    for metric, value in errs.items()])
+        additional_run_info += ";" + "duration: " + str(self.duration)
+        additional_run_info += ";" + "prediction_files_template: " + \
+            pred_dump_name_template
+        return err, additional_run_info
+        
+"""
 def evaluate(Datamanager, configuration, with_predictions=False,
         all_scoring_functions=False, splitting_function=split_data, seed=1):
+            
     X_train, X_optimization, Y_train, Y_optimization = \
         splitting_function(Datamanager.data['X_train'], Datamanager.data['Y_train'])
     X_valid = Datamanager.data.get('X_valid')
@@ -99,7 +223,7 @@ def evaluate(Datamanager, configuration, with_predictions=False,
     metric = Datamanager.info['metric']
     task_type = Datamanager.info['task'].lower()
 
-    if task_type == 'regression':
+   if task_type == 'regression':
         model = AutoSklearnRegressor(configuration, seed)
     else:
         model = AutoSklearnClassifier(configuration, seed)
@@ -134,3 +258,4 @@ def evaluate(Datamanager, configuration, with_predictions=False,
         return err, Y_optimization_pred, Y_valid_pred, Y_test_pred
     else:
         return err
+"""
