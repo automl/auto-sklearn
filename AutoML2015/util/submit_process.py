@@ -29,8 +29,10 @@ def get_algo_exec(runsolver_limit, runsolver_delay, target_call_limit):
     call += " --limit %d" % target_call_limit
 
     # Now add runsolver command
-    runsolver_prefix = "runsolver --watcher-data /dev/null -W %d -d %d" % \
-                       (runsolver_limit, runsolver_delay)
+    runsolver_prefix = "runsolver --watcher-data /dev/null -W %d" % \
+                       (runsolver_limit)
+    #runsolver_prefix = "runsolver --watcher-data /dev/null -W %d -d %d" % \
+    #                   (runsolver_limit, runsolver_delay)
     call = '"' + runsolver_prefix + " " + call + '"'
     return call
 
@@ -96,8 +98,10 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit, output
                         task_type, metric, str(limit-5), output_dir])
 
     # Now add runsolver command
-    runsolver_cmd = "%s --watcher-data /dev/null -W %d -d %d" % \
-                    (runsolver_exec, limit, delay)
+    runsolver_cmd = "%s --watcher-data /dev/null -W %d" % \
+                    (runsolver_exec, limit)
+    #runsolver_cmd = "%s --watcher-data /dev/null -W %d -d %d" % \
+    #                (runsolver_exec, limit, delay)
     call = runsolver_cmd + " " + call
 
     pid = submit_call(call)
