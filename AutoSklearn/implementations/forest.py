@@ -348,14 +348,19 @@ class ForestClassifier(six.with_metaclass(ABCMeta, MyBaseForest,
 
         # Assign chunk of trees to jobs
         n_jobs, n_trees, starts = _partition_estimators(self)
-
+        
+        # Bugfix for _parallel_predict_proba which expects a list for multi-label and integer for single-label problems
+        if not isinstance(self.n_classes_, int) and len(self.n_classes_) == 1:
+            n_classes_ = self.n_classes_[0]
+        else:
+            n_classes_ = self.n_classes_
         # Parallel loop
         all_proba = Parallel(n_jobs=n_jobs, verbose=self.verbose,
                              backend="threading")(
             delayed(_parallel_predict_proba)(
                 self.estimators_[starts[i]:starts[i + 1]],
                 X,
-                self.n_classes_,
+                n_classes_,
                 self.n_outputs_)
             for i in range(n_jobs))
 
