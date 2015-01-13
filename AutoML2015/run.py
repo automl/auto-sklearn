@@ -417,6 +417,11 @@ if __name__=="__main__" and debug_mode<4:
     vprint(verbose, "Starting Shutdown, %fsec left" %
            (overall_limit-stop.wall_elapsed("wholething")))
     util.send_signal_to_our_processes(sig=15, filter=smac_exp)
+    util.send_signal_to_our_processes(sig=15, filter=wrapper_exp)
+    util.send_signal_to_our_processes(sig=15, filter=ensemble_exp)
+    util.send_signal_to_our_processes(sig=15, filter=runsolver_exp)
+
+
     stop.stop_task("Shutdown")
 
     while stop.wall_elapsed("wholething") <= overall_limit - BUFFER_BEFORE_SENDING_SIGTERM + DELAY_TO_SIGKILL:
@@ -427,6 +432,9 @@ if __name__=="__main__" and debug_mode<4:
     stop.start_task("Harakiri")
     vprint(verbose, "Starting Harakiri")
     util.send_signal_to_our_processes(sig=9, filter=smac_exp)
+    util.send_signal_to_our_processes(sig=9, filter=wrapper_exp)
+    util.send_signal_to_our_processes(sig=9, filter=ensemble_exp)
+    util.send_signal_to_our_processes(sig=9, filter=runsolver_exp)
     stop.stop_task("Harakiri")
 
     # == Finish and show stopwatch
