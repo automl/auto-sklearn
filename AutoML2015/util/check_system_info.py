@@ -1,5 +1,6 @@
 import os
 import platform
+import pwd
 import subprocess
 import shlex
 
@@ -28,6 +29,7 @@ def check_system_info():
         vprint(verbose, "sklearn %s" % str(sklearn.__version__))
         vprint(verbose, "numpy: %s" % str(numpy.__version__))
         vprint(verbose, "scipy: %s" % str(scipy.__version__))
+        vprint(verbose, "Username: %s" % str(pwd.getpwuid(os.getuid()).pw_name))
     except:
         vprint(verbose, "Could not find platform information")
         pass
