@@ -8,12 +8,10 @@ def submit_call(call, log_dir=None):
     call = shlex.split(call)
     try:
         if log_dir is None:
-            proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'),
-                                    preexec_fn=os.setsid)
+            proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'))
         else:
             proc = subprocess.Popen(call, stdout=open(os.path.join(log_dir, "ensemble_out.log"), 'w'),
-                                    stderr=open(os.path.join(log_dir, "ensemble_err.log"), 'w'),
-                                    preexec_fn=os.setsid)
+                                    stderr=open(os.path.join(log_dir, "ensemble_err.log"), 'w'))
         #proc_id = proc.pid
     except OSError as e:
         print e
