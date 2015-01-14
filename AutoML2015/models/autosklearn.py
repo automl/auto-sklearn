@@ -1,5 +1,5 @@
-from AutoSklearn.autosklearn import AutoSklearnClassifier
-from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
+from AutoSklearn.classification import AutoSklearnClassifier
+from AutoSklearn.regression import AutoSklearnRegressor
 
 
 def get_configuration_space(info, include_classifiers=None,
@@ -34,10 +34,6 @@ def get_configuration_space(info, include_classifiers=None,
 
         # Todo add a check here if this is useful...
         exclude_classifiers = None
-        #if include_classifiers is None:
-        #    if sparse == True:
-        #        exclude_classifiers = []
-        #        exclude_classifiers.append('libsvm_svc')
 
         configuration_space = AutoSklearnClassifier. \
             get_hyperparameter_search_space(multiclass=multiclass,

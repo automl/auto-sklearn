@@ -6,8 +6,8 @@ Created on Dec 18, 2014
 
 import numpy as np
 
-from AutoSklearn.autosklearn import AutoSklearnClassifier
-from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
+from AutoSklearn.classification import AutoSklearnClassifier
+from AutoSklearn.regression import AutoSklearnRegressor
 
 try:
     from ..data.data_converter import convert_to_bin

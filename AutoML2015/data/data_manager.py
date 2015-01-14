@@ -191,10 +191,11 @@ class DataManager:
         sparse = True if self.info['is_sparse'] == 1 else False
         has_missing = True if self.info['has_missing'] else False
 
-        to_encode = ['Categorical']
+        to_encode = ['categorical']
         if has_missing:
-            to_encode += ['Binary']
-        encoding_mask = [feat_type in to_encode for feat_type in self.feat_type]
+            to_encode += ['binary']
+        encoding_mask = [feat_type.lower() in to_encode
+                         for feat_type in self.feat_type]
 
         categorical = [True if feat_type.lower() == 'categorical' else False
                        for feat_type in self.feat_type]

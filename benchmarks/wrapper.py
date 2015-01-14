@@ -14,8 +14,8 @@ try:
     import cPickle as pickle
 except:
     import pickle
-from AutoSklearn.autosklearn import AutoSklearnClassifier
-from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
+from AutoSklearn.classification import AutoSklearnClassifier
+from AutoSklearn.regression import AutoSklearnRegressor
 
 from HPOlibConfigSpace import configuration_space
 

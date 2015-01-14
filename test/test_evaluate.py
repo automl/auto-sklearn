@@ -3,18 +3,19 @@ Created on Dec 18, 2014
 
 @author: Aaron Klein
 '''
+import copy
 import unittest
 import numpy as np
 
 from AutoML2015.data.data_converter import convert_to_bin
 from AutoML2015.models.evaluate import Evaluator, predict_proba
 from AutoML2015.util.split_data import split_data
-from AutoSklearn.autosklearn import AutoSklearnClassifier
-from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
+from AutoSklearn.classification import AutoSklearnClassifier
+from AutoSklearn.regression import AutoSklearnRegressor
 from AutoSklearn.util import get_dataset
 from HPOlibConfigSpace.random_sampler import RandomSampler
 
-N_TEST_RUNS = 10
+N_TEST_RUNS = 100
 
 
 class Dummy(object):
@@ -45,9 +46,13 @@ class Test(unittest.TestCase):
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
-            evaluator = Evaluator(D, configuration,
+            D_ = copy.deepcopy(D)
+            evaluator = Evaluator(D_, configuration,
                                   splitting_function=split_data)
-            evaluator.fit()
+
+            if not self._fit(evaluator):
+                print
+                continue
             err[i] = evaluator.predict()
             print err[i]
 
@@ -61,8 +66,12 @@ class Test(unittest.TestCase):
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
-            evaluator = Evaluator(D, configuration, all_scoring_functions=True)
-            evaluator.fit()
+            D_ = copy.deepcopy(D)
+            evaluator = Evaluator(D_, configuration, all_scoring_functions=True)
+            if not self._fit(evaluator):
+                print
+                continue
+
             err.append(evaluator.predict())
             print err[-1]
 
@@ -102,7 +111,9 @@ class Test(unittest.TestCase):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
             evaluator = Evaluator(D, configuration)
-            evaluator.fit()
+            if not self._fit(evaluator):
+                print
+                continue
             err[i] = evaluator.predict()
             print err[i]
 
@@ -143,9 +154,11 @@ class Test(unittest.TestCase):
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
-
             evaluator = Evaluator(D, configuration)
-            evaluator.fit()
+
+            if not self._fit(evaluator):
+                print
+                continue
             err[i] = evaluator.predict()
             self.assertTrue(np.isfinite(err[i]))
             print err[i]
@@ -182,7 +195,9 @@ class Test(unittest.TestCase):
             configuration = sampler.sample_configuration()
 
             evaluator = Evaluator(D, configuration)
-            evaluator.fit()
+            if not self._fit(evaluator):
+                print
+                continue
             err[i] = evaluator.predict()
             self.assertTrue(np.isfinite(err[i]))
             print err[i]
@@ -191,6 +206,18 @@ class Test(unittest.TestCase):
 
         print "Number of times it was worse than random guessing:" + str(
             np.sum(err > 1))
+
+    def _fit(self, evaluator):
+        """Allow us to catch known and valid exceptions for all evaluate
+        scripts."""
+        try:
+            evaluator.fit()
+            return True
+        except ValueError as e:
+            if "Floating-point under-/overflow occurred at epoch" in e.message:
+                return False
+            else:
+                raise e
 
     def test_predict_proba_binary_classification(self):
         class Dummy(object):
