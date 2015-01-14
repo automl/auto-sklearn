@@ -51,6 +51,7 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
                 'prefers_data_scaled': False,
                 # TODO find out if this is good because of sparsity...
                 'prefers_data_normalized': False,
+                'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,

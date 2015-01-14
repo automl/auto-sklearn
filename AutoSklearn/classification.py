@@ -146,6 +146,9 @@ class AutoSklearnClassifier(ClassifierMixin, AutoSklearnBaseEstimator):
                             name in exclude_preprocessors:
                 continue
 
+            if available_preprocessors[name]. \
+                    get_properties()['handles_classification'] is False:
+                continue
             if multiclass is True and available_preprocessors[name]. \
                     get_properties()['handles_multiclass'] is False:
                 continue

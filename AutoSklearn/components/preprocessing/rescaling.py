@@ -35,6 +35,7 @@ class Rescaling(AutoSklearnPreprocessingAlgorithm):
                 'handles_numerical_features': True,
                 'prefers_data_scaled': False,
                 'prefers_data_normalized': False,
+                'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,

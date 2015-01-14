@@ -23,6 +23,8 @@ class AutoSklearnPreprocessingAlgorithm(object):
           (prefers_data_scaled : {True, False}
         * Does the algorithm prefer data normalized to 0-mean, 1std?
           (prefers_data_normalized : {True, False}
+        * Can preprocess regression data?
+          (handles_regression : {True, False}
         * Can preprocess classification data?
           (handles_classification : {True, False}
         * Can the algorithm handle multiclass-classification problems?

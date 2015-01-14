@@ -184,8 +184,12 @@ class AutoSklearnRegressor(RegressorMixin, AutoSklearnBaseEstimator):
             elif exclude_preprocessors is not None and \
                             name in exclude_preprocessors:
                 continue
+
             if sparse is True and available_preprocessors[name]. \
                     get_properties()['handles_sparse'] is False:
+                continue
+            elif available_preprocessors[name]. \
+                    get_properties()['handles_regression'] is False:
                 continue
 
             preprocessors[name] = available_preprocessors[name]

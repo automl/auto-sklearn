@@ -39,6 +39,7 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
                 'handles_numerical_features': True,
                 'prefers_data_scaled': True,
                 'prefers_data_normalized': True,
+                'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
