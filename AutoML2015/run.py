@@ -356,6 +356,7 @@ if __name__=="__main__" and debug_mode<4:
     # == Try to get information from all subprocesses, especially pid
     information_ready = False
     data_loading_times = dict()
+    data_manager_files = list()
     while not information_ready:
         # = We assume all jobs are running
         information_ready = True
@@ -366,7 +367,8 @@ if __name__=="__main__" and debug_mode<4:
                 information_ready = False
                 vprint(verbose, "Waiting for run information about %s" % basename)
                 try:
-                    [time_needed_to_load_data, pid_smac, pid_ensembles] = queue_dict[basename].get_nowait()
+                    [time_needed_to_load_data, data_manager_file, pid_smac, pid_ensembles] = queue_dict[basename].get_nowait()
+                    data_manager_files.append(data_manager_file)
                     pid_dict[basename + "_ensemble"] = pid_ensembles
                     pid_dict[basename + "_smac"] = pid_smac
                     stop.insert_task(name=basename + "_load",
@@ -423,6 +425,15 @@ if __name__=="__main__" and debug_mode<4:
 
 
     stop.stop_task("Shutdown")
+
+    # == We delete the datamanager.pkl files to reduce the size of our output
+    for fl in data_manager_files:
+        if os.path.exists(fl):
+            try:
+                os.remove(fl)
+            except:
+                vprint(verbose, "Could not remove %s" % fl)
+        vprint(verbose, "Removed %s" % fl)
 
     while stop.wall_elapsed("wholething") <= overall_limit - BUFFER_BEFORE_SENDING_SIGTERM + DELAY_TO_SIGKILL:
         vprint(verbose, "wait")
