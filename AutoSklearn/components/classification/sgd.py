@@ -8,6 +8,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from HPOlibConfigSpace.conditions import EqualsCondition, OrConjunction
 
 from ..classification_base import AutoSklearnClassificationAlgorithm
+from ...implementations.util import softmax
 
 class SGD(AutoSklearnClassificationAlgorithm):
     def __init__(self, loss, penalty, alpha, fit_intercept, n_iter,
@@ -69,13 +70,7 @@ class SGD(AutoSklearnClassificationAlgorithm):
             return self.estimator.predict_proba(X)
         else:
             df = self.estimator.decision_function(X)
-
-            if len(df.shape) == 1:
-                ppositive = 1 / (1 + np.exp(-df))
-                return np.transpose(np.array((1 - ppositive, ppositive)))
-            else:
-                tmp = np.exp(-df)
-                return tmp / np.sum(tmp, axis=1).reshape((-1, 1))
+            return softmax(df)
 
     @staticmethod
     def get_properties():
