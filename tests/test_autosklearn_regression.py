@@ -13,7 +13,7 @@ import sklearn.svm
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
-from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
+from AutoSklearn.regression import AutoSklearnRegressor
 from AutoSklearn.components.regression_base import AutoSklearnRegressionAlgorithm
 from AutoSklearn.components.preprocessor_base import AutoSklearnPreprocessingAlgorithm
 import AutoSklearn.components.regression as regression_components
@@ -22,8 +22,6 @@ from AutoSklearn.util import get_dataset
 
 
 class TestAutoSKlearnRegressor(unittest.TestCase):
-    # TODO: test for both possible ways to initialize AutoSklearn
-    # parameters and other...
 
     def test_find_regressors(self):
         regressors = regression_components._regressors
@@ -58,24 +56,25 @@ class TestAutoSKlearnRegressor(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(35, len(hyperparameters))
+        self.assertEqual(26, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 4, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
         cs = AutoSklearnRegressor.get_hyperparameter_search_space(
-            include_regressors=['random_forest'])
+            include_estimators=['random_forest'])
         self.assertEqual(cs.get_hyperparameter('regressor'),
             CategoricalHyperparameter('regressor', ['random_forest']))
 
         # TODO add this test when more than one regressor is present
         cs = AutoSklearnRegressor.get_hyperparameter_search_space(
-            exclude_regressors=['random_forest'])
+            exclude_estimators=['random_forest'])
         self.assertNotIn('random_forest', str(cs))
 
         cs = AutoSklearnRegressor.get_hyperparameter_search_space(
             include_preprocessors=['pca'])
         self.assertEqual(cs.get_hyperparameter('preprocessor'),
-            CategoricalHyperparameter('preprocessor', ["None", 'pca']))
+            CategoricalHyperparameter('preprocessor',
+            ["None", 'pca', 'rescaling', 'imputation']))
 
         cs = AutoSklearnRegressor.get_hyperparameter_search_space(
             exclude_preprocessors=['pca'])

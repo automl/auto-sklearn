@@ -13,7 +13,7 @@ import sklearn.svm
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
-from AutoSklearn.autosklearn import AutoSklearnClassifier
+from AutoSklearn.classification import AutoSklearnClassifier
 from AutoSklearn.components.classification_base import AutoSklearnClassificationAlgorithm
 from AutoSklearn.components.preprocessor_base import AutoSklearnPreprocessingAlgorithm
 import AutoSklearn.components.classification as classification_components
@@ -60,18 +60,19 @@ class TestAutoSKlearnClassifier(unittest.TestCase):
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
         cs = AutoSklearnClassifier.get_hyperparameter_search_space(
-            include_classifiers=['libsvm_svc'])
+            include_estimators=['libsvm_svc'])
         self.assertEqual(cs.get_hyperparameter('classifier'),
             CategoricalHyperparameter('classifier', ['libsvm_svc']))
 
         cs = AutoSklearnClassifier.get_hyperparameter_search_space(
-            exclude_classifiers=['libsvm_svc'])
+            exclude_estimators=['libsvm_svc'])
         self.assertNotIn('libsvm_svc', str(cs))
 
         cs = AutoSklearnClassifier.get_hyperparameter_search_space(
             include_preprocessors=['pca'])
         self.assertEqual(cs.get_hyperparameter('preprocessor'),
-            CategoricalHyperparameter('preprocessor', ["None", 'pca']))
+            CategoricalHyperparameter('preprocessor',
+                ["None", 'pca', 'rescaling', 'imputation']))
 
         cs = AutoSklearnClassifier.get_hyperparameter_search_space(
             exclude_preprocessors=['pca'])
