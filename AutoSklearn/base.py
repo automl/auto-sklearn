@@ -93,7 +93,6 @@ class AutoSklearnBaseEstimator(BaseEstimator):
         # List of preprocessing steps (and their order)
         preprocessors_names = ["imputation", "rescaling",
                                self.configuration['preprocessor'].value]
-
         for preproc_name in preprocessors_names:
             if preproc_name != "None":
                 preproc_params = {}
@@ -319,8 +318,10 @@ class AutoSklearnBaseEstimator(BaseEstimator):
                                                              dlc.hyperparameter.name)
                 cs.add_forbidden_clause(forbidden_clause)
 
+        preprocessor_choices = filter(lambda app: app not in always_active,
+                                      available_preprocessors.keys())
         preprocessor = CategoricalHyperparameter("preprocessor",
-            ["None"] + available_preprocessors.keys(), default='None')
+            ["None"] + preprocessor_choices, default='None')
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors.keys():
             preprocessor_configuration_space = available_preprocessors[name]. \

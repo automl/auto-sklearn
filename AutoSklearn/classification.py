@@ -69,10 +69,10 @@ class AutoSklearnClassifier(ClassifierMixin, AutoSklearnBaseEstimator):
         array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)
         """
         self._validate_input_X(X)
-
         Xt = X
         for name, transform in self._pipeline.steps[:-1]:
             Xt = transform.transform(Xt)
+
         return self._pipeline.steps[-1][-1].predict_proba(Xt)
 
     @staticmethod
