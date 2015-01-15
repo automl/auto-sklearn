@@ -4,7 +4,7 @@ from AutoSklearn.components.preprocessing.kitchen_sinks import RandomKitchenSink
 from AutoSklearn.util import _test_preprocessing
 
 
-class PCAComponentTest(unittest.TestCase):
+class KitchenSinkComponent(unittest.TestCase):
     def test_default_configuration(self):
         transformation, original = _test_preprocessing(RandomKitchenSinks)
         self.assertEqual(transformation.shape[0], original.shape[0])
