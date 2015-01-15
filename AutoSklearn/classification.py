@@ -79,11 +79,6 @@ class AutoSklearnClassifier(ClassifierMixin, AutoSklearnBaseEstimator):
                                         exclude_preprocessors=None,
                                         dataset_properties=None):
 
-        print cls
-        print include_estimators
-        print exclude_estimators
-        print exclude_preprocessors
-
         if include_estimators is not None and exclude_estimators is not None:
             raise ValueError("The arguments include_estimators and "
                              "exclude_estimators cannot be used together.")

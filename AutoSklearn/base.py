@@ -15,6 +15,8 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
     InactiveHyperparameter
 from HPOlibConfigSpace.conditions import EqualsCondition
+from HPOlibConfigSpace.forbidden import ForbiddenAndConjunction, \
+    ForbiddenEqualsClause
 
 from . import components as components
 
@@ -358,6 +360,17 @@ class AutoSklearnBaseEstimator(BaseEstimator):
                         dlc.hyperparameter.name = "%s:%s" % (name,
                                                              dlc.hyperparameter.name)
                 cs.add_forbidden_clause(forbidden_clause)
+
+        # Now try to add things for which we know that they don't work
+        try:
+            cs.add_forbidden_clause(ForbiddenAndConjunction(
+                ForbiddenEqualsClause(cs.get_hyperparameter(
+                    "select_percentile_classification:score_func"), "chi2"),
+                ForbiddenEqualsClause(cs.get_hyperparameter(
+                    "rescaling:strategy"), "standard")
+            ))
+        except:
+            pass
 
         return cs
 
