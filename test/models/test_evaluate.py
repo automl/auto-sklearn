@@ -221,6 +221,7 @@ class Test(unittest.TestCase):
             if "Floating-point under-/overflow occurred at epoch" in e.message:
                 return False
             else:
+                print evaluator.configuration
                 raise e
 
     def test_predict_proba_binary_classification(self):
