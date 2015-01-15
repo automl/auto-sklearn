@@ -38,7 +38,11 @@ def weighted_ensemble(predictions, true_labels, task_type, metric):
     if n_models > 1:
         res = cma.fmin(weighted_ensemble_error, weights, sigma0=0.25,
                        args=(predictions, true_labels, metric,
-                             task_type), options={'bounds': [0, 1], 'seed': seed})
+                             task_type), options={'bounds': [0, 1],
+                                                  'seed': seed,
+                                                  'verb_log': 0, # No output files
+                                                  'tolfun': 1e-9 # Default was 1e-11
+                                                  })
         weights = np.array(res[0])
     else:
         # Python CMA-ES does not work in a 1-D space
@@ -66,7 +70,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
     current_num_models = 0
     logging.basicConfig(filename=os.path.join(predictions_dir, "ensemble.log"), level=logging.DEBUG)
 
-    while (used_time + time_iter) < limit:
+    while used_time < limit:
         logging.debug("Time left: %f" % (limit - used_time))
         logging.debug("Time last iteration: %f" % time_iter)
         # Load the true labels of the validation data
@@ -78,7 +82,8 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
         dir_valid = os.path.join(predictions_dir, "predictions_valid/")
         dir_test = os.path.join(predictions_dir, "predictions_test/")
 
-        if not os.path.isdir(dir_ensemble):
+        if not os.path.isdir(dir_ensemble) or not os.path.isdir(dir_valid) or \
+                not os.path.isdir(dir_test):
             logging.debug("Prediction directory does not exist")
             time.sleep(2)
             used_time = watch.wall_elapsed("ensemble_builder")

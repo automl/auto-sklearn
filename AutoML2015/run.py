@@ -188,6 +188,9 @@ import sys
 import errno
 import multiprocessing
 import Queue
+import psutil
+import pwd
+import re
 
 our_root_dir = os.path.abspath(os.path.dirname(__file__))
 our_lib_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib"))
@@ -212,7 +215,7 @@ os.environ["JAVA_HOME"] = os.path.join(java_path, "java")
 # Imports from this library
 import data.data_io as data_io            # general purpose input/output functions
 from data.data_io import vprint           # print only in verbose mode
-from util import Stopwatch, get_dataset_info, check_pid, check_system_info
+from util import Stopwatch, get_dataset_info, check_pid, check_system_info, util
 import start_automl
 
 if debug_mode >= 4 or running_on_codalab: # Show library version and directory structure
@@ -224,7 +227,13 @@ if __name__=="__main__" and debug_mode<4:
     # ==========================================================================
     # ============ CHECK THIS SECTION BEFORE SUBMITTING ========================
     # == Definitions
-    BUFFER = 60  # time-left - BUFFER = timelimit for SMAC/ensembles.py
+    BUFFER = 35  # time-left - BUFFER = timelimit for SMAC/ensembles.py
+    BUFFER_BEFORE_SENDING_SIGTERM = 30  # We send SIGTERM to all processes
+    DELAY_TO_SIGKILL = 15  # And after a delay we send a sigkill
+
+    # == Change permissions for our libraries
+    util.change_permission_folder(perm="755", fl=lib_dir)
+
     # == Check system
     check_system_info.check_system_info()
 
@@ -262,7 +271,7 @@ if __name__=="__main__" and debug_mode<4:
             os.mkdir(tmp_dir)
         except os.error as e:
             print(e)
-            vprint( verbose, "Using /tmp/ as output directory")
+            vprint(verbose, "Using /tmp/ as output directory")
             tmp_dir = "/tmp/"
     TMP_DIR = tmp_dir
 
@@ -347,6 +356,7 @@ if __name__=="__main__" and debug_mode<4:
     # == Try to get information from all subprocesses, especially pid
     information_ready = False
     data_loading_times = dict()
+    data_manager_files = list()
     while not information_ready:
         # = We assume all jobs are running
         information_ready = True
@@ -357,7 +367,8 @@ if __name__=="__main__" and debug_mode<4:
                 information_ready = False
                 vprint(verbose, "Waiting for run information about %s" % basename)
                 try:
-                    [time_needed_to_load_data, pid_smac, pid_ensembles] = queue_dict[basename].get_nowait()
+                    [time_needed_to_load_data, data_manager_file, pid_smac, pid_ensembles] = queue_dict[basename].get_nowait()
+                    data_manager_files.append(data_manager_file)
                     pid_dict[basename + "_ensemble"] = pid_ensembles
                     pid_dict[basename + "_smac"] = pid_smac
                     stop.insert_task(name=basename + "_load",
@@ -391,25 +402,51 @@ if __name__=="__main__" and debug_mode<4:
         vprint(verbose, "+" + "-" * 48 + "+")
 
         # == List results in outputdirectory
-        output_dir_list = str(os.listdir(output_dir).sort())
+        output_dir_list = str(os.listdir(output_dir))
         vprint(verbose, "\nOutput directory contains: %s" % output_dir_list)
         time.sleep(10)
-        if stop.wall_elapsed("wholething") >= overall_limit-15:
+        if stop.wall_elapsed("wholething") >= overall_limit-BUFFER_BEFORE_SENDING_SIGTERM-10:
             run = False
 
-    # == Now it's time to kill subprocesses
-    for key in pid_dict:
-        try:
-            os.killpg(os.getpgid(pid_dict[key]), 9)
-        except OSError:
-            # This is ok
-            continue
+    # == Now it's time to terminate ... subprocesses
+    # We kill processes where the cmdline() matches ones of these expressions
+    smac_exp = re.compile(r"ca\.ubc\.cs\.beta\.smac\.executors\.SMACExecutor").search
+    wrapper_exp = re.compile(r"wrapper\_for\_SMAC\.py$").search
+    runsolver_exp = re.compile(r"runsolver$").search
+    ensemble_exp = re.compile(r"ensembles\.py$").search
 
-    vprint(verbose, "+" + "-" * 48 + "+")
-    for key in pid_dict:
-        running = check_pid.check_pid(pid_dict[key])
-        vprint(verbose, "|%32s|%10d|%5s|" % (key, pid_dict[key], str(running)))
-    vprint(verbose, "+" + "-" * 48 + "+")
+    stop.start_task("Shutdown")
+    vprint(verbose, "Starting Shutdown, %fsec left" %
+           (overall_limit-stop.wall_elapsed("wholething")))
+    util.send_signal_to_our_processes(sig=15, filter=smac_exp)
+    util.send_signal_to_our_processes(sig=15, filter=wrapper_exp)
+    util.send_signal_to_our_processes(sig=15, filter=ensemble_exp)
+    util.send_signal_to_our_processes(sig=15, filter=runsolver_exp)
+
+
+    stop.stop_task("Shutdown")
+
+    # == We delete the datamanager.pkl files to reduce the size of our output
+    for fl in data_manager_files:
+        if os.path.exists(fl):
+            try:
+                os.remove(fl)
+            except:
+                vprint(verbose, "Could not remove %s" % fl)
+        vprint(verbose, "Removed %s" % fl)
+
+    while stop.wall_elapsed("wholething") <= overall_limit - BUFFER_BEFORE_SENDING_SIGTERM + DELAY_TO_SIGKILL:
+        vprint(verbose, "wait")
+        time.sleep(1)
+
+    # == Now it's time to kill ... subprocesses
+    stop.start_task("Harakiri")
+    vprint(verbose, "Starting Harakiri")
+    util.send_signal_to_our_processes(sig=9, filter=smac_exp)
+    util.send_signal_to_our_processes(sig=9, filter=wrapper_exp)
+    util.send_signal_to_our_processes(sig=9, filter=ensemble_exp)
+    util.send_signal_to_our_processes(sig=9, filter=runsolver_exp)
+    stop.stop_task("Harakiri")
 
     # == Finish and show stopwatch
     stop.stop_task("submitcode")

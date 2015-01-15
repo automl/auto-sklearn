@@ -71,10 +71,12 @@ def load_predictions_of_nbest(dirs, nbest, labels, task_type, metric, load_all_p
             dir_test = os.path.join(d, "predictions_test/")
             dir_valid = os.path.join(d, "predictions_valid/")
 
-        for m, f in enumerate(os.listdir(dir_ensemble)):
+        for f in os.listdir(dir_ensemble):
             p = np.load(os.path.join(dir_ensemble, f))
             if not np.isfinite(p).all():
                 continue
+
+            model_index = int(f.split("_")[-1].split(".")[0])
 
             # Compute performance of current model
             performance = 1 - evaluate.calculate_score(labels, p, task_type, metric)
@@ -85,7 +87,7 @@ def load_predictions_of_nbest(dirs, nbest, labels, task_type, metric, load_all_p
             if(performance_nbest[idx] > performance):
 
                 performance_nbest[idx] = performance
-                indices_nbest[idx] = m
+                indices_nbest[idx] = model_index
                 dirs_nbest[idx] = d
                 pred[idx] = p
 
@@ -124,6 +126,8 @@ def pick_best_models(pred, labels, task_type, metric):
 def train_models_on_complete_data(indices_nbest, dirs_nbest, X_train, Y_train, X_valid, X_test, task_type):
     params = []
     for i, d in enumerate(dirs_nbest):
+        print indices_nbest[i]
+        print d
         p = load_configuration(os.path.join(d, "smac_2_08_00-master.pkl"), indices_nbest[i])
         params.append(p)
 
@@ -166,11 +170,9 @@ def main(dataset):
     print "Use data set: " + str(dataset)
     path = "/home/feurerm/projects/automl_competition_2015/code/benchmarks/" + dataset + "/"
 
-    # Debug
-    #dirs = ["/home/feurerm/projects/automl_competition_2015/code/benchmarks/digits/smac_2_08_00-master_1000_2015-1-9--14-4-13-351537/"]
-    dirs = glob.glob(path + "smac_2_08_00-*0_2015-1-9*")
+    dirs = glob.glob(path + "smac_2_08_00-")
     output_dir = "predictions_tweakathon/"
-    data_dir = "/data/aad/automl_data/"
+    data_dir = "/data/aad/automl_data"
     n_best = 10
 
     print "Load labels from " + str(os.path.join(path, dataset + ".npy"))
@@ -201,6 +203,6 @@ def main(dataset):
 
 if __name__ == '__main__':
     #dataset = ["adult", "digits", "newsgroups", "dorothea", "cadata"]
-    dataset = ["digits"]
+    dataset = ["adult"]
     for d in dataset:
         main(d)

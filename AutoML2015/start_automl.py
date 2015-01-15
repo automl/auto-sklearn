@@ -26,7 +26,8 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     X_train, X_ensemble, Y_train, Y_ensemble = split_data.split_data(loaded_data_manager.data['X_train'], loaded_data_manager.data['Y_train'])
     del X_train, X_ensemble, Y_train
     np.save(os.path.join(tmp_dataset_dir, "true_labels_ensemble.npy"), Y_ensemble)
-    cPickle.dump(loaded_data_manager, open(os.path.join(tmp_dataset_dir, basename + "_Manager.pkl"), 'w'), protocol=-1)
+    data_manager_path = os.path.join(tmp_dataset_dir, basename + "_Manager.pkl")
+    cPickle.dump(loaded_data_manager, open(data_manager_path, 'w'), protocol=-1)
 
     stop = time.time()
     time_needed_to_load_data = stop - start
@@ -70,5 +71,5 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
                                             output_dir=output_dir)
 
     pid_ensembles = proc_ensemble.pid
-    queue.put([time_needed_to_load_data, pid_smac, pid_ensembles])
+    queue.put([time_needed_to_load_data, data_manager_path, pid_smac, pid_ensembles])
     return
