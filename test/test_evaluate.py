@@ -38,7 +38,8 @@ class Test(unittest.TestCase):
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
         configuration_space = AutoSklearnClassifier.\
-            get_hyperparameter_search_space(multiclass=True)
+            get_hyperparameter_search_space(
+            dataset_properties={'multiclass': True})
 
         sampler = RandomSampler(configuration_space, 1)
 
@@ -102,7 +103,8 @@ class Test(unittest.TestCase):
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
         configuration_space = AutoSklearnClassifier.\
-            get_hyperparameter_search_space(multilabel=True)
+            get_hyperparameter_search_space(
+            dataset_properties={'multilabel': True})
 
         sampler = RandomSampler(configuration_space, 1)
 
