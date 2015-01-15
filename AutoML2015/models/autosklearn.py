@@ -1,5 +1,5 @@
-from AutoSklearn.autosklearn import AutoSklearnClassifier
-from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
+from AutoSklearn.classification import AutoSklearnClassifier
+from AutoSklearn.regression import AutoSklearnRegressor
 
 
 def get_configuration_space(info, include_classifiers=None,
