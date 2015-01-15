@@ -112,7 +112,8 @@ class Test(unittest.TestCase):
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
-            evaluator = Evaluator(D, configuration)
+            D_ = copy.deepcopy(D)
+            evaluator = Evaluator(D_, configuration)
             if not self._fit(evaluator):
                 print
                 continue
@@ -156,7 +157,8 @@ class Test(unittest.TestCase):
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
-            evaluator = Evaluator(D, configuration)
+            D_ = copy.deepcopy(D)
+            evaluator = Evaluator(D_, configuration)
 
             if not self._fit(evaluator):
                 print
@@ -195,8 +197,8 @@ class Test(unittest.TestCase):
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
-
-            evaluator = Evaluator(D, configuration)
+            D_ = copy.deepcopy(D)
+            evaluator = Evaluator(D_, configuration)
             if not self._fit(evaluator):
                 print
                 continue
