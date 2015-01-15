@@ -10,7 +10,7 @@ import sklearn.base
 import sklearn.datasets
 
 
-def find_sklearn_classifiers():
+def find_sklearn_classes(class_):
     classifiers = set()
     all_subdirectories = []
     sklearn_path = sklearn.__path__[0]
@@ -33,42 +33,12 @@ def find_sklearn_classifiers():
 
         for member_name, obj in inspect.getmembers(pkg):
             if inspect.isclass(obj) and \
-                    issubclass(obj, sklearn.base.ClassifierMixin):
+                    issubclass(obj, class_):
                 classifier = obj
-                print member_name, obj
+                # print member_name, obj
                 classifiers.add(classifier)
 
-    print classifiers
-
-
-def find_sklearn_regressor():
-    classifiers = set()
-    all_subdirectories = []
-    sklearn_path = sklearn.__path__[0]
-    for root, dirs, files in os.walk(sklearn_path):
-        all_subdirectories.append(root)
-
-    for module_loader, module_name, ispkg in \
-            pkgutil.iter_modules(all_subdirectories):
-
-        # Work around some issues...
-        if module_name in ["hmm", "mixture"]:
-            print "Skipping %s" % module_name
-            continue
-
-        module_file = module_loader.__dict__["path"]
-        sklearn_module = module_file.replace(sklearn_path, "").replace("/", ".")
-        full_module_name = "sklearn" + sklearn_module + "." + module_name
-
-        pkg = importlib.import_module(full_module_name)
-
-        for member_name, obj in inspect.getmembers(pkg):
-            if inspect.isclass(obj) and \
-                    issubclass(obj, sklearn.base.RegressorMixin):
-                classifier = obj
-                print member_name, obj
-                classifiers.add(classifier)
-
+    print
     print classifiers
 
 
@@ -141,5 +111,6 @@ def _test_regressor(Regressor, dataset='diabetes'):
 
 
 if __name__ == "__main__":
-    find_sklearn_classifiers()
-    find_sklearn_regressor()
+    find_sklearn_classes(sklearn.base.ClassifierMixin)
+    find_sklearn_classes(sklearn.base.RegressorMixin)
+    find_sklearn_classes(sklearn.base.TransformerMixin)
