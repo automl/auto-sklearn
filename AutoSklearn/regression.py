@@ -90,7 +90,7 @@ class AutoSklearnRegressor(RegressorMixin, AutoSklearnBaseEstimator):
                                         exclude_estimators=None,
                                         include_preprocessors=None,
                                         exclude_preprocessors=None,
-                                        sparse=False):
+                                        dataset_properties=None):
         """Return the configuration space for the CASH problem.
 
         Parameters
@@ -126,7 +126,6 @@ class AutoSklearnRegressor(RegressorMixin, AutoSklearnBaseEstimator):
         cs : HPOlibConfigSpace.configuration_space.Configuration
             The configuration space describing the AutoSklearnClassifier.
         """
-
         if include_estimators is not None and exclude_estimators is not None:
             raise ValueError("The arguments include_estimators and "
                              "exclude_regressors cannot be used together.")
@@ -134,6 +133,9 @@ class AutoSklearnRegressor(RegressorMixin, AutoSklearnBaseEstimator):
         if include_preprocessors is not None and exclude_preprocessors is not None:
             raise ValueError("The arguments include_preprocessors and "
                              "exclude_preprocessors cannot be used together.")
+
+        if dataset_properties is None or not isinstance(dataset_properties, dict):
+            dataset_properties = dict()
 
         # Compile a list of all estimator objects for this problem
         available_regressors = AutoSklearnRegressor._get_estimator_components()
@@ -149,8 +151,9 @@ class AutoSklearnRegressor(RegressorMixin, AutoSklearnBaseEstimator):
             elif exclude_estimators is not None and \
                             name in exclude_estimators:
                 continue
-            if sparse is True and available_regressors[name]. \
-                    get_properties()['handles_sparse'] is False:
+            if dataset_properties.get('sparse') is True and \
+                    available_regressors[name].get_properties()[
+                        'handles_sparse'] is False:
                 continue
             regressors[name] = available_regressors[name]
 
@@ -185,8 +188,9 @@ class AutoSklearnRegressor(RegressorMixin, AutoSklearnBaseEstimator):
                             name in exclude_preprocessors:
                 continue
 
-            if sparse is True and available_preprocessors[name]. \
-                    get_properties()['handles_sparse'] is False:
+            if dataset_properties.get('sparse') is True and \
+                    available_preprocessors[name].get_properties()[
+                                'handles_sparse'] is False:
                 continue
             elif available_preprocessors[name]. \
                     get_properties()['handles_regression'] is False:
@@ -198,8 +202,8 @@ class AutoSklearnRegressor(RegressorMixin, AutoSklearnBaseEstimator):
         configuration_space = AutoSklearnBaseEstimator \
             ._get_hyperparameter_search_space(
             AutoSklearnRegressor._get_estimator_hyperparameter_name(),
-            regressors, preprocessors,
-            AutoSklearnRegressor._pipeline, regressor_default)
+            regressor_default, regressors, preprocessors, dataset_properties,
+            AutoSklearnRegressor._pipeline, )
 
         # And now add forbidden parameter configurations which would take too
         # long

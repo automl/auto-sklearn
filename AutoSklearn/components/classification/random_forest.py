@@ -98,7 +98,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
                 'preferred_dtype': np.float32}
 
     @staticmethod
-    def get_hyperparameter_search_space():
+    def get_hyperparameter_search_space(dataset_properties=None):
         #n_estimators = UniformIntegerHyperparameter(
         #    "n_estimators", 10, 100, default=10)
         n_estimators = Constant("n_estimators", 100)

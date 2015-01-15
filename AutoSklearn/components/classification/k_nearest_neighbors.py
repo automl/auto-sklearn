@@ -61,7 +61,7 @@ class KNearestNeighborsClassifier(AutoSklearnClassificationAlgorithm):
                 'preferred_dtype' : None}
 
     @staticmethod
-    def get_hyperparameter_search_space():
+    def get_hyperparameter_search_space(dataset_properties=None):
 
         n_neighbors = UniformIntegerHyperparameter(
             name="n_neighbors", lower=1, upper=100, default=1)

@@ -224,10 +224,11 @@ class AutoSklearnBaseEstimator(BaseEstimator):
 
     @staticmethod
     def _get_hyperparameter_search_space(estimator_name,
+                                         default_estimator,
                                          estimator_components,
                                          preprocessor_components,
-                                         always_active,
-                                         default_estimator):
+                                         dataset_properties,
+                                         always_active):
         """Return the configuration space for the CASH problem.
 
         This method should be called by the method
@@ -287,7 +288,7 @@ class AutoSklearnBaseEstimator(BaseEstimator):
             # conditions!
 
             estimator_configuration_space = available_estimators[name]. \
-                get_hyperparameter_search_space()
+                get_hyperparameter_search_space(dataset_properties)
             for parameter in estimator_configuration_space.get_hyperparameters():
                 new_parameter = copy.deepcopy(parameter)
                 new_parameter.name = "%s:%s" % (name, new_parameter.name)
@@ -300,7 +301,7 @@ class AutoSklearnBaseEstimator(BaseEstimator):
                     cs.add_condition(condition)
 
             for condition in available_estimators[name]. \
-                    get_hyperparameter_search_space().get_conditions():
+                    get_hyperparameter_search_space(dataset_properties).get_conditions():
                 dlcs = condition.get_descendant_literal_conditions()
                 for dlc in dlcs:
                     if not dlc.child.name.startswith(name):
@@ -310,7 +311,7 @@ class AutoSklearnBaseEstimator(BaseEstimator):
                 cs.add_condition(condition)
 
             for forbidden_clause in available_estimators[name]. \
-                    get_hyperparameter_search_space().forbidden_clauses:
+                    get_hyperparameter_search_space(dataset_properties).forbidden_clauses:
                 dlcs = forbidden_clause.get_descendant_literal_clauses()
                 for dlc in dlcs:
                     if not dlc.hyperparameter.name.startswith(name):
@@ -325,7 +326,7 @@ class AutoSklearnBaseEstimator(BaseEstimator):
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors.keys():
             preprocessor_configuration_space = available_preprocessors[name]. \
-                get_hyperparameter_search_space()
+                get_hyperparameter_search_space(dataset_properties)
             for parameter in preprocessor_configuration_space.get_hyperparameters():
                 new_parameter = copy.deepcopy(parameter)
                 new_parameter.name = "%s:%s" % (name, new_parameter.name)
@@ -340,7 +341,7 @@ class AutoSklearnBaseEstimator(BaseEstimator):
                     cs.add_condition(condition)
 
             for condition in available_preprocessors[name]. \
-                    get_hyperparameter_search_space().get_conditions():
+                    get_hyperparameter_search_space(dataset_properties).get_conditions():
                 dlcs = condition.get_descendent_literal_conditions()
                 for dlc in dlcs:
                     if not dlc.child.name.startswith(name):
@@ -350,7 +351,7 @@ class AutoSklearnBaseEstimator(BaseEstimator):
                 cs.add_condition(condition)
 
             for forbidden_clause in available_preprocessors[name]. \
-                    get_hyperparameter_search_space().forbidden_clauses:
+                    get_hyperparameter_search_space(dataset_properties).forbidden_clauses:
                 dlcs = forbidden_clause.get_descendant_literal_clauses()
                 for dlc in dlcs:
                     if not dlc.hyperparameter.startwith(name):

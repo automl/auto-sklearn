@@ -58,7 +58,7 @@ class RidgeRegression(AutoSklearnRegressionAlgorithm):
                 'preferred_dtype': np.float32}
 
     @staticmethod
-    def get_hyperparameter_search_space():
+    def get_hyperparameter_search_space(dataset_properties=None):
         alpha = UniformFloatHyperparameter(
             name="alpha", lower=0.0001, upper=10, default=1.0, log=True)
 

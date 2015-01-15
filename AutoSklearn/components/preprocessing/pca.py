@@ -63,7 +63,7 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
                 'preferred_dtype': None}
 
     @staticmethod
-    def get_hyperparameter_search_space():
+    def get_hyperparameter_search_space(dataset_properties=None):
         keep_variance = UniformFloatHyperparameter(
             "keep_variance", 0.5, 1.0, default=1.0)
         whiten = CategoricalHyperparameter(

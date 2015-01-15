@@ -42,7 +42,7 @@ class SparseFiltering(AutoSklearnPreprocessingAlgorithm):
 
     
     @staticmethod
-    def get_hyperparameter_search_space():
+    def get_hyperparameter_search_space(dataset_properties=None):
         N = UniformIntegerHyperparameter(
             "N", 50, 2000, default=100)
         maxiter = UniformIntegerHyperparameter(

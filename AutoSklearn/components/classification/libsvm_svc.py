@@ -87,7 +87,7 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
             'preferred_dtype': None}
 
     @staticmethod
-    def get_hyperparameter_search_space():
+    def get_hyperparameter_search_space(dataset_properties=None):
         C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True,
                                        default=1.0)
         # No linear kernel here, because we have liblinear

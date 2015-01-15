@@ -119,7 +119,7 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
                 'preferred_dtype': np.float32}
 
     @staticmethod
-    def get_hyperparameter_search_space():
+    def get_hyperparameter_search_space(dataset_properties=None):
 
         loss = CategoricalHyperparameter(
             name="loss", choices=["ls", "lad"], default='ls') #, "huber", "quantile"], default='ls')

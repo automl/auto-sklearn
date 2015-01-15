@@ -80,9 +80,7 @@ class AutoSklearnClassifier(ClassifierMixin, AutoSklearnBaseEstimator):
                                         exclude_estimators=None,
                                         include_preprocessors=None,
                                         exclude_preprocessors=None,
-                                        multiclass=False,
-                                        multilabel=False,
-                                        sparse=False):
+                                        dataset_properties=None):
 
         if include_estimators is not None and exclude_estimators is not None:
             raise ValueError("The arguments include_estimators and "
@@ -91,6 +89,9 @@ class AutoSklearnClassifier(ClassifierMixin, AutoSklearnBaseEstimator):
         if include_preprocessors is not None and exclude_preprocessors is not None:
             raise ValueError("The arguments include_preprocessors and "
                              "exclude_preprocessors cannot be used together.")
+
+        if dataset_properties is None or not isinstance(dataset_properties, dict):
+            dataset_properties = dict()
 
         # Compile a list of all estimator objects for this problem
         available_classifiers = AutoSklearnClassifier._get_estimator_components()
@@ -104,14 +105,17 @@ class AutoSklearnClassifier(ClassifierMixin, AutoSklearnBaseEstimator):
                             name in exclude_estimators:
                 continue
 
-            if multiclass is True and available_classifiers[name]. \
-                    get_properties()['handles_multiclass'] is False:
+            if dataset_properties.get('multiclass') is True and \
+                    available_classifiers[name].get_properties()[
+                        'handles_multiclass'] is False:
                 continue
-            if multilabel is True and available_classifiers[name]. \
-                    get_properties()['handles_multilabel'] is False:
+            if dataset_properties.get('multilabel') is True and \
+                    available_classifiers[name].get_properties()[
+                        'handles_multilabel'] is False:
                 continue
-            if sparse is True and available_classifiers[name]. \
-                    get_properties()['handles_sparse'] is False:
+            if dataset_properties.get('sparse') is True and \
+                    available_classifiers[name].get_properties()[
+                        'handles_sparse'] is False:
                 continue
             classifiers[name] = available_classifiers[name]
 
@@ -149,14 +153,17 @@ class AutoSklearnClassifier(ClassifierMixin, AutoSklearnBaseEstimator):
             if available_preprocessors[name]. \
                     get_properties()['handles_classification'] is False:
                 continue
-            if multiclass is True and available_preprocessors[name]. \
-                    get_properties()['handles_multiclass'] is False:
+            if dataset_properties.get('multiclass') is True and \
+                    available_preprocessors[name].get_properties()[
+                                'handles_multiclass'] is False:
                 continue
-            if multilabel is True and available_preprocessors[name]. \
-                    get_properties()['handles_multilabel'] is False:
+            if dataset_properties.get('multilabel') is True and \
+                    available_preprocessors[name].get_properties()[
+                                'handles_multilabel'] is False:
                 continue
-            if sparse is True and available_preprocessors[name]. \
-                    get_properties()['handles_sparse'] is False:
+            if dataset_properties.get('sparse') is True and \
+                    available_preprocessors[name].get_properties()[
+                                'handles_sparse'] is False:
                 continue
 
             preprocessors[name] = available_preprocessors[name]
@@ -165,8 +172,8 @@ class AutoSklearnClassifier(ClassifierMixin, AutoSklearnBaseEstimator):
         configuration_space = AutoSklearnBaseEstimator\
             ._get_hyperparameter_search_space(
             AutoSklearnClassifier._get_estimator_hyperparameter_name(),
-            classifiers, preprocessors,
-            AutoSklearnClassifier._pipeline, classifier_default)
+            classifier_default, classifiers, preprocessors, dataset_properties,
+            AutoSklearnClassifier._pipeline)
 
         # And now add forbidden parameter configurations which would take too
         # long

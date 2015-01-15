@@ -109,7 +109,7 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
                 'preferred_dtype': np.float32}
 
     @staticmethod
-    def get_hyperparameter_search_space():
+    def get_hyperparameter_search_space(dataset_properties=None):
 
         #use_max_depth = CategoricalHyperparameter(
         #    name="use_max_depth", choices=("True", "False"), default="False")

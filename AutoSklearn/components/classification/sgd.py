@@ -89,7 +89,7 @@ class SGD(AutoSklearnClassificationAlgorithm):
                 'preferred_dtype' : None}
 
     @staticmethod
-    def get_hyperparameter_search_space():
+    def get_hyperparameter_search_space(dataset_properties=None):
         loss = CategoricalHyperparameter("loss",
             ["hinge", "log", "modified_huber", "squared_hinge", "perceptron"],
             default="hinge")

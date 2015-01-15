@@ -90,7 +90,7 @@ class SupportVectorRegression(AutoSklearnRegressionAlgorithm):
                 'preferred_dtype': np.float32}
 
     @staticmethod
-    def get_hyperparameter_search_space():
+    def get_hyperparameter_search_space(dataset_properties):
         # Copied from libsvm_c
         C = UniformFloatHyperparameter(
             name="C", lower=0.03125, upper=32768, log=True, default=1.0)

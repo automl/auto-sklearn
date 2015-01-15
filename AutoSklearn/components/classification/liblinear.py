@@ -81,7 +81,7 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
                 'preferred_dtype' : None}
 
     @staticmethod
-    def get_hyperparameter_search_space():
+    def get_hyperparameter_search_space(dataset_properties=None):
         penalty = CategoricalHyperparameter("penalty", ["l1", "l2"],
                                             default="l2")
         loss = CategoricalHyperparameter("loss", ["l1", "l2"], default="l2")

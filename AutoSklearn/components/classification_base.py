@@ -42,7 +42,7 @@ class AutoSklearnClassificationAlgorithm(object):
         raise NotImplementedError()
 
     @staticmethod
-    def get_hyperparameter_search_space():
+    def get_hyperparameter_search_space(dataset_properties=None):
         """Return the configuration space of this classification algorithm.
 
         Returns

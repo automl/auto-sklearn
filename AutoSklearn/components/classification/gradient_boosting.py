@@ -114,7 +114,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 'preferred_dtype': np.float32}
 
     @staticmethod
-    def get_hyperparameter_search_space():
+    def get_hyperparameter_search_space(dataset_properties=None):
         learning_rate = UniformFloatHyperparameter(
             name="learning_rate", lower=0.0001, upper=1, default=0.1, log=True)
         subsample = UniformFloatHyperparameter(
