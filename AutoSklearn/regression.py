@@ -85,8 +85,8 @@ class AutoSklearnRegressor(RegressorMixin, AutoSklearnBaseEstimator):
         """
         raise NotImplementedError()
 
-    @staticmethod
-    def get_hyperparameter_search_space(include_estimators=None,
+    @classmethod
+    def get_hyperparameter_search_space(cls, include_estimators=None,
                                         exclude_estimators=None,
                                         include_preprocessors=None,
                                         exclude_preprocessors=None,
@@ -199,11 +199,11 @@ class AutoSklearnRegressor(RegressorMixin, AutoSklearnBaseEstimator):
             preprocessors[name] = available_preprocessors[name]
 
         # Get the configuration space
-        configuration_space = AutoSklearnBaseEstimator \
-            ._get_hyperparameter_search_space(
-            AutoSklearnRegressor._get_estimator_hyperparameter_name(),
+        configuration_space = super(AutoSklearnRegressor, cls).\
+            get_hyperparameter_search_space(
+            cls._get_estimator_hyperparameter_name(),
             regressor_default, regressors, preprocessors, dataset_properties,
-            AutoSklearnRegressor._pipeline, )
+            cls._pipeline, )
 
         # And now add forbidden parameter configurations which would take too
         # long

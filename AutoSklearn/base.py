@@ -222,8 +222,8 @@ class AutoSklearnBaseEstimator(BaseEstimator):
         self._validate_input_X(X)
         return self._pipeline.predict(X)
 
-    @staticmethod
-    def _get_hyperparameter_search_space(estimator_name,
+    @classmethod
+    def get_hyperparameter_search_space(cls, estimator_name,
                                          default_estimator,
                                          estimator_components,
                                          preprocessor_components,

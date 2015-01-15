@@ -1,4 +1,3 @@
-import copy
 from itertools import product
 
 from sklearn.base import ClassifierMixin
@@ -54,8 +53,6 @@ class AutoSklearnClassifier(ClassifierMixin, AutoSklearnBaseEstimator):
     --------
 
     """
-    _pipeline = ["imputation", "rescaling", "__preprocessor__",
-                 "__estimator__"]
 
     def predict_proba(self, X):
         """predict_proba.
@@ -75,12 +72,17 @@ class AutoSklearnClassifier(ClassifierMixin, AutoSklearnBaseEstimator):
 
         return self._pipeline.steps[-1][-1].predict_proba(Xt)
 
-    @staticmethod
-    def get_hyperparameter_search_space(include_estimators=None,
+    @classmethod
+    def get_hyperparameter_search_space(cls, include_estimators=None,
                                         exclude_estimators=None,
                                         include_preprocessors=None,
                                         exclude_preprocessors=None,
                                         dataset_properties=None):
+
+        print cls
+        print include_estimators
+        print exclude_estimators
+        print exclude_preprocessors
 
         if include_estimators is not None and exclude_estimators is not None:
             raise ValueError("The arguments include_estimators and "
@@ -140,7 +142,7 @@ class AutoSklearnClassifier(ClassifierMixin, AutoSklearnBaseEstimator):
 
         preprocessors = dict()
         for name in available_preprocessors:
-            if name in ["imputation", "rescaling"]:
+            if name in cls._get_pipeline():
                 preprocessors[name] = available_preprocessors[name]
                 continue
             elif include_preprocessors is not None and \
@@ -169,11 +171,11 @@ class AutoSklearnClassifier(ClassifierMixin, AutoSklearnBaseEstimator):
             preprocessors[name] = available_preprocessors[name]
 
         # Get the configuration space
-        configuration_space = AutoSklearnBaseEstimator\
-            ._get_hyperparameter_search_space(
-            AutoSklearnClassifier._get_estimator_hyperparameter_name(),
+        configuration_space = super(AutoSklearnClassifier, cls)\
+            .get_hyperparameter_search_space(
+            cls._get_estimator_hyperparameter_name(),
             classifier_default, classifiers, preprocessors, dataset_properties,
-            AutoSklearnClassifier._pipeline)
+            cls._get_pipeline())
 
         # And now add forbidden parameter configurations which would take too
         # long
@@ -202,3 +204,7 @@ class AutoSklearnClassifier(ClassifierMixin, AutoSklearnBaseEstimator):
     @staticmethod
     def _get_estimator_components():
         return components.classification_components._classifiers
+
+    @staticmethod
+    def _get_pipeline():
+        return ["imputation", "rescaling", "__preprocessor__", "__estimator__"]
