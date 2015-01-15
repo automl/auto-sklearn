@@ -6,7 +6,7 @@ from AutoSklearn.components.preprocessing.imputation import Imputation
 from AutoSklearn.util import _test_preprocessing
 
 
-class LibLinearComponentTest(unittest.TestCase):
+class ImputationTest(unittest.TestCase):
     def test_default_configuration(self):
         transformations = []
         for i in range(10):
