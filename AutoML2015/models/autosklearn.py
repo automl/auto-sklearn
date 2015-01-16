@@ -2,51 +2,60 @@ from AutoSklearn.classification import AutoSklearnClassifier
 from AutoSklearn.regression import AutoSklearnRegressor
 
 
-def get_configuration_space(info, include_classifiers=None,
+def get_configuration_space(info, include_estimators=None,
                             include_preprocessors=None):
     if info['task'] == 'regression':
-        sparse = False
-        if info['is_sparse'] == 1:
-            sparse = True
-        configuration_space = AutoSklearnRegressor. \
-        get_hyperparameter_search_space(sparse=sparse,
-                                        exclude_regressors=None)
-        return configuration_space
+        return _get_regression_configuration_space(info, include_estimators,
+                                                   include_preprocessors)
     else:
-        task_type = info['task']
+        return _get_classification_configuration_space(info,
+                                                       include_estimators,
+                                                       include_preprocessors)
 
-        multilabel = False
-        multiclass = False
-        sparse = False
 
-        if task_type.lower() == 'multilabel.classification':
-            multilabel = True
-        if task_type.lower() == 'regression':
-            raise NotImplementedError()
-        if task_type.lower() == 'multiclass.classification':
-            multiclass = True
-            pass
-        if task_type.lower() == 'binary.classification':
-            pass
+def _get_regression_configuration_space(info, include_estimators=None,
+                                        include_preprocessors=None):
+    sparse = False
+    if info['is_sparse'] == 1:
+        sparse = True
+    configuration_space = AutoSklearnRegressor. \
+        get_hyperparameter_search_space(include_estimators=include_estimators,
+                                        include_preprocessors=include_preprocessors,
+                                        dataset_properties={'sparse': sparse})
+    return configuration_space
 
-        if info['is_sparse'] == 1:
-            sparse = True
 
-        # Todo add a check here if this is useful...
-        exclude_classifiers = None
+def _get_classification_configuration_space(info, include_estimators=None,
+                                            include_preprocessors=None):
+    task_type = info['task']
 
-        configuration_space = AutoSklearnClassifier. \
-            get_hyperparameter_search_space(multiclass=multiclass,
-                                            multilabel=multilabel,
-                                            sparse=sparse,
-                                            exclude_classifiers=exclude_classifiers,
-                                            include_classifiers=include_classifiers,
-                                            include_preprocessors=include_preprocessors)
-        return configuration_space
+    multilabel = False
+    multiclass = False
+    sparse = False
 
+    if task_type.lower() == 'multilabel.classification':
+        multilabel = True
+    if task_type.lower() == 'regression':
+        raise NotImplementedError()
+    if task_type.lower() == 'multiclass.classification':
+        multiclass = True
+        pass
+    if task_type.lower() == 'binary.classification':
+        pass
+
+    if info['is_sparse'] == 1:
+        sparse = True
+
+    dataset_properties = {'multilabel': multilabel, 'multiclass': multiclass,
+                          'sparse': sparse}
+
+    return AutoSklearnClassifier.get_hyperparameter_search_space(
+        dataset_properties=dataset_properties,
+        include_estimators=include_estimators,
+        include_preprocessors=include_preprocessors)
 
 def get_model(configuration, seed):
     if 'classifier' in configuration:
         return AutoSklearnClassifier(configuration, seed)
-    else:
-        raise NotImplementedError()
+    elif 'regressor' in configuration:
+        return  AutoSklearnRegressor(configuration, seed)

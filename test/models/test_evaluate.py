@@ -9,9 +9,8 @@ import numpy as np
 
 from AutoML2015.data.data_converter import convert_to_bin
 from AutoML2015.models.evaluate import Evaluator, predict_proba
+from AutoML2015.models.autosklearn import get_configuration_space
 from AutoML2015.util.split_data import split_data
-from AutoSklearn.classification import AutoSklearnClassifier
-from AutoSklearn.regression import AutoSklearnRegressor
 from AutoSklearn.util import get_dataset
 from HPOlibConfigSpace.random_sampler import RandomSampler
 
@@ -32,15 +31,13 @@ class Test(unittest.TestCase):
         Y_test = Y_test[25:,]
 
         D = Dummy()
-        D.info = {'metric': 'bac_metric', 'task': 'multiclass.classification'}
+        D.info = {'metric': 'bac_metric', 'task': 'multiclass.classification',
+                  'is_sparse': False}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = AutoSklearnClassifier.\
-            get_hyperparameter_search_space(
-            dataset_properties={'multiclass': True})
-
+        configuration_space = get_configuration_space(D.info)
         sampler = RandomSampler(configuration_space, 1)
 
         err = np.zeros([N_TEST_RUNS])
@@ -97,22 +94,21 @@ class Test(unittest.TestCase):
         Y_test = Y_test[25:, ]
 
         D = Dummy()
-        D.info = {'metric': 'f1_metric', 'task': 'multilabel.classification'}
+        D.info = {'metric': 'f1_metric', 'task': 'multilabel.classification',
+                  'is_sparse': False}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = AutoSklearnClassifier.\
-            get_hyperparameter_search_space(
-            dataset_properties={'multilabel': True})
-
+        configuration_space = get_configuration_space(D.info)
         sampler = RandomSampler(configuration_space, 1)
 
         err = np.zeros([N_TEST_RUNS])
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
-            evaluator = Evaluator(D, configuration)
+            D_ = copy.deepcopy(D)
+            evaluator = Evaluator(D_, configuration)
             if not self._fit(evaluator):
                 print
                 continue
@@ -142,21 +138,21 @@ class Test(unittest.TestCase):
         Y_test = Y_test[25:, ]
 
         D = Dummy()
-        D.info = {'metric': 'auc_metric', 'task': 'binary.classification'}
+        D.info = {'metric': 'auc_metric', 'task': 'binary.classification',
+                  'is_sparse': False}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = AutoSklearnClassifier. \
-            get_hyperparameter_search_space()
-
+        configuration_space = get_configuration_space(D.info)
         sampler = RandomSampler(configuration_space, 1)
 
         err = np.zeros([N_TEST_RUNS])
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
-            evaluator = Evaluator(D, configuration)
+            D_ = copy.deepcopy(D)
+            evaluator = Evaluator(D_, configuration)
 
             if not self._fit(evaluator):
                 print
@@ -179,24 +175,23 @@ class Test(unittest.TestCase):
         Y_test = Y_test[200:, ]
 
         D = Dummy()
-        D.info = {'metric': 'r2_metric', 'task': 'regression'}
+        D.info = {'metric': 'r2_metric', 'task': 'regression',
+                  'is_sparse': False}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical',
                        'numerical', 'numerical', 'numerical', 'numerical',
                        'numerical', 'numerical', 'numerical']
 
-        configuration_space = AutoSklearnRegressor. \
-            get_hyperparameter_search_space()
-
+        configuration_space = get_configuration_space(D.info)
         sampler = RandomSampler(configuration_space, 1)
 
         err = np.zeros([N_TEST_RUNS])
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
-
-            evaluator = Evaluator(D, configuration)
+            D_ = copy.deepcopy(D)
+            evaluator = Evaluator(D_, configuration)
             if not self._fit(evaluator):
                 print
                 continue
@@ -219,6 +214,7 @@ class Test(unittest.TestCase):
             if "Floating-point under-/overflow occurred at epoch" in e.message:
                 return False
             else:
+                print evaluator.configuration
                 raise e
 
     def test_predict_proba_binary_classification(self):
