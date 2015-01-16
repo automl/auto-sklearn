@@ -21,7 +21,7 @@ try:
 except:
     import pickle
 
-import helper_functions
+import chelper_functions
 import time
 
 
@@ -138,9 +138,9 @@ class DataManager:
         if 'feat_num' not in self.info:
             self.getNbrFeatures(filename)
 
-        data_func = {'dense': helper_functions.read_dense_file,
-                     'sparse': helper_functions.read_sparse_file,
-                     'sparse_binary': helper_functions.read_sparse_binary_file}
+        data_func = {'dense': chelper_functions.read_dense_file,
+                     'sparse': chelper_functions.read_sparse_file,
+                     'sparse_binary': chelper_functions.read_sparse_binary_file}
         
         data = data_func[self.info['format']](filename, num_points, self.info['feat_num'])
 
@@ -169,14 +169,14 @@ class DataManager:
         # IG: Here change to accommodate the new multiclass label format
         if self.info['task'] == 'multilabel.classification':
 			#cast into ints
-            label = (helper_functions.read_dense_file_unknown_width(filename, num_points)).astype(np.int)
+            label = (chelper_functions.read_dense_file_unknown_width(filename, num_points)).astype(np.int)
         elif self.info['task'] == 'multiclass.classification':
-            label = helper_functions.read_dense_file_unknown_width(filename, num_points)
+            label = chelper_functions.read_dense_file_unknown_width(filename, num_points)
             # read the class from the only non zero entry in each line!
             # should be ints right away
             label = np.where(label!=0)[1];
         else:
-            label = helper_functions.read_dense_file_unknown_width(filename, num_points)
+            label = chelper_functions.read_dense_file_unknown_width(filename, num_points)
    
         if self.use_pickle:
             with open (os.path.join (self.tmp_dir, os.path.basename(filename) + ".pickle"), "wb") as pickle_file:
@@ -208,7 +208,7 @@ class DataManager:
 
         categorical = [True if feat_type.lower() == 'categorical' else False
                        for feat_type in self.feat_type]
-        predicted_RAM_usage = float(helper_functions.predict_RAM_usage(
+        predicted_RAM_usage = float(chelper_functions.predict_RAM_usage(
             self.data['X_train'], categorical)) / 1024 / 1024
 
         if predicted_RAM_usage > 1000:
@@ -238,7 +238,7 @@ class DataManager:
         start = time.time()
         type_list = []
         if os.path.isfile(filename):
-            type_list = helper_functions.file_to_array (filename, verbose=False)
+            type_list = chelper_functions.file_to_array (filename, verbose=False)
         else:
             n=self.info['feat_num']
             type_list = [self.info['feat_type']]*n
@@ -319,13 +319,13 @@ class DataManager:
             if self.info['is_sparse'] == 0:
                 self.info['format'] = 'dense'
             else:
-                data = helper_functions.read_first_line (filename)
+                data = chelper_functions.read_first_line (filename)
                 if ':' in data[0]:
                     self.info['format'] = 'sparse'
                 else:
                     self.info['format'] = 'sparse_binary'
         else:
-            data = helper_functions.file_to_array (filename)
+            data = chelper_functions.file_to_array (filename)
             if ':' in data[0][0]:
                 self.info['is_sparse'] = 1
                 self.info['format'] = 'sparse'
