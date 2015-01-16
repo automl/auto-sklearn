@@ -26,7 +26,6 @@ except:
     import pickle
 
 
-
 def predict_proba(X, model, task_type):
     Y_pred = model.predict_proba(X)
 
@@ -116,6 +115,8 @@ class Evaluator(object):
     def __init__(self,Datamanager, configuration, with_predictions=False, all_scoring_functions=False, splitting_function=split_data, seed=1):
 
         self.starttime = time.time()
+
+        self.configuration = configuration
 
         self.X_train, self.X_optimization, self.Y_train, self.Y_optimization = \
         splitting_function(Datamanager.data['X_train'], Datamanager.data['Y_train'])
