@@ -1,0 +1,71 @@
+import numpy as np
+
+import sklearn.gaussian_process 
+
+from HPOlibConfigSpace.configuration_space import ConfigurationSpace
+from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
+    UniformIntegerHyperparameter, CategoricalHyperparameter, \
+    UnParametrizedHyperparameter, Constant
+
+from ..regression_base import AutoSklearnRegressionAlgorithm
+
+
+class GaussianProcess(AutoSklearnRegressionAlgorithm):
+    def __init__(self, nugget, thetaL, thetaU, normalize=False, copy_X=False, 
+            tol=0.001, optimizer='fmin_cobyla', random_state=None):
+        self.nugget = float(nugget)
+        self.thetaL = float(thetaL)
+        self.thetaU = float(thetaU)
+        self.normalize = normalize
+        self.copy_X = copy_X
+        self.optimizer = optimizer
+        # We ignore it
+        self.random_state = random_state
+        self.estimator = None
+
+    def fit(self, X, Y):
+        # Instanciate a Gaussian Process model
+        self.estimator = sklearn.gaussian_process.GaussianProcess(
+            corr='squared_exponential', 
+            theta0=np.ones(X.shape[1]) * 1e-1,
+            thetaL=np.ones(X.shape[1]) * self.thetaL, 
+            thetaU=np.ones(X.shape[1]) * self.thetaU,
+            nugget=self.nugget)
+        self.estimator.fit(X, Y)
+        return self
+
+    def predict(self, X):
+        if self.estimator is None:
+            raise NotImplementedError
+        return self.estimator.predict(X)
+
+    @staticmethod
+    def get_properties():
+        return {'shortname': 'GP',
+                'name': 'Gaussian Process',
+                'handles_missing_values': False,
+                'handles_nominal_values': False,
+                'handles_numerical_features': True,
+                'prefers_data_scaled': True,
+                # TODO find out if this is good because of sparcity...
+                'prefers_data_normalized': True,
+                'is_deterministic': True,
+                'handles_sparse': False,
+                # TODO find out what is best used here!
+                # But rather fortran or C-contiguous?
+                'preferred_dtype': np.float32}
+
+    @staticmethod
+    def get_hyperparameter_search_space(dataset_properties=None):
+        nugget = UniformFloatHyperparameter(
+            name="nugget", lower=0.0001, upper=10, default=0.1, log=True)
+        thetaL = UniformFloatHyperparameter(
+            name="thetaL", lower=1e-5, upper=1e-3, default=1e-4, log=True)
+        thetaU = UniformFloatHyperparameter(
+            name="thetaU", lower=0.2, upper=10, default=1.0, log=True)
+
+        cs = ConfigurationSpace()
+        cs.add_hyperparameter(nugget)
+        cs.add_hyperparameter(thetaL)
+        cs.add_hyperparameter(thetaU)
+        return cs
