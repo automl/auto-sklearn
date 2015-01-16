@@ -1,4 +1,14 @@
 import setuptools
+import os
+
+
+
+
+
+for basename in ["chelper_functions", "cdata_manager"]:
+    os.system("cython ./AutoML2015/data/%s.pyx"%basename)
+    os.system('gcc -w -shared -fPIC -fwrapv -O2 -fno-strict-aliasing -I/usr/include/python2.7 -o AutoML2015/data/%s.so AutoML2015/data/%s.c'%(basename, basename))
+
 
 setuptools.setup(name="AutoML2015",
                  description="Code to participate in the AutoML 2015 challenge.",
@@ -21,3 +31,7 @@ setuptools.setup(name="AutoML2015",
                  platforms=['Linux'],
                  classifiers=[],
                  url='')
+
+
+
+
