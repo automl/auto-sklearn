@@ -79,21 +79,13 @@ class DataManager:
         info_file = os.path.join(self.input_dir, basename + '_public.info')
         self.getInfo(info_file)
         
-        print self.info
-        
         self.feat_type = self.loadType(os.path.join(self.input_dir, basename + '_feat.type'), verbose=verbose)
         self.data = {}
 
         Xtr = self.loadData(os.path.join(self.input_dir, basename + '_train.data'), self.info['train_num'], verbose=verbose)
-        print "done loading trainings data"
-        
         Xva = self.loadData(os.path.join(self.input_dir, basename + '_valid.data'), self.info['valid_num'], verbose=verbose)
-        print "done loading validation data"
         Xte = self.loadData(os.path.join(self.input_dir, basename + '_test.data' ), self.info['test_num' ], verbose=verbose)
-        print "done loading test data"
-        
         Ytr = self.loadLabel(os.path.join(self.input_dir, basename + '_train.solution'), self.info['train_num'], verbose=verbose)
-        print "done loading test data"
 		
         self.data['X_train'] = Xtr
         self.data['Y_train'] = Ytr

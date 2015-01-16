@@ -86,7 +86,6 @@ def read_sparse_file(char *filename, int num_points,int num_features, int initia
 	# fix the end of indptr
 	for j in range (i,num_points+1):
 		indptr[j] = num_entries
-	print num_points, num_features
 	return(scipy.sparse.csr_matrix((data,indices,indptr),shape=[num_points, num_features]))
 
 
