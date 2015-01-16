@@ -59,7 +59,8 @@ class DataManager:
         Get the kind of problem ('binary.classification', 'multiclass.classification', 'multilabel.classification', 'regression'), using the solution file given.
     '''
     
-    def __init__(self, basename, input_dir, verbose=False, use_pickle=False):
+    def __init__(self, basename, input_dir, verbose=False, use_pickle=False,
+            encode_labels=True):
         '''Constructor'''
         self.use_pickle = use_pickle # Turn this to true to save data as pickle (inefficient)
         self.basename = basename
@@ -100,8 +101,8 @@ class DataManager:
         self.data['X_valid'] = Xva
         self.data['X_test'] = Xte
         
-        
-        self.perform1HotEncoding()
+        if encode_labels:
+            self.perform1HotEncoding()
           
     def __repr__(self):
         return "DataManager : " + self.basename
