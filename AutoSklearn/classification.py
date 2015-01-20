@@ -129,7 +129,7 @@ class AutoSklearnClassifier(ClassifierMixin, AutoSklearnBaseEstimator):
                 classifier_default = cd_
                 break
         if classifier_default is None:
-            classifier_default = classifiers[0]
+            classifier_default = classifiers.keys()[0]
 
         # Compile a list of preprocessor for this problem
         available_preprocessors = \
