@@ -1,25 +1,23 @@
 import sklearn.decomposition
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace, \
-    Configuration
-
-from HPOlibConfigSpace.hyperparameters import  IntegerHyperparameter
+from HPOlibConfigSpace.configuration_space import ConfigurationSpace
+from HPOlibConfigSpace.hyperparameters import UniformIntegerHyperparameter
 
 from ..preprocessor_base import AutoSklearnPreprocessingAlgorithm
 import numpy as np
 
 
 
-class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
+class TruncatedSVD():#AutoSklearnPreprocessingAlgorithm):
     def __init__(self, target_dim, random_state=None):
-        # TODO: fill out handles_???
-        #		how to set the maximum of the hyperparameter search space for target dim in a meaningful way?
-        self.target_dim = target_dim
+        self.target_dim = int(target_dim)
         self.random_state = random_state
-        self.preprocessor=None
+        self.preprocessor = None
 
     def fit(self, X, Y):
-        self.preprocessor = sklearn.decomposition.TruncatedSVD(min(self.target_dim, X.shape[0]), algorithm='arpack')
+        target_dim = min(self.target_dim, X.shape[0])
+        self.preprocessor = sklearn.decomposition.TruncatedSVD(
+            target_dim, algorithm='arpack')
         self.preprocessor.fit(X, Y)
 
         return self
@@ -38,18 +36,18 @@ class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
                 'handles_numerical_features': True,
                 'prefers_data_scaled': False,
                 'prefers_data_normalized': False,
-                'handles_regression': None,
-                'handles_classification': None,
-                'handles_multiclass': None,
-                'handles_multilabel': None,
+                'handles_regression': True,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': True,
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'preferred_dtype': np.float32}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        target_dim = IntegerHyperparameter(
-            "target_dim", 0, 256, default=128)
+        target_dim = UniformIntegerHyperparameter(
+            "target_dim", 10, 256, default=128)
         cs = ConfigurationSpace()
         cs.add_hyperparameter(target_dim)
         return cs

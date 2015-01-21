@@ -7,29 +7,27 @@ from ..preprocessor_base import AutoSklearnPreprocessingAlgorithm
 import numpy as np
 
 
-class TFIDF(AutoSklearnPreprocessingAlgorithm):
+class TFIDF(object):#AutoSklearnPreprocessingAlgorithm):
     def __init__(self, random_state=None):
-        #
         # This is implementation is for sparse data only! It will make inplace changes to the data!
-        #
-        # TODO: Define some meaningful parameter. Maybe some thresholding or so
-        #		Should transform return X again?
-        #		Should transform raise a NotImplementedError?
-        #		'handles_multilabel'???
+
         self.idf = None
         self.random_state = random_state
 
-    def fit(self, X, Y):
-        #count the number of docmunts in which each word occurs 
+    def fit(self, X, y):
+        #count the number of documents in which each word occurs
+        # @Stefan: Is there a reason why this is called weights and not
+        # document_frequency?
         weights = (X>0.0).sum(axis=0)
         # words that never appear have to be treated differently!
+        # @Stefan: Doesn't weights == 0 yield a boolean numpy array which can
+        #  be directly used for indexing?
         indices = np.ravel(np.where(weights == 0)[1])
         
         # calculate (the log of) the inverse document frequencies
-        self.idf = np.array(np.log(float(X_train.shape[0])/(weights)))[0]
+        self.idf = np.array(np.log(float(X.shape[0])/(weights)))[0]
         # words that are not in the training data get will be set to zero
         self.idf[indices] = 0
-        
 
         return self
 
@@ -42,7 +40,7 @@ class TFIDF(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_properties():
         return {'shortname': 'TFIDF',
-                'name': 'Term Frequency (times) Inverse Document Frequency',
+                'name': 'Term Frequency / Inverse Document Frequency',
                 'handles_missing_values': False,
                 'handles_nominal_values': False,
                 'handles_numerical_features': True,
@@ -51,7 +49,7 @@ class TFIDF(AutoSklearnPreprocessingAlgorithm):
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': None,
+                'handles_multilabel': True,
                 'is_deterministic': True,
                 'handles_sparse': True,
                 # TODO find out what is best used here!
