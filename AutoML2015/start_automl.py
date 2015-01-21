@@ -5,7 +5,7 @@ import time
 import numpy as np
 
 from data.data_io import vprint
-from data import data_manager
+from data import cdata_manager as data_manager
 from util import split_data
 from models import autosklearn
 from util import submit_process
