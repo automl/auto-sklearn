@@ -21,7 +21,7 @@ pca:keep_variance [0.5, 1.0] [1.0]
 extra_trees:max_features [0.5, 5.0] [1]
 random_forest:bootstrap {True, False} [True]
 extra_trees:min_samples_leaf [1, 20] [1]i
-classifier {extra_trees, random_forest} [random_forest]
+classifier {random_forest, extra_trees} [random_forest]
 preprocessor {None, sparse_filtering, pca, kitchen_sinks} [None]
 
 random_forest:max_leaf_nodes | classifier in {random_forest}
