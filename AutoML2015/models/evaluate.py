@@ -6,8 +6,8 @@ Created on Dec 18, 2014
 
 import numpy as np
 
-from AutoSklearn.autosklearn import AutoSklearnClassifier
-from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
+from AutoSklearn.classification import AutoSklearnClassifier
+from AutoSklearn.regression import AutoSklearnRegressor
 
 try:
     from ..data.data_converter import convert_to_bin
@@ -24,7 +24,6 @@ try:
     import cPickle as pickle
 except:
     import pickle
-
 
 
 def predict_proba(X, model, task_type):
@@ -116,6 +115,8 @@ class Evaluator(object):
     def __init__(self,Datamanager, configuration, with_predictions=False, all_scoring_functions=False, splitting_function=split_data, seed=1):
 
         self.starttime = time.time()
+
+        self.configuration = configuration
 
         self.X_train, self.X_optimization, self.Y_train, self.Y_optimization = \
         splitting_function(Datamanager.data['X_train'], Datamanager.data['Y_train'])

@@ -11,40 +11,44 @@ sgd:power_t [1e-05, 1.0] [0.5]
 libsvm_svc:max_iter {-1} [-1]
 sgd:class_weight {None, auto} [None]
 sgd:epsilon [1e-05, 0.1] [0.0001]l
-sgd:loss {hinge, log, modified_huber, squared_hinge, perceptron} [hinge]
 liblinear:multi_class {ovr} [ovr]
 k_nearest_neighbors:weights {uniform, distance} [uniform]
+libsvm_svc:coef0 [-1.0, 1.0] [0]
 liblinear:class_weight {None, auto} [None]
-sgd:eta0 [1e-07, 0.1] [0.01]
+libsvm_svc:kernel {rbf, poly, sigmoid} [rbf]
 kitchen_sinks:gamma [0.3, 2.0] [1.0]
 sgd:alpha [1e-07, 0.1] [0.0001]l
+select_percentile_classification:score_func {chi2} [chi2]
 imputation:strategy {mean, median, most_frequent} [mean]
 libsvm_svc:degree [1, 5] [3]i
 libsvm_svc:shrinking {True, False} [True]
 liblinear:fit_intercept {True} [True]
+select_percentile_classification:percentile [10.0, 90.0] [50]
 liblinear:intercept_scaling {1} [1]
-libsvm_svc:kernel {rbf, poly, sigmoid} [rbf]
-libsvm_svc:C [0.03125, 32768.0] [1.0]l
-libsvm_svc:coef0 [-1.0, 1.0] [0]
+sgd:eta0 [1e-07, 0.1] [0.01]
+sgd:loss {hinge, log, modified_huber, squared_hinge, perceptron} [hinge]
+sgd:n_iter [5, 1000] [20]i
 liblinear:tol [1e-05, 0.1] [0.0001]l
 liblinear:dual {False} [False]
-preprocessor {None, kitchen_sinks} [None]
+preprocessor {None, select_percentile_classification, kitchen_sinks} [None]
 kitchen_sinks:n_components [50, 10000] [100]il
 sgd:fit_intercept {True} [True]
-sgd:n_iter [5, 1000] [20]i
 liblinear:penalty {l1, l2} [l2]
 liblinear:C [0.03125, 32768.0] [1.0]l
+libsvm_svc:C [0.03125, 32768.0] [1.0]l
 k_nearest_neighbors:algorithm {auto} [auto]
 liblinear:loss {l1, l2} [l2]
 sgd:learning_rate {optimal, invscaling, constant} [optimal]
 k_nearest_neighbors:p {1, 2, 5} [2]
-classifier {libsvm_svc, sgd, k_nearest_neighbors, liblinear} [liblinear]
+classifier {liblinear, sgd, libsvm_svc, k_nearest_neighbors} [liblinear]
 
 k_nearest_neighbors:p | k_nearest_neighbors:metric in {minkowski}
 sgd:l1_ratio | sgd:penalty in {elasticnet}
-sgd:epsilon | sgd:loss in {modified_huber}
 libsvm_svc:degree | libsvm_svc:kernel in {poly}
 libsvm_svc:coef0 | libsvm_svc:kernel in {poly, sigmoid}
+sgd:epsilon | sgd:loss in {modified_huber}
+select_percentile_classification:score_func | preprocessor in {select_percentile_classification}
+select_percentile_classification:percentile | preprocessor in {select_percentile_classification}
 kitchen_sinks:gamma | preprocessor in {kitchen_sinks}
 kitchen_sinks:n_components | preprocessor in {kitchen_sinks}
 sgd:power_t | sgd:learning_rate in {invscaling}
@@ -61,12 +65,12 @@ libsvm_svc:max_iter | classifier in {libsvm_svc}
 sgd:class_weight | classifier in {sgd}
 liblinear:multi_class | classifier in {liblinear}
 k_nearest_neighbors:weights | classifier in {k_nearest_neighbors}
-sgd:eta0 | classifier in {sgd}
+libsvm_svc:kernel | classifier in {libsvm_svc}
 sgd:alpha | classifier in {sgd}
 libsvm_svc:shrinking | classifier in {libsvm_svc}
 liblinear:fit_intercept | classifier in {liblinear}
 liblinear:intercept_scaling | classifier in {liblinear}
-libsvm_svc:kernel | classifier in {libsvm_svc}
+sgd:eta0 | classifier in {sgd}
 libsvm_svc:C | classifier in {libsvm_svc}
 sgd:loss | classifier in {sgd}
 liblinear:tol | classifier in {liblinear}
@@ -81,5 +85,6 @@ sgd:learning_rate | classifier in {sgd}
 {liblinear:penalty=l1, liblinear:loss=l1}
 {liblinear:dual=False, liblinear:penalty=l2, liblinear:loss=l1}
 {liblinear:dual=False, liblinear:penalty=l1}
+{select_percentile_classification:score_func=chi2, rescaling:strategy=standard}
 {classifier=k_nearest_neighbors, preprocessor=kitchen_sinks}
 {classifier=libsvm_svc, preprocessor=kitchen_sinks}

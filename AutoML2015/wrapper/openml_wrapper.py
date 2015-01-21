@@ -4,7 +4,7 @@ import time
 
 import numpy as np
 
-from AutoSklearn.autosklearn import AutoSklearnClassifier
+from AutoSklearn.classification import AutoSklearnClassifier
 from sklearn.preprocessing.label import LabelEncoder
 from HPOlibConfigSpace import configuration_space
 

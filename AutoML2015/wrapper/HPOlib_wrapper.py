@@ -5,17 +5,15 @@ Created on Dec 17, 2014
 '''
 
 import lockfile
-
 import os
-import sys
 import time
 
 try:
     import cPickle as pickle
 except:
     import pickle
-from AutoSklearn.autosklearn import AutoSklearnClassifier
-from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
+from AutoSklearn.classification import AutoSklearnClassifier
+from AutoSklearn.regression import AutoSklearnRegressor
 
 from HPOlibConfigSpace import configuration_space
 
@@ -23,7 +21,6 @@ try:
     from HPOlib.benchmark_util import parse_cli
 except:
     from HPOlib.benchmarks.benchmark_util import parse_cli
-from HPOlib.wrapping_util import get_time_string
 
 from AutoML2015.data.data_manager import DataManager
 from AutoML2015.models.evaluate import Evaluator
@@ -60,17 +57,20 @@ def store_and_or_load_data(outputdir, dataset, data_dir):
 
 def get_new_run_num():
     counter_file = os.path.join(os.getcwd(), "num_run")
-    if not os.path.exists(counter_file):
-        with open(counter_file, "w") as fh:
-            fh.write("0")
-        return 0
-    else:
-        with open(counter_file, "r") as fh:
-            num = int(fh.read())
-        num += 1
-        with open(counter_file, "w") as fh:
-            fh.write(str(num).zfill(4))
-        return num
+    lock = lockfile.LockFile(counter_file)
+    with lock:
+        if not os.path.exists(counter_file):
+            with open(counter_file, "w") as fh:
+                fh.write("0")
+            num = 0
+        else:
+            with open(counter_file, "r") as fh:
+                num = int(fh.read())
+            num += 1
+            with open(counter_file, "w") as fh:
+                fh.write(str(num).zfill(4))
+
+    return num
 
 
 def main(args, params):
