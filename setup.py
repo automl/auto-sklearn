@@ -9,8 +9,9 @@ from distutils.extension import Extension
 setuptools.setup(name="AutoML2015",
                  description="Code to participate in the AutoML 2015 challenge.",
                  version="0.1dev",
-                 ext_modules=[Extension("AutoML2015.data.cdata_manager", ["AutoML2015/data/cdata_manager.c"]),
-                              Extension("AutoML2015.data.chelper_functions", ["AutoML2015/data/chelper_functions.c"])],
+                 # When we have a package, uncomment this
+                 #ext_modules=[Extension("AutoML2015.data.cdata_manager", ["AutoML2015/data/cdata_manager.c"]),
+                 #             Extension("AutoMl2015.data.chelper_functions", ["AutoML2015/data/chelper_functions.c"])],
                  packages=setuptools.find_packages(),
                  install_requires=["numpy",
                                    "pyyaml",
