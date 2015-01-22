@@ -10,8 +10,8 @@ import glob
 import cPickle
 import numpy as np
 
-from AutoSklearn.autosklearn import AutoSklearnClassifier
-from AutoSklearn.autosklearn_regression import AutoSklearnRegressor
+from AutoSklearn.classification import AutoSklearnClassifier
+from AutoSklearn.regression import AutoSklearnRegressor
 
 from HPOlibConfigSpace import configuration_space
 
@@ -187,6 +187,11 @@ def main(dataset):
     output_dir = "predictions_tweakathon/"
     data_dir = "/data/aad/automl_data"
     n_best = 10
+
+    try:
+        os.mkdir(output_dir)
+    except:
+        pass
 
     print "Load labels from " + str(os.path.join(path, dataset + ".npy"))
     true_labels = np.load(os.path.join(path, dataset + ".npy"))
