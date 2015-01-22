@@ -31,12 +31,12 @@ tar -xf data.tar.gz
 === archive submission @aadpool
 
 bash create_submission.sh
-scp submission.zip  azureuser@automl.cloudapp.net:
+scp submission_${number}.zip  azureuser@automl.cloudapp.net:
 
 === Run script
 # will remove results and outputs from previous experiments
 # prepare folder
-bash test.sh submission_0.zip
+bash test.sh submission_${number}.zip
 # or for testing the code on just one dataset (adult)
 bash test_single.sh submission_0.zip
 
@@ -46,11 +46,11 @@ ps -ef | grep azureuser
 === Analyze Results
 
 # results, which will be used to submit are located under ~/OUTPUT
-# results of optimization procedures are locates under OUTPUT/TMP/
+# results of optimization procedures are located under OUTPUT/TMP/
 
 === If you want to keep the code and results of your submission
 
 mkdir #number_submission_#date
-mv submission_#number.zip #number_submission_#date
-mv OUTPUT #number_submission_#date
+mv submission_${number}.zip #number_submission_${date}
+mv OUTPUT ${number}_submission_${date}
 
