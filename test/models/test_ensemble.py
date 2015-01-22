@@ -26,13 +26,14 @@ class Test(unittest.TestCase):
 
         true_labels = np.random.randint(self.n_classes, size=self.n_points)
 
-        weights = np.random.randn(self.n_models)
+        weights = np.random.rand(self.n_models)
+
         weights /= weights.sum()
 
         metric = "f1_metric"
         task_type = "multiclass.classification"
 
-        weights = ensembles.weighted_ensemble(predictions, true_labels, task_type, metric)
+        weights = ensembles.weighted_ensemble(predictions, true_labels, task_type, metric, weights)
 
         self.assertEqual(weights.shape[0], self.n_models)
 
