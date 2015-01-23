@@ -1,3 +1,27 @@
+"""Create a csv file which contains all datasets IDs to use for metadata
+generation in the automl phase1.
+
+The input csv file must have the following columns:
+* did: Dataset ID
+* type: Task type; one of multiclass.classification,
+  multilabel.classification, binary.classification
+* status: OpenML status for that dataset
+* target: target attribute for that dataset
+* correct: If the target attribute is correct
+* ignore: the ignore attributes of OpenML
+* correct: If the ignore attribute is correct
+* row_id: The row ID of the OpenML dataset
+* correct: If the row ID is correct
+* attributes_correct: Sometimes the attributes are marked to be of a wrong
+  type. This happens mostly for categorical attributes, which are represented as
+  numerical ones. This should be True if all attributes are correct.
+* use?: True if this dataset is checked and can be safely used
+* comment
+
+It then outputs .csv file with a single column. This column contains the
+OpenML dataset IDs which should be used in the first automl phase."""
+
+from argparse import ArgumentParser
 import csv
 from openml.apiconnector import APIConnector
 
@@ -90,8 +114,7 @@ def get_dataset_list(fh):
             continue
         """
 
-        if type_ in ["binary.classification", "multiclass.classification"] \
-                and status == "active" and \
+        if type_ in ["binary.classification"] and status == "active" and \
                         target_correct is True and ignore_correct is True and \
                         row_id_correct is True and use is True:
             dataset = api.get_cached_dataset(did)
@@ -109,6 +132,21 @@ def get_dataset_list(fh):
                 "#instances", num_instances, \
                 "#classes", num_classes
 
-            datasets.append((dataset, type_))
+            datasets.append(dataset)
 
     return datasets
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("input", help="Path to the input .csv file.")
+    parser.add_argument("output", help="Path of the output file.")
+    args = parser.parse_args()
+
+    with open(args.input) as fh:
+        datasets = get_dataset_list(fh)
+
+    with open(args.output, "w") as fh:
+        for dataset in datasets:
+            fh.write(str(dataset.id))
+            fh.write("\n")

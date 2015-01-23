@@ -10,7 +10,8 @@ import glob
 import cPickle
 import numpy as np
 
-from AutoSklearn.autosklearn import AutoSklearnClassifier
+from AutoSklearn.classification import AutoSklearnClassifier
+from AutoSklearn.regression import AutoSklearnRegressor
 
 from HPOlibConfigSpace import configuration_space
 
@@ -20,29 +21,33 @@ from util.get_dataset_info import getInfoFromFile
 from models import evaluate
 
 
-def load_predictions(dirs):
+def load_predictions(dirs, load_all_predictions=False):
     pred = []
     pred_valid = []
     pred_test = []
     for d in dirs:
-        dir_test = os.path.join(d, "predictions_test/")
-        dir_valid = os.path.join(d, "predictions_valid/")
         dir_ensemble = os.path.join(d, "predictions_ensemble/")
+        if load_all_predictions:
+            dir_test = os.path.join(d, "predictions_test/")
+            dir_valid = os.path.join(d, "predictions_valid/")
+
         for f in os.listdir(dir_ensemble):
             p = np.load(os.path.join(dir_ensemble, f))
             if not np.isfinite(p).all():
                 continue
             pred.append(p)
 
-            p = np.load(os.path.join(dir_valid, f.replace("ensemble", "valid")))
-            pred_valid.append(p)
-
-            p = np.load(os.path.join(dir_test, f.replace("ensemble", "test")))
-            pred_test.append(p)
+            if load_all_predictions:
+                p = np.load(os.path.join(dir_valid, f.replace("ensemble", "valid")))
+                pred_valid.append(p)
+                p = np.load(os.path.join(dir_test, f.replace("ensemble", "test")))
+                pred_test.append(p)
 
     assert len(pred) > 0
 
-    return np.array(pred), np.array(pred_valid), np.array(pred_test)
+    if load_all_predictions:
+        return np.array(pred), np.array(pred_valid), np.array(pred_test)
+    return np.array(pred)
 
 
 def load_predictions_of_nbest(dirs, nbest, labels, task_type, metric, load_all_predictions=False):
@@ -147,13 +152,21 @@ def train_model(params, X_train, Y_train, X_valid, X_test, task_type):
             params[key] = float(params[key])
         except:
             pass
-    cs = AutoSklearnClassifier.get_hyperparameter_search_space()
-    configuration = configuration_space.Configuration(cs, **params)
 
-    model = AutoSklearnClassifier(configuration, random_state=42)
-    model.fit(X_train, Y_train)
-    Y_valid = evaluate.predict_proba(X_valid, model, task_type)
-    Y_test = evaluate.predict_proba(X_test, model, task_type)
+    if task_type == "regression":
+        cs = AutoSklearnRegressor.get_hyperparameter_search_space()
+        configuration = configuration_space.Configuration(cs, **params)
+        model = AutoSklearnRegressor(configuration, random_state=42)
+        model.fit(X_train, Y_train)
+        Y_valid = evaluate.predict_regression(X_valid, model, task_type)
+        Y_test = evaluate.predict_regression(X_test, model, task_type)
+    else:
+        cs = AutoSklearnClassifier.get_hyperparameter_search_space()
+        configuration = configuration_space.Configuration(cs, **params)
+        model = AutoSklearnClassifier(configuration, random_state=42)
+        model.fit(X_train, Y_train)
+        Y_valid = evaluate.predict_proba(X_valid, model, task_type)
+        Y_test = evaluate.predict_proba(X_test, model, task_type)
 
     return Y_valid, Y_test
 
@@ -168,12 +181,17 @@ def load_configuration(pkl_file, index):
 def main(dataset):
 
     print "Use data set: " + str(dataset)
-    path = "/home/feurerm/projects/automl_competition_2015/code/benchmarks/" + dataset + "/"
+    path = "/home/feurerm/mhome/projects/automl_competition_2015/tweakathon/" + dataset + "/"
 
-    dirs = glob.glob(path + "smac_2_08_00-")
+    dirs = glob.glob(path + "smac_2_08_00-master_*")
     output_dir = "predictions_tweakathon/"
     data_dir = "/data/aad/automl_data"
     n_best = 10
+
+    try:
+        os.mkdir(output_dir)
+    except:
+        pass
 
     print "Load labels from " + str(os.path.join(path, dataset + ".npy"))
     true_labels = np.load(os.path.join(path, dataset + ".npy"))
@@ -183,7 +201,8 @@ def main(dataset):
     predictions, indices_nbest, dirs_nbest = load_predictions_of_nbest(dirs, n_best, true_labels, info['task'], info['metric'])
 
     print "Start optimization"
-    weights = weighted_ensemble(predictions, true_labels, info['task'], info['metric'])
+    weights = np.ones([predictions.shape[0]]) / float(predictions.shape[0])
+    weights = weighted_ensemble(predictions, true_labels, info['task'], info['metric'], weights)
     print "Best weights found by CMA-ES: " + str(weights)
 
     print "Re-train models with the whole data set"
@@ -202,7 +221,7 @@ def main(dataset):
     np.savetxt(output_dir + dataset + "_test_000.predict", Y_test, delimiter=' ')
 
 if __name__ == '__main__':
-    #dataset = ["adult", "digits", "newsgroups", "dorothea", "cadata"]
-    dataset = ["adult"]
+    dataset = ["adult", "digits", "newsgroups", "dorothea", "cadata"]
+
     for d in dataset:
         main(d)

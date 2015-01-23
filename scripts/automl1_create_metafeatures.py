@@ -62,10 +62,11 @@ for dataset, task_type in datasets:
 # Write the calculation times as a csv file to disc (can be viewed in
 # LibreOffice calc afterwards)
 calculation_times = dict()
-for mf in all_metafeatures:
-    calculation_times[mf.dataset_name] = dict()
+for i, mf in enumerate(all_metafeatures):
+    calculation_times[mf.dataset_name + "_" + str(i)] = dict()
     for value in mf.metafeature_values:
-        calculation_times[mf.dataset_name][value.name] = value.time
+        calculation_times[mf.dataset_name + "_" + str(i)][value.name] = \
+            value.time
 
 csv_file = os.path.join(output_dir, "calculation_times.csv")
 with open(csv_file, "w") as fh:
