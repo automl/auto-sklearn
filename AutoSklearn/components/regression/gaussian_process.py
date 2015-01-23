@@ -37,7 +37,7 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
     def predict(self, X):
         if self.estimator is None:
             raise NotImplementedError
-        return self.estimator.predict(X)
+        return self.estimator.predict(X, batch_size=512)
 
     @staticmethod
     def get_properties():
