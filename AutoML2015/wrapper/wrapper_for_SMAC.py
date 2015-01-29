@@ -23,8 +23,6 @@ from data.data_manager import DataManager
 import models.evaluate
 import signal
 
-"""
-# We might not need this
 def store_and_or_load_data(outputdir, dataset, data_dir):
     save_path = os.path.join(outputdir, dataset + "_Manager.pkl")
     if not os.path.exists(save_path):
@@ -53,9 +51,6 @@ def store_and_or_load_data(outputdir, dataset, data_dir):
         D = pickle.load(open(save_path, 'r'))
         print "Loaded data"
     return D
-"""
-
-
 
 
 # signal handler seem to work only if they are globally defined

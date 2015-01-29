@@ -66,6 +66,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
     used_time = 0
     time_iter = 0
     index_run = 0
+    weights = 0
     current_num_models = 0
     logging.basicConfig(filename=os.path.join(predictions_dir, "ensemble.log"), level=logging.DEBUG)
 
@@ -140,9 +141,15 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
         else:
             try:
                 # Compute the weights for the ensemble
-                n_models = len(all_predictions_train)
-                weights = np.ones([n_models]) / n_models
-                weights = weighted_ensemble(np.array(all_predictions_train),
+                if weights == 0:
+                    weights = np.ones([1])
+                else:
+                    #weights = np.ones([n_models]) / n_models
+                    # Use the previous weights again and set the new one to 1/M
+                    weights = np.concatenate((weights, np.array([1. / float(weights.shape[0])])), axis=0)
+                    weights = weights / float(weights.sum())
+
+                    weights = weighted_ensemble(np.array(all_predictions_train),
                                         true_labels, task_type, metric, weights)
             except (ValueError):
                 logging.error("Caught ValueError!")
