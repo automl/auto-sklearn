@@ -123,6 +123,8 @@ def create_metadata_directories(datasets, metrics, output_dir, smac,
                               'function':
                                   'python -m ' \
                                   'AutoML2015.wrapper.openml_wrapper ' \
+                                  #'python ' \
+                                  #'/home/kleinaa/experiments/ensembles_stacking/wrapper.py' \
                                   "--dataset %d --metric %s " \
                                   "--task_type %s --remove_categorical %s" \
                                   % (did, metric, "binary.classification",
@@ -298,6 +300,7 @@ if __name__ == "__main__":
             dataset_ids.append(int(float(row.strip())))
 
     metrics = ["bac_metric", "auc_metric", "f1_metric", "pac_metric"]
+    #metrics = ["bac_metric"]
     function_arguments = ""
     if args.openml:
         function_arguments += " --openml_cache_directory %s" % \

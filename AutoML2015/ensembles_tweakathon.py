@@ -16,7 +16,7 @@ from AutoSklearn.regression import AutoSklearnRegressor
 from HPOlibConfigSpace import configuration_space
 
 from data.data_manager import DataManager
-from ensembles import weighted_ensemble, ensemble_prediction
+from ensembles_statistics import weighted_ensemble, ensemble_prediction
 from util.get_dataset_info import getInfoFromFile
 from models import evaluate
 
@@ -209,10 +209,10 @@ def main(dataset):
     D = DataManager(dataset, data_dir, verbose=True)
     predictions_valid, predictions_test = train_models_on_complete_data(indices_nbest, dirs_nbest, D.data['X_train'], D.data['Y_train'], D.data['X_valid'], D.data['X_test'], info['task'])
 
-    print "Compute ensembles predictions for valid data"
+    print "Compute ensembles_statistics predictions for valid data"
     Y_valid = ensemble_prediction(predictions_valid, weights)
 
-    print "Compute ensembles predictions for test data"
+    print "Compute ensembles_statistics predictions for test data"
     Y_test = ensemble_prediction(predictions_test, weights)
 
     print "Save predictions in: " + output_dir

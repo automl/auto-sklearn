@@ -28,7 +28,7 @@ class MyAutoML:
             - if was checked only on the phase 0 data at the time of release
             - not all cases are considered
             - this could easily break on datasets from further phases
-            - this is very inefficient (most ensembles have no "warm start" option, hence we do a lot of unnecessary calculations)
+            - this is very inefficient (most ensembles_statistics have no "warm start" option, hence we do a lot of unnecessary calculations)
             - there is no preprocessing
          '''
          
@@ -119,7 +119,7 @@ class MultiLabelEnsemble:
         self.predictors = [predictorInstance]
         self.n_label = 1
         self.n_target = 1
-        self.n_estimators =  1 # for predictors that are ensembles of estimators
+        self.n_estimators =  1 # for predictors that are ensembles_statistics of estimators
         self.balance=balance
         
     def __repr__(self):
