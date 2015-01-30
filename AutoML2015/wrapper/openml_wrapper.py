@@ -25,13 +25,14 @@ class DataManagerDummy(DataManager):
         pass
 
 
-def load_dataset(dataset):
+def load_dataset(dataset, openml_cache_directory=None):
     """Load an OpenML datasets by its ID."""
     e = None
     for i in range(60):
         e = None
         try:
-            api = APIConnector(authenticate=False)
+            api = APIConnector(authenticate=False,
+                               cache_directory=openml_cache_directory)
             dataset = api.get_cached_dataset(int(dataset))
             X, y, categorical = dataset.get_pandas(
                 target=dataset.default_target_attribute,
@@ -85,6 +86,7 @@ def main(args, params):
         except:
             pass
 
+    openml_cache_directory = args.get("openml_cache_directory")
     dataset = args['dataset']
     metric = args['metric']
     task_type = args['task_type']
@@ -97,7 +99,7 @@ def main(args, params):
     cs = AutoSklearnClassifier.get_hyperparameter_search_space()
     configuration = configuration_space.Configuration(cs, **params)
 
-    X, y, categorical = load_dataset(dataset)
+    X, y, categorical = load_dataset(dataset, openml_cache_directory)
     if 'remove_categorical' in args:
         X, categorical = remove_categorical_features(X, categorical)
     D = create_mock_data_manager(X, y, categorical, metric, task_type)
