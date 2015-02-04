@@ -84,9 +84,10 @@ def main(args, params):
         except:
             pass
 
-    #FIXME: If we make the CV internally such that SMAC does not know it we do not need this variable right?
+    #FIXME: If we make the CV internally such that SMAC does not know it, we do not need this variable right?
     fold = int(args['fold'])
     folds = int(args['folds'])
+    print folds
     basename = args['dataset']
     input_dir = args['data_dir']
     output_dir = os.getcwd()
@@ -112,7 +113,7 @@ def main(args, params):
     Y_optimization_pred = []
     Y_valid_pred = []
     Y_test_pred = []
-    for k in folds:
+    for k in range(folds):
         splitting_function = partial(splitting_function, fold=k, folds=folds)
 
         evaluator = Evaluator(D, configuration, with_predictions=True,
