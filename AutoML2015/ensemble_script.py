@@ -30,7 +30,7 @@ def weighted_ensemble_error(weights, *args):
     return 1 - score
 
 
-def weighted_ensemble(predictions, true_labels, task_type, metric, weights, tolfun=1e-9):
+def weighted_ensemble(predictions, true_labels, task_type, metric, weights, tolfun=1e-3):
     seed = np.random.randint(0, 1000)
     logging.debug("CMA-ES uses seed: " + str(seed))
     n_models = predictions.shape[0]

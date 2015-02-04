@@ -227,7 +227,7 @@ if __name__=="__main__" and debug_mode<4:
     # ==========================================================================
     # ============ CHECK THIS SECTION BEFORE SUBMITTING ========================
     # == Definitions
-    BUFFER = 35  # time-left - BUFFER = timelimit for SMAC/ensembles_statistics.py
+    BUFFER = 35  # time-left - BUFFER = timelimit for SMAC/ensemble_script.py
     BUFFER_BEFORE_SENDING_SIGTERM = 30  # We send SIGTERM to all processes
     DELAY_TO_SIGKILL = 15  # And after a delay we send a sigkill
 

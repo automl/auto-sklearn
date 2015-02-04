@@ -93,7 +93,7 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit, output
         # It makes no sense to start building ensembles_statistics
         return
     path_to_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    wrapper_exec = os.path.join(path_to_root, "ensembles_statistics.py")
+    wrapper_exec = os.path.join(path_to_root, "ensembles_script.py")
     runsolver_exec = os.path.join(path_to_root, "lib", "runsolver")
     delay = 5
 
