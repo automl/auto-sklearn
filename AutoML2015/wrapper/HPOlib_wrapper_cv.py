@@ -87,6 +87,7 @@ def main(args, params):
     #FIXME: If we make the CV internally such that SMAC does not know it, we do not need this variable right?
     fold = int(args['fold'])
     folds = int(args['folds'])
+    folds = 4
     print folds
     basename = args['dataset']
     input_dir = args['data_dir']
