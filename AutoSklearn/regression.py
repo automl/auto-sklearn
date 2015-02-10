@@ -209,7 +209,7 @@ class AutoSklearnRegressor(RegressorMixin, AutoSklearnBaseEstimator):
         # long
 
         # Combinations of tree-based models with feature learning:
-        regressors_ = ["random_forest", "gradient_boosting"]
+        regressors_ = ["random_forest", "gradient_boosting", "gaussian_process"]
         feature_learning_ = ["kitchen_sinks", "sparse_filtering"]
 
         for c, f in product(regressors_, feature_learning_):
