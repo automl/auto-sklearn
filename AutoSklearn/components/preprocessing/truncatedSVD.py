@@ -8,7 +8,7 @@ import numpy as np
 
 
 
-class TruncatedSVD():#AutoSklearnPreprocessingAlgorithm):
+class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, target_dim, random_state=None):
         self.target_dim = int(target_dim)
         self.random_state = random_state
@@ -42,6 +42,7 @@ class TruncatedSVD():#AutoSklearnPreprocessingAlgorithm):
                 'handles_multilabel': True,
                 'is_deterministic': True,
                 'handles_sparse': True,
+                'handles_dense': False,
                 'preferred_dtype': np.float32}
 
     @staticmethod

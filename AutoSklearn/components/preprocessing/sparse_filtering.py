@@ -37,6 +37,7 @@ class SparseFiltering(AutoSklearnPreprocessingAlgorithm):
                 'handles_multilabel': True,
                 'is_deterministic': False,
                 'handles_sparse': False,
+                'handles_dense': True,
                 'preferred_dtype': None}
 
 

@@ -40,6 +40,7 @@ class SelectPercentileRegression(SelectPercentileBase, AutoSklearnPreprocessingA
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
+                'handles_dense': True,
                 'preferred_dtype': None}
 
     @staticmethod

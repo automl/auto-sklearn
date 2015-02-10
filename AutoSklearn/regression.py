@@ -192,6 +192,10 @@ class AutoSklearnRegressor(RegressorMixin, AutoSklearnBaseEstimator):
                     available_preprocessors[name].get_properties()[
                                 'handles_sparse'] is False:
                 continue
+            elif dataset_properties.get('sparse') is False and \
+                    available_preprocessors[name].get_properties()[
+                                'handles_dense'] is False:
+                continue
             elif available_preprocessors[name]. \
                     get_properties()['handles_regression'] is False:
                 continue

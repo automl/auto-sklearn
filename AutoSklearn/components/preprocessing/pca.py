@@ -57,8 +57,8 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
                 'handles_multilabel': True,
                 # TODO document that we have to be very careful
                 'is_deterministic': False,
-                # TODO find out of this is right!
                 'handles_sparse': False,
+                'handles_dense': True,
                 # TODO find out what is best used here!
                 'preferred_dtype': None}
 

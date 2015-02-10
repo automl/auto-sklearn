@@ -52,6 +52,7 @@ class TFIDF(object):#AutoSklearnPreprocessingAlgorithm):
                 'handles_multilabel': True,
                 'is_deterministic': True,
                 'handles_sparse': True,
+                'handles_dense': True,
                 # TODO find out what is best used here!
                 'preferred_dtype': np.float32}
 

@@ -42,6 +42,7 @@ class Rescaling(AutoSklearnPreprocessingAlgorithm):
                 'is_deterministic': True,
                 # TODO find out of this is right!
                 'handles_sparse': True,
+                'handles_dense': True,
                 # Add something here...
                 'preferred_dtype': None}
 

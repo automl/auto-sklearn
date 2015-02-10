@@ -38,6 +38,7 @@ class Imputation(AutoSklearnPreprocessingAlgorithm):
                 'is_deterministic': True,
                 # TODO find out of this is right!
                 'handles_sparse': True,
+                'handles_dense': True,
                 'preferred_dtype': None}
 
     @staticmethod

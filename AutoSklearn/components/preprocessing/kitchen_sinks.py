@@ -45,6 +45,7 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
                 'handles_multilabel': True,
                 'is_deterministic': True,
                 'handles_sparse': True,
+                'handles_dense': True,
                 'preferred_dtype': None}
 
     @staticmethod
