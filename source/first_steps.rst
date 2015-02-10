@@ -6,7 +6,7 @@ AutoSklearn, feed it to the random search algorithm implemented by the
 HPOlibConfigSpace package and then train a classifier with a random
 configuration on the iris dataset.
 
-    >>> from AutoSklearn.autosklearn import AutoSklearnClassifier
+    >>> from AutoSklearn.classification import AutoSklearnClassifier
     >>> from HPOlibConfigSpace.random_sampler import RandomSampler
     >>> import sklearn.datasets
     >>> import sklearn.metrics
@@ -24,4 +24,4 @@ configuration on the iris dataset.
     >>> auto = auto.fit(X[indices[:100]], Y[indices[:100]])
     >>> predictions = auto.predict(X[indices[100:]])
     >>> sklearn.metrics.accuracy_score(predictions, Y[indices[100:]])
-    0.92000000000000004
+    0.81999999999999995
