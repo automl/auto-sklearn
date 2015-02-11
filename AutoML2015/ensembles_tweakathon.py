@@ -35,6 +35,7 @@ def load_predictions(dirs, load_all_predictions=False):
             p = np.load(os.path.join(dir_ensemble, f))
             if not np.isfinite(p).all():
                 continue
+
             pred.append(p)
 
             if load_all_predictions:
@@ -42,6 +43,38 @@ def load_predictions(dirs, load_all_predictions=False):
                 pred_valid.append(p)
                 p = np.load(os.path.join(dir_test, f.replace("ensemble", "test")))
                 pred_test.append(p)
+
+    assert len(pred) > 0
+
+    if load_all_predictions:
+        return np.array(pred), np.array(pred_valid), np.array(pred_test)
+    return np.array(pred)
+
+
+def load_predictions_of_best(dirs, labels, task_type, metric, load_all_predictions=False):
+    pred = []
+    pred_valid = []
+    pred_test = []
+    for d in dirs:
+        dir_ensemble = os.path.join(d, "predictions_ensemble/")
+        if load_all_predictions:
+            dir_test = os.path.join(d, "predictions_test/")
+            dir_valid = os.path.join(d, "predictions_valid/")
+
+        for f in os.listdir(dir_ensemble):
+            p = np.load(os.path.join(dir_ensemble, f))
+            if not np.isfinite(p).all():
+                continue
+
+            score = evaluate.calculate_score(labels, p, task_type, metric)
+            # Keep model only if it is better than random
+            if score > 0:
+                pred.append(p)
+                if load_all_predictions:
+                    p = np.load(os.path.join(dir_valid, f.replace("ensemble", "valid")))
+                    pred_valid.append(p)
+                    p = np.load(os.path.join(dir_test, f.replace("ensemble", "test")))
+                    pred_test.append(p)
 
     assert len(pred) > 0
 

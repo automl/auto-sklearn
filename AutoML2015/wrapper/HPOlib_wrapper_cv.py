@@ -88,7 +88,7 @@ def main(args, params):
     fold = int(args['fold'])
     folds = int(args['folds'])
     folds = 4
-    print folds
+
     basename = args['dataset']
     input_dir = args['data_dir']
     output_dir = os.getcwd()
