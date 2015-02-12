@@ -194,7 +194,7 @@ import re
 
 our_root_dir = os.path.abspath(os.path.dirname(__file__))
 our_lib_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib"))
-smac_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib", "smac-v2.08.00-master-731"))
+smac_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib", "smac-v2.08.01-master-0_metalearning"))
 java_path = os.path.join(our_lib_dir, "jre1.8.0_25", "bin")
 
 # To use it within this scope:
@@ -375,6 +375,7 @@ if __name__=="__main__" and debug_mode<4:
                                      cpu_dur=time_needed_to_load_data,
                                      wall_dur=time_needed_to_load_data)
                 except Queue.Empty:
+                    time.sleep(1)
                     continue
         vprint(verbose, "\n")
         if not information_ready:

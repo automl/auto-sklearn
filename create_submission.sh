@@ -17,10 +17,10 @@ pip install git+https://bitbucket.org/mfeurer/autosklearn#egg=AutoSklearn -t lib
 
 # ====== Download Stuff
 cd download/
-if [ ! -e smac-v2.08.00-master-731.tar.gz ]
+if [ ! -e smac-v2.08.01-master-0_metalearning.tar.gz ]
 then
-    wget http://www.cs.ubc.ca/labs/beta/Projects/SMAC/smac-v2.08.00-master-731.tar.gz
-    mv smac-v2.08.00-master-731.tar.gz downloads/
+    wget http://aad.informatik.uni-freiburg.de/~feurerm/smac-v2.08.01-master-0_metalearning.tar.gz
+    mv smac-v2.08.01-master-0_metalearning.tar.gz download/
 fi
 
 if [ ! -e cma.py ]
@@ -38,11 +38,14 @@ then
     wget http://www.cril.univ-artois.fr/~roussel/runsolver/runsolver-3.3.4.tar.bz2
 fi
 
+wget metadata_automl1_000.tar.gz
+
 # ==== UNZIP STUFF
-tar -xf smac-v2.08.00-master-731.tar.gz
+tar -xf smac-v2.08.01-master-0_metalearning.tar.gz
 tar -xf lockfile-0.10.2.tar.gz
 tar -xf runsolver-3.3.4.tar.bz2
 tar -xf jre-8u25-linux-x64.tar.gz
+tar -xf metadata_automl1_000
 
 # ==== Compile
 cd runsolver/src
@@ -50,11 +53,12 @@ make
 cd ../../
 
 # ==== MOVE Libraries
-cp smac-v2.08.00-master-731 ../lib/ -r
+cp smac-v2.08.01-master-0_metalearning ../lib/ -r
 cp cma.py ../lib/
 cp jre1.8.0_25 ../lib/ -r
 cp lockfile-0.10.2/lockfile ../lib/ -r
 cp runsolver/src/runsolver ../lib/
+cp metadata_automl1_000/* ../.zip/AutoML2015/metalearning/files
 
 cd ..
 
