@@ -1,5 +1,6 @@
 import os
 from StringIO import StringIO
+import time
 
 import numpy as np
 
@@ -25,10 +26,10 @@ class MetaLearning(object):
         self._metafeatures_encoded_labels = None
         self._metafeatures_labels = None
         # Hard-coded list of too-expensive metafeatures!
-        self._exclude_metafeatures = ['landmark_1NN',
-                                      'landmark_decision_node_learner',
-                                      'landmark_decision_tree',
-                                      'landmark_lda']
+        self._exclude_metafeatures = set(['landmark_1NN',
+                                          'landmark_decision_node_learner',
+                                          'landmark_decision_tree',
+                                          'landmark_lda'])
 
     def calculate_metafeatures_with_labels(self, X_train, Y_train,
                                            categorical, dataset_name):
@@ -68,16 +69,29 @@ class MetaLearning(object):
 
         # Concatenate the metafeatures!
         mf = self._metafeatures_labels
-        mf.metafeature_values.append(
+        mf.metafeature_values.extend(
             self._metafeatures_encoded_labels.metafeature_values)
         self.mf = mf
 
+        if not all([np.isfinite(mf.value)
+                    for mf in self.mf.metafeature_values
+                    if isinstance(mf.value, float)]):
+            print "%s contains non-finite metafeatures!" % self.mf
+            return []
+
+        metafeatures_subset = metafeatures.subsets["all"]
+        metafeatures_subset.difference_update(self._exclude_metafeatures)
+        metafeatures_subset = list(metafeatures_subset)
+
         # TODO maybe replace by kND directly to remove unavailable configurations
+        start = time.time()
         ml = metalearner.MetaLearningOptimizer(dataset_name, configuration_space,
             datasets_file, experiments_file, distance="l1", seed=1,
-            use_features=[], subset='all')
+            use_features=metafeatures_subset, subset='all')
+        print "Reading meta-data took %5.2f seconds" % (time.time() - start)
+
         # TODO This is hacky, I must find a different way of adding a new dataset!
-        ml.meta_base.add_dataset_with_metafeatures(dataset_name, None, mf)
+        ml.meta_base.add_dataset_with_metafeatures(dataset_name, None, self.mf)
         runs = ml.metalearning_suggest_all(
             exclude_double_configurations=True)
 
@@ -102,6 +116,7 @@ class MetaLearning(object):
         """
         config_string = StringIO()
         config_string.write("--initial_challengers")
+
         for hyperparameter in configuration:
             if isinstance(hyperparameter, InactiveHyperparameter):
                 continue

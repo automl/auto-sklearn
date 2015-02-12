@@ -6,8 +6,9 @@ import numpy as np
 
 from data.data_io import vprint
 from data import data_manager as data_manager
-from util import split_data
+from metalearning import metalearning
 from models import autosklearn
+from util import split_data
 from util import submit_process
 
 from HPOlibConfigSpace.converters import pcs_parser
@@ -19,20 +20,93 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     verbose = True
     # == Creating a data object with data and information about it
     vprint(verbose,  "======== Reading and converting data ==========")
-    loaded_data_manager = data_manager.DataManager(basename, input_dir, verbose=verbose)
+    # Encoding the labels will be done after the metafeature calculation!
+    loaded_data_manager = data_manager.DataManager(basename, input_dir,
+                                                   verbose=verbose,
+                                                   encode_labels=False)
     print loaded_data_manager
 
-    # == Split dataset and store Data, Datamanager
-    X_train, X_ensemble, Y_train, Y_ensemble = split_data.split_data(loaded_data_manager.data['X_train'], loaded_data_manager.data['Y_train'])
-    del X_train, X_ensemble, Y_train
+    # == Split dataset and store Data for the ensemble script
+    X_train, X_ensemble, Y_train, Y_ensemble = split_data.split_data(
+        loaded_data_manager.data['X_train'], loaded_data_manager.data['Y_train'])
     np.save(os.path.join(tmp_dataset_dir, "true_labels_ensemble.npy"), Y_ensemble)
-    data_manager_path = os.path.join(tmp_dataset_dir, basename + "_Manager.pkl")
-    cPickle.dump(loaded_data_manager, open(data_manager_path, 'w'), protocol=-1)
+    del X_train, X_ensemble, Y_train, Y_ensemble
 
     stop = time.time()
     time_needed_to_load_data = stop - start
-    time_left_after_reading = max(0, time_left_for_this_task - time_needed_to_load_data)
+    time_left_after_reading = max(0, time_left_for_this_task -
+                                  time_needed_to_load_data)
     vprint(verbose, "Remaining time after reading data %5.2f sec" % time_left_after_reading)
+
+    # = Create a searchspace
+    searchspace_path = os.path.join(tmp_dataset_dir, "space.pcs")
+    config_space = autosklearn.get_configuration_space(loaded_data_manager.info)
+    sp_string = pcs_parser.write(config_space)
+    fh = open(searchspace_path, 'w')
+    fh.write(sp_string)
+    fh.close()
+
+    # == Calculate metafeatures
+    categorical = [True if feat_type.lower() in ["categorical"] else False
+                   for feat_type in loaded_data_manager.feat_type]
+
+    if loaded_data_manager.info["task"].lower() not in \
+            ["multilabel.classification", "regression"] and \
+            not loaded_data_manager.info["is_sparse"]:
+        ml = metalearning.MetaLearning()
+        metafeatures_start_time = time.time()
+        vprint(verbose, "Start calculating metafeatures")
+        ml.calculate_metafeatures_with_labels(loaded_data_manager.data["X_train"],
+                                              loaded_data_manager.data["Y_train"],
+                                              categorical=categorical,
+                                              dataset_name=loaded_data_manager.basename)
+
+    loaded_data_manager.perform1HotEncoding()
+
+    if loaded_data_manager.info["task"].lower() not in \
+            ["multilabel.classification", "regression"] and \
+            not loaded_data_manager.info["is_sparse"]:
+        ml.calculate_metafeatures_encoded_labels(loaded_data_manager.data["X_train"],
+                                                 loaded_data_manager.data["Y_train"],
+            categorical=[False]*loaded_data_manager.data["X_train"].shape[0],
+            dataset_name=loaded_data_manager.basename)
+        metafeatures_end_time = time.time()
+        metafeature_calculation_time = metafeatures_end_time - metafeatures_start_time
+        vprint(verbose, "Done calculationg metafeatures, took %5.2f seconds." %
+               metafeature_calculation_time)
+        time_left_after_metafeatures = max(0, time_left_for_this_task -
+                                           (metafeatures_end_time - start))
+        vprint(verbose,
+           "Remaining time after calculating the metafeatures %5.2f sec" %
+           time_left_after_metafeatures)
+
+        vprint(verbose, ml._metafeatures_labels)
+        vprint(verbose, ml._metafeatures_encoded_labels)
+
+        # TODO check that Metafeatures only contain finite numbers!
+
+        vprint(verbose, "Starting to look for initial configurations.")
+        initial_configurations_start_time = time.time()
+        initial_configurations = ml.create_metalearning_string_for_smac_call(
+            config_space, loaded_data_manager.basename, loaded_data_manager.info[
+                'metric'])
+        initial_configurations_end_time = time.time()
+        vprint(verbose, "Calculating the initial configurations took %5.2f "
+                        "seconds" % (initial_configurations_end_time - initial_configurations_start_time))
+
+        time_left_after_initial_configurations = max(0,
+            time_left_for_this_task - (initial_configurations_end_time - start))
+
+        vprint(verbose,
+               "Remaining time after finding the initial configurations %5.2f "
+               "sec" % time_left_after_initial_configurations)
+
+    else:
+        initial_configurations = []
+
+    # == Pickle the data manager
+    data_manager_path = os.path.join(tmp_dataset_dir, basename + "_Manager.pkl")
+    cPickle.dump(loaded_data_manager, open(data_manager_path, 'w'), protocol=-1)
 
     # == RUN SMAC
     # = Create an empty instance file
@@ -41,22 +115,15 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     fh.write(os.path.join(input_dir, basename))
     fh.close()
 
-    # = Create a searchspace
-    searchspace = os.path.join(tmp_dataset_dir, "space.pcs")
-    sp = autosklearn.get_configuration_space(loaded_data_manager.info)
-    sp_string = pcs_parser.write(sp)
-    fh = open(searchspace, 'w')
-    fh.write(sp_string)
-    fh.close()
-
     # = Start SMAC
     stop = time.time()
     time_left_for_smac = max(0, time_left_for_this_task - (stop - start))
     proc_smac = \
         submit_process.run_smac(tmp_dir=tmp_dataset_dir,
-                                searchspace=searchspace,
+                                searchspace=searchspace_path,
                                 instance_file=instance_file,
-                                limit=time_left_for_smac)
+                                limit=time_left_for_smac,
+                                initial_challengers=initial_configurations)
     pid_smac = proc_smac.pid
 
     # == RUN ensemble builder
