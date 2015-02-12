@@ -123,9 +123,10 @@ def create_metadata_directories(datasets, metrics, output_dir, smac,
                               'function':
                                   'python -m ' \
                                   'AutoML2015.wrapper.openml_wrapper ' \
-                                  "--dataset %d --metric %s " \
+                                  "--dataset %s --metric %s " \
                                   "--task_type %s --remove_categorical %s" \
-                                  % (did, metric, "binary.classification",
+                                  % (str(did).replace("-", "\-"), metric,
+                                     "binary.classification",
                                      function_arguments),
                               'number_of_jobs': 100,
                               'number_cv_folds': 10,
@@ -165,8 +166,8 @@ def create_metadata_directories_product(datasets, metrics, output_dir, smac,
     print "#preprocessors", len(preprocessors)
     print "#metrics", len(metrics)
     print "Approximately %d experiment directories will be created." % \
-          len(datasets) * len(classifiers) * len(preprocessors) * len(
-        metrics)
+          (len(datasets) * len(classifiers) * len(preprocessors) * len(
+           metrics))
     print
 
     for dataset_info in datasets:
@@ -239,9 +240,10 @@ def create_metadata_directories_product(datasets, metrics, output_dir, smac,
                                 'function':
                                     'python -m '
                                     'AutoML2015.wrapper.openml_wrapper '
-                                    "--dataset %d --metric %s "
+                                    "--dataset %s --metric %s "
                                     "--task_type %s --remove_categorical %s"
-                                    % (did, metric, "binary.classification",
+                                    % (str(did).replace("-", "/-"), metric,
+                                       "binary.classification",
                                        function_arguments),
                                 'number_of_jobs': 100,
                                 'number_cv_folds': 10,
@@ -297,7 +299,8 @@ if __name__ == "__main__":
         for row in fh:
             dataset_ids.append(int(float(row.strip())))
 
-    metrics = ["bac_metric", "auc_metric", "f1_metric", "pac_metric"]
+    # metrics = ["bac_metric", "auc_metric", "f1_metric", "pac_metric"]
+    metrics = ["bac_metric"]
     function_arguments = ""
     if args.openml:
         function_arguments += " --openml_cache_directory %s" % \
