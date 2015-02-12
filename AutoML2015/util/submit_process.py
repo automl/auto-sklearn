@@ -41,7 +41,8 @@ def get_algo_exec(runsolver_limit, runsolver_delay, target_call_limit):
     return call
 
 
-def run_smac(tmp_dir, searchspace, instance_file, limit):
+def run_smac(tmp_dir, searchspace, instance_file, limit,
+             initial_challengers=None):
     if limit <= 0:
         # It makes no sense to start building ensembles
         return
@@ -60,6 +61,9 @@ def run_smac(tmp_dir, searchspace, instance_file, limit):
     algo_exec = get_algo_exec(runsolver_limit=runsolver_softlimit,
                               runsolver_delay=runsolver_hardlimit_delay,
                               target_call_limit=cutoff_time_target_function_sees)
+
+    if initial_challengers is None:
+        initial_challengers = []
 
     # Bad hack to find smac
     call = os.path.join("smac")
@@ -84,7 +88,8 @@ def run_smac(tmp_dir, searchspace, instance_file, limit):
                     '--abort-on-first-run-crash', 'false',
                     '-p', os.path.abspath(searchspace),
                     '--execDir', tmp_dir,
-                    '--instances', instance_file])
+                    '--instances', instance_file] +
+                    initial_challengers)
     return submit_call(call)
 
 
