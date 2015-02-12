@@ -30,7 +30,7 @@ def weighted_ensemble_error(weights, *args):
     return 1 - score
 
 
-def weighted_ensemble(predictions, true_labels, task_type, metric, weights, tolfun=1e-9):
+def weighted_ensemble(predictions, true_labels, task_type, metric, weights, tolfun=1e-3):
     seed = np.random.randint(0, 1000)
     logging.debug("CMA-ES uses seed: " + str(seed))
     n_models = predictions.shape[0]
@@ -144,13 +144,14 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
                 if weights == 0:
                     weights = np.ones([1])
                 else:
+                    # Use equally initialized weights
                     #weights = np.ones([n_models]) / n_models
-                    # Use the previous weights again and set the new one to 1/M
-                    weights = np.concatenate((weights, np.array([1. / float(weights.shape[0])])), axis=0)
-                    weights = weights / float(weights.sum())
+                    # Use the previous weights again and set the new one to 1/M as initial weights
+                    init_weights = np.concatenate((weights, np.array([1. / float(weights.shape[0])])), axis=0)
+                    init_weights = init_weights / float(init_weights.sum())
 
                     weights = weighted_ensemble(np.array(all_predictions_train),
-                                        true_labels, task_type, metric, weights)
+                                        true_labels, task_type, metric, init_weights)
             except (ValueError):
                 logging.error("Caught ValueError!")
                 used_time = watch.wall_elapsed("ensemble_builder")

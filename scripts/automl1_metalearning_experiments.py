@@ -299,7 +299,6 @@ if __name__ == "__main__":
         for row in fh:
             dataset_ids.append(int(float(row.strip())))
 
-    # metrics = ["bac_metric", "auc_metric", "f1_metric", "pac_metric"]
     metrics = ["bac_metric"]
     function_arguments = ""
     if args.openml:

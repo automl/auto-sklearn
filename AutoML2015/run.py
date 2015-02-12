@@ -68,7 +68,7 @@
 #                 M = MyAutoML(D.info, ...) 
 # to create a model.
 #     Number of base estimators --
-#       Our models are ensembles. Adding more estimators may improve their accuracy.
+#       Our models are ensembles_statistics. Adding more estimators may improve their accuracy.
 #       Use M.model.n_estimators = num
 #     Training --
 #       M.fit(D.data['X_train'], D.data['Y_train'])
@@ -227,7 +227,7 @@ if __name__=="__main__" and debug_mode<4:
     # ==========================================================================
     # ============ CHECK THIS SECTION BEFORE SUBMITTING ========================
     # == Definitions
-    BUFFER = 35  # time-left - BUFFER = timelimit for SMAC/ensembles.py
+    BUFFER = 35  # time-left - BUFFER = timelimit for SMAC/ensemble_script.py
     BUFFER_BEFORE_SENDING_SIGTERM = 30  # We send SIGTERM to all processes
     DELAY_TO_SIGKILL = 15  # And after a delay we send a sigkill
 
@@ -414,7 +414,7 @@ if __name__=="__main__" and debug_mode<4:
     smac_exp = re.compile(r"ca\.ubc\.cs\.beta\.smac\.executors\.SMACExecutor").search
     wrapper_exp = re.compile(r"wrapper\_for\_SMAC\.py$").search
     runsolver_exp = re.compile(r"runsolver$").search
-    ensemble_exp = re.compile(r"ensembles\.py$").search
+    ensemble_exp = re.compile(r"ensembles_statistics\.py$").search
 
     stop.start_task("Shutdown")
     vprint(verbose, "Starting Shutdown, %fsec left" %

@@ -68,7 +68,7 @@
 #                 M = MyAutoML(D.info, ...) 
 # to create a model.
 #     Number of base estimators --
-#       Our models are ensembles. Adding more estimators may improve their accuracy.
+#       Our models are ensembles_statistics. Adding more estimators may improve their accuracy.
 #       Use M.model.n_estimators = num
 #     Training --
 #       M.fit(D.data['X_train'], D.data['Y_train'])

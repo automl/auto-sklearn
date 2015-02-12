@@ -16,7 +16,7 @@ from AutoSklearn.regression import AutoSklearnRegressor
 from HPOlibConfigSpace import configuration_space
 
 from data.data_manager import DataManager
-from ensembles import weighted_ensemble, ensemble_prediction
+from ensemble_script import weighted_ensemble, ensemble_prediction
 from util.get_dataset_info import getInfoFromFile
 from models import evaluate
 
@@ -35,6 +35,7 @@ def load_predictions(dirs, load_all_predictions=False):
             p = np.load(os.path.join(dir_ensemble, f))
             if not np.isfinite(p).all():
                 continue
+
             pred.append(p)
 
             if load_all_predictions:
@@ -42,6 +43,38 @@ def load_predictions(dirs, load_all_predictions=False):
                 pred_valid.append(p)
                 p = np.load(os.path.join(dir_test, f.replace("ensemble", "test")))
                 pred_test.append(p)
+
+    assert len(pred) > 0
+
+    if load_all_predictions:
+        return np.array(pred), np.array(pred_valid), np.array(pred_test)
+    return np.array(pred)
+
+
+def load_predictions_of_best(dirs, labels, task_type, metric, load_all_predictions=False):
+    pred = []
+    pred_valid = []
+    pred_test = []
+    for d in dirs:
+        dir_ensemble = os.path.join(d, "predictions_ensemble/")
+        if load_all_predictions:
+            dir_test = os.path.join(d, "predictions_test/")
+            dir_valid = os.path.join(d, "predictions_valid/")
+
+        for f in os.listdir(dir_ensemble):
+            p = np.load(os.path.join(dir_ensemble, f))
+            if not np.isfinite(p).all():
+                continue
+
+            score = evaluate.calculate_score(labels, p, task_type, metric)
+            # Keep model only if it is better than random
+            if score > 0:
+                pred.append(p)
+                if load_all_predictions:
+                    p = np.load(os.path.join(dir_valid, f.replace("ensemble", "valid")))
+                    pred_valid.append(p)
+                    p = np.load(os.path.join(dir_test, f.replace("ensemble", "test")))
+                    pred_test.append(p)
 
     assert len(pred) > 0
 
@@ -62,7 +95,7 @@ def load_predictions_of_nbest(dirs, nbest, labels, task_type, metric, load_all_p
     if load_all_predictions:
         pred_valid = []
         pred_test = []
-        for i in range(0, nbest):
+        for j in range(0, nbest):
             pred_valid.append(0)
             pred_test.append(0)
 
@@ -128,7 +161,7 @@ def pick_best_models(pred, labels, task_type, metric):
     return np.array(best)
 
 
-def train_models_on_complete_data(indices_nbest, dirs_nbest, X_train, Y_train, X_valid, X_test, task_type):
+def train_models_on_complete_data(indices_nbest, dirs_nbest, X_train, Y_train, X_valid, X_test, task_type, old_predictions_valid, old_predictions_test):
     params = []
     for i, d in enumerate(dirs_nbest):
         print indices_nbest[i]
@@ -138,11 +171,15 @@ def train_models_on_complete_data(indices_nbest, dirs_nbest, X_train, Y_train, X
 
     predictions_valid = []
     predictions_test = []
-    for p in params:
-        Y_valid, Y_test = train_model(p, X_train, Y_train, X_valid, X_test, task_type)
-        predictions_valid.append(Y_valid)
-        predictions_test.append(Y_test)
-
+    for i, p in enumerate(params):
+        try:
+            Y_valid, Y_test = train_model(p, X_train, Y_train, X_valid, X_test, task_type)
+            predictions_valid.append(Y_valid)
+            predictions_test.append(Y_test)
+        except:
+            print "Retraining did not work use the previous test and valid predictions of this model"
+            predictions_valid.append(old_predictions_valid[i])
+            predictions_test.append(old_predictions_test[i])
     return np.array(predictions_valid), np.array(predictions_test)
 
 
@@ -178,13 +215,12 @@ def load_configuration(pkl_file, index):
     return param
 
 
-def main(dataset):
+def main(dataset, path="/home/feurerm/mhome/projects/automl_competition_2015/tweakathon/"):
 
     print "Use data set: " + str(dataset)
-    path = "/home/feurerm/mhome/projects/automl_competition_2015/tweakathon/" + dataset + "/"
 
-    dirs = glob.glob(path + "smac_2_08_00-master_*")
-    output_dir = "predictions_tweakathon/"
+    dirs = glob.glob(os.path.join(path, dataset, "smac_2_08_00-master_*"))
+    output_dir = "./predictions_tweakathon/"
     data_dir = "/data/aad/automl_data"
     n_best = 10
 
@@ -193,12 +229,12 @@ def main(dataset):
     except:
         pass
 
-    print "Load labels from " + str(os.path.join(path, dataset + ".npy"))
-    true_labels = np.load(os.path.join(path, dataset + ".npy"))
+    print "Load labels from " + str(os.path.join(path, dataset, dataset + ".npy"))
+    true_labels = np.load(os.path.join(path, dataset, dataset + ".npy"))
 
     print "Load predictions from " + path + " and determine the " + str(n_best) + " models"
     info = getInfoFromFile(data_dir, dataset)
-    predictions, indices_nbest, dirs_nbest = load_predictions_of_nbest(dirs, n_best, true_labels, info['task'], info['metric'])
+    predictions, predictions_valid, predictions_test, indices_nbest, dirs_nbest = load_predictions_of_nbest(dirs, n_best, true_labels, info['task'], info['metric'], load_all_predictions=True)
 
     print "Start optimization"
     weights = np.ones([predictions.shape[0]]) / float(predictions.shape[0])
@@ -207,12 +243,14 @@ def main(dataset):
 
     print "Re-train models with the whole data set"
     D = DataManager(dataset, data_dir, verbose=True)
-    predictions_valid, predictions_test = train_models_on_complete_data(indices_nbest, dirs_nbest, D.data['X_train'], D.data['Y_train'], D.data['X_valid'], D.data['X_test'], info['task'])
+    predictions_valid, predictions_test = train_models_on_complete_data(indices_nbest, dirs_nbest,
+                                                                        D.data['X_train'], D.data['Y_train'],
+                                                                        D.data['X_valid'], D.data['X_test'], info['task'], predictions_valid, predictions_test)
 
     print "Compute ensembles predictions for valid data"
     Y_valid = ensemble_prediction(predictions_valid, weights)
 
-    print "Compute ensembles predictions for test data"
+    print "Compute ensemble predictions for test data"
     Y_test = ensemble_prediction(predictions_test, weights)
 
     print "Save predictions in: " + output_dir

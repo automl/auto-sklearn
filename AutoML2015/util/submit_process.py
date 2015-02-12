@@ -44,7 +44,7 @@ def get_algo_exec(runsolver_limit, runsolver_delay, target_call_limit):
 def run_smac(tmp_dir, searchspace, instance_file, limit,
              initial_challengers=None):
     if limit <= 0:
-        # It makes no sense to start building ensembles
+        # It makes no sense to start building ensembles_statistics
         return
     limit = int(limit)
     wallclock_limit = int(limit)
@@ -95,10 +95,10 @@ def run_smac(tmp_dir, searchspace, instance_file, limit,
 
 def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit, output_dir):
     if limit <= 0:
-        # It makes no sense to start building ensembles
+        # It makes no sense to start building ensembles_statistics
         return
     path_to_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    wrapper_exec = os.path.join(path_to_root, "ensembles.py")
+    wrapper_exec = os.path.join(path_to_root, "ensemble_script.py")
     runsolver_exec = os.path.join(path_to_root, "lib", "runsolver")
     delay = 5
 

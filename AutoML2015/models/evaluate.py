@@ -143,7 +143,7 @@ class Evaluator(object):
 
     # This function does everything necessary after the fitting is done:
     #        predicting
-    #        saving the files for the ensembles
+    #        saving the files for the ensembles_statistics
     #        generate output for SMAC
     # We use it as the signal handler so we can recycle the code for the normal usecase and when the runsolver kills us here :)
     def finish_up(self):
