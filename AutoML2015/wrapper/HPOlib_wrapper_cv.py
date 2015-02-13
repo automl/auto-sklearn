@@ -130,8 +130,11 @@ def main(args, params):
     duration = time.time() - starttime
 
     Y_optimization_pred = np.array(Y_optimization_pred)
+    Y_optimization_pred = np.reshape(Y_optimization_pred, (Y_optimization_pred.shape[1] * folds, Y_optimization_pred.shape[2]))
     Y_valid_pred = np.array(Y_valid_pred)
+    Y_valid_pred = np.reshape(Y_valid_pred, (Y_valid_pred.shape[1] * folds, Y_valid_pred.shape[2]))
     Y_test_pred = np.array(Y_test_pred)
+    Y_test_pred = np.reshape(Y_test_pred, (Y_test_pred.shape[1] * folds, Y_test_pred.shape[2]))
 
     pred_dump_name_template = os.path.join(output_dir, "predictions_%s",
         basename + '_predictions_%s_' + str(get_new_run_num()) + '.npy')
