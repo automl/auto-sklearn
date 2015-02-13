@@ -19,7 +19,7 @@ pip install git+https://github.com/mfeurer/liac-arff#egg=liac-arff -t lib/ -b bu
 
 # ====== Download Stuff
 cd download/
-if [ ! -e smac-v2.08.01-master-0_metalearning.tar.gz ]
+if [ ! -e smac-v2.08.01-development-1.tar.gz ]
 then
     wget http://aad.informatik.uni-freiburg.de/~feurerm/smac-v2.08.01-development-1.tar.gz
 fi
