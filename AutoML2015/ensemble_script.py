@@ -66,7 +66,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
     used_time = 0
     time_iter = 0
     index_run = 0
-    weights = 0
+    weights = None
     current_num_models = 0
     logging.basicConfig(filename=os.path.join(predictions_dir, "ensemble.log"), level=logging.DEBUG)
 
@@ -141,7 +141,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
         else:
             try:
                 # Compute the weights for the ensemble
-                if weights == 0:
+                if weights is None:
                     weights = np.ones([1])
                 else:
                     # Use equally initialized weights
