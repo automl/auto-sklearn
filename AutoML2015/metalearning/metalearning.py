@@ -98,7 +98,7 @@ class MetaLearning(object):
         # = Convert these configurations into the SMAC CLI configuration format
         smac_initial_configuration_strings = []
 
-        for run in runs:
+        for run in runs[:25]:
             smac_initial_configuration_strings.append(
                 self.convert_configuration_to_smac_string(run.configuration))
 
