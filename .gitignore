@@ -61,5 +61,8 @@ nosetests.xml
 *~
 *.dat
 *.pstats
+*.stats
 *.npy
 *.zip
+download
+*.predict

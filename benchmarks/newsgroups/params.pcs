@@ -30,11 +30,12 @@ sgd:loss {hinge, log, modified_huber, squared_hinge, perceptron} [hinge]
 sgd:n_iter [5, 1000] [20]i
 liblinear:tol [1e-05, 0.1] [0.0001]l
 liblinear:dual {False} [False]
-preprocessor {None, select_percentile_classification, kitchen_sinks} [None]
+preprocessor {None, select_percentile_classification, kitchen_sinks, truncatedSVD} [None]
 kitchen_sinks:n_components [50, 10000] [100]il
 sgd:fit_intercept {True} [True]
 liblinear:penalty {l1, l2} [l2]
 liblinear:C [0.03125, 32768.0] [1.0]l
+truncatedSVD:target_dim [10, 256] [128]i
 libsvm_svc:C [0.03125, 32768.0] [1.0]l
 k_nearest_neighbors:algorithm {auto} [auto]
 liblinear:loss {l1, l2} [l2]
@@ -47,6 +48,7 @@ sgd:l1_ratio | sgd:penalty in {elasticnet}
 libsvm_svc:degree | libsvm_svc:kernel in {poly}
 libsvm_svc:coef0 | libsvm_svc:kernel in {poly, sigmoid}
 sgd:epsilon | sgd:loss in {modified_huber}
+truncatedSVD:target_dim | preprocessor in {truncatedSVD}
 select_percentile_classification:score_func | preprocessor in {select_percentile_classification}
 select_percentile_classification:percentile | preprocessor in {select_percentile_classification}
 kitchen_sinks:gamma | preprocessor in {kitchen_sinks}

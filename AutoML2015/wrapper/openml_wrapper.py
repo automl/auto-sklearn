@@ -87,7 +87,7 @@ def main(args, params):
             pass
 
     openml_cache_directory = args.get("openml_cache_directory")
-    dataset = args['dataset']
+    dataset = args['dataset'].replace("/-", "-")
     metric = args['metric']
     task_type = args['task_type']
     if task_type not in ["multiclass.classification", "binary.classification",
