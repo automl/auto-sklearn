@@ -370,10 +370,10 @@ if __name__=="__main__" and debug_mode<4:
                 information_ready = False
                 vprint(verbose, "Waiting for run information about %s" % basename)
                 try:
-                    [time_needed_to_load_data, data_manager_file, pid_smac, pid_ensembles] = queue_dict[basename].get_nowait()
+                    [time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles] = queue_dict[basename].get_nowait()
                     data_manager_files.append(data_manager_file)
-                    pid_dict[basename + "_ensemble"] = pid_ensembles
-                    pid_dict[basename + "_smac"] = pid_smac
+                    pid_dict[basename + "_ensemble"] = proc_ensembles.pid
+                    pid_dict[basename + "_smac"] = proc_smac.pid
                     stop.insert_task(name=basename + "_load",
                                      cpu_dur=time_needed_to_load_data,
                                      wall_dur=time_needed_to_load_data)
