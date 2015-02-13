@@ -3,6 +3,9 @@ Azure machine
 ==== Log In @aadpool, password as discussed
 
 ssh azureuser@automl.cloudapp.net
+ssh azureuser@automl2.cloudapp.net
+ssh azureuser@automl3.cloudapp.net
+
 
 ==== ALREADY DONE: Download and install Anaconda @Azure
 
