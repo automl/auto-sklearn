@@ -381,7 +381,7 @@ if __name__=="__main__" and debug_mode<4:
         if not information_ready:
             if stop.wall_elapsed("wholething") >= overall_limit-15:
                 # = We have to stop, as there is no time left
-                continue
+                break
             else:
                 time.sleep(10)
 
