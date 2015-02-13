@@ -11,6 +11,6 @@ class GaussianProcessComponentTest(unittest.TestCase):
         for i in range(10):
 
             predictions, targets = _test_regressor(GaussianProcess, dataset='diabetes')
-            self.assertAlmostEqual(0.28867320357768378,
+            self.assertAlmostEqual(0.28876614862410088,
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
 

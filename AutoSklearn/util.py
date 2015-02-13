@@ -105,8 +105,16 @@ def _test_regressor(Regressor, dataset='diabetes'):
     regressor = Regressor(random_state=1,
                           **{hp.hyperparameter.name: hp.value for hp in
                           default.values.values()})
+    # Dumb incomplete hacky test to check that we do not alter the data
+    X_train_hash = hash(str(X_train))
+    X_test_hash = hash(str(X_test))
+    Y_train_hash = hash(str(Y_train))
     predictor = regressor.fit(X_train, Y_train)
     predictions = predictor.predict(X_test)
+    if X_train_hash != hash(str(X_train)) or \
+                    X_test_hash != hash(str(X_test)) or \
+                    Y_train_hash != hash(str(Y_train)):
+        raise ValueError("Model modified data")
     return predictions, Y_test
 
 
