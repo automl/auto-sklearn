@@ -60,7 +60,7 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
         nugget = UniformFloatHyperparameter(
             name="nugget", lower=0.0001, upper=10, default=0.1, log=True)
         thetaL = UniformFloatHyperparameter(
-            name="thetaL", lower=1e-5, upper=1e-3, default=1e-4, log=True)
+            name="thetaL", lower=1e-6, upper=1e-3, default=1e-4, log=True)
         thetaU = UniformFloatHyperparameter(
             name="thetaU", lower=0.2, upper=10, default=1.0, log=True)
 
