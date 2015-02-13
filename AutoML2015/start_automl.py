@@ -123,7 +123,7 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     # = Start SMAC
     stop = time.time()
     time_left_for_smac = max(0, time_left_for_this_task - (stop - start))
-    pid_smac = \
+    proc_smac = \
         submit_process.run_smac(tmp_dir=tmp_dataset_dir,
                                 searchspace=searchspace_path,
                                 instance_file=instance_file,
@@ -134,7 +134,7 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     # == RUN ensemble builder
     stop = time.time()
     time_left_for_ensembles = max(0, time_left_for_this_task - (stop - start))
-    pid_ensembles = \
+    proc_ensembles = \
         submit_process.run_ensemble_builder(tmp_dir=tmp_dataset_dir,
                                             dataset_name=basename,
                                             task_type=loaded_data_manager.info['task'],
@@ -142,5 +142,6 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
                                             limit=time_left_for_ensembles,
                                             output_dir=output_dir)
 
-    queue.put([time_needed_to_load_data, data_manager_path, pid_smac, pid_ensembles])
+    queue.put([time_needed_to_load_data, data_manager_path,
+               proc_smac, proc_ensembles])
     return
