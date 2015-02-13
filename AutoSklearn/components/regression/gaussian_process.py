@@ -1,6 +1,9 @@
+import copy
+
 import numpy as np
 
 import sklearn.gaussian_process 
+import sklearn.preprocessing
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -22,22 +25,29 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
         # We ignore it
         self.random_state = random_state
         self.estimator = None
+        self.scaler = None
 
     def fit(self, X, Y):
         # Instanciate a Gaussian Process model
         self.estimator = sklearn.gaussian_process.GaussianProcess(
             corr='squared_exponential', 
             theta0=np.ones(X.shape[1]) * 1e-1,
-            thetaL=np.ones(X.shape[1]) * self.thetaL, 
+            thetaL=np.ones(X.shape[1]) * self.thetaL,
             thetaU=np.ones(X.shape[1]) * self.thetaU,
             nugget=self.nugget)
-        self.estimator.fit(X, Y)
+        self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
+        self.scaler.fit(Y)
+        Y_scaled = self.scaler.transform(Y)
+        self.estimator.fit(X, Y_scaled)
         return self
 
     def predict(self, X):
         if self.estimator is None:
             raise NotImplementedError
-        return self.estimator.predict(X, batch_size=512)
+        if self.scaler is None:
+            raise NotImplementedError
+        Y_pred = self.estimator.predict(X, batch_size=512)
+        return self.scaler.inverse_transform(Y_pred)
 
     @staticmethod
     def get_properties():
