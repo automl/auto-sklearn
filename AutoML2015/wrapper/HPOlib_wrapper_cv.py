@@ -111,9 +111,7 @@ def main(args, params):
             Y[test_indices]
 
     errors = []
-    Y_optimization_pred = []
-    Y_valid_pred = []
-    Y_test_pred = []
+
     for k in range(folds):
         splitting_function = partial(splitting_function, fold=k, folds=folds)
 
@@ -123,15 +121,17 @@ def main(args, params):
         err, opt_pred, valid_pred, test_pred = \
             evaluator.predict()
         errors.append(err)
-        Y_optimization_pred.append(opt_pred)
-        Y_valid_pred.append(valid_pred)
-        Y_test_pred.append(test_pred)
+
+        if k == 0:
+            Y_optimization_pred = opt_pred
+            Y_valid_pred = test_pred
+            Y_test_pred = valid_pred
+        else:
+            Y_optimization_pred = np.concatenate((Y_optimization_pred, opt_pred))
+            Y_valid_pred = np.concatenate((Y_valid_pred, valid_pred))
+            Y_test_pred = np.concatenate((Y_test_pred, test_pred))
 
     duration = time.time() - starttime
-
-    Y_optimization_pred = np.array(Y_optimization_pred)
-    Y_valid_pred = np.array(Y_valid_pred)
-    Y_test_pred = np.array(Y_test_pred)
 
     pred_dump_name_template = os.path.join(output_dir, "predictions_%s",
         basename + '_predictions_%s_' + str(get_new_run_num()) + '.npy')
