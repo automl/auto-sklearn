@@ -110,7 +110,9 @@ def load_predictions_of_nbest(dirs, nbest, labels, task_type, metric, load_all_p
             dir_valid = os.path.join(d, "predictions_valid/")
 
         for f in os.listdir(dir_ensemble):
+            print f
             p = np.load(os.path.join(dir_ensemble, f))
+            print p.shape
             if not np.isfinite(p).all():
                 continue
 

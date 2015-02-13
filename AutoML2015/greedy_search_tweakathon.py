@@ -11,7 +11,7 @@ from data.data_manager import DataManager
 from ensemble_script import weighted_ensemble, ensemble_prediction
 from util.get_dataset_info import getInfoFromFile
 from ensembles_tweakathon import load_predictions, load_predictions_of_best, load_predictions_of_nbest
-from ensembles.greedy_search import GreedySearch
+from ensembles.greedy_search import greedy_search
 from ensembles import stacking
 from models import evaluate
 
@@ -50,11 +50,9 @@ def greedy_search(X, y, task_type, metric):
     y_train = y[:split]
     y_test = y[split:]
 
-    gs = GreedySearch(acq_fkt)
-    trajectory = gs.search(X_train, X_test, y_train, y_test, task_type, metric)
+    trajectory, order = greedy_search(X_train, X_test, y_train, y_test, acq_fkt, task_type, metric)
     print "Trajectory: "
     print trajectory
-    order = gs.get_order()
     print "Complete order: "
     print order
     # Check were the trajectory starts to overfit
@@ -124,6 +122,6 @@ def main(dataset, path="/home/feurerm/mhome/projects/automl_competition_2015/twe
 
 if __name__ == '__main__':
     #dataset = ["adult", "digits", "newsgroups", "dorothea", "cadata"]
-    dataset = ["adult", "digits", "newsgroups", "cadata"]
+    dataset = ["dorothea"]
     for d in dataset:
-        main(d)
+        main(d, path="/mhome/kleinaa/experiments/automl/dorothea/dorothea_with_cv")

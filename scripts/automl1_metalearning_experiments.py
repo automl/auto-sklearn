@@ -129,12 +129,12 @@ def create_metadata_directories(datasets, metrics, output_dir, smac,
                                   "--task_type %s --remove_categorical %s" \
                                   % (did, metric, "binary.classification",
                                      function_arguments),
-                              'number_of_jobs': 100,
+                              'number_of_jobs': 10000,
                               'number_cv_folds': 10,
                               'runsolver_time_limit': 1800,
                               'memory_limit': 4000,
                               'result_on_terminate': 1.0},
-                          SMAC={'runtime_limit': 86400,
+                          SMAC={'runtime_limit': 172800, #2 days
                                 'p': 'params.pcs'})
 
             commands.append(
@@ -245,12 +245,12 @@ def create_metadata_directories_product(datasets, metrics, output_dir, smac,
                                     "--task_type %s --remove_categorical %s"
                                     % (did, metric, "binary.classification",
                                        function_arguments),
-                                'number_of_jobs': 100,
+                                'number_of_jobs': 10000,
                                 'number_cv_folds': 10,
                                 'runsolver_time_limit': 1800,
                                 'memory_limit': 4000,
                                 'result_on_terminate': 1.0},
-                        SMAC={'runtime_limit': 86400, 'p': 'params.pcs'})
+                        SMAC={'runtime_limit': 172800, 'p': 'params.pcs'})
 
             commands[classifier][preprocessor].append(
                 "HPOlib-run -o %s --cwd %s --HPOLIB:temporary_output_directory "
