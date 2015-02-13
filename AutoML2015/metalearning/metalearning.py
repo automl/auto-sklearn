@@ -115,12 +115,13 @@ class MetaLearning(object):
             --initialChallengers "-alpha 1 -rho 1 -ps 0.1 -wp 0.00"
         """
         config_string = StringIO()
-        config_string.write("--initial-challengers")
+        config_string.write("--initial-challengers \"")
 
         for hyperparameter in configuration:
             if isinstance(hyperparameter, InactiveHyperparameter):
                 continue
             name = hyperparameter.hyperparameter.name
-            config_string.write(" -%s %s" % (name, configuration[name].value))
+            config_string.write(" -%s '%s'" % (name, configuration[name].value))
 
+        config_string.write("\"")
         return config_string.getvalue()

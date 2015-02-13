@@ -64,7 +64,7 @@ cp cma.py ../lib/
 cp jre1.8.0_25 ../lib/ -r
 cp lockfile-0.10.2/lockfile ../lib/ -r
 cp runsolver/src/runsolver ../lib/
-cp files/* ../.zip/AutoML2015/metalearning/files
+cp files ../.zip/AutoML2015/metalearning/ -r
 
 cd ..
 

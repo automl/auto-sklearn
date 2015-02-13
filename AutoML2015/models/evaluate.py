@@ -152,10 +152,15 @@ class Evaluator(object):
             result, additional_run_info = self.file_output()
             print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % ("SAT", abs(self.duration), result, self.seed, additional_run_info)
         except:
+            self.duration = time.time() - self.starttime
             import sys
             e = sys.exc_info()[0]
             print e
-            print "No results were produced! Probably the training was not finished, and no valid model was generated!"
+            print
+            print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % (
+                "TIMEOUT", abs(self.duration), 1.0, self.seed,
+                "No results were produced! Probably the training was not "
+                "finished, and no valid model was generated!")
 
     def predict(self):
 

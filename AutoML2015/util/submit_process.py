@@ -67,8 +67,9 @@ def run_smac(tmp_dir, searchspace, instance_file, limit,
 
     # Bad hack to find smac
     call = os.path.join("smac")
-    call = " ".join(['bash', call, '--numRun', '2147483647',
+    call = " ".join([call, '--numRun', '2147483647',
                     '--cli-log-all-calls false',
+                    '--console-log-level INFO',
                     '--cutoffTime', str(cutoff_time),
                     '--wallclock-limit', str(wallclock_limit),
                     '--intraInstanceObj', 'MEAN',
@@ -90,8 +91,8 @@ def run_smac(tmp_dir, searchspace, instance_file, limit,
                     '--execDir', tmp_dir,
                     '--instances', instance_file] +
                     initial_challengers)
-    return submit_call(call)
-
+    proc = submit_call(call)
+    return proc
 
 def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit, output_dir):
     if limit <= 0:
@@ -112,5 +113,8 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit, output
                     (runsolver_exec, limit, delay)
     call = runsolver_cmd + " " + call
 
-    return submit_call(call, log_dir=tmp_dir)
+    proc = submit_call(call, log_dir=tmp_dir)
+    return proc
+
+
 
