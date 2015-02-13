@@ -67,7 +67,7 @@ def run_smac(tmp_dir, searchspace, instance_file, limit,
 
     # Bad hack to find smac
     call = os.path.join("smac")
-    call = " ".join(['bash', call, '--numRun', '2147483647',
+    call = " ".join([call, '--numRun', '2147483647',
                     '--cli-log-all-calls false',
                     '--cutoffTime', str(cutoff_time),
                     '--wallclock-limit', str(wallclock_limit),
