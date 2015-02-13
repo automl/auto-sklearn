@@ -194,7 +194,7 @@ import re
 
 our_root_dir = os.path.abspath(os.path.dirname(__file__))
 our_lib_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib"))
-smac_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib", "smac-v2.08.01-master-0_metalearning"))
+smac_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "lib", "smac-v2.08.01-development-1"))
 java_path = os.path.join(our_lib_dir, "jre1.8.0_25", "bin")
 
 # To use it within this scope:
@@ -326,6 +326,8 @@ if __name__=="__main__" and debug_mode<4:
     stop.stop_task("get_info")
 
     # == Loop over all datasets and start AutoML
+    subprocesses = []
+
     queue_dict = dict()
     for basename in datanames:
         stop.start_task(basename)
@@ -351,6 +353,7 @@ if __name__=="__main__" and debug_mode<4:
                                           tmp_dataset_dir, output_dir,
                                           time_left_for_this_task, queue_dict[basename]))
         p.start()
+        subprocesses.append(p)
         stop.stop_task(basename)
 
     # == Try to get information from all subprocesses, especially pid
@@ -383,7 +386,7 @@ if __name__=="__main__" and debug_mode<4:
                 # = We have to stop, as there is no time left
                 break
             else:
-                time.sleep(10)
+                time.sleep(1)
 
     print stop
 
@@ -403,10 +406,10 @@ if __name__=="__main__" and debug_mode<4:
         vprint(verbose, "+" + "-" * 48 + "+")
 
         # == List results in outputdirectory
-        output_dir_list = str(os.listdir(output_dir))
+        output_dir_list = str(sorted(os.listdir(output_dir)))
         vprint(verbose, "\nOutput directory contains: %s" % output_dir_list)
-        time.sleep(10)
-        if stop.wall_elapsed("wholething") >= overall_limit-BUFFER_BEFORE_SENDING_SIGTERM-10:
+        time.sleep(1)
+        if stop.wall_elapsed("wholething") >= overall_limit-BUFFER_BEFORE_SENDING_SIGTERM:
             run = False
 
     # == Now it's time to terminate ... subprocesses
@@ -448,6 +451,13 @@ if __name__=="__main__" and debug_mode<4:
     util.send_signal_to_our_processes(sig=9, filter=ensemble_exp)
     util.send_signal_to_our_processes(sig=9, filter=runsolver_exp)
     stop.stop_task("Harakiri")
+
+    # == Stop all subprocesses
+    for p in subprocesses:
+        try:
+            p.terminate()
+        except:
+            pass
 
     # == Finish and show stopwatch
     stop.stop_task("submitcode")

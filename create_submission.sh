@@ -21,7 +21,7 @@ pip install git+https://github.com/mfeurer/liac-arff#egg=liac-arff -t lib/ -b bu
 cd download/
 if [ ! -e smac-v2.08.01-master-0_metalearning.tar.gz ]
 then
-    wget http://aad.informatik.uni-freiburg.de/~feurerm/smac-v2.08.01-master-0_metalearning.tar.gz
+    wget http://aad.informatik.uni-freiburg.de/~feurerm/smac-v2.08.01-development-1.tar.gz
 fi
 
 if [ ! -e cma.py ]
@@ -40,13 +40,14 @@ then
 fi
 
 # Get the data necessary for metalearning
-if [ ! -e metadata_automl1_000.tar.gz ]
+if [ -e metadata_automl1_000.tar.gz ]
 then
-    wget http://aad.informatik.uni-freiburg.de/~feurerm/metadata_automl1_000.tar.gz
+    rm metadata_automl1_000.tar.gz
 fi
+wget http://aad.informatik.uni-freiburg.de/~feurerm/metadata_automl1_000.tar.gz
 
 # ==== UNZIP STUFF
-tar -xf smac-v2.08.01-master-0_metalearning.tar.gz
+tar -xf smac-v2.08.01-development-1.tar.gz
 tar -xf lockfile-0.10.2.tar.gz
 tar -xf runsolver-3.3.4.tar.bz2
 tar -xf jre-8u25-linux-x64.tar.gz
@@ -58,7 +59,7 @@ make
 cd ../../
 
 # ==== MOVE Libraries
-cp smac-v2.08.01-master-0_metalearning ../lib/ -r
+cp smac-v2.08.01-development-1 ../lib/ -r
 cp cma.py ../lib/
 cp jre1.8.0_25 ../lib/ -r
 cp lockfile-0.10.2/lockfile ../lib/ -r

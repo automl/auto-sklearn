@@ -26,10 +26,10 @@ class MetaLearning(object):
         self._metafeatures_encoded_labels = None
         self._metafeatures_labels = None
         # Hard-coded list of too-expensive metafeatures!
-        self._exclude_metafeatures = set(['landmark_1NN',
-                                          'landmark_decision_node_learner',
-                                          'landmark_decision_tree',
-                                          'landmark_lda'])
+        self._exclude_metafeatures = set(['Landmark1NN',
+                                          'LandmarkDecisionNodeLearner',
+                                          'LandmarkDecisionTree',
+                                          'LandmarkLDA'])
 
     def calculate_metafeatures_with_labels(self, X_train, Y_train,
                                            categorical, dataset_name):
@@ -115,7 +115,7 @@ class MetaLearning(object):
             --initialChallengers "-alpha 1 -rho 1 -ps 0.1 -wp 0.00"
         """
         config_string = StringIO()
-        config_string.write("--initial_challengers")
+        config_string.write("--initial-challengers")
 
         for hyperparameter in configuration:
             if isinstance(hyperparameter, InactiveHyperparameter):
