@@ -160,7 +160,7 @@ class Evaluator(object):
             print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % (
                 "TIMEOUT", abs(self.duration), 1.0, self.seed,
                 "No results were produced! Probably the training was not "
-                "finished, and no valid model was generated!")
+                "finished and no valid model was generated!")
 
     def predict(self):
 

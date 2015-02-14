@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
             ml.create_metalearning_string_for_smac_call(
             configuration_space, "iris", "bac_metric")
 
-        self.assertEqual(["--initial-challengers "
+        self.assertEqual(["--initial-challengers \" "
                           "-rescaling:strategy 'min/max' "
                           "-gradient_boosting:min_samples_leaf '8' "
                           "-imputation:strategy 'most_frequent' "
@@ -75,5 +75,5 @@ class Test(unittest.TestCase):
                           "'0.000822335208483' "
                           "-gradient_boosting:n_estimators '100' "
                           "-gradient_boosting:max_features '4.55642355925' "
-                          "-classifier 'gradient_boosting'"],
+                          "-classifier 'gradient_boosting'\""],
                          initial_configuration_strings_for_smac)

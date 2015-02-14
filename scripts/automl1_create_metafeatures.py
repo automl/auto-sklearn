@@ -2,27 +2,36 @@ from csv import DictWriter
 import numpy as np
 import os
 
-import arff
 
 from pyMetaLearn.metafeatures import metafeatures
 from pyMetaLearn.metafeatures.metafeature import DatasetMetafeatures
-from AutoML2015.util.automl_phase1 import get_dataset_list
 from AutoML2015.data.data_converter import predict_RAM_usage
 from AutoML2015.wrapper.openml_wrapper import create_mock_data_manager, \
     remove_categorical_features
+from openml.apiconnector import APIConnector
 
 
-input_csv_file = "/home/feurerm/projects/openml/datasets/datasets_iteration002.csv"
+#input_csv_file = "/home/feurerm/mhome/projects/automl_competition_2015" \
+#                 "/experiments/openml_dataset_phase1.csv"
+input_csv_file = "/home/feurerm/mhome/projects/automl_competition_2015/" \
+                 "experiments/libsvm_datasets_phase1.csv"
 output_dir = "/home/feurerm/ihome/projects/automl_competition_2015" \
              "/experiments/metafeatures_for_phase_1"
 
-with open(input_csv_file) as fh:
-    datasets = get_dataset_list(fh)
 
+datasets = []
+with open(input_csv_file) as fh:
+    for line in fh:
+        datasets.append(int(line))
+
+api = APIConnector(authenticate=False,
+                   cache_directory="/home/feurerm/mhome/projects/automl_competition_2015/")
 
 all_metafeatures = []
-for dataset, task_type in datasets:
+for did in datasets:
     commands = []
+
+    dataset = api.get_cached_dataset(did)
 
     X, y, categorical = dataset.get_pandas(
         target=dataset.default_target_attribute, include_row_id=False,
