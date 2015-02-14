@@ -23,6 +23,7 @@ class MetaLearning(object):
     """
 
     def __init__(self):
+        self._sentinel = "uiaeo"
         self._metafeatures_encoded_labels = None
         self._metafeatures_labels = None
         # Hard-coded list of too-expensive metafeatures!
@@ -38,7 +39,7 @@ class MetaLearning(object):
 
         self._metafeatures_labels = metafeatures. \
             calculate_all_metafeatures_with_labels(
-            X_train, Y_train, categorical, dataset_name,
+            X_train, Y_train, categorical, dataset_name + self._sentinel,
             dont_calculate=self._exclude_metafeatures)
 
     def calculate_metafeatures_encoded_labels(self, X_train, Y_train,
@@ -51,7 +52,7 @@ class MetaLearning(object):
 
         self._metafeatures_encoded_labels = metafeatures.\
             calculate_all_metafeatures_encoded_labels(
-            X_train, Y_train, categorical, dataset_name,
+            X_train, Y_train, categorical, dataset_name + self._sentinel,
             dont_calculate=self._exclude_metafeatures)
 
     def create_metalearning_string_for_smac_call(self, configuration_space,
@@ -85,13 +86,14 @@ class MetaLearning(object):
 
         # TODO maybe replace by kND directly to remove unavailable configurations
         start = time.time()
-        ml = metalearner.MetaLearningOptimizer(dataset_name, configuration_space,
-            datasets_file, experiments_file, distance="l1", seed=1,
-            use_features=metafeatures_subset, subset='all')
+        ml = metalearner.MetaLearningOptimizer(dataset_name + self._sentinel,
+            configuration_space, datasets_file, experiments_file, distance="l1",
+            seed=1, use_features=metafeatures_subset, subset='all')
         print "Reading meta-data took %5.2f seconds" % (time.time() - start)
 
         # TODO This is hacky, I must find a different way of adding a new dataset!
-        ml.meta_base.add_dataset_with_metafeatures(dataset_name, None, self.mf)
+        ml.meta_base.add_dataset_with_metafeatures(dataset_name + self._sentinel,
+                                                   None, self.mf)
         runs = ml.metalearning_suggest_all(
             exclude_double_configurations=True)
 
