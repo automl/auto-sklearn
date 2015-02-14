@@ -3,27 +3,40 @@ import glob
 import os
 import yaml
 
+from openml.apiconnector import APIConnector
 import numpy as np
 
-from AutoML2015.util.automl_phase1 import get_dataset_list
 from AutoML2015.models.autosklearn import get_configuration_space
 import AutoML2015.metalearning.files
 from HPOlibConfigSpace.configuration_space import Configuration
+from HPOlibConfigSpace.hyperparameters import InstantiatedFloatHyperparameter, \
+    InstantiatedIntegerHyperparameter, InstantiatedCategoricalHyperparameter, \
+    InstantiatedConstant
 
-input_csv_file = "/home/feurerm/projects/openml/datasets/datasets_iteration002.csv"
+openml_cache_dir = None
+input_csv_file = "/home/feurerm/mhome/projects/automl_competition_2015" \
+                 "/experiments/openml_dataset_phase1.csv"
+#openml_cache_dir = "/home/feurerm/mhome/projects/automl_competition_2015/"
+#input_csv_file = "/home/feurerm/mhome/projects/automl_competition_2015" \
+#                 "/experiments/libsvm_datasets_phase1.csv"
+
 output_dir = os.path.dirname(AutoML2015.metalearning.files.__file__)
 
-experiment_dir = "/home/feurerm/projects/automl_competition_2015/experiments" \
-                 "/metalearning_for_phase_1"
+experiment_dir = "/home/feurerm/mhome/projects/automl_competition_2015" \
+                 "/experiments/metadata_for_phase_1"
 
+datasets = []
 with open(input_csv_file) as fh:
-    datasets = get_dataset_list(fh)
+    for line in fh:
+        datasets.append(int(float(line)))
 
 
 output_list = []
 
+api = APIConnector(authenticate=False, cache_directory=openml_cache_dir)
 
-for dataset, task_type in datasets:
+for did in datasets:
+    dataset = api.get_cached_dataset(did)
     X, y, categorical = dataset.get_pandas(
         target=dataset.default_target_attribute, include_row_id=False,
         include_ignore_attributes=False)
@@ -40,7 +53,7 @@ for dataset, task_type in datasets:
     output_list.append(output_dict)
 
 
-with open(os.path.join(output_dir, 'datasets.yaml'), 'w') as fh:
+with open(os.path.join(output_dir, 'datasets.yaml'), 'a') as fh:
     yaml.safe_dump(output_list, fh)
 
 
@@ -50,7 +63,8 @@ outputs_per_metric = {'bac_metric': list(),
                       'f1_metric': list(),
                       'pac_metric': list()}
 
-for dataset, task_type in datasets:
+for did in datasets:
+    dataset = api.get_cached_dataset(did)
     # For phase 1, do not use categorical features
     X, y, categorical = dataset.get_pandas(
         target=dataset.default_target_attribute, include_row_id=False,
@@ -61,7 +75,7 @@ for dataset, task_type in datasets:
               "categorical variables." % dataset.id
         continue
 
-    data_manager_info_dummy = {'task': task_type, 'is_sparse': 0}
+    data_manager_info_dummy = {'task': 'binary.classification', 'is_sparse': 0}
     configuration_space = get_configuration_space(data_manager_info_dummy)
     directory_content = os.listdir(experiment_dir)
 
@@ -89,8 +103,8 @@ for dataset, task_type in datasets:
                 runs = []
                 trials = cPickle.load(fh)
                 for trial in trials["trials"]:
-                    result = trial['result']
-                    if not np.isfinite(result):
+                    test_result = trial['test_result']
+                    if not np.isfinite(test_result):
                         continue
                     params = trial['params']
                     for key in params:
@@ -99,9 +113,35 @@ for dataset, task_type in datasets:
                         except:
                             pass
 
+                    break_ = False
+                    for key in params:
+                        if "sparse_filtering" in key:
+                            break_ = True
+                    if break_:
+                        break
+
                     configuration = Configuration(configuration_space, **params)
-                    # params is an ordered dict which cannot be yamled
-                    parameters = {k_: v_ for k_, v_ in params.items()}
+                    parameters = {}
+                    for ihp in configuration:
+                        if isinstance(ihp, InstantiatedIntegerHyperparameter):
+                            value_ = int(float(ihp.value))
+                        elif isinstance(ihp, InstantiatedFloatHyperparameter):
+                            value_ = float(ihp.value)
+                        elif isinstance(ihp, InstantiatedCategoricalHyperparameter):
+                            try:
+                                if abs(int(float(ihp.value)) -
+                                       float(ihp.value)) < 0.000001:
+                                    value_ = int(ihp.value)
+                                else:
+                                    value_ = str(ihp.value)
+                            except Exception as e:
+                                #print e
+                                value_ = str(ihp.value)
+                        elif isinstance(ihp, InstantiatedConstant):
+                            value_ = ihp.hyperparameter.value
+                        else:
+                            raise ValueError(ihp)
+                        parameters[ihp.hyperparameter.name] = value_
 
                     # We only have the results for each of the CV folds,
                     # therefore we must average these values first.
@@ -109,8 +149,8 @@ for dataset, task_type in datasets:
                                          outputs_per_metric}
 
                     # Extract the results of the different metrics
-                    for key in trial['additional_data']:
-                        additional_data = trial['additional_data'][key]
+                    for key in trial['test_additional_data']:
+                        additional_data = trial['test_additional_data'][key]
                         additional_data = additional_data.split(";")
 
                         for pair in additional_data:
@@ -143,5 +183,5 @@ for dataset, task_type in datasets:
                             append(run)
 
 for metric in outputs_per_metric:
-    with open(os.path.join(output_dir, "%s.experiments.yaml" % metric), "w") as fh:
+    with open(os.path.join(output_dir, "%s.experiments.yaml" % metric), "a") as fh:
         yaml.safe_dump(outputs_per_metric[metric], fh)
