@@ -14,6 +14,7 @@ import numpy as np
 from data import data_io
 from models import evaluate
 import util.Stopwatch
+from time import sleep
 
 
 def weighted_ensemble_error(weights, *args):
@@ -35,7 +36,7 @@ def weighted_ensemble(predictions, true_labels, task_type, metric, weights, tolf
     logging.debug("CMA-ES uses seed: " + str(seed))
     n_models = predictions.shape[0]
     if n_models > 1:
-        res = cma.fmin(weighted_ensemble_error, weights, sigma0=0.25,
+        res = cma.fmin(weighted_ensemble_error, weights, sigma0=0.25, restarts=3,
                        args=(predictions, true_labels, metric,
                              task_type), options={'bounds': [0, 1],
                                                   'seed': seed,
@@ -88,9 +89,9 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
             used_time = watch.wall_elapsed("ensemble_builder")
             continue
 
-        dir_ensemble_list = os.listdir(dir_ensemble)
-        dir_valid_list = os.listdir(dir_valid)
-        dir_test_list = os.listdir(dir_test)
+        dir_ensemble_list = sorted(os.listdir(dir_ensemble))
+        dir_valid_list = sorted(os.listdir(dir_valid))
+        dir_test_list = sorted(os.listdir(dir_test))
 
         if len(dir_ensemble_list) == 0:
             logging.debug("Directories are empty")
@@ -119,21 +120,37 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
         watch.start_task("ensemble_iter_" + str(index_run))
 
         # Load all predictions
+        random_pred_mask = []
         for f in dir_ensemble_list:
             predictions = np.load(os.path.join(dir_ensemble, f))
-            all_predictions_train.append(predictions)
+            score = evaluate.calculate_score(true_labels, predictions,
+                                     task_type, metric)
+
+            if score <= 0.001:
+                random_pred_mask.append(True)
+                logging.error("Model only predicts at random: " + f + " has score: " + str(score))
+            else:
+                random_pred_mask.append(False)
+                all_predictions_train.append(predictions)
 
         all_predictions_valid = []
-        for f in dir_valid_list:
+        for i, f in enumerate(dir_valid_list):
             predictions = np.load(os.path.join(dir_valid, f))
-            all_predictions_valid.append(predictions)
+            if not random_pred_mask[i]:
+                all_predictions_valid.append(predictions)
 
         all_predictions_test = []
-        for f in dir_test_list:
+        for i, f in enumerate(dir_test_list):
             predictions = np.load(os.path.join(dir_test, f))
-            all_predictions_test.append(predictions)
+            if not random_pred_mask[i]:
+                all_predictions_test.append(predictions)
 
-        if len(dir_test_list) == 1:
+        if len(all_predictions_train) == len(all_predictions_test) == len(all_predictions_valid) == 0:
+            logging.error("All models do just random guessing")
+            time.sleep(2)
+            continue
+
+        if len(all_predictions_train) == 1:
             logging.debug("Only one model so far we just copy its predictions")
             Y_valid = all_predictions_valid[0]
             Y_test = all_predictions_test[0]
