@@ -52,7 +52,8 @@ def _get_classification_configuration_space(info, include_estimators=None,
     return AutoSklearnClassifier.get_hyperparameter_search_space(
         dataset_properties=dataset_properties,
         include_estimators=include_estimators,
-        include_preprocessors=include_preprocessors)
+        include_preprocessors=include_preprocessors,
+        exclude_preprocessors=["sparse_filtering"])
 
 def get_model(configuration, seed):
     if 'classifier' in configuration:
