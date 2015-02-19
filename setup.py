@@ -1,6 +1,6 @@
 import setuptools
 
-setuptools.setup(name="AutoSklearn",
+setuptools.setup(name="ParamSklearn",
                  description="Scikit-Learn wrapper for automatic "
                              "hyperparameter configuration.",
                  version="0.1dev",
@@ -17,4 +17,4 @@ setuptools.setup(name="AutoSklearn",
                  license="BSD",
                  platforms=['Linux'],
                  classifiers=[],
-                 url="github.com/mfeurer/autosklearn")
+                 url="github.com/mfeurer/paramsklearn")

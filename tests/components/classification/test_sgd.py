@@ -1,7 +1,7 @@
 import unittest
 
-from AutoSklearn.components.classification.sgd import SGD
-from AutoSklearn.util import _test_classifier
+from ParamSklearn.components.classification.sgd import SGD
+from ParamSklearn.util import _test_classifier
 
 import sklearn.metrics
 

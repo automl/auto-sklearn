@@ -1,17 +1,17 @@
-Introduction to AutoSklearn
-***************************
+Introduction to ParamSklearn
+****************************
 
-What is AutoSklearn?
-====================
+What is ParamSklearn?
+=====================
 
-.. automodule:: AutoSklearn
+.. automodule:: ParamSklearn
 
 Get involved
 ============
 
 License
 =======
-We chose to license AutoSklearn the same way as scikit-learn. It is available under the open source and commercially usable 3-clause BSD license.
+We chose to license ParamSklearn the same way as scikit-learn. It is available under the open source and commercially usable 3-clause BSD license.
 
 Copyright (c) 2014, Matthias Feurer
 All rights reserved.

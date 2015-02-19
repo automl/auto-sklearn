@@ -6,8 +6,8 @@ import scipy.sparse
 from sklearn.utils.testing import assert_array_almost_equal
 from sklearn.preprocessing.data import scale
 
-from AutoSklearn.implementations.StandardScaler import StandardScaler
-from AutoSklearn.util import get_dataset
+from ParamSklearn.implementations.StandardScaler import StandardScaler
+from ParamSklearn.util import get_dataset
 
 matrix1 = [[0, 1, 2],
            [0, 1, 2],

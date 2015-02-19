@@ -2,8 +2,8 @@ import unittest
 
 from scipy import sparse
 
-from AutoSklearn.components.preprocessing.imputation import Imputation
-from AutoSklearn.util import _test_preprocessing
+from ParamSklearn.components.preprocessing.imputation import Imputation
+from ParamSklearn.util import _test_preprocessing
 
 
 class ImputationTest(unittest.TestCase):

@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import scipy.sparse
 
-from AutoSklearn.implementations.OneHotEncoder import OneHotEncoder
+from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
 
 dense1 = [[1, 5, 9],
           [1, 3, 9]]

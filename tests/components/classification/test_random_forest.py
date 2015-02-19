@@ -1,7 +1,7 @@
 import unittest
 
-from AutoSklearn.components.classification.random_forest import RandomForest
-from AutoSklearn.util import _test_classifier
+from ParamSklearn.components.classification.random_forest import RandomForest
+from ParamSklearn.util import _test_classifier
 
 import sklearn.metrics
 

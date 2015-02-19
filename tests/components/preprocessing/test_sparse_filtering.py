@@ -1,7 +1,7 @@
 import unittest
 
-from AutoSklearn.components.preprocessing.sparse_filtering import SparseFiltering
-from AutoSklearn.util import _test_preprocessing
+from ParamSklearn.components.preprocessing.sparse_filtering import SparseFiltering
+from ParamSklearn.util import _test_preprocessing
 
 
 class SparseFilteringComponentTest(unittest.TestCase):

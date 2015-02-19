@@ -1,7 +1,7 @@
 import unittest
 
-from AutoSklearn.components.preprocessing.select_percentile_regression import SelectPercentileRegression
-from AutoSklearn.util import _test_preprocessing
+from ParamSklearn.components.preprocessing.select_percentile_regression import SelectPercentileRegression
+from ParamSklearn.util import _test_preprocessing
 
 
 class SelectPercentileRegressionTest(unittest.TestCase):

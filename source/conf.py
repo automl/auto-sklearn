@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# AutoSklearn documentation build configuration file, created by
+# ParamSklearn documentation build configuration file, created by
 # sphinx-quickstart on Mon Oct  6 11:12:25 2014.
 #
 # This file is execfile()d with the current directory set to its
@@ -56,7 +56,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'AutoSklearn'
+project = u'ParamSklearn'
 copyright = u'2014, Matthias Feurer'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -189,7 +189,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'AutoSklearndoc'
+htmlhelp_basename = 'ParamSklearndoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -209,7 +209,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'AutoSklearn.tex', u'AutoSklearn Documentation',
+  ('index', 'ParamSklearn.tex', u'ParamSklearn Documentation',
    u'Matthias Feurer', 'manual'),
 ]
 
@@ -239,7 +239,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'autosklearn', u'AutoSklearn Documentation',
+    ('index', 'ParamSklearn', u'ParamSklearn Documentation',
      [u'Matthias Feurer'], 1)
 ]
 
@@ -253,8 +253,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'AutoSklearn', u'AutoSklearn Documentation',
-   u'Matthias Feurer', 'AutoSklearn', 'One line description of project.',
+  ('index', 'ParamSklearn', u'ParamSklearn Documentation',
+   u'Matthias Feurer', 'ParamSklearn', 'One line description of project.',
    'Miscellaneous'),
 ]
 

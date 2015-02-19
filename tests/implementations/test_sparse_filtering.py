@@ -2,7 +2,7 @@ import unittest
 import os
 import numpy as np
 
-from AutoSklearn.implementations.SparseFiltering import SparseFiltering
+from ParamSklearn.implementations.SparseFiltering import SparseFiltering
 
 
 class TestSparseFiltering(unittest.TestCase):

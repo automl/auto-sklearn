@@ -1,7 +1,7 @@
 import unittest
 
-from AutoSklearn.components.regression.gradient_boosting import GradientBoosting
-from AutoSklearn.util import _test_regressor
+from ParamSklearn.components.regression.gradient_boosting import GradientBoosting
+from ParamSklearn.util import _test_regressor
 
 import sklearn.metrics
 

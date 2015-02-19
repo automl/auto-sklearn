@@ -1,7 +1,7 @@
 import unittest
 
-from AutoSklearn.components.classification.libsvm_svc import LibSVM_SVC
-from AutoSklearn.util import _test_classifier
+from ParamSklearn.components.classification.libsvm_svc import LibSVM_SVC
+from ParamSklearn.util import _test_classifier
 
 import sklearn.metrics
 

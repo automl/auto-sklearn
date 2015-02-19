@@ -8,35 +8,35 @@ Available Components
 Classification
 ==============
 
-A list of all classification algorithms considered in the AutoSklearn search space.
+A list of all classification algorithms considered in the ParamSklearn search space.
 
-.. autoclass:: AutoSklearn.components.classification.extra_trees.ExtraTreesClassifier
+.. autoclass:: ParamSklearn.components.classification.extra_trees.ExtraTreesClassifier
     :members:
 
-.. autoclass:: AutoSklearn.components.classification.gradient_boosting.GradientBoostingClassifier
+.. autoclass:: ParamSklearn.components.classification.gradient_boosting.GradientBoostingClassifier
     :members:
 
-.. autoclass:: AutoSklearn.components.classification.k_nearest_neighbors.KNearestNeighborsClassifier
+.. autoclass:: ParamSklearn.components.classification.k_nearest_neighbors.KNearestNeighborsClassifier
     :members:
 
-.. autoclass:: AutoSklearn.components.classification.liblinear.LibLinear_SVC
+.. autoclass:: ParamSklearn.components.classification.liblinear.LibLinear_SVC
     :members:
     
-.. autoclass:: AutoSklearn.components.classification.libsvm_svc.LibSVM_SVC
+.. autoclass:: ParamSklearn.components.classification.libsvm_svc.LibSVM_SVC
     :members:
     
-.. autoclass:: AutoSklearn.components.classification.random_forest.RandomForest
+.. autoclass:: ParamSklearn.components.classification.random_forest.RandomForest
     :members:
 
-.. autoclass:: AutoSklearn.components.classification.sgd.SGD
+.. autoclass:: ParamSklearn.components.classification.sgd.SGD
     :members:
 
 Regression
 ==========
 
-Currently there is no AutoSklearnRegressor.
+Currently there is no ParamSklearnRegressor.
 
 Preprocessing
 =============
 
-.. autoclass:: AutoSklearn.components.preprocessing.pca.PCA
+.. autoclass:: ParamSklearn.components.preprocessing.pca.PCA

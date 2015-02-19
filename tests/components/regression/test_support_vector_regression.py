@@ -1,7 +1,7 @@
 import unittest
 """
-from AutoSklearn.components.regression.support_vector_regression import SupportVectorRegression
-from AutoSklearn.util import _test_regressor
+from ParamSklearn.components.regression.support_vector_regression import SupportVectorRegression
+from ParamSklearn.util import _test_regressor
 
 
 import sklearn.metrics

@@ -1,8 +1,8 @@
 import unittest
 
-from AutoSklearn.components.classification.k_nearest_neighbors import \
+from ParamSklearn.components.classification.k_nearest_neighbors import \
     KNearestNeighborsClassifier
-from AutoSklearn.util import _test_classifier
+from ParamSklearn.util import _test_classifier
 
 import sklearn.metrics
 

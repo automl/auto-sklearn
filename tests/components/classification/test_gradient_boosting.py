@@ -1,8 +1,8 @@
 import unittest
 
-from AutoSklearn.components.classification.gradient_boosting import \
+from ParamSklearn.components.classification.gradient_boosting import \
     GradientBoostingClassifier
-from AutoSklearn.util import _test_classifier
+from ParamSklearn.util import _test_classifier
 
 import sklearn.metrics
 

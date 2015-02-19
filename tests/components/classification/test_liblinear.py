@@ -1,7 +1,7 @@
 import unittest
 
-from AutoSklearn.components.classification.liblinear import LibLinear_SVC
-from AutoSklearn.util import _test_classifier
+from ParamSklearn.components.classification.liblinear import LibLinear_SVC
+from ParamSklearn.util import _test_classifier
 
 
 class LibLinearComponentTest(unittest.TestCase):

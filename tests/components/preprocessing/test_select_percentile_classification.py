@@ -2,8 +2,8 @@ import unittest
 
 import scipy.sparse
 
-from AutoSklearn.components.preprocessing.select_percentile_classification import SelectPercentileClassification
-from AutoSklearn.util import _test_preprocessing
+from ParamSklearn.components.preprocessing.select_percentile_classification import SelectPercentileClassification
+from ParamSklearn.util import _test_preprocessing
 
 
 class SelectPercentileClassificationTest(unittest.TestCase):

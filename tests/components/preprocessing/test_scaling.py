@@ -3,8 +3,8 @@ import unittest
 import numpy as np
 import sklearn.datasets
 
-from AutoSklearn.components.preprocessing.rescaling import Rescaling
-from AutoSklearn.util import _test_preprocessing
+from ParamSklearn.components.preprocessing.rescaling import Rescaling
+from ParamSklearn.util import _test_preprocessing
 
 
 class ScalingComponentTest(unittest.TestCase):

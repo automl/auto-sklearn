@@ -1,7 +1,7 @@
 import unittest
 
-from AutoSklearn.components.preprocessing.pca import PCA
-from AutoSklearn.util import _test_preprocessing
+from ParamSklearn.components.preprocessing.pca import PCA
+from ParamSklearn.util import _test_preprocessing
 
 
 class PCAComponentTest(unittest.TestCase):

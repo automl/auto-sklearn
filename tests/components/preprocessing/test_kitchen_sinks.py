@@ -1,7 +1,7 @@
 import unittest
 
-from AutoSklearn.components.preprocessing.kitchen_sinks import RandomKitchenSinks
-from AutoSklearn.util import _test_preprocessing
+from ParamSklearn.components.preprocessing.kitchen_sinks import RandomKitchenSinks
+from ParamSklearn.util import _test_preprocessing
 
 
 class KitchenSinkComponent(unittest.TestCase):

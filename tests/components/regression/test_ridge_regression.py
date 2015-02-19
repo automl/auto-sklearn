@@ -1,8 +1,8 @@
 import unittest
 
-from AutoSklearn.components.regression.ridge_regression import RidgeRegression
-from AutoSklearn.components.preprocessing.kitchen_sinks import RandomKitchenSinks
-from AutoSklearn.util import _test_regressor, get_dataset
+from ParamSklearn.components.regression.ridge_regression import RidgeRegression
+from ParamSklearn.components.preprocessing.kitchen_sinks import RandomKitchenSinks
+from ParamSklearn.util import _test_regressor, get_dataset
 
 import sklearn.metrics
 

@@ -2,12 +2,12 @@ import unittest
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 
-from AutoSklearn.textclassification import AutoSklearnTextClassifier
+from ParamSklearn.textclassification import ParamSklearnTextClassifier
 
 
 class TextClassificationTest(unittest.TestCase):
     def test_get_hyperparameter_search_space(self):
-        cs = AutoSklearnTextClassifier.get_hyperparameter_search_space()
+        cs = ParamSklearnTextClassifier.get_hyperparameter_search_space()
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()

@@ -4,8 +4,8 @@ import numpy as np
 from scipy import sparse
 from sklearn.utils.testing import assert_array_almost_equal
 
-from AutoSklearn.util import get_dataset
-from AutoSklearn.implementations.MinMaxScaler import MinMaxScaler
+from ParamSklearn.util import get_dataset
+from ParamSklearn.implementations.MinMaxScaler import MinMaxScaler
 
 
 class MinMaxScalerTest(unittest.TestCase):

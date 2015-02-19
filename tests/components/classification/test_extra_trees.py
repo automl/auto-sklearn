@@ -1,8 +1,8 @@
 import unittest
 
-from AutoSklearn.components.classification.extra_trees import \
+from ParamSklearn.components.classification.extra_trees import \
     ExtraTreesClassifier
-from AutoSklearn.util import _test_classifier
+from ParamSklearn.util import _test_classifier
 
 import sklearn.metrics
 

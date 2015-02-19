@@ -1,7 +1,7 @@
 import unittest
 
-from AutoSklearn.components.regression.random_forest import RandomForest
-from AutoSklearn.util import _test_regressor
+from ParamSklearn.components.regression.random_forest import RandomForest
+from ParamSklearn.util import _test_regressor
 
 import sklearn.metrics
 

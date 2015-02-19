@@ -1,7 +1,7 @@
 import unittest
 
-from AutoSklearn.components.regression.gaussian_process import GaussianProcess
-from AutoSklearn.util import _test_regressor
+from ParamSklearn.components.regression.gaussian_process import GaussianProcess
+from ParamSklearn.util import _test_regressor
 
 import sklearn.metrics
 

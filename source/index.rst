@@ -1,10 +1,10 @@
-.. AutoSklearn documentation master file, created by
+.. ParamSklearn documentation master file, created by
    sphinx-quickstart on Mon Oct  6 11:12:25 2014.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to AutoSklearn's documentation!
-=======================================
+Welcome to ParamSklearn's documentation!
+========================================
 
 Contents:
 
@@ -14,7 +14,7 @@ Contents:
    introduction
    installation
    first_steps
-   extending_AutoSklearn
+   extending_ParamSklearn
 
 
 Indices and Tables
