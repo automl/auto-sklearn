@@ -4,7 +4,7 @@ from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.regression import ParamSklearnRegressor
 
 from AutoML2015.scores import libscores
-from AutoML2015.util.split_data import split_data
+from AutoML2015.data.split_data import split_data
 import time
 import os
 
