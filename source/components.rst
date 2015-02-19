@@ -34,7 +34,19 @@ A list of all classification algorithms considered in the ParamSklearn search sp
 Regression
 ==========
 
-Currently there is no ParamSklearnRegressor.
+A list of all regression algorithms considered in the ParamSklearn search space.
+
+.. autoclass:: ParamSklearn.components.regression.gaussian_process.GaussianProcess
+    :members:
+
+.. autoclass:: ParamSklearn.components.regression.gradient_boosting.GradientBoosting
+    :members:
+
+.. autoclass:: ParamSklearn.components.regression.random_forest.RandomForest
+    :members:
+
+.. autoclass:: ParamSklearn.components.regression.ridge_regression.RidgeRegression
+
 
 Preprocessing
 =============
