@@ -14,7 +14,7 @@ import numpy as np
 
 from AutoML2015.data import data_io
 from AutoML2015.models import evaluate
-import AutoML2015.util.Stopwatch
+import AutoML2015.util.stopwatch
 
 
 def weighted_ensemble_error(weights, *args):

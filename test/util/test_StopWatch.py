@@ -8,7 +8,7 @@ Created on Dec 16, 2014
 import unittest
 import time
 
-import AutoML2015.util.Stopwatch
+import AutoML2015.util.stopwatch
 
 
 class Test(unittest.TestCase):

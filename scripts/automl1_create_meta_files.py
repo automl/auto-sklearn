@@ -6,7 +6,7 @@ import yaml
 from openml.apiconnector import APIConnector
 import numpy as np
 
-from AutoML2015.models.autosklearn import get_configuration_space
+from AutoML2015.models.paramsklearn import get_configuration_space
 import AutoML2015.metalearning.files
 from HPOlibConfigSpace.configuration_space import Configuration
 from HPOlibConfigSpace.hyperparameters import InstantiatedFloatHyperparameter, \
