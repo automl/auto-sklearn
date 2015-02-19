@@ -89,13 +89,14 @@ def run_smac(tmp_dir, searchspace, instance_file, limit,
     proc = submit_call(call)
     return proc
 
+
 def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit, output_dir):
     if limit <= 0:
         # It makes no sense to start building ensembles_statistics
         return
-    path_to_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    path_to_root = os.path.dirname(os.path.abspath(__file__))
     wrapper_exec = os.path.join(path_to_root, "ensemble_script.py")
-    runsolver_exec = os.path.join(path_to_root, "lib", "runsolver")
+    runsolver_exec = "runsolver"
     delay = 5
 
     call = " ".join(["python", wrapper_exec, tmp_dir, dataset_name,
