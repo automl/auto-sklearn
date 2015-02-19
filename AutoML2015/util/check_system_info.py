@@ -8,7 +8,7 @@ import sklearn
 import numpy
 import scipy
 
-from data.data_io import vprint
+from AutoML2015.data.data_io import vprint
 
 
 def check_system_info():

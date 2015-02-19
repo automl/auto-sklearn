@@ -12,10 +12,6 @@
 # INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER ARISING OUT OF OR IN
 # CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS, 
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE. 
-
-import data_converter
-import data_io
-from data_io import vprint
 import numpy as np
 try:
     import cPickle as pickle
@@ -26,9 +22,13 @@ import time
 
 import scipy.sparse
 
-from AutoSklearn.implementations.OneHotEncoder import OneHotEncoder
+import AutoML2015.data.data_converter as data_converter
+import AutoML2015.data.data_io as data_io
+from AutoML2015.data.data_io import vprint
+import AutoML2015.data.input_routines as input_routines
 
-import input_routines
+from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
+
 
 class DataManager:
     ''' This class aims at loading and saving data easily with a cache and at generating a dictionary (self.info) in which each key is a feature (e.g. : name, format, feat_num,...).
@@ -165,7 +165,7 @@ class DataManager:
         if self.info['task'] == 'multilabel.classification':
             label = data_io.data(filename)
         elif self.info['task'] == 'multiclass.classification':
-            label = data_converter.convert_to_num(data_io.data(filename))              
+            label = data_converter.convert_to_num(data_io.data(filename))
         else:
             label = np.ravel(data_io.data(filename)) # get a column vector
             #label = np.array([np.ravel(data_io.data(filename))]).transpose() # get a column vector

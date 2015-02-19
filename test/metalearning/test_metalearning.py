@@ -1,7 +1,7 @@
 import mock
 import os
 import unittest
-from AutoSklearn.util import get_dataset
+from ParamSklearn.util import get_dataset
 from HPOlibConfigSpace.converters import pcs_parser
 from HPOlibConfigSpace.random_sampler import RandomSampler
 

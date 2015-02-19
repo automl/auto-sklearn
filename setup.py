@@ -10,8 +10,8 @@ setuptools.setup(name="AutoML2015",
                  description="Code to participate in the AutoML 2015 challenge.",
                  version="0.1dev",
                  # When we have a package, uncomment this
-                 #ext_modules=[Extension("AutoML2015.data.cdata_manager", ["AutoML2015/data/cdata_manager.c"]),
-                 #             Extension("AutoMl2015.data.chelper_functions", ["AutoML2015/data/chelper_functions.c"])],
+                 ext_modules=[Extension("AutoML2015.data.cdata_manager", ["AutoML2015/data/cdata_manager.c"]),
+                              Extension("AutoML2015.data.chelper_functions", ["AutoML2015/data/chelper_functions.c"])],
                  packages=setuptools.find_packages(),
                  install_requires=["numpy",
                                    "pyyaml",
@@ -20,7 +20,8 @@ setuptools.setup(name="AutoML2015",
                                    "nose",
                                    "lockfile",
                                    "HPOlibConfigSpace",
-                                   "AutoSklearn",
+                                   "ParamSklearn",
+                                   "pymetalearn",
                                    "cma"],
                  test_suite="nose.collector",
                  package_data={'': ['*.txt', '*.md', 'metadata']},
@@ -29,7 +30,7 @@ setuptools.setup(name="AutoML2015",
                  license="BSD",
                  platforms=['Linux'],
                  classifiers=[],
-                 url='')
+                 url='www.automl.org')
 
 
 

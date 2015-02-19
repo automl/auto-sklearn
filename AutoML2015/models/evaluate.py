@@ -1,22 +1,10 @@
-'''
-Created on Dec 18, 2014
-
-@author: Aaron Klein
-'''
-
 import numpy as np
 
-from AutoSklearn.classification import AutoSklearnClassifier
-from AutoSklearn.regression import AutoSklearnRegressor
+from ParamSklearn.classification import ParamSklearnClassifier
+from ParamSklearn.regression import ParamSklearnRegressor
 
-try:
-    from ..data.data_converter import convert_to_bin
-    from ..scores import libscores
-    from ..util.split_data import split_data
-except:
-    from data.data_converter import convert_to_bin
-    from scores import libscores
-    from util.split_data import split_data
+from AutoML2015.scores import libscores
+from AutoML2015.util.split_data import split_data
 import time
 import os
 
@@ -132,10 +120,10 @@ class Evaluator(object):
         self.all_scoring_functions = all_scoring_functions
 
         if self.task_type == 'regression':
-            self.model = AutoSklearnRegressor(configuration, seed)
+            self.model = ParamSklearnRegressor(configuration, seed)
             self.predict_function = predict_regression
         else:
-            self.model = AutoSklearnClassifier(configuration, seed)
+            self.model = ParamSklearnClassifier(configuration, seed)
             self.predict_function = predict_proba
 
     def fit(self):
@@ -231,9 +219,9 @@ def evaluate(Datamanager, configuration, with_predictions=False,
     task_type = Datamanager.info['task'].lower()
 
    if task_type == 'regression':
-        model = AutoSklearnRegressor(configuration, seed)
+        model = ParamSklearnRegressor(configuration, seed)
     else:
-        model = AutoSklearnClassifier(configuration, seed)
+        model = ParamSklearnClassifier(configuration, seed)
 
     print configuration
     model.fit(X_train, Y_train)

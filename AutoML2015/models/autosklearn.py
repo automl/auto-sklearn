@@ -1,5 +1,5 @@
-from AutoSklearn.classification import AutoSklearnClassifier
-from AutoSklearn.regression import AutoSklearnRegressor
+from ParamSklearn.classification import ParamSklearnClassifier
+from ParamSklearn.regression import ParamSklearnRegressor
 
 
 def get_configuration_space(info, include_estimators=None,
@@ -18,7 +18,7 @@ def _get_regression_configuration_space(info, include_estimators=None,
     sparse = False
     if info['is_sparse'] == 1:
         sparse = True
-    configuration_space = AutoSklearnRegressor. \
+    configuration_space = ParamSklearnRegressor. \
         get_hyperparameter_search_space(include_estimators=include_estimators,
                                         include_preprocessors=include_preprocessors,
                                         dataset_properties={'sparse': sparse})
@@ -49,14 +49,15 @@ def _get_classification_configuration_space(info, include_estimators=None,
     dataset_properties = {'multilabel': multilabel, 'multiclass': multiclass,
                           'sparse': sparse}
 
-    return AutoSklearnClassifier.get_hyperparameter_search_space(
+    return ParamSklearnClassifier.get_hyperparameter_search_space(
         dataset_properties=dataset_properties,
         include_estimators=include_estimators,
         include_preprocessors=include_preprocessors,
         exclude_preprocessors=["sparse_filtering"])
 
+
 def get_model(configuration, seed):
     if 'classifier' in configuration:
-        return AutoSklearnClassifier(configuration, seed)
+        return ParamSklearnClassifier(configuration, seed)
     elif 'regressor' in configuration:
-        return  AutoSklearnRegressor(configuration, seed)
+        return  ParamSklearnRegressor(configuration, seed)

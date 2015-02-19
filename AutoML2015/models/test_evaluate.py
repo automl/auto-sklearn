@@ -1,24 +1,7 @@
-'''
-Created on Dec 18, 2014
+from ParamSklearn.classification import ParamSklearnClassifier
+from ParamSklearn.regression import ParamSklearnRegressor
 
-@author: Aaron Klein
-'''
-
-import numpy as np
-
-from AutoSklearn.classification import AutoSklearnClassifier
-from AutoSklearn.regression import AutoSklearnRegressor
-
-try:
-    from ..data.data_converter import convert_to_bin
-    from ..scores import libscores
-    from ..util.split_data import split_data
-except:
-    from data.data_converter import convert_to_bin
-    from scores import libscores
-    from util.split_data import split_data
 import time
-import os
 
 try:
     import cPickle as pickle
@@ -49,10 +32,10 @@ class Test_Evaluator(AutoML2015.models.evaluate.Evaluator):
         self.all_scoring_functions = all_scoring_functions
 
         if self.task_type == 'regression':
-            self.model = AutoSklearnRegressor(configuration, seed)
+            self.model = ParamSklearnRegressor(configuration, seed)
             self.predict_function = AutoML2015.models.evaluate.predict_regression
         else:
-            self.model = AutoSklearnClassifier(configuration, seed)
+            self.model = ParamSklearnClassifier(configuration, seed)
             self.predict_function = AutoML2015.models.evaluate.predict_proba
 
     #override

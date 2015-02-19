@@ -12,24 +12,24 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS, 
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE. 
 
-import numpy as np
+from contextlib import closing
+from glob import glob
+from pip import get_installed_distributions as lib
 import os
 import shutil
-from scipy.sparse import * # used in data_binary_sparse 
+import sys
 from zipfile import ZipFile, ZIP_DEFLATED
-from contextlib import closing
-import data_converter
-from sys import stderr
-from sys import version
-from glob import glob
-from os import getcwd as pwd
-from pip import get_installed_distributions as lib
+
+from scipy.sparse import * # used in data_binary_sparse
 import yaml
 from shutil import copy2
 
+import AutoML2015.data.data_converter as data_converter
+
+
 # ================ Small auxiliary functions =================
 
-swrite = stderr.write
+swrite = sys.stderr.write
 
 if (os.name == "nt"):
        filesep = '\\'
@@ -208,7 +208,7 @@ def show_dir(run_dir):
 def show_io(input_dir, output_dir):     
     swrite('\n=== DIRECTORIES ===\n\n')
     # Show this directory
-    swrite("-- Current directory " + pwd() + ":\n")
+    swrite("-- Current directory " + os.getcwd() + ":\n")
     write_list(glob('.'))
     write_list(glob('./*'))
     write_list(glob('./*/*'))
@@ -228,29 +228,29 @@ def show_io(input_dir, output_dir):
         
     # write meta data to sdterr
     swrite('\n=== METADATA ===\n\n')
-    swrite("-- Current directory " + pwd() + ":\n")
+    swrite("-- Current directory " + os.getcwd() + ":\n")
     try:
         metadata = yaml.load(open('metadata', 'r'))
-        for key,value in metadata.items():
+        for key, value in metadata.items():
             swrite(key + ': ')
             swrite(str(value) + '\n')
     except:
-        swrite("none\n");
+        swrite("none\n")
     swrite("-- Input directory " + input_dir + ":\n")
     try:
         metadata = yaml.load(open(os.path.join(input_dir, 'metadata'), 'r'))
-        for key,value in metadata.items():
+        for key, value in metadata.items():
             swrite(key + ': ')
             swrite(str(value) + '\n')
         swrite("\n")
     except:
-        swrite("none\n");
+        swrite("none\n")
     
 def show_version():
     # Python version and library versions
     swrite('\n=== VERSIONS ===\n\n')
     # Python version
-    swrite("Python version: " + version + "\n\n")
+    swrite("Python version: " + sys.version + "\n\n")
     # Give information on the version installed
     swrite("Versions of libraries installed:\n")
     map(swrite, sorted(["%s==%s\n" % (i.key, i.version) for i in lib()]))
