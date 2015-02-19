@@ -61,7 +61,7 @@ def ensemble_prediction(all_predictions, weights):
 
 
 def main(predictions_dir, basename, task_type, metric, limit, output_dir):
-    watch = AutoML2015.util.Stopwatch.StopWatch()
+    watch = AutoML2015.util.stopwatch.StopWatch()
     watch.start_task("ensemble_builder")
 
     used_time = 0
