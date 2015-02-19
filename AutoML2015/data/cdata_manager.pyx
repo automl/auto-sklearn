@@ -25,7 +25,7 @@ import chelper_functions
 import time
 
 
-from AutoSklearn.implementations.OneHotEncoder import OneHotEncoder
+from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
 
 #import input_routines
 
