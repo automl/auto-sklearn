@@ -6,6 +6,7 @@ Created on Dec 18, 2014
 import copy
 import unittest
 import numpy as np
+import os
 
 from AutoML2015.data.data_converter import convert_to_bin
 from AutoML2015.models.evaluate import Evaluator, predict_proba
@@ -216,6 +217,45 @@ class Test(unittest.TestCase):
             else:
                 print evaluator.configuration
                 raise e
+
+    def test_file_output(self):
+        X_train, Y_train, X_test, Y_test = get_dataset('iris')
+        X_valid = X_test[:25, ]
+        Y_valid = Y_test[:25, ]
+        X_test = X_test[25:, ]
+        Y_test = Y_test[25:, ]
+
+        D = Dummy()
+        D.info = {'metric': 'bac_metric', 'task': 'multiclass.classification',
+                  'is_sparse': False}
+        D.data = {'X_train': X_train, 'Y_train': Y_train,
+                  'X_valid': X_valid, 'X_test': X_test}
+        D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
+        D.basename = "test"
+
+        output_dir = os.path.join(os.getcwd(), ".test")
+        configuration_space = get_configuration_space(D.info)
+        sampler = RandomSampler(configuration_space, 1)
+
+        configuration = sampler.sample_configuration()
+        evaluator = Evaluator(D, configuration,
+                              splitting_function=split_data,
+                              with_predictions=True,
+                              all_scoring_functions=True,
+                              output_dir=output_dir,
+                              output_y_test=True)
+
+        while True:
+            if not self._fit(evaluator):
+                print
+                continue
+            evaluator.predict()
+            evaluator.file_output()
+
+            self.assertTrue(os.path.exists(os.path.join(output_dir,
+                                                        "y_optimization.npy")))
+            break
+
 
     def test_predict_proba_binary_classification(self):
         class Dummy(object):

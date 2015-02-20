@@ -102,7 +102,7 @@ def get_new_run_num():
 class Evaluator(object):
     def __init__(self, Datamanager, configuration, with_predictions=False,
                  all_scoring_functions=False, splitting_function=split_data,
-                 seed=1, output_dir=None):
+                 seed=1, output_dir=None, output_y_test=False):
 
         self.starttime = time.time()
 
@@ -123,6 +123,8 @@ class Evaluator(object):
             self.output_dir = os.getcwd()
         else:
             self.output_dir = output_dir
+
+        self.output_y_test = output_y_test
 
         self.with_predictions = with_predictions
         self.all_scoring_functions = all_scoring_functions
@@ -187,21 +189,27 @@ class Evaluator(object):
             "predictions_%s", self.D.basename + '_predictions_%s_' +
             str(get_new_run_num()) + '.npy')
 
+        if self.output_y_test:
+            if not os.path.exists(self.output_dir):
+                os.makedirs(self.output_dir)
+            with open(os.path.join(self.output_dir, "y_optimization.npy"), "w") as fh:
+                pickle.dump(self.Y_optimization, fh, -1)
+
         ensemble_output_dir = os.path.join(self.output_dir, "predictions_ensemble")
         if not os.path.exists(ensemble_output_dir):
-            os.mkdir(ensemble_output_dir)
+            os.makedirs(ensemble_output_dir)
         with open(pred_dump_name_template % ("ensemble", "ensemble"), "w") as fh:
             pickle.dump(Y_optimization_pred, fh, -1)
 
         valid_output_dir = os.path.join(self.output_dir, "predictions_valid")
-        if not os.path.exists(valid_output_dir):
-            os.mkdir(valid_output_dir)
+        if not os.path.exists(ensemble_output_dir):
+            os.makedirs(ensemble_output_dir)
         with open(pred_dump_name_template % ("valid", "valid"), "w") as fh:
             pickle.dump(Y_valid_pred, fh, -1)
 
         test_output_dir = os.path.join(self.output_dir, "predictions_test")
-        if not os.path.exists(test_output_dir):
-            os.mkdir(test_output_dir)
+        if not os.path.exists(ensemble_output_dir):
+            os.makedirs(ensemble_output_dir)
         with open(pred_dump_name_template % ("test", "test"), "w") as fh:
             pickle.dump(Y_test_pred, fh, -1)
 
