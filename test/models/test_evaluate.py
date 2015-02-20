@@ -7,6 +7,7 @@ import copy
 import unittest
 import numpy as np
 import os
+import shutil
 
 from AutoML2015.data.data_converter import convert_to_bin
 from AutoML2015.models.evaluate import Evaluator, predict_proba
@@ -219,6 +220,13 @@ class Test(unittest.TestCase):
                 raise e
 
     def test_file_output(self):
+        output_dir = os.path.join(os.getcwd(), ".test")
+
+        try:
+            shutil.rmtree(output_dir)
+        except:
+            pass
+
         X_train, Y_train, X_test, Y_test = get_dataset('iris')
         X_valid = X_test[:25, ]
         Y_valid = Y_test[:25, ]
@@ -233,7 +241,7 @@ class Test(unittest.TestCase):
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
         D.basename = "test"
 
-        output_dir = os.path.join(os.getcwd(), ".test")
+
         configuration_space = get_configuration_space(D.info)
         sampler = RandomSampler(configuration_space, 1)
 

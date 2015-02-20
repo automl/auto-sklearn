@@ -202,14 +202,14 @@ class Evaluator(object):
             pickle.dump(Y_optimization_pred, fh, -1)
 
         valid_output_dir = os.path.join(self.output_dir, "predictions_valid")
-        if not os.path.exists(ensemble_output_dir):
-            os.makedirs(ensemble_output_dir)
+        if not os.path.exists(valid_output_dir):
+            os.makedirs(valid_output_dir)
         with open(pred_dump_name_template % ("valid", "valid"), "w") as fh:
             pickle.dump(Y_valid_pred, fh, -1)
 
         test_output_dir = os.path.join(self.output_dir, "predictions_test")
-        if not os.path.exists(ensemble_output_dir):
-            os.makedirs(ensemble_output_dir)
+        if not os.path.exists(test_output_dir):
+            os.makedirs(test_output_dir)
         with open(pred_dump_name_template % ("test", "test"), "w") as fh:
             pickle.dump(Y_test_pred, fh, -1)
 
