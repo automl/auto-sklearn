@@ -44,7 +44,7 @@ def get_CV_fold(X, Y, fold, folds, shuffle=True):
         rs.shuffle(indices)
         Y = Y[indices]
 
-    kf = StratifiedKFold(Y, n_folds=folds, indices=True)
+    kf = StratifiedKFold(Y, n_folds=folds)
     for idx, split in enumerate(kf):
         if idx == fold:
             break
