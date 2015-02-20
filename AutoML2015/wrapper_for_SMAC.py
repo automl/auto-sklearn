@@ -1,24 +1,21 @@
-import lockfile
-
-import os
-import time
-import sys
-
 try:
     import cPickle as pickle
 except:
     import pickle
 
-from ParamSklearn.classification import ParamSklearnClassifier
-from ParamSklearn.regression import ParamSklearnRegressor
+import os
+import time
+import signal
+import sys
+
+import lockfile
 
 from HPOlibConfigSpace import configuration_space
 
 from AutoML2015.data.data_manager import DataManager
-
-#from models.evaluate import evaluate
 import AutoML2015.models.evaluate
-import signal
+from AutoML2015.models.paramsklearn import get_class
+
 
 
 def store_and_or_load_data(outputdir, dataset, data_dir):
@@ -76,33 +73,20 @@ def main(basename, input_dir, params, time_limit=sys.maxint):
     D = store_and_or_load_data(data_dir=input_dir, dataset=basename,
                                outputdir=output_dir)
 
-    if D.info["task"].lower() == "regression":
-        cs = ParamSklearnRegressor.get_hyperparameter_search_space()
-    else:
-        cs = ParamSklearnClassifier.get_hyperparameter_search_space()
+    cs = get_class(D.info).get_hyperparameter_search_space()
     configuration = configuration_space.Configuration(cs, **params)
 
     global evaluator
     evaluator = AutoML2015.models.evaluate.Evaluator(Datamanager=D,
                                                      configuration=configuration,
                                                      with_predictions=True,
-                                                     all_scoring_functions=True)
-    evaluator.output_dir = output_dir
-    evaluator.basename = basename
-    evaluator.D = D
+                                                     all_scoring_functions=True,
+                                                     output_dir=output_dir)
     evaluator.fit()
-
     evaluator.finish_up()
 
 if __name__ == "__main__":
     outer_starttime = time.time()
-    # Change a SMAC call into an HPOlib call, not yet needed!
-    #if not "--params" in sys.argv:
-    #    # Call from SMAC
-    #    # Replace the SMAC seed by --params
-    #    for i in range(len(sys.argv)):
-    #        if sys.argv[i] == "2147483647" and sys.argv[i+1] == "-1":
-    #            sys.argv[i+1] = "--params"
 
     limit = None
     for idx, arg in enumerate(sys.argv):

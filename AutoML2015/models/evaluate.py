@@ -100,11 +100,14 @@ def get_new_run_num():
 
 
 class Evaluator(object):
-    def __init__(self,Datamanager, configuration, with_predictions=False, all_scoring_functions=False, splitting_function=split_data, seed=1):
+    def __init__(self, Datamanager, configuration, with_predictions=False,
+                 all_scoring_functions=False, splitting_function=split_data,
+                 seed=1, output_dir=None):
 
         self.starttime = time.time()
 
         self.configuration = configuration
+        self.D = Datamanager
 
         self.X_train, self.X_optimization, self.Y_train, self.Y_optimization = \
         splitting_function(Datamanager.data['X_train'], Datamanager.data['Y_train'])
@@ -115,6 +118,11 @@ class Evaluator(object):
         self.metric = Datamanager.info['metric']
         self.task_type = Datamanager.info['task'].lower()
         self.seed = seed
+
+        if output_dir is None:
+            self.output_dir = os.getcwd()
+        else:
+            self.output_dir = output_dir
 
         self.with_predictions = with_predictions
         self.all_scoring_functions = all_scoring_functions
@@ -175,7 +183,9 @@ class Evaluator(object):
     
     def file_output(self):
         errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
-        pred_dump_name_template = os.path.join(self.output_dir, "predictions_%s", self.basename + '_predictions_%s_' + str(get_new_run_num()) + '.npy')
+        pred_dump_name_template = os.path.join(self.output_dir,
+            "predictions_%s", self.D.basename + '_predictions_%s_' +
+            str(get_new_run_num()) + '.npy')
 
         ensemble_output_dir = os.path.join(self.output_dir, "predictions_ensemble")
         if not os.path.exists(ensemble_output_dir):

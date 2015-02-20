@@ -61,3 +61,10 @@ def get_model(configuration, seed):
         return ParamSklearnClassifier(configuration, seed)
     elif 'regressor' in configuration:
         return  ParamSklearnRegressor(configuration, seed)
+
+
+def get_class(info):
+    if info['task'].lower() == 'regression':
+        return ParamSklearnRegressor
+    else:
+        return ParamSklearnClassifier

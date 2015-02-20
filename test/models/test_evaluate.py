@@ -10,7 +10,7 @@ import numpy as np
 from AutoML2015.data.data_converter import convert_to_bin
 from AutoML2015.models.evaluate import Evaluator, predict_proba
 from AutoML2015.models.paramsklearn import get_configuration_space
-from AutoML2015.util.split_data import split_data
+from AutoML2015.data.split_data import split_data
 from ParamSklearn.util import get_dataset
 from HPOlibConfigSpace.random_sampler import RandomSampler
 
