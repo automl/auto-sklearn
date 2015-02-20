@@ -205,10 +205,8 @@ class Evaluator(object):
         with open(pred_dump_name_template % ("test", "test"), "w") as fh:
             pickle.dump(Y_test_pred, fh, -1)
 
+        self.duration = time.time() - self.starttime
         err = errs[self.D.info['metric']]
-        print errs
-        import sys
-        sys.stdout.flush()
         additional_run_info = ";".join(["%s: %s" % (metric, value)
                                     for metric, value in errs.items()])
         additional_run_info += ";" + "duration: " + str(self.duration)
