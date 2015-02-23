@@ -61,7 +61,8 @@ if __name__=="__main__":
         # Load the info file and get the task and metric
         info_file = ls(os.path.join(input_dir, 'ref', basename[0:2] + '*_public.info'))[0]
         info = get_info (info_file)    
-        score_name = info['task'][0:-15] + info['metric'][0:-7].upper() 
+        score_name = info['task'][0:-15] + info['metric'][0:-7].upper()
+        predict_name = basename
         try:
             # Get the last prediction from the res subdirectory (must end with '.predict')
             predict_file = ls(os.path.join(input_dir, 'res', basename + '*.predict'))[-1]

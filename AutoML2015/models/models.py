@@ -88,7 +88,7 @@ class MyAutoML:
         # Calibrate proba
         if self.task != 'regression' and self.postprocessor!=None:          
             prediction = self.postprocessor.predict_proba(prediction)
-        # Keep only 1st column because the second one is 1-first    
+        # Keep only 2st column because the second one is 1-first
         if self.target_num==1 and len(prediction.shape)>1 and prediction.shape[1]>1:
             prediction = prediction[:,1]
         # Make sure the normalization is correct
