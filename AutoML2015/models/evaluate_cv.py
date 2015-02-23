@@ -25,6 +25,7 @@ class CVEvaluator(Evaluator):
     def fit(self):
         self.models = []
         self.indices = []
+
         for i in range(self.cv_folds):
             if self.task_type == 'regression':
                 model = ParamSklearnRegressor(self.configuration,
@@ -40,6 +41,14 @@ class CVEvaluator(Evaluator):
 
             self.models.append(model.fit(self.X_train[train_indices],
                                          self.Y_train[train_indices]))
+
+            if i == 0:
+                Y_optimization = self.Y_train[test_indices]
+            else:
+                Y_optimization = np.concatenate(
+                    (Y_optimization, self.Y_train[test_indices]))
+
+        self.Y_optimization = Y_optimization
 
     def predict(self):
         for i in range(self.cv_folds):
