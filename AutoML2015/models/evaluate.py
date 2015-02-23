@@ -185,9 +185,10 @@ class Evaluator(object):
     
     def file_output(self):
         errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
+        num_run = str(get_new_run_num())
         pred_dump_name_template = os.path.join(self.output_dir,
             "predictions_%s", self.D.basename + '_predictions_%s_' +
-            str(get_new_run_num()) + '.npy')
+            num_run + '.npy')
 
         if self.output_y_test:
             if not os.path.exists(self.output_dir):
@@ -218,8 +219,7 @@ class Evaluator(object):
         additional_run_info = ";".join(["%s: %s" % (metric, value)
                                     for metric, value in errs.items()])
         additional_run_info += ";" + "duration: " + str(self.duration)
-        additional_run_info += ";" + "prediction_files_template: " + \
-            pred_dump_name_template
+        additional_run_info += ";" + "num_run:" + num_run
         return err, additional_run_info
         
 """

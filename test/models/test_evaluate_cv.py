@@ -4,6 +4,7 @@ import numpy as np
 import os
 
 from AutoML2015.models.evaluate_cv import CVEvaluator
+from AutoML2015.models.evaluate import calculate_score
 from AutoML2015.models.paramsklearn import get_configuration_space
 from AutoML2015.data.split_data import split_data
 from ParamSklearn.util import get_dataset
@@ -38,6 +39,8 @@ class Test(unittest.TestCase):
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
+            if configuration["classifier"].value != "sgd":
+                continue
             D_ = copy.deepcopy(D)
             evaluator = CVEvaluator(D_, configuration,
                                     splitting_function=split_data,
@@ -48,8 +51,16 @@ class Test(unittest.TestCase):
                 continue
             e_, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
                 evaluator.predict()
-            err[i]
-            print err[i]
+            err[i] = e_
+
+            # Validation errors:
+            valid_errs = calculate_score(Y_valid, Y_valid_pred,
+                                         D.info['task'], D.info['metric'],
+                                         all_scoring_functions=False)
+            test_errs = calculate_score(Y_test, Y_test_pred,
+                                        D.info['task'], D.info['metric'],
+                                        all_scoring_functions=False)
+            print err[i], valid_errs, test_errs, configuration["classifier"]
 
             self.assertTrue(np.isfinite(err[i]))
             self.assertGreaterEqual(err[i], 0.0)
