@@ -3,10 +3,10 @@ import unittest
 import numpy as np
 import os
 
-from AutoML2015.models.evaluate_cv import CVEvaluator
-from AutoML2015.models.evaluate import calculate_score
-from AutoML2015.models.paramsklearn import get_configuration_space
-from AutoML2015.data.split_data import split_data
+from autosklearn.models.evaluate_cv import CVEvaluator
+from autosklearn.models.evaluate import calculate_score
+from autosklearn.models.paramsklearn import get_configuration_space
+from autosklearn.data.split_data import split_data
 from ParamSklearn.util import get_dataset
 from HPOlibConfigSpace.random_sampler import RandomSampler
 

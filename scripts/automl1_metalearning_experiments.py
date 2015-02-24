@@ -25,8 +25,8 @@ import os
 import numpy as np
 from openml.apiconnector import APIConnector
 
-from AutoML2015.models.paramsklearn import get_configuration_space
-from AutoML2015.data.data_converter import predict_RAM_usage
+from autosklearn.models.paramsklearn import get_configuration_space
+from autosklearn.data.data_converter import predict_RAM_usage
 from AutoSklearn.components.classification import _classifiers
 from AutoSklearn.components.preprocessing import _preprocessors
 from HPOlibConfigSpace.converters import pcs_parser

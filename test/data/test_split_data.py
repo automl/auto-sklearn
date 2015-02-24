@@ -6,7 +6,7 @@ Created on Dec 16, 2014
 import unittest
 import numpy as np
 
-from AutoML2015.data.split_data import split_data
+from autosklearn.data.split_data import split_data
 
 
 class Test(unittest.TestCase):

@@ -5,8 +5,8 @@ import os
 
 from pyMetaLearn.metafeatures import metafeatures
 from pyMetaLearn.metafeatures.metafeature import DatasetMetafeatures
-from AutoML2015.data.data_converter import predict_RAM_usage
-from AutoML2015.wrapper.openml_wrapper import create_mock_data_manager, \
+from autosklearn.data.data_converter import predict_RAM_usage
+from autosklearn.wrapper.openml_wrapper import create_mock_data_manager, \
     remove_categorical_features
 from openml.apiconnector import APIConnector
 

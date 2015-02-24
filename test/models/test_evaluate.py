@@ -9,10 +9,10 @@ import numpy as np
 import os
 import shutil
 
-from AutoML2015.data.data_converter import convert_to_bin
-from AutoML2015.models.evaluate import Evaluator, predict_proba
-from AutoML2015.models.paramsklearn import get_configuration_space
-from AutoML2015.data.split_data import split_data
+from autosklearn.data.data_converter import convert_to_bin
+from autosklearn.models.evaluate import Evaluator, predict_proba
+from autosklearn.models.paramsklearn import get_configuration_space
+from autosklearn.data.split_data import split_data
 from ParamSklearn.util import get_dataset
 from HPOlibConfigSpace.random_sampler import RandomSampler
 

@@ -5,8 +5,8 @@ from ParamSklearn.util import get_dataset
 from HPOlibConfigSpace.converters import pcs_parser
 from HPOlibConfigSpace.random_sampler import RandomSampler
 
-from AutoML2015.metalearning.metalearning import MetaLearning
-from AutoML2015.metalearning import metalearning
+from autosklearn.metalearning.metalearning import MetaLearning
+from autosklearn.metalearning import metalearning
 from pyMetaLearn.metafeatures.metafeature import DatasetMetafeatures
 from pyMetaLearn.optimizers.metalearn_optimizer.metalearner import MetaLearningOptimizer
 from pyMetaLearn.metalearning.meta_base import Run
