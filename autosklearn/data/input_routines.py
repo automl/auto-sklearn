@@ -3,7 +3,6 @@ import re
 import numpy as np
 
 
-
 def convert_file_to_array(filename, feat_type):
     r_comment = re.compile(r'^%')
     # Match an empty line
