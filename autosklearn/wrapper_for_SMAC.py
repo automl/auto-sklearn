@@ -12,9 +12,9 @@ import lockfile
 
 from HPOlibConfigSpace import configuration_space
 
-from AutoML2015.data.data_manager import DataManager
-import AutoML2015.models.evaluate
-from AutoML2015.models.paramsklearn import get_class
+from autosklearn.data.data_manager import DataManager
+import autosklearn.models.evaluate
+from autosklearn.models.paramsklearn import get_class
 
 
 
@@ -77,7 +77,7 @@ def main(basename, input_dir, params, time_limit=sys.maxint):
     configuration = configuration_space.Configuration(cs, **params)
 
     global evaluator
-    evaluator = AutoML2015.models.evaluate.Evaluator(Datamanager=D,
+    evaluator = autosklearn.models.evaluate.Evaluator(Datamanager=D,
                                                      configuration=configuration,
                                                      with_predictions=True,
                                                      all_scoring_functions=True,

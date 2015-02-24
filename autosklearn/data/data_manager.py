@@ -22,10 +22,10 @@ import time
 
 import scipy.sparse
 
-import AutoML2015.data.data_converter as data_converter
-import AutoML2015.data.data_io as data_io
-from AutoML2015.data.data_io import vprint
-import AutoML2015.data.input_routines as input_routines
+import autosklearn.data.data_converter as data_converter
+import autosklearn.data.data_io as data_io
+from autosklearn.data.data_io import vprint
+import autosklearn.data.input_routines as input_routines
 
 from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
 

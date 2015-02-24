@@ -12,9 +12,9 @@ import time
 import logging
 import numpy as np
 
-from AutoML2015.data import data_io
-from AutoML2015.models import evaluate
-import AutoML2015.util.stopwatch
+from autosklearn.data import data_io
+from autosklearn.models import evaluate
+import autosklearn.util.stopwatch
 
 
 def weighted_ensemble_error(weights, *args):
@@ -61,7 +61,7 @@ def ensemble_prediction(all_predictions, weights):
 
 
 def main(predictions_dir, basename, task_type, metric, limit, output_dir):
-    watch = AutoML2015.util.stopwatch.StopWatch()
+    watch = autosklearn.util.stopwatch.StopWatch()
     watch.start_task("ensemble_builder")
 
     used_time = 0

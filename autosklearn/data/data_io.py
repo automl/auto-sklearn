@@ -24,7 +24,7 @@ import numpy
 import scipy.sparse
 import yaml
 
-import AutoML2015.data.data_converter as data_converter
+import autosklearn.data.data_converter as data_converter
 
 
 # ================ Small auxiliary functions =================

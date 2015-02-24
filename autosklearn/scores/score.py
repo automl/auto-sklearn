@@ -18,7 +18,7 @@ import os
 
 from sys import argv
 import yaml
-from AutoML2015.scores.libscores import * # Library of scores we implemented
+from autosklearn.scores.libscores import * # Library of scores we implemented
 
 # Default I/O directories:      
 root_dir = "/Users/isabelleguyon/Documents/Projects/Codalab/AutoMLcompetition/StartingKit/"

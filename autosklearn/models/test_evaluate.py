@@ -8,10 +8,10 @@ try:
 except:
     import pickle
 
-import AutoML2015.models.evaluate
+import autosklearn.models.evaluate
 
 
-class Test_Evaluator(AutoML2015.models.evaluate.Evaluator):
+class Test_Evaluator(autosklearn.models.evaluate.Evaluator):
     def __init__(self, Datamanager, configuration, with_predictions=False, all_scoring_functions=False, seed=1):
 
         self.starttime = time.time()
@@ -33,22 +33,22 @@ class Test_Evaluator(AutoML2015.models.evaluate.Evaluator):
 
         if self.task_type == 'regression':
             self.model = ParamSklearnRegressor(configuration, seed)
-            self.predict_function = AutoML2015.models.evaluate.predict_regression
+            self.predict_function = autosklearn.models.evaluate.predict_regression
         else:
             self.model = ParamSklearnClassifier(configuration, seed)
-            self.predict_function = AutoML2015.models.evaluate.predict_proba
+            self.predict_function = autosklearn.models.evaluate.predict_proba
 
     #override
     def predict(self, train=False):
 
         if train:
             Y_pred = self.predict_function(self.X_train, self.model, self.task_type)
-            score = AutoML2015.models.evaluate.calculate_score(solution=self.Y_train, prediction=Y_pred,
+            score = autosklearn.models.evaluate.calculate_score(solution=self.Y_train, prediction=Y_pred,
                                                                task_type=self.task_type, metric=self.metric,
                                                                all_scoring_functions=self.all_scoring_functions)
         else:
             Y_pred = self.predict_function(self.X_test, self.model, self.task_type)
-            score = AutoML2015.models.evaluate.calculate_score(solution=self.Y_test, prediction=Y_pred,
+            score = autosklearn.models.evaluate.calculate_score(solution=self.Y_test, prediction=Y_pred,
                                                                task_type=self.task_type, metric=self.metric,
                                                                all_scoring_functions=self.all_scoring_functions)
 
