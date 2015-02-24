@@ -3,8 +3,8 @@ import numpy as np
 from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.regression import ParamSklearnRegressor
 
-from ..scores import libscores
-from ..data.split_data import split_data
+from autosklearn.scores import libscores
+from autosklearn.data.split_data import split_data
 import time
 import os
 

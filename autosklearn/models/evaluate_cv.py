@@ -3,8 +3,8 @@ from ParamSklearn.regression import ParamSklearnRegressor
 
 import numpy as np
 
-from ..data.split_data import split_data, get_CV_fold
-from .evaluate import Evaluator, calculate_score
+from autosklearn.data.split_data import split_data, get_CV_fold
+from autosklearn.models.evaluate import Evaluator, calculate_score
 
 
 class CVEvaluator(Evaluator):
