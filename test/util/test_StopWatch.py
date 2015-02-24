@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
     def test_stopwatch_overhead(self):
         # CPU overhead
         start = time.clock()
-        watch = autosklearn.util.Stopwatch.StopWatch()
+        watch = autosklearn.util.stopwatch.StopWatch()
         for i in range(1, 100000):
             watch.start_task("task_%d" % i)
             watch.stop_task("task_%d" % i)
@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
 
         # Wall Overhead
         start = time.time()
-        watch = autosklearn.util.Stopwatch.StopWatch()
+        watch = autosklearn.util.stopwatch.StopWatch()
         for i in range(1, 100000):
             watch.start_task("task_%d" % i)
             watch.stop_task("task_%d" % i)
