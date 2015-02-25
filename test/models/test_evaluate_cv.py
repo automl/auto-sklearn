@@ -20,6 +20,7 @@ class Dummy(object):
 class Test(unittest.TestCase):
     def test_evaluate_multiclass_classification(self):
         X_train, Y_train, X_test, Y_test = get_dataset('iris')
+
         X_valid = X_test[:25, ]
         Y_valid = Y_test[:25, ]
         X_test = X_test[25:, ]
@@ -39,8 +40,6 @@ class Test(unittest.TestCase):
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
             configuration = sampler.sample_configuration()
-            if configuration["classifier"].value != "sgd":
-                continue
             D_ = copy.deepcopy(D)
             evaluator = CVEvaluator(D_, configuration,
                                     splitting_function=split_data,
@@ -52,15 +51,7 @@ class Test(unittest.TestCase):
             e_, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
                 evaluator.predict()
             err[i] = e_
-
-            # Validation errors:
-            valid_errs = calculate_score(Y_valid, Y_valid_pred,
-                                         D.info['task'], D.info['metric'],
-                                         all_scoring_functions=False)
-            test_errs = calculate_score(Y_test, Y_test_pred,
-                                        D.info['task'], D.info['metric'],
-                                        all_scoring_functions=False)
-            print err[i], valid_errs, test_errs, configuration["classifier"]
+            print err[i]
 
             self.assertTrue(np.isfinite(err[i]))
             self.assertGreaterEqual(err[i], 0.0)
