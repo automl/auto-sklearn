@@ -36,17 +36,25 @@ def _transform_selected(X, transform, selected="all", copy=True):
         X = safe_asarray(X, copy=copy, force_all_finite=False)
         return transform(X)
 
-    X = atleast2d_or_csc(X, copy=copy, force_all_finite=False)
-
-    if len(selected) == 0:
-        return X
-
+    X = check_arrays(X, allow_nans=True)[0]
     n_features = X.shape[1]
     ind = np.arange(n_features)
     sel = np.zeros(n_features, dtype=bool)
     sel[np.asarray(selected)] = True
     not_sel = np.logical_not(sel)
     n_selected = np.sum(sel)
+
+    # Add 1 to all categorical colums to avoid loosing them due to slicing
+    subtract = False
+    if sparse.isspmatrix_csr(X):
+        X.data += 1
+        subtract = True
+    X = atleast2d_or_csc(X, copy=copy, force_all_finite=False)
+    if subtract:
+        X.data -= 1
+
+    if len(selected) == 0:
+        return X
 
     if n_selected == 0:
         # No features selected.
@@ -55,7 +63,20 @@ def _transform_selected(X, transform, selected="all", copy=True):
         # All features selected.
         return transform(X)
     else:
-        X_sel = transform(X[:, ind[sel]])
+        # Add 1 to all categorical columns to avoid loosing them due to slicing
+        if sparse.issparse(X):
+            for idx in range(n_features):
+                if idx in ind[sel]:
+                    X.data[X.indptr[idx]:X.indptr[idx + 1]] += 1
+            X_ = X[:, ind[sel]]
+            for idx in range(n_features):
+                if idx in ind[sel]:
+                    X.data[X.indptr[idx]:X.indptr[idx + 1]] -= 1
+            X_.data -= 1
+        else:
+            X_ = X[:, ind[sel]]
+
+        X_sel = transform(X_)
         X_not_sel = X[:, ind[not_sel]]
 
         if sparse.issparse(X_sel) or sparse.issparse(X_not_sel):
@@ -159,47 +180,68 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
         return self
 
     def _fit_transform(self, X):
-        """Assumes X contains only categorical features."""
+
+        # Add 1 to all categorical colums to avoid loosing them due to slicing
+        subtract = False
+        if sparse.isspmatrix_csr(X):
+            X.data += 1
+            subtract = True
+        X = check_arrays(X, sparse_format="csc", allow_nans=True)[0]
+        if subtract:
+            X.data -= 1
+
         n_samples, n_features = X.shape
 
-        uniques = [np.unique(X[:,i], False, True, False)
-                   for i in range(n_features)]
-        n_values = [0]
+        # By replacing NaNs (which means a column full on NaNs in the
+        # original data matrix) with a 1, we add a column full of zeros to
+        # the array
+        if sparse.isspmatrix_csc(X):
+            n_values = [0]
+            for idx in range(n_features):
+                if X.indptr[idx] == X.indptr[idx+1]:
+                    values_for_idx = 1
+                else:
+                    values_for_idx = np.nanmax(
+                        X.data[X.indptr[idx]:X.indptr[idx + 1]]) + 1
+                n_values.append(values_for_idx if
+                                np.isfinite(values_for_idx) else 1)
+            row_indices = X.indices
+        else:
+            n_values = np.hstack([[0], np.nanmax(X, axis=0) + 1])
+            n_values[~np.isfinite(n_values)] = 1
+            row_indices = np.tile(np.arange(n_samples, dtype=np.int32),
+                                  n_features)
+
+        total_num_values = np.nansum(n_values)
 
         column_indices = []
         data = []
         feature_indices = []
 
-        for idx, values_ in enumerate(uniques):
-            unique_elements, inverse = values_
+        for idx in range(X.shape[1]):
+            if sparse.isspmatrix_csc(X):
+                values_ = X.getcol(idx).data
+            else:
+                values_ = X[:, idx]
 
-            # Number of unique elements in that column (without np.NaN)
-            n_uniques = np.sum(np.isfinite(unique_elements))
-
-            n_values.append(n_uniques)
-            offset = np.sum(n_values[:-1])
-
-            column_indices_idx = [offset if index >= n_uniques
-                                  else index + offset
-                                  for index in inverse]
-            data_idx = [0 if index >= n_uniques else 1 for index in inverse]
-            feature_indices_idx = {unique: index + offset
-                                   for index, unique in enumerate(unique_elements)
-                                   if np.isfinite(unique)}
+            offset = np.nansum(n_values[:idx+1])
+            column_indices_idx = [offset + value if np.isfinite(value)
+                                  else offset for value in values_]
+            data_idx = [1 if np.isfinite(value) else 0 for value in values_]
+            feature_indices_idx = {value: value + offset
+                                   for value in values_
+                                   if np.isfinite(value)}
 
             column_indices.extend(column_indices_idx)
             data.extend(data_idx)
             feature_indices.append(feature_indices_idx)
 
-        row_indices = np.tile(np.arange(n_samples, dtype=np.int32),
-                                        n_features)
-
         self.feature_indices_ = feature_indices
         self.n_values = n_values
+        # tocsr() removes zeros in the data which represent NaNs
         out = sparse.coo_matrix((data, (row_indices, column_indices)),
-                                shape=(n_samples, np.sum(n_values)),
+                                shape=(n_samples, total_num_values),
                                 dtype=self.dtype).tocsr()
-
         return out if self.sparse else out.toarray()
 
     def fit_transform(self, X, y=None):
@@ -213,7 +255,14 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
 
     def _transform(self, X):
         """Assumes X contains only categorical features."""
-        X = check_arrays(X, sparse_format='csc', allow_nans=True)[0]
+        # Add 1 to all categorical colums to avoid loosing them due to slicing
+        subtract = False
+        if sparse.isspmatrix_csr(X):
+            X.data += 1
+            subtract = True
+        X = check_arrays(X, sparse_format="csc", allow_nans=True)[0]
+        if subtract:
+            X.data -= 1
         n_samples, n_features = X.shape
 
         indices = self.feature_indices_
@@ -222,19 +271,27 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
                              " Expected %d, got %d."
                              % (len(indices), n_features))
 
-        row_indices = np.tile(np.arange(n_samples, dtype=np.int32),
-                              n_features)
+        if sparse.isspmatrix_csc(X):
+            row_indices = X.indices
+        else:
+            row_indices = np.tile(np.arange(n_samples, dtype=np.int32),
+                                  n_features)
 
         data = []
         column_indices = []
 
         for idx, feature in enumerate(range(n_features)):
+            if sparse.isspmatrix_csc(X):
+                values_ = X.getcol(idx).data
+            else:
+                values_ = X[:, idx]
+
             offset = np.sum(self.n_values[:idx+1])
             feature_indices_idx = self.feature_indices_[idx]
             column_indices_idx = [feature_indices_idx.get(x, offset)
-                                  for x in X[:,idx]]
+                                  for x in values_]
             data_idx = [1 if feature_indices_idx.get(x) is not None else 0
-                        for x in X[:, idx]]
+                        for x in values_]
 
             column_indices.extend(column_indices_idx)
             data.extend(data_idx)
