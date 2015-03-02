@@ -11,7 +11,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from ..classification_base import ParamSklearnClassificationAlgorithm
 
 
-class MultinomialNB(ParamSklearnClassificationAlgorithm):
+class BaggedMultinomialNB(ParamSklearnClassificationAlgorithm):
 
     def __init__(self, alpha, fit_prior, random_state=None, verbose=0):
 
@@ -55,6 +55,19 @@ class MultinomialNB(ParamSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
+        
+        # The three parameters of the bagging ensamble are set to constants for now (SF)
+
+        #UniformIntegerHyperparameter('n_estimators', lower=10, upper = 100)
+        n_estimators = Constant('n_estimators', 100)
+
+        #max_samples = UniformFloatHyperparameter('max_samples', lower = 0.5, upper=1.0)
+        max_samples = Constant('max_samples' ,1.0)  # caution: has to be float!
+
+        #max_features = UniformFloatHyperparameter('max_features', lower = 0.5, upper=1.0)
+        max_features = Constant('max_features', 1.0) # caution: has to be float!
+        
+        
         cs = ConfigurationSpace()
         
         # the smoothing parameter is a non-negative float
@@ -66,6 +79,9 @@ class MultinomialNB(ParamSklearnClassificationAlgorithm):
         
         cs.add_hyperparameter(alpha)
         cs.add_hyperparameter(fit_prior)
+        cs.add_hyperparameter(n_estimators)
+        cs.add_hyperparameter(max_samples)
+        cs.add_hyperparameter(max_features)
         
         return cs
 
