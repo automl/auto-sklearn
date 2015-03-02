@@ -6,8 +6,8 @@ import yaml
 from openml.apiconnector import APIConnector
 import numpy as np
 
-from AutoML2015.models.autosklearn import get_configuration_space
-import AutoML2015.metalearning.files
+from autosklearn.models.paramsklearn import get_configuration_space
+import autosklearn.metalearning.files
 from HPOlibConfigSpace.configuration_space import Configuration
 from HPOlibConfigSpace.hyperparameters import InstantiatedFloatHyperparameter, \
     InstantiatedIntegerHyperparameter, InstantiatedCategoricalHyperparameter, \
@@ -20,7 +20,7 @@ input_csv_file = "/home/feurerm/mhome/projects/automl_competition_2015" \
 #input_csv_file = "/home/feurerm/mhome/projects/automl_competition_2015" \
 #                 "/experiments/libsvm_datasets_phase1.csv"
 
-output_dir = os.path.dirname(AutoML2015.metalearning.files.__file__)
+output_dir = os.path.dirname(autosklearn.metalearning.files.__file__)
 
 experiment_dir = "/home/feurerm/mhome/projects/automl_competition_2015" \
                  "/experiments/metadata_for_phase_1"

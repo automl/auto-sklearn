@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from sklearn.utils.testing import assert_array_almost_equal
 
-from autosklearn.data.data_manager import DataManager
+from autosklearn.data.cdata_manager import DataManager
 
 
 dataset_train = [[2.5, 3.3, 2, 5, 1, 1],
