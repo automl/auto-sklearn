@@ -36,7 +36,7 @@ def weighted_ensemble(predictions, true_labels, task_type, metric, weights, tolf
     logging.debug("CMA-ES uses seed: " + str(seed))
     n_models = predictions.shape[0]
     if n_models > 1:
-        res = cma.fmin(weighted_ensemble_error, weights, sigma0=0.25, restarts=3,
+        res = cma.fmin(weighted_ensemble_error, weights, sigma0=0.25, restarts=1,
                        args=(predictions, true_labels, metric,
                              task_type), options={'bounds': [0, 1],
                                                   'seed': seed,
