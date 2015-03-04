@@ -60,7 +60,7 @@ class BernoulliNB(ParamSklearnClassificationAlgorithm):
         # the smoothing parameter is a non-negative float
         # I will limit it to 1000 and put it on a logarithmic scale. (SF)
         # Please adjust that, if you know a proper range, this is just a guess.
-        alpha = UniformFloatHyperparameter(name="alpha", lower=0, upper=1000, default=1, log=True)
+        alpha = UniformFloatHyperparameter(name="alpha", lower=1e-2, upper=100, default=1, log=True)
 
         fit_prior = CategoricalHyperparameter( name="fit_prior", choices=[True, False], default=True)
         
