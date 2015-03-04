@@ -61,6 +61,23 @@ class Test(unittest.TestCase):
 
         print "Number of times it was worse than random guessing:" + str(np.sum(err > 1))
 
+    def test_evaluate_multiclass_classification_all_metrics(self):
+        X_train, Y_train, X_test, Y_test = get_dataset('iris')
+        X_valid = X_test[:25, ]
+        Y_valid = Y_test[:25, ]
+        X_test = X_test[25:, ]
+        Y_test = Y_test[25:, ]
+
+        D = Dummy()
+        D.info = {'metric': 'bac_metric', 'task': 'multiclass.classification',
+                  'is_sparse': False}
+        D.data = {'X_train': X_train, 'Y_train': Y_train,
+                  'X_valid': X_valid, 'X_test': X_test}
+        D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
+
+        configuration_space = get_configuration_space(D.info)
+        sampler = RandomSampler(configuration_space, 1)
+
         # Test all scoring functions
         err = []
         for i in range(N_TEST_RUNS):
