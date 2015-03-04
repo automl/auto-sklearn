@@ -23,7 +23,8 @@ class MultinomialNB(ParamSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
-        self.estimator = sklearn.naive_bayes.MultinomialNB( alpha = self.alpha, fit_prior = self.fit_prior)
+        self.estimator = sklearn.naive_bayes.MultinomialNB(alpha=self.alpha,
+            fit_prior=self.fit_prior)
         self.estimator.fit(X, Y)
         return self
 
@@ -43,7 +44,9 @@ class MultinomialNB(ParamSklearnClassificationAlgorithm):
                 'name': 'Multinomial Naive Bayes classifier',
                 'handles_missing_values': False,
                 'handles_nominal_values': False,
-                # sklearn website says:  The multinomial distribution normally requires integer feature counts. However, in practice, fractional counts such as tf-idf may also work.
+                # sklearn website says:  The multinomial distribution normally
+                # requires integer feature counts. However, in practice,
+                # fractional counts such as tf-idf may also work.
                 'handles_numerical_features': True,
                 'prefers_data_scaled': False,
                 'prefers_data_normalized': False,

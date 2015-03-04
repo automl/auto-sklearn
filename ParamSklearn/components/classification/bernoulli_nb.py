@@ -12,9 +12,7 @@ from ..classification_base import ParamSklearnClassificationAlgorithm
 
 
 class BernoulliNB(ParamSklearnClassificationAlgorithm):
-
     def __init__(self, alpha, fit_prior, random_state=None, verbose=0):
-
         self.alpha = alpha
         self.fit_prior = fit_prior
 
@@ -22,9 +20,9 @@ class BernoulliNB(ParamSklearnClassificationAlgorithm):
         self.verbose = int(verbose)
         self.estimator = None
 
-    def fit(self, X, Y):
+    def fit(self, X, y):
         self.estimator = sklearn.naive_bayes.MultinomialNB( alpha = self.alpha, fit_prior = self.fit_prior)
-        self.estimator.fit(X, Y)
+        self.estimator.fit(X, y)
         return self
 
     def predict(self, X):
@@ -43,7 +41,8 @@ class BernoulliNB(ParamSklearnClassificationAlgorithm):
                 'name': 'Multinomial Naive Bayes classifier',
                 'handles_missing_values': False,
                 'handles_nominal_values': False,
-                # sklearn website says: ... BernoulliNB is designed for binary/boolean features.
+                # sklearn website says: ... BernoulliNB is designed for
+                # binary/boolean features.
                 'handles_numerical_features': False,
                 'prefers_data_scaled': False,
                 'prefers_data_normalized': False,
@@ -60,12 +59,14 @@ class BernoulliNB(ParamSklearnClassificationAlgorithm):
         # the smoothing parameter is a non-negative float
         # I will limit it to 1000 and put it on a logarithmic scale. (SF)
         # Please adjust that, if you know a proper range, this is just a guess.
-        alpha = UniformFloatHyperparameter(name="alpha", lower=1e-2, upper=100, default=1, log=True)
+        alpha = UniformFloatHyperparameter(name="alpha", lower=1e-2, upper=100,
+                                           default=1, log=True)
 
-        fit_prior = CategoricalHyperparameter( name="fit_prior", choices=[True, False], default=True)
+        fit_prior = CategoricalHyperparameter(name="fit_prior",
+                                              choices=[True, False],
+                                              default=True)
         
         cs.add_hyperparameter(alpha)
         cs.add_hyperparameter(fit_prior)
         
         return cs
-

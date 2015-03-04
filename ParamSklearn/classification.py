@@ -194,6 +194,30 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
             except:
                 pass
 
+        # Multinomial NB does not work with negative values -> so don't use
+        # it with standardization, features learning, pca
+        classifiers_ = ["multinomial_nb", "bagged_multinomial_nb",
+                       "bernoulli_nb"]
+        feature_learning_ = ["kitchen_sinks", "sparse_filtering", "pca"]
+        for c in classifiers_:
+            try:
+                configuration_space.add_forbidden_clause(ForbiddenAndConjunction(
+                    ForbiddenEqualsClause(configuration_space.get_hyperparameter(
+                        "rescaling:strategy"), "standard"),
+                    ForbiddenEqualsClause(configuration_space.get_hyperparameter(
+                        "classifier"), c)))
+            except:
+                pass
+        for c, f in product(classifiers_, feature_learning_):
+            try:
+                configuration_space.add_forbidden_clause(ForbiddenAndConjunction(
+                    ForbiddenEqualsClause(configuration_space.get_hyperparameter(
+                        "preprocessor"), f),
+                    ForbiddenEqualsClause(configuration_space.get_hyperparameter(
+                        "classifier"), c)))
+            except:
+                pass
+
         return configuration_space
 
     @staticmethod
