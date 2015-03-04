@@ -1,11 +1,11 @@
 import numpy as np
+import sys
 
 import sklearn.cross_validation
 
 
 def split_data(X, Y):
     X_train, X_valid, Y_train, Y_valid = None, None, None, None
-
     if X.shape[0] != Y.shape[0]:
         raise ValueError("The first dimension of the X and Y array must "
                          "be equal.")
@@ -15,7 +15,8 @@ def split_data(X, Y):
                                                               train_size=None,
                                                               random_state=42)
     except ValueError:
-        print "To few samples of one class, use shuffle split"
+        sys.stdout.write("To few samples of one class or maybe a regression "
+                         "dataset, use shuffle split")
         sss = sklearn.cross_validation.ShuffleSplit(Y.shape[0], n_iter=1,
                                                     test_size=0.33,
                                                     train_size=None,
