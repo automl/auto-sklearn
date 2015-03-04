@@ -80,10 +80,9 @@ class TestParamSklearnClassifier(unittest.TestCase):
         self.assertNotIn('pca', str(cs))
 
     def test_get_hyperparameter_search_space_dataset_properties(self):
-        full_cs = ParamSklearnClassifier.get_hyperparameter_search_space()
         cs_mc = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'multiclass': True})
-        self.assertEqual(full_cs, cs_mc)
+        self.assertNotIn('bernoulli_nb', str(cs_mc))
 
         cs_ml = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'multilabel': True})
