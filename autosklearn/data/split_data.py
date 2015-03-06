@@ -16,7 +16,7 @@ def split_data(X, Y):
                                                               random_state=42)
     except ValueError:
         sys.stdout.write("To few samples of one class or maybe a regression "
-                         "dataset, use shuffle split")
+                         "dataset, use shuffle split.\n")
         sss = sklearn.cross_validation.ShuffleSplit(Y.shape[0], n_iter=1,
                                                     test_size=0.33,
                                                     train_size=None,
