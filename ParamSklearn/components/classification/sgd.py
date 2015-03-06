@@ -1,14 +1,15 @@
-import numpy as np
 from sklearn.linear_model.stochastic_gradient import SGDClassifier
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, UnParametrizedHyperparameter, \
     UniformIntegerHyperparameter
-from HPOlibConfigSpace.conditions import EqualsCondition, OrConjunction
+from HPOlibConfigSpace.conditions import EqualsCondition
 
-from ..classification_base import ParamSklearnClassificationAlgorithm
-from ...implementations.util import softmax
+from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
+from ParamSklearn.implementations.util import softmax
+
 
 class SGD(ParamSklearnClassificationAlgorithm):
     def __init__(self, loss, penalty, alpha, fit_intercept, n_iter,
@@ -85,6 +86,8 @@ class SGD(ParamSklearnClassificationAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': True,
+                'input': (DENSE, SPARSE),
+                'output': PREDICTIONS,
                 # TODO find out what is best used here!
                 'preferred_dtype' : None}
 

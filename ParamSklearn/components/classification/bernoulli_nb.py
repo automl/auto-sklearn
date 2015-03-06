@@ -1,14 +1,12 @@
 import numpy as np
 import sklearn.naive_bayes
 
-from HPOlibConfigSpace.conditions import EqualsCondition
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter, Constant
+    CategoricalHyperparameter
 
-from ..classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.util import DENSE, PREDICTIONS
 
 
 class BernoulliNB(ParamSklearnClassificationAlgorithm):
@@ -50,6 +48,8 @@ class BernoulliNB(ParamSklearnClassificationAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
+                'input': (DENSE, ),
+                'output': PREDICTIONS,
                 'preferred_dtype': np.bool}
 
     @staticmethod
