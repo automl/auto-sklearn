@@ -1,31 +1,33 @@
 import numpy as np
+import sys
 
-from sklearn.cross_validation import train_test_split, StratifiedKFold
+import sklearn.cross_validation
 
 
-def split_data(X, Y, cv=False, shuffle=True):
-
-    #if fold >= folds:
-    #    raise ValueError((fold, folds))
+def split_data(X, Y):
+    X_train, X_valid, Y_train, Y_valid = None, None, None, None
     if X.shape[0] != Y.shape[0]:
         raise ValueError("The first dimension of the X and Y array must "
                          "be equal.")
+    try:
+        sss = sklearn.cross_validation.StratifiedShuffleSplit(Y, n_iter=1,
+                                                              test_size=0.33,
+                                                              train_size=None,
+                                                              random_state=42)
+    except ValueError:
+        sys.stdout.write("To few samples of one class or maybe a regression "
+                         "dataset, use shuffle split.\n")
+        sss = sklearn.cross_validation.ShuffleSplit(Y.shape[0], n_iter=1,
+                                                    test_size=0.33,
+                                                    train_size=None,
+                                                    random_state=42)
 
-    #if shuffle == True:
-    #    rs = np.random.RandomState(42)
-    #    indices = np.arange(X.shape[0])
-    #    rs.shuffle(indices)
-    #    Y = Y[indices]
+    assert len(sss) == 1, "Splitting data went wrong"
 
-    X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.33, random_state=42)
-#     if(cv):
-# #         kf = StratifiedKFold(Y_train, n_folds=folds, indices=True)
-# #         for train_index, test_index in skf:
-# #             X_train, X_test = X_train[train_index], X[test_index]
-# #             y_train, y_test = y[train_index], y[test_index]
-#
-#     else:
-#         return X_train, X_valid, Y_train, Y_valid
+    for train_index, valid_index in sss:
+        X_train, X_valid = X[train_index], X[valid_index]
+        Y_train, Y_valid = Y[train_index], Y[valid_index]
+
     return X_train, X_valid, Y_train, Y_valid
 
 
@@ -44,7 +46,7 @@ def get_CV_fold(X, Y, fold, folds, shuffle=True):
         rs.shuffle(indices)
         Y = Y[indices]
 
-    kf = StratifiedKFold(Y, n_folds=folds)
+    kf = sklearn.cross_validation.StratifiedKFold(Y, n_folds=folds)
     for idx, split in enumerate(kf):
         if idx == fold:
             break

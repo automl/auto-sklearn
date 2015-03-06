@@ -10,7 +10,7 @@ from autosklearn.data.split_data import split_data
 from ParamSklearn.util import get_dataset
 from HPOlibConfigSpace.random_sampler import RandomSampler
 
-N_TEST_RUNS = 100
+N_TEST_RUNS = 50
 
 
 class Dummy(object):

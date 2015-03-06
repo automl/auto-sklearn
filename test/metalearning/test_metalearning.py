@@ -7,6 +7,7 @@ from HPOlibConfigSpace.random_sampler import RandomSampler
 
 from autosklearn.metalearning.metalearning import MetaLearning
 from autosklearn.metalearning import metalearning
+from autosklearn.models.paramsklearn import get_configuration_space
 from pyMetaLearn.metafeatures.metafeature import DatasetMetafeatures
 from pyMetaLearn.optimizers.metalearn_optimizer.metalearner import MetaLearningOptimizer
 from pyMetaLearn.metalearning.meta_base import Run
@@ -29,9 +30,10 @@ class Test(unittest.TestCase):
 
     @mock.patch.object(MetaLearningOptimizer, "metalearning_suggest_all", autospec=True)
     def test_metalearning(self, mock_mlo):
-        with open(os.path.join(os.path.dirname(metalearning.__file__),
-                               "files", "params.pcs")) as fh:
-            configuration_space = pcs_parser.read(fh)
+        configuration_space = get_configuration_space(
+            {'metric': 'bac_metric',
+             'task': 'multiclass.classification',
+             'is_sparse': False})
 
         # TODO accept float/ints instead of string in the HPOlibConfigSpace
         configuration_space.get_hyperparameter(
@@ -64,16 +66,12 @@ class Test(unittest.TestCase):
             configuration_space, "iris", "bac_metric")
 
         self.assertEqual(["--initial-challengers \" "
+                          "-multinomial_nb:fit_prior 'False' "
                           "-rescaling:strategy 'min/max' "
-                          "-gradient_boosting:min_samples_leaf '8' "
-                          "-imputation:strategy 'most_frequent' "
-                          "-gradient_boosting:subsample '0.545998348066' "
-                          "-gradient_boosting:max_depth '1' "
-                          "-preprocessor 'None' "
-                          "-gradient_boosting:min_samples_split '10' "
-                          "-gradient_boosting:learning_rate "
-                          "'0.000822335208483' "
-                          "-gradient_boosting:n_estimators '100' "
-                          "-gradient_boosting:max_features '4.55642355925' "
-                          "-classifier 'gradient_boosting'\""],
+                          "-select_percentile_classification:score_func 'chi2' "
+                          "-imputation:strategy 'mean' "
+                          "-select_percentile_classification:percentile '70.9824065966' "
+                          "-preprocessor 'select_percentile_classification' "
+                          "-multinomial_nb:alpha '22.0323293841' "
+                          "-classifier 'multinomial_nb'\""],
                          initial_configuration_strings_for_smac)
