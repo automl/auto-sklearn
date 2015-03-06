@@ -48,7 +48,7 @@ class RandomKitchenSinks(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (SPARSE, DENSE),
-                'ouput': INPUT,
+                'output': INPUT,
                 'preferred_dtype': None}
 
     @staticmethod
