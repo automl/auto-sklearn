@@ -1,13 +1,14 @@
 import sklearn.svm
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.conditions import EqualsCondition, OrConjunction, \
-    InCondition
+from HPOlibConfigSpace.conditions import EqualsCondition, InCondition
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter
 
-from ..classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
+
 
 class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
     def __init__(self, C, kernel, gamma, shrinking, tol, class_weight, max_iter,
@@ -82,6 +83,8 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
             # TODO find out of this is right!
             # this here suggests so http://scikit-learn.org/stable/modules/svm.html#tips-on-practical-use
             'handles_sparse': True,
+            'input': (DENSE, SPARSE),
+            'output': PREDICTIONS,
             # TODO find out what is best used here!
             # C-continouos and double precision...
             'preferred_dtype': None}

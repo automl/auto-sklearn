@@ -2,14 +2,11 @@ import numpy as np
 import sklearn.ensemble
 import sklearn.naive_bayes
 
-from HPOlibConfigSpace.conditions import EqualsCondition
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter, Constant
+from HPOlibConfigSpace.hyperparameters import Constant
 
-from ..classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.util import DENSE, PREDICTIONS
 
 
 class BaggedGaussianNB(ParamSklearnClassificationAlgorithm):
@@ -54,6 +51,8 @@ class BaggedGaussianNB(ParamSklearnClassificationAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
+                'input': (DENSE, ),
+                'output': PREDICTIONS,
                 'preferred_dtype': np.float32}
 
     @staticmethod
@@ -61,8 +60,8 @@ class BaggedGaussianNB(ParamSklearnClassificationAlgorithm):
         # The three parameters of the bagging ensemble are set to
         # constants for now (SF)
         n_estimators = Constant('n_estimators', 100)
-        max_samples = Constant('max_samples' ,1.0)  # caution: has to be float!
-        max_features = Constant('max_features', 1.0) # caution: has to be float!
+        max_samples = Constant('max_samples', 1.0)    # caution: has to be float
+        max_features = Constant('max_features', 1.0)  # caution: has to be float
 
         cs = ConfigurationSpace()
         cs.add_hyperparameter(n_estimators)
