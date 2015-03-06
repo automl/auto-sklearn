@@ -3,8 +3,9 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, UnPara
 
 import sklearn.feature_selection
 
-from ..preprocessor_base import ParamSklearnPreprocessingAlgorithm
-from select_percentile import SelectPercentileBase
+from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.components.preprocessing.select_percentile import SelectPercentileBase
+from ParamSklearn.util import DENSE
 
 
 class SelectPercentileRegression(SelectPercentileBase,
@@ -42,6 +43,8 @@ class SelectPercentileRegression(SelectPercentileBase,
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'handles_dense': True,
+                'input': (DENSE, ),
+                'output': DENSE,
                 'preferred_dtype': None}
 
     @staticmethod
@@ -59,5 +62,5 @@ class SelectPercentileRegression(SelectPercentileBase,
 
     def __str__(self):
         name = self.get_properties()['name']
-        return "ParamSklearn %" % name
+        return "ParamSklearn %s" % name
 

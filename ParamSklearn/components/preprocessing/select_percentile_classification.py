@@ -3,8 +3,9 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, Catego
 
 import sklearn.feature_selection
 
-from ..preprocessor_base import ParamSklearnPreprocessingAlgorithm
-from select_percentile import SelectPercentileBase
+from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.components.preprocessing.select_percentile import SelectPercentileBase
+from ParamSklearn.util import DENSE, SPARSE, INPUT
 
 
 class SelectPercentileClassification(SelectPercentileBase,
@@ -44,6 +45,8 @@ class SelectPercentileClassification(SelectPercentileBase,
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'handles_dense': True,
+                'input': (SPARSE, DENSE),
+                'output': INPUT,
                 'preferred_dtype': None}
 
     @staticmethod
@@ -67,5 +70,5 @@ class SelectPercentileClassification(SelectPercentileBase,
 
     def __str__(self):
         name = self.get_properties()['name']
-        return "ParamSklearn %" % name
+        return "ParamSklearn %s" % name
 

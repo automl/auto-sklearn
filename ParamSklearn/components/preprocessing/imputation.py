@@ -3,7 +3,8 @@ import sklearn.preprocessing
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
-from ..preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.util import DENSE, SPARSE, INPUT
 
 
 class Imputation(ParamSklearnPreprocessingAlgorithm):
@@ -39,6 +40,8 @@ class Imputation(ParamSklearnPreprocessingAlgorithm):
                 # TODO find out of this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
+                'input': (DENSE, SPARSE),
+                'output': INPUT,
                 'preferred_dtype': None}
 
     @staticmethod
@@ -52,4 +55,4 @@ class Imputation(ParamSklearnPreprocessingAlgorithm):
 
     def __str__(self):
         name = self.get_properties()['name']
-        return "ParamSklearn %" % name
+        return "ParamSklearn %s" % name

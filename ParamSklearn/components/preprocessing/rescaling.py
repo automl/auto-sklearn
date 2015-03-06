@@ -1,9 +1,10 @@
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
-from ...implementations.StandardScaler import StandardScaler
-from ...implementations.MinMaxScaler import MinMaxScaler
-from ..preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.implementations.StandardScaler import StandardScaler
+from ParamSklearn.implementations.MinMaxScaler import MinMaxScaler
+from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.util import DENSE, SPARSE, INPUT
 
 
 class Rescaling(ParamSklearnPreprocessingAlgorithm):
@@ -43,6 +44,8 @@ class Rescaling(ParamSklearnPreprocessingAlgorithm):
                 # TODO find out of this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
+                'input': (SPARSE, DENSE),
+                'output': INPUT,
                 # Add something here...
                 'preferred_dtype': None}
 
@@ -57,4 +60,4 @@ class Rescaling(ParamSklearnPreprocessingAlgorithm):
 
     def __str__(self):
         name = self.get_properties()['name']
-        return "ParamSklearn %" % name
+        return "ParamSklearn %s" % name
