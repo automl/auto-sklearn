@@ -26,7 +26,6 @@ class SelectPercentileRegression(SelectPercentileBase,
         else:
             raise ValueError("Don't know this scoring function: %s" % score_func)
 
-
     @staticmethod
     def get_properties():
         return {'shortname': 'SPR',

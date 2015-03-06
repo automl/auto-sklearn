@@ -28,7 +28,6 @@ class SelectPercentileClassification(SelectPercentileBase,
             raise ValueError("score_func must be in ('chi2, 'f_classif'), "
                              "but is: %s" % score_func)
 
-
     @staticmethod
     def get_properties():
         return {'shortname': 'SPC',
