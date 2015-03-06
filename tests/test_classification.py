@@ -1,8 +1,5 @@
 __author__ = 'feurerm'
 
-import copy
-import numpy as np
-import StringIO
 import unittest
 
 import sklearn.datasets
@@ -18,11 +15,26 @@ from ParamSklearn.components.classification_base import ParamSklearnClassificati
 from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
 import ParamSklearn.components.classification as classification_components
 import ParamSklearn.components.preprocessing as preprocessing_components
-from ParamSklearn.util import get_dataset
+from ParamSklearn.util import get_dataset, DENSE, SPARSE, PREDICTIONS
+
 
 class TestParamSklearnClassifier(unittest.TestCase):
     # TODO: test for both possible ways to initialize ParamSklearn
     # parameters and other...
+
+    def test_io_dict(self):
+        classifiers = classification_components._classifiers
+        for c in classifiers:
+            self.assertIn('input', c.get_properties())
+            self.assertIn('output', c.get_properties())
+            inp = c.get_properties()['input']
+            output = c.get_properties()['output']
+
+            self.assertIsInstance(inp, tuple)
+            self.assertIsInstance(output, str)
+            for i in inp:
+                self.assertIn(i, (SPARSE, DENSE))
+            self.assertEqual(output, PREDICTIONS)
 
     def test_find_classifiers(self):
         classifiers = classification_components._classifiers
