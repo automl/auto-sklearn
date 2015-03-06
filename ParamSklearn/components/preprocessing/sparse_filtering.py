@@ -1,9 +1,10 @@
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace, \
-    Configuration
+from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformIntegerHyperparameter
 
-from ..preprocessor_base import ParamSklearnPreprocessingAlgorithm
-from ...implementations.SparseFiltering import SparseFiltering as SparseFilteringImpl
+from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.implementations.SparseFiltering import SparseFiltering as SparseFilteringImpl
+from ParamSklearn.util import DENSE
+
 
 class SparseFiltering(ParamSklearnPreprocessingAlgorithm):
 
@@ -38,6 +39,8 @@ class SparseFiltering(ParamSklearnPreprocessingAlgorithm):
                 'is_deterministic': False,
                 'handles_sparse': False,
                 'handles_dense': True,
+                'input': (DENSE, ),
+                'output': DENSE,
                 'preferred_dtype': None}
 
 
@@ -55,4 +58,4 @@ class SparseFiltering(ParamSklearnPreprocessingAlgorithm):
 
     def __str__(self):
         name = self.get_properties()['name']
-        return "ParamSklearn %" % name
+        return "ParamSklearn %s" % name
