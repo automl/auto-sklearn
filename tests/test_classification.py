@@ -25,10 +25,10 @@ class TestParamSklearnClassifier(unittest.TestCase):
     def test_io_dict(self):
         classifiers = classification_components._classifiers
         for c in classifiers:
-            self.assertIn('input', c.get_properties())
-            self.assertIn('output', c.get_properties())
-            inp = c.get_properties()['input']
-            output = c.get_properties()['output']
+            self.assertIn('input', classifiers[c].get_properties())
+            self.assertIn('output', classifiers[c].get_properties())
+            inp = classifiers[c].get_properties()['input']
+            output = classifiers[c].get_properties()['output']
 
             self.assertIsInstance(inp, tuple)
             self.assertIsInstance(output, str)
