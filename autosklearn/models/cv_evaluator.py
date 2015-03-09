@@ -20,6 +20,7 @@ class CVEvaluator(Evaluator):
         self.cv_folds = cv_folds
         self.X_train = self.D.data['X_train']
         self.Y_train = self.D.data['Y_train']
+        self.Y_optimization = None
 
         self.models = [None] * cv_folds
         self.indices = [None] * cv_folds
@@ -90,6 +91,7 @@ class CVEvaluator(Evaluator):
             if len(Y_test_pred.shape) == 3:
                 Y_test_pred = np.mean(Y_test_pred, axis=0)
 
+        self.Y_optimization = Y_targets
         score = calculate_score(Y_targets, Y_optimization_pred,
                                 self.task_type, self.metric,
                                 all_scoring_functions=self.all_scoring_functions)

@@ -142,6 +142,10 @@ class Evaluator(object):
     def fit(self):
         pass
 
+    @abc.abstractmethod
+    def predict(self):
+        pass
+
     # This function does everything necessary after the fitting is done:
     #        predicting
     #        saving the files for the ensembles_statistics
@@ -154,34 +158,13 @@ class Evaluator(object):
             print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % ("SAT", abs(self.duration), result, self.seed, additional_run_info)
         except:
             self.duration = time.time() - self.starttime
-            import sys
-            e = sys.exc_info()[0]
-            print e
+            import traceback
+            print traceback.format_exc()
             print
             print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % (
                 "TIMEOUT", abs(self.duration), 1.0, self.seed,
                 "No results were produced! Probably the training was not "
                 "finished and no valid model was generated!")
-
-    @abc.abstractmethod
-    def predict(self):
-        pass
-
-    @abc.abstractmethod
-    def nested_fit(self):
-        pass
-
-    @abc.abstractmethod
-    def nested_predict(self):
-        pass
-
-    @abc.abstractmethod
-    def partial_nested_fit(self, fold):
-        pass
-
-    @abc.abstractmethod
-    def partial_nested_predict(self, fold):
-        pass
     
     def file_output(self):
         errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()

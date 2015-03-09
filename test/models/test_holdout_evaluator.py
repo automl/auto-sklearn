@@ -227,16 +227,10 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             np.sum(err > 1))
 
     def _fit(self, evaluator):
-        return self.__fit(evaluator.fit)
-
-    def _nested_fit(self, evaluator):
-        return self.__fit(evaluator.nested_fit)
-
-    def __fit(self, function_handle):
         """Allow us to catch known and valid exceptions for all evaluate
         scripts."""
         try:
-            function_handle()
+            evaluator.fit()
             return True
         except TypeError as e:
             print e
@@ -303,41 +297,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         expected = [[0.9], [0.3]]
         for i in range(len(expected)):
             self.assertEqual(expected[i], pred[i])
-
-    def test_nested_fit(self):
-        X_train, Y_train, X_test, Y_test = get_dataset('iris')
-        X_valid = X_test[:25, ]
-        Y_valid = Y_test[:25, ]
-        X_test = X_test[25:, ]
-        Y_test = Y_test[25:, ]
-
-        D = Dummy()
-        D.info = {'metric': 'bac_metric', 'task': 'multiclass.classification',
-                  'is_sparse': False}
-        D.data = {'X_train': X_train, 'Y_train': Y_train,
-                  'X_valid': X_valid, 'X_test': X_test}
-        D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
-
-        configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
-
-        err = np.zeros([N_TEST_RUNS])
-        for i in range(N_TEST_RUNS):
-            print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
-            D_ = copy.deepcopy(D)
-            evaluator = HoldoutEvaluator(D_, configuration)
-            if not self._nested_fit(evaluator):
-                print
-                continue
-            err[i] = evaluator.nested_predict()
-            self.assertTrue(np.isfinite(err[i]))
-            print err[i]
-
-            self.assertGreaterEqual(err[i], 0.0)
-
-        print "Number of times it was worse than random guessing:" + str(
-            np.sum(err > 1))
 
 
 
