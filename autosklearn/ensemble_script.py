@@ -13,7 +13,7 @@ import logging
 import numpy as np
 
 from autosklearn.data import data_io
-from autosklearn.models import evaluate
+from autosklearn.models import evaluator
 import autosklearn.util.stopwatch
 
 
@@ -26,7 +26,7 @@ def weighted_ensemble_error(weights, *args):
     weight_prime = weights / weights.sum()
     weighted_predictions = ensemble_prediction(predictions, weight_prime)
 
-    score = evaluate.calculate_score(true_labels, weighted_predictions,
+    score = evaluator.calculate_score(true_labels, weighted_predictions,
                                      task_type, metric)
     return 1 - score
 
@@ -123,7 +123,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
         random_pred_mask = []
         for f in dir_ensemble_list:
             predictions = np.load(os.path.join(dir_ensemble, f))
-            score = evaluate.calculate_score(true_labels, predictions,
+            score = evaluator.calculate_score(true_labels, predictions,
                                      task_type, metric)
 
             if score <= 0.001:

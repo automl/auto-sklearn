@@ -13,7 +13,7 @@ import lockfile
 from HPOlibConfigSpace import configuration_space
 
 from autosklearn.data.data_manager import DataManager
-import autosklearn.models.evaluate
+import autosklearn.models.holdout_evaluator
 from autosklearn.models.paramsklearn import get_class
 
 
@@ -77,11 +77,9 @@ def main(basename, input_dir, params, time_limit=sys.maxint):
     configuration = configuration_space.Configuration(cs, **params)
 
     global evaluator
-    evaluator = autosklearn.models.evaluate.Evaluator(Datamanager=D,
-                                                     configuration=configuration,
-                                                     with_predictions=True,
-                                                     all_scoring_functions=True,
-                                                     output_dir=output_dir)
+    evaluator = autosklearn.models.holdout_evaluator.HoldoutEvaluator(
+        Datamanager=D, configuration=configuration, with_predictions=True,
+        all_scoring_functions=True, output_dir=output_dir)
     evaluator.fit()
     evaluator.finish_up()
 
