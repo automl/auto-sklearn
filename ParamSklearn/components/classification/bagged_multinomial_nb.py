@@ -17,7 +17,12 @@ class BaggedMultinomialNB(ParamSklearnClassificationAlgorithm):
     def __init__(self, alpha, fit_prior, n_estimators, max_samples,
                  max_features, random_state=None, verbose=0):
         self.alpha = alpha
-        self.fit_prior = fit_prior
+        if fit_prior.lower() == "true":
+            self.fit_prior = True
+        elif fit_prior.lower() == "false":
+            self.fit_prior = False
+        else:
+            self.fit_prior = fit_prior
 
         self.n_estimators = n_estimators
         self.max_samples = max_samples
@@ -69,7 +74,7 @@ class BaggedMultinomialNB(ParamSklearnClassificationAlgorithm):
         # The three parameters of the bagging ensamble are set to constants
         # for now (SF)
         n_estimators = Constant('n_estimators', 100)
-        max_samples = Constant('max_samples' ,1.0)  # caution: has to be float!
+        max_samples = Constant('max_samples', 1.0)  # caution: has to be float!
         max_features = Constant('max_features', 1.0) # caution: has to be float!
 
         cs = ConfigurationSpace()
@@ -79,9 +84,9 @@ class BaggedMultinomialNB(ParamSklearnClassificationAlgorithm):
         # Please adjust that, if you know a proper range, this is just a guess.
         alpha = UniformFloatHyperparameter(name="alpha", lower=1e-2, upper=100,
                                            default=1, log=True)
-        fit_prior = CategoricalHyperparameter( name="fit_prior",
-                                               choices=[True, False],
-                                               default=True)
+        fit_prior = CategoricalHyperparameter(name="fit_prior",
+                                              choices=["True", "False"],
+                                              default="True")
         
         cs.add_hyperparameter(alpha)
         cs.add_hyperparameter(fit_prior)

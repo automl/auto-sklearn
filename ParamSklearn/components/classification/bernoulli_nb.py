@@ -14,7 +14,12 @@ from ..classification_base import ParamSklearnClassificationAlgorithm
 class BernoulliNB(ParamSklearnClassificationAlgorithm):
     def __init__(self, alpha, fit_prior, random_state=None, verbose=0):
         self.alpha = alpha
-        self.fit_prior = fit_prior
+        if fit_prior.lower() == "true":
+            self.fit_prior = True
+        elif fit_prior.lower() == "false":
+            self.fit_prior = False
+        else:
+            self.fit_prior = fit_prior
 
         self.random_state = random_state
         self.verbose = int(verbose)
@@ -63,8 +68,8 @@ class BernoulliNB(ParamSklearnClassificationAlgorithm):
                                            default=1, log=True)
 
         fit_prior = CategoricalHyperparameter(name="fit_prior",
-                                              choices=[True, False],
-                                              default=True)
+                                              choices=["True", "False"],
+                                              default="True")
         
         cs.add_hyperparameter(alpha)
         cs.add_hyperparameter(fit_prior)

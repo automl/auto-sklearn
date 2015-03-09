@@ -14,9 +14,13 @@ from ..classification_base import ParamSklearnClassificationAlgorithm
 class MultinomialNB(ParamSklearnClassificationAlgorithm):
 
     def __init__(self, alpha, fit_prior, random_state=None, verbose=0):
-
         self.alpha = alpha
-        self.fit_prior = fit_prior
+        if fit_prior.lower() == "true":
+            self.fit_prior = True
+        elif fit_prior.lower() == "false":
+            self.fit_prior = False
+        else:
+            self.fit_prior = fit_prior
 
         self.random_state = random_state
         self.verbose = int(verbose)
@@ -63,9 +67,12 @@ class MultinomialNB(ParamSklearnClassificationAlgorithm):
         # the smoothing parameter is a non-negative float
         # I will limit it to 100 and put it on a logarithmic scale. (SF)
         # Please adjust that, if you know a proper range, this is just a guess.
-        alpha = UniformFloatHyperparameter(name="alpha", lower=1e-2, upper=100, default=1, log=True)
+        alpha = UniformFloatHyperparameter(name="alpha", lower=1e-2, upper=100,
+                                           default=1, log=True)
 
-        fit_prior = CategoricalHyperparameter( name="fit_prior", choices=[True, False], default=True)
+        fit_prior = CategoricalHyperparameter( name="fit_prior",
+                                               choices=["True", "False"],
+                                               default="True")
         
         cs.add_hyperparameter(alpha)
         cs.add_hyperparameter(fit_prior)
