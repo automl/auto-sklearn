@@ -44,6 +44,8 @@ class BernoulliNB(ParamSklearnClassificationAlgorithm):
                 'handles_numerical_features': False,
                 'prefers_data_scaled': False,
                 'prefers_data_normalized': False,
+                'handles_regression': False,
+                'handles_classification': True,
                 'handles_multiclass': False,
                 'handles_multilabel': False,
                 'is_deterministic': True,

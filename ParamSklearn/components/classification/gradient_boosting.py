@@ -103,6 +103,8 @@ class GradientBoostingClassifier(ParamSklearnClassificationAlgorithm):
                 'prefers_data_scaled': False,
                 # TODO find out if this is good because of sparcity...
                 'prefers_data_normalized': False,
+                'handles_regression': False,
+                'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': False,
                 'is_deterministic': True,

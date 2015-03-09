@@ -72,6 +72,8 @@ class LibLinear_SVC(ParamSklearnClassificationAlgorithm):
                 'prefers_data_scaled': True,
                 # Find out if this is good because of sparsity
                 'prefers_data_normalized': False,
+                'handles_regression': False,
+                'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': False,
                 'is_deterministic': False,
