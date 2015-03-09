@@ -70,12 +70,12 @@ def get_dataset(dataset='iris', make_sparse=False):
     return X_train, Y_train, X_test, Y_test
 
 
-def _test_classifier(Classifier, dataset='iris'):
+def _test_classifier(classifier, dataset='iris'):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
                                                    make_sparse=False)
-    configuration_space = Classifier.get_hyperparameter_search_space()
+    configuration_space = classifier.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
-    classifier = Classifier(random_state=1,
+    classifier = classifier(random_state=1,
                             **{hp.hyperparameter.name: hp.value for hp in
                              default.values.values()})
     predictor = classifier.fit(X_train, Y_train)
