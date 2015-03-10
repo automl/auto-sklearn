@@ -24,7 +24,7 @@ class,added,comment
 <class 'sklearn.decomposition.pca.RandomizedPCA'>,,
 <class 'sklearn.decomposition.sparse_pca.MiniBatchSparsePCA'>,,
 <class 'sklearn.decomposition.sparse_pca.SparsePCA'>,,
-<class 'sklearn.decomposition.truncated_svd.TruncatedSVD'>,,
+<class 'sklearn.decomposition.truncated_svd.TruncatedSVD'>,True,
 <class 'sklearn.ensemble.forest.BaseForest'>,FALSE,Base class
 <class 'sklearn.ensemble.forest.ExtraTreesClassifier'>,FALSE,Prefer Forests
 <class 'sklearn.ensemble.forest.ExtraTreesRegressor'>,FALSE,Prefer Forests
