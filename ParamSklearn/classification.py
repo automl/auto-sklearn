@@ -140,20 +140,12 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         preproc_list = [preprocessors_list[p] for p in keep_row]
         class_list = [classifiers_list[p] for p in keep_col]
 
-        # Make sure they don't exist anymore
-        del preprocessors_list
-        del classifiers_list
-
         new_class = dict()
         for c in class_list:
             new_class[c] = classifiers[c]
         new_preproc = dict()
         for p in preproc_list:
             new_preproc[p] = preprocessors[p]
-
-        # Make sure they don't exist anymore
-        del preprocessors
-        del classifiers
 
         return m, preproc_list, class_list, new_preproc, new_class
 
@@ -186,9 +178,11 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
             entry = available_comp[name]
             if entry.get_properties()['handles_classification'] is False:
                 continue
-            if data_prop.get('multiclass') is True and entry.get_properties()['handles_multiclass'] is False:
+            if data_prop.get('multiclass') is True and entry.get_properties()[
+                    'handles_multiclass'] is False:
                 continue
-            if data_prop.get('multilabel') is True and available_comp[name].get_properties()['handles_multilabel'] is False:
+            if data_prop.get('multilabel') is True and available_comp[name]. \
+                    get_properties()['handles_multilabel'] is False:
                 continue
             components[name] = entry
 
