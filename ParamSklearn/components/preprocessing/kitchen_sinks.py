@@ -4,7 +4,8 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter
 
-from ..preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.util import SPARSE, DENSE, INPUT
 
 class RandomKitchenSinks(ParamSklearnPreprocessingAlgorithm):
 
@@ -46,6 +47,8 @@ class RandomKitchenSinks(ParamSklearnPreprocessingAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'handles_dense': True,
+                'input': (SPARSE, DENSE),
+                'output': INPUT,
                 'preferred_dtype': None}
 
     @staticmethod
@@ -61,5 +64,5 @@ class RandomKitchenSinks(ParamSklearnPreprocessingAlgorithm):
 
     def __str__(self):
         name = self.get_properties()['name']
-        return "ParamSklearn %" % name
+        return "ParamSklearn %s" % name
 

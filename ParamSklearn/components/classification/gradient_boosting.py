@@ -1,14 +1,12 @@
 import numpy as np
 import sklearn.ensemble
 
-from HPOlibConfigSpace.conditions import EqualsCondition
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter, Constant
+    UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant
 
-from ..classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.util import DENSE, PREDICTIONS
 
 
 class GradientBoostingClassifier(ParamSklearnClassificationAlgorithm):
@@ -105,10 +103,14 @@ class GradientBoostingClassifier(ParamSklearnClassificationAlgorithm):
                 'prefers_data_scaled': False,
                 # TODO find out if this is good because of sparcity...
                 'prefers_data_normalized': False,
+                'handles_regression': False,
+                'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
+                'input': (DENSE, ),
+                'output': PREDICTIONS,
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}

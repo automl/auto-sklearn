@@ -1,11 +1,11 @@
 import sklearn.decomposition
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace, \
-    Configuration
+from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
 
-from ..preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.util import DENSE
 
 
 class PCA(ParamSklearnPreprocessingAlgorithm):
@@ -59,6 +59,8 @@ class PCA(ParamSklearnPreprocessingAlgorithm):
                 'is_deterministic': False,
                 'handles_sparse': False,
                 'handles_dense': True,
+                'input': (DENSE, ),
+                'output': DENSE,
                 # TODO find out what is best used here!
                 'preferred_dtype': None}
 
@@ -75,4 +77,4 @@ class PCA(ParamSklearnPreprocessingAlgorithm):
 
     def __str__(self):
         name = self.get_properties()['name']
-        return "ParamSklearn %" % name
+        return "ParamSklearn %s" % name

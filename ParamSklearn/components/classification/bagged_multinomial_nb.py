@@ -2,14 +2,12 @@ import numpy as np
 import sklearn.naive_bayes
 import sklearn.ensemble
 
-from HPOlibConfigSpace.conditions import EqualsCondition
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter, Constant
+    CategoricalHyperparameter, Constant
 
-from ..classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.util import DENSE, PREDICTIONS
 
 
 class BaggedMultinomialNB(ParamSklearnClassificationAlgorithm):
@@ -63,10 +61,14 @@ class BaggedMultinomialNB(ParamSklearnClassificationAlgorithm):
                 'handles_numerical_features': True,
                 'prefers_data_scaled': False,
                 'prefers_data_normalized': False,
+                'handles_regression': False,
+                'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
+                'input': (DENSE, ),
+                'output': PREDICTIONS,
                 'preferred_dtype': np.float32}
 
     @staticmethod

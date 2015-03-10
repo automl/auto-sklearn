@@ -5,7 +5,8 @@ from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
     Constant, UnParametrizedHyperparameter, UniformIntegerHyperparameter
 from HPOlibConfigSpace.conditions import EqualsCondition
 
-from ..classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.util import DENSE, PREDICTIONS
 
 
 class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
@@ -53,10 +54,14 @@ class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
                 'prefers_data_scaled': True,
                 # Find out if this is good because of sparsity
                 'prefers_data_normalized': False,
+                'handles_regression': False,
+                'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': True,
+                'input': (DENSE, ),
+                'output': PREDICTIONS,
                 # TODO find out what is best used here!
                 'preferred_dtype' : None}
 

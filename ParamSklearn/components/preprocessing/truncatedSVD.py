@@ -1,11 +1,12 @@
+import numpy as np
+
 import sklearn.decomposition
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformIntegerHyperparameter
 
-from ..preprocessor_base import ParamSklearnPreprocessingAlgorithm
-import numpy as np
-
+from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.util import SPARSE, DENSE
 
 
 class TruncatedSVD(ParamSklearnPreprocessingAlgorithm):
@@ -43,6 +44,8 @@ class TruncatedSVD(ParamSklearnPreprocessingAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'handles_dense': False,
+                'input': (SPARSE, ),
+                'output': DENSE,
                 'preferred_dtype': np.float32}
 
     @staticmethod
@@ -55,4 +58,4 @@ class TruncatedSVD(ParamSklearnPreprocessingAlgorithm):
 
     def __str__(self):
         name = self.get_properties()['name']
-        return "ParamSklearn %" % name
+        return "ParamSklearn %s" % name
