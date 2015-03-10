@@ -25,16 +25,22 @@ class TestParamSklearnClassifier(unittest.TestCase):
     def test_io_dict(self):
         classifiers = classification_components._classifiers
         for c in classifiers:
-            self.assertIn('input', classifiers[c].get_properties())
-            self.assertIn('output', classifiers[c].get_properties())
-            inp = classifiers[c].get_properties()['input']
-            output = classifiers[c].get_properties()['output']
+            props = classifiers[c].get_properties()
+            self.assertIn('input', props)
+            self.assertIn('output', props)
+            inp = props['input']
+            output = props['output']
 
             self.assertIsInstance(inp, tuple)
             self.assertIsInstance(output, str)
             for i in inp:
                 self.assertIn(i, (SPARSE, DENSE))
             self.assertEqual(output, PREDICTIONS)
+            self.assertIn('handles_regression', props)
+            self.assertFalse(props['handles_regression'])
+            self.assertIn('handles_classification', props)
+            self.assertIn('handles_multiclass', props)
+            self.assertIn('handles_multilabel', props)
 
     def test_find_classifiers(self):
         classifiers = classification_components._classifiers
@@ -105,21 +111,22 @@ class TestParamSklearnClassifier(unittest.TestCase):
 
         cs_sp = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
-        self.assertNotIn('extra_trees', str(cs_sp))
-        self.assertNotIn('gradient_boosting', str(cs_sp))
-        self.assertNotIn('random_forest', str(cs_sp))
+        self.assertIn('extra_trees', str(cs_sp))
+        self.assertIn('gradient_boosting', str(cs_sp))
+        self.assertIn('random_forest', str(cs_sp))
 
         cs_mc_ml = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'multilabel': True, 'multiclass': True})
         self.assertEqual(cs_ml, cs_mc_ml)
 
-        self.assertRaisesRegexp(ValueError,
-                                "No classifier to build a configuration space "
-                                "for...", ParamSklearnClassifier.
-                                get_hyperparameter_search_space,
-                                dataset_properties={'multilabel': True,
-                                                    'multiclass': True,
-                                                    'sparse': True})
+        # We now have a preprocessing method that handles this case
+        #self.assertRaisesRegexp(ValueError,
+        #                        "No classifier to build a configuration space "
+        #                        "for...", ParamSklearnClassifier.
+        #                        get_hyperparameter_search_space,
+        #                        dataset_properties={'multilabel': True,
+        #                                            'multiclass': True,
+        #                                            'sparse': True})
 
     @unittest.skip("test_check_random_state Not yet Implemented")
     def test_check_random_state(self):
