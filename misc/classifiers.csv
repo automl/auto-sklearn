@@ -24,9 +24,9 @@ class,added,comment
 <class 'sklearn.multiclass.OutputCodeClassifier'>,False,Is a meta-estimator
 <class 'sklearn.naive_bayes.BaseDiscreteNB'>,False,Abstract base class for naive Bayes estimators
 <class 'sklearn.naive_bayes.BaseNB'>,False,Abstract base class for naive Bayes on discrete/categorical data
-<class 'sklearn.naive_bayes.BernoulliNB'>,,
-<class 'sklearn.naive_bayes.GaussianNB'>,,
-<class 'sklearn.naive_bayes.MultinomialNB'>,,
+<class 'sklearn.naive_bayes.BernoulliNB'>,True,
+<class 'sklearn.naive_bayes.GaussianNB'>,True,
+<class 'sklearn.naive_bayes.MultinomialNB'>,True,
 <class 'sklearn.neighbors.classification.KNeighborsClassifier'>,True,
 <class 'sklearn.neighbors.classification.RadiusNeighborsClassifier'>,,Can crash when there is no neighbour within the radius
 <class 'sklearn.neighbors.nearest_centroid.NearestCentroid'>,,

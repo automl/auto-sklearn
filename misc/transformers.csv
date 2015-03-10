@@ -32,7 +32,7 @@ class,added,comment
 <class 'sklearn.ensemble.forest.ForestRegressor'>,FALSE,Base class
 <class 'sklearn.ensemble.forest.RandomForestClassifier'>,,
 <class 'sklearn.ensemble.forest.RandomForestRegressor'>,,
-<class 'sklearn.ensemble.forest.RandomTreesEmbedding'>,,
+<class 'sklearn.ensemble.forest.RandomTreesEmbedding'>,True,
 <class 'sklearn.ensemble.gradient_boosting.BaseGradientBoosting'>,FALSE,Base class
 <class 'sklearn.ensemble.gradient_boosting.GradientBoostingClassifier'>,,
 <class 'sklearn.ensemble.gradient_boosting.GradientBoostingRegressor'>,,
@@ -50,12 +50,12 @@ class,added,comment
 <class 'sklearn.feature_selection.univariate_selection.SelectFpr'>,,
 <class 'sklearn.feature_selection.univariate_selection.SelectFwe'>,,
 <class 'sklearn.feature_selection.univariate_selection.SelectKBest'>,,
-<class 'sklearn.feature_selection.univariate_selection.SelectPercentile'>,,
+<class 'sklearn.feature_selection.univariate_selection.SelectPercentile'>,True,
 <class 'sklearn.feature_selection.variance_threshold.VarianceThreshold'>,,
 <class 'sklearn.isotonic.IsotonicRegression'>,,
 <class 'sklearn.kernel_approximation.AdditiveChi2Sampler'>,,
 <class 'sklearn.kernel_approximation.Nystroem'>,,
-<class 'sklearn.kernel_approximation.RBFSampler'>,,
+<class 'sklearn.kernel_approximation.RBFSampler'>,True,
 <class 'sklearn.kernel_approximation.SkewedChi2Sampler'>,,
 <class 'sklearn.lda.LDA'>,,
 <class 'sklearn.linear_model.logistic.LogisticRegression'>,,
