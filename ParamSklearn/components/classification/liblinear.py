@@ -1,4 +1,3 @@
-import numpy as np
 import sklearn.svm
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
@@ -7,8 +6,10 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, \
     ForbiddenAndConjunction
 
-from ..classification_base import ParamSklearnClassificationAlgorithm
-from ...implementations.util import softmax
+from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.implementations.util import softmax
+from ParamSklearn.util import SPARSE, DENSE, PREDICTIONS
+
 
 class LibLinear_SVC(ParamSklearnClassificationAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
@@ -71,14 +72,18 @@ class LibLinear_SVC(ParamSklearnClassificationAlgorithm):
                 'prefers_data_scaled': True,
                 # Find out if this is good because of sparsity
                 'prefers_data_normalized': False,
+                'handles_regression': False,
+                'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': False,
                 'is_deterministic': False,
                 # TODO find out of this is right!
                 # this here suggests so http://scikit-learn.org/stable/modules/svm.html#tips-on-practical-use
                 'handles_sparse': True,
+                'input': (SPARSE, DENSE),
+                'output': PREDICTIONS,
                 # TODO find out what is best used here!
-                'preferred_dtype' : None}
+                'preferred_dtype': None}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

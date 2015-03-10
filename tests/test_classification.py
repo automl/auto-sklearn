@@ -1,8 +1,5 @@
 __author__ = 'feurerm'
 
-import copy
-import numpy as np
-import StringIO
 import unittest
 
 import sklearn.datasets
@@ -18,11 +15,32 @@ from ParamSklearn.components.classification_base import ParamSklearnClassificati
 from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
 import ParamSklearn.components.classification as classification_components
 import ParamSklearn.components.preprocessing as preprocessing_components
-from ParamSklearn.util import get_dataset
+from ParamSklearn.util import get_dataset, DENSE, SPARSE, PREDICTIONS
+
 
 class TestParamSklearnClassifier(unittest.TestCase):
     # TODO: test for both possible ways to initialize ParamSklearn
     # parameters and other...
+
+    def test_io_dict(self):
+        classifiers = classification_components._classifiers
+        for c in classifiers:
+            props = classifiers[c].get_properties()
+            self.assertIn('input', props)
+            self.assertIn('output', props)
+            inp = props['input']
+            output = props['output']
+
+            self.assertIsInstance(inp, tuple)
+            self.assertIsInstance(output, str)
+            for i in inp:
+                self.assertIn(i, (SPARSE, DENSE))
+            self.assertEqual(output, PREDICTIONS)
+            self.assertIn('handles_regression', props)
+            self.assertFalse(props['handles_regression'])
+            self.assertIn('handles_classification', props)
+            self.assertIn('handles_multiclass', props)
+            self.assertIn('handles_multilabel', props)
 
     def test_find_classifiers(self):
         classifiers = classification_components._classifiers
@@ -55,7 +73,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(86, len(hyperparameters))
+        self.assertEqual(91, len(hyperparameters))
         # The four parameters which are always active are classifier,
         # preprocessor, imputation strategy and scaling strategy
         self.assertEqual(len(hyperparameters) - 4, len(conditions))
@@ -93,21 +111,22 @@ class TestParamSklearnClassifier(unittest.TestCase):
 
         cs_sp = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
-        self.assertNotIn('extra_trees', str(cs_sp))
-        self.assertNotIn('gradient_boosting', str(cs_sp))
-        self.assertNotIn('random_forest', str(cs_sp))
+        self.assertIn('extra_trees', str(cs_sp))
+        self.assertIn('gradient_boosting', str(cs_sp))
+        self.assertIn('random_forest', str(cs_sp))
 
         cs_mc_ml = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'multilabel': True, 'multiclass': True})
         self.assertEqual(cs_ml, cs_mc_ml)
 
-        self.assertRaisesRegexp(ValueError,
-                                "No classifier to build a configuration space "
-                                "for...", ParamSklearnClassifier.
-                                get_hyperparameter_search_space,
-                                dataset_properties={'multilabel': True,
-                                                    'multiclass': True,
-                                                    'sparse': True})
+        # We now have a preprocessing method that handles this case
+        #self.assertRaisesRegexp(ValueError,
+        #                        "No classifier to build a configuration space "
+        #                        "for...", ParamSklearnClassifier.
+        #                        get_hyperparameter_search_space,
+        #                        dataset_properties={'multilabel': True,
+        #                                            'multiclass': True,
+        #                                            'sparse': True})
 
     @unittest.skip("test_check_random_state Not yet Implemented")
     def test_check_random_state(self):
