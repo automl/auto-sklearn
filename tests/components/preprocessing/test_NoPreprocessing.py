@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
 
-from ParamSklearn.components.preprocessing.NoPreprocessing import NoPreprocessing
+from ParamSklearn.components.preprocessing.no_peprocessing import NoPreprocessing
 from ParamSklearn.util import _test_preprocessing
 
 
