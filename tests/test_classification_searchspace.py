@@ -6,12 +6,13 @@ import numpy
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
-from ParamSklearn.components.classification.random_forest import RandomForest
 from ParamSklearn.components.classification.liblinear import LibLinear_SVC
+from ParamSklearn.components.classification.random_forest import RandomForest
 
 from ParamSklearn.components.preprocessing.pca import PCA
 from ParamSklearn.components.preprocessing.truncatedSVD import TruncatedSVD
-from ParamSklearn.components.preprocessing.no_peprocessing import NoPreprocessing
+from ParamSklearn.components.preprocessing.no_preprocessing import NoPreprocessing
+from ParamSklearn.components.preprocessing.random_trees_embedding import RandomTreesEmbedding
 
 from ParamSklearn.classification import ParamSklearnClassifier
 
@@ -23,42 +24,65 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
         preprocessors["pca"] = PCA  # dense
         classifiers = OrderedDict()
         classifiers["random_forest"] = RandomForest
-        m = ParamSklearnClassifier.get_match_array(preprocessors=preprocessors, classifiers=classifiers, sparse=True)
+        m = ParamSklearnClassifier.get_match_array(
+            preprocessors=preprocessors, classifiers=classifiers, sparse=True)
         self.assertEqual(numpy.sum(m), 0)
 
-        m = ParamSklearnClassifier.get_match_array(preprocessors=preprocessors, classifiers=classifiers, sparse=False)
+        m = ParamSklearnClassifier.get_match_array(
+            preprocessors=preprocessors, classifiers=classifiers, sparse=False)
         self.assertEqual(m, [[1]])
 
         preprocessors['TSVD'] = TruncatedSVD  # sparse
-        m = ParamSklearnClassifier.get_match_array(preprocessors=preprocessors, classifiers=classifiers, sparse=True)
+        m = ParamSklearnClassifier.get_match_array(
+            preprocessors=preprocessors, classifiers=classifiers, sparse=True)
         self.assertEqual(m[0], [0])  # pca
         self.assertEqual(m[1], [1])  # svd
 
-        m = ParamSklearnClassifier.get_match_array(preprocessors=preprocessors, classifiers=classifiers, sparse=False)
+        m = ParamSklearnClassifier.get_match_array(
+            preprocessors=preprocessors, classifiers=classifiers, sparse=False)
         self.assertEqual(m[0], [1])  # pca
         self.assertEqual(m[1], [0])  # svd
 
         preprocessors['none'] = NoPreprocessing  # sparse + dense
-        m = ParamSklearnClassifier.get_match_array(preprocessors=preprocessors, classifiers=classifiers, sparse=True)
+        m = ParamSklearnClassifier.get_match_array(
+            preprocessors=preprocessors, classifiers=classifiers, sparse=True)
         self.assertEqual(m[0, :], [0])  # pca
         self.assertEqual(m[1, :], [1])  # tsvd
         self.assertEqual(m[2, :], [0])  # none
 
-        m = ParamSklearnClassifier.get_match_array(preprocessors=preprocessors, classifiers=classifiers, sparse=False)
+        m = ParamSklearnClassifier.get_match_array(
+            preprocessors=preprocessors, classifiers=classifiers, sparse=False)
         self.assertEqual(m[0, :], [1])  # pca
         self.assertEqual(m[1, :], [0])  # tsvd
         self.assertEqual(m[2, :], [1])  # none
 
         classifiers['libsvm'] = LibLinear_SVC
-        m = ParamSklearnClassifier.get_match_array(preprocessors=preprocessors, classifiers=classifiers, sparse=False)
+        m = ParamSklearnClassifier.get_match_array(
+            preprocessors=preprocessors, classifiers=classifiers, sparse=False)
         self.assertListEqual(list(m[0, :]), [1, 1])  # pca
         self.assertListEqual(list(m[1, :]), [0, 0])  # tsvd
         self.assertListEqual(list(m[2, :]), [1, 1])  # none
 
-        m = ParamSklearnClassifier.get_match_array(preprocessors=preprocessors, classifiers=classifiers, sparse=True)
+        m = ParamSklearnClassifier.get_match_array(
+            preprocessors=preprocessors, classifiers=classifiers, sparse=True)
         self.assertListEqual(list(m[0, :]), [0, 0])  # pca
         self.assertListEqual(list(m[1, :]), [1, 1])  # tsvd
         self.assertListEqual(list(m[2, :]), [0, 1])  # none
+
+        preprocessors['rte'] = RandomTreesEmbedding
+        m = ParamSklearnClassifier.get_match_array(
+            preprocessors=preprocessors, classifiers=classifiers, sparse=False)
+        self.assertListEqual(list(m[0, :]), [1, 1])  # pca
+        self.assertListEqual(list(m[1, :]), [0, 0])  # tsvd
+        self.assertListEqual(list(m[2, :]), [1, 1])  # none
+        self.assertListEqual(list(m[3, :]), [0, 1])  # random trees embedding
+
+        m = ParamSklearnClassifier.get_match_array(
+            preprocessors=preprocessors, classifiers=classifiers, sparse=True)
+        self.assertListEqual(list(m[0, :]), [0, 0])  # pca
+        self.assertListEqual(list(m[1, :]), [1, 1])  # tsvd
+        self.assertListEqual(list(m[2, :]), [0, 1])  # none
+        self.assertListEqual(list(m[3, :]), [0, 0])  # random trees embedding
 
     def test_get_idx_to_keep(self):
         m = numpy.zeros([3, 4])

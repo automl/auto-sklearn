@@ -96,26 +96,25 @@ class ParamSklearnBaseEstimator(BaseEstimator):
         preprocessors_names = ["imputation", "rescaling",
                                self.configuration['preprocessor'].value]
         for preproc_name in preprocessors_names:
-            if preproc_name != "None":
-                preproc_params = {}
+            preproc_params = {}
 
-                for instantiated_hyperparameter in self.configuration:
-                    if not instantiated_hyperparameter.hyperparameter.name \
-                            .startswith(preproc_name):
-                        continue
-                    if isinstance(instantiated_hyperparameter,
-                                  InactiveHyperparameter):
-                        continue
+            for instantiated_hyperparameter in self.configuration:
+                if not instantiated_hyperparameter.hyperparameter.name \
+                        .startswith(preproc_name):
+                    continue
+                if isinstance(instantiated_hyperparameter,
+                              InactiveHyperparameter):
+                    continue
 
-                    name_ = instantiated_hyperparameter.hyperparameter.name. \
-                        split(":")[1]
-                    preproc_params[name_] = instantiated_hyperparameter.value
+                name_ = instantiated_hyperparameter.hyperparameter.name. \
+                    split(":")[1]
+                preproc_params[name_] = instantiated_hyperparameter.value
 
-                preproc_params.update(init_params_per_method[preproc_name])
-                preprocessor_object = components.preprocessing_components. \
-                    _preprocessors[preproc_name](random_state=self.random_state,
-                                                 **preproc_params)
-                steps.append((preproc_name, preprocessor_object))
+            preproc_params.update(init_params_per_method[preproc_name])
+            preprocessor_object = components.preprocessing_components. \
+                _preprocessors[preproc_name](random_state=self.random_state,
+                                             **preproc_params)
+            steps.append((preproc_name, preprocessor_object))
 
         # Extract Estimator Hyperparameters from the configuration object
         estimator_name = self.configuration[
@@ -324,7 +323,7 @@ class ParamSklearnBaseEstimator(BaseEstimator):
         preprocessor_choices = filter(lambda app: app not in always_active,
                                       available_preprocessors.keys())
         preprocessor = CategoricalHyperparameter("preprocessor",
-            ["None"] + preprocessor_choices, default='None')
+            preprocessor_choices, default='no_preprocessing')
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors.keys():
             preprocessor_configuration_space = available_preprocessors[name]. \

@@ -147,6 +147,8 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         for p in preproc_list:
             new_preproc[p] = preprocessors[p]
 
+        assert len(new_preproc) == m.shape[0]
+        assert len(new_class) == m.shape[1]
         return m, preproc_list, class_list, new_preproc, new_class
 
     @classmethod
@@ -187,7 +189,6 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
             components[name] = entry
 
         return components
-
 
     @classmethod
     def get_hyperparameter_search_space(cls, include_estimators=None,
@@ -247,7 +248,7 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
              matches.shape[0], matches.shape[1])
 
         if np.sum(matches) < (matches.shape[0] * matches.shape[1]):
-            matches, preprocessors_list, classifiers_list, preprocessors_list, classifiers = \
+            matches, preprocessors_list, classifiers_list, preprocessors, classifiers = \
                 ParamSklearnClassifier.sanitize_arrays(m=matches,
                                                        preprocessors_list=preprocessors_list,
                                                        classifiers_list=classifiers_list,
@@ -301,9 +302,9 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         # Combinations of tree-based models with feature learning:
         classifiers_ = ["extra_trees", "gradient_boosting",
                         "k_nearest_neighbors", "libsvm_svc", "random_forest"]
-        feature_learning_ = ["kitchen_sinks", "sparse_filtering"]
+        preproc_with_negative_X = ["kitchen_sinks", "sparse_filtering"]
 
-        for c, f in product(classifiers_, feature_learning_):
+        for c, f in product(classifiers_, preproc_with_negative_X):
             if c not in classifiers_list:
                 continue
             if f not in preprocessors_list:
@@ -322,7 +323,8 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         # it with standardization, features learning, pca
         classifiers_ = ["multinomial_nb", "bagged_multinomial_nb",
                        "bernoulli_nb"]
-        feature_learning_ = ["kitchen_sinks", "sparse_filtering", "pca"]
+        preproc_with_negative_X = ["kitchen_sinks", "sparse_filtering",
+                                   "pca", "truncatedSVD"]
         for c in classifiers_:
             if c not in classifiers_list:
                 continue
@@ -335,7 +337,7 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
             except:
                 pass
 
-        for c, f in product(classifiers_, feature_learning_):
+        for c, f in product(classifiers_, preproc_with_negative_X):
             if c not in classifiers_list:
                 continue
             if f not in preprocessors_list:

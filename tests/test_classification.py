@@ -9,6 +9,7 @@ import sklearn.svm
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
+from HPOlibConfigSpace.random_sampler import RandomSampler
 
 from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
@@ -67,6 +68,40 @@ class TestParamSklearnClassifier(unittest.TestCase):
             self.assertAlmostEqual(0.95999999999999996,
                 sklearn.metrics.accuracy_score(predictions, Y_test))
             scores = auto.predict_proba(X_test)
+
+    def test_configurations(self):
+        cs = ParamSklearnClassifier.get_hyperparameter_search_space()
+        sampler = RandomSampler(cs, 1)
+        for i in range(10):
+            config = sampler.sample_configuration()
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
+            cls = ParamSklearnClassifier(config, random_state=1)
+            try:
+                cls.fit(X_train, Y_train)
+                predictions = cls.predict(X_test)
+            except ValueError as e:
+                if "Floating-point under-/overflow occurred at epoch" in e.message:
+                    continue
+                else:
+                    raise e
+
+    def test_configurations_sparse(self):
+        cs = ParamSklearnClassifier.get_hyperparameter_search_space(
+            dataset_properties={'sparse': True})
+        sampler = RandomSampler(cs, 1)
+        for i in range(10):
+            config = sampler.sample_configuration()
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris',
+                                                           make_sparse=True)
+            cls = ParamSklearnClassifier(config, random_state=1)
+            try:
+                cls.fit(X_train, Y_train)
+                predictions = cls.predict(X_test)
+            except ValueError as e:
+                if "Floating-point under-/overflow occurred at epoch" in e.message:
+                    continue
+                else:
+                    raise e
 
     def test_get_hyperparameter_search_space(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space()
