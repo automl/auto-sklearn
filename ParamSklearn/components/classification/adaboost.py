@@ -66,8 +66,8 @@ class AdaboostClassifier(ParamSklearnClassificationAlgorithm):
                 'handles_multiclass': True,
                 'handles_multilabel': False,
                 'is_deterministic': True,
-                'handles_sparse': True,
-                'input': (SPARSE, DENSE),
+                'handles_sparse': False,
+                'input': (DENSE),
                 'output': PREDICTIONS,
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?

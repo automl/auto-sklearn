@@ -6,7 +6,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
 
 from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
-from ParamSklearn.util import DENSE, PREDICTIONS
+from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 
 
 class BernoulliNB(ParamSklearnClassificationAlgorithm):
@@ -55,7 +55,7 @@ class BernoulliNB(ParamSklearnClassificationAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
-                'input': (DENSE, ),
+                'input': (DENSE, SPARSE),
                 'output': PREDICTIONS,
                 'preferred_dtype': np.bool}
 
