@@ -276,7 +276,11 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                                'libsvm_svc']
         classifier_default = None
         for cd_ in classifier_defaults:
-            if cd_ in classifiers:
+            # Make sure that a classifier which can only handle dense is not
+            # selected as the default for a sparse dataset
+            no_preprocessing_idx = preprocessors_list.index("no_preprocessing")
+            cd_index = classifiers_list.index(cd_)
+            if cd_ in classifiers and matches[no_preprocessing_idx, cd_index] == 1:
                 classifier_default = cd_
                 break
         if classifier_default is None:
@@ -298,13 +302,29 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
             preproc_list=preprocessors_list,
             class_list=classifiers_list, matches=matches)
 
+        # A classifier which can handle sparse data after the densifier
+        for key in classifiers:
+            if SPARSE in classifiers[key].get_properties()['input']:
+                try:
+                    configuration_space.add_forbidden_clause(
+                        ForbiddenAndConjunction(
+                            ForbiddenEqualsClause(
+                                configuration_space.get_hyperparameter(
+                                    'classifier'), key),
+                            ForbiddenEqualsClause(
+                                configuration_space.get_hyperparameter(
+                                    'preprocessor'), 'densifier')
+                        ))
+                except:
+                    pass
+
         # which would take too long
         # Combinations of tree-based models with feature learning:
         classifiers_ = ["extra_trees", "gradient_boosting",
                         "k_nearest_neighbors", "libsvm_svc", "random_forest"]
-        preproc_with_negative_X = ["kitchen_sinks", "sparse_filtering"]
+        feature_learning = ["kitchen_sinks", "sparse_filtering"]
 
-        for c, f in product(classifiers_, preproc_with_negative_X):
+        for c, f in product(classifiers_, feature_learning):
             if c not in classifiers_list:
                 continue
             if f not in preprocessors_list:
