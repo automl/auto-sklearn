@@ -16,7 +16,7 @@ class TruncatedSVD(ParamSklearnPreprocessingAlgorithm):
         self.preprocessor = None
 
     def fit(self, X, Y):
-        target_dim = min(self.target_dim, X.shape[0])
+        target_dim = min(self.target_dim, X.shape[1] - 1)
         self.preprocessor = sklearn.decomposition.TruncatedSVD(
             target_dim, algorithm='arpack')
         self.preprocessor.fit(X, Y)
