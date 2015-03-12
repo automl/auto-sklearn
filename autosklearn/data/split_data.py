@@ -41,7 +41,8 @@ def get_CV_fold(X, Y, fold, folds, shuffle=True):
                          "be equal.")
 
     kf = sklearn.cross_validation.StratifiedKFold(Y, n_folds=folds,
-                                                  shuffle=shuffle)
+                                                  shuffle=shuffle,
+                                                  random_state=42)
     for idx, split in enumerate(kf):
         if idx == fold:
             break
