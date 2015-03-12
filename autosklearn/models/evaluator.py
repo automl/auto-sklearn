@@ -75,6 +75,8 @@ def calculate_score(solution, prediction, task_type, metric,
                                                      task=task_type)
             score["pac_metric"] = libscores.pac_metric(csolution, cprediction,
                                                        task=task_type)
+            score["acc_metric"] = libscores.acc_metric(csolution, cprediction,
+                                                       task=task_type)
 
     else:
         if task_type == "regression":
