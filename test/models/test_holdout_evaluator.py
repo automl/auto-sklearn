@@ -27,7 +27,6 @@ class Dummy(object):
 
 
 class HoldoutEvaluator_Test(unittest.TestCase):
-
     def test_evaluate_multiclass_classification(self):
         X_train, Y_train, X_test, Y_test = get_dataset('iris')
         X_valid = X_test[:25,]
@@ -188,6 +187,8 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         print "Number of times it was worse than random guessing:" + str(
             np.sum(err > 1))
 
+
+
     def test_evaluate_regression(self):
         X_train, Y_train, X_test, Y_test = get_dataset('boston')
 
@@ -232,8 +233,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         try:
             evaluator.fit()
             return True
-        except TypeError as e:
-            print e
         except ValueError as e:
             if "Floating-point under-/overflow occurred at epoch" in e.message:
                 return False

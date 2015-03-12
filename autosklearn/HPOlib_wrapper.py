@@ -96,6 +96,16 @@ def main(args, params):
     cv = args.get('cv')
     if cv is not None:
         cv = int(float(cv))
+
+    seed = args.get('seed')
+    if seed is not None:
+        seed = int(float(seed))
+    else:
+        seed = 1
+
+    fold = int(float(args['fold']))
+    folds = int(float(args['folds']))
+
     output_dir = os.getcwd()
 
     D = store_and_or_load_data(data_dir=input_dir, dataset=basename,
@@ -103,34 +113,60 @@ def main(args, params):
 
     cs = get_class(D.info).get_hyperparameter_search_space()
     configuration = configuration_space.Configuration(cs, **params)
+    metric = D.info['metric']
 
     # Train/test split
-    if cv is None and test is None:
-
+    if cv is None and test is None and folds == 1:
         evaluator = HoldoutEvaluator(D, configuration,
                                      with_predictions=True,
                                      all_scoring_functions=True,
-                                     output_y_test=True)
+                                     output_y_test=True,
+                                     seed=seed)
         evaluator.fit()
         evaluator.finish_up()
 
-    elif cv is None and test is not None:
-        evaluator = TestEvaluator(D, configuration)
+    elif cv is None and test is not None and folds == 1:
+        evaluator = TestEvaluator(D, configuration,
+                                  all_scoring_functions=True,
+                                  seed=seed)
         evaluator.fit()
-        score = evaluator.predict()
+        scores = evaluator.predict()
         duration = time.time() - evaluator.starttime
+
+        score = scores[metric]
+        additional_run_info = ";".join(["%s: %s" % (m_, value)
+                                        for m_, value in scores.items()])
+        additional_run_info += ";" + "duration: " + str(duration)
+
         print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % (
-            "SAT", abs(duration), score, evaluator.seed, "")
+            "SAT", abs(duration), score, evaluator.seed, additional_run_info)
 
     # CV on the whole dataset
-    elif cv is not None and test is None:
+    elif cv is not None and test is None and folds == 1:
         if test is not None:
             raise ValueError("Test mode not supported with CV.")
         evaluator = CVEvaluator(D, configuration, with_predictions=True,
                                 all_scoring_functions=True, output_y_test=True,
-                                cv_folds=cv)
+                                cv_folds=cv, seed=seed)
         evaluator.fit()
         evaluator.finish_up()
+
+    elif folds != 1 and cv is not None and folds == cv:
+        if test is not None:
+            raise ValueError("Test mode not supported with CV.")
+        evaluator = CVEvaluator(D, configuration, all_scoring_functions=True,
+                                cv_folds=cv, seed=seed)
+        evaluator.partial_fit(fold)
+        scores = evaluator.predict()
+        duration = time.time() - evaluator.starttime
+
+        score = scores[metric]
+        additional_run_info = ";".join(["%s: %s" % (m_, value)
+                                        for m_, value in scores.items()])
+        additional_run_info += ";" + "duration: " + str(duration)
+
+        print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % (
+            "SAT", abs(duration), score, evaluator.seed, additional_run_info)
 
     else:
         raise ValueError("Must choose a legal mode.")

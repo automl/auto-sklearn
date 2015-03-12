@@ -104,15 +104,3 @@ class CVEvaluator(Evaluator):
         if self.with_predictions:
             return err, Y_optimization_pred, Y_valid_pred, Y_test_pred
         return err
-
-    def nested_fit(self):
-        raise NotImplementedError()
-
-    def nested_predict(self):
-        raise NotImplementedError()
-
-    def partial_nested_fit(self, fold):
-        raise NotImplementedError()
-
-    def partial_nested_predict(self, fold):
-        raise NotImplementedError()
