@@ -60,7 +60,7 @@ class CVEvaluator_Test(unittest.TestCase):
             self.assertEqual(Y_valid_pred.shape[0], Y_valid.shape[0])
             self.assertEqual(Y_test_pred.shape[0], Y_test.shape[0])
             # Test some basic statistics of the dataset
-            if err[i] < 0.99999999:
+            if err[i] < 0.5:
                 self.assertTrue(0.3 < Y_valid_pred.mean() < 0.36666)
                 self.assertGreaterEqual(Y_valid_pred.std(), 0.04)
                 self.assertTrue(0.3 < Y_test_pred.mean() < 0.36666)
@@ -113,7 +113,7 @@ class CVEvaluator_Test(unittest.TestCase):
             self.assertEqual(Y_valid_pred.shape[0], Y_valid.shape[0])
             self.assertEqual(Y_test_pred.shape[0], Y_test.shape[0])
             # Test some basic statistics of the dataset
-            if err[i] < 0.999999:
+            if err[i] < 0.5:
                 self.assertTrue(0.3 < Y_valid_pred.mean() < 0.36666)
                 self.assertGreaterEqual(Y_valid_pred.std(), 0.04)
                 self.assertTrue(0.3 < Y_test_pred.mean() < 0.36666)
