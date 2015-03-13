@@ -326,8 +326,12 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                                 configuration_space.get_hyperparameter(
                                     'preprocessor'), 'densifier')
                         ))
-                except:
-                    pass
+                except ValueError as e:
+                    if e.message.startswith("Forbidden clause must be "
+                                            "instantiated with a legal "
+                                            "hyperparameter value for "
+                                            "'preprocessor"):
+                        pass
 
         # which would take too long
         # Combinations of tree-based models with feature learning:
@@ -346,7 +350,7 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                         "classifier"), c),
                     ForbiddenEqualsClause(configuration_space.get_hyperparameter(
                         "preprocessor"), f)))
-            except:
+            except KeyError:
                 pass
 
         # Won't work
@@ -365,7 +369,7 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                         "rescaling:strategy"), "standard"),
                     ForbiddenEqualsClause(configuration_space.get_hyperparameter(
                         "classifier"), c)))
-            except:
+            except KeyError:
                 pass
 
         for c, f in product(classifiers_, preproc_with_negative_X):
@@ -379,7 +383,7 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                         "preprocessor"), f),
                     ForbiddenEqualsClause(configuration_space.get_hyperparameter(
                         "classifier"), c)))
-            except:
+            except KeyError:
                 pass
 
         return configuration_space
