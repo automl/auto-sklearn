@@ -2,11 +2,10 @@ import numpy as np
 import sklearn.linear_model
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter, Constant
+from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
 
-from ..regression_base import ParamSklearnRegressionAlgorithm
+from ParamSklearn.components.regression_base import ParamSklearnRegressionAlgorithm
+from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 
 
 class RidgeRegression(ParamSklearnRegressionAlgorithm):
@@ -50,9 +49,15 @@ class RidgeRegression(ParamSklearnRegressionAlgorithm):
                 'handles_numerical_features': True,
                 'prefers_data_scaled': True,
                 # TODO find out if this is good because of sparcity...
+                'handles_regression': True,
+                'handles_classification': False,
+                'handles_multiclass': False,
+                'handles_multilabel': False,
                 'prefers_data_normalized': True,
                 'is_deterministic': True,
                 'handles_sparse': True,
+                'input': (SPARSE, DENSE),
+                'output': PREDICTIONS,
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}

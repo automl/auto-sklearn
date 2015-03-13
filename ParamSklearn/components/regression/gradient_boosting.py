@@ -2,12 +2,11 @@ import numpy as np
 import sklearn.ensemble
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.conditions import InCondition
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter, Constant
+    UniformIntegerHyperparameter, CategoricalHyperparameter, Constant
 
-from ..regression_base import ParamSklearnRegressionAlgorithm
+from ParamSklearn.components.regression_base import ParamSklearnRegressionAlgorithm
+from ParamSklearn.util import DENSE, PREDICTIONS
 
 
 class GradientBoosting(ParamSklearnRegressionAlgorithm):
@@ -111,9 +110,15 @@ class GradientBoosting(ParamSklearnRegressionAlgorithm):
                 'handles_numerical_features': True,
                 'prefers_data_scaled': False,
                 # TODO find out if this is good because of sparcity...
+                'handles_regression': True,
+                'handles_classification': False,
+                'handles_multiclass': False,
+                'handles_multilabel': False,
                 'prefers_data_normalized': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
+                'input': (DENSE, ),
+                'output': PREDICTIONS,
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}

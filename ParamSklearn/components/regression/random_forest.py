@@ -5,9 +5,11 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
-from ..regression_base import ParamSklearnRegressionAlgorithm
+from ParamSklearn.components.regression_base import ParamSklearnRegressionAlgorithm
+from ParamSklearn.util import DENSE, PREDICTIONS
 # get our own forests to replace the sklearn ones
-from ...implementations import forest
+from ParamSklearn.implementations import forest
+
 
 class RandomForest(ParamSklearnRegressionAlgorithm):
     def __init__(self, n_estimators, criterion, max_features,
@@ -98,9 +100,15 @@ class RandomForest(ParamSklearnRegressionAlgorithm):
                 'handles_numerical_features': True,
                 'prefers_data_scaled': False,
                 # TODO find out if this is good because of sparcity...
+                'handles_regression': True,
+                'handles_classification': False,
+                'handles_multiclass': False,
+                'handles_multilabel': False,
                 'prefers_data_normalized': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
+                'input': (DENSE, ),
+                'output': PREDICTIONS,
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}

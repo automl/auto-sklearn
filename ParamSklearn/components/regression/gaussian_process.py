@@ -1,16 +1,13 @@
-import copy
-
 import numpy as np
 
 import sklearn.gaussian_process 
 import sklearn.preprocessing
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter, Constant
+from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
 
-from ..regression_base import ParamSklearnRegressionAlgorithm
+from ParamSklearn.components.regression_base import ParamSklearnRegressionAlgorithm
+from ParamSklearn.util import DENSE, PREDICTIONS
 
 
 class GaussianProcess(ParamSklearnRegressionAlgorithm):
@@ -59,8 +56,14 @@ class GaussianProcess(ParamSklearnRegressionAlgorithm):
                 'prefers_data_scaled': True,
                 # TODO find out if this is good because of sparcity...
                 'prefers_data_normalized': True,
+                'handles_regression': True,
+                'handles_classification': False,
+                'handles_multiclass': False,
+                'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
+                'input': (DENSE, ),
+                'output': PREDICTIONS,
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}

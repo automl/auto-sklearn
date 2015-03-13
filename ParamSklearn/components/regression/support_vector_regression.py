@@ -9,7 +9,8 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UnParametrizedHyperparameter
 
 
-from ..regression_base import ParamSklearnRegressionAlgorithm
+from ParamSklearn.components.regression_base import ParamSklearnRegressionAlgorithm
+from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 
 # Something is wrong here...
 """
@@ -82,9 +83,15 @@ class SupportVectorRegression(ParamSklearnRegressionAlgorithm):
                 'handles_numerical_features': True,
                 'prefers_data_scaled': True,
                 # TODO find out if this is good because of sparcity...
+                'handles_regression': True,
+                'handles_classification': False,
+                'handles_multiclass': False,
+                'handles_multilabel': False,
                 'prefers_data_normalized': True,
                 'is_deterministic': True,
                 'handles_sparse': True,
+                'input': (SPARSE, DENSE),
+                'ouput': PREDICTIONS,
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}
