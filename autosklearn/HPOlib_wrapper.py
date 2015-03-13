@@ -25,7 +25,7 @@ from autosklearn.data.data_manager import DataManager
 from autosklearn.models.holdout_evaluator import HoldoutEvaluator
 from autosklearn.models.cv_evaluator import CVEvaluator
 from autosklearn.models.test_evaluator import TestEvaluator
-from autosklearn.models.paramsklearn import get_class
+from autosklearn.models.paramsklearn import get_configuration_space
 
 
 def store_and_or_load_data(outputdir, dataset, data_dir):
@@ -42,7 +42,8 @@ def store_and_or_load_data(outputdir, dataset, data_dir):
         # It is not yet sure, whether the file already exists
         try:
             if not os.path.exists(save_path):
-                D = DataManager(dataset, data_dir, verbose=True)
+                D = DataManager(dataset, data_dir, verbose=True,
+                                encode_labels=True)
                 fh = open(save_path, 'w')
                 pickle.dump(D, fh, -1)
                 fh.close()
@@ -82,6 +83,8 @@ def main(args, params):
     * 1/3 test split: useful to evaluate a configuration
     * cv on 2/3 train split: useful to optimize hyperparameters in a training
       mode before testing a configuration on the 1/3 test split.
+
+    It must by no means be used for the Auto part of the competition!
     """
 
     for key in params:
@@ -111,7 +114,7 @@ def main(args, params):
     D = store_and_or_load_data(data_dir=input_dir, dataset=basename,
                                outputdir=output_dir)
 
-    cs = get_class(D.info).get_hyperparameter_search_space()
+    cs = get_configuration_space(D.info)
     configuration = configuration_space.Configuration(cs, **params)
     metric = D.info['metric']
 

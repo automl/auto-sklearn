@@ -96,7 +96,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
             self.assertIsInstance(err[-1], dict)
             for key in err[-1]:
-                self.assertEqual(len(err[-1]), 4)
+                self.assertEqual(len(err[-1]), 5)
                 self.assertTrue(np.isfinite(err[-1][key]))
                 self.assertGreaterEqual(err[-1][key], 0.0)
 

@@ -221,14 +221,14 @@ class DataManager:
 
         if any(encoding_mask):
             encoder = OneHotEncoder(categorical_features=encoding_mask,
-                                    dtype=np.float64, sparse=False)
+                                    dtype=np.float64, sparse=sparse)
             self.data['X_train'] = encoder.fit_transform(self.data['X_train'])
             if 'X_valid' in self.data:
                 self.data['X_valid'] = encoder.transform(self.data['X_valid'])
             if 'X_test' in self.data:
                 self.data['X_test'] = encoder.transform(self.data['X_test'])
 
-            if not sparse and predicted_RAM_usage > 1000:
+            if not sparse:
                 self.data['X_train'] = self.data['X_train'].todense()
                 if 'X_valid' in self.data:
                     self.data['X_valid'] = self.data['X_valid'].todense()
@@ -236,6 +236,7 @@ class DataManager:
                     self.data['X_test'] = self.data['X_test'].todense()
 
             self.encoder = encoder
+            self.info['is_sparse'] = 1 if sparse else 0
 
     def loadType (self, filename, verbose=True):
         ''' Get the variable types'''
