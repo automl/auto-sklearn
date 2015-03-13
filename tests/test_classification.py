@@ -148,6 +148,29 @@ class TestParamSklearnClassifier(unittest.TestCase):
                                 include_preprocessors=['truncatedSVD'],
                                 dataset_properties={'sparse':True})
 
+        # It must also be catched that no classifiers which can handle sparse
+        #  data are located behind the densifier
+        self.assertRaisesRegexp(ValueError, "Configuration:\n"
+            "  classifier, Value: liblinear\n"
+            "  imputation:strategy, Value: mean\n"
+            "  liblinear:C, Value: 1.000000\n"
+            "  liblinear:class_weight, Value: None\n"
+            "  liblinear:dual, Constant: False\n"
+            "  liblinear:fit_intercept, Constant: True\n"
+            "  liblinear:intercept_scaling, Constant: 1\n"
+            "  liblinear:loss, Value: l2\n"
+            "  liblinear:multi_class, Constant: ovr\n"
+            "  liblinear:penalty, Value: l2\n"
+            "  liblinear:tol, Value: 0.000100\n"
+            "  preprocessor, Value: densifier\n"
+            "  rescaling:strategy, Value: min/max\n"
+            "violates forbidden clause \(Forbidden: classifier == liblinear &&"
+            " Forbidden: preprocessor == densifier\)",
+                                ParamSklearnClassifier.get_hyperparameter_search_space,
+                                include_estimators=['liblinear'],
+                                include_preprocessors=['densifier'],
+                                dataset_properties={'sparse': True})
+
     def test_get_hyperparameter_search_space_dataset_properties(self):
         cs_mc = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'multiclass': True})

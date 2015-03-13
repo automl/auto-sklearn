@@ -332,6 +332,8 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                                             "hyperparameter value for "
                                             "'preprocessor"):
                         pass
+                    else:
+                        raise e
 
         # which would take too long
         # Combinations of tree-based models with feature learning:
