@@ -15,6 +15,7 @@ from ParamSklearn.components.preprocessing.no_preprocessing import NoPreprocessi
 from ParamSklearn.components.preprocessing.random_trees_embedding import RandomTreesEmbedding
 
 from ParamSklearn.classification import ParamSklearnClassifier
+import ParamSklearn.create_searchspace_util
 
 class TestCreateClassificationSearchspace(unittest.TestCase):
 
@@ -24,61 +25,71 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
         preprocessors["pca"] = PCA  # dense
         classifiers = OrderedDict()
         classifiers["random_forest"] = RandomForest
-        m = ParamSklearnClassifier.get_match_array(
-            preprocessors=preprocessors, classifiers=classifiers, sparse=True)
+        m = ParamSklearn.create_searchspace_util.get_match_array(
+            preprocessors=preprocessors, estimators=classifiers, sparse=True,
+            pipeline=ParamSklearnClassifier._get_pipeline())
         self.assertEqual(numpy.sum(m), 0)
 
-        m = ParamSklearnClassifier.get_match_array(
-            preprocessors=preprocessors, classifiers=classifiers, sparse=False)
+        m = ParamSklearn.create_searchspace_util.get_match_array(
+            preprocessors=preprocessors, estimators=classifiers, sparse=False,
+            pipeline=ParamSklearnClassifier._get_pipeline())
         self.assertEqual(m, [[1]])
 
         preprocessors['TSVD'] = TruncatedSVD  # sparse
-        m = ParamSklearnClassifier.get_match_array(
-            preprocessors=preprocessors, classifiers=classifiers, sparse=True)
+        m = ParamSklearn.create_searchspace_util.get_match_array(
+            preprocessors=preprocessors, estimators=classifiers, sparse=True,
+            pipeline=ParamSklearnClassifier._get_pipeline())
         self.assertEqual(m[0], [0])  # pca
         self.assertEqual(m[1], [1])  # svd
 
-        m = ParamSklearnClassifier.get_match_array(
-            preprocessors=preprocessors, classifiers=classifiers, sparse=False)
+        m = ParamSklearn.create_searchspace_util.get_match_array(
+            preprocessors=preprocessors, estimators=classifiers, sparse=False,
+            pipeline=ParamSklearnClassifier._get_pipeline())
         self.assertEqual(m[0], [1])  # pca
         self.assertEqual(m[1], [0])  # svd
 
         preprocessors['none'] = NoPreprocessing  # sparse + dense
-        m = ParamSklearnClassifier.get_match_array(
-            preprocessors=preprocessors, classifiers=classifiers, sparse=True)
+        m = ParamSklearn.create_searchspace_util.get_match_array(
+            preprocessors=preprocessors, estimators=classifiers, sparse=True,
+            pipeline=ParamSklearnClassifier._get_pipeline())
         self.assertEqual(m[0, :], [0])  # pca
         self.assertEqual(m[1, :], [1])  # tsvd
         self.assertEqual(m[2, :], [0])  # none
 
-        m = ParamSklearnClassifier.get_match_array(
-            preprocessors=preprocessors, classifiers=classifiers, sparse=False)
+        m = ParamSklearn.create_searchspace_util.get_match_array(
+            preprocessors=preprocessors, estimators=classifiers, sparse=False,
+            pipeline=ParamSklearnClassifier._get_pipeline())
         self.assertEqual(m[0, :], [1])  # pca
         self.assertEqual(m[1, :], [0])  # tsvd
         self.assertEqual(m[2, :], [1])  # none
 
         classifiers['libsvm'] = LibLinear_SVC
-        m = ParamSklearnClassifier.get_match_array(
-            preprocessors=preprocessors, classifiers=classifiers, sparse=False)
+        m = ParamSklearn.create_searchspace_util.get_match_array(
+            preprocessors=preprocessors, estimators=classifiers, sparse=False,
+            pipeline=ParamSklearnClassifier._get_pipeline())
         self.assertListEqual(list(m[0, :]), [1, 1])  # pca
         self.assertListEqual(list(m[1, :]), [0, 0])  # tsvd
         self.assertListEqual(list(m[2, :]), [1, 1])  # none
 
-        m = ParamSklearnClassifier.get_match_array(
-            preprocessors=preprocessors, classifiers=classifiers, sparse=True)
+        m = ParamSklearn.create_searchspace_util.get_match_array(
+            preprocessors=preprocessors, estimators=classifiers, sparse=True,
+            pipeline=ParamSklearnClassifier._get_pipeline())
         self.assertListEqual(list(m[0, :]), [0, 0])  # pca
         self.assertListEqual(list(m[1, :]), [1, 1])  # tsvd
         self.assertListEqual(list(m[2, :]), [0, 1])  # none
 
         preprocessors['rte'] = RandomTreesEmbedding
-        m = ParamSklearnClassifier.get_match_array(
-            preprocessors=preprocessors, classifiers=classifiers, sparse=False)
+        m = ParamSklearn.create_searchspace_util.get_match_array(
+            preprocessors=preprocessors, estimators=classifiers, sparse=False,
+            pipeline=ParamSklearnClassifier._get_pipeline())
         self.assertListEqual(list(m[0, :]), [1, 1])  # pca
         self.assertListEqual(list(m[1, :]), [0, 0])  # tsvd
         self.assertListEqual(list(m[2, :]), [1, 1])  # none
         self.assertListEqual(list(m[3, :]), [0, 1])  # random trees embedding
 
-        m = ParamSklearnClassifier.get_match_array(
-            preprocessors=preprocessors, classifiers=classifiers, sparse=True)
+        m = ParamSklearn.create_searchspace_util.get_match_array(
+            preprocessors=preprocessors, estimators=classifiers, sparse=True,
+            pipeline=ParamSklearnClassifier._get_pipeline())
         self.assertListEqual(list(m[0, :]), [0, 0])  # pca
         self.assertListEqual(list(m[1, :]), [1, 1])  # tsvd
         self.assertListEqual(list(m[2, :]), [0, 1])  # none
@@ -86,7 +97,7 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
 
     def test_get_idx_to_keep(self):
         m = numpy.zeros([3, 4])
-        col, row = ParamSklearnClassifier._get_idx_to_keep(m)
+        col, row = ParamSklearn.create_searchspace_util._get_idx_to_keep(m)
         self.assertListEqual(col, [])
         self.assertListEqual(row, [])
 
@@ -99,12 +110,11 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
             row_idx = numpy.random.randint(low=0, high=100, size=1)[0]
             r_keep.add(row_idx)
             m[row_idx, col_idx] = 1
-            col, row = ParamSklearnClassifier._get_idx_to_keep(m)
+            col, row = ParamSklearn.create_searchspace_util._get_idx_to_keep(m)
             self.assertListEqual(col, sorted(c_keep))
             self.assertListEqual(row, sorted(r_keep))
             [self.assertTrue(c < m.shape[1]) for c in c_keep]
             [self.assertTrue(r < m.shape[0]) for r in r_keep]
-
 
     def test_sanitize_arrays(self):
         m = numpy.zeros([2, 3])
@@ -114,7 +124,11 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
         classifiers = OrderedDict([['ca', 1], ['cb', 2], ['cc', 3]])
 
         # all zeros -> empty
-        new_m, new_preprocessors_list, new_classifier_list, new_preproc, new_class = ParamSklearnClassifier.sanitize_arrays(m=m, preprocessors=preprocessors, preprocessors_list=preprocessors_list, classifiers=classifiers, classifiers_list=classifier_list)
+        new_m, new_preprocessors_list, new_classifier_list, new_preproc, new_class = \
+            ParamSklearn.create_searchspace_util.sanitize_arrays(
+                m=m, preprocessors=preprocessors,
+                preprocessors_list=preprocessors_list, estimators=classifiers,
+                estimators_list=classifier_list)
         self.assertEqual(len(new_m), 0)
         self.assertTrue(len(new_classifier_list) == len(new_preprocessors_list) == 0)
         self.assertTrue(len(new_preproc) == len(new_class) == 0)
@@ -124,7 +138,11 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
             class_idx = numpy.random.randint(low=0, high=m.shape[1], size=1)[0]
             pre_idx = numpy.random.randint(low=0, high=m.shape[0], size=1)[0]
             m[pre_idx, class_idx] = 1
-            new_m, new_preprocessors_list, new_classifier_list, new_preproc, new_class = ParamSklearnClassifier.sanitize_arrays(m=m, preprocessors=preprocessors, preprocessors_list=preprocessors_list, classifiers=classifiers, classifiers_list=classifier_list)
+            new_m, new_preprocessors_list, new_classifier_list, new_preproc, new_class = \
+                ParamSklearn.create_searchspace_util.sanitize_arrays(
+                    m=m, preprocessors=preprocessors,
+                    preprocessors_list=preprocessors_list,
+                    estimators=classifiers, estimators_list=classifier_list)
             self.assertIn(preprocessors_list[pre_idx], new_preprocessors_list)
             self.assertIn(preprocessors_list[pre_idx], preprocessors)
             self.assertIn(classifier_list[class_idx], new_classifier_list)
@@ -132,7 +150,11 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
             self.assertTrue(new_m.shape[0] == new_m.shape[1] == 1)
 
         m = numpy.array([[1, 0, 0], [0, 1, 0]])
-        new_m, new_preprocessors_list, new_classifier_list, new_preproc, new_class = ParamSklearnClassifier.sanitize_arrays(m=m, preprocessors=preprocessors, preprocessors_list=preprocessors_list, classifiers=classifiers, classifiers_list=classifier_list)
+        new_m, new_preprocessors_list, new_classifier_list, new_preproc, new_class = \
+            ParamSklearn.create_searchspace_util.sanitize_arrays(
+                m=m, preprocessors=preprocessors,
+                preprocessors_list=preprocessors_list, estimators=classifiers,
+                estimators_list=classifier_list)
         self.assertListEqual(preprocessors_list, new_preprocessors_list)
         [self.assertIn(p, preprocessors) for p in preprocessors_list]
         self.assertListEqual(classifier_list[:-1], new_classifier_list)
@@ -145,16 +167,22 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
         preprocessors_list = ['pa', 'pb']
         classifier_list = ['ca', 'cb', 'cc']
         cs = ConfigurationSpace()
-        preprocessor = CategoricalHyperparameter(name='preprocessor', choices=preprocessors_list)
-        classifier = CategoricalHyperparameter(name='classifier', choices=classifier_list)
+        preprocessor = CategoricalHyperparameter(name='preprocessor',
+                                                 choices=preprocessors_list)
+        classifier = CategoricalHyperparameter(name='classifier',
+                                               choices=classifier_list)
         cs.add_hyperparameter(preprocessor)
         cs.add_hyperparameter(classifier)
-        new_cs = ParamSklearnClassifier.add_forbidden(conf_space=cs, preproc_list=preprocessors_list, class_list=classifier_list, matches=m)
+        new_cs = ParamSklearn.create_searchspace_util.add_forbidden(
+            conf_space=cs, preproc_list=preprocessors_list,
+            est_list=classifier_list, matches=m, est_type="classifier")
         self.assertEqual(len(new_cs.forbidden_clauses), 0)
         self.assertIsInstance(new_cs, ConfigurationSpace)
 
         m[0, 0] = 0
-        new_cs = ParamSklearnClassifier.add_forbidden(conf_space=cs, preproc_list=preprocessors_list, class_list=classifier_list, matches=m)
+        new_cs = ParamSklearn.create_searchspace_util.add_forbidden(
+            conf_space=cs, preproc_list=preprocessors_list,
+            est_list=classifier_list, matches=m, est_type="classifier")
         self.assertEqual(len(new_cs.forbidden_clauses), 1)
         self.assertEqual(new_cs.forbidden_clauses[0].components[0].value, 'ca')
         self.assertEqual(new_cs.forbidden_clauses[0].components[1].value, 'pa')
