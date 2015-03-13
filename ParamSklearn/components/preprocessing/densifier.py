@@ -1,7 +1,7 @@
 from scipy import sparse
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
+from HPOlibConfigSpace.hyperparameters import Constant
 
 from ParamSklearn.components.preprocessor_base import \
     ParamSklearnPreprocessingAlgorithm
@@ -9,8 +9,7 @@ from ParamSklearn.util import DENSE, SPARSE
 
 
 class Densifier(ParamSklearnPreprocessingAlgorithm):
-    def __init__(self, densify, random_state):
-        self.densify = bool(densify)
+    def __init__(self, random_state):
         self.random_state = random_state
 
     def fit(self, X, Y):
@@ -42,9 +41,6 @@ class Densifier(ParamSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
-        densify = CategoricalHyperparameter("densify", ["False", "True"],
-                                            default="False")
-        cs.add_hyperparameter(densify)
         return cs
 
     def __str__(self):

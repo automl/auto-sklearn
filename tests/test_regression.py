@@ -56,7 +56,7 @@ class TestParamSKlearnRegressor(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(38, len(hyperparameters))
+        self.assertEqual(37, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 4, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
