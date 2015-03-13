@@ -71,12 +71,12 @@ class MetaLearning(object):
 
         # Concatenate the metafeatures!
         mf = self._metafeatures_labels
-        mf.metafeature_values.extend(
+        mf.metafeature_values.update(
             self._metafeatures_encoded_labels.metafeature_values)
         self.mf = mf
 
         if not all([np.isfinite(mf.value)
-                    for mf in self.mf.metafeature_values
+                    for mf in self.mf.metafeature_values.values()
                     if isinstance(mf.value, float)]):
             print "%s contains non-finite metafeatures!" % self.mf
             return []
