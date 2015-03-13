@@ -10,7 +10,8 @@ from HPOlibConfigSpace.forbidden import ForbiddenAndConjunction
 
 from ParamSklearn import components as components
 from ParamSklearn.base import ParamSklearnBaseEstimator
-from ParamSklearn.util import SPARSE, DENSE, INPUT
+from ParamSklearn.util import SPARSE
+import ParamSklearn.create_searchspace_util
 
 
 class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
@@ -78,99 +79,8 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         return self._pipeline.steps[-1][-1].predict_proba(Xt)
 
     @classmethod
-    def get_match_array(cls, preprocessors, classifiers, sparse):
-        # Now select combinations that work
-        # We build a binary matrix, where a 1 indicates, that a combination
-        # work on this dataset based in the dataset and the input/output formats
-        # A 'zero'-row (column) is an unusable preprocessor (classifier)
-        # A single zero results in an forbidden condition
-        preprocessors_list = preprocessors.keys()
-        classifiers_list = classifiers.keys()
-        matches = np.zeros([len(preprocessors), len(classifiers)])
-        for pidx, p in enumerate(preprocessors_list):
-            p_in = preprocessors[p].get_properties()['input']
-            p_out = preprocessors[p].get_properties()['output']
-            if p in cls._get_pipeline():
-                continue
-            elif sparse and SPARSE not in p_in:
-                continue
-            elif not sparse and DENSE not in p_in:
-                continue
-            for cidx, c in enumerate(classifiers_list):
-                c_in = classifiers[c].get_properties()['input']
-                if p_out == INPUT:
-                    # Preprocessor does not change the format
-                    if (sparse and SPARSE in c_in) or \
-                            (not sparse and DENSE in c_in):
-                        # Classifier input = Dataset format
-                        matches[pidx, cidx] = 1
-                        continue
-                    else:
-                        # These won't work
-                        continue
-                elif p_out == DENSE and DENSE in c_in:
-                    matches[pidx, cidx] = 1
-                    continue
-                elif p_out == SPARSE and SPARSE in c_in:
-                    matches[pidx, cidx] = 1
-                    continue
-                else:
-                    # These won't work
-                    continue
-        return matches
-
-    @classmethod
-    def _get_idx_to_keep(cls, m):
-        # Returns all rows and cols where matches contains not only zeros
-        keep_row = [idx for idx in range(m.shape[0]) if np.sum(m[idx, :]) != 0]
-        keep_col = [idx for idx in range(m.shape[1]) if np.sum(m[:, idx]) != 0]
-        return keep_col, keep_row
-
-    @classmethod
-    def sanitize_arrays(cls, m, preprocessors_list, classifiers_list,
-                        preprocessors, classifiers):
-        assert len(preprocessors_list) == len(preprocessors.keys())
-        assert len(classifiers_list) == len(classifiers.keys())
-        assert isinstance(m, np.ndarray)
-        # remove components that are not usable for this problem
-        keep_col, keep_row = ParamSklearnClassifier._get_idx_to_keep(m)
-
-        m = m[keep_row, :]
-        m = m[:, keep_col]
-        preproc_list = [preprocessors_list[p] for p in keep_row]
-        class_list = [classifiers_list[p] for p in keep_col]
-
-        new_class = dict()
-        for c in class_list:
-            new_class[c] = classifiers[c]
-        new_preproc = dict()
-        for p in preproc_list:
-            new_preproc[p] = preprocessors[p]
-
-        assert len(new_preproc) == m.shape[0]
-        assert len(new_class) == m.shape[1]
-        return m, preproc_list, class_list, new_preproc, new_class
-
-    @classmethod
-    def add_forbidden(cls, conf_space, preproc_list, class_list, matches):
-        for pdx, p in enumerate(preproc_list):
-            if np.sum(matches[pdx, :]) == matches.shape[1]:
-                continue
-            for cdx, c in enumerate(class_list):
-                if matches[pdx, cdx] == 0:
-                    try:
-                        conf_space.add_forbidden_clause(ForbiddenAndConjunction(
-                            ForbiddenEqualsClause(conf_space.get_hyperparameter(
-                                "classifier"), c),
-                            ForbiddenEqualsClause(conf_space.get_hyperparameter(
-                                "preprocessor"), p)))
-                    except:
-                        pass
-        return conf_space
-
-    @classmethod
     def get_available_components(cls, available_comp, data_prop, inc, exc):
-        components = OrderedDict()
+        components_dict = OrderedDict()
         for name in available_comp:
             if inc is not None and name not in inc:
                 continue
@@ -186,9 +96,9 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
             if data_prop.get('multilabel') is True and available_comp[name]. \
                     get_properties()['handles_multilabel'] is False:
                 continue
-            components[name] = entry
+            components_dict[name] = entry
 
-        return components
+        return components_dict
 
     @classmethod
     def get_hyperparameter_search_space(cls, include_estimators=None,
@@ -206,7 +116,8 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                              "exclude_preprocessors cannot be used together.")
 
         if dataset_properties is None or not isinstance(dataset_properties, dict):
-            dataset_properties = {}
+            dataset_properties = dict()
+
         if 'sparse' not in dataset_properties:
             # This dataset is probaby dense
             dataset_properties['sparse'] = False
@@ -234,9 +145,9 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
 
         preprocessors_list = preprocessors.keys()
         classifiers_list = classifiers.keys()
-        matches = ParamSklearnClassifier.get_match_array(preprocessors=preprocessors,
-                                                         classifiers=classifiers,
-                                                         sparse=dataset_properties.get('sparse'))
+        matches = ParamSklearn.create_searchspace_util.get_match_array(
+            preprocessors=preprocessors, estimators=classifiers,
+            sparse=dataset_properties.get('sparse'), pipeline=cls._get_pipeline())
 
         # Now we have only legal preprocessors/classifiers we combine them
         # Simple sanity checks
@@ -249,11 +160,10 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
 
         if np.sum(matches) < (matches.shape[0] * matches.shape[1]):
             matches, preprocessors_list, classifiers_list, preprocessors, classifiers = \
-                ParamSklearnClassifier.sanitize_arrays(m=matches,
-                                                       preprocessors_list=preprocessors_list,
-                                                       classifiers_list=classifiers_list,
-                                                       preprocessors=preprocessors,
-                                                       classifiers=classifiers)
+                ParamSklearn.create_searchspace_util.sanitize_arrays(
+                    m=matches, preprocessors_list=preprocessors_list,
+                    estimators_list=classifiers_list,
+                    preprocessors=preprocessors, estimators=classifiers)
 
         # Sanity checks
         assert len(preprocessors_list) > 0, "No valid preprocessors found"
@@ -308,10 +218,9 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
 
         # And now add forbidden parameter configurations
         # According to matches
-        configuration_space = ParamSklearnClassifier.add_forbidden(
-            conf_space=configuration_space,
-            preproc_list=preprocessors_list,
-            class_list=classifiers_list, matches=matches)
+        configuration_space = ParamSklearn.create_searchspace_util.add_forbidden(
+            conf_space=configuration_space, preproc_list=preprocessors_list,
+            est_list=classifiers_list, matches=matches, est_type="classifier")
 
         # A classifier which can handle sparse data after the densifier
         for key in classifiers:
@@ -353,7 +262,7 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         # Multinomial NB does not work with negative values, don't use
         # it with standardization, features learning, pca
         classifiers_ = ["multinomial_nb", "bagged_multinomial_nb",
-                       "bernoulli_nb"]
+                        "bernoulli_nb"]
         preproc_with_negative_X = ["kitchen_sinks", "sparse_filtering",
                                    "pca", "truncatedSVD"]
         for c in classifiers_:
