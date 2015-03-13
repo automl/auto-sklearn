@@ -227,6 +227,7 @@ class ParamSklearnBaseEstimator(BaseEstimator):
     def get_hyperparameter_search_space(cls, estimator_name,
                                          default_estimator,
                                          estimator_components,
+                                         default_preprocessor,
                                          preprocessor_components,
                                          dataset_properties,
                                          always_active):
@@ -323,7 +324,7 @@ class ParamSklearnBaseEstimator(BaseEstimator):
         preprocessor_choices = filter(lambda app: app not in always_active,
                                       available_preprocessors.keys())
         preprocessor = CategoricalHyperparameter("preprocessor",
-            preprocessor_choices, default='no_preprocessing')
+            preprocessor_choices, default=default_preprocessor)
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors.keys():
             preprocessor_configuration_space = available_preprocessors[name]. \

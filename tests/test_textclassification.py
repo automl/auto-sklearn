@@ -11,7 +11,7 @@ class TextClassificationTest(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(90, len(hyperparameters))
+        self.assertEqual(89, len(hyperparameters))
         # The three parameters which are always active are classifier,
         # preprocessor and imputation strategy
         self.assertEqual(len(hyperparameters) - 3, len(conditions))

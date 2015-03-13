@@ -205,9 +205,13 @@ class ParamSklearnRegressor(RegressorMixin, ParamSklearnBaseEstimator):
         # Get the configuration space
         configuration_space = super(ParamSklearnRegressor, cls).\
             get_hyperparameter_search_space(
-            cls._get_estimator_hyperparameter_name(),
-            regressor_default, regressors, preprocessors, dataset_properties,
-            cls._pipeline, )
+            estimator_name=cls._get_estimator_hyperparameter_name(),
+            default_estimator=regressor_default,
+            estimator_components=regressors,
+            default_preprocessor="no_preprocessing",
+            preprocessor_components=preprocessors,
+            dataset_properties=dataset_properties,
+            always_active=cls._pipeline)
 
         # And now add forbidden parameter configurations which would take too
         # long

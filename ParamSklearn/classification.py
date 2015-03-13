@@ -266,6 +266,14 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         assert [c in classifiers_list for c in classifiers]
         assert [p in preprocessors_list for p in preprocessors]
 
+        # Select the default preprocessor before the always active
+        # preprocessors are added, so they will not be selected as default
+        # preprocessors
+        if "no_preprocessing" in preprocessors:
+            preprocessor_default = "no_preprocessing"
+        else:
+            preprocessor_default = sorted(preprocessors.keys())[0]
+
         # Now add always present preprocessors
         for name in available_preprocessors:
             if name in cls._get_pipeline():
@@ -278,9 +286,11 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         for cd_ in classifier_defaults:
             # Make sure that a classifier which can only handle dense is not
             # selected as the default for a sparse dataset
-            no_preprocessing_idx = preprocessors_list.index("no_preprocessing")
+            if cd_ not in classifiers:
+                continue
+            no_preprocessing_idx = preprocessors_list.index(preprocessor_default)
             cd_index = classifiers_list.index(cd_)
-            if cd_ in classifiers and matches[no_preprocessing_idx, cd_index] == 1:
+            if matches[no_preprocessing_idx, cd_index] == 1:
                 classifier_default = cd_
                 break
         if classifier_default is None:
@@ -291,6 +301,7 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
             get_hyperparameter_search_space(estimator_name=cls._get_estimator_hyperparameter_name(),
                                             default_estimator=classifier_default,
                                             estimator_components=classifiers,
+                                            default_preprocessor=preprocessor_default,
                                             preprocessor_components=preprocessors,
                                             dataset_properties=dataset_properties,
                                             always_active=cls._get_pipeline())

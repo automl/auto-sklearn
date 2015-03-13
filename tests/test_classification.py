@@ -20,9 +20,6 @@ from ParamSklearn.util import get_dataset, DENSE, SPARSE, PREDICTIONS
 
 
 class TestParamSklearnClassifier(unittest.TestCase):
-    # TODO: test for both possible ways to initialize ParamSklearn
-    # parameters and other...
-
     def test_io_dict(self):
         classifiers = classification_components._classifiers
         for c in classifiers:
@@ -108,7 +105,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(91, len(hyperparameters))
+        self.assertEqual(90, len(hyperparameters))
         # The four parameters which are always active are classifier,
         # preprocessor, imputation strategy and scaling strategy
         self.assertEqual(len(hyperparameters) - 4, len(conditions))
@@ -126,7 +123,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
             include_preprocessors=['pca'])
         self.assertEqual(cs.get_hyperparameter('preprocessor'),
-            CategoricalHyperparameter('preprocessor', ["None", 'pca']))
+            CategoricalHyperparameter('preprocessor', ['pca']))
 
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
             exclude_preprocessors=['pca'])
