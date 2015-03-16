@@ -245,8 +245,8 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                         raise e
 
         # which would take too long
-        # Combinations of tree-based models with feature learning:
-        classifiers_ = ["extra_trees", "gradient_boosting",
+        # Combinations of non-linear models with feature learning:
+        classifiers_ = ["adaboost", "extra_trees", "gradient_boosting",
                         "k_nearest_neighbors", "libsvm_svc", "random_forest"]
         feature_learning = ["kitchen_sinks", "sparse_filtering"]
 
