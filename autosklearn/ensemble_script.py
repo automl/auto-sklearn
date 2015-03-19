@@ -60,7 +60,7 @@ def ensemble_prediction(all_predictions, weights):
     return pred
 
 
-def main(predictions_dir, basename, task_type, metric, limit, output_dir):
+def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemble_size=None):
     watch = autosklearn.util.stopwatch.StopWatch()
     watch.start_task("ensemble_builder")
 
@@ -119,30 +119,67 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
 
         watch.start_task("ensemble_iter_" + str(index_run))
 
-        # Load all predictions
-        random_pred_mask = []
+        # Binary mask where True indicates that the corresponding will be excluded from the ensemble
+        exclude_mask = []
+        if ensemble_size is not None:
+            # Keeps track of the single scores of each model in our ensemble
+            scores_nbest = []
+            # The indices of the model that are currently in our ensemble
+            indices_nbest = []
+
+        model_idx = 0
         for f in dir_ensemble_list:
             predictions = np.load(os.path.join(dir_ensemble, f))
             score = evaluator.calculate_score(true_labels, predictions,
                                      task_type, metric)
 
-            if score <= 0.001:
-                random_pred_mask.append(True)
-                logging.error("Model only predicts at random: " + f + " has score: " + str(score))
+            if ensemble_size is not None:
+                if score <= 0.001:
+                    exclude_mask.append(True)
+                    logging.error("Model only predicts at random: " + f + " has score: " + str(score))
+                # If we have less model in our ensemble than ensemble_size add the current model if it is better than random
+                elif len(scores_nbest) < ensemble_size:
+                    scores_nbest.append(score)
+                    indices_nbest.append(model_idx)
+                    exclude_mask.append(False)
+                else:
+                    # Take the worst performing model in our ensemble so far
+                    idx = np.argmin(np.array([scores_nbest]))
+
+                    # If the current model is better than the worst model in our ensemble replace it by the current model
+                    if(scores_nbest[idx] < score):
+                        logging.debug("Worst model in our ensemble: %d with score %f will be replaced by model %d with score %f" % (idx, scores_nbest[idx], model_idx, score))
+                        scores_nbest[idx] = score
+                        # Exclude the old model
+                        exclude_mask[int(indices_nbest[idx])] = True
+                        indices_nbest[idx] = model_idx
+                        exclude_mask.append(False)
+                    # Otherwise exclude the current model from the ensemble
+                    else:
+                        exclude_mask.append(True)
+
             else:
-                random_pred_mask.append(False)
-                all_predictions_train.append(predictions)
+                # Load all predictions that are better than random
+                if score <= 0.001:
+                    exclude_mask.append(True)
+                    logging.error("Model only predicts at random: " + f + " has score: " + str(score))
+                else:
+                    exclude_mask.append(False)
+                    all_predictions_train.append(predictions)
+
+            model_idx += 1
+            print exclude_mask
 
         all_predictions_valid = []
         for i, f in enumerate(dir_valid_list):
             predictions = np.load(os.path.join(dir_valid, f))
-            if not random_pred_mask[i]:
+            if not exclude_mask[i]:
                 all_predictions_valid.append(predictions)
 
         all_predictions_test = []
         for i, f in enumerate(dir_test_list):
             predictions = np.load(os.path.join(dir_test, f))
-            if not random_pred_mask[i]:
+            if not exclude_mask[i]:
                 all_predictions_test.append(predictions)
 
         if len(all_predictions_train) == len(all_predictions_test) == len(all_predictions_valid) == 0:
@@ -196,5 +233,5 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir):
 if __name__ == "__main__":
     main(predictions_dir=sys.argv[1], basename=sys.argv[2],
          task_type=sys.argv[3], metric=sys.argv[4], limit=float(sys.argv[5]),
-         output_dir=sys.argv[6])
+         output_dir=sys.argv[6], ensemble_size=int(sys.argv[7]))
     sys.exit(0)
