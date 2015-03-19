@@ -184,6 +184,33 @@ def a_metric (solution, prediction, task='regression'):
 ### CLASSIFICATION METRICS (work on solutions in {0, 1} and predictions in [0, 1])
 # These can be computed for regression scores only after running normalize_array
 
+def acc_metric(solution, prediction, task='binary.classification'):
+    # Get the accuracy stats
+    # acc = (tpr + fpr) / (tn + fp + tp + fn)
+    # Normalize, so 1 is the best and zero mean random...
+    """ Compute the accuracy.
+    """
+    label_num = solution.shape[1]
+    bin_predictions = binarize_predictions(prediction, task)
+    [tn, fp, tp, fn] = acc_stat(solution, bin_predictions)
+    # Bounding to avoid division by 0
+    eps = np.float(1e-15)
+    tp = np.sum(tp)
+    fp = np.sum(fp)
+    tn = np.sum(tn)
+    fn = np.sum(fn)
+    correct_classifications = np.max([eps, tp + tn])
+    total_classifications = tp + fp + tn + fn
+    accuracy = float(correct_classifications) / float(total_classifications)
+    if (task != 'multiclass.classification') or (label_num == 1):
+        base_accuracy = 0.5     # random predictions for binary case
+    else:
+        base_accuracy = 1./label_num
+    # Normalize: 0 for random, 1 for perfect
+    score = (accuracy - base_accuracy) / sp.maximum(eps, (1 - base_accuracy))
+    return score
+
+
 def bac_metric (solution, prediction, task='binary.classification'):
     ''' Compute the normalized balanced accuracy. The binarization and 
     the normalization differ for the multi-label and multi-class case. '''

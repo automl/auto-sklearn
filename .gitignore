@@ -66,3 +66,6 @@ nosetests.xml
 *.zip
 download
 *.predict
+*.pkl
+num_run
+number_submission

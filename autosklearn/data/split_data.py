@@ -40,17 +40,10 @@ def get_CV_fold(X, Y, fold, folds, shuffle=True):
         raise ValueError("The first dimension of the X and Y array must "
                          "be equal.")
 
-    if shuffle == True:
-        rs = np.random.RandomState(42)
-        indices = np.arange(X.shape[0])
-        rs.shuffle(indices)
-        Y = Y[indices]
-
-    kf = sklearn.cross_validation.StratifiedKFold(Y, n_folds=folds)
+    kf = sklearn.cross_validation.StratifiedKFold(Y, n_folds=folds,
+                                                  shuffle=shuffle,
+                                                  random_state=42)
     for idx, split in enumerate(kf):
         if idx == fold:
             break
-
-    if shuffle == True:
-        return indices[split[0]], indices[split[1]]
     return split

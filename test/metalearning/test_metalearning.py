@@ -55,15 +55,16 @@ class Test(unittest.TestCase):
         mock_mlo.return_value = [Run(rs.sample_configuration(), 1, 1)]
 
         ml = MetaLearning()
-        ml._metafeatures_encoded_labels = DatasetMetafeatures("1",
-            [MetafeatureValueDummy("a", 1), MetafeatureValueDummy("b", 1)])
+        ml._metafeatures_encoded_labels = DatasetMetafeatures(
+            "1", {"a": MetafeatureValueDummy("a", 1),
+                  "b": MetafeatureValueDummy("b", 1)})
         ml._metafeatures_labels = DatasetMetafeatures("2",
-            [MetafeatureValueDummy("c", 1),
-             MetafeatureValueDummy("d", 1),
-             MetafeatureValueDummy("e", 1)])
+            {"c": MetafeatureValueDummy("c", 1),
+             "d": MetafeatureValueDummy("d", 1),
+             "e": MetafeatureValueDummy("e", 1)})
         initial_configuration_strings_for_smac = \
             ml.create_metalearning_string_for_smac_call(
-            configuration_space, "iris", "bac_metric")
+            configuration_space, "iris", "bac_metric", 1)
 
         self.assertEqual(["--initial-challengers \" "
                           "-multinomial_nb:fit_prior 'False' "

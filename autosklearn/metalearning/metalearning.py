@@ -56,7 +56,8 @@ class MetaLearning(object):
             dont_calculate=self._exclude_metafeatures)
 
     def create_metalearning_string_for_smac_call(self, configuration_space,
-                                                 dataset_name, metric):
+                                                 dataset_name, metric,
+                                                 num_initial_configurations):
         if self._metafeatures_encoded_labels is None or \
                 self._metafeatures_labels is None:
             raise ValueError("Please call "
@@ -70,12 +71,12 @@ class MetaLearning(object):
 
         # Concatenate the metafeatures!
         mf = self._metafeatures_labels
-        mf.metafeature_values.extend(
+        mf.metafeature_values.update(
             self._metafeatures_encoded_labels.metafeature_values)
         self.mf = mf
 
         if not all([np.isfinite(mf.value)
-                    for mf in self.mf.metafeature_values
+                    for mf in self.mf.metafeature_values.values()
                     if isinstance(mf.value, float)]):
             print "%s contains non-finite metafeatures!" % self.mf
             return []
@@ -100,7 +101,7 @@ class MetaLearning(object):
         # = Convert these configurations into the SMAC CLI configuration format
         smac_initial_configuration_strings = []
 
-        for run in runs[:25]:
+        for run in runs[:num_initial_configurations]:
             smac_initial_configuration_strings.append(
                 self.convert_configuration_to_smac_string(run.configuration))
 

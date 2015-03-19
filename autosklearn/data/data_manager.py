@@ -96,6 +96,20 @@ class DataManager:
         self.data['X_valid'] = Xva
         self.data['X_test'] = Xte
 
+        try:
+            self.data['Y_valid'] = self.loadLabel(
+                os.path.join(self.input_dir, basename + '_valid.solution'),
+                verbose=verbose)
+        except (IOError, OSError):
+            pass
+
+        try:
+            self.data['Y_test'] = self.loadLabel(
+                os.path.join(self.input_dir, basename + '_test.solution'),
+                verbose=verbose)
+        except (IOError, OSError) as e:
+            pass
+
         if encode_labels:
             self.perform1HotEncoding()
           
@@ -208,14 +222,14 @@ class DataManager:
 
         if any(encoding_mask):
             encoder = OneHotEncoder(categorical_features=encoding_mask,
-                                    dtype=np.float64, sparse=False)
+                                    dtype=np.float64, sparse=sparse)
             self.data['X_train'] = encoder.fit_transform(self.data['X_train'])
             if 'X_valid' in self.data:
                 self.data['X_valid'] = encoder.transform(self.data['X_valid'])
             if 'X_test' in self.data:
                 self.data['X_test'] = encoder.transform(self.data['X_test'])
 
-            if not sparse and predicted_RAM_usage > 1000:
+            if not sparse and scipy.sparse.issparse(self.data['X_train']):
                 self.data['X_train'] = self.data['X_train'].todense()
                 if 'X_valid' in self.data:
                     self.data['X_valid'] = self.data['X_valid'].todense()
@@ -223,6 +237,7 @@ class DataManager:
                     self.data['X_test'] = self.data['X_test'].todense()
 
             self.encoder = encoder
+            self.info['is_sparse'] = 1 if sparse else 0
 
     def loadType (self, filename, verbose=True):
         ''' Get the variable types'''
