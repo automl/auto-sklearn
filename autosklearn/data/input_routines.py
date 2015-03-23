@@ -7,7 +7,7 @@ def convert_file_to_array(filename, feat_type):
     r_comment = re.compile(r'^%')
     # Match an empty line
     r_empty = re.compile(r'^\s+$')
-    descr = [(str(i), np.float64) for i in range(len(feat_type))]
+    descr = [(str(i), np.float32) for i in range(len(feat_type))]
 
     def generator(row_iter, delim=','):
         # Copied from scipy.io.arff.arffread
@@ -35,5 +35,5 @@ def convert_file_to_array(filename, feat_type):
         # No error should happen here: it is a bug otherwise
         data = np.fromiter(a, descr)
 
-    data = data.view(np.float64).reshape((len(data), -1))
+    data = data.view(np.float32).reshape((len(data), -1))
     return data

@@ -123,8 +123,8 @@ class DataManager:
         val = val + "data:\n"
 
         for subset in ['X_train', 'Y_train', 'X_valid', 'X_test']:
-            val = val + "\t%s = %s" % (subset, type(self.data[subset])) \
-                  + str(self.data[subset].shape) + "\n"
+            val = val + "\t%s = %s %s %s\n" % (subset, type(self.data[subset]),\
+                  str(self.data[subset].shape), str(self.data[subset].dtype))
             if isinstance(self.data[subset], scipy.sparse.spmatrix):
                 val = val + "\tdensity: %f\n" % \
                             (float(len(self.data[subset].data)) /
@@ -222,7 +222,7 @@ class DataManager:
 
         if any(encoding_mask):
             encoder = OneHotEncoder(categorical_features=encoding_mask,
-                                    dtype=np.float64, sparse=sparse)
+                                    dtype=np.float32, sparse=sparse)
             self.data['X_train'] = encoder.fit_transform(self.data['X_train'])
             if 'X_valid' in self.data:
                 self.data['X_valid'] = encoder.transform(self.data['X_valid'])

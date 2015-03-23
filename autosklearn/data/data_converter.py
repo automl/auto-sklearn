@@ -88,7 +88,8 @@ def sparse_list_to_csr_sparse(sparse_list, nbr_features, verbose=True):
     # It converts it into a scipy csr sparse matrix
     nbr_samples = len(sparse_list)
     # construction easier w/ dok_sparse...
-    dok_sparse = scipy.sparse.dok_matrix((nbr_samples, nbr_features))
+    dok_sparse = scipy.sparse.dok_matrix((nbr_samples, nbr_features),
+                                         dtype=np.float32)
     if verbose:
         print ("\tConverting sparse list to dok sparse matrix")
     for row in range(nbr_samples):
@@ -188,5 +189,5 @@ def predict_RAM_usage(X, categorical):
             estimated_columns += num_unique_values
         else:
             estimated_columns += 1
-    estimated_ram = estimated_columns * X.shape[0] * 8
+    estimated_ram = estimated_columns * X.shape[0] * X.dtype.itemsize
     return estimated_ram

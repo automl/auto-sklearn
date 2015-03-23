@@ -169,7 +169,8 @@ def data(filename, feat_type=None, verbose=False):
     # parameters
     if verbose:
         print (numpy.array(data_converter.file_to_array(filename)))
-    return numpy.array(data_converter.file_to_array(filename), dtype=float)
+    return numpy.array(data_converter.file_to_array(filename),
+                       dtype=numpy.float32)
 
 
 def data_sparse(filename, feat_type):

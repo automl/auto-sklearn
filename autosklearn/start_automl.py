@@ -16,14 +16,15 @@ from autosklearn.util import stopwatch
 
 from HPOlibConfigSpace.converters import pcs_parser
 
-import util
+import autosklearn.util.logging_
 
 
 def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
                             time_left_for_this_task, queue, log_dir=None,
                             initial_configurations_via_metalearning=25):
 
-    logger = util.get_logger(outputdir=log_dir, name="automl_%s" % basename)
+    logger = autosklearn.util.logging_.get_logger(
+        outputdir=log_dir, name="automl_%s" % basename)
     stop = stopwatch.StopWatch()
     stop.start_task(basename)
     stop.start_task("LoadData")
@@ -66,7 +67,10 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     categorical = [True if feat_type.lower() in ["categorical"] else False
                    for feat_type in loaded_data_manager.feat_type]
 
-    if loaded_data_manager.info["task"].lower() not in \
+    print initial_configurations_via_metalearning
+    if initial_configurations_via_metalearning <= 0:
+        ml = None
+    elif loaded_data_manager.info["task"].lower() not in \
             ["multilabel.classification", "regression"] and \
             not loaded_data_manager.info["is_sparse"]:
         ml = metalearning.MetaLearning()
@@ -89,7 +93,6 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     stop.start_task("CalculateMetafeaturesEncoded")
     if ml is None:
         initial_configurations = []
-        logger.critical("Metafeatures encoded not calculated, because metalearning.MetaLearning() is None")
     elif loaded_data_manager.info["task"].lower() not in \
             ["multilabel.classification", "regression"] and \
             not loaded_data_manager.info["is_sparse"]:
@@ -113,6 +116,7 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     else:
         initial_configurations = []
         logger.critical("Metafeatures encoded not calculated")
+
     stop.stop_task("CalculateMetafeaturesEncoded")
     logger.debug("Calculating Metafeatures_encoded took %5.2fsec" %
                  stop.wall_elapsed("CalculateMetafeaturesEncoded"))
