@@ -5,6 +5,7 @@ import sklearn.cross_validation
 
 
 def split_data(X, Y):
+    num_data_points = X.shape[0]
     X_train, X_valid, Y_train, Y_valid = None, None, None, None
     if X.shape[0] != Y.shape[0]:
         raise ValueError("The first dimension of the X and Y array must "
@@ -28,10 +29,14 @@ def split_data(X, Y):
         X_train, X_valid = X[train_index], X[valid_index]
         Y_train, Y_valid = Y[train_index], Y[valid_index]
 
+    assert len(X_train) + len(X_valid) == num_data_points
+    assert len(Y_train) + len(Y_valid) == num_data_points
+
     return X_train, X_valid, Y_train, Y_valid
 
 
 def get_CV_fold(X, Y, fold, folds, shuffle=True):
+    num_data_points = X.shape[0]
     fold = int(fold)
     folds = int(folds)
     if fold >= folds:
@@ -46,4 +51,7 @@ def get_CV_fold(X, Y, fold, folds, shuffle=True):
     for idx, split in enumerate(kf):
         if idx == fold:
             break
+
+    assert len(split[0]) + len(split[1]) == num_data_points
+
     return split
