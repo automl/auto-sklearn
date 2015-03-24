@@ -112,20 +112,20 @@ class DataManager:
         return "DataManager : " + self.basename
 
     def __str__(self):
-        val = "DataManager : " + self.basename + "\ninfo:\n"
+        val = "cDataManager : " + self.basename + "\ninfo:\n"
         for item in self.info:
             val = val + "\t" + item + " = " + str(self.info[item]) + "\n"
         val = val + "data:\n"
 
         for subset in ['X_train', 'Y_train', 'X_valid', 'X_test']:
-            val = val + "\t%s = %s" % (subset, type(self.data[subset])) \
-                  + str(self.data[subset].shape) + "\n"
-            if isinstance(self.data[subset], scipy.sparse.spmatrix):
-                val = val + "\tdensity: %f\n" % \
-                            (float(len(self.data[subset].data)) /
-                             self.data[subset].shape[0] /
-                             self.data[subset].shape[1])
-        val = val + "feat_type:\tarray" + str(self.feat_type.shape) + "\n"
+            val = val + "\t%s = %s %s %s\n" % (subset, type(self.data[subset]),\
+                    str(self.data[subset].shape), str(self.data[subset].dtype))
+                if isinstance(self.data[subset], scipy.sparse.spmatrix):
+                    val = val + "\tdensity: %f\n" % \
+                                (float(len(self.data[subset].data)) /
+                                 self.data[subset].shape[0] /
+                                 self.data[subset].shape[1])
+            val = val + "feat_type:\tarray" + str(self.feat_type.shape) + "\n"
         return val
                 
     def loadData (self, filename, num_points, verbose=True):
