@@ -39,9 +39,9 @@ class GPyClassifier(ParamSklearnClassificationAlgorithm):
             # train model 
             kern = GPy.kern._src.rbf.RBF(X.shape[1], variance=1.0, lengthscale=1.0, ARD=self.ard)
             # dense
-            model = GPy.models.GPClassification(X, targets[:,i,None], kernel=kern)
+            # model = GPy.models.GPClassification(X, targets[:,i,None], kernel=kern)
             # sparse 
-            #model = GPy.models.SparseGPClassification(X, targets[:,i,None], kernel=kern, num_inducing=self.n_inducing)
+            model = GPy.models.SparseGPClassification(X, targets[:,i,None], kernel=kern, num_inducing=self.n_inducing)
             # fit kernel hyperparameters
             model.optimize('bfgs', max_iters=100)
             # add to list of estimators
@@ -61,8 +61,8 @@ class GPyClassifier(ParamSklearnClassificationAlgorithm):
     def predict_proba(self, X):
         if self.estimators is None:
             raise NotImplementedError()
-        probs = np.zeros([len(X), len(estimators)])
-        for i, model in enumerate(estimators):
+        probs = np.zeros([len(X), len(self.estimators)])
+        for i, model in enumerate(self.estimators):
             probs[:,i] = model.predict(X)[0].flatten()
         # normalize to get probabilities
         return probs / np.sum(probs,1)[:,None]
