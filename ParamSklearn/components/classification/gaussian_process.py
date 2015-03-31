@@ -15,7 +15,7 @@ import GPy
 
 
 class GPyClassifier(ParamSklearnClassificationAlgorithm):
-    def __init__(self, random_state=None, n_inducing=5, ard=False):
+    def __init__(self, random_state=None, n_inducing=20, ard=False):
         self.estimators = None
         self.n_inducing = int(n_inducing)
 
@@ -37,7 +37,9 @@ class GPyClassifier(ParamSklearnClassificationAlgorithm):
         self.estimators = []
         for i in range(self.enc.n_values_):
             # train model 
-            kern = GPy.kern._src.rbf.RBF(X.shape[1], variance=1.0, lengthscale=1.0, ARD=self.ard)
+            white = GPy.kern._src.static.White(X.shape[1], variance=1.0, active_dims=None, name='white')
+            rbf = GPy.kern._src.rbf.RBF(X.shape[1], variance=1.0, lengthscale=1.0, ARD=self.ard)
+            kern = rbf + white
             # dense
             # model = GPy.models.GPClassification(X, targets[:,i,None], kernel=kern)
             # sparse 
