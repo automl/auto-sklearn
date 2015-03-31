@@ -110,15 +110,9 @@ class MinMaxScaler(BaseEstimator, TransformerMixin):
             for i in range(X.shape[1]):
                 X.data[X.indptr[i]:X.indptr[i + 1]] *= self.scale_[i]
                 X.data[X.indptr[i]:X.indptr[i + 1]] += self.min_[i]
-            # Fix numeric instabilities
-            X.data[X.data < 0] = 0
-            X.data[X.data > 1] = 1
         else:
             X *= self.scale_
             X += self.min_
-            # Fix numeric instabilities
-            X[X < 0] = 0
-            X[X > 1] = 1
         return X
 
 
