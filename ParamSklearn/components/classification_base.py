@@ -119,4 +119,4 @@ class ParamSklearnClassificationAlgorithm(object):
 
     def __str__(self):
         name = self.get_properties()['name']
-        return "ParamSklearn %" % name
+        return "ParamSklearn %s" % name

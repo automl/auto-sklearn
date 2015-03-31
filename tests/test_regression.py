@@ -3,10 +3,12 @@ __author__ = 'eggenspk'
 import copy
 import unittest
 
+import mock
 import sklearn.datasets
 import sklearn.decomposition
 import sklearn.ensemble
 import sklearn.svm
+from sklearn.utils.testing import assert_array_almost_equal
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
@@ -168,6 +170,22 @@ class TestParamSKlearnRegressor(unittest.TestCase):
                                 get_hyperparameter_search_space,
                                 multiclass=True, multilabel=True, sparse=True)
     """
+
+    def test_predict_batched(self):
+        cs = ParamSklearnRegressor.get_hyperparameter_search_space()
+        default = cs.get_default_configuration()
+        cls = ParamSklearnRegressor(default)
+
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
+        cls.fit(X_train, Y_train)
+        X_test_ = X_test.copy()
+        prediction_ = cls.predict(X_test_)
+        cls_predict = mock.Mock(wraps=cls._pipeline)
+        cls._pipeline = cls_predict
+        prediction = cls.predict(X_test, batch_size=20)
+        self.assertEqual((356,), prediction.shape)
+        self.assertEqual(18, cls_predict.predict.call_count)
+        assert_array_almost_equal(prediction_, prediction)
 
     @unittest.skip("test_check_random_state Not yet Implemented")
     def test_check_random_state(self):

@@ -62,6 +62,13 @@ class ParamSklearnRegressor(RegressorMixin, ParamSklearnBaseEstimator):
 
     """
 
+    def fit(self, X, Y, fit_params=None, init_params=None):
+        super(ParamSklearnRegressor, self).fit(X, Y, fit_params=fit_params,
+                                               init_params=init_params)
+        self.num_targets = 1 if len(Y.shape) == 1 else Y.shape[1]
+        return self
+
+
     def _validate_input_X(self, X):
         # TODO: think of all possible states which can occur and how to
         # handle them

@@ -2,10 +2,13 @@ __author__ = 'feurerm'
 
 import unittest
 
+import mock
+import numpy as np
 import sklearn.datasets
 import sklearn.decomposition
 import sklearn.ensemble
 import sklearn.svm
+from sklearn.utils.testing import assert_array_almost_equal
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
@@ -199,6 +202,72 @@ class TestParamSklearnClassifier(unittest.TestCase):
         #                        dataset_properties={'multilabel': True,
         #                                            'multiclass': True,
         #                                            'sparse': True})
+
+    def test_predict_batched(self):
+        cs = ParamSklearnClassifier.get_hyperparameter_search_space()
+        default = cs.get_default_configuration()
+        cls = ParamSklearnClassifier(default)
+
+        # Multiclass
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
+        cls.fit(X_train, Y_train)
+        X_test_ = X_test.copy()
+        prediction_ = cls.predict(X_test_)
+        cls_predict = mock.Mock(wraps=cls._pipeline)
+        #cls_predict.predict.return_value = lambda X: np.ones((X.shape[0],))
+        cls._pipeline = cls_predict
+        prediction = cls.predict(X_test, batch_size=20)
+        self.assertEqual((1647,), prediction.shape)
+        self.assertEqual(83, cls_predict.predict.call_count)
+        assert_array_almost_equal(prediction_, prediction)
+
+        # Multilabel
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
+        Y_train = np.array([(y, 26 - y) for y in Y_train])
+        cls.fit(X_train, Y_train)
+        X_test_ = X_test.copy()
+        prediction_ = cls.predict(X_test_)
+        cls_predict = mock.Mock(wraps=cls._pipeline)
+        cls._pipeline = cls_predict
+        prediction = cls.predict(X_test, batch_size=20)
+        self.assertEqual((1647, 2), prediction.shape)
+        self.assertEqual(83, cls_predict.predict.call_count)
+        assert_array_almost_equal(prediction_, prediction)
+
+    def test_predict_proba_batched(self):
+        cs = ParamSklearnClassifier.get_hyperparameter_search_space()
+        default = cs.get_default_configuration()
+
+        # Multiclass
+        cls = ParamSklearnClassifier(default)
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
+        cls.fit(X_train, Y_train)
+        X_test_ = X_test.copy()
+        prediction_ = cls.predict_proba(X_test_)
+        # The object behind the last step in the pipeline
+        cls_predict = mock.Mock(wraps=cls._pipeline.steps[-1][1])
+        cls._pipeline.steps[-1] = ("estimator", cls_predict)
+        prediction = cls.predict_proba(X_test, batch_size=20)
+        self.assertEqual((1647, 10), prediction.shape)
+        self.assertEqual(84, cls_predict.predict_proba.call_count)
+        assert_array_almost_equal(prediction_, prediction)
+
+        # Multilabel
+        cls = ParamSklearnClassifier(default)
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
+        Y_train = np.array([(y, 26 - y) for y in Y_train])
+        cls.fit(X_train, Y_train)
+        X_test_ = X_test.copy()
+        prediction_ = cls.predict_proba(X_test_)
+        cls_predict = mock.Mock(wraps=cls._pipeline.steps[-1][1])
+        cls._pipeline.steps[-1] = ("estimator", cls_predict)
+        prediction = cls.predict_proba(X_test, batch_size=20)
+        self.assertIsInstance(prediction, list)
+        self.assertEqual(2, len(prediction))
+        self.assertEqual((1647, 10), prediction[0].shape)
+        self.assertEqual((1647, 10), prediction[1].shape)
+        self.assertEqual(84, cls_predict.predict_proba.call_count)
+        assert_array_almost_equal(prediction_, prediction)
 
     @unittest.skip("test_check_random_state Not yet Implemented")
     def test_check_random_state(self):
