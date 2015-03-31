@@ -199,9 +199,13 @@ def acc_metric(solution, prediction, task='binary.classification'):
     fp = np.sum(fp)
     tn = np.sum(tn)
     fn = np.sum(fn)
-    correct_classifications = np.max([eps, tp + tn])
-    total_classifications = tp + fp + tn + fn
-    accuracy = float(correct_classifications) / float(total_classifications)
+
+    if (task != 'multiclass.classification') or (label_num == 1):
+        accuracy = (np.sum(tp) + np.sum(tn)) / (np.sum(tp) + np.sum(fp) +
+                                                np.sum(tn) + np.sum(fn))
+    else:
+        accuracy = np.sum(tp) / (np.sum(tp) + np.sum(fp))
+
     if (task != 'multiclass.classification') or (label_num == 1):
         base_accuracy = 0.5     # random predictions for binary case
     else:
@@ -553,7 +557,8 @@ def show_platform():
 def compute_all_scores(solution, prediction):
     ''' Compute all the scores and return them as a dist'''
     missing_score = -0.999999
-    scoring = {'BAC (multilabel)':nbac_binary_score, 
+    scoring = {'ACC': acc_metric,
+               'BAC (multilabel)':nbac_binary_score,
                'BAC (multiclass)':nbac_multiclass_score, 
                'F1  (multilabel)':f1_binary_score, 
                'F1  (multiclass)':f1_multiclass_score, 
