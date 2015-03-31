@@ -12,5 +12,5 @@ class GradientBoostingComponentTest(unittest.TestCase):
 
             predictions, targets = _test_regressor(GradientBoosting,
                                                    dataset='diabetes')
-            self.assertAlmostEqual(0.39056015252360077,
+            self.assertAlmostEqual(0.38851325425603489,
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))

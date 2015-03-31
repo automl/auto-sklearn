@@ -20,5 +20,5 @@ class AdaBoostComponentTest(unittest.TestCase):
             predictions, targets = \
                 _test_classifier(classifier=AdaboostClassifier,
                                  dataset='digits')
-            self.assertAlmostEqual(0.48791985857395404,
+            self.assertAlmostEqual(0.56527018822100794,
                                    sklearn.metrics.accuracy_score(predictions, targets))

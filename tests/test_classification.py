@@ -62,7 +62,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
             auto = ParamSklearnClassifier(default)
             auto = auto.fit(X_train, Y_train)
             predictions = auto.predict(X_test)
-            self.assertAlmostEqual(0.95999999999999996,
+            self.assertAlmostEqual(0.62,
                 sklearn.metrics.accuracy_score(predictions, Y_test))
             scores = auto.predict_proba(X_test)
 
@@ -71,7 +71,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
         sampler = RandomSampler(cs, 1)
         for i in range(10):
             config = sampler.sample_configuration()
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
             cls = ParamSklearnClassifier(config, random_state=1)
             try:
                 cls.fit(X_train, Y_train)
@@ -88,7 +88,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
         sampler = RandomSampler(cs, 1)
         for i in range(10):
             config = sampler.sample_configuration()
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris',
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                            make_sparse=True)
             cls = ParamSklearnClassifier(config, random_state=1)
             try:
