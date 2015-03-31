@@ -14,7 +14,7 @@ from ParamSklearn.util import DENSE, PREDICTIONS
 import GPy
 
 
-class GPyClassifier(ParamSklearnClassificationAlgorithm):
+class GPyClassifier():#ParamSklearnClassificationAlgorithm):
     def __init__(self, random_state=None, n_inducing=5, ard=False):
         self.estimators = None
         self.n_inducing = int(n_inducing)

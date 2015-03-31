@@ -10,6 +10,6 @@ class GPyClassifierComponentTest(unittest.TestCase):
     def test_default_configuration(self):
         for i in range(10):
             predictions, targets = _test_classifier(GPyClassifier)
-            self.assertAlmostEqual(0.97999999999999998,
+            self.assertAlmostEqual(0.95999999999999996,
                 sklearn.metrics.accuracy_score(predictions, targets))
 
