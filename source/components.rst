@@ -13,12 +13,6 @@ A list of all classification algorithms considered in the ParamSklearn search sp
 .. autoclass:: ParamSklearn.components.classification.adaboost.AdaboostClassifier
     :members:
 
-.. autoclass:: ParamSklearn.components.classification.bagged_gaussian_nb.BaggedGaussianNB
-    :members:
-
-.. autoclass:: ParamSklearn.components.classification.bagged_multinomial_nb.BaggedMultinomialNB
-    :members:
-
 .. autoclass:: ParamSklearn.components.classification.bernoulli_nb.BernoulliNB
     :members:
 
