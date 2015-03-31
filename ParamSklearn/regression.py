@@ -285,6 +285,32 @@ class ParamSklearnRegressor(RegressorMixin, ParamSklearnBaseEstimator):
             except KeyError:
                 pass
 
+        # We have seen empirically that tree-based models together with PCA
+        # don't work better than tree-based models without preprocessing
+        regressors_ = ["random_forest", "gradient_boosting"]
+        for r in regressors_:
+            if r not in regressors_list:
+                continue
+            try:
+                configuration_space.add_forbidden_clause(
+                    ForbiddenAndConjunction(
+                        ForbiddenEqualsClause(
+                            configuration_space.get_hyperparameter(
+                                "preprocessor"), "pca"),
+                        ForbiddenEqualsClause(
+                            configuration_space.get_hyperparameter(
+                                "classifier"), r)))
+            except KeyError:
+                pass
+            except ValueError as e:
+                if e.message.startswith("Forbidden clause must be "
+                                        "instantiated with a legal "
+                                        "hyperparameter value for "
+                                        "'preprocessor"):
+                    pass
+                else:
+                    raise e
+
         return configuration_space
 
     @staticmethod

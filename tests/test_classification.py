@@ -105,7 +105,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(90, len(hyperparameters))
+        self.assertEqual(82, len(hyperparameters))
         # The four parameters which are always active are classifier,
         # preprocessor, imputation strategy and scaling strategy
         self.assertEqual(len(hyperparameters) - 4, len(conditions))
@@ -121,30 +121,28 @@ class TestParamSklearnClassifier(unittest.TestCase):
         self.assertNotIn('libsvm_svc', str(cs))
 
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
-            include_preprocessors=['pca'])
+            include_preprocessors=['select_percentile_classification'])
         self.assertEqual(cs.get_hyperparameter('preprocessor'),
-            CategoricalHyperparameter('preprocessor', ['pca']))
+            CategoricalHyperparameter('preprocessor',
+                                      ['select_percentile_classification']))
 
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
-            exclude_preprocessors=['pca'])
-        self.assertNotIn('pca', str(cs))
+            exclude_preprocessors=['select_percentile_classification'])
+        self.assertNotIn('select_percentile_classification', str(cs))
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
-        self.assertRaisesRegexp(ValueError, "Configuration:\n"
-            "  bagged_multinomial_nb:alpha, Value: 1.000000\n"
-            "  bagged_multinomial_nb:fit_prior, Value: True\n"
-            "  bagged_multinomial_nb:max_features, Constant: 1.0\n"
-            "  bagged_multinomial_nb:max_samples, Constant: 1.0\n"
-            "  bagged_multinomial_nb:n_estimators, Constant: 100\n"
-            "  classifier, Value: bagged_multinomial_nb\n"
+        self.assertRaisesRegexp(ValueError, "Default Configuration:\n"
+            "  classifier, Value: multinomial_nb\n"
             "  imputation:strategy, Value: mean\n"
+            "  multinomial_nb:alpha, Value: 1.000000\n"
+            "  multinomial_nb:fit_prior, Value: True\n"
             "  preprocessor, Value: truncatedSVD\n"
             "  rescaling:strategy, Value: min/max\n"
             "  truncatedSVD:target_dim, Value: 128\n"
             "violates forbidden clause \(Forbidden: preprocessor == "
-            "truncatedSVD && Forbidden: classifier == bagged_multinomial_nb\)",
+            "truncatedSVD && Forbidden: classifier == multinomial_nb\)",
                                 ParamSklearnClassifier.get_hyperparameter_search_space,
-                                include_estimators=['bagged_multinomial_nb'],
+                                include_estimators=['multinomial_nb'],
                                 include_preprocessors=['truncatedSVD'],
                                 dataset_properties={'sparse':True})
 
