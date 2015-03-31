@@ -1,0 +1,154 @@
+#! /usr/bin/env python
+from argparse import ArgumentParser
+from collections import deque
+import random
+from multiprocessing import Queue
+import os
+import pkg_resources
+import signal
+import shutil
+import time
+
+import psutil
+
+import autosklearn.start_automl
+import autosklearn.util.check_pid
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("dataset_name", type=str,
+                        help="Name of the target dataset.")
+    parser.add_argument("data_dir", type=str,
+                        help="Directory where the dataset resides.")
+    parser.add_argument("--output_dir", type=str, default=None,
+                        help="AutoSklearn output directory. If not specified, "
+                             "a new directory under /tmp/ will be generated.")
+    parser.add_argument("--temporary_output_directory", type=str,
+                        help="Temporary output directory. If not specified, "
+                             "a new directory under /tmp/ will be generated.",
+                        default=None)
+    parser.add_argument("--keep_output", action='store_true', default=False,
+                        help="If output_dir and temporary_output_dir are not "
+                             "specified, setting this to False will make "
+                             "autosklearn not delete these two directories.")
+    parser.add_argument("--time_limit", type=int, default=3600,
+                        help="Total runtime of the AutoSklearn package in "
+                             "seconds.")
+    parser.add_argument("--metalearning_configurations", type=int, default=25,
+                        help="Number of configurations which will be used as "
+                             "initial challengers for SMAC.")
+    parser.add_argument("--ensemble_size", type=int, default=1,
+                        help="Maximum number of models in the ensemble. Set "
+                             "this to one in order to evaluate the single "
+                             "best.")
+
+    args = parser.parse_args()
+
+    time_limit = args.time_limit
+    start_time = time.time()
+
+    BUFFER = 35  # time-left - BUFFER = timelimit for SMAC/ensemble_script.py
+    BUFFER_BEFORE_SENDING_SIGTERM = 30  # We send SIGTERM to all processes
+    DELAY_TO_SIGKILL = 15  # And after a delay we send a sigkill
+
+    queue = Queue()
+
+    # Check the output directories
+    output_dir = args.output_dir
+    tmp_dataset_dir = args.temporary_output_directory
+    if output_dir is not None and not os.path.isdir(output_dir):
+        raise ValueError("If output_dir is specified, it must exist!")
+    if tmp_dataset_dir is not None and not os.path.isdir(tmp_dataset_dir):
+        raise ValueError("If tmp_dataset_dir is specified, it must exist!")
+
+    pid = os.getpid()
+    random_number = random.randint(0, 10000)
+    remove_output_dir = False
+    remove_tmp_dir = False
+
+    if output_dir is None:
+        output_dir = "/tmp/autosklearn_output_%d_%d" % (pid, random_number)
+        os.makedirs(output_dir)
+        remove_output_dir = not args.keep_output
+    if tmp_dataset_dir is None:
+        tmp_dataset_dir = "/tmp/autosklearn_tmp_%d_%d" % (pid, random_number)
+        os.makedirs(tmp_dataset_dir)
+        remove_tmp_dir = not args.keep_output
+
+    # Manipulate $PATH so that SMAC and the runsolver are in it.
+    smac = pkg_resources.resource_filename(
+        "autosklearn",
+        "binaries/smac-v2.08.01-development-1/smac-v2.08.01-development-1/")
+    runsolver = pkg_resources.resource_filename(
+        "autosklearn",
+        "binaries/"
+    )
+    os.environ["PATH"] = smac + os.pathsep + runsolver + os.pathsep + \
+                         os.environ["PATH"]
+
+    time_spent_so_far = time.time() - start_time
+    time_left_for_smac = time_limit - time_spent_so_far
+    autosklearn.start_automl.start_automl_on_dataset(
+        basename=args.dataset_name, input_dir=args.data_dir,
+        tmp_dataset_dir=tmp_dataset_dir, output_dir=output_dir,
+        time_left_for_this_task=time_left_for_smac, queue=queue, log_dir=None,
+        initial_configurations_via_metalearning=args.metalearning_configurations)
+
+    [time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles] \
+        = queue.get()
+
+    # == And now we wait till we run out of time
+    while time.time() - start_time <= time_limit - BUFFER_BEFORE_SENDING_SIGTERM:
+        time.sleep(1)
+
+    # Kill all children, grand-children and so on
+    process = psutil.Process()
+    # All children which must be killed
+    children = deque()
+    children.extendleft(process.children(recursive=True))
+
+    for delay, sig in \
+            [(0, signal.SIGINT),
+             (BUFFER_BEFORE_SENDING_SIGTERM / 3., signal.SIGTERM),
+             (BUFFER_BEFORE_SENDING_SIGTERM / 3. * 2., signal.SIGKILL)]:
+        visited = set()
+
+        # first, send SIGINT
+        while len(children) > 0:
+            child = children.pop()
+            # First, check if all children of child are in the children set
+            if not child.is_running():
+                continue
+
+            try:
+                grandchildren = process.children(recursive=True)
+                for grandchild in grandchildren:
+                    if grandchild in visited:
+                        continue
+                    else:
+                        children.appendleft(grandchild)
+            except psutil.NoSuchProcess:
+                pass
+
+            # Then, send the signal
+            try:
+                child.send_signal(sig)
+            except psutil.NoSuchProcess:
+                pass
+
+            visited.add(child)
+
+        # Readd all children we ever found to the list which were running in
+        # the last iteration of killing processes to make sure that we killed
+        #  them all.
+        children.extendleft(visited)
+
+        while time.time() - start_time <= time_limit - \
+                (BUFFER_BEFORE_SENDING_SIGTERM - delay):
+            time.sleep(1)
+
+    if remove_output_dir is True:
+        shutil.rmtree(output_dir)
+    if remove_tmp_dir is True:
+        shutil.rmtree(tmp_dataset_dir)
