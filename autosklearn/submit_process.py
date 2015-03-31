@@ -90,7 +90,8 @@ def run_smac(tmp_dir, searchspace, instance_file, limit,
     return proc
 
 
-def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit, output_dir):
+def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
+                         output_dir, ensemble_size):
     if limit <= 0:
         # It makes no sense to start building ensembles_statistics
         return
@@ -100,7 +101,12 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit, output
     delay = 5
 
     call = " ".join(["python", wrapper_exec, tmp_dir, dataset_name,
-                        task_type, metric, str(limit-5), output_dir])
+                        task_type, metric, str(limit-5), output_dir,
+                        str(ensemble_size)])
+
+    # Runsolver does strange things if the time limit is negative. Set it to
+    # be at least one (0 means infinity)
+    limit = max(1, limit)
 
     # Now add runsolver command
     #runsolver_cmd = "%s --watcher-data /dev/null -W %d" % \

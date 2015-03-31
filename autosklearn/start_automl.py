@@ -21,7 +21,8 @@ import autosklearn.util.logging_
 
 def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
                             time_left_for_this_task, queue, log_dir=None,
-                            initial_configurations_via_metalearning=25):
+                            initial_configurations_via_metalearning=25,
+                            ensemble_size=1):
 
     logger = autosklearn.util.logging_.get_logger(
         outputdir=log_dir, name="automl_%s" % basename)
@@ -67,7 +68,6 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     categorical = [True if feat_type.lower() in ["categorical"] else False
                    for feat_type in loaded_data_manager.feat_type]
 
-    print initial_configurations_via_metalearning
     if initial_configurations_via_metalearning <= 0:
         ml = None
     elif loaded_data_manager.info["task"].lower() not in \
@@ -160,7 +160,8 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
                                             task_type=loaded_data_manager.info['task'],
                                             metric=loaded_data_manager.info['metric'],
                                             limit=time_left_for_ensembles,
-                                            output_dir=output_dir)
+                                            output_dir=output_dir,
+                                            ensemble_size=ensemble_size)
     stop.stop_task("runEnsemble")
 
     queue.put([time_needed_to_load_data, data_manager_path,
