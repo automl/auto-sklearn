@@ -19,13 +19,16 @@ def submit_call(call, log_dir=None):
     return proc
 
 
-def get_algo_exec(runsolver_limit, runsolver_delay, target_call_limit):
+def get_algo_exec(runsolver_limit, runsolver_delay):
 
     # Create call to autosklearn
     path_to_wrapper = os.path.dirname(os.path.abspath(__file__))
     wrapper_exec = os.path.join(path_to_wrapper, "wrapper_for_SMAC.py")
     call = 'python %s' % wrapper_exec
-    call += " --limit %d" % target_call_limit
+
+    # Runsolver does strange things if the time limit is negative. Set it to
+    # be at least one (0 means infinity)
+    runsolver_limit = max(1, runsolver_limit)
 
     # Now add runsolver command
     #runsolver_prefix = "runsolver --watcher-data /dev/null -W %d" % \
@@ -49,13 +52,11 @@ def run_smac(tmp_dir, searchspace, instance_file, limit,
         # We try to do at least one run within the whole runtime
         cutoff_time = int(wallclock_limit) - 5
 
-    cutoff_time_target_function_sees = cutoff_time - 10  # Not needed
     runsolver_softlimit = cutoff_time - 35
     runsolver_hardlimit_delay = 30
 
     algo_exec = get_algo_exec(runsolver_limit=runsolver_softlimit,
-                              runsolver_delay=runsolver_hardlimit_delay,
-                              target_call_limit=cutoff_time_target_function_sees)
+                              runsolver_delay=runsolver_hardlimit_delay,)
 
     if initial_challengers is None:
         initial_challengers = []
