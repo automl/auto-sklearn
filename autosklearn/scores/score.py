@@ -14,16 +14,12 @@
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE. 
 
 # Some libraries and options
+from argparse import ArgumentParser
 import os
 
 from sys import argv
 import yaml
 from autosklearn.scores.libscores import * # Library of scores we implemented
-
-# Default I/O directories:      
-root_dir = "/Users/isabelleguyon/Documents/Projects/Codalab/AutoMLcompetition/StartingKit/"
-default_input_dir = root_dir + "scoring_input0" 
-default_output_dir = root_dir + "scoring_output0"  
 
 # Debug flag 0: no debug, 1: show all scores, 2: also show version amd listing of dir
 debug_mode = 1
@@ -37,35 +33,44 @@ scoring_version = 0.8
 # =============================== MAIN ========================================
     
 if __name__=="__main__":
+    parser = ArgumentParser()
+    parser.add_argument("dataset_directory", help="Directory in which the "
+                                                  "dataset resides.")
+    parser.add_argument("prediction_directory", help="Directory in which the "
+                                                     "predictions reside.")
+    parser.add_argument("output_directory", help="Directory where the scores "
+                                                 "will be written.")
+    args = parser.parse_args()
 
-    #### INPUT/OUTPUT: Get input and output directory names
-    if len(argv)==1: # Use the default input and output directories if no arguments are provided
-        input_dir = default_input_dir
-        output_dir = default_output_dir
-    else:
-        input_dir = argv[1]
-        output_dir = argv[2] 
+    #### INPUT/OUTPUT: Get input and output directory name
+    input_dir = args.dataset_directory
+    prediction_dir = args.prediction_directory
+    output_dir = args.output_directory
+
     # Create the output directory, if it does not already exist and open output files  
     mkdir(output_dir) 
     score_file = open(os.path.join(output_dir, 'scores.txt'), 'wb')
     html_file = open(os.path.join(output_dir, 'scores.html'), 'wb')
     
     # Get all the solution files from the solution directory
-    solution_names = sorted(ls(os.path.join(input_dir, 'ref', '*.solution')))
+    solution_names = sorted(ls(os.path.join(input_dir, '*.solution')))
 
     # Loop over files in solution directory and search for predictions with extension .predict having the same basename
     set_num = 1
     for solution_file in solution_names:
         # Extract the dataset name from the file name
         basename = solution_file[-solution_file[::-1].index(filesep):-solution_file[::-1].index('.')-1]
+        basename, seperator, set_name = basename.rpartition("_")
+
         # Load the info file and get the task and metric
-        info_file = ls(os.path.join(input_dir, 'ref', basename[0:2] + '*_public.info'))[0]
+        info_file = ls(os.path.join(input_dir, basename + '*_public.info'))[0]
         info = get_info (info_file)    
         score_name = info['task'][0:-15] + info['metric'][0:-7].upper()
         predict_name = basename
         try:
             # Get the last prediction from the res subdirectory (must end with '.predict')
-            predict_file = ls(os.path.join(input_dir, 'res', basename + '*.predict'))[-1]
+            predict_file = ls(os.path.join(prediction_dir, basename + "_" +
+                                           set_name + '*.predict'))[-1]
             if (predict_file == []): raise IOError('Missing prediction file {}'.format(basename))
             predict_name = predict_file[-predict_file[::-1].index(filesep):-predict_file[::-1].index('.')-1]
             # Read the solution and prediction values into numpy arrays
@@ -110,7 +115,7 @@ if __name__=="__main__":
     except:
         score_file.write("Duration: 0\n")
 		
-	html_file.close()
+    html_file.close()
     score_file.close()
 
     # Lots of debug stuff
