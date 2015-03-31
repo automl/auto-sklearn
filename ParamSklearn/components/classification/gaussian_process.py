@@ -10,7 +10,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.util import DENSE, PREDICTIONS
-# get our own forests to replace the sklearn ones
+
 import GPy
 
 
@@ -43,7 +43,12 @@ class GPyClassifier(ParamSklearnClassificationAlgorithm):
             # dense
             # model = GPy.models.GPClassification(X, targets[:,i,None], kernel=kern)
             # sparse 
-            model = GPy.models.SparseGPClassification(X, targets[:,i,None], kernel=kern, num_inducing=self.n_inducing)
+            model = GPy.models.SparseGPClassification(X, 
+                    targets[:,i,None], 
+                    kernel=kern, 
+                    num_inducing=self.n_inducing,
+                    normalize_X=False,
+                    normalize_Y=False)
             # fit kernel hyperparameters
             model.optimize('bfgs', max_iters=100)
             # add to list of estimators
