@@ -52,7 +52,10 @@ class MinMaxScaler(BaseEstimator, TransformerMixin):
             used for later scaling along the features axis.
         """
         X = check_arrays(X, sparse_format="csc", copy=self.copy)[0]
-        warn_if_not_float(X, estimator=self)
+        if warn_if_not_float(X, estimator=self):
+            # Costly conversion, but otherwise the pipeline will break:
+            # https://github.com/scikit-learn/scikit-learn/issues/1709
+            X = X.astype(np.float)
         feature_range = self.feature_range
         if feature_range[0] >= feature_range[1]:
             raise ValueError("Minimum of desired feature range must be smaller"
