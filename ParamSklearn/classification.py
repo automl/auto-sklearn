@@ -264,11 +264,36 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
             except KeyError:
                 pass
 
+        # We have seen empirically that tree-based models together with PCA
+        # don't work better than tree-based models without preprocessing
+        classifiers_ = ["random_forest", "extra_trees", "gradient_boosting"]
+        for c in classifiers_:
+            if c not in classifiers_list:
+                continue
+            try:
+                configuration_space.add_forbidden_clause(
+                    ForbiddenAndConjunction(
+                        ForbiddenEqualsClause(
+                            configuration_space.get_hyperparameter(
+                                "preprocessor"), "pca"),
+                        ForbiddenEqualsClause(
+                            configuration_space.get_hyperparameter(
+                                "classifier"), c)))
+            except KeyError:
+                pass
+            except ValueError as e:
+                if e.message.startswith("Forbidden clause must be "
+                                        "instantiated with a legal "
+                                        "hyperparameter value for "
+                                        "'preprocessor"):
+                    pass
+                else:
+                    raise e
+
         # Won't work
         # Multinomial NB does not work with negative values, don't use
         # it with standardization, features learning, pca
-        classifiers_ = ["multinomial_nb", "bagged_multinomial_nb",
-                        "bernoulli_nb"]
+        classifiers_ = ["multinomial_nb", "bernoulli_nb"]
         preproc_with_negative_X = ["kitchen_sinks", "sparse_filtering",
                                    "pca", "truncatedSVD"]
         for c in classifiers_:

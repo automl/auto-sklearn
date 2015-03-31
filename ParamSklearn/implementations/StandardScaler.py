@@ -105,7 +105,9 @@ class StandardScaler(BaseEstimator, TransformerMixin):
         """
         X = check_arrays(X, copy=self.copy, sparse_format="csc")[0]
         if warn_if_not_float(X, estimator=self):
-            X = X.astype(np.float)
+            # Costly conversion, but otherwise the pipeline will break:
+            # https://github.com/scikit-learn/scikit-learn/issues/1709
+            X = X.astype(np.float32)
         if sparse.issparse(X):
             if self.center_sparse:
                 means = []

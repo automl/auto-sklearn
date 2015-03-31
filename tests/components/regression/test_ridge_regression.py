@@ -18,7 +18,7 @@ class RandomForestComponentTest(unittest.TestCase):
             # This should be a bad results
             predictions, targets = _test_regressor(RidgeRegression,
                                                    dataset='diabetes')
-            self.assertAlmostEqual(-3.726787582018825,
+            self.assertAlmostEqual(-3.5118220034267313,
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
 
             # This should be much more better
@@ -38,5 +38,5 @@ class RandomForestComponentTest(unittest.TestCase):
             predictor = regressor.fit(X_train_transformed, Y_train)
             predictions = predictor.predict(X_test_transformed)
 
-            self.assertAlmostEqual(0.24658871483206091,
+            self.assertAlmostEqual(0.30195375410805392,
                 sklearn.metrics.r2_score(y_true=Y_test, y_pred=predictions))

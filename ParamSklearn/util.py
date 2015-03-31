@@ -54,14 +54,14 @@ def get_dataset(dataset='iris', make_sparse=False):
     Y = iris.target
     rs = np.random.RandomState(42)
     indices = np.arange(X.shape[0])
-    train_size = len(indices) / 3. * 2.
+    train_size = min(int(len(indices) / 3. * 2.), 150)
     rs.shuffle(indices)
     X = X[indices]
     Y = Y[indices]
-    X_train = X[:100]
-    Y_train = Y[:100]
-    X_test = X[100:]
-    Y_test = Y[100:]
+    X_train = X[:train_size]
+    Y_train = Y[:train_size]
+    X_test = X[train_size:]
+    Y_test = Y[train_size:]
 
     if make_sparse:
         X_train[:,0] = 0

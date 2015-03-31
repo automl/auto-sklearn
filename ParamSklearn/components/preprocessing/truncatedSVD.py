@@ -18,7 +18,11 @@ class TruncatedSVD(ParamSklearnPreprocessingAlgorithm):
     def fit(self, X, Y):
         target_dim = min(self.target_dim, X.shape[1] - 1)
         self.preprocessor = sklearn.decomposition.TruncatedSVD(
-            target_dim, algorithm='arpack')
+            target_dim, algorithm='randomized')
+        # TODO: remove when migrating to sklearn 0.16
+        # Circumvents a bug in sklearn
+        # https://github.com/scikit-learn/scikit-learn/commit/f08b8c8e52663167819f242f605db39f3b5a6d0c
+        X = X.astype(np.float64)
         self.preprocessor.fit(X, Y)
 
         return self
