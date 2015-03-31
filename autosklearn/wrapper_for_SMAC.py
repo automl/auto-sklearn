@@ -62,7 +62,7 @@ def signal_handler(signum, frame):
 signal.signal(15, signal_handler)
 
 
-def main(basename, input_dir, params, time_limit=sys.maxint):
+def main(basename, input_dir, params):
     for key in params:
         try:
             params[key] = float(params[key])
@@ -86,21 +86,11 @@ def main(basename, input_dir, params, time_limit=sys.maxint):
 if __name__ == "__main__":
     outer_starttime = time.time()
 
-    limit = None
-    for idx, arg in enumerate(sys.argv):
-        if arg == "--limit":
-            limit = int(float(sys.argv[idx+1]))
-            del sys.argv[idx:idx+2]
-            break
-
     instance_name = sys.argv[1]
     instance_specific_information = sys.argv[2]  # = 0
     cutoff_time = float(sys.argv[3])  # = inf
     cutoff_length = int(float(sys.argv[4]))  # = 2147483647
     seed = int(float(sys.argv[5]))
-
-    if limit is None:
-        limit = cutoff_time
 
     params = dict()
     for i in range(6, len(sys.argv), 2):
@@ -111,6 +101,6 @@ if __name__ == "__main__":
     
     dataset = os.path.basename(instance_name)
     data_dir = os.path.dirname(instance_name)
-    main(basename=dataset, input_dir=data_dir, params=params, time_limit=limit)
+    main(basename=dataset, input_dir=data_dir, params=params)
 
     sys.exit(0)
