@@ -18,7 +18,7 @@ except:
 
 
 def predict_proba(X, model, task_type):
-    Y_pred = model.predict_proba(X)
+    Y_pred = model.predict_proba(X, batch_size=1000)
 
     if task_type == "multilabel.classification":
         Y_pred = np.hstack(
@@ -33,7 +33,7 @@ def predict_proba(X, model, task_type):
 
 
 def predict_regression(X, model, task_type):
-    Y_pred = model.predict(X)
+    Y_pred = model.predict(X, batch_size=1000)
 
     if len(Y_pred.shape) == 1:
         Y_pred = Y_pred.reshape((-1, 1))
