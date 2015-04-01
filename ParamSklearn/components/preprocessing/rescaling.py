@@ -17,13 +17,6 @@ class Rescaling(ParamSklearnPreprocessingAlgorithm):
     def fit(self, X, Y):
         if self.strategy == "min/max":
             self.preprocessor = MinMaxScaler(copy=False)
-            # Fix numeric instabilities
-            if sparse.issparse(X):
-                X.data[X.data < 0] = 0
-                X.data[X.data > 1] = 1
-            else:
-                X[X < 0] = 0
-                X[X > 1] = 1
         elif self.strategy == "standard":
             self.preprocessor = StandardScaler(copy=False)
         else:

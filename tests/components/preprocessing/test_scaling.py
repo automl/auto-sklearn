@@ -29,5 +29,5 @@ class ScalingComponentTest(unittest.TestCase):
         preprocessing = _test_preprocessing(Rescaling, dataset='boston',
                                             make_sparse=True)
         transformation, original = preprocessing
-        self.assertAlmostEqual(transformation.max(), 1)
+        self.assertAlmostEqual(1, transformation.max(), places=6)
         self.assertTrue(all((original != transformation).data))

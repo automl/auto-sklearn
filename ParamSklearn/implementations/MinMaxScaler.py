@@ -72,8 +72,8 @@ class MinMaxScaler(BaseEstimator, TransformerMixin):
                 else:
                     data_min.append(X.data[X.indptr[i]:X.indptr[i + 1]].min())
                     data_max.append(X.data[X.indptr[i]:X.indptr[i + 1]].max())
-            data_min = np.array(data_min)
-            data_max = np.array(data_max)
+            data_min = np.array(data_min, dtype=np.float32)
+            data_max = np.array(data_max, dtype=np.float32)
             data_range = data_max - data_min
 
         else:

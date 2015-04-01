@@ -7,6 +7,7 @@ class SelectPercentileBase(object):
         self.preprocessor = sklearn.feature_selection.SelectPercentile(
             score_func=self.score_func,
             percentile=self.percentile)
+
         self.preprocessor.fit(X, Y)
         return self
 
