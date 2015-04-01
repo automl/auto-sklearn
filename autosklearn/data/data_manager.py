@@ -260,8 +260,10 @@ class DataManager:
         if filename==None:
             basename = self.basename
             input_dir = self.input_dir
-        else:   
-            basename = os.path.basename(filename).split('_')[0]
+        else:
+            # Split away the _public.info (anyway, I don't know why its
+            # there... the dataset name is known from the call)
+            basename = "_".join(os.path.basename(filename).split('_')[:-1])
             input_dir = os.path.dirname(filename)
         if os.path.exists(filename):
             self.getInfoFromFile (filename)
