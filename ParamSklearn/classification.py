@@ -4,7 +4,6 @@ from itertools import product
 import numpy as np
 
 from sklearn.base import ClassifierMixin
-from sklearn.preprocessing import LabelEncoder
 
 from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause
 from HPOlibConfigSpace.forbidden import ForbiddenAndConjunction
@@ -106,7 +105,7 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                     for k in range(max(1, int(np.ceil(float(X.shape[0]) /
                             batch_size)))):
                         batch_from = k * batch_size
-                        batch_to = min([(k + 1) * batch_size, X.shape[0] + 1])
+                        batch_to = min([(k + 1) * batch_size, X.shape[0]])
                         y[batch_from:batch_to] = \
                             self.predict_proba(X[batch_from:batch_to],
                                                batch_size=None)
@@ -118,7 +117,7 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                     for k in range(max(1, int(np.ceil(float(X.shape[0]) /
                             batch_size)))):
                         batch_from = k * batch_size
-                        batch_to = min([(k + 1) * batch_size, X.shape[0] + 1])
+                        batch_to = min([(k + 1) * batch_size, X.shape[0]])
                         predictions = \
                             self.predict_proba(X[batch_from:batch_to],
                                                batch_size=None)

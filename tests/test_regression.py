@@ -187,6 +187,24 @@ class TestParamSKlearnRegressor(unittest.TestCase):
         self.assertEqual(18, cls_predict.predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
+    def test_predict_batched_sparse(self):
+        cs = ParamSklearnRegressor.get_hyperparameter_search_space(
+            dataset_properties={'sparse': True})
+        default = cs.get_default_configuration()
+        cls = ParamSklearnRegressor(default)
+
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston',
+                                                       make_sparse=True)
+        cls.fit(X_train, Y_train)
+        X_test_ = X_test.copy()
+        prediction_ = cls.predict(X_test_)
+        cls_predict = mock.Mock(wraps=cls._pipeline)
+        cls._pipeline = cls_predict
+        prediction = cls.predict(X_test, batch_size=20)
+        self.assertEqual((356,), prediction.shape)
+        self.assertEqual(18, cls_predict.predict.call_count)
+        assert_array_almost_equal(prediction_, prediction)
+
     @unittest.skip("test_check_random_state Not yet Implemented")
     def test_check_random_state(self):
         raise NotImplementedError()

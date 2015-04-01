@@ -244,7 +244,7 @@ class ParamSklearnBaseEstimator(BaseEstimator):
                 for k in range(max(1, int(np.ceil(float(X.shape[0]) /
                                                   batch_size)))):
                     batch_from = k * batch_size
-                    batch_to = min([(k + 1) * batch_size, X.shape[0] + 1])
+                    batch_to = min([(k + 1) * batch_size, X.shape[0]])
                     y[batch_from:batch_to] = \
                         self.predict(X[batch_from:batch_to], batch_size=None)
 
