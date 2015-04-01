@@ -1,3 +1,4 @@
+import numpy as np
 import sklearn.decomposition
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
@@ -33,6 +34,10 @@ class PCA(ParamSklearnPreprocessingAlgorithm):
 
         components = self.preprocessor.components_
         self.preprocessor.components_ = components[:idx]
+
+        if not np.isfinite(self.preprocessor.components_).all():
+            raise ValueError("PCA found non-finite components.")
+
         return self
 
     def transform(self, X):
