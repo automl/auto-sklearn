@@ -60,23 +60,72 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
 
     """
 
-    def predict_proba(self, X):
+    def fit(self, X, Y, fit_params=None, init_params=None):
+        super(ParamSklearnClassifier, self).fit(X, Y, fit_params=fit_params,
+                                                init_params=init_params)
+        self.num_targets = 1 if len(Y.shape) == 1 else Y.shape[1]
+        return self
+
+    def predict_proba(self, X, batch_size=None):
         """predict_proba.
 
         Parameters
         ----------
         X : array-like, shape = (n_samples, n_features)
 
+        batch_size: int or None, defaults to None
+            batch_size controls whether the ParamSklearn pipeline will be
+            called on small chunks of the data. Useful when calling the
+            predict method on the whole array X results in a MemoryError.
+
         Returns
         -------
         array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)
         """
-        self._validate_input_X(X)
-        Xt = X
-        for name, transform in self._pipeline.steps[:-1]:
-            Xt = transform.transform(Xt)
+        if batch_size is None:
+            self._validate_input_X(X)
+            Xt = X
+            for name, transform in self._pipeline.steps[:-1]:
+                Xt = transform.transform(Xt)
 
-        return self._pipeline.steps[-1][-1].predict_proba(Xt)
+            return self._pipeline.steps[-1][-1].predict_proba(Xt)
+
+        else:
+            if type(batch_size) is not int or batch_size <= 0:
+                raise Exception("batch_size must be a positive integer")
+
+            else:
+                # Probe for the target array dimensions
+                target = self.predict_proba(X[0].copy())
+
+                # Binary or Multiclass
+                if len(target) == 1:
+                    y = np.zeros((X.shape[0], target.shape[1]))
+
+                    for k in range(max(1, int(np.ceil(float(X.shape[0]) /
+                            batch_size)))):
+                        batch_from = k * batch_size
+                        batch_to = min([(k + 1) * batch_size, X.shape[0]])
+                        y[batch_from:batch_to] = \
+                            self.predict_proba(X[batch_from:batch_to],
+                                               batch_size=None)
+
+                elif len(target) > 1:
+                    y = [np.zeros((X.shape[0], target[i].shape[1]))
+                         for i in range(len(target))]
+
+                    for k in range(max(1, int(np.ceil(float(X.shape[0]) /
+                            batch_size)))):
+                        batch_from = k * batch_size
+                        batch_to = min([(k + 1) * batch_size, X.shape[0]])
+                        predictions = \
+                            self.predict_proba(X[batch_from:batch_to],
+                                               batch_size=None)
+
+                        for i in range(len(target)):
+                            y[i][batch_from:batch_to] = predictions[i]
+
+                return y
 
     @classmethod
     def get_available_components(cls, available_comp, data_prop, inc, exc):

@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 import copy
 
+import numpy as np
 import sklearn
 if sklearn.__version__ != "0.15.2":
     raise ValueError("ParamSklearn supports only sklearn version 0.15.2, "
@@ -208,20 +209,46 @@ class ParamSklearnBaseEstimator(BaseEstimator):
         """
         raise NotImplementedError()
 
-    def predict(self, X):
+    def predict(self, X, batch_size=None):
         """Predict the classes using the selected model.
 
         Parameters
         ----------
         X : array-like, shape = (n_samples, n_features)
 
+        batch_size: int or None, defaults to None
+            batch_size controls whether the ParamSklearn pipeline will be
+            called on small chunks of the data. Useful when calling the
+            predict method on the whole array X results in a MemoryError.
+
         Returns
         -------
         array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)
             Returns the predicted values"""
         # TODO check if fit() was called before...
-        self._validate_input_X(X)
-        return self._pipeline.predict(X)
+
+        if batch_size is None:
+            self._validate_input_X(X)
+            return self._pipeline.predict(X)
+        else:
+            if type(batch_size) is not int or batch_size <= 0:
+                raise Exception("batch_size must be a positive integer")
+
+            else:
+                if self.num_targets == 1:
+                    y = np.zeros((X.shape[0],))
+                else:
+                    y = np.zeros((X.shape[0], self.num_targets))
+
+                # Copied and adapted from the scikit-learn GP code
+                for k in range(max(1, int(np.ceil(float(X.shape[0]) /
+                                                  batch_size)))):
+                    batch_from = k * batch_size
+                    batch_to = min([(k + 1) * batch_size, X.shape[0]])
+                    y[batch_from:batch_to] = \
+                        self.predict(X[batch_from:batch_to], batch_size=None)
+
+                return y
 
     @classmethod
     def get_hyperparameter_search_space(cls, estimator_name,

@@ -1,5 +1,4 @@
 import numpy as np
-import setuptools
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -11,11 +10,13 @@ from sklearn.preprocessing import OneHotEncoder
 from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.util import DENSE, PREDICTIONS
 
-import GPy
 
 
 class GPyClassifier():#ParamSklearnClassificationAlgorithm):
-    def __init__(self, random_state=None, n_inducing=20, ard=False):
+    def __init__(self, random_state=None, n_inducing=5, ard=False):
+        import GPy
+        global GPy
+
         self.estimators = None
         self.n_inducing = int(n_inducing)
 
