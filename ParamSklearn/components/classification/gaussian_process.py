@@ -12,7 +12,7 @@ from ParamSklearn.util import DENSE, PREDICTIONS
 
 
 
-class GPyClassifier():#ParamSklearnClassificationAlgorithm):
+class GPyClassifier(ParamSklearnClassificationAlgorithm):
     def __init__(self, random_state=None, n_inducing=20, ard=False):
         import GPy
         global GPy
