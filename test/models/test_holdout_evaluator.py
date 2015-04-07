@@ -187,8 +187,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         print "Number of times it was worse than random guessing:" + str(
             np.sum(err > 1))
 
-
-
     def test_evaluate_regression(self):
         X_train, Y_train, X_test, Y_test = get_dataset('boston')
 
@@ -286,7 +284,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
     def test_predict_proba_binary_classification(self):
         class Dummy(object):
-            def predict_proba(self, y):
+            def predict_proba(self, y, batch_size=200):
                 return np.array([[0.1, 0.9], [0.7, 0.3]])
 
         model = Dummy()

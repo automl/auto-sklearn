@@ -8,7 +8,6 @@ from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.regression import ParamSklearnRegressor
 
 from autosklearn.scores import libscores
-from autosklearn.data.split_data import split_data
 
 
 try:

@@ -62,9 +62,9 @@ class CVEvaluator_Test(unittest.TestCase):
             # Test some basic statistics of the dataset
             if err[i] < 0.5:
                 self.assertTrue(0.3 < Y_valid_pred.mean() < 0.36666)
-                self.assertGreaterEqual(Y_valid_pred.std(), 0.04)
+                self.assertGreaterEqual(Y_valid_pred.std(), 0.01)
                 self.assertTrue(0.3 < Y_test_pred.mean() < 0.36666)
-                self.assertGreaterEqual(Y_test_pred.std(), 0.04)
+                self.assertGreaterEqual(Y_test_pred.std(), 0.01)
                 num_models_better_than_random += 1
         self.assertGreater(num_models_better_than_random, 5)
 
@@ -115,9 +115,9 @@ class CVEvaluator_Test(unittest.TestCase):
             # Test some basic statistics of the dataset
             if err[i] < 0.5:
                 self.assertTrue(0.3 < Y_valid_pred.mean() < 0.36666)
-                self.assertGreaterEqual(Y_valid_pred.std(), 0.04)
+                self.assertGreaterEqual(Y_valid_pred.std(), 0.01)
                 self.assertTrue(0.3 < Y_test_pred.mean() < 0.36666)
-                self.assertGreaterEqual(Y_test_pred.std(), 0.04)
+                self.assertGreaterEqual(Y_test_pred.std(), 0.01)
                 num_models_better_than_random += 1
         self.assertGreaterEqual(num_models_better_than_random, 5)
 

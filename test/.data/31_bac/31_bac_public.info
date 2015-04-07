@@ -11,5 +11,5 @@ is_sparse = 0
 has_missing = 0
 usage = 'ParamSklearn Configuration for AutoML challenge 2015'
 feat_num = 20
-valid_num = 0
+valid_num = 10
 name = '31'

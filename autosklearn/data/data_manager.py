@@ -136,7 +136,6 @@ class DataManager:
             self.getFormatData(filename)
         if 'feat_num' not in self.info:
             self.getNbrFeatures(filename)
-        print chelper_is_there
         if chelper_is_there:
             data_func = {'dense': chelper_functions.read_dense_file,
                          'sparse': chelper_functions.read_sparse_file,

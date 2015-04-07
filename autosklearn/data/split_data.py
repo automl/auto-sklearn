@@ -6,18 +6,27 @@ import sklearn.cross_validation
 
 def split_data(X, Y):
     num_data_points = X.shape[0]
+    num_labels = Y.shape[1] if len(Y.shape) > 1 else 1
     X_train, X_valid, Y_train, Y_valid = None, None, None, None
     if X.shape[0] != Y.shape[0]:
         raise ValueError("The first dimension of the X and Y array must "
                          "be equal.")
-    try:
-        sss = sklearn.cross_validation.StratifiedShuffleSplit(Y, n_iter=1,
-                                                              test_size=0.33,
-                                                              train_size=None,
-                                                              random_state=42)
-    except ValueError:
-        sys.stdout.write("To few samples of one class or maybe a regression "
-                         "dataset, use shuffle split.\n")
+
+    if num_labels > 1:
+        sys.stdout.write("Multilabel dataset, do a random split.")
+        sss = None
+    else:
+        try:
+            sss = sklearn.cross_validation.StratifiedShuffleSplit(Y, n_iter=1,
+                                                                  test_size=0.33,
+                                                                  train_size=None,
+                                                                  random_state=42)
+        except ValueError:
+            sss = None
+            sys.stdout.write("Too few samples of one class or maybe a "
+                             "regression dataset, use shuffle split.\n")
+
+    if sss is None:
         sss = sklearn.cross_validation.ShuffleSplit(Y.shape[0], n_iter=1,
                                                     test_size=0.33,
                                                     train_size=None,
