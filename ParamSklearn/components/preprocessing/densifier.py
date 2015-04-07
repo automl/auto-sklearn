@@ -16,7 +16,7 @@ class Densifier(ParamSklearnPreprocessingAlgorithm):
 
     def transform(self, X):
         if sparse.issparse(X):
-            return X.todense()
+            return X.todense().getA()
         else:
             return X
 
