@@ -1,7 +1,6 @@
 from scipy import sparse
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import Constant
 
 from ParamSklearn.components.preprocessor_base import \
     ParamSklearnPreprocessingAlgorithm
@@ -9,14 +8,17 @@ from ParamSklearn.util import DENSE, SPARSE
 
 
 class Densifier(ParamSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state):
-        self.random_state = random_state
+    def __init__(self, random_state=None):
+        pass
 
-    def fit(self, X, Y):
+    def fit(self, X, y=None):
         return self
 
     def transform(self, X):
-        return X.todense()
+        if sparse.issparse(X):
+            return X.todense()
+        else:
+            return X
 
     @staticmethod
     def get_properties():

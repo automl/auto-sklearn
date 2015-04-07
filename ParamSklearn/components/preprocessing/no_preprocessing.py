@@ -10,7 +10,7 @@ class NoPreprocessing(ParamSklearnPreprocessingAlgorithm):
         """ This preprocessors does not change the data """
         self.preprocessor = None
 
-    def fit(self, X, Y):
+    def fit(self, X, Y=None):
         self.preprocessor = 0
         return self
 

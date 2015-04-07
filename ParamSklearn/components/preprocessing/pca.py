@@ -20,10 +20,10 @@ class PCA(ParamSklearnPreprocessingAlgorithm):
         self.whiten = whiten
         self.random_state = random_state
 
-    def fit(self, X, Y):
+    def fit(self, X, Y=None):
         self.preprocessor = sklearn.decomposition.PCA(whiten=self.whiten,
                                                       copy=True)
-        self.preprocessor.fit(X, Y)
+        self.preprocessor.fit(X)
 
         sum_ = 0.
         idx = 0
