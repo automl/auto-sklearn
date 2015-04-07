@@ -52,7 +52,7 @@ def find_sklearn_classes(class_):
 def get_dataset(dataset='iris', make_sparse=False, add_NaNs=False):
     iris = getattr(sklearn.datasets, "load_%s" % dataset)()
     X = iris.data.astype(np.float32)
-    Y = iris.target.astype(np.int32)
+    Y = iris.target
     rs = np.random.RandomState(42)
     indices = np.arange(X.shape[0])
     train_size = min(int(len(indices) / 3. * 2.), 150)
