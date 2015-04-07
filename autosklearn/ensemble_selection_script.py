@@ -8,7 +8,7 @@ Created on Apr 2, 2015
 import os
 import sys
 import time
-
+import random
 import logging
 import numpy as np
 
@@ -19,14 +19,23 @@ from autosklearn.util.stopwatch import StopWatch
 
 def build_ensemble(predictions_train, predictions_valid, predictions_test, true_labels, ensemble_size, task_type, metric):
 
-    indices = ensemble_selection(predictions_train, true_labels, ensemble_size, task_type, metric)
+    indices, _ = ensemble_selection(predictions_train, true_labels, ensemble_size, task_type, metric)
     ensemble_predictions_valid = np.mean(predictions_valid[indices.astype(int)], axis=0)
     ensemble_predictions_test = np.mean(predictions_test[indices.astype(int)], axis=0)
 
     return ensemble_predictions_valid, ensemble_predictions_test
 
 
-def ensemble_selection(predictions, labels, ensemble_size, task_type, metric):
+def pruning(predictions, labels, n_best, task_type, metric):
+    perf = np.zeros([predictions.shape[0]])
+    for i, p in enumerate(predictions):
+        perf[i] = evaluator.calculate_score(labels, predictions, task_type, metric)
+
+    indcies = np.argsort(perf)[perf.shape[0] - n_best:]
+    return indcies
+
+
+def ensemble_selection(predictions, labels, ensemble_size, task_type, metric, do_pruning=False):
     '''
         Rich Caruana's ensemble selection method
     '''
@@ -34,6 +43,16 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric):
     ensemble = []
     trajectory = []
     order = []
+
+    if do_pruning:
+        n_best = 20
+        indices = pruning(predictions, labels, n_best, task_type, metric)
+        for idx in indices:
+            ensemble.append(predictions[idx])
+            order.append(idx)
+        ensemble_performance = evaluator.calculate_score(labels, np.array(ensemble).mean(axis=0), task_type, metric)
+        trajectory.append(ensemble_performance)
+
     for i in range(ensemble_size):
         scores = np.zeros([predictions.shape[0]])
         for j, pred in enumerate(predictions):
@@ -42,11 +61,30 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric):
             scores[j] = evaluator.calculate_score(labels, ensemble_prediction, task_type, metric)
             ensemble.pop()
         best = np.argmax(scores)
+
         ensemble.append(predictions[best])
         trajectory.append(scores[best])
         order.append(best)
 
-    return np.array(order)
+    return np.array(order), np.array(trajectory)
+
+
+def ensemble_selection_bagging(predictions, labels, ensemble_size, task_type, metric, fraction=0.5, n_bags=20, do_pruning=False):
+    '''
+        Rich Caruana's ensemble selection method with bagging
+    '''
+    n_models = predictions.shape[0]
+    bag_size = int(n_models * fraction)
+
+    order_of_each_bag = []
+    for j in range(n_bags):
+        # Bagging a set of models
+        indices = sorted(random.sample(range(0, n_models), bag_size))
+        bag = predictions[indices, :, :]
+        order, _ = ensemble_selection(bag, labels, ensemble_size, task_type, metric, do_pruning)
+        order_of_each_bag.append(order)
+
+    return np.array(order_of_each_bag)
 
 
 def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemble_size=None):
