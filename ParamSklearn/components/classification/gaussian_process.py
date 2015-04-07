@@ -38,11 +38,18 @@ class GPyClassifier():#ParamSklearnClassificationAlgorithm):
         self.estimators = []
         for i in range(self.enc.n_values_):
             # train model 
-            kern = GPy.kern._src.rbf.RBF(X.shape[1], variance=1.0, lengthscale=1.0, ARD=self.ard)
+            white = GPy.kern._src.static.White(X.shape[1], variance=1.0, active_dims=None, name='white')
+            rbf = GPy.kern._src.rbf.RBF(X.shape[1], variance=1.0, lengthscale=1.0, ARD=self.ard)
+            kern = rbf + white
             # dense
             # model = GPy.models.GPClassification(X, targets[:,i,None], kernel=kern)
             # sparse 
-            model = GPy.models.SparseGPClassification(X, targets[:,i,None], kernel=kern, num_inducing=self.n_inducing)
+            model = GPy.models.SparseGPClassification(X, 
+                    targets[:,i,None], 
+                    kernel=kern, 
+                    num_inducing=self.n_inducing,
+                    normalize_X=False,
+                    normalize_Y=False)
             # fit kernel hyperparameters
             model.optimize('bfgs', max_iters=100)
             # add to list of estimators
