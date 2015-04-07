@@ -2,10 +2,10 @@ import numpy as np
 import unittest
 
 from ParamSklearn.components.preprocessing.no_preprocessing import NoPreprocessing
-from ParamSklearn.util import _test_preprocessing
+from ParamSklearn.util import _test_preprocessing, PreprocessingTestCase
 
 
-class NoneComponentTest(unittest.TestCase):
+class NoneComponentTest(PreprocessingTestCase):
     def test_default_configuration(self):
         transformation, original = _test_preprocessing(NoPreprocessing)
         self.assertEqual(transformation.shape[0], original.shape[0])
@@ -16,5 +16,8 @@ class NoneComponentTest(unittest.TestCase):
         self.assertEqual(np.max(original), np.max(transformation))
         self.assertEqual(np.std(original), np.std(transformation))
         self.assertEqual(np.mean(original), np.mean(transformation))
+
+    def test_preprocessing_dtype(self):
+        super(NoneComponentTest, self)._test_preprocessing_dtype(NoPreprocessing)
 
 

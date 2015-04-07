@@ -2,6 +2,7 @@ import importlib
 import inspect
 import os
 import pkgutil
+import unittest
 
 import numpy as np
 import scipy.sparse
@@ -48,10 +49,10 @@ def find_sklearn_classes(class_):
     print classifiers
 
 
-def get_dataset(dataset='iris', make_sparse=False):
+def get_dataset(dataset='iris', make_sparse=False, add_NaNs=False):
     iris = getattr(sklearn.datasets, "load_%s" % dataset)()
-    X = iris.data
-    Y = iris.target
+    X = iris.data.astype(np.float32)
+    Y = iris.target.astype(np.int32)
     rs = np.random.RandomState(42)
     indices = np.arange(X.shape[0])
     train_size = min(int(len(indices) / 3. * 2.), 150)
@@ -62,6 +63,10 @@ def get_dataset(dataset='iris', make_sparse=False):
     Y_train = Y[:train_size]
     X_test = X[train_size:]
     Y_test = Y[train_size:]
+
+    if add_NaNs:
+        mask = np.random.choice([True, False], size=(X_train.shape))
+        X_train[mask] = np.NaN
 
     if make_sparse:
         X_train[:,0] = 0
@@ -101,6 +106,62 @@ def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False):
 
     transformer = preprocessor.fit(X_train, Y_train)
     return transformer.transform(X_train), original_X_train
+
+
+class PreprocessingTestCase(unittest.TestCase):
+    def _test_preprocessing_dtype(self, Preprocessor, add_NaNs=False):
+        # Dense
+        # np.float32
+        X_train, Y_train, X_test, Y_test = get_dataset("iris", add_NaNs=add_NaNs)
+        self.assertEqual(X_train.dtype, np.float32)
+
+        configuration_space = Preprocessor.get_hyperparameter_search_space()
+        default = configuration_space.get_default_configuration()
+        preprocessor = Preprocessor(random_state=1,
+                                    **{hp.hyperparameter.name: hp.value for hp in
+                                       default.values.values()})
+        preprocessor.fit(X_train)
+        Xt = preprocessor.transform(X_train)
+        self.assertEqual(Xt.dtype, np.float32)
+
+        # np.float64
+        X_train, Y_train, X_test, Y_test = get_dataset("iris", add_NaNs=add_NaNs)
+        X_train = X_train.astype(np.float64)
+        configuration_space = Preprocessor.get_hyperparameter_search_space()
+        default = configuration_space.get_default_configuration()
+        preprocessor = Preprocessor(random_state=1,
+                                    **{hp.hyperparameter.name: hp.value for hp in
+                                       default.values.values()})
+        preprocessor.fit(X_train, Y_train)
+        Xt = preprocessor.transform(X_train)
+        self.assertEqual(Xt.dtype, np.float64)
+
+        # Sparse
+        # np.float32
+        X_train, Y_train, X_test, Y_test = get_dataset("iris", make_sparse=True,
+                                                       add_NaNs=add_NaNs)
+        self.assertEqual(X_train.dtype, np.float32)
+        configuration_space = Preprocessor.get_hyperparameter_search_space()
+        default = configuration_space.get_default_configuration()
+        preprocessor = Preprocessor(random_state=1,
+                                    **{hp.hyperparameter.name: hp.value for hp in
+                                       default.values.values()})
+        preprocessor.fit(X_train)
+        Xt = preprocessor.transform(X_train)
+        self.assertEqual(Xt.dtype, np.float32)
+
+        # np.float64
+        X_train, Y_train, X_test, Y_test = get_dataset("iris", make_sparse=True,
+                                                       add_NaNs=add_NaNs)
+        X_train = X_train.astype(np.float64)
+        configuration_space = Preprocessor.get_hyperparameter_search_space()
+        default = configuration_space.get_default_configuration()
+        preprocessor = Preprocessor(random_state=1,
+                                    **{hp.hyperparameter.name: hp.value for hp in
+                                       default.values.values()})
+        preprocessor.fit(X_train)
+        Xt = preprocessor.transform(X_train)
+        self.assertEqual(Xt.dtype, np.float64)
 
 
 def _test_regressor(Regressor, dataset='diabetes'):
