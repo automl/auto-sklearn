@@ -14,14 +14,14 @@ class Rescaling(ParamSklearnPreprocessingAlgorithm):
         # TODO pay attention to the cases when a copy is made
         self.strategy = strategy
 
-    def fit(self, X, Y):
+    def fit(self, X, Y=None):
         if self.strategy == "min/max":
             self.preprocessor = MinMaxScaler(copy=False)
         elif self.strategy == "standard":
             self.preprocessor = StandardScaler(copy=False)
         else:
             raise ValueError(self.strategy)
-        self.preprocessor.fit(X, Y)
+        self.preprocessor.fit(X)
         return self
 
     def transform(self, X):

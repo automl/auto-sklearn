@@ -28,7 +28,7 @@ class RandomTreesEmbedding(ParamSklearnPreprocessingAlgorithm):
         self.n_jobs = n_jobs
         self.random_state = random_state
 
-    def fit(self, X, Y):
+    def fit(self, X, Y=None):
         self.preprocessor = sklearn.ensemble.RandomTreesEmbedding(
             n_estimators=self.n_estimators,
             max_depth=self.max_depth,
@@ -39,7 +39,7 @@ class RandomTreesEmbedding(ParamSklearnPreprocessingAlgorithm):
             n_jobs=self.n_jobs,
             random_state=self.random_state
         )
-        self.preprocessor.fit(X, Y)
+        self.preprocessor.fit(X)
         return self
 
     def transform(self, X):

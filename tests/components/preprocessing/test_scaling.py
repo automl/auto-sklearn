@@ -4,10 +4,10 @@ import numpy as np
 import sklearn.datasets
 
 from ParamSklearn.components.preprocessing.rescaling import Rescaling
-from ParamSklearn.util import _test_preprocessing
+from ParamSklearn.util import _test_preprocessing, PreprocessingTestCase
 
 
-class ScalingComponentTest(unittest.TestCase):
+class ScalingComponentTest(PreprocessingTestCase):
     def test_boston_is_not_scaled(self):
         data = sklearn.datasets.load_boston()['data']
         self.assertGreaterEqual(np.max(data), 100)
@@ -31,3 +31,6 @@ class ScalingComponentTest(unittest.TestCase):
         transformation, original = preprocessing
         self.assertAlmostEqual(1, transformation.max(), places=6)
         self.assertTrue(all((original != transformation).data))
+
+    def test_preprocessing_dtype(self):
+        super(ScalingComponentTest, self)._test_preprocessing_dtype(Rescaling)

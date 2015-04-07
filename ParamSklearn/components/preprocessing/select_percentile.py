@@ -3,12 +3,12 @@ import sklearn.feature_selection
 
 class SelectPercentileBase(object):
 
-    def fit(self, X, Y):
+    def fit(self, X, y):
         self.preprocessor = sklearn.feature_selection.SelectPercentile(
             score_func=self.score_func,
             percentile=self.percentile)
 
-        self.preprocessor.fit(X, Y)
+        self.preprocessor.fit(X, y)
         return self
 
     def transform(self, X):

@@ -3,10 +3,10 @@ import unittest
 from scipy import sparse
 
 from ParamSklearn.components.preprocessing.imputation import Imputation
-from ParamSklearn.util import _test_preprocessing
+from ParamSklearn.util import _test_preprocessing, PreprocessingTestCase
 
 
-class ImputationTest(unittest.TestCase):
+class ImputationTest(PreprocessingTestCase):
     def test_default_configuration(self):
         transformations = []
         for i in range(10):
@@ -26,3 +26,7 @@ class ImputationTest(unittest.TestCase):
         self.assertTrue((transformation.data == original.data).all())
         self.assertIsInstance(transformation, sparse.csc_matrix)
         transformations.append(transformation)
+
+    def test_preprocessing_dtype(self):
+        super(ImputationTest, self)._test_preprocessing_dtype(Imputation,
+                                                              add_NaNs=True)

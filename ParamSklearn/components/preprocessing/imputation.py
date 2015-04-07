@@ -12,10 +12,10 @@ class Imputation(ParamSklearnPreprocessingAlgorithm):
         # TODO pay attention to the cases when a copy is made (CSR matrices)
         self.strategy = strategy
 
-    def fit(self, X, Y):
+    def fit(self, X, y=None):
         self.preprocessor = sklearn.preprocessing.Imputer(
             strategy=self.strategy, copy=False)
-        self.preprocessor.fit(X, Y)
+        self.preprocessor.fit(X)
         return self
 
     def transform(self, X):

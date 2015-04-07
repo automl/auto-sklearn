@@ -70,7 +70,7 @@ class TestParamSKlearnRegressor(unittest.TestCase):
             predictions = auto.predict(copy.deepcopy(X_test))
             # The lower the worse
             r2_score = sklearn.metrics.r2_score(Y_test, predictions)
-            self.assertAlmostEqual(0.41142912213964022, r2_score)
+            self.assertAlmostEqual(0.41211271098191482, r2_score)
             model_score = auto.score(copy.deepcopy(X_test), Y_test)
             self.assertEqual(model_score, r2_score)
 

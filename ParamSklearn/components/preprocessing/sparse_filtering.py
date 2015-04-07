@@ -13,9 +13,9 @@ class SparseFiltering(ParamSklearnPreprocessingAlgorithm):
         self.maxiter = maxiter
         self.random_state = random_state
 
-    def fit(self, X, Y):
+    def fit(self, X, Y=None):
         self.preprocessor = SparseFilteringImpl(self.N, self.maxiter, random_state = self.random_state)
-        self.preprocessor.fit(X, Y)
+        self.preprocessor.fit(X)
         return self
     
     def transform(self, X):
