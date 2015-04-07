@@ -13,14 +13,17 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS, 
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE. 
 import numpy as np
-try:
-    import cPickle as pickle
-except:
-    import pickle
 import os
 import time
 
 import scipy.sparse
+
+try:
+    import autosklearn.data.chelper_functions as chelper_functions
+    chelper_is_there = True
+except:
+    chelper_is_there = False
+    pass
 
 import autosklearn.data.data_converter as data_converter
 import autosklearn.data.data_io as data_io
@@ -61,20 +64,11 @@ class DataManager:
     
     def __init__(self, basename, input_dir, verbose=False, encode_labels=True):
         '''Constructor'''
-        self.use_pickle = False # Turn this to true to save data as pickle (inefficient)
         self.basename = basename
         if basename in input_dir:
             self.input_dir = input_dir 
         else:
-            self.input_dir = input_dir + "/" + basename + "/"   
-        if self.use_pickle:
-            if os.path.exists("tmp"):
-                self.tmp_dir = "tmp"
-            elif os.path.exists("../tmp"):
-                self.tmp_dir = "../tmp" 
-            else:
-                os.makedirs("tmp")
-                self.tmp_dir = "tmp"
+            self.input_dir = input_dir + "/" + basename + "/"
 
         info_file = os.path.join(self.input_dir, basename + '_public.info')
         self.info = {}
@@ -83,13 +77,13 @@ class DataManager:
         self.data = {}
 
         Xtr = self.loadData(os.path.join(self.input_dir, basename + '_train.data'),
-                            self.feat_type, verbose=verbose)
+                            self.info['train_num'], verbose=verbose)
         Ytr = self.loadLabel(os.path.join(self.input_dir, basename + '_train.solution'),
-                             verbose=verbose)
+                             self.info['train_num'], verbose=verbose)
         Xva = self.loadData(os.path.join(self.input_dir, basename + '_valid.data'),
-                            self.feat_type, verbose=verbose)
+                            self.info['valid_num'], verbose=verbose)
         Xte = self.loadData(os.path.join(self.input_dir, basename + '_test.data'),
-                            self.feat_type, verbose=verbose)
+                            self.info['test_num'], verbose=verbose)
 
         self.data['X_train'] = Xtr
         self.data['Y_train'] = Ytr
@@ -99,14 +93,14 @@ class DataManager:
         try:
             self.data['Y_valid'] = self.loadLabel(
                 os.path.join(self.input_dir, basename + '_valid.solution'),
-                verbose=verbose)
+                self.info['valid_num'], verbose=verbose)
         except (IOError, OSError):
             pass
 
         try:
             self.data['Y_test'] = self.loadLabel(
                 os.path.join(self.input_dir, basename + '_test.solution'),
-                verbose=verbose)
+                self.info['test_num'], verbose=verbose)
         except (IOError, OSError) as e:
             pass
 
@@ -133,63 +127,64 @@ class DataManager:
         val = val + "feat_type:\tarray" + str(self.feat_type.shape) + "\n"
         return val
                 
-    def loadData (self, filename, feat_type, verbose=True):
+    def loadData (self, filename, num_points, verbose=True):
         ''' Get the data from a text file in one of 3 formats: matrix, sparse, binary_sparse'''
         if verbose:  print("========= Reading " + filename)
         start = time.time()
-
-        if self.use_pickle and os.path.exists (os.path.join (self.tmp_dir, os.path.basename(filename) + ".pickle")):
-            with open (os.path.join (self.tmp_dir, os.path.basename(filename) + ".pickle"), "r") as pickle_file:
-                vprint (verbose, "Loading pickle file : " + os.path.join(self.tmp_dir, os.path.basename(filename) + ".pickle"))
-                return pickle.load(pickle_file)
 
         if 'format' not in self.info:
             self.getFormatData(filename)
         if 'feat_num' not in self.info:
             self.getNbrFeatures(filename)
+        print chelper_is_there
+        if chelper_is_there:
+            data_func = {'dense': chelper_functions.read_dense_file,
+                         'sparse': chelper_functions.read_sparse_file,
+                         'sparse_binary': chelper_functions.read_sparse_binary_file}
 
-        data_func = {'dense': input_routines.convert_file_to_array,
-                     'sparse': data_io.data_sparse,
-                     'sparse_binary': data_io.data_binary_sparse}
-        
-        data = data_func[self.info['format']](filename, feat_type)
+            data = data_func[self.info['format']](filename, num_points,
+                                                  self.info['feat_num'])
+        else:
+            data_func = {'dense': input_routines.convert_file_to_array,
+                         'sparse': data_io.data_sparse,
+                         'sparse_binary': data_io.data_binary_sparse}
 
-        if self.use_pickle:
-            with open (os.path.join (self.tmp_dir, os.path.basename(filename) + ".pickle"), "wb") as pickle_file:
-                vprint (verbose, "Saving pickle file : " + os.path.join (self.tmp_dir, os.path.basename(filename) + ".pickle"))
-                p = pickle.Pickler(pickle_file) 
-                p.fast = True 
-                p.dump(data)
+            data = data_func[self.info['format']](filename, self.feat_type)
+
         end = time.time()
         if verbose:  print( "[+] Success in %5.2f sec" % (end - start))
         return data
     
-    def loadLabel (self, filename, verbose=True):
+    def loadLabel (self, filename, num_points, verbose=True):
         ''' Get the solution/truth values'''
         if verbose:  print("========= Reading " + filename)
         start = time.time()
-        if self.use_pickle and os.path.exists (os.path.join (self.tmp_dir, os.path.basename(filename) + ".pickle")):
-            with open (os.path.join (self.tmp_dir, os.path.basename(filename) + ".pickle"), "r") as pickle_file:
-                vprint (verbose, "Loading pickle file : " + os.path.join (self.tmp_dir, os.path.basename(filename) + ".pickle"))
-                return pickle.load(pickle_file)
+
         if 'task' not in self.info.keys():
             self.getTypeProblem(filename)
     
         # IG: Here change to accommodate the new multiclass label format
-        if self.info['task'] == 'multilabel.classification':
-            label = data_io.data(filename)
-        elif self.info['task'] == 'multiclass.classification':
-            label = data_converter.convert_to_num(data_io.data(filename))
+        if chelper_is_there:
+            if self.info['task'] == 'multilabel.classification':
+                # cast into ints
+                label = (chelper_functions.read_dense_file_unknown_width(
+                    filename, num_points)).astype(np.int)
+            elif self.info['task'] == 'multiclass.classification':
+                label = chelper_functions.read_dense_file_unknown_width(
+                    filename, num_points)
+                # read the class from the only non zero entry in each line!
+                # should be ints right away
+                label = np.where(label != 0)[1];
+            else:
+                label = chelper_functions.read_dense_file_unknown_width(
+                    filename, num_points)
         else:
-            label = np.ravel(data_io.data(filename)) # get a column vector
-            #label = np.array([np.ravel(data_io.data(filename))]).transpose() # get a column vector
-   
-        if self.use_pickle:
-            with open (os.path.join (self.tmp_dir, os.path.basename(filename) + ".pickle"), "wb") as pickle_file:
-                vprint (verbose, "Saving pickle file : " + os.path.join (self.tmp_dir, os.path.basename(filename) + ".pickle"))
-                p = pickle.Pickler(pickle_file) 
-                p.fast = True 
-                p.dump(label)
+            if self.info['task'] == 'multilabel.classification':
+                label = data_io.data(filename)
+            elif self.info['task'] == 'multiclass.classification':
+                label = data_converter.convert_to_num(data_io.data(filename))
+            else:
+                label = np.ravel(data_io.data(filename)) # get a column vector
 
         end = time.time()
         if verbose:  print( "[+] Success in %5.2f sec" % (end - start))
@@ -214,8 +209,12 @@ class DataManager:
 
         categorical = [True if feat_type.lower() == 'categorical' else False
                        for feat_type in self.feat_type]
-        predicted_RAM_usage = float(data_converter.predict_RAM_usage(
-            self.data['X_train'], categorical)) / 1024 / 1024
+        if chelper_is_there:
+            predicted_RAM_usage = float(chelper_functions.predict_RAM_usage(
+                self.data['X_train'], categorical)) / 1024 / 1024
+        else:
+            predicted_RAM_usage = float(data_converter.predict_RAM_usage(
+                self.data['X_train'], categorical)) / 1024 / 1024
 
         if predicted_RAM_usage > 1000:
             sparse = True
@@ -245,7 +244,12 @@ class DataManager:
         start = time.time()
         type_list = []
         if os.path.isfile(filename):
-            type_list = data_converter.file_to_array (filename, verbose=False)
+            if chelper_is_there:
+                type_list = chelper_functions.file_to_array(filename,
+                                                            verbose=False)
+            else:
+                type_list = data_converter.file_to_array (filename,
+                                                          verbose=False)
         else:
             n=self.info['feat_num']
             type_list = [self.info['feat_type']]*n
@@ -319,13 +323,19 @@ class DataManager:
             if self.info['is_sparse'] == 0:
                 self.info['format'] = 'dense'
             else:
-                data = data_converter.read_first_line (filename)
+                if chelper_is_there:
+                    data = data_converter.read_first_line (filename)
+                else:
+                    data = chelper_functions.read_first_line(filename)
                 if ':' in data[0]:
                     self.info['format'] = 'sparse'
                 else:
                     self.info['format'] = 'sparse_binary'
         else:
-            data = data_converter.file_to_array (filename)
+            if chelper_is_there:
+                data = data_converter.file_to_array (filename)
+            else:
+                data = chelper_functions.file_to_array(filename)
             if ':' in data[0][0]:
                 self.info['is_sparse'] = 1
                 self.info['format'] = 'sparse'
