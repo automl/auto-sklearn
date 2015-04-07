@@ -13,7 +13,7 @@ from ParamSklearn.util import DENSE, PREDICTIONS
 
 
 class GPyClassifier():#ParamSklearnClassificationAlgorithm):
-    def __init__(self, random_state=None, n_inducing=5, ard=False):
+    def __init__(self, random_state=None, n_inducing=20, ard=False):
         import GPy
         global GPy
 
@@ -47,9 +47,7 @@ class GPyClassifier():#ParamSklearnClassificationAlgorithm):
             model = GPy.models.SparseGPClassification(X, 
                     targets[:,i,None], 
                     kernel=kern, 
-                    num_inducing=self.n_inducing,
-                    normalize_X=False,
-                    normalize_Y=False)
+                    num_inducing=self.n_inducing)
             # fit kernel hyperparameters
             model.optimize('bfgs', max_iters=100)
             # add to list of estimators
