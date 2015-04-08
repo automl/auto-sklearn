@@ -90,19 +90,21 @@ class DataManager:
         self.data['X_valid'] = Xva
         self.data['X_test'] = Xte
 
-        try:
-            self.data['Y_valid'] = self.loadLabel(
-                os.path.join(self.input_dir, basename + '_valid.solution'),
-                self.info['valid_num'], verbose=verbose)
-        except (IOError, OSError):
-            pass
+        p = os.path.join(self.input_dir, basename + '_valid.solution')
+        if os.path.exists(p):
+            try:
+                self.data['Y_valid'] = self.loadLabel(p,
+                    self.info['valid_num'], verbose=verbose)
+            except (IOError, OSError):
+                pass
 
-        try:
-            self.data['Y_test'] = self.loadLabel(
-                os.path.join(self.input_dir, basename + '_test.solution'),
-                self.info['test_num'], verbose=verbose)
-        except (IOError, OSError) as e:
-            pass
+        p = os.path.join(self.input_dir, basename + '_test.solution')
+        if os.path.exists(p):
+            try:
+                self.data['Y_test'] = self.loadLabel(p,
+                    self.info['test_num'], verbose=verbose)
+            except (IOError, OSError) as e:
+                pass
 
         if encode_labels:
             self.perform1HotEncoding()
