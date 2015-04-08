@@ -325,18 +325,18 @@ class DataManager:
                 self.info['format'] = 'dense'
             else:
                 if chelper_is_there:
-                    data = data_converter.read_first_line (filename)
-                else:
                     data = chelper_functions.read_first_line(filename)
+                else:
+                    data = data_converter.read_first_line(filename)
                 if ':' in data[0]:
                     self.info['format'] = 'sparse'
                 else:
                     self.info['format'] = 'sparse_binary'
         else:
             if chelper_is_there:
-                data = data_converter.file_to_array (filename)
-            else:
                 data = chelper_functions.file_to_array(filename)
+            else:
+                data = data_converter.file_to_array(filename)
             if ':' in data[0][0]:
                 self.info['is_sparse'] = 1
                 self.info['format'] = 'sparse'
