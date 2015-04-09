@@ -83,7 +83,7 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
         ml = None
         logger.critical("Metafeatures not calculated")
     stop.stop_task("CalculateMetafeatures")
-    logger.debug("Calculating Metafeatures took %5.2f" % stop.wall_elapsed("CalculateMetafeatures"))
+    logger.debug("Calculating Metafeatures (categorical attributes) took %5.2f" % stop.wall_elapsed("CalculateMetafeatures"))
 
     stop.start_task("OneHot")
     loaded_data_manager.perform1HotEncoding()
@@ -116,7 +116,7 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
         logger.critical("Metafeatures encoded not calculated")
 
     stop.stop_task("CalculateMetafeaturesEncoded")
-    logger.debug("Calculating Metafeatures_encoded took %5.2fsec" %
+    logger.debug("Calculating Metafeatures (encoded attributes) took %5.2fsec" %
                  stop.wall_elapsed("CalculateMetafeaturesEncoded"))
     logger.info("Time left for %s after calculating metafeatures: %5.2fsec" %
                 (basename, time_left_for_this_task - stop.wall_elapsed(basename)))
