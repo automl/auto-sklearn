@@ -120,7 +120,7 @@ class PreprocessingTestCase(unittest.TestCase):
         preprocessor = Preprocessor(random_state=1,
                                     **{hp.hyperparameter.name: hp.value for hp in
                                        default.values.values()})
-        preprocessor.fit(X_train)
+        preprocessor.fit(X_train, Y_train)
         Xt = preprocessor.transform(X_train)
         self.assertEqual(Xt.dtype, np.float32)
 
@@ -146,7 +146,7 @@ class PreprocessingTestCase(unittest.TestCase):
         preprocessor = Preprocessor(random_state=1,
                                     **{hp.hyperparameter.name: hp.value for hp in
                                        default.values.values()})
-        preprocessor.fit(X_train)
+        preprocessor.fit(X_train, Y_train)
         Xt = preprocessor.transform(X_train)
         self.assertEqual(Xt.dtype, np.float32)
 
