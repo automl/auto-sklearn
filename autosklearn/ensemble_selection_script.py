@@ -19,11 +19,11 @@ from autosklearn.util.stopwatch import StopWatch
 
 def build_ensemble(predictions_train, predictions_valid, predictions_test, true_labels, ensemble_size, task_type, metric):
 
-    indices, _ = ensemble_selection(predictions_train, true_labels, ensemble_size, task_type, metric)
+    indices, trajectory = ensemble_selection(predictions_train, true_labels, ensemble_size, task_type, metric)
     ensemble_predictions_valid = np.mean(predictions_valid[indices.astype(int)], axis=0)
     ensemble_predictions_test = np.mean(predictions_test[indices.astype(int)], axis=0)
 
-    return ensemble_predictions_valid, ensemble_predictions_test
+    return ensemble_predictions_valid, ensemble_predictions_test, trajectory[-1]
 
 
 def pruning(predictions, labels, n_best, task_type, metric):
@@ -221,10 +221,11 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
             Y_test = all_predictions_test[0]
         else:
             try:
-                Y_valid, Y_test = build_ensemble(np.array(all_predictions_train),
-                                                 np.array(all_predictions_valid),
-                                                 np.array(all_predictions_test),
-                                                 true_labels, ensemble_size, task_type, metric)
+                Y_valid, Y_test, score = build_ensemble(
+                    np.array(all_predictions_train),
+                    np.array(all_predictions_valid),
+                    np.array(all_predictions_test),
+                    true_labels, ensemble_size, task_type, metric)
             except (ValueError):
                 logging.error("Caught ValueError!")
                 used_time = watch.wall_elapsed("ensemble_builder")
@@ -233,6 +234,9 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
                 logging.error("Caught error! %s", e.message)
                 used_time = watch.wall_elapsed("ensemble_builder")
                 continue
+
+        # Output the score
+        logging.info("Training performance: %f" % score)
 
         # Save predictions for valid and test data set
         filename_test = os.path.join(output_dir, basename + '_valid_' + str(index_run).zfill(3) + '.predict')
