@@ -92,9 +92,8 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     stop.start_task("CalculateMetafeaturesEncoded")
     if ml is None:
         initial_configurations = []
-    elif loaded_data_manager.info["task"].lower() not in \
-            ["multilabel.classification", "regression"] and \
-            not loaded_data_manager.info["is_sparse"]:
+    elif loaded_data_manager.info["task"].lower() in \
+            ["multiclass.classification", "binary.classification"]:
         ml.calculate_metafeatures_encoded_labels(X_train=loaded_data_manager.data["X_train"],
                                                  Y_train=loaded_data_manager.data["Y_train"],
                                                  categorical=[False] * loaded_data_manager.data["X_train"].shape[0],
