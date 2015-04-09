@@ -170,7 +170,7 @@ class Evaluator(object):
     def file_output(self):
         errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
 
-        num_run = str(get_new_run_num())
+        num_run = str(get_new_run_num()).zfill(5)
         pred_dump_name_template = os.path.join(self.output_dir,
             "predictions_%s", self.D.basename + '_predictions_%s_' +
             num_run + '.npy')

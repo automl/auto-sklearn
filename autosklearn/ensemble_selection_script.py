@@ -5,6 +5,7 @@ Created on Apr 2, 2015
 '''
 
 
+from collections import Counter
 import os
 import sys
 import time
@@ -23,7 +24,8 @@ def build_ensemble(predictions_train, predictions_valid, predictions_test, true_
     ensemble_predictions_valid = np.mean(predictions_valid[indices.astype(int)], axis=0)
     ensemble_predictions_test = np.mean(predictions_test[indices.astype(int)], axis=0)
 
-    return ensemble_predictions_valid, ensemble_predictions_test, trajectory[-1]
+    return ensemble_predictions_valid, ensemble_predictions_test, \
+           trajectory[-1], indices
 
 
 def pruning(predictions, labels, n_best, task_type, metric):
@@ -221,7 +223,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
             Y_test = all_predictions_test[0]
         else:
             try:
-                Y_valid, Y_test, score = build_ensemble(
+                Y_valid, Y_test, score, indices= build_ensemble(
                     np.array(all_predictions_train),
                     np.array(all_predictions_valid),
                     np.array(all_predictions_test),
@@ -237,6 +239,11 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
 
         # Output the score
         logging.info("Training performance: %f" % score)
+
+        # Print the ensemble members:
+        ensemble_members = Counter(indices).most_common()
+        for ensemble_member in ensemble_members:
+            print ensemble_member[0], float(ensemble_members[1]) / len(indices)
 
         # Save predictions for valid and test data set
         filename_test = os.path.join(output_dir, basename + '_valid_' + str(index_run).zfill(3) + '.predict')
