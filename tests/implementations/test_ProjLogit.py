@@ -24,8 +24,8 @@ class TestProjLogit(unittest.TestCase):
 
         model = ProjLogit(max_epochs = 10, verbose = True)
         model.fit(trainx, trainy)
-        print("weights:")
-        print(model.w)
+        print("weights 0:")
+        print(model.w0)
         predicted_prob = model.predict_proba(testx)
         predicted2 = np.argmax(predicted_prob, axis = 1)
         predicted = model.predict(testx)

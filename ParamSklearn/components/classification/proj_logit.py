@@ -56,7 +56,7 @@ class ProjLogitCLassifier(ParamSklearnClassificationAlgorithm):
     
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        max_epochs = UniformIntegerHyperparameter("max_epochs", 2, 100, default=10)
+        max_epochs = UniformIntegerHyperparameter("max_epochs", 1, 20, default=2)
         cs = ConfigurationSpace()
         cs.add_hyperparameter(max_epochs)
         return cs

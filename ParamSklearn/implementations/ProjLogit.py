@@ -20,8 +20,9 @@ def proj_simplex(Y):
 class ProjLogit(object):
 
     def __init__(self, max_epochs = 10, verbose = False):
-        self.w = None
-        self.ws = None
+        self.w0 = None
+        self.ws_all = []
+        self.w_all = []
         self.max_epochs = max_epochs
         self.verbose = verbose
 
@@ -40,6 +41,7 @@ class ProjLogit(object):
         C = np.linalg.cholesky(0.5 * np.dot(trainx.T,trainx) + precond)
         wp = np.linalg.solve(C, np.dot(trainx.T, yt))
         w = np.linalg.solve(C.T, wp)
+        self.w0 = np.copy(w)
         pred_train = np.dot(trainx, w)
         for i in range(self.max_epochs):
             # expand prediction
@@ -48,11 +50,13 @@ class ProjLogit(object):
             precond = np.eye(res.shape[1]) * np.sqrt(n)
             Cp = np.linalg.cholesky(np.dot(res.T,res) + precond)
             ws = np.linalg.solve(Cp.T, np.linalg.solve(Cp, np.dot(res.T, yt)))
+            self.ws_all.append(np.copy(ws))
             # project to probability simplex
             p_res = proj_simplex(np.dot(res, ws))
             # and solve again with updated residual
             wp = np.linalg.solve(C, np.dot(trainx.T, (yt - p_res)))
             w = np.linalg.solve(C.T, wp)
+            self.w_all.append(np.copy(w))
             pred_train = p_res + np.dot(trainx, w)
             obj = np.linalg.norm(yt - pred_train)
 
@@ -61,24 +65,23 @@ class ProjLogit(object):
             # print training error
             if self.verbose:
                 print("Epoch {} obj: {} train error: {}".format(i,obj,1.*errort/n))
-        self.ws = ws
-        self.w = w
         return self
 
+    
     def predict(self, X):
-        testx = np.hstack([np.ones((X.shape[0], 1)), X])
-        pred = np.dot(testx, self.w)
-        res = np.argmax(pred, axis = 1)
-        return res
-
+        res = self.predict_proba(X)
+        return np.argmax(res, axis = 1)
+    
     def predict_proba(self, X):
-        if self.w == None:
-            return np.zeros(X.shape[0])
+        if self.w0 == None:
+            raise NotImplementedError
         testx = np.hstack([np.ones((X.shape[0], 1)), X])
-        pred = np.dot(testx, self.w)
-        #print(pred)
-        p_res = proj_simplex(pred)
-        return p_res
+        pred = np.dot(testx, self.w0)
+        for ws, w in zip(self.ws_all, self.w_all):
+            res = np.hstack([pred, np.power(pred, 2) / 2., np.power(pred, 3) / 6., np.power(pred, 4) / 24.])
+            p_res = proj_simplex(np.dot(res, ws))
+            pred = p_res + np.dot(testx, w)
+        return proj_simplex(pred)
     
     def predict_log_proba(self, X):
         if self.w == None:

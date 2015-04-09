@@ -10,5 +10,5 @@ class ProjLogitComponentTest(unittest.TestCase):
     def test_default_configuration(self):
         for i in range(10):
             predictions, targets = _test_classifier(ProjLogitCLassifier, dataset='iris')
-            self.assertAlmostEqual(0.85999999999999996,
+            self.assertAlmostEqual(0.98,
                 sklearn.metrics.accuracy_score(predictions, targets))
