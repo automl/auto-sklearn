@@ -202,10 +202,15 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
 
         indices_to_model_names = dict()
         all_predictions_valid = []
+
+        for i, model_name in enumerate(dir_ensemble_list):
+            if not exclude_mask[i]:
+                num_indices = len(indices_to_model_names)
+                indices_to_model_names[num_indices] = model_name
+
         for i, model_name in enumerate(dir_valid_list):
             predictions = np.load(os.path.join(dir_valid, model_name))
             if not exclude_mask[i]:
-                indices_to_model_names[i] = model_name
                 all_predictions_valid.append(predictions)
 
         all_predictions_test = []
