@@ -73,12 +73,6 @@ class MetaLearning(object):
             self._metafeatures_encoded_labels.metafeature_values)
         self.mf = mf
 
-        if not all([np.isfinite(mf.value)
-                    for mf in self.mf.metafeature_values.values()
-                    if isinstance(mf.value, float)]):
-            print "%s contains non-finite metafeatures!" % self.mf
-            return []
-
         metafeatures_subset = metafeatures.subsets["all"]
         metafeatures_subset.difference_update(self._exclude_metafeatures)
         metafeatures_subset = list(metafeatures_subset)
