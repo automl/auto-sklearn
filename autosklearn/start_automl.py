@@ -70,9 +70,8 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
 
     if initial_configurations_via_metalearning <= 0:
         ml = None
-    elif loaded_data_manager.info["task"].lower() not in \
-            ["multilabel.classification", "regression"] and \
-            not loaded_data_manager.info["is_sparse"]:
+    elif loaded_data_manager.info["task"].lower() in \
+            ["multiclass.classification", "binary.classification"]:
         ml = metalearning.MetaLearning()
         logger.debug("Start calculating metafeatures for %s" %
                      loaded_data_manager.basename)
