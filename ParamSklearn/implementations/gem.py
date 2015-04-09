@@ -9,7 +9,7 @@ class GEM(object):
         self.N = N
         self.precond = precond
         self.W = None
-        self.verbose = True
+        self.verbose = False
 
 
     def fit(self, X, Y):
