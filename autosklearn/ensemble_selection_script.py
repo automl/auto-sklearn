@@ -200,10 +200,12 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
 
             model_idx += 1
 
+        indices_to_model_names = dict()
         all_predictions_valid = []
         for i, model_name in enumerate(dir_valid_list):
             predictions = np.load(os.path.join(dir_valid, model_name))
             if not exclude_mask[i]:
+                indices_to_model_names[i] = model_name
                 all_predictions_valid.append(predictions)
 
         all_predictions_test = []
@@ -221,9 +223,12 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
             logging.debug("Only one model so far we just copy its predictions")
             Y_valid = all_predictions_valid[0]
             Y_test = all_predictions_test[0]
+
+            # Output the score
+            logging.info("Training performance: %f" % score)
         else:
             try:
-                Y_valid, Y_test, score, indices= build_ensemble(
+                Y_valid, Y_test, score, indices = build_ensemble(
                     np.array(all_predictions_train),
                     np.array(all_predictions_valid),
                     np.array(all_predictions_test),
@@ -237,13 +242,19 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
                 used_time = watch.wall_elapsed("ensemble_builder")
                 continue
 
-        # Output the score
-        logging.info("Training performance: %f" % score)
+            # Output the score
+            logging.info("Training performance: %f" % score)
 
-        # Print the ensemble members:
-        ensemble_members = Counter(indices).most_common()
-        for ensemble_member in ensemble_members:
-            print ensemble_member[0], float(ensemble_members[1]) / len(indices)
+            # Print the ensemble members:
+            ensemble_members = Counter(indices).most_common()
+            ensemble_members_string = "Ensemble members:\n"
+            logging.info(ensemble_members)
+            for ensemble_member in ensemble_members:
+                ensemble_members_string += \
+                    ("    %s; weight: %f\n" %
+                     (indices_to_model_names[ensemble_member[0]],
+                      float(ensemble_member[1]) / len(indices)))
+            logging.info(ensemble_members_string)
 
         # Save predictions for valid and test data set
         filename_test = os.path.join(output_dir, basename + '_valid_' + str(index_run).zfill(3) + '.predict')
