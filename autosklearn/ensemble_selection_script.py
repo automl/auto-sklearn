@@ -24,6 +24,10 @@ def build_ensemble(predictions_train, predictions_valid, predictions_test, true_
     ensemble_predictions_valid = np.mean(predictions_valid[indices.astype(int)], axis=0)
     ensemble_predictions_test = np.mean(predictions_test[indices.astype(int)], axis=0)
 
+    logging.info("Trajectory and indices!")
+    logging.info(trajectory)
+    logging.info(indices)
+
     return ensemble_predictions_valid, ensemble_predictions_test, \
            trajectory[-1], indices
 
@@ -62,7 +66,7 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric, do
             ensemble_prediction = np.mean(np.array(ensemble), axis=0)
             scores[j] = evaluator.calculate_score(labels, ensemble_prediction, task_type, metric)
             ensemble.pop()
-        best = np.argmax(scores)
+        best = np.nanargmax(scores)
 
         ensemble.append(predictions[best])
         trajectory.append(scores[best])
@@ -106,7 +110,6 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
         true_labels = np.load(os.path.join(predictions_dir, "true_labels_ensemble.npy"))
 
         # Load the predictions from the models
-        all_predictions_train = []
         dir_ensemble = os.path.join(predictions_dir, "predictions_ensemble/")
         dir_valid = os.path.join(predictions_dir, "predictions_valid/")
         dir_test = os.path.join(predictions_dir, "predictions_test/")
@@ -171,7 +174,6 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
                     scores_nbest.append(score)
                     indices_nbest.append(model_idx)
                     exclude_mask.append(False)
-                    all_predictions_train.append(predictions)
                 else:
                     # Take the worst performing model in our ensemble so far
                     idx = np.argmin(np.array([scores_nbest]))
@@ -183,7 +185,9 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
                         scores_nbest[idx] = score
                         # Exclude the old model
                         exclude_mask[int(indices_nbest[idx])] = True
-                        indices_nbest[idx] = model_idx
+                        #indices_nbest[idx] = model_idx
+                        del indices_nbest[idx]
+                        indices_nbest.append(model_idx)
                         exclude_mask.append(False)
                     # Otherwise exclude the current model from the ensemble
                     else:
@@ -196,18 +200,29 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
                     logging.error("Model only predicts at random: " + model_name + " has score: " + str(score))
                 else:
                     exclude_mask.append(False)
-                    all_predictions_train.append(predictions)
 
             model_idx += 1
 
-        indices_to_model_names = dict()
-        all_predictions_valid = []
+        if ensemble_size is not None:
+            logging.info("Indices nbest.")
+            logging.info(indices_nbest)
 
+        indices_to_model_names = dict()
         for i, model_name in enumerate(dir_ensemble_list):
             if not exclude_mask[i]:
                 num_indices = len(indices_to_model_names)
                 indices_to_model_names[num_indices] = model_name
 
+        logging.info("Indices to model names:")
+        logging.info(indices_to_model_names)
+
+        all_predictions_train = []
+        for i, model_name in enumerate(dir_ensemble_list):
+            predictions = np.load(os.path.join(dir_ensemble, model_name))
+            if not exclude_mask[i]:
+                all_predictions_train.append(predictions)
+
+        all_predictions_valid = []
         for i, model_name in enumerate(dir_valid_list):
             predictions = np.load(os.path.join(dir_valid, model_name))
             if not exclude_mask[i]:

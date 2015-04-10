@@ -24,7 +24,6 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
                             time_left_for_this_task, queue, log_dir=None,
                             initial_configurations_via_metalearning=25,
                             ensemble_size=1):
-
     logger = autosklearn.util.logging_.get_logger(
         outputdir=log_dir, name="automl_%s" % basename)
     stop = stopwatch.StopWatch()
