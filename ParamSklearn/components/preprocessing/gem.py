@@ -33,7 +33,7 @@ class GEM(ParamSklearnPreprocessingAlgorithm):
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': True,
+                'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'handles_dense': True,
