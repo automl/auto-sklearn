@@ -15,6 +15,7 @@ from autosklearn import submit_process
 from autosklearn.util import stopwatch
 
 from HPOlibConfigSpace.converters import pcs_parser
+from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 import autosklearn.util.logging_
 
@@ -56,6 +57,34 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     stop.start_task("CreateSearchSpace")
     searchspace_path = os.path.join(tmp_dataset_dir, "space.pcs")
     config_space = paramsklearn.get_configuration_space(loaded_data_manager.info)
+
+    # Remove configurations we think are unhelpful
+    combinations = [("no_preprocessing", "gaussian_nb"),
+                    ("sparse_filtering", "gaussian_nb"),
+                    ("pca", "gaussian_nb"),
+                    ("select_percentile", "gaussian_nb"),
+                    ("kitchen_sinks", "gaussian_nb"),
+                    ("no_preprocessing", "multinomial_nb"),
+                    ("select_percentile", "multinomial_nb"),
+                    ("no_preprocessing", "k_nearest_neighbors"),
+                    ("pca", "k_nearest_neighbors"),
+                    ("random_trees_embedding", "k_nearest_neighbors"),
+                    ("pca", "adaboost"),
+                    ("no_preprocessing", "adaboost"),
+                    ("select_percentile", "adaboost"),
+                    ("sparse_filtering", "liblinear"),
+                    ("sparse_filtering", "sgd")]
+    for combination in combinations:
+        try:
+            config_space.add_forbidden(ForbiddenAndConjunction(
+                ForbiddenEqualsClause(config_space.get_hyperparameter("preprocessor"),
+                                      combination[0]),
+                ForbiddenEqualsClause(config_space.get_hyperparameter("classifier"),
+                                      combination[1])
+            ))
+        except:
+            pass
+
     sp_string = pcs_parser.write(config_space)
     fh = open(searchspace_path, 'w')
     fh.write(sp_string)
