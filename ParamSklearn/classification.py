@@ -296,7 +296,8 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         # which would take too long
         # Combinations of non-linear models with feature learning:
         classifiers_ = ["adaboost", "extra_trees", "gradient_boosting",
-                        "k_nearest_neighbors", "libsvm_svc", "random_forest"]
+                        "k_nearest_neighbors", "libsvm_svc", "random_forest",
+                        "gaussian_nb"]
         feature_learning = ["kitchen_sinks", "sparse_filtering"]
 
         for c, f in product(classifiers_, feature_learning):
