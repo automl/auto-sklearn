@@ -1,5 +1,6 @@
 import numpy as np
 import sklearn.ensemble
+import sklearn.tree
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -12,7 +13,7 @@ from ParamSklearn.util import SPARSE, DENSE, PREDICTIONS
 class AdaboostClassifier(ParamSklearnClassificationAlgorithm):
 
     def __init__(self, n_estimators, learning_rate, algorithm='SAMME.R',
-                 base_estimator=None, random_state=None):
+                 max_depth=1, random_state=None):
         self.n_estimators = int(n_estimators)
         self.learning_rate = float(learning_rate)
 
@@ -20,23 +21,20 @@ class AdaboostClassifier(ParamSklearnClassificationAlgorithm):
             raise ValueError("Illegal 'algorithm': %s" % algorithm)
         self.algorithm = algorithm
         self.random_state = random_state
-
-        if base_estimator is None:
-            self.base_estimator = base_estimator
-        elif base_estimator == "None":
-            self.base_estimator = None
-        else:
-            raise ValueError("Illegal ")
+        self.max_depth = max_depth
 
         self.estimator = None
 
     def fit(self, X, Y):
+        base_estimator = sklearn.tree.DecisionTreeClassifier(max_depth=self.max_depth)
+
         self.estimator = sklearn.ensemble.AdaBoostClassifier(
-            base_estimator=self.base_estimator,
+            base_estimator=base_estimator,
             n_estimators=self.n_estimators,
             learning_rate=self.learning_rate,
             algorithm=self.algorithm,
             random_state=self.random_state
+
         )
         self.estimator.fit(X, Y)
         return self
@@ -78,15 +76,20 @@ class AdaboostClassifier(ParamSklearnClassificationAlgorithm):
         learning_rate = UniformFloatHyperparameter(
             name="learning_rate", lower=0.0001, upper=1, default=0.1, log=True)
         algorithm = Constant(name="algorithm", value="SAMME.R")
-        base_estimator = Constant(name="base_estimator", value="None")
+        #base_estimator = Constant(name="base_estimator", value="None")
 
         n_estimators = UniformIntegerHyperparameter(
-            name="n_estimators", lower=5, upper=50, default=10, log=False)
+            name="n_estimators", lower=50, upper=500, default=50, log=False)
+
+        max_depth = UniformIntegerHyperparameter(
+            name="max_depth", lower=1, upper=10, default=1, log=False)
+
 
         cs = ConfigurationSpace()
         cs.add_hyperparameter(n_estimators)
         cs.add_hyperparameter(learning_rate)
-        cs.add_hyperparameter(base_estimator)
+        #cs.add_hyperparameter(base_estimator)
+        cs.add_hyperparameter(max_depth)
         cs.add_hyperparameter(algorithm)
 
         return cs
