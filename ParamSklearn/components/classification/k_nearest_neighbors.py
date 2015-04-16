@@ -11,7 +11,7 @@ from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 
 class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
 
-    def __init__(self, n_neighbors, weights, metric, algorithm='auto', p=2,
+    def __init__(self, n_neighbors, weights, algorithm='auto', p=2,
                  leaf_size=30, random_state=None):
 
         self.n_neighbors = int(n_neighbors)
@@ -19,10 +19,11 @@ class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
             raise ValueError("'weights' should be in ('uniform', 'distance'): "
                              "%s" % weights)
         self.weights = weights
-        if metric not in ("euclidean", "manhattan", "chebyshev", "minkowski"):
-            raise ValueError("'metric' should be in ('euclidean', 'chebyshev', "
-                             "'manhattan', 'minkowski'): %s" % metric)
-        self.metric = metric
+        #if metric not in ("euclidean", "manhattan", "chebyshev", "minkowski"):
+        #    raise ValueError("'metric' should be in ('euclidean',
+        # 'chebyshev', "
+        #                     "'manhattan', 'minkowski'): %s" % metric)
+        #self.metric = metric
         self.algorithm = algorithm
         self.p = int(p)
         self.leaf_size = int(leaf_size)
@@ -30,7 +31,10 @@ class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
 
     def fit(self, X, Y):
         self.estimator = \
-            sklearn.neighbors.KNeighborsClassifier()
+            sklearn.neighbors.KNeighborsClassifier(
+                n_neighbors=self.n_neighbors, weights=self.weights,
+                p=self.p, algorithm=self.algorithm,
+                leaf_size=self.leaf_size)
         self.estimator.fit(X, Y)
         return self
 
@@ -72,7 +76,6 @@ class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
             name="n_neighbors", lower=1, upper=100, default=1)
         weights = CategoricalHyperparameter(
             name="weights", choices=["uniform", "distance"], default="uniform")
-        metric = UnParametrizedHyperparameter(name="metric", value="minkowski")
         algorithm = Constant(name='algorithm', value="auto")
         p = CategoricalHyperparameter(
             name="p", choices=[1, 2, 5], default=2)
@@ -80,18 +83,18 @@ class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
 
         # Unparametrized
         # TODO: If we further parametrize 'metric' we need more metric params
-        metric = UnParametrizedHyperparameter(name="metric", value="minkowski")
+        #metric = UnParametrizedHyperparameter(name="metric", value="minkowski")
 
         cs = ConfigurationSpace()
         cs.add_hyperparameter(n_neighbors)
         cs.add_hyperparameter(weights)
-        cs.add_hyperparameter(metric)
+        #cs.add_hyperparameter(metric)
         cs.add_hyperparameter(algorithm)
         cs.add_hyperparameter(p)
         cs.add_hyperparameter(leaf_size)
 
         # Conditions
-        metric_p = EqualsCondition(parent=metric, child=p, value="minkowski")
-        cs.add_condition(metric_p)
+        #metric_p = EqualsCondition(parent=metric, child=p, value="minkowski")
+        #cs.add_condition(metric_p)
 
         return cs
