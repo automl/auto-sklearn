@@ -7,13 +7,13 @@ class,added,comment
 <class 'sklearn.ensemble.forest.ForestClassifier'>,False,Scikit-learn source code says: This class should not be used directly
 <class 'sklearn.ensemble.forest.RandomForestClassifier'>,True,
 <class 'sklearn.ensemble.gradient_boosting.GradientBoostingClassifier'>,True,
-<class 'sklearn.ensemble.weight_boosting.AdaBoostClassifier'>,FALSE,This can blow up the configuration space; because we need to define a configured base object. Maybe consider later.
-<class 'sklearn.lda.LDA'>,,
+<class 'sklearn.ensemble.weight_boosting.AdaBoostClassifier'>,True,Added with decision stumps(up to depth ten)
+<class 'sklearn.lda.LDA'>,True,
 <class 'sklearn.linear_model.base.LinearClassifierMixin'>,False,Mixin but no full model
-<class 'sklearn.linear_model.logistic.LogisticRegression'>,,
-<class 'sklearn.linear_model.passive_aggressive.PassiveAggressiveClassifier'>,,
-<class 'sklearn.linear_model.perceptron.Perceptron'>,,
-<class 'sklearn.linear_model.ridge.RidgeClassifier'>,,
+<class 'sklearn.linear_model.logistic.LogisticRegression'>,False,Is implemented using LibLinear
+<class 'sklearn.linear_model.passive_aggressive.PassiveAggressiveClassifier'>,True,I don't know how similar to SGD this one is
+<class 'sklearn.linear_model.perceptron.Perceptron'>,False,n fact, Perceptron() is equivalent to SGDClassifier(...)
+<class 'sklearn.linear_model.ridge.RidgeClassifier'>,True,
 <class 'sklearn.linear_model.ridge.RidgeClassifierCV'>,,
 <class 'sklearn.linear_model.stochastic_gradient.BaseSGDClassifier'>,False,This class has abstract methods
 <class 'sklearn.linear_model.stochastic_gradient.SGDClassifier'>,True,
@@ -28,15 +28,15 @@ class,added,comment
 <class 'sklearn.naive_bayes.GaussianNB'>,True,
 <class 'sklearn.naive_bayes.MultinomialNB'>,True,
 <class 'sklearn.neighbors.classification.KNeighborsClassifier'>,True,
-<class 'sklearn.neighbors.classification.RadiusNeighborsClassifier'>,,Can crash when there is no neighbour within the radius
-<class 'sklearn.neighbors.nearest_centroid.NearestCentroid'>,,
-<class 'sklearn.qda.QDA'>,,
+<class 'sklearn.neighbors.classification.RadiusNeighborsClassifier'>,False,Has no predict_proba method, method cannot be easily added
+<class 'sklearn.neighbors.nearest_centroid.NearestCentroid'>,False,Has no predict_proba method, method cannot be easily added
+<class 'sklearn.qda.QDA'>,True,
 <class 'sklearn.semi_supervised.label_propagation.BaseLabelPropagation'>,False,semi-supervised learning
 <class 'sklearn.semi_supervised.label_propagation.LabelPropagation'>,False,semi-supervised learning
 <class 'sklearn.semi_supervised.label_propagation.LabelSpreading'>,False,semi-supervised learning
 <class 'sklearn.svm.base.BaseSVC'>,False,ABC for LibSVM-based classifiers
 <class 'sklearn.svm.classes.LinearSVC'>,True,
-<class 'sklearn.svm.classes.NuSVC'>,,
+<class 'sklearn.svm.classes.NuSVC'>,False,Equivalent to SVC
 <class 'sklearn.svm.classes.SVC'>,True,
 <class 'sklearn.tests.test_grid_search.LinearSVCNoScore'>,False,This classifier is in a test module
 <class 'sklearn.tree.tree.DecisionTreeClassifier'>,FALSE,Rfs are considered better (and are most likely faster to train)

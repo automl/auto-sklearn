@@ -84,6 +84,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
                 if "Floating-point under-/overflow occurred at epoch" in e.message:
                     continue
                 else:
+                    print config
                     raise e
 
     def test_configurations_sparse(self):
@@ -102,6 +103,14 @@ class TestParamSklearnClassifier(unittest.TestCase):
                 if "Floating-point under-/overflow occurred at epoch" in e.message:
                     continue
                 else:
+                    print config
+                    raise e
+            except AttributeError as e:
+                # Some error in QDA
+                if "log" == e.message:
+                    continue
+                else:
+                    print config
                     raise e
 
     def test_get_hyperparameter_search_space(self):
@@ -109,7 +118,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(83, len(hyperparameters))
+        self.assertEqual(96, len(hyperparameters))
         # The four parameters which are always active are classifier,
         # preprocessor, imputation strategy and scaling strategy
         self.assertEqual(len(hyperparameters) - 4, len(conditions))

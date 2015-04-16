@@ -94,6 +94,19 @@ def _test_classifier(classifier, dataset='iris'):
     return predictions, Y_test
 
 
+def _test_classifier_predict_proba(classifier, dataset='iris'):
+    X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
+                                                   make_sparse=False)
+    configuration_space = classifier.get_hyperparameter_search_space()
+    default = configuration_space.get_default_configuration()
+    classifier = classifier(random_state=1,
+                            **{hp.hyperparameter.name: hp.value for hp in
+                               default.values.values()})
+    predictor = classifier.fit(X_train, Y_train)
+    predictions = predictor.predict_proba(X_test)
+    return predictions, Y_test
+
+
 def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
                                                    make_sparse=make_sparse)
