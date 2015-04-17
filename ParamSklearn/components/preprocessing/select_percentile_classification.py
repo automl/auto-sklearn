@@ -51,7 +51,7 @@ class SelectPercentileClassification(SelectPercentileBase,
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         percentile = UniformFloatHyperparameter(
-            name="percentile", lower=10, upper=90, default=50)
+            name="percentile", lower=1, upper=99, default=50)
 
         score_func = CategoricalHyperparameter(
             name="score_func", choices=["chi2", "f_classif"], default="chi2")
