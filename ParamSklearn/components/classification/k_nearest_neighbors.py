@@ -71,14 +71,17 @@ class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-
         n_neighbors = UniformIntegerHyperparameter(
             name="n_neighbors", lower=1, upper=100, default=1)
         weights = CategoricalHyperparameter(
             name="weights", choices=["uniform", "distance"], default="uniform")
         algorithm = Constant(name='algorithm', value="auto")
+        if dataset_properties.get('sparse'):
+            p_choices = [1, 2, 5]
+        else:
+            p_choices = [1, 2]
         p = CategoricalHyperparameter(
-            name="p", choices=[1, 2, 5], default=2)
+            name="p", choices=p_choices, default=2)
         leaf_size = Constant(name="leaf_size", value=30)
 
         # Unparametrized

@@ -15,6 +15,14 @@ class KNearestNeighborsComponentTest(unittest.TestCase):
             self.assertAlmostEqual(0.959999999999999,
                 sklearn.metrics.accuracy_score(predictions, targets))
 
+    def test_default_configuration_sparse_data(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(KNearestNeighborsClassifier, sparse=True)
+            self.assertAlmostEqual(0.71999999999999997,
+                                   sklearn.metrics.accuracy_score(predictions,
+                                                                  targets))
+
     def test_default_configuration_predict_proba(self):
         for i in range(10):
             predictions, targets = \
