@@ -76,10 +76,10 @@ class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
         weights = CategoricalHyperparameter(
             name="weights", choices=["uniform", "distance"], default="uniform")
         algorithm = Constant(name='algorithm', value="auto")
-        if dataset_properties.get('sparse'):
-            p_choices = [1, 2, 5]
-        else:
+        if dataset_properties is not None and dataset_properties.get('sparse'):
             p_choices = [1, 2]
+        else:
+            p_choices = [1, 2, 5]
         p = CategoricalHyperparameter(
             name="p", choices=p_choices, default=2)
         leaf_size = Constant(name="leaf_size", value=30)

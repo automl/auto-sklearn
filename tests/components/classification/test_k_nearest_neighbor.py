@@ -19,7 +19,7 @@ class KNearestNeighborsComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_classifier(KNearestNeighborsClassifier, sparse=True)
-            self.assertAlmostEqual(0.71999999999999997,
+            self.assertAlmostEqual(0.82,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
 

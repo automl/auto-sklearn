@@ -65,26 +65,27 @@ def get_dataset(dataset='iris', make_sparse=False, add_NaNs=False):
     Y_test = Y[train_size:]
 
     if add_NaNs:
-        mask = np.random.choice([True, False], size=(X_train.shape))
+        mask = rs.choice([True, False], size=(X_train.shape))
         X_train[mask] = np.NaN
 
     if make_sparse:
         X_train[:,0] = 0
-        X_train[np.random.random(X_train.shape) > 0.5] = 0
+        X_train[rs.random_sample(X_train.shape) > 0.5] = 0
         X_train = scipy.sparse.csc_matrix(X_train)
         X_train.eliminate_zeros()
         X_test[:,0] = 0
-        X_test[np.random.random(X_test.shape) > 0.5] = 0
+        X_test[rs.random_sample(X_test.shape) > 0.5] = 0
         X_test = scipy.sparse.csc_matrix(X_test)
         X_test.eliminate_zeros()
 
     return X_train, Y_train, X_test, Y_test
 
 
-def _test_classifier(classifier, dataset='iris'):
+def _test_classifier(classifier, dataset='iris', sparse=False):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
-                                                   make_sparse=False)
-    configuration_space = classifier.get_hyperparameter_search_space()
+                                                   make_sparse=sparse)
+    configuration_space = classifier.get_hyperparameter_search_space(
+        dataset_properties={'sparse': sparse})
     default = configuration_space.get_default_configuration()
     classifier = classifier(random_state=1,
                             **{hp.hyperparameter.name: hp.value for hp in
@@ -94,9 +95,9 @@ def _test_classifier(classifier, dataset='iris'):
     return predictions, Y_test
 
 
-def _test_classifier_predict_proba(classifier, dataset='iris'):
+def _test_classifier_predict_proba(classifier, dataset='iris', sparse=False):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
-                                                   make_sparse=False)
+                                                   make_sparse=sparse)
     configuration_space = classifier.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
     classifier = classifier(random_state=1,
