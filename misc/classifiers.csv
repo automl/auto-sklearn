@@ -39,5 +39,5 @@ class,added,comment
 <class 'sklearn.svm.classes.NuSVC'>,False,Equivalent to SVC
 <class 'sklearn.svm.classes.SVC'>,True,
 <class 'sklearn.tests.test_grid_search.LinearSVCNoScore'>,False,This classifier is in a test module
-<class 'sklearn.tree.tree.DecisionTreeClassifier'>,FALSE,Rfs are considered better (and are most likely faster to train)
-<class 'sklearn.tree.tree.ExtraTreeClassifier'>,FALSE,ExtraTreeForests are considered better
+<class 'sklearn.tree.tree.DecisionTreeClassifier'>,True,
+<class 'sklearn.tree.tree.ExtraTreeClassifier'>,FALSE,Extra-trees should only be used within ensemble methods.
