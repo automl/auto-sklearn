@@ -297,8 +297,9 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         # Combinations of non-linear models with feature learning:
         classifiers_ = ["adaboost", "extra_trees", "gradient_boosting",
                         "k_nearest_neighbors", "libsvm_svc", "random_forest",
-                        "gaussian_nb"]
-        feature_learning = ["kitchen_sinks", "sparse_filtering"]
+                        "gaussian_nb", "gaussian_process", "decision_tree"]
+        feature_learning = ["kitchen_sinks", "sparse_filtering",
+                            "nystroem_sampler", "dictionary_learning"]
 
         for c, f in product(classifiers_, feature_learning):
             if c not in classifiers_list:
@@ -316,7 +317,8 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
 
         # We have seen empirically that tree-based models together with PCA
         # don't work better than tree-based models without preprocessing
-        classifiers_ = ["random_forest", "extra_trees", "gradient_boosting"]
+        classifiers_ = ["random_forest", "extra_trees", "gradient_boosting",
+                        "decision_tree"]
         for c in classifiers_:
             if c not in classifiers_list:
                 continue
@@ -345,7 +347,8 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         # it with standardization, features learning, pca
         classifiers_ = ["multinomial_nb", "bernoulli_nb"]
         preproc_with_negative_X = ["kitchen_sinks", "sparse_filtering",
-                                   "pca", "truncatedSVD"]
+                                   "pca", "truncatedSVD", "fast_ica",
+                                   "kernel_pca"]
         for c in classifiers_:
             if c not in classifiers_list:
                 continue
@@ -370,6 +373,32 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                     ForbiddenEqualsClause(configuration_space.get_hyperparameter(
                         "classifier"), c)))
             except KeyError:
+                pass
+
+        # Now try to add things for which we know that they don't work
+        forbidden_hyperparameter_combinations = \
+            [("select_percentile_classification:score_func", "chi2",
+              "rescaling:strategy", "standard"),
+             ("select_percentile_classification:score_func", "chi2",
+              "rescaling:strategy", "none"),
+             ("select_rates:score_func", "chi2",
+              "rescaling:strategy", "standard"),
+             ("select_rates:score_func", "chi2",
+              "rescaling:strategy", "none"),
+             ("nystroem_sampler:kernel", 'chi2', "rescaling:strategy",
+              "standard"),
+             ("nystroem_sampler:kernel", 'chi2', "rescaling:strategy",
+              "none")]
+        for hp_name_1, hp_value_1, hp_name_2, hp_value_2 in \
+                forbidden_hyperparameter_combinations:
+            try:
+                configuration_space.add_forbidden_clause(ForbiddenAndConjunction(
+                    ForbiddenEqualsClause(configuration_space.get_hyperparameter(
+                        hp_name_1), hp_value_1),
+                    ForbiddenEqualsClause(configuration_space.get_hyperparameter(
+                        hp_name_2), hp_value_2)
+                ))
+            except:
                 pass
 
         return configuration_space

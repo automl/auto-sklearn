@@ -80,8 +80,12 @@ class TestParamSklearnClassifier(unittest.TestCase):
             cls = ParamSklearnClassifier(config, random_state=1)
             try:
                 cls.fit(X_train, Y_train)
+                X_test_ = X_test.copy()
                 predictions = cls.predict(X_test)
-            except ValueError as e:
+                self.assertIsInstance(predictions, np.ndarray)
+                predicted_probabiliets = cls.predict_proba(X_test_)
+                self.assertIsInstance(predicted_probabiliets, np.ndarray)
+            except KeyError as e:
                 if "Floating-point under-/overflow occurred at epoch" in e.message:
                     continue
                 else:
@@ -96,6 +100,20 @@ class TestParamSklearnClassifier(unittest.TestCase):
             except AttributeError as e:
                 # Some error in QDA
                 if "log" == e.message:
+                    continue
+                else:
+                    print config
+                    raise e
+            except RuntimeWarning as e:
+                if "invalid value encountered in sqrt" in e.message:
+                    continue
+                elif "divide by zero encountered in divide" in e.message:
+                    continue
+                else:
+                    print config
+                    raise e
+            except UserWarning as e:
+                if "FastICA did not converge" in e.message:
                     continue
                 else:
                     print config

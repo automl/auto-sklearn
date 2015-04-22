@@ -11,10 +11,10 @@ class TextClassificationTest(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(101, len(hyperparameters))
+        self.assertEqual(130, len(hyperparameters))
         # The three parameters which are always active are classifier,
         # preprocessor and imputation strategy
-        self.assertEqual(len(hyperparameters) - 3, len(conditions))
+        self.assertEqual(len(hyperparameters) - 9, len(conditions))
         self.assertNotIn("rescaling", cs.get_hyperparameter(
             "preprocessor").choices)
         self.assertRaisesRegexp(KeyError, "Hyperparameter "

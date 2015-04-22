@@ -14,7 +14,7 @@ class,added,comment
 <class 'sklearn.linear_model.passive_aggressive.PassiveAggressiveClassifier'>,True,I don't know how similar to SGD this one is
 <class 'sklearn.linear_model.perceptron.Perceptron'>,False,n fact, Perceptron() is equivalent to SGDClassifier(...)
 <class 'sklearn.linear_model.ridge.RidgeClassifier'>,True,
-<class 'sklearn.linear_model.ridge.RidgeClassifierCV'>,,
+<class 'sklearn.linear_model.ridge.RidgeClassifierCV'>,False,Contains CV
 <class 'sklearn.linear_model.stochastic_gradient.BaseSGDClassifier'>,False,This class has abstract methods
 <class 'sklearn.linear_model.stochastic_gradient.SGDClassifier'>,True,
 <class 'sklearn.linear_model.tests.test_passive_aggressive.MyPassiveAggressive'>,False,This classifier is in a test module
