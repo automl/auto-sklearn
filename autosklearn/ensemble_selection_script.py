@@ -50,8 +50,9 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric, do
         for idx in indices:
             ensemble.append(predictions[idx])
             order.append(idx)
-        ensemble_performance = evaluator.calculate_score(labels, np.array(ensemble).mean(axis=0), task_type, metric)
-        trajectory.append(ensemble_performance)
+            ensemble_performance = evaluator.calculate_score(labels, np.array(ensemble).mean(axis=0), task_type, metric)
+            trajectory.append(ensemble_performance)
+        ensemble_size = ensemble_size - n_best
 
     for i in range(ensemble_size):
         scores = np.zeros([predictions.shape[0]])
