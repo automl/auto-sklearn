@@ -85,7 +85,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
                 self.assertIsInstance(predictions, np.ndarray)
                 predicted_probabiliets = cls.predict_proba(X_test_)
                 self.assertIsInstance(predicted_probabiliets, np.ndarray)
-            except KeyError as e:
+            except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in e.message:
                     continue
                 else:

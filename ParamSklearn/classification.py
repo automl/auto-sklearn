@@ -349,17 +349,19 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         preproc_with_negative_X = ["kitchen_sinks", "sparse_filtering",
                                    "pca", "truncatedSVD", "fast_ica",
                                    "kernel_pca"]
+        scaling_strategies = ['standard', 'none']
         for c in classifiers_:
             if c not in classifiers_list:
                 continue
-            try:
-                configuration_space.add_forbidden_clause(ForbiddenAndConjunction(
-                    ForbiddenEqualsClause(configuration_space.get_hyperparameter(
-                        "rescaling:strategy"), "standard"),
-                    ForbiddenEqualsClause(configuration_space.get_hyperparameter(
-                        "classifier"), c)))
-            except KeyError:
-                pass
+            for scaling_strategy in scaling_strategies:
+                try:
+                    configuration_space.add_forbidden_clause(ForbiddenAndConjunction(
+                        ForbiddenEqualsClause(configuration_space.get_hyperparameter(
+                            "rescaling:strategy"), scaling_strategy),
+                        ForbiddenEqualsClause(configuration_space.get_hyperparameter(
+                            "classifier"), c)))
+                except KeyError:
+                    pass
 
         for c, f in product(classifiers_, preproc_with_negative_X):
             if c not in classifiers_list:
