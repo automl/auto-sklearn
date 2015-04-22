@@ -79,17 +79,18 @@ class CVEvaluator(Evaluator):
                                     if Y_targets[i] is not None])
 
         if self.X_valid is not None:
-            Y_valid_pred = np.hstack([Y_valid_pred[i] for i in range(
+            Y_valid_pred = np.array([Y_valid_pred[i] for i in range(
                 self.cv_folds) if Y_valid_pred[i] is not None])
             # Average the predictions of several models
             if len(Y_valid_pred.shape) == 3:
                 Y_valid_pred = np.nanmean(Y_valid_pred, axis=0)
+
         if self.X_test is not None:
-            Y_test_pred = np.hstack([Y_test_pred[i] for i in range(
+            Y_test_pred = np.array([Y_test_pred[i] for i in range(
                 self.cv_folds) if Y_test_pred[i] is not None])
             # Average the predictions of several models
             if len(Y_test_pred.shape) == 3:
-                Y_test_pred = np.mean(Y_test_pred, axis=0)
+                Y_test_pred = np.nanmean(Y_test_pred, axis=0)
 
         self.Y_optimization = Y_targets
         score = calculate_score(Y_targets, Y_optimization_pred,

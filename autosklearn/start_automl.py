@@ -15,6 +15,7 @@ from autosklearn import submit_process
 from autosklearn.util import stopwatch
 
 from HPOlibConfigSpace.converters import pcs_parser
+from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 import autosklearn.util.logging_
 
@@ -23,7 +24,6 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
                             time_left_for_this_task, queue, log_dir=None,
                             initial_configurations_via_metalearning=25,
                             ensemble_size=1):
-
     logger = autosklearn.util.logging_.get_logger(
         outputdir=log_dir, name="automl_%s" % basename)
     stop = stopwatch.StopWatch()
@@ -56,6 +56,34 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     stop.start_task("CreateSearchSpace")
     searchspace_path = os.path.join(tmp_dataset_dir, "space.pcs")
     config_space = paramsklearn.get_configuration_space(loaded_data_manager.info)
+
+    # Remove configurations we think are unhelpful
+    combinations = [("no_preprocessing", "gaussian_nb"),
+                    ("sparse_filtering", "gaussian_nb"),
+                    ("pca", "gaussian_nb"),
+                    ("select_percentile", "gaussian_nb"),
+                    ("kitchen_sinks", "gaussian_nb"),
+                    ("no_preprocessing", "multinomial_nb"),
+                    ("select_percentile", "multinomial_nb"),
+                    ("no_preprocessing", "k_nearest_neighbors"),
+                    ("pca", "k_nearest_neighbors"),
+                    ("random_trees_embedding", "k_nearest_neighbors"),
+                    ("pca", "adaboost"),
+                    ("no_preprocessing", "adaboost"),
+                    ("select_percentile", "adaboost"),
+                    ("sparse_filtering", "liblinear"),
+                    ("sparse_filtering", "sgd")]
+    for combination in combinations:
+        try:
+            config_space.add_forbidden(ForbiddenAndConjunction(
+                ForbiddenEqualsClause(config_space.get_hyperparameter("preprocessor"),
+                                      combination[0]),
+                ForbiddenEqualsClause(config_space.get_hyperparameter("classifier"),
+                                      combination[1])
+            ))
+        except:
+            pass
+
     sp_string = pcs_parser.write(config_space)
     fh = open(searchspace_path, 'w')
     fh.write(sp_string)
@@ -70,9 +98,8 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
 
     if initial_configurations_via_metalearning <= 0:
         ml = None
-    elif loaded_data_manager.info["task"].lower() not in \
-            ["multilabel.classification", "regression"] and \
-            not loaded_data_manager.info["is_sparse"]:
+    elif loaded_data_manager.info["task"].lower() in \
+            ["multiclass.classification", "binary.classification"]:
         ml = metalearning.MetaLearning()
         logger.debug("Start calculating metafeatures for %s" %
                      loaded_data_manager.basename)
@@ -84,7 +111,7 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
         ml = None
         logger.critical("Metafeatures not calculated")
     stop.stop_task("CalculateMetafeatures")
-    logger.debug("Calculating Metafeatures took %5.2f" % stop.wall_elapsed("CalculateMetafeatures"))
+    logger.debug("Calculating Metafeatures (categorical attributes) took %5.2f" % stop.wall_elapsed("CalculateMetafeatures"))
 
     stop.start_task("OneHot")
     loaded_data_manager.perform1HotEncoding()
@@ -93,9 +120,8 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     stop.start_task("CalculateMetafeaturesEncoded")
     if ml is None:
         initial_configurations = []
-    elif loaded_data_manager.info["task"].lower() not in \
-            ["multilabel.classification", "regression"] and \
-            not loaded_data_manager.info["is_sparse"]:
+    elif loaded_data_manager.info["task"].lower() in \
+            ["multiclass.classification", "binary.classification"]:
         ml.calculate_metafeatures_encoded_labels(X_train=loaded_data_manager.data["X_train"],
                                                  Y_train=loaded_data_manager.data["Y_train"],
                                                  categorical=[False] * loaded_data_manager.data["X_train"].shape[0],
@@ -118,7 +144,7 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
         logger.critical("Metafeatures encoded not calculated")
 
     stop.stop_task("CalculateMetafeaturesEncoded")
-    logger.debug("Calculating Metafeatures_encoded took %5.2fsec" %
+    logger.debug("Calculating Metafeatures (encoded attributes) took %5.2fsec" %
                  stop.wall_elapsed("CalculateMetafeaturesEncoded"))
     logger.info("Time left for %s after calculating metafeatures: %5.2fsec" %
                 (basename, time_left_for_this_task - stop.wall_elapsed(basename)))

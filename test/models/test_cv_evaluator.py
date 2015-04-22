@@ -51,20 +51,27 @@ class CVEvaluator_Test(unittest.TestCase):
                 evaluator.predict()
             err[i] = e_
             print err[i], configuration['classifier']
+            print Y_optimization_pred.shape
+            print Y_valid_pred.shape
+            print Y_test_pred.shape
 
+            num_targets = len(np.unique(Y_train))
             self.assertTrue(np.isfinite(err[i]))
             self.assertGreaterEqual(err[i], 0.0)
             # Test that ten models were trained
             self.assertEqual(len(evaluator.models), 10)
             self.assertEqual(Y_optimization_pred.shape[0], Y_train.shape[0])
+            self.assertEqual(Y_optimization_pred.shape[1], num_targets)
             self.assertEqual(Y_valid_pred.shape[0], Y_valid.shape[0])
+            self.assertEqual(Y_valid_pred.shape[1], num_targets)
             self.assertEqual(Y_test_pred.shape[0], Y_test.shape[0])
+            self.assertEqual(Y_test_pred.shape[1], num_targets)
             # Test some basic statistics of the dataset
             if err[i] < 0.5:
                 self.assertTrue(0.3 < Y_valid_pred.mean() < 0.36666)
-                self.assertGreaterEqual(Y_valid_pred.std(), 0.04)
+                self.assertGreaterEqual(Y_valid_pred.std(), 0.01)
                 self.assertTrue(0.3 < Y_test_pred.mean() < 0.36666)
-                self.assertGreaterEqual(Y_test_pred.std(), 0.04)
+                self.assertGreaterEqual(Y_test_pred.std(), 0.01)
                 num_models_better_than_random += 1
         self.assertGreater(num_models_better_than_random, 5)
 
@@ -115,9 +122,9 @@ class CVEvaluator_Test(unittest.TestCase):
             # Test some basic statistics of the dataset
             if err[i] < 0.5:
                 self.assertTrue(0.3 < Y_valid_pred.mean() < 0.36666)
-                self.assertGreaterEqual(Y_valid_pred.std(), 0.04)
+                self.assertGreaterEqual(Y_valid_pred.std(), 0.01)
                 self.assertTrue(0.3 < Y_test_pred.mean() < 0.36666)
-                self.assertGreaterEqual(Y_test_pred.std(), 0.04)
+                self.assertGreaterEqual(Y_test_pred.std(), 0.01)
                 num_models_better_than_random += 1
         self.assertGreaterEqual(num_models_better_than_random, 5)
 

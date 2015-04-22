@@ -1,16 +1,8 @@
-import mock
-import os
 import unittest
 from ParamSklearn.util import get_dataset
-from HPOlibConfigSpace.converters import pcs_parser
-from HPOlibConfigSpace.random_sampler import RandomSampler
 
 from autosklearn.metalearning.metalearning import MetaLearning
-from autosklearn.metalearning import metalearning
 from autosklearn.models.paramsklearn import get_configuration_space
-from pyMetaLearn.metafeatures.metafeature import DatasetMetafeatures
-from pyMetaLearn.optimizers.metalearn_optimizer.metalearner import MetaLearningOptimizer
-from pyMetaLearn.metalearning.meta_base import Run
 
 
 class MetafeatureValueDummy(object):
@@ -28,51 +20,39 @@ class Test(unittest.TestCase):
         self.X_train = self.X_train[eliminate_class_two]
         self.Y_train = self.Y_train[eliminate_class_two]
 
-    @mock.patch.object(MetaLearningOptimizer, "metalearning_suggest_all", autospec=True)
-    def test_metalearning(self, mock_mlo):
-        configuration_space = get_configuration_space(
-            {'metric': 'bac_metric',
-             'task': 'multiclass.classification',
-             'is_sparse': False})
+    def test_metalearning(self):
+        dataset_name = 'digits'
 
-        # TODO accept float/ints instead of string in the HPOlibConfigSpace
-        configuration_space.get_hyperparameter(
-            'gradient_boosting:n_estimators').choices = [100]
-        configuration_space.get_hyperparameter(
-            'random_forest:n_estimators').choices = [100]
-        configuration_space.get_hyperparameter(
-            'extra_trees:n_estimators').choices = [100]
-        configuration_space.get_hyperparameter(
-            'k_nearest_neighbors:leaf_size').choices = [30]
-        configuration_space.get_hyperparameter(
-            'k_nearest_neighbors:p').choices = [1, 2, 5]
-        configuration_space.get_hyperparameter(
-            'libsvm_svc:max_iter').choices = [-1]
-        configuration_space.get_hyperparameter(
-            'liblinear:intercept_scaling').choices = [1]
+        for metric in ['acc_metric', 'auc_metric', 'bac_metric', 'f1_metric',
+                       'pac_metric']:
+            print metric
+            configuration_space = get_configuration_space(
+                {'metric': metric,
+                 'task': 'multiclass.classification',
+                 'is_sparse': False})
 
-        rs = RandomSampler(configuration_space, 1)
-        mock_mlo.return_value = [Run(rs.sample_configuration(), 1, 1)]
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset_name)
+            categorical = [False] * X_train.shape[1]
 
-        ml = MetaLearning()
-        ml._metafeatures_encoded_labels = DatasetMetafeatures(
-            "1", {"a": MetafeatureValueDummy("a", 1),
-                  "b": MetafeatureValueDummy("b", 1)})
-        ml._metafeatures_labels = DatasetMetafeatures("2",
-            {"c": MetafeatureValueDummy("c", 1),
-             "d": MetafeatureValueDummy("d", 1),
-             "e": MetafeatureValueDummy("e", 1)})
-        initial_configuration_strings_for_smac = \
-            ml.create_metalearning_string_for_smac_call(
-            configuration_space, "iris", "bac_metric", 1)
+            ml = MetaLearning()
+            ml.calculate_metafeatures_with_labels(
+                    X_train, Y_train, categorical, dataset_name)
+            ml.calculate_metafeatures_encoded_labels(
+                    X_train, Y_train, categorical, dataset_name)
+            initial_configuration_strings_for_smac = \
+                ml.create_metalearning_string_for_smac_call(
+                    configuration_space, dataset_name, metric, 1)
 
-        self.assertEqual(["--initial-challengers \" "
-                          "-multinomial_nb:fit_prior 'False' "
-                          "-rescaling:strategy 'min/max' "
-                          "-select_percentile_classification:score_func 'chi2' "
-                          "-imputation:strategy 'mean' "
-                          "-select_percentile_classification:percentile '70.9824065966' "
-                          "-preprocessor 'select_percentile_classification' "
-                          "-multinomial_nb:alpha '22.0323293841' "
-                          "-classifier 'multinomial_nb'\""],
-                         initial_configuration_strings_for_smac)
+            self.assertEqual(["--initial-challengers \" "
+                              "-classifier 'libsvm_svc' "
+                              "-imputation:strategy 'mean' "
+                              "-libsvm_svc:C '55.4450303414' "
+                              "-libsvm_svc:class_weight 'auto' "
+                              "-libsvm_svc:gamma '0.333079079137' "
+                              "-libsvm_svc:kernel 'rbf' "
+                              "-libsvm_svc:max_iter '-1' "
+                              "-libsvm_svc:shrinking 'False' "
+                              "-libsvm_svc:tol '0.000167717946595' "
+                              "-preprocessor 'no_preprocessing' "
+                              "-rescaling:strategy 'min/max'\""],
+                             initial_configuration_strings_for_smac)

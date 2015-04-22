@@ -65,9 +65,7 @@ class MetaLearning(object):
                              "calculate_metafeatures_with_labels first!")
 
         current_directory = os.path.dirname(__file__)
-        datasets_file = os.path.join(current_directory, "files", "datasets.yaml")
-        experiments_file = os.path.join(current_directory, "files",
-                                        "%s.experiments.yaml" % metric)
+        metadata_directory = os.path.join(current_directory, "files", metric)
 
         # Concatenate the metafeatures!
         mf = self._metafeatures_labels
@@ -75,35 +73,30 @@ class MetaLearning(object):
             self._metafeatures_encoded_labels.metafeature_values)
         self.mf = mf
 
-        if not all([np.isfinite(mf.value)
-                    for mf in self.mf.metafeature_values.values()
-                    if isinstance(mf.value, float)]):
-            print "%s contains non-finite metafeatures!" % self.mf
-            return []
-
         metafeatures_subset = metafeatures.subsets["all"]
         metafeatures_subset.difference_update(self._exclude_metafeatures)
         metafeatures_subset = list(metafeatures_subset)
 
         # TODO maybe replace by kND directly to remove unavailable configurations
         start = time.time()
-        ml = metalearner.MetaLearningOptimizer(dataset_name + self._sentinel,
-            configuration_space, datasets_file, experiments_file, distance="l1",
+        ml = metalearner.MetaLearningOptimizer(
+            dataset_name=dataset_name + self._sentinel,
+            configuration_space=configuration_space,
+            aslib_directory=metadata_directory, distance="l1",
             seed=1, use_features=metafeatures_subset, subset='all')
         print "Reading meta-data took %5.2f seconds" % (time.time() - start)
 
         # TODO This is hacky, I must find a different way of adding a new dataset!
-        ml.meta_base.add_dataset_with_metafeatures(dataset_name + self._sentinel,
-                                                   None, self.mf)
+        ml.meta_base.add_dataset(dataset_name + self._sentinel, self.mf)
         runs = ml.metalearning_suggest_all(
             exclude_double_configurations=True)
 
         # = Convert these configurations into the SMAC CLI configuration format
         smac_initial_configuration_strings = []
 
-        for run in runs[:num_initial_configurations]:
+        for configuration in runs[:num_initial_configurations]:
             smac_initial_configuration_strings.append(
-                self.convert_configuration_to_smac_string(run.configuration))
+                self.convert_configuration_to_smac_string(configuration))
 
         return smac_initial_configuration_strings
 
@@ -120,7 +113,8 @@ class MetaLearning(object):
         config_string = StringIO()
         config_string.write("--initial-challengers \"")
 
-        for hyperparameter in configuration:
+        for hyperparameter in sorted(configuration,
+                                     key=lambda t: t.hyperparameter.name):
             if isinstance(hyperparameter, InactiveHyperparameter):
                 continue
             name = hyperparameter.hyperparameter.name

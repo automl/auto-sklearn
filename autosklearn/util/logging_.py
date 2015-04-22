@@ -4,9 +4,8 @@ import sys
 
 
 def get_logger(name, outputdir=None):
-    # Creates a logger with a stream and file handler
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
+    # Root logger with a stream and file handler
+    root = logging.getLogger()
 
     console = logging.StreamHandler(stream=sys.stdout)
     console.setLevel(logging.INFO)
@@ -15,15 +14,18 @@ def get_logger(name, outputdir=None):
                                       '[%(asctime)s:%(name)s]: %(message)s',
                                   datefmt='%m-%d %H:%M:%S')
     console.setFormatter(formatter)
-    logger.addHandler(console)
+    root.addHandler(console)
 
     if outputdir is not None:
         logger_file = os.path.join(outputdir, '%s.log' % name)
         file_handler = logging.FileHandler(filename=logger_file, mode="w")
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
+        root.addHandler(file_handler)
 
+    # Create a logger
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
     logger.debug("Logger created")
 
     return logger

@@ -90,19 +90,21 @@ class DataManager:
         self.data['X_valid'] = Xva
         self.data['X_test'] = Xte
 
-        try:
-            self.data['Y_valid'] = self.loadLabel(
-                os.path.join(self.input_dir, basename + '_valid.solution'),
-                self.info['valid_num'], verbose=verbose)
-        except (IOError, OSError):
-            pass
+        p = os.path.join(self.input_dir, basename + '_valid.solution')
+        if os.path.exists(p):
+            try:
+                self.data['Y_valid'] = self.loadLabel(p,
+                    self.info['valid_num'], verbose=verbose)
+            except (IOError, OSError):
+                pass
 
-        try:
-            self.data['Y_test'] = self.loadLabel(
-                os.path.join(self.input_dir, basename + '_test.solution'),
-                self.info['test_num'], verbose=verbose)
-        except (IOError, OSError) as e:
-            pass
+        p = os.path.join(self.input_dir, basename + '_test.solution')
+        if os.path.exists(p):
+            try:
+                self.data['Y_test'] = self.loadLabel(p,
+                    self.info['test_num'], verbose=verbose)
+            except (IOError, OSError) as e:
+                pass
 
         if encode_labels:
             self.perform1HotEncoding()
@@ -136,7 +138,6 @@ class DataManager:
             self.getFormatData(filename)
         if 'feat_num' not in self.info:
             self.getNbrFeatures(filename)
-        print chelper_is_there
         if chelper_is_there:
             data_func = {'dense': chelper_functions.read_dense_file,
                          'sparse': chelper_functions.read_sparse_file,
@@ -324,18 +325,18 @@ class DataManager:
                 self.info['format'] = 'dense'
             else:
                 if chelper_is_there:
-                    data = data_converter.read_first_line (filename)
-                else:
                     data = chelper_functions.read_first_line(filename)
+                else:
+                    data = data_converter.read_first_line(filename)
                 if ':' in data[0]:
                     self.info['format'] = 'sparse'
                 else:
                     self.info['format'] = 'sparse_binary'
         else:
             if chelper_is_there:
-                data = data_converter.file_to_array (filename)
-            else:
                 data = chelper_functions.file_to_array(filename)
+            else:
+                data = data_converter.file_to_array(filename)
             if ':' in data[0][0]:
                 self.info['is_sparse'] = 1
                 self.info['format'] = 'sparse'
