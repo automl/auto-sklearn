@@ -6,6 +6,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
 from ParamSklearn.components.classification_base import \
     ParamSklearnClassificationAlgorithm
 from ParamSklearn.util import DENSE, PREDICTIONS
+from ParamSklearn.implementations.util import softmax
 
 
 class QDA(ParamSklearnClassificationAlgorithm):
@@ -30,6 +31,7 @@ class QDA(ParamSklearnClassificationAlgorithm):
             raise NotImplementedError()
 
         df = self.estimator.predict_proba(X)
+        return softmax(df)
 
     @staticmethod
     def get_properties():
