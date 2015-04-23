@@ -372,8 +372,9 @@ class ParamSklearnBaseEstimator(BaseEstimator):
             for condition in available_preprocessors[name]. \
                     get_hyperparameter_search_space(dataset_properties).get_conditions():
                 if not isinstance(condition, AbstractConjunction):
-                    continue
-                dlcs = condition.get_descendent_literal_conditions()
+                    dlcs = [condition]
+                else:
+                    dlcs = condition.get_descendent_literal_conditions()
                 for dlc in dlcs:
                     if not dlc.child.name.startswith(name):
                         dlc.child.name = "%s:%s" % (name, dlc.child.name)

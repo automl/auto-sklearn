@@ -1,3 +1,4 @@
+import numpy as np
 import sklearn.decomposition
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
@@ -32,6 +33,7 @@ class DictionaryLearning(ParamSklearnPreprocessingAlgorithm):
             transform_alpha=self.transform_alpha,
             split_sign=self.split_sign, random_state=self.random_state
         )
+        X = X.astype(np.float64)
         self.preprocessor.fit(X)
         return self
 
@@ -56,7 +58,7 @@ class DictionaryLearning(ParamSklearnPreprocessingAlgorithm):
                 'is_deterministic': False,
                 'handles_sparse': True,
                 'handles_dense': True,
-                'input': (SPARSE, DENSE),
+                'input': (DENSE, ),
                 'output': INPUT,
                 'preferred_dtype': None}
 
@@ -69,8 +71,8 @@ class DictionaryLearning(ParamSklearnPreprocessingAlgorithm):
         max_iter = UniformIntegerHyperparameter(
             "max_iter", 50, 500, default=100)
         tol = UniformFloatHyperparameter('tol', 1e-9, 1e-3, 1e-8, log=True)
-        # CD causes problems here
-        fit_algorithm = Constant('fit_algorithm', 'lars')
+        fit_algorithm = CategoricalHyperparameter('fit_algorithm',
+                                                  ['lars', 'cd'], 'lars')
         transform_algorithm = CategoricalHyperparameter('transform_algorithm',
             ['lasso_lars', 'lasso_cd', 'lars', 'omp', 'threshold'], 'omp')
         transform_alpha = UniformFloatHyperparameter('transform_alpha',

@@ -86,7 +86,9 @@ class TestParamSklearnClassifier(unittest.TestCase):
                 predicted_probabiliets = cls.predict_proba(X_test_)
                 self.assertIsInstance(predicted_probabiliets, np.ndarray)
             except ValueError as e:
-                if "Floating-point under-/overflow occurred at epoch" in e.message:
+                if "Floating-point under-/overflow occurred at epoch" in \
+                        e.message or \
+                    "removed all features" in e.message:
                     continue
                 else:
                     print config
@@ -147,10 +149,11 @@ class TestParamSklearnClassifier(unittest.TestCase):
 
     def test_get_hyperparameter_search_space(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space()
+        print cs
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(102, len(hyperparameters))
+        self.assertEqual(130, len(hyperparameters))
         # The four parameters which are always active are classifier,
         # preprocessor, imputation strategy and scaling strategy
         self.assertEqual(len(hyperparameters) - 4, len(conditions))

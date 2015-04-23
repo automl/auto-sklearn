@@ -16,7 +16,7 @@ class FastICAComponentTest(PreprocessingTestCase):
 
     def test_default_configuration_classify(self):
         for i in range(5):
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris',
                                                            make_sparse=False)
             configuration_space = FastICA.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
@@ -34,7 +34,7 @@ class FastICAComponentTest(PreprocessingTestCase):
             predictor = classifier.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
             accuracy = sklearn.metrics.accuracy_score(predictions, Y_test)
-            self.assertAlmostEqual(accuracy, 0.83545840922890102)
+            self.assertAlmostEqual(accuracy, 0.90000000000000002)
 
     @unittest.skip("Always returns float64")
     def test_preprocessing_dtype(self):

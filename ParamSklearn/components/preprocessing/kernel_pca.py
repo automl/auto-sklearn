@@ -56,7 +56,7 @@ class KernelPCA(ParamSklearnPreprocessingAlgorithm):
                 'is_deterministic': False,
                 'handles_sparse': True,
                 'handles_dense': True,
-                'input': (SPARSE, DENSE),
+                'input': (DENSE, ),
                 'output': INPUT,
                 'preferred_dtype': None}
 
@@ -68,7 +68,7 @@ class KernelPCA(ParamSklearnPreprocessingAlgorithm):
             ['poly', 'rbf', 'sigmoid', 'cosine'], 'rbf')
         degree = UniformIntegerHyperparameter('degree', 2, 5, 3)
         gamma = UniformFloatHyperparameter("gamma", 3.0517578125e-05, 8,
-                                           log=True, default=0.1)
+                                           log=True, default=1.0)
         coef0 = UniformFloatHyperparameter("coef0", -1, 1, default=0)
         cs = ConfigurationSpace()
         cs.add_hyperparameter(n_components)
