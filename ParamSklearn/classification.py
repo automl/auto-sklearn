@@ -348,7 +348,7 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         classifiers_ = ["multinomial_nb", "bernoulli_nb"]
         preproc_with_negative_X = ["kitchen_sinks", "sparse_filtering",
                                    "pca", "truncatedSVD", "fast_ica",
-                                   "kernel_pca"]
+                                   "kernel_pca", "nystroem_sampler"]
         scaling_strategies = ['standard', 'none']
         for c in classifiers_:
             if c not in classifiers_list:
