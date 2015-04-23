@@ -1,5 +1,7 @@
 __author__ = 'feurerm'
 
+import sys
+import traceback
 import unittest
 
 import mock
@@ -124,8 +126,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
     def test_configurations_sparse(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
-        sampler = RandomSampler(cs, 1)
-        for i in range(10):
+        sampler = RandomSampler(cs, 123456)
+        for i in range(1000):
             config = sampler.sample_configuration()
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                            make_sparse=True)
@@ -134,7 +136,16 @@ class TestParamSklearnClassifier(unittest.TestCase):
                 cls.fit(X_train, Y_train)
                 predictions = cls.predict(X_test)
             except ValueError as e:
-                if "Floating-point under-/overflow occurred at epoch" in e.message:
+                if "Floating-point under-/overflow occurred at epoch" in \
+                        e.message or \
+                                "removed all features" in e.message:
+                    continue
+                else:
+                    print config
+                    traceback.print_tb(sys.exc_info()[2])
+                    raise e
+            except LinAlgError as e:
+                if "not positive definite, even with jitter" in e.message:
                     continue
                 else:
                     print config
@@ -142,6 +153,20 @@ class TestParamSklearnClassifier(unittest.TestCase):
             except AttributeError as e:
                 # Some error in QDA
                 if "log" == e.message:
+                    continue
+                else:
+                    print config
+                    raise e
+            except RuntimeWarning as e:
+                if "invalid value encountered in sqrt" in e.message:
+                    continue
+                elif "divide by zero encountered in divide" in e.message:
+                    continue
+                else:
+                    print config
+                    raise e
+            except UserWarning as e:
+                if "FastICA did not converge" in e.message:
                     continue
                 else:
                     print config

@@ -48,7 +48,7 @@ class FeatureAgglomeration(ParamSklearnPreprocessingAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'handles_dense': True,
-                'input': (SPARSE, DENSE),
+                'input': (DENSE, ),
                 'output': INPUT,
                 'preferred_dtype': None}
 

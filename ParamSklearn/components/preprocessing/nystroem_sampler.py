@@ -1,3 +1,4 @@
+import numpy as np
 import sklearn.kernel_approximation
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
@@ -11,7 +12,7 @@ from ParamSklearn.util import SPARSE, DENSE, INPUT
 
 
 class Nystroem(ParamSklearnPreprocessingAlgorithm):
-    def __init__(self, kernel, n_components, gamma=None, degree=3,
+    def __init__(self, kernel, n_components, gamma=1.0, degree=3,
                  coef0=1, random_state=None):
         self.kernel = kernel
         self.n_components = int(n_components)
@@ -25,7 +26,7 @@ class Nystroem(ParamSklearnPreprocessingAlgorithm):
             kernel=self.kernel, n_components=self.n_components,
             gamma=self.gamma, degree=self.degree, coef0=self.coef0,
             random_state=self.random_state)
-        self.preprocessor.fit(X)
+        self.preprocessor.fit(X.astype(np.float64))
         return self
 
     def transform(self, X):
@@ -55,8 +56,15 @@ class Nystroem(ParamSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        kernel = CategoricalHyperparameter('kernel',
-            ['chi2', 'poly', 'rbf', 'sigmoid', 'cosine'], 'rbf')
+        if dataset_properties is not None and dataset_properties.get("sparse"):
+            allow_chi2 = False
+        else:
+            allow_chi2 = True
+
+        possible_kernels = ['poly', 'rbf', 'sigmoid', 'cosine']
+        if allow_chi2:
+            possible_kernels.append("chi2")
+        kernel = CategoricalHyperparameter('kernel', possible_kernels, 'rbf')
         degree = UniformIntegerHyperparameter('degree', 2, 5, 3)
         gamma = UniformFloatHyperparameter("gamma", 3.0517578125e-05, 8,
                                            log=True, default=0.1)
@@ -73,8 +81,11 @@ class Nystroem(ParamSklearnPreprocessingAlgorithm):
 
         degree_depends_on_poly = EqualsCondition(degree, kernel, "poly")
         coef0_condition = InCondition(coef0, kernel, ["poly", "sigmoid"])
-        gamma_condition = InCondition(gamma, kernel, ["poly", "rbf", "chi2",
-                                                      "sigmoid"])
+
+        gamma_kernels = ["poly", "rbf", "sigmoid"]
+        if allow_chi2:
+            gamma_kernels.append("chi2")
+        gamma_condition = InCondition(gamma, kernel, gamma_kernels)
         cs.add_condition(degree_depends_on_poly)
         cs.add_condition(coef0_condition)
         cs.add_condition(gamma_condition)
