@@ -14,8 +14,11 @@ class HoldoutEvaluator(Evaluator):
             seed=seed, output_dir=output_dir,
             output_y_test=output_y_test)
 
+        classification = "classification" in Datamanager.info['task'].lower()
         self.X_train, self.X_optimization, self.Y_train, self.Y_optimization = \
-            split_data(Datamanager.data['X_train'], Datamanager.data['Y_train'])
+            split_data(Datamanager.data['X_train'],
+                       Datamanager.data['Y_train'],
+                       classification=classification)
 
         self.model = self.model_class(self.configuration, self.seed)
 

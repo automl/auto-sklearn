@@ -3,6 +3,7 @@ import functools
 import unittest
 
 import numpy as np
+from numpy.linalg import LinAlgError
 
 from autosklearn.models.cv_evaluator import CVEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
@@ -51,9 +52,6 @@ class CVEvaluator_Test(unittest.TestCase):
                 evaluator.predict()
             err[i] = e_
             print err[i], configuration['classifier']
-            print Y_optimization_pred.shape
-            print Y_valid_pred.shape
-            print Y_test_pred.shape
 
             num_targets = len(np.unique(Y_train))
             self.assertTrue(np.isfinite(err[i]))
@@ -141,10 +139,33 @@ class CVEvaluator_Test(unittest.TestCase):
         try:
             function_handle()
             return True
-        except TypeError as e:
-            print e
         except ValueError as e:
-            if "Floating-point under-/overflow occurred at epoch" in e.message:
-                return False
+            if "Floating-point under-/overflow occurred at epoch" in e.message or \
+                    "removed all features" in e.message or \
+                    "failed to create intent" in e.message:
+                pass
+            else:
+                raise e
+        except LinAlgError as e:
+            if "not positive definite, even with jitter" in e.message:
+                pass
+            else:
+                raise e
+        except AttributeError as e:
+            # Some error in QDA
+            if "log" == e.message:
+                pass
+            else:
+                raise e
+        except RuntimeWarning as e:
+            if "invalid value encountered in sqrt" in e.message:
+                pass
+            elif "divide by zero encountered in divide" in e.message:
+                pass
+            else:
+                raise e
+        except UserWarning as e:
+            if "FastICA did not converge" in e.message:
+                pass
             else:
                 raise e

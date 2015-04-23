@@ -1,15 +1,13 @@
-'''
-Created on Dec 18, 2014
-
-@author: Aaron Klein
-'''
 import copy
 import functools
 import unittest
 import os
 import shutil
+import sys
+import traceback
 
 import numpy as np
+from numpy.linalg import LinAlgError
 
 from autosklearn.data.data_converter import convert_to_bin
 from autosklearn.models.evaluator import predict_proba
@@ -232,8 +230,34 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             evaluator.fit()
             return True
         except ValueError as e:
-            if "Floating-point under-/overflow occurred at epoch" in e.message:
-                return False
+            if "Floating-point under-/overflow occurred at epoch" in e.message or \
+                            "removed all features" in e.message or \
+                            "failed to create intent" in e.message:
+                pass
+            else:
+                traceback.print_tb(sys.exc_info()[2])
+                raise e
+        except LinAlgError as e:
+            if "not positive definite, even with jitter" in e.message:
+                pass
+            else:
+                raise e
+        except AttributeError as e:
+            # Some error in QDA
+            if "log" == e.message:
+                pass
+            else:
+                raise e
+        except RuntimeWarning as e:
+            if "invalid value encountered in sqrt" in e.message:
+                pass
+            elif "divide by zero encountered in divide" in e.message:
+                pass
+            else:
+                raise e
+        except UserWarning as e:
+            if "FastICA did not converge" in e.message:
+                pass
             else:
                 raise e
 
