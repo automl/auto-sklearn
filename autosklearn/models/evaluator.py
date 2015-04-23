@@ -2,6 +2,7 @@ import abc
 import os
 import time
 
+import lockfile
 import numpy as np
 
 from ParamSklearn.classification import ParamSklearnClassifier
@@ -90,17 +91,20 @@ def calculate_score(solution, prediction, task_type, metric,
 
 def get_new_run_num():
     counter_file = os.path.join(os.getcwd(), "num_run")
-    if not os.path.exists(counter_file):
-        with open(counter_file, "w") as fh:
-            fh.write("0")
-        return 0
-    else:
-        with open(counter_file, "r") as fh:
-            num = int(fh.read())
-        num += 1
-        with open(counter_file, "w") as fh:
-            fh.write(str(num))
-        return num
+    lock = lockfile.LockFile(counter_file)
+    with lock:
+        if not os.path.exists(counter_file):
+            with open(counter_file, "w") as fh:
+                fh.write("0")
+            num = 0
+        else:
+            with open(counter_file, "r") as fh:
+                num = int(fh.read())
+            num += 1
+            with open(counter_file, "w") as fh:
+                fh.write(str(num).zfill(4))
+
+    return num
 
 
 class Evaluator(object):
