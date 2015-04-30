@@ -22,7 +22,7 @@ def predict_proba(X, model, task_type):
 
     if task_type == "multilabel.classification":
         Y_pred = np.hstack(
-            [Y_pred[i][:, 1].reshape((-1, 1))
+            [Y_pred[i][:, -1].reshape((-1, 1))
              for i in range(len(Y_pred))])
 
     elif task_type == "binary.classification":

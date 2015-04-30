@@ -105,7 +105,11 @@ class HoldoutEvaluator_Test(unittest.TestCase):
     def test_evaluate_multilabel_classification(self):
         X_train, Y_train, X_test, Y_test = get_dataset('iris')
         Y_train = np.array(convert_to_bin(Y_train, 3))
+        Y_train[:,-1] = 1
         Y_test = np.array(convert_to_bin(Y_test, 3))
+        Y_test[:, -1] = 1
+
+        print Y_train
 
         X_valid = X_test[:25, ]
         Y_valid = Y_test[:25, ]
