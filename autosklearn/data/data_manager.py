@@ -145,6 +145,11 @@ class DataManager:
 
             data = data_func[self.info['format']](filename, num_points,
                                                   self.info['feat_num'])
+
+            if scipy.sparse.issparse(data):
+                if not np.all(data.indices >= 0):
+                    raise ValueError("Sparse data must be 1-indexed, "
+                                     "not 0-indexed.")
         else:
             data_func = {'dense': input_routines.convert_file_to_array,
                          'sparse': data_io.data_sparse,

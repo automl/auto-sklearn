@@ -52,7 +52,7 @@ def split_data(X, Y, classification=None):
                 train_index[train_index >= sample_idx] += 1
                 valid_index[valid_index >= sample_idx] += 1
                 train_index = np.append(train_index, np.array(sample_idx))
-            except:
+            except UnboundLocalError:
                 pass
 
         X_train, X_valid = X[train_index], X[valid_index]
