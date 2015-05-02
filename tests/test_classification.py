@@ -126,8 +126,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
     def test_configurations_sparse(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
-        sampler = RandomSampler(cs, 123456)
-        for i in range(1000):
+        sampler = RandomSampler(cs, 1)
+        for i in range(10):
             config = sampler.sample_configuration()
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                            make_sparse=True)
@@ -178,10 +178,10 @@ class TestParamSklearnClassifier(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(130, len(hyperparameters))
+        self.assertEqual(146, len(hyperparameters))
         # The four parameters which are always active are classifier,
         # preprocessor, imputation strategy and scaling strategy
-        self.assertEqual(len(hyperparameters) - 4, len(conditions))
+        self.assertEqual(len(hyperparameters) - 5, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
@@ -205,6 +205,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(ValueError, "Default Configuration:\n"
+            "  balancing:strategy, Value: none\n"
             "  classifier, Value: multinomial_nb\n"
             "  imputation:strategy, Value: mean\n"
             "  multinomial_nb:alpha, Value: 1.000000\n"
@@ -222,23 +223,24 @@ class TestParamSklearnClassifier(unittest.TestCase):
         # It must also be catched that no classifiers which can handle sparse
         #  data are located behind the densifier
         self.assertRaisesRegexp(ValueError, "Configuration:\n"
-            "  classifier, Value: liblinear\n"
+            "  balancing:strategy, Value: none\n"
+            "  classifier, Value: liblinear_svc\n"
             "  imputation:strategy, Value: mean\n"
-            "  liblinear:C, Value: 1.000000\n"
-            "  liblinear:class_weight, Value: None\n"
-            "  liblinear:dual, Constant: False\n"
-            "  liblinear:fit_intercept, Constant: True\n"
-            "  liblinear:intercept_scaling, Constant: 1\n"
-            "  liblinear:loss, Value: l2\n"
-            "  liblinear:multi_class, Constant: ovr\n"
-            "  liblinear:penalty, Value: l2\n"
-            "  liblinear:tol, Value: 0.000100\n"
+            "  liblinear_svc:C, Value: 1.000000\n"
+            "  liblinear_svc:class_weight, Value: None\n"
+            "  liblinear_svc:dual, Constant: False\n"
+            "  liblinear_svc:fit_intercept, Constant: True\n"
+            "  liblinear_svc:intercept_scaling, Constant: 1\n"
+            "  liblinear_svc:loss, Value: l2\n"
+            "  liblinear_svc:multi_class, Constant: ovr\n"
+            "  liblinear_svc:penalty, Value: l2\n"
+            "  liblinear_svc:tol, Value: 0.000100\n"
             "  preprocessor, Value: densifier\n"
             "  rescaling:strategy, Value: min/max\n"
-            "violates forbidden clause \(Forbidden: classifier == liblinear &&"
+            "violates forbidden clause \(Forbidden: classifier == liblinear_svc &&"
             " Forbidden: preprocessor == densifier\)",
                                 ParamSklearnClassifier.get_hyperparameter_search_space,
-                                include_estimators=['liblinear'],
+                                include_estimators=['liblinear_svc'],
                                 include_preprocessors=['densifier'],
                                 dataset_properties={'sparse': True})
 
@@ -309,7 +311,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
         # Densifier + RF is the only combination that easily tests sparse
         # data with multilabel classification!
         config = Configuration(cs,
-            hyperparameters={"classifier": "random_forest",
+            hyperparameters={"balancing:strategy": "none",
+                             "classifier": "random_forest",
                              "imputation:strategy": "mean",
                              "preprocessor": "densifier",
                              'random_forest:bootstrap': 'True',
@@ -392,7 +395,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
         # Densifier + RF is the only combination that easily tests sparse
         # data with multilabel classification!
         config = Configuration(cs,
-                               hyperparameters={"classifier": "random_forest",
+                               hyperparameters={"balancing:strategy": "none",
+                                                "classifier": "random_forest",
                                                 "imputation:strategy": "mean",
                                                 "preprocessor": "densifier",
                                                 'random_forest:bootstrap': 'True',

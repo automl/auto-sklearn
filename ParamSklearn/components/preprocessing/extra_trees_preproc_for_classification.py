@@ -7,7 +7,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from ParamSklearn.components.preprocessor_base import \
     ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import DENSE, PREDICTIONS
+from ParamSklearn.util import DENSE, INPUT
 
 # get our own forests to replace the sklearn ones
 from ParamSklearn.implementations import forest
@@ -60,7 +60,7 @@ class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
         self.verbose = int(verbose)
         self.preprocessor = None
 
-    def fit(self, X, Y):
+    def fit(self, X, Y, sample_weight=None):
         num_features = X.shape[1]
         max_features = int(
             float(self.max_features) * (np.log(num_features) + 1))
@@ -80,7 +80,7 @@ class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
         while len(self.preprocessor.estimators_) < self.n_estimators:
             tmp = self.preprocessor  # TODO copy ?
             tmp.n_estimators += self.estimator_increment
-            tmp.fit(X, Y)
+            tmp.fit(X, Y, sample_weight=sample_weight)
             self.preprocessor = tmp
         return self
 
@@ -106,7 +106,7 @@ class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'input': (DENSE, ),
-                'output': PREDICTIONS,
+                'output': INPUT,
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}

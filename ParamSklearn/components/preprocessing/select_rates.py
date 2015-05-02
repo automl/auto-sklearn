@@ -35,7 +35,16 @@ class SelectRates(ParamSklearnPreprocessingAlgorithm):
     def transform(self, X):
         if self.preprocessor is None:
             raise NotImplementedError()
-        Xt = self.preprocessor.transform(X)
+        try:
+            Xt = self.preprocessor.transform(X)
+        except ValueError as e:
+            if "zero-size array to reduction operation maximum which has no " \
+                    "identity" in e.message:
+                raise ValueError(
+                    "%s removed all features." % self.__class__.__name__)
+            else:
+                raise e
+
         if Xt.shape[1] == 0:
             raise ValueError(
                 "%s removed all features." % self.__class__.__name__)

@@ -39,7 +39,7 @@ class RandomTreesEmbedding(ParamSklearnPreprocessingAlgorithm):
             n_jobs=self.n_jobs,
             random_state=self.random_state
         )
-        self.preprocessor.fit(X)
+        self.preprocessor.fit(X, Y)
         return self
 
     def transform(self, X):

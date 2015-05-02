@@ -1,6 +1,6 @@
 import unittest
 
-from ParamSklearn.components.classification.liblinear import LibLinear_SVC
+from ParamSklearn.components.classification.liblinear_svc import LibLinear_SVC
 from ParamSklearn.util import _test_classifier
 
 

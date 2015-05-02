@@ -4,7 +4,6 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, UnParametrizedHyperparameter, \
     UniformIntegerHyperparameter
-from HPOlibConfigSpace.conditions import EqualsCondition
 
 from ParamSklearn.components.classification_base import \
     ParamSklearnClassificationAlgorithm

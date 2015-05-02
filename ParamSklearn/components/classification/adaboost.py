@@ -25,7 +25,7 @@ class AdaboostClassifier(ParamSklearnClassificationAlgorithm):
 
         self.estimator = None
 
-    def fit(self, X, Y):
+    def fit(self, X, Y, sample_weight=None):
         base_estimator = sklearn.tree.DecisionTreeClassifier(max_depth=self.max_depth)
 
         self.estimator = sklearn.ensemble.AdaBoostClassifier(
@@ -34,9 +34,8 @@ class AdaboostClassifier(ParamSklearnClassificationAlgorithm):
             learning_rate=self.learning_rate,
             algorithm=self.algorithm,
             random_state=self.random_state
-
         )
-        self.estimator.fit(X, Y)
+        self.estimator.fit(X, Y, sample_weight=sample_weight)
         return self
 
     def predict(self, X):

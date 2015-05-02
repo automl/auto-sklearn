@@ -35,7 +35,7 @@ class DecisionTree(ParamSklearnClassificationAlgorithm):
         self.random_state = random_state
         self.estimator = None
 
-    def fit(self, X, y):
+    def fit(self, X, y, sample_weight=None):
         self.estimator = DecisionTreeClassifier(
             criterion=self.criterion,
             max_depth=self.max_depth,
@@ -43,7 +43,7 @@ class DecisionTree(ParamSklearnClassificationAlgorithm):
             min_samples_leaf=self.min_samples_leaf,
             max_leaf_nodes=self.max_leaf_nodes,
             random_state=self.random_state)
-        self.estimator.fit(X, y)
+        self.estimator.fit(X, y, sample_weight=sample_weight)
         return self
 
     def predict(self, X):

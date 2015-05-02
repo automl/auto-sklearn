@@ -1,7 +1,7 @@
 import unittest
 
 from sklearn.linear_model import RidgeClassifier
-from ParamSklearn.components.preprocessing.liblinear import \
+from ParamSklearn.components.preprocessing.liblinear_svc_preprocessor import \
     LibLinear_Preprocessor
 from ParamSklearn.util import _test_preprocessing, PreprocessingTestCase, \
     get_dataset

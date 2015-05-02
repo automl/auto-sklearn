@@ -88,8 +88,8 @@ class ParamSklearnBaseEstimator(BaseEstimator):
 
         # seperate the init parameters for the single methods
         init_params_per_method = defaultdict(dict)
-        if init_params is not None:
-            for init_param, value in init_params:
+        if init_params is not None and len(init_params) != 0:
+            for init_param, value in init_params.items():
                 method, param = init_param.split(":")
                 init_params_per_method[method][param] = value
 

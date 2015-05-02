@@ -11,6 +11,7 @@ from HPOlibConfigSpace.forbidden import ForbiddenAndConjunction
 from ParamSklearn import components as components
 from ParamSklearn.base import ParamSklearnBaseEstimator
 from ParamSklearn.util import SPARSE
+from ParamSklearn.components.preprocessing.balancing import Balancing
 import ParamSklearn.create_searchspace_util
 
 
@@ -61,9 +62,19 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
     """
 
     def fit(self, X, Y, fit_params=None, init_params=None):
+        self.num_targets = 1 if len(Y.shape) == 1 else Y.shape[1]
+
+        # Weighting samples has to be done here, not in the components
+        if self.configuration['balancing:strategy'].value == 'weighting':
+            balancing = Balancing(strategy='weighting')
+            init_params, fit_params = balancing.get_weights(
+                Y, self.configuration['classifier'].value,
+                self.configuration['preprocessor'].value,
+                init_params, fit_params)
+
         super(ParamSklearnClassifier, self).fit(X, Y, fit_params=fit_params,
                                                 init_params=init_params)
-        self.num_targets = 1 if len(Y.shape) == 1 else Y.shape[1]
+
         return self
 
     def predict_proba(self, X, batch_size=None):
@@ -415,4 +426,5 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
 
     @staticmethod
     def _get_pipeline():
-        return ["imputation", "rescaling", "__preprocessor__", "__estimator__"]
+        return ["imputation", "rescaling", "balancing", "__preprocessor__",
+                "__estimator__"]

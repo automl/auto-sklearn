@@ -13,17 +13,20 @@ from ParamSklearn.implementations.util import softmax
 
 
 class Ridge(ParamSklearnClassificationAlgorithm):
-    def __init__(self, alpha, fit_intercept, tol, random_state=None):
+    def __init__(self, alpha, fit_intercept, tol, class_weight=None,
+        random_state=None):
         self.alpha = float(alpha)
         self.fit_intercept = bool(fit_intercept)
         self.tol = float(tol)
+        self.class_weight = class_weight
         self.random_state = random_state
         self.estimator = None
 
     def fit(self, X, Y):
         self.estimator = RidgeClassifier(alpha=self.alpha,
                                         fit_intercept=self.fit_intercept,
-                                        tol=self.tol)
+                                        tol=self.tol,
+                                        class_weight=self.class_weight)
         self.estimator.fit(X, Y)
         return self
 

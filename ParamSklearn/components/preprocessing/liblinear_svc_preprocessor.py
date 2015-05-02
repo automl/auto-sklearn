@@ -8,8 +8,7 @@ from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, \
 
 from ParamSklearn.components.preprocessor_base import \
     ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.implementations.util import softmax
-from ParamSklearn.util import SPARSE, DENSE, PREDICTIONS
+from ParamSklearn.util import SPARSE, DENSE, INPUT
 
 
 class LibLinear_Preprocessor(ParamSklearnPreprocessingAlgorithm):
@@ -73,7 +72,7 @@ class LibLinear_Preprocessor(ParamSklearnPreprocessingAlgorithm):
                 # this here suggests so http://scikit-learn.org/stable/modules/svm.html#tips-on-practical-use
                 'handles_sparse': True,
                 'input': (SPARSE, DENSE),
-                'output': PREDICTIONS,
+                'output': INPUT,
                 # TODO find out what is best used here!
                 'preferred_dtype': None}
 

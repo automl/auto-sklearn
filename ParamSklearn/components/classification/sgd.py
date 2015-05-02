@@ -13,7 +13,7 @@ from ParamSklearn.implementations.util import softmax
 
 class SGD(ParamSklearnClassificationAlgorithm):
     def __init__(self, loss, penalty, alpha, fit_intercept, n_iter,
-                 learning_rate, class_weight, l1_ratio=0.15, epsilon=0.1,
+                 learning_rate, class_weight=None, l1_ratio=0.15, epsilon=0.1,
                  eta0=0.01, power_t=0.5, random_state=None):
         self.loss = loss
         self.penalty = penalty
@@ -111,10 +111,6 @@ class SGD(ParamSklearnClassificationAlgorithm):
             ["optimal", "invscaling", "constant"], default="optimal")
         eta0 = UniformFloatHyperparameter("eta0", 10**-7, 0.1, default=0.01)
         power_t = UniformFloatHyperparameter("power_t", 1e-5, 1, default=0.5)
-        # This does not allow for other resampling methods!
-        class_weight = CategoricalHyperparameter("class_weight",
-                                                 ["None", "auto"],
-                                                 default="None")
         cs = ConfigurationSpace()
         cs.add_hyperparameter(loss)
         cs.add_hyperparameter(penalty)
@@ -126,7 +122,6 @@ class SGD(ParamSklearnClassificationAlgorithm):
         cs.add_hyperparameter(learning_rate)
         cs.add_hyperparameter(eta0)
         cs.add_hyperparameter(power_t)
-        cs.add_hyperparameter(class_weight)
 
         # TODO add passive/aggressive here, although not properly documented?
         elasticnet = EqualsCondition(l1_ratio, penalty, "elasticnet")

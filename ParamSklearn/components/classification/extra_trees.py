@@ -59,7 +59,7 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
         self.verbose = int(verbose)
         self.estimator = None
 
-    def fit(self, X, Y):
+    def fit(self, X, Y, sample_weight=None):
         num_features = X.shape[1]
         max_features = int(float(self.max_features) * (np.log(num_features) + 1))
         # Use at most half of the features
@@ -78,7 +78,7 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
         while len(self.estimator.estimators_) < self.n_estimators:
             tmp = self.estimator # TODO copy ?
             tmp.n_estimators += self.estimator_increment
-            tmp.fit(X, Y)
+            tmp.fit(X, Y, sample_weight=sample_weight)
             self.estimator = tmp
         return self
 

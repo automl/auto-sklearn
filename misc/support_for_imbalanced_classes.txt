@@ -1,0 +1,22 @@
+AdaBoost:       Sample weights. If None, the sample weights are initialized to 1 / n_samples.
+Bernoulli_NB:   Weights applied to individual samples (1. for unweighted).
+DecisionTree:   Sample weights. If None, then samples are equally weighted. Splits that would create child nodes with net zero or negative weight are ignored while searching for a split in each node. In the case of classification, splits are also ignored if they would result in any single class carrying a negative weight in either child node.
+ExtraTrees:     Sample weights. If None, then samples are equally weighted. Splits that would create child nodes with net zero or negative weight are ignored while searching for a split in each node. In the case of classification, splits are also ignored if they would result in any single class carrying a negative weight in either child node.
+GaussianNB:     -
+GB:             -
+kNN:            -
+LDA:            priors : array, optional, shape = [n_classes]   ?
+LibLinear:      class_weight : {dict, ‘auto’}, optional
+SVC:            class_weight : {dict, ‘auto’}, optional;    Per-sample weights. Rescale C per sample. Higher weights force the classifier to put more emphasis on these points.
+MultinomialNB:  -
+PA:             sample_weight : array-like, shape = [n_samples], optional
+QDA:            -
+RF:             sample_weight : array-like, shape = [n_samples] or None
+RidgeClassifier:class_weight : dict, optional
+SGD            :class_weight : dict, {class_label
+
+
+
+
+Preprocessors:
+

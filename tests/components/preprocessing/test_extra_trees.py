@@ -1,7 +1,7 @@
 import unittest
 
 from sklearn.linear_model import RidgeClassifier
-from ParamSklearn.components.preprocessing.extra_trees import \
+from ParamSklearn.components.preprocessing.extra_trees_preproc_for_classification import \
     ExtraTreesPreprocessor
 from ParamSklearn.util import _test_preprocessing, PreprocessingTestCase, \
     get_dataset
