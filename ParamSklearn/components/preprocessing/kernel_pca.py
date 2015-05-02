@@ -63,7 +63,7 @@ class KernelPCA(ParamSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         n_components = UniformIntegerHyperparameter(
-            "n_components", 50, 2000, default=100)
+            "n_components", 10, 2000, default=100)
         kernel = CategoricalHyperparameter('kernel',
             ['poly', 'rbf', 'sigmoid', 'cosine'], 'rbf')
         degree = UniformIntegerHyperparameter('degree', 2, 5, 3)

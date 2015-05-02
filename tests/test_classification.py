@@ -76,10 +76,11 @@ class TestParamSklearnClassifier(unittest.TestCase):
     def test_configurations(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space()
         sampler = RandomSampler(cs, 1)
-        for i in range(10):
+        for i in range(1000):
             config = sampler.sample_configuration()
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
             cls = ParamSklearnClassifier(config, random_state=1)
+            print config
             try:
                 cls.fit(X_train, Y_train)
                 X_test_ = X_test.copy()
@@ -174,11 +175,10 @@ class TestParamSklearnClassifier(unittest.TestCase):
 
     def test_get_hyperparameter_search_space(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space()
-        print cs
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(136, len(hyperparameters))
+        self.assertEqual(135, len(hyperparameters))
         # The four parameters which are always active are classifier,
         # preprocessor, imputation strategy and scaling strategy
         self.assertEqual(len(hyperparameters) - 5, len(conditions))

@@ -308,8 +308,8 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         # Combinations of non-linear models with feature learning:
         classifiers_ = ["adaboost", "extra_trees", "gradient_boosting",
                         "k_nearest_neighbors", "libsvm_svc", "random_forest",
-                        "gaussian_nb", "gaussian_process", "decision_tree"]
-        feature_learning = ["kitchen_sinks", "nystroem_sampler", "dictionary_learning"]
+                        "gaussian_nb", "decision_tree"]
+        feature_learning = ["kitchen_sinks", "nystroem_sampler"]
 
         for c, f in product(classifiers_, feature_learning):
             if c not in classifiers_list:
@@ -327,30 +327,30 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
 
         # We have seen empirically that tree-based models together with PCA
         # don't work better than tree-based models without preprocessing
-        classifiers_ = ["random_forest", "extra_trees", "gradient_boosting",
-                        "decision_tree"]
-        for c in classifiers_:
-            if c not in classifiers_list:
-                continue
-            try:
-                configuration_space.add_forbidden_clause(
-                    ForbiddenAndConjunction(
-                        ForbiddenEqualsClause(
-                            configuration_space.get_hyperparameter(
-                                "preprocessor"), "pca"),
-                        ForbiddenEqualsClause(
-                            configuration_space.get_hyperparameter(
-                                "classifier"), c)))
-            except KeyError:
-                pass
-            except ValueError as e:
-                if e.message.startswith("Forbidden clause must be "
-                                        "instantiated with a legal "
-                                        "hyperparameter value for "
-                                        "'preprocessor"):
-                    pass
-                else:
-                    raise e
+        #classifiers_ = ["random_forest", "extra_trees", "gradient_boosting",
+        #                "decision_tree"]
+        #for c in classifiers_:
+        #    if c not in classifiers_list:
+        #        continue
+        #    try:
+        #        configuration_space.add_forbidden_clause(
+        #            ForbiddenAndConjunction(
+        #                ForbiddenEqualsClause(
+        #                    configuration_space.get_hyperparameter(
+        #                        "preprocessor"), "pca"),
+        #                ForbiddenEqualsClause(
+        #                    configuration_space.get_hyperparameter(
+        #                        "classifier"), c)))
+        #    except KeyError:
+        #        pass
+        #    except ValueError as e:
+        #        if e.message.startswith("Forbidden clause must be "
+        #                                "instantiated with a legal "
+        #                                "hyperparameter value for "
+        #                                "'preprocessor"):
+        #            pass
+        #        else:
+        #            raise e
 
         # Won't work
         # Multinomial NB does not work with negative values, don't use

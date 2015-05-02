@@ -63,7 +63,7 @@ class FastICA(ParamSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         n_components = UniformIntegerHyperparameter(
-            "n_components", 50, 2000, default=100)
+            "n_components", 10, 2000, default=100)
         algorithm = CategoricalHyperparameter('algorithm',
             ['parallel', 'deflation'], 'parallel')
         whiten = CategoricalHyperparameter('whiten',

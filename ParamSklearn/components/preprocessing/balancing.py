@@ -29,8 +29,7 @@ class Balancing(ParamSklearnPreprocessingAlgorithm):
         # We can have adaboost in here, because in the fit method,
         # the sample weights are normalized:
         # https://github.com/scikit-learn/scikit-learn/blob/0.15.X/sklearn/ensemble/weight_boosting.py#L121
-        clf_ = ['adaboost', 'decision_tree', 'extra_trees', 'random_forest',
-                'gradient_boosting']
+        clf_ = ['adaboost', 'decision_tree', 'extra_trees', 'random_forest']
         pre_ = ['extra_trees_preproc_for_classification']
         if classifier in clf_ or preprocessor in pre_:
             if len(Y.shape) > 1:
