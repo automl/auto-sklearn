@@ -309,8 +309,7 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         classifiers_ = ["adaboost", "extra_trees", "gradient_boosting",
                         "k_nearest_neighbors", "libsvm_svc", "random_forest",
                         "gaussian_nb", "gaussian_process", "decision_tree"]
-        feature_learning = ["kitchen_sinks", "sparse_filtering",
-                            "nystroem_sampler", "dictionary_learning"]
+        feature_learning = ["kitchen_sinks", "nystroem_sampler", "dictionary_learning"]
 
         for c, f in product(classifiers_, feature_learning):
             if c not in classifiers_list:
@@ -357,9 +356,8 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         # Multinomial NB does not work with negative values, don't use
         # it with standardization, features learning, pca
         classifiers_ = ["multinomial_nb", "bernoulli_nb"]
-        preproc_with_negative_X = ["kitchen_sinks", "sparse_filtering",
-                                   "pca", "truncatedSVD", "fast_ica",
-                                   "kernel_pca", "nystroem_sampler"]
+        preproc_with_negative_X = ["kitchen_sinks", "pca", "truncatedSVD",
+                                   "fast_ica", "kernel_pca", "nystroem_sampler"]
         scaling_strategies = ['standard', 'none']
         for c in classifiers_:
             if c not in classifiers_list:
