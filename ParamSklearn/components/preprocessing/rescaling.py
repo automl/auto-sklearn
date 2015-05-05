@@ -30,7 +30,7 @@ class Rescaling(ParamSklearnPreprocessingAlgorithm):
         elif self.strategy == 'none':
             self.preprocessor = none()
         elif self.strategy == 'normalize':
-            self.preprocessor = Normalizer(norm='l2', copy=True)
+            self.preprocessor = Normalizer(norm='l2', copy=False)
         else:
             raise ValueError(self.strategy)
         self.preprocessor.fit(X)
