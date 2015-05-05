@@ -76,7 +76,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
     def test_configurations(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space()
         sampler = RandomSampler(cs, 1)
-        for i in range(1000):
+        for i in range(10):
             config = sampler.sample_configuration()
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
             cls = ParamSklearnClassifier(config, random_state=1)
