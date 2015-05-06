@@ -184,12 +184,20 @@ class Imputer(BaseEstimator, TransformerMixin):
         # transform(X), the imputation data will be computed in transform()
         # when the imputation is done per sample (i.e., when axis=1).
         if self.axis == 0:
-            X = atleast2d_or_csc(X, dtype=self.dtype,
-                                 force_all_finite=False)
-            self.statistics_ = self._dense_fit(X,
-                                               self.strategy,
-                                               self.missing_values,
-                                               self.axis)
+            if sparse.issparse(X):
+                X = atleast2d_or_csc(X, dtype=np.float64,
+                                     force_all_finite=False)
+                self.statistics_ = self._sparse_fit(X,
+                                                    self.strategy,
+                                                    self.missing_values,
+                                                    self.axis)
+            else:
+                X = atleast2d_or_csc(X, dtype=self.dtype,
+                                     force_all_finite=False)
+                self.statistics_ = self._dense_fit(X,
+                                                   self.strategy,
+                                                   self.missing_values,
+                                                   self.axis)
         return self
 
     def _sparse_fit(self, X, strategy, missing_values, axis):
