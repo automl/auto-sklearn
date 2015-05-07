@@ -77,7 +77,6 @@ class MetaLearning(object):
         metafeatures_subset.difference_update(self._exclude_metafeatures)
         metafeatures_subset = list(metafeatures_subset)
 
-        # TODO maybe replace by kND directly to remove unavailable configurations
         start = time.time()
         ml = metalearner.MetaLearningOptimizer(
             dataset_name=dataset_name + self._sentinel,
