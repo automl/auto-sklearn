@@ -24,7 +24,7 @@ def split_data(X, Y, classification=None):
             Y = Y[indices]
 
     if num_labels > 1:
-        sys.stdout.write("Multilabel dataset, do a random split.")
+        sys.stdout.write("Multilabel dataset, do a random split.\n")
         sss = None
     else:
         try:
