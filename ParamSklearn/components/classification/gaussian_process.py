@@ -25,7 +25,7 @@ class GPyClassifier(ParamSklearnClassificationAlgorithm):
         elif ard == "False":
             self.ard = False
         else:
-            selfard = ard
+            self.ard = ard
 
         self.enc = None
 
