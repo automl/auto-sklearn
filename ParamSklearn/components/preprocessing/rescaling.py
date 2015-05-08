@@ -1,12 +1,20 @@
-from scipy import sparse
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from ParamSklearn.implementations.StandardScaler import StandardScaler
 from ParamSklearn.implementations.MinMaxScaler import MinMaxScaler
+from ParamSklearn.implementations.Normalizer import Normalizer
 from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.util import DENSE, SPARSE, INPUT
+
+
+class none(object):
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        return X
 
 
 class Rescaling(ParamSklearnPreprocessingAlgorithm):
@@ -19,6 +27,10 @@ class Rescaling(ParamSklearnPreprocessingAlgorithm):
             self.preprocessor = MinMaxScaler(copy=False)
         elif self.strategy == "standard":
             self.preprocessor = StandardScaler(copy=False)
+        elif self.strategy == 'none':
+            self.preprocessor = none()
+        elif self.strategy == 'normalize':
+            self.preprocessor = Normalizer(norm='l2', copy=False)
         else:
             raise ValueError(self.strategy)
         self.preprocessor.fit(X)
@@ -55,7 +67,8 @@ class Rescaling(ParamSklearnPreprocessingAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         # TODO add replace by zero!
         strategy = CategoricalHyperparameter(
-            "strategy", ["min/max", "standard"], default="min/max")
+            "strategy", ["min/max", "standard", "none", "normalize"],
+            default="min/max")
         cs = ConfigurationSpace()
         cs.add_hyperparameter(strategy)
         return cs

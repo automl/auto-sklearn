@@ -11,6 +11,7 @@ from HPOlibConfigSpace.forbidden import ForbiddenAndConjunction
 from ParamSklearn import components as components
 from ParamSklearn.base import ParamSklearnBaseEstimator
 from ParamSklearn.util import SPARSE
+from ParamSklearn.components.preprocessing.balancing import Balancing
 import ParamSklearn.create_searchspace_util
 
 
@@ -61,9 +62,19 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
     """
 
     def fit(self, X, Y, fit_params=None, init_params=None):
+        self.num_targets = 1 if len(Y.shape) == 1 else Y.shape[1]
+
+        # Weighting samples has to be done here, not in the components
+        if self.configuration['balancing:strategy'].value == 'weighting':
+            balancing = Balancing(strategy='weighting')
+            init_params, fit_params = balancing.get_weights(
+                Y, self.configuration['classifier'].value,
+                self.configuration['preprocessor'].value,
+                init_params, fit_params)
+
         super(ParamSklearnClassifier, self).fit(X, Y, fit_params=fit_params,
                                                 init_params=init_params)
-        self.num_targets = 1 if len(Y.shape) == 1 else Y.shape[1]
+
         return self
 
     def predict_proba(self, X, batch_size=None):
@@ -295,10 +306,11 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
 
         # which would take too long
         # Combinations of non-linear models with feature learning:
-        classifiers_ = ["adaboost", "extra_trees", "gradient_boosting",
-                        "k_nearest_neighbors", "libsvm_svc", "random_forest",
-                        "gaussian_nb"]
-        feature_learning = ["kitchen_sinks", "sparse_filtering"]
+        classifiers_ = ["adaboost", "decision_tree", "extra_trees",
+                        "gradient_boosting", "k_nearest_neighbors",
+                        "libsvm_svc", "random_forest", "gaussian_nb",
+                        "decision_tree"]
+        feature_learning = ["kitchen_sinks", "nystroem_sampler"]
 
         for c, f in product(classifiers_, feature_learning):
             if c not in classifiers_list:
@@ -316,47 +328,50 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
 
         # We have seen empirically that tree-based models together with PCA
         # don't work better than tree-based models without preprocessing
-        classifiers_ = ["random_forest", "extra_trees", "gradient_boosting"]
-        for c in classifiers_:
-            if c not in classifiers_list:
-                continue
-            try:
-                configuration_space.add_forbidden_clause(
-                    ForbiddenAndConjunction(
-                        ForbiddenEqualsClause(
-                            configuration_space.get_hyperparameter(
-                                "preprocessor"), "pca"),
-                        ForbiddenEqualsClause(
-                            configuration_space.get_hyperparameter(
-                                "classifier"), c)))
-            except KeyError:
-                pass
-            except ValueError as e:
-                if e.message.startswith("Forbidden clause must be "
-                                        "instantiated with a legal "
-                                        "hyperparameter value for "
-                                        "'preprocessor"):
-                    pass
-                else:
-                    raise e
+        #classifiers_ = ["random_forest", "extra_trees", "gradient_boosting",
+        #                "decision_tree"]
+        #for c in classifiers_:
+        #    if c not in classifiers_list:
+        #        continue
+        #    try:
+        #        configuration_space.add_forbidden_clause(
+        #            ForbiddenAndConjunction(
+        #                ForbiddenEqualsClause(
+        #                    configuration_space.get_hyperparameter(
+        #                        "preprocessor"), "pca"),
+        #                ForbiddenEqualsClause(
+        #                    configuration_space.get_hyperparameter(
+        #                        "classifier"), c)))
+        #    except KeyError:
+        #        pass
+        #    except ValueError as e:
+        #        if e.message.startswith("Forbidden clause must be "
+        #                                "instantiated with a legal "
+        #                                "hyperparameter value for "
+        #                                "'preprocessor"):
+        #            pass
+        #        else:
+        #            raise e
 
         # Won't work
         # Multinomial NB does not work with negative values, don't use
         # it with standardization, features learning, pca
         classifiers_ = ["multinomial_nb", "bernoulli_nb"]
-        preproc_with_negative_X = ["kitchen_sinks", "sparse_filtering",
-                                   "pca", "truncatedSVD"]
+        preproc_with_negative_X = ["kitchen_sinks", "pca", "truncatedSVD",
+                                   "fast_ica", "kernel_pca", "nystroem_sampler"]
+        scaling_strategies = ['standard', 'none', "normalize"]
         for c in classifiers_:
             if c not in classifiers_list:
                 continue
-            try:
-                configuration_space.add_forbidden_clause(ForbiddenAndConjunction(
-                    ForbiddenEqualsClause(configuration_space.get_hyperparameter(
-                        "rescaling:strategy"), "standard"),
-                    ForbiddenEqualsClause(configuration_space.get_hyperparameter(
-                        "classifier"), c)))
-            except KeyError:
-                pass
+            for scaling_strategy in scaling_strategies:
+                try:
+                    configuration_space.add_forbidden_clause(ForbiddenAndConjunction(
+                        ForbiddenEqualsClause(configuration_space.get_hyperparameter(
+                            "rescaling:strategy"), scaling_strategy),
+                        ForbiddenEqualsClause(configuration_space.get_hyperparameter(
+                            "classifier"), c)))
+                except KeyError:
+                    pass
 
         for c, f in product(classifiers_, preproc_with_negative_X):
             if c not in classifiers_list:
@@ -372,6 +387,38 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
             except KeyError:
                 pass
 
+        # Now try to add things for which we know that they don't work
+        forbidden_hyperparameter_combinations = \
+            [("select_percentile_classification:score_func", "chi2",
+              "rescaling:strategy", "standard"),
+             ("select_percentile_classification:score_func", "chi2",
+              "rescaling:strategy", "normalize"),
+             ("select_percentile_classification:score_func", "chi2",
+              "rescaling:strategy", "none"),
+             ("select_rates:score_func", "chi2",
+              "rescaling:strategy", "standard"),
+             ("select_rates:score_func", "chi2",
+              "rescaling:strategy", "none"),
+             ("select_rates:score_func", "chi2",
+              "rescaling:strategy", "normalize"),
+             ("nystroem_sampler:kernel", 'chi2', "rescaling:strategy",
+              "standard"),
+             ("nystroem_sampler:kernel", 'chi2', "rescaling:strategy",
+              "normalize"),
+             ("nystroem_sampler:kernel", 'chi2', "rescaling:strategy",
+              "none")]
+        for hp_name_1, hp_value_1, hp_name_2, hp_value_2 in \
+                forbidden_hyperparameter_combinations:
+            try:
+                configuration_space.add_forbidden_clause(ForbiddenAndConjunction(
+                    ForbiddenEqualsClause(configuration_space.get_hyperparameter(
+                        hp_name_1), hp_value_1),
+                    ForbiddenEqualsClause(configuration_space.get_hyperparameter(
+                        hp_name_2), hp_value_2)
+                ))
+            except:
+                pass
+
         return configuration_space
 
     @staticmethod
@@ -384,4 +431,5 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
 
     @staticmethod
     def _get_pipeline():
-        return ["imputation", "rescaling", "__preprocessor__", "__estimator__"]
+        return ["imputation", "rescaling", "balancing", "__preprocessor__",
+                "__estimator__"]

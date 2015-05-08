@@ -1,25 +1,20 @@
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, CategoricalHyperparameter, Constant
+from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
+    CategoricalHyperparameter, Constant
 
 import sklearn.feature_selection
 
-from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.components.preprocessing.select_percentile import SelectPercentileBase
+from ParamSklearn.components.preprocessor_base import \
+    ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.util import DENSE, SPARSE, INPUT
 
 
-class SelectPercentileClassification(SelectPercentileBase,
-                                     ParamSklearnPreprocessingAlgorithm):
-
-    def __init__(self, percentile, score_func="chi2", random_state=None):
-        """ Parameters:
-        random state : ignored
-
-        score_func : callable, Function taking two arrays X and y, and
-                     returning a pair of arrays (scores, pvalues).
-        """
+class SelectRates(ParamSklearnPreprocessingAlgorithm):
+    def __init__(self, alpha, mode='fpr',
+                 score_func="chi2", random_state=None):
         self.random_state = random_state  # We don't use this
-        self.percentile = int(float(percentile))
+        self.alpha = float(alpha)
+
         if score_func == "chi2":
             self.score_func = sklearn.feature_selection.chi2
         elif score_func == "f_classif":
@@ -28,10 +23,37 @@ class SelectPercentileClassification(SelectPercentileBase,
             raise ValueError("score_func must be in ('chi2, 'f_classif'), "
                              "but is: %s" % score_func)
 
+        self.mode = mode
+
+    def fit(self, X, y):
+        self.preprocessor = sklearn.feature_selection.GenericUnivariateSelect(
+            score_func=self.score_func, param=self.alpha, mode=self.mode)
+
+        self.preprocessor.fit(X, y)
+        return self
+
+    def transform(self, X):
+        if self.preprocessor is None:
+            raise NotImplementedError()
+        try:
+            Xt = self.preprocessor.transform(X)
+        except ValueError as e:
+            if "zero-size array to reduction operation maximum which has no " \
+                    "identity" in e.message:
+                raise ValueError(
+                    "%s removed all features." % self.__class__.__name__)
+            else:
+                raise e
+
+        if Xt.shape[1] == 0:
+            raise ValueError(
+                "%s removed all features." % self.__class__.__name__)
+        return Xt
+
     @staticmethod
     def get_properties():
-        return {'shortname': 'SPC',
-                'name': 'Select Percentile Classification',
+        return {'shortname': 'SR',
+                'name': 'Univariate Feature Selection based on rates',
                 'handles_missing_values': False,
                 'handles_nominal_values': False,
                 'handles_numerical_features': True,
@@ -50,8 +72,8 @@ class SelectPercentileClassification(SelectPercentileBase,
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        percentile = UniformFloatHyperparameter(
-            name="percentile", lower=1, upper=99, default=50)
+        alpha = UniformFloatHyperparameter(
+            name="alpha", lower=0.01, upper=0.5, default=0.1)
 
         score_func = CategoricalHyperparameter(
             name="score_func", choices=["chi2", "f_classif"], default="chi2")
@@ -61,9 +83,12 @@ class SelectPercentileClassification(SelectPercentileBase,
                 score_func = Constant(
                     name="score_func", value="chi2")
 
+        mode = CategoricalHyperparameter('mode', ['fpr', 'fdr', 'fwe'], 'fpr')
+
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(percentile)
+        cs.add_hyperparameter(alpha)
         cs.add_hyperparameter(score_func)
+        cs.add_hyperparameter(mode)
 
         return cs
 

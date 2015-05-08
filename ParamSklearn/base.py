@@ -15,7 +15,7 @@ from sklearn.utils import check_random_state
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
     InactiveHyperparameter
-from HPOlibConfigSpace.conditions import EqualsCondition
+from HPOlibConfigSpace.conditions import EqualsCondition, AbstractConjunction
 from HPOlibConfigSpace.forbidden import ForbiddenAndConjunction, \
     ForbiddenEqualsClause
 
@@ -88,8 +88,8 @@ class ParamSklearnBaseEstimator(BaseEstimator):
 
         # seperate the init parameters for the single methods
         init_params_per_method = defaultdict(dict)
-        if init_params is not None:
-            for init_param, value in init_params:
+        if init_params is not None and len(init_params) != 0:
+            for init_param, value in init_params.items():
                 method, param = init_param.split(":")
                 init_params_per_method[method][param] = value
 
@@ -371,7 +371,10 @@ class ParamSklearnBaseEstimator(BaseEstimator):
 
             for condition in available_preprocessors[name]. \
                     get_hyperparameter_search_space(dataset_properties).get_conditions():
-                dlcs = condition.get_descendent_literal_conditions()
+                if not isinstance(condition, AbstractConjunction):
+                    dlcs = [condition]
+                else:
+                    dlcs = condition.get_descendent_literal_conditions()
                 for dlc in dlcs:
                     if not dlc.child.name.startswith(name):
                         dlc.child.name = "%s:%s" % (name, dlc.child.name)
@@ -383,21 +386,10 @@ class ParamSklearnBaseEstimator(BaseEstimator):
                     get_hyperparameter_search_space(dataset_properties).forbidden_clauses:
                 dlcs = forbidden_clause.get_descendant_literal_clauses()
                 for dlc in dlcs:
-                    if not dlc.hyperparameter.startwith(name):
+                    if not dlc.hyperparameter.name.startswith(name):
                         dlc.hyperparameter.name = "%s:%s" % (name,
                                                              dlc.hyperparameter.name)
                 cs.add_forbidden_clause(forbidden_clause)
-
-        # Now try to add things for which we know that they don't work
-        try:
-            cs.add_forbidden_clause(ForbiddenAndConjunction(
-                ForbiddenEqualsClause(cs.get_hyperparameter(
-                    "select_percentile_classification:score_func"), "chi2"),
-                ForbiddenEqualsClause(cs.get_hyperparameter(
-                    "rescaling:strategy"), "standard")
-            ))
-        except:
-            pass
 
         return cs
 

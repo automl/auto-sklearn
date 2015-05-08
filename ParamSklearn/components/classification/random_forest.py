@@ -28,7 +28,7 @@ class RandomForest(ParamSklearnClassificationAlgorithm):
         self.n_jobs = n_jobs
         self.estimator = None
 
-    def fit(self, X, Y):
+    def fit(self, X, Y, sample_weight=None):
         self.n_estimators = int(self.n_estimators)
 
         if self.max_depth == "None":
@@ -67,7 +67,7 @@ class RandomForest(ParamSklearnClassificationAlgorithm):
         while len(self.estimator.estimators_) < self.n_estimators:
             tmp = self.estimator # TODO I think we need to copy here!
             tmp.n_estimators += self.estimator_increment
-            tmp.fit(X, Y)
+            tmp.fit(X, Y, sample_weight=sample_weight)
             self.estimator = tmp
         return self
 

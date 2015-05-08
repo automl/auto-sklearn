@@ -79,7 +79,7 @@ class TestParamSKlearnRegressor(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(38, len(hyperparameters))
+        self.assertEqual(51, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 4, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
@@ -99,8 +99,8 @@ class TestParamSKlearnRegressor(unittest.TestCase):
             CategoricalHyperparameter('preprocessor', ['pca', ]))
 
         cs = ParamSklearnRegressor.get_hyperparameter_search_space(
-            exclude_preprocessors=['pca'])
-        self.assertNotIn('pca', str(cs))
+            exclude_preprocessors=['no_preprocessing'])
+        self.assertNotIn('no_preprocessing', str(cs))
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(ValueError, "Configuration:\n"

@@ -49,7 +49,7 @@ class SelectPercentileRegression(SelectPercentileBase,
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         percentile = UniformFloatHyperparameter(
-            "percentile", lower=10, upper=90, default=50)
+            "percentile", lower=1, upper=99, default=50)
 
         score_func = UnParametrizedHyperparameter(
             name="score_func", value="f_regression")

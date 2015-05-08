@@ -6,7 +6,7 @@ import numpy
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
-from ParamSklearn.components.classification.liblinear import LibLinear_SVC
+from ParamSklearn.components.classification.liblinear_svc import LibLinear_SVC
 from ParamSklearn.components.classification.random_forest import RandomForest
 
 from ParamSklearn.components.preprocessing.pca import PCA

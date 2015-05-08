@@ -5,17 +5,18 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
-from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
-from ParamSklearn.util import DENSE, PREDICTIONS
+from ParamSklearn.components.preprocessor_base import \
+    ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.util import DENSE, INPUT
 
 # get our own forests to replace the sklearn ones
 from ParamSklearn.implementations import forest
 
 
-class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
-
+class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
     def __init__(self, n_estimators, criterion, min_samples_leaf,
-                 min_samples_split,  max_features, max_leaf_nodes_or_max_depth="max_depth", #use_max_depth=False,
+                 min_samples_split, max_features,
+                 max_leaf_nodes_or_max_depth="max_depth",
                  bootstrap=False, max_leaf_nodes=None, max_depth="None",
                  oob_score=False, n_jobs=1, random_state=None, verbose=0):
 
@@ -32,10 +33,10 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
                 self.max_depth = None
             else:
                 self.max_depth = int(max_depth)
-            #if use_max_depth == "True":
-            #    self.max_depth = int(max_depth)
-            #elif use_max_depth == "False":
-            #    self.max_depth = None
+                # if use_max_depth == "True":
+                #    self.max_depth = int(max_depth)
+                #elif use_max_depth == "False":
+                #    self.max_depth = None
         else:
             if max_leaf_nodes == "None":
                 self.max_leaf_nodes = None
@@ -57,45 +58,41 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
         self.n_jobs = int(n_jobs)
         self.random_state = random_state
         self.verbose = int(verbose)
-        self.estimator = None
+        self.preprocessor = None
 
     def fit(self, X, Y, sample_weight=None):
         num_features = X.shape[1]
-        max_features = int(float(self.max_features) * (np.log(num_features) + 1))
+        max_features = int(
+            float(self.max_features) * (np.log(num_features) + 1))
         # Use at most half of the features
         max_features = max(1, min(int(X.shape[1] / 2), max_features))
-        self.estimator = forest.ExtraTreesClassifier(
+        self.preprocessor = forest.ExtraTreesClassifier(
             n_estimators=0, criterion=self.criterion,
             max_depth=self.max_depth, min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,
             max_features=max_features, max_leaf_nodes=self.max_leaf_nodes,
             oob_score=self.oob_score, n_jobs=self.n_jobs, verbose=self.verbose,
             random_state=self.random_state,
-            warm_start = True
+            warm_start=True
         )
         # JTS TODO: I think we might have to copy here if we want self.estimator
-        #           to always be consistent on sigabort
-        while len(self.estimator.estimators_) < self.n_estimators:
-            tmp = self.estimator # TODO copy ?
+        # to always be consistent on sigabort
+        while len(self.preprocessor.estimators_) < self.n_estimators:
+            tmp = self.preprocessor  # TODO copy ?
             tmp.n_estimators += self.estimator_increment
             tmp.fit(X, Y, sample_weight=sample_weight)
-            self.estimator = tmp
+            self.preprocessor = tmp
         return self
 
-    def predict(self, X):
-        if self.estimator is None:
+    def transform(self, X):
+        if self.preprocessor is None:
             raise NotImplementedError
-        return self.estimator.predict(X)
-
-    def predict_proba(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        return self.estimator.predict_proba(X)
+        return self.preprocessor.transform(X)
 
     @staticmethod
     def get_properties():
         return {'shortname': 'ET',
-                'name': 'Extra Trees Classifier',
+                'name': 'Extra Trees Classifier Preprocessing',
                 'handles_missing_values': False,
                 'handles_nominal_values': False,
                 'handles_numerical_features': True,
@@ -109,27 +106,18 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'input': (DENSE, ),
-                'output': PREDICTIONS,
+                'output': INPUT,
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-
-        #use_max_depth = CategoricalHyperparameter(
-        #    name="use_max_depth", choices=("True", "False"), default="False")
         bootstrap = CategoricalHyperparameter(
             "bootstrap", ["True", "False"], default="False")
-
-        # Copied from random_forest.py
-        #n_estimators = UniformIntegerHyperparameter(
-        #    "n_estimators", 10, 100, default=10)
         n_estimators = Constant("n_estimators", 100)
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default="gini")
-        #max_features = UniformFloatHyperparameter(
-        #    "max_features", 0.01, 0.5, default=0.1)
         max_features = UniformFloatHyperparameter(
             "max_features", 0.5, 5, default=1)
         min_samples_split = UniformIntegerHyperparameter(
@@ -137,45 +125,14 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
         min_samples_leaf = UniformIntegerHyperparameter(
             "min_samples_leaf", 1, 20, default=1)
 
-        # Unparametrized
-        #max_leaf_nodes_or_max_depth = UnParametrizedHyperparameter(
-        #    name="max_leaf_nodes_or_max_depth", value="max_depth")
-            # CategoricalHyperparameter("max_leaf_nodes_or_max_depth",
-            # choices=["max_leaf_nodes", "max_depth"], default="max_depth")
-        #max_leaf_nodes = UnParametrizedHyperparameter(name="max_leaf_nodes",
-        #                                              value="None")
-            # UniformIntegerHyperparameter(
-            # name="max_leaf_nodes", lower=10, upper=1000, default=)
-
         max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
 
         cs = ConfigurationSpace()
         cs.add_hyperparameter(n_estimators)
         cs.add_hyperparameter(criterion)
         cs.add_hyperparameter(max_features)
-        #cs.add_hyperparameter(use_max_depth)
         cs.add_hyperparameter(max_depth)
-        #cs.add_hyperparameter(max_leaf_nodes_or_max_depth)
         cs.add_hyperparameter(min_samples_split)
         cs.add_hyperparameter(min_samples_leaf)
-        #cs.add_hyperparameter(max_leaf_nodes)
         cs.add_hyperparameter(bootstrap)
-
-        # Conditions
-        # Not applicable because max_leaf_nodes is no legal value of the parent
-        #cond_max_leaf_nodes_or_max_depth = \
-        #    EqualsCondition(child=max_leaf_nodes,
-        #                    parent=max_leaf_nodes_or_max_depth,
-        #                    value="max_leaf_nodes")
-        #cond2_max_leaf_nodes_or_max_depth = \
-        #    EqualsCondition(child=use_max_depth,
-        #                    parent=max_leaf_nodes_or_max_depth,
-        #                    value="max_depth")
-
-        #cond_max_depth = EqualsCondition(child=max_depth, parent=use_max_depth,
-                                         #value="True")
-        #cs.add_condition(cond_max_leaf_nodes_or_max_depth)
-        #cs.add_condition(cond2_max_leaf_nodes_or_max_depth)
-        #cs.add_condition(cond_max_depth)
-
         return cs
