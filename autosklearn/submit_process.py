@@ -2,6 +2,8 @@ import shlex
 import os
 import subprocess
 
+import autosklearn.cli.SMAC_cli_holdout
+
 
 def submit_call(call, log_dir=None):
     print "Calling: " + call
@@ -19,27 +21,23 @@ def submit_call(call, log_dir=None):
     return proc
 
 
-def get_algo_exec(runsolver_limit, runsolver_delay):
-
+def get_algo_exec(runsolver_limit, runsolver_delay, *args):
     # Create call to autosklearn
-    path_to_wrapper = os.path.dirname(os.path.abspath(__file__))
-    wrapper_exec = os.path.join(path_to_wrapper, "wrapper_for_SMAC.py")
+    path_to_wrapper = os.path.dirname(os.path.abspath(autosklearn.cli.__file__))
+    wrapper_exec = os.path.join(path_to_wrapper, "SMAC_cli_holdout.py")
     call = 'python %s' % wrapper_exec
 
     # Runsolver does strange things if the time limit is negative. Set it to
     # be at least one (0 means infinity)
     runsolver_limit = max(1, runsolver_limit)
 
-    # Now add runsolver command
-    #runsolver_prefix = "runsolver --watcher-data /dev/null -W %d" % \
-    #                   (runsolver_limit)
-    runsolver_prefix = "runsolver --watcher-data /dev/null -W %d -d %d" % \
+    runsolver_prefix = "runsolver --watcher-data /dev/null -W %d -d %d " % \
                        (runsolver_limit, runsolver_delay)
-    call = '"' + runsolver_prefix + " " + call + '"'
+    call = '"' + runsolver_prefix + " " + call + " " + " ".join(args) + '"'
     return call
 
 
-def run_smac(tmp_dir, searchspace, instance_file, limit,
+def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
              initial_challengers=None):
     if limit <= 0:
         # It makes no sense to start building ensembles_statistics
@@ -55,15 +53,15 @@ def run_smac(tmp_dir, searchspace, instance_file, limit,
     runsolver_softlimit = cutoff_time - 35
     runsolver_hardlimit_delay = 30
 
-    algo_exec = get_algo_exec(runsolver_limit=runsolver_softlimit,
-                              runsolver_delay=runsolver_hardlimit_delay,)
+    algo_exec = get_algo_exec(runsolver_softlimit,
+                              runsolver_hardlimit_delay,
+                              dataset)
 
     if initial_challengers is None:
         initial_challengers = []
 
     # Bad hack to find smac
-    call = os.path.join("smac")
-    call = " ".join([call, '--numRun', '2147483647',
+    call = " ".join(["smac", '--numRun', '2147483647',
                     '--cli-log-all-calls false',
                     '--console-log-level DEBUG',
                     '--cutoffTime', str(cutoff_time),

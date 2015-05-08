@@ -1,5 +1,4 @@
 import os
-
 try:
     import cPickle as pickle
 except:
@@ -161,15 +160,17 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     # = Create an empty instance file
     instance_file = os.path.join(tmp_dataset_dir, "instances.txt")
     fh = open(instance_file, 'w')
-    fh.write(os.path.join(input_dir, basename))
+    fh.write("holdout")
     fh.close()
     logger.debug("Create instance file %s" % instance_file)
 
     # = Start SMAC
+    dataset = os.path.join(input_dir, basename)
     time_left_for_smac = max(0, time_left_for_this_task - (stop.wall_elapsed(basename)))
     logger.debug("Start SMAC with %5.2fsec time left" % time_left_for_smac)
     proc_smac = \
-        submit_process.run_smac(tmp_dir=tmp_dataset_dir,
+        submit_process.run_smac(dataset=dataset,
+                                tmp_dir=tmp_dataset_dir,
                                 searchspace=searchspace_path,
                                 instance_file=instance_file,
                                 limit=time_left_for_smac,

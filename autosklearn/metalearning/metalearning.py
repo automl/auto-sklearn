@@ -10,6 +10,9 @@ import pyMetaLearn.metafeatures.metafeatures as metafeatures
 import pyMetaLearn.optimizers.metalearn_optimizer.metalearner as \
     metalearner
 
+from autosklearn.util import logging_
+logger = logging_.get_logger(__name__)
+
 
 class MetaLearning(object):
     """Right now, pyMetaLearn performs a OneHotEncoding if necessary, but it
@@ -67,37 +70,43 @@ class MetaLearning(object):
         current_directory = os.path.dirname(__file__)
         metadata_directory = os.path.join(current_directory, "files", metric)
 
-        # Concatenate the metafeatures!
-        mf = self._metafeatures_labels
-        mf.metafeature_values.update(
-            self._metafeatures_encoded_labels.metafeature_values)
-        self.mf = mf
+        try:
+            # Concatenate the metafeatures!
+            mf = self._metafeatures_labels
+            mf.metafeature_values.update(
+                self._metafeatures_encoded_labels.metafeature_values)
+            self.mf = mf
 
-        metafeatures_subset = metafeatures.subsets["all"]
-        metafeatures_subset.difference_update(self._exclude_metafeatures)
-        metafeatures_subset = list(metafeatures_subset)
+            metafeatures_subset = metafeatures.subsets["all"]
+            metafeatures_subset.difference_update(self._exclude_metafeatures)
+            metafeatures_subset = list(metafeatures_subset)
 
-        start = time.time()
-        ml = metalearner.MetaLearningOptimizer(
-            dataset_name=dataset_name + self._sentinel,
-            configuration_space=configuration_space,
-            aslib_directory=metadata_directory, distance="l1",
-            seed=1, use_features=metafeatures_subset, subset='all')
-        print "Reading meta-data took %5.2f seconds" % (time.time() - start)
+            start = time.time()
+            ml = metalearner.MetaLearningOptimizer(
+                dataset_name=dataset_name + self._sentinel,
+                configuration_space=configuration_space,
+                aslib_directory=metadata_directory, distance="l1",
+                seed=1, use_features=metafeatures_subset, subset='all')
+            logger.info("Reading meta-data took %5.2f seconds",
+                        time.time() - start)
 
-        # TODO This is hacky, I must find a different way of adding a new dataset!
-        ml.meta_base.add_dataset(dataset_name + self._sentinel, self.mf)
-        runs = ml.metalearning_suggest_all(
-            exclude_double_configurations=True)
+            # TODO This is hacky, I must find a different way of adding a new dataset!
+            ml.meta_base.add_dataset(dataset_name + self._sentinel, self.mf)
+            runs = ml.metalearning_suggest_all(
+                exclude_double_configurations=True)
 
-        # = Convert these configurations into the SMAC CLI configuration format
-        smac_initial_configuration_strings = []
+            # = Convert these configurations into the SMAC CLI configuration format
+            smac_initial_configuration_strings = []
 
-        for configuration in runs[:num_initial_configurations]:
-            smac_initial_configuration_strings.append(
-                self.convert_configuration_to_smac_string(configuration))
+            for configuration in runs[:num_initial_configurations]:
+                smac_initial_configuration_strings.append(
+                    self.convert_configuration_to_smac_string(configuration))
 
-        return smac_initial_configuration_strings
+            return smac_initial_configuration_strings
+
+        except Exception as e:
+            logger.error(str(e))
+            return []
 
 
     def convert_configuration_to_smac_string(self, configuration):

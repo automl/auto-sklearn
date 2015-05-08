@@ -3,7 +3,7 @@ import subprocess
 import unittest
 
 
-class HPOlib_wrapperTest(unittest.TestCase):
+class HPOlib_interfaceTest(unittest.TestCase):
     """Test the HPOlib wrapper. Do this via the command line/subprocess
     module, to have this call HPOlib_wrapper.py like it is called from the
     HPOlib.
@@ -11,9 +11,10 @@ class HPOlib_wrapperTest(unittest.TestCase):
     # TODO also the the wrapper programmatic, so far this rather tests the
     # single evaluators!
     def setUp(self):
-        self.data_dir = os.path.join(os.path.dirname(__file__), ".data")
+        self.data_dir = os.path.join(os.path.dirname(__file__), "../.data")
         self.dataset = "31_bac"
         self.param_string = " --params " \
+                            "-balancing:strategy none " \
                             "-classifier random_forest " \
                             "-imputation:strategy mean " \
                             "-preprocessor no_preprocessing " \
@@ -28,8 +29,8 @@ class HPOlib_wrapperTest(unittest.TestCase):
                             "-rescaling:strategy min/max"
 
     def test_holdout(self):
-        call = "python -m autosklearn.HPOlib_wrapper --dataset %s " \
-               "--data_dir %s --fold 0 --folds 1 --seed 1 %s" % \
+        call = "python -m autosklearn.cli.HPOlib_interface --dataset %s " \
+               "--data_dir %s --fold 0 --folds 1 --seed 1 --mode holdout %s" % \
                (self.dataset, self.data_dir, self.param_string)
         proc = subprocess.Popen(call, shell=True,
                                 stdout=subprocess.PIPE,
@@ -46,8 +47,9 @@ class HPOlib_wrapperTest(unittest.TestCase):
         self.assertEqual(additional.count(";"), 6)
 
     def test_testset(self):
-        call = "python -m autosklearn.HPOlib_wrapper --dataset %s " \
-               "--data_dir %s --fold 0 --folds 1 --test True --seed 1 %s" % \
+        call = "python -m autosklearn.cli.HPOlib_interface --dataset %s " \
+               "--data_dir %s --fold 0 --folds 1 --test True --seed 1 " \
+               "--mode test %s" % \
                (self.dataset, self.data_dir, self.param_string)
         proc = subprocess.Popen(call, shell=True,
                                 stdout=subprocess.PIPE,
@@ -61,8 +63,9 @@ class HPOlib_wrapperTest(unittest.TestCase):
         self.assertEqual(additional.count(";"), 5)
 
     def test_cv(self):
-        call = "python -m autosklearn.HPOlib_wrapper --dataset %s " \
-               "--data_dir %s --fold 0 --folds 1 --cv 3 --seed 1 %s" % \
+        call = "python -m autosklearn.cli.HPOlib_interface --dataset %s " \
+               "--data_dir %s --fold 0 --folds 1 --seed 1 " \
+               "--mode 3cv %s" % \
                (self.dataset, self.data_dir, self.param_string)
         proc = subprocess.Popen(call, shell=True,
                                 stdout=subprocess.PIPE,
@@ -79,8 +82,9 @@ class HPOlib_wrapperTest(unittest.TestCase):
     def test_partial_cv(self):
         results = []
         for fold in range(3):
-            call = "python -m autosklearn.HPOlib_wrapper --dataset %s " \
-                   "--data_dir %s --fold %d --folds 3 --cv 3 --seed 1 %s" % \
+            call = "python -m autosklearn.cli.HPOlib_interface --dataset %s " \
+                   "--data_dir %s --fold %d --folds 3 --mode cv --seed 1 " \
+                   "%s" % \
                    (self.dataset, self.data_dir, fold, self.param_string)
             proc = subprocess.Popen(call, shell=True,
                                     stdout=subprocess.PIPE,

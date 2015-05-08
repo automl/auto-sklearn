@@ -1,25 +1,14 @@
-'''
-Created on Dec 17, 2014
-
-@author: Aaron Klein
-'''
-
-import functools
-import lockfile
 import os
-import time
-
 try:
     import cPickle as pickle
 except:
     import pickle
+import signal
+import time
+
+import lockfile
 
 from HPOlibConfigSpace import configuration_space
-
-try:
-    from HPOlib.benchmark_util import parse_cli
-except:
-    from HPOlib.benchmarks.benchmark_util import parse_cli
 
 from autosklearn.data.data_manager import DataManager
 from autosklearn.models.holdout_evaluator import HoldoutEvaluator
@@ -34,7 +23,7 @@ def store_and_or_load_data(outputdir, dataset, data_dir):
         lock = lockfile.LockFile(save_path)
         while not lock.i_am_locking():
             try:
-                lock.acquire(timeout=60)    # wait up to 60 seconds
+                lock.acquire(timeout=60)  # wait up to 60 seconds
             except lockfile.LockTimeout:
                 lock.break_lock()
                 lock.acquire()
@@ -58,26 +47,23 @@ def store_and_or_load_data(outputdir, dataset, data_dir):
     return D
 
 
-def get_new_run_num():
-    counter_file = os.path.join(os.getcwd(), "num_run")
-    lock = lockfile.LockFile(counter_file)
-    with lock:
-        if not os.path.exists(counter_file):
-            with open(counter_file, "w") as fh:
-                fh.write("0")
-            num = 0
-        else:
-            with open(counter_file, "r") as fh:
-                num = int(fh.read())
-            num += 1
-            with open(counter_file, "w") as fh:
-                fh.write(str(num).zfill(4))
+# signal handler seem to work only if they are globally defined
+# to give it access to the evaluator class, the evaluator name has to
+# be a global name. It's not the cleanest solution, but works for now.
+evaluator = None
 
-    return num
+def signal_handler(signum, frame):
+    print "Aborting Training!"
+    global evaluator
+    evaluator.finish_up()
+    exit(0)
 
 
-def main(args, params):
-    """This wrapper has three different operation modes:
+signal.signal(15, signal_handler)
+
+
+def main(dataset, data_dir, mode, seed, params, mode_args=None):
+    """This command line interface has three different operation modes:
 
     * CV: useful for the Tweakathon
     * 1/3 test split: useful to evaluate a configuration
@@ -86,32 +72,21 @@ def main(args, params):
 
     It must by no means be used for the Auto part of the competition!
     """
-
     for key in params:
         try:
             params[key] = float(params[key])
         except:
             pass
 
-    basename = args['dataset']
-    input_dir = args['data_dir']
-    test = args.get('test')
-    cv = args.get('cv')
-    if cv is not None:
-        cv = int(float(cv))
-
-    seed = args.get('seed')
     if seed is not None:
         seed = int(float(seed))
     else:
         seed = 1
 
-    fold = int(float(args['fold']))
-    folds = int(float(args['folds']))
-
     output_dir = os.getcwd()
 
-    D = store_and_or_load_data(data_dir=input_dir, dataset=basename,
+    D = store_and_or_load_data(data_dir=data_dir,
+                               dataset=dataset,
                                outputdir=output_dir)
 
     cs = get_configuration_space(D.info)
@@ -119,7 +94,7 @@ def main(args, params):
     metric = D.info['metric']
 
     # Train/test split
-    if cv is None and test is None and folds == 1:
+    if mode == 'holdout':
         evaluator = HoldoutEvaluator(D, configuration,
                                      with_predictions=True,
                                      all_scoring_functions=True,
@@ -128,7 +103,7 @@ def main(args, params):
         evaluator.fit()
         evaluator.finish_up()
 
-    elif cv is None and test is not None and folds == 1:
+    elif mode == 'test':
         evaluator = TestEvaluator(D, configuration,
                                   all_scoring_functions=True,
                                   seed=seed)
@@ -144,22 +119,18 @@ def main(args, params):
         print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % (
             "SAT", abs(duration), score, evaluator.seed, additional_run_info)
 
-    # CV on the whole dataset
-    elif cv is not None and test is None and folds == 1:
-        if test is not None:
-            raise ValueError("Test mode not supported with CV.")
+    # CV on the whole training set
+    elif mode == 'cv':
         evaluator = CVEvaluator(D, configuration, with_predictions=True,
                                 all_scoring_functions=True, output_y_test=True,
-                                cv_folds=cv, seed=seed)
+                                cv_folds=mode_args['folds'], seed=seed)
         evaluator.fit()
         evaluator.finish_up()
 
-    elif folds != 1 and cv is not None and folds == cv:
-        if test is not None:
-            raise ValueError("Test mode not supported with CV.")
+    elif mode == 'partial_cv':
         evaluator = CVEvaluator(D, configuration, all_scoring_functions=True,
-                                cv_folds=cv, seed=seed)
-        evaluator.partial_fit(fold)
+                                cv_folds=mode_args['folds'], seed=seed)
+        evaluator.partial_fit(mode_args['fold'])
         scores = evaluator.predict()
         duration = time.time() - evaluator.starttime
 
@@ -173,9 +144,3 @@ def main(args, params):
 
     else:
         raise ValueError("Must choose a legal mode.")
-
-
-if __name__ == "__main__":
-    starttime = time.time()
-    args, params = parse_cli()
-    main(args, params)

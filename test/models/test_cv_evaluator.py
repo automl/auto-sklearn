@@ -33,7 +33,9 @@ class CVEvaluator_Test(unittest.TestCase):
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = get_configuration_space(D.info)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['ridge'],
+            include_preprocessors=['select_rates'])
         sampler = RandomSampler(configuration_space, 1)
 
         err = np.zeros([N_TEST_RUNS])
@@ -88,7 +90,9 @@ class CVEvaluator_Test(unittest.TestCase):
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = get_configuration_space(D.info)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['ridge'],
+            include_preprocessors=['select_rates'])
         sampler = RandomSampler(configuration_space, 1)
 
         err = np.zeros([N_TEST_RUNS])
