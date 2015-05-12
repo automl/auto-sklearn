@@ -28,10 +28,10 @@ if __name__ == "__main__":
         mode_args = None
     else:
         mode = 'partial_cv'
-        match = re.match(r"([0-9]+)/([0-9]+)")
+        match = re.match(r"([0-9]+)/([0-9]+)", instance_name)
         if match:
             fold = int(match.group(1))
-            folds = int(match.groups(2))
+            folds = int(match.group(2))
         else:
             print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % (
                 "ABORT", 0, 1.0, seed, "Could not parse instance name!")
@@ -41,6 +41,6 @@ if __name__ == "__main__":
     dataset = os.path.basename(dataset_info)
     data_dir = os.path.dirname(dataset_info)
 
-    base_interface.main(dataset, data_dir, mode, seed, params, mode_args=None)
+    base_interface.main(dataset, data_dir, mode, seed, params, mode_args=mode_args)
 
     sys.exit(0)
