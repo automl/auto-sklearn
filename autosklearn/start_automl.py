@@ -1,3 +1,4 @@
+from itertools import chain
 import os
 try:
     import cPickle as pickle
@@ -57,30 +58,108 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     config_space = paramsklearn.get_configuration_space(loaded_data_manager.info)
 
     # Remove configurations we think are unhelpful
-    combinations = [("no_preprocessing", "gaussian_nb"),
-                    ("sparse_filtering", "gaussian_nb"),
-                    ("pca", "gaussian_nb"),
-                    ("select_percentile", "gaussian_nb"),
-                    ("kitchen_sinks", "gaussian_nb"),
-                    ("no_preprocessing", "multinomial_nb"),
-                    ("select_percentile", "multinomial_nb"),
-                    ("no_preprocessing", "k_nearest_neighbors"),
-                    ("pca", "k_nearest_neighbors"),
-                    ("random_trees_embedding", "k_nearest_neighbors"),
-                    ("pca", "adaboost"),
-                    ("no_preprocessing", "adaboost"),
-                    ("select_percentile", "adaboost"),
-                    ("sparse_filtering", "liblinear"),
-                    ("sparse_filtering", "sgd")]
+    classifiers = [# Never the best
+                   'passive_aggressive',
+                   'adaboost',
+                   'gaussian_nb',
+                   'k_nearest_neighbors',
+                   'multinomial_nb',
+                   # Only the best with one preprocessing method
+                   'bernoulli_nb',
+                   # Causes lots of crashes
+                   'qda',
+                   'lda']
+
+    preprocessors = [  # The very slowest method
+                       'kernel_pca']
+
+    combinations = [  # Not too good
+                      ("proj_logit", "fast_ica"),
+                      ("proj_logit", "extra_trees_preproc_for_classification"),
+                      ("proj_logit", "pca"),
+                      ("proj_logit", "no_preprocessing"),
+                      ("proj_logit", "liblinear_svc_preprocessor"),
+                      ("proj_logit", "select_rates"),
+                      ("proj_logit", "nystroem_sampler"),
+                      ("proj_logit", "kitchen_sinks"),
+                      ("sgd", "gem"),
+                      ("sgd", "pca"),
+                      ("sgd", "extra_trees_preproc_for_classification"),
+                      ("decision_tree", "fast_ica"),
+                      ("decision_tree", "gem"),
+                      ("decision_tree", "pca"),
+                      ("decision_tree", "liblinear_svc_preprocessor"),
+                      ("decision_tree", "extra_trees_preproc_for_classification"),
+                      ("libsvm_svc", "pca"),
+                      ("libsvm_svc", "no_preprocessing"),
+                      ("libsvm_svc", "select_percentile_classification"),
+                      ("liblinear_svc", "gem"),
+                      ("liblinear_svc", "pca"),
+                      ("liblinear_svc", "fast_ica"),
+                      ("liblinear_svc", "extra_trees_preproc_for_classification"),
+                      ("gradient_boosting", "pca"),
+                      ("gradient_boosting", "no_preprocessing"),
+                      ("ridge", "pca"),
+                      ("ridge", "fast_ica"),
+                      ("ridge", "liblinear_svc_preprocessor"),
+                      ("ridge", "extra_trees_preproc_for_classification"),
+                      ("ridge", "select_percentile_classification"),
+                      ("ridge", "select_rates"),
+                      ("random_forest", "fast_ica"),
+                      ("random_forest", "pca"),
+                      ("random_forest", "liblinear_svc_preprocessor"),
+                      ("extra_trees", "liblinear_svc_preprocessor"),
+
+
+                      # Slow
+                      ('random_forest', 'fast_ica'),
+                      ('libsvm_svc', 'fast_ica'),
+                      ('gradient_boosting', 'fast_ica'),
+                      ('extra_trees', 'fast_ica'),
+                      ('sgd', 'nystroem_sampler')]
+
+    if loaded_data_manager.info['is_sparse'] == 1:
+        classifiers.extend(['proj_logit', 'decision_tree',
+                            'gradient_boosting'])
+
+        preprocessors.append(['kitchen_sinks'])
+
+        combinations.append([
+            # Not really good
+            ('libsvm_svc', 'truncatedSVD'),
+            ('ridge', 'no_preprocessing'),
+            ('ridge', 'select_percentile_classification'),
+            ('ridge', 'select_rates'),
+            ('libsvm_svc', 'liblinear_svc_preprocessor'),
+            ('libsvm_svc', 'select_rates')])
+
+    for classifier in classifiers:
+        try:
+            config_space.add_forbidden_clause(ForbiddenEqualsClause(
+                config_space.get_hyperparameter("classifier"), classifier))
+        except ValueError as e:
+            logger.debug(e)
+        except KeyError:
+            pass
+
+    for preprocessor in preprocessors:
+        try:
+            config_space.add_forbidden_clause(ForbiddenEqualsClause(
+                config_space.get_hyperparameter("preprocessor"), preprocessor))
+        except ValueError as e:
+            logger.debug(e)
+
     for combination in combinations:
         try:
-            config_space.add_forbidden(ForbiddenAndConjunction(
-                ForbiddenEqualsClause(config_space.get_hyperparameter("preprocessor"),
-                                      combination[0]),
+            config_space.add_forbidden_clause(ForbiddenAndConjunction(
                 ForbiddenEqualsClause(config_space.get_hyperparameter("classifier"),
+                                      combination[0]),
+                ForbiddenEqualsClause(config_space.get_hyperparameter("preprocessor"),
                                       combination[1])
             ))
-        except:
+        except ValueError as e:
+            logger.debug(e)
+        except KeyError:
             pass
 
     sp_string = pcs_parser.write(config_space)
@@ -126,8 +205,8 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
                                                  categorical=[False] * loaded_data_manager.data["X_train"].shape[0],
                                                  dataset_name=loaded_data_manager.basename)
 
-        logger.debug(ml._metafeatures_labels)
-        logger.debug(ml._metafeatures_encoded_labels)
+        logger.debug(ml._metafeatures_labels.__repr__(verbosity=2))
+        logger.debug(ml._metafeatures_encoded_labels.__repr__(verbosity=2))
 
         # TODO check that Metafeatures only contain finite numbers!
 
@@ -168,13 +247,14 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     dataset = os.path.join(input_dir, basename)
     time_left_for_smac = max(0, time_left_for_this_task - (stop.wall_elapsed(basename)))
     logger.debug("Start SMAC with %5.2fsec time left" % time_left_for_smac)
-    proc_smac = \
+    proc_smac, smac_call = \
         submit_process.run_smac(dataset=dataset,
                                 tmp_dir=tmp_dataset_dir,
                                 searchspace=searchspace_path,
                                 instance_file=instance_file,
                                 limit=time_left_for_smac,
                                 initial_challengers=initial_configurations)
+    logger.debug(smac_call)
     stop.stop_task("runSmac")
 
     # == RUN ensemble builder

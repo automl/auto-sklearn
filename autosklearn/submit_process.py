@@ -21,7 +21,7 @@ def submit_call(call, log_dir=None):
     return proc
 
 
-def get_algo_exec(runsolver_limit, runsolver_delay, *args):
+def get_algo_exec(runsolver_limit, runsolver_delay, memory_limit, *args):
     # Create call to autosklearn
     path_to_wrapper = os.path.dirname(os.path.abspath(autosklearn.cli.__file__))
     wrapper_exec = os.path.join(path_to_wrapper, "SMAC_cli_holdout.py")
@@ -31,8 +31,8 @@ def get_algo_exec(runsolver_limit, runsolver_delay, *args):
     # be at least one (0 means infinity)
     runsolver_limit = max(1, runsolver_limit)
 
-    runsolver_prefix = "runsolver --watcher-data /dev/null -W %d -d %d " % \
-                       (runsolver_limit, runsolver_delay)
+    runsolver_prefix = "runsolver --watcher-data /dev/null -W %d -d %d -M %d " \
+                        % (runsolver_limit, runsolver_delay, memory_limit)
     call = '"' + runsolver_prefix + " " + call + " " + " ".join(args) + '"'
     return call
 
@@ -52,9 +52,11 @@ def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
 
     runsolver_softlimit = cutoff_time - 35
     runsolver_hardlimit_delay = 30
+    memory_limit = 4000
 
     algo_exec = get_algo_exec(runsolver_softlimit,
                               runsolver_hardlimit_delay,
+                              memory_limit,
                               dataset)
 
     if initial_challengers is None:
@@ -85,8 +87,9 @@ def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
                     '--execDir', tmp_dir,
                     '--instances', instance_file] +
                     initial_challengers)
+
     proc = submit_call(call)
-    return proc
+    return proc, call
 
 
 def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
