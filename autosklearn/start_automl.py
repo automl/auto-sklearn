@@ -195,15 +195,19 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
     loaded_data_manager.perform1HotEncoding()
     stop.stop_task("OneHot")
 
-    stop.start_task("CalculateMetafeaturesEncoded")
     if ml is None:
         initial_configurations = []
     elif loaded_data_manager.info["task"].lower() in \
             ["multiclass.classification", "binary.classification"]:
+        stop.start_task("CalculateMetafeaturesEncoded")
         ml.calculate_metafeatures_encoded_labels(X_train=loaded_data_manager.data["X_train"],
                                                  Y_train=loaded_data_manager.data["Y_train"],
                                                  categorical=[False] * loaded_data_manager.data["X_train"].shape[0],
                                                  dataset_name=loaded_data_manager.basename)
+        stop.stop_task("CalculateMetafeaturesEncoded")
+        logger.debug(
+            "Calculating Metafeatures (encoded attributes) took %5.2fsec" %
+            stop.wall_elapsed("CalculateMetafeaturesEncoded"))
 
         logger.debug(ml._metafeatures_labels.__repr__(verbosity=2))
         logger.debug(ml._metafeatures_encoded_labels.__repr__(verbosity=2))
@@ -217,15 +221,12 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
         stop.stop_task("InitialConfigurations")
         logger.debug("Looking for initial configurations took %5.2fsec" %
                      stop.wall_elapsed("InitialConfigurations"))
+        logger.info(
+            "Time left for %s after finding initial configurations: %5.2fsec" %
+            (basename, time_left_for_this_task - stop.wall_elapsed(basename)))
     else:
         initial_configurations = []
         logger.critical("Metafeatures encoded not calculated")
-
-    stop.stop_task("CalculateMetafeaturesEncoded")
-    logger.debug("Calculating Metafeatures (encoded attributes) took %5.2fsec" %
-                 stop.wall_elapsed("CalculateMetafeaturesEncoded"))
-    logger.info("Time left for %s after calculating metafeatures: %5.2fsec" %
-                (basename, time_left_for_this_task - stop.wall_elapsed(basename)))
 
     # == Pickle the data manager
     stop.start_task("StoreDatamanager")
