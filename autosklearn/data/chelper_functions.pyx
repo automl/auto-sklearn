@@ -118,7 +118,7 @@ def read_sparse_binary_file(char *filename, int num_points, int num_features, in
         
     while True:
         # read the column and the value and store it
-        read =fscanf(cfile, "%f",&j)
+        read =fscanf(cfile, "%d",&j)
         # stop at EOF
         if (read == -1): break
 

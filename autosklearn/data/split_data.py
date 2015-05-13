@@ -1,7 +1,9 @@
 import numpy as np
-import sys
 
 import sklearn.cross_validation
+import autosklearn.util.logging_
+
+logger = autosklearn.util.logging_.get_logger(__name__)
 
 
 def split_data(X, Y, classification=None):
@@ -24,7 +26,7 @@ def split_data(X, Y, classification=None):
             Y = Y[indices]
 
     if num_labels > 1:
-        sys.stdout.write("Multilabel dataset, do a random split.\n")
+        logger.info("Multilabel dataset, do a random split.\n")
         sss = None
     else:
         try:
@@ -34,8 +36,8 @@ def split_data(X, Y, classification=None):
                                                                   random_state=42)
         except ValueError:
             sss = None
-            sys.stdout.write("Too few samples of one class or maybe a "
-                             "regression dataset, use shuffle split.\n")
+            logger.info("Too few samples of one class or maybe a "
+                        "regression dataset, use shuffle split.\n")
 
     if sss is None:
         sss = sklearn.cross_validation.ShuffleSplit(Y.shape[0], n_iter=1,
