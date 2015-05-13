@@ -159,12 +159,17 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
             scores_nbest = []
             # The indices of the model that are currently in our ensemble
             indices_nbest = []
+            # The names of the models
+            model_names = []
+
+        model_names_to_scores = dict()
 
         model_idx = 0
         for model_name in dir_ensemble_list:
             predictions = np.load(os.path.join(dir_ensemble, model_name))
             score = evaluator.calculate_score(true_labels, predictions,
                                      task_type, metric)
+            model_names_to_scores[model_name] = score
 
             if ensemble_size is not None:
                 if score <= 0.001:
@@ -175,21 +180,27 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
                     scores_nbest.append(score)
                     indices_nbest.append(model_idx)
                     exclude_mask.append(False)
+                    model_names.append(model_name)
                 else:
                     # Take the worst performing model in our ensemble so far
                     idx = np.argmin(np.array([scores_nbest]))
 
                     # If the current model is better than the worst model in our ensemble replace it by the current model
                     if(scores_nbest[idx] < score):
-                        logging.debug("Worst model in our ensemble: %d with score %f will be replaced by model %d with score %f",
-                                      idx, scores_nbest[idx], model_idx, score)
-                        scores_nbest[idx] = score
+                        logging.debug("Worst model in our ensemble: %s with "
+                                      "score %f will be replaced by model %s "
+                                      "with score %f",
+                                      model_names[idx], scores_nbest[idx],
+                                      model_name, score)
                         # Exclude the old model
+                        del scores_nbest[idx]
+                        scores_nbest.append(score)
                         exclude_mask[int(indices_nbest[idx])] = True
-                        #indices_nbest[idx] = model_idx
                         del indices_nbest[idx]
                         indices_nbest.append(model_idx)
                         exclude_mask.append(False)
+                        del model_names[idx]
+                        model_names.append(model_name)
                     # Otherwise exclude the current model from the ensemble
                     else:
                         exclude_mask.append(True)
@@ -204,18 +215,18 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
 
             model_idx += 1
 
-        if ensemble_size is not None:
-            logging.info("Indices nbest.")
-            logging.info(indices_nbest)
-
         indices_to_model_names = dict()
         for i, model_name in enumerate(dir_ensemble_list):
             if not exclude_mask[i]:
                 num_indices = len(indices_to_model_names)
                 indices_to_model_names[num_indices] = model_name
 
-        logging.info("Indices to model names:")
-        logging.info(indices_to_model_names)
+        #logging.info("Indices to model names:")
+        #logging.info(indices_to_model_names)
+
+        #for i, item in enumerate(sorted(model_names_to_scores.items(),
+        #                                key=lambda t: t[1])):
+        #    logging.info("%d: %s", i, item)
 
         all_predictions_train = []
         for i, model_name in enumerate(dir_ensemble_list):
@@ -272,9 +283,10 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
             logging.info(ensemble_members)
             for ensemble_member in ensemble_members:
                 ensemble_members_string += \
-                    ("    %s; weight: %f\n" %
+                    ("    %s; weight: %10f; performance: %10f\n" %
                      (indices_to_model_names[ensemble_member[0]],
-                      float(ensemble_member[1]) / len(indices)))
+                      float(ensemble_member[1]) / len(indices),
+                    model_names_to_scores[indices_to_model_names[ensemble_member[0]]]))
             logging.info(ensemble_members_string)
 
         # Save predictions for valid and test data set
