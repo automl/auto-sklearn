@@ -1,11 +1,8 @@
 import time
 import re
 
-try:
-    from HPOlib.benchmark_util import parse_cli
-except:
-    from HPOlib.benchmarks.benchmark_util import parse_cli
 
+from HPOlib.benchmarks.benchmark_util import parse_cli
 from autosklearn.cli import base_interface
 
 
