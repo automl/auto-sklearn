@@ -38,13 +38,12 @@ def get_algo_exec(runsolver_limit, runsolver_delay, memory_limit, *args):
 
 
 def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
-             initial_challengers=None):
+             cutoff_time, initial_challengers=None):
     if limit <= 0:
         # It makes no sense to start building ensembles_statistics
         return
     limit = int(limit)
     wallclock_limit = int(limit)
-    cutoff_time = int(wallclock_limit/5)
     if cutoff_time < 10:
         # It makes no sense to use less than 10sec
         # We try to do at least one run within the whole runtime

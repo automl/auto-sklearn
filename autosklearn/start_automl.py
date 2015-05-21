@@ -21,9 +21,10 @@ import autosklearn.util.logging_
 
 
 def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
-                            time_left_for_this_task, queue, log_dir=None,
+                            time_left_for_this_task, per_run_time_limit,
+                            queue, log_dir=None,
                             initial_configurations_via_metalearning=25,
-                            ensemble_size=1):
+                            ensemble_size=1, ensemble_nbest=1):
     logger = autosklearn.util.logging_.get_logger(
         outputdir=log_dir, name="automl_%s" % basename)
     stop = stopwatch.StopWatch()
@@ -254,6 +255,7 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
                                 searchspace=searchspace_path,
                                 instance_file=instance_file,
                                 limit=time_left_for_smac,
+                                cutoff_time=per_run_time_limit,
                                 initial_challengers=initial_configurations)
     logger.debug(smac_call)
     stop.stop_task("runSmac")
