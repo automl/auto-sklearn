@@ -83,7 +83,7 @@ def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
                     '--abort-on-first-run-crash', 'false',
                     '-p', os.path.abspath(searchspace),
                     '--execDir', tmp_dir,
-                    '--transform-crashed-quality-value', 2,
+                    '--transform-crashed-quality-value', '2',
                     '--instances', instance_file] +
                     initial_challengers)
 
