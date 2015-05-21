@@ -257,7 +257,8 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
             Y_test = all_predictions_test[0]
 
             # Output the score
-            logging.info("Training performance: %f" % score)
+            logging.info("Training performance: %f" % np.max(
+                model_names_to_scores.values()))
         else:
             try:
                 Y_valid, Y_test, score, indices = build_ensemble(
