@@ -11,6 +11,7 @@ import lockfile
 from HPOlibConfigSpace import configuration_space
 
 from autosklearn.data.data_manager import DataManager
+from autosklearn.models.evaluator import get_new_run_num
 from autosklearn.models.holdout_evaluator import HoldoutEvaluator
 from autosklearn.models.cv_evaluator import CVEvaluator
 from autosklearn.models.test_evaluator import TestEvaluator
@@ -58,6 +59,8 @@ def signal_handler(signum, frame):
     evaluator.finish_up()
     exit(0)
 
+def empty_signal_handler(signum, frame):
+    print "Received Signal %s, but alread finishing up!" % str(signum)
 
 signal.signal(15, signal_handler)
 
@@ -72,11 +75,17 @@ def main(dataset, data_dir, mode, seed, params, mode_args=None):
 
     It must by no means be used for the Auto part of the competition!
     """
+    if mode != "test":
+        num_run = get_new_run_num()
+
     for key in params:
         try:
-            params[key] = float(params[key])
+            params[key] = int(params[key])
         except:
-            pass
+            try:
+                params[key] = float(params[key])
+            except:
+                pass
 
     if seed is not None:
         seed = int(float(seed))
@@ -90,17 +99,19 @@ def main(dataset, data_dir, mode, seed, params, mode_args=None):
                                outputdir=output_dir)
 
     cs = get_configuration_space(D.info)
-    configuration = configuration_space.Configuration(cs, **params)
+    configuration = configuration_space.Configuration(cs, values=params)
     metric = D.info['metric']
 
+    global evaluator
     # Train/test split
     if mode == 'holdout':
         evaluator = HoldoutEvaluator(D, configuration,
                                      with_predictions=True,
                                      all_scoring_functions=True,
                                      output_y_test=True,
-                                     seed=seed)
+                                     seed=seed, num_run=num_run)
         evaluator.fit()
+        signal.signal(15, empty_signal_handler)
         evaluator.finish_up()
 
     elif mode == 'test':
@@ -123,13 +134,16 @@ def main(dataset, data_dir, mode, seed, params, mode_args=None):
     elif mode == 'cv':
         evaluator = CVEvaluator(D, configuration, with_predictions=True,
                                 all_scoring_functions=True, output_y_test=True,
-                                cv_folds=mode_args['folds'], seed=seed)
+                                cv_folds=mode_args['folds'], seed=seed,
+                                num_run=num_run)
         evaluator.fit()
+        signal.signal(15, empty_signal_handler)
         evaluator.finish_up()
 
     elif mode == 'partial_cv':
         evaluator = CVEvaluator(D, configuration, all_scoring_functions=True,
-                                cv_folds=mode_args['folds'], seed=seed)
+                                cv_folds=mode_args['folds'], seed=seed,
+                                num_run=num_run)
         evaluator.partial_fit(mode_args['fold'])
         scores = evaluator.predict()
         duration = time.time() - evaluator.starttime

@@ -113,7 +113,7 @@ class Evaluator(object):
     @abc.abstractmethod
     def __init__(self, Datamanager, configuration, with_predictions=False,
                  all_scoring_functions=False, seed=1, output_dir=None,
-                 output_y_test=False):
+                 output_y_test=False, num_run=None):
 
         self.starttime = time.time()
 
@@ -142,6 +142,10 @@ class Evaluator(object):
         else:
             self.model_class = ParamSklearnClassifier
             self.predict_function = predict_proba
+
+        if num_run is None:
+            num_run = get_new_run_num()
+        self.num_run = num_run
 
     @abc.abstractmethod
     def fit(self):
@@ -173,8 +177,7 @@ class Evaluator(object):
     
     def file_output(self):
         errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
-
-        num_run = str(get_new_run_num()).zfill(5)
+        num_run = str(self.num_run).zfill(5)
         pred_dump_name_template = os.path.join(self.output_dir,
             "predictions_%s", self.D.basename + '_predictions_%s_' +
             num_run + '.npy')

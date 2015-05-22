@@ -111,7 +111,6 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
                       ("random_forest", "liblinear_svc_preprocessor"),
                       ("extra_trees", "liblinear_svc_preprocessor"),
 
-
                       # Slow
                       ('random_forest', 'fast_ica'),
                       ('libsvm_svc', 'fast_ica'),
@@ -216,10 +215,22 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
         # TODO check that Metafeatures only contain finite numbers!
 
         stop.start_task("InitialConfigurations")
-        initial_configurations = ml.create_metalearning_string_for_smac_call(
-            config_space, loaded_data_manager.basename, loaded_data_manager.info[
-                'metric'], initial_configurations_via_metalearning)
+        try:
+            initial_configurations = ml.create_metalearning_string_for_smac_call(
+                config_space, loaded_data_manager.basename, loaded_data_manager.info[
+                    'metric'], initial_configurations_via_metalearning)
+        except Exception as e:
+            import traceback
+
+            logger.error(str(e))
+            logger.error(traceback.format_exc())
+            return []
+
         stop.stop_task("InitialConfigurations")
+
+        logger.debug("Initial Configurations: (%d)", len(initial_configurations))
+        for initial_configuration in initial_configurations:
+            logger.debug(initial_configuration)
         logger.debug("Looking for initial configurations took %5.2fsec" %
                      stop.wall_elapsed("InitialConfigurations"))
         logger.info(
@@ -271,7 +282,8 @@ def start_automl_on_dataset(basename, input_dir, tmp_dataset_dir, output_dir,
                                             metric=loaded_data_manager.info['metric'],
                                             limit=time_left_for_ensembles,
                                             output_dir=output_dir,
-                                            ensemble_size=ensemble_size)
+                                            ensemble_size=ensemble_size,
+                                            ensemble_nbest=ensemble_nbest)
     stop.stop_task("runEnsemble")
 
     queue.put([time_needed_to_load_data, data_manager_path,

@@ -10,10 +10,6 @@ def get_logger(name, outputdir=None):
                                       '[%(asctime)s:%(name)s]: %(message)s',
                                   datefmt='%m-%d %H:%M:%S')
 
-
-
-
-
     if not any([isinstance(handler, logging.StreamHandler) for handler in
             root.handlers]):
         console = logging.StreamHandler(stream=sys.stdout)

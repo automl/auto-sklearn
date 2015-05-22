@@ -92,7 +92,7 @@ def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
 
 
 def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
-                         output_dir, ensemble_size):
+                         output_dir, ensemble_size, ensemble_nbest):
     if limit <= 0:
         # It makes no sense to start building ensembles_statistics
         return

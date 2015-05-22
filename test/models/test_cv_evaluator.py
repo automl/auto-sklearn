@@ -8,7 +8,6 @@ from numpy.linalg import LinAlgError
 from autosklearn.models.cv_evaluator import CVEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
 from ParamSklearn.util import get_dataset
-from HPOlibConfigSpace.random_sampler import RandomSampler
 
 N_TEST_RUNS = 10
 
@@ -36,13 +35,12 @@ class CVEvaluator_Test(unittest.TestCase):
         configuration_space = get_configuration_space(D.info,
             include_estimators=['ridge'],
             include_preprocessors=['select_rates'])
-        sampler = RandomSampler(configuration_space, 1)
 
         err = np.zeros([N_TEST_RUNS])
         num_models_better_than_random = 0
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
             evaluator = CVEvaluator(D_, configuration,
                                     with_predictions=True)
@@ -93,13 +91,12 @@ class CVEvaluator_Test(unittest.TestCase):
         configuration_space = get_configuration_space(D.info,
             include_estimators=['ridge'],
             include_preprocessors=['select_rates'])
-        sampler = RandomSampler(configuration_space, 1)
 
         err = np.zeros([N_TEST_RUNS])
         num_models_better_than_random = 0
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
             evaluator = CVEvaluator(D_, configuration,
                                     with_predictions=True)

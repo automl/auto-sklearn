@@ -23,13 +23,80 @@ class Test(unittest.TestCase):
     def test_metalearning(self):
         dataset_name = 'digits'
 
-        for metric in ['acc_metric', 'auc_metric', 'bac_metric', 'f1_metric',
-                       'pac_metric']:
-            print metric
+        initial_challengers = {'acc_metric':
+                                   ["--initial-challengers \" "
+                                    "-balancing:strategy 'weighting' "
+                                    "-classifier 'random_forest' "
+                                    "-imputation:strategy 'most_frequent' "
+                                    "-preprocessor 'no_preprocessing' "
+                                    "-random_forest:bootstrap 'True' "
+                                    "-random_forest:criterion 'gini' "
+                                    "-random_forest:max_depth 'None' "
+                                    "-random_forest:max_features '1.66027054533' "
+                                    "-random_forest:max_leaf_nodes 'None' "
+                                    "-random_forest:min_samples_leaf '2' "
+                                    "-random_forest:min_samples_split '20' "
+                                    "-random_forest:n_estimators '100' "
+                                    "-rescaling:strategy 'min/max'\""],
+                               'auc_metric':
+                                    ["--initial-challengers \" "
+                                     "-balancing:strategy 'weighting' "
+                                     "-classifier 'libsvm_svc' "
+                                     "-imputation:strategy 'mean' "
+                                     "-libsvm_svc:C '648.819569958' "
+                                     "-libsvm_svc:class_weight 'auto' "
+                                     "-libsvm_svc:gamma '0.00329721741668' "
+                                     "-libsvm_svc:kernel 'rbf' "
+                                     "-libsvm_svc:max_iter '-1' "
+                                     "-libsvm_svc:shrinking 'False' "
+                                     "-libsvm_svc:tol '0.00113999553712' "
+                                     "-preprocessor 'no_preprocessing' "
+                                     "-rescaling:strategy 'none'\""],
+                               'bac_metric':
+                                   ["--initial-challengers \" "
+                                    "-adaboost:algorithm 'SAMME.R' "
+                                    "-adaboost:learning_rate '0.775491860564' "
+                                    "-adaboost:max_depth '8' "
+                                    "-adaboost:n_estimators '292' "
+                                    "-balancing:strategy 'none' "
+                                    "-classifier 'adaboost' "
+                                    "-imputation:strategy 'mean' "
+                                    "-preprocessor 'no_preprocessing' "
+                                    "-rescaling:strategy 'standard'\""],
+                               'f1_metric':
+                                   ["--initial-challengers \" "
+                                    "-balancing:strategy 'weighting' "
+                                    "-classifier 'random_forest' "
+                                    "-imputation:strategy 'median' "
+                                    "-preprocessor 'no_preprocessing' "
+                                    "-random_forest:bootstrap 'False' "
+                                    "-random_forest:criterion 'gini' "
+                                    "-random_forest:max_depth 'None' "
+                                    "-random_forest:max_features '1.04361822759' "
+                                    "-random_forest:max_leaf_nodes 'None' "
+                                    "-random_forest:min_samples_leaf '3' "
+                                    "-random_forest:min_samples_split '6' "
+                                    "-random_forest:n_estimators '100' "
+                                    "-rescaling:strategy 'min/max'\""],
+                               'pac_metric': ["--initial-challengers \" "
+                                              "-balancing:strategy 'weighting' "
+                                              "-classifier 'libsvm_svc' "
+                                              "-imputation:strategy 'mean' "
+                                              "-libsvm_svc:C '648.819569958' "
+                                              "-libsvm_svc:class_weight 'auto' "
+                                              "-libsvm_svc:gamma '0.00329721741668' "
+                                              "-libsvm_svc:kernel 'rbf' "
+                                              "-libsvm_svc:max_iter '-1' "
+                                              "-libsvm_svc:shrinking 'False' "
+                                              "-libsvm_svc:tol '0.00113999553712' "
+                                              "-preprocessor 'no_preprocessing' "
+                                              "-rescaling:strategy 'none'\""]}
+
+        for metric in initial_challengers:
             configuration_space = get_configuration_space(
                 {'metric': metric,
                  'task': 'multiclass.classification',
-                 'is_sparse': False})
+                 'is_sparse': False}, include_preprocessors=['no_preprocessing'])
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset_name)
             categorical = [False] * X_train.shape[1]
@@ -43,16 +110,6 @@ class Test(unittest.TestCase):
                 ml.create_metalearning_string_for_smac_call(
                     configuration_space, dataset_name, metric, 1)
 
-            self.assertEqual(["--initial-challengers \" "
-                              "-classifier 'libsvm_svc' "
-                              "-imputation:strategy 'mean' "
-                              "-libsvm_svc:C '55.4450303414' "
-                              "-libsvm_svc:class_weight 'auto' "
-                              "-libsvm_svc:gamma '0.333079079137' "
-                              "-libsvm_svc:kernel 'rbf' "
-                              "-libsvm_svc:max_iter '-1' "
-                              "-libsvm_svc:shrinking 'False' "
-                              "-libsvm_svc:tol '0.000167717946595' "
-                              "-preprocessor 'no_preprocessing' "
-                              "-rescaling:strategy 'min/max'\""],
+            print metric
+            self.assertEqual(initial_challengers[metric],
                              initial_configuration_strings_for_smac)
