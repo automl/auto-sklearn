@@ -13,11 +13,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.utils import check_random_state
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
-    InactiveHyperparameter
+from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 from HPOlibConfigSpace.conditions import EqualsCondition, AbstractConjunction
-from HPOlibConfigSpace.forbidden import ForbiddenAndConjunction, \
-    ForbiddenEqualsClause
 
 from . import components as components
 
@@ -31,12 +28,7 @@ class ParamSklearnBaseEstimator(BaseEstimator):
     __metaclass__ = ABCMeta
 
     def __init__(self, configuration, random_state=None):
-        # TODO check sklearn version!
         self.configuration = configuration
-
-        cs = self.get_hyperparameter_search_space()
-        cs.check_configuration(configuration)
-
         self._pipeline = None
 
         if random_state is None:
@@ -95,21 +87,18 @@ class ParamSklearnBaseEstimator(BaseEstimator):
 
         # List of preprocessing steps (and their order)
         preprocessors_names = ["imputation", "rescaling",
-                               self.configuration['preprocessor'].value]
+                               self.configuration['preprocessor']]
         for preproc_name in preprocessors_names:
             preproc_params = {}
 
             for instantiated_hyperparameter in self.configuration:
-                if not instantiated_hyperparameter.hyperparameter.name \
-                        .startswith(preproc_name):
+                if not instantiated_hyperparameter.startswith(preproc_name):
                     continue
-                if isinstance(instantiated_hyperparameter,
-                              InactiveHyperparameter):
+                if self.configuration[instantiated_hyperparameter] is None:
                     continue
 
-                name_ = instantiated_hyperparameter.hyperparameter.name. \
-                    split(":")[1]
-                preproc_params[name_] = instantiated_hyperparameter.value
+                name_ = instantiated_hyperparameter.split(":")[1]
+                preproc_params[name_] = self.configuration[instantiated_hyperparameter]
 
             preproc_params.update(init_params_per_method[preproc_name])
             preprocessor_object = components.preprocessing_components. \
@@ -119,18 +108,17 @@ class ParamSklearnBaseEstimator(BaseEstimator):
 
         # Extract Estimator Hyperparameters from the configuration object
         estimator_name = self.configuration[
-            self._get_estimator_hyperparameter_name()].value
+            self._get_estimator_hyperparameter_name()]
         estimator_parameters = {}
         for instantiated_hyperparameter in self.configuration:
-            if not instantiated_hyperparameter.hyperparameter.name.startswith(
-                    estimator_name):
+            if not instantiated_hyperparameter.startswith(estimator_name):
                 continue
-            if isinstance(instantiated_hyperparameter, InactiveHyperparameter):
+            if self.configuration[instantiated_hyperparameter] is None:
                 continue
 
-            name_ = instantiated_hyperparameter.hyperparameter.name. \
-                split(":")[1]
-            estimator_parameters[name_] = instantiated_hyperparameter.value
+            name_ = instantiated_hyperparameter. split(":")[1]
+            estimator_parameters[name_] = self.configuration[
+                instantiated_hyperparameter]
 
         estimator_parameters.update(init_params_per_method[estimator_name])
         estimator_object = self._get_estimator_components()[

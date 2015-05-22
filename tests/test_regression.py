@@ -105,13 +105,13 @@ class TestParamSKlearnRegressor(unittest.TestCase):
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(ValueError, "Configuration:\n"
             "  imputation:strategy, Value: mean\n"
-            "  kitchen_sinks:gamma, Value: 1.000000\n"
+            "  kitchen_sinks:gamma, Value: 1.0\n"
             "  kitchen_sinks:n_components, Value: 100\n"
             "  preprocessor, Value: kitchen_sinks\n"
             "  random_forest:bootstrap, Value: True\n"
             "  random_forest:criterion, Constant: mse\n"
             "  random_forest:max_depth, Constant: None\n"
-            "  random_forest:max_features, Value: 1.000000\n"
+            "  random_forest:max_features, Value: 1.0\n"
             "  random_forest:min_samples_leaf, Value: 1\n"
             "  random_forest:min_samples_split, Value: 2\n"
             "  random_forest:n_estimators, Constant: 100\n"
@@ -130,7 +130,7 @@ class TestParamSKlearnRegressor(unittest.TestCase):
             "  preprocessor, Value: densifier\n"
             "  regressor, Value: ridge_regression\n"
             "  rescaling:strategy, Value: min/max\n"
-            "  ridge_regression:alpha, Value: 1.000000\n"
+            "  ridge_regression:alpha, Value: 1.0\n"
             "violates forbidden clause \(Forbidden: regressor == "
             "ridge_regression && Forbidden: preprocessor == densifier\)",
                                 ParamSklearnRegressor.get_hyperparameter_search_space,

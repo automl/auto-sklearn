@@ -21,10 +21,8 @@ class PolynomialFeaturesComponentTest(PreprocessingTestCase):
             configuration_space = PolynomialFeatures.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
             preprocessor = PolynomialFeatures(random_state=1,
-                                                  **{
-                                                      hp.hyperparameter.name: hp.value
-                                                      for hp in
-                                                      default.values.values()})
+                                              **{hp_name: default[hp_name] for
+                                                 hp_name in default})
             preprocessor.fit(X_train, Y_train)
             X_train_trans = preprocessor.transform(X_train)
             X_test_trans = preprocessor.transform(X_test)

@@ -88,8 +88,8 @@ def _test_classifier(classifier, dataset='iris', sparse=False):
         dataset_properties={'sparse': sparse})
     default = configuration_space.get_default_configuration()
     classifier = classifier(random_state=1,
-                            **{hp.hyperparameter.name: hp.value for hp in
-                             default.values.values()})
+                            **{hp_name: default[hp_name] for hp_name in
+                               default if default[hp_name] is not None})
     predictor = classifier.fit(X_train, Y_train)
     predictions = predictor.predict(X_test)
     return predictions, Y_test
@@ -101,8 +101,8 @@ def _test_classifier_predict_proba(classifier, dataset='iris', sparse=False):
     configuration_space = classifier.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
     classifier = classifier(random_state=1,
-                            **{hp.hyperparameter.name: hp.value for hp in
-                               default.values.values()})
+                            **{hp_name: default[hp_name] for hp_name in
+                               default})
     predictor = classifier.fit(X_train, Y_train)
     predictions = predictor.predict_proba(X_test)
     return predictions, Y_test
@@ -114,9 +114,10 @@ def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False):
     original_X_train = X_train.copy()
     configuration_space = Preprocessor.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
+    print default
     preprocessor = Preprocessor(random_state=1,
-                                **{hp.hyperparameter.name: hp.value for hp in
-                                default.values.values()})
+                                **{hp_name: default[hp_name] for hp_name in
+                                   default if default[hp_name] is not None})
 
     transformer = preprocessor.fit(X_train, Y_train)
     return transformer.transform(X_train), original_X_train
@@ -133,8 +134,8 @@ class PreprocessingTestCase(unittest.TestCase):
         configuration_space = Preprocessor.get_hyperparameter_search_space()
         default = configuration_space.get_default_configuration()
         preprocessor = Preprocessor(random_state=1,
-                                    **{hp.hyperparameter.name: hp.value for hp in
-                                       default.values.values()})
+                                    **{hp_name: default[hp_name] for hp_name in
+                                       default})
         preprocessor.fit(X_train, Y_train)
         Xt = preprocessor.transform(X_train)
         self.assertEqual(Xt.dtype, np.float32)
@@ -145,8 +146,8 @@ class PreprocessingTestCase(unittest.TestCase):
         configuration_space = Preprocessor.get_hyperparameter_search_space()
         default = configuration_space.get_default_configuration()
         preprocessor = Preprocessor(random_state=1,
-                                    **{hp.hyperparameter.name: hp.value for hp in
-                                       default.values.values()})
+                                    **{hp_name: default[hp_name] for hp_name in
+                                       default})
         preprocessor.fit(X_train, Y_train)
         Xt = preprocessor.transform(X_train)
         self.assertEqual(Xt.dtype, np.float64)
@@ -160,8 +161,8 @@ class PreprocessingTestCase(unittest.TestCase):
             configuration_space = Preprocessor.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
             preprocessor = Preprocessor(random_state=1,
-                                        **{hp.hyperparameter.name: hp.value for hp in
-                                           default.values.values()})
+                                        **{hp_name: default[hp_name] for hp_name
+                                           in default})
             preprocessor.fit(X_train, Y_train)
             Xt = preprocessor.transform(X_train)
             self.assertEqual(Xt.dtype, np.float32)
@@ -173,8 +174,8 @@ class PreprocessingTestCase(unittest.TestCase):
             configuration_space = Preprocessor.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
             preprocessor = Preprocessor(random_state=1,
-                                        **{hp.hyperparameter.name: hp.value for hp in
-                                           default.values.values()})
+                                        **{hp_name: default[hp_name] for hp_name
+                                           in default})
             preprocessor.fit(X_train)
             Xt = preprocessor.transform(X_train)
             self.assertEqual(Xt.dtype, np.float64)
@@ -186,8 +187,8 @@ def _test_regressor(Regressor, dataset='diabetes'):
     configuration_space = Regressor.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
     regressor = Regressor(random_state=1,
-                          **{hp.hyperparameter.name: hp.value for hp in
-                          default.values.values()})
+                          **{hp_name: default[hp_name] for hp_name in
+                             default})
     # Dumb incomplete hacky test to check that we do not alter the data
     X_train_hash = hash(str(X_train))
     X_test_hash = hash(str(X_test))

@@ -9,7 +9,7 @@ from ParamSklearn.util import SPARSE, DENSE, INPUT
 
 class RandomKitchenSinks(ParamSklearnPreprocessingAlgorithm):
 
-    def __init__(self, gamma, n_components, random_state = None):
+    def __init__(self, gamma, n_components, random_state=None):
         """ Parameters:
         gamma: float
                Parameter of the rbf kernel to be approximated exp(-gamma * x^2)

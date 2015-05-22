@@ -16,7 +16,6 @@ from sklearn.utils.testing import assert_array_almost_equal
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace, \
     Configuration
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
-from HPOlibConfigSpace.random_sampler import RandomSampler
 
 from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
@@ -75,9 +74,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
 
     def test_configurations(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space()
-        sampler = RandomSampler(cs, 1)
         for i in range(10):
-            config = sampler.sample_configuration()
+            config = cs.sample_configuration()
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
             cls = ParamSklearnClassifier(config, random_state=1)
             print config
@@ -127,9 +125,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
     def test_configurations_sparse(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
-        sampler = RandomSampler(cs, 1)
         for i in range(10):
-            config = sampler.sample_configuration()
+            config = cs.sample_configuration()
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                            make_sparse=True)
             cls = ParamSklearnClassifier(config, random_state=1)
@@ -204,11 +201,11 @@ class TestParamSklearnClassifier(unittest.TestCase):
         self.assertNotIn('select_percentile_classification', str(cs))
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
-        self.assertRaisesRegexp(ValueError, "Default Configuration:\n"
+        self.assertRaisesRegexp(ValueError, "Configuration:\n"
             "  balancing:strategy, Value: none\n"
             "  classifier, Value: multinomial_nb\n"
             "  imputation:strategy, Value: mean\n"
-            "  multinomial_nb:alpha, Value: 1.000000\n"
+            "  multinomial_nb:alpha, Value: 1.0\n"
             "  multinomial_nb:fit_prior, Value: True\n"
             "  preprocessor, Value: truncatedSVD\n"
             "  rescaling:strategy, Value: min/max\n"
@@ -226,7 +223,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
             "  balancing:strategy, Value: none\n"
             "  classifier, Value: liblinear_svc\n"
             "  imputation:strategy, Value: mean\n"
-            "  liblinear_svc:C, Value: 1.000000\n"
+            "  liblinear_svc:C, Value: 1.0\n"
             "  liblinear_svc:class_weight, Value: None\n"
             "  liblinear_svc:dual, Constant: False\n"
             "  liblinear_svc:fit_intercept, Constant: True\n"
@@ -234,7 +231,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
             "  liblinear_svc:loss, Value: l2\n"
             "  liblinear_svc:multi_class, Constant: ovr\n"
             "  liblinear_svc:penalty, Value: l2\n"
-            "  liblinear_svc:tol, Value: 0.000100\n"
+            "  liblinear_svc:tol, Value: 0.0001\n"
             "  preprocessor, Value: densifier\n"
             "  rescaling:strategy, Value: min/max\n"
             "violates forbidden clause \(Forbidden: classifier == liblinear_svc &&"
@@ -311,19 +308,19 @@ class TestParamSklearnClassifier(unittest.TestCase):
         # Densifier + RF is the only combination that easily tests sparse
         # data with multilabel classification!
         config = Configuration(cs,
-            hyperparameters={"balancing:strategy": "none",
-                             "classifier": "random_forest",
-                             "imputation:strategy": "mean",
-                             "preprocessor": "densifier",
-                             'random_forest:bootstrap': 'True',
-                             'random_forest:criterion': 'gini',
-                             'random_forest:max_depth': 'None',
-                             'random_forest:min_samples_split': 2,
-                             'random_forest:min_samples_leaf': 2,
-                             'random_forest:max_features': 0.5,
-                             'random_forest:max_leaf_nodes': 'None',
-                             'random_forest:n_estimators': 100,
-                             "rescaling:strategy": "min/max"})
+            values={"balancing:strategy": "none",
+                    "classifier": "random_forest",
+                    "imputation:strategy": "mean",
+                    "preprocessor": "densifier",
+                    'random_forest:bootstrap': 'True',
+                    'random_forest:criterion': 'gini',
+                    'random_forest:max_depth': 'None',
+                    'random_forest:min_samples_split': 2,
+                    'random_forest:min_samples_leaf': 2,
+                    'random_forest:max_features': 0.5,
+                    'random_forest:max_leaf_nodes': 'None',
+                    'random_forest:n_estimators': 100,
+                    "rescaling:strategy": "min/max"})
         cls = ParamSklearnClassifier(config)
 
         # Multiclass
@@ -395,19 +392,19 @@ class TestParamSklearnClassifier(unittest.TestCase):
         # Densifier + RF is the only combination that easily tests sparse
         # data with multilabel classification!
         config = Configuration(cs,
-                               hyperparameters={"balancing:strategy": "none",
-                                                "classifier": "random_forest",
-                                                "imputation:strategy": "mean",
-                                                "preprocessor": "densifier",
-                                                'random_forest:bootstrap': 'True',
-                                                'random_forest:criterion': 'gini',
-                                                'random_forest:max_depth': 'None',
-                                                'random_forest:min_samples_split': 2,
-                                                'random_forest:min_samples_leaf': 2,
-                                                'random_forest:max_features': 0.5,
-                                                'random_forest:max_leaf_nodes': 'None',
-                                                'random_forest:n_estimators': 100,
-                                                "rescaling:strategy": "min/max"})
+                               values={"balancing:strategy": "none",
+                                       "classifier": "random_forest",
+                                       "imputation:strategy": "mean",
+                                       "preprocessor": "densifier",
+                                       'random_forest:bootstrap': 'True',
+                                       'random_forest:criterion': 'gini',
+                                       'random_forest:max_depth': 'None',
+                                       'random_forest:min_samples_split': 2,
+                                       'random_forest:min_samples_leaf': 2,
+                                       'random_forest:max_features': 0.5,
+                                       'random_forest:max_leaf_nodes': 'None',
+                                       'random_forest:n_estimators': 100,
+                                       "rescaling:strategy": "min/max"})
 
         # Multiclass
         cls = ParamSklearnClassifier(config)

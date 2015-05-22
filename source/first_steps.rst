@@ -7,7 +7,6 @@ HPOlibConfigSpace package and then train a classifier with a random
 configuration on the iris dataset.
 
     >>> from ParamSklearn.classification import ParamSklearnClassifier
-    >>> from HPOlibConfigSpace.random_sampler import RandomSampler
     >>> import sklearn.datasets
     >>> import sklearn.metrics
     >>> import numpy as np
@@ -18,10 +17,9 @@ configuration on the iris dataset.
     >>> np.random.seed(1)
     >>> np.random.shuffle(indices)
     >>> configuration_space = ParamSklearnClassifier.get_hyperparameter_search_space()
-    >>> sampler = RandomSampler(configuration_space, 1)
-    >>> configuration = sampler.sample_configuration()
+    >>> configuration = configuration_space.sample_configuration()
     >>> cls = ParamSklearnClassifier(configuration, random_state=1)
     >>> cls = cls.fit(X[indices[:100]], Y[indices[:100]])
     >>> predictions = cls.predict(X[indices[100:]])
     >>> sklearn.metrics.accuracy_score(predictions, Y[indices[100:]])
-    0.73999999999999999
+    0.80000000000000004

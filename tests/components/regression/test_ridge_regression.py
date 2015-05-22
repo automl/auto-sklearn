@@ -7,7 +7,7 @@ from ParamSklearn.util import _test_regressor, get_dataset
 import sklearn.metrics
 
 
-class RandomForestComponentTest(unittest.TestCase):
+class RidgeComponentTest(unittest.TestCase):
     def test_default_configuration(self):
         configuration_space = RidgeRegression.get_hyperparameter_search_space()
         default = configuration_space.get_default_configuration()
@@ -26,7 +26,8 @@ class RandomForestComponentTest(unittest.TestCase):
                                                            make_sparse=False)
             preprocessor = RandomKitchenSinks(
                 random_state=1,
-                **{hp.hyperparameter.name: hp.value for hp in default_preproc.values.values()})
+                **{hp_name: default_preproc[hp_name] for hp_name in
+                   default_preproc if default_preproc[hp_name] is not None})
 
             transformer = preprocessor.fit(X_train, Y_train)
             X_train_transformed = transformer.transform(X_train)
@@ -34,7 +35,8 @@ class RandomForestComponentTest(unittest.TestCase):
 
             regressor = RidgeRegression(
                 random_state=1,
-                **{hp.hyperparameter.name: hp.value for hp in default.values.values()})
+                **{hp_name: default[hp_name] for hp_name in
+                   default if default[hp_name] is not None})
             predictor = regressor.fit(X_train_transformed, Y_train)
             predictions = predictor.predict(X_test_transformed)
 

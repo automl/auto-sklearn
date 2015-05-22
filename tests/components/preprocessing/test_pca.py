@@ -26,9 +26,8 @@ class PCAComponentTest(unittest.TestCase):
         configuration_space = PCA.get_hyperparameter_search_space()
         default = configuration_space.get_default_configuration()
         preprocessor = PCA(random_state=1,
-                                    **{hp.hyperparameter.name: hp.value for hp
-                                       in
-                                       default.values.values()})
+                           **{hp_name: default[hp_name] for hp_name in
+                              default})
         preprocessor.fit(X_train)
         Xt = preprocessor.transform(X_train)
         self.assertEqual(Xt.dtype, np.float32)
@@ -39,9 +38,8 @@ class PCAComponentTest(unittest.TestCase):
         configuration_space = PCA.get_hyperparameter_search_space()
         default = configuration_space.get_default_configuration()
         preprocessor = PCA(random_state=1,
-                                    **{hp.hyperparameter.name: hp.value for hp
-                                       in
-                                       default.values.values()})
+                           **{hp_name: default[hp_name] for hp_name in
+                              default})
         preprocessor.fit(X_train, Y_train)
         Xt = preprocessor.transform(X_train)
         self.assertEqual(Xt.dtype, np.float64)

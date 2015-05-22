@@ -5,8 +5,6 @@ import unittest
 import numpy as np
 import sklearn.metrics
 
-from HPOlibConfigSpace.hyperparameters import InactiveHyperparameter
-
 from ParamSklearn.components.preprocessing.balancing import Balancing
 from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.components.classification.adaboost import AdaboostClassifier
@@ -87,7 +85,7 @@ class BalancingComponentTest(unittest.TestCase):
                 cs = ParamSklearnClassifier.get_hyperparameter_search_space(
                     include_estimators=[name])
                 default = cs.get_default_configuration()
-                default.values['balancing:strategy'].value = strategy
+                default._values['balancing:strategy'] = strategy
                 classifier = ParamSklearnClassifier(default, random_state=1)
                 predictor = classifier.fit(X_train, Y_train)
                 predictions = predictor.predict(X_test)
@@ -107,7 +105,7 @@ class BalancingComponentTest(unittest.TestCase):
                 cs = ParamSklearnClassifier.get_hyperparameter_search_space(
                     include_estimators=['sgd'], include_preprocessors=[name])
                 default = cs.get_default_configuration()
-                default.values['balancing:strategy'].value = strategy
+                default._values['balancing:strategy'] = strategy
                 classifier = ParamSklearnClassifier(default, random_state=1)
                 predictor = classifier.fit(X_train, Y_train)
                 predictions = predictor.predict(X_test)

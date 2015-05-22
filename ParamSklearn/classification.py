@@ -65,11 +65,11 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         self.num_targets = 1 if len(Y.shape) == 1 else Y.shape[1]
 
         # Weighting samples has to be done here, not in the components
-        if self.configuration['balancing:strategy'].value == 'weighting':
+        if self.configuration['balancing:strategy'] == 'weighting':
             balancing = Balancing(strategy='weighting')
             init_params, fit_params = balancing.get_weights(
-                Y, self.configuration['classifier'].value,
-                self.configuration['preprocessor'].value,
+                Y, self.configuration['classifier'],
+                self.configuration['preprocessor'],
                 init_params, fit_params)
 
         super(ParamSklearnClassifier, self).fit(X, Y, fit_params=fit_params,
