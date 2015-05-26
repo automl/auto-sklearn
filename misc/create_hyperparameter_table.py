@@ -184,7 +184,7 @@ def main():
 
     args, unknown = parser.parse_known_args()
 
-    props = {"sparse": False,
+    props = {"sparse": args.sparse,
              "multilabel.classification": args.multilabel,
              "multiclass.classification": args.multiclass,
              "binary.classification": args.binary}
