@@ -1,10 +1,12 @@
 from argparse import ArgumentParser
+from collections import OrderedDict
+import os
 import shlex
 import subprocess
+
 import HPOlibConfigSpace.hyperparameters
 import ParamSklearn.classification
 import ParamSklearn.regression
-from collections import OrderedDict
 
 # Some macros
 COND = "conditional"
@@ -119,14 +121,14 @@ def get_dict(task_type="classifier", **kwargs):
     for h in cs.get_conditions():
         if h.parent.name == task_type:
             # ignore this condition
-            print "IGNORE", h
+            # print "IGNORE", h
             continue
 
         # walk over both dicts and collect hyperparams
         for d in (estimator_dict, preprocessor_dict):
             est = h.child.name.split(":")[0]
             if est not in d:
-                print "Could not find %s" % est
+                #print "Could not find %s" % est
                 continue
             #print "####"
             #print vars(h)
@@ -205,6 +207,12 @@ def main():
         fh.close()
         proc = subprocess.Popen(shlex.split('pdflatex %s' % args.save))
         proc.communicate()
+        try:
+            os.remove(args.save.replace(".tex", ".aux"))
+            os.remove(args.save.replace(".tex", ".log"))
+        except OSError:
+            # This is fine
+            pass
 
 
 if __name__ == "__main__":
