@@ -62,6 +62,10 @@ if __name__ == "__main__":
                         help="Consider only the best n models in the ensemble "
                              "building process.")
 
+    # Other
+    parser.add_argument("-s", "--seed", type=int,
+                        help="Seed for random number generators.")
+
     args = parser.parse_args()
 
     time_limit = args.time_limit
@@ -112,18 +116,13 @@ if __name__ == "__main__":
     time_spent_so_far = time.time() - start_time
     time_left_for_smac = time_limit - time_spent_so_far
     queue = Queue()
-    autosklearn.start_automl.start_automl_on_dataset(
-        basename=args.dataset_name,
-        input_dir=args.data_dir,
-        tmp_dataset_dir=tmp_dataset_dir,
-        output_dir=output_dir,
-        time_left_for_this_task=time_left_for_smac,
-        per_run_time_limit=args.per_run_time_limit,
-        queue=queue,
-        log_dir=None,
-        ensemble_size=args.ensemble_size,
+    automl = autosklearn.start_automl.AutoML(
+        queue, args.dataset_name, args.data_dir, tmp_dataset_dir,
+        output_dir, time_left_for_smac, args.per_run_time_limit,
+        log_dir=tmp_dataset_dir, ensemble_size=args.ensemble_size,
         ensemble_nbest=args.ensemble_nbest,
         initial_configurations_via_metalearning=args.metalearning_configurations)
+    automl.start_automl()
 
     [time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles] \
         = queue.get()

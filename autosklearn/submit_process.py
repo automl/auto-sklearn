@@ -38,7 +38,7 @@ def get_algo_exec(runsolver_limit, runsolver_delay, memory_limit, *args):
 
 
 def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
-             cutoff_time, initial_challengers=None):
+             cutoff_time, initial_challengers=None, seed=1):
     if limit <= 0:
         # It makes no sense to start building ensembles_statistics
         return
@@ -61,7 +61,7 @@ def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
     if initial_challengers is None:
         initial_challengers = []
 
-    call = " ".join(["smac", '--numRun', '2147483647',
+    call = " ".join(["smac", '--numRun', str(seed),
                     '--cli-log-all-calls false',
                     '--console-log-level DEBUG',
                     '--cutoffTime', str(cutoff_time),
