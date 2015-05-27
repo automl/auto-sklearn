@@ -63,6 +63,7 @@ def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
 
     scenario = {'cli-log-all-calls': 'false',
                 'console-log-level': 'DEBUG',
+                'log-level': 'DEBUG',
                 'cutoffTime': str(cutoff_time),
                 'wallclock-limit': str(wallclock_limit),
                 'intraInstanceObj': 'MEAN',
