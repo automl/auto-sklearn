@@ -114,13 +114,18 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
         true_labels = np.load(os.path.join(predictions_dir, "true_labels_ensemble.npy"))
 
         # Load the predictions from the models
-        dir_ensemble = os.path.join(predictions_dir, "predictions_ensemble/")
-        dir_valid = os.path.join(predictions_dir, "predictions_valid/")
-        dir_test = os.path.join(predictions_dir, "predictions_test/")
+        dir_ensemble = os.path.join(predictions_dir,
+                                    "predictions_ensemble_%s/" % seed)
+        dir_valid = os.path.join(predictions_dir,
+                                 "predictions_valid_%s/" % seed)
+        dir_test = os.path.join(predictions_dir,
+                                "predictions_test_%s/" % seed)
 
-        if not os.path.isdir(dir_ensemble) or not os.path.isdir(dir_valid) or \
-                not os.path.isdir(dir_test):
-            logging.debug("Prediction directory does not exist")
+        paths_ = [dir_ensemble, dir_valid, dir_test]
+        exists = [os.path.isdir(dir_) for dir_ in paths_]
+        if not all(exists):
+            logging.debug("Prediction directory %s does not exist!" %
+                          [paths_[i] for i in range(len(exists)) if not exists[i]])
             time.sleep(2)
             used_time = watch.wall_elapsed("ensemble_builder")
             continue
