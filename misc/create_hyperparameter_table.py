@@ -119,7 +119,7 @@ def get_dict(task_type="classifier", **kwargs):
                 raise ValueError("Don't know that type: %s" % type(h))
 
     for h in cs.get_conditions():
-        if h.parent.name == task_type:
+        if h.parent.name == task_type or h.parent.name == "preprocessor":
             # ignore this condition
             # print "IGNORE", h
             continue
@@ -130,6 +130,7 @@ def get_dict(task_type="classifier", **kwargs):
             if est not in d:
                 #print "Could not find %s" % est
                 continue
+
             #print "####"
             #print vars(h)
             #print h.parent
@@ -146,7 +147,7 @@ def get_dict(task_type="classifier", **kwargs):
                 d[est][COND][UN] += 1
             else:
                 raise ValueError("Don't know that type: %s" % type(h))
-
+    print preprocessor_dict
     return (estimator_dict, preprocessor_dict)
 
 
@@ -176,20 +177,17 @@ def main():
                         choices=("classifier", ), help="Type of dataset")
     parser.add_argument("--sparse", dest="sparse", default=False,
                         action="store_true", help="dataset property")
-    prop = parser.add_mutually_exclusive_group()
+    prop = parser.add_mutually_exclusive_group(required=True)
     prop.add_argument("--multilabel", dest="multilabel", default=False,
                       action="store_true", help="dataset property")
     prop.add_argument("--multiclass", dest="multiclass", default=False,
-                      action="store_true", help="dataset property")
-    prop.add_argument("--binary", dest="binary", default=False,
                       action="store_true", help="dataset property")
 
     args, unknown = parser.parse_known_args()
 
     props = {"sparse": args.sparse,
-             "multilabel.classification": args.multilabel,
-             "multiclass.classification": args.multiclass,
-             "binary.classification": args.binary}
+             "multilabel": args.multilabel,
+             "multiclass": args.multiclass}
     est_dict, preproc_dict = get_dict(task_type=args.task_type, **props)
 
     est_table = build_table(est_dict)
