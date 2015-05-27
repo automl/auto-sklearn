@@ -80,7 +80,7 @@ def get_dict(task_type="classifier", **kwargs):
         raise ValueError("No preprocessor found")
 
     estimator_dict = OrderedDict()
-    for i in estimator.choices:
+    for i in sorted(estimator.choices):
         estimator_dict[i] = OrderedDict()
         estimator_dict[i][COND] = OrderedDict()
         for t in (CAT, CONT, CONST):
@@ -89,7 +89,7 @@ def get_dict(task_type="classifier", **kwargs):
         estimator_dict[i][UN] = 0
 
     preprocessor_dict = OrderedDict()
-    for i in preprocessor.choices:
+    for i in sorted(preprocessor.choices):
         preprocessor_dict[i] = OrderedDict()
         preprocessor_dict[i][COND] = OrderedDict()
         for t in (CAT, CONT, CONST):
