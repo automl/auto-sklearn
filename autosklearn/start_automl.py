@@ -5,6 +5,7 @@ except:
     import pickle
 import multiprocessing
 
+import lockfile
 import numpy as np
 
 from autosklearn.data import data_manager as data_manager
@@ -38,12 +39,21 @@ class AutoML(multiprocessing.Process):
         self.ensemble_nbest = ensemble_nbest
         self.seed = seed
         self.logger = autosklearn.util.logging_.get_logger(
-            outputdir=self.log_dir, name="AutoML_%s" % self.basename)
+            outputdir=self.log_dir,
+            name="AutoML_%s_%d" % (self.basename, self.seed))
 
     def run(self):
         self.start_automl()
 
     def start_automl(self):
+        # Set environment variable:
+        seed = os.environ.get("AUTOSKLEARN_SEED")
+        if seed is not None and int(seed) != self.seed:
+            raise ValueError("It seems you have already started an instance "
+                             "of AutoSklearn in this thread.")
+        else:
+            os.environ["AUTOSKLEARN_SEED"] = str(self.seed)
+
         stop = stopwatch.StopWatch()
         stop.start_task(self.basename)
         stop.start_task("LoadData")
@@ -62,8 +72,14 @@ class AutoML(multiprocessing.Process):
         # == Split dataset and store Data for the ensemble script
         X_train, X_ensemble, Y_train, Y_ensemble = split_data.split_data(
             self.loaded_data_manager.data['X_train'], self.loaded_data_manager.data['Y_train'])
-        np.save(os.path.join(self.tmp_dir, "true_labels_ensemble.npy"),
-                Y_ensemble)
+
+        true_labels_ensemble_filename = os.path.join(self.tmp_dir,
+                                                     "true_labels_ensemble.npy")
+        true_labels_ensemble_lock = true_labels_ensemble_filename + ".lock"
+        with lockfile.LockFile(true_labels_ensemble_lock):
+            if not os.path.exists(true_labels_ensemble_filename):
+                np.save(true_labels_ensemble_filename, Y_ensemble)
+
         del X_train, X_ensemble, Y_train, Y_ensemble
 
         time_needed_to_load_data = stop.wall_elapsed(self.basename)
@@ -74,19 +90,25 @@ class AutoML(multiprocessing.Process):
 
         stop.stop_task("LoadData")
         # = Create a searchspace
-        stop.start_task("CreateSearchSpace")
-        searchspace_path = os.path.join(self.tmp_dir, "space.pcs")
+        stop.start_task("CreateConfigSpace")
+        configspace_path = os.path.join(self.tmp_dir, "space.pcs")
         self.configuration_space = paramsklearn.get_configuration_space(
             self.loaded_data_manager.info)
 
         self.configuration_space_created_hook()
 
         sp_string = pcs_parser.write(self.configuration_space)
-        fh = open(searchspace_path, 'w')
-        fh.write(sp_string)
-        fh.close()
-        self.logger.debug("Searchspace written to %s" % searchspace_path)
-        stop.stop_task("CreateSearchSpace")
+        configuration_space_lockfile = configspace_path + ".lock"
+        with lockfile.LockFile(configuration_space_lockfile):
+            if not os.path.exists(configspace_path):
+                with open(configspace_path, "w") as fh:
+                    fh.write(sp_string)
+                self.logger.debug("Configuration space written to %s" %
+                                  configspace_path)
+            else:
+                self.logger.debug("Configuration space already present at %s" %
+                                  configspace_path)
+        stop.stop_task("CreateConfigSpace")
 
         # == Calculate metafeatures
         stop.start_task("CalculateMetafeatures")
@@ -131,8 +153,6 @@ class AutoML(multiprocessing.Process):
             self.logger.debug(ml._metafeatures_labels.__repr__(verbosity=2))
             self.logger.debug(ml._metafeatures_encoded_labels.__repr__(verbosity=2))
 
-            # TODO check that Metafeatures only contain finite numbers!
-
             stop.start_task("InitialConfigurations")
             try:
                 initial_configurations = ml.create_metalearning_string_for_smac_call(
@@ -143,6 +163,7 @@ class AutoML(multiprocessing.Process):
 
                 self.logger.error(str(e))
                 self.logger.error(traceback.format_exc())
+                initial_configurations = []
 
             stop.stop_task("InitialConfigurations")
 
@@ -163,18 +184,30 @@ class AutoML(multiprocessing.Process):
         stop.start_task("StoreDatamanager")
         data_manager_path = os.path.join(self.tmp_dir,
                                          self.basename + "_Manager.pkl")
-        pickle.dump(self.loaded_data_manager, open(data_manager_path, 'w'), protocol=-1)
-        self.logger.debug("Pickled Datamanager under %s" % data_manager_path)
+        data_manager_lockfile = data_manager_path + ".lock"
+        with lockfile.LockFile(data_manager_lockfile):
+            if not os.path.exists(data_manager_path):
+                pickle.dump(self.loaded_data_manager,
+                            open(data_manager_path, 'w'), protocol=-1)
+                self.logger.debug("Pickled Datamanager at %s" %
+                                  data_manager_path)
+            else:
+                self.logger.debug("Data manager already presend at %s" %
+                                  data_manager_path)
         stop.stop_task("StoreDatamanager")
 
         # == RUN SMAC
         stop.start_task("runSmac")
         # = Create an empty instance file
         instance_file = os.path.join(self.tmp_dir, "instances.txt")
-        fh = open(instance_file, 'w')
-        fh.write("holdout")
-        fh.close()
-        self.logger.debug("Create instance file %s" % instance_file)
+        instance_file_lock = instance_file + ".lock"
+        with lockfile.LockFile(instance_file_lock):
+            if not os.path.exists(instance_file_lock):
+                with open(instance_file, "w") as fh:
+                    fh.write("holdout")
+                self.logger.debug("Created instance file %s" % instance_file)
+            else:
+                self.logger.debug("Instance file already present at %s" % instance_file)
 
         # = Start SMAC
         dataset = os.path.join(self.input_dir, self.basename)
@@ -184,7 +217,7 @@ class AutoML(multiprocessing.Process):
         proc_smac, smac_call = \
             submit_process.run_smac(dataset=dataset,
                                     tmp_dir=self.tmp_dir,
-                                    searchspace=searchspace_path,
+                                    searchspace=configspace_path,
                                     instance_file=instance_file,
                                     limit=time_left_for_smac,
                                     cutoff_time=self.per_run_time_limit,
@@ -206,12 +239,16 @@ class AutoML(multiprocessing.Process):
                                                 limit=time_left_for_ensembles,
                                                 output_dir=self.output_dir,
                                                 ensemble_size=self.ensemble_size,
-                                                ensemble_nbest=self.ensemble_nbest)
+                                                ensemble_nbest=self.ensemble_nbest,
+                                                seed=self.seed)
         stop.stop_task("runEnsemble")
 
         self.queue.put([time_needed_to_load_data, data_manager_path,
                    proc_smac, proc_ensembles])
         del self.loaded_data_manager
+
+        # Delete AutoSklearn environment variable
+        del os.environ["AUTOSKLEARN_SEED"]
         return
 
     def configuration_space_created_hook(self):

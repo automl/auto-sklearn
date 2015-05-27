@@ -31,7 +31,11 @@ class MetaLearning(object):
         self._exclude_metafeatures = set(['Landmark1NN',
                                           'LandmarkDecisionNodeLearner',
                                           'LandmarkDecisionTree',
-                                          'LandmarkLDA'])
+                                          'LandmarkLDA',
+                                          'LandmarkNaiveBayes',
+                                          'PCAFractionOfComponentsFor95PercentVariance',
+                                          'PCAKurtosisFirstPC',
+                                          'PCASkewnessFirstPC'])
 
     def calculate_metafeatures_with_labels(self, X_train, Y_train,
                                            categorical, dataset_name):

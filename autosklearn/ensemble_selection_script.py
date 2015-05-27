@@ -94,7 +94,8 @@ def ensemble_selection_bagging(predictions, labels, ensemble_size, task_type, me
     return np.array(order_of_each_bag)
 
 
-def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemble_size=None):
+def main(predictions_dir, basename, task_type, metric, limit, output_dir,
+         ensemble_size=None, seed=1):
     watch = StopWatch()
     watch.start_task("ensemble_builder")
 
@@ -102,7 +103,9 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
     time_iter = 0
     index_run = 0
     current_num_models = 0
-    logging.basicConfig(filename=os.path.join(predictions_dir, "ensemble.log"), level=logging.DEBUG)
+    logging.basicConfig(filename=os.path.join(predictions_dir,
+                                              "ensemble_%d.log" % seed),
+                        level=logging.DEBUG)
 
     while used_time < limit:
         logging.debug("Time left: %f", limit - used_time)
@@ -309,5 +312,6 @@ if __name__ == "__main__":
 
     main(predictions_dir=sys.argv[1], basename=sys.argv[2],
          task_type=sys.argv[3], metric=sys.argv[4], limit=float(sys.argv[5]),
-         output_dir=sys.argv[6], ensemble_size=int(sys.argv[7]))
+         output_dir=sys.argv[6], ensemble_size=int(sys.argv[7]),
+         seed=int(sys.argv[8]))
     sys.exit(0)

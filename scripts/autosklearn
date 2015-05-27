@@ -63,7 +63,7 @@ if __name__ == "__main__":
                              "building process.")
 
     # Other
-    parser.add_argument("-s", "--seed", type=int,
+    parser.add_argument("-s", "--seed", type=int, default=1,
                         help="Seed for random number generators.")
 
     args = parser.parse_args()
@@ -74,10 +74,6 @@ if __name__ == "__main__":
     # Check the output directories
     output_dir = args.output_dir
     tmp_dataset_dir = args.temporary_output_directory
-    if output_dir is not None and not os.path.isdir(output_dir):
-        raise ValueError("If output_dir is specified, it must exist!")
-    if tmp_dataset_dir is not None and not os.path.isdir(tmp_dataset_dir):
-        raise ValueError("If tmp_dataset_dir is specified, it must exist!")
 
     pid = os.getpid()
     random_number = random.randint(0, 10000)
@@ -88,12 +84,23 @@ if __name__ == "__main__":
         output_dir = "/tmp/autosklearn_output_%d_%d" % (pid, random_number)
         os.makedirs(output_dir)
         remove_output_dir = not args.keep_output
+    else:
+        if not os.path.isdir(output_dir):
+            raise ValueError("If output_dir is specified, it must exist!")
+        output_dir = os.path.join(output_dir, str(args.seed))
+        os.mkdir(output_dir)
+
     if tmp_dataset_dir is None:
         tmp_dataset_dir = "/tmp/autosklearn_tmp_%d_%d" % (pid, random_number)
         os.makedirs(tmp_dataset_dir)
         remove_tmp_dir = not args.keep_output
+    else:
+        if not os.path.isdir(tmp_dataset_dir):
+            raise ValueError("If tmp_dataset_dir is specified, it must exist!")
+        tmp_dataset_dir = os.path.join(tmp_dataset_dir)
 
-    logger = logging_.get_logger("autosklearn", outputdir=tmp_dataset_dir)
+    logger = logging_.get_logger("autosklearn_%d" % args.seed,
+                                 outputdir=tmp_dataset_dir)
     metalearning_logger = logging.getLogger(
         "pyMetaLearn.metalearning.meta_base")
     metalearning_logger.setLevel(logging.DEBUG)
@@ -121,7 +128,8 @@ if __name__ == "__main__":
         output_dir, time_left_for_smac, args.per_run_time_limit,
         log_dir=tmp_dataset_dir, ensemble_size=args.ensemble_size,
         ensemble_nbest=args.ensemble_nbest,
-        initial_configurations_via_metalearning=args.metalearning_configurations)
+        initial_configurations_via_metalearning=args
+        .metalearning_configurations, seed=args.seed)
     automl.start_automl()
 
     [time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles] \
