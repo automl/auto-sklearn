@@ -42,7 +42,7 @@ def get_algo_exec(runsolver_limit, runsolver_delay, memory_limit, *args):
 
 
 def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
-             cutoff_time, seed, initial_challengers=None, ):
+             cutoff_time, seed, memory_limit, initial_challengers=None, ):
     if limit <= 0:
         # It makes no sense to start building ensembles_statistics
         return
@@ -55,7 +55,6 @@ def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
 
     runsolver_softlimit = cutoff_time - 35
     runsolver_hardlimit_delay = 30
-    memory_limit = 4000
 
     algo_exec = get_algo_exec(runsolver_softlimit,
                               runsolver_hardlimit_delay,

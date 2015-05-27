@@ -24,7 +24,7 @@ class AutoML(multiprocessing.Process):
     def __init__(self, queue, basename, input_dir, tmp_dir, output_dir,
                  time_left_for_this_task, per_run_time_limit, log_dir=None,
                  initial_configurations_via_metalearning=25, ensemble_size=1,
-                 ensemble_nbest=1, seed=1):
+                 ensemble_nbest=1, seed=1, ml_memory_limit=3000):
         super(AutoML, self).__init__()
         self.queue = queue
         self.basename = basename
@@ -38,6 +38,7 @@ class AutoML(multiprocessing.Process):
         self.ensemble_size = ensemble_size
         self.ensemble_nbest = ensemble_nbest
         self.seed = seed
+        self.ml_memory_limit = ml_memory_limit
         self.logger = autosklearn.util.logging_.get_logger(
             outputdir=self.log_dir,
             name="AutoML_%s_%d" % (self.basename, self.seed))
@@ -222,6 +223,7 @@ class AutoML(multiprocessing.Process):
                                     limit=time_left_for_smac,
                                     cutoff_time=self.per_run_time_limit,
                                     initial_challengers=initial_configurations,
+                                    memory_limit=self.ml_memory_limit,
                                     seed=self.seed)
         self.logger.debug(smac_call)
         stop.stop_task("runSmac")

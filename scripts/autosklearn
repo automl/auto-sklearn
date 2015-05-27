@@ -23,9 +23,9 @@ if __name__ == "__main__":
                         is_config_file=True)
 
     # Arguments concerning the target dataset
-    parser.add_argument("dataset_name", metavar="dataset-name", type=str,
+    parser.add_argument("--dataset-name", type=str,
                         help="Name of the target dataset.")
-    parser.add_argument("data_dir", metavar="data-dir", type=str,
+    parser.add_argument("--data-dir", type=str,
                         help="Directory where the dataset resides.")
 
     # Arguments concerning the file output
@@ -47,6 +47,9 @@ if __name__ == "__main__":
                              "seconds.")
     parser.add_argument("--per-run-time-limit", type=int, default=360,
                         help="Runtime for a single call of a target algorithm.")
+    parser.add_argument("--ml-memory-limit", type=int, default=3000,
+                        help="Memory limit for the machine learning pipeline "
+                             "being optimized")
 
     # Arguments concerning the metalearning part
     parser.add_argument("--metalearning-configurations", type=int, default=25,
@@ -65,11 +68,17 @@ if __name__ == "__main__":
     # Other
     parser.add_argument("-s", "--seed", type=int, default=1,
                         help="Seed for random number generators.")
+    parser.add_argument('--exec-dir', type=str,
+                        help="Execution directory.")
 
     args = parser.parse_args()
 
     time_limit = args.time_limit
     start_time = time.time()
+
+    # Go to the execution directory
+    if args.exec_dir is not None:
+        os.chdir(args.exec_dir)
 
     # Check the output directories
     output_dir = args.output_dir
@@ -86,7 +95,8 @@ if __name__ == "__main__":
         remove_output_dir = not args.keep_output
     else:
         if not os.path.isdir(output_dir):
-            raise ValueError("If output_dir is specified, it must exist!")
+            raise ValueError("If output_dir is specified, it must exist: %s"
+                             % output_dir)
         output_dir = os.path.join(output_dir, str(args.seed))
         os.mkdir(output_dir)
 
@@ -96,7 +106,8 @@ if __name__ == "__main__":
         remove_tmp_dir = not args.keep_output
     else:
         if not os.path.isdir(tmp_dataset_dir):
-            raise ValueError("If tmp_dataset_dir is specified, it must exist!")
+            raise ValueError("If tmp_dataset_dir is specified, it must exist: %s"
+                             % tmp_dataset_dir)
         tmp_dataset_dir = os.path.join(tmp_dataset_dir)
 
     logger = logging_.get_logger("autosklearn_%d" % args.seed,
@@ -129,7 +140,8 @@ if __name__ == "__main__":
         log_dir=tmp_dataset_dir, ensemble_size=args.ensemble_size,
         ensemble_nbest=args.ensemble_nbest,
         initial_configurations_via_metalearning=args
-        .metalearning_configurations, seed=args.seed)
+        .metalearning_configurations, seed=args.seed,
+        ml_memory_limit=args.ml_memory_limit)
     automl.start_automl()
 
     [time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles] \
