@@ -3,6 +3,10 @@ import os
 import sys
 
 
+def setup():
+    logging.basicConfig(level=logging.DEBUG)
+
+
 def get_logger(name, outputdir=None):
     # Root logger with a stream and file handler
     root = logging.getLogger()

@@ -61,8 +61,8 @@ class MetaLearning(object):
             dont_calculate=self._exclude_metafeatures)
 
     def create_metalearning_string_for_smac_call(self, configuration_space,
-                                                 dataset_name, metric,
-                                                 num_initial_configurations):
+            dataset_name, metric, task, sparse, num_initial_configurations,
+            metadata_directory):
         if self._metafeatures_encoded_labels is None or \
                 self._metafeatures_labels is None:
             raise ValueError("Please call "
@@ -70,7 +70,9 @@ class MetaLearning(object):
                              "calculate_metafeatures_with_labels first!")
 
         current_directory = os.path.dirname(__file__)
-        metadata_directory = os.path.join(current_directory, "files", metric)
+        if metadata_directory is None:
+            metadata_directory = os.path.join(current_directory, "files",
+                "%s_%s_%s" %(task, "sparse" if sparse is True else "dense", metric))
 
         # Concatenate the metafeatures!
         mf = self._metafeatures_labels
@@ -90,7 +92,7 @@ class MetaLearning(object):
             seed=1, use_features=metafeatures_subset, subset='all')
         logger.info("Reading meta-data took %5.2f seconds",
                     time.time() - start)
-
+        print ml.meta_base.configurations.keys()
         # TODO This is hacky, I must find a different way of adding a new dataset!
         ml.meta_base.add_dataset(dataset_name + self._sentinel, self.mf)
         runs = ml.metalearning_suggest_all(

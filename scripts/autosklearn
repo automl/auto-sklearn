@@ -11,66 +11,16 @@ import time
 
 import psutil
 
-from autosklearn.external.configargparse import ArgParser
+
 import autosklearn.start_automl
 import autosklearn.util.check_pid
 from autosklearn.util import logging_
+from autosklearn.util import options
 
 
 if __name__ == "__main__":
-    parser = ArgParser()
-    parser.add_argument("-c", "--config", help="Path to a configuration file.",
-                        is_config_file=True)
-
-    # Arguments concerning the target dataset
-    parser.add_argument("--dataset-name", type=str,
-                        help="Name of the target dataset.")
-    parser.add_argument("--data-dir", type=str,
-                        help="Directory where the dataset resides.")
-
-    # Arguments concerning the file output
-    parser.add_argument("--output-dir", type=str, default=None,
-                        help="AutoSklearn output directory. If not specified, "
-                             "a new directory under /tmp/ will be generated.")
-    parser.add_argument("--temporary-output-directory", type=str,
-                        help="Temporary output directory. If not specified, "
-                             "a new directory under /tmp/ will be generated.",
-                        default=None)
-    parser.add_argument("--keep-output", action='store_true', default=False,
-                        help="If output_dir and temporary_output_dir are not "
-                             "specified, setting this to False will make "
-                             "autosklearn not delete these two directories.")
-
-    # Arguments concerning the configuration procedure
-    parser.add_argument("--time-limit", type=int, default=3600,
-                        help="Total runtime of the AutoSklearn package in "
-                             "seconds.")
-    parser.add_argument("--per-run-time-limit", type=int, default=360,
-                        help="Runtime for a single call of a target algorithm.")
-    parser.add_argument("--ml-memory-limit", type=int, default=3000,
-                        help="Memory limit for the machine learning pipeline "
-                             "being optimized")
-
-    # Arguments concerning the metalearning part
-    parser.add_argument("--metalearning-configurations", type=int, default=25,
-                        help="Number of configurations which will be used as "
-                             "initial challengers for SMAC.")
-
-    # Arguments concerning the algorithm selection part
-    parser.add_argument("--ensemble-size", type=int, default=1,
-                        help="Maximum number of models in the ensemble. Set "
-                             "this to one in order to evaluate the single "
-                             "best.")
-    parser.add_argument("--ensemble-nbest", type=int, default=1,
-                        help="Consider only the best n models in the ensemble "
-                             "building process.")
-
-    # Other
-    parser.add_argument("-s", "--seed", type=int, default=1,
-                        help="Seed for random number generators.")
-    parser.add_argument('--exec-dir', type=str,
-                        help="Execution directory.")
-
+    logging_.setup()
+    parser = options.get_options()
     args = parser.parse_args()
 
     time_limit = args.time_limit
@@ -112,9 +62,13 @@ if __name__ == "__main__":
 
     logger = logging_.get_logger("autosklearn_%d" % args.seed,
                                  outputdir=tmp_dataset_dir)
-    metalearning_logger = logging.getLogger(
+    meta_base_logger = logging.getLogger(
         "pyMetaLearn.metalearning.meta_base")
-    metalearning_logger.setLevel(logging.DEBUG)
+    meta_base_logger.setLevel(logging.DEBUG)
+    metalearn_logger = logging.getLogger(
+        "pyMetaLearn.optimizers.metalearn_optimizer.metalearner")
+    metalearn_logger.setLevel(logging.DEBUG)
+
 
     BUFFER = 35  # time-left - BUFFER = timelimit for SMAC/ensemble_script.py
     BUFFER_BEFORE_SENDING_SIGTERM = 30  # We send SIGTERM to all processes
@@ -141,7 +95,8 @@ if __name__ == "__main__":
         ensemble_nbest=args.ensemble_nbest,
         initial_configurations_via_metalearning=args
         .metalearning_configurations, seed=args.seed,
-        ml_memory_limit=args.ml_memory_limit)
+        ml_memory_limit=args.ml_memory_limit,
+        metadata_directory=args.metadata_directory)
     automl.start_automl()
 
     [time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles] \

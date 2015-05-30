@@ -24,7 +24,8 @@ class AutoML(multiprocessing.Process):
     def __init__(self, queue, basename, input_dir, tmp_dir, output_dir,
                  time_left_for_this_task, per_run_time_limit, log_dir=None,
                  initial_configurations_via_metalearning=25, ensemble_size=1,
-                 ensemble_nbest=1, seed=1, ml_memory_limit=3000):
+                 ensemble_nbest=1, seed=1, ml_memory_limit=3000,
+                 metadata_directory=None):
         super(AutoML, self).__init__()
         self.queue = queue
         self.basename = basename
@@ -39,6 +40,7 @@ class AutoML(multiprocessing.Process):
         self.ensemble_nbest = ensemble_nbest
         self.seed = seed
         self.ml_memory_limit = ml_memory_limit
+        self.metadata_directory = metadata_directory
         self.logger = autosklearn.util.logging_.get_logger(
             outputdir=self.log_dir,
             name="AutoML_%s_%d" % (self.basename, self.seed))
@@ -157,8 +159,11 @@ class AutoML(multiprocessing.Process):
             stop.start_task("InitialConfigurations")
             try:
                 initial_configurations = ml.create_metalearning_string_for_smac_call(
-                    self.configuration_space, self.loaded_data_manager.basename, self.loaded_data_manager.info[
-                        'metric'], self.initial_configurations_via_metalearning)
+                    self.configuration_space, self.loaded_data_manager.basename,
+                    self.loaded_data_manager.info['metric'],
+                    self.loaded_data_manager.info['task'],
+                    True if self.loaded_data_manager.info['is_sparse'] == 1 else False,
+                    self.initial_configurations_via_metalearning, self.metadata_directory)
             except Exception as e:
                 import traceback
 

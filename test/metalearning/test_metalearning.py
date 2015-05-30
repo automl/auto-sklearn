@@ -25,81 +25,83 @@ class Test(unittest.TestCase):
 
         initial_challengers = {'acc_metric':
                                    ["--initial-challengers \" "
-                                    "-balancing:strategy 'weighting' "
+                                    "-balancing:strategy 'none' "
                                     "-classifier 'random_forest' "
-                                    "-imputation:strategy 'most_frequent' "
+                                    "-imputation:strategy 'mean' "
                                     "-preprocessor 'no_preprocessing' "
                                     "-random_forest:bootstrap 'True' "
                                     "-random_forest:criterion 'gini' "
                                     "-random_forest:max_depth 'None' "
-                                    "-random_forest:max_features '1.66027054533' "
+                                    "-random_forest:max_features '1.0' "
                                     "-random_forest:max_leaf_nodes 'None' "
-                                    "-random_forest:min_samples_leaf '2' "
-                                    "-random_forest:min_samples_split '20' "
+                                    "-random_forest:min_samples_leaf '1' "
+                                    "-random_forest:min_samples_split '2' "
                                     "-random_forest:n_estimators '100' "
-                                    "-rescaling:strategy 'min/max'\""],
+                                    "-rescaling:strategy 'min/max'\""
+                                   ],
                                'auc_metric':
                                     ["--initial-challengers \" "
                                      "-balancing:strategy 'weighting' "
-                                     "-classifier 'random_forest' "
-                                     "-imputation:strategy 'most_frequent' "
+                                     "-classifier 'gradient_boosting' "
+                                     "-gradient_boosting:learning_rate '0.00438932235819' "
+                                     "-gradient_boosting:max_depth '8' "
+                                     "-gradient_boosting:max_features '2.47034566014' "
+                                     "-gradient_boosting:min_samples_leaf '3' "
+                                     "-gradient_boosting:min_samples_split '6' "
+                                     "-gradient_boosting:n_estimators '100' "
+                                     "-gradient_boosting:subsample '0.601991494509' "
+                                     "-imputation:strategy 'mean' "
                                      "-preprocessor 'no_preprocessing' "
-                                     "-random_forest:bootstrap 'True' "
-                                     "-random_forest:criterion 'gini' "
-                                     "-random_forest:max_depth 'None' "
-                                     "-random_forest:max_features '1.66027054533' "
-                                     "-random_forest:max_leaf_nodes 'None' "
-                                     "-random_forest:min_samples_leaf '2' "
-                                     "-random_forest:min_samples_split '20' "
-                                     "-random_forest:n_estimators '100' "
-                                     "-rescaling:strategy 'min/max'\""
+                                     "-rescaling:strategy 'none'\""
                                     ],
                                'bac_metric':
                                    ["--initial-challengers \" "
                                     "-balancing:strategy 'weighting' "
-                                    "-classifier 'libsvm_svc' "
-                                    "-imputation:strategy 'median' "
-                                    "-libsvm_svc:C '5486.70315669' "
-                                    "-libsvm_svc:class_weight 'auto' "
-                                    "-libsvm_svc:gamma '0.29783505435' "
-                                    "-libsvm_svc:kernel 'rbf' "
-                                    "-libsvm_svc:max_iter '-1' "
-                                    "-libsvm_svc:shrinking 'True' "
-                                    "-libsvm_svc:tol '0.0962993142836' "
+                                    "-classifier 'gradient_boosting' "
+                                    "-gradient_boosting:learning_rate '0.00438932235819' "
+                                    "-gradient_boosting:max_depth '8' "
+                                    "-gradient_boosting:max_features '2.47034566014' "
+                                    "-gradient_boosting:min_samples_leaf '3' "
+                                    "-gradient_boosting:min_samples_split '6' "
+                                    "-gradient_boosting:n_estimators '100' "
+                                    "-gradient_boosting:subsample '0.601991494509' "
+                                    "-imputation:strategy 'mean' "
                                     "-preprocessor 'no_preprocessing' "
-                                    "-rescaling:strategy 'min/max'\""
-                                    ],
+                                    "-rescaling:strategy 'none'\""
+                                   ],
                                'f1_metric':
                                    ["--initial-challengers \" "
-                                    "-balancing:strategy 'weighting' "
+                                    "-balancing:strategy 'none' "
                                     "-classifier 'random_forest' "
-                                    "-imputation:strategy 'median' "
-                                    "-preprocessor 'no_preprocessing' "
-                                    "-random_forest:bootstrap 'False' "
-                                    "-random_forest:criterion 'gini' "
-                                    "-random_forest:max_depth 'None' "
-                                    "-random_forest:max_features '1.04361822759' "
-                                    "-random_forest:max_leaf_nodes 'None' "
-                                    "-random_forest:min_samples_leaf '3' "
-                                    "-random_forest:min_samples_split '6' "
-                                    "-random_forest:n_estimators '100' "
-                                    "-rescaling:strategy 'min/max'\""],
-                               'pac_metric':
-                                   ["--initial-challengers \" "
-                                    "-balancing:strategy 'weighting' "
-                                    "-classifier 'random_forest' "
-                                    "-imputation:strategy 'most_frequent' "
+                                    "-imputation:strategy 'mean' "
                                     "-preprocessor 'no_preprocessing' "
                                     "-random_forest:bootstrap 'True' "
                                     "-random_forest:criterion 'gini' "
                                     "-random_forest:max_depth 'None' "
-                                    "-random_forest:max_features '1.66027054533' "
+                                    "-random_forest:max_features '1.0' "
                                     "-random_forest:max_leaf_nodes 'None' "
-                                    "-random_forest:min_samples_leaf '2' "
-                                    "-random_forest:min_samples_split '20' "
+                                    "-random_forest:min_samples_leaf '1' "
+                                    "-random_forest:min_samples_split '2' "
                                     "-random_forest:n_estimators '100' "
                                     "-rescaling:strategy 'min/max'\""
-                               ]}
+                                   ],
+                               'pac_metric':
+                                   ["--initial-challengers \" "
+                                    "-balancing:strategy 'none' "
+                                    "-classifier 'random_forest' "
+                                    "-imputation:strategy 'mean' "
+                                    "-preprocessor 'no_preprocessing' "
+                                    "-random_forest:bootstrap 'True' "
+                                    "-random_forest:criterion 'gini' "
+                                    "-random_forest:max_depth 'None' "
+                                    "-random_forest:max_features '1.0' "
+                                    "-random_forest:max_leaf_nodes 'None' "
+                                    "-random_forest:min_samples_leaf '1' "
+                                    "-random_forest:min_samples_split '2' "
+                                    "-random_forest:n_estimators '100' "
+                                    "-rescaling:strategy 'min/max'\""
+
+                                   ]}
 
         for metric in initial_challengers:
             configuration_space = get_configuration_space(
@@ -117,7 +119,8 @@ class Test(unittest.TestCase):
                     X_train, Y_train, categorical, dataset_name)
             initial_configuration_strings_for_smac = \
                 ml.create_metalearning_string_for_smac_call(
-                    configuration_space, dataset_name, metric, 1)
+                    configuration_space, dataset_name, metric,
+                    'multiclass.classification', False, 1, None)
 
             print metric
             self.assertEqual(initial_challengers[metric],
