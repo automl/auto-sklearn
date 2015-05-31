@@ -182,6 +182,8 @@ def main():
                       action="store_true", help="dataset property")
     prop.add_argument("--multiclass", dest="multiclass", default=False,
                       action="store_true", help="dataset property")
+    prop.add_argument("--binary", dest="binary", default=False,
+                      action="store_true", help="dataset property")
 
     args, unknown = parser.parse_known_args()
 
