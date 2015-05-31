@@ -200,6 +200,12 @@ class TestParamSklearnClassifier(unittest.TestCase):
             exclude_preprocessors=['select_percentile_classification'])
         self.assertNotIn('select_percentile_classification', str(cs))
 
+    def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(self):
+        cs = ParamSklearnClassifier.get_hyperparameter_search_space(
+            include_preprocessors=['nystroem_sampler'])
+        self.assertEqual(cs.get_hyperparameter('preprocessor').choices,
+                         ['nystroem_sampler'])
+
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(ValueError, "Configuration:\n"
             "  balancing:strategy, Value: none\n"

@@ -250,7 +250,7 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                 preprocessors[name] = available_preprocessors[name]
 
         # Hardcode the defaults based on some educated guesses
-        classifier_defaults = ['random_forest', 'liblinear', 'sgd',
+        classifier_defaults = ['random_forest', 'liblinear_svc', 'sgd',
                                'libsvm_svc']
         classifier_default = None
         for cd_ in classifier_defaults:
@@ -325,6 +325,14 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                         "preprocessor"), f)))
             except KeyError:
                 pass
+            except ValueError as e:
+                if "violates forbidden clause (Forbidden: classifier == %s " \
+                        "&& Forbidden: preprocessor == %s)" % (classifiers_,
+                                                               feature_learning):
+                    # TODO: super-hacky, build a method for that in the
+                    # configuration space module
+                    configuration_space._hyperparameters[
+                        'classifier'].default = classifier_defaults[1]
 
         # We have seen empirically that tree-based models together with PCA
         # don't work better than tree-based models without preprocessing
@@ -354,7 +362,7 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         #            raise e
 
         # Won't work
-        # Multinomial NB does not work with negative values, don't use
+        # Multinomial NB etc does not work with negative values, don't use
         # it with standardization, features learning, pca
         classifiers_ = ["multinomial_nb", "bernoulli_nb"]
         preproc_with_negative_X = ["kitchen_sinks", "pca", "truncatedSVD",
