@@ -15,7 +15,6 @@ from autosklearn.models.holdout_evaluator import HoldoutEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
 from autosklearn.data.split_data import split_data
 from ParamSklearn.util import get_dataset
-from HPOlibConfigSpace.random_sampler import RandomSampler
 
 N_TEST_RUNS = 10
 
@@ -39,13 +38,14 @@ class HoldoutEvaluator_Test(unittest.TestCase):
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators = ['ridge'],
+            include_preprocessors = ['select_rates'])
 
         err = np.zeros([N_TEST_RUNS])
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
             evaluator = HoldoutEvaluator(D_, configuration)
 
@@ -74,14 +74,15 @@ class HoldoutEvaluator_Test(unittest.TestCase):
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['ridge'],
+            include_preprocessors=['select_rates'])
 
         # Test all scoring functions
         err = []
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
             evaluator = HoldoutEvaluator(D_, configuration,
                                          all_scoring_functions=True)
@@ -109,8 +110,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         Y_test = np.array(convert_to_bin(Y_test, 3))
         Y_test[:, -1] = 1
 
-        print Y_train
-
         X_valid = X_test[:25, ]
         Y_valid = Y_test[:25, ]
         X_test = X_test[25:, ]
@@ -123,13 +122,14 @@ class HoldoutEvaluator_Test(unittest.TestCase):
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['random_forest'],
+            include_preprocessors=['no_preprocessing'])
 
         err = np.zeros([N_TEST_RUNS])
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
             evaluator = HoldoutEvaluator(D_, configuration)
             if not self._fit(evaluator):
@@ -167,13 +167,14 @@ class HoldoutEvaluator_Test(unittest.TestCase):
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['ridge'],
+            include_preprocessors=['select_rates'])
 
         err = np.zeros([N_TEST_RUNS])
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
             evaluator = HoldoutEvaluator(D_, configuration)
 
@@ -206,13 +207,14 @@ class HoldoutEvaluator_Test(unittest.TestCase):
                        'numerical', 'numerical', 'numerical', 'numerical',
                        'numerical', 'numerical', 'numerical']
 
-        configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['random_forest'],
+            include_preprocessors=['no_preprocessing'])
 
         err = np.zeros([N_TEST_RUNS])
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
             evaluator = HoldoutEvaluator(D_, configuration)
             if not self._fit(evaluator):
@@ -289,10 +291,9 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
 
         configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
 
         while True:
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             evaluator = HoldoutEvaluator(D, configuration,
                                          with_predictions=True,
                                          all_scoring_functions=True,

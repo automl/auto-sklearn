@@ -8,7 +8,8 @@ class TestEvaluator(autosklearn.models.evaluator.Evaluator):
                                             with_predictions=with_predictions,
                                             all_scoring_functions=all_scoring_functions,
                                             seed=seed, output_dir=None,
-                                            output_y_test=False)
+                                            output_y_test=False,
+                                            num_run="dummy")
         self.configuration = configuration
 
         self.X_train = Datamanager.data['X_train']

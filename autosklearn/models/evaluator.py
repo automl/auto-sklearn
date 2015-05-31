@@ -90,7 +90,11 @@ def calculate_score(solution, prediction, task_type, metric,
 
 
 def get_new_run_num():
-    counter_file = os.path.join(os.getcwd(), "num_run")
+    seed = os.environ.get("AUTOSKLEARN_SEED")
+    counter_file = "num_run"
+    if seed is not None:
+        counter_file = counter_file + ("_%s" % seed)
+    counter_file = os.path.join(os.getcwd(), counter_file)
     lock = lockfile.LockFile(counter_file)
     with lock:
         if not os.path.exists(counter_file):
@@ -113,7 +117,7 @@ class Evaluator(object):
     @abc.abstractmethod
     def __init__(self, Datamanager, configuration, with_predictions=False,
                  all_scoring_functions=False, seed=1, output_dir=None,
-                 output_y_test=False):
+                 output_y_test=False, num_run=None):
 
         self.starttime = time.time()
 
@@ -142,6 +146,10 @@ class Evaluator(object):
         else:
             self.model_class = ParamSklearnClassifier
             self.predict_function = predict_proba
+
+        if num_run is None:
+            num_run = get_new_run_num()
+        self.num_run = num_run
 
     @abc.abstractmethod
     def fit(self):
@@ -172,35 +180,43 @@ class Evaluator(object):
                 "finished and no valid model was generated!")
     
     def file_output(self):
+        seed = os.environ.get("AUTOSKLEARN_SEED")
         errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
-
-        num_run = str(get_new_run_num()).zfill(5)
+        num_run = str(self.num_run).zfill(5)
         pred_dump_name_template = os.path.join(self.output_dir,
-            "predictions_%s", self.D.basename + '_predictions_%s_' +
+            "predictions_%s_%s", self.D.basename + '_predictions_%s_' +
             num_run + '.npy')
 
         if self.output_y_test:
-            if not os.path.exists(self.output_dir):
+            try:
                 os.makedirs(self.output_dir)
-            with open(os.path.join(self.output_dir, "y_optimization.npy"), "w") as fh:
-                pickle.dump(self.Y_optimization.astype(np.float32), fh, -1)
+            except OSError:
+                pass
+            y_test_filename = os.path.join(self.output_dir,
+                                           "y_optimization.npy")
+            with lockfile.LockFile(y_test_filename + '.lock'):
+                with open(y_test_filename, "w") as fh:
+                    pickle.dump(self.Y_optimization.astype(np.float32), fh, -1)
 
-        ensemble_output_dir = os.path.join(self.output_dir, "predictions_ensemble")
+        ensemble_output_dir = os.path.join(self.output_dir,
+                                           "predictions_ensemble_%s" % seed)
         if not os.path.exists(ensemble_output_dir):
             os.makedirs(ensemble_output_dir)
-        with open(pred_dump_name_template % ("ensemble", "ensemble"), "w") as fh:
+        with open(pred_dump_name_template % ("ensemble", seed, "ensemble"), "w") as fh:
             pickle.dump(Y_optimization_pred.astype(np.float32), fh, -1)
 
-        valid_output_dir = os.path.join(self.output_dir, "predictions_valid")
+        valid_output_dir = os.path.join(self.output_dir,
+                                        "predictions_valid_%s" % seed)
         if not os.path.exists(valid_output_dir):
             os.makedirs(valid_output_dir)
-        with open(pred_dump_name_template % ("valid", "valid"), "w") as fh:
+        with open(pred_dump_name_template % ("valid", seed, "valid"), "w") as fh:
             pickle.dump(Y_valid_pred.astype(np.float32), fh, -1)
 
-        test_output_dir = os.path.join(self.output_dir, "predictions_test")
+        test_output_dir = os.path.join(self.output_dir,
+                                       "predictions_test_%s" % seed)
         if not os.path.exists(test_output_dir):
             os.makedirs(test_output_dir)
-        with open(pred_dump_name_template % ("test", "test"), "w") as fh:
+        with open(pred_dump_name_template % ("test", seed, "test"), "w") as fh:
             pickle.dump(Y_test_pred.astype(np.float32), fh, -1)
 
         self.duration = time.time() - self.starttime

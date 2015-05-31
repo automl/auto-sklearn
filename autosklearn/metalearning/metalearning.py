@@ -4,11 +4,12 @@ import time
 
 import numpy as np
 
-from HPOlibConfigSpace.hyperparameters import InactiveHyperparameter
-
 import pyMetaLearn.metafeatures.metafeatures as metafeatures
 import pyMetaLearn.optimizers.metalearn_optimizer.metalearner as \
     metalearner
+
+from autosklearn.util import logging_
+logger = logging_.get_logger(__name__)
 
 
 class MetaLearning(object):
@@ -30,7 +31,11 @@ class MetaLearning(object):
         self._exclude_metafeatures = set(['Landmark1NN',
                                           'LandmarkDecisionNodeLearner',
                                           'LandmarkDecisionTree',
-                                          'LandmarkLDA'])
+                                          'LandmarkLDA',
+                                          'LandmarkNaiveBayes',
+                                          'PCAFractionOfComponentsFor95PercentVariance',
+                                          'PCAKurtosisFirstPC',
+                                          'PCASkewnessFirstPC'])
 
     def calculate_metafeatures_with_labels(self, X_train, Y_train,
                                            categorical, dataset_name):
@@ -56,8 +61,8 @@ class MetaLearning(object):
             dont_calculate=self._exclude_metafeatures)
 
     def create_metalearning_string_for_smac_call(self, configuration_space,
-                                                 dataset_name, metric,
-                                                 num_initial_configurations):
+            dataset_name, metric, task, sparse, num_initial_configurations,
+            metadata_directory):
         if self._metafeatures_encoded_labels is None or \
                 self._metafeatures_labels is None:
             raise ValueError("Please call "
@@ -65,7 +70,9 @@ class MetaLearning(object):
                              "calculate_metafeatures_with_labels first!")
 
         current_directory = os.path.dirname(__file__)
-        metadata_directory = os.path.join(current_directory, "files", metric)
+        if metadata_directory is None:
+            metadata_directory = os.path.join(current_directory, "files",
+                "%s_%s_%s" %(task, "sparse" if sparse is True else "dense", metric))
 
         # Concatenate the metafeatures!
         mf = self._metafeatures_labels
@@ -77,15 +84,15 @@ class MetaLearning(object):
         metafeatures_subset.difference_update(self._exclude_metafeatures)
         metafeatures_subset = list(metafeatures_subset)
 
-        # TODO maybe replace by kND directly to remove unavailable configurations
         start = time.time()
         ml = metalearner.MetaLearningOptimizer(
             dataset_name=dataset_name + self._sentinel,
             configuration_space=configuration_space,
             aslib_directory=metadata_directory, distance="l1",
             seed=1, use_features=metafeatures_subset, subset='all')
-        print "Reading meta-data took %5.2f seconds" % (time.time() - start)
-
+        logger.info("Reading meta-data took %5.2f seconds",
+                    time.time() - start)
+        print ml.meta_base.configurations.keys()
         # TODO This is hacky, I must find a different way of adding a new dataset!
         ml.meta_base.add_dataset(dataset_name + self._sentinel, self.mf)
         runs = ml.metalearning_suggest_all(
@@ -101,6 +108,7 @@ class MetaLearning(object):
         return smac_initial_configuration_strings
 
 
+
     def convert_configuration_to_smac_string(self, configuration):
         """Convert configuration to string for SMAC option --initialChallengers.
 
@@ -113,12 +121,11 @@ class MetaLearning(object):
         config_string = StringIO()
         config_string.write("--initial-challengers \"")
 
-        for hyperparameter in sorted(configuration,
-                                     key=lambda t: t.hyperparameter.name):
-            if isinstance(hyperparameter, InactiveHyperparameter):
+        for hp_name in sorted(configuration):
+            value = configuration[hp_name]
+            if value is None:
                 continue
-            name = hyperparameter.hyperparameter.name
-            config_string.write(" -%s '%s'" % (name, configuration[name].value))
+            config_string.write(" -%s '%s'" % (hp_name, value))
 
         config_string.write("\"")
         return config_string.getvalue()
