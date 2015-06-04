@@ -92,26 +92,6 @@ class AutoML(multiprocessing.Process):
                     (self.basename, time_left_after_reading))
 
         stop.stop_task("LoadData")
-        # = Create a searchspace
-        stop.start_task("CreateConfigSpace")
-        configspace_path = os.path.join(self.tmp_dir, "space.pcs")
-        self.configuration_space = paramsklearn.get_configuration_space(
-            self.loaded_data_manager.info)
-
-        self.configuration_space_created_hook()
-
-        sp_string = pcs_parser.write(self.configuration_space)
-        configuration_space_lockfile = configspace_path + ".lock"
-        with lockfile.LockFile(configuration_space_lockfile):
-            if not os.path.exists(configspace_path):
-                with open(configspace_path, "w") as fh:
-                    fh.write(sp_string)
-                self.logger.debug("Configuration space written to %s" %
-                                  configspace_path)
-            else:
-                self.logger.debug("Configuration space already present at %s" %
-                                  configspace_path)
-        stop.stop_task("CreateConfigSpace")
 
         # == Calculate metafeatures
         stop.start_task("CalculateMetafeatures")
@@ -154,6 +134,27 @@ class AutoML(multiprocessing.Process):
                 self.logger.debug("Data manager already presend at %s" %
                                   data_manager_path)
         stop.stop_task("StoreDatamanager")
+
+        # = Create a searchspace
+        stop.start_task("CreateConfigSpace")
+        configspace_path = os.path.join(self.tmp_dir, "space.pcs")
+        self.configuration_space = paramsklearn.get_configuration_space(
+            self.loaded_data_manager.info)
+
+        self.configuration_space_created_hook()
+
+        sp_string = pcs_parser.write(self.configuration_space)
+        configuration_space_lockfile = configspace_path + ".lock"
+        with lockfile.LockFile(configuration_space_lockfile):
+            if not os.path.exists(configspace_path):
+                with open(configspace_path, "w") as fh:
+                    fh.write(sp_string)
+                self.logger.debug("Configuration space written to %s" %
+                                  configspace_path)
+            else:
+                self.logger.debug("Configuration space already present at %s" %
+                                  configspace_path)
+        stop.stop_task("CreateConfigSpace")
 
         if ml is None:
             initial_configurations = []
