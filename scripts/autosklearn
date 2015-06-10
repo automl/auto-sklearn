@@ -1,6 +1,6 @@
 #! /usr/bin/env python
-from argparse import ArgumentParser
 from collections import deque
+import logging
 import random
 from multiprocessing import Queue
 import os
@@ -11,56 +11,28 @@ import time
 
 import psutil
 
+
 import autosklearn.start_automl
 import autosklearn.util.check_pid
+from autosklearn.util import logging_
+from autosklearn.util import options
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("dataset_name", type=str,
-                        help="Name of the target dataset.")
-    parser.add_argument("data_dir", type=str,
-                        help="Directory where the dataset resides.")
-    parser.add_argument("--output_dir", type=str, default=None,
-                        help="AutoSklearn output directory. If not specified, "
-                             "a new directory under /tmp/ will be generated.")
-    parser.add_argument("--temporary_output_directory", type=str,
-                        help="Temporary output directory. If not specified, "
-                             "a new directory under /tmp/ will be generated.",
-                        default=None)
-    parser.add_argument("--keep_output", action='store_true', default=False,
-                        help="If output_dir and temporary_output_dir are not "
-                             "specified, setting this to False will make "
-                             "autosklearn not delete these two directories.")
-    parser.add_argument("--time_limit", type=int, default=3600,
-                        help="Total runtime of the AutoSklearn package in "
-                             "seconds.")
-    parser.add_argument("--metalearning_configurations", type=int, default=25,
-                        help="Number of configurations which will be used as "
-                             "initial challengers for SMAC.")
-    parser.add_argument("--ensemble_size", type=int, default=1,
-                        help="Maximum number of models in the ensemble. Set "
-                             "this to one in order to evaluate the single "
-                             "best.")
-
+    logging_.setup()
+    parser = options.get_options()
     args = parser.parse_args()
 
     time_limit = args.time_limit
     start_time = time.time()
 
-    BUFFER = 35  # time-left - BUFFER = timelimit for SMAC/ensemble_script.py
-    BUFFER_BEFORE_SENDING_SIGTERM = 30  # We send SIGTERM to all processes
-    DELAY_TO_SIGKILL = 15  # And after a delay we send a sigkill
-
-    queue = Queue()
+    # Go to the execution directory
+    if args.exec_dir is not None:
+        os.chdir(args.exec_dir)
 
     # Check the output directories
     output_dir = args.output_dir
     tmp_dataset_dir = args.temporary_output_directory
-    if output_dir is not None and not os.path.isdir(output_dir):
-        raise ValueError("If output_dir is specified, it must exist!")
-    if tmp_dataset_dir is not None and not os.path.isdir(tmp_dataset_dir):
-        raise ValueError("If tmp_dataset_dir is specified, it must exist!")
 
     pid = os.getpid()
     random_number = random.randint(0, 10000)
@@ -71,10 +43,36 @@ if __name__ == "__main__":
         output_dir = "/tmp/autosklearn_output_%d_%d" % (pid, random_number)
         os.makedirs(output_dir)
         remove_output_dir = not args.keep_output
+    else:
+        if not os.path.isdir(output_dir):
+            raise ValueError("If output_dir is specified, it must exist: %s"
+                             % output_dir)
+        output_dir = os.path.join(output_dir, str(args.seed))
+        os.mkdir(output_dir)
+
     if tmp_dataset_dir is None:
         tmp_dataset_dir = "/tmp/autosklearn_tmp_%d_%d" % (pid, random_number)
         os.makedirs(tmp_dataset_dir)
         remove_tmp_dir = not args.keep_output
+    else:
+        if not os.path.isdir(tmp_dataset_dir):
+            raise ValueError("If tmp_dataset_dir is specified, it must exist: %s"
+                             % tmp_dataset_dir)
+        tmp_dataset_dir = os.path.join(tmp_dataset_dir)
+
+    logger = logging_.get_logger("autosklearn_%d" % args.seed,
+                                 outputdir=tmp_dataset_dir)
+    meta_base_logger = logging.getLogger(
+        "pyMetaLearn.metalearning.meta_base")
+    meta_base_logger.setLevel(logging.DEBUG)
+    metalearn_logger = logging.getLogger(
+        "pyMetaLearn.optimizers.metalearn_optimizer.metalearner")
+    metalearn_logger.setLevel(logging.DEBUG)
+
+
+    BUFFER = 35  # time-left - BUFFER = timelimit for SMAC/ensemble_script.py
+    BUFFER_BEFORE_SENDING_SIGTERM = 30  # We send SIGTERM to all processes
+    DELAY_TO_SIGKILL = 15  # And after a delay we send a sigkill
 
     # Manipulate $PATH so that SMAC and the runsolver are in it.
     smac = pkg_resources.resource_filename(
@@ -89,11 +87,17 @@ if __name__ == "__main__":
 
     time_spent_so_far = time.time() - start_time
     time_left_for_smac = time_limit - time_spent_so_far
-    autosklearn.start_automl.start_automl_on_dataset(
-        basename=args.dataset_name, input_dir=args.data_dir,
-        tmp_dataset_dir=tmp_dataset_dir, output_dir=output_dir,
-        time_left_for_this_task=time_left_for_smac, queue=queue, log_dir=None,
-        initial_configurations_via_metalearning=args.metalearning_configurations)
+    queue = Queue()
+    automl = autosklearn.start_automl.AutoML(
+        queue, args.dataset_name, args.data_dir, tmp_dataset_dir,
+        output_dir, time_left_for_smac, args.per_run_time_limit,
+        log_dir=tmp_dataset_dir, ensemble_size=args.ensemble_size,
+        ensemble_nbest=args.ensemble_nbest,
+        initial_configurations_via_metalearning=args
+        .metalearning_configurations, seed=args.seed,
+        ml_memory_limit=args.ml_memory_limit,
+        metadata_directory=args.metadata_directory)
+    automl.start_automl()
 
     [time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles] \
         = queue.get()

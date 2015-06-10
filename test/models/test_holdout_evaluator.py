@@ -1,15 +1,13 @@
-'''
-Created on Dec 18, 2014
-
-@author: Aaron Klein
-'''
 import copy
 import functools
 import unittest
 import os
 import shutil
+import sys
+import traceback
 
 import numpy as np
+from numpy.linalg import LinAlgError
 
 from autosklearn.data.data_converter import convert_to_bin
 from autosklearn.models.evaluator import predict_proba
@@ -17,7 +15,6 @@ from autosklearn.models.holdout_evaluator import HoldoutEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
 from autosklearn.data.split_data import split_data
 from ParamSklearn.util import get_dataset
-from HPOlibConfigSpace.random_sampler import RandomSampler
 
 N_TEST_RUNS = 10
 
@@ -41,13 +38,14 @@ class HoldoutEvaluator_Test(unittest.TestCase):
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators = ['ridge'],
+            include_preprocessors = ['select_rates'])
 
         err = np.zeros([N_TEST_RUNS])
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
             evaluator = HoldoutEvaluator(D_, configuration)
 
@@ -76,14 +74,15 @@ class HoldoutEvaluator_Test(unittest.TestCase):
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['ridge'],
+            include_preprocessors=['select_rates'])
 
         # Test all scoring functions
         err = []
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
             evaluator = HoldoutEvaluator(D_, configuration,
                                          all_scoring_functions=True)
@@ -107,7 +106,9 @@ class HoldoutEvaluator_Test(unittest.TestCase):
     def test_evaluate_multilabel_classification(self):
         X_train, Y_train, X_test, Y_test = get_dataset('iris')
         Y_train = np.array(convert_to_bin(Y_train, 3))
+        Y_train[:,-1] = 1
         Y_test = np.array(convert_to_bin(Y_test, 3))
+        Y_test[:, -1] = 1
 
         X_valid = X_test[:25, ]
         Y_valid = Y_test[:25, ]
@@ -121,13 +122,14 @@ class HoldoutEvaluator_Test(unittest.TestCase):
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['random_forest'],
+            include_preprocessors=['no_preprocessing'])
 
         err = np.zeros([N_TEST_RUNS])
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
             evaluator = HoldoutEvaluator(D_, configuration)
             if not self._fit(evaluator):
@@ -165,13 +167,14 @@ class HoldoutEvaluator_Test(unittest.TestCase):
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['ridge'],
+            include_preprocessors=['select_rates'])
 
         err = np.zeros([N_TEST_RUNS])
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
             evaluator = HoldoutEvaluator(D_, configuration)
 
@@ -204,13 +207,14 @@ class HoldoutEvaluator_Test(unittest.TestCase):
                        'numerical', 'numerical', 'numerical', 'numerical',
                        'numerical', 'numerical', 'numerical']
 
-        configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['random_forest'],
+            include_preprocessors=['no_preprocessing'])
 
         err = np.zeros([N_TEST_RUNS])
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
             evaluator = HoldoutEvaluator(D_, configuration)
             if not self._fit(evaluator):
@@ -232,8 +236,34 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             evaluator.fit()
             return True
         except ValueError as e:
-            if "Floating-point under-/overflow occurred at epoch" in e.message:
-                return False
+            if "Floating-point under-/overflow occurred at epoch" in e.message or \
+                            "removed all features" in e.message or \
+                            "failed to create intent" in e.message:
+                pass
+            else:
+                traceback.print_tb(sys.exc_info()[2])
+                raise e
+        except LinAlgError as e:
+            if "not positive definite, even with jitter" in e.message:
+                pass
+            else:
+                raise e
+        except AttributeError as e:
+            # Some error in QDA
+            if "log" == e.message:
+                pass
+            else:
+                raise e
+        except RuntimeWarning as e:
+            if "invalid value encountered in sqrt" in e.message:
+                pass
+            elif "divide by zero encountered in divide" in e.message:
+                pass
+            else:
+                raise e
+        except UserWarning as e:
+            if "FastICA did not converge" in e.message:
+                pass
             else:
                 raise e
 
@@ -261,10 +291,9 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
 
         configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
 
         while True:
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             evaluator = HoldoutEvaluator(D, configuration,
                                          with_predictions=True,
                                          all_scoring_functions=True,

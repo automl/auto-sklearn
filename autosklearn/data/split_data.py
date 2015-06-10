@@ -1,10 +1,12 @@
 import numpy as np
-import sys
 
 import sklearn.cross_validation
+import autosklearn.util.logging_
+
+logger = autosklearn.util.logging_.get_logger(__name__)
 
 
-def split_data(X, Y):
+def split_data(X, Y, classification=None):
     num_data_points = X.shape[0]
     num_labels = Y.shape[1] if len(Y.shape) > 1 else 1
     X_train, X_valid, Y_train, Y_valid = None, None, None, None
@@ -12,8 +14,19 @@ def split_data(X, Y):
         raise ValueError("The first dimension of the X and Y array must "
                          "be equal.")
 
+    # If one class only has one sample, put it into the training set
+    if classification is True and num_labels == 1:
+        classes, y_indices = np.unique(Y, return_inverse=True)
+        if np.min(np.bincount(y_indices)) < 2:
+            class_with_one_sample = np.argmin(np.bincount(y_indices))
+            sample_idx = np.argwhere(Y == class_with_one_sample)[0][0]
+            indices = np.ones(Y.shape, dtype=bool)
+            indices[sample_idx] = False
+            Y_old = Y
+            Y = Y[indices]
+
     if num_labels > 1:
-        sys.stdout.write("Multilabel dataset, do a random split.")
+        logger.info("Multilabel dataset, do a random split.\n")
         sss = None
     else:
         try:
@@ -23,8 +36,8 @@ def split_data(X, Y):
                                                                   random_state=42)
         except ValueError:
             sss = None
-            sys.stdout.write("Too few samples of one class or maybe a "
-                             "regression dataset, use shuffle split.\n")
+            logger.info("Too few samples of one class or maybe a "
+                        "regression dataset, use shuffle split.\n")
 
     if sss is None:
         sss = sklearn.cross_validation.ShuffleSplit(Y.shape[0], n_iter=1,
@@ -35,6 +48,15 @@ def split_data(X, Y):
     assert len(sss) == 1, "Splitting data went wrong"
 
     for train_index, valid_index in sss:
+        if classification is True and num_labels == 1:
+            try:
+                Y = Y_old
+                train_index[train_index >= sample_idx] += 1
+                valid_index[valid_index >= sample_idx] += 1
+                train_index = np.append(train_index, np.array(sample_idx))
+            except UnboundLocalError:
+                pass
+
         X_train, X_valid = X[train_index], X[valid_index]
         Y_train, Y_valid = Y[train_index], Y[valid_index]
 

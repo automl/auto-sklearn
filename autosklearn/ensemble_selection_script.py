@@ -93,7 +93,8 @@ def ensemble_selection_bagging(predictions, labels, ensemble_size, task_type, me
     return np.array(order_of_each_bag)
 
 
-def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemble_size=None):
+def main(predictions_dir, basename, task_type, metric, limit, output_dir,
+         ensemble_size=None, seed=1):
     watch = StopWatch()
     watch.start_task("ensemble_builder")
 
@@ -101,7 +102,9 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
     time_iter = 0
     index_run = 0
     current_num_models = 0
-    logging.basicConfig(filename=os.path.join(predictions_dir, "ensemble.log"), level=logging.DEBUG)
+    logging.basicConfig(filename=os.path.join(predictions_dir,
+                                              "ensemble_%d.log" % seed),
+                        level=logging.DEBUG)
 
     while used_time < limit:
         logging.debug("Time left: %f", limit - used_time)
@@ -110,13 +113,18 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
         true_labels = np.load(os.path.join(predictions_dir, "true_labels_ensemble.npy"))
 
         # Load the predictions from the models
-        dir_ensemble = os.path.join(predictions_dir, "predictions_ensemble/")
-        dir_valid = os.path.join(predictions_dir, "predictions_valid/")
-        dir_test = os.path.join(predictions_dir, "predictions_test/")
+        dir_ensemble = os.path.join(predictions_dir,
+                                    "predictions_ensemble_%s/" % seed)
+        dir_valid = os.path.join(predictions_dir,
+                                 "predictions_valid_%s/" % seed)
+        dir_test = os.path.join(predictions_dir,
+                                "predictions_test_%s/" % seed)
 
-        if not os.path.isdir(dir_ensemble) or not os.path.isdir(dir_valid) or \
-                not os.path.isdir(dir_test):
-            logging.debug("Prediction directory does not exist")
+        paths_ = [dir_ensemble, dir_valid, dir_test]
+        exists = [os.path.isdir(dir_) for dir_ in paths_]
+        if not all(exists):
+            logging.debug("Prediction directory %s does not exist!" %
+                          [paths_[i] for i in range(len(exists)) if not exists[i]])
             time.sleep(2)
             used_time = watch.wall_elapsed("ensemble_builder")
             continue
@@ -158,12 +166,17 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
             scores_nbest = []
             # The indices of the model that are currently in our ensemble
             indices_nbest = []
+            # The names of the models
+            model_names = []
+
+        model_names_to_scores = dict()
 
         model_idx = 0
         for model_name in dir_ensemble_list:
             predictions = np.load(os.path.join(dir_ensemble, model_name))
             score = evaluator.calculate_score(true_labels, predictions,
                                      task_type, metric)
+            model_names_to_scores[model_name] = score
 
             if ensemble_size is not None:
                 if score <= 0.001:
@@ -174,21 +187,27 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
                     scores_nbest.append(score)
                     indices_nbest.append(model_idx)
                     exclude_mask.append(False)
+                    model_names.append(model_name)
                 else:
                     # Take the worst performing model in our ensemble so far
                     idx = np.argmin(np.array([scores_nbest]))
 
                     # If the current model is better than the worst model in our ensemble replace it by the current model
                     if(scores_nbest[idx] < score):
-                        logging.debug("Worst model in our ensemble: %d with score %f will be replaced by model %d with score %f",
-                                      idx, scores_nbest[idx], model_idx, score)
-                        scores_nbest[idx] = score
+                        logging.debug("Worst model in our ensemble: %s with "
+                                      "score %f will be replaced by model %s "
+                                      "with score %f",
+                                      model_names[idx], scores_nbest[idx],
+                                      model_name, score)
                         # Exclude the old model
+                        del scores_nbest[idx]
+                        scores_nbest.append(score)
                         exclude_mask[int(indices_nbest[idx])] = True
-                        #indices_nbest[idx] = model_idx
                         del indices_nbest[idx]
                         indices_nbest.append(model_idx)
                         exclude_mask.append(False)
+                        del model_names[idx]
+                        model_names.append(model_name)
                     # Otherwise exclude the current model from the ensemble
                     else:
                         exclude_mask.append(True)
@@ -203,18 +222,18 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
 
             model_idx += 1
 
-        if ensemble_size is not None:
-            logging.info("Indices nbest.")
-            logging.info(indices_nbest)
-
         indices_to_model_names = dict()
         for i, model_name in enumerate(dir_ensemble_list):
             if not exclude_mask[i]:
                 num_indices = len(indices_to_model_names)
                 indices_to_model_names[num_indices] = model_name
 
-        logging.info("Indices to model names:")
-        logging.info(indices_to_model_names)
+        #logging.info("Indices to model names:")
+        #logging.info(indices_to_model_names)
+
+        #for i, item in enumerate(sorted(model_names_to_scores.items(),
+        #                                key=lambda t: t[1])):
+        #    logging.info("%d: %s", i, item)
 
         all_predictions_train = []
         for i, model_name in enumerate(dir_ensemble_list):
@@ -245,7 +264,8 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
             Y_test = all_predictions_test[0]
 
             # Output the score
-            logging.info("Training performance: %f" % score)
+            logging.info("Training performance: %f" % np.max(
+                model_names_to_scores.values()))
         else:
             try:
                 Y_valid, Y_test, score, indices = build_ensemble(
@@ -271,9 +291,10 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
             logging.info(ensemble_members)
             for ensemble_member in ensemble_members:
                 ensemble_members_string += \
-                    ("    %s; weight: %f\n" %
+                    ("    %s; weight: %10f; performance: %10f\n" %
                      (indices_to_model_names[ensemble_member[0]],
-                      float(ensemble_member[1]) / len(indices)))
+                      float(ensemble_member[1]) / len(indices),
+                    model_names_to_scores[indices_to_model_names[ensemble_member[0]]]))
             logging.info(ensemble_members_string)
 
         # Save predictions for valid and test data set
@@ -295,5 +316,6 @@ if __name__ == "__main__":
 
     main(predictions_dir=sys.argv[1], basename=sys.argv[2],
          task_type=sys.argv[3], metric=sys.argv[4], limit=float(sys.argv[5]),
-         output_dir=sys.argv[6], ensemble_size=int(sys.argv[7]))
+         output_dir=sys.argv[6], ensemble_size=int(sys.argv[7]),
+         seed=int(sys.argv[8]))
     sys.exit(0)

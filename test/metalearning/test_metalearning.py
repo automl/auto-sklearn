@@ -23,13 +23,72 @@ class Test(unittest.TestCase):
     def test_metalearning(self):
         dataset_name = 'digits'
 
-        for metric in ['acc_metric', 'auc_metric', 'bac_metric', 'f1_metric',
-                       'pac_metric']:
-            print metric
+        initial_challengers = {'acc_metric':
+                                   ["--initial-challengers \" "
+                                    "-adaboost:algorithm 'SAMME.R' "
+                                    "-adaboost:learning_rate '0.400363929326' "
+                                    "-adaboost:max_depth '5' "
+                                    "-adaboost:n_estimators '319' "
+                                    "-balancing:strategy 'none' "
+                                    "-classifier 'adaboost' "
+                                    "-imputation:strategy 'most_frequent' "
+                                    "-preprocessor 'no_preprocessing' "
+                                    "-rescaling:strategy 'min/max'\""
+                                   ],
+                               'auc_metric':
+                                    ["--initial-challengers \" "
+                                     "-adaboost:algorithm 'SAMME.R' "
+                                     "-adaboost:learning_rate '0.966883114819' "
+                                     "-adaboost:max_depth '5' "
+                                     "-adaboost:n_estimators '412' "
+                                     "-balancing:strategy 'weighting' "
+                                     "-classifier 'adaboost' "
+                                     "-imputation:strategy 'median' "
+                                     "-preprocessor 'no_preprocessing' "
+                                     "-rescaling:strategy 'min/max'\""
+                                    ],
+                               'bac_metric':
+                                   ["--initial-challengers \" "
+                                    "-adaboost:algorithm 'SAMME.R' "
+                                    "-adaboost:learning_rate '0.400363929326' "
+                                    "-adaboost:max_depth '5' "
+                                    "-adaboost:n_estimators '319' "
+                                    "-balancing:strategy 'none' "
+                                    "-classifier 'adaboost' "
+                                    "-imputation:strategy 'most_frequent' "
+                                    "-preprocessor 'no_preprocessing' "
+                                    "-rescaling:strategy 'min/max'\""
+                                   ],
+                               'f1_metric':
+                                   ["--initial-challengers \" "
+                                    "-adaboost:algorithm 'SAMME.R' "
+                                    "-adaboost:learning_rate '0.966883114819' "
+                                    "-adaboost:max_depth '5' "
+                                    "-adaboost:n_estimators '412' "
+                                    "-balancing:strategy 'weighting' "
+                                    "-classifier 'adaboost' "
+                                    "-imputation:strategy 'median' "
+                                    "-preprocessor 'no_preprocessing' "
+                                    "-rescaling:strategy 'min/max'\""
+                                   ],
+                               'pac_metric':
+                                   ["--initial-challengers \" "
+                                    "-adaboost:algorithm 'SAMME.R' "
+                                    "-adaboost:learning_rate '0.400363929326' "
+                                    "-adaboost:max_depth '5' "
+                                    "-adaboost:n_estimators '319' "
+                                    "-balancing:strategy 'none' "
+                                    "-classifier 'adaboost' "
+                                    "-imputation:strategy 'most_frequent' "
+                                    "-preprocessor 'no_preprocessing' "
+                                    "-rescaling:strategy 'min/max'\""
+                                   ]}
+
+        for metric in initial_challengers:
             configuration_space = get_configuration_space(
                 {'metric': metric,
                  'task': 'multiclass.classification',
-                 'is_sparse': False})
+                 'is_sparse': False}, include_preprocessors=['no_preprocessing'])
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset_name)
             categorical = [False] * X_train.shape[1]
@@ -41,18 +100,9 @@ class Test(unittest.TestCase):
                     X_train, Y_train, categorical, dataset_name)
             initial_configuration_strings_for_smac = \
                 ml.create_metalearning_string_for_smac_call(
-                    configuration_space, dataset_name, metric, 1)
+                    configuration_space, dataset_name, metric,
+                    'multiclass.classification', False, 1, None)
 
-            self.assertEqual(["--initial-challengers \" "
-                              "-classifier 'libsvm_svc' "
-                              "-imputation:strategy 'mean' "
-                              "-libsvm_svc:C '55.4450303414' "
-                              "-libsvm_svc:class_weight 'auto' "
-                              "-libsvm_svc:gamma '0.333079079137' "
-                              "-libsvm_svc:kernel 'rbf' "
-                              "-libsvm_svc:max_iter '-1' "
-                              "-libsvm_svc:shrinking 'False' "
-                              "-libsvm_svc:tol '0.000167717946595' "
-                              "-preprocessor 'no_preprocessing' "
-                              "-rescaling:strategy 'min/max'\""],
+            print metric
+            self.assertEqual(initial_challengers[metric],
                              initial_configuration_strings_for_smac)

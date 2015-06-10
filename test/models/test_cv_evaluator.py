@@ -3,11 +3,11 @@ import functools
 import unittest
 
 import numpy as np
+from numpy.linalg import LinAlgError
 
 from autosklearn.models.cv_evaluator import CVEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
 from ParamSklearn.util import get_dataset
-from HPOlibConfigSpace.random_sampler import RandomSampler
 
 N_TEST_RUNS = 10
 
@@ -32,14 +32,15 @@ class CVEvaluator_Test(unittest.TestCase):
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['ridge'],
+            include_preprocessors=['select_rates'])
 
         err = np.zeros([N_TEST_RUNS])
         num_models_better_than_random = 0
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
             evaluator = CVEvaluator(D_, configuration,
                                     with_predictions=True)
@@ -51,9 +52,6 @@ class CVEvaluator_Test(unittest.TestCase):
                 evaluator.predict()
             err[i] = e_
             print err[i], configuration['classifier']
-            print Y_optimization_pred.shape
-            print Y_valid_pred.shape
-            print Y_test_pred.shape
 
             num_targets = len(np.unique(Y_train))
             self.assertTrue(np.isfinite(err[i]))
@@ -90,14 +88,15 @@ class CVEvaluator_Test(unittest.TestCase):
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
 
-        configuration_space = get_configuration_space(D.info)
-        sampler = RandomSampler(configuration_space, 1)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['ridge'],
+            include_preprocessors=['select_rates'])
 
         err = np.zeros([N_TEST_RUNS])
         num_models_better_than_random = 0
         for i in range(N_TEST_RUNS):
             print "Evaluate configuration: %d; result:" % i,
-            configuration = sampler.sample_configuration()
+            configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
             evaluator = CVEvaluator(D_, configuration,
                                     with_predictions=True)
@@ -141,10 +140,33 @@ class CVEvaluator_Test(unittest.TestCase):
         try:
             function_handle()
             return True
-        except TypeError as e:
-            print e
         except ValueError as e:
-            if "Floating-point under-/overflow occurred at epoch" in e.message:
-                return False
+            if "Floating-point under-/overflow occurred at epoch" in e.message or \
+                    "removed all features" in e.message or \
+                    "failed to create intent" in e.message:
+                pass
+            else:
+                raise e
+        except LinAlgError as e:
+            if "not positive definite, even with jitter" in e.message:
+                pass
+            else:
+                raise e
+        except AttributeError as e:
+            # Some error in QDA
+            if "log" == e.message:
+                pass
+            else:
+                raise e
+        except RuntimeWarning as e:
+            if "invalid value encountered in sqrt" in e.message:
+                pass
+            elif "divide by zero encountered in divide" in e.message:
+                pass
+            else:
+                raise e
+        except UserWarning as e:
+            if "FastICA did not converge" in e.message:
+                pass
             else:
                 raise e

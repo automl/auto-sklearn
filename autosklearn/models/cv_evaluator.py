@@ -10,12 +10,12 @@ from autosklearn.models.evaluator import Evaluator, calculate_score
 class CVEvaluator(Evaluator):
     def __init__(self, Datamanager, configuration, with_predictions=False,
                  all_scoring_functions=False, seed=1, output_dir=None,
-                 output_y_test=False, cv_folds=10):
+                 output_y_test=False, cv_folds=10, num_run=None):
         super(CVEvaluator, self).__init__(Datamanager, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed, output_dir=output_dir,
-            output_y_test=output_y_test)
+            output_y_test=output_y_test, num_run=num_run)
 
         self.cv_folds = cv_folds
         self.X_train = self.D.data['X_train']

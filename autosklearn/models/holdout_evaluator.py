@@ -7,15 +7,19 @@ from autosklearn.models.evaluator import Evaluator, calculate_score
 class HoldoutEvaluator(Evaluator):
     def __init__(self, Datamanager, configuration, with_predictions=False,
                  all_scoring_functions=False, seed=1, output_dir=None,
-                 output_y_test=False):
+                 output_y_test=False, num_run=None):
         super(HoldoutEvaluator, self).__init__(Datamanager, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed, output_dir=output_dir,
-            output_y_test=output_y_test)
+            output_y_test=output_y_test,
+            num_run=num_run)
 
+        classification = "classification" in Datamanager.info['task'].lower()
         self.X_train, self.X_optimization, self.Y_train, self.Y_optimization = \
-            split_data(Datamanager.data['X_train'], Datamanager.data['Y_train'])
+            split_data(Datamanager.data['X_train'],
+                       Datamanager.data['Y_train'],
+                       classification=classification)
 
         self.model = self.model_class(self.configuration, self.seed)
 

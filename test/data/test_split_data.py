@@ -11,7 +11,7 @@ from autosklearn.data.split_data import split_data
 
 class Test(unittest.TestCase):
 
-    def test_split_data(self):
+    def test_split_data_regression(self):
         n_points = 1000
         np.random.seed(42)
         n_dims = np.random.randint(1, 100)
@@ -39,24 +39,37 @@ class Test(unittest.TestCase):
     def test_stratify(self):
         for i in range(5):
             self._split_regular()
+            self._split_regular_classification()
             self._stratify()
 
     def _split_regular(self):
-        X = np.array([[1, 2], [3, 4], [1, 2]])
-        y = np.array([0, 1, 2])
+        X = np.array([[1, 2], [3, 4], [1, 2], [3, 4], [1, 2], [3, 4]])
+        y = np.array([0, 0, 0, 1, 1, 2])
         X_train, X_valid, Y_train, Y_valid = split_data(X, y)
 
         # Check shapes
-        self.assertEqual(X_train.shape[0], 2)
-        self.assertEqual(X_train.shape[1], 2)
-        self.assertEqual(Y_train.shape[0], 2)
+        self.assertEqual(X_train.shape, (4, 2))
+        self.assertEqual(Y_train.shape, (4, ))
+        self.assertEqual(X_valid.shape, (2, 2))
+        self.assertEqual(Y_valid.shape, (2, ))
 
-        self.assertEqual(X_valid.shape[0], 1)
-        self.assertEqual(X_valid.shape[1], 2)
-        self.assertEqual(Y_valid.shape[0], 1)
+        self.assertListEqual(list(Y_valid), [0, 0])
+        self.assertListEqual(list(Y_train), [2, 0, 1, 1])
 
-        self.assertListEqual(list(Y_valid), [0, ])
-        self.assertListEqual(list(Y_train), [1, 2])
+    def _split_regular_classification(self):
+        X = np.array([[1, 2], [3, 4], [1, 2], [3, 4], [1, 2], [3, 4]])
+        y = np.array([0, 0, 2, 1, 1, 0])
+        X_train, X_valid, Y_train, Y_valid = split_data(X, y,
+                                                        classification=True)
+
+        # Check shapes
+        self.assertEqual(X_train.shape, (4, 2))
+        self.assertEqual(Y_train.shape, (4, ))
+        self.assertEqual(X_valid.shape, (2, 2))
+        self.assertEqual(Y_valid.shape, (2, ))
+
+        self.assertListEqual(list(Y_valid), [0, 1])
+        self.assertListEqual(list(Y_train), [0, 0, 1, 2])
 
     def _stratify(self):
         X = np.array([[1, 2], [3, 4], [1, 2], [3, 4], [1, 2], [3, 4]])

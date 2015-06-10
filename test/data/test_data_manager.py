@@ -46,6 +46,9 @@ class DataManagerTest(unittest.TestCase):
         assert_array_almost_equal(dataset_train, self.D.data['X_train'])
         assert_array_almost_equal(dataset_valid, self.D.data['X_valid'])
         assert_array_almost_equal(dataset_test, self.D.data['X_test'])
+        self.assertIsInstance(self.D.data['X_train'], np.ndarray)
+        self.assertIsInstance(self.D.data['X_valid'], np.ndarray)
+        self.assertIsInstance(self.D.data['X_test'], np.ndarray)
 
     def test_perform1HotEncoding_binary_data(self):
         self.D.feat_type = [N, N, N, N, B, B]
@@ -56,6 +59,9 @@ class DataManagerTest(unittest.TestCase):
         assert_array_almost_equal(dataset_train, self.D.data['X_train'])
         assert_array_almost_equal(dataset_valid, self.D.data['X_valid'])
         assert_array_almost_equal(dataset_test, self.D.data['X_test'])
+        self.assertIsInstance(self.D.data['X_train'], np.ndarray)
+        self.assertIsInstance(self.D.data['X_valid'], np.ndarray)
+        self.assertIsInstance(self.D.data['X_test'], np.ndarray)
 
     def test_perform1HotEncoding_categorical_data(self):
         self.D.feat_type = [N, N, C, C, B, B]
