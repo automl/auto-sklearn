@@ -63,11 +63,6 @@ signal.signal(15, signal_handler)
 
 
 def main(basename, input_dir, params):
-    for key in params:
-        try:
-            params[key] = float(params[key])
-        except:
-            pass
 
     output_dir = os.getcwd()
     D = store_and_or_load_data(data_dir=input_dir, dataset=basename,
@@ -97,8 +92,14 @@ if __name__ == "__main__":
         p_name = str(sys.argv[i])
         if p_name[0].startswith("-"):
             p_name = p_name[1:]
-        params[p_name] = sys.argv[i+1].strip()
-    
+        params[p_name] = sys.argv[i + 1].strip()
+
+    for key in params:
+        try:
+            params[key] = float(params[key])
+        except:
+            pass
+
     dataset = os.path.basename(instance_name)
     data_dir = os.path.dirname(instance_name)
     main(basename=dataset, input_dir=data_dir, params=params)

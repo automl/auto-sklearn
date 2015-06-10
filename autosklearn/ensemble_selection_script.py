@@ -68,7 +68,6 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric, do
             scores[j] = evaluator.calculate_score(labels, ensemble_prediction, task_type, metric)
             ensemble.pop()
         best = np.nanargmax(scores)
-
         ensemble.append(predictions[best])
         trajectory.append(scores[best])
         order.append(best)
