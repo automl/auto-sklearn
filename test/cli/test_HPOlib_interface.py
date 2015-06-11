@@ -77,7 +77,7 @@ class HPOlib_interfaceTest(unittest.TestCase):
         additional = output[5]
         # Has num_run in the additional info
         self.assertEqual(additional.count(";"), 6)
-        self.assertEqual(0.756219, result)
+        self.assertEqual(0.779673, result)
 
     def test_partial_cv(self):
         results = []
@@ -96,7 +96,7 @@ class HPOlib_interfaceTest(unittest.TestCase):
             additional = output[5]
             results.append(result)
             self.assertEqual(additional.count(";"), 5)
-        self.assertEqual([0.801217, 0.742155, 0.725029], results)
+        self.assertEqual([0.795038, 0.827497, 0.716609], results)
 
     def test_nested_cv(self):
         call = "python -m autosklearn.cli.HPOlib_interface --dataset %s " \
@@ -113,5 +113,5 @@ class HPOlib_interfaceTest(unittest.TestCase):
         additional = output[5]
         # Has num_run in the additional info
         self.assertEqual(additional.count(";"), 11)
-        self.assertTrue((0.9 - result) < 0.02)
+        self.assertEqual(0.815061, result)
 

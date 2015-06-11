@@ -19,12 +19,12 @@ class NestedCVEvaluator(Evaluator):
 
         self.inner_cv_folds = inner_cv_folds
         self.outer_cv_folds = outer_cv_folds
-        self.X_train = self.D.data['X_train'][:50]
-        self.Y_train = self.D.data['Y_train'][:50]
         self.Y_optimization = None
 
         self.outer_models = [None] * outer_cv_folds
         self.inner_models = [None] * outer_cv_folds
+        self.X_train = Datamanager.data["X_train"]
+        self.Y_train = Datamanager.data["Y_train"]
         for i in range(outer_cv_folds):
             self.inner_models[i] = [None] * inner_cv_folds
 

@@ -162,7 +162,8 @@ def main(dataset, data_dir, mode, seed, params, mode_args=None):
                                       inner_cv_folds=mode_args['inner_folds'],
                                       outer_cv_folds=mode_args['outer_folds'],
                                       all_scoring_functions=True,
-                                      output_y_test=True, seed=seed, num_run=num_run)
+                                      output_y_test=True, seed=seed,
+                                      num_run=num_run)
         evaluator.fit()
         signal.signal(15, empty_signal_handler)
         evaluator.finish_up()
