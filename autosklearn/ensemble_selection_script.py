@@ -104,7 +104,7 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric, do
             #ensemble_prediction = np.mean(np.array(ensemble), axis=0)
             fant_ensemble_prediction = weighted_ensemble_prediction + (1. / float(s + 1)) * pred
             scores[j] = evaluator.calculate_score(labels, fant_ensemble_prediction, task_type, metric)
-            ensemble.pop()
+            # ensemble.pop()
         best = np.nanargmax(scores)
         ensemble.append(predictions[best])
         trajectory.append(scores[best])
