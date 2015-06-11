@@ -41,7 +41,7 @@ def pruning(predictions, labels, n_best, task_type, metric):
     return indcies
 
 
-def ensemble_selection(predictions, labels, ensemble_size, task_type, metric, do_pruning=False):
+def original_ensemble_selection(predictions, labels, ensemble_size, task_type, metric, do_pruning=False):
     '''
         Rich Caruana's ensemble selection method
     '''
@@ -66,6 +66,44 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric, do
             ensemble.append(pred)
             ensemble_prediction = np.mean(np.array(ensemble), axis=0)
             scores[j] = evaluator.calculate_score(labels, ensemble_prediction, task_type, metric)
+            ensemble.pop()
+        best = np.nanargmax(scores)
+        ensemble.append(predictions[best])
+        trajectory.append(scores[best])
+        order.append(best)
+
+    return np.array(order), np.array(trajectory)
+
+
+def ensemble_selection(predictions, labels, ensemble_size, task_type, metric, do_pruning=False):
+    '''
+        Fast version of Rich Caruana's ensemble selection method
+    '''
+
+    ensemble = []
+    trajectory = []
+    order = []
+
+    if do_pruning:
+        n_best = 20
+        indices = pruning(predictions, labels, n_best, task_type, metric)
+        for idx in indices:
+            ensemble.append(predictions[idx])
+            order.append(idx)
+            ensemble_performance = evaluator.calculate_score(labels, np.array(ensemble).mean(axis=0), task_type, metric)
+            trajectory.append(ensemble_performance)
+        ensemble_size = ensemble_size - n_best
+
+    for i in range(ensemble_size):
+        scores = np.zeros([predictions.shape[0]])
+        ensemble_prediction = np.mean(np.array(ensemble), axis=0)
+        s = len(ensemble)
+        weighted_ensemble_prediction = (s / float(s + 1)) * ensemble_prediction
+        for j, pred in enumerate(predictions):
+            #ensemble.append(pred)
+            #ensemble_prediction = np.mean(np.array(ensemble), axis=0)
+            fant_ensemble_prediction = weighted_ensemble_prediction + (1. / float(s + 1)) * pred
+            scores[j] = evaluator.calculate_score(labels, fant_ensemble_prediction, task_type, metric)
             ensemble.pop()
         best = np.nanargmax(scores)
         ensemble.append(predictions[best])
