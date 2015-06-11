@@ -1,6 +1,3 @@
-from ParamSklearn.classification import ParamSklearnClassifier
-from ParamSklearn.regression import ParamSklearnRegressor
-
 import numpy as np
 
 from autosklearn.data.split_data import get_CV_fold
