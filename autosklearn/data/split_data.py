@@ -66,7 +66,7 @@ def split_data(X, Y, classification=None):
     return X_train, X_valid, Y_train, Y_valid
 
 
-def get_CV_fold(X, Y, fold, folds, shuffle=True):
+def get_CV_fold(X, Y, fold, folds, shuffle=True, random_state=None):
     num_data_points = X.shape[0]
     fold = int(fold)
     folds = int(folds)
@@ -78,7 +78,7 @@ def get_CV_fold(X, Y, fold, folds, shuffle=True):
 
     kf = sklearn.cross_validation.StratifiedKFold(Y, n_folds=folds,
                                                   shuffle=shuffle,
-                                                  random_state=42)
+                                                  random_state=random_state)
     for idx, split in enumerate(kf):
         if idx == fold:
             break

@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 import numpy as np
+import sklearn.utils
 
 from autosklearn.data.split_data import get_CV_fold
 from autosklearn.models.evaluator import Evaluator, calculate_score
@@ -18,8 +19,8 @@ class NestedCVEvaluator(Evaluator):
 
         self.inner_cv_folds = inner_cv_folds
         self.outer_cv_folds = outer_cv_folds
-        self.X_train = self.D.data['X_train']
-        self.Y_train = self.D.data['Y_train']
+        self.X_train = self.D.data['X_train'][:50]
+        self.Y_train = self.D.data['Y_train'][:50]
         self.Y_optimization = None
 
         self.outer_models = [None] * outer_cv_folds
@@ -32,37 +33,42 @@ class NestedCVEvaluator(Evaluator):
         for i in range(outer_cv_folds):
             self.inner_indices[i] = [None] * inner_cv_folds
 
+        self.random_state = sklearn.utils.check_random_state(seed)
+
     def fit(self):
-        for fold in range(self.outer_cv_folds):
+        seed = self.random_state.randint(1000000)
+        for outer_fold in range(self.outer_cv_folds):
             # First perform the fit for the outer cross validation
-            model = self.model_class(self.configuration, self.seed)
-
             outer_train_indices, outer_test_indices = \
-                get_CV_fold(self.X_train, self.Y_train, fold=fold,
-                            folds=self.outer_cv_folds)
+                get_CV_fold(self.X_train, self.Y_train, fold=outer_fold,
+                            folds=self.outer_cv_folds, shuffle=True,
+                            random_state=seed)
+            self.outer_indices[outer_fold] = ((outer_train_indices,
+                                               outer_test_indices))
 
-            self.outer_indices[fold] = ((outer_train_indices,
-                                         outer_test_indices))
-
-            self.outer_models[fold] = model
-            self.outer_models[fold].fit(self.X_train[outer_train_indices],
-                                        self.Y_train[outer_train_indices])
+            model = self.model_class(self.configuration, self.random_state)
+            self.outer_models[outer_fold] = model
+            self.outer_models[outer_fold].fit(self.X_train[outer_train_indices],
+                                              self.Y_train[outer_train_indices])
 
             # Then perform the fit for the inner cross validation
             for inner_fold in range(self.inner_cv_folds):
-                model = self.model_class(self.configuration, self.seed)
+                X_train = self.X_train[outer_train_indices]
+                Y_train = self.Y_train[outer_train_indices]
                 inner_train_indices, inner_test_indices = \
-                    get_CV_fold(self.X_train[outer_train_indices],
-                                self.Y_train[outer_train_indices],
-                                fold=inner_fold, folds=self.inner_cv_folds)
+                    get_CV_fold(X_train, Y_train,
+                                fold=inner_fold, folds=self.inner_cv_folds,
+                                shuffle=True, random_state=seed)
+                inner_train_indices = outer_train_indices[inner_train_indices]
+                inner_test_indices = outer_train_indices[inner_test_indices]
+                X_train = self.X_train[inner_train_indices]
+                Y_train = self.Y_train[inner_train_indices]
 
-                self.inner_indices[fold][inner_fold] = ((inner_train_indices,
-                                                         inner_test_indices))
-
-                self.inner_models[fold][inner_fold] = model
-                self.inner_models[fold][inner_fold].fit(
-                    self.X_train[outer_train_indices][inner_train_indices],
-                    self.Y_train[outer_train_indices][inner_train_indices])
+                self.inner_indices[outer_fold][inner_fold] = \
+                    ((inner_train_indices, inner_test_indices))
+                model = self.model_class(self.configuration, self.random_state)
+                model = model.fit(X_train, Y_train)
+                self.inner_models[outer_fold][inner_fold] = model
 
     def predict(self):
         # First, obtain the predictions for the ensembles, the validation and
@@ -132,15 +138,15 @@ class NestedCVEvaluator(Evaluator):
         self.Y_optimization = Y_targets
 
         # Second, calculate the inner score
-        for i in range(self.outer_cv_folds):
-            for j in range(self.inner_cv_folds):
-                outer_train_indices, outer_test_indices = self.outer_indices[i]
-                inner_train_indices, inner_test_indices = self.inner_indices[i][j]
-                inner_Y_targets = self.Y_train[outer_train_indices][inner_test_indices]
-                inner_X = self.X_train[outer_train_indices][inner_test_indices]
-                inner_Y_predictios = self.inner_models[i][j].predict_proba(inner_X)
-                scores = calculate_score(inner_Y_targets, inner_Y_predictios,
-                                         self.task_type, self.metric,
+        for outer_fold in range(self.outer_cv_folds):
+            for inner_fold in range(self.inner_cv_folds):
+                inner_train_indices, inner_test_indices = self.inner_indices[
+                    outer_fold][inner_fold]
+                Y_test = self.Y_train[inner_test_indices]
+                X_test = self.X_train[inner_test_indices]
+                model = self.inner_models[outer_fold][inner_fold]
+                Y_hat = self.predict_function(X_test, model, self.task_type)
+                scores = calculate_score(Y_test, Y_hat, self.task_type, self.metric,
                                          all_scoring_functions=self.all_scoring_functions)
                 if self.all_scoring_functions:
                     for score_name in scores:

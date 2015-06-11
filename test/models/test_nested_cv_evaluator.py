@@ -82,6 +82,10 @@ class NestedCVEvaluator_Test(unittest.TestCase):
                 self.assertEqual(len(evaluator.inner_models[fold]), 5)
                 self.assertTrue(all([model is not None for model
                                      in evaluator.inner_models[fold]]))
+                self.assertGreaterEqual(len(evaluator.outer_indices[fold][0]), 75)
+                for inner_fold in range(5):
+                    self.assertGreaterEqual(len(evaluator.inner_indices[
+                        fold][inner_fold][0]), 60)
 
 
         self.assertGreater(num_models_better_than_random, 9)
