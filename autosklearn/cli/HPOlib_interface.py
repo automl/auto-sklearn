@@ -16,8 +16,14 @@ if __name__ == "__main__":
     seed = args.get('seed')
     fold = int(args['fold'])
     folds = int(args['folds'])
-
-    if mode.endswith("cv"):
+    if "nested-cv" in mode:
+        # Specifiy like this 5/5-nested-cv
+        cv_match = re.match(r"([0-9]+)/([0-9]+)-nested-cv", mode)
+        outer_folds = int(cv_match.group(1))
+        inner_folds = int(cv_match.group(2))
+        mode = "nested-cv"
+        mode_args = {"inner_folds": inner_folds, "outer_folds": outer_folds}
+    elif mode.endswith("cv"):
         if folds == 1:
             cv_match = re.match(r"([0-9]*)cv", mode)
             real_folds = cv_match.group(1)

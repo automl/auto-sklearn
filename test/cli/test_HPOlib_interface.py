@@ -98,3 +98,20 @@ class HPOlib_interfaceTest(unittest.TestCase):
             self.assertEqual(additional.count(";"), 5)
         self.assertEqual([0.801217, 0.742155, 0.725029], results)
 
+    def test_nested_cv(self):
+        call = "python -m autosklearn.cli.HPOlib_interface --dataset %s " \
+               "--data_dir %s --fold 0 --folds 1 --seed 1 " \
+               "--mode 3/3-nested-cv %s" % \
+               (self.dataset, self.data_dir, self.param_string)
+        proc = subprocess.Popen(call, shell=True,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        proc.wait()
+        self.assertEqual(proc.stderr.read(), "")
+        output = proc.stdout.read().split(",")
+        result = float(output[3])
+        additional = output[5]
+        # Has num_run in the additional info
+        self.assertEqual(additional.count(";"), 11)
+        self.assertTrue((0.9 - result) < 0.02)
+
