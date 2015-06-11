@@ -104,7 +104,7 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric, do
             #ensemble_prediction = np.mean(np.array(ensemble), axis=0)
             fant_ensemble_prediction = weighted_ensemble_prediction + (1. / float(s + 1)) * pred
             scores[j] = evaluator.calculate_score(labels, fant_ensemble_prediction, task_type, metric)
-            ensemble.pop()
+            #ensemble.pop()
         best = np.nanargmax(scores)
         ensemble.append(predictions[best])
         trajectory.append(scores[best])
@@ -140,9 +140,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
     time_iter = 0
     index_run = 0
     current_num_models = 0
-    logging.basicConfig(filename=os.path.join(predictions_dir,
-                                              "ensemble_%d.log" % seed),
-                        level=logging.DEBUG)
+    logging.basicConfig(filename=os.path.join(predictions_dir, "ensemble_%d.log" % seed), level=logging.DEBUG)
 
     while used_time < limit:
         logging.debug("Time left: %f", limit - used_time)
@@ -311,8 +309,8 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
                     np.array(all_predictions_valid),
                     np.array(all_predictions_test),
                     true_labels, ensemble_size, task_type, metric)
-            except (ValueError):
-                logging.error("Caught ValueError!")
+            except ValueError as e:
+                logging.error("Caught ValueError: " + str(e))
                 used_time = watch.wall_elapsed("ensemble_builder")
                 continue
             except Exception as e:
