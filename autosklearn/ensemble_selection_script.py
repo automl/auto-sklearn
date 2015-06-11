@@ -309,8 +309,8 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
                     np.array(all_predictions_valid),
                     np.array(all_predictions_test),
                     true_labels, ensemble_size, task_type, metric)
-            except (ValueError):
-                logging.error("Caught ValueError!")
+            except ValueError as e:
+                logging.error("Caught ValueError: " + str(e))
                 used_time = watch.wall_elapsed("ensemble_builder")
                 continue
             except Exception as e:
