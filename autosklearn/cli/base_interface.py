@@ -15,6 +15,7 @@ from autosklearn.models.evaluator import get_new_run_num
 from autosklearn.models.holdout_evaluator import HoldoutEvaluator
 from autosklearn.models.cv_evaluator import CVEvaluator
 from autosklearn.models.test_evaluator import TestEvaluator
+from autosklearn.models.nested_cv_evaluator import NestedCVEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
 
 
@@ -99,7 +100,7 @@ def main(dataset, data_dir, mode, seed, params, mode_args=None):
                                outputdir=output_dir)
 
     cs = get_configuration_space(D.info)
-    configuration = configuration_space.Configuration(cs, values=params)
+    configuration = configuration_space.Configuration(cs, params)
     metric = D.info['metric']
 
     global evaluator
@@ -155,6 +156,16 @@ def main(dataset, data_dir, mode, seed, params, mode_args=None):
 
         print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % (
             "SAT", abs(duration), score, evaluator.seed, additional_run_info)
+
+    elif mode == 'nested-cv':
+        evaluator = NestedCVEvaluator(D, configuration, with_predictions=True,
+                                      inner_cv_folds=mode_args['inner_folds'],
+                                      outer_cv_folds=mode_args['outer_folds'],
+                                      all_scoring_functions=True,
+                                      output_y_test=True, seed=seed, num_run=num_run)
+        evaluator.fit()
+        signal.signal(15, empty_signal_handler)
+        evaluator.finish_up()
 
     else:
         raise ValueError("Must choose a legal mode.")
