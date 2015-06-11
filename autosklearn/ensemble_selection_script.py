@@ -96,13 +96,17 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric, do
 
     for i in range(ensemble_size):
         scores = np.zeros([predictions.shape[0]])
-        ensemble_prediction = np.mean(np.array(ensemble), axis=0)
         s = len(ensemble)
-        weighted_ensemble_prediction = (s / float(s + 1)) * ensemble_prediction
+        if s == 0:
+            weighted_ensemble_prediction = np.zeros(predictions[0].shape)
+        else:
+            ensemble_prediction = np.mean(np.array(ensemble), axis=0)
+            weighted_ensemble_prediction = (s / float(s + 1)) * ensemble_prediction
         for j, pred in enumerate(predictions):
             #ensemble.append(pred)
             #ensemble_prediction = np.mean(np.array(ensemble), axis=0)
             fant_ensemble_prediction = weighted_ensemble_prediction + (1. / float(s + 1)) * pred
+
             scores[j] = evaluator.calculate_score(labels, fant_ensemble_prediction, task_type, metric)
             # ensemble.pop()
         best = np.nanargmax(scores)
@@ -140,7 +144,8 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
     time_iter = 0
     index_run = 0
     current_num_models = 0
-    logging.basicConfig(filename=os.path.join(predictions_dir, "ensemble_%d.log" % seed), level=logging.DEBUG)
+    #logging.basicConfig(filename=os.path.join(predictions_dir, "ensemble_%d.log" % seed), level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG)
 
     while used_time < limit:
         logging.debug("Time left: %f", limit - used_time)
@@ -210,8 +215,9 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
         model_idx = 0
         for model_name in dir_ensemble_list:
             predictions = np.load(os.path.join(dir_ensemble, model_name))
-            score = evaluator.calculate_score(true_labels, predictions,
-                                     task_type, metric)
+            print predictions.shape
+            print true_labels.shape
+            score = evaluator.calculate_score(true_labels, predictions, task_type, metric)
             model_names_to_scores[model_name] = score
 
             if ensemble_size is not None:
