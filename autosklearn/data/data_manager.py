@@ -3,15 +3,15 @@
 # Main contributor: Arthur Pesah, August 2014
 # Edits: Isabelle Guyon, October 2014
 
-# ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS". 
+# ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
 # ISABELLE GUYON, CHALEARN, AND/OR OTHER ORGANIZERS OR CODE AUTHORS DISCLAIM
 # ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR ANY PARTICULAR PURPOSE, AND THE
-# WARRANTY OF NON-INFRIGEMENT OF ANY THIRD PARTY'S INTELLECTUAL PROPERTY RIGHTS. 
-# IN NO EVENT SHALL ISABELLE GUYON AND/OR OTHER ORGANIZERS BE LIABLE FOR ANY SPECIAL, 
+# WARRANTY OF NON-INFRIGEMENT OF ANY THIRD PARTY'S INTELLECTUAL PROPERTY RIGHTS.
+# IN NO EVENT SHALL ISABELLE GUYON AND/OR OTHER ORGANIZERS BE LIABLE FOR ANY SPECIAL,
 # INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER ARISING OUT OF OR IN
-# CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS, 
-# PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE. 
+# CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS,
+# PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 import numpy as np
 import os
 import time
@@ -37,36 +37,36 @@ class DataManager:
     ''' This class aims at loading and saving data easily with a cache and at generating a dictionary (self.info) in which each key is a feature (e.g. : name, format, feat_num,...).
     Methods defined here are :
     __init__ (...)
-        x.__init__([(feature, value)]) -> void        
+        x.__init__([(feature, value)]) -> void
         Initialize the info dictionary with the tuples (feature, value) given as argument. It recognizes the type of value (int, string) and assign value to info[feature]. An unlimited number of tuple can be sent.
-    
+
     getInfo (...)
-        x.getInfo (filename) -> void        
+        x.getInfo (filename) -> void
         Fill the dictionary with an info file. Each line of the info file must have this format 'feature' : value
-        The information is obtained from the public.info file if it exists, or inferred from the data files        
+        The information is obtained from the public.info file if it exists, or inferred from the data files
 
     getInfoFromFile (...)
-        x.getInfoFromFile (filename) -> void        
+        x.getInfoFromFile (filename) -> void
         Fill the dictionary with an info file. Each line of the info file must have this format 'feature' : value
-        
+
     getFormatData (...)
-        x.getFormatData (filename) -> str        
+        x.getFormatData (filename) -> str
         Get the format of the file ('dense', 'sparse' or 'sparse_binary') either using the 'is_sparse' feature if it exists (for example after a call of getInfoFromFile function) and then determing if it's binary or not, or determining it alone.
-        
+
     getNbrFeatures (...)
-        x.getNbrFeatures (*filenames) -> int        
+        x.getNbrFeatures (*filenames) -> int
         Get the number of features, using the data files given. It first checks the format of the data. If it's a matrix, the number of features is trivial. If it's a sparse file, it gets the max feature index given in every files.
-        
+
     getTypeProblem (...)
-        x.getTypeProblem (filename) -> str        
+        x.getTypeProblem (filename) -> str
         Get the kind of problem ('binary.classification', 'multiclass.classification', 'multilabel.classification', 'regression'), using the solution file given.
     '''
-    
+
     def __init__(self, basename, input_dir, verbose=False, encode_labels=True):
         '''Constructor'''
         self.basename = basename
         if basename in input_dir:
-            self.input_dir = input_dir 
+            self.input_dir = input_dir
         else:
             self.input_dir = input_dir + "/" + basename + "/"
 
@@ -108,7 +108,7 @@ class DataManager:
 
         if encode_labels:
             self.perform1HotEncoding()
-          
+
     def __repr__(self):
         return "DataManager : " + self.basename
 
@@ -128,7 +128,7 @@ class DataManager:
                              self.data[subset].shape[1])
         val = val + "feat_type:\tarray" + str(self.feat_type.shape) + "\n"
         return val
-                
+
     def loadData (self, filename, num_points, verbose=True):
         ''' Get the data from a text file in one of 3 formats: matrix, sparse, binary_sparse'''
         if verbose:  print("========= Reading " + filename)
@@ -160,7 +160,7 @@ class DataManager:
         end = time.time()
         if verbose:  print( "[+] Success in %5.2f sec" % (end - start))
         return data
-    
+
     def loadLabel (self, filename, num_points, verbose=True):
         ''' Get the solution/truth values'''
         if verbose:  print("========= Reading " + filename)
@@ -168,7 +168,7 @@ class DataManager:
 
         if 'task' not in self.info.keys():
             self.getTypeProblem(filename)
-    
+
         # IG: Here change to accommodate the new multiclass label format
         if chelper_is_there:
             if self.info['task'] == 'multilabel.classification':
@@ -263,10 +263,10 @@ class DataManager:
         end = time.time()
         if verbose:  print( "[+] Success in %5.2f sec" % (end - start))
         return type_list
-  
+
     def getInfo (self, filename, verbose=True):
-        ''' Get all information {attribute = value} pairs from the filename (public.info file), 
-              if it exists, otherwise, output default values''' 
+        ''' Get all information {attribute = value} pairs from the filename (public.info file),
+              if it exists, otherwise, output default values'''
         if filename==None:
             basename = self.basename
             input_dir = self.input_dir
@@ -278,28 +278,28 @@ class DataManager:
         if os.path.exists(filename):
             self.getInfoFromFile (filename)
             vprint (verbose, "Info file found : " + os.path.abspath(filename))
-            # Finds the data format ('dense', 'sparse', or 'sparse_binary')   
+            # Finds the data format ('dense', 'sparse', or 'sparse_binary')
             self.getFormatData(os.path.join(input_dir, basename + '_train.data'))
-        else:    
-            vprint (verbose, "Info file NOT found : " + os.path.abspath(filename))            
+        else:
+            vprint (verbose, "Info file NOT found : " + os.path.abspath(filename))
             # Hopefully this never happens because this is done in a very inefficient way
-            # reading the data multiple times...              
+            # reading the data multiple times...
             self.info['usage'] = 'No Info File'
             self.info['name'] = basename
             # Get the data format and sparsity
             self.getFormatData(os.path.join(input_dir, basename + '_train.data'))
             # Assume no categorical variable and no missing value (we'll deal with that later)
             self.info['has_categorical'] = 0
-            self.info['has_missing'] = 0              
-            # Get the target number, label number, target type and task               
+            self.info['has_missing'] = 0
+            # Get the target number, label number, target type and task
             self.getTypeProblem(os.path.join(input_dir, basename + '_train.solution'))
             if self.info['task']=='regression':
                 self.info['metric'] = 'r2_metric'
             else:
                 self.info['metric'] = 'auc_metric'
             # Feature type: Numerical, Categorical, or Binary
-            # Can also be determined from [filename].type        
-            self.info['feat_type'] = 'Mixed'  
+            # Can also be determined from [filename].type
+            self.info['feat_type'] = 'Mixed'
             # Get the number of features and patterns
             self.getNbrFeatures(os.path.join(input_dir, basename + '_train.data'), os.path.join(input_dir, basename + '_test.data'), os.path.join(input_dir, basename + '_valid.data'))
             self.getNbrPatterns(basename, input_dir, 'train')
@@ -308,18 +308,17 @@ class DataManager:
             # Set default time budget
             self.info['time_budget'] = 600
         return self.info
-                  
+
     def getInfoFromFile (self, filename):
         ''' Get all information {attribute = value} pairs from the public.info file'''
         with open (filename, "r") as info_file:
             lines = info_file.readlines()
             features_list = list(map(lambda x: tuple(x.strip("\'").split(" = ")), lines))
-            
             for (key, value) in features_list:
                 self.info[key] = value.rstrip().strip("'").strip(' ')
                 if self.info[key].isdigit(): # if we have a number, we want it to be an integer
                     self.info[key] = int(self.info[key])
-        return self.info     
+        return self.info
 
     def getFormatData(self,filename):
         ''' Get the data format directly from the data file (in case we do not have an info file)'''
@@ -352,9 +351,9 @@ class DataManager:
                         self.info['format'] = 'sparse_binary'
                 if 'format' not in self.info.keys():
                     self.info['format'] = 'dense'
-                    self.info['is_sparse'] = 0            
+                    self.info['is_sparse'] = 0
         return self.info['format']
-            
+
     def getNbrFeatures (self, *filenames):
         ''' Get the number of features directly from the data file (in case we do not have an info file)'''
         if 'feat_num' not in self.info.keys():
@@ -368,21 +367,21 @@ class DataManager:
                     sparse_list = data_converter.sparse_file_to_sparse_list (filename)
                     last_column = [sparse_list[i][-1] for i in range(len(sparse_list))]
                     last_column_feature = [a for (a,b) in last_column]
-                    self.info['feat_num'] = max(self.info['feat_num'], max(last_column_feature))                
+                    self.info['feat_num'] = max(self.info['feat_num'], max(last_column_feature))
             elif self.info['format'] == 'sparse_binary':
                 self.info['feat_num'] = 0
                 for filename in filenames:
                     data = data_converter.file_to_array (filename)
                     last_column = [int(data[i][-1]) for i in range(len(data))]
-                    self.info['feat_num'] = max(self.info['feat_num'], max(last_column))            
+                    self.info['feat_num'] = max(self.info['feat_num'], max(last_column))
         return self.info['feat_num']
-  
+
     def getNbrPatterns (self, basename, info_dir, datatype):
         ''' Get the number of patterns directly from the data file (in case we do not have an info file)'''
         line_num = data_converter.num_lines(os.path.join(info_dir, basename + '_' + datatype + '.data'))
         self.info[datatype+'_num'] =  line_num
         return line_num
-        
+
     def getTypeProblem (self, solution_filename):
         ''' Get the type of problem directly from the solution file (in case we do not have an info file)'''
         if 'task' not in self.info.keys():
@@ -405,15 +404,15 @@ class DataManager:
                     # Regression
                     self.info['label_num'] = 0
                     self.info['task'] = 'regression'
-                    self.info['target_type'] = 'Numerical'     
+                    self.info['target_type'] = 'Numerical'
             else:
-                # Multilabel or multiclass       
+                # Multilabel or multiclass
                 self.info['label_num'] = target_num
-                self.info['target_type'] = 'Binary' 
+                self.info['target_type'] = 'Binary'
                 if any(item > 1 for item in map(np.sum,solution.astype(int))):
-                    self.info['task'] = 'multilabel.classification'     
+                    self.info['task'] = 'multilabel.classification'
                 else:
-                    self.info['task'] = 'multiclass.classification'        
+                    self.info['task'] = 'multiclass.classification'
         return self.info['task']
-        
-        
+
+

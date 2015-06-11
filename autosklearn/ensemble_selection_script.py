@@ -140,9 +140,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
     time_iter = 0
     index_run = 0
     current_num_models = 0
-    logging.basicConfig(filename=os.path.join(predictions_dir,
-                                              "ensemble_%d.log" % seed),
-                        level=logging.DEBUG)
+    logging.basicConfig(filename=os.path.join(predictions_dir, "ensemble_%d.log" % seed), level=logging.DEBUG)
 
     while used_time < limit:
         logging.debug("Time left: %f", limit - used_time)
