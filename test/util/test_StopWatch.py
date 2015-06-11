@@ -23,7 +23,7 @@ class Test(unittest.TestCase):
         stop = time.clock()
         dur = stop - start
         cpu_overhead = dur - watch.cpu_sum()
-        self.assertLess(cpu_overhead, 1)
+        self.assertLess(cpu_overhead, 1.5)
 
         # Wall Overhead
         start = time.time()
