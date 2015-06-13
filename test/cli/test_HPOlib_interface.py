@@ -38,7 +38,10 @@ class HPOlib_interfaceTest(unittest.TestCase):
         proc.wait()
         self.assertEqual(proc.stderr.read(), "")
         output = proc.stdout.read().split(",")
-        result = float(output[3])
+        try:
+            result = float(output[3])
+        except:
+            pass
         additional = output[5]
         self.assertAlmostEqual(result, 0.740202)
         # Metrics in the additional data are seperated by a semicolon. Right
@@ -57,7 +60,10 @@ class HPOlib_interfaceTest(unittest.TestCase):
         proc.wait()
         self.assertEqual(proc.stderr.read(), "")
         output = proc.stdout.read().split(",")
-        result = float(output[3])
+        try:
+            result = float(output[3])
+        except:
+            print output
         additional = output[5]
         self.assertAlmostEqual(0.670996, result)
         self.assertEqual(additional.count(";"), 5)
@@ -73,7 +79,10 @@ class HPOlib_interfaceTest(unittest.TestCase):
         proc.wait()
         self.assertEqual(proc.stderr.read(), "")
         output = proc.stdout.read().split(",")
-        result = float(output[3])
+        try:
+            result = float(output[3])
+        except:
+            print output
         additional = output[5]
         # Has num_run in the additional info
         self.assertEqual(additional.count(";"), 6)
@@ -92,7 +101,10 @@ class HPOlib_interfaceTest(unittest.TestCase):
             proc.wait()
             self.assertEqual(proc.stderr.read(), "")
             output = proc.stdout.read().split(",")
-            result = float(output[3])
+            try:
+                result = float(output[3])
+            except:
+                print output
             additional = output[5]
             results.append(result)
             self.assertEqual(additional.count(";"), 5)
@@ -109,7 +121,10 @@ class HPOlib_interfaceTest(unittest.TestCase):
         proc.wait()
         self.assertEqual(proc.stderr.read(), "")
         output = proc.stdout.read().split(",")
-        result = float(output[3])
+        try:
+            result = float(output[3])
+        except:
+            print output
         additional = output[5]
         # Has num_run in the additional info
         self.assertEqual(additional.count(";"), 11)

@@ -205,9 +205,9 @@ class Evaluator(object):
                                     for metric, value in errs.items()])
         additional_run_info += ";" + "duration: " + str(self.duration)
         additional_run_info += ";" + "num_run:" + num_run
-        print "Saved predictions with shapes %s, %s, %s for num_run %s" % \
-              (Y_optimization_pred.shape, Y_valid_pred.shape,
-               Y_test_pred.shape, num_run)
+        # print "Saved predictions with shapes %s, %s, %s for num_run %s" % \
+        #       (Y_optimization_pred.shape, Y_valid_pred.shape,
+        #        Y_test_pred.shape, num_run)
         return err, additional_run_info
 
     def predict_proba(self, X, model, task_type, Y_train=None):

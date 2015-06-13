@@ -29,7 +29,6 @@ class TestEvaluator(autosklearn.models.evaluator.Evaluator):
         if train:
             Y_pred = self.predict_function(self.X_train, self.model,
                                            self.task_type,
-                                           self.D.info['target_num'],
                                            self.Y_train)
             score = autosklearn.models.evaluator.calculate_score(
                 solution=self.Y_train, prediction=Y_pred,
@@ -39,7 +38,6 @@ class TestEvaluator(autosklearn.models.evaluator.Evaluator):
         else:
             Y_pred = self.predict_function(self.X_test, self.model,
                                            self.task_type,
-                                           self.D.info['target_num'],
                                            self.Y_train)
             score = autosklearn.models.evaluator.calculate_score(
                 solution=self.Y_test, prediction=Y_pred,
