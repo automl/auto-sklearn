@@ -1,5 +1,4 @@
 import copy
-import functools
 import unittest
 import os
 import shutil
@@ -8,12 +7,12 @@ import traceback
 
 import numpy as np
 from numpy.linalg import LinAlgError
+import sklearn.datasets
 
 from autosklearn.data.data_converter import convert_to_bin
 from autosklearn.data.data_manager import DataManager
 from autosklearn.models.holdout_evaluator import HoldoutEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
-from autosklearn.data.split_data import split_data
 from ParamSklearn.util import get_dataset
 
 N_TEST_RUNS = 10
@@ -252,6 +251,40 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         # This is a reasonable bound
         self.assertEqual(10, len(errors))
         self.assertLess(min(errors), 0.77)
+
+    def test_5000_classes(self):
+        weights = ([0.0002] * 4750) + ([0.0001] * 250)
+        X, Y = sklearn.datasets.make_classification(n_samples=10000,
+                                                    n_features=20,
+                                                    n_classes=5000,
+                                                    n_clusters_per_class=1,
+                                                    n_informative=15,
+                                                    n_redundant=5,
+                                                    n_repeated=0,
+                                                    weights=weights,
+                                                    flip_y=0,
+                                                    class_sep=1.0,
+                                                    hypercube=True,
+                                                    shift=None,
+                                                    scale=1.0,
+                                                    shuffle=True,
+                                                    random_state=1)
+
+        self.assertEqual(250, np.sum(np.bincount(Y) == 1))
+        D = Dummy()
+        D.info = {'metric': 'r2_metric', 'task': 'multiclass.classification',
+                  'is_sparse': False, 'target_num': 1}
+        D.data = {'X_train': X, 'Y_train': Y,
+                  'X_valid': X, 'X_test': X}
+        D.feat_type = ['numerical'] * 5000
+
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['extra_trees'],
+            include_preprocessors=['no_preprocessing'])
+        configuration = configuration_space.sample_configuration()
+        D_ = copy.deepcopy(D)
+        evaluator = HoldoutEvaluator(D_, configuration)
+        evaluator.fit()
 
     def _fit(self, evaluator):
         """Allow us to catch known and valid exceptions for all evaluate
