@@ -88,5 +88,16 @@ class Test(unittest.TestCase):
         self.assertListEqual(list(Y_valid), [1, 0])
         self.assertListEqual(list(Y_train), [0, 0, 0, 1])
 
+    def test_split_classification_many_imbalanced_classes(self):
+        for i in range(10):
+            X = np.array([range(20), range(20)]).transpose()
+            y = np.array((0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3,
+                          4, 5))
+            np.random.shuffle(y)
+            X_train, X_valid, Y_train, Y_valid = split_data(X, y,
+                                                            classification=True)
+            print X_train, Y_train
+            self.assertLessEqual(max(Y_valid), 1)
+
 if __name__ == "__main__":
     unittest.main()

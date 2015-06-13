@@ -42,6 +42,7 @@ class HoldoutEvaluator(Evaluator):
 
         score = calculate_score(self.Y_optimization, Y_optimization_pred,
                                 self.task_type, self.metric,
+                                self.D.info['target_num'],
                                 all_scoring_functions=self.all_scoring_functions)
 
         if hasattr(score, "__len__"):
@@ -52,3 +53,4 @@ class HoldoutEvaluator(Evaluator):
         if self.with_predictions:
             return err, Y_optimization_pred, Y_valid_pred, Y_test_pred
         return err
+

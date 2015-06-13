@@ -27,16 +27,24 @@ class TestEvaluator(autosklearn.models.evaluator.Evaluator):
     def predict(self, train=False):
 
         if train:
-            Y_pred = self.predict_function(self.X_train, self.model, self.task_type)
+            Y_pred = self.predict_function(self.X_train, self.model,
+                                           self.task_type,
+                                           self.D.info['target_num'],
+                                           self.Y_train)
             score = autosklearn.models.evaluator.calculate_score(
                 solution=self.Y_train, prediction=Y_pred,
                 task_type=self.task_type, metric=self.metric,
+                num_classes=self.D.info['target_num'],
                 all_scoring_functions=self.all_scoring_functions)
         else:
-            Y_pred = self.predict_function(self.X_test, self.model, self.task_type)
+            Y_pred = self.predict_function(self.X_test, self.model,
+                                           self.task_type,
+                                           self.D.info['target_num'],
+                                           self.Y_train)
             score = autosklearn.models.evaluator.calculate_score(
                 solution=self.Y_test, prediction=Y_pred,
                 task_type=self.task_type, metric=self.metric,
+                num_classes=self.D.info['target_num'],
                 all_scoring_functions=self.all_scoring_functions)
 
         if hasattr(score, "__len__"):

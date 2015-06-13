@@ -17,34 +17,10 @@ except:
     import pickle
 
 
-def predict_proba(X, model, task_type):
-    Y_pred = model.predict_proba(X, batch_size=1000)
-
-    if task_type == "multilabel.classification":
-        Y_pred = np.hstack(
-            [Y_pred[i][:, -1].reshape((-1, 1))
-             for i in range(len(Y_pred))])
-
-    elif task_type == "binary.classification":
-        if len(Y_pred.shape) != 1:
-            Y_pred = Y_pred[:, 1].reshape(-1, 1)
-
-    return Y_pred
-
-
-def predict_regression(X, model, task_type):
-    Y_pred = model.predict(X, batch_size=1000)
-
-    if len(Y_pred.shape) == 1:
-        Y_pred = Y_pred.reshape((-1, 1))
-
-    return Y_pred
-
-
-def calculate_score(solution, prediction, task_type, metric,
+def calculate_score(solution, prediction, task_type, metric, num_classes,
                     all_scoring_functions=False):
     if task_type == "multiclass.classification":
-        solution_binary = np.zeros((prediction.shape))
+        solution_binary = np.zeros((prediction.shape[0], num_classes))
         for i in range(solution_binary.shape[0]):
             label = solution[i]
             solution_binary[i, label] = 1
@@ -55,6 +31,10 @@ def calculate_score(solution, prediction, task_type, metric,
             solution = solution.reshape((-1, 1))
 
     scoring_func = getattr(libscores, metric)
+
+    if solution.shape != prediction.shape:
+        raise ValueError("Solution shape %s != prediction shape %s" %
+                         (solution.shape, prediction.shape))
 
     if all_scoring_functions:
         score = dict()
@@ -142,10 +122,10 @@ class Evaluator(object):
 
         if self.task_type == 'regression':
             self.model_class = ParamSklearnRegressor
-            self.predict_function = predict_regression
+            self.predict_function = self.predict_regression
         else:
             self.model_class = ParamSklearnClassifier
-            self.predict_function = predict_proba
+            self.predict_function = self.predict_proba
 
         if num_run is None:
             num_run = get_new_run_num()
@@ -225,4 +205,59 @@ class Evaluator(object):
                                     for metric, value in errs.items()])
         additional_run_info += ";" + "duration: " + str(self.duration)
         additional_run_info += ";" + "num_run:" + num_run
+        print "Saved predictions with shapes %s, %s, %s for num_run %s" % \
+              (Y_optimization_pred.shape, Y_valid_pred.shape,
+               Y_test_pred.shape, num_run)
         return err, additional_run_info
+
+    def predict_proba(self, X, model, task_type, Y_train=None):
+        Y_pred = model.predict_proba(X, batch_size=1000)
+
+        if task_type == "multilabel.classification":
+            Y_pred = np.hstack(
+                [Y_pred[i][:, -1].reshape((-1, 1))
+                 for i in range(len(Y_pred))])
+
+        elif task_type == "binary.classification":
+            if len(Y_pred.shape) != 1:
+                Y_pred = Y_pred[:, 1].reshape(-1, 1)
+
+        elif task_type == "multiclass.classification":
+            pass
+
+        Y_pred = self._ensure_prediction_array_sizes(Y_pred, Y_train)
+        return Y_pred
+
+    def predict_regression(self, X, model, task_type, Y_train=None):
+        Y_pred = model.predict(X, batch_size=1000)
+
+        if len(Y_pred.shape) == 1:
+            Y_pred = Y_pred.reshape((-1, 1))
+
+        return Y_pred
+
+    def _ensure_prediction_array_sizes(self, prediction, Y_train):
+        num_classes = self.D.info["target_num"]
+
+        if self.task_type == "multiclass.classification" and \
+                        prediction.shape[1] < num_classes:
+            classes = list(np.unique(self.D.data["Y_train"]))
+            if num_classes == prediction.shape[1]:
+                return prediction
+
+            if Y_train is not None:
+                classes = list(np.unique(Y_train))
+
+            mapping = dict()
+            for class_number in range(num_classes):
+                if class_number in classes:
+                    index = classes.index(class_number)
+                    mapping[index] = class_number
+            new_predictions = np.zeros((prediction.shape[0], num_classes))
+            for index in mapping:
+                class_index = mapping[index]
+                new_predictions[:, class_index] = prediction[:, index]
+
+            return new_predictions
+
+        return prediction

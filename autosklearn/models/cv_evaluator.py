@@ -52,7 +52,8 @@ class CVEvaluator(Evaluator):
 
             train_indices, test_indices = self.indices[i]
             opt_pred = self.predict_function(self.X_train[test_indices],
-                                             self.models[i], self.task_type)
+                                             self.models[i], self.task_type,
+                                             self.Y_train[train_indices])
 
             Y_optimization_pred[i] = opt_pred
             Y_targets[i] = self.Y_train[test_indices]
@@ -60,13 +61,15 @@ class CVEvaluator(Evaluator):
             if self.X_valid is not None:
                 X_valid = self.X_valid.copy()
                 valid_pred = self.predict_function(X_valid, self.models[i],
-                                                     self.task_type)
+                                                   self.task_type,
+                                                   self.Y_train[train_indices])
                 Y_valid_pred[i] = valid_pred
 
             if self.X_test is not None:
                 X_test = self.X_test.copy()
                 test_pred = self.predict_function(X_test, self.models[i],
-                                                    self.task_type)
+                                                  self.task_type,
+                                                  self.Y_train[train_indices])
                 Y_test_pred[i] = test_pred
 
         Y_optimization_pred = np.concatenate([Y_optimization_pred[i] for i in
@@ -92,6 +95,7 @@ class CVEvaluator(Evaluator):
         self.Y_optimization = Y_targets
         score = calculate_score(Y_targets, Y_optimization_pred,
                                 self.task_type, self.metric,
+                                self.D.info['target_num'],
                                 all_scoring_functions=self.all_scoring_functions)
 
         if hasattr(score, "__len__"):

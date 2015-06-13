@@ -1,10 +1,11 @@
 import copy
-import functools
+import os
 import unittest
 
 import numpy as np
 from numpy.linalg import LinAlgError
 
+from autosklearn.data.data_manager import DataManager
 from autosklearn.models.nested_cv_evaluator import NestedCVEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
 from ParamSklearn.util import get_dataset
@@ -27,7 +28,7 @@ class NestedCVEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {'metric': 'acc_metric', 'task': 'multiclass.classification',
-                  'is_sparse': False}
+                  'is_sparse': False, 'target_num': 3}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
@@ -89,6 +90,31 @@ class NestedCVEvaluator_Test(unittest.TestCase):
 
 
         self.assertGreater(num_models_better_than_random, 9)
+
+    def test_with_abalone(self):
+        dataset = "abalone"
+        dataset_dir = os.path.join(os.path.dirname(__file__), ".datasets")
+        D = DataManager(dataset, dataset_dir)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['extra_trees'],
+            include_preprocessors=['no_preprocessing'])
+
+        errors = []
+        for i in range(N_TEST_RUNS):
+            configuration = configuration_space.sample_configuration()
+            D_ = copy.deepcopy(D)
+            evaluator = NestedCVEvaluator(D_, configuration, inner_cv_folds=2,
+                                          outer_cv_folds=2)
+            if not self._fit(evaluator):
+                print
+                continue
+            err = evaluator.predict()
+            self.assertLess(err, 0.99)
+            self.assertTrue(np.isfinite(err))
+            errors.append(err)
+        # This is a reasonable bound
+        self.assertEqual(10, len(errors))
+        self.assertLess(min(errors), 0.77)
 
     def _fit(self, evaluator):
         return self.__fit(evaluator.fit)

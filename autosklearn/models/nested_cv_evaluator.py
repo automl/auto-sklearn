@@ -84,7 +84,8 @@ class NestedCVEvaluator(Evaluator):
             train_indices, test_indices = self.outer_indices[i]
             opt_pred = self.predict_function(self.X_train[test_indices],
                                              self.outer_models[i],
-                                             self.task_type)
+                                             self.task_type,
+                                             Y_train=self.Y_train[train_indices])
 
             Y_optimization_pred[i] = opt_pred
             Y_targets[i] = self.Y_train[test_indices]
@@ -93,19 +94,22 @@ class NestedCVEvaluator(Evaluator):
                 X_valid = self.X_valid.copy()
                 valid_pred = self.predict_function(X_valid,
                                                    self.outer_models[i],
-                                                   self.task_type)
+                                                   self.task_type,
+                                                   Y_train=self.Y_train[train_indices])
                 Y_valid_pred[i] = valid_pred
 
             if self.X_test is not None:
                 X_test = self.X_test.copy()
                 test_pred = self.predict_function(X_test, self.outer_models[i],
-                                                  self.task_type)
+                                                  self.task_type,
+                                                  Y_train=self.Y_train[train_indices])
                 Y_test_pred[i] = test_pred
 
         # Calculate the outer scores
         for i in range(self.outer_cv_folds):
             scores = calculate_score(Y_targets[i], Y_optimization_pred[i],
                                      self.task_type, self.metric,
+                                     self.D.info['target_num'],
                                      all_scoring_functions=self.all_scoring_functions)
             if self.all_scoring_functions:
                 for score_name in scores:
@@ -145,8 +149,10 @@ class NestedCVEvaluator(Evaluator):
                 Y_test = self.Y_train[inner_test_indices]
                 X_test = self.X_train[inner_test_indices]
                 model = self.inner_models[outer_fold][inner_fold]
-                Y_hat = self.predict_function(X_test, model, self.task_type)
+                Y_hat = self.predict_function(X_test, model, self.task_type,
+                                              Y_train=self.Y_train[inner_train_indices])
                 scores = calculate_score(Y_test, Y_hat, self.task_type, self.metric,
+                                         self.D.info['target_num'],
                                          all_scoring_functions=self.all_scoring_functions)
                 if self.all_scoring_functions:
                     for score_name in scores:

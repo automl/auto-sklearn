@@ -35,7 +35,8 @@ def build_ensemble(predictions_train, predictions_valid, predictions_test, true_
 def pruning(predictions, labels, n_best, task_type, metric):
     perf = np.zeros([predictions.shape[0]])
     for i, p in enumerate(predictions):
-        perf[i] = evaluator.calculate_score(labels, predictions, task_type, metric)
+        perf[i] = evaluator.calculate_score(labels, predictions, task_type,
+                                            metric, predictions.shape[1])
 
     indcies = np.argsort(perf)[perf.shape[0] - n_best:]
     return indcies
@@ -56,7 +57,10 @@ def original_ensemble_selection(predictions, labels, ensemble_size, task_type, m
         for idx in indices:
             ensemble.append(predictions[idx])
             order.append(idx)
-            ensemble_performance = evaluator.calculate_score(labels, np.array(ensemble).mean(axis=0), task_type, metric)
+            ensemble_ = np.array(ensemble).mean(axis=0)
+            ensemble_performance = evaluator.calculate_score(labels, ensemble_,
+                                                             task_type, metric,
+                                                             ensemble_.shape[1])
             trajectory.append(ensemble_performance)
         ensemble_size = ensemble_size - n_best
 
@@ -65,7 +69,10 @@ def original_ensemble_selection(predictions, labels, ensemble_size, task_type, m
         for j, pred in enumerate(predictions):
             ensemble.append(pred)
             ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-            scores[j] = evaluator.calculate_score(labels, ensemble_prediction, task_type, metric)
+            scores[j] = evaluator.calculate_score(labels,
+                                                  ensemble_prediction,
+                                                  task_type, metric,
+                                                  ensemble_prediction.shape[1])
             ensemble.pop()
         best = np.nanargmax(scores)
         ensemble.append(predictions[best])
@@ -90,7 +97,10 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric, do
         for idx in indices:
             ensemble.append(predictions[idx])
             order.append(idx)
-            ensemble_performance = evaluator.calculate_score(labels, np.array(ensemble).mean(axis=0), task_type, metric)
+            ensemble_ = np.array(ensemble).mean(axis=0)
+            ensemble_performance = evaluator.calculate_score(labels, ensemble_,
+                                                             task_type, metric,
+                                                             ensemble_.shape[1])
             trajectory.append(ensemble_performance)
         ensemble_size = ensemble_size - n_best
 
@@ -107,7 +117,10 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric, do
             #ensemble_prediction = np.mean(np.array(ensemble), axis=0)
             fant_ensemble_prediction = weighted_ensemble_prediction + (1. / float(s + 1)) * pred
 
-            scores[j] = evaluator.calculate_score(labels, fant_ensemble_prediction, task_type, metric)
+            scores[j] = evaluator.calculate_score(labels,
+                                                  fant_ensemble_prediction,
+                                                  task_type, metric,
+                                                  fant_ensemble_prediction.shape[1])
             # ensemble.pop()
         best = np.nanargmax(scores)
         ensemble.append(predictions[best])
@@ -217,7 +230,9 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
             predictions = np.load(os.path.join(dir_ensemble, model_name))
             print predictions.shape
             print true_labels.shape
-            score = evaluator.calculate_score(true_labels, predictions, task_type, metric)
+            score = evaluator.calculate_score(true_labels, predictions,
+                                              task_type, metric,
+                                              predictions.shape[1])
             model_names_to_scores[model_name] = score
 
             if ensemble_size is not None:

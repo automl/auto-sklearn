@@ -27,7 +27,8 @@ def weighted_ensemble_error(weights, *args):
     weighted_predictions = ensemble_prediction(predictions, weight_prime)
 
     score = evaluator.calculate_score(true_labels, weighted_predictions,
-                                     task_type, metric)
+                                     task_type, metric,
+                                     weighted_predictions.shape[1])
     return 1 - score
 
 
@@ -131,7 +132,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
         for f in dir_ensemble_list:
             predictions = np.load(os.path.join(dir_ensemble, f))
             score = evaluator.calculate_score(true_labels, predictions,
-                                     task_type, metric)
+                task_type, metric, predictions.shape[1])
 
             if ensemble_size is not None:
                 if score <= 0.001:

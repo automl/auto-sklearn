@@ -10,7 +10,7 @@ import numpy as np
 from numpy.linalg import LinAlgError
 
 from autosklearn.data.data_converter import convert_to_bin
-from autosklearn.models.evaluator import predict_proba
+from autosklearn.data.data_manager import DataManager
 from autosklearn.models.holdout_evaluator import HoldoutEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
 from autosklearn.data.split_data import split_data
@@ -33,7 +33,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {'metric': 'bac_metric', 'task': 'multiclass.classification',
-                  'is_sparse': False}
+                  'is_sparse': False, 'target_num': 3}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
@@ -69,7 +69,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {'metric': 'bac_metric', 'task': 'multiclass.classification',
-                  'is_sparse': False}
+                  'is_sparse': False, 'target_num': 3}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
@@ -117,7 +117,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {'metric': 'f1_metric', 'task': 'multilabel.classification',
-                  'is_sparse': False}
+                  'is_sparse': False, 'target_num': 3}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
@@ -162,7 +162,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {'metric': 'auc_metric', 'task': 'binary.classification',
-                  'is_sparse': False}
+                  'is_sparse': False, 'target_num': 2}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
@@ -200,7 +200,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {'metric': 'r2_metric', 'task': 'regression',
-                  'is_sparse': False}
+                  'is_sparse': False, 'target_num': 1}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical',
@@ -228,6 +228,30 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         print "Number of times it was worse than random guessing:" + str(
             np.sum(err > 1))
+
+    def test_with_abalone(self):
+        dataset = "abalone"
+        dataset_dir = os.path.join(os.path.dirname(__file__), ".datasets")
+        D = DataManager(dataset, dataset_dir)
+        configuration_space = get_configuration_space(D.info,
+            include_estimators=['extra_trees'],
+            include_preprocessors=['no_preprocessing'])
+
+        errors = []
+        for i in range(N_TEST_RUNS):
+            configuration = configuration_space.sample_configuration()
+            D_ = copy.deepcopy(D)
+            evaluator = HoldoutEvaluator(D_, configuration)
+            if not self._fit(evaluator):
+                print
+                continue
+            err = evaluator.predict()
+            self.assertLess(err, 0.99)
+            self.assertTrue(np.isfinite(err))
+            errors.append(err)
+        # This is a reasonable bound
+        self.assertEqual(10, len(errors))
+        self.assertLess(min(errors), 0.77)
 
     def _fit(self, evaluator):
         """Allow us to catch known and valid exceptions for all evaluate
@@ -283,7 +307,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {'metric': 'bac_metric', 'task': 'multiclass.classification',
-                  'is_sparse': False}
+                  'is_sparse': False, 'target_num': 3}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
@@ -312,14 +336,42 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
 
     def test_predict_proba_binary_classification(self):
-        class Dummy(object):
+        X_train, Y_train, X_test, Y_test = get_dataset('iris')
+
+        eliminate_class_two = Y_train != 2
+        X_train = X_train[eliminate_class_two]
+        Y_train = Y_train[eliminate_class_two]
+
+        eliminate_class_two = Y_test != 2
+        X_test = X_test[eliminate_class_two]
+        Y_test = Y_test[eliminate_class_two]
+
+        X_valid = X_test[:25, ]
+        Y_valid = Y_test[:25, ]
+        X_test = X_test[25:, ]
+        Y_test = Y_test[25:, ]
+
+        class Dummy2(object):
             def predict_proba(self, y, batch_size=200):
                 return np.array([[0.1, 0.9], [0.7, 0.3]])
 
-        model = Dummy()
+        model = Dummy2()
         task_type = "binary.classification"
 
-        pred = predict_proba(None, model, task_type)
+        D = Dummy()
+        D.info = {'metric': 'bac_metric', 'task': 'binary.classification',
+                  'is_sparse': False, 'target_num': 3}
+        D.data = {'X_train': X_train, 'Y_train': Y_train,
+                  'X_valid': X_valid, 'X_test': X_test}
+        D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
+
+        configuration_space = get_configuration_space(
+            D.info, include_estimators=['ridge'],
+            include_preprocessors=['select_rates'])
+        configuration = configuration_space.sample_configuration()
+
+        evaluator = HoldoutEvaluator(D, configuration)
+        pred = evaluator.predict_proba(None, model, task_type)
         expected = [[0.9], [0.3]]
         for i in range(len(expected)):
             self.assertEqual(expected[i], pred[i])

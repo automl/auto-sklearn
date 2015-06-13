@@ -18,11 +18,16 @@ def split_data(X, Y, classification=None):
     if classification is True and num_labels == 1:
         classes, y_indices = np.unique(Y, return_inverse=True)
         if np.min(np.bincount(y_indices)) < 2:
-            class_with_one_sample = np.argmin(np.bincount(y_indices))
-            sample_idx = np.argwhere(Y == class_with_one_sample)[0][0]
-            indices = np.ones(Y.shape, dtype=bool)
-            indices[sample_idx] = False
+            classes_with_one_sample = np.bincount(y_indices) < 2
+            sample_idxs = []
             Y_old = Y
+            indices = np.ones(Y.shape, dtype=bool)
+            for i, class_with_one_sample in enumerate(classes_with_one_sample):
+                if not class_with_one_sample:
+                    continue
+                sample_idx = np.argwhere(Y == classes[i])[0][0]
+                indices[sample_idx] = False
+                sample_idxs.append(sample_idx)
             Y = Y[indices]
 
     if num_labels > 1:
@@ -51,9 +56,11 @@ def split_data(X, Y, classification=None):
         if classification is True and num_labels == 1:
             try:
                 Y = Y_old
-                train_index[train_index >= sample_idx] += 1
-                valid_index[valid_index >= sample_idx] += 1
-                train_index = np.append(train_index, np.array(sample_idx))
+                for sample_idx in sorted(sample_idxs):
+                    train_index[train_index >= sample_idx] += 1
+                    valid_index[valid_index >= sample_idx] += 1
+                for sample_idx in sample_idxs:
+                    train_index = np.append(train_index, np.array(sample_idx))
             except UnboundLocalError:
                 pass
 
