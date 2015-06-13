@@ -208,7 +208,7 @@ class AutoML(multiprocessing.Process):
         ########################################################################
         # Start Hack
 
-        def convert_configuration_to_smac_string(self, configuration):
+        def convert_configuration_to_smac_string(configuration):
             """Convert configuration to string for SMAC option --initialChallengers.
 
             The expected format looks like this:
