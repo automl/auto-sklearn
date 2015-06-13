@@ -261,7 +261,7 @@ class AutoML(multiprocessing.Process):
                 config = {"balancing:strategy": 'none',
                           "classifier": 'ridge',
                           "imputation:strategy": 'median',
-                          "ridge:alpha": 1.0,
+                          "ridge:alpha": 0.1,
                           "ridge:tol": 0.001,
                           "ridge:fit_intercept": 'True',
                           "preprocessor": 'no_preprocessing',
