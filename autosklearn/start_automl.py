@@ -16,6 +16,7 @@ from autosklearn import submit_process
 from autosklearn.util import stopwatch
 
 from HPOlibConfigSpace.converters import pcs_parser
+from HPOlibConfigSpace.configuration_space import ConfigurationSpace, Configuration
 
 import autosklearn.util.logging_
 
@@ -202,6 +203,80 @@ class AutoML(multiprocessing.Process):
         else:
             initial_configurations = []
             self.logger.critical("Metafeatures encoded not calculated")
+
+
+        ########################################################################
+        # Start Hack
+
+        def convert_configuration_to_smac_string(self, configuration):
+            """Convert configuration to string for SMAC option --initialChallengers.
+
+            The expected format looks like this:
+
+            .. code:: bash
+
+                --initialChallengers "-alpha 1 -rho 1 -ps 0.1 -wp 0.00"
+            """
+            from StringIO import StringIO
+
+            config_string = StringIO()
+            config_string.write("--initial-challengers \"")
+
+            for hp_name in sorted(configuration):
+                value = configuration[hp_name]
+                if value is None:
+                    continue
+                config_string.write(" -%s '%s'" % (hp_name, value))
+
+            config_string.write("\"")
+            return config_string.getvalue()
+
+        if self.loaded_data_manager.info['task'] == \
+                'multiclass.classification' and \
+                self.loaded_data_manager.info['target_num'] >= 50:
+            if self.loaded_data_manager.info['is_sparse'] == 1:
+                config = {"balancing:strategy": 'weighting',
+                          "classifier": 'liblinear_svc',
+                          "imputation:strategy": 'median',
+                          "liblinear_svc:C": 1,
+                          "liblinear_svc:class_weight": 'None',
+                          "liblinear_svc:dual": 'False',
+                          "liblinear_svc:fit_intercept": 'True',
+                          "liblinear_svc:intercept_scaling": 1,
+                          "liblinear_svc:loss": 'l2',
+                          "liblinear_svc:multi_class": 'ovr',
+                          "liblinear_svc:penalty": 'l2',
+                          "liblinear_svc:tol": 0.0001,
+                          "preprocessor": 'no_preprocessing',
+                          "rescaling:strategy": 'none'}
+                try:
+                    configuration = Configuration(self.configuration_space,
+                                                  config)
+                    config_string = convert_configuration_to_smac_string(
+                        configuration)
+                    initial_configurations = [config_string] + initial_configurations
+                except:
+                    self.logger.error(str(e))
+            else:
+                config = {"balancing:strategy": 'none',
+                          "classifier": 'ridge',
+                          "imputation:strategy": 'median',
+                          "ridge:alpha": 1.0,
+                          "ridge:tol": 0.001,
+                          "preprocessor": 'no_preprocessing',
+                          "rescaling:strategy": 'none'}
+                try:
+                    configuration = Configuration(self.configuration_space,
+                                                  config)
+                    config_string = convert_configuration_to_smac_string(
+                        configuration)
+                    initial_configurations = [config_string] + initial_configurations
+                except Exception as e:
+                    self.logger.error(str(e))
+
+        # End hack
+        ########################################################################
+
 
         # == RUN SMAC
         stop.start_task("runSmac")
