@@ -121,3 +121,12 @@ class OneHotEncoderTest(unittest.TestCase):
         self.assertIsInstance(transformation, np.ndarray)
         assert_array_almost_equal(expected, transformation)
 
+    def test_transform_with_unknown_value(self):
+        input = np.array(((0, 1, 2, 3, 4, 5), (0, 1, 2, 3, 4, 5))).transpose()
+        ohe = OneHotEncoder()
+        ohe.fit(input)
+        test_data = np.array(((0, 1, 2, 6), (0, 1, 6, 7))).transpose()
+        output = ohe.transform(test_data).todense()
+        self.assertEqual(5, np.sum(output))
+
+
