@@ -1,0 +1,15 @@
+task = 'multiclass.classification'
+has_categorical = 1
+feat_type = 'Mixed'
+train_num = 2924
+metric = 'acc_metric'
+test_num = 1253
+target_type = 'Categorical'
+label_num = 28
+target_num = 28
+is_sparse = 0
+has_missing = 0
+usage = 'ParamSklearn Configuration for AutoML challenge 2015'
+feat_num = 8
+valid_num = 10
+name = 'abalone'
