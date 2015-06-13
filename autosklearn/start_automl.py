@@ -263,6 +263,7 @@ class AutoML(multiprocessing.Process):
                           "imputation:strategy": 'median',
                           "ridge:alpha": 1.0,
                           "ridge:tol": 0.001,
+                          "ridge:fit_intercept": 'True',
                           "preprocessor": 'no_preprocessing',
                           "rescaling:strategy": 'none'}
                 try:
