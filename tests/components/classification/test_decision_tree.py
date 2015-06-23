@@ -19,5 +19,5 @@ class DecisionTreetComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = _test_classifier_predict_proba(
                 DecisionTree, dataset='iris')
-            self.assertAlmostEqual(2.7631021115928571,
+            self.assertAlmostEqual(0.28069887755912964,
                 sklearn.metrics.log_loss(targets, predictions))

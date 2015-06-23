@@ -64,8 +64,8 @@ class Ridge(ParamSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        alpha = UniformFloatHyperparameter("alpha", 10 ** -7, 10 ** -1,
-                                           log=True, default=0.0001)
+        alpha = UniformFloatHyperparameter("alpha", 10 ** -5, 10.,
+                                           log=True, default=1.)
         fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
         tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default=1e-4,
                                          log=True)
