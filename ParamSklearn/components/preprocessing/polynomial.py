@@ -52,7 +52,7 @@ class PolynomialFeatures(ParamSklearnPreprocessingAlgorithm):
                 # this here suggests so http://scikit-learn.org/stable/modules/svm.html#tips-on-practical-use
                 'handles_sparse': True,
                 'input': (DENSE,),
-                'output': PREDICTIONS,
+                'output': DENSE,
                 # TODO find out what is best used here!
                 'preferred_dtype': None}
 
