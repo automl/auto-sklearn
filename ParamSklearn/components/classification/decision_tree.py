@@ -37,7 +37,7 @@ class DecisionTree(ParamSklearnClassificationAlgorithm):
 
     def fit(self, X, y, sample_weight=None):
         num_features = X.shape[1]
-        max_depth = max(1, self.max_depth * np.ceil(np.log2(num_features)))
+        max_depth = max(1, int(np.round(self.max_depth * num_features, 0)))
 
         self.estimator = DecisionTreeClassifier(
             criterion=self.criterion,
@@ -86,7 +86,7 @@ class DecisionTree(ParamSklearnClassificationAlgorithm):
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default="gini")
         max_features = Constant('max_features', 1.0)
-        max_depth = UniformFloatHyperparameter('max_depth', 0., 1., default=1.)
+        max_depth = UniformFloatHyperparameter('max_depth', 0., 2., default=0.5)
         min_samples_split = UniformIntegerHyperparameter(
             "min_samples_split", 2, 20, default=2)
         min_samples_leaf = UniformIntegerHyperparameter(

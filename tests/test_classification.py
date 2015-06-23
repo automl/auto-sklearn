@@ -121,6 +121,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
                 else:
                     print config
                     raise e
+            except MemoryError as e:
+                continue
 
     def test_configurations_sparse(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
@@ -175,7 +177,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(135, len(hyperparameters))
+        self.assertEqual(138, len(hyperparameters))
         # The four parameters which are always active are classifier,
         # preprocessor, imputation strategy and scaling strategy
         self.assertEqual(len(hyperparameters) - 5, len(conditions))

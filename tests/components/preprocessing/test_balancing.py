@@ -78,7 +78,8 @@ class BalancingComponentTest(unittest.TestCase):
                  ('libsvm_svc', LibSVM_SVC, 0.915, 0.937),
                  ('liblinear_svc', LibLinear_SVC, 0.920, 0.923),
                  ('sgd', SGD, 0.879, 0.906),
-                 ('ridge', Ridge, 0.868, 0.880)]:
+                 ('ridge', Ridge, 0.89071038251366119,
+                                  0.91013964784456591)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
                 X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
