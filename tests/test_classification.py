@@ -177,7 +177,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(138, len(hyperparameters))
+        self.assertEqual(136, len(hyperparameters))
         # The four parameters which are always active are classifier,
         # preprocessor, imputation strategy and scaling strategy
         self.assertEqual(len(hyperparameters) - 5, len(conditions))
@@ -232,7 +232,6 @@ class TestParamSklearnClassifier(unittest.TestCase):
             "  classifier, Value: liblinear_svc\n"
             "  imputation:strategy, Value: mean\n"
             "  liblinear_svc:C, Value: 1.0\n"
-            "  liblinear_svc:class_weight, Value: None\n"
             "  liblinear_svc:dual, Constant: False\n"
             "  liblinear_svc:fit_intercept, Constant: True\n"
             "  liblinear_svc:intercept_scaling, Constant: 1\n"

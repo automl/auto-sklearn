@@ -11,8 +11,8 @@ from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 
 
 class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
-    def __init__(self, C, kernel, gamma, shrinking, tol, class_weight, max_iter,
-                 degree=3, coef0=0, random_state=None):
+    def __init__(self, C, kernel, gamma, shrinking, tol, max_iter,
+                 class_weight=None, degree=3, coef0=0, random_state=None):
         self.C = C
         self.kernel = kernel
         self.degree = degree
@@ -110,9 +110,6 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
         tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default=1e-4,
                                          log=True)
         # cache size is not a hyperparameter, but an argument to the program!
-        class_weight = CategoricalHyperparameter("class_weight",
-                                                 ["None", "auto"],
-                                                 default="None")
         max_iter = UnParametrizedHyperparameter("max_iter", -1)
 
         cs = ConfigurationSpace()
@@ -123,7 +120,6 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
         cs.add_hyperparameter(coef0)
         cs.add_hyperparameter(shrinking)
         cs.add_hyperparameter(tol)
-        cs.add_hyperparameter(class_weight)
         cs.add_hyperparameter(max_iter)
 
         degree_depends_on_poly = EqualsCondition(degree, kernel, "poly")

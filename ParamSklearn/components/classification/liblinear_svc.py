@@ -15,7 +15,7 @@ class LibLinear_SVC(ParamSklearnClassificationAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
     # TODO: maybe add dual and crammer-singer?
     def __init__(self, penalty, loss, dual, tol, C, multi_class,
-                 fit_intercept, intercept_scaling, class_weight,
+                 fit_intercept, intercept_scaling, class_weight=None,
                  random_state=None):
         self.penalty = penalty
         self.loss = loss
@@ -100,10 +100,7 @@ class LibLinear_SVC(ParamSklearnClassificationAlgorithm):
         # These are set ad-hoc
         fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
         intercept_scaling = UnParametrizedHyperparameter("intercept_scaling", 1)
-        # This does not allow for other resampling methods!
-        class_weight = CategoricalHyperparameter("class_weight",
-                                                 ["None", "auto"],
-                                                 default="None")
+
         cs = ConfigurationSpace()
         cs.add_hyperparameter(penalty)
         cs.add_hyperparameter(loss)
@@ -113,7 +110,6 @@ class LibLinear_SVC(ParamSklearnClassificationAlgorithm):
         cs.add_hyperparameter(multi_class)
         cs.add_hyperparameter(fit_intercept)
         cs.add_hyperparameter(intercept_scaling)
-        cs.add_hyperparameter(class_weight)
         penalty_and_loss = ForbiddenAndConjunction(
             ForbiddenEqualsClause(penalty, "l1"),
             ForbiddenEqualsClause(loss, "l1")
