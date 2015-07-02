@@ -1,14 +1,14 @@
 import os
 import unittest
 
-import autosklearn.data.chelper_functions as chelper_function
+import autosklearn.data.competition_c_functions as competition_c_functions
 
 
 class CHelperFunctionTest(unittest.TestCase):
     def test_read_sparse_binary_file(self):
         filename = os.path.join(os.path.dirname(__file__),
                                 "../.data/dorothea/dorothea_train.data")
-        data = chelper_function.read_sparse_binary_file(
+        data = competition_c_functions.read_sparse_binary_file(
             filename, 800, 100000)
 
         print data.indices

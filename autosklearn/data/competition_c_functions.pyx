@@ -250,18 +250,3 @@ def file_to_array (filename, verbose=False):
         if verbose: print ("Converting {} to correct array...".format(filename))
         data = [lines[i].strip().split() for i in range (len(lines))]
     return data
-
-
-def predict_RAM_usage(X, categorical, size_in_byte=4):
-    """Return estimated RAM usage of dataset after OneHotEncoding in bytes."""
-    estimated_columns = 0
-    for i, cat in enumerate(categorical):
-        if cat:
-            unique_values = np.unique(X[:, i])
-            num_unique_values = np.sum(np.isfinite(unique_values))
-            estimated_columns += num_unique_values
-        else:
-            estimated_columns += 1
-    estimated_ram = estimated_columns * X.shape[0] * size_in_byte
-    return estimated_ram
-

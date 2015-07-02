@@ -22,7 +22,7 @@ def get_logger(name, outputdir=None):
         root.addHandler(console)
 
     if outputdir is not None:
-        logger_file = os.path.join(outputdir, '%s.log' % name)
+        logger_file = os.path.join(outputdir, '%s.log' % str(name))
 
         add = True
         for handler in root.handlers:

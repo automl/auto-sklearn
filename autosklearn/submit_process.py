@@ -10,18 +10,15 @@ import autosklearn.cli.SMAC_cli_holdout
 def submit_call(call, seed, log_dir=None):
     print "Calling: " + call
     call = shlex.split(call)
-    try:
-        if log_dir is None:
-            proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'))
-        else:
-            proc = subprocess.Popen(call, stdout=open(os.path.join(log_dir,
-                                    "ensemble_out_%d.log" % seed), 'w'),
-                                    stderr=open(os.path.join(log_dir,
-                                    "ensemble_err_%d.log" % seed), 'w'))
-        #proc_id = proc.pid
-    except OSError as e:
-        print e
-        return -1
+
+    if log_dir is None:
+        proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'))
+    else:
+        proc = subprocess.Popen(call, stdout=open(os.path.join(log_dir,
+                                "ensemble_out_%d.log" % seed), 'w'),
+                                stderr=open(os.path.join(log_dir,
+                                "ensemble_err_%d.log" % seed), 'w'))
+
     return proc
 
 
@@ -41,19 +38,17 @@ def get_algo_exec(runsolver_limit, runsolver_delay, memory_limit, *args):
     return call
 
 
-def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
+def run_smac(dataset_name, dataset, tmp_dir, searchspace, instance_file, limit,
              cutoff_time, seed, memory_limit, initial_challengers=None, ):
     if limit <= 0:
         # It makes no sense to start building ensembles_statistics
         return
     limit = int(limit)
     wallclock_limit = int(limit)
-    if cutoff_time < 10:
-        # It makes no sense to use less than 10sec
-        # We try to do at least one run within the whole runtime
-        cutoff_time = int(wallclock_limit) - 5
 
-    runsolver_softlimit = cutoff_time - 35
+    # It makes no sense to use less than 5sec
+    # We try to do at least one run within the whole runtime
+    runsolver_softlimit = max(5, cutoff_time - 35)
     runsolver_hardlimit_delay = 30
 
     algo_exec = get_algo_exec(runsolver_softlimit,
@@ -64,7 +59,7 @@ def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
     scenario = {'cli-log-all-calls': 'false',
                 'console-log-level': 'DEBUG',
                 'log-level': 'DEBUG',
-                'cutoffTime': str(cutoff_time),
+                'cutoffTime': str(runsolver_softlimit),
                 'wallclock-limit': str(wallclock_limit),
                 'intraInstanceObj': 'MEAN',
                 'runObj': 'QUALITY',
@@ -88,8 +83,7 @@ def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
                 'execDir': tmp_dir,
                 'transform-crashed-quality-value': '2',
                 'instances': instance_file}
-    scenario_file = os.path.join(tmp_dir, "%s.scenario" %
-                                 os.path.split(dataset)[1])
+    scenario_file = os.path.join(tmp_dir, "%s.scenario" % dataset_name)
     scenario_file_lock = scenario_file + ".lock"
     with lockfile.LockFile(scenario_file_lock):
         if not os.path.exists(scenario_file):
@@ -108,7 +102,8 @@ def run_smac(dataset, tmp_dir, searchspace, instance_file, limit,
 
 
 def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
-                         output_dir, ensemble_size, ensemble_nbest, seed):
+                         output_dir, ensemble_size, ensemble_nbest, seed,
+                         ensemble_indices_output_dir):
     if limit <= 0:
         # It makes no sense to start building ensembles_statistics
         return
@@ -119,7 +114,7 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
 
     call = " ".join(["python", wrapper_exec, tmp_dir, dataset_name,
                         task_type, metric, str(limit-5), output_dir,
-                        str(ensemble_size), str(seed)])
+                        str(ensemble_size), str(seed), ensemble_indices_output_dir])
 
     # Runsolver does strange things if the time limit is negative. Set it to
     # be at least one (0 means infinity)

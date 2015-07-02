@@ -38,9 +38,7 @@ if __name__ == "__main__":
             sys.exit(1)
         mode_args = {'fold': fold, 'folds': folds}
 
-    dataset = os.path.basename(dataset_info)
-    data_dir = os.path.dirname(dataset_info)
 
-    base_interface.main(dataset, data_dir, mode, seed, params, mode_args=mode_args)
+    base_interface.main(dataset_info, mode, seed, params, mode_args=mode_args)
 
     sys.exit(0)

@@ -12,7 +12,7 @@ import time
 import logging
 import numpy as np
 
-from autosklearn.data import data_io
+from autosklearn.data import util as data_util
 from autosklearn.models import evaluator
 import autosklearn.util.stopwatch
 
@@ -218,10 +218,10 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir, ensemb
 
         # Save predictions for valid and test data set
         filename_test = os.path.join(output_dir, basename + '_valid_' + str(index_run).zfill(3) + '.predict')
-        data_io.write(os.path.join(predictions_dir, filename_test), Y_valid)
+        data_util.save_predictions(os.path.join(predictions_dir, filename_test), Y_valid)
 
         filename_test = os.path.join(output_dir, basename + '_test_' + str(index_run).zfill(3) + '.predict')
-        data_io.write(os.path.join(predictions_dir, filename_test), Y_test)
+        data_util.save_predictions(os.path.join(predictions_dir, filename_test), Y_test)
 
         current_num_models = len(dir_ensemble_list)
         watch.stop_task("ensemble_iter_" + str(index_run))

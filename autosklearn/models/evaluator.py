@@ -185,19 +185,21 @@ class Evaluator(object):
         with open(pred_dump_name_template % ("ensemble", seed, "ensemble"), "w") as fh:
             pickle.dump(Y_optimization_pred.astype(np.float32), fh, -1)
 
-        valid_output_dir = os.path.join(self.output_dir,
-                                        "predictions_valid_%s" % seed)
-        if not os.path.exists(valid_output_dir):
-            os.makedirs(valid_output_dir)
-        with open(pred_dump_name_template % ("valid", seed, "valid"), "w") as fh:
-            pickle.dump(Y_valid_pred.astype(np.float32), fh, -1)
+        if Y_valid_pred is not None:
+            valid_output_dir = os.path.join(self.output_dir,
+                                            "predictions_valid_%s" % seed)
+            if not os.path.exists(valid_output_dir):
+                os.makedirs(valid_output_dir)
+            with open(pred_dump_name_template % ("valid", seed, "valid"), "w") as fh:
+                pickle.dump(Y_valid_pred.astype(np.float32), fh, -1)
 
-        test_output_dir = os.path.join(self.output_dir,
-                                       "predictions_test_%s" % seed)
-        if not os.path.exists(test_output_dir):
-            os.makedirs(test_output_dir)
-        with open(pred_dump_name_template % ("test", seed, "test"), "w") as fh:
-            pickle.dump(Y_test_pred.astype(np.float32), fh, -1)
+        if Y_test_pred is not None:
+            test_output_dir = os.path.join(self.output_dir,
+                                           "predictions_test_%s" % seed)
+            if not os.path.exists(test_output_dir):
+                os.makedirs(test_output_dir)
+            with open(pred_dump_name_template % ("test", seed, "test"), "w") as fh:
+                pickle.dump(Y_test_pred.astype(np.float32), fh, -1)
 
         self.duration = time.time() - self.starttime
         err = errs[self.D.info['metric']]

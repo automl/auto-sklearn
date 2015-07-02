@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 from numpy.linalg import LinAlgError
 
-from autosklearn.data.data_manager import DataManager
+from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.models.cv_evaluator import CVEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
 from ParamSklearn.util import get_dataset
@@ -132,7 +132,7 @@ class CVEvaluator_Test(unittest.TestCase):
     def test_with_abalone(self):
         dataset = "abalone"
         dataset_dir = os.path.join(os.path.dirname(__file__), ".datasets")
-        D = DataManager(dataset, dataset_dir)
+        D = CompetitionDataManager(dataset, dataset_dir)
         configuration_space = get_configuration_space(D.info,
             include_estimators=['extra_trees'],
             include_preprocessors=['no_preprocessing'])

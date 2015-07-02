@@ -10,7 +10,7 @@ import lockfile
 
 from HPOlibConfigSpace import configuration_space
 
-from autosklearn.data.data_manager import DataManager
+from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.models.evaluator import get_new_run_num
 from autosklearn.models.holdout_evaluator import HoldoutEvaluator
 from autosklearn.models.cv_evaluator import CVEvaluator
@@ -19,8 +19,14 @@ from autosklearn.models.nested_cv_evaluator import NestedCVEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
 
 
-def store_and_or_load_data(outputdir, dataset, data_dir):
-    save_path = os.path.join(outputdir, dataset + "_Manager.pkl")
+def store_and_or_load_data(dataset_info, outputdir):
+    if dataset_info.endswith(".pkl"):
+        save_path = dataset_info
+    else:
+        dataset = os.path.basename(dataset_info)
+        data_dir = os.path.dirname(dataset_info)
+        save_path = os.path.join(outputdir, dataset + "_Manager.pkl")
+
     if not os.path.exists(save_path):
         lock = lockfile.LockFile(save_path)
         while not lock.i_am_locking():
@@ -33,8 +39,8 @@ def store_and_or_load_data(outputdir, dataset, data_dir):
         # It is not yet sure, whether the file already exists
         try:
             if not os.path.exists(save_path):
-                D = DataManager(dataset, data_dir, verbose=True,
-                                encode_labels=True)
+                D = CompetitionDataManager(dataset, data_dir, verbose=True,
+                                           encode_labels=True)
                 fh = open(save_path, 'w')
                 pickle.dump(D, fh, -1)
                 fh.close()
@@ -66,7 +72,7 @@ def empty_signal_handler(signum, frame):
 signal.signal(15, signal_handler)
 
 
-def main(dataset, data_dir, mode, seed, params, mode_args=None):
+def main(dataset_info, mode, seed, params, mode_args=None):
     """This command line interface has three different operation modes:
 
     * CV: useful for the Tweakathon
@@ -95,8 +101,7 @@ def main(dataset, data_dir, mode, seed, params, mode_args=None):
 
     output_dir = os.getcwd()
 
-    D = store_and_or_load_data(data_dir=data_dir,
-                               dataset=dataset,
+    D = store_and_or_load_data(dataset_info=dataset_info,
                                outputdir=output_dir)
 
     cs = get_configuration_space(D.info)
@@ -114,6 +119,11 @@ def main(dataset, data_dir, mode, seed, params, mode_args=None):
         evaluator.fit()
         signal.signal(15, empty_signal_handler)
         evaluator.finish_up()
+        model_directory = os.path.join(os.getcwd(), "models_%d" % seed)
+        if os.path.exists(model_directory):
+            model_filename = os.path.join(model_directory, "%s.model" % num_run)
+            with open(model_filename, "w") as fh:
+                pickle.dump(evaluator.model, fh, -1)
 
     elif mode == 'test':
         evaluator = TestEvaluator(D, configuration,

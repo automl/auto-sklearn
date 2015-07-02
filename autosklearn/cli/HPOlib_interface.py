@@ -11,7 +11,6 @@ if __name__ == "__main__":
     args, params = parse_cli()
 
     dataset = args['dataset']
-    data_dir = args['data_dir']
     mode = args['mode']
     seed = args.get('seed')
     fold = int(args['fold'])
@@ -44,4 +43,4 @@ if __name__ == "__main__":
     else:
         raise ValueError(mode)
 
-    base_interface.main(dataset, data_dir, mode, seed, params, mode_args=mode_args)
+    base_interface.main(dataset, mode, seed, params, mode_args=mode_args)

@@ -13,6 +13,7 @@ class HPOlib_interfaceTest(unittest.TestCase):
     def setUp(self):
         self.data_dir = os.path.join(os.path.dirname(__file__), "../.data")
         self.dataset = "31_bac"
+        self.dataset_string = os.path.join(self.data_dir, self.dataset)
         self.param_string = " --params " \
                             "-balancing:strategy none " \
                             "-classifier random_forest " \
@@ -28,10 +29,18 @@ class HPOlib_interfaceTest(unittest.TestCase):
                             "-random_forest:n_estimators 100 " \
                             "-rescaling:strategy min/max"
 
+    def tearDown(self):
+        try:
+            manager = os.path.join(os.path.dirname(__file__),
+                                   "%s_Manager.pkl" % self.dataset)
+            os.remove(manager)
+        except:
+            pass
+
     def test_holdout(self):
         call = "python -m autosklearn.cli.HPOlib_interface --dataset %s " \
-               "--data_dir %s --fold 0 --folds 1 --seed 1 --mode holdout %s" % \
-               (self.dataset, self.data_dir, self.param_string)
+               "--fold 0 --folds 1 --seed 1 --mode holdout %s" % \
+               (self.dataset_string, self.param_string)
         proc = subprocess.Popen(call, shell=True,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
@@ -51,9 +60,9 @@ class HPOlib_interfaceTest(unittest.TestCase):
 
     def test_testset(self):
         call = "python -m autosklearn.cli.HPOlib_interface --dataset %s " \
-               "--data_dir %s --fold 0 --folds 1 --test True --seed 1 " \
+               "--fold 0 --folds 1 --test True --seed 1 " \
                "--mode test %s" % \
-               (self.dataset, self.data_dir, self.param_string)
+               (self.dataset_string, self.param_string)
         proc = subprocess.Popen(call, shell=True,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
@@ -70,9 +79,9 @@ class HPOlib_interfaceTest(unittest.TestCase):
 
     def test_cv(self):
         call = "python -m autosklearn.cli.HPOlib_interface --dataset %s " \
-               "--data_dir %s --fold 0 --folds 1 --seed 1 " \
+               "--fold 0 --folds 1 --seed 1 " \
                "--mode 3cv %s" % \
-               (self.dataset, self.data_dir, self.param_string)
+               (self.dataset_string, self.param_string)
         proc = subprocess.Popen(call, shell=True,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
@@ -92,9 +101,9 @@ class HPOlib_interfaceTest(unittest.TestCase):
         results = []
         for fold in range(3):
             call = "python -m autosklearn.cli.HPOlib_interface --dataset %s " \
-                   "--data_dir %s --fold %d --folds 3 --mode cv --seed 1 " \
+                   "--fold %d --folds 3 --mode cv --seed 1 " \
                    "%s" % \
-                   (self.dataset, self.data_dir, fold, self.param_string)
+                   (self.dataset_string, fold, self.param_string)
             proc = subprocess.Popen(call, shell=True,
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
@@ -112,9 +121,9 @@ class HPOlib_interfaceTest(unittest.TestCase):
 
     def test_nested_cv(self):
         call = "python -m autosklearn.cli.HPOlib_interface --dataset %s " \
-               "--data_dir %s --fold 0 --folds 1 --seed 1 " \
+               "--fold 0 --folds 1 --seed 1 " \
                "--mode 3/3-nested-cv %s" % \
-               (self.dataset, self.data_dir, self.param_string)
+               (self.dataset_string, self.param_string)
         proc = subprocess.Popen(call, shell=True,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
