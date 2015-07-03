@@ -136,7 +136,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         y : array of shape = [n_samples] or [n_samples, n_outputs]
             The predicted classes.
         """
-        return super(AutoSklearnClassifier, self).fit(X)
+        return super(AutoSklearnClassifier, self).predict(X)
 
 
 class AutoSklearnRegressor(autosklearn.automl.AutoML):
