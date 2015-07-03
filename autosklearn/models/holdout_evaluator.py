@@ -1,7 +1,7 @@
-import numpy as np
-
-from autosklearn.data.split_data import split_data, get_CV_fold
+from autosklearn.data.split_data import split_data
 from autosklearn.models.evaluator import Evaluator, calculate_score
+
+from autosklearn.constants import *
 
 
 class HoldoutEvaluator(Evaluator):
@@ -15,7 +15,7 @@ class HoldoutEvaluator(Evaluator):
             output_y_test=output_y_test,
             num_run=num_run)
 
-        classification = "classification" in Datamanager.info['task'].lower()
+        classification =  Datamanager.info['task'] in CLASSIFICATION_TASKS
         self.X_train, self.X_optimization, self.Y_train, self.Y_optimization = \
             split_data(Datamanager.data['X_train'],
                        Datamanager.data['Y_train'],

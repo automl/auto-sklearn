@@ -12,13 +12,15 @@ import time
 import psutil
 
 
-import autosklearn.start_automl
+import autosklearn.automl
 import autosklearn.util.check_pid
 from autosklearn.util import logging_
 from autosklearn.util import options
 
 
 if __name__ == "__main__":
+    raise NotImplementedError("This does not work at the moment. Please wait "
+                              "until the refactoring is done!")
     logging_.setup()
     parser = options.get_options()
     args = parser.parse_args()
@@ -88,15 +90,16 @@ if __name__ == "__main__":
     time_spent_so_far = time.time() - start_time
     time_left_for_smac = time_limit - time_spent_so_far
     queue = Queue()
-    automl = autosklearn.start_automl.AutoML(
-        queue, args.dataset_name, args.data_dir, tmp_dataset_dir,
+    automl = autosklearn.automl.AutoML(
+        args.dataset_name, args.data_dir, tmp_dataset_dir,
         output_dir, time_left_for_smac, args.per_run_time_limit,
         log_dir=tmp_dataset_dir, ensemble_size=args.ensemble_size,
         ensemble_nbest=args.ensemble_nbest,
         initial_configurations_via_metalearning=args
         .metalearning_configurations, seed=args.seed,
         ml_memory_limit=args.ml_memory_limit,
-        metadata_directory=args.metadata_directory)
+        metadata_directory=args.metadata_directory,
+        queue=queue)
     automl.start_automl()
 
     [time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles] \

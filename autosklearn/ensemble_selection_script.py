@@ -21,6 +21,7 @@ import numpy as np
 from autosklearn.data import util as data_util
 from autosklearn.models import evaluator
 from autosklearn.util.stopwatch import StopWatch
+from autosklearn.constants import *
 
 
 def build_ensemble(predictions_train, predictions_valid, predictions_test, true_labels, ensemble_size, task_type, metric):
@@ -157,6 +158,8 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
          ensemble_size=None, seed=1, indices_output_dir="."):
     watch = StopWatch()
     watch.start_task("ensemble_builder")
+
+    task_type = STRING_TO_TASK_TYPES[task_type]
 
     used_time = 0
     time_iter = 0

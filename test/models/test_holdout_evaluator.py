@@ -14,6 +14,7 @@ from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.models.holdout_evaluator import HoldoutEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
 from ParamSklearn.util import get_dataset
+from autosklearn.constants import *
 
 N_TEST_RUNS = 10
 
@@ -31,7 +32,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         Y_test = Y_test[25:,]
 
         D = Dummy()
-        D.info = {'metric': 'bac_metric', 'task': 'multiclass.classification',
+        D.info = {'metric': 'bac_metric', 'task': MULTICLASS_CLASSIFICATION,
                   'is_sparse': False, 'target_num': 3}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
@@ -67,7 +68,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         Y_test = Y_test[25:, ]
 
         D = Dummy()
-        D.info = {'metric': 'bac_metric', 'task': 'multiclass.classification',
+        D.info = {'metric': 'bac_metric', 'task': MULTICLASS_CLASSIFICATION,
                   'is_sparse': False, 'target_num': 3}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
@@ -115,7 +116,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         Y_test = Y_test[25:, ]
 
         D = Dummy()
-        D.info = {'metric': 'f1_metric', 'task': 'multilabel.classification',
+        D.info = {'metric': 'f1_metric', 'task': MULTILABEL_CLASSIFICATION,
                   'is_sparse': False, 'target_num': 3}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
@@ -160,7 +161,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         Y_test = Y_test[25:, ]
 
         D = Dummy()
-        D.info = {'metric': 'auc_metric', 'task': 'binary.classification',
+        D.info = {'metric': 'auc_metric', 'task': BINARY_CLASSIFICATION,
                   'is_sparse': False, 'target_num': 2}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
@@ -198,7 +199,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         Y_test = Y_test[200:, ]
 
         D = Dummy()
-        D.info = {'metric': 'r2_metric', 'task': 'regression',
+        D.info = {'metric': 'r2_metric', 'task': REGRESSION,
                   'is_sparse': False, 'target_num': 1}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
@@ -272,7 +273,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         self.assertEqual(250, np.sum(np.bincount(Y) == 1))
         D = Dummy()
-        D.info = {'metric': 'r2_metric', 'task': 'multiclass.classification',
+        D.info = {'metric': 'r2_metric', 'task': MULTICLASS_CLASSIFICATION,
                   'is_sparse': False, 'target_num': 1}
         D.data = {'X_train': X, 'Y_train': Y,
                   'X_valid': X, 'X_test': X}
@@ -339,7 +340,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         Y_test = Y_test[25:, ]
 
         D = Dummy()
-        D.info = {'metric': 'bac_metric', 'task': 'multiclass.classification',
+        D.info = {'metric': 'bac_metric', 'task': MULTICLASS_CLASSIFICATION,
                   'is_sparse': False, 'target_num': 3}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
@@ -389,10 +390,10 @@ class HoldoutEvaluator_Test(unittest.TestCase):
                 return np.array([[0.1, 0.9], [0.7, 0.3]])
 
         model = Dummy2()
-        task_type = "binary.classification"
+        task_type = BINARY_CLASSIFICATION
 
         D = Dummy()
-        D.info = {'metric': 'bac_metric', 'task': 'binary.classification',
+        D.info = {'metric': 'bac_metric', 'task': task_type,
                   'is_sparse': False, 'target_num': 3}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}

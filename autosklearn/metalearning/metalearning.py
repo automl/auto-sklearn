@@ -9,6 +9,7 @@ import pyMetaLearn.optimizers.metalearn_optimizer.metalearner as \
     metalearner
 
 from autosklearn.util import logging_
+from autosklearn.constants import *
 logger = logging_.get_logger(__name__)
 
 
@@ -63,6 +64,8 @@ class MetaLearning(object):
     def create_metalearning_string_for_smac_call(self, configuration_space,
             dataset_name, metric, task, sparse, num_initial_configurations,
             metadata_directory):
+        task = TASK_TYPES_TO_STRING[task]
+
         if self._metafeatures_encoded_labels is None or \
                 self._metafeatures_labels is None:
             raise ValueError("Please call "

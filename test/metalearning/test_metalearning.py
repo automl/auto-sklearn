@@ -3,6 +3,7 @@ from ParamSklearn.util import get_dataset
 
 from autosklearn.metalearning.metalearning import MetaLearning
 from autosklearn.models.paramsklearn import get_configuration_space
+from autosklearn.constants import *
 
 
 class MetafeatureValueDummy(object):
@@ -87,7 +88,7 @@ class Test(unittest.TestCase):
         for metric in initial_challengers:
             configuration_space = get_configuration_space(
                 {'metric': metric,
-                 'task': 'multiclass.classification',
+                 'task': MULTICLASS_CLASSIFICATION,
                  'is_sparse': False}, include_preprocessors=['no_preprocessing'])
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset_name)
@@ -101,7 +102,7 @@ class Test(unittest.TestCase):
             initial_configuration_strings_for_smac = \
                 ml.create_metalearning_string_for_smac_call(
                     configuration_space, dataset_name, metric,
-                    'multiclass.classification', False, 1, None)
+                    MULTICLASS_CLASSIFICATION, False, 1, None)
 
             print metric
             self.assertEqual(initial_challengers[metric],

@@ -7,6 +7,7 @@ import unittest
 import numpy as np
 
 import autosklearn.ensemble_script
+from autosklearn.constants import *
 
 N_TEST_RUNS = 10
 
@@ -28,7 +29,7 @@ class Test(unittest.TestCase):
         weights /= weights.sum()
 
         metric = "f1_metric"
-        task_type = "multiclass.classification"
+        task_type = MULTICLASS_CLASSIFICATION
 
         weights = autosklearn.ensemble_script.weighted_ensemble(predictions, true_labels, task_type, metric, weights)
 
@@ -69,7 +70,7 @@ class Test(unittest.TestCase):
         weights /= weights.sum()
 
         metric = "f1_metric"
-        task_type = "multiclass.classification"
+        task_type = MULTICLASS_CLASSIFICATION
 
         err = autosklearn.ensemble_script.weighted_ensemble_error(weights, predictions, true_labels, metric, task_type)
 

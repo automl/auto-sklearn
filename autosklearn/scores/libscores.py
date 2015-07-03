@@ -34,6 +34,9 @@ from glob import glob
 import platform
 import psutil
 
+from autosklearn.constants import *
+
+
 if (os.name == "nt"):
     filesep = '\\'
 else:
@@ -85,7 +88,7 @@ def normalize_array (solution, prediction):
     #new_prediction = np.power(new_prediction, (1./10))
     return [new_solution, new_prediction]
     
-def binarize_predictions(array, task='binary.classification'):
+def binarize_predictions(array, task=BINARY_CLASSIFICATION):
     ''' Turn predictions into decisions {0,1} by selecting the class with largest 
     score for multiclass problems and thresholding at 0.5 for other cases.'''
     # add a very small random value as tie breaker (a bit bad because this changes the score every time)
@@ -94,7 +97,7 @@ def binarize_predictions(array, task='binary.classification'):
     #np.random.seed(sum(array.shape))
     #array = array + eps*np.random.rand(array.shape[0],array.shape[1])
     bin_array = np.zeros(array.shape)
-    if (task != 'multiclass.classification') or (array.shape[1]==1): 
+    if (task != MULTICLASS_CLASSIFICATION) or (array.shape[1]==1):
         bin_array[array>=0.5] = 1
     else:        
         sample_num=array.shape[0]
@@ -165,14 +168,14 @@ def mvmean(R, axis=0):
 ### REGRESSION METRICS (work on raw solution and prediction)
 # These can be computed on all solutions and predictions (classification included)
 
-def r2_metric(solution, prediction, task='regression'):
+def r2_metric(solution, prediction, task=REGRESSION):
     ''' 1 - Mean squared error divided by variance '''
     mse = mvmean((solution-prediction)**2)
     var = mvmean((solution-mvmean(solution))**2)
     score = 1 - mse / var
     return mvmean(score)
 
-def a_metric (solution, prediction, task='regression'):
+def a_metric (solution, prediction, task=REGRESSION):
     ''' 1 - Mean absolute error divided by mean absolute deviation '''
     mae = mvmean(np.abs(solution-prediction))         # mean absolute error
     mad = mvmean(np.abs(solution-mvmean(solution))) # mean absolute deviation
@@ -184,7 +187,7 @@ def a_metric (solution, prediction, task='regression'):
 ### CLASSIFICATION METRICS (work on solutions in {0, 1} and predictions in [0, 1])
 # These can be computed for regression scores only after running normalize_array
 
-def acc_metric(solution, prediction, task='binary.classification'):
+def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     # Get the accuracy stats
     # acc = (tpr + fpr) / (tn + fp + tp + fn)
     # Normalize, so 1 is the best and zero mean random...
@@ -200,13 +203,13 @@ def acc_metric(solution, prediction, task='binary.classification'):
     tn = np.sum(tn)
     fn = np.sum(fn)
 
-    if (task != 'multiclass.classification') or (label_num == 1):
+    if (task != MULTICLASS_CLASSIFICATION) or (label_num == 1):
         accuracy = (np.sum(tp) + np.sum(tn)) / (np.sum(tp) + np.sum(fp) +
                                                 np.sum(tn) + np.sum(fn))
     else:
         accuracy = np.sum(tp) / (np.sum(tp) + np.sum(fp))
 
-    if (task != 'multiclass.classification') or (label_num == 1):
+    if (task != MULTICLASS_CLASSIFICATION) or (label_num == 1):
         base_accuracy = 0.5     # random predictions for binary case
     else:
         base_accuracy = 1./label_num
@@ -215,7 +218,7 @@ def acc_metric(solution, prediction, task='binary.classification'):
     return score
 
 
-def bac_metric (solution, prediction, task='binary.classification'):
+def bac_metric (solution, prediction, task=BINARY_CLASSIFICATION):
     ''' Compute the normalized balanced accuracy. The binarization and 
     the normalization differ for the multi-label and multi-class case. '''
     label_num = solution.shape[1]
@@ -227,7 +230,7 @@ def bac_metric (solution, prediction, task='binary.classification'):
     tp = sp.maximum (eps, tp)
     pos_num = sp.maximum (eps, tp+fn)
     tpr = tp / pos_num # true positive rate (sensitivity)
-    if (task != 'multiclass.classification') or (label_num==1):
+    if (task != MULTICLASS_CLASSIFICATION) or (label_num==1):
         tn = sp.maximum (eps, tn)
         neg_num = sp.maximum (eps, tn+fp)
         tnr = tn / neg_num # true negative rate (specificity)
@@ -242,13 +245,13 @@ def bac_metric (solution, prediction, task='binary.classification'):
     return score
     
 
-def pac_metric (solution, prediction, task='binary.classification'):
+def pac_metric (solution, prediction, task=BINARY_CLASSIFICATION):
     ''' Probabilistic Accuracy based on log_loss metric. 
     We assume the solution is in {0, 1} and prediction in [0, 1].
     Otherwise, run normalize_array.''' 
     debug_flag=False
     [sample_num, label_num] = solution.shape
-    if label_num==1: task='binary.classification'
+    if label_num==1: task=BINARY_CLASSIFICATION
     eps = 1e-15
     the_log_loss = log_loss(solution, prediction, task)
     # Compute the base log loss (using the prior probabilities)    
@@ -275,7 +278,7 @@ def pac_metric (solution, prediction, task='binary.classification'):
     score = (pac - base_pac) / sp.maximum(eps, (1 - base_pac))
     return score
  
-def f1_metric (solution, prediction, task='binary.classification'):
+def f1_metric (solution, prediction, task=BINARY_CLASSIFICATION):
     ''' Compute the normalized f1 measure. The binarization differs 
         for the multi-label and multi-class case. 
         A non-weighted average over classes is taken.
@@ -297,7 +300,7 @@ def f1_metric (solution, prediction, task='binary.classification'):
     # Average over all classes
     f1 = mvmean(f1)
     # Normalize: 0 for random, 1 for perfect
-    if (task != 'multiclass.classification') or (label_num==1):
+    if (task != MULTICLASS_CLASSIFICATION) or (label_num==1):
     # How to choose the "base_f1"?
     # For the binary/multilabel classification case, one may want to predict all 1.
     # In that case tpr = 1 and ppv = frac_pos. f1 = 2 * frac_pos / (1+frac_pos)
@@ -319,7 +322,7 @@ def f1_metric (solution, prediction, task='binary.classification'):
     score = (f1 - base_f1) / sp.maximum(eps, (1 - base_f1))
     return score
     
-def auc_metric(solution, prediction, task='binary.classification'):
+def auc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     ''' Normarlized Area under ROC curve (AUC).
     Return Gini index = 2*AUC-1 for  binary classification problems.
     Should work for a vector of binary 0/1 (or -1/1)"solution" and any discriminant values
@@ -348,49 +351,49 @@ def auc_metric(solution, prediction, task='binary.classification'):
     
 def nbac_binary_score(solution, prediction):
     ''' Normalized balanced accuracy for binary and multilabel classification '''
-    return bac_metric (solution, prediction, task='binary.classification')
+    return bac_metric (solution, prediction, task=BINARY_CLASSIFICATION)
     
 def nbac_multiclass_score(solution, prediction):
     ''' Multiclass accuracy for binary and multilabel classification '''
-    return bac_metric (solution, prediction, task='multiclass.classification')
+    return bac_metric (solution, prediction, task=MULTICLASS_CLASSIFICATION)
     
 def npac_binary_score(solution, prediction):
     ''' Normalized balanced accuracy for binary and multilabel classification '''
-    return pac_metric (solution, prediction, task='binary.classification')
+    return pac_metric (solution, prediction, task=BINARY_CLASSIFICATION)
     
 def npac_multiclass_score(solution, prediction):
     ''' Multiclass accuracy for binary and multilabel classification '''
-    return pac_metric (solution, prediction, task='multiclass.classification')
+    return pac_metric (solution, prediction, task=MULTICLASS_CLASSIFICATION)
 
 def f1_binary_score(solution, prediction):
     ''' Normalized balanced accuracy for binary and multilabel classification '''
-    return f1_metric (solution, prediction, task='binary.classification')
+    return f1_metric (solution, prediction, task=BINARY_CLASSIFICATION)
     
 def f1_multiclass_score(solution, prediction):
     ''' Multiclass accuracy for binary and multilabel classification '''
-    return f1_metric (solution, prediction, task='multiclass.classification')
+    return f1_metric (solution, prediction, task=MULTICLASS_CLASSIFICATION)
     
-def log_loss(solution, prediction, task = 'binary.classification'):
+def log_loss(solution, prediction, task = BINARY_CLASSIFICATION):
     ''' Log loss for binary and multiclass. '''
     [sample_num, label_num] = solution.shape
     eps = 1e-15
     
     pred = np.copy(prediction) # beware: changes in prediction occur through this
     sol = np.copy(solution)
-    if (task == 'multiclass.classification') and (label_num>1):
+    if (task == MULTICLASS_CLASSIFICATION) and (label_num>1):
         # Make sure the lines add up to one for multi-class classification
         norma = np.sum(prediction, axis=1)
         for k in range(sample_num):
             pred[k,:] /= sp.maximum (norma[k], eps) 
         # Make sure there is a single label active per line for multi-class classification
-        sol = binarize_predictions(solution, task='multiclass.classification')
+        sol = binarize_predictions(solution, task=MULTICLASS_CLASSIFICATION)
         # For the base prediction, this solution is ridiculous in the multi-label case
     
     # Bounding of predictions to avoid log(0),1/0,...
     pred = sp.minimum (1-eps, sp.maximum (eps, pred))
     # Compute the log loss    
     pos_class_log_loss = - mvmean(sol*np.log(pred), axis=0)
-    if (task != 'multiclass.classification') or (label_num==1):
+    if (task != MULTICLASS_CLASSIFICATION) or (label_num==1):
         # The multi-label case is a bunch of binary problems.
         # The second class is the negative class for each column.
         neg_class_log_loss = - mvmean((1-sol)*np.log(1-pred), axis=0)
@@ -409,11 +412,11 @@ def log_loss(solution, prediction, task = 'binary.classification'):
         #print('multiclass {}'.format(log_loss))
     return log_loss
     
-def prior_log_loss(frac_pos, task = 'binary.classification'):
+def prior_log_loss(frac_pos, task = BINARY_CLASSIFICATION):
     ''' Baseline log loss. For multiplr classes ot labels return the volues for each column'''
     eps = 1e-15   
     frac_pos_ = sp.maximum (eps, frac_pos)
-    if (task != 'multiclass.classification'): # binary case
+    if (task != MULTICLASS_CLASSIFICATION): # binary case
         frac_neg = 1-frac_pos
         frac_neg_ = sp.maximum (eps, frac_neg)
         pos_class_log_loss_ = - frac_pos * np.log(frac_pos_)
@@ -471,46 +474,46 @@ def get_info (filename):
     return info   
 
 def show_io(input_dir, output_dir):  
-	''' show directory structure and inputs and autputs to scoring program'''      
-	swrite('\n=== DIRECTORIES ===\n\n')
-	# Show this directory
-	swrite("-- Current directory " + pwd() + ":\n")
-	write_list(ls('.'))
-	write_list(ls('./*'))
-	write_list(ls('./*/*'))
-	swrite("\n")
-	
-	# List input and output directories
-	swrite("-- Input directory " + input_dir + ":\n")
-	write_list(ls(input_dir))
-	write_list(ls(input_dir + '/*'))
-	write_list(ls(input_dir + '/*/*'))
-	write_list(ls(input_dir + '/*/*/*'))
-	swrite("\n")
-	swrite("-- Output directory  " + output_dir + ":\n")
-	write_list(ls(output_dir))
-	write_list(ls(output_dir + '/*'))
-	swrite("\n")
-        
+    ''' show directory structure and inputs and autputs to scoring program'''
+    swrite('\n=== DIRECTORIES ===\n\n')
+    # Show this directory
+    swrite("-- Current directory " + pwd() + ":\n")
+    write_list(ls('.'))
+    write_list(ls('./*'))
+    write_list(ls('./*/*'))
+    swrite("\n")
+
+    # List input and output directories
+    swrite("-- Input directory " + input_dir + ":\n")
+    write_list(ls(input_dir))
+    write_list(ls(input_dir + '/*'))
+    write_list(ls(input_dir + '/*/*'))
+    write_list(ls(input_dir + '/*/*/*'))
+    swrite("\n")
+    swrite("-- Output directory  " + output_dir + ":\n")
+    write_list(ls(output_dir))
+    write_list(ls(output_dir + '/*'))
+    swrite("\n")
+
     # write meta data to sdterr
-	swrite('\n=== METADATA ===\n\n')
-	swrite("-- Current directory " + pwd() + ":\n")
-	try:
-		metadata = yaml.load(open('metadata', 'r'))
-		for key,value in metadata.items():
-			swrite(key + ': ')
-			swrite(str(value) + '\n')
-	except:
-		swrite("none\n");
-	swrite("-- Input directory " + input_dir + ":\n")
-	try:
-		metadata = yaml.load(open(os.path.join(input_dir, 'metadata'), 'r'))
-		for key,value in metadata.items():
-			swrite(key + ': ')
-			swrite(str(value) + '\n')
-		swrite("\n")
-	except:
-		swrite("none\n");
+    swrite('\n=== METADATA ===\n\n')
+    swrite("-- Current directory " + pwd() + ":\n")
+    try:
+        metadata = yaml.load(open('metadata', 'r'))
+        for key,value in metadata.items():
+            swrite(key + ': ')
+            swrite(str(value) + '\n')
+    except:
+        swrite("none\n")
+    swrite("-- Input directory " + input_dir + ":\n")
+    try:
+        metadata = yaml.load(open(os.path.join(input_dir, 'metadata'), 'r'))
+        for key,value in metadata.items():
+            swrite(key + ': ')
+            swrite(str(value) + '\n')
+        swrite("\n")
+    except:
+        swrite("none\n")
 	
 def show_version(scoring_version):
 	''' Python version and library versions '''

@@ -4,7 +4,6 @@ try:
 except:
     import pickle
 import multiprocessing
-import re
 
 import lockfile
 import numpy as np
@@ -16,6 +15,7 @@ from autosklearn.models import paramsklearn, evaluator
 from autosklearn.data import split_data
 from autosklearn import submit_process
 from autosklearn.util import stopwatch
+from autosklearn.constants import *
 
 from HPOlibConfigSpace.converters import pcs_parser
 
@@ -46,7 +46,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
     def run(self):
         raise NotImplementedError()
 
-    def fit(self, X, y, task='multiclass.classification',
+    def fit(self, X, y, task=MULTICLASS_CLASSIFICATION,
             metric='acc_metric', feat_type=None, dataset_name=None):
         if dataset_name is None:
             import hashlib
@@ -99,6 +99,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         return self._fit(loaded_data_manager)
 
     def _fit(self, D):
+        # TODO: check that data and task definition fit together!
+
         self.metric_ = D.info['metric']
         self.task_ = D.info['task']
         self.target_num_ = D.info['target_num']
@@ -139,8 +141,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         if self.initial_configurations_via_metalearning <= 0:
             ml = None
-        elif D.info["task"].lower() in \
-                ["multiclass.classification", "binary.classification"]:
+        elif D.info["task"] in \
+                [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
             ml = metalearning.MetaLearning()
             self.logger.debug("Start calculating metafeatures for %s" %
                               self.basename_)
@@ -198,8 +200,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         if ml is None:
             initial_configurations = []
-        elif D.info["task"].lower() in \
-                ["multiclass.classification", "binary.classification"]:
+        elif D.info["task"]in \
+                [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
             self.stopwatch_.start_task("CalculateMetafeaturesEncoded")
             ml.calculate_metafeatures_encoded_labels(X_train=D.data["X_train"],
                                                      Y_train=D.data["Y_train"],
@@ -345,7 +347,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             weight = ensemble_members_run_numbers[num_run]
 
             X_ = X.copy()
-            if "regression" in self.task_:
+            if self.task_ in REGRESSION_TASKS:
                 prediction = model.predict(X_)
             else:
                 prediction = model.predict_proba(X_)

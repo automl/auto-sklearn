@@ -2,6 +2,7 @@ import numpy as np
 from scipy import sparse
 
 from autosklearn.data.data_manager import DataManager
+from autosklearn.constants import *
 
 
 class XyDataManager(DataManager):
@@ -13,10 +14,10 @@ class XyDataManager(DataManager):
         self.info['is_sparse'] = 1 if sparse.issparse(X) else 0
         self.info['has_missing'] = np.all(np.isfinite(X))
 
-        target_num = {'regression': 1,
-                      'binary.classification': 2,
-                      'multiclass.classification': len(np.unique(y)),
-                      'multilabel.classification': y.shape[-1]}
+        target_num = {REGRESSION: 1,
+                      BINARY_CLASSIFICATION: 2,
+                      MULTICLASS_CLASSIFICATION: len(np.unique(y)),
+                      MULTILABEL_CLASSIFICATION: y.shape[-1]}
 
         self.info['target_num'] = target_num[task]
         self.basename = dataset_name
@@ -36,8 +37,8 @@ class XyDataManager(DataManager):
                              "datapoints, but have %d and %d." % (X.shape[0],
                                                                   y.shape[0]))
         if self.feat_type is None:
-            self.feat_type = ['Numerical'] * X.shape[0]
-        if X.shape[0] != len(self.feat_type):
+            self.feat_type = ['Numerical'] * X.shape[1]
+        if X.shape[1] != len(self.feat_type):
             raise ValueError("X and feat type must have the same dimensions, "
                              "but are %d and %d." %
                              (X.shape[1], len(self.feat_type)))

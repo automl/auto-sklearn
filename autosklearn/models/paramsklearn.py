@@ -1,10 +1,12 @@
 from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.regression import ParamSklearnRegressor
 
+from autosklearn.constants import *
+
 
 def get_configuration_space(info, include_estimators=None,
                             include_preprocessors=None):
-    if info['task'] == 'regression':
+    if info['task'] in REGRESSION_TASKS:
         return _get_regression_configuration_space(info, include_estimators,
                                                    include_preprocessors)
     else:
@@ -33,14 +35,14 @@ def _get_classification_configuration_space(info, include_estimators=None,
     multiclass = False
     sparse = False
 
-    if task_type.lower() == 'multilabel.classification':
+    if task_type == MULTILABEL_CLASSIFICATION:
         multilabel = True
-    if task_type.lower() == 'regression':
+    if task_type == REGRESSION:
         raise NotImplementedError()
-    if task_type.lower() == 'multiclass.classification':
+    if task_type == MULTICLASS_CLASSIFICATION:
         multiclass = True
         pass
-    if task_type.lower() == 'binary.classification':
+    if task_type == BINARY_CLASSIFICATION:
         pass
 
     if info['is_sparse'] == 1:
@@ -64,7 +66,7 @@ def get_model(configuration, seed):
 
 
 def get_class(info):
-    if info['task'].lower() == 'regression':
+    if info['task'] in REGRESSION_TASKS:
         return ParamSklearnRegressor
     else:
         return ParamSklearnClassifier

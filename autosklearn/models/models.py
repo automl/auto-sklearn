@@ -6,6 +6,7 @@ from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegress
 from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
+from autosklearn.constants import *
 import operator
 import copy
 
@@ -46,7 +47,7 @@ class MyAutoML:
             self.model = RandomPredictor(self.target_num)
             self.predict_method = self.model.predict_proba 
             return
-        if info['task']=='regression':
+        if info['task']==REGRESSION:
             if info['is_sparse']==True:
                 self.name = "BaggingRidgeRegressor"
                 self.model = BaggingRegressor(base_estimator=Ridge(), n_estimators=1, verbose=verbose, random_state=self.seed) # unfortunately, no warm start...
@@ -64,7 +65,7 @@ class MyAutoML:
             else:
                 self.name = "GradientBoostingClassifier"
                 self.model = eval(self.name + "(n_estimators=1, verbose=" + str(verbose) + ", min_samples_split=10, random_state=1, warm_start = True)")
-            if info['task']=='multilabel.classification':
+            if info['task']==MULTILABEL_CLASSIFICATION:
                 self.model = MultiLabelEnsemble(self.model)
             self.predict_method = self.model.predict_proba  
                           
@@ -78,7 +79,7 @@ class MyAutoML:
     def fit(self, X, Y):
         self.model.fit(X,Y)
         # Train a calibration model postprocessor
-        if self.task != 'regression' and self.postprocessor!=None:
+        if self.task != REGRESSION and self.postprocessor!=None:
             Yhat = self.predict_method(X)
             self.postprocessor.fit(Yhat, Y)
         return self
@@ -86,13 +87,13 @@ class MyAutoML:
     def predict(self, X):
         prediction = self.predict_method(X)
         # Calibrate proba
-        if self.task != 'regression' and self.postprocessor!=None:          
+        if self.task != REGRESSION and self.postprocessor!=None:
             prediction = self.postprocessor.predict_proba(prediction)
         # Keep only 2st column because the second one is 1-first
         if self.target_num==1 and len(prediction.shape)>1 and prediction.shape[1]>1:
             prediction = prediction[:,1]
         # Make sure the normalization is correct
-        if self.task=='multiclass.classification':
+        if self.task==MULTICLASS_CLASSIFICATION:
             eps = 1e-15
             norma = np.sum(prediction, axis=1)
             for k in range(prediction.shape[0]):

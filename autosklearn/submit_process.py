@@ -5,6 +5,7 @@ import subprocess
 import lockfile
 
 import autosklearn.cli.SMAC_cli_holdout
+from autosklearn.constants import *
 
 
 def submit_call(call, seed, log_dir=None):
@@ -111,6 +112,8 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
     wrapper_exec = os.path.join(path_to_root, "ensemble_selection_script.py")
     runsolver_exec = "runsolver"
     delay = 5
+
+    task_type = TASK_TYPES_TO_STRING[task_type]
 
     call = " ".join(["python", wrapper_exec, tmp_dir, dataset_name,
                         task_type, metric, str(limit-5), output_dir,

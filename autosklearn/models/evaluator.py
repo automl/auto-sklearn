@@ -9,6 +9,7 @@ from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.regression import ParamSklearnRegressor
 
 from autosklearn.scores import libscores
+from autosklearn.constants import *
 
 
 try:
@@ -19,26 +20,28 @@ except:
 
 def calculate_score(solution, prediction, task_type, metric, num_classes,
                     all_scoring_functions=False):
-    if task_type == "multiclass.classification":
+    if task_type == MULTICLASS_CLASSIFICATION:
         solution_binary = np.zeros((prediction.shape[0], num_classes))
         for i in range(solution_binary.shape[0]):
             label = solution[i]
             solution_binary[i, label] = 1
         solution = solution_binary
 
-    elif task_type in ["binary.classification", "regression"]:
+    elif task_type in [BINARY_CLASSIFICATION, REGRESSION]:
         if len(solution.shape) == 1:
             solution = solution.reshape((-1, 1))
 
-    scoring_func = getattr(libscores, metric)
+    if task_type not in TASK_TYPES:
+        raise NotImplementedError(task_type)
 
+    scoring_func = getattr(libscores, metric)
     if solution.shape != prediction.shape:
         raise ValueError("Solution shape %s != prediction shape %s" %
                          (solution.shape, prediction.shape))
 
     if all_scoring_functions:
         score = dict()
-        if task_type == "regression":
+        if task_type in REGRESSION_TASKS:
             cprediction = libscores.sanitize_array(prediction)
             score["a_metric"] = libscores.a_metric(solution, cprediction,
                                                    task=task_type)
@@ -59,7 +62,7 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
                                                        task=task_type)
 
     else:
-        if task_type == "regression":
+        if task_type in REGRESSION_TASKS:
             cprediction = libscores.sanitize_array(prediction)
             score = scoring_func(solution, cprediction, task=task_type)
         else:
@@ -108,7 +111,7 @@ class Evaluator(object):
         self.X_test = Datamanager.data.get('X_test')
 
         self.metric = Datamanager.info['metric']
-        self.task_type = Datamanager.info['task'].lower()
+        self.task_type = Datamanager.info['task']
         self.seed = seed
 
         if output_dir is None:
@@ -120,7 +123,7 @@ class Evaluator(object):
         self.with_predictions = with_predictions
         self.all_scoring_functions = all_scoring_functions
 
-        if self.task_type == 'regression':
+        if self.task_type in REGRESSION_TASKS:
             self.model_class = ParamSklearnRegressor
             self.predict_function = self.predict_regression
         else:
@@ -215,16 +218,16 @@ class Evaluator(object):
     def predict_proba(self, X, model, task_type, Y_train=None):
         Y_pred = model.predict_proba(X, batch_size=1000)
 
-        if task_type == "multilabel.classification":
+        if task_type == MULTILABEL_CLASSIFICATION:
             Y_pred = np.hstack(
                 [Y_pred[i][:, -1].reshape((-1, 1))
                  for i in range(len(Y_pred))])
 
-        elif task_type == "binary.classification":
+        elif task_type == BINARY_CLASSIFICATION:
             if len(Y_pred.shape) != 1:
                 Y_pred = Y_pred[:, 1].reshape(-1, 1)
 
-        elif task_type == "multiclass.classification":
+        elif task_type == MULTICLASS_CLASSIFICATION:
             pass
 
         Y_pred = self._ensure_prediction_array_sizes(Y_pred, Y_train)
@@ -241,7 +244,7 @@ class Evaluator(object):
     def _ensure_prediction_array_sizes(self, prediction, Y_train):
         num_classes = self.D.info["target_num"]
 
-        if self.task_type == "multiclass.classification" and \
+        if self.task_type == MULTICLASS_CLASSIFICATION and \
                         prediction.shape[1] < num_classes:
             classes = list(np.unique(self.D.data["Y_train"]))
             if num_classes == prediction.shape[1]:

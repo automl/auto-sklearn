@@ -28,6 +28,7 @@ except:
 
 from autosklearn.data import util as data_util
 from autosklearn.data.data_manager import DataManager
+from autosklearn.constants import *
 
 
 def data_dense(filename, feat_type=None, verbose=False):
@@ -262,11 +263,11 @@ class CompetitionDataManager(DataManager):
 
         # IG: Here change to accommodate the new multiclass label format
         if competition_c_functions_is_there:
-            if self.info['task'] == 'multilabel.classification':
+            if self.info['task'] == MULTILABEL_CLASSIFICATION:
                 # cast into ints
                 label = (competition_c_functions.read_dense_file_unknown_width(
                     filename, num_points)).astype(np.int)
-            elif self.info['task'] == 'multiclass.classification':
+            elif self.info['task'] == MULTICLASS_CLASSIFICATION:
                 label = competition_c_functions.read_dense_file_unknown_width(
                     filename, num_points)
                 # read the class from the only non zero entry in each line!
@@ -276,9 +277,9 @@ class CompetitionDataManager(DataManager):
                 label = competition_c_functions.read_dense_file_unknown_width(
                     filename, num_points)
         else:
-            if self.info['task'] == 'multilabel.classification':
+            if self.info['task'] == MULTILABEL_CLASSIFICATION:
                 label = self._data(filename)
-            elif self.info['task'] == 'multiclass.classification':
+            elif self.info['task'] == MULTICLASS_CLASSIFICATION:
                 label = data_util.convert_to_num(self._data(filename))
             else:
                 label = np.ravel(data_util.data(filename)) # get a column vector
@@ -325,6 +326,9 @@ class CompetitionDataManager(DataManager):
         else:
             raise NotImplementedError("The user must always provide an info "
                                       "file.")
+
+        self.info['task'] = STRING_TO_TASK_TYPES[self.info['task']]
+
         return self.info
 
     def getInfoFromFile (self, filename):

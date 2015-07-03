@@ -4,11 +4,13 @@ import os
 import shutil
 import unittest
 
+import mock
 import numpy as np
 
 import ParamSklearn.util as putil
 
-import autosklearn.start_automl
+import autosklearn.automl
+from autosklearn.constants import *
 
 
 class AutoMLTest(unittest.TestCase):
@@ -30,10 +32,12 @@ class AutoMLTest(unittest.TestCase):
 
     def test_fit(self):
         X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
-        automl = autosklearn.start_automl.AutoML(self.output, self.output,
-                                                 10, 10)
+        automl = autosklearn.automl.AutoML(self.output, self.output,
+                                           10, 10)
         automl.fit(X_train, Y_train)
-        print automl.score(X_test, Y_test)
+        score = automl.score(X_test, Y_test)
+        self.assertGreaterEqual(score, 0.9)
+        self.assertEqual(automl.task_, MULTICLASS_CLASSIFICATION)
 
     def test_dataset_manager_pickling(self):
         data_dir = os.path.join(self.test_dir, "..", ".data")
@@ -42,9 +46,9 @@ class AutoMLTest(unittest.TestCase):
                                          dataset)
 
         queue = multiprocessing.Queue()
-        auto = autosklearn.start_automl.AutoML(self.output, self.output, 10, 10,
-                                               initial_configurations_via_metalearning=25,
-                                               queue=queue)
+        auto = autosklearn.automl.AutoML(self.output, self.output, 10, 10,
+                                         initial_configurations_via_metalearning=25,
+                                         queue=queue)
         auto.fit_automl_dataset(dataset, data_dir)
         with open(data_manager_file) as fh:
             D = cPickle.load(fh)

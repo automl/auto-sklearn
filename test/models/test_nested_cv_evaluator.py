@@ -9,6 +9,7 @@ from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.models.nested_cv_evaluator import NestedCVEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
 from ParamSklearn.util import get_dataset
+from autosklearn.constants import *
 
 N_TEST_RUNS = 10
 
@@ -27,7 +28,7 @@ class NestedCVEvaluator_Test(unittest.TestCase):
         Y_test = Y_test[25:, ]
 
         D = Dummy()
-        D.info = {'metric': 'acc_metric', 'task': 'multiclass.classification',
+        D.info = {'metric': 'acc_metric', 'task': MULTICLASS_CLASSIFICATION,
                   'is_sparse': False, 'target_num': 3}
         D.data = {'X_train': X_train, 'Y_train': Y_train,
                   'X_valid': X_valid, 'X_test': X_test}
