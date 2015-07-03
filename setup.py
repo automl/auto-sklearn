@@ -97,7 +97,7 @@ class Download(install):
 
 setuptools.setup(name="AutoSklearn",
                  description="Code to participate in the AutoML 2015 challenge.",
-                 version="0.1dev",
+                 version="0.0.1dev",
                  ext_modules=[Extension("autosklearn.data.competition_c_functions",
                                         ["autosklearn/data/competition_c_functions.c"])],
                  packages=setuptools.find_packages(exclude=['test']),

@@ -9,10 +9,36 @@ from autosklearn.constants import *
 
 
 class AutoSklearnClassifier(autosklearn.automl.AutoML):
+    """This class implements the classification task. It must not be pickled!
+
+    Parameters
+    ----------
+    time_left_for_this_task : int, optional (default=3600)
+        Time limit in seconds for the search for appropriate classification
+        models. By increasing this value, *auto-sklearn* will find better
+        configurations.
+
+    per_run_time_limit : int, optional (default=360)
+        Time limit for a single call to machine learning model.
+
+    initial_configurations_via_metalearning : int, optional (default=25)
+
+    ensemble_size : int, optional (default=50)
+
+    ensemble_nbest : int, optional (default=50)
+
+    seed : int, optional (default=1)
+
+    ml_memory_limit : int, optional (3000)
+        Memory limit for the machine learning algorithm. If the machine
+        learning algorithm allocates tries to allocate more memory,
+        its evaluation will be stopped.
+    """
+
     def __init__(self, time_left_for_this_task=3600,
                  per_run_time_limit=360,
                  initial_configurations_via_metalearning=25,
-                 ensemble_size=1, ensemble_nbest=1, seed=1,
+                 ensemble_size=50, ensemble_nbest=50, seed=1,
                  ml_memory_limit=3000):
         random_number = random.randint(0, 10000)
 
@@ -41,6 +67,23 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         shutil.rmtree(self.output_dir)
 
     def fit(self, X, y, metric='acc_metric', feat_type=None):
+        """Fit *autosklearn* to given training set (X, y).
+
+        X : array-like or sparse matrix of shape = [n_samples, n_features]
+            The training input samples.
+
+        y : array-like, shape = [n_samples] or [n_samples, n_outputs]
+            The target classes.
+
+        metric : str, optional (default='acc_metric')
+            The metric to optimize for. Can be one of: ['acc_metric',
+            'auc_metric', 'bac_metric', 'f1_metric', 'pac_metric']
+
+        feat_type : list, optional (default=None)
+            List of :python:`len(X.shape[1])` describing if an attribute is
+            continuous or categorical. Categorical attributes will
+            automatically 1Hot encoded.
+        """
         # Fit is supposed to be idempotent!
         self._delete_output_directories()
         self._create_output_directories()
@@ -80,6 +123,20 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
 
         return super(AutoSklearnClassifier, self).fit(X, y, task, metric,
                                                    feat_type)
+
+    def predict(self, X):
+        """Predict class for X.
+
+        Parameters
+        ----------
+        X : array-like or sparse matrix of shape = [n_samples, n_features]
+
+        Returns
+        -------
+        y : array of shape = [n_samples] or [n_samples, n_outputs]
+            The predicted classes.
+        """
+        return super(AutoSklearnClassifier, self).fit(X)
 
 
 class AutoSklearnRegressor(autosklearn.automl.AutoML):
