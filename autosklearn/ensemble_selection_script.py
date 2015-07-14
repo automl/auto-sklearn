@@ -339,6 +339,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
         elif len(all_predictions_train) == 1:
             logging.debug('Only one model so far we just copy its predictions')
             ensemble_members_run_numbers = {0: 1.0}
+            indices = np.array([0])
 
             # Output the score
             logging.info('Training performance: %f' %
