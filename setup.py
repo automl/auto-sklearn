@@ -125,7 +125,6 @@ setuptools.setup(
                       'lockfile',
                       'HPOlibConfigSpace',
                       'ParamSklearn',
-                      'pymetalearn',
                       'cma',
                       'six',
                       'ConfigArgParse'],

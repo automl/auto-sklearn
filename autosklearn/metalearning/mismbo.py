@@ -6,12 +6,12 @@ import time
 from StringIO import StringIO
 
 import numpy as np
-from pyMetaLearn.metafeatures.metafeatures import \
+from autosklearn.metalearning.metafeatures.metafeatures import \
     calculate_all_metafeatures_with_labels, \
     calculate_all_metafeatures_encoded_labels, subsets
 
-from pyMetaLearn.optimizers.metalearn_optimizer.metalearner import \
-    MetaLearningOptimizer
+from autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner \
+    import MetaLearningOptimizer
 
 from autosklearn.constants import *
 from autosklearn.util import get_logger

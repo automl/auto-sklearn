@@ -38,8 +38,9 @@ Example
     >>> X_test = X[1000:]
     >>> y_test = y[1000:]
     >>> automl = autosklearn.AutoSklearnClassifier()
-    >>> automl.fit(X_train,y_train)
+    >>> automl.fit(X_train, y_train)
     >>> print automl.score(X_test,y_test)
+
 
 This will run for one hour should result in an accuracy above 0.98.
 
@@ -57,7 +58,6 @@ resolved:
 * `HPOlib <https://github.com/automl/HPOlib>`_
 * `HPOlibConfigSpace <https://github.com/automl/HPOlibConfigSpace>`_
 * `ParamSklearn <https://bitbucket.org/mfeurer/paramsklearn>`_
-* `pyMetaLearn <https://bitbucket.org/mfeurer/pymetalearn>`_
 
 Please install these manually with:
 

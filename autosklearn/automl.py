@@ -16,7 +16,7 @@ from autosklearn.constants import *
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import resampling
-from autosklearn.metalearning.metalearning import \
+from autosklearn.metalearning.mismbo import \
     calc_meta_features, calc_meta_features_encoded, \
     create_metalearning_string_for_smac_call
 from autosklearn.evaluation import calculate_score
