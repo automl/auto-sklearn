@@ -8,7 +8,8 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from ParamSklearn.components.regression_base import ParamSklearnRegressionAlgorithm
 from ParamSklearn.util import DENSE, PREDICTIONS
 # get our own forests to replace the sklearn ones
-from ParamSklearn.implementations import forest
+#from ParamSklearn.implementations import forest
+from sklearn.ensemble import RandomForestRegressor
 
 
 class RandomForest(ParamSklearnRegressionAlgorithm):
@@ -65,7 +66,7 @@ class RandomForest(ParamSklearnRegressionAlgorithm):
         max_features = int(float(self.max_features) * (np.log(num_features) + 1))
         # Use at most half of the features
         max_features = max(1, min(int(X.shape[1] / 2), max_features))
-        self.estimator = forest.RandomForestRegressor(
+        self.estimator = RandomForestRegressor(
             n_estimators=0,
             criterion=self.criterion,
             max_features=max_features,

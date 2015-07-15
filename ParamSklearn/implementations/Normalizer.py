@@ -1,6 +1,5 @@
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.utils import check_arrays
-from sklearn.utils import atleast2d_or_csr
+from sklearn.utils import check_array
 from sklearn.utils import warn_if_not_float
 from sklearn.utils.extmath import row_norms
 from sklearn.utils.sparsefuncs_fast import inplace_csr_row_normalize_l1
@@ -10,7 +9,7 @@ import numpy as np
 from scipy import sparse
 
 def normalize(X, norm='l2', axis=1, copy=True):
-    """Normalize a dataset along any axis
+    """Scale input vectors individually to unit norm (vector length).
 
     Parameters
     ----------
@@ -27,7 +26,7 @@ def normalize(X, norm='l2', axis=1, copy=True):
         axis used to normalize the data along. If 1, independently normalize
         each sample, otherwise (if 0) normalize each feature.
 
-    copy : boolean, optional, default is True
+    copy : boolean, optional, default True
         set to False to perform inplace row normalization and avoid a
         copy (if the input is already a numpy array or a scipy.sparse
         CSR matrix and if axis is 1).
@@ -48,13 +47,13 @@ def normalize(X, norm='l2', axis=1, copy=True):
     else:
         raise ValueError("'%d' is not a supported axis" % axis)
 
-    X = check_arrays(X, sparse_format=sparse_format, copy=copy,
-                     dtype=np.float64)[0]
+    X = check_array(X, sparse_format, copy=copy)
     warn_if_not_float(X, 'The normalize function')
     if axis == 0:
         X = X.T
 
     if sparse.issparse(X):
+        X = check_array(X, accept_sparse=sparse_format, dtype=np.float64)
         if norm == 'l1':
             inplace_csr_row_normalize_l1(X)
         elif norm == 'l2':
@@ -75,7 +74,7 @@ def normalize(X, norm='l2', axis=1, copy=True):
 
 
 class Normalizer(BaseEstimator, TransformerMixin):
-    """Normalize samples individually to unit norm
+    """Normalize samples individually to unit norm.
 
     Each sample (i.e. each row of the data matrix) with at least one
     non zero component is rescaled independently of other samples so
@@ -96,7 +95,7 @@ class Normalizer(BaseEstimator, TransformerMixin):
     norm : 'l1' or 'l2', optional ('l2' by default)
         The norm to use to normalize each non zero sample.
 
-    copy : boolean, optional, default is True
+    copy : boolean, optional, default True
         set to False to perform inplace row normalization and avoid a
         copy (if the input is already a numpy array or a scipy.sparse
         CSR matrix).
@@ -122,7 +121,7 @@ class Normalizer(BaseEstimator, TransformerMixin):
         This method is just there to implement the usual API and hence
         work in pipelines.
         """
-        atleast2d_or_csr(X)
+        X = check_array(X, accept_sparse='csr')
         return self
 
     def transform(self, X, y=None, copy=None):
@@ -135,5 +134,5 @@ class Normalizer(BaseEstimator, TransformerMixin):
             in CSR format to avoid an un-necessary copy.
         """
         copy = copy if copy is not None else self.copy
-        atleast2d_or_csr(X)
+        X = check_array(X, accept_sparse='csr')
         return normalize(X, norm=self.norm, axis=1, copy=copy)

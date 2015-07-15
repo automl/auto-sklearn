@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.ensemble import RandomForestClassifier
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -8,7 +9,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.util import DENSE, PREDICTIONS
 # get our own forests to replace the sklearn ones
-from ParamSklearn.implementations import forest
+#from ParamSklearn.implementations import forest
 
 
 class RandomForest(ParamSklearnClassificationAlgorithm):
@@ -50,7 +51,7 @@ class RandomForest(ParamSklearnClassificationAlgorithm):
             self.max_leaf_nodes = None
 
         # initial fit of only increment trees
-        self.estimator = forest.RandomForestClassifier(
+        self.estimator = RandomForestClassifier(
             n_estimators=0,
             criterion=self.criterion,
             max_features=max_features,

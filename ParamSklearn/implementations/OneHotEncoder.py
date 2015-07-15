@@ -2,13 +2,8 @@ import numpy as np
 from scipy import sparse
 
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.externals import six
-from sklearn.utils import check_arrays
-from sklearn.utils import atleast2d_or_csc, safe_asarray
 
-#zip = six.moves.zip
-#map = six.moves.map
-#range = six.moves.range
+from sklearn.utils import check_array
 
 
 def _transform_selected(X, transform, selected="all", copy=True):
@@ -32,11 +27,11 @@ def _transform_selected(X, transform, selected="all", copy=True):
     -------
     X : array or sparse matrix, shape=(n_samples, n_features_new)
     """
+
     if selected == "all":
-        X = safe_asarray(X, copy=copy, force_all_finite=False)
         return transform(X)
 
-    X = check_arrays(X, allow_nans=True)[0]
+    X = check_array(X, accept_sparse='csc', force_all_finite=False)
     n_features = X.shape[1]
     ind = np.arange(n_features)
     sel = np.zeros(n_features, dtype=bool)
@@ -49,7 +44,7 @@ def _transform_selected(X, transform, selected="all", copy=True):
     if sparse.isspmatrix_csr(X):
         X.data += 1
         subtract = True
-    X = atleast2d_or_csc(X, copy=copy, force_all_finite=False)
+    X = check_array(X, copy=copy, force_all_finite=False, accept_sparse="csc")
     if subtract:
         X.data -= 1
 
@@ -186,7 +181,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
         if sparse.isspmatrix_csr(X):
             X.data += 1
             subtract = True
-        X = check_arrays(X, sparse_format="csc", allow_nans=True)[0]
+        X = check_array(X, accept_sparse="csc", force_all_finite=False)
         if subtract:
             X.data -= 1
 
@@ -255,12 +250,14 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
 
     def _transform(self, X):
         """Assumes X contains only categorical features."""
+        X = check_array(X, dtype=np.int, accept_sparse='csc')
+
         # Add 1 to all categorical colums to avoid loosing them due to slicing
         subtract = False
         if sparse.isspmatrix_csr(X):
             X.data += 1
             subtract = True
-        X = check_arrays(X, sparse_format="csc", allow_nans=True)[0]
+        X = check_array(X, accept_sparse="csc", force_all_finite=False)
         if subtract:
             X.data -= 1
         n_samples, n_features = X.shape

@@ -40,5 +40,5 @@ class RidgeComponentTest(unittest.TestCase):
             predictor = regressor.fit(X_train_transformed, Y_train)
             predictions = predictor.predict(X_test_transformed)
 
-            self.assertAlmostEqual(0.30195375410805392,
+            self.assertAlmostEqual(0.37173953934750514,
                 sklearn.metrics.r2_score(y_true=Y_test, y_pred=predictions))

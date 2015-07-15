@@ -32,6 +32,6 @@ class GEMComponentTest(PreprocessingTestCase):
             accuracy = sklearn.metrics.accuracy_score(predictions, Y_test)
             self.assertGreaterEqual(accuracy, 0.94)
 
-    @unittest.skip("Right now GEM cannot handle sparse arrays!")
     def test_preprocessing_dtype(self):
-        super(GEMComponentTest, self)._test_preprocessing_dtype(GEM)
+        super(GEMComponentTest, self)._test_preprocessing_dtype(GEM,
+                                                                test_sparse=False)

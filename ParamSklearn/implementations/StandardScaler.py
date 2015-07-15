@@ -2,9 +2,9 @@ import numpy as np
 from scipy import sparse
 
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.utils import check_arrays, warn_if_not_float
+from sklearn.utils.validation import check_array, warn_if_not_float, check_is_fitted
 from sklearn.utils.sparsefuncs import inplace_column_scale, \
-    mean_variance_axis0
+    mean_variance_axis
 
 
 def _mean_and_std(X, axis=0, with_mean=True, with_std=True):
@@ -15,14 +15,14 @@ def _mean_and_std(X, axis=0, with_mean=True, with_std=True):
     Xr = np.rollaxis(X, axis)
 
     if with_mean:
-       mean_ = Xr.mean(axis=0)
+        mean_ = Xr.mean(axis=0)
     else:
         mean_ = None
 
     if with_std:
         std_ = Xr.std(axis=0)
         if isinstance(std_, np.ndarray):
-            std_[std_ == 0.0] = 1.0
+            std_[std_ == 0.] = 1.0
         elif std_ == 0.:
             std_ = 1.
     else:
@@ -61,7 +61,7 @@ class StandardScaler(BaseEstimator, TransformerMixin):
         If True, scale the data to unit variance (or equivalently,
         unit standard deviation).
 
-    copy : boolean, optional, default is True
+    copy : boolean, optional, default True
         If False, try to avoid a copy and do inplace scaling instead.
         This is not guaranteed to always work inplace; e.g. if the data is
         not a NumPy array or scipy.sparse CSR matrix, a copy may still be
@@ -69,10 +69,10 @@ class StandardScaler(BaseEstimator, TransformerMixin):
 
     Attributes
     ----------
-    `mean_` : array of floats with shape [n_features]
+    mean_ : array of floats with shape [n_features]
         The mean value for each feature in the training set.
 
-    `std_` : array of floats with shape [n_features]
+    std_ : array of floats with shape [n_features]
         The standard deviation for each feature in the training set.
 
     See also
@@ -103,7 +103,8 @@ class StandardScaler(BaseEstimator, TransformerMixin):
             The data used to compute the mean and standard deviation
             used for later scaling along the features axis.
         """
-        X = check_arrays(X, copy=self.copy, sparse_format="csc")[0]
+        X = check_array(X, copy=self.copy, accept_sparse="csc",
+                         ensure_2d=False)
         if warn_if_not_float(X, estimator=self):
             # Costly conversion, but otherwise the pipeline will break:
             # https://github.com/scikit-learn/scikit-learn/issues/1709
@@ -141,7 +142,7 @@ class StandardScaler(BaseEstimator, TransformerMixin):
                 self.mean_ = None
 
             if self.with_std:
-                var = mean_variance_axis0(X)[1]
+                var = mean_variance_axis(X, axis=0)[1]
                 self.std_ = np.sqrt(var)
                 self.std_[var == 0.0] = 1.0
             else:
@@ -150,7 +151,7 @@ class StandardScaler(BaseEstimator, TransformerMixin):
         else:
             self.mean_, self.std_ = _mean_and_std(
                 X, axis=0, with_mean=self.with_mean, with_std=self.with_std)
-        return self
+            return self
 
     def transform(self, X, y=None, copy=None):
         """Perform standardization by centering and scaling
@@ -160,18 +161,22 @@ class StandardScaler(BaseEstimator, TransformerMixin):
         X : array-like with shape [n_samples, n_features]
             The data used to scale along the features axis.
         """
+        check_is_fitted(self, 'std_')
+
         copy = copy if copy is not None else self.copy
-        X = check_arrays(X, copy=copy, sparse_format="csc")[0]
+        X = check_array(X, copy=copy, accept_sparse="csc", ensure_2d=False)
         if warn_if_not_float(X, estimator=self):
             X = X.astype(np.float)
         if sparse.issparse(X):
             if self.center_sparse:
                 for i in range(X.shape[1]):
                     X.data[X.indptr[i]:X.indptr[i + 1]] -= self.mean_[i]
+
             elif self.with_mean:
                 raise ValueError(
                     "Cannot center sparse matrices: pass `with_mean=False` "
                     "instead. See docstring for motivation and alternatives.")
+
             else:
                 pass
 
@@ -193,6 +198,8 @@ class StandardScaler(BaseEstimator, TransformerMixin):
         X : array-like with shape [n_samples, n_features]
             The data used to scale along the features axis.
         """
+        check_is_fitted(self, 'std_')
+
         copy = copy if copy is not None else self.copy
         if sparse.issparse(X):
             if self.with_mean:

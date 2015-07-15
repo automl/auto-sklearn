@@ -15,11 +15,11 @@ class QDAComponentTest(unittest.TestCase):
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
 
-    @unittest.skip("QDA fails on this one")
+    #@unittest.skip("QDA fails on this one")
     def test_default_configuration_digits(self):
         for i in range(10):
             predictions, targets = \
                 _test_classifier(classifier=QDA, dataset='digits')
-            self.assertAlmostEqual(0.88585306618093507,
+            self.assertAlmostEqual(0.18882817243472982,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))

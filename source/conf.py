@@ -38,6 +38,8 @@ extensions = [
     'numpydoc',             # Important for get headings like Parameters...
 ]
 
+# Configure the extensions
+
 numpydoc_show_class_members = False
 autosummary_generate = True
 autodoc_default_flags = ['members', 'inherited-members',

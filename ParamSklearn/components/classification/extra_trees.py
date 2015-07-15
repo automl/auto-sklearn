@@ -8,8 +8,9 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.util import DENSE, PREDICTIONS
 
+from sklearn.ensemble import ExtraTreesClassifier as ETC
 # get our own forests to replace the sklearn ones
-from ParamSklearn.implementations import forest
+#from ParamSklearn.implementations import forest
 
 
 class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
@@ -64,7 +65,7 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
         max_features = int(float(self.max_features) * (np.log(num_features) + 1))
         # Use at most half of the features
         max_features = max(1, min(int(X.shape[1] / 2), max_features))
-        self.estimator = forest.ExtraTreesClassifier(
+        self.estimator = ETC(
             n_estimators=0, criterion=self.criterion,
             max_depth=self.max_depth, min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,

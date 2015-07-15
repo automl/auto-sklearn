@@ -4,8 +4,8 @@ import copy
 
 import numpy as np
 import sklearn
-if sklearn.__version__ != "0.15.2":
-    raise ValueError("ParamSklearn supports only sklearn version 0.15.2, "
+if sklearn.__version__ != "0.16.1":
+    raise ValueError("ParamSklearn supports only sklearn version 0.16.1, "
                      "you installed %s." % sklearn.__version__)
 
 from sklearn.base import BaseEstimator

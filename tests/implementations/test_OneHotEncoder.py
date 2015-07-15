@@ -6,26 +6,26 @@ from sklearn.utils.testing import assert_array_almost_equal
 
 from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
 
-dense1 = [[0, 1, 0],
-          [0, 0, 0]]
-dense1_1h = [[1, 0, 1, 1],
-             [1, 1, 0, 1]]
+dense1 = np.array([[0, 1, 0],
+                   [0, 0, 0]])
+dense1_1h = np.array([[1, 0, 1, 1],
+                     [1, 1, 0 , 1]])
 
-dense2 = [[0, np.NaN, 0],
-          [np.NaN, 0, 2],
-          [1, 1, 1]]
-dense2_1h = [[1, 0, 0, 0, 1, 0, 0],
-             [0, 0, 1, 0, 0, 0, 1],
-             [0, 1, 0, 1, 0, 1, 0]]
-dense2_partial_1h = [[1., 0., 0., 0., 0.],
-                     [0., 0., 1., 0., 2.],
-                     [0., 1., 0., 1., 1.]]
+dense2 = np.array([[0, np.NaN, 0],
+                   [np.NaN, 0, 2],
+                   [1, 1, 1]])
+dense2_1h = np.array([[1, 0, 0, 0, 1, 0, 0],
+                      [0, 0, 1, 0, 0, 0, 1],
+                      [0, 1, 0, 1, 0, 1, 0]])
+dense2_partial_1h = np.array([[1., 0., 0., 0., 0.],
+                              [0., 0., 1., 0., 2.],
+                              [0., 1., 0., 1., 1.]])
 
 # All NaN slice
-dense3 = [[0, 1, np.NaN],
-          [1, 0, np.NaN]]
-dense3_1h = [[1, 0, 0, 1, 0],
-             [0, 1, 1, 0, 0]]
+dense3 = np.array([[0, 1, np.NaN],
+                   [1, 0, np.NaN]])
+dense3_1h = np.array([[1, 0, 0, 1, 0],
+                      [0, 1, 1, 0, 0]])
 
 sparse1 = scipy.sparse.csc_matrix(([2, 1, 0, 0, 1, 2],
                                    ((1, 4, 5, 2, 3, 5),
@@ -97,27 +97,27 @@ class OneHotEncoderTest(unittest.TestCase):
 
     def fit_then_transform(self, expected, input, categorical_features='all'):
         ohe = OneHotEncoder(categorical_features=categorical_features)
-        transformation = ohe.fit_transform(input)
+        transformation = ohe.fit_transform(input.copy())
         self.assertIsInstance(transformation, scipy.sparse.csr_matrix)
         assert_array_almost_equal(expected, transformation.todense())
 
         ohe2 = OneHotEncoder(categorical_features=categorical_features)
-        ohe2.fit(input)
-        transformation = ohe2.transform(input)
+        ohe2.fit(input.copy())
+        transformation = ohe2.transform(input.copy())
         self.assertIsInstance(transformation, scipy.sparse.csr_matrix)
         assert_array_almost_equal(expected, transformation.todense())
 
     def fit_then_transform_dense(self, expected, input, categorical_features='all'):
         ohe = OneHotEncoder(categorical_features=categorical_features,
                             sparse=False)
-        transformation = ohe.fit_transform(input)
+        transformation = ohe.fit_transform(input.copy())
         self.assertIsInstance(transformation, np.ndarray)
         assert_array_almost_equal(expected, transformation)
 
         ohe2 = OneHotEncoder(categorical_features=categorical_features,
                              sparse=False)
-        ohe2.fit(input)
-        transformation = ohe2.transform(input)
+        ohe2.fit(input.copy())
+        transformation = ohe2.transform(input.copy())
         self.assertIsInstance(transformation, np.ndarray)
         assert_array_almost_equal(expected, transformation)
 

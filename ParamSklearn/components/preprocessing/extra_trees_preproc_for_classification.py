@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.ensemble import ExtraTreesClassifier
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -10,7 +11,7 @@ from ParamSklearn.components.preprocessor_base import \
 from ParamSklearn.util import DENSE, INPUT
 
 # get our own forests to replace the sklearn ones
-from ParamSklearn.implementations import forest
+#from ParamSklearn.implementations import forest
 
 
 class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
@@ -66,7 +67,7 @@ class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
             float(self.max_features) * (np.log(num_features) + 1))
         # Use at most half of the features
         max_features = max(1, min(int(X.shape[1] / 2), max_features))
-        self.preprocessor = forest.ExtraTreesClassifier(
+        self.preprocessor = ExtraTreesClassifier(
             n_estimators=0, criterion=self.criterion,
             max_depth=self.max_depth, min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,

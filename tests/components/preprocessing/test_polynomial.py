@@ -34,7 +34,6 @@ class PolynomialFeaturesComponentTest(PreprocessingTestCase):
             accuracy = sklearn.metrics.accuracy_score(predictions, Y_test)
             self.assertAlmostEqual(accuracy, 0.93564055859137829, places=2)
 
-    @unittest.skip("Produces np.float64")
     def test_preprocessing_dtype(self):
         super(PolynomialFeaturesComponentTest,
               self)._test_preprocessing_dtype(PolynomialFeatures,
