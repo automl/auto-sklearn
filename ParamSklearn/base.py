@@ -36,7 +36,7 @@ class ParamSklearnBaseEstimator(BaseEstimator):
         else:
             self.random_state = check_random_state(random_state)
 
-    def fit(self, X, Y, fit_params=None, init_params=None):
+    def fit(self, X, y, fit_params=None, init_params=None):
         """Fit the selected algorithm to the training data.
 
         Parameters
@@ -70,11 +70,12 @@ class ParamSklearnBaseEstimator(BaseEstimator):
         # TODO: perform input validation
         # TODO: look if X.shape[0] == y.shape[0]
         # TODO: check if the hyperparameters have been set...
-        # TODO: this is an example of the antipattern of not properly
-        # initializing a class in the init function!
-        # TODO: can this happen now that a configuration is specified at
-        # instantiation time
+        X, fit_params = self.pre_transform(X, y, fit_params=fit_params,
+                                          init_params=init_params)
+        self.fit_estimator(X, y, fit_params=fit_params)
+        return self
 
+    def pre_transform(self, X, y, fit_params=None, init_params=None):
         # Save all transformation object in a list to create a pipeline object
         steps = []
 
@@ -98,7 +99,8 @@ class ParamSklearnBaseEstimator(BaseEstimator):
                     continue
 
                 name_ = instantiated_hyperparameter.split(":")[1]
-                preproc_params[name_] = self.configuration[instantiated_hyperparameter]
+                preproc_params[name_] = self.configuration[
+                    instantiated_hyperparameter]
 
             preproc_params.update(init_params_per_method[preproc_name])
             preprocessor_object = components.preprocessing_components. \
@@ -116,7 +118,7 @@ class ParamSklearnBaseEstimator(BaseEstimator):
             if self.configuration[instantiated_hyperparameter] is None:
                 continue
 
-            name_ = instantiated_hyperparameter. split(":")[1]
+            name_ = instantiated_hyperparameter.split(":")[1]
             estimator_parameters[name_] = self.configuration[
                 instantiated_hyperparameter]
 
@@ -127,7 +129,7 @@ class ParamSklearnBaseEstimator(BaseEstimator):
         steps.append((estimator_name, estimator_object))
 
         self._validate_input_X(X)
-        self._validate_input_Y(Y)
+        self._validate_input_Y(y)
 
         self._pipeline = Pipeline(steps)
         if fit_params is None or not isinstance(fit_params, dict):
@@ -135,8 +137,19 @@ class ParamSklearnBaseEstimator(BaseEstimator):
         else:
             fit_params = {key.replace(":", "__"): value for key, value in
                           fit_params.items()}
-        self._pipeline.fit(X, Y, **fit_params)
+        X, fit_params = self._pipeline._pre_transform(X, y, **fit_params)
+        return X, fit_params
+
+    def fit_estimator(self, X, y, fit_params=None):
+        self._pipeline.steps[-1][-1].fit(X, y, **fit_params)
         return self
+
+    def iterative_fit(self, X, y, fit_params=None, n_iter=1):
+        self._pipeline.steps[-1][-1].iterative_fit(X, y, n_iter=n_iter,
+                                                   **fit_params)
+
+    def configuration_fully_fitted(self):
+        return self._pipeline.steps[-1][-1].configuration_fully_fitted()
 
     def _validate_input_X(self, X):
         # TODO: think of all possible states which can occur and how to

@@ -73,15 +73,16 @@ class BalancingComponentTest(unittest.TestCase):
         for name, clf, acc_no_weighting, acc_weighting in \
                 [('adaboost', AdaboostClassifier, 0.692, 0.719),
                  ('decision_tree', DecisionTree, 0.712, 0.668),
-                 ('extra_trees', ExtraTreesClassifier, 0.910, 0.913),
-                 ('random_forest', RandomForest, 0.896, 0.895),
+                 ('extra_trees', ExtraTreesClassifier, 0.901, 0.919),
+                 ('random_forest', RandomForest, 0.886, 0.885),
                  ('libsvm_svc', LibSVM_SVC, 0.915, 0.937),
                  ('liblinear_svc', LibLinear_SVC, 0.920, 0.923),
-                 ('sgd', SGD, 0.879, 0.906),
+                 ('sgd', SGD, 0.811, 0.902),
                  ('ridge', Ridge, 0.89071038251366119,
                                   0.91013964784456591)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
+                # Fit
                 X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
                 cs = ParamSklearnClassifier.get_hyperparameter_search_space(
                     include_estimators=[name])
@@ -94,15 +95,30 @@ class BalancingComponentTest(unittest.TestCase):
                     sklearn.metrics.accuracy_score(predictions, Y_test),
                     places=3)
 
+                # pre_transform and fit_estimator
+                X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
+                cs = ParamSklearnClassifier.get_hyperparameter_search_space(
+                    include_estimators=[name])
+                default = cs.get_default_configuration()
+                default._values['balancing:strategy'] = strategy
+                classifier = ParamSklearnClassifier(default, random_state=1)
+                Xt, fit_params = classifier.pre_transform(X_train, Y_train)
+                classifier.fit_estimator(Xt, Y_train, fit_params=fit_params)
+                predictions = classifier.predict(X_test)
+                self.assertAlmostEqual(acc,
+                                       sklearn.metrics.accuracy_score(
+                                           predictions, Y_test),
+                                       places=3)
+
         for name, pre, acc_no_weighting, acc_weighting in \
                 [('extra_trees_preproc_for_classification',
-                  ExtraTreesPreprocessor, 0.900, 0.908),
+                  ExtraTreesPreprocessor, 0.892, 0.910),
                    ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
-                    0.907, 0.882)]:
+                    0.889, 0.885)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
-                X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
 
+                X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
                 cs = ParamSklearnClassifier.get_hyperparameter_search_space(
                     include_estimators=['sgd'], include_preprocessors=[name])
                 default = cs.get_default_configuration()
@@ -110,6 +126,21 @@ class BalancingComponentTest(unittest.TestCase):
                 classifier = ParamSklearnClassifier(default, random_state=1)
                 predictor = classifier.fit(X_train, Y_train)
                 predictions = predictor.predict(X_test)
+                self.assertAlmostEqual(acc,
+                                       sklearn.metrics.accuracy_score(
+                                           predictions, Y_test),
+                                       places=3)
+
+                # pre_transform and fit_estimator
+                X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
+                cs = ParamSklearnClassifier.get_hyperparameter_search_space(
+                    include_estimators=['sgd'], include_preprocessors=[name])
+                default = cs.get_default_configuration()
+                default._values['balancing:strategy'] = strategy
+                classifier = ParamSklearnClassifier(default, random_state=1)
+                Xt, fit_params = classifier.pre_transform(X_train, Y_train)
+                classifier.fit_estimator(Xt, Y_train, fit_params=fit_params)
+                predictions = classifier.predict(X_test)
                 self.assertAlmostEqual(acc,
                                        sklearn.metrics.accuracy_score(
                                            predictions, Y_test),

@@ -29,34 +29,49 @@ class SGD(ParamSklearnClassificationAlgorithm):
         self.random_state = random_state
         self.estimator = None
 
-    def fit(self, X, Y):
-        # TODO: maybe scale training data that its norm becomes 1?
-        # http://scikit-learn.org/stable/modules/sgd.html#id1
-        self.alpha = float(self.alpha)
-        self.fit_intercept = bool(self.fit_intercept)
-        self.n_iter = int(self.n_iter)
-        if self.class_weight == "None":
-            self.class_weight = None
-        self.l1_ratio = float(self.l1_ratio)
-        self.epsilon = float(self.epsilon)
-        self.eta0 = float(self.eta0)
-        self.power_t = float(self.power_t)
+    def fit(self, X, y):
+        while not self.configuration_fully_fitted():
+            self.iterative_fit(X, y, n_iter=1)
 
-        self.estimator = SGDClassifier(loss=self.loss,
-                                       penalty=self.penalty,
-                                       alpha=self.alpha,
-                                       fit_intercept=self.fit_intercept,
-                                       n_iter=self.n_iter,
-                                       learning_rate=self.learning_rate,
-                                       class_weight=self.class_weight,
-                                       l1_ratio=self.l1_ratio,
-                                       epsilon=self.epsilon,
-                                       eta0=self.eta0,
-                                       power_t=self.power_t,
-                                       shuffle=True,
-                                       random_state=self.random_state)
-        self.estimator.fit(X, Y)
         return self
+
+    def iterative_fit(self, X, y, n_iter=1, refit=False):
+        if refit:
+            self.estimator = None
+
+        if self.estimator is None:
+            self.alpha = float(self.alpha)
+            self.fit_intercept = bool(self.fit_intercept)
+            self.n_iter = int(self.n_iter)
+            if self.class_weight == "None":
+                self.class_weight = None
+            self.l1_ratio = float(self.l1_ratio)
+            self.epsilon = float(self.epsilon)
+            self.eta0 = float(self.eta0)
+            self.power_t = float(self.power_t)
+
+            self.estimator = SGDClassifier(loss=self.loss,
+                                           penalty=self.penalty,
+                                           alpha=self.alpha,
+                                           fit_intercept=self.fit_intercept,
+                                           n_iter=self.n_iter,
+                                           learning_rate=self.learning_rate,
+                                           class_weight=self.class_weight,
+                                           l1_ratio=self.l1_ratio,
+                                           epsilon=self.epsilon,
+                                           eta0=self.eta0,
+                                           power_t=self.power_t,
+                                           shuffle=True,
+                                           random_state=self.random_state)
+
+        self.estimator.n_iter += n_iter
+        self.estimator.fit(X, y)
+        return self
+
+    def configuration_fully_fitted(self):
+        if self.estimator is None:
+            return False
+        return not self.estimator.n_iter < self.n_iter
 
     def predict(self, X):
         if self.estimator is None:

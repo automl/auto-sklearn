@@ -29,48 +29,64 @@ class RandomForest(ParamSklearnClassificationAlgorithm):
         self.n_jobs = n_jobs
         self.estimator = None
 
-    def fit(self, X, Y, sample_weight=None):
-        self.n_estimators = int(self.n_estimators)
+    def fit(self, X, y, sample_weight=None, refit=False):
+        if self.estimator is None or refit:
+            self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight,
+                               refit=refit)
 
-        if self.max_depth == "None":
-            self.max_depth = None
-        else:
-            self.max_depth = int(self.max_depth)
-        self.min_samples_split = int(self.min_samples_split)
-        self.min_samples_leaf = int(self.min_samples_leaf)
-        if self.max_features not in ("sqrt", "log2", "auto"):
-            num_features = X.shape[1]
-            max_features = int(float(self.max_features) * (np.log(num_features) + 1))
-            # Use at most half of the features
-            max_features = max(1, min(int(X.shape[1] / 2), max_features))
-        if self.bootstrap == "True":
-            self.bootstrap = True
-        else:
-            self.bootstrap = False
-        if self.max_leaf_nodes == "None":
-            self.max_leaf_nodes = None
-
-        # initial fit of only increment trees
-        self.estimator = RandomForestClassifier(
-            n_estimators=0,
-            criterion=self.criterion,
-            max_features=max_features,
-            max_depth=self.max_depth,
-            min_samples_split=self.min_samples_split,
-            min_samples_leaf=self.min_samples_leaf,
-            bootstrap=self.bootstrap,
-            max_leaf_nodes=self.max_leaf_nodes,
-            random_state=self.random_state,
-            n_jobs=self.n_jobs,
-            warm_start=True)
-        # JTS TODO: I think we might have to copy here if we want self.estimator
-        #           to always be consistent on sigabort
-        while len(self.estimator.estimators_) < self.n_estimators:
-            tmp = self.estimator # TODO I think we need to copy here!
-            tmp.n_estimators += self.estimator_increment
-            tmp.fit(X, Y, sample_weight=sample_weight)
-            self.estimator = tmp
+        while not self.configuration_fully_fitted():
+            self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight)
         return self
+
+    def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
+        if refit:
+            self.estimator = None
+
+        if self.estimator is None:
+            self.n_estimators = int(self.n_estimators)
+            if self.max_depth == "None":
+                self.max_depth = None
+            else:
+                self.max_depth = int(self.max_depth)
+            self.min_samples_split = int(self.min_samples_split)
+            self.min_samples_leaf = int(self.min_samples_leaf)
+            if self.max_features not in ("sqrt", "log2", "auto"):
+                num_features = X.shape[1]
+                max_features = int(float(self.max_features) * (np.log(num_features) + 1))
+                # Use at most half of the features
+                max_features = max(1, min(int(X.shape[1] / 2), max_features))
+            if self.bootstrap == "True":
+                self.bootstrap = True
+            else:
+                self.bootstrap = False
+            if self.max_leaf_nodes == "None":
+                self.max_leaf_nodes = None
+
+            # initial fit of only increment trees
+            self.estimator = RandomForestClassifier(
+                n_estimators=0,
+                criterion=self.criterion,
+                max_features=max_features,
+                max_depth=self.max_depth,
+                min_samples_split=self.min_samples_split,
+                min_samples_leaf=self.min_samples_leaf,
+                bootstrap=self.bootstrap,
+                max_leaf_nodes=self.max_leaf_nodes,
+                random_state=self.random_state,
+                n_jobs=self.n_jobs,
+                warm_start=True)
+
+        tmp = self.estimator # TODO I think we need to copy here!
+        tmp.n_estimators += n_iter
+        tmp.fit(X, y, sample_weight=sample_weight)
+        self.estimator = tmp
+        return self
+
+    def configuration_fully_fitted(self):
+        if self.estimator is None:
+            return False
+
+        return not len(self.estimator.estimators_) < self.n_estimators
 
     def predict(self, X):
         if self.estimator is None:

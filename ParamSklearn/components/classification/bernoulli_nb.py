@@ -1,5 +1,6 @@
 import numpy as np
 import sklearn.naive_bayes
+from sklearn.utils.validation import check_is_fitted
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -24,9 +25,40 @@ class BernoulliNB(ParamSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, y):
-        self.estimator = sklearn.naive_bayes.MultinomialNB( alpha = self.alpha, fit_prior = self.fit_prior)
-        self.estimator.fit(X, y)
+        while not self.configuration_fully_fitted():
+            self.iterative_fit(X, y, n_iter=1)
         return self
+
+    def iterative_fit(self, X, y, n_iter=1, refit=False):
+        if refit:
+            self.estimator = None
+
+        if self.estimator is None:
+            self.n_iter = 0
+            self.fully_fit_ = False
+            self.estimator = sklearn.naive_bayes.MultinomialNB(
+                alpha=self.alpha, fit_prior=self.fit_prior)
+            self.classes_ = np.unique(y.astype(int))
+
+        for iter in range(n_iter):
+            start = self.n_iter * 1000
+            stop = (self.n_iter + 1) * 1000
+            self.estimator.partial_fit(X[start:stop], y[start:stop], self.classes_)
+            self.n_iter += 1
+
+            if stop >= len(y):
+                self.fully_fit_ = True
+                break
+
+        return self
+
+    def configuration_fully_fitted(self):
+        if self.estimator is None:
+            return False
+        elif not hasattr(self, 'fully_fit_'):
+            return False
+        else:
+            return self.fully_fit_
 
     def predict(self, X):
         if self.estimator is None:

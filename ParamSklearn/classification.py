@@ -61,21 +61,21 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
 
     """
 
-    def fit(self, X, Y, fit_params=None, init_params=None):
-        self.num_targets = 1 if len(Y.shape) == 1 else Y.shape[1]
+    def pre_transform(self, X, y, fit_params=None, init_params=None):
+        self.num_targets = 1 if len(y.shape) == 1 else y.shape[1]
 
         # Weighting samples has to be done here, not in the components
         if self.configuration['balancing:strategy'] == 'weighting':
             balancing = Balancing(strategy='weighting')
             init_params, fit_params = balancing.get_weights(
-                Y, self.configuration['classifier'],
+                y, self.configuration['classifier'],
                 self.configuration['preprocessor'],
                 init_params, fit_params)
 
-        super(ParamSklearnClassifier, self).fit(X, Y, fit_params=fit_params,
-                                                init_params=init_params)
+        X, fit_params = super(ParamSklearnClassifier, self).pre_transform(
+            X, y, fit_params=fit_params, init_params=init_params)
 
-        return self
+        return X, fit_params
 
     def predict_proba(self, X, batch_size=None):
         """predict_proba.

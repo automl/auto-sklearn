@@ -1,3 +1,4 @@
+import numpy as np
 from sklearn.linear_model.passive_aggressive import PassiveAggressiveClassifier
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
@@ -20,12 +21,32 @@ class PassiveAggressive(ParamSklearnClassificationAlgorithm):
         self.random_state = random_state
         self.estimator = None
 
-    def fit(self, X, Y):
-        self.estimator = PassiveAggressiveClassifier(
-            C=self.C, fit_intercept=self.fit_intercept, n_iter=self.n_iter,
-            loss=self.loss, shuffle=True, random_state=self.random_state)
-        self.estimator.fit(X, Y)
+    def fit(self, X, y):
+        while not self.configuration_fully_fitted():
+            self.iterative_fit(X, y, n_iter=1)
+
         return self
+
+    def iterative_fit(self, X, y, n_iter=1, refit=False):
+        if refit:
+            self.estimator = None
+
+        if self.estimator is None:
+            self.estimator = PassiveAggressiveClassifier(
+                C=self.C, fit_intercept=self.fit_intercept, n_iter=1,
+                loss=self.loss, shuffle=True, random_state=self.random_state,
+                warm_start=True)
+            self.classes_ = np.unique(y.astype(int))
+
+        self.estimator.n_iter += n_iter
+        self.estimator.fit(X, y)
+
+        return self
+
+    def configuration_fully_fitted(self):
+        if self.estimator is None:
+            return False
+        return not self.estimator.n_iter < self.n_iter
 
     def predict(self, X):
         if self.estimator is None:

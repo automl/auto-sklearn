@@ -95,6 +95,21 @@ def _test_classifier(classifier, dataset='iris', sparse=False):
     return predictions, Y_test
 
 
+def _test_classifier_iterative_fit(classifier, dataset='iris', sparse=False):
+    X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
+                                                   make_sparse=sparse)
+    configuration_space = classifier.get_hyperparameter_search_space(
+        dataset_properties={'sparse': sparse})
+    default = configuration_space.get_default_configuration()
+    classifier = classifier(random_state=1,
+                            **{hp_name: default[hp_name] for hp_name in
+                               default if default[hp_name] is not None})
+    while not classifier.configuration_fully_fitted():
+        predictor = classifier.iterative_fit(X_train, Y_train)
+    predictions = predictor.predict(X_test)
+    return predictions, Y_test
+
+
 def _test_classifier_predict_proba(classifier, dataset='iris', sparse=False):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
                                                    make_sparse=sparse)
