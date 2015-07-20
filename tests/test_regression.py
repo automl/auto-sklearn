@@ -180,8 +180,8 @@ class TestParamSKlearnRegressor(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
-        cls_predict = mock.Mock(wraps=cls._pipeline)
-        cls._pipeline = cls_predict
+        cls_predict = mock.Mock(wraps=cls.pipeline_)
+        cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
         self.assertEqual((356,), prediction.shape)
         self.assertEqual(18, cls_predict.predict.call_count)
@@ -198,8 +198,8 @@ class TestParamSKlearnRegressor(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
-        cls_predict = mock.Mock(wraps=cls._pipeline)
-        cls._pipeline = cls_predict
+        cls_predict = mock.Mock(wraps=cls.pipeline_)
+        cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
         self.assertEqual((356,), prediction.shape)
         self.assertEqual(18, cls_predict.predict.call_count)

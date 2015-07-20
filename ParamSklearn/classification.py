@@ -96,10 +96,10 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         if batch_size is None:
             self._validate_input_X(X)
             Xt = X
-            for name, transform in self._pipeline.steps[:-1]:
+            for name, transform in self.pipeline_.steps[:-1]:
                 Xt = transform.transform(Xt)
 
-            return self._pipeline.steps[-1][-1].predict_proba(Xt)
+            return self.pipeline_.steps[-1][-1].predict_proba(Xt)
 
         else:
             if type(batch_size) is not int or batch_size <= 0:

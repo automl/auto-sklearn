@@ -289,8 +289,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
-        cls_predict = mock.Mock(wraps=cls._pipeline)
-        cls._pipeline = cls_predict
+        cls_predict = mock.Mock(wraps=cls.pipeline_)
+        cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
         self.assertEqual((1647,), prediction.shape)
         self.assertEqual(83, cls_predict.predict.call_count)
@@ -302,8 +302,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
-        cls_predict = mock.Mock(wraps=cls._pipeline)
-        cls._pipeline = cls_predict
+        cls_predict = mock.Mock(wraps=cls.pipeline_)
+        cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
         self.assertEqual((1647, 2), prediction.shape)
         self.assertEqual(83, cls_predict.predict.call_count)
@@ -336,8 +336,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
-        cls_predict = mock.Mock(wraps=cls._pipeline)
-        cls._pipeline = cls_predict
+        cls_predict = mock.Mock(wraps=cls.pipeline_)
+        cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
         self.assertEqual((1647,), prediction.shape)
         self.assertEqual(83, cls_predict.predict.call_count)
@@ -350,8 +350,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
-        cls_predict = mock.Mock(wraps=cls._pipeline)
-        cls._pipeline = cls_predict
+        cls_predict = mock.Mock(wraps=cls.pipeline_)
+        cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
         self.assertEqual((1647, 2), prediction.shape)
         self.assertEqual(83, cls_predict.predict.call_count)
@@ -368,8 +368,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         # The object behind the last step in the pipeline
-        cls_predict = mock.Mock(wraps=cls._pipeline.steps[-1][1])
-        cls._pipeline.steps[-1] = ("estimator", cls_predict)
+        cls_predict = mock.Mock(wraps=cls.pipeline_.steps[-1][1])
+        cls.pipeline_.steps[-1] = ("estimator", cls_predict)
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(84, cls_predict.predict_proba.call_count)
@@ -382,8 +382,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
-        cls_predict = mock.Mock(wraps=cls._pipeline.steps[-1][1])
-        cls._pipeline.steps[-1] = ("estimator", cls_predict)
+        cls_predict = mock.Mock(wraps=cls.pipeline_.steps[-1][1])
+        cls.pipeline_.steps[-1] = ("estimator", cls_predict)
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertIsInstance(prediction, list)
         self.assertEqual(2, len(prediction))
@@ -421,8 +421,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         # The object behind the last step in the pipeline
-        cls_predict = mock.Mock(wraps=cls._pipeline.steps[-1][1])
-        cls._pipeline.steps[-1] = ("estimator", cls_predict)
+        cls_predict = mock.Mock(wraps=cls.pipeline_.steps[-1][1])
+        cls.pipeline_.steps[-1] = ("estimator", cls_predict)
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(84, cls_predict.predict_proba.call_count)
@@ -436,8 +436,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
-        cls_predict = mock.Mock(wraps=cls._pipeline.steps[-1][1])
-        cls._pipeline.steps[-1] = ("estimator", cls_predict)
+        cls_predict = mock.Mock(wraps=cls.pipeline_.steps[-1][1])
+        cls.pipeline_.steps[-1] = ("estimator", cls_predict)
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertIsInstance(prediction, list)
         self.assertEqual(2, len(prediction))

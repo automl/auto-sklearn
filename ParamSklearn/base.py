@@ -10,7 +10,7 @@ if sklearn.__version__ != "0.16.1":
 
 from sklearn.base import BaseEstimator
 from sklearn.pipeline import Pipeline
-from sklearn.utils import check_random_state
+from sklearn.utils.validation import check_random_state, check_is_fitted
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
@@ -29,7 +29,6 @@ class ParamSklearnBaseEstimator(BaseEstimator):
 
     def __init__(self, configuration, random_state=None):
         self.configuration = configuration
-        self._pipeline = None
 
         if random_state is None:
             self.random_state = check_random_state(1)
@@ -131,31 +130,42 @@ class ParamSklearnBaseEstimator(BaseEstimator):
         self._validate_input_X(X)
         self._validate_input_Y(y)
 
-        self._pipeline = Pipeline(steps)
+        self.pipeline_ = Pipeline(steps)
         if fit_params is None or not isinstance(fit_params, dict):
             fit_params = dict()
         else:
             fit_params = {key.replace(":", "__"): value for key, value in
                           fit_params.items()}
-        X, fit_params = self._pipeline._pre_transform(X, y, **fit_params)
+        X, fit_params = self.pipeline_._pre_transform(X, y, **fit_params)
         return X, fit_params
 
     def fit_estimator(self, X, y, fit_params=None):
-        self._pipeline.steps[-1][-1].fit(X, y, **fit_params)
+        check_is_fitted(self, 'pipeline_')
+        if fit_params is None:
+            fit_params = {}
+        self.pipeline_.steps[-1][-1].fit(X, y, **fit_params)
         return self
 
     def iterative_fit(self, X, y, fit_params=None, n_iter=1):
-        self._pipeline.steps[-1][-1].iterative_fit(X, y, n_iter=n_iter,
+        check_is_fitted(self, 'pipeline_')
+        if fit_params is None:
+            fit_params = {}
+        self.pipeline_.steps[-1][-1].iterative_fit(X, y, n_iter=n_iter,
                                                    **fit_params)
 
+    def estimator_supports_iterative_fit(self):
+        check_is_fitted(self, 'pipeline_')
+        return hasattr(self.pipeline_.steps[-1][-1], 'iterative_fit')
+
     def configuration_fully_fitted(self):
-        return self._pipeline.steps[-1][-1].configuration_fully_fitted()
+        check_is_fitted(self, 'pipeline_')
+        return self.pipeline_.steps[-1][-1].configuration_fully_fitted()
 
     def _validate_input_X(self, X):
         # TODO: think of all possible states which can occur and how to
         # handle them
         """
-        if not self._pipeline[-1].handles_missing_values() or \
+        if not self.pipeline_[-1].handles_missing_values() or \
                 (self._preprocessor is not None and not\
                 self._preprocessor.handles_missing_value()):
             assert_all_finite(X)
@@ -230,7 +240,7 @@ class ParamSklearnBaseEstimator(BaseEstimator):
 
         if batch_size is None:
             self._validate_input_X(X)
-            return self._pipeline.predict(X)
+            return self.pipeline_.predict(X)
         else:
             if type(batch_size) is not int or batch_size <= 0:
                 raise Exception("batch_size must be a positive integer")
