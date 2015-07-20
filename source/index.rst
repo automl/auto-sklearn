@@ -55,7 +55,7 @@ Please install these manually, for example by:
     pip install scikit-learn==0.15.2
     pip install git+https://github.com/mfeurer/HPOlibConfigSpace#egg=HPOlibConfigSpace0.1dev
     pip install --editable git+https://bitbucket.org/mfeurer/paramsklearn#egg=ParamSklearn
-    pip install git+https://github.com/automl/HPOlib#egg=HPOlib0.1
+    pip install git+https://github.com/automl/HPOlib#egg=HPOlib0.2
     pip install --editable git+https://bitbucket.org/mfeurer/pymetalearn/#egg=pyMetaLearn
 
 Then install *auto-sklearn*
