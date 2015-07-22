@@ -5,8 +5,8 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
 
-from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import DENSE
+from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.util import DENSE, INPUT
 
 
 class PCA(ParamSklearnPreprocessingAlgorithm):
@@ -34,6 +34,8 @@ class PCA(ParamSklearnPreprocessingAlgorithm):
 
         components = self.preprocessor.components_
         self.preprocessor.components_ = components[:idx]
+        self.preprocessor.explained_variance_ = \
+            self.preprocessor.explained_variance_[:idx]
 
         if not np.isfinite(self.preprocessor.components_).all():
             raise ValueError("PCA found non-finite components.")
@@ -65,7 +67,7 @@ class PCA(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': False,
                 'handles_dense': True,
                 'input': (DENSE, ),
-                'output': DENSE,
+                'output': INPUT,
                 # TODO find out what is best used here!
                 'preferred_dtype': None}
 

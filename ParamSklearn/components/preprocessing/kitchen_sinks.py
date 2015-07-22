@@ -4,7 +4,7 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter
 
-from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.util import SPARSE, DENSE, INPUT
 
 class RandomKitchenSinks(ParamSklearnPreprocessingAlgorithm):

@@ -6,8 +6,8 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
-from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
-from ParamSklearn.util import DENSE, PREDICTIONS
+from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.util import DENSE, PREDICTIONS, SPARSE
 # get our own forests to replace the sklearn ones
 #from ParamSklearn.implementations import forest
 
@@ -113,8 +113,8 @@ class RandomForest(ParamSklearnClassificationAlgorithm):
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                'handles_sparse': False,
-                'input': (DENSE, ),
+                'handles_sparse': True,
+                'input': (DENSE, SPARSE),
                 'output': PREDICTIONS,
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?

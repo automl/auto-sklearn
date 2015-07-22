@@ -29,11 +29,11 @@ class BalancingComponentTest(unittest.TestCase):
         balancing = Balancing(strategy='weighting')
         init_params, fit_params = balancing.get_weights(
             Y, 'random_forest', None, None, None)
-        self.assertTrue(np.allclose(fit_params['random_forest:sample_weight'],
+        self.assertTrue(np.allclose(fit_params['classifier:sample_weight'],
                                     np.array([0.4] * 80 + [1.6] * 20)))
         init_params, fit_params = balancing.get_weights(
             Y, None, 'extra_trees_preproc_for_classification', None, None)
-        self.assertTrue(np.allclose(fit_params['extra_trees_preproc_for_classification:sample_weight'],
+        self.assertTrue(np.allclose(fit_params['preprocessor:sample_weight'],
                                     np.array([0.4] * 80 + [1.6] * 20)))
 
     def test_balancing_get_weights_treed_multilabel(self):
@@ -42,11 +42,11 @@ class BalancingComponentTest(unittest.TestCase):
         balancing = Balancing(strategy='weighting')
         init_params, fit_params = balancing.get_weights(
             Y, 'random_forest', None, None, None)
-        self.assertTrue(np.allclose(fit_params['random_forest:sample_weight'],
+        self.assertTrue(np.allclose(fit_params['classifier:sample_weight'],
                                     np.array([0.4] * 500 + [4.0] * 10)))
         init_params, fit_params = balancing.get_weights(
             Y, None, 'extra_trees_preproc_for_classification', None, None)
-        self.assertTrue(np.allclose(fit_params['extra_trees_preproc_for_classification:sample_weight'],
+        self.assertTrue(np.allclose(fit_params['preprocessor:sample_weight'],
                                     np.array([0.4] * 500 + [4.0] * 10)))
 
     def test_balancing_get_weights_svm_sgd(self):
@@ -54,11 +54,11 @@ class BalancingComponentTest(unittest.TestCase):
         balancing = Balancing(strategy='weighting')
         init_params, fit_params = balancing.get_weights(
             Y, 'libsvm_svc', None, None, None)
-        self.assertEqual(("libsvm_svc:class_weight", "auto"),
+        self.assertEqual(("classifier:class_weight", "auto"),
                          init_params.items()[0])
         init_params, fit_params = balancing.get_weights(
             Y, None, 'liblinear_svc_preprocessor', None, None)
-        self.assertEqual(("liblinear_svc_preprocessor:class_weight", "auto"),
+        self.assertEqual(("preprocessor:class_weight", "auto"),
                          init_params.items()[0])
 
     def test_balancing_get_weights_ridge(self):
@@ -66,8 +66,8 @@ class BalancingComponentTest(unittest.TestCase):
         balancing = Balancing(strategy='weighting')
         init_params, fit_params = balancing.get_weights(
             Y, 'ridge', None, None, None)
-        self.assertAlmostEqual(0.4, init_params['ridge:class_weight'][0])
-        self.assertAlmostEqual(1.6, init_params['ridge:class_weight'][1])
+        self.assertAlmostEqual(0.4, init_params['classifier:class_weight'][0])
+        self.assertAlmostEqual(1.6, init_params['classifier:class_weight'][1])
 
     def test_weighting_effect(self):
         for name, clf, acc_no_weighting, acc_weighting in \
@@ -85,7 +85,7 @@ class BalancingComponentTest(unittest.TestCase):
                 # Fit
                 X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
                 cs = ParamSklearnClassifier.get_hyperparameter_search_space(
-                    include_estimators=[name])
+                    include={'classifier': [name]})
                 default = cs.get_default_configuration()
                 default._values['balancing:strategy'] = strategy
                 classifier = ParamSklearnClassifier(default, random_state=1)
@@ -98,7 +98,7 @@ class BalancingComponentTest(unittest.TestCase):
                 # pre_transform and fit_estimator
                 X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
                 cs = ParamSklearnClassifier.get_hyperparameter_search_space(
-                    include_estimators=[name])
+                    include={'classifier': [name]})
                 default = cs.get_default_configuration()
                 default._values['balancing:strategy'] = strategy
                 classifier = ParamSklearnClassifier(default, random_state=1)
@@ -120,7 +120,7 @@ class BalancingComponentTest(unittest.TestCase):
 
                 X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
                 cs = ParamSklearnClassifier.get_hyperparameter_search_space(
-                    include_estimators=['sgd'], include_preprocessors=[name])
+                    include={'classifier': ['sgd'], 'preprocessor': [name]})
                 default = cs.get_default_configuration()
                 default._values['balancing:strategy'] = strategy
                 classifier = ParamSklearnClassifier(default, random_state=1)
@@ -134,7 +134,7 @@ class BalancingComponentTest(unittest.TestCase):
                 # pre_transform and fit_estimator
                 X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
                 cs = ParamSklearnClassifier.get_hyperparameter_search_space(
-                    include_estimators=['sgd'], include_preprocessors=[name])
+                    include={'classifier': ['sgd'], 'preprocessor': [name]})
                 default = cs.get_default_configuration()
                 default._values['balancing:strategy'] = strategy
                 classifier = ParamSklearnClassifier(default, random_state=1)

@@ -5,7 +5,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
-from ParamSklearn.components.classification_base import \
+from ParamSklearn.components.base import \
     ParamSklearnClassificationAlgorithm
 from ParamSklearn.util import DENSE, PREDICTIONS
 # get our own forests to replace the sklearn ones

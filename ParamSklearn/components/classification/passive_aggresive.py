@@ -6,7 +6,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, UnParametrizedHyperparameter, \
     UniformIntegerHyperparameter
 
-from ParamSklearn.components.classification_base import \
+from ParamSklearn.components.base import \
     ParamSklearnClassificationAlgorithm
 from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 from ParamSklearn.implementations.util import softmax

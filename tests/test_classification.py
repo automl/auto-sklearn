@@ -18,8 +18,8 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace, \
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from ParamSklearn.classification import ParamSklearnClassifier
-from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
-from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 import ParamSklearn.components.classification as classification_components
 import ParamSklearn.components.preprocessing as preprocessing_components
 from ParamSklearn.util import get_dataset, DENSE, SPARSE, PREDICTIONS
@@ -29,6 +29,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
     def test_io_dict(self):
         classifiers = classification_components._classifiers
         for c in classifiers:
+            if classifiers[c] == classification_components.ClassifierChoice:
+                continue
             props = classifiers[c].get_properties()
             self.assertIn('input', props)
             self.assertIn('output', props)
@@ -48,8 +50,10 @@ class TestParamSklearnClassifier(unittest.TestCase):
 
     def test_find_classifiers(self):
         classifiers = classification_components._classifiers
-        self.assertGreaterEqual(len(classifiers), 1)
+        self.assertGreaterEqual(len(classifiers), 2)
         for key in classifiers:
+            if hasattr(classifiers[key], 'get_components'):
+                continue
             self.assertIn(ParamSklearnClassificationAlgorithm,
                             classifiers[key].__bases__)
 
@@ -57,6 +61,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
         preprocessors = preprocessing_components._preprocessors
         self.assertGreaterEqual(len(preprocessors),  1)
         for key in preprocessors:
+            if hasattr(preprocessors[key], 'get_components'):
+                continue
             self.assertIn(ParamSklearnPreprocessingAlgorithm,
                             preprocessors[key].__bases__)
 
@@ -64,11 +70,12 @@ class TestParamSklearnClassifier(unittest.TestCase):
         for i in range(2):
             cs = ParamSklearnClassifier.get_hyperparameter_search_space()
             default = cs.get_default_configuration()
+            print cs
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
             auto = ParamSklearnClassifier(default)
             auto = auto.fit(X_train, Y_train)
             predictions = auto.predict(X_test)
-            self.assertAlmostEqual(0.95999999999999996,
+            self.assertAlmostEqual(0.9599999999999995,
                 sklearn.metrics.accuracy_score(predictions, Y_test))
             scores = auto.predict_proba(X_test)
 
@@ -93,12 +100,14 @@ class TestParamSklearnClassifier(unittest.TestCase):
                     continue
                 else:
                     print config
+                    print traceback.format_exc()
                     raise e
             except LinAlgError as e:
                 if "not positive definite, even with jitter" in e.message:
                     continue
                 else:
                     print config
+                    print traceback.format_exc()
                     raise e
             except AttributeError as e:
                 # Some error in QDA
@@ -106,6 +115,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
                     continue
                 else:
                     print config
+                    print traceback.format_exc()
                     raise e
             except RuntimeWarning as e:
                 if "invalid value encountered in sqrt" in e.message:
@@ -114,12 +124,14 @@ class TestParamSklearnClassifier(unittest.TestCase):
                     continue
                 else:
                     print config
+                    print traceback.format_exc()
                     raise e
             except UserWarning as e:
                 if "FastICA did not converge" in e.message:
                     continue
                 else:
                     print config
+                    print traceback.format_exc()
                     raise e
             except MemoryError as e:
                 continue
@@ -127,15 +139,17 @@ class TestParamSklearnClassifier(unittest.TestCase):
     def test_configurations_sparse(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
+        print cs
         for i in range(10):
             config = cs.sample_configuration()
+            print config
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                            make_sparse=True)
             cls = ParamSklearnClassifier(config, random_state=1)
             try:
                 cls.fit(X_train, Y_train)
                 predictions = cls.predict(X_test)
-            except ValueError as e:
+            except ValueError as e:                                 
                 if "Floating-point under-/overflow occurred at epoch" in \
                         e.message or \
                                 "removed all features" in e.message:
@@ -184,68 +198,84 @@ class TestParamSklearnClassifier(unittest.TestCase):
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
-            include_estimators=['libsvm_svc'])
-        self.assertEqual(cs.get_hyperparameter('classifier'),
-            CategoricalHyperparameter('classifier', ['libsvm_svc']))
+            include={'classifier': ['libsvm_svc']})
+        self.assertEqual(cs.get_hyperparameter('classifier:__choice__'),
+            CategoricalHyperparameter('classifier:__choice__', ['libsvm_svc']))
 
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
-            exclude_estimators=['libsvm_svc'])
+            exclude={'classifier': ['libsvm_svc']})
         self.assertNotIn('libsvm_svc', str(cs))
 
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
-            include_preprocessors=['select_percentile_classification'])
-        self.assertEqual(cs.get_hyperparameter('preprocessor'),
-            CategoricalHyperparameter('preprocessor',
+            include={'preprocessor': ['select_percentile_classification']})
+        self.assertEqual(cs.get_hyperparameter('preprocessor:__choice__'),
+            CategoricalHyperparameter('preprocessor:__choice__',
                                       ['select_percentile_classification']))
 
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
-            exclude_preprocessors=['select_percentile_classification'])
+            exclude={'preprocessor': ['select_percentile_classification']})
         self.assertNotIn('select_percentile_classification', str(cs))
 
     def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(self):
-        cs = ParamSklearnClassifier.get_hyperparameter_search_space(
-            include_preprocessors=['nystroem_sampler'])
-        self.assertEqual(cs.get_hyperparameter('preprocessor').choices,
-                         ['nystroem_sampler'])
+        self.assertRaisesRegexp(ValueError, "Configuration:\n"
+            "  balancing:strategy, Value: none\n"
+            "  classifier:__choice__, Value: random_forest\n"
+            "  classifier:random_forest:bootstrap, Value: True\n"
+            "  classifier:random_forest:criterion, Value: gini\n"
+            "  classifier:random_forest:max_depth, Constant: None\n"
+            "  classifier:random_forest:max_features, Value: 1.0\n"
+            "  classifier:random_forest:max_leaf_nodes, Constant: None\n"
+            "  classifier:random_forest:min_samples_leaf, Value: 1\n"
+            "  classifier:random_forest:min_samples_split, Value: 2\n"
+            "  classifier:random_forest:n_estimators, Constant: 100\n"
+            "  imputation:strategy, Value: mean\n"
+            "  preprocessor:__choice__, Value: nystroem_sampler\n"
+            "  preprocessor:nystroem_sampler:gamma, Value: 0.1\n"
+            "  preprocessor:nystroem_sampler:kernel, Value: rbf\n"
+            "  preprocessor:nystroem_sampler:n_components, Value: 100\n"
+            "  rescaling:strategy, Value: min/max\n"
+            "violates forbidden clause \(Forbidden: classifier:__choice__ == random_forest && Forbidden: preprocessor:__choice__ == nystroem_sampler\)",
+            ParamSklearnClassifier.get_hyperparameter_search_space,
+            include={'preprocessor': ['nystroem_sampler']})
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(ValueError, "Configuration:\n"
             "  balancing:strategy, Value: none\n"
-            "  classifier, Value: multinomial_nb\n"
+            "  classifier:__choice__, Value: multinomial_nb\n"
+            "  classifier:multinomial_nb:alpha, Value: 1.0\n"
+            "  classifier:multinomial_nb:fit_prior, Value: True\n"
             "  imputation:strategy, Value: mean\n"
-            "  multinomial_nb:alpha, Value: 1.0\n"
-            "  multinomial_nb:fit_prior, Value: True\n"
-            "  preprocessor, Value: truncatedSVD\n"
+            "  preprocessor:__choice__, Value: truncatedSVD\n"
+            "  preprocessor:truncatedSVD:target_dim, Value: 128\n"
             "  rescaling:strategy, Value: min/max\n"
-            "  truncatedSVD:target_dim, Value: 128\n"
-            "violates forbidden clause \(Forbidden: preprocessor == "
-            "truncatedSVD && Forbidden: classifier == multinomial_nb\)",
+            "violates forbidden clause \(Forbidden: preprocessor:__choice__ == "
+            "truncatedSVD && Forbidden: classifier:__choice__ == multinomial_nb\)",
                                 ParamSklearnClassifier.get_hyperparameter_search_space,
-                                include_estimators=['multinomial_nb'],
-                                include_preprocessors=['truncatedSVD'],
+                                include={'classifier': ['multinomial_nb'],
+                                         'preprocessor': ['truncatedSVD']},
                                 dataset_properties={'sparse':True})
 
         # It must also be catched that no classifiers which can handle sparse
         #  data are located behind the densifier
         self.assertRaisesRegexp(ValueError, "Configuration:\n"
             "  balancing:strategy, Value: none\n"
-            "  classifier, Value: liblinear_svc\n"
+            "  classifier:__choice__, Value: liblinear_svc\n"
+            "  classifier:liblinear_svc:C, Value: 1.0\n"
+            "  classifier:liblinear_svc:dual, Constant: False\n"
+            "  classifier:liblinear_svc:fit_intercept, Constant: True\n"
+            "  classifier:liblinear_svc:intercept_scaling, Constant: 1\n"
+            "  classifier:liblinear_svc:loss, Value: l2\n"
+            "  classifier:liblinear_svc:multi_class, Constant: ovr\n"
+            "  classifier:liblinear_svc:penalty, Value: l2\n"
+            "  classifier:liblinear_svc:tol, Value: 0.0001\n"
             "  imputation:strategy, Value: mean\n"
-            "  liblinear_svc:C, Value: 1.0\n"
-            "  liblinear_svc:dual, Constant: False\n"
-            "  liblinear_svc:fit_intercept, Constant: True\n"
-            "  liblinear_svc:intercept_scaling, Constant: 1\n"
-            "  liblinear_svc:loss, Value: l2\n"
-            "  liblinear_svc:multi_class, Constant: ovr\n"
-            "  liblinear_svc:penalty, Value: l2\n"
-            "  liblinear_svc:tol, Value: 0.0001\n"
-            "  preprocessor, Value: densifier\n"
+            "  preprocessor:__choice__, Value: densifier\n"
             "  rescaling:strategy, Value: min/max\n"
-            "violates forbidden clause \(Forbidden: classifier == liblinear_svc &&"
-            " Forbidden: preprocessor == densifier\)",
+            "violates forbidden clause \(Forbidden: classifier:__choice__ == liblinear_svc &&"
+            " Forbidden: preprocessor:__choice__ == densifier\)",
                                 ParamSklearnClassifier.get_hyperparameter_search_space,
-                                include_estimators=['liblinear_svc'],
-                                include_preprocessors=['densifier'],
+                                include={'classifier': ['liblinear_svc'],
+                                         'preprocessor': ['densifier']},
                                 dataset_properties={'sparse': True})
 
     def test_get_hyperparameter_search_space_dataset_properties(self):
@@ -312,21 +342,19 @@ class TestParamSklearnClassifier(unittest.TestCase):
     def test_predict_batched_sparse(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
-        # Densifier + RF is the only combination that easily tests sparse
-        # data with multilabel classification!
         config = Configuration(cs,
             values={"balancing:strategy": "none",
-                    "classifier": "random_forest",
+                    "classifier:__choice__": "random_forest",
                     "imputation:strategy": "mean",
-                    "preprocessor": "densifier",
-                    'random_forest:bootstrap': 'True',
-                    'random_forest:criterion': 'gini',
-                    'random_forest:max_depth': 'None',
-                    'random_forest:min_samples_split': 2,
-                    'random_forest:min_samples_leaf': 2,
-                    'random_forest:max_features': 0.5,
-                    'random_forest:max_leaf_nodes': 'None',
-                    'random_forest:n_estimators': 100,
+                    "preprocessor:__choice__": "no_preprocessing",
+                    'classifier:random_forest:bootstrap': 'True',
+                    'classifier:random_forest:criterion': 'gini',
+                    'classifier:random_forest:max_depth': 'None',
+                    'classifier:random_forest:min_samples_split': 2,
+                    'classifier:random_forest:min_samples_leaf': 2,
+                    'classifier:random_forest:max_features': 0.5,
+                    'classifier:random_forest:max_leaf_nodes': 'None',
+                    'classifier:random_forest:n_estimators': 100,
                     "rescaling:strategy": "min/max"})
         cls = ParamSklearnClassifier(config)
 
@@ -396,21 +424,19 @@ class TestParamSklearnClassifier(unittest.TestCase):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
 
-        # Densifier + RF is the only combination that easily tests sparse
-        # data with multilabel classification!
         config = Configuration(cs,
                                values={"balancing:strategy": "none",
-                                       "classifier": "random_forest",
+                                       "classifier:__choice__": "random_forest",
                                        "imputation:strategy": "mean",
-                                       "preprocessor": "densifier",
-                                       'random_forest:bootstrap': 'True',
-                                       'random_forest:criterion': 'gini',
-                                       'random_forest:max_depth': 'None',
-                                       'random_forest:min_samples_split': 2,
-                                       'random_forest:min_samples_leaf': 2,
-                                       'random_forest:max_features': 0.5,
-                                       'random_forest:max_leaf_nodes': 'None',
-                                       'random_forest:n_estimators': 100,
+                                       "preprocessor:__choice__": "no_preprocessing",
+                                       'classifier:random_forest:bootstrap': 'True',
+                                       'classifier:random_forest:criterion': 'gini',
+                                       'classifier:random_forest:max_depth': 'None',
+                                       'classifier:random_forest:min_samples_split': 2,
+                                       'classifier:random_forest:min_samples_leaf': 2,
+                                       'classifier:random_forest:max_features': 0.5,
+                                       'classifier:random_forest:max_leaf_nodes': 'None',
+                                       'classifier:random_forest:n_estimators': 100,
                                        "rescaling:strategy": "min/max"})
 
         # Multiclass

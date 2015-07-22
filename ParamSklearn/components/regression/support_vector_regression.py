@@ -9,7 +9,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UnParametrizedHyperparameter
 
 
-from ParamSklearn.components.regression_base import ParamSklearnRegressionAlgorithm
+from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
 from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 
 # Something is wrong here...

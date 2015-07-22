@@ -6,7 +6,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, \
     ForbiddenAndConjunction
 
-from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.implementations.util import softmax
 from ParamSklearn.util import SPARSE, DENSE, PREDICTIONS
 

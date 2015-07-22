@@ -3,7 +3,7 @@ import sklearn.qda
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
 
-from ParamSklearn.components.classification_base import \
+from ParamSklearn.components.base import \
     ParamSklearnClassificationAlgorithm
 from ParamSklearn.util import DENSE, PREDICTIONS
 from ParamSklearn.implementations.util import softmax

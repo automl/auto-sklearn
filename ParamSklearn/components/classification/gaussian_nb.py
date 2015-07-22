@@ -3,7 +3,7 @@ import sklearn.naive_bayes
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 
-from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.util import DENSE, PREDICTIONS
 
 

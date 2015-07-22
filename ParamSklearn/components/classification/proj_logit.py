@@ -5,7 +5,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
-from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.util import DENSE, PREDICTIONS
 from ParamSklearn.implementations import ProjLogit
 
@@ -16,7 +16,6 @@ class ProjLogitCLassifier(ParamSklearnClassificationAlgorithm):
     def __init__(self, max_epochs = 2, random_state=None, n_jobs=1):
         self.max_epochs = max_epochs
         self.estimator = None
-
 
     def fit(self, X, Y):
         self.estimator = ProjLogit.ProjLogit(max_epochs = int(self.max_epochs))

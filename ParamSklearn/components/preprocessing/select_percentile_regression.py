@@ -3,7 +3,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, UnPara
 
 import sklearn.feature_selection
 
-from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.components.preprocessing.select_percentile import SelectPercentileBase
 from ParamSklearn.util import DENSE
 

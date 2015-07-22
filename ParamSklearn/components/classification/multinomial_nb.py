@@ -5,7 +5,7 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
 
-from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 
 

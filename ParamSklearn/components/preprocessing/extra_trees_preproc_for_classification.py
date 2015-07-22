@@ -6,7 +6,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
-from ParamSklearn.components.preprocessor_base import \
+from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.util import DENSE, INPUT
 

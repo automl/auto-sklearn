@@ -14,8 +14,8 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from ParamSklearn.regression import ParamSklearnRegressor
-from ParamSklearn.components.regression_base import ParamSklearnRegressionAlgorithm
-from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
+from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 import ParamSklearn.components.regression as regression_components
 import ParamSklearn.components.preprocessing as preprocessing_components
 from ParamSklearn.util import get_dataset, SPARSE, DENSE, PREDICTIONS
@@ -25,8 +25,10 @@ class TestParamSKlearnRegressor(unittest.TestCase):
 
     def test_io_dict(self):
         regressors = regression_components._regressors
-        for c in regressors:
-            props = regressors[c].get_properties()
+        for r in regressors:
+            if regressors[r] == regression_components.RegressorChoice:
+                continue
+            props = regressors[r].get_properties()
             self.assertIn('input', props)
             self.assertIn('output', props)
             inp = props['input']
@@ -50,6 +52,8 @@ class TestParamSKlearnRegressor(unittest.TestCase):
         regressors = regression_components._regressors
         self.assertGreaterEqual(len(regressors), 1)
         for key in regressors:
+            if hasattr(regressors[key], 'get_components'):
+                continue
             self.assertIn(ParamSklearnRegressionAlgorithm,
                             regressors[key].__bases__)
 
@@ -57,6 +61,8 @@ class TestParamSKlearnRegressor(unittest.TestCase):
         preprocessors = preprocessing_components._preprocessors
         self.assertGreaterEqual(len(preprocessors),  1)
         for key in preprocessors:
+            if hasattr(preprocessors[key], 'get_components'):
+                continue
             self.assertIn(ParamSklearnPreprocessingAlgorithm,
                             preprocessors[key].__bases__)
 
@@ -79,63 +85,63 @@ class TestParamSKlearnRegressor(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(51, len(hyperparameters))
+        self.assertEqual(75, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 4, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
         cs = ParamSklearnRegressor.get_hyperparameter_search_space(
-            include_estimators=['random_forest'])
-        self.assertEqual(cs.get_hyperparameter('regressor'),
-            CategoricalHyperparameter('regressor', ['random_forest']))
+            include={'regressor': ['random_forest']})
+        self.assertEqual(cs.get_hyperparameter('regressor:__choice__'),
+            CategoricalHyperparameter('regressor:__choice__', ['random_forest']))
 
         # TODO add this test when more than one regressor is present
         cs = ParamSklearnRegressor.get_hyperparameter_search_space(
-            exclude_estimators=['random_forest'])
+            exclude={'regressor': ['random_forest']})
         self.assertNotIn('random_forest', str(cs))
 
         cs = ParamSklearnRegressor.get_hyperparameter_search_space(
-            include_preprocessors=['pca'])
-        self.assertEqual(cs.get_hyperparameter('preprocessor'),
-            CategoricalHyperparameter('preprocessor', ['pca', ]))
+            include={'preprocessor': ['pca']})
+        self.assertEqual(cs.get_hyperparameter('preprocessor:__choice__'),
+            CategoricalHyperparameter('preprocessor:__choice__', ['pca']))
 
         cs = ParamSklearnRegressor.get_hyperparameter_search_space(
-            exclude_preprocessors=['no_preprocessing'])
+            exclude={'preprocessor': ['no_preprocessing']})
         self.assertNotIn('no_preprocessing', str(cs))
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(ValueError, "Configuration:\n"
             "  imputation:strategy, Value: mean\n"
-            "  kitchen_sinks:gamma, Value: 1.0\n"
-            "  kitchen_sinks:n_components, Value: 100\n"
-            "  preprocessor, Value: kitchen_sinks\n"
-            "  random_forest:bootstrap, Value: True\n"
-            "  random_forest:criterion, Constant: mse\n"
-            "  random_forest:max_depth, Constant: None\n"
-            "  random_forest:max_features, Value: 1.0\n"
-            "  random_forest:min_samples_leaf, Value: 1\n"
-            "  random_forest:min_samples_split, Value: 2\n"
-            "  random_forest:n_estimators, Constant: 100\n"
-            "  regressor, Value: random_forest\n"
+            "  preprocessor:__choice__, Value: kitchen_sinks\n"
+            "  preprocessor:kitchen_sinks:gamma, Value: 1.0\n"
+            "  preprocessor:kitchen_sinks:n_components, Value: 100\n"
+            "  regressor:__choice__, Value: random_forest\n"
+            "  regressor:random_forest:bootstrap, Value: True\n"
+            "  regressor:random_forest:criterion, Constant: mse\n"
+            "  regressor:random_forest:max_depth, Constant: None\n"
+            "  regressor:random_forest:max_features, Value: 1.0\n"
+            "  regressor:random_forest:min_samples_leaf, Value: 1\n"
+            "  regressor:random_forest:min_samples_split, Value: 2\n"
+            "  regressor:random_forest:n_estimators, Constant: 100\n"
             "  rescaling:strategy, Value: min/max\n"
-            "violates forbidden clause \(Forbidden: regressor == random_forest"
-            " && Forbidden: preprocessor == kitchen_sinks\)",
+            "violates forbidden clause \(Forbidden: regressor:__choice__ == random_forest"
+            " && Forbidden: preprocessor:__choice__ == kitchen_sinks\)",
                                 ParamSklearnRegressor.get_hyperparameter_search_space,
-                                include_estimators=['random_forest'],
-                                include_preprocessors=['kitchen_sinks'])
+                                include={'regressor': ['random_forest'],
+                                         'preprocessor': ['kitchen_sinks']})
 
         # It must also be catched that no classifiers which can handle sparse
         # data are located behind the densifier
         self.assertRaisesRegexp(ValueError, "Configuration:\n"
             "  imputation:strategy, Value: mean\n"
-            "  preprocessor, Value: densifier\n"
-            "  regressor, Value: ridge_regression\n"
+            "  preprocessor:__choice__, Value: densifier\n"
+            "  regressor:__choice__, Value: ridge_regression\n"
+            "  regressor:ridge_regression:alpha, Value: 1.0\n"
             "  rescaling:strategy, Value: min/max\n"
-            "  ridge_regression:alpha, Value: 1.0\n"
-            "violates forbidden clause \(Forbidden: regressor == "
-            "ridge_regression && Forbidden: preprocessor == densifier\)",
+            "violates forbidden clause \(Forbidden: regressor:__choice__ == "
+            "ridge_regression && Forbidden: preprocessor:__choice__ == densifier\)",
                                 ParamSklearnRegressor.get_hyperparameter_search_space,
-                                include_estimators=['ridge_regression'],
-                                include_preprocessors=['densifier'],
+                                include={'regressor': ['ridge_regression'],
+                                         'preprocessor': ['densifier']},
                                 dataset_properties={'sparse': True})
 
     @unittest.skip("test_get_hyperparameter_search_space_dataset_properties" +

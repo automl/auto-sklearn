@@ -5,7 +5,7 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant
 
-from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.util import DENSE, PREDICTIONS
 
 
@@ -63,6 +63,9 @@ class GradientBoostingClassifier(ParamSklearnClassificationAlgorithm):
         return self
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
+        # Special fix for gradient boosting!
+        if isinstance(X, np.ndarray):
+            X = np.ascontiguousarray(X, dtype=X.dtype)
         if refit:
             self.estimator = None
 

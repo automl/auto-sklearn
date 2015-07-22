@@ -6,7 +6,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
 from HPOlibConfigSpace.conditions import InCondition, EqualsCondition, AndConjunction
 
-from ParamSklearn.components.preprocessor_base import \
+from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.util import SPARSE, DENSE, INPUT
 

@@ -4,7 +4,7 @@ import sklearn.linear_model
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
 
-from ParamSklearn.components.regression_base import ParamSklearnRegressionAlgorithm
+from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
 from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 
 

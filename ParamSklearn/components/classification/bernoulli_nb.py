@@ -6,7 +6,7 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
 
-from ParamSklearn.components.classification_base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 
 
@@ -43,6 +43,8 @@ class BernoulliNB(ParamSklearnClassificationAlgorithm):
         for iter in range(n_iter):
             start = self.n_iter * 1000
             stop = (self.n_iter + 1) * 1000
+            # Upper limit, scipy.sparse doesn't seem to handle max > len(matrix)
+            stop = min(stop, y.shape[0])
             self.estimator.partial_fit(X[start:stop], y[start:stop], self.classes_)
             self.n_iter += 1
 

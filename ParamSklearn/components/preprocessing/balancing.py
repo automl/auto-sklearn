@@ -3,7 +3,7 @@ import numpy as np
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
-from ParamSklearn.components.preprocessor_base import \
+from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.util import DENSE, SPARSE, INPUT
 
@@ -13,10 +13,10 @@ class Balancing(ParamSklearnPreprocessingAlgorithm):
         self.strategy = strategy
 
     def fit(self, X, y=None):
-        raise NotImplementedError()
+        return self
 
     def transform(self, X):
-        raise NotImplementedError()
+        return X
 
     def get_weights(self, Y, classifier, preprocessor, init_params, fit_params):
         if init_params is None:
@@ -49,18 +49,18 @@ class Balancing(ParamSklearnPreprocessingAlgorithm):
                 sample_weights[mask] *= cw[i]
 
             if classifier in clf_:
-                fit_params['%s:sample_weight' % classifier] = sample_weights
+                fit_params['classifier:sample_weight'] = sample_weights
             if preprocessor in pre_:
-                fit_params['%s:sample_weight' % preprocessor] = sample_weights
+                fit_params['preprocessor:sample_weight'] = sample_weights
 
         # Classifiers which can adjust sample weights themselves via the
         # argument `class_weight`
         clf_ = ['liblinear_svc', 'libsvm_svc', 'sgd']
         pre_ = ['liblinear_svc_preprocessor']
         if classifier in clf_:
-            init_params['%s:class_weight' % classifier] = 'auto'
+            init_params['classifier:class_weight'] = 'auto'
         if preprocessor in pre_:
-            init_params['%s:class_weight' % preprocessor] = 'auto'
+            init_params['preprocessor:class_weight'] = 'auto'
 
         clf_ = ['ridge']
         if classifier in clf_:
@@ -74,7 +74,7 @@ class Balancing(ParamSklearnPreprocessingAlgorithm):
                 class_weights[ue] = cw[i]
 
             if classifier in clf_:
-                init_params['%s:class_weight' % classifier] = class_weights
+                init_params['classifier:class_weight'] = class_weights
 
         return init_params, fit_params
 

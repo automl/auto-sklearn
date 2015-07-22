@@ -1,11 +1,10 @@
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from ParamSklearn.implementations.StandardScaler import StandardScaler
 from ParamSklearn.implementations.MinMaxScaler import MinMaxScaler
 from ParamSklearn.implementations.Normalizer import Normalizer
-from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.util import DENSE, SPARSE, INPUT
 
 

@@ -2,7 +2,7 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace, \
     Configuration
 
 
-from ..preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ..base import ParamSklearnPreprocessingAlgorithm
 
 import numpy as np
 

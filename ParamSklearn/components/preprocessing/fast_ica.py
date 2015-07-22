@@ -8,7 +8,7 @@ from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
 from HPOlibConfigSpace.forbidden import ForbiddenInClause, \
     ForbiddenAndConjunction, ForbiddenEqualsClause
 
-from ParamSklearn.components.preprocessor_base import \
+from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.util import SPARSE, DENSE, INPUT
 

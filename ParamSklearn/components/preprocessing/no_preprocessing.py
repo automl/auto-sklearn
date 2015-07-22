@@ -1,6 +1,6 @@
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 
-from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.util import SPARSE, DENSE, INPUT
 
 

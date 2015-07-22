@@ -1,7 +1,7 @@
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformIntegerHyperparameter, UniformFloatHyperparameter
 
-from ParamSklearn.components.preprocessor_base import ParamSklearnPreprocessingAlgorithm
+from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.implementations.gem import GEM as GEMImpl
 from ParamSklearn.util import DENSE
 

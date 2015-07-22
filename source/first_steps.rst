@@ -17,7 +17,7 @@ configuration on the iris dataset.
     >>> np.random.seed(1)
     >>> np.random.shuffle(indices)
     >>> configuration_space = ParamSklearnClassifier.get_hyperparameter_search_space()
-    >>> configuration_space.seed(2)
+    >>> configuration_space.seed(1)
     >>> configuration = configuration_space.sample_configuration()
     >>> cls = ParamSklearnClassifier(configuration, random_state=1)
     >>> cls = cls.fit(X[indices[:100]], Y[indices[:100]])
