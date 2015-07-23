@@ -4,12 +4,11 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
     Constant, UniformIntegerHyperparameter
 
-from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
 from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 
 
-class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
-
+class KNearestNeighborsRegressor(ParamSklearnRegressionAlgorithm):
     def __init__(self, n_neighbors, weights, p, random_state=None):
         self.n_neighbors = n_neighbors
         self.weights = weights
@@ -30,11 +29,6 @@ class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
             raise NotImplementedError()
         return self.estimator.predict(X)
 
-    def predict_proba(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        return self.estimator.predict_proba(X)
-
     @staticmethod
     def get_properties():
         return {'shortname': 'KNN',
@@ -45,16 +39,16 @@ class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
                 'prefers_data_scaled': True,
                 # Find out if this is good because of sparsity
                 'prefers_data_normalized': False,
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
+                'handles_regression': True,
+                'handles_classification': False,
+                'handles_multiclass': False,
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'input': (DENSE, SPARSE),
                 'output': PREDICTIONS,
                 # TODO find out what is best used here!
-                'preferred_dtype' : None}
+                'preferred_dtype': None}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
