@@ -15,6 +15,14 @@ class AdaBoostComponentTest(unittest.TestCase):
             self.assertAlmostEqual(0.93999999999999995,
                                    sklearn.metrics.accuracy_score(predictions, targets))
 
+    def test_default_configuration_iris_sparse(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(AdaboostClassifier, sparse=True)
+            self.assertAlmostEqual(0.88,
+                                   sklearn.metrics.accuracy_score(predictions,
+                                                                  targets))
+
     def test_default_configuration_digits(self):
         for i in range(10):
             predictions, targets = \
