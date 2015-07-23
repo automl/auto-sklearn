@@ -52,6 +52,7 @@ class RandomForest(ParamSklearnClassificationAlgorithm):
                 self.max_depth = int(self.max_depth)
             self.min_samples_split = int(self.min_samples_split)
             self.min_samples_leaf = int(self.min_samples_leaf)
+            self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
             if self.max_features not in ("sqrt", "log2", "auto"):
                 num_features = X.shape[1]
                 max_features = int(float(self.max_features) * (np.log(num_features) + 1))
