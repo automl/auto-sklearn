@@ -6,7 +6,7 @@ class,added,comment
 <class 'sklearn.cross_decomposition.pls_.PLSRegression'>,False,Is a preprocessing method
 <class 'sklearn.dummy.DummyRegressor'>,False,See module name
 <class 'sklearn.ensemble.bagging.BaggingRegressor'>,False,This can blow up the configuration space; because we need to define a configured base object. Maybe consider later.
-<class 'sklearn.ensemble.forest.ExtraTreesRegressor'>,,
+<class 'sklearn.ensemble.forest.ExtraTreesRegressor'>,True,
 <class 'sklearn.ensemble.forest.ForestRegressor'>,,
 <class 'sklearn.ensemble.forest.RandomForestRegressor'>,True,
 <class 'sklearn.ensemble.gradient_boosting.GradientBoostingRegressor'>,True,

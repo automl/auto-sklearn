@@ -15,6 +15,14 @@ class ExtraTreesComponentTest(unittest.TestCase):
             self.assertAlmostEqual(0.95999999999999996,
                 sklearn.metrics.accuracy_score(predictions, targets))
 
+    def test_default_configuration_sparse(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(ExtraTreesClassifier, sparse=True)
+            self.assertAlmostEqual(0.71999999999999997,
+                                   sklearn.metrics.accuracy_score(predictions,
+                                                                  targets))
+
     def test_default_configuration_iterative_fit(self):
         for i in range(10):
             predictions, targets = \

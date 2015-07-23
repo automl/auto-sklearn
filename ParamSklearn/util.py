@@ -196,9 +196,9 @@ class PreprocessingTestCase(unittest.TestCase):
             self.assertEqual(Xt.dtype, np.float64)
 
 
-def _test_regressor(Regressor, dataset='diabetes'):
+def _test_regressor(Regressor, dataset='diabetes', sparse=False):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
-                                                   make_sparse=False)
+                                                   make_sparse=sparse)
     configuration_space = Regressor.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
     regressor = Regressor(random_state=1,
@@ -214,6 +214,21 @@ def _test_regressor(Regressor, dataset='diabetes'):
                     X_test_hash != hash(str(X_test)) or \
                     Y_train_hash != hash(str(Y_train)):
         raise ValueError("Model modified data")
+    return predictions, Y_test
+
+
+def _test_regressor_iterative_fit(Regressor, dataset='diabetes', sparse=False):
+    X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
+                                                   make_sparse=sparse)
+    configuration_space = Regressor.get_hyperparameter_search_space(
+        dataset_properties={'sparse': sparse})
+    default = configuration_space.get_default_configuration()
+    regressor = Regressor(random_state=1,
+                          **{hp_name: default[hp_name] for hp_name in
+                             default})
+    while not regressor.configuration_fully_fitted():
+        regressor = regressor.iterative_fit(X_train, Y_train)
+    predictions = regressor.predict(X_test)
     return predictions, Y_test
 
 

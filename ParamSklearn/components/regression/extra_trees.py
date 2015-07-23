@@ -5,23 +5,23 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
-from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
+from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
 from ParamSklearn.util import DENSE, PREDICTIONS, SPARSE
 
-from sklearn.ensemble import ExtraTreesClassifier as ETC
+from sklearn.ensemble import ExtraTreesRegressor as ETR
 
 
-class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
-
+class ExtraTreesRegressor(ParamSklearnRegressionAlgorithm):
     def __init__(self, n_estimators, criterion, min_samples_leaf,
-                 min_samples_split,  max_features, max_leaf_nodes_or_max_depth="max_depth",
+                 min_samples_split, max_features,
+                 max_leaf_nodes_or_max_depth="max_depth",
                  bootstrap=False, max_leaf_nodes=None, max_depth="None",
                  oob_score=False, n_jobs=1, random_state=None, verbose=0):
 
         self.n_estimators = int(n_estimators)
         self.estimator_increment = 10
-        if criterion not in ("gini", "entropy"):
-            raise ValueError("'criterion' is not in ('gini', 'entropy'): "
+        if criterion not in ("mse"):
+            raise ValueError("'criterion' is not in ('mse'): "
                              "%s" % criterion)
         self.criterion = criterion
 
@@ -31,10 +31,10 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
                 self.max_depth = None
             else:
                 self.max_depth = int(max_depth)
-            #if use_max_depth == "True":
-            #    self.max_depth = int(max_depth)
-            #elif use_max_depth == "False":
-            #    self.max_depth = None
+                #if use_max_depth == "True":
+                #    self.max_depth = int(max_depth)
+                #elif use_max_depth == "False":
+                #    self.max_depth = None
         else:
             if max_leaf_nodes == "None":
                 self.max_leaf_nodes = None
@@ -58,16 +58,15 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
         self.verbose = int(verbose)
         self.estimator = None
 
-    def fit(self, X, y, sample_weight=None, refit=False):
+    def fit(self, X, y, refit=False):
         if self.estimator is None or refit:
-            self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight,
-                               refit=refit)
+            self.iterative_fit(X, y, n_iter=1, refit=refit)
 
         while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight)
+            self.iterative_fit(X, y, n_iter=1)
         return self
 
-    def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
+    def iterative_fit(self, X, y, n_iter=1, refit=False):
         if refit:
             self.estimator = None
 
@@ -77,19 +76,21 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
                 float(self.max_features) * (np.log(num_features) + 1))
             # Use at most half of the features
             max_features = max(1, min(int(X.shape[1] / 2), max_features))
-            self.estimator = ETC(
+            self.estimator = ETR(
                 n_estimators=0, criterion=self.criterion,
-                max_depth=self.max_depth, min_samples_split=self.min_samples_split,
-                min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,
+                max_depth=self.max_depth,
+                min_samples_split=self.min_samples_split,
+                min_samples_leaf=self.min_samples_leaf,
+                bootstrap=self.bootstrap,
                 max_features=max_features, max_leaf_nodes=self.max_leaf_nodes,
-                oob_score=self.oob_score, n_jobs=self.n_jobs, verbose=self.verbose,
+                oob_score=self.oob_score, n_jobs=self.n_jobs,
+                verbose=self.verbose,
                 random_state=self.random_state,
                 warm_start=True
             )
-
         tmp = self.estimator  # TODO copy ?
         tmp.n_estimators += n_iter
-        tmp.fit(X, y, sample_weight=sample_weight)
+        tmp.fit(X, y,)
         self.estimator = tmp
         return self
 
@@ -111,17 +112,17 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
     @staticmethod
     def get_properties():
         return {'shortname': 'ET',
-                'name': 'Extra Trees Classifier',
+                'name': 'Extra Trees Regressor',
                 'handles_missing_values': False,
                 'handles_nominal_values': False,
                 'handles_numerical_features': True,
                 'prefers_data_scaled': False,
                 # TODO find out if this is good because of sparcity...
                 'prefers_data_normalized': False,
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
+                'handles_regression': True,
+                'handles_classification': False,
+                'handles_multiclass': False,
+                'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'input': (DENSE, SPARSE),
@@ -135,8 +136,7 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
         cs = ConfigurationSpace()
 
         n_estimators = cs.add_hyperparameter(Constant("n_estimators", 100))
-        criterion = cs.add_hyperparameter(CategoricalHyperparameter(
-            "criterion", ["gini", "entropy"], default="gini"))
+        criterion = cs.add_hyperparameter(Constant("criterion", "mse"))
         max_features = cs.add_hyperparameter(UniformFloatHyperparameter(
             "max_features", 0.5, 5, default=1))
 
@@ -150,7 +150,7 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
 
         # Unparametrized, we use min_samples as regularization
         # max_leaf_nodes_or_max_depth = UnParametrizedHyperparameter(
-        #    name="max_leaf_nodes_or_max_depth", value="max_depth")
+        # name="max_leaf_nodes_or_max_depth", value="max_depth")
         # CategoricalHyperparameter("max_leaf_nodes_or_max_depth",
         # choices=["max_leaf_nodes", "max_depth"], default="max_depth")
         # min_weight_fraction_leaf = UniformFloatHyperparameter(
@@ -173,7 +173,7 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
         #                    value="max_depth")
 
         #cond_max_depth = EqualsCondition(child=max_depth, parent=use_max_depth,
-                                         #value="True")
+        #value="True")
         #cs.add_condition(cond_max_leaf_nodes_or_max_depth)
         #cs.add_condition(cond2_max_leaf_nodes_or_max_depth)
         #cs.add_condition(cond_max_depth)
