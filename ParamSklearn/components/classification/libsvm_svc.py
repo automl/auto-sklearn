@@ -8,6 +8,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
+from ParamSklearn.implementations.util import softmax
 
 
 class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
@@ -27,17 +28,21 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
 
     def fit(self, X, Y):
         self.C = float(self.C)
-        self.degree = int(self.degree)
-        self.gamma = float(self.gamma)
-        self.coef0 = float(self.coef0)
+        if self.degree is None:
+            self.degree = 3
+        else:
+            self.degree = int(self.degree)
+        if self.gamma is None:
+            self.gamma = 0.0
+        else:
+            self.gamma = float(self.gamma)
+        if self.coef0 is None:
+            self.coef0 = 0.0
+        else:
+            self.coef0 = float(self.coef0)
         self.tol = float(self.tol)
         self.max_iter = float(self.max_iter)
-
-        try:
-            self.shrinking = bool(self.shrinking)
-        except TypeError as e:
-            raise TypeError("Value %s not allowed for hyperparameter "
-                            "shrinking" % str(self.shrinking))
+        self.shrinking = bool(self.shrinking)
 
         if self.class_weight == "None":
             self.class_weight = None
@@ -52,8 +57,8 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
                                          class_weight=self.class_weight,
                                          max_iter=self.max_iter,
                                          random_state=self.random_state,
-                                         cache_size=2000,
-                                         probability=True)
+                                         cache_size=2000)
+                                         # probability=True)
         self.estimator.fit(X, Y)
         return self
 
@@ -65,7 +70,10 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
     def predict_proba(self, X):
         if self.estimator is None:
             raise NotImplementedError()
-        return self.estimator.predict_proba(X)
+        # return self.estimator.predict_proba(X)
+        decision = self.estimator.decision_function(X)
+        return softmax(decision)
+
 
     @staticmethod
     def get_properties():
