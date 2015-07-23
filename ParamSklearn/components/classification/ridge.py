@@ -16,7 +16,7 @@ class Ridge(ParamSklearnClassificationAlgorithm):
     def __init__(self, alpha, fit_intercept, tol, class_weight=None,
                  random_state=None):
         self.alpha = float(alpha)
-        self.fit_intercept = bool(fit_intercept)
+        self.fit_intercept = fit_intercept == 'True'
         self.tol = float(tol)
         self.class_weight = class_weight
         self.random_state = random_state

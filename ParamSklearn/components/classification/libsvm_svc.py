@@ -42,7 +42,7 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
             self.coef0 = float(self.coef0)
         self.tol = float(self.tol)
         self.max_iter = float(self.max_iter)
-        self.shrinking = bool(self.shrinking)
+        self.shrinking = self.shrinking == 'True'
 
         if self.class_weight == "None":
             self.class_weight = None

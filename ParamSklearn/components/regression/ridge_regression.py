@@ -12,7 +12,7 @@ from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 class RidgeRegression(ParamSklearnRegressionAlgorithm):
     def __init__(self, alpha, fit_intercept, tol, random_state=None):
         self.alpha = float(alpha)
-        self.fit_intercept = bool(fit_intercept)
+        self.fit_intercept = fit_intercept == 'True'
         self.tol = float(tol)
         self.random_state = random_state
         self.estimator = None

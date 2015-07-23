@@ -30,8 +30,8 @@ class LibLinear_SVR(ParamSklearnRegressionAlgorithm):
         self.tol = float(self.tol)
         self.epsilon = float(self.epsilon)
 
-        self.dual = bool(self.dual)
-        self.fit_intercept = bool(self.fit_intercept)
+        self.dual = self.dual == 'True'
+        self.fit_intercept = self.fit_intercept == 'True'
         self.intercept_scaling = float(self.intercept_scaling)
 
         self.estimator = sklearn.svm.LinearSVR(epsilon=self.epsilon,

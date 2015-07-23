@@ -34,7 +34,7 @@ class LibSVM_SVR(ParamSklearnRegressionAlgorithm):
         self.C = float(self.C)
         self.epsilon = float(self.epsilon)
         self.tol = float(self.tol)
-        self.shrinking = bool(self.shrinking)
+        self.shrinking = self.shrinking == 'True'
         self.degree = int(self.degree)
         self.gamma = float(self.gamma)
         if self.coef0 is None:

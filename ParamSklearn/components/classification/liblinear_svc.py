@@ -32,8 +32,8 @@ class LibLinear_SVC(ParamSklearnClassificationAlgorithm):
         self.C = float(self.C)
         self.tol = float(self.tol)
 
-        self.dual = bool(self.dual)
-        self.fit_intercept = bool(self.fit_intercept)
+        self.dual = self.dual == 'True'
+        self.fit_intercept = self.fit_intercept == 'True'
         self.intercept_scaling = float(self.intercept_scaling)
 
         if self.class_weight == "None":

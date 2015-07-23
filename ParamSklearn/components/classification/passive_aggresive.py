@@ -15,7 +15,7 @@ from ParamSklearn.implementations.util import softmax
 class PassiveAggressive(ParamSklearnClassificationAlgorithm):
     def __init__(self, C, fit_intercept, n_iter, loss, random_state=None):
         self.C = float(C)
-        self.fit_intercept = bool(fit_intercept)
+        self.fit_intercept = fit_intercept == 'True'
         self.n_iter = int(n_iter)
         self.loss = loss
         self.random_state = random_state

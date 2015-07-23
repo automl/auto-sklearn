@@ -1,6 +1,6 @@
 import unittest
 
-from sklearn.linear_model import RidgeClassifier
+from sklearn.linear_model import Ridge
 from ParamSklearn.components.preprocessing.fast_ica import \
     FastICA
 from ParamSklearn.util import _test_preprocessing, PreprocessingTestCase, \
@@ -10,14 +10,14 @@ import sklearn.metrics
 
 class FastICAComponentTest(PreprocessingTestCase):
     def test_default_configuration(self):
-        transformation, original = _test_preprocessing(FastICA)
+        transformation, original = _test_preprocessing(FastICA,
+                                                       dataset="diabetes")
         self.assertEqual(transformation.shape[0], original.shape[0])
         self.assertFalse((transformation == 0).all())
 
-    def test_default_configuration_classify(self):
+    def test_default_configuration_regression(self):
         for i in range(5):
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris',
-                                                           make_sparse=False)
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes')
             configuration_space = FastICA.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
             preprocessor = FastICA(random_state=1,
@@ -28,11 +28,11 @@ class FastICAComponentTest(PreprocessingTestCase):
             X_test_trans = preprocessor.transform(X_test)
 
             # fit a classifier on top
-            classifier = RidgeClassifier()
+            classifier = Ridge()
             predictor = classifier.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
-            accuracy = sklearn.metrics.accuracy_score(predictions, Y_test)
-            self.assertAlmostEqual(accuracy, 0.90000000000000002)
+            accuracy = sklearn.metrics.r2_score(Y_test, predictions)
+            self.assertAlmostEqual(accuracy, 0.32614416980439365)
 
     @unittest.skip("Always returns float64")
     def test_preprocessing_dtype(self):
