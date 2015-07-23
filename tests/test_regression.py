@@ -85,7 +85,7 @@ class TestParamSKlearnRegressor(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(87, len(hyperparameters))
+        self.assertEqual(89, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 4, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
@@ -138,6 +138,8 @@ class TestParamSKlearnRegressor(unittest.TestCase):
             "  preprocessor:__choice__, Value: densifier\n"
             "  regressor:__choice__, Value: ridge_regression\n"
             "  regressor:ridge_regression:alpha, Value: 1.0\n"
+            "  regressor:ridge_regression:fit_intercept, Constant: True\n"
+            "  regressor:ridge_regression:tol, Value: 0.0001\n"
             "  rescaling:strategy, Value: min/max\n"
             "violates forbidden clause \(Forbidden: regressor:__choice__ == "
             "ridge_regression && Forbidden: preprocessor:__choice__ == densifier\)",

@@ -14,7 +14,7 @@ from ParamSklearn.implementations.util import softmax
 
 class Ridge(ParamSklearnClassificationAlgorithm):
     def __init__(self, alpha, fit_intercept, tol, class_weight=None,
-        random_state=None):
+                 random_state=None):
         self.alpha = float(alpha)
         self.fit_intercept = bool(fit_intercept)
         self.tol = float(tol)
@@ -26,7 +26,9 @@ class Ridge(ParamSklearnClassificationAlgorithm):
         self.estimator = RidgeClassifier(alpha=self.alpha,
                                         fit_intercept=self.fit_intercept,
                                         tol=self.tol,
-                                        class_weight=self.class_weight)
+                                        class_weight=self.class_weight,
+                                        copy_X=False,
+                                        normalize=False)
         self.estimator.fit(X, Y)
         return self
 
@@ -44,7 +46,7 @@ class Ridge(ParamSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_properties():
-        return {'shortname': 'Rigde Classifier',
+        return {'shortname': 'Rigde',
                 'name': 'Rigde Classifier',
                 'handles_missing_values': False,
                 'handles_nominal_values': False,
@@ -64,17 +66,13 @@ class Ridge(ParamSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        alpha = UniformFloatHyperparameter("alpha", 10 ** -5, 10.,
-                                           log=True, default=1.)
-        fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default=1e-4,
-                                         log=True)
-
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(alpha)
-        cs.add_hyperparameter(fit_intercept)
-        cs.add_hyperparameter(tol)
-
+        alpha = cs.add_hyperparameter(UniformFloatHyperparameter(
+            "alpha", 10 ** -5, 10., log=True, default=1.))
+        fit_intercept = cs.add_hyperparameter(UnParametrizedHyperparameter(
+            "fit_intercept", "True"))
+        tol = cs.add_hyperparameter(UniformFloatHyperparameter(
+            "tol", 1e-5, 1e-1, default=1e-4, log=True))
         return cs
 
     def __str__(self):

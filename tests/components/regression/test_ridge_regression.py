@@ -16,9 +16,8 @@ class RidgeComponentTest(unittest.TestCase):
 
         for i in range(10):
             # This should be a bad results
-            predictions, targets = _test_regressor(RidgeRegression,
-                                                   dataset='diabetes')
-            self.assertAlmostEqual(-3.5118220034267313,
+            predictions, targets = _test_regressor(RidgeRegression,)
+            self.assertAlmostEqual(0.32614416980439365,
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
 
             # This should be much more better
@@ -40,5 +39,5 @@ class RidgeComponentTest(unittest.TestCase):
             predictor = regressor.fit(X_train_transformed, Y_train)
             predictions = predictor.predict(X_test_transformed)
 
-            self.assertAlmostEqual(0.37173953934750514,
+            self.assertAlmostEqual(0.37183512452087852,
                 sklearn.metrics.r2_score(y_true=Y_test, y_pred=predictions))

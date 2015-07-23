@@ -2,36 +2,27 @@ import numpy as np
 import sklearn.linear_model
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
+from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
+    UnParametrizedHyperparameter
 
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
 from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 
 
 class RidgeRegression(ParamSklearnRegressionAlgorithm):
-    def __init__(self, alpha, fit_intercept=False, normalize=False,
-                 copy_X=False, max_iter=None, tol=0.001, solver='auto',
-                 random_state=None):
+    def __init__(self, alpha, fit_intercept, tol, random_state=None):
         self.alpha = float(alpha)
-        self.fit_intercept = fit_intercept
-        self.normalize = normalize
-        self.copy_X = copy_X
-        self.max_iter = max_iter
-        self.tol = tol
-        self.solver = solver
-        # We ignore it
+        self.fit_intercept = bool(fit_intercept)
+        self.tol = float(tol)
         self.random_state = random_state
         self.estimator = None
 
     def fit(self, X, Y):
-        self.estimator = sklearn.linear_model.Ridge(
-            alpha=self.alpha,
-            fit_intercept=self.fit_intercept,
-            normalize=self.normalize,
-            copy_X=self.copy_X,
-            max_iter=self.max_iter,
-            tol=self.tol,
-            solver=self.solver)
+        self.estimator = sklearn.linear_model.Ridge(alpha=self.alpha,
+                                                    fit_intercept=self.fit_intercept,
+                                                    tol=self.tol,
+                                                    copy_X=False,
+                                                    normalize=False)
         self.estimator.fit(X, Y)
         return self
 
@@ -42,7 +33,7 @@ class RidgeRegression(ParamSklearnRegressionAlgorithm):
 
     @staticmethod
     def get_properties():
-        return {'shortname': 'RR',
+        return {'shortname': 'Rigde',
                 'name': 'Ridge Regression',
                 'handles_missing_values': False,
                 'handles_nominal_values': False,
@@ -64,9 +55,14 @@ class RidgeRegression(ParamSklearnRegressionAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        alpha = UniformFloatHyperparameter(
-            name="alpha", lower=0.0001, upper=10, default=1.0, log=True)
-
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(alpha)
+        alpha = cs.add_hyperparameter(UniformFloatHyperparameter(
+            "alpha", 10 ** -5, 10., log=True, default=1.))
+        fit_intercept = cs.add_hyperparameter(UnParametrizedHyperparameter(
+            "fit_intercept", "True"))
+        tol = cs.add_hyperparameter(UniformFloatHyperparameter(
+            "tol", 1e-5, 1e-1, default=1e-4, log=True))
         return cs
+
+    def __str__(self):
+        return "ParamSklearn Ridge Regression"
