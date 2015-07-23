@@ -265,7 +265,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
             "  classifier:liblinear_svc:dual, Constant: False\n"
             "  classifier:liblinear_svc:fit_intercept, Constant: True\n"
             "  classifier:liblinear_svc:intercept_scaling, Constant: 1\n"
-            "  classifier:liblinear_svc:loss, Value: l2\n"
+            "  classifier:liblinear_svc:loss, Value: squared_hinge\n"
             "  classifier:liblinear_svc:multi_class, Constant: ovr\n"
             "  classifier:liblinear_svc:penalty, Value: l2\n"
             "  classifier:liblinear_svc:tol, Value: 0.0001\n"

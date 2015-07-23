@@ -12,7 +12,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
 from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 
-class SupportVectorRegression(ParamSklearnRegressionAlgorithm):
+class LibSVM_SVR(ParamSklearnRegressionAlgorithm):
     def __init__(self, kernel, C, epsilon, tol, shrinking, gamma=0.0,
                  degree=3, coef0=0.0, cache_size=2000, verbose=False,
                  max_iter=-1, random_state=None):
