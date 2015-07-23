@@ -1,6 +1,7 @@
 class,added,comment
 <class 'sklearn.base.TransformerMixin'>,FALSE,BaseClass
 <class 'sklearn.cluster._feature_agglomeration.AgglomerationTransform'>,FALSE,Mixin class for feature agglomeration.
+<class 'sklearn.cluster.birch.Birch'>,,
 <class 'sklearn.cluster.hierarchical.FeatureAgglomeration'>,TRUE,try out
 <class 'sklearn.cluster.hierarchical.WardAgglomeration'>,FALSE,deprecated
 <class 'sklearn.cluster.k_means_.KMeans'>,FALSE,We expect this to not work better than PCA
@@ -10,12 +11,14 @@ class,added,comment
 <class 'sklearn.cross_decomposition.pls_.PLSCanonical'>,FALSE,Regression only
 <class 'sklearn.cross_decomposition.pls_.PLSRegression'>,FALSE,Regression only
 <class 'sklearn.cross_decomposition.pls_.PLSSVD'>,FALSE,Regression only
+<class 'sklearn.decomposition.base._BasePCA'>,,
 <class 'sklearn.decomposition.dict_learning.DictionaryLearning'>,TRUE,try out
 <class 'sklearn.decomposition.dict_learning.MiniBatchDictionaryLearning'>,FALSE,
 <class 'sklearn.decomposition.dict_learning.SparseCoder'>,FALSE,What is the difference to Tobis implementation?
 <class 'sklearn.decomposition.dict_learning.SparseCodingMixin'>,FALSE,Mixin class for sparse coding
 <class 'sklearn.decomposition.factor_analysis.FactorAnalysis'>,FALSE,
 <class 'sklearn.decomposition.fastica_.FastICA'>,TRUE,try out
+<class 'sklearn.decomposition.incremental_pca.IncrementalPCA'>,,
 <class 'sklearn.decomposition.kernel_pca.KernelPCA'>,TRUE,try out
 <class 'sklearn.decomposition.nmf.NMF'>,FALSE,Special case of sparse coding
 <class 'sklearn.decomposition.nmf.ProjectedGradientNMF'>,FALSE,see above
@@ -59,6 +62,7 @@ class,added,comment
 <class 'sklearn.kernel_approximation.SkewedChi2Sampler'>,FALSE,very specia case
 <class 'sklearn.lda.LDA'>,FALSE,Special case of GEM
 <class 'sklearn.linear_model.logistic.LogisticRegression'>,FALSE,same as LibLinear
+<class 'sklearn.linear_model.logistic.LogisticRegressionCV'>,,
 <class 'sklearn.linear_model.perceptron.Perceptron'>,FALSE,same as SGD
 <class 'sklearn.linear_model.randomized_l1.BaseRandomizedLinearModel'>,FALSE,Base class
 <class 'sklearn.linear_model.randomized_l1.RandomizedLasso'>,FALSE,not right now
@@ -69,6 +73,7 @@ class,added,comment
 <class 'sklearn.linear_model.tests.test_sgd.SparseSGDRegressor'>,FALSE,test class
 <class 'sklearn.manifold.isomap.Isomap'>,FALSE,only look at if clustering helps
 <class 'sklearn.manifold.locally_linear.LocallyLinearEmbedding'>,FALSE,only look at if clustering helps
+<class 'sklearn.neighbors.approximate.GaussianRandomProjectionHash'>,,
 <class 'sklearn.neural_network.rbm.BernoulliRBM'>,FALSE,handles only binary input
 <class 'sklearn.pipeline.FeatureUnion'>,FALSE,"Right now, we do not have different feature sources."
 <class 'sklearn.preprocessing.data.Binarizer'>,FALSE,"Right now, we have no need to binarize data"

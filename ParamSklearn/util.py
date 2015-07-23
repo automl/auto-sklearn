@@ -46,7 +46,8 @@ def find_sklearn_classes(class_):
                 classifiers.add(classifier)
 
     print
-    print classifiers
+    for classifier in sorted([str(cls) for cls in classifiers]):
+        print classifier
 
 
 def get_dataset(dataset='iris', make_sparse=False, add_NaNs=False):

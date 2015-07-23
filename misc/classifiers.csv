@@ -1,5 +1,6 @@
 class,added,comment
 <class 'sklearn.base.ClassifierMixin'>,False,Mixin class which adds no functionality except the score function
+<class 'sklearn.calibration.CalibratedClassifierCV'>,,
 <class 'sklearn.covariance.outlier_detection.EllipticEnvelope'>,False,Outlier detection
 <class 'sklearn.dummy.DummyClassifier'>,False,Please read the module name
 <class 'sklearn.ensemble.bagging.BaggingClassifier'>,False,This can blow up the configuration space; because we need to define a configured base object. Maybe consider later.
@@ -11,6 +12,7 @@ class,added,comment
 <class 'sklearn.lda.LDA'>,True,
 <class 'sklearn.linear_model.base.LinearClassifierMixin'>,False,Mixin but no full model
 <class 'sklearn.linear_model.logistic.LogisticRegression'>,False,Is implemented using LibLinear
+<class 'sklearn.linear_model.logistic.LogisticRegressionCV'>,,
 <class 'sklearn.linear_model.passive_aggressive.PassiveAggressiveClassifier'>,True,I don't know how similar to SGD this one is
 <class 'sklearn.linear_model.perceptron.Perceptron'>,False,n fact, Perceptron() is equivalent to SGDClassifier(...)
 <class 'sklearn.linear_model.ridge.RidgeClassifier'>,True,

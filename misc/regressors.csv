@@ -1,5 +1,6 @@
 class,added,comment
 <class 'sklearn.base.RegressorMixin'>,False,BaseClass
+<class 'sklearn.calibration._SigmoidCalibration'>,,
 <class 'sklearn.cross_decomposition.cca_.CCA'>,False,Is a preprocessing method
 <class 'sklearn.cross_decomposition.pls_._PLS'>,False,Is a preprocessing method
 <class 'sklearn.cross_decomposition.pls_.PLSCanonical'>,False,Is a preprocessing method
@@ -7,12 +8,13 @@ class,added,comment
 <class 'sklearn.dummy.DummyRegressor'>,False,See module name
 <class 'sklearn.ensemble.bagging.BaggingRegressor'>,False,This can blow up the configuration space; because we need to define a configured base object. Maybe consider later.
 <class 'sklearn.ensemble.forest.ExtraTreesRegressor'>,True,
-<class 'sklearn.ensemble.forest.ForestRegressor'>,,
+<class 'sklearn.ensemble.forest.ForestRegressor'>,False,Is a base class
 <class 'sklearn.ensemble.forest.RandomForestRegressor'>,True,
 <class 'sklearn.ensemble.gradient_boosting.GradientBoostingRegressor'>,True,
-<class 'sklearn.ensemble.weight_boosting.AdaBoostRegressor'>,,
-<class 'sklearn.gaussian_process.gaussian_process.GaussianProcess'>,,Crashes when getting two similar inputs
-<class 'sklearn.isotonic.IsotonicRegression'>,,
+<class 'sklearn.ensemble.weight_boosting.AdaBoostRegressor'>,True,
+<class 'sklearn.gaussian_process.gaussian_process.GaussianProcess'>,True,Crashes when getting two similar inputs
+<class 'sklearn.isotonic.IsotonicRegression'>,False,Calibration instead of prediction method
+<class 'sklearn.kernel_ridge.KernelRidge'>,,
 <class 'sklearn.linear_model.base.LinearRegression'>,,
 <class 'sklearn.linear_model.bayes.ARDRegression'>,,
 <class 'sklearn.linear_model.bayes.BayesianRidge'>,,
@@ -33,14 +35,16 @@ class,added,comment
 <class 'sklearn.linear_model.omp.OrthogonalMatchingPursuitCV'>,False,We want to perform CV ourselves
 <class 'sklearn.linear_model.passive_aggressive.PassiveAggressiveRegressor'>,,
 <class 'sklearn.linear_model.ransac.RANSACRegressor'>,,
-<class 'sklearn.linear_model.ridge.Ridge'>,True,Check range for alpha
+<class 'sklearn.linear_model.ridge.Ridge'>,True,
 <class 'sklearn.linear_model.ridge.RidgeCV'>,False,We want to perform CV ourselves
-<class 'sklearn.linear_model.stochastic_gradient.BaseSGDRegressor'>,,
+<class 'sklearn.linear_model.stochastic_gradient.BaseSGDRegressor'>,False,
 <class 'sklearn.linear_model.stochastic_gradient.SGDRegressor'>,,
 <class 'sklearn.linear_model.tests.test_sgd.SparseSGDRegressor'>,FALSE,This regressor is inside a test module
-<class 'sklearn.neighbors.regression.KNeighborsRegressor'>,,Crashes when predicting a training input and weighted distances
-<class 'sklearn.neighbors.regression.RadiusNeighborsRegressor'>,,Can crash when there is no neighbour within the radius
-<class 'sklearn.svm.classes.NuSVR'>,,
-<class 'sklearn.svm.classes.SVR'>,True,Check searchspace
-<class 'sklearn.tree.tree.DecisionTreeRegressor'>,FALSE,Rfs are considered better (and are most likely faster to train)
-<class 'sklearn.tree.tree.ExtraTreeRegressor'>,FALSE,ExtraTreeForests are considered better
+<class 'sklearn.linear_model.theil_sen.TheilSenRegressor'>,,
+<class 'sklearn.neighbors.regression.KNeighborsRegressor'>,True,
+<class 'sklearn.neighbors.regression.RadiusNeighborsRegressor'>,False,Can crash when there is no neighbour within the radius
+<class 'sklearn.svm.classes.LinearSVR'>,True,
+<class 'sklearn.svm.classes.NuSVR'>,False,Mathematical idental to SVR
+<class 'sklearn.svm.classes.SVR'>,True,
+<class 'sklearn.tree.tree.DecisionTreeRegressor'>,TRUE,
+<class 'sklearn.tree.tree.ExtraTreeRegressor'>,FALSE,Not to be used as a base regressor
