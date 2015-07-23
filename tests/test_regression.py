@@ -76,7 +76,7 @@ class TestParamSKlearnRegressor(unittest.TestCase):
             predictions = auto.predict(copy.deepcopy(X_test))
             # The lower the worse
             r2_score = sklearn.metrics.r2_score(Y_test, predictions)
-            self.assertAlmostEqual(0.41211271098191482, r2_score)
+            self.assertAlmostEqual(0.41626416529791199, r2_score)
             model_score = auto.score(copy.deepcopy(X_test), Y_test)
             self.assertEqual(model_score, r2_score)
 
@@ -85,7 +85,7 @@ class TestParamSKlearnRegressor(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(82, len(hyperparameters))
+        self.assertEqual(84, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 4, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
@@ -119,8 +119,10 @@ class TestParamSKlearnRegressor(unittest.TestCase):
             "  regressor:random_forest:criterion, Constant: mse\n"
             "  regressor:random_forest:max_depth, Constant: None\n"
             "  regressor:random_forest:max_features, Value: 1.0\n"
+            "  regressor:random_forest:max_leaf_nodes, Constant: None\n"
             "  regressor:random_forest:min_samples_leaf, Value: 1\n"
             "  regressor:random_forest:min_samples_split, Value: 2\n"
+            "  regressor:random_forest:min_weight_fraction_leaf, Constant: 0.0\n"
             "  regressor:random_forest:n_estimators, Constant: 100\n"
             "  rescaling:strategy, Value: min/max\n"
             "violates forbidden clause \(Forbidden: regressor:__choice__ == random_forest"

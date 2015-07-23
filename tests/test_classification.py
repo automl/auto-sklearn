@@ -191,7 +191,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(136, len(hyperparameters))
+        self.assertEqual(137, len(hyperparameters))
         # The four parameters which are always active are classifier,
         # preprocessor, imputation strategy and scaling strategy
         self.assertEqual(len(hyperparameters) - 5, len(conditions))
@@ -227,6 +227,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
             "  classifier:random_forest:max_leaf_nodes, Constant: None\n"
             "  classifier:random_forest:min_samples_leaf, Value: 1\n"
             "  classifier:random_forest:min_samples_split, Value: 2\n"
+            "  classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0\n"
             "  classifier:random_forest:n_estimators, Constant: 100\n"
             "  imputation:strategy, Value: mean\n"
             "  preprocessor:__choice__, Value: nystroem_sampler\n"
@@ -355,6 +356,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
                     'classifier:random_forest:max_features': 0.5,
                     'classifier:random_forest:max_leaf_nodes': 'None',
                     'classifier:random_forest:n_estimators': 100,
+                    'classifier:random_forest:min_weight_fraction_leaf': 0.0,
                     "rescaling:strategy": "min/max"})
         cls = ParamSklearnClassifier(config)
 
@@ -434,6 +436,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
                                        'classifier:random_forest:max_depth': 'None',
                                        'classifier:random_forest:min_samples_split': 2,
                                        'classifier:random_forest:min_samples_leaf': 2,
+                                       'classifier:random_forest:min_weight_fraction_leaf': 0.0,
                                        'classifier:random_forest:max_features': 0.5,
                                        'classifier:random_forest:max_leaf_nodes': 'None',
                                        'classifier:random_forest:n_estimators': 100,
