@@ -6,13 +6,13 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
 from ParamSklearn.components.base import \
-    ParamSklearnClassificationAlgorithm
+    ParamSklearnRegressionAlgorithm
 from ParamSklearn.util import DENSE, PREDICTIONS, SPARSE
 # get our own forests to replace the sklearn ones
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeRegressor
 
 
-class DecisionTree(ParamSklearnClassificationAlgorithm):
+class DecisionTree(ParamSklearnRegressionAlgorithm):
     def __init__(self, criterion, splitter, max_features, max_depth,
                  min_samples_split, min_samples_leaf, min_weight_fraction_leaf,
                  max_leaf_nodes, random_state=None):
@@ -42,7 +42,7 @@ class DecisionTree(ParamSklearnClassificationAlgorithm):
             self.max_leaf_nodes = int(self.max_leaf_nodes)
         self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
 
-        self.estimator = DecisionTreeClassifier(
+        self.estimator = DecisionTreeRegressor(
             criterion=self.criterion,
             max_depth=max_depth,
             min_samples_split=self.min_samples_split,
@@ -57,11 +57,6 @@ class DecisionTree(ParamSklearnClassificationAlgorithm):
             raise NotImplementedError
         return self.estimator.predict(X)
 
-    def predict_proba(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        return self.estimator.predict_proba(X)
-
     @staticmethod
     def get_properties():
         return {'shortname': 'DT',
@@ -72,11 +67,11 @@ class DecisionTree(ParamSklearnClassificationAlgorithm):
                 'prefers_data_scaled': False,
                 # TODO find out if this is good because of sparcity...
                 'prefers_data_normalized': False,
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'is_deterministic': True,
+                'handles_regression': True,
+                'handles_classification': False,
+                'handles_multiclass': False,
+                'handles_multilabel': False,
+                'is_deterministic': False,
                 'handles_sparse': True,
                 'input': (DENSE, SPARSE),
                 'output': PREDICTIONS,
@@ -88,8 +83,7 @@ class DecisionTree(ParamSklearnClassificationAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        criterion = cs.add_hyperparameter(CategoricalHyperparameter(
-            "criterion", ["gini", "entropy"], default="gini"))
+        criterion = cs.add_hyperparameter(Constant('criterion', 'mse'))
         splitter = cs.add_hyperparameter(Constant("splitter", "best"))
         max_features = cs.add_hyperparameter(Constant('max_features', 1.0))
         max_depth = cs.add_hyperparameter(UniformFloatHyperparameter(
