@@ -12,67 +12,66 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
 from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 
-# Something is wrong here...
-"""
 class SupportVectorRegression(ParamSklearnRegressionAlgorithm):
-    def __init__(self, kernel, C, epsilon, degree, coef0, tol, shrinking,
-                 gamma=0.0, probability=False, cache_size=2000, verbose=False,
-                 max_iter=-1, random_state=None
-                 ):
-
-        if kernel in ('linear', 'poly', 'rbf', 'sigmoid'):
-            self.kernel = kernel
-        else:
-            raise ValueError("'kernel' must be in ('linear', 'poly', 'rbf', "
-                             "'sigmoid'), but is %s" % str(kernel))
-        self.gamma = float(gamma)
-        self.C = float(C)
+    def __init__(self, kernel, C, epsilon, tol, shrinking, gamma=0.0,
+                 degree=3, coef0=0.0, cache_size=2000, verbose=False,
+                 max_iter=-1, random_state=None):
+        self.kernel = kernel
+        self.C = C
         self.epsilon = epsilon
-        self.degree = int(float(degree))
-        self.coef0 = float(coef0)
-        self.tol = float(tol)
-
-        if shrinking == "True":
-            self.shrinking = True
-        elif shrinking == "False":
-            self.shrinking = False
-        else:
-            raise ValueError("'shrinking' must be in ('True', 'False'), "
-                             "but is %s" % str(shrinking))
-
-        # We don't assume any hyperparameters here
-        self.probability = probability
+        self.tol = tol
+        self.shrinking = shrinking
+        self.degree = degree
+        self.gamma = gamma
+        self.coef0 = coef0
         self.cache_size = cache_size
         self.verbose = verbose
-        self.max_iter = int(float(max_iter))
+        self.max_iter = max_iter
         self.random_state = random_state
         self.estimator = None
 
     def fit(self, X, Y):
+        self.C = float(self.C)
+        self.epsilon = float(self.epsilon)
+        self.tol = float(self.tol)
+        self.shrinking = bool(self.shrinking)
+        self.degree = int(self.degree)
+        self.gamma = float(self.gamma)
+        if self.coef0 is None:
+            self.coef0 = 0.0
+        else:
+            self.coef0 = float(self.coef0)
+        self.cache_size = int(self.cache_size)
+        self.verbose = int(self.verbose)
+        self.max_iter = int(self.max_iter)
 
         self.estimator = sklearn.svm.SVR(
             kernel=self.kernel,
+            C=self.C,
+            epsilon=self.epsilon,
+            tol=self.tol,
+            shrinking=self.shrinking,
             degree=self.degree,
             gamma=self.gamma,
             coef0=self.coef0,
-            tol=self.tol,
-            C=self.C,
-            epsilon=self.epsilon,
-            shrinking=self.shrinking,
-            probability=self.probability,
             cache_size=self.cache_size,
             verbose=self.verbose,
-            max_iter=self.max_iter,
-            random_state=self.random_state
+            max_iter=self.max_iter
         )
+        self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
 
-        self.estimator.fit(X, Y)
+        self.scaler.fit(Y)
+        Y_scaled = self.scaler.transform(Y)
+        self.estimator.fit(X, Y_scaled)
         return self
 
     def predict(self, X):
         if self.estimator is None:
             raise NotImplementedError
-        return self.estimator.predict(X)
+        if self.scaler is None:
+            raise NotImplementedError
+        Y_pred = self.estimator.predict(X)
+        return self.scaler.inverse_transform(Y_pred)
 
     @staticmethod
     def get_properties():
@@ -91,13 +90,13 @@ class SupportVectorRegression(ParamSklearnRegressionAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'input': (SPARSE, DENSE),
-                'ouput': PREDICTIONS,
+                'output': PREDICTIONS,
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}
 
     @staticmethod
-    def get_hyperparameter_search_space(dataset_properties):
+    def get_hyperparameter_search_space(dataset_properties=None):
         # Copied from libsvm_c
         C = UniformFloatHyperparameter(
             name="C", lower=0.03125, upper=32768, log=True, default=1.0)
@@ -146,4 +145,3 @@ class SupportVectorRegression(ParamSklearnRegressionAlgorithm):
         cs.add_condition(gamma_depends_on_kernel)
         cs.add_condition(coef0_depends_on_kernel)
         return cs
-"""
