@@ -136,6 +136,38 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest):
                                                               self.categorical)
         self.assertAlmostEqual(float(14)/float(38), mf.value)
 
+    def test_skewnesses(self):
+        mf = self.helpers["Skewnesses"](self.X_transformed, self.y)
+        self.assertEqual(str([0.0, np.nan, np.nan, 0.0, np.nan, np.nan, np.nan,
+                              np.nan, 0.0, 0.0, -2.1717380859814943, 0.0,
+                              np.nan, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                              -1.3406501827593897, 0.0, 0.0, 0.0, 0.0, np.nan,
+                              0.0, 0.0, 6.8652365656298615, 0.0, 0.0, 0.0, 0.0,
+                              8.456571731037167, 0.0, 0.0, 1.1517139198634414,
+                              0.0, 0.7689648524911159, 0.0, 0.0, 0.0, 0.0,
+                              7.856842927127302, 0.0, 0.0, 0.0,
+                              3.563940300169727, np.nan, 10.47659050196491,
+                              np.nan, 0.0, 0.0, 0.0, 0.0, np.nan, 0.0, 0.0,
+                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, np.nan, 0.0, 0.0,
+                              -0.6969708499033568, 0.626346013011263,
+                              0.38099875966240376, 1.4762248835141034,
+                              0.07687661087633728, 0.36889797830360116]),
+                         str(mf.value))
+
+    def test_kurtosisses(self):
+        mf = self.helpers["Kurtosisses"](self.X_transformed, self.y)
+        self.assertEqual(str([-3.0, np.nan, np.nan, -3.0, np.nan, np.nan, np.nan, np.nan, -3.0, -3.0,
+                              2.716446314102563, -3.0, np.nan, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0,
+                              -0.20265708746721423, -3.0, -3.0, -3.0, -3.0, np.nan, -3.0, -3.0,
+                              45.131473102061314, -3.0, -3.0, -3.0, -3.0, 69.51360544217692,
+                              -3.0, -3.0, -0.6735550467927869, -3.0, -1.4086930556333161, -3.0,
+                              -3.0, -3.0, -3.0, 59.729980781550324, -3.0, -3.0, -3.0,
+                              10.701670463173883, np.nan, 107.75894854586127, np.nan, -3.0, -3.0, -3.0,
+                              -3.0, np.nan, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, np.nan,
+                              -3.0, -3.0, -1.100583611425576, -1.1786325509475737,
+                              -1.2387998382327916, 1.3934382644137013, -0.9768209837948341,
+                              -1.7937072296512782]), str(mf.value))
+
     def test_pca_95percent(self):
         mf = self.mf["PCAFractionOfComponentsFor95PercentVariance"](
             self.X_transformed, self.y)

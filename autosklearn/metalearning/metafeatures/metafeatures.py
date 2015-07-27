@@ -423,9 +423,12 @@ class Kurtosisses(HelperFunction):
 
     def _calculate_sparse(self, X, y, categorical):
         kurts = []
-        for i in range(X.shape[1]):
+        X_new = X.tocsc()
+        for i in range(X_new.shape[1]):
             if not categorical[i]:
-                kurts.append(scipy.stats.kurtosis(X.getcol(i).data))
+                start = X_new.indptr[i]
+                stop = X_new.indptr[i+1]
+                kurts.append(scipy.stats.kurtosis(X_new.data[start:stop]))
         return kurts
 
 @metafeatures.define("KurtosisMin", dependency="Kurtosisses")
@@ -467,9 +470,12 @@ class Skewnesses(HelperFunction):
 
     def _calculate_sparse(self, X, y, categorical):
         skews = []
-        for i in range(X.shape[1]):
+        X_new = X.tocsc()
+        for i in range(X_new.shape[1]):
             if not categorical[i]:
-                skews.append(scipy.stats.skew(X.getcol(i).data))
+                start = X_new.indptr[i]
+                stop = X_new.indptr[i + 1]
+                skews.append(scipy.stats.skew(X_new.data[start:stop]))
         return skews
 
 @metafeatures.define("SkewnessMin", dependency="Skewnesses")

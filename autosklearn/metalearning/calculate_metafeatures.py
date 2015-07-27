@@ -4,10 +4,10 @@ import os
 
 import numpy as np
 
-from autosklearn.data.data_manager import DataManager
+from autosklearn.data.competition_data_manager import CompetitionDataManager
 
-import pyMetaLearn.metafeatures.metafeatures
-import pyMetaLearn.metafeatures.metafeature
+import autosklearn.metalearning.metafeatures.metafeatures
+import autosklearn.metalearning.metafeatures.metafeature
 
 
 def calculate_metafeatures(dataset_name, dataset_dir, output_dir,
@@ -15,7 +15,7 @@ def calculate_metafeatures(dataset_name, dataset_dir, output_dir,
     resource.setrlimit(resource.RLIMIT_AS, (memory_limit * 1048576L, -1L))
     mf_filename = os.path.join(output_dir, "%s.arff" % dataset_name)
 
-    D = DataManager(dataset_name, dataset_dir, verbose=False,
+    D = CompetitionDataManager(dataset_name, dataset_dir, verbose=False,
                     encode_labels=False)
     X = D.data["X_train"]
     y = D.data["Y_train"]
@@ -28,7 +28,7 @@ def calculate_metafeatures(dataset_name, dataset_dir, output_dir,
         categorical = [True if c.lower() == "categorical" else False
                        for c in D.feat_type]
 
-    _metafeatures_labels = pyMetaLearn.metafeatures.metafeatures.\
+    _metafeatures_labels = autosklearn.metalearning.metafeatures.metafeatures.\
         calculate_all_metafeatures_with_labels(
         X, y, categorical, dataset_name)
 
@@ -42,22 +42,22 @@ def calculate_metafeatures(dataset_name, dataset_dir, output_dir,
     categorical = [False] * X.shape[1]
 
     try:
-        _metafeatures_encoded_labels = pyMetaLearn.metafeatures.metafeatures.\
-            calculate_all_metafeatures_encoded_labels(
+        _metafeatures_encoded_labels = autosklearn.metalearning.metafeatures.\
+            metafeatures.calculate_all_metafeatures_encoded_labels(
             X, y, categorical, dataset_name)
     except MemoryError as e:
         # During the conversion of the dataset (rescaling, etc...), it can
         # happen that we run out of memory.
         _metafeatures_encoded_labels = \
-            pyMetaLearn.metafeatures.metafeature.DatasetMetafeatures(
+            autosklearn.metalearning.metafeatures.metafeature.DatasetMetafeatures(
                 dataset_name, dict())
         for metafeature_name in \
-                pyMetaLearn.metafeatures.metafeatures.npy_metafeatures:
+                autosklearn.metalearning.metafeatures.metafeatures.npy_metafeatures:
             type_ = "HELPERFUNCTION" if metafeature_name not in \
-                pyMetaLearn.metafeatures.metafeatures.metafeatures.functions \
+                autosklearn.metalearning.metafeatures.metafeatures.metafeatures.functions \
                 else "METAFEATURE"
             _metafeatures_encoded_labels.metafeature_values[metafeature_name] = \
-                pyMetaLearn.metafeatures.metafeature.MetaFeatureValue(
+                autosklearn.metalearning.metafeatures.metafeature.MetaFeatureValue(
                     metafeature_name, type_, 0, 0, np.NaN, np.NaN,
                     "Memory error during dataset scaling.")
 
