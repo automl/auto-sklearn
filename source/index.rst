@@ -40,10 +40,11 @@ This will run for one hour should result in an accuracy above 0.99.
 
 Installation
 ************
+**Prerequisities**: *auto-sklearn* is written in python (2.7) and was developed with Ubuntu. It should run on other Linux distributions, but won't work on a MAC or on a windows PC.
+
 *auto-sklearn* has several dependencies, which are not yet automatically
 resolved:
 
-* `HPOlib <https://github.com/automl/HPOlib>`_
 * `HPOlibConfigSpace <https://github.com/automl/HPOlibConfigSpace>`_
 * `ParamSklearn <https://bitbucket.org/mfeurer/paramsklearn>`_
 * `pyMetaLearn <https://bitbucket.org/mfeurer/pymetalearn>`_
@@ -55,7 +56,7 @@ Please install these manually, for example by:
     pip install scikit-learn==0.15.2
     pip install git+https://github.com/mfeurer/HPOlibConfigSpace#egg=HPOlibConfigSpace0.1dev
     pip install git+https://git@bitbucket.org/mfeurer/paramsklearn.git@73d8643b2849db753ddc7b8909d01e6cee9bafc6 --no-deps
-    pip install git+https://github.com/automl/HPOlib#egg=HPOlib0.2
+    
     pip install --editable git+https://bitbucket.org/mfeurer/pymetalearn/#egg=pyMetaLearn
 
 Then install *auto-sklearn*
@@ -65,6 +66,12 @@ Then install *auto-sklearn*
     git clone https://github.com/automl/auto-sklearn.git
     cd auto-sklearn
     python setup.py install
+    
+To run the tests, you must also install `HPOlib <https://github.com/automl/HPOlib>`_:
+
+.. code:: bash
+
+    pip install git+https://github.com/automl/HPOlib#egg=HPOlib0.2
 
 API
 ***
