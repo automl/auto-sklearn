@@ -82,8 +82,7 @@ class LibLinear_Preprocessor(ParamSklearnPreprocessingAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        penalty = cs.add_hyperparameter(CategoricalHyperparameter(
-            "penalty", ["l1", "l2"], default="l2"))
+        penalty = cs.add_hyperparameter(Constant("penalty", "l1"))
         loss = cs.add_hyperparameter(CategoricalHyperparameter(
             "loss", ["hinge", "squared_hinge"], default="squared_hinge"))
         dual = cs.add_hyperparameter(Constant("dual", "False"))
@@ -102,16 +101,5 @@ class LibLinear_Preprocessor(ParamSklearnPreprocessingAlgorithm):
             ForbiddenEqualsClause(penalty, "l1"),
             ForbiddenEqualsClause(loss, "hinge")
         )
-        constant_penalty_and_loss = ForbiddenAndConjunction(
-            ForbiddenEqualsClause(dual, "False"),
-            ForbiddenEqualsClause(penalty, "l2"),
-            ForbiddenEqualsClause(loss, "hinge")
-        )
-        penalty_and_dual = ForbiddenAndConjunction(
-            ForbiddenEqualsClause(dual, "False"),
-            ForbiddenEqualsClause(penalty, "l1")
-        )
         cs.add_forbidden_clause(penalty_and_loss)
-        cs.add_forbidden_clause(constant_penalty_and_loss)
-        cs.add_forbidden_clause(penalty_and_dual)
         return cs
