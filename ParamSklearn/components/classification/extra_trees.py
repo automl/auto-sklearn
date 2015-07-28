@@ -16,7 +16,8 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
     def __init__(self, n_estimators, criterion, min_samples_leaf,
                  min_samples_split,  max_features, max_leaf_nodes_or_max_depth="max_depth",
                  bootstrap=False, max_leaf_nodes=None, max_depth="None",
-                 oob_score=False, n_jobs=1, random_state=None, verbose=0):
+                 oob_score=False, n_jobs=1, random_state=None, verbose=0,
+                 class_weight=None):
 
         self.n_estimators = int(n_estimators)
         self.estimator_increment = 10
@@ -56,6 +57,7 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
         self.n_jobs = int(n_jobs)
         self.random_state = random_state
         self.verbose = int(verbose)
+        self.class_weight = class_weight
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None, refit=False):
@@ -84,6 +86,7 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
                 max_features=max_features, max_leaf_nodes=self.max_leaf_nodes,
                 oob_score=self.oob_score, n_jobs=self.n_jobs, verbose=self.verbose,
                 random_state=self.random_state,
+                class_weight=self.class_weight,
                 warm_start=True
             )
 

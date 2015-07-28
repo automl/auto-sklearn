@@ -28,7 +28,7 @@ class BalancingComponentTest(unittest.TestCase):
         Y = np.array([0] * 80 + [1] * 20)
         balancing = Balancing(strategy='weighting')
         init_params, fit_params = balancing.get_weights(
-            Y, 'random_forest', None, None, None)
+            Y, 'adaboost', None, None, None)
         self.assertTrue(np.allclose(fit_params['classifier:sample_weight'],
                                     np.array([0.4] * 80 + [1.6] * 20)))
         init_params, fit_params = balancing.get_weights(
@@ -41,7 +41,7 @@ class BalancingComponentTest(unittest.TestCase):
                      [[1, 1, 0]] * 100 + [[0, 0, 1]] * 100 + [[1, 0, 1]] * 10)
         balancing = Balancing(strategy='weighting')
         init_params, fit_params = balancing.get_weights(
-            Y, 'random_forest', None, None, None)
+            Y, 'adaboost', None, None, None)
         self.assertTrue(np.allclose(fit_params['classifier:sample_weight'],
                                     np.array([0.4] * 500 + [4.0] * 10)))
         init_params, fit_params = balancing.get_weights(
@@ -74,6 +74,7 @@ class BalancingComponentTest(unittest.TestCase):
                 [('adaboost', AdaboostClassifier, 0.692, 0.719),
                  ('decision_tree', DecisionTree, 0.712, 0.668),
                  ('extra_trees', ExtraTreesClassifier, 0.901, 0.919),
+                 ('gradient_boosting', GradientBoostingClassifier, 0.879, 0.883),
                  ('random_forest', RandomForest, 0.886, 0.885),
                  ('libsvm_svc', LibSVM_SVC, 0.915, 0.937),
                  ('liblinear_svc', LibLinear_SVC, 0.920, 0.923),
@@ -89,6 +90,7 @@ class BalancingComponentTest(unittest.TestCase):
                 default = cs.get_default_configuration()
                 default._values['balancing:strategy'] = strategy
                 classifier = ParamSklearnClassifier(default, random_state=1)
+                print classifier
                 predictor = classifier.fit(X_train, Y_train)
                 predictions = predictor.predict(X_test)
                 self.assertAlmostEqual(acc,

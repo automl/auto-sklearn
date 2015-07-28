@@ -103,9 +103,9 @@ class MultinomialNB(ParamSklearnClassificationAlgorithm):
         alpha = UniformFloatHyperparameter(name="alpha", lower=1e-2, upper=100,
                                            default=1, log=True)
 
-        fit_prior = CategoricalHyperparameter( name="fit_prior",
-                                               choices=["True", "False"],
-                                               default="True")
+        fit_prior = CategoricalHyperparameter(name="fit_prior",
+                                              choices=["True", "False"],
+                                              default="True")
         
         cs.add_hyperparameter(alpha)
         cs.add_hyperparameter(fit_prior)

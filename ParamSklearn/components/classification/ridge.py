@@ -24,11 +24,12 @@ class Ridge(ParamSklearnClassificationAlgorithm):
 
     def fit(self, X, Y):
         self.estimator = RidgeClassifier(alpha=self.alpha,
-                                        fit_intercept=self.fit_intercept,
-                                        tol=self.tol,
-                                        class_weight=self.class_weight,
-                                        copy_X=False,
-                                        normalize=False)
+                                         fit_intercept=self.fit_intercept,
+                                         tol=self.tol,
+                                         class_weight=self.class_weight,
+                                         copy_X=False,
+                                         normalize=False,
+                                         solver='auto')
         self.estimator.fit(X, Y)
         return self
 

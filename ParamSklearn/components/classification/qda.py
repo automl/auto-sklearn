@@ -56,11 +56,11 @@ class QDA(ParamSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        n_components = UniformFloatHyperparameter('reg_param', 0.0, 10.0,
+        reg_param = UniformFloatHyperparameter('reg_param', 0.0, 10.0,
                                                     default=0.5)
         tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default=1e-4,
                                          log=True)
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(n_components)
+        cs.add_hyperparameter(reg_param)
         cs.add_hyperparameter(tol)
         return cs

@@ -16,7 +16,7 @@ class RandomForest(ParamSklearnClassificationAlgorithm):
     def __init__(self, n_estimators, criterion, max_features,
                  max_depth, min_samples_split, min_samples_leaf,
                  min_weight_fraction_leaf, bootstrap, max_leaf_nodes,
-                 random_state=None, n_jobs=1):
+                 random_state=None, n_jobs=1, class_weight=None):
         self.n_estimators = n_estimators
         self.estimator_increment = 10
         self.criterion = criterion
@@ -29,6 +29,7 @@ class RandomForest(ParamSklearnClassificationAlgorithm):
         self.max_leaf_nodes = max_leaf_nodes
         self.random_state = random_state
         self.n_jobs = n_jobs
+        self.class_weight = class_weight
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None, refit=False):
@@ -80,6 +81,7 @@ class RandomForest(ParamSklearnClassificationAlgorithm):
                 max_leaf_nodes=self.max_leaf_nodes,
                 random_state=self.random_state,
                 n_jobs=self.n_jobs,
+                class_weight=self.class_weight,
                 warm_start=True)
 
         tmp = self.estimator

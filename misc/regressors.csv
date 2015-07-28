@@ -14,27 +14,27 @@ class,added,comment
 <class 'sklearn.ensemble.weight_boosting.AdaBoostRegressor'>,True,
 <class 'sklearn.gaussian_process.gaussian_process.GaussianProcess'>,True,Crashes when getting two similar inputs
 <class 'sklearn.isotonic.IsotonicRegression'>,False,Calibration instead of prediction method
-<class 'sklearn.kernel_ridge.KernelRidge'>,,
-<class 'sklearn.linear_model.base.LinearRegression'>,,
-<class 'sklearn.linear_model.bayes.ARDRegression'>,,
-<class 'sklearn.linear_model.bayes.BayesianRidge'>,,
-<class 'sklearn.linear_model.coordinate_descent.ElasticNet'>,,
+<class 'sklearn.kernel_ridge.KernelRidge'>,False,Add
+<class 'sklearn.linear_model.base.LinearRegression'>,False,No
+<class 'sklearn.linear_model.bayes.ARDRegression'>,False,Wait for Tobias' feedback
+<class 'sklearn.linear_model.bayes.BayesianRidge'>,False,Wait for Tobias' feedback
+<class 'sklearn.linear_model.coordinate_descent.ElasticNet'>,False,Wait for Tobias' feedback
 <class 'sklearn.linear_model.coordinate_descent.ElasticNetCV'>,False,
-<class 'sklearn.linear_model.coordinate_descent.Lasso'>,,
+<class 'sklearn.linear_model.coordinate_descent.Lasso'>,False,Wait for Tobias' feedback
 <class 'sklearn.linear_model.coordinate_descent.LassoCV'>,False,We want to perform CV ourselves
 <class 'sklearn.linear_model.coordinate_descent.MultiTaskElasticNet'>,False,MultiTask
 <class 'sklearn.linear_model.coordinate_descent.MultiTaskElasticNetCV'>,False,We want to perform CV ourselves
 <class 'sklearn.linear_model.coordinate_descent.MultiTaskLasso'>,False,MultiTask
 <class 'sklearn.linear_model.coordinate_descent.MultiTaskLassoCV'>,False,MultiTask
-<class 'sklearn.linear_model.least_angle.Lars'>,,
+<class 'sklearn.linear_model.least_angle.Lars'>,,No
 <class 'sklearn.linear_model.least_angle.LarsCV'>,False,We want to perform CV ourselves
-<class 'sklearn.linear_model.least_angle.LassoLars'>,,
+<class 'sklearn.linear_model.least_angle.LassoLars'>,,No
 <class 'sklearn.linear_model.least_angle.LassoLarsCV'>,False,We want to perform CV ourselves
 <class 'sklearn.linear_model.least_angle.LassoLarsIC'>,False,We want to perform CV ourselves
 <class 'sklearn.linear_model.omp.OrthogonalMatchingPursuit'>,,
 <class 'sklearn.linear_model.omp.OrthogonalMatchingPursuitCV'>,False,We want to perform CV ourselves
 <class 'sklearn.linear_model.passive_aggressive.PassiveAggressiveRegressor'>,,
-<class 'sklearn.linear_model.ransac.RANSACRegressor'>,,
+<class 'sklearn.linear_model.ransac.RANSACRegressor'>,,no
 <class 'sklearn.linear_model.ridge.Ridge'>,True,
 <class 'sklearn.linear_model.ridge.RidgeCV'>,False,We want to perform CV ourselves
 <class 'sklearn.linear_model.stochastic_gradient.BaseSGDRegressor'>,False,

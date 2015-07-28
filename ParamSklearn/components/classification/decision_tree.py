@@ -15,7 +15,7 @@ from sklearn.tree import DecisionTreeClassifier
 class DecisionTree(ParamSklearnClassificationAlgorithm):
     def __init__(self, criterion, splitter, max_features, max_depth,
                  min_samples_split, min_samples_leaf, min_weight_fraction_leaf,
-                 max_leaf_nodes, random_state=None):
+                 max_leaf_nodes, class_weight=None, random_state=None):
         self.criterion = criterion
         self.splitter = splitter
         self.max_features = max_features
@@ -25,6 +25,7 @@ class DecisionTree(ParamSklearnClassificationAlgorithm):
         self.max_leaf_nodes = max_leaf_nodes
         self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.random_state = random_state
+        self.class_weight = class_weight
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None):
@@ -48,6 +49,7 @@ class DecisionTree(ParamSklearnClassificationAlgorithm):
             min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf,
             max_leaf_nodes=self.max_leaf_nodes,
+            class_weight=self.class_weight,
             random_state=self.random_state)
         self.estimator.fit(X, y, sample_weight=sample_weight)
         return self
