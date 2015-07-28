@@ -14,7 +14,7 @@ from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
 
 class LibSVM_SVR(ParamSklearnRegressionAlgorithm):
     def __init__(self, kernel, C, epsilon, tol, shrinking, gamma=0.0,
-                 degree=3, coef0=0.0, cache_size=2000, verbose=False,
+                 degree=3, coef0=0.0, cache_size=1000, verbose=False,
                  max_iter=-1, random_state=None):
         self.kernel = kernel
         self.C = C
@@ -56,8 +56,7 @@ class LibSVM_SVR(ParamSklearnRegressionAlgorithm):
             coef0=self.coef0,
             cache_size=self.cache_size,
             verbose=self.verbose,
-            max_iter=self.max_iter,
-            cache_size=1000
+            max_iter=self.max_iter
         )
         self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
 
