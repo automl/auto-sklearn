@@ -56,7 +56,7 @@ class KernelPCA(ParamSklearnPreprocessingAlgorithm):
                 'is_deterministic': False,
                 'handles_sparse': True,
                 'handles_dense': True,
-                'input': (DENSE, ),
+                'input': (DENSE, SPARSE),
                 'output': INPUT,
                 'preferred_dtype': None}
 

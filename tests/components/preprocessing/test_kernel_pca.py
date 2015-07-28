@@ -15,6 +15,13 @@ class KernelPCAComponentTest(PreprocessingTestCase):
         self.assertEqual(transformation.shape[0], original.shape[0])
         self.assertFalse((transformation == 0).all())
 
+    def test_default_configuration_sparse(self):
+        transformation, original = _test_preprocessing(KernelPCA,
+                                                       make_sparse=True,
+                                                       dataset='digits')
+        self.assertEqual(transformation.shape[0], original.shape[0])
+        self.assertFalse((transformation == 0).all())
+
     def test_default_configuration_classify(self):
         for i in range(5):
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',

@@ -1,3 +1,4 @@
+import numpy as np
 import sklearn.cluster
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
@@ -12,18 +13,26 @@ from ParamSklearn.util import SPARSE, DENSE, INPUT
 
 
 class FeatureAgglomeration(ParamSklearnPreprocessingAlgorithm):
-    def __init__(self, n_clusters, affinity, linkage, random_state=None):
+    def __init__(self, n_clusters, affinity, linkage, pooling_func,
+        random_state=None):
         self.n_clusters = int(n_clusters)
         self.affinity = affinity
         self.linkage = linkage
+        self.pooling_func = pooling_func
         self.random_state = random_state
+
+        self.pooling_func_mapping = dict(mean=np.mean,
+                                         median=np.median,
+                                         max=np.max)
 
     def fit(self, X, Y=None):
         n_clusters = min(self.n_clusters, X.shape[1])
+        if not callable(self.pooling_func):
+            self.pooling_func = self.pooling_func_mapping[self.pooling_func]
 
         self.preprocessor = sklearn.cluster.FeatureAgglomeration(
             n_clusters=n_clusters, affinity=self.affinity,
-            linkage=self.linkage)
+            linkage=self.linkage, pooling_func=self.pooling_func)
         self.preprocessor.fit(X)
         return self
 
@@ -54,15 +63,16 @@ class FeatureAgglomeration(ParamSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        n_clusters = UniformIntegerHyperparameter("n_clusters", 2, 400, 25)
-        affinity = CategoricalHyperparameter("affinity",
-            ["euclidean", "manhattan", "cosine"], "euclidean")
-        linkage = CategoricalHyperparameter("linkage",
-            ["ward", "complete", "average"], "ward")
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(n_clusters)
-        cs.add_hyperparameter(affinity)
-        cs.add_hyperparameter(linkage)
+        n_clusters = cs.add_hyperparameter(UniformIntegerHyperparameter(
+            "n_clusters", 2, 400, 25))
+        affinity = cs.add_hyperparameter(CategoricalHyperparameter(
+            "affinity", ["euclidean", "manhattan", "cosine"], "euclidean"))
+        linkage = cs.add_hyperparameter(CategoricalHyperparameter(
+            "linkage", ["ward", "complete", "average"], "ward"))
+        pooling_func = cs.add_hyperparameter(CategoricalHyperparameter(
+            "pooling_func", ["mean", "median", "max"]))
+
         affinity_and_linkage = ForbiddenAndConjunction(
             ForbiddenInClause(affinity, ["manhattan", "cosine"]),
             ForbiddenEqualsClause(linkage, "ward"))

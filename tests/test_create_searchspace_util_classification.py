@@ -12,6 +12,7 @@ from ParamSklearn.components.classification.lda import LDA
 from ParamSklearn.components.preprocessing.pca import PCA
 from ParamSklearn.components.preprocessing.truncatedSVD import TruncatedSVD
 from ParamSklearn.components.preprocessing.no_preprocessing import NoPreprocessing
+from ParamSklearn.components.preprocessing.fast_ica import FastICA
 from ParamSklearn.components.preprocessing.random_trees_embedding import RandomTreesEmbedding
 import ParamSklearn.create_searchspace_util
 
@@ -87,14 +88,14 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
         self.assertListEqual(list(m[1, :]), [1, 1])  # tsvd
         self.assertListEqual(list(m[2, :]), [0, 1])  # none
 
-        preprocessors['rte'] = RandomTreesEmbedding
+        preprocessors['fast_ica'] = FastICA
         m = ParamSklearn.create_searchspace_util.get_match_array(
             node_0=Preprocessors, node_1=Classifiers,
             dataset_properties={'sparse': False})
         self.assertListEqual(list(m[0, :]), [1, 1])  # pca
         self.assertListEqual(list(m[1, :]), [0, 0])  # tsvd
         self.assertListEqual(list(m[2, :]), [1, 1])  # none
-        self.assertListEqual(list(m[3, :]), [0, 1])  # random trees embedding
+        self.assertListEqual(list(m[3, :]), [1, 1])  # fast_ica
 
         m = ParamSklearn.create_searchspace_util.get_match_array(
             node_0=Preprocessors, node_1=Classifiers,
@@ -102,7 +103,7 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
         self.assertListEqual(list(m[0, :]), [0, 0])  # pca
         self.assertListEqual(list(m[1, :]), [1, 1])  # tsvd
         self.assertListEqual(list(m[2, :]), [0, 1])  # none
-        self.assertListEqual(list(m[3, :]), [0, 0])  # random trees embedding
+        self.assertListEqual(list(m[3, :]), [0, 0])  # fast_ica
 
     def test_get_idx_to_keep(self):
         m = numpy.zeros([3, 4])

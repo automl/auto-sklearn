@@ -130,7 +130,7 @@ def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False):
     original_X_train = X_train.copy()
     configuration_space = Preprocessor.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
-    print default
+
     preprocessor = Preprocessor(random_state=1,
                                 **{hp_name: default[hp_name] for hp_name in
                                    default if default[hp_name] is not None})
@@ -141,10 +141,10 @@ def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False):
 
 class PreprocessingTestCase(unittest.TestCase):
     def _test_preprocessing_dtype(self, Preprocessor, add_NaNs=False,
-                                  test_sparse=True):
+                                  test_sparse=True, dataset='iris'):
         # Dense
         # np.float32
-        X_train, Y_train, X_test, Y_test = get_dataset("iris", add_NaNs=add_NaNs)
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset, add_NaNs=add_NaNs)
         self.assertEqual(X_train.dtype, np.float32)
 
         configuration_space = Preprocessor.get_hyperparameter_search_space()
@@ -157,7 +157,7 @@ class PreprocessingTestCase(unittest.TestCase):
         self.assertEqual(Xt.dtype, np.float32)
 
         # np.float64
-        X_train, Y_train, X_test, Y_test = get_dataset("iris", add_NaNs=add_NaNs)
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset, add_NaNs=add_NaNs)
         X_train = X_train.astype(np.float64)
         configuration_space = Preprocessor.get_hyperparameter_search_space()
         default = configuration_space.get_default_configuration()
@@ -171,7 +171,7 @@ class PreprocessingTestCase(unittest.TestCase):
         if test_sparse is True:
             # Sparse
             # np.float32
-            X_train, Y_train, X_test, Y_test = get_dataset("iris", make_sparse=True,
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset, make_sparse=True,
                                                            add_NaNs=add_NaNs)
             self.assertEqual(X_train.dtype, np.float32)
             configuration_space = Preprocessor.get_hyperparameter_search_space()
@@ -184,7 +184,8 @@ class PreprocessingTestCase(unittest.TestCase):
             self.assertEqual(Xt.dtype, np.float32)
 
             # np.float64
-            X_train, Y_train, X_test, Y_test = get_dataset("iris", make_sparse=True,
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset,
+                                                           make_sparse=True,
                                                            add_NaNs=add_NaNs)
             X_train = X_train.astype(np.float64)
             configuration_space = Preprocessor.get_hyperparameter_search_space()
@@ -192,7 +193,7 @@ class PreprocessingTestCase(unittest.TestCase):
             preprocessor = Preprocessor(random_state=1,
                                         **{hp_name: default[hp_name] for hp_name
                                            in default})
-            preprocessor.fit(X_train)
+            preprocessor.fit(X_train, Y_train)
             Xt = preprocessor.transform(X_train)
             self.assertEqual(Xt.dtype, np.float64)
 

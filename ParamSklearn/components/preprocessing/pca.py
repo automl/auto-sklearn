@@ -11,31 +11,16 @@ from ParamSklearn.util import DENSE, INPUT
 
 class PCA(ParamSklearnPreprocessingAlgorithm):
     def __init__(self, keep_variance, whiten, random_state=None):
-        # TODO document that this implementation does not allow the number of
-        #  components to be specified, but rather the amount of variance to
-        # be kept!
-        # TODO it would also be possible to use a heuristic for the number of
-        #  PCA components!
         self.keep_variance = keep_variance
         self.whiten = whiten
         self.random_state = random_state
 
     def fit(self, X, Y=None):
-        self.preprocessor = sklearn.decomposition.PCA(whiten=self.whiten,
+        n_components = float(self.keep_variance)
+        self.preprocessor = sklearn.decomposition.PCA(n_components=n_components,
+                                                      whiten=self.whiten,
                                                       copy=True)
         self.preprocessor.fit(X)
-
-        sum_ = 0.
-        idx = 0
-        while idx < len(self.preprocessor.explained_variance_ratio_) and \
-                sum_ < self.keep_variance:
-            sum_ += self.preprocessor.explained_variance_ratio_[idx]
-            idx += 1
-
-        components = self.preprocessor.components_
-        self.preprocessor.components_ = components[:idx]
-        self.preprocessor.explained_variance_ = \
-            self.preprocessor.explained_variance_[:idx]
 
         if not np.isfinite(self.preprocessor.components_).all():
             raise ValueError("PCA found non-finite components.")
@@ -74,7 +59,7 @@ class PCA(ParamSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         keep_variance = UniformFloatHyperparameter(
-            "keep_variance", 0.5, 1.0, default=1.0)
+            "keep_variance", 0.5, 0.9999, default=0.9999)
         whiten = CategoricalHyperparameter(
             "whiten", ["False", "True"], default="False")
         cs = ConfigurationSpace()

@@ -32,7 +32,7 @@ class RandomTreesEmbeddingComponentTest(unittest.TestCase):
                                                default})
         preprocessor.fit(X_train)
         Xt = preprocessor.transform(X_train)
-        print Xt
+
         self.assertEqual(Xt.dtype, np.float32)
 
         # np.float64

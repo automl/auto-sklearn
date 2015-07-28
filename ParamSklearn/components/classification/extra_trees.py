@@ -16,6 +16,7 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
     def __init__(self, n_estimators, criterion, min_samples_leaf,
                  min_samples_split,  max_features, max_leaf_nodes_or_max_depth="max_depth",
                  bootstrap=False, max_leaf_nodes=None, max_depth="None",
+                 min_weight_fraction_leaf=0.0,
                  oob_score=False, n_jobs=1, random_state=None, verbose=0,
                  class_weight=None):
 
@@ -150,35 +151,10 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
             "min_samples_split", 2, 20, default=2))
         min_samples_leaf = cs.add_hyperparameter(UniformIntegerHyperparameter(
             "min_samples_leaf", 1, 20, default=1))
-
-        # Unparametrized, we use min_samples as regularization
-        # max_leaf_nodes_or_max_depth = UnParametrizedHyperparameter(
-        #    name="max_leaf_nodes_or_max_depth", value="max_depth")
-        # CategoricalHyperparameter("max_leaf_nodes_or_max_depth",
-        # choices=["max_leaf_nodes", "max_depth"], default="max_depth")
-        # min_weight_fraction_leaf = UniformFloatHyperparameter(
-        #    "min_weight_fraction_leaf", 0.0, 0.1)
-        # max_leaf_nodes = UnParametrizedHyperparameter(name="max_leaf_nodes",
-        #                                              value="None")
+        min_weight_fraction_leaf = cs.add_hyperparameter(Constant(
+            'min_weight_fraction_leaf', 0.))
 
         bootstrap = cs.add_hyperparameter(CategoricalHyperparameter(
             "bootstrap", ["True", "False"], default="False"))
-
-        # Conditions
-        # Not applicable because max_leaf_nodes is no legal value of the parent
-        #cond_max_leaf_nodes_or_max_depth = \
-        #    EqualsCondition(child=max_leaf_nodes,
-        #                    parent=max_leaf_nodes_or_max_depth,
-        #                    value="max_leaf_nodes")
-        #cond2_max_leaf_nodes_or_max_depth = \
-        #    EqualsCondition(child=use_max_depth,
-        #                    parent=max_leaf_nodes_or_max_depth,
-        #                    value="max_depth")
-
-        #cond_max_depth = EqualsCondition(child=max_depth, parent=use_max_depth,
-                                         #value="True")
-        #cs.add_condition(cond_max_leaf_nodes_or_max_depth)
-        #cs.add_condition(cond2_max_leaf_nodes_or_max_depth)
-        #cs.add_condition(cond_max_depth)
 
         return cs

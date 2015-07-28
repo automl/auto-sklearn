@@ -22,7 +22,7 @@ class TruncatedSVD(ParamSklearnPreprocessingAlgorithm):
         # TODO: remove when migrating to sklearn 0.16
         # Circumvents a bug in sklearn
         # https://github.com/scikit-learn/scikit-learn/commit/f08b8c8e52663167819f242f605db39f3b5a6d0c
-        X = X.astype(np.float64)
+        # X = X.astype(np.float64)
         self.preprocessor.fit(X, Y)
 
         return self

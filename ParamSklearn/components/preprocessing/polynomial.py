@@ -1,23 +1,19 @@
 import sklearn.preprocessing
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    CategoricalHyperparameter, Constant, UnParametrizedHyperparameter, \
+from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
     UniformIntegerHyperparameter
-from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, \
-    ForbiddenAndConjunction
 
 from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.implementations.util import softmax
 from ParamSklearn.util import SPARSE, DENSE, PREDICTIONS
 
 
 class PolynomialFeatures(ParamSklearnPreprocessingAlgorithm):
     def __init__(self, degree, interaction_only, include_bias, random_state=None):
         self.degree = int(degree)
-        self.interaction_only = interaction_only == 'True'
-        self.include_bias = include_bias == 'True'
+        self.interaction_only = interaction_only.lower() == 'true'
+        self.include_bias = include_bias.lower() == 'true'
         self.random_state = random_state
         self.preprocessor = None
 

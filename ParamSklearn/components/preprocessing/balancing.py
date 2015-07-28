@@ -30,7 +30,7 @@ class Balancing(ParamSklearnPreprocessingAlgorithm):
         # the sample weights are normalized:
         # https://github.com/scikit-learn/scikit-learn/blob/0.15.X/sklearn/ensemble/weight_boosting.py#L121
         clf_ = ['adaboost', 'gradient_boosting']
-        pre_ = ['extra_trees_preproc_for_classification']
+        pre_ = []
         if classifier in clf_ or preprocessor in pre_:
             if len(Y.shape) > 1:
                 offsets = [2 ** i for i in range(Y.shape[1])]
@@ -57,7 +57,8 @@ class Balancing(ParamSklearnPreprocessingAlgorithm):
         # argument `class_weight`
         clf_ = ['decision_tree', 'extra_trees', 'liblinear_svc',
                 'libsvm_svc', 'random_forest', 'sgd']
-        pre_ = ['liblinear_svc_preprocessor']
+        pre_ = ['liblinear_svc_preprocessor',
+                'extra_trees_preproc_for_classification']
         if classifier in clf_:
             init_params['classifier:class_weight'] = 'auto'
         if preprocessor in pre_:

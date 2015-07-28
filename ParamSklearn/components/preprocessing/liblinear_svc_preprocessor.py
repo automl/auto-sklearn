@@ -12,8 +12,9 @@ from ParamSklearn.util import SPARSE, DENSE, INPUT
 
 
 class LibLinear_Preprocessor(ParamSklearnPreprocessingAlgorithm):
+    # Liblinear is not deterministic as it uses a RNG inside
     def __init__(self, penalty, loss, dual, tol, C, multi_class,
-                 fit_intercept, intercept_scaling, class_weight,
+                 fit_intercept, intercept_scaling, class_weight=None,
                  random_state=None):
         self.penalty = penalty
         self.loss = loss
@@ -39,12 +40,15 @@ class LibLinear_Preprocessor(ParamSklearnPreprocessingAlgorithm):
             self.class_weight = None
 
         self.preprocessor = sklearn.svm.LinearSVC(penalty=self.penalty,
-                                               loss=self.loss,
-                                               dual=self.dual,
-                                               tol=self.tol,
-                                               C=self.C,
-                                               class_weight=self.class_weight,
-                                               random_state=self.random_state)
+                                                  loss=self.loss,
+                                                  dual=self.dual,
+                                                  tol=self.tol,
+                                                  C=self.C,
+                                                  class_weight=self.class_weight,
+                                                  fit_intercept=self.fit_intercept,
+                                                  intercept_scaling=self.intercept_scaling,
+                                                  multi_class=self.multi_class,
+                                                  random_state=self.random_state)
         self.preprocessor.fit(X, Y)
         return self
 
@@ -68,8 +72,6 @@ class LibLinear_Preprocessor(ParamSklearnPreprocessingAlgorithm):
                 'handles_multiclass': True,
                 'handles_multilabel': False,
                 'is_deterministic': False,
-                # TODO find out of this is right!
-                # this here suggests so http://scikit-learn.org/stable/modules/svm.html#tips-on-practical-use
                 'handles_sparse': True,
                 'input': (SPARSE, DENSE),
                 'output': INPUT,
@@ -78,41 +80,32 @@ class LibLinear_Preprocessor(ParamSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        penalty = CategoricalHyperparameter("penalty", ["l1", "l2"],
-                                            default="l2")
-        loss = CategoricalHyperparameter("loss", ["l1", "l2"], default="l2")
-        dual = Constant("dual", "False")
-        # This is set ad-how
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default=1e-4,
-                                         log=True)
-        C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True,
-                                       default=1.0)
-        multi_class = UnParametrizedHyperparameter("multi_class", "ovr")
-        # These are set ad-hoc
-        fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
-        intercept_scaling = UnParametrizedHyperparameter("intercept_scaling", 1)
-        # This does not allow for other resampling methods!
-        class_weight = CategoricalHyperparameter("class_weight",
-                                                 ["None", "auto"],
-                                                 default="None")
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(penalty)
-        cs.add_hyperparameter(loss)
-        cs.add_hyperparameter(dual)
-        cs.add_hyperparameter(tol)
-        cs.add_hyperparameter(C)
-        cs.add_hyperparameter(multi_class)
-        cs.add_hyperparameter(fit_intercept)
-        cs.add_hyperparameter(intercept_scaling)
-        cs.add_hyperparameter(class_weight)
+
+        penalty = cs.add_hyperparameter(CategoricalHyperparameter(
+            "penalty", ["l1", "l2"], default="l2"))
+        loss = cs.add_hyperparameter(CategoricalHyperparameter(
+            "loss", ["hinge", "squared_hinge"], default="squared_hinge"))
+        dual = cs.add_hyperparameter(Constant("dual", "False"))
+        # This is set ad-hoc
+        tol = cs.add_hyperparameter(UniformFloatHyperparameter(
+            "tol", 1e-5, 1e-1, default=1e-4, log=True))
+        C = cs.add_hyperparameter(UniformFloatHyperparameter(
+            "C", 0.03125, 32768, log=True, default=1.0))
+        multi_class = cs.add_hyperparameter(Constant("multi_class", "ovr"))
+        # These are set ad-hoc
+        fit_intercept = cs.add_hyperparameter(Constant("fit_intercept", "True"))
+        intercept_scaling = cs.add_hyperparameter(Constant(
+            "intercept_scaling", 1))
+
         penalty_and_loss = ForbiddenAndConjunction(
             ForbiddenEqualsClause(penalty, "l1"),
-            ForbiddenEqualsClause(loss, "l1")
+            ForbiddenEqualsClause(loss, "hinge")
         )
         constant_penalty_and_loss = ForbiddenAndConjunction(
             ForbiddenEqualsClause(dual, "False"),
             ForbiddenEqualsClause(penalty, "l2"),
-            ForbiddenEqualsClause(loss, "l1")
+            ForbiddenEqualsClause(loss, "hinge")
         )
         penalty_and_dual = ForbiddenAndConjunction(
             ForbiddenEqualsClause(dual, "False"),

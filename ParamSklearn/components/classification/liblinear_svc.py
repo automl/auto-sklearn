@@ -2,7 +2,7 @@ import sklearn.svm
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    CategoricalHyperparameter, Constant, UnParametrizedHyperparameter
+    CategoricalHyperparameter, Constant
 from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, \
     ForbiddenAndConjunction
 

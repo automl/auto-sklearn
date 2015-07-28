@@ -37,5 +37,5 @@ class FastICAComponentTest(PreprocessingTestCase):
     @unittest.skip("Always returns float64")
     def test_preprocessing_dtype(self):
         super(FastICAComponentTest,
-              self)._test_preprocessing_dtype(FastICA)
+              self)._test_preprocessing_dtype(FastICA, dataset='diabetes')
 

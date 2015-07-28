@@ -8,10 +8,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import DENSE, INPUT
-
-# get our own forests to replace the sklearn ones
-#from ParamSklearn.implementations import forest
+from ParamSklearn.util import DENSE, INPUT, SPARSE
 
 
 class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
@@ -19,7 +16,9 @@ class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
                  min_samples_split, max_features,
                  max_leaf_nodes_or_max_depth="max_depth",
                  bootstrap=False, max_leaf_nodes=None, max_depth="None",
-                 oob_score=False, n_jobs=1, random_state=None, verbose=0):
+                 min_weight_fraction_leaf=0.0,
+                 oob_score=False, n_jobs=1, random_state=None, verbose=0,
+                 class_weight=None):
 
         self.n_estimators = int(n_estimators)
         self.estimator_increment = 10
@@ -59,6 +58,7 @@ class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
         self.n_jobs = int(n_jobs)
         self.random_state = random_state
         self.verbose = int(verbose)
+        self.class_weight = class_weight
         self.preprocessor = None
 
     def fit(self, X, Y, sample_weight=None):
@@ -73,7 +73,7 @@ class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
             min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,
             max_features=max_features, max_leaf_nodes=self.max_leaf_nodes,
             oob_score=self.oob_score, n_jobs=self.n_jobs, verbose=self.verbose,
-            random_state=self.random_state,
+            random_state=self.random_state, class_weight=self.class_weight,
             warm_start=True
         )
         # JTS TODO: I think we might have to copy here if we want self.estimator
@@ -106,7 +106,7 @@ class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
                 'handles_multilabel': True,
                 'is_deterministic': True,
                 'handles_sparse': False,
-                'input': (DENSE, ),
+                'input': (DENSE, SPARSE),
                 'output': INPUT,
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
@@ -114,26 +114,25 @@ class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        bootstrap = CategoricalHyperparameter(
-            "bootstrap", ["True", "False"], default="False")
-        n_estimators = Constant("n_estimators", 100)
-        criterion = CategoricalHyperparameter(
-            "criterion", ["gini", "entropy"], default="gini")
-        max_features = UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default=1)
-        min_samples_split = UniformIntegerHyperparameter(
-            "min_samples_split", 2, 20, default=2)
-        min_samples_leaf = UniformIntegerHyperparameter(
-            "min_samples_leaf", 1, 20, default=1)
-
-        max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
-
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(n_estimators)
-        cs.add_hyperparameter(criterion)
-        cs.add_hyperparameter(max_features)
-        cs.add_hyperparameter(max_depth)
-        cs.add_hyperparameter(min_samples_split)
-        cs.add_hyperparameter(min_samples_leaf)
-        cs.add_hyperparameter(bootstrap)
+
+        n_estimators = cs.add_hyperparameter(Constant("n_estimators", 100))
+        criterion = cs.add_hyperparameter(CategoricalHyperparameter(
+            "criterion", ["gini", "entropy"], default="gini"))
+        max_features = cs.add_hyperparameter(UniformFloatHyperparameter(
+            "max_features", 0.5, 5, default=1))
+
+        max_depth = cs.add_hyperparameter(
+            UnParametrizedHyperparameter(name="max_depth", value="None"))
+
+        min_samples_split = cs.add_hyperparameter(UniformIntegerHyperparameter(
+            "min_samples_split", 2, 20, default=2))
+        min_samples_leaf = cs.add_hyperparameter(UniformIntegerHyperparameter(
+            "min_samples_leaf", 1, 20, default=1))
+        min_weight_fraction_leaf = cs.add_hyperparameter(Constant(
+            'min_weight_fraction_leaf', 0.))
+
+        bootstrap = cs.add_hyperparameter(CategoricalHyperparameter(
+            "bootstrap", ["True", "False"], default="False"))
+
         return cs
