@@ -56,7 +56,8 @@ class LibSVM_SVR(ParamSklearnRegressionAlgorithm):
             coef0=self.coef0,
             cache_size=self.cache_size,
             verbose=self.verbose,
-            max_iter=self.max_iter
+            max_iter=self.max_iter,
+            cache_size=1000
         )
         self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
 

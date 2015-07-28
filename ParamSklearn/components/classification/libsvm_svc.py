@@ -57,7 +57,7 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
                                          class_weight=self.class_weight,
                                          max_iter=self.max_iter,
                                          random_state=self.random_state,
-                                         cache_size=2000)
+                                         cache_size=1000)
                                          # probability=True)
         self.estimator.fit(X, Y)
         return self
