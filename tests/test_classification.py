@@ -1,5 +1,6 @@
 __author__ = 'feurerm'
 
+import resource
 import sys
 import traceback
 import unittest
@@ -80,8 +81,12 @@ class TestParamSklearnClassifier(unittest.TestCase):
             scores = auto.predict_proba(X_test)
 
     def test_configurations(self):
+        # Use a limit of ~4GiB
+        limit = 4000 * 1024 * 2014
+        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
         cs = ParamSklearnClassifier.get_hyperparameter_search_space()
-        for i in range(10):
+        for i in range(1000):
             config = cs.sample_configuration()
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
             cls = ParamSklearnClassifier(config, random_state=1)
@@ -121,6 +126,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
                 if "invalid value encountered in sqrt" in e.message:
                     continue
                 elif "divide by zero encountered in divide" in e.message:
+                    continue
+                elif "invalid value encountered in divide" in e.message:
                     continue
                 else:
                     print config
