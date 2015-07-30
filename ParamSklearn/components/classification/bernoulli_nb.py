@@ -41,8 +41,8 @@ class BernoulliNB(ParamSklearnClassificationAlgorithm):
             self.classes_ = np.unique(y.astype(int))
 
         for iter in range(n_iter):
-            start = self.n_iter * 1000
-            stop = (self.n_iter + 1) * 1000
+            start = min(self.n_iter * 1000, y.shape[0])
+            stop = min((self.n_iter + 1) * 1000, y.shape[0])
             # Upper limit, scipy.sparse doesn't seem to handle max > len(matrix)
             stop = min(stop, y.shape[0])
             self.estimator.partial_fit(X[start:stop], y[start:stop], self.classes_)
