@@ -115,7 +115,7 @@ class BalancingComponentTest(unittest.TestCase):
                 [('extra_trees_preproc_for_classification',
                   ExtraTreesPreprocessor, 0.892, 0.910),
                    ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
-                    0.889, 0.885)]:
+                    0.906, 0.887)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
 
