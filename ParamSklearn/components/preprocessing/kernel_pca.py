@@ -57,7 +57,7 @@ class KernelPCA(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (DENSE, SPARSE),
-                'output': INPUT,
+                'output': DENSE,
                 'preferred_dtype': None}
 
     @staticmethod
