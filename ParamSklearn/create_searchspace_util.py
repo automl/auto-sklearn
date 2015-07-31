@@ -15,6 +15,7 @@ def get_match_array(pipeline, dataset_properties, include=None,
     # Duck typing, not sure if it's good...
     node_i_is_choice = []
     node_i_choices = []
+    node_i_choices_names = []
     all_nodes = []
     for node_name, node in pipeline:
         all_nodes.append(node)
@@ -27,6 +28,9 @@ def get_match_array(pipeline, dataset_properties, include=None,
             node_name) if exclude is not None else None
 
         if is_choice:
+            node_i_choices_names.append(node.get_available_components(
+                dataset_properties, include=node_include,
+                exclude=node_exclude).keys())
             node_i_choices.append(node.get_available_components(
                 dataset_properties, include=node_include,
                 exclude=node_exclude).values())
@@ -98,6 +102,7 @@ def add_forbidden(conf_space, pipeline, matches, dataset_properties,
                   include, exclude):
     # Not sure if this works for 3D
     node_i_is_choice = []
+    node_i_choices_names = []
     node_i_choices = []
     all_nodes = []
     for node_name, node in pipeline:
@@ -111,6 +116,9 @@ def add_forbidden(conf_space, pipeline, matches, dataset_properties,
             node_name) if exclude is not None else None
 
         if is_choice:
+            node_i_choices_names.append(node.get_available_components(
+                dataset_properties, include=node_include,
+                exclude=node_exclude).keys())
             node_i_choices.append(node.get_available_components(
                 dataset_properties, include=node_include,
                 exclude=node_exclude).values())
@@ -134,8 +142,6 @@ def add_forbidden(conf_space, pipeline, matches, dataset_properties,
 
     for choices_chain in choices_chains:
         constraints = set()
-        possible_constraints = set()
-        possible_constraints_by_length = dict()
 
         chain_start = choices_chain[0]
         chain_stop = choices_chain[1]
@@ -143,58 +149,83 @@ def add_forbidden(conf_space, pipeline, matches, dataset_properties,
 
         # Add one to have also have chain_length in the range
         for sub_chain_length in range(2, chain_length + 1):
-            if sub_chain_length > 2:
-                break
 
             for start_idx in range(chain_start, chain_stop - sub_chain_length + 1):
-                #print chain_start + start_idx, sub_chain_length
-
                 indices = range(start_idx, start_idx + sub_chain_length)
-                #print indices
+                node_names = [pipeline[idx][0] for idx in indices]
 
-                node_0_idx = indices[0]
-                node_1_idx = indices[1]
+                num_node_choices = []
+                node_choice_names = []
+                skip_array_shape = []
 
-                node_0_name, node_0 = pipeline[node_0_idx]
-                node_1_name, node_1 = pipeline[node_1_idx]
-                node_0_is_choice = hasattr(node_0, "get_available_components")
-                node_1_is_choice = hasattr(node_1, "get_available_components")
+                for idx in indices:
+                    node = all_nodes[idx]
+                    available_components = node.get_available_components(
+                        dataset_properties,
+                        include=node_i_choices_names[idx-start_idx])
+                    skip_array_shape.append(len(available_components))
+                    num_node_choices.append(range(len(available_components)))
+                    node_choice_names.append([name for name in available_components])
 
-                if not node_0_is_choice or not node_1_is_choice:
-                    continue
+                # Figure out which choices were already abandoned
+                skip_array = np.zeros(skip_array_shape)
+                for product in itertools.product(*num_node_choices):
+                    for node_idx, choice_idx in enumerate(product):
+                        node_idx += start_idx
+                        slices_ = [
+                            slice(None) if idx != node_idx else
+                            slice(choice_idx, choice_idx + 1) for idx in
+                            range(len(matches.shape))]
 
-                # Now iterate all combinations and add them as forbidden!
-                for pdx, p in enumerate(node_0.get_available_components(dataset_properties)):
-                    slices_0 = [
-                        slice(None) if idx != node_0_idx else
-                        slice(pdx, pdx + 1) for idx in range(len(matches.shape))]
-                    if np.sum(matches[slices_0]) == 0:
+                        if np.sum(matches[slices_]) == 0:
+                            skip_array[product] = 1
+
+                for product in itertools.product(*num_node_choices):
+                    if skip_array[product]:
                         continue
 
-                    for cdx, c in enumerate(node_1.get_available_components(dataset_properties)):
+                    slices = []
+                    for idx in range(len(matches.shape)):
+                        if idx not in indices:
+                            slices.append(slice(None))
+                        else:
+                            slices.append(slice(product[idx - start_idx],
+                                                product[idx - start_idx] + 1))
 
-                        slices_1 = [
-                            slice(None) if idx != node_1_idx else
-                            slice(cdx, cdx + 1) for idx in range(len(matches.shape))]
-                        if np.sum(matches[slices_1]) == 0:
+                    # This prints the affected nodes
+                    # print [node_choice_names[i][product[i]]
+                    #        for i in range(len(product))]
+
+                    if np.sum(matches[slices]) == 0:
+                        constraint = tuple([(node_names[i],
+                                             node_choice_names[i][product[i]])
+                                            for i in range(len(product))])
+
+                        # Check if a more general constraint/forbidden clause
+                        #  was already added
+                        continue_ = False
+                        for constraint_length in range(2, len(constraint)):
+                            for constraint_start_idx in range(len(constraint)
+                                    - constraint_length + 1):
+                                sub_constraint = constraint[
+                                                     constraint_start_idx:constraint_start_idx + constraint_length]
+                                if sub_constraint in constraints:
+                                    continue_ = True
+                                    break
+                            if continue_:
+                                break
+                        if continue_:
                             continue
 
-                        slices = [slice(None) if idx not in (node_0_idx, node_1_idx)
-                                  else slice(pdx if idx is node_0_idx else cdx,
-                                             pdx+1 if idx is node_0_idx else cdx+1)
-                                  for idx in range(len(matches.shape))]
+                        constraints.add(constraint)
 
-                        #print node_0_name, node_1_name, p, c, matches[slices]
-                        if np.sum(matches[slices]) == 0:
-                            conf_space.add_forbidden_clause(ForbiddenAndConjunction(
+                        forbiddens = []
+                        for i in range(len(product)):
+                            forbiddens.append(
                                 ForbiddenEqualsClause(conf_space.get_hyperparameter(
-                                    node_1_name + ":__choice__"), c),
-                                ForbiddenEqualsClause(conf_space.get_hyperparameter(
-                                    node_0_name + ":__choice__"), p)))
-                            constraints.add(((node_0_name, p), (node_1_name, c)))
-
-                        elif np.size(matches[slices]) > np.sum(matches[slices]) > 0:
-                            #possible_constraints.add()
-                            pass
+                                    node_names[i] + ":__choice__"),
+                                    node_choice_names[i][product[i]]))
+                        forbidden = ForbiddenAndConjunction(*forbiddens)
+                        conf_space.add_forbidden_clause(forbidden)
 
     return conf_space
