@@ -86,7 +86,10 @@ class TestParamSklearnClassifier(unittest.TestCase):
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         cs = ParamSklearnClassifier.get_hyperparameter_search_space()
-        for i in range(1000):
+
+        print cs
+
+        for i in range(10):
             config = cs.sample_configuration()
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
             cls = ParamSklearnClassifier(config, random_state=1)
@@ -114,9 +117,12 @@ class TestParamSklearnClassifier(unittest.TestCase):
                     print config
                     print traceback.format_exc()
                     raise e
-            except AttributeError as e:
+            except KeyError as e:
                 # Some error in QDA
                 if "log" == e.message:
+                    print config
+                    print traceback.format_exc()
+                    raise e
                     continue
                 else:
                     print config

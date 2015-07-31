@@ -1,137 +1,200 @@
+import itertools
+
 import numpy as np
 
 from HPOlibConfigSpace.forbidden import ForbiddenAndConjunction
 from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause
 
-from ParamSklearn.util import SPARSE, DENSE, INPUT
+from ParamSklearn.util import SPARSE, DENSE, INPUT, PREDICTIONS
 
 
-def get_match_array(node_0, node_1, dataset_properties,
-                    node_0_include=None, node_0_exclude=None,
-                    node_1_include=None, node_1_exclude=None):
-    # Select combinations of nodes that work
-    # Three cases possible:
-    # * node_0 and node_1 are both nodes:
-    #   Check if they fit together, return a (1, 1) array
-    # * node_0 is a node, node_1 is a composite of nodes (or vice versa)
-    #   Check if they fit together, return a (1, n) array
-    # * node_0 and node_1 are both composites of nodes
-    #   Check if they fit together, return a (n, m) array
-    #
-    # We build a binary array, where a 1 indicates, that a combination
-    # works on this dataset based on the dataset and the input/output formats
-    #
-    # A 'zero'-row (column) is an unusable preprocessor (classifier)
-    # A single zero results in an forbidden condition
-
-    # Duck typing, not sure if it's good...
+def get_match_array(pipeline, dataset_properties, include=None,
+                                   exclude=None):
     sparse = dataset_properties.get('sparse')
 
-    node_0_is_choice = hasattr(node_0, "get_available_components")
-    node_1_is_choice = hasattr(node_1, "get_available_components")
+    # Duck typing, not sure if it's good...
+    node_i_is_choice = []
+    node_i_choices = []
+    all_nodes = []
+    for node_name, node in pipeline:
+        all_nodes.append(node)
+        is_choice = hasattr(node, "get_available_components")
+        node_i_is_choice.append(is_choice)
 
-    if node_0_is_choice:
-        node_0_choices = node_0.get_available_components(
-            dataset_properties, include=node_0_include, exclude=node_0_exclude).values()
-    else:
-        node_0_choices = [node_0]
-    if node_1_is_choice:
-        node_1_choices = node_1.get_available_components(
-            dataset_properties, include=node_1_include, exclude=node_1_exclude).values()
-    else:
-        node_1_choices = [node_1]
+        node_include = include.get(
+            node_name) if include is not None else None
+        node_exclude = exclude.get(
+            node_name) if exclude is not None else None
 
-    matches = np.zeros([len(node_0_choices), len(node_1_choices)])
+        if is_choice:
+            node_i_choices.append(node.get_available_components(
+                dataset_properties, include=node_include,
+                exclude=node_exclude).values())
 
-    for n0_idx, n0 in enumerate(node_0_choices):
-        if node_0_is_choice and node_0 == n0:
-            continue
+        else:
+            node_i_choices.append([node])
 
-        node0_in = node_0_choices[n0_idx].get_properties()['input']
-        node0_out = node_0_choices[n0_idx].get_properties()['output']
+    matches_dimensions = [len(choices) for choices in node_i_choices]
+    # Start by allowing every combination of nodes. Go through all
+    # combinations/pipelines and erase the illegal ones
+    matches = np.ones(matches_dimensions, dtype=int)
 
-        if sparse and SPARSE not in node0_in:
-            continue
-        elif not sparse and DENSE not in node0_in:
-            continue
+    pipeline_idxs = [range(dim) for dim in matches_dimensions]
+    for pipeline_instantiation_idxs  in itertools.product(*pipeline_idxs):
+        pipeline_instantiation = [node_i_choices[i][idx] for i, idx in
+                                  enumerate(pipeline_instantiation_idxs)]
 
-        for n1_idx, n1 in enumerate(node_1_choices):
-            if node_1_is_choice and node_1 == n1:
-                continue
+        data_is_sparse = sparse
+        for node in pipeline_instantiation:
+            node_input = node.get_properties()['input']
+            node_output = node.get_properties()['output']
 
-            node1_in = n1.get_properties()['input']
-            if node0_out == INPUT:
-                # Preprocessor does not change the format
-                if (sparse and SPARSE in node1_in) or \
-                        (not sparse and DENSE in node1_in):
-                    # Estimator input = Dataset format
-                    matches[n0_idx, n1_idx] = 1
-                else:
-                    # These won't work
-                    pass
-            elif node0_out == DENSE and DENSE in node1_in:
-                matches[n0_idx, n1_idx] = 1
-            elif node0_out == SPARSE and SPARSE in node1_in:
-                matches[n0_idx, n1_idx] = 1
-            else:
-                # These won't work
+            if (data_is_sparse and SPARSE not in node_input) or \
+                    not data_is_sparse and DENSE not in node_input:
+                matches[pipeline_instantiation_idxs] = 0
+                break
+
+            if INPUT in node_output or PREDICTIONS in node_output or\
+                    (not data_is_sparse and DENSE in node_input and
+                        node_output == DENSE) or \
+                    (data_is_sparse and SPARSE in node_input and node_output
+                        == SPARSE):
+                # Don't change the data_is_sparse flag
                 pass
+            elif data_is_sparse and DENSE in node_output:
+                data_is_sparse = False
+            elif not data_is_sparse and SPARSE in node_output:
+                data_is_sparse = True
+            else:
+                print node
+                print data_is_sparse
+                print node_input, node_output
+                raise ValueError("This combination is not allowed!")
+
     return matches
 
 
-def _get_idx_to_keep(matches):
-    # Returns all rows and cols where matches contains not only zeros
-    keep_row = [idx for idx in range(matches.shape[0]) if np.sum(matches[idx, :]) != 0]
-    keep_col = [idx for idx in range(matches.shape[1]) if np.sum(matches[:, idx]) != 0]
-    return keep_col, keep_row
+def find_active_choices(matches, node, node_idx, dataset_properties, \
+                        include=None, exclude=None):
+    if not hasattr(node, "get_available_components"):
+        raise ValueError()
+    available_components = node.get_available_components(dataset_properties,
+                                                         include=include,
+                                                         exclude=exclude)
+    assert matches.shape[node_idx] == len(available_components), \
+        (matches.shape[node_idx], len(available_components))
+
+    choices = []
+    for c_idx, component in enumerate(available_components):
+        slices = [slice(None) if idx != node_idx else slice(c_idx, c_idx+1)
+                  for idx in range(len(matches.shape))]
+
+        if np.sum(matches[slices]) > 0:
+            choices.append(component)
+    return choices
 
 
-def sanitize_arrays(matches, node_0, node_1, dataset_properties,
-                    node_0_include=None, node_0_exclude=None,
-                    node_1_include=None, node_1_exclude=None):
-    node_0_is_choice = hasattr(node_0, "get_available_components")
-    node_1_is_choice = hasattr(node_1, "get_available_components")
+def add_forbidden(conf_space, pipeline, matches, dataset_properties,
+                  include, exclude):
+    # Not sure if this works for 3D
+    node_i_is_choice = []
+    node_i_choices = []
+    all_nodes = []
+    for node_name, node in pipeline:
+        all_nodes.append(node)
+        is_choice = hasattr(node, "get_available_components")
+        node_i_is_choice.append(is_choice)
 
-    if not node_0_is_choice:
-        node_0 = [node_0]
-    else:
-        node_0 = node_0.get_available_components(dataset_properties,
-                                                 include=node_0_include,
-                                                 exclude=node_0_exclude).keys()
-    if not node_1_is_choice:
-        node_1 = [node_1]
-    else:
-        node_1 = node_1.get_available_components(dataset_properties,
-                                                 include=node_1_include,
-                                                 exclude=node_1_exclude).keys()
+        node_include = include.get(
+            node_name) if include is not None else None
+        node_exclude = exclude.get(
+            node_name) if exclude is not None else None
 
-    assert matches.shape[0] == len(node_0), (matches.shape[0], len(node_0))
-    assert matches.shape[1] == len(node_1), (matches.shape[1], len(node_1))
-    assert isinstance(matches, np.ndarray)
-    # remove components that are not usable for this problem
-    keep_col, keep_row = _get_idx_to_keep(matches)
+        if is_choice:
+            node_i_choices.append(node.get_available_components(
+                dataset_properties, include=node_include,
+                exclude=node_exclude).values())
 
-    matches = matches[keep_row, :]
-    matches = matches[:, keep_col]
+        else:
+            node_i_choices.append([node])
 
-    node_0_list = [node_0[p] for p in keep_row]
-    node_1_list = [node_1[p] for p in keep_col]
+    # Find out all chains of choices. Only in such a chain its possible to
+    # have several forbidden constraints
+    choices_chains = []
+    idx = 0
+    while idx < len(pipeline):
+        if node_i_is_choice[idx]:
+            chain_start = idx
+            idx += 1
+            while idx < len(pipeline) and node_i_is_choice[idx]:
+                idx += 1
+            chain_stop = idx
+            choices_chains.append((chain_start, chain_stop))
+        idx += 1
 
-    assert len(node_0_list) == matches.shape[0]
-    assert len(node_1_list) == matches.shape[1]
-    return matches, node_0_list, node_1_list
+    for choices_chain in choices_chains:
+        constraints = set()
+        possible_constraints = set()
+        possible_constraints_by_length = dict()
 
+        chain_start = choices_chain[0]
+        chain_stop = choices_chain[1]
+        chain_length = chain_stop - chain_start
 
-def add_forbidden(conf_space, node_0_list, node_1_list, matches,
-                  node_0_name, node_1_name):
-    for pdx, p in enumerate(node_0_list):
-        if np.sum(matches[pdx, :]) == matches.shape[1]:
-            continue
-        for cdx, c in enumerate(node_1_list):
-            if matches[pdx, cdx] == 0:
-                conf_space.add_forbidden_clause(ForbiddenAndConjunction(
-                    ForbiddenEqualsClause(conf_space.get_hyperparameter(
-                        node_1_name), c),
-                    ForbiddenEqualsClause(conf_space.get_hyperparameter(
-                        node_0_name), p)))
+        # Add one to have also have chain_length in the range
+        for sub_chain_length in range(2, chain_length + 1):
+            if sub_chain_length > 2:
+                break
+
+            for start_idx in range(chain_start, chain_stop - sub_chain_length + 1):
+                #print chain_start + start_idx, sub_chain_length
+
+                indices = range(start_idx, start_idx + sub_chain_length)
+                #print indices
+
+                node_0_idx = indices[0]
+                node_1_idx = indices[1]
+
+                node_0_name, node_0 = pipeline[node_0_idx]
+                node_1_name, node_1 = pipeline[node_1_idx]
+                node_0_is_choice = hasattr(node_0, "get_available_components")
+                node_1_is_choice = hasattr(node_1, "get_available_components")
+
+                if not node_0_is_choice or not node_1_is_choice:
+                    continue
+
+                # Now iterate all combinations and add them as forbidden!
+                for pdx, p in enumerate(node_0.get_available_components(dataset_properties)):
+                    slices_0 = [
+                        slice(None) if idx != node_0_idx else
+                        slice(pdx, pdx + 1) for idx in range(len(matches.shape))]
+                    if np.sum(matches[slices_0]) == 0:
+                        continue
+
+                    for cdx, c in enumerate(node_1.get_available_components(dataset_properties)):
+
+                        slices_1 = [
+                            slice(None) if idx != node_1_idx else
+                            slice(cdx, cdx + 1) for idx in range(len(matches.shape))]
+                        if np.sum(matches[slices_1]) == 0:
+                            continue
+
+                        slices = [slice(None) if idx not in (node_0_idx, node_1_idx)
+                                  else slice(pdx if idx is node_0_idx else cdx,
+                                             pdx+1 if idx is node_0_idx else cdx+1)
+                                  for idx in range(len(matches.shape))]
+
+                        #print node_0_name, node_1_name, p, c, matches[slices]
+                        if np.sum(matches[slices]) == 0:
+                            conf_space.add_forbidden_clause(ForbiddenAndConjunction(
+                                ForbiddenEqualsClause(conf_space.get_hyperparameter(
+                                    node_1_name + ":__choice__"), c),
+                                ForbiddenEqualsClause(conf_space.get_hyperparameter(
+                                    node_0_name + ":__choice__"), p)))
+                            constraints.add(((node_0_name, p), (node_1_name, c)))
+
+                        elif np.size(matches[slices]) > np.sum(matches[slices]) > 0:
+                            #possible_constraints.add()
+                            pass
+
     return conf_space

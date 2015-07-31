@@ -251,108 +251,53 @@ class ParamSklearnBaseEstimator(BaseEstimator):
     @classmethod
     def _get_hyperparameter_search_space(cls, cs, dataset_properties, exclude,
                                          include, pipeline):
-        for node_0_idx, node_1_idx in zip(range(len(pipeline) - 1),
-                                          range(1, len(pipeline))):
-            node_0_name = pipeline[node_0_idx][0]
-            node_1_name = pipeline[node_1_idx][0]
-            node_0 = pipeline[node_0_idx][1]
-            node_1 = pipeline[node_1_idx][1]
+        if include is None:
+            include = {}
+        if exclude is None:
+            exclude = {}
 
-            node_0_include = include.get(
-                node_0_name) if include is not None else None
-            node_0_exclude = exclude.get(
-                node_0_name) if exclude is not None else None
-            node_1_include = include.get(
-                node_1_name) if include is not None else None
-            node_1_exclude = exclude.get(
-                node_1_name) if exclude is not None else None
+        matches = ParamSklearn.create_searchspace_util.get_match_array(
+            pipeline, dataset_properties, include=include, exclude=exclude)
 
-            matches = ParamSklearn.create_searchspace_util.get_match_array(
-                node_0=node_0, node_1=node_1, node_0_include=node_0_include,
-                node_0_exclude=node_0_exclude, node_1_include=node_1_include,
-                node_1_exclude=node_1_exclude,
-                dataset_properties=dataset_properties, )
+        # Now we have only legal combinations at this step of the pipeline
+        # Simple sanity checks
+        assert np.sum(matches) != 0, "No valid pipeline found."
 
-            # Now we have only legal combinations at this step of the pipeline
-            # Simple sanity checks
-            assert np.sum(matches) != 0, "No valid %s/%s combination found, " \
-                                         "probably a bug." % (node_0_name,
-                                                              node_1_name)
+        assert np.sum(matches) <= np.size(matches), \
+            "'matches' is not binary; %s <= %d, %s" % \
+            (str(np.sum(matches)), np.size(matches), str(matches.shape))
 
-            assert np.sum(matches) <= (matches.shape[0] * matches.shape[1]), \
-                "'matches' is not binary; %s <= %d, [%d*%d]" % \
-                (str(np.sum(matches)), matches.shape[0] * matches.shape[1],
-                 matches.shape[0], matches.shape[1])
+        # Iterate each dimension of the matches array (each step of the
+        # pipeline) to see if we can add a hyperparameter for that step
+        for node_idx, n_ in enumerate(pipeline):
+            node_name, node = n_
+            is_choice = hasattr(node, "get_available_components")
 
-            if np.sum(matches) < (matches.shape[0] * matches.shape[1]):
-                matches, node_0_list, node_1_list = \
-                    ParamSklearn.create_searchspace_util.sanitize_arrays(
-                        matches=matches, node_0=node_0, node_1=node_1,
-                        dataset_properties=dataset_properties,
-                        node_0_include=node_0_include,
-                        node_0_exclude=node_0_exclude,
-                        node_1_include=node_1_include,
-                        node_1_exclude=node_1_exclude)
-
-                # Check if we reached a dead end
-                assert len(node_0_list) > 0, "No valid node 0 found"
-                assert len(node_1_list) > 0, "No valid node 1 found"
-
-                # Check for inconsistencies
-                assert len(node_0_list) == matches.shape[0], \
-                    "Node 0 deleting went wrong"
-                assert len(node_1_list) == matches.shape[1], \
-                    "Node 1 deleting went wrong"
+            # if the node isn't a choice we can add it immediately because it
+            #  must be active (if it wouldn't, np.sum(matches) would be zero
+            if not is_choice:
+                cs.add_configuration_space(node_name,
+                    node.get_hyperparameter_search_space(dataset_properties))
+            # If the node isn't a choice, we have to figure out which of it's
+            #  choices are actually legal choices
             else:
-                if hasattr(node_0, "get_components"):
-                    node_0_list = node_0.get_available_components(
-                        data_prop=dataset_properties,
-                        include=node_0_include,
-                        exclude=node_0_exclude
-                    )
-                else:
-                    node_0_list = None
-                if hasattr(node_1, "get_components"):
-                    node_1_list = node_1.get_available_components(
-                        data_prop=dataset_properties,
-                        include=node_1_include,
-                        exclude=node_1_exclude
-                    )
-                else:
-                    node_1_list = None
+                choices_list = ParamSklearn.create_searchspace_util.\
+                    find_active_choices(matches, node, node_idx,
+                                        dataset_properties,
+                                        include.get(node_name),
+                                        exclude.get(node_name))
+                cs.add_configuration_space(node_name,
+                    node.get_hyperparameter_search_space(
+                        dataset_properties, include=choices_list))
 
-            if hasattr(node_0, "get_components"):
-                node_0_name += ":__choice__"
+        # And now add forbidden parameter configurations
+        # According to matches
+        if np.sum(matches) < np.size(matches):
+            cs = ParamSklearn.create_searchspace_util.add_forbidden(
+                conf_space=cs, pipeline=pipeline, matches=matches,
+                dataset_properties=dataset_properties, include=include,
+                exclude=exclude)
 
-            if node_0_idx == 0:
-                if hasattr(node_0, "get_components"):
-                    cs.add_configuration_space(node_0_name,
-                                               node_0.get_hyperparameter_search_space(
-                                                   dataset_properties,
-                                                   include=node_0_list))
-                else:
-                    cs.add_configuration_space(node_0_name,
-                                               node_0.get_hyperparameter_search_space(
-                                                   dataset_properties))
-
-            if hasattr(node_1, "get_components"):
-                cs.add_configuration_space(node_1_name,
-                                           node_1.get_hyperparameter_search_space(
-                                               dataset_properties,
-                                               include=node_1_list))
-                node_1_name += ":__choice__"
-            else:
-                cs.add_configuration_space(node_1_name,
-                                           node_1.get_hyperparameter_search_space(
-                                               dataset_properties))
-
-            # And now add forbidden parameter configurations
-            # According to matches
-            if np.sum(matches) < (matches.shape[0] * matches.shape[1]):
-                cs = ParamSklearn.create_searchspace_util.add_forbidden(
-                    conf_space=cs, node_0_list=node_0_list,
-                    node_1_list=node_1_list, matches=matches,
-                    node_0_name=node_0_name, node_1_name=node_1_name)
         return cs
 
     @staticmethod
