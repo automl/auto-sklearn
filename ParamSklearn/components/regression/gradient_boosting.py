@@ -8,7 +8,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from HPOlibConfigSpace.conditions import InCondition
 
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
-from ParamSklearn.util import DENSE, PREDICTIONS
+from ParamSklearn.constants import *
 
 
 class GradientBoosting(ParamSklearnRegressionAlgorithm):
@@ -125,7 +125,7 @@ class GradientBoosting(ParamSklearnRegressionAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'input': (DENSE, ),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}

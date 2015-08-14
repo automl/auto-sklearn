@@ -6,7 +6,7 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformIntegerHyperparameter
 
 from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import SPARSE, DENSE
+from ParamSklearn.constants import *
 
 
 class TruncatedSVD(ParamSklearnPreprocessingAlgorithm):
@@ -49,7 +49,7 @@ class TruncatedSVD(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': True,
                 'handles_dense': False,
                 'input': (SPARSE, ),
-                'output': DENSE,
+                'output': (DENSE,),
                 'preferred_dtype': np.float32}
 
     @staticmethod

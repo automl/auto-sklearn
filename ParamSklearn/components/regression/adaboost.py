@@ -7,7 +7,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
 
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
-from ParamSklearn.util import SPARSE, DENSE, PREDICTIONS
+from ParamSklearn.constants import *
 
 
 class AdaboostRegressor(ParamSklearnRegressionAlgorithm):
@@ -59,7 +59,7 @@ class AdaboostRegressor(ParamSklearnRegressionAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'input': (DENSE, SPARSE),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS, ),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}

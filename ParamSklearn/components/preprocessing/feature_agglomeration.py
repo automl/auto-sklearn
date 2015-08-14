@@ -9,7 +9,7 @@ from HPOlibConfigSpace.forbidden import ForbiddenInClause, \
 
 from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import SPARSE, DENSE, INPUT
+from ParamSklearn.constants import *
 
 
 class FeatureAgglomeration(ParamSklearnPreprocessingAlgorithm):
@@ -58,7 +58,7 @@ class FeatureAgglomeration(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (DENSE, ),
-                'output': INPUT,
+                'output': (INPUT,),
                 'preferred_dtype': None}
 
     @staticmethod

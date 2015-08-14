@@ -5,7 +5,7 @@ from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
     Constant, UniformIntegerHyperparameter
 
 from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
-from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
+from ParamSklearn.constants import *
 
 
 class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
@@ -52,7 +52,7 @@ class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'input': (DENSE, SPARSE),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 'preferred_dtype' : None}
 

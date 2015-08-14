@@ -3,7 +3,7 @@ from HPOlibConfigSpace.hyperparameters import UniformIntegerHyperparameter, Unif
 
 from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.implementations.gem import GEM as GEMImpl
-from ParamSklearn.util import DENSE
+from ParamSklearn.constants import *
 
 class GEM(ParamSklearnPreprocessingAlgorithm):
 
@@ -38,7 +38,7 @@ class GEM(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': False,
                 'handles_dense': True,
                 'input': (DENSE, ),
-                'output': DENSE,
+                'output': (INPUT,),
                 'preferred_dtype': None}
 
 

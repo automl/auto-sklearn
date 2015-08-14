@@ -6,7 +6,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
 from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
-from ParamSklearn.util import DENSE, PREDICTIONS
+from ParamSklearn.constants import *
 from ParamSklearn.implementations import ProjLogit
 
 
@@ -48,7 +48,7 @@ class ProjLogitCLassifier(ParamSklearnClassificationAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'input': (DENSE, ),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS,),
                 'preferred_dtype': np.float32}
         
 

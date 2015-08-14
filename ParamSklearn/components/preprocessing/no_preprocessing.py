@@ -1,7 +1,7 @@
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 
 from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import SPARSE, DENSE, INPUT
+from ParamSklearn.constants import *
 
 
 class NoPreprocessing(ParamSklearnPreprocessingAlgorithm):
@@ -36,7 +36,7 @@ class NoPreprocessing(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (SPARSE, DENSE),
-                'output': INPUT,
+                'output': (INPUT,),
                 'preferred_dtype': None}
 
     @staticmethod

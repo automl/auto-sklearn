@@ -7,7 +7,7 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
 
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
-from ParamSklearn.util import DENSE, PREDICTIONS
+from ParamSklearn.constants import *
 
 
 class GaussianProcess(ParamSklearnRegressionAlgorithm):
@@ -63,7 +63,7 @@ class GaussianProcess(ParamSklearnRegressionAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'input': (DENSE, ),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}

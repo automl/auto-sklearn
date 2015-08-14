@@ -4,7 +4,7 @@ import sklearn.naive_bayes
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 
 from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
-from ParamSklearn.util import DENSE, PREDICTIONS
+from ParamSklearn.constants import *
 
 
 class GaussianNB(ParamSklearnClassificationAlgorithm):
@@ -77,7 +77,7 @@ class GaussianNB(ParamSklearnClassificationAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'input': (DENSE, ),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS,),
                 'preferred_dtype': np.float32}
 
     @staticmethod

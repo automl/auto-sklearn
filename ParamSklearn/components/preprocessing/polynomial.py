@@ -6,7 +6,7 @@ from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
 
 from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import SPARSE, DENSE, PREDICTIONS
+from ParamSklearn.constants import *
 
 
 class PolynomialFeatures(ParamSklearnPreprocessingAlgorithm):
@@ -48,7 +48,7 @@ class PolynomialFeatures(ParamSklearnPreprocessingAlgorithm):
                 # this here suggests so http://scikit-learn.org/stable/modules/svm.html#tips-on-practical-use
                 'handles_sparse': True,
                 'input': (DENSE,),
-                'output': DENSE,
+                'output': (INPUT,),
                 # TODO find out what is best used here!
                 'preferred_dtype': None}
 

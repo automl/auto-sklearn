@@ -5,7 +5,7 @@ import sklearn.feature_selection
 
 from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.components.preprocessing.select_percentile import SelectPercentileBase
-from ParamSklearn.util import DENSE
+from ParamSklearn.constants import *
 
 
 class SelectPercentileRegression(SelectPercentileBase,
@@ -43,7 +43,7 @@ class SelectPercentileRegression(SelectPercentileBase,
                 'handles_sparse': False,
                 'handles_dense': True,
                 'input': (DENSE, ),
-                'output': DENSE,
+                'output': (DENSE,),
                 'preferred_dtype': None}
 
     @staticmethod

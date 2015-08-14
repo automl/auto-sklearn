@@ -6,7 +6,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
-from ParamSklearn.util import DENSE, PREDICTIONS, SPARSE
+from ParamSklearn.constants import *
 
 from sklearn.ensemble import ExtraTreesRegressor as ETR
 
@@ -126,7 +126,7 @@ class ExtraTreesRegressor(ParamSklearnRegressionAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'input': (DENSE, SPARSE),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}

@@ -7,7 +7,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
 
 from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
-from ParamSklearn.util import DENSE, PREDICTIONS
+from ParamSklearn.constants import *
 
 
 class GradientBoostingClassifier(ParamSklearnClassificationAlgorithm):
@@ -125,7 +125,7 @@ class GradientBoostingClassifier(ParamSklearnClassificationAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'input': (DENSE, ),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}

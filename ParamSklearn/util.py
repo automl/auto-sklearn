@@ -11,12 +11,6 @@ import sklearn.base
 import sklearn.datasets
 
 
-SPARSE = 'SPARSE'
-DENSE = 'DENSE'
-PREDICTIONS = 'PREDICTIONS'
-INPUT = 'INPUT'
-
-
 def find_sklearn_classes(class_):
     classifiers = set()
     all_subdirectories = []

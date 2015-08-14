@@ -5,7 +5,7 @@ from HPOlibConfigSpace.hyperparameters import UniformIntegerHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
 from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import SPARSE, DENSE
+from ParamSklearn.constants import *
 
 
 class RandomTreesEmbedding(ParamSklearnPreprocessingAlgorithm):
@@ -68,7 +68,7 @@ class RandomTreesEmbedding(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': False,
                 'handles_dense': True,
                 'input': (DENSE, SPARSE),
-                'output': SPARSE,
+                'output': (SPARSE,),
                 'preferred_dtype': None}
 
     @staticmethod

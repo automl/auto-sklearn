@@ -8,7 +8,7 @@ from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, \
 
 from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import SPARSE, DENSE, INPUT
+from ParamSklearn.constants import *
 
 
 class LibLinear_Preprocessor(ParamSklearnPreprocessingAlgorithm):
@@ -74,7 +74,7 @@ class LibLinear_Preprocessor(ParamSklearnPreprocessingAlgorithm):
                 'is_deterministic': False,
                 'handles_sparse': True,
                 'input': (SPARSE, DENSE),
-                'output': INPUT,
+                'output': (INPUT,),
                 # TODO find out what is best used here!
                 'preferred_dtype': None}
 

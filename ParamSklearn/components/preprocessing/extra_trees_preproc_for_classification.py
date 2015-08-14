@@ -8,7 +8,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import DENSE, INPUT, SPARSE
+from ParamSklearn.constants import *
 
 
 class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
@@ -107,7 +107,7 @@ class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'input': (DENSE, SPARSE),
-                'output': INPUT,
+                'output': (INPUT,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}

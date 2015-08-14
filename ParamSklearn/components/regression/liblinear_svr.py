@@ -2,13 +2,10 @@ import sklearn.svm
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    CategoricalHyperparameter, Constant, UnParametrizedHyperparameter
-from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, \
-    ForbiddenAndConjunction
+    CategoricalHyperparameter, Constant
 
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
-from ParamSklearn.implementations.util import softmax
-from ParamSklearn.util import SPARSE, DENSE, PREDICTIONS
+from ParamSklearn.constants import *
 
 
 class LibLinear_SVR(ParamSklearnRegressionAlgorithm):
@@ -67,7 +64,7 @@ class LibLinear_SVR(ParamSklearnRegressionAlgorithm):
                 'is_deterministic': False,
                 'handles_sparse': True,
                 'input': (SPARSE, DENSE),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS,),
                 'preferred_dtype': None}
 
     @staticmethod

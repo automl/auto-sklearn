@@ -5,7 +5,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
 
 from ParamSklearn.components.base import \
     ParamSklearnClassificationAlgorithm
-from ParamSklearn.util import DENSE, PREDICTIONS
+from ParamSklearn.constants import *
 from ParamSklearn.implementations.util import softmax
 
 
@@ -50,7 +50,7 @@ class QDA(ParamSklearnClassificationAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'input': (DENSE, ),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 'preferred_dtype': None}
 

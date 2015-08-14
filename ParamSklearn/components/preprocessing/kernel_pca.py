@@ -9,7 +9,7 @@ from HPOlibConfigSpace.conditions import EqualsCondition, InCondition
 
 from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import SPARSE, DENSE, INPUT
+from ParamSklearn.constants import *
 
 
 class KernelPCA(ParamSklearnPreprocessingAlgorithm):
@@ -57,7 +57,7 @@ class KernelPCA(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (DENSE, SPARSE),
-                'output': DENSE,
+                'output': (DENSE,),
                 'preferred_dtype': None}
 
     @staticmethod

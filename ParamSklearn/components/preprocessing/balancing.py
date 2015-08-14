@@ -5,7 +5,7 @@ from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import DENSE, SPARSE, INPUT
+from ParamSklearn.constants import *
 
 
 class Balancing(ParamSklearnPreprocessingAlgorithm):
@@ -97,7 +97,7 @@ class Balancing(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (DENSE, SPARSE),
-                'output': INPUT,
+                'output': (INPUT,),
                 'preferred_dtype': None}
 
     @staticmethod

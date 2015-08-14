@@ -6,7 +6,7 @@ import sklearn.feature_selection
 
 from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import DENSE, SPARSE, INPUT
+from ParamSklearn.constants import *
 
 
 class SelectRates(ParamSklearnPreprocessingAlgorithm):
@@ -67,7 +67,7 @@ class SelectRates(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (SPARSE, DENSE),
-                'output': INPUT,
+                'output': (INPUT,),
                 'preferred_dtype': None}
 
     @staticmethod

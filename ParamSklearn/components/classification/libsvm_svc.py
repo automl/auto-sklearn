@@ -7,7 +7,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UnParametrizedHyperparameter
 
 from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
-from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
+from ParamSklearn.constants import *
 from ParamSklearn.implementations.util import softmax
 
 
@@ -94,7 +94,7 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
             # this here suggests so http://scikit-learn.org/stable/modules/svm.html#tips-on-practical-use
             'handles_sparse': True,
             'input': (DENSE, SPARSE),
-            'output': PREDICTIONS,
+            'output': (PREDICTIONS,),
             # TODO find out what is best used here!
             # C-continouos and double precision...
             'preferred_dtype': None}

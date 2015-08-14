@@ -6,7 +6,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
 
 from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
-from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
+from ParamSklearn.constants import *
 
 
 class MultinomialNB(ParamSklearnClassificationAlgorithm):
@@ -90,7 +90,7 @@ class MultinomialNB(ParamSklearnClassificationAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'input': (DENSE, SPARSE),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS,),
                 'preferred_dtype': np.float32}
 
     @staticmethod

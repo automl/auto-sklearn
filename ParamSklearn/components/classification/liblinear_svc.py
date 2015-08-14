@@ -8,7 +8,7 @@ from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, \
 
 from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.implementations.util import softmax
-from ParamSklearn.util import SPARSE, DENSE, PREDICTIONS
+from ParamSklearn.constants import *
 
 
 class LibLinear_SVC(ParamSklearnClassificationAlgorithm):
@@ -81,7 +81,7 @@ class LibLinear_SVC(ParamSklearnClassificationAlgorithm):
                 'is_deterministic': False,
                 'handles_sparse': True,
                 'input': (SPARSE, DENSE),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS,),
                 'preferred_dtype': None}
 
     @staticmethod

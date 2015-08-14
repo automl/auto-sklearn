@@ -6,7 +6,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
-from ParamSklearn.util import DENSE, PREDICTIONS, SPARSE
+from ParamSklearn.constants import *
 # get our own forests to replace the sklearn ones
 #from ParamSklearn.implementations import forest
 from sklearn.ensemble import RandomForestRegressor
@@ -113,7 +113,7 @@ class RandomForest(ParamSklearnRegressionAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'input': (DENSE, SPARSE),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}

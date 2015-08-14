@@ -5,11 +5,11 @@ import numpy as np
 from HPOlibConfigSpace.forbidden import ForbiddenAndConjunction
 from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause
 
-from ParamSklearn.util import SPARSE, DENSE, INPUT, PREDICTIONS
+from ParamSklearn.constants import *
 
 
-def get_match_array(pipeline, dataset_properties, include=None,
-                                   exclude=None):
+def get_match_array(pipeline, dataset_properties,
+                    include=None, exclude=None):
     sparse = dataset_properties.get('sparse')
 
     # Duck typing, not sure if it's good...
@@ -57,12 +57,11 @@ def get_match_array(pipeline, dataset_properties, include=None,
                     not data_is_sparse and DENSE not in node_input:
                 matches[pipeline_instantiation_idxs] = 0
                 break
-
             if INPUT in node_output or PREDICTIONS in node_output or\
                     (not data_is_sparse and DENSE in node_input and
-                        node_output == DENSE) or \
-                    (data_is_sparse and SPARSE in node_input and node_output
-                        == SPARSE):
+                        DENSE in node_output) or \
+                    (data_is_sparse and SPARSE in node_input and
+                        SPARSE in node_output):
                 # Don't change the data_is_sparse flag
                 pass
             elif data_is_sparse and DENSE in node_output:

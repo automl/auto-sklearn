@@ -10,7 +10,7 @@ from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConju
 
 from ParamSklearn import components as components
 from ParamSklearn.base import ParamSklearnBaseEstimator
-from ParamSklearn.util import SPARSE
+from ParamSklearn.constants import SPARSE
 from ParamSklearn.components.preprocessing.balancing import Balancing
 import ParamSklearn.create_searchspace_util
 
@@ -140,6 +140,15 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
     @classmethod
     def get_hyperparameter_search_space(cls, include=None, exclude=None,
                                         dataset_properties=None):
+        """Create the hyperparameter configuration space.
+
+        Parameters
+        ----------
+        include : dict (optional, default=None)
+
+        Returns
+        -------
+        """
         cs = ConfigurationSpace()
 
         if dataset_properties is None or not isinstance(dataset_properties, dict):

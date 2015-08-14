@@ -23,7 +23,8 @@ from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 import ParamSklearn.components.classification as classification_components
 import ParamSklearn.components.preprocessing as preprocessing_components
-from ParamSklearn.util import get_dataset, DENSE, SPARSE, PREDICTIONS
+from ParamSklearn.util import get_dataset
+from ParamSklearn.constants import DENSE, SPARSE, PREDICTIONS
 
 
 class TestParamSklearnClassifier(unittest.TestCase):
@@ -39,10 +40,10 @@ class TestParamSklearnClassifier(unittest.TestCase):
             output = props['output']
 
             self.assertIsInstance(inp, tuple)
-            self.assertIsInstance(output, str)
+            self.assertIsInstance(output, tuple)
             for i in inp:
                 self.assertIn(i, (SPARSE, DENSE))
-            self.assertEqual(output, PREDICTIONS)
+            self.assertEqual(output, (PREDICTIONS,))
             self.assertIn('handles_regression', props)
             self.assertFalse(props['handles_regression'])
             self.assertIn('handles_classification', props)

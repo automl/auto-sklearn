@@ -4,7 +4,7 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 
 from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import DENSE, SPARSE
+from ParamSklearn.constants import *
 
 
 class Densifier(ParamSklearnPreprocessingAlgorithm):
@@ -37,7 +37,7 @@ class Densifier(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': True,
                 'handles_dense': False,
                 'input': (SPARSE,),
-                'output': DENSE,
+                'output': (DENSE,),
                 'preferred_dtype': None}
 
     @staticmethod

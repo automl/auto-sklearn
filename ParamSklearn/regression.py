@@ -13,7 +13,7 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 
 from ParamSklearn import components as components
 from ParamSklearn.base import ParamSklearnBaseEstimator
-from ParamSklearn.util import SPARSE
+from ParamSklearn.constants import SPARSE
 import ParamSklearn.create_searchspace_util
 
 

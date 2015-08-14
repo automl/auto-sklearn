@@ -6,7 +6,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
 
 from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import DENSE, INPUT
+from ParamSklearn.constants import *
 
 
 class PCA(ParamSklearnPreprocessingAlgorithm):
@@ -52,7 +52,7 @@ class PCA(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': False,
                 'handles_dense': True,
                 'input': (DENSE, ),
-                'output': INPUT,
+                'output': (INPUT,),
                 # TODO find out what is best used here!
                 'preferred_dtype': None}
 

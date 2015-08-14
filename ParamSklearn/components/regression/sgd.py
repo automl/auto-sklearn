@@ -8,8 +8,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from HPOlibConfigSpace.conditions import InCondition, EqualsCondition
 
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
-from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
-from ParamSklearn.implementations.util import softmax
+from ParamSklearn.constants import *
 
 
 class SGD(ParamSklearnRegressionAlgorithm):
@@ -105,7 +104,7 @@ class SGD(ParamSklearnRegressionAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'input': (DENSE, SPARSE),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 'preferred_dtype': None}
 

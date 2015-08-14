@@ -5,7 +5,7 @@ from ParamSklearn.implementations.StandardScaler import StandardScaler
 from ParamSklearn.implementations.MinMaxScaler import MinMaxScaler
 from ParamSklearn.implementations.Normalizer import Normalizer
 from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import DENSE, SPARSE, INPUT
+from ParamSklearn.constants import *
 
 
 class none(object):
@@ -58,7 +58,7 @@ class Rescaling(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (SPARSE, DENSE),
-                'output': INPUT,
+                'output': (INPUT,),
                 # Add something here...
                 'preferred_dtype': None}
 

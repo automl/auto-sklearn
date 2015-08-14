@@ -5,7 +5,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter
 
 from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import SPARSE, DENSE, INPUT
+from ParamSklearn.constants import *
 
 class RandomKitchenSinks(ParamSklearnPreprocessingAlgorithm):
 
@@ -48,7 +48,7 @@ class RandomKitchenSinks(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (SPARSE, DENSE),
-                'output': INPUT,
+                'output': (INPUT,),
                 'preferred_dtype': None}
 
     @staticmethod

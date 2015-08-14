@@ -6,7 +6,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UnParametrizedHyperparameter
 
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
-from ParamSklearn.util import DENSE, SPARSE, PREDICTIONS
+from ParamSklearn.constants import *
 
 
 class RidgeRegression(ParamSklearnRegressionAlgorithm):
@@ -48,7 +48,7 @@ class RidgeRegression(ParamSklearnRegressionAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'input': (SPARSE, DENSE),
-                'output': PREDICTIONS,
+                'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?
                 'preferred_dtype': np.float32}

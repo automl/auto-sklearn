@@ -8,7 +8,7 @@ from HPOlibConfigSpace.conditions import InCondition, EqualsCondition, AndConjun
 
 from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
-from ParamSklearn.util import SPARSE, DENSE, INPUT
+from ParamSklearn.constants import *
 
 
 class Nystroem(ParamSklearnPreprocessingAlgorithm):
@@ -51,7 +51,7 @@ class Nystroem(ParamSklearnPreprocessingAlgorithm):
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (SPARSE, DENSE),
-                'output': INPUT,
+                'output': (INPUT,),
                 'preferred_dtype': None}
 
     @staticmethod
