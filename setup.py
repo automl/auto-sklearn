@@ -12,8 +12,8 @@ from setuptools.command.install import install
 
 SMAC_DOWNLOAD_LOCATION = 'http://aad.informatik.uni-freiburg.de/~feurerm/'
 SMAC_TAR_NAME = 'smac-v2.08.01-development-1.tar.gz'
-#METADATA_LOCATION = "http://aad.informatik.uni-freiburg.de/~feurerm/"
-#METADATA_TAR_NAME = "metadata_automl1_000.tar.gz"
+# METADATA_LOCATION = "http://aad.informatik.uni-freiburg.de/~feurerm/"
+# METADATA_TAR_NAME = "metadata_automl1_000.tar.gz"
 RUNSOLVER_LOCATION = 'http://www.cril.univ-artois.fr/~roussel/runsolver/'
 RUNSOLVER_TAR_NAME = 'runsolver-3.3.4.tar.bz2'
 DOWNLOAD_DIRECTORY = os.path.join(os.path.dirname(__file__), '.downloads')
@@ -34,10 +34,11 @@ class Download(install):
         except Exception:
             pass
 
-        for download_url, filename in [(SMAC_DOWNLOAD_LOCATION, SMAC_TAR_NAME),
-                                       #(METADATA_LOCATION, METADATA_TAR_NAME),
-                                       (RUNSOLVER_LOCATION,
-                                        RUNSOLVER_TAR_NAME)]:
+        for download_url, filename in [
+            (SMAC_DOWNLOAD_LOCATION, SMAC_TAR_NAME),
+            # (METADATA_LOCATION, METADATA_TAR_NAME),
+            (RUNSOLVER_LOCATION, RUNSOLVER_TAR_NAME)
+        ]:
             # This can fail ungracefully, because having these files is
             # crucial to AutoSklearn!
             urllib.urlretrieve(
@@ -108,8 +109,9 @@ setuptools.setup(
     ext_modules=[Extension('autosklearn.data.competition_c_functions',
                            ['autosklearn/data/competition_c_functions.c'])],
     packages=setuptools.find_packages(exclude=['test']),
-    install_requires=['numpy', 'psutil', 'pyyaml', 'scipy', 'scikit-learn==0.15.2', 'nose',
-                      'lockfile', 'HPOlibConfigSpace', 'ParamSklearn', 'pymetalearn', 'cma'],
+    install_requires=['numpy', 'psutil', 'pyyaml', 'scipy', 'scikit-learn==0.15.2',
+                      'nose', 'lockfile', 'HPOlibConfigSpace', 'ParamSklearn',
+                      'pymetalearn', 'cma', 'six'],
     test_suite='nose.collector',
     cmdclass={'install': Download},
     scripts=['scripts/autosklearn'],

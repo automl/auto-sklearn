@@ -15,20 +15,15 @@ from collections import Counter
 
 import numpy as np
 
+import six.moves.cPickle as pickle
 from autosklearn.constants import *
 from autosklearn.data import util as data_util
 from autosklearn.models import evaluator
 from autosklearn.util.stopwatch import StopWatch
 
-try:
-    import cPickle as pickle
-except Exception:
-    import pickle
-
 
 def build_ensemble(predictions_train, predictions_valid, predictions_test,
                    true_labels, ensemble_size, task_type, metric):
-
     indices, trajectory = ensemble_selection(predictions_train, true_labels,
                                              ensemble_size, task_type, metric)
     ensemble_predictions_valid = np.mean(
@@ -124,7 +119,7 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric,
                                             ) * ensemble_prediction
         for j, pred in enumerate(predictions):
             # ensemble.append(pred)
-            #ensemble_prediction = np.mean(np.array(ensemble), axis=0)
+            # ensemble_prediction = np.mean(np.array(ensemble), axis=0)
             fant_ensemble_prediction = weighted_ensemble_prediction + (
                 1. / float(s + 1)) * pred
 
@@ -305,7 +300,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
                 indices_to_model_names[num_indices] = model_name
                 indices_to_run_num[num_indices] = num_run
 
-        #logging.info("Indices to model names:")
+        # logging.info("Indices to model names:")
         # logging.info(indices_to_model_names)
 
         # for i, item in enumerate(sorted(model_names_to_scores.items(),
@@ -381,7 +376,8 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
                     ('    %s; weight: %10f; performance: %10f\n' %
                      (indices_to_model_names[ensemble_member[0]],
                       weight,
-                      model_names_to_scores[indices_to_model_names[ensemble_member[0]]]))
+                      model_names_to_scores[
+                         indices_to_model_names[ensemble_member[0]]]))
 
                 ensemble_members_run_numbers[
                     indices_to_run_num[
@@ -434,7 +430,6 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
 
 
 if __name__ == '__main__':
-
     main(predictions_dir=sys.argv[1],
          basename=sys.argv[2],
          task_type=sys.argv[3],

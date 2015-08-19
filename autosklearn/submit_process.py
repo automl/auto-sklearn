@@ -40,7 +40,7 @@ def get_algo_exec(runsolver_limit, runsolver_delay, memory_limit, *args):
     runsolver_limit = max(1, runsolver_limit)
 
     runsolver_prefix = 'runsolver --watcher-data /dev/null -W %d -d %d -M %d ' \
-        % (runsolver_limit, runsolver_delay, memory_limit)
+                       % (runsolver_limit, runsolver_delay, memory_limit)
     call = '"' + runsolver_prefix + ' ' + call + ' ' + ' '.join(args) + '"'
     return call
 

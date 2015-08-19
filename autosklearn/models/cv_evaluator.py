@@ -41,7 +41,8 @@ class CVEvaluator(Evaluator):
 
         train_indices, test_indices = \
             get_CV_fold(self.X_train, self.Y_train, fold=fold,
-                        folds=self.cv_folds, shuffle=True, random_state=self.seed)
+                        folds=self.cv_folds, shuffle=True,
+                        random_state=self.seed)
 
         self.indices[fold] = ((train_indices, test_indices))
 

@@ -4,6 +4,7 @@ import signal
 import time
 
 import lockfile
+import six.moves.cPickle as pickle
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.models.cv_evaluator import CVEvaluator
 from autosklearn.models.evaluator import get_new_run_num
@@ -12,11 +13,6 @@ from autosklearn.models.nested_cv_evaluator import NestedCVEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
 from autosklearn.models.test_evaluator import TestEvaluator
 from HPOlibConfigSpace import configuration_space
-
-try:
-    import cPickle as pickle
-except Exception:
-    import pickle
 
 
 def store_and_or_load_data(dataset_info, outputdir):
@@ -113,9 +109,12 @@ def main(dataset_info, mode, seed, params, mode_args=None):
     global evaluator
     # Train/test split
     if mode == 'holdout':
-        evaluator = HoldoutEvaluator(D, configuration, with_predictions=True,
-                                     all_scoring_functions=True, seed=seed,
-                                     output_y_test=True, num_run=num_run)
+        evaluator = HoldoutEvaluator(D, configuration,
+                                     with_predictions=True,
+                                     all_scoring_functions=True,
+                                     seed=seed,
+                                     output_y_test=True,
+                                     num_run=num_run)
         evaluator.fit()
         signal.signal(15, empty_signal_handler)
         evaluator.finish_up()

@@ -60,7 +60,6 @@ class NestedCVEvaluator_Test(unittest.TestCase):
                                           all_scoring_functions=True)
 
             if not self._fit(evaluator):
-
                 continue
             e_, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
                 evaluator.predict()
@@ -123,7 +122,6 @@ class NestedCVEvaluator_Test(unittest.TestCase):
                                           inner_cv_folds=2,
                                           outer_cv_folds=2)
             if not self._fit(evaluator):
-
                 continue
             err = evaluator.predict()
             self.assertLess(err, 0.99)

@@ -140,7 +140,8 @@ class StopWatch:
 
     def __repr__(self):
         ret_str = '| %10s | %10s | %10s | %10s | %10s | %10s | %10s |\n' % \
-                  ('Name', 'CPUStart', 'CPUEnd', 'CPUDur', 'WallStart', 'WallEnd',
+                  ('Name', 'CPUStart', 'CPUEnd', 'CPUDur', 'WallStart',
+                   'WallEnd',
                    'WallDur')
         ret_str += '+' + '------------+' * 7 + '\n'
         offset = self._tasks['stopwatch_time'].wall_tic

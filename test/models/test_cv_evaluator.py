@@ -163,7 +163,6 @@ class CVEvaluator_Test(unittest.TestCase):
             D_ = copy.deepcopy(D)
             evaluator = CVEvaluator(D_, configuration, cv_folds=5)
             if not self._fit(evaluator):
-
                 continue
             err = evaluator.predict()
             self.assertLess(err, 0.99)

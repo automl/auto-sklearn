@@ -5,7 +5,6 @@ import os
 import shutil
 import unittest
 
-import mock
 import numpy as np
 
 import autosklearn.automl
