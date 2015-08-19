@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import hashlib
 import multiprocessing
 import os
 
@@ -6,6 +7,7 @@ import numpy as np
 
 import autosklearn.util.logging_
 import lockfile
+import six.moves.cPickle as pickle
 from autosklearn import submit_process
 from autosklearn.constants import *
 from autosklearn.data import split_data
@@ -14,11 +16,6 @@ from autosklearn.models import evaluator, paramsklearn
 from autosklearn.util import stopwatch
 from HPOlibConfigSpace.converters import pcs_parser
 from sklearn.base import BaseEstimator
-
-try:
-    import cPickle as pickle
-except Exception:
-    import pickle
 
 
 class AutoML(multiprocessing.Process, BaseEstimator):
@@ -58,7 +55,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             feat_type=None,
             dataset_name=None):
         if dataset_name is None:
-            import hashlib
             m = hashlib.md5()
             m.update(X.data)
             dataset_name = m.hexdigest()

@@ -35,7 +35,6 @@ import psutil
 import scipy as sp
 from autosklearn.constants import *
 from sklearn import metrics
-from sklearn.preprocessing import *
 
 swrite = stderr.write
 
@@ -99,7 +98,7 @@ def normalize_array(solution, prediction):
     new_prediction[new_prediction > 1] = 1
     new_prediction[new_prediction < 0] = 0
     # Make probabilities smoother
-    #new_prediction = np.power(new_prediction, (1./10))
+    # new_prediction = np.power(new_prediction, (1./10))
     return [new_solution, new_prediction]
 
 
@@ -108,9 +107,9 @@ def binarize_predictions(array, task=BINARY_CLASSIFICATION):
     score for multiclass problems and thresholding at 0.5 for other cases.'''
     # add a very small random value as tie breaker (a bit bad because this changes the score every time)
     # so to make sure we get the same result every time, we seed it
-    #eps = 1e-15
+    # eps = 1e-15
     # np.random.seed(sum(array.shape))
-    #array = array + eps*np.random.rand(array.shape[0],array.shape[1])
+    # array = array + eps*np.random.rand(array.shape[0],array.shape[1])
     bin_array = np.zeros(array.shape)
     if (task != MULTICLASS_CLASSIFICATION) or (array.shape[1] == 1):
         bin_array[array >= 0.5] = 1
@@ -384,7 +383,7 @@ def auc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     binary and multilabel classification problems).
 
     """
-    #auc = metrics.roc_auc_score(solution, prediction, average=None)
+    # auc = metrics.roc_auc_score(solution, prediction, average=None)
     # There is a bug in metrics.roc_auc_score: auc([1,0,0],[1e-10,0,0])
     # incorrect
     label_num = solution.shape[1]
@@ -479,7 +478,7 @@ def log_loss(solution, prediction, task=BINARY_CLASSIFICATION):
         log_loss = pos_class_log_loss
         # We sum the contributions of the columns.
         log_loss = np.sum(log_loss)
-        #print('multiclass {}'.format(log_loss))
+        # print('multiclass {}'.format(log_loss))
     return log_loss
 
 

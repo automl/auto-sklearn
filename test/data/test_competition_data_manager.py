@@ -22,6 +22,7 @@ C = 'Categorical'
 
 
 class InitFreeDataManager(DataManager):
+
     def __init__(self):
         super(InitFreeDataManager, self).__init__()
 
@@ -81,8 +82,8 @@ class DataManagerTest(unittest.TestCase):
         self.assertEqual(self.D.data['X_train'][0, 9], 2.5)
 
     def test_perform1HotEncoding_binary_data_with_missing_values(self):
-        #self.D.feat_type = [N, N, N, N, B, B]
-        #self.D.info = {'is_sparse': 0, 'has_missing': 1}
+        # self.D.feat_type = [N, N, N, N, B, B]
+        # self.D.info = {'is_sparse': 0, 'has_missing': 1}
         # self.D.perform1HotEncoding()
-        #self.assertEqual((3, 8), self.D.data['X_train'].shape)
+        # self.assertEqual((3, 8), self.D.data['X_train'].shape)
         pass

@@ -61,7 +61,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             evaluator = HoldoutEvaluator(D_, configuration)
 
             if not self._fit(evaluator):
-
                 continue
             err[i] = evaluator.predict()
             print(err[i])
@@ -108,7 +107,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             evaluator = HoldoutEvaluator(D_, configuration,
                                          all_scoring_functions=True)
             if not self._fit(evaluator):
-
                 continue
 
             err.append(evaluator.predict())
@@ -162,7 +160,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             D_ = copy.deepcopy(D)
             evaluator = HoldoutEvaluator(D_, configuration)
             if not self._fit(evaluator):
-
                 continue
             err[i] = evaluator.predict()
             print(err[i])
@@ -217,7 +214,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             evaluator = HoldoutEvaluator(D_, configuration)
 
             if not self._fit(evaluator):
-
                 continue
             err[i] = evaluator.predict()
             self.assertTrue(np.isfinite(err[i]))
@@ -265,7 +261,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             D_ = copy.deepcopy(D)
             evaluator = HoldoutEvaluator(D_, configuration)
             if not self._fit(evaluator):
-
                 continue
             err[i] = evaluator.predict()
             self.assertTrue(np.isfinite(err[i]))
@@ -291,7 +286,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             D_ = copy.deepcopy(D)
             evaluator = HoldoutEvaluator(D_, configuration)
             if not self._fit(evaluator):
-
                 continue
             err = evaluator.predict()
             self.assertLess(err, 0.99)
@@ -418,7 +412,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
                                          output_y_test=True)
 
             if not self._fit(evaluator):
-
                 continue
             evaluator.predict()
             evaluator.file_output()
@@ -480,5 +473,5 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    #import sys;sys.argv = ['', 'Test.test_evaluate']
+    # import sys;sys.argv = ['', 'Test.test_evaluate']
     unittest.main()

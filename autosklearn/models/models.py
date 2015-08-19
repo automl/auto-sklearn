@@ -5,16 +5,10 @@ import numpy as np
 
 import scipy as sp
 from autosklearn.constants import *
-from sklearn.ensemble import BaggingClassifier, \
-    BaggingRegressor, GradientBoostingClassifier, \
+from sklearn.ensemble import BaggingClassifier, BaggingRegressor, \
     GradientBoostingRegressor, RandomForestClassifier
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
-from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import Ridge
-from sklearn.linear_model import RidgeClassifier
+from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.naive_bayes import BernoulliNB
-from sklearn.pipeline import Pipeline
 
 
 class MyAutoML:

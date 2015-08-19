@@ -15,7 +15,6 @@
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 
 # Some libraries and options
-import os
 from argparse import ArgumentParser
 
 import yaml

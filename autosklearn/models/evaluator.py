@@ -6,15 +6,11 @@ import time
 import numpy as np
 
 import lockfile
+import six.moves.cPickle as pickle
 from autosklearn.constants import *
 from autosklearn.scores import libscores
 from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.regression import ParamSklearnRegressor
-
-try:
-    import cPickle as pickle
-except Exception:
-    import pickle
 
 
 def calculate_score(solution, prediction, task_type, metric, num_classes,
@@ -161,6 +157,7 @@ class Evaluator(object):
         except Exception:
             self.duration = time.time() - self.starttime
             import traceback
+
             print(traceback.format_exc())
             print()
             print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %

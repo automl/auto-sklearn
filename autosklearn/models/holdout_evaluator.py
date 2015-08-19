@@ -6,9 +6,13 @@ from autosklearn.models.evaluator import Evaluator, calculate_score
 
 class HoldoutEvaluator(Evaluator):
 
-    def __init__(self, datamanager, configuration, with_predictions=False,
-                 all_scoring_functions=False, seed=1, output_dir=None,
-                 output_y_test=False, num_run=None):
+    def __init__(self, datamanager, configuration,
+                 with_predictions=False,
+                 all_scoring_functions=False,
+                 seed=1,
+                 output_dir=None,
+                 output_y_test=False,
+                 num_run=None):
         super(HoldoutEvaluator, self).__init__(
             datamanager, configuration,
             with_predictions=with_predictions,

@@ -54,7 +54,7 @@ class MetaLearning(object):
         if np.sum(categorical) != 0:
             raise ValueError("Training matrix doesn't look OneHotEncoded!")
 
-        self._metafeatures_encoded_labels = metafeatures.\
+        self._metafeatures_encoded_labels = metafeatures. \
             calculate_all_metafeatures_encoded_labels(
                 X_train, Y_train, categorical, dataset_name + self._sentinel,
                 dont_calculate=self._exclude_metafeatures)

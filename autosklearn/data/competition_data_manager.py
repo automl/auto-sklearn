@@ -28,6 +28,7 @@ from autosklearn.data.data_manager import DataManager
 
 try:
     import autosklearn.data.competition_c_functions as competition_c_functions
+
     competition_c_functions_is_there = True
 except Exception:
     competition_c_functions_is_there = False

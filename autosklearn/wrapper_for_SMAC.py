@@ -1,7 +1,3 @@
-try:
-    import cPickle as pickle
-except Exception:
-    import pickle
 # -*- encoding: utf-8 -*-
 
 import os
@@ -11,6 +7,7 @@ import time
 
 import autosklearn.models.holdout_evaluator
 import lockfile
+import six.moves.cPickle as pickle
 from autosklearn.data.data_manager import DataManager
 from autosklearn.models.paramsklearn import get_class
 from HPOlibConfigSpace import configuration_space
@@ -62,7 +59,6 @@ signal.signal(15, signal_handler)
 
 
 def main(basename, input_dir, params):
-
     output_dir = os.getcwd()
     D = store_and_or_load_data(data_dir=input_dir,
                                dataset=basename,
@@ -73,8 +69,11 @@ def main(basename, input_dir, params):
 
     global evaluator
     evaluator = autosklearn.models.holdout_evaluator.HoldoutEvaluator(
-        datamanager=D, configuration=configuration, with_predictions=True,
-        all_scoring_functions=True, output_dir=output_dir)
+        datamanager=D,
+        configuration=configuration,
+        with_predictions=True,
+        all_scoring_functions=True,
+        output_dir=output_dir)
     evaluator.fit()
     evaluator.finish_up()
 
