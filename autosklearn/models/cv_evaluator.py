@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 import numpy as np
 
 from autosklearn.data.split_data import get_CV_fold
@@ -5,14 +6,23 @@ from autosklearn.models.evaluator import Evaluator, calculate_score
 
 
 class CVEvaluator(Evaluator):
-    def __init__(self, Datamanager, configuration, with_predictions=False,
-                 all_scoring_functions=False, seed=1, output_dir=None,
-                 output_y_test=False, cv_folds=10, num_run=None):
-        super(CVEvaluator, self).__init__(Datamanager, configuration,
+
+    def __init__(self, Datamanager, configuration,
+                 with_predictions=False,
+                 all_scoring_functions=False,
+                 seed=1,
+                 output_dir=None,
+                 output_y_test=False,
+                 cv_folds=10,
+                 num_run=None):
+        super(CVEvaluator, self).__init__(
+            Datamanager, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
-            seed=seed, output_dir=output_dir,
-            output_y_test=output_y_test, num_run=num_run)
+            seed=seed,
+            output_dir=output_dir,
+            output_y_test=output_y_test,
+            num_run=num_run)
 
         self.cv_folds = cv_folds
         self.X_train = self.D.data['X_train']
@@ -72,33 +82,35 @@ class CVEvaluator(Evaluator):
                                                   self.Y_train[train_indices])
                 Y_test_pred[i] = test_pred
 
-        Y_optimization_pred = np.concatenate([Y_optimization_pred[i] for i in
-                                              range(self.cv_folds) if
-                                              Y_optimization_pred[i] is not None])
+        Y_optimization_pred = np.concatenate(
+            [Y_optimization_pred[i] for i in range(self.cv_folds)
+             if Y_optimization_pred[i] is not None])
         Y_targets = np.concatenate([Y_targets[i] for i in range(self.cv_folds)
                                     if Y_targets[i] is not None])
 
         if self.X_valid is not None:
-            Y_valid_pred = np.array([Y_valid_pred[i] for i in range(
-                self.cv_folds) if Y_valid_pred[i] is not None])
+            Y_valid_pred = np.array([Y_valid_pred[i]
+                                     for i in range(self.cv_folds)
+                                     if Y_valid_pred[i] is not None])
             # Average the predictions of several models
             if len(Y_valid_pred.shape) == 3:
                 Y_valid_pred = np.nanmean(Y_valid_pred, axis=0)
 
         if self.X_test is not None:
-            Y_test_pred = np.array([Y_test_pred[i] for i in range(
-                self.cv_folds) if Y_test_pred[i] is not None])
+            Y_test_pred = np.array([Y_test_pred[i]
+                                    for i in range(self.cv_folds)
+                                    if Y_test_pred[i] is not None])
             # Average the predictions of several models
             if len(Y_test_pred.shape) == 3:
                 Y_test_pred = np.nanmean(Y_test_pred, axis=0)
 
         self.Y_optimization = Y_targets
-        score = calculate_score(Y_targets, Y_optimization_pred,
-                                self.task_type, self.metric,
-                                self.D.info['target_num'],
-                                all_scoring_functions=self.all_scoring_functions)
+        score = calculate_score(
+            Y_targets, Y_optimization_pred, self.task_type, self.metric,
+            self.D.info['target_num'],
+            all_scoring_functions=self.all_scoring_functions)
 
-        if hasattr(score, "__len__"):
+        if hasattr(score, '__len__'):
             err = {key: 1 - score[key] for key in score}
         else:
             err = 1 - score

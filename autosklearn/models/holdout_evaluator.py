@@ -1,24 +1,27 @@
+# -*- encoding: utf-8 -*-
+from autosklearn.constants import *
 from autosklearn.data.split_data import split_data
 from autosklearn.models.evaluator import Evaluator, calculate_score
 
-from autosklearn.constants import *
-
 
 class HoldoutEvaluator(Evaluator):
-    def __init__(self, Datamanager, configuration, with_predictions=False,
+
+    def __init__(self, datamanager, configuration, with_predictions=False,
                  all_scoring_functions=False, seed=1, output_dir=None,
                  output_y_test=False, num_run=None):
-        super(HoldoutEvaluator, self).__init__(Datamanager, configuration,
+        super(HoldoutEvaluator, self).__init__(
+            datamanager, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
-            seed=seed, output_dir=output_dir,
+            seed=seed,
+            output_dir=output_dir,
             output_y_test=output_y_test,
             num_run=num_run)
 
-        classification =  Datamanager.info['task'] in CLASSIFICATION_TASKS
+        classification = datamanager.info['task'] in CLASSIFICATION_TASKS
         self.X_train, self.X_optimization, self.Y_train, self.Y_optimization = \
-            split_data(Datamanager.data['X_train'],
-                       Datamanager.data['Y_train'],
+            split_data(datamanager.data['X_train'],
+                       datamanager.data['Y_train'],
                        classification=classification)
 
         self.model = self.model_class(self.configuration, self.seed)
@@ -40,12 +43,12 @@ class HoldoutEvaluator(Evaluator):
         else:
             Y_test_pred = None
 
-        score = calculate_score(self.Y_optimization, Y_optimization_pred,
-                                self.task_type, self.metric,
-                                self.D.info['target_num'],
-                                all_scoring_functions=self.all_scoring_functions)
+        score = calculate_score(
+            self.Y_optimization, Y_optimization_pred, self.task_type,
+            self.metric, self.D.info['target_num'],
+            all_scoring_functions=self.all_scoring_functions)
 
-        if hasattr(score, "__len__"):
+        if hasattr(score, '__len__'):
             err = {key: 1 - score[key] for key in score}
         else:
             err = 1 - score
@@ -53,4 +56,3 @@ class HoldoutEvaluator(Evaluator):
         if self.with_predictions:
             return err, Y_optimization_pred, Y_valid_pred, Y_test_pred
         return err
-

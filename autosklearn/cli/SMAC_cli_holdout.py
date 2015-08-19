@@ -1,11 +1,9 @@
-import os
+# -*- encoding: utf-8 -*-
 import sys
-
 
 from autosklearn.cli import base_interface
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dataset_info = sys.argv[1]
     instance_name = sys.argv[2]
     instance_specific_information = sys.argv[3]
@@ -19,9 +17,9 @@ if __name__ == "__main__":
     params = dict()
     for i in range(7, len(sys.argv), 2):
         p_name = str(sys.argv[i])
-        if p_name[0].startswith("-"):
+        if p_name[0].startswith('-'):
             p_name = p_name[1:]
-        params[p_name] = sys.argv[i+1].strip()
+        params[p_name] = sys.argv[i + 1].strip()
 
     if instance_name == 'test':
         mode = 'test'

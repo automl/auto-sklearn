@@ -1,21 +1,32 @@
+# -*- encoding: utf-8 -*-
 from collections import defaultdict
 
 import numpy as np
-import sklearn.utils
 
+import sklearn.utils
 from autosklearn.data.split_data import get_CV_fold
 from autosklearn.models.evaluator import Evaluator, calculate_score
 
 
 class NestedCVEvaluator(Evaluator):
-    def __init__(self, Datamanager, configuration, with_predictions=False,
-                 all_scoring_functions=False, seed=1, output_dir=None,
-                 output_y_test=False, inner_cv_folds=5, outer_cv_folds=5,
+
+    def __init__(self, Datamanager, configuration,
+                 with_predictions=False,
+                 all_scoring_functions=False,
+                 seed=1,
+                 output_dir=None,
+                 output_y_test=False,
+                 inner_cv_folds=5,
+                 outer_cv_folds=5,
                  num_run=None):
         super(NestedCVEvaluator, self).__init__(
-            Datamanager, configuration, with_predictions=with_predictions,
-            all_scoring_functions=all_scoring_functions, seed=seed,
-            output_dir=output_dir, output_y_test=output_y_test, num_run=num_run)
+            Datamanager, configuration,
+            with_predictions=with_predictions,
+            all_scoring_functions=all_scoring_functions,
+            seed=seed,
+            output_dir=output_dir,
+            output_y_test=output_y_test,
+            num_run=num_run)
 
         self.inner_cv_folds = inner_cv_folds
         self.outer_cv_folds = outer_cv_folds
@@ -23,8 +34,8 @@ class NestedCVEvaluator(Evaluator):
 
         self.outer_models = [None] * outer_cv_folds
         self.inner_models = [None] * outer_cv_folds
-        self.X_train = Datamanager.data["X_train"]
-        self.Y_train = Datamanager.data["Y_train"]
+        self.X_train = Datamanager.data['X_train']
+        self.Y_train = Datamanager.data['Y_train']
         for i in range(outer_cv_folds):
             self.inner_models[i] = [None] * inner_cv_folds
 
@@ -48,8 +59,9 @@ class NestedCVEvaluator(Evaluator):
 
             model = self.model_class(self.configuration, self.random_state)
             self.outer_models[outer_fold] = model
-            self.outer_models[outer_fold].fit(self.X_train[outer_train_indices],
-                                              self.Y_train[outer_train_indices])
+            self.outer_models[outer_fold].fit(
+                self.X_train[outer_train_indices],
+                self.Y_train[outer_train_indices])
 
             # Then perform the fit for the inner cross validation
             for inner_fold in range(self.inner_cv_folds):
@@ -82,59 +94,59 @@ class NestedCVEvaluator(Evaluator):
 
         for i in range(self.outer_cv_folds):
             train_indices, test_indices = self.outer_indices[i]
-            opt_pred = self.predict_function(self.X_train[test_indices],
-                                             self.outer_models[i],
-                                             self.task_type,
-                                             Y_train=self.Y_train[train_indices])
+            opt_pred = self.predict_function(
+                self.X_train[test_indices], self.outer_models[i],
+                self.task_type,
+                Y_train=self.Y_train[train_indices])
 
             Y_optimization_pred[i] = opt_pred
             Y_targets[i] = self.Y_train[test_indices]
 
             if self.X_valid is not None:
                 X_valid = self.X_valid.copy()
-                valid_pred = self.predict_function(X_valid,
-                                                   self.outer_models[i],
-                                                   self.task_type,
-                                                   Y_train=self.Y_train[train_indices])
+                valid_pred = self.predict_function(
+                    X_valid, self.outer_models[i], self.task_type,
+                    Y_train=self.Y_train[train_indices])
                 Y_valid_pred[i] = valid_pred
 
             if self.X_test is not None:
                 X_test = self.X_test.copy()
-                test_pred = self.predict_function(X_test, self.outer_models[i],
-                                                  self.task_type,
-                                                  Y_train=self.Y_train[train_indices])
+                test_pred = self.predict_function(
+                    X_test, self.outer_models[i], self.task_type,
+                    Y_train=self.Y_train[train_indices])
                 Y_test_pred[i] = test_pred
 
         # Calculate the outer scores
         for i in range(self.outer_cv_folds):
-            scores = calculate_score(Y_targets[i], Y_optimization_pred[i],
-                                     self.task_type, self.metric,
-                                     self.D.info['target_num'],
-                                     all_scoring_functions=self.all_scoring_functions)
+            scores = calculate_score(
+                Y_targets[i], Y_optimization_pred[i], self.task_type,
+                self.metric, self.D.info['target_num'],
+                all_scoring_functions=self.all_scoring_functions)
             if self.all_scoring_functions:
                 for score_name in scores:
                     outer_scores[score_name].append(scores[score_name])
             else:
                 outer_scores[self.metric].append(scores)
 
-
-        Y_optimization_pred = np.concatenate([Y_optimization_pred[i] for i in
-                                              range(self.outer_cv_folds) if
-                                              Y_optimization_pred[
-                                                  i] is not None])
-        Y_targets = np.concatenate([Y_targets[i] for i in range(self.outer_cv_folds)
+        Y_optimization_pred = np.concatenate(
+            [Y_optimization_pred[i] for i in range(self.outer_cv_folds)
+             if Y_optimization_pred[i] is not None])
+        Y_targets = np.concatenate([Y_targets[i]
+                                    for i in range(self.outer_cv_folds)
                                     if Y_targets[i] is not None])
 
         if self.X_valid is not None:
-            Y_valid_pred = np.array([Y_valid_pred[i] for i in range(
-                self.outer_cv_folds) if Y_valid_pred[i] is not None])
+            Y_valid_pred = np.array([Y_valid_pred[i]
+                                     for i in range(self.outer_cv_folds)
+                                     if Y_valid_pred[i] is not None])
             # Average the predictions of several models
             if len(Y_valid_pred.shape) == 3:
                 Y_valid_pred = np.nanmean(Y_valid_pred, axis=0)
 
         if self.X_test is not None:
-            Y_test_pred = np.array([Y_test_pred[i] for i in range(
-                self.outer_cv_folds) if Y_test_pred[i] is not None])
+            Y_test_pred = np.array([Y_test_pred[i]
+                                    for i in range(self.outer_cv_folds)
+                                    if Y_test_pred[i] is not None])
             # Average the predictions of several models
             if len(Y_test_pred.shape) == 3:
                 Y_test_pred = np.nanmean(Y_test_pred, axis=0)
@@ -149,11 +161,13 @@ class NestedCVEvaluator(Evaluator):
                 Y_test = self.Y_train[inner_test_indices]
                 X_test = self.X_train[inner_test_indices]
                 model = self.inner_models[outer_fold][inner_fold]
-                Y_hat = self.predict_function(X_test, model, self.task_type,
-                                              Y_train=self.Y_train[inner_train_indices])
-                scores = calculate_score(Y_test, Y_hat, self.task_type, self.metric,
-                                         self.D.info['target_num'],
-                                         all_scoring_functions=self.all_scoring_functions)
+                Y_hat = self.predict_function(
+                    X_test, model, self.task_type,
+                    Y_train=self.Y_train[inner_train_indices])
+                scores = calculate_score(
+                    Y_test, Y_hat, self.task_type, self.metric,
+                    self.D.info['target_num'],
+                    all_scoring_functions=self.all_scoring_functions)
                 if self.all_scoring_functions:
                     for score_name in scores:
                         inner_scores[score_name].append(scores[score_name])
@@ -162,10 +176,14 @@ class NestedCVEvaluator(Evaluator):
 
         # Average the scores!
         if self.all_scoring_functions:
-            inner_err = {key: 1 - np.mean(inner_scores[key])
-                         for key in inner_scores}
-            outer_err = {"outer:%s" % key: 1 - np.mean(outer_scores[key])
-                         for key in outer_scores}
+            inner_err = {
+                key: 1 - np.mean(inner_scores[key])
+                for key in inner_scores
+            }
+            outer_err = {
+                'outer:%s' % key: 1 - np.mean(outer_scores[key])
+                for key in outer_scores
+            }
             inner_err.update(outer_err)
         else:
             inner_err = 1 - np.mean(inner_scores[self.metric])

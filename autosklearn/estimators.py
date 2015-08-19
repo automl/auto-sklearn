@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 import os
 import random
 import shutil
@@ -9,6 +10,7 @@ from autosklearn.constants import *
 
 
 class AutoSklearnClassifier(autosklearn.automl.AutoML):
+
     """This class implements the classification task. It must not be pickled!
 
     Parameters
@@ -33,18 +35,22 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         Memory limit for the machine learning algorithm. If the machine
         learning algorithm allocates tries to allocate more memory,
         its evaluation will be stopped.
+
     """
 
-    def __init__(self, time_left_for_this_task=3600,
+    def __init__(self,
+                 time_left_for_this_task=3600,
                  per_run_time_limit=360,
                  initial_configurations_via_metalearning=25,
-                 ensemble_size=50, ensemble_nbest=50, seed=1,
+                 ensemble_size=50,
+                 ensemble_nbest=50,
+                 seed=1,
                  ml_memory_limit=3000):
         random_number = random.randint(0, 10000)
 
         pid = os.getpid()
-        output_dir = "/tmp/autosklearn_output_%d_%d" % (pid, random_number)
-        tmp_dir = "/tmp/autosklearn_tmp_%d_%d" % (pid, random_number)
+        output_dir = '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
+        tmp_dir = '/tmp/autosklearn_tmp_%d_%d' % (pid, random_number)
         os.makedirs(output_dir)
         os.makedirs(tmp_dir)
 
@@ -52,8 +58,10 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             tmp_dir, output_dir, time_left_for_this_task, per_run_time_limit,
             log_dir=tmp_dir,
             initial_configurations_via_metalearning=initial_configurations_via_metalearning,
-            ensemble_size=ensemble_size, ensemble_nbest=ensemble_nbest,
-            seed=seed, ml_memory_limit=ml_memory_limit)
+            ensemble_size=ensemble_size,
+            ensemble_nbest=ensemble_nbest,
+            seed=seed,
+            ml_memory_limit=ml_memory_limit)
 
     def __del__(self):
         self._delete_output_directories()
@@ -122,7 +130,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             y = y.flatten()
 
         return super(AutoSklearnClassifier, self).fit(X, y, task, metric,
-                                                   feat_type)
+                                                      feat_type)
 
     def predict(self, X):
         """Predict class for X.
@@ -135,10 +143,12 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         -------
         y : array of shape = [n_samples] or [n_samples, n_outputs]
             The predicted classes.
+
         """
         return super(AutoSklearnClassifier, self).predict(X)
 
 
 class AutoSklearnRegressor(autosklearn.automl.AutoML):
+
     def __init__(self, **kwargs):
         raise NotImplementedError()

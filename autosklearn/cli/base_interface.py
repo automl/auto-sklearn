@@ -1,31 +1,31 @@
+# -*- encoding: utf-8 -*-
 import os
-try:
-    import cPickle as pickle
-except:
-    import pickle
 import signal
 import time
 
 import lockfile
-
-from HPOlibConfigSpace import configuration_space
-
 from autosklearn.data.competition_data_manager import CompetitionDataManager
+from autosklearn.models.cv_evaluator import CVEvaluator
 from autosklearn.models.evaluator import get_new_run_num
 from autosklearn.models.holdout_evaluator import HoldoutEvaluator
-from autosklearn.models.cv_evaluator import CVEvaluator
-from autosklearn.models.test_evaluator import TestEvaluator
 from autosklearn.models.nested_cv_evaluator import NestedCVEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
+from autosklearn.models.test_evaluator import TestEvaluator
+from HPOlibConfigSpace import configuration_space
+
+try:
+    import cPickle as pickle
+except Exception:
+    import pickle
 
 
 def store_and_or_load_data(dataset_info, outputdir):
-    if dataset_info.endswith(".pkl"):
+    if dataset_info.endswith('.pkl'):
         save_path = dataset_info
     else:
         dataset = os.path.basename(dataset_info)
         data_dir = os.path.dirname(dataset_info)
-        save_path = os.path.join(outputdir, dataset + "_Manager.pkl")
+        save_path = os.path.join(outputdir, dataset + '_Manager.pkl')
 
     if not os.path.exists(save_path):
         lock = lockfile.LockFile(save_path)
@@ -35,18 +35,19 @@ def store_and_or_load_data(dataset_info, outputdir):
             except lockfile.LockTimeout:
                 lock.break_lock()
                 lock.acquire()
-        print "I locked", lock.path
+        print('I locked', lock.path)
         # It is not yet sure, whether the file already exists
         try:
             if not os.path.exists(save_path):
-                D = CompetitionDataManager(dataset, data_dir, verbose=True,
+                D = CompetitionDataManager(dataset, data_dir,
+                                           verbose=True,
                                            encode_labels=True)
                 fh = open(save_path, 'w')
                 pickle.dump(D, fh, -1)
                 fh.close()
             else:
                 D = pickle.load(open(save_path, 'r'))
-        except:
+        except Exception:
             raise
         finally:
             lock.release()
@@ -54,20 +55,22 @@ def store_and_or_load_data(dataset_info, outputdir):
         D = pickle.load(open(save_path, 'r'))
     return D
 
-
 # signal handler seem to work only if they are globally defined
 # to give it access to the evaluator class, the evaluator name has to
 # be a global name. It's not the cleanest solution, but works for now.
 evaluator = None
 
+
 def signal_handler(signum, frame):
-    print "Aborting Training!"
+    print('Aborting Training!')
     global evaluator
     evaluator.finish_up()
     exit(0)
 
+
 def empty_signal_handler(signum, frame):
-    print "Received Signal %s, but alread finishing up!" % str(signum)
+    print('Received Signal %s, but alread finishing up!' % str(signum))
+
 
 signal.signal(15, signal_handler)
 
@@ -82,16 +85,16 @@ def main(dataset_info, mode, seed, params, mode_args=None):
 
     It must by no means be used for the Auto part of the competition!
     """
-    if mode != "test":
+    if mode != 'test':
         num_run = get_new_run_num()
 
     for key in params:
         try:
             params[key] = int(params[key])
-        except:
+        except Exception:
             try:
                 params[key] = float(params[key])
-            except:
+            except Exception:
                 pass
 
     if seed is not None:
@@ -101,8 +104,7 @@ def main(dataset_info, mode, seed, params, mode_args=None):
 
     output_dir = os.getcwd()
 
-    D = store_and_or_load_data(dataset_info=dataset_info,
-                               outputdir=output_dir)
+    D = store_and_or_load_data(dataset_info=dataset_info, outputdir=output_dir)
 
     cs = get_configuration_space(D.info)
     configuration = configuration_space.Configuration(cs, params)
@@ -111,18 +113,17 @@ def main(dataset_info, mode, seed, params, mode_args=None):
     global evaluator
     # Train/test split
     if mode == 'holdout':
-        evaluator = HoldoutEvaluator(D, configuration,
-                                     with_predictions=True,
-                                     all_scoring_functions=True,
-                                     output_y_test=True,
-                                     seed=seed, num_run=num_run)
+        evaluator = HoldoutEvaluator(D, configuration, with_predictions=True,
+                                     all_scoring_functions=True, seed=seed,
+                                     output_y_test=True, num_run=num_run)
         evaluator.fit()
         signal.signal(15, empty_signal_handler)
         evaluator.finish_up()
-        model_directory = os.path.join(os.getcwd(), "models_%d" % seed)
+        model_directory = os.path.join(os.getcwd(), 'models_%d' % seed)
         if os.path.exists(model_directory):
-            model_filename = os.path.join(model_directory, "%s.model" % num_run)
-            with open(model_filename, "w") as fh:
+            model_filename = os.path.join(model_directory,
+                                          '%s.model' % num_run)
+            with open(model_filename, 'w') as fh:
                 pickle.dump(evaluator.model, fh, -1)
 
     elif mode == 'test':
@@ -134,49 +135,58 @@ def main(dataset_info, mode, seed, params, mode_args=None):
         duration = time.time() - evaluator.starttime
 
         score = scores[metric]
-        additional_run_info = ";".join(["%s: %s" % (m_, value)
+        additional_run_info = ';'.join(['%s: %s' % (m_, value)
                                         for m_, value in scores.items()])
-        additional_run_info += ";" + "duration: " + str(duration)
+        additional_run_info += ';' + 'duration: ' + str(duration)
 
-        print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % (
-            "SAT", abs(duration), score, evaluator.seed, additional_run_info)
+        print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
+              ('SAT', abs(duration), score, evaluator.seed,
+               additional_run_info))
 
     # CV on the whole training set
     elif mode == 'cv':
-        evaluator = CVEvaluator(D, configuration, with_predictions=True,
-                                all_scoring_functions=True, output_y_test=True,
-                                cv_folds=mode_args['folds'], seed=seed,
+        evaluator = CVEvaluator(D, configuration,
+                                with_predictions=True,
+                                all_scoring_functions=True,
+                                output_y_test=True,
+                                cv_folds=mode_args['folds'],
+                                seed=seed,
                                 num_run=num_run)
         evaluator.fit()
         signal.signal(15, empty_signal_handler)
         evaluator.finish_up()
 
     elif mode == 'partial_cv':
-        evaluator = CVEvaluator(D, configuration, all_scoring_functions=True,
-                                cv_folds=mode_args['folds'], seed=seed,
+        evaluator = CVEvaluator(D, configuration,
+                                all_scoring_functions=True,
+                                cv_folds=mode_args['folds'],
+                                seed=seed,
                                 num_run=num_run)
         evaluator.partial_fit(mode_args['fold'])
         scores = evaluator.predict()
         duration = time.time() - evaluator.starttime
 
         score = scores[metric]
-        additional_run_info = ";".join(["%s: %s" % (m_, value)
+        additional_run_info = ';'.join(['%s: %s' % (m_, value)
                                         for m_, value in scores.items()])
-        additional_run_info += ";" + "duration: " + str(duration)
+        additional_run_info += ';' + 'duration: ' + str(duration)
 
-        print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % (
-            "SAT", abs(duration), score, evaluator.seed, additional_run_info)
+        print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
+              ('SAT', abs(duration), score, evaluator.seed,
+               additional_run_info))
 
     elif mode == 'nested-cv':
-        evaluator = NestedCVEvaluator(D, configuration, with_predictions=True,
+        evaluator = NestedCVEvaluator(D, configuration,
+                                      with_predictions=True,
                                       inner_cv_folds=mode_args['inner_folds'],
                                       outer_cv_folds=mode_args['outer_folds'],
                                       all_scoring_functions=True,
-                                      output_y_test=True, seed=seed,
+                                      output_y_test=True,
+                                      seed=seed,
                                       num_run=num_run)
         evaluator.fit()
         signal.signal(15, empty_signal_handler)
         evaluator.finish_up()
 
     else:
-        raise ValueError("Must choose a legal mode.")
+        raise ValueError('Must choose a legal mode.')

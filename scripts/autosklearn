@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+# -*- encoding: utf-8 -*-
 from collections import deque
 import logging
 import random
@@ -18,9 +19,9 @@ from autosklearn.util import logging_
 from autosklearn.util import options
 
 
-if __name__ == "__main__":
-    raise NotImplementedError("This does not work at the moment. Please wait "
-                              "until the refactoring is done!")
+if __name__ == '__main__':
+    raise NotImplementedError('This does not work at the moment. Please wait '
+                              'until the refactoring is done!')
     logging_.setup()
     parser = options.get_options()
     args = parser.parse_args()
@@ -42,35 +43,34 @@ if __name__ == "__main__":
     remove_tmp_dir = False
 
     if output_dir is None:
-        output_dir = "/tmp/autosklearn_output_%d_%d" % (pid, random_number)
+        output_dir = '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
         os.makedirs(output_dir)
         remove_output_dir = not args.keep_output
     else:
         if not os.path.isdir(output_dir):
-            raise ValueError("If output_dir is specified, it must exist: %s"
+            raise ValueError('If output_dir is specified, it must exist: %s'
                              % output_dir)
         output_dir = os.path.join(output_dir, str(args.seed))
         os.mkdir(output_dir)
 
     if tmp_dataset_dir is None:
-        tmp_dataset_dir = "/tmp/autosklearn_tmp_%d_%d" % (pid, random_number)
+        tmp_dataset_dir = '/tmp/autosklearn_tmp_%d_%d' % (pid, random_number)
         os.makedirs(tmp_dataset_dir)
         remove_tmp_dir = not args.keep_output
     else:
         if not os.path.isdir(tmp_dataset_dir):
-            raise ValueError("If tmp_dataset_dir is specified, it must exist: %s"
+            raise ValueError('If tmp_dataset_dir is specified, it must exist: %s'
                              % tmp_dataset_dir)
         tmp_dataset_dir = os.path.join(tmp_dataset_dir)
 
-    logger = logging_.get_logger("autosklearn_%d" % args.seed,
+    logger = logging_.get_logger('autosklearn_%d' % args.seed,
                                  outputdir=tmp_dataset_dir)
     meta_base_logger = logging.getLogger(
-        "pyMetaLearn.metalearning.meta_base")
+        'pyMetaLearn.metalearning.meta_base')
     meta_base_logger.setLevel(logging.DEBUG)
     metalearn_logger = logging.getLogger(
-        "pyMetaLearn.optimizers.metalearn_optimizer.metalearner")
+        'pyMetaLearn.optimizers.metalearn_optimizer.metalearner')
     metalearn_logger.setLevel(logging.DEBUG)
-
 
     BUFFER = 35  # time-left - BUFFER = timelimit for SMAC/ensemble_script.py
     BUFFER_BEFORE_SENDING_SIGTERM = 30  # We send SIGTERM to all processes
@@ -78,14 +78,14 @@ if __name__ == "__main__":
 
     # Manipulate $PATH so that SMAC and the runsolver are in it.
     smac = pkg_resources.resource_filename(
-        "autosklearn",
-        "binaries/smac-v2.08.01-development-1/smac-v2.08.01-development-1/")
+        'autosklearn',
+        'binaries/smac-v2.08.01-development-1/smac-v2.08.01-development-1/')
     runsolver = pkg_resources.resource_filename(
-        "autosklearn",
-        "binaries/"
+        'autosklearn',
+        'binaries/'
     )
-    os.environ["PATH"] = smac + os.pathsep + runsolver + os.pathsep + \
-                         os.environ["PATH"]
+    os.environ['PATH'] = smac + os.pathsep + runsolver + os.pathsep + \
+        os.environ['PATH']
 
     time_spent_so_far = time.time() - start_time
     time_left_for_smac = time_limit - time_spent_so_far
@@ -106,7 +106,8 @@ if __name__ == "__main__":
         = queue.get()
 
     # == And now we wait till we run out of time
-    while time.time() - start_time <= time_limit - BUFFER_BEFORE_SENDING_SIGTERM:
+    while time.time() - start_time <= time_limit - \
+            BUFFER_BEFORE_SENDING_SIGTERM:
         time.sleep(1)
 
     # Kill all children, grand-children and so on
