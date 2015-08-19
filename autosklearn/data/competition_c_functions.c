@@ -3857,7 +3857,7 @@ static PyObject *__pyx_pf_11autosklearn_4data_23competition_c_functions_8read_fi
  *         line = data_file.readline()
  *         data = line.strip().split()
  */
-        /*except:*/ {
+        /*except Exception:*/ {
           __Pyx_AddTraceback("autosklearn.data.competition_c_functions.read_first_line", __pyx_clineno, __pyx_lineno, __pyx_filename);
           if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_1, &__pyx_t_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 237; __pyx_clineno = __LINE__; goto __pyx_L9_except_error;}
           __Pyx_GOTREF(__pyx_t_4);
@@ -4317,7 +4317,7 @@ static PyObject *__pyx_pf_11autosklearn_4data_23competition_c_functions_10file_t
  *         if verbose: print ("Reading {}...".format(filename))
  *         lines = data_file.readlines()
  */
-        /*except:*/ {
+        /*except Exception:*/ {
           __Pyx_AddTraceback("autosklearn.data.competition_c_functions.file_to_array", __pyx_clineno, __pyx_lineno, __pyx_filename);
           if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_2, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 247; __pyx_clineno = __LINE__; goto __pyx_L9_except_error;}
           __Pyx_GOTREF(__pyx_t_4);

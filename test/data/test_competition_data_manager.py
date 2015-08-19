@@ -1,36 +1,33 @@
+# -*- encoding: utf-8 -*-
 import unittest
 
 import numpy as np
-from sklearn.utils.testing import assert_array_almost_equal
 
 from autosklearn.data.data_manager import DataManager
+from sklearn.utils.testing import assert_array_almost_equal
 
-
-dataset_train = [[2.5, 3.3, 2, 5, 1, 1],
-                 [1.0, 0.7, 1, 5, 1, 0],
-                 [1.3, 0.8, 1, 4, 1, 1]]
+dataset_train = [[2.5, 3.3, 2, 5, 1, 1], [1.0, 0.7, 1, 5, 1, 0], [1.3, 0.8, 1,
+                                                                  4, 1, 1]]
 dataset_train = np.array(dataset_train)
-dataset_valid = [[1.5, 1.7, 1, 4, 1, 1],
-                 [2.0, 2.1, 1, 5, 1, 0],
-                 [1.9, 1.8, 2, 4, 0, 1]]
+dataset_valid = [[1.5, 1.7, 1, 4, 1, 1], [2.0, 2.1, 1, 5, 1, 0], [1.9, 1.8, 2,
+                                                                  4, 0, 1]]
 dataset_valid = np.array(dataset_valid)
-dataset_test = [[0.9, 2.2, 2, 4, 1, 1],
-                [0.7, 3.1, 1, 5, 1, 1],
-                [2.4, 2.6, 2, 5, 0, 1]]
+dataset_test = [[0.9, 2.2, 2, 4, 1, 1], [0.7, 3.1, 1, 5, 1, 1], [2.4, 2.6, 2,
+                                                                 5, 0, 1]]
 dataset_test = np.array(dataset_test)
 
-
-N = "Numerical"
-B = "Binary"
-C = "Categorical"
+N = 'Numerical'
+B = 'Binary'
+C = 'Categorical'
 
 
 class InitFreeDataManager(DataManager):
     def __init__(self):
-        pass
+        super(InitFreeDataManager, self).__init__()
 
 
 class DataManagerTest(unittest.TestCase):
+
     def setUp(self):
         self.D = InitFreeDataManager()
         self.D._data = {}
@@ -77,8 +74,8 @@ class DataManagerTest(unittest.TestCase):
         self.assertEqual((3, 13), self.D.data['X_valid'].shape)
         self.assertEqual((3, 13), self.D.data['X_test'].shape)
         # Some tests if encoding works
-        self.assertEqual(self.D.data['X_train'][:,:9].max(), 1)
-        self.assertEqual(self.D.data['X_valid'][:,:9].min(), 0)
+        self.assertEqual(self.D.data['X_train'][:, :9].max(), 1)
+        self.assertEqual(self.D.data['X_valid'][:, :9].min(), 0)
         self.assertEqual(self.D.data['X_test'][:, :9].min(), 0)
         # Test that other stuff is not encoded
         self.assertEqual(self.D.data['X_train'][0, 9], 2.5)
@@ -86,7 +83,6 @@ class DataManagerTest(unittest.TestCase):
     def test_perform1HotEncoding_binary_data_with_missing_values(self):
         #self.D.feat_type = [N, N, N, N, B, B]
         #self.D.info = {'is_sparse': 0, 'has_missing': 1}
-        #self.D.perform1HotEncoding()
+        # self.D.perform1HotEncoding()
         #self.assertEqual((3, 8), self.D.data['X_train'].shape)
         pass
-

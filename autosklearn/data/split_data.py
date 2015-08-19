@@ -1,7 +1,8 @@
+# -*- encoding: utf-8 -*-
 import numpy as np
 
-import sklearn.cross_validation
 import autosklearn.util.logging_
+import sklearn.cross_validation
 
 logger = autosklearn.util.logging_.get_logger(__name__)
 
@@ -11,8 +12,8 @@ def split_data(X, Y, classification=None):
     num_labels = Y.shape[1] if len(Y.shape) > 1 else 1
     X_train, X_valid, Y_train, Y_valid = None, None, None, None
     if X.shape[0] != Y.shape[0]:
-        raise ValueError("The first dimension of the X and Y array must "
-                         "be equal.")
+        raise ValueError('The first dimension of the X and Y array must '
+                         'be equal.')
 
     # If one class only has one sample, put it into the training set
     if classification is True and num_labels == 1:
@@ -31,26 +32,29 @@ def split_data(X, Y, classification=None):
             Y = Y[indices]
 
     if num_labels > 1:
-        logger.info("Multilabel dataset, do a random split.\n")
+        logger.info('Multilabel dataset, do a random split.\n')
         sss = None
     else:
         try:
-            sss = sklearn.cross_validation.StratifiedShuffleSplit(Y, n_iter=1,
-                                                                  test_size=0.33,
-                                                                  train_size=None,
-                                                                  random_state=42)
+            sss = sklearn.cross_validation.StratifiedShuffleSplit(
+                Y,
+                n_iter=1,
+                test_size=0.33,
+                train_size=None,
+                random_state=42)
         except ValueError:
             sss = None
-            logger.info("Too few samples of one class or maybe a "
-                        "regression dataset, use shuffle split.\n")
+            logger.info('Too few samples of one class or maybe a '
+                        'regression dataset, use shuffle split.\n')
 
     if sss is None:
-        sss = sklearn.cross_validation.ShuffleSplit(Y.shape[0], n_iter=1,
+        sss = sklearn.cross_validation.ShuffleSplit(Y.shape[0],
+                                                    n_iter=1,
                                                     test_size=0.33,
                                                     train_size=None,
                                                     random_state=42)
 
-    assert len(sss) == 1, "Splitting data went wrong"
+    assert len(sss) == 1, 'Splitting data went wrong'
 
     for train_index, valid_index in sss:
         if classification is True and num_labels == 1:
@@ -80,10 +84,11 @@ def get_CV_fold(X, Y, fold, folds, shuffle=True, random_state=None):
     if fold >= folds:
         raise ValueError((fold, folds))
     if X.shape[0] != Y.shape[0]:
-        raise ValueError("The first dimension of the X and Y array must "
-                         "be equal.")
+        raise ValueError('The first dimension of the X and Y array must '
+                         'be equal.')
 
-    kf = sklearn.cross_validation.StratifiedKFold(Y, n_folds=folds,
+    kf = sklearn.cross_validation.StratifiedKFold(Y,
+                                                  n_folds=folds,
                                                   shuffle=shuffle,
                                                   random_state=random_state)
     for idx, split in enumerate(kf):

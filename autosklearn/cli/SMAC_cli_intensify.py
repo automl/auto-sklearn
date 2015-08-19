@@ -1,11 +1,10 @@
-import os
+# -*- encoding: utf-8 -*-
 import re
 import sys
 
 from autosklearn.cli import base_interface
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dataset_info = sys.argv[1]
     instance_name = sys.argv[2]
     instance_specific_information = sys.argv[3]
@@ -19,7 +18,7 @@ if __name__ == "__main__":
     params = dict()
     for i in range(7, len(sys.argv), 2):
         p_name = str(sys.argv[i])
-        if p_name[0].startswith("-"):
+        if p_name[0].startswith('-'):
             p_name = p_name[1:]
         params[p_name] = sys.argv[i + 1].strip()
 
@@ -33,11 +32,10 @@ if __name__ == "__main__":
             fold = int(match.group(1))
             folds = int(match.group(2))
         else:
-            print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % (
-                "ABORT", 0, 1.0, seed, "Could not parse instance name!")
+            print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
+                  ('ABORT', 0, 1.0, seed, 'Could not parse instance name!'))
             sys.exit(1)
         mode_args = {'fold': fold, 'folds': folds}
-
 
     base_interface.main(dataset_info, mode, seed, params, mode_args=mode_args)
 

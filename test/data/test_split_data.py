@@ -1,9 +1,11 @@
-'''
-Created on Dec 16, 2014
+# -*- encoding: utf-8 -*-
+"""Created on Dec 16, 2014.
 
 @author: Aaron Klein
-'''
+
+"""
 import unittest
+
 import numpy as np
 
 from autosklearn.data.split_data import split_data
@@ -94,10 +96,12 @@ class Test(unittest.TestCase):
             y = np.array((0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3,
                           4, 5))
             np.random.shuffle(y)
-            X_train, X_valid, Y_train, Y_valid = split_data(X, y,
-                                                            classification=True)
-            print X_train, Y_train
+            X_train, X_valid, Y_train, Y_valid = split_data(
+                X, y,
+                classification=True)
+            print(X_train, Y_train)
             self.assertLessEqual(max(Y_valid), 1)
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     unittest.main()

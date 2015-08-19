@@ -1,20 +1,23 @@
-# Functions performing various data conversions for the ChaLearn AutoML challenge
+# -*- encoding: utf-8 -*-
+# Functions performing various data conversions for the ChaLearn AutoML
+# challenge
 
 # Main contributors: Arthur Pesah and Isabelle Guyon, August-October 2014
 
-# ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS". 
+# ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
 # ISABELLE GUYON, CHALEARN, AND/OR OTHER ORGANIZERS OR CODE AUTHORS DISCLAIM
 # ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR ANY PARTICULAR PURPOSE, AND THE
-# WARRANTY OF NON-INFRIGEMENT OF ANY THIRD PARTY'S INTELLECTUAL PROPERTY RIGHTS. 
-# IN NO EVENT SHALL ISABELLE GUYON AND/OR OTHER ORGANIZERS BE LIABLE FOR ANY SPECIAL, 
+# WARRANTY OF NON-INFRIGEMENT OF ANY THIRD PARTY'S INTELLECTUAL PROPERTY RIGHTS.
+# IN NO EVENT SHALL ISABELLE GUYON AND/OR OTHER ORGANIZERS BE LIABLE FOR ANY SPECIAL,
 # INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER ARISING OUT OF OR IN
-# CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS, 
+# CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS,
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 
 import glob
-import numpy as np
 import os
+
+import numpy as np
 
 
 def binarization(array):
@@ -22,8 +25,8 @@ def binarization(array):
     # into 1 and the min into 0
     array = np.array(array, dtype=float)  # conversion needed to use np.inf
     if len(np.unique(array)) > 2:
-        raise ValueError("The argument must be a binary-class datafile. "
-                         "{} classes detected".format(len(np.unique(array))))
+        raise ValueError('The argument must be a binary-class datafile. '
+                         '{} classes detected'.format(len(np.unique(array))))
 
     # manipulation which aims at avoid error in data
     # with for example classes '1' and '2'.
@@ -42,14 +45,14 @@ def convert_to_num(Ybin, verbose=True):
     # Convert binary targets to numeric vector
     # typically classification target values
     if verbose:
-        print("\tConverting to numeric vector")
+        print('\tConverting to numeric vector')
     Ybin = np.array(Ybin)
     if len(Ybin.shape) == 1:
         return Ybin
     classid = range(Ybin.shape[1])
     Ycont = np.dot(Ybin, classid)
     if verbose:
-        print Ycont
+        print(Ycont)
     return Ycont
 
 
@@ -79,19 +82,19 @@ def predict_RAM_usage(X, categorical):
     return estimated_ram
 
 
-# ================ Output prediction results and prepare code submission =======
+# ================ Output prediction results and prepare code submission =
 def save_predictions(filename, predictions):
     # Write prediction scores in prescribed format
-    with open(filename, "w") as output_file:
+    with open(filename, 'w') as output_file:
         for row in predictions:
-            if type(row) is not np.ndarray and type(row) is not list:
+            if not isinstance(row, np.ndarray) and not isinstance(row, list):
                 row = [row]
             for val in row:
                 output_file.write('{:g} '.format(float(val)))
             output_file.write('\n')
 
 
-# ================ Inventory input data and create data structure ==============
+# ================ Inventory input data and create data structure ========
 def inventory_data(input_dir):
     # Inventory the datasets in the input directory and return them in
     # alphabetical order
@@ -115,8 +118,8 @@ def inventory_data_nodir(input_dir):
     training_names = glob.glob(os.path.join(input_dir, '*_train.data'))
     for i in range(0, len(training_names)):
         name = training_names[i]
-        training_names[i] = name[-name[::-1].index(os.sep):-name[::-1].
-            index('_') - 1]
+        training_names[
+            i] = name[-name[::-1].index(os.sep):-name[::-1].index('_') - 1]
         check_dataset(input_dir, training_names[i])
     return training_names
 
@@ -129,8 +132,8 @@ def inventory_data_dir(input_dir):
     training_names = glob.glob(input_dir + '/*/*_train.data')
     for i in range(0, len(training_names)):
         name = training_names[i]
-        training_names[i] = name[-name[::-1].index(os.sep):-name[::-1].
-            index('_') - 1]
+        training_names[
+            i] = name[-name[::-1].index(os.sep):-name[::-1].index('_') - 1]
         check_dataset(os.path.join(input_dir, training_names[i]),
                       training_names[i])
     return training_names

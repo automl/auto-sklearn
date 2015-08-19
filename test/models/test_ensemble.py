@@ -1,15 +1,18 @@
-'''
-Created on Dec 19, 2014
+# -*- encoding: utf-8 -*-
+"""Created on Dec 19, 2014.
 
 @author: Aaron Klein
-'''
+
+"""
 import unittest
+
 import numpy as np
 
 import autosklearn.ensemble_script
 from autosklearn.constants import *
 
 N_TEST_RUNS = 10
+
 
 class Test(unittest.TestCase):
 
@@ -20,7 +23,8 @@ class Test(unittest.TestCase):
 
     def test_weighted_ensemble(self):
 
-        predictions = np.random.rand(self.n_models, self.n_points, self.n_classes)
+        predictions = np.random.rand(self.n_models, self.n_points,
+                                     self.n_classes)
 
         true_labels = np.random.randint(self.n_classes, size=self.n_points)
 
@@ -28,18 +32,19 @@ class Test(unittest.TestCase):
 
         weights /= weights.sum()
 
-        metric = "f1_metric"
+        metric = 'f1_metric'
         task_type = MULTICLASS_CLASSIFICATION
 
-        weights = autosklearn.ensemble_script.weighted_ensemble(predictions, true_labels, task_type, metric, weights)
+        weights = autosklearn.ensemble_script.weighted_ensemble(
+            predictions, true_labels, task_type, metric, weights)
 
         self.assertEqual(weights.shape[0], self.n_models)
 
         self.assertAlmostEqual(weights.sum(), 1.0)
 
         for w in weights:
-                self.assertLessEqual(w, 1.0)
-                self.assertGreaterEqual(w, 0.0)
+            self.assertLessEqual(w, 1.0)
+            self.assertGreaterEqual(w, 0.0)
 
     def test_ensemble_prediction(self):
 
@@ -62,19 +67,22 @@ class Test(unittest.TestCase):
                 self.assertAlmostEqual(pred[0, i, j], p_hat[i, j])
 
     def test_weighted_ensemble_error(self):
-        predictions = np.random.rand(self.n_models, self.n_points, self.n_classes)
+        predictions = np.random.rand(self.n_models, self.n_points,
+                                     self.n_classes)
 
         true_labels = np.random.randint(self.n_classes, size=self.n_points)
 
         weights = np.random.randn(self.n_models)
         weights /= weights.sum()
 
-        metric = "f1_metric"
+        metric = 'f1_metric'
         task_type = MULTICLASS_CLASSIFICATION
 
-        err = autosklearn.ensemble_script.weighted_ensemble_error(weights, predictions, true_labels, metric, task_type)
+        err = autosklearn.ensemble_script.weighted_ensemble_error(
+            weights, predictions, true_labels, metric, task_type)
 
         self.assertAlmostEqual(err, 1.0, delta=0.3)
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     unittest.main()

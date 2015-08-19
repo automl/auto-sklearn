@@ -1,9 +1,10 @@
-'''
-Created on Dec 16, 2014
+# -*- encoding: utf-8 -*-
+"""Created on Dec 16, 2014.
 
 @author: Katharina Eggensperger
 @projekt: AutoML2015
-'''
+
+"""
 
 import os
 import unittest
@@ -17,9 +18,10 @@ class TestCheckPID(unittest.TestCase):
         our_pid = os.getpid()
         exists = autosklearn.util.check_pid.check_pid(our_pid)
         self.assertTrue(exists)
-        our_pid = -11000 # We hope this pid does not exist
+        our_pid = -11000  # We hope this pid does not exist
         exists = autosklearn.util.check_pid.check_pid(our_pid)
         self.assertFalse(exists)
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     unittest.main()
