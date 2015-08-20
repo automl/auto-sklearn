@@ -20,4 +20,4 @@ class EstimatorTest(unittest.TestCase):
                 feat_type=['NUMERICAL', 'NUMERICAL', 'NUMERICAL', 'NUMERICAL',
                            'CATEGORICAL'])
         self.assertEqual([False, False, False, False, True],
-                         cls.ohe_.categorical_features)
+                         cls._ohe.categorical_features)

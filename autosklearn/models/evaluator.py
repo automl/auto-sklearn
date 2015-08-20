@@ -239,7 +239,7 @@ class Evaluator(object):
         return Y_pred
 
     def predict_regression(self, X, model, task_type, Y_train=None):
-        Y_pred = model.predict(X, batch_size=1000)
+        Y_pred = model.predict(X)
 
         if len(Y_pred.shape) == 1:
             Y_pred = Y_pred.reshape((-1, 1))
