@@ -19,7 +19,8 @@ def main():
     y_train = y[:1000]
     X_test = X[1000:]
     y_test = y[1000:]
-    automl = autosklearn.AutoSklearnClassifier()
+    automl = autosklearn.AutoSklearnClassifier(time_left_for_this_task=10,
+                                               per_run_time_limit=1)
     automl.fit(X_train, y_train)
     print(automl.score(X_test, y_test))
 

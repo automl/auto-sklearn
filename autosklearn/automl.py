@@ -4,6 +4,7 @@ import multiprocessing
 import os
 
 import numpy as np
+
 import lockfile
 from HPOlibConfigSpace.converters import pcs_parser
 from sklearn.base import BaseEstimator
@@ -12,6 +13,8 @@ import six.moves.cPickle as pickle
 from autosklearn import submit_process
 from autosklearn.constants import *
 from autosklearn.data import split_data
+from autosklearn.data.Xy_data_manager import XyDataManager
+from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.metalearning import metalearning
 from autosklearn.models import evaluator, paramsklearn
 from autosklearn.util import StopWatch, get_logger
@@ -33,165 +36,179 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                  queue=None,
                  keep_models=True):
         super(AutoML, self).__init__()
-        self.tmp_dir = tmp_dir
-        self.output_dir = output_dir
-        self.time_left_for_this_task = time_left_for_this_task
-        self.per_run_time_limit = per_run_time_limit
-        self.log_dir = log_dir
-        self.initial_configurations_via_metalearning = initial_configurations_via_metalearning
-        self.ensemble_size = ensemble_size
-        self.ensemble_nbest = ensemble_nbest
-        self.seed = seed
-        self.ml_memory_limit = ml_memory_limit
-        self.metadata_directory = metadata_directory
-        self.queue = queue
-        self.keep_models = keep_models
+        self._tmp_dir = tmp_dir
+        self._output_dir = output_dir
+        self._time_left_for_this_task = time_left_for_this_task
+        self._per_run_time_limit = per_run_time_limit
+        self._log_dir = log_dir
+        self._initial_configurations_via_metalearning = initial_configurations_via_metalearning
+        self._ensemble_size = ensemble_size
+        self._ensemble_nbest = ensemble_nbest
+        self._seed = seed
+        self._ml_memory_limit = ml_memory_limit
+        self._metadata_directory = metadata_directory
+        self._queue = queue
+        self._keep_models = keep_models
+
+        self._basename = None
+        self._stopwatch = None
+        self._logger = None
+        self._ohe = None
+
+    @staticmethod
+    def _get_logger(log_dir, basename, seed):
+        return get_logger(
+            outputdir=log_dir,
+            name='AutoML_%s_%d' % (basename, seed))
+
+    @staticmethod
+    def _set_auto_seed(seed):
+        env_key = 'AUTOSKLEARN_SEED'
+        # Set environment variable:
+        env_seed = os.environ.get(env_key)
+        if env_seed is not None and int(env_seed) != seed:
+            raise ValueError('It seems you have already started an instance '
+                             'of AutoSklearn in this thread.')
+        else:
+            os.environ[env_key] = str(seed)
+
+    @staticmethod
+    def _save_ensemble_data(x_data, y_data, tmp_dir):
+        """
+        Split dataset and store Data for the ensemble script
+        :param x_data:
+        :param y_data:
+        :return:
+        """
+        _, _, _, y_ensemble = split_data.split_data(x_data, y_data)
+
+        filepath = os.path.join(
+            tmp_dir, 'true_labels_ensemble.npy')
+
+        lock_path = filepath + '.lock'
+        with lockfile.LockFile(lock_path):
+            if not os.path.exists(filepath):
+                np.save(filepath, y_ensemble)
 
     def run(self):
         raise NotImplementedError()
 
-    def fit(self, X, y,
-            task=MULTICLASS_CLASSIFICATION,
-            metric='acc_metric',
-            feat_type=None,
-            dataset_name=None):
+    def fit(self, data_x, y, task=MULTICLASS_CLASSIFICATION,
+            metric='acc_metric', feat_type=None, dataset_name=None):
         if dataset_name is None:
             m = hashlib.md5()
-            m.update(X.data)
+            m.update(data_x.data)
             dataset_name = m.hexdigest()
-        self.basename_ = dataset_name
 
-        self.stopwatch_ = StopWatch()
-        self.stopwatch_.start_task(self.basename_)
-        self.stopwatch_.start_task('LoadData')
+        self._basename = dataset_name
 
-        from autosklearn.data import Xy_data_manager as data_manager
+        self._stopwatch = StopWatch()
+        self._stopwatch.start_task(self._basename)
+        self._stopwatch.start_task('LoadData')
 
-        self.logger = get_logger(
-            outputdir=self.log_dir,
-            name='AutoML_%s_%d' % (self.basename_, self.seed))
+        self._logger = self._get_logger(self._log_dir,
+                                        self._basename,
+                                        self._seed)
 
-        loaded_data_manager = data_manager.XyDataManager(
-            X, y,
-            task=task,
-            metric=metric,
-            feat_type=feat_type,
-            encode_labels=False,
-            dataset_name=dataset_name)
+        loaded_data_manager = XyDataManager(data_x, y, task=task, metric=metric,
+                                            feat_type=feat_type,
+                                            dataset_name=dataset_name,
+                                            encode_labels=False)
 
         return self._fit(loaded_data_manager)
 
     def fit_automl_dataset(self, basename, input_dir):
         # == Creating a data object with data and information about it
-        self.basename_ = basename
+        self._basename = basename
 
-        self.stopwatch_ = StopWatch()
-        self.stopwatch_.start_task(self.basename_)
+        self._stopwatch = StopWatch()
+        self._stopwatch.start_task(self._basename)
 
-        self.logger = get_logger(
-            outputdir=self.log_dir,
-            name='AutoML_%s_%d' % (self.basename_, self.seed))
+        self._logger = self._get_logger(self._log_dir,
+                                        self._basename,
+                                        self._seed)
 
-        self.stopwatch_.start_task('LoadData')
+        self._stopwatch.start_task('LoadData')
 
-        from autosklearn.data import competition_data_manager as data_manager
-
-        self.logger.debug('======== Reading and converting data ==========')
+        self._logger.debug('======== Reading and converting data ==========')
         # Encoding the labels will be done after the metafeature calculation!
-        loaded_data_manager = data_manager.CompetitionDataManager(
-            self.basename_, input_dir,
+        loaded_data_manager = CompetitionDataManager(
+            self._basename, input_dir,
             verbose=True,
             encode_labels=False)
         loaded_data_manager_str = str(loaded_data_manager).split('\n')
         for part in loaded_data_manager_str:
-            self.logger.debug(part)
+            self._logger.debug(part)
 
         return self._fit(loaded_data_manager)
 
-    def _fit(self, D):
+    def _fit(self, data_d):
         # TODO: check that data and task definition fit together!
 
-        self.metric_ = D.info['metric']
-        self.task_ = D.info['task']
-        self.target_num_ = D.info['target_num']
+        self.metric_ = data_d.info['metric']
+        self.task_ = data_d.info['task']
+        self.target_num_ = data_d.info['target_num']
 
-        # Set environment variable:
-        seed = os.environ.get('AUTOSKLEARN_SEED')
-        if seed is not None and int(seed) != self.seed:
-            raise ValueError('It seems you have already started an instance '
-                             'of AutoSklearn in this thread.')
-        else:
-            os.environ['AUTOSKLEARN_SEED'] = str(self.seed)
+        self._set_auto_seed(self._seed)
+        self._save_ensemble_data(data_d.data['X_train'], data_d.data['Y_train'],
+                                 self._tmp_dir)
 
-        # == Split dataset and store Data for the ensemble script
-        X_train, X_ensemble, Y_train, Y_ensemble = split_data.split_data(
-            D.data['X_train'], D.data['Y_train'])
+        time_for_load_data = self._stopwatch.wall_elapsed(self._basename)
+        time_left_after_reading = max(0, self._time_left_for_this_task - time_for_load_data)
+        self._logger.info('Remaining time after reading %s %5.2f sec' %
+                          (self._basename, time_left_after_reading))
 
-        true_labels_ensemble_filename = os.path.join(
-            self.tmp_dir, 'true_labels_ensemble.npy')
-        true_labels_ensemble_lock = true_labels_ensemble_filename + '.lock'
-        with lockfile.LockFile(true_labels_ensemble_lock):
-            if not os.path.exists(true_labels_ensemble_filename):
-                np.save(true_labels_ensemble_filename, Y_ensemble)
-
-        del X_train, X_ensemble, Y_train, Y_ensemble
-
-        time_needed_to_load_data = self.stopwatch_.wall_elapsed(self.basename_)
-        time_left_after_reading = max(
-            0, self.time_left_for_this_task - time_needed_to_load_data)
-        self.logger.info('Remaining time after reading %s %5.2f sec' %
-                         (self.basename_, time_left_after_reading))
-
-        self.stopwatch_.stop_task('LoadData')
+        self._stopwatch.stop_task('LoadData')
 
         # == Calculate metafeatures
-        self.stopwatch_.start_task('CalculateMetafeatures')
+        self._stopwatch.start_task('CalculateMetafeatures')
         categorical = [True if feat_type.lower() in ['categorical'] else False
-                       for feat_type in D.feat_type]
+                       for feat_type in data_d.feat_type]
 
-        if self.initial_configurations_via_metalearning <= 0:
+        if self._initial_configurations_via_metalearning <= 0:
             ml = None
-        elif D.info['task'] in \
+        elif data_d.info['task'] in \
                 [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
             ml = metalearning.MetaLearning()
-            self.logger.debug('Start calculating metafeatures for %s' %
-                              self.basename_)
-            ml.calculate_metafeatures_with_labels(D.data['X_train'],
-                                                  D.data['Y_train'],
+            self._logger.debug('Start calculating metafeatures for %s' %
+                               self._basename)
+            ml.calculate_metafeatures_with_labels(data_d.data['X_train'],
+                                                  data_d.data['Y_train'],
                                                   categorical=categorical,
-                                                  dataset_name=self.basename_)
+                                                  dataset_name=self._basename)
         else:
             ml = None
-            self.logger.critical('Metafeatures not calculated')
-        self.stopwatch_.stop_task('CalculateMetafeatures')
-        self.logger.debug(
+            self._logger.critical('Metafeatures not calculated')
+        self._stopwatch.stop_task('CalculateMetafeatures')
+        self._logger.debug(
             'Calculating Metafeatures (categorical attributes) took %5.2f' %
-            self.stopwatch_.wall_elapsed('CalculateMetafeatures'))
+            self._stopwatch.wall_elapsed('CalculateMetafeatures'))
 
-        self.stopwatch_.start_task('OneHot')
-        D.perform1HotEncoding()
-        self.ohe_ = D.encoder_
-        self.stopwatch_.stop_task('OneHot')
+        self._stopwatch.start_task('OneHot')
+        data_d.perform1HotEncoding()
+        self._ohe = data_d.encoder_
+        self._stopwatch.stop_task('OneHot')
 
         # == Pickle the data manager
-        self.stopwatch_.start_task('StoreDatamanager')
-        data_manager_path = os.path.join(self.tmp_dir,
-                                         self.basename_ + '_Manager.pkl')
+        self._stopwatch.start_task('StoreDatamanager')
+        data_manager_path = os.path.join(self._tmp_dir,
+                                         self._basename + '_Manager.pkl')
         data_manager_lockfile = data_manager_path + '.lock'
         with lockfile.LockFile(data_manager_lockfile):
             if not os.path.exists(data_manager_path):
-                pickle.dump(D, open(data_manager_path, 'w'), protocol=-1)
-                self.logger.debug('Pickled Datamanager at %s' %
+                pickle.dump(data_d, open(data_manager_path, 'w'), protocol=-1)
+                self._logger.debug('Pickled Datamanager at %s' %
                                   data_manager_path)
             else:
-                self.logger.debug('Data manager already presend at %s' %
+                self._logger.debug('Data manager already presend at %s' %
                                   data_manager_path)
-        self.stopwatch_.stop_task('StoreDatamanager')
+        self._stopwatch.stop_task('StoreDatamanager')
 
         # = Create a searchspace
-        self.stopwatch_.start_task('CreateConfigSpace')
-        configspace_path = os.path.join(self.tmp_dir, 'space.pcs')
-        self.configuration_space = paramsklearn.get_configuration_space(D.info)
+        self._stopwatch.start_task('CreateConfigSpace')
+        configspace_path = os.path.join(self._tmp_dir, 'space.pcs')
+        self.configuration_space = paramsklearn.get_configuration_space(
+            data_d.info)
 
         self.configuration_space_created_hook()
 
@@ -201,130 +218,131 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             if not os.path.exists(configspace_path):
                 with open(configspace_path, 'w') as fh:
                     fh.write(sp_string)
-                self.logger.debug('Configuration space written to %s' %
+                self._logger.debug('Configuration space written to %s' %
                                   configspace_path)
             else:
-                self.logger.debug('Configuration space already present at %s' %
+                self._logger.debug('Configuration space already present at %s' %
                                   configspace_path)
-        self.stopwatch_.stop_task('CreateConfigSpace')
+        self._stopwatch.stop_task('CreateConfigSpace')
 
         if ml is None:
             initial_configurations = []
-        elif D.info['task'] in \
+        elif data_d.info['task'] in \
                 [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
-            self.stopwatch_.start_task('CalculateMetafeaturesEncoded')
+            self._stopwatch.start_task('CalculateMetafeaturesEncoded')
             ml.calculate_metafeatures_encoded_labels(
-                X_train=D.data['X_train'],
-                Y_train=D.data['Y_train'],
-                categorical=[False] * D.data['X_train'].shape[0],
-                dataset_name=self.basename_)
-            self.stopwatch_.stop_task('CalculateMetafeaturesEncoded')
-            self.logger.debug(
+                X_train=data_d.data['X_train'],
+                Y_train=data_d.data['Y_train'],
+                categorical=[False] * data_d.data['X_train'].shape[0],
+                dataset_name=self._basename)
+            self._stopwatch.stop_task('CalculateMetafeaturesEncoded')
+            self._logger.debug(
                 'Calculating Metafeatures (encoded attributes) took %5.2fsec' %
-                self.stopwatch_.wall_elapsed('CalculateMetafeaturesEncoded'))
+                self._stopwatch.wall_elapsed('CalculateMetafeaturesEncoded'))
 
-            self.logger.debug(ml._metafeatures_labels.__repr__(verbosity=2))
-            self.logger.debug(
+            self._logger.debug(ml._metafeatures_labels.__repr__(verbosity=2))
+            self._logger.debug(
                 ml._metafeatures_encoded_labels.__repr__(verbosity=2))
 
-            self.stopwatch_.start_task('InitialConfigurations')
+            self._stopwatch.start_task('InitialConfigurations')
             try:
                 initial_configurations = ml.create_metalearning_string_for_smac_call(
-                    self.configuration_space, self.basename_, self.metric_,
-                    self.task_, True if D.info['is_sparse'] == 1 else False,
-                    self.initial_configurations_via_metalearning,
-                    self.metadata_directory)
+                    self.configuration_space, self._basename, self.metric_,
+                    self.task_,
+                    True if data_d.info['is_sparse'] == 1 else False,
+                    self._initial_configurations_via_metalearning,
+                    self._metadata_directory)
             except Exception as e:
                 import traceback
 
-                self.logger.error(str(e))
-                self.logger.error(traceback.format_exc())
+                self._logger.error(str(e))
+                self._logger.error(traceback.format_exc())
                 initial_configurations = []
 
-            self.stopwatch_.stop_task('InitialConfigurations')
+            self._stopwatch.stop_task('InitialConfigurations')
 
-            self.logger.debug('Initial Configurations: (%d)',
+            self._logger.debug('Initial Configurations: (%d)',
                               len(initial_configurations))
             for initial_configuration in initial_configurations:
-                self.logger.debug(initial_configuration)
-            self.logger.debug(
+                self._logger.debug(initial_configuration)
+            self._logger.debug(
                 'Looking for initial configurations took %5.2fsec' %
-                self.stopwatch_.wall_elapsed('InitialConfigurations'))
-            self.logger.info(
+                self._stopwatch.wall_elapsed('InitialConfigurations'))
+            self._logger.info(
                 'Time left for %s after finding initial configurations: %5.2fsec'
-                % (self.basename_, self.time_left_for_this_task -
-                   self.stopwatch_.wall_elapsed(self.basename_)))
+                % (self._basename, self._time_left_for_this_task -
+                   self._stopwatch.wall_elapsed(self._basename)))
         else:
             initial_configurations = []
-            self.logger.critical('Metafeatures encoded not calculated')
+            self._logger.critical('Metafeatures encoded not calculated')
 
         # == Set up a directory where all the trained models will be pickled to
-        if self.keep_models:
-            self.model_directory_ = os.path.join(self.tmp_dir,
-                                                 'models_%d' % self.seed)
+        if self._keep_models:
+            self.model_directory_ = os.path.join(self._tmp_dir,
+                                                 'models_%d' % self._seed)
             os.mkdir(self.model_directory_)
         self.ensemble_indices_directory_ = os.path.join(
-            self.tmp_dir, 'ensemble_indices_%d' % self.seed)
+            self._tmp_dir, 'ensemble_indices_%d' % self._seed)
         os.mkdir(self.ensemble_indices_directory_)
 
         # == RUN SMAC
-        self.stopwatch_.start_task('runSmac')
+        self._stopwatch.start_task('runSmac')
         # = Create an empty instance file
-        instance_file = os.path.join(self.tmp_dir, 'instances.txt')
+        instance_file = os.path.join(self._tmp_dir, 'instances.txt')
         instance_file_lock = instance_file + '.lock'
         with lockfile.LockFile(instance_file_lock):
             if not os.path.exists(instance_file_lock):
                 with open(instance_file, 'w') as fh:
                     fh.write('holdout')
-                self.logger.debug('Created instance file %s' % instance_file)
+                self._logger.debug('Created instance file %s' % instance_file)
             else:
-                self.logger.debug('Instance file already present at %s' %
+                self._logger.debug('Instance file already present at %s' %
                                   instance_file)
 
         # = Start SMAC
         time_left_for_smac = max(
-            0, self.time_left_for_this_task -
-            (self.stopwatch_.wall_elapsed(self.basename_)))
-        self.logger.debug('Start SMAC with %5.2fsec time left' %
+            0, self._time_left_for_this_task -
+               (self._stopwatch.wall_elapsed(self._basename)))
+        self._logger.debug('Start SMAC with %5.2fsec time left' %
                           time_left_for_smac)
         proc_smac, smac_call = \
-            submit_process.run_smac(dataset_name=self.basename_,
+            submit_process.run_smac(dataset_name=self._basename,
                                     dataset=data_manager_path,
-                                    tmp_dir=self.tmp_dir,
+                                    tmp_dir=self._tmp_dir,
                                     searchspace=configspace_path,
                                     instance_file=instance_file,
                                     limit=time_left_for_smac,
-                                    cutoff_time=self.per_run_time_limit,
+                                    cutoff_time=self._per_run_time_limit,
                                     initial_challengers=initial_configurations,
-                                    memory_limit=self.ml_memory_limit,
-                                    seed=self.seed)
-        self.logger.debug(smac_call)
-        self.stopwatch_.stop_task('runSmac')
+                                    memory_limit=self._ml_memory_limit,
+                                    seed=self._seed)
+        self._logger.debug(smac_call)
+        self._stopwatch.stop_task('runSmac')
 
         # == RUN ensemble builder
-        self.stopwatch_.start_task('runEnsemble')
+        self._stopwatch.start_task('runEnsemble')
         time_left_for_ensembles = max(
-            0, self.time_left_for_this_task -
-            (self.stopwatch_.wall_elapsed(self.basename_)))
-        self.logger.debug('Start Ensemble with %5.2fsec time left' %
+            0, self._time_left_for_this_task -
+               (self._stopwatch.wall_elapsed(self._basename)))
+        self._logger.debug('Start Ensemble with %5.2fsec time left' %
                           time_left_for_ensembles)
         proc_ensembles = \
-            submit_process.run_ensemble_builder(tmp_dir=self.tmp_dir,
-                                                dataset_name=self.basename_,
+            submit_process.run_ensemble_builder(tmp_dir=self._tmp_dir,
+                                                dataset_name=self._basename,
                                                 task_type=self.task_,
                                                 metric=self.metric_,
                                                 limit=time_left_for_ensembles,
-                                                output_dir=self.output_dir,
-                                                ensemble_size=self.ensemble_size,
-                                                ensemble_nbest=self.ensemble_nbest,
-                                                seed=self.seed,
+                                                output_dir=self._output_dir,
+                                                ensemble_size=self._ensemble_size,
+                                                ensemble_nbest=self._ensemble_nbest,
+                                                seed=self._seed,
                                                 ensemble_indices_output_dir=self.ensemble_indices_directory_)
-        self.stopwatch_.stop_task('runEnsemble')
+        self._stopwatch.stop_task('runEnsemble')
 
-        del D
+        del data_d
 
-        if self.queue is not None:
-            self.queue.put([time_needed_to_load_data, data_manager_path,
+        if self._queue is not None:
+            self._queue.put([time_for_load_data, data_manager_path,
                             proc_smac, proc_ensembles])
         else:
             proc_smac.wait()
@@ -334,8 +352,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         del os.environ['AUTOSKLEARN_SEED']
         return self
 
-    def predict(self, X):
-        if self.keep_models is not True:
+    def predict(self, data_x):
+        if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
 
@@ -349,8 +367,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         if len(models) == 0:
             raise ValueError('No models fitted!')
 
-        if self.ohe_ is not None:
-            X = self.ohe_._transform(X)
+        if self._ohe is not None:
+            data_x = self._ohe._transform(data_x)
 
         indices_files = sorted(os.listdir(self.ensemble_indices_directory_))
         indices_file = os.path.join(self.ensemble_indices_directory_,
@@ -367,7 +385,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
             weight = ensemble_members_run_numbers[num_run]
 
-            X_ = X.copy()
+            X_ = data_x.copy()
             if self.task_ in REGRESSION_TASKS:
                 prediction = model.predict(X_)
             else:
@@ -377,8 +395,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         predictions = np.sum(np.array(predictions), axis=0)
         return predictions
 
-    def score(self, X, y):
-        prediction = self.predict(X)
+    def score(self, data_x, y):
+        prediction = self.predict(data_x)
         return evaluator.calculate_score(y, prediction, self.task_,
                                          self.metric_, self.target_num_)
 
