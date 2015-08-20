@@ -7,18 +7,17 @@ from os.path import join
 import numpy as np
 
 import lockfile
-from HPOlibConfigSpace.converters import pcs_parser
-from sklearn.base import BaseEstimator
-
 import six.moves.cPickle as pickle
 from autosklearn import submit_process
 from autosklearn.constants import *
 from autosklearn.data import split_data
-from autosklearn.data.Xy_data_manager import XyDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
+from autosklearn.data.Xy_data_manager import XyDataManager
 from autosklearn.metalearning import metalearning
 from autosklearn.models import evaluator, paramsklearn
 from autosklearn.util import StopWatch, get_logger
+from HPOlibConfigSpace.converters import pcs_parser
+from sklearn.base import BaseEstimator
 
 
 def _write_file_with_data(filepath, data, name, log_function):
@@ -40,9 +39,8 @@ def _check_path_for_save(filepath, name, log_function):
 
 
 def _get_logger(log_dir, basename, seed):
-    return get_logger(
-        outputdir=log_dir,
-        name='AutoML_%s_%d' % (basename, seed))
+    return get_logger(outputdir=log_dir,
+                      name='AutoML_%s_%d' % (basename, seed))
 
 
 def _set_auto_seed(seed):
@@ -65,17 +63,15 @@ def _del_auto_seed():
     del os.environ[env_key]
 
 
-def _run_smac(tmp_dir, basename, time_for_task,
-              ml_memory_limit, data_manager_path,
-              configspace_path, initial_configurations, per_run_time_limit,
-              watcher, log_function):
+def _run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
+              data_manager_path, configspace_path, initial_configurations,
+              per_run_time_limit, watcher, log_function):
     task_name = 'runSmac'
     watcher.start_task(task_name)
 
     # = Create an empty instance file
     instance_file = os.path.join(tmp_dir, 'instances.txt')
-    _write_file_with_data(instance_file, 'holdout', "Instances",
-                          log_function)
+    _write_file_with_data(instance_file, 'holdout', 'Instances', log_function)
 
     # = Start SMAC
     time_smac = max(0, time_for_task - watcher.wall_elapsed(basename))
@@ -98,9 +94,7 @@ def _run_smac(tmp_dir, basename, time_for_task,
 
 class AutoML(multiprocessing.Process, BaseEstimator):
 
-    def __init__(self, tmp_dir,
-                 output_dir,
-                 time_left_for_this_task,
+    def __init__(self, tmp_dir, output_dir, time_left_for_this_task,
                  per_run_time_limit,
                  log_dir=None,
                  initial_configurations_via_metalearning=25,
@@ -145,18 +139,18 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
     @staticmethod
     def _save_ensemble_data(x_data, y_data, tmp_dir, watcher):
-        """
-        Split dataset and store Data for the ensemble script
+        """Split dataset and store Data for the ensemble script.
+
         :param x_data:
         :param y_data:
         :return:
+
         """
-        task_name = "LoadData"
+        task_name = 'LoadData'
         watcher.start_task(task_name)
         _, _, _, y_ensemble = split_data.split_data(x_data, y_data)
 
-        filepath = os.path.join(
-            tmp_dir, 'true_labels_ensemble.npy')
+        filepath = os.path.join(tmp_dir, 'true_labels_ensemble.npy')
 
         lock_path = filepath + '.lock'
         with lockfile.LockFile(lock_path):
@@ -166,9 +160,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         watcher.stop_task(task_name)
 
     def _calculate_metafeatures(self, data_feat_type, data_info_task, basename,
-                                metalearning_cnt,
-                                x_train,
-                                y_train, watcher):
+                                metalearning_cnt, x_train, y_train, watcher):
         # == Calculate metafeatures
         watcher.start_task('CalculateMetafeatures')
         categorical = [True if feat_type.lower() in ['categorical'] else False
@@ -180,8 +172,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
             ml = metalearning.MetaLearning()
             self._debug('Start calculating metafeatures for %s' % basename)
-            ml.calculate_metafeatures_with_labels(x_train,
-                                                  y_train,
+            ml.calculate_metafeatures_with_labels(x_train, y_train,
                                                   categorical=categorical,
                                                   dataset_name=basename)
         else:
@@ -196,8 +187,11 @@ class AutoML(multiprocessing.Process, BaseEstimator):
     def run(self):
         raise NotImplementedError()
 
-    def fit(self, data_x, y, task=MULTICLASS_CLASSIFICATION,
-            metric='acc_metric', feat_type=None, dataset_name=None):
+    def fit(self, data_x, y,
+            task=MULTICLASS_CLASSIFICATION,
+            metric='acc_metric',
+            feat_type=None,
+            dataset_name=None):
         if dataset_name is None:
             m = hashlib.md5()
             m.update(data_x.data)
@@ -208,11 +202,11 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._stopwatch = StopWatch()
         self._stopwatch.start_task(self._basename)
 
-        self._logger = _get_logger(self._log_dir,
-                                        self._basename,
-                                        self._seed)
+        self._logger = _get_logger(self._log_dir, self._basename, self._seed)
 
-        loaded_data_manager = XyDataManager(data_x, y, task=task, metric=metric,
+        loaded_data_manager = XyDataManager(data_x, y,
+                                            task=task,
+                                            metric=metric,
                                             feat_type=feat_type,
                                             dataset_name=dataset_name,
                                             encode_labels=False)
@@ -238,16 +232,14 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._stopwatch = StopWatch()
         self._stopwatch.start_task(self._basename)
 
-        self._logger = self._get_logger(self._log_dir,
-                                        self._basename,
+        self._logger = self._get_logger(self._log_dir, self._basename,
                                         self._seed)
 
         self._debug('======== Reading and converting data ==========')
         # Encoding the labels will be done after the metafeature calculation!
-        loaded_data_manager = CompetitionDataManager(
-            self._basename, input_dir,
-            verbose=True,
-            encode_labels=False)
+        loaded_data_manager = CompetitionDataManager(self._basename, input_dir,
+                                                     verbose=True,
+                                                     encode_labels=False)
         loaded_data_manager_str = str(loaded_data_manager).split('\n')
         for part in loaded_data_manager_str:
             self._debug(part)
@@ -258,10 +250,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         task_name = 'StoreDatamanager'
 
         watcher.start_task(task_name)
-        filepath = os.path.join(tmp_dir,
-                                basename + '_Manager.pkl')
+        filepath = os.path.join(tmp_dir, basename + '_Manager.pkl')
 
-        if _check_path_for_save(filepath, "Data manager ", self._debug):
+        if _check_path_for_save(filepath, 'Data manager ', self._debug):
             pickle.dump(data_d, open(filepath, 'w'), protocol=-1)
 
         watcher.stop_task(task_name)
@@ -276,11 +267,10 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         watcher.stop_task(task_name)
 
     def _print_load_time(self, basename, time_left_for_this_task,
-                         time_for_load_data,
-                         log_function):
+                         time_for_load_data, log_function):
 
-        time_left_after_reading = max(0,
-                                      time_left_for_this_task - time_for_load_data)
+        time_left_after_reading = max(
+            0, time_left_for_this_task - time_for_load_data)
         log_function('Remaining time after reading %s %5.2f sec' %
                      (basename, time_left_after_reading))
         return time_for_load_data
@@ -297,17 +287,14 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         # load data
         self._save_ensemble_data(data_d.data['X_train'],
-                                 data_d.data['Y_train'],
-                                 self._tmp_dir,
+                                 data_d.data['Y_train'], self._tmp_dir,
                                  self._stopwatch)
 
         time_for_load_data = self._stopwatch.wall_elapsed(self._basename)
 
         if self._debug_mode:
-            self._print_load_time(self._basename,
-                                  self._time_for_task,
-                                  time_for_load_data,
-                                  self._info)
+            self._print_load_time(self._basename, self._time_for_task,
+                                  time_for_load_data, self._info)
 
         # == Calculate metafeatures
         ml = self._calculate_metafeatures(
@@ -317,8 +304,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             y_train=data_d.data['Y_train'],
             basename=self._basename,
             watcher=self._stopwatch,
-            metalearning_cnt=self._initial_configurations_via_metalearning
-        )
+            metalearning_cnt=self._initial_configurations_via_metalearning)
 
         self._stopwatch.start_task('OneHot')
         data_d.perform1HotEncoding()
@@ -326,12 +312,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._stopwatch.stop_task('OneHot')
 
         # == Pickle the data manager
-        data_manager_path = self._save_data_manager(
-            data_d,
-            self._tmp_dir,
-            self._basename,
-            watcher=self._stopwatch,
-        )
+        data_manager_path = self._save_data_manager(data_d, self._tmp_dir,
+                                                    self._basename,
+                                                    watcher=self._stopwatch, )
 
         # = Create a searchspace
         self._stopwatch.start_task('CreateConfigSpace')
@@ -341,7 +324,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self.configuration_space_created_hook()
         sp_string = pcs_parser.write(self.configuration_space)
         _write_file_with_data(configspace_path, sp_string,
-                              "Configuration space", self._debug)
+                              'Configuration space', self._debug)
         self._stopwatch.stop_task('CreateConfigSpace')
 
         if ml is None:
@@ -360,16 +343,14 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 self._stopwatch.wall_elapsed('CalculateMetafeaturesEncoded'))
 
             self._debug(ml._metafeatures_labels.__repr__(verbosity=2))
-            self._debug(
-                ml._metafeatures_encoded_labels.__repr__(verbosity=2))
+            self._debug(ml._metafeatures_encoded_labels.__repr__(verbosity=2))
 
             self._stopwatch.start_task('InitialConfigurations')
             try:
                 initial_configurations = ml.create_metalearning_string_for_smac_call(
                     self.configuration_space, self._basename, self.metric_,
-                    self.task_,
-                    True if data_d.info['is_sparse'] == 1 else False,
-                    self._initial_configurations_via_metalearning,
+                    self.task_, True if data_d.info['is_sparse'] == 1 else
+                    False, self._initial_configurations_via_metalearning,
                     self._metadata_directory)
             except Exception as e:
                 import traceback
@@ -381,12 +362,11 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._stopwatch.stop_task('InitialConfigurations')
 
             self._debug('Initial Configurations: (%d)' %
-                              len(initial_configurations))
+                        len(initial_configurations))
             for initial_configuration in initial_configurations:
                 self._debug(initial_configuration)
-            self._debug(
-                'Looking for initial configurations took %5.2fsec' %
-                self._stopwatch.wall_elapsed('InitialConfigurations'))
+            self._debug('Looking for initial configurations took %5.2fsec' %
+                        self._stopwatch.wall_elapsed('InitialConfigurations'))
             self._info(
                 'Time left for %s after finding initial configurations: %5.2fsec'
                 % (self._basename, self._time_for_task -
@@ -397,22 +377,18 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         # == RUN SMAC
         proc_smac = _run_smac(self._tmp_dir, self._basename,
-                              self._time_for_task,
-                              self._ml_memory_limit,
-                              data_manager_path,
-                              configspace_path,
-                              initial_configurations,
-                              self._per_run_time_limit,
-                              self._stopwatch,
-                              self._debug)
+                              self._time_for_task, self._ml_memory_limit,
+                              data_manager_path, configspace_path,
+                              initial_configurations, self._per_run_time_limit,
+                              self._stopwatch, self._debug)
 
         # == RUN ensemble builder
         self._stopwatch.start_task('runEnsemble')
         time_left_for_ensembles = max(
             0, self._time_for_task -
-               (self._stopwatch.wall_elapsed(self._basename)))
+            (self._stopwatch.wall_elapsed(self._basename)))
         self._debug('Start Ensemble with %5.2fsec time left' %
-                          time_left_for_ensembles)
+                    time_left_for_ensembles)
         proc_ensembles = \
             submit_process.run_ensemble_builder(tmp_dir=self._tmp_dir,
                                                 dataset_name=self._basename,
@@ -429,8 +405,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         del data_d
 
         if self._queue is not None:
-            self._queue.put([time_for_load_data, data_manager_path,
-                            proc_smac, proc_ensembles])
+            self._queue.put([time_for_load_data, data_manager_path, proc_smac,
+                             proc_ensembles])
         else:
             proc_smac.wait()
             proc_ensembles.wait()

@@ -1,7 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 
-from six.moves import cStringIO as cPickle
 import multiprocessing
 import os
 import shutil
@@ -12,6 +11,7 @@ import numpy as np
 import autosklearn.automl
 import ParamSklearn.util as putil
 from autosklearn.constants import *
+from six.moves import cStringIO as cPickle
 
 
 class AutoMLTest(unittest.TestCase):

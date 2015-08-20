@@ -6,17 +6,18 @@
 """
 
 from __future__ import print_function
+
 import logging
 import os
 import sys
 import time
 
 import numpy as np
-import cma
 
-from autosklearn.util import StopWatch
+import cma
 from autosklearn.data import util as data_util
 from autosklearn.models import evaluator
+from autosklearn.util import StopWatch
 
 
 def weighted_ensemble_error(weights, *args):

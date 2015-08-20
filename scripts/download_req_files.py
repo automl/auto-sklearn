@@ -11,34 +11,33 @@ from os.path import join
 
 BASE_DIR = os.path.join(os.path.dirname(__file__), '..')
 
-SMAC_DOWNLOAD_LOCATION = "http://aad.informatik.uni-freiburg.de/~feurerm/"
-SMAC_TAR_NAME = "smac-v2.08.01-development-1.tar.gz"
-METADATA_LOCATION = "http://aad.informatik.uni-freiburg.de/~feurerm/"
-METADATA_TAR_NAME = "metadata_automl1_000.tar.gz"
-RUNSOLVER_LOCATION = "http://www.cril.univ-artois.fr/~roussel/runsolver/"
-RUNSOLVER_TAR_NAME = "runsolver-3.3.4.tar.bz2"
-DOWNLOAD_DIRECTORY = os.path.join(BASE_DIR, ".downloads")
-BINARIES_DIRECTORY = os.path.join(BASE_DIR, "autosklearn/binaries")
-METADATA_DIRECTORY = os.path.join(BASE_DIR, "autosklearn/metalearning/files")
+SMAC_DOWNLOAD_LOCATION = 'http://aad.informatik.uni-freiburg.de/~feurerm/'
+SMAC_TAR_NAME = 'smac-v2.08.01-development-1.tar.gz'
+METADATA_LOCATION = 'http://aad.informatik.uni-freiburg.de/~feurerm/'
+METADATA_TAR_NAME = 'metadata_automl1_000.tar.gz'
+RUNSOLVER_LOCATION = 'http://www.cril.univ-artois.fr/~roussel/runsolver/'
+RUNSOLVER_TAR_NAME = 'runsolver-3.3.4.tar.bz2'
+DOWNLOAD_DIRECTORY = os.path.join(BASE_DIR, '.downloads')
+BINARIES_DIRECTORY = os.path.join(BASE_DIR, 'autosklearn/binaries')
+METADATA_DIRECTORY = os.path.join(BASE_DIR, 'autosklearn/metalearning/files')
 
 
 def load_file(data):
     download_url, filename = data
     # This can fail ungracefully, because having these files is
     # crucial to AutoSklearn!
-    print("Download file: %s" % download_url)
+    print('Download file: %s' % download_url)
     filepath = os.path.join(DOWNLOAD_DIRECTORY, filename)
-    urllib.urlretrieve(os.path.join(download_url, filename),
-                       filename=filepath)
+    urllib.urlretrieve(os.path.join(download_url, filename), filename=filepath)
     return filepath
 
 
 def extract_file(filename):
-    print("Extract file: %s" % filename)
+    print('Extract file: %s' % filename)
     tfile = tarfile.open(os.path.join(DOWNLOAD_DIRECTORY, filename))
-    tfile.extractall(os.path.join(DOWNLOAD_DIRECTORY,
-                                  filename.replace(".tar.gz", "").
-                                  replace(".tar.bz2", "")))
+    tfile.extractall(
+        os.path.join(DOWNLOAD_DIRECTORY,
+                     filename.replace('.tar.gz', '').replace('.tar.bz2', '')))
 
 
 def clean_directory_dir(dirpath):
@@ -61,7 +60,7 @@ def build_runsolver(folder_path):
     cur_pwd = os.getcwd()
 
     os.chdir(folder_path)
-    subprocess.check_call("make")
+    subprocess.check_call('make')
     os.chdir(cur_pwd)
 
 
@@ -70,23 +69,20 @@ def run():
     with open(os.path.join(BINARIES_DIRECTORY, '__init__.py'), 'w'):
         pass
 
-    map(extract_file, map(load_file, [(SMAC_DOWNLOAD_LOCATION, SMAC_TAR_NAME),
-                                      (RUNSOLVER_LOCATION, RUNSOLVER_TAR_NAME)])
-        )
+    map(extract_file, map(load_file,
+                          [(SMAC_DOWNLOAD_LOCATION, SMAC_TAR_NAME),
+                           (RUNSOLVER_LOCATION, RUNSOLVER_TAR_NAME)]))
 
-    sys.stdout.write("Building runsolver\n")
-    runsolver_source_path = os.path.join(DOWNLOAD_DIRECTORY,
-                                         "runsolver-3.3.4",
-                                         "runsolver", "src")
+    sys.stdout.write('Building runsolver\n')
+    runsolver_source_path = os.path.join(DOWNLOAD_DIRECTORY, 'runsolver-3.3.4',
+                                         'runsolver', 'src')
     build_runsolver(runsolver_source_path)
 
-    map(lambda (x, y): shutil.move(x, y), [
-        (join(runsolver_source_path, "runsolver"),
-         join(BINARIES_DIRECTORY, "runsolver")),
-
-        (join(DOWNLOAD_DIRECTORY, SMAC_TAR_NAME.replace(".tar.gz", "")),
+    map(lambda x_y: shutil.move(x_y[0], x_y[1]), [
+        (join(runsolver_source_path, 'runsolver'),
+         join(BINARIES_DIRECTORY, 'runsolver')),
+        (join(DOWNLOAD_DIRECTORY, SMAC_TAR_NAME.replace('.tar.gz', '')),
          BINARIES_DIRECTORY),
-
         # (os.path.join(DOWNLOAD_DIRECTORY,
         #               METADATA_TAR_NAME.replace(".tar.gz", ""),
         #               "files"),
@@ -94,8 +90,7 @@ def run():
     ])
 
     map(shutil.rmtree, [
-        DOWNLOAD_DIRECTORY,
-        # BINARIES_DIRECTORY,
+        DOWNLOAD_DIRECTORY,  # BINARIES_DIRECTORY,
         # METADATA_DIRECTORY
     ])
 

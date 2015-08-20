@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 
-import sklearn.datasets
 import numpy as np
 
 import autosklearn
+import sklearn.datasets
 
 
 def main():

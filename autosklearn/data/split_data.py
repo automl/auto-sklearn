@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 import numpy as np
-import sklearn.cross_validation
 
+import sklearn.cross_validation
 from autosklearn.util import get_logger
 
 logger = get_logger(__name__)

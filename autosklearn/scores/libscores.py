@@ -22,6 +22,7 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS,
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 from __future__ import print_function
+
 import os
 import platform
 from glob import glob

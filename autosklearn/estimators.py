@@ -50,9 +50,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
                  output_folder=None):
 
         self._tmp_dir, self._output_dir = self._prepare_create_folders(
-            tmp_folder,
-            output_folder
-        )
+            tmp_folder, output_folder)
 
         self._classes = []
         self._n_classes = []
@@ -97,8 +95,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             task=MULTICLASS_CLASSIFICATION,
             metric='acc_metric',
             feat_type=None,
-            dataset_name=None,
-            ):
+            dataset_name=None, ):
         """Fit *autosklearn* to given training set (X, y).
 
         X : array-like or sparse matrix of shape = [n_samples, n_features]

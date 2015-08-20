@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
+
 import unittest
 
 from autosklearn.constants import *

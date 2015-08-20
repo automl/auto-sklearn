@@ -30,7 +30,6 @@ from collections import OrderedDict
 
 from six.moves import cStringIO as StringIO
 
-
 __version__ = '0.9.3'
 
 ACTION_TYPES_THAT_DONT_NEED_A_VALUE = {

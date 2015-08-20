@@ -38,8 +38,9 @@ class XyDataManager(DataManager):
 
         if data_x.shape[0] != y.shape[0]:
             raise ValueError('X and y must have the same number of '
-                             'datapoints, but have %d and %d.' % (data_x.shape[0],
-                                                                  y.shape[0]))
+                             'datapoints, but have %d and %d.' % (
+                                 data_x.shape[0], y.shape[0]
+                             ))
         if self.feat_type is None:
             self.feat_type = ['Numerical'] * data_x.shape[1]
         if data_x.shape[1] != len(self.feat_type):
