@@ -19,7 +19,7 @@ import six.moves.cPickle as pickle
 from autosklearn.constants import *
 from autosklearn.data import util as data_util
 from autosklearn.models import evaluator
-from autosklearn.util.stopwatch import StopWatch
+from autosklearn.util import StopWatch
 
 
 def build_ensemble(predictions_train, predictions_valid, predictions_test,

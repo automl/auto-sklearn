@@ -28,10 +28,8 @@ import sys
 import types
 from collections import OrderedDict
 
-if sys.version_info >= (3, 0):
-    from io import StringIO
-else:
-    from StringIO import StringIO
+from six.moves import cStringIO as StringIO
+
 
 __version__ = '0.9.3'
 

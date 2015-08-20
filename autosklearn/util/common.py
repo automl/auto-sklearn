@@ -1,10 +1,27 @@
 # -*- encoding: utf-8 -*-
+
+
 import os
 import sys
 
 
-def getInfoFromFile(datadir, dataset):
-    ''' Get all information {attribute = value} pairs from the public.info file'''
+def check_pid(pid):
+    """Check For the existence of a unix pid."""
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    else:
+        return True
+
+
+def get_info_from_file(datadir, dataset):
+    """
+    Get all information {attribute = value} pairs from the public.info file
+    :param datadir:
+    :param dataset:
+    :return:
+    """
     dataset_path = os.path.join(datadir, dataset, dataset + '_public.info')
 
     if not os.path.exists(dataset_path):

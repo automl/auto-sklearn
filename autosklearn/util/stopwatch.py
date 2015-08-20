@@ -10,7 +10,7 @@ import time
 from collections import OrderedDict
 
 
-class TimingTask():
+class TimingTask(object):
     _name = False
     _cpu_tic = False
     _cpu_tac = False

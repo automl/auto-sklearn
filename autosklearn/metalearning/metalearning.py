@@ -4,13 +4,13 @@ import time
 from StringIO import StringIO
 
 import numpy as np
-
 import pyMetaLearn.metafeatures.metafeatures as metafeatures
 import pyMetaLearn.optimizers.metalearn_optimizer.metalearner as metalearner
-from autosklearn.constants import *
-from autosklearn.util import logging_
 
-logger = logging_.get_logger(__name__)
+from autosklearn.constants import *
+from autosklearn.util import get_logger
+
+logger = get_logger(__name__)
 
 
 class MetaLearning(object):

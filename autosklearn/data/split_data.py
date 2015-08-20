@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 import numpy as np
-
-import autosklearn.util.logging_
 import sklearn.cross_validation
 
-logger = autosklearn.util.logging_.get_logger(__name__)
+from autosklearn.util import get_logger
+
+logger = get_logger(__name__)
 
 
 def split_data(X, Y, classification=None):
