@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from __future__ import print_function
 import abc
 import os
 import time
@@ -159,7 +160,6 @@ class Evaluator(object):
             import traceback
 
             print(traceback.format_exc())
-            print()
             print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
                   ('TIMEOUT', abs(self.duration), 1.0, self.seed,
                    'No results were produced! Probably the training was not '
