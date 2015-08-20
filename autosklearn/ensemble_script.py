@@ -11,9 +11,9 @@ import sys
 import time
 
 import numpy as np
-
-import autosklearn.util.stopwatch
 import cma
+
+from autosklearn.util import StopWatch
 from autosklearn.data import util as data_util
 from autosklearn.models import evaluator
 
@@ -68,7 +68,7 @@ def ensemble_prediction(all_predictions, weights):
 
 def main(predictions_dir, basename, task_type, metric, limit, output_dir,
          ensemble_size=None):
-    watch = autosklearn.util.stopwatch.StopWatch()
+    watch = StopWatch()
     watch.start_task('ensemble_builder')
 
     used_time = 0

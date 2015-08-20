@@ -4,23 +4,24 @@ import multiprocessing
 import os
 
 import numpy as np
-
-import autosklearn.util.logging_
 import lockfile
+from HPOlibConfigSpace.converters import pcs_parser
+from sklearn.base import BaseEstimator
+
 import six.moves.cPickle as pickle
 from autosklearn import submit_process
 from autosklearn.constants import *
 from autosklearn.data import split_data
 from autosklearn.metalearning import metalearning
 from autosklearn.models import evaluator, paramsklearn
-from autosklearn.util import stopwatch
-from HPOlibConfigSpace.converters import pcs_parser
-from sklearn.base import BaseEstimator
+from autosklearn.util import StopWatch, get_logger
 
 
 class AutoML(multiprocessing.Process, BaseEstimator):
 
-    def __init__(self, tmp_dir, output_dir, time_left_for_this_task,
+    def __init__(self, tmp_dir,
+                 output_dir,
+                 time_left_for_this_task,
                  per_run_time_limit,
                  log_dir=None,
                  initial_configurations_via_metalearning=25,
@@ -60,13 +61,13 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             dataset_name = m.hexdigest()
         self.basename_ = dataset_name
 
-        self.stopwatch_ = stopwatch.StopWatch()
+        self.stopwatch_ = StopWatch()
         self.stopwatch_.start_task(self.basename_)
         self.stopwatch_.start_task('LoadData')
 
         from autosklearn.data import Xy_data_manager as data_manager
 
-        self.logger = autosklearn.util.logging_.get_logger(
+        self.logger = get_logger(
             outputdir=self.log_dir,
             name='AutoML_%s_%d' % (self.basename_, self.seed))
 
@@ -84,10 +85,10 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         # == Creating a data object with data and information about it
         self.basename_ = basename
 
-        self.stopwatch_ = stopwatch.StopWatch()
+        self.stopwatch_ = StopWatch()
         self.stopwatch_.start_task(self.basename_)
 
-        self.logger = autosklearn.util.logging_.get_logger(
+        self.logger = get_logger(
             outputdir=self.log_dir,
             name='AutoML_%s_%d' % (self.basename_, self.seed))
 
