@@ -1,6 +1,7 @@
 mock
 nose
 
+cython
 lockfile
 numpy
 psutil

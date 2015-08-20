@@ -1,4 +1,4 @@
-import numpy as np
+# -*- encoding: utf-8 -*-
 cimport numpy as np
 
 import scipy.sparse
@@ -6,6 +6,9 @@ import scipy.sparse
 
 from libc.stdio cimport *
 
+
+def log_function(*args):
+    print(args)
 
 '''    read_sparse_file (filename, num_features, num_points)
 
@@ -51,27 +54,29 @@ def read_sparse_file(char *filename, int num_points,int num_features, int initia
         # read the column and the value and store it
         read =fscanf(cfile, "%i:%f",&j,&v)
         # stop at EOF
-        if (read == -1): break
+        if read == -1:
+            break
 
-        data[num_entries] = v;
+        data[num_entries] = v
         indices[num_entries] = j+offset
         num_entries += 1
         
         #enlarge the array if necessary
-        if (num_entries == data.shape[0]):
+        if num_entries == data.shape[0]:
             data.resize(data.shape[0]+initial_length)
             indices.resize(data.shape[0])
         
         # check if we hit a endline next to recognize the next row
         # It is cumbersome, but a way to reliably do it!
         whitespace = fgetc(cfile)
-        while (whitespace==32):
+        while whitespace == 32:
             whitespace = fgetc(cfile)
-        
-        if (whitespace == '\n'):
+
+        if whitespace == '\n':
             i+=1
             # stop if num_points have been read
-            if (i >=num_points): break
+            if i >= num_points:
+                break
             indptr[i] = num_entries
         else:
             ungetc(whitespace, cfile)
@@ -86,7 +91,8 @@ def read_sparse_file(char *filename, int num_points,int num_features, int initia
     # fix the end of indptr
     for j in range (i,num_points+1):
         indptr[j] = num_entries
-    return(scipy.sparse.csr_matrix((data,indices,indptr),shape=[num_points, num_features]))
+    return (scipy.sparse.csr_matrix((data, indices, indptr),
+                                    shape=[num_points, num_features]))
 
 
 
@@ -120,14 +126,15 @@ def read_sparse_binary_file(char *filename, int num_points, int num_features, in
         # read the column and the value and store it
         read =fscanf(cfile, "%d",&j)
         # stop at EOF
-        if (read == -1): break
+        if read == -1:
+            break
 
-        data[num_entries] = True;
+        data[num_entries] = True
         indices[num_entries] = j+offset
         num_entries += 1
         
         #enlarge the array if necessary
-        if (num_entries == data.shape[0]):
+        if num_entries == data.shape[0]:
             data.resize(data.shape[0]+initial_length)
             indices.resize(data.shape[0])
         
@@ -136,8 +143,8 @@ def read_sparse_binary_file(char *filename, int num_points, int num_features, in
         whitespace = fgetc(cfile)
         while (whitespace==32):
             whitespace = fgetc(cfile)
-        
-        if (whitespace == '\n'):
+
+        if whitespace == '\n':
             i+=1
             # stop if num_points have been read
             if (i >=num_points): break
@@ -155,8 +162,10 @@ def read_sparse_binary_file(char *filename, int num_points, int num_features, in
     # fix the end of indptr
     for j in range (i,num_points+1):
         indptr[j] = num_entries
-    
-    return(scipy.sparse.csr_matrix((data,indices,indptr),shape=[num_points, num_features], dtype=np.bool))
+
+    return (scipy.sparse.csr_matrix((data, indices, indptr),
+                                    shape=[num_points, num_features],
+                                    dtype=np.bool))
 
 
 '''    read_dense_file (filename, num_features, num_points)
@@ -223,16 +232,20 @@ def read_dense_file_unknown_width(filename, num_points):
 
     # if only one predictor is present, convert it into a 1D array
     if data.shape[1] == 1:
-        return(data.flatten())
+        return (data.flatten())
 
-    return(data)
+    return (data)
 
 
 # function copied from the reference implementation
 # no need to really optimize them because they don't take long
 
 def read_first_line (filename):
-    '''Read fist line of file'''
+    """
+    Read fist line of file
+    :param filename:
+    :return:
+    """
     data =[]
     with open(filename, "r") as data_file:
         line = data_file.readline()
@@ -241,12 +254,22 @@ def read_first_line (filename):
 
 
 def file_to_array (filename, verbose=False):
-    ''' Converts a file to a list of list of STRING
-    It differs from np.genfromtxt in that the number of columns doesn't need to be constant'''
+    """
+    Converts a file to a list of list of STRING
+    It differs from np.genfromtxt in that the number of columns doesn't need to be constant
+    :param filename:
+    :param verbose:
+    :return:
+    """
+
     data =[]
     with open(filename, "r") as data_file:
-        if verbose: print ("Reading {}...".format(filename))
+        if verbose:
+            log_function("Reading {}...".format(filename))
         lines = data_file.readlines()
-        if verbose: print ("Converting {} to correct array...".format(filename))
+
+        if verbose:
+            log_function("Converting {} to correct array...".format(filename))
+
         data = [lines[i].strip().split() for i in range (len(lines))]
     return data

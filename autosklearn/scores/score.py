@@ -15,6 +15,7 @@
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 
 # Some libraries and options
+from __future__ import print_function
 from argparse import ArgumentParser
 
 import yaml

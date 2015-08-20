@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
-import cPickle
+from __future__ import print_function
+
+from six.moves import cStringIO as cPickle
 import multiprocessing
 import os
 import shutil

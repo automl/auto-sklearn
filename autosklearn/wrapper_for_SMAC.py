@@ -1,16 +1,17 @@
 # -*- encoding: utf-8 -*-
-
+from __future__ import print_function
 import os
 import signal
 import sys
 import time
 
-import autosklearn.models.holdout_evaluator
 import lockfile
+from HPOlibConfigSpace import configuration_space
+
+import autosklearn.models.holdout_evaluator
 import six.moves.cPickle as pickle
 from autosklearn.data.data_manager import DataManager
 from autosklearn.models.paramsklearn import get_class
-from HPOlibConfigSpace import configuration_space
 
 
 def store_and_or_load_data(outputdir, dataset, data_dir):
