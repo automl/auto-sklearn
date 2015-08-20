@@ -37,7 +37,7 @@ class AutoMLTest(unittest.TestCase):
         automl.fit(X_train, Y_train)
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.9)
-        self.assertEqual(automl.task_, MULTICLASS_CLASSIFICATION)
+        self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
     def test_dataset_manager_pickling(self):
         data_dir = os.path.join(self.test_dir, '..', '.data')

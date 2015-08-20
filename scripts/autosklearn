@@ -101,8 +101,6 @@ def get_options():
     return parser
 
 
-
-
 if __name__ == '__main__':
     raise NotImplementedError('This does not work at the moment. Please wait '
                               'until the refactoring is done!')
