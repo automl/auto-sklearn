@@ -3,10 +3,13 @@ import hashlib
 import multiprocessing
 import os
 from os.path import join
+import traceback
 
 import numpy as np
-
 import lockfile
+from HPOlibConfigSpace.converters import pcs_parser
+from sklearn.base import BaseEstimator
+
 import six.moves.cPickle as pickle
 from autosklearn import submit_process
 from autosklearn.constants import *
@@ -16,8 +19,6 @@ from autosklearn.data.Xy_data_manager import XyDataManager
 from autosklearn.metalearning import metalearning
 from autosklearn.models import evaluator, paramsklearn
 from autosklearn.util import StopWatch, get_logger
-from HPOlibConfigSpace.converters import pcs_parser
-from sklearn.base import BaseEstimator
 
 
 def _write_file_with_data(filepath, data, name, log_function):
@@ -55,7 +56,9 @@ def _set_auto_seed(seed):
 
 
 def _get_auto_seed():
-    return os.environ['AUTOSKLEARN_SEED']
+    value = os.environ['AUTOSKLEARN_SEED']
+    assert value is not None
+    return int(value)
 
 
 def _del_auto_seed():
@@ -92,6 +95,80 @@ def _run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
     return proc_smac
 
 
+def _run_ensemble_builder(tmp_dir,
+                          output_dir,
+                          basename,
+                          time_for_task,
+                          task,
+                          metric,
+                          ensemble_size,
+                          ensemble_nbest,
+                          ensemble_indices_dir,
+                          watcher,
+                          log_function):
+    task_name = 'runEnsemble'
+    watcher.start_task(task_name)
+    time_left_for_ensembles = max(
+        0, time_for_task -
+           (watcher.wall_elapsed(basename)))
+    log_function('Start Ensemble with %5.2fsec time left' %
+                 time_left_for_ensembles)
+    proc_ensembles = \
+        submit_process.run_ensemble_builder(tmp_dir=tmp_dir,
+                                            dataset_name=basename,
+                                            task_type=task,
+                                            metric=metric,
+                                            limit=time_left_for_ensembles,
+                                            output_dir=output_dir,
+                                            ensemble_size=ensemble_size,
+                                            ensemble_nbest=ensemble_nbest,
+                                            seed=_get_auto_seed(),
+                                            ensemble_indices_output_dir=ensemble_indices_dir)
+    watcher.stop_task(task_name)
+    return proc_ensembles
+
+
+def _calculate_metafeatures(data_feat_type, data_info_task, basename,
+                            metalearning_cnt, x_train, y_train, watcher,
+                            log_function):
+    # == Calculate metafeatures
+    watcher.start_task('CalculateMetafeatures')
+    categorical = [True if feat_type.lower() in ['categorical'] else False
+                   for feat_type in data_feat_type]
+
+    if metalearning_cnt <= 0:
+        ml = None
+    elif data_info_task in \
+            [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
+        ml = metalearning.MetaLearning()
+        log_function('Start calculating metafeatures for %s' % basename)
+        ml.calculate_metafeatures_with_labels(x_train, y_train,
+                                              categorical=categorical,
+                                              dataset_name=basename)
+    else:
+        ml = None
+        log_function('Metafeatures not calculated')
+    watcher.stop_task('CalculateMetafeatures')
+    log_function(
+        'Calculating Metafeatures (categorical attributes) took %5.2f' %
+        watcher.wall_elapsed('CalculateMetafeatures'))
+    return ml
+
+
+def _create_search_space(tmp_dir, data_info, watcher, log_function):
+    task_name = 'CreateConfigSpace'
+    watcher.start_task(task_name)
+    configspace_path = os.path.join(tmp_dir, 'space.pcs')
+    configuration_space = paramsklearn.get_configuration_space(
+        data_info)
+    sp_string = pcs_parser.write(configuration_space)
+    _write_file_with_data(configspace_path, sp_string,
+                          'Configuration space', log_function)
+    watcher.stop_task(task_name)
+
+    return configuration_space, configspace_path
+
+
 class AutoML(multiprocessing.Process, BaseEstimator):
 
     def __init__(self, tmp_dir, output_dir, time_left_for_this_task,
@@ -124,6 +201,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._stopwatch = None
         self._logger = None
         self._ohe = None
+        self._task = None
+        self._metric = None
+        self._target_num = None
 
         self._debug_mode = False
 
@@ -158,31 +238,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 np.save(filepath, y_ensemble)
 
         watcher.stop_task(task_name)
-
-    def _calculate_metafeatures(self, data_feat_type, data_info_task, basename,
-                                metalearning_cnt, x_train, y_train, watcher):
-        # == Calculate metafeatures
-        watcher.start_task('CalculateMetafeatures')
-        categorical = [True if feat_type.lower() in ['categorical'] else False
-                       for feat_type in data_feat_type]
-
-        if metalearning_cnt <= 0:
-            ml = None
-        elif data_info_task in \
-                [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
-            ml = metalearning.MetaLearning()
-            self._debug('Start calculating metafeatures for %s' % basename)
-            ml.calculate_metafeatures_with_labels(x_train, y_train,
-                                                  categorical=categorical,
-                                                  dataset_name=basename)
-        else:
-            ml = None
-            self._critical('Metafeatures not calculated')
-        watcher.stop_task('CalculateMetafeatures')
-        self._debug(
-            'Calculating Metafeatures (categorical attributes) took %5.2f' %
-            watcher.wall_elapsed('CalculateMetafeatures'))
-        return ml
 
     def run(self):
         raise NotImplementedError()
@@ -232,7 +287,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._stopwatch = StopWatch()
         self._stopwatch.start_task(self._basename)
 
-        self._logger = self._get_logger(self._log_dir, self._basename,
+        self._logger = _get_logger(self._log_dir, self._basename,
                                         self._seed)
 
         self._debug('======== Reading and converting data ==========')
@@ -266,7 +321,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
     def _stop_task(watcher, task_name):
         watcher.stop_task(task_name)
 
-    def _print_load_time(self, basename, time_left_for_this_task,
+    @staticmethod
+    def _print_load_time(basename, time_left_for_this_task,
                          time_for_load_data, log_function):
 
         time_left_after_reading = max(
@@ -279,9 +335,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         # TODO: check that data and task definition fit together!
 
-        self.metric_ = data_d.info['metric']
-        self.task_ = data_d.info['task']
-        self.target_num_ = data_d.info['target_num']
+        self._metric = data_d.info['metric']
+        self._task = data_d.info['task']
+        self._target_num = data_d.info['target_num']
 
         _set_auto_seed(self._seed)
 
@@ -297,14 +353,15 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                                   time_for_load_data, self._info)
 
         # == Calculate metafeatures
-        ml = self._calculate_metafeatures(
+        ml = _calculate_metafeatures(
             data_feat_type=data_d.feat_type,
             data_info_task=data_d.info['task'],
             x_train=data_d.data['X_train'],
             y_train=data_d.data['Y_train'],
             basename=self._basename,
             watcher=self._stopwatch,
-            metalearning_cnt=self._initial_configurations_via_metalearning)
+            metalearning_cnt=self._initial_configurations_via_metalearning,
+            log_function=self._debug)
 
         self._stopwatch.start_task('OneHot')
         data_d.perform1HotEncoding()
@@ -317,15 +374,12 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                                                     watcher=self._stopwatch, )
 
         # = Create a searchspace
-        self._stopwatch.start_task('CreateConfigSpace')
-        configspace_path = os.path.join(self._tmp_dir, 'space.pcs')
-        self.configuration_space = paramsklearn.get_configuration_space(
-            data_d.info)
-        self.configuration_space_created_hook()
-        sp_string = pcs_parser.write(self.configuration_space)
-        _write_file_with_data(configspace_path, sp_string,
-                              'Configuration space', self._debug)
-        self._stopwatch.stop_task('CreateConfigSpace')
+        self.configuration_space, configspace_path = _create_search_space(
+            self._tmp_dir,
+            data_d.info,
+            self._stopwatch,
+            self._debug
+        )
 
         if ml is None:
             initial_configurations = []
@@ -348,13 +402,11 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._stopwatch.start_task('InitialConfigurations')
             try:
                 initial_configurations = ml.create_metalearning_string_for_smac_call(
-                    self.configuration_space, self._basename, self.metric_,
-                    self.task_, True if data_d.info['is_sparse'] == 1 else
+                    self.configuration_space, self._basename, self._metric,
+                    self._task, True if data_d.info['is_sparse'] == 1 else
                     False, self._initial_configurations_via_metalearning,
                     self._metadata_directory)
             except Exception as e:
-                import traceback
-
                 self._error(str(e))
                 self._error(traceback.format_exc())
                 initial_configurations = []
@@ -383,25 +435,19 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                               self._stopwatch, self._debug)
 
         # == RUN ensemble builder
-        self._stopwatch.start_task('runEnsemble')
-        time_left_for_ensembles = max(
-            0, self._time_for_task -
-            (self._stopwatch.wall_elapsed(self._basename)))
-        self._debug('Start Ensemble with %5.2fsec time left' %
-                    time_left_for_ensembles)
-        proc_ensembles = \
-            submit_process.run_ensemble_builder(tmp_dir=self._tmp_dir,
-                                                dataset_name=self._basename,
-                                                task_type=self.task_,
-                                                metric=self.metric_,
-                                                limit=time_left_for_ensembles,
-                                                output_dir=self._output_dir,
-                                                ensemble_size=self._ensemble_size,
-                                                ensemble_nbest=self._ensemble_nbest,
-                                                seed=self._seed,
-                                                ensemble_indices_output_dir=self._ensemble_indices_dir)
-        self._stopwatch.stop_task('runEnsemble')
-
+        proc_ensembles = _run_ensemble_builder(
+            self._tmp_dir,
+            self._output_dir,
+            self._basename,
+            self._time_for_task,
+            self._task,
+            self._metric,
+            self._ensemble_size,
+            self._ensemble_nbest,
+            self._ensemble_indices_dir,
+            self._stopwatch,
+            self._debug
+        )
         del data_d
 
         if self._queue is not None:
@@ -449,7 +495,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             weight = ensemble_members_run_numbers[num_run]
 
             X_ = data_x.copy()
-            if self.task_ in REGRESSION_TASKS:
+            if self._task in REGRESSION_TASKS:
                 prediction = model.predict(X_)
             else:
                 prediction = model.predict_proba(X_)
@@ -460,8 +506,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
     def score(self, data_x, y):
         prediction = self.predict(data_x)
-        return evaluator.calculate_score(y, prediction, self.task_,
-                                         self.metric_, self.target_num_)
+        return evaluator.calculate_score(y, prediction, self._task,
+                                         self._metric, self._target_num)
 
     def configuration_space_created_hook(self):
         pass
