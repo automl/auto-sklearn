@@ -49,8 +49,10 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
                  tmp_folder=None,
                  output_folder=None):
 
-        tmp_dir, output_dir = self._prepare_create_folders(tmp_folder,
-                                                           output_folder)
+        self._tmp_dir, self._output_dir = self._prepare_create_folders(
+            tmp_folder,
+            output_folder
+        )
 
         self._classes = []
         self._n_classes = []
@@ -59,9 +61,9 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         super(AutoSklearnClassifier, self).__init__(
             time_left_for_this_task=time_left_for_this_task,
             per_run_time_limit=per_run_time_limit,
-            tmp_dir=tmp_dir,
-            output_dir=output_dir,
-            log_dir=tmp_dir,
+            tmp_dir=self._tmp_dir,
+            output_dir=self._output_dir,
+            log_dir=self._tmp_dir,
             initial_configurations_via_metalearning=initial_configurations_via_metalearning,
             ensemble_size=ensemble_size,
             ensemble_nbest=ensemble_nbest,
@@ -74,7 +76,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         pid = os.getpid()
         if tmp_dir is None:
             tmp_dir = '/tmp/autosklearn_tmp_%d_%d' % (pid, random_number)
-        if output_dir:
+        if output_dir is None:
             output_dir = '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
         os.makedirs(output_dir)
         os.makedirs(tmp_dir)
