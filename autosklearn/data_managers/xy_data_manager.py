@@ -28,11 +28,11 @@ class XYDataManager(SimpleDataManager):
         }
 
         self.info['target_num'] = target_num[task]
-        self.basename = dataset_name
+        self._basename = dataset_name
 
         self.data['X_train'] = data_x
         self.data['Y_train'] = y
-        self.feat_type = feat_type
+        self._feat_type = feat_type
 
         # TODO: try to guess task type!
 
@@ -45,12 +45,12 @@ class XYDataManager(SimpleDataManager):
                              'datapoints, but have %d and %d.' % (
                                  data_x.shape[0], y.shape[0]
                              ))
-        if self.feat_type is None:
-            self.feat_type = ['Numerical'] * data_x.shape[1]
-        if data_x.shape[1] != len(self.feat_type):
+        if self._feat_type is None:
+            self._feat_type = ['Numerical'] * data_x.shape[1]
+        if data_x.shape[1] != len(self._feat_type):
             raise ValueError('X and feat type must have the same dimensions, '
                              'but are %d and %d.' %
-                             (data_x.shape[1], len(self.feat_type)))
+                             (data_x.shape[1], len(self._feat_type)))
 
         if encode_labels:
-            self.perform1HotEncoding()
+            self.perform_hot_encoding()

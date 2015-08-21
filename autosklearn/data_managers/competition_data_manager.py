@@ -28,20 +28,283 @@ import time
 import numpy as np
 import scipy.sparse
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
-    STRING_TO_TASK_TYPES
+    STRING_TO_TASK_TYPES, MULTICLASS_CLASSIFICATION
 
 from autosklearn.data_managers import SimpleDataManager
 from autosklearn.util import convert_to_num, read_first_line, file_to_array
-
+from autosklearn.data_managers.competition_c_functions import \
+    read_dense_file, \
+    read_sparse_file, read_sparse_binary_file, read_dense_file_unknown_width
 try:
 
-    from autosklearn.data_managers.competition_c_functions import \
-        read_dense_file, \
-        read_sparse_file, read_sparse_binary_file, read_dense_file_unknown_width
 
+    from autosklearn.data_managers.competition_c_functions import \
+        read_first_line as c_read_first_line
     competition_c_functions_is_there = True
 except Exception:
     competition_c_functions_is_there = False
+
+
+def get_info_from_file(filename):
+    """
+    Get all information {attribute = value} pairs from the public.info file
+    :param filename:
+    :return:
+    """
+    info = {}
+    with open(filename, 'r') as info_file:
+        lines = info_file.readlines()
+        features_list = list(
+            map(lambda x: tuple(x.strip("\'").split(' = ')), lines)
+        )
+
+        for (key, value) in features_list:
+            val = value.rstrip().strip("'").strip(' ')
+            info[key] = int(val) if val.isdigit() else val
+
+    return info
+
+
+def get_format_data(info, filename):
+    """
+    Get the data format directly from the data file (in case we do not
+    have an info file)
+    :param info:
+    :param filename:
+    :return:
+    """
+
+    def read_data(filepath):
+        if competition_c_functions_is_there:
+            result = read_first_line(filepath)
+        else:
+            result = c_read_first_line(filepath)
+        return result
+
+    main_key = 'format'
+    is_space = 'is_sparse'
+    if main_key in info.keys():
+        return info
+
+    if is_space in info.keys():
+        if info[is_space] == 0:
+            info[main_key] = 'dense'
+        else:
+            info[main_key] = 'sparse' if ':' in read_data(filename)[
+                0] else 'sparse_binary'
+    else:
+        data = read_data(filename)
+        if ':' in data[0][0]:
+            info[is_space] = 1
+            info[main_key] = 'sparse'
+        else:
+            nbr_columns = len(data[0])
+            for row in range(len(data)):
+                if len(data[row]) != nbr_columns:
+                    info[main_key] = 'sparse_binary'
+            if main_key not in info.keys():
+                info[main_key] = 'dense'
+                info[is_space] = 0
+    return info
+
+
+class CompetitionDataManager(SimpleDataManager):
+    """ This class aims at loading and saving data easily with a cache and at
+    generating a dictionary (self.info) in which each key is a feature
+    (e.g. : name, format, feat_num,...).
+
+    Methods defined here are :
+    __init__ (...)
+        x.__init__([(feature, value)]) -> void
+        Initialize the info dictionary with the tuples (feature, value)
+        given as argument. It recognizes the type of value (int, string) and
+        assign value to info[feature]. An unlimited number of tuple can be sent.
+
+    getInfo (...)
+        x.getInfo (filename) -> void
+        Fill the dictionary with an info file. Each line of the info file must
+        have this format 'feature' : value
+        The information is obtained from the public.info file if it exists, or
+        inferred from the data files
+
+    getInfoFromFile (...)
+        x.getInfoFromFile (filename) -> void
+        Fill the dictionary with an info file. Each line of the info file must
+        have this format 'feature' : value
+    """
+
+    def __init__(self, basename, input_dir, verbose=False, encode_labels=True):
+        super(CompetitionDataManager, self).__init__()
+
+        self._basename = basename
+        if basename in input_dir:
+            self.input_dir = input_dir
+        else:
+            self.input_dir = input_dir + '/' + basename + '/'
+
+        info_file = os.path.join(self.input_dir, basename + '_public.info')
+        self.get_info(info_file)
+        self._feat_type = self.load_type(os.path.join(self.input_dir,
+                                                      basename + '_feat.type'),
+                                         verbose=verbose)
+
+        Xtr = self.load_data(
+            os.path.join(self.input_dir, basename + '_train.data'),
+            self.info['train_num'], verbose=verbose)
+        Ytr = self.load_label(
+            os.path.join(self.input_dir, basename + '_train.solution'),
+            self.info['train_num'], verbose=verbose)
+        Xva = self.load_data(
+            os.path.join(self.input_dir, basename + '_valid.data'),
+            self.info['valid_num'], verbose=verbose)
+        Xte = self.load_data(
+            os.path.join(self.input_dir, basename + '_test.data'),
+            self.info['test_num'], verbose=verbose)
+
+        self._data['X_train'] = Xtr
+        self._data['Y_train'] = Ytr
+        self._data['X_valid'] = Xva
+        self._data['X_test'] = Xte
+
+        p = os.path.join(self.input_dir, basename + '_valid.solution')
+        if os.path.exists(p):
+            try:
+                self._data['Y_valid'] = self.load_label(p,
+                                                        self.info['valid_num'],
+                                                        verbose=verbose)
+            except (IOError, OSError):
+                pass
+
+        p = os.path.join(self.input_dir, basename + '_test.solution')
+        if os.path.exists(p):
+            try:
+                self.data['Y_test'] = self.load_label(p, self.info['test_num'],
+                                                      verbose=verbose)
+            except (IOError, OSError) as e:
+                pass
+
+        if encode_labels:
+            self.perform_hot_encoding()
+
+    def load_data(self, filename, num_points, verbose=True):
+        """ Get the data from a text file in one of 3 formats: matrix,
+        sparse, binary_sparse"""
+        if verbose:
+            print('========= Reading ' + filename)
+        start = time.time()
+
+        if 'format' not in self.info:
+            self.info.update(**get_format_data(self.info, filename))
+        if competition_c_functions_is_there:
+            data_func = {
+                'dense': read_dense_file,
+                'sparse': read_sparse_file,
+                'sparse_binary': read_sparse_binary_file
+            }
+
+            data = data_func[self.info['format']](filename, num_points,
+                                                  self.info['feat_num'])
+
+            if scipy.sparse.issparse(data):
+                if not np.all(data.indices >= 0):
+                    raise ValueError('Sparse data must be 1-indexed, '
+                                     'not 0-indexed.')
+        else:
+            data_func = {
+                'dense': _data_dense,
+                'sparse': _data_sparse,
+                'sparse_binary': _data_binary_sparse
+            }
+
+            data = data_func[self.info['format']](filename, self._feat_type)
+
+        end = time.time()
+        if verbose:
+            print('[+] Success in %5.2f sec' % (end - start))
+        return data
+
+    def load_label(self, filename, num_points, verbose=True):
+        """Get the solution/truth values."""
+        if verbose:
+            print('========= Reading ' + filename)
+        start = time.time()
+
+        # IG: Here change to accommodate the new multiclass label format
+        if competition_c_functions_is_there:
+            if self.info['task'] == MULTILABEL_CLASSIFICATION:
+                # cast into ints
+                label = (read_dense_file_unknown_width(
+                    filename, num_points)).astype(np.int)
+            elif self.info['task'] == MULTICLASS_CLASSIFICATION:
+                label = read_dense_file_unknown_width(
+                    filename, num_points)
+                # read the class from the only non zero entry in each line!
+                # should be ints right away
+                label = np.where(label != 0)[1]
+            else:
+                label = read_dense_file_unknown_width(
+                    filename, num_points)
+        else:
+            if self.info['task'] == MULTILABEL_CLASSIFICATION:
+                label = self._data(filename)
+            elif self.info['task'] == MULTICLASS_CLASSIFICATION:
+                label = convert_to_num(self._data(filename))
+            else:
+                label = np.ravel(data_util.data(filename)
+                                 )  # get a column vector
+
+        end = time.time()
+        if verbose:
+            print('[+] Success in %5.2f sec' % (end - start))
+        return label
+
+    def load_type(self, filename, verbose=True):
+        """Get the variable types."""
+        if verbose:
+            print('========= Reading ' + filename)
+        start = time.time()
+        type_list = []
+        if os.path.isfile(filename):
+            if competition_c_functions_is_there:
+                type_list = file_to_array(
+                    filename,
+                    verbose=False)
+            else:
+                type_list = file_to_array(filename, verbose=False)
+        else:
+            n = self.info['feat_num']
+            type_list = [self.info['feat_type']] * n
+        type_list = np.array(type_list).ravel()
+        end = time.time()
+        if verbose:
+            print('[+] Success in %5.2f sec' % (end - start))
+        return type_list
+
+    def get_info(self, filename, verbose=True):
+        """ Get all information {attribute = value} pairs from the filename (public.info file),
+              if it exists, otherwise, output default values"""
+        if filename is None:
+            basename = self._basename
+            input_dir = self.input_dir
+        else:
+            # Split away the _public.info (anyway, I don't know why its
+            # there... the dataset name is known from the call)
+            basename = '_'.join(os.path.basename(filename).split('_')[:-1])
+            input_dir = os.path.dirname(filename)
+        if os.path.exists(filename):
+            self.info.update(**get_info_from_file(filename))
+            print('Info file found : ' + os.path.abspath(filename))
+            # Finds the data format ('dense', 'sparse', or 'sparse_binary')
+            self.info.update(
+                **get_format_data(self.info, os.path.join(input_dir,
+                                                          basename + '_train.data')))
+        else:
+            raise NotImplementedError('The user must always provide an info '
+                                      'file.')
+
+        self.info['task'] = STRING_TO_TASK_TYPES[self.info['task']]
+
+        return self.info
 
 
 def _data_dense(filename, feat_type=None, verbose=False):
@@ -150,245 +413,3 @@ def _sparse_list_to_csr_sparse(sparse_list, nbr_features, verbose=True):
         print('\tConverting dok sparse matrix to csr sparse matrix')
         # but csr better for shuffling data or other tricks
     return dok_sparse.tocsr()
-
-
-class CompetitionDataManager(SimpleDataManager):
-
-    ''' This class aims at loading and saving data easily with a cache and at generating a dictionary (self.info) in which each key is a feature (e.g. : name, format, feat_num,...).
-    Methods defined here are :
-    __init__ (...)
-        x.__init__([(feature, value)]) -> void
-        Initialize the info dictionary with the tuples (feature, value) given as argument. It recognizes the type of value (int, string) and assign value to info[feature]. An unlimited number of tuple can be sent.
-
-    getInfo (...)
-        x.getInfo (filename) -> void
-        Fill the dictionary with an info file. Each line of the info file must have this format 'feature' : value
-        The information is obtained from the public.info file if it exists, or inferred from the data files
-
-    getInfoFromFile (...)
-        x.getInfoFromFile (filename) -> void
-        Fill the dictionary with an info file. Each line of the info file must have this format 'feature' : value
-    '''
-
-    def __init__(self, basename, input_dir, verbose=False, encode_labels=True):
-        super(CompetitionDataManager, self).__init__()
-
-        self.basename = basename
-        if basename in input_dir:
-            self.input_dir = input_dir
-        else:
-            self.input_dir = input_dir + '/' + basename + '/'
-
-        info_file = os.path.join(self.input_dir, basename + '_public.info')
-        self.getInfo(info_file)
-        self.feat_type = self.loadType(os.path.join(self.input_dir,
-                                                    basename + '_feat.type'),
-                                       verbose=verbose)
-
-        Xtr = self.loadData(
-            os.path.join(self.input_dir, basename + '_train.data'),
-            self.info['train_num'],
-            verbose=verbose)
-        Ytr = self.loadLabel(
-            os.path.join(self.input_dir, basename + '_train.solution'),
-            self.info['train_num'],
-            verbose=verbose)
-        Xva = self.loadData(
-            os.path.join(self.input_dir, basename + '_valid.data'),
-            self.info['valid_num'],
-            verbose=verbose)
-        Xte = self.loadData(
-            os.path.join(self.input_dir, basename + '_test.data'),
-            self.info['test_num'],
-            verbose=verbose)
-
-        self._data['X_train'] = Xtr
-        self._data['Y_train'] = Ytr
-        self._data['X_valid'] = Xva
-        self._data['X_test'] = Xte
-
-        p = os.path.join(self.input_dir, basename + '_valid.solution')
-        if os.path.exists(p):
-            try:
-                self._data['Y_valid'] = self.loadLabel(p,
-                                                       self.info['valid_num'],
-                                                       verbose=verbose)
-            except (IOError, OSError):
-                pass
-
-        p = os.path.join(self.input_dir, basename + '_test.solution')
-        if os.path.exists(p):
-            try:
-                self.data['Y_test'] = self.loadLabel(p, self.info['test_num'],
-                                                     verbose=verbose)
-            except (IOError, OSError) as e:
-                pass
-
-        if encode_labels:
-            self.perform1HotEncoding()
-
-    def loadData(self, filename, num_points, verbose=True):
-        ''' Get the data from a text file in one of 3 formats: matrix, sparse, binary_sparse'''
-        if verbose:
-            print('========= Reading ' + filename)
-        start = time.time()
-
-        if 'format' not in self.info:
-            self.getFormatData(filename)
-        if competition_c_functions_is_there:
-            data_func = {
-                'dense': read_dense_file,
-                'sparse': read_sparse_file,
-                'sparse_binary': read_sparse_binary_file
-            }
-
-            data = data_func[self.info['format']](filename, num_points,
-                                                  self.info['feat_num'])
-
-            if scipy.sparse.issparse(data):
-                if not np.all(data.indices >= 0):
-                    raise ValueError('Sparse data must be 1-indexed, '
-                                     'not 0-indexed.')
-        else:
-            data_func = {
-                'dense': _data_dense,
-                'sparse': _data_sparse,
-                'sparse_binary': _data_binary_sparse
-            }
-
-            data = data_func[self.info['format']](filename, self.feat_type)
-
-        end = time.time()
-        if verbose:
-            print('[+] Success in %5.2f sec' % (end - start))
-        return data
-
-    def loadLabel(self, filename, num_points, verbose=True):
-        """Get the solution/truth values."""
-        if verbose:
-            print('========= Reading ' + filename)
-        start = time.time()
-
-        # IG: Here change to accommodate the new multiclass label format
-        if competition_c_functions_is_there:
-            if self.info['task'] == MULTILABEL_CLASSIFICATION:
-                # cast into ints
-                label = (read_dense_file_unknown_width(
-                    filename, num_points)).astype(np.int)
-            elif self.info['task'] == MULTICLASS_CLASSIFICATION:
-                label = read_dense_file_unknown_width(
-                    filename, num_points)
-                # read the class from the only non zero entry in each line!
-                # should be ints right away
-                label = np.where(label != 0)[1]
-            else:
-                label = read_dense_file_unknown_width(
-                    filename, num_points)
-        else:
-            if self.info['task'] == MULTILABEL_CLASSIFICATION:
-                label = self._data(filename)
-            elif self.info['task'] == MULTICLASS_CLASSIFICATION:
-                label = convert_to_num(self._data(filename))
-            else:
-                label = np.ravel(data_util.data(filename)
-                                 )  # get a column vector
-
-        end = time.time()
-        if verbose:
-            print('[+] Success in %5.2f sec' % (end - start))
-        return label
-
-    def loadType(self, filename, verbose=True):
-        """Get the variable types."""
-        if verbose:
-            print('========= Reading ' + filename)
-        start = time.time()
-        type_list = []
-        if os.path.isfile(filename):
-            if competition_c_functions_is_there:
-                type_list = file_to_array(
-                    filename,
-                    verbose=False)
-            else:
-                type_list = file_to_array(filename, verbose=False)
-        else:
-            n = self.info['feat_num']
-            type_list = [self.info['feat_type']] * n
-        type_list = np.array(type_list).ravel()
-        end = time.time()
-        if verbose:
-            print('[+] Success in %5.2f sec' % (end - start))
-        return type_list
-
-    def getInfo(self, filename, verbose=True):
-        ''' Get all information {attribute = value} pairs from the filename (public.info file),
-              if it exists, otherwise, output default values'''
-        if filename is None:
-            basename = self.basename
-            input_dir = self.input_dir
-        else:
-            # Split away the _public.info (anyway, I don't know why its
-            # there... the dataset name is known from the call)
-            basename = '_'.join(os.path.basename(filename).split('_')[:-1])
-            input_dir = os.path.dirname(filename)
-        if os.path.exists(filename):
-            self.getInfoFromFile(filename)
-            print('Info file found : ' + os.path.abspath(filename))
-            # Finds the data format ('dense', 'sparse', or 'sparse_binary')
-            self.getFormatData(os.path.join(input_dir,
-                                            basename + '_train.data'))
-        else:
-            raise NotImplementedError('The user must always provide an info '
-                                      'file.')
-
-        self.info['task'] = STRING_TO_TASK_TYPES[self.info['task']]
-
-        return self.info
-
-    def getInfoFromFile(self, filename):
-        ''' Get all information {attribute = value} pairs from the public.info file'''
-        with open(filename, 'r') as info_file:
-            lines = info_file.readlines()
-            features_list = list(
-                map(lambda x: tuple(x.strip("\'").split(' = ')), lines))
-            for (key, value) in features_list:
-                self.info[key] = value.rstrip().strip("'").strip(' ')
-                if self.info[key].isdigit(
-                ):  # if we have a number, we want it to be an integer
-                    self.info[key] = int(self.info[key])
-        return self.info
-
-    def getFormatData(self, filename):
-        """Get the data format directly from the data file (in case we do not
-        have an info file)"""
-        if 'format' in self.info.keys():
-            return self.info['format']
-        if 'is_sparse' in self.info.keys():
-            if self.info['is_sparse'] == 0:
-                self.info['format'] = 'dense'
-            else:
-                if competition_c_functions_is_there:
-                    data = read_first_line(filename)
-                else:
-                    data = read_first_line(filename)
-                if ':' in data[0]:
-                    self.info['format'] = 'sparse'
-                else:
-                    self.info['format'] = 'sparse_binary'
-        else:
-            if competition_c_functions_is_there:
-                data = file_to_array(filename)
-            else:
-                data = file_to_array(filename)
-            if ':' in data[0][0]:
-                self.info['is_sparse'] = 1
-                self.info['format'] = 'sparse'
-            else:
-                nbr_columns = len(data[0])
-                for row in range(len(data)):
-                    if len(data[row]) != nbr_columns:
-                        self.info['format'] = 'sparse_binary'
-                if 'format' not in self.info.keys():
-                    self.info['format'] = 'dense'
-                    self.info['is_sparse'] = 0
-        return self.info['format']

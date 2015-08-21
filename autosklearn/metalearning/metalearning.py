@@ -35,10 +35,9 @@ from autosklearn.util import get_logger
 
 logger = get_logger(os.path.basename(__file__))
 
-
 SENTINEL = 'uiaeo'
 
-EXCLUDE_META_FUTURES = set([
+EXCLUDE_META_FUTURES = {
     'Landmark1NN',
     'LandmarkDecisionNodeLearner',
     'LandmarkDecisionTree',
@@ -47,9 +46,7 @@ EXCLUDE_META_FUTURES = set([
     'PCAFractionOfComponentsFor95PercentVariance',
     'PCAKurtosisFirstPC',
     'PCASkewnessFirstPC'
-])
-
-
+}
 
 def calc_meta_features(X_train, Y_train, categorical, dataset_name):
     """
@@ -108,9 +105,15 @@ def convert_conf2smac_string(configuration):
 
 
 def create_metalearning_string_for_smac_call(
-        metafeatures_labels, metafeatures_encoded_labels,
-        configuration_space, dataset_name, metric, task, sparse,
-        num_initial_configurations, metadata_directory):
+        metafeatures_labels,
+        metafeatures_encoded_labels,
+        configuration_space,
+        dataset_name,
+        metric,
+        task,
+        sparse,
+        num_initial_configurations,
+        metadata_directory):
     """
 
     :param metafeatures_labels:

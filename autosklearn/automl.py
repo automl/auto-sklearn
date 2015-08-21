@@ -15,7 +15,7 @@ import six.moves.cPickle as pickle
 from autosklearn.constants import *
 from autosklearn.data_managers import CompetitionDataManager
 from autosklearn.data_managers import XYDataManager
-from autosklearn.metalearning.metalearning import \
+from autosklearn.metalearning import \
     calc_meta_features, calc_meta_features_encoded, \
     create_metalearning_string_for_smac_call
 from autosklearn.models import evaluator, paramsklearn
@@ -410,7 +410,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             log_function=self._debug)
 
         self._stopwatch.start_task('OneHot')
-        manager.perform1HotEncoding()
+        manager.perform_hot_encoding()
         self._ohe = manager.encoder_
         self._stopwatch.stop_task('OneHot')
 

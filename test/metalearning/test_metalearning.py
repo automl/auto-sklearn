@@ -4,7 +4,7 @@ from __future__ import print_function
 import unittest
 
 from autosklearn.constants import *
-from autosklearn.metalearning.metalearning import calc_meta_features_encoded, \
+from autosklearn.metalearning import calc_meta_features_encoded, \
     create_metalearning_string_for_smac_call, calc_meta_features
 from autosklearn.models.paramsklearn import get_configuration_space
 from ParamSklearn.util import get_dataset

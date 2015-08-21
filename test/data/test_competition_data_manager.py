@@ -37,9 +37,9 @@ class DataManagerTest(unittest.TestCase):
         self.D._data['X_test'] = dataset_test.copy()
 
     def test_perform1HotEncoding(self):
-        self.D.feat_type = [N, N, N, N, N, N]
+        self.D._feat_type = [N, N, N, N, N, N]
         self.D._info = {'is_sparse': 0, 'has_missing': 0}
-        self.D.perform1HotEncoding()
+        self.D.perform_hot_encoding()
 
         assert_array_almost_equal(dataset_train, self.D.data['X_train'])
         assert_array_almost_equal(dataset_valid, self.D.data['X_valid'])
@@ -49,9 +49,9 @@ class DataManagerTest(unittest.TestCase):
         self.assertIsInstance(self.D.data['X_test'], np.ndarray)
 
     def test_perform1HotEncoding_binary_data(self):
-        self.D.feat_type = [N, N, N, N, B, B]
+        self.D._feat_type = [N, N, N, N, B, B]
         self.D._info = {'is_sparse': 0, 'has_missing': 0}
-        self.D.perform1HotEncoding()
+        self.D.perform_hot_encoding()
 
         # Nothing should have happened to the array...
         assert_array_almost_equal(dataset_train, self.D.data['X_train'])
@@ -62,9 +62,9 @@ class DataManagerTest(unittest.TestCase):
         self.assertIsInstance(self.D.data['X_test'], np.ndarray)
 
     def test_perform1HotEncoding_categorical_data(self):
-        self.D.feat_type = [N, N, C, C, B, B]
+        self.D._feat_type = [N, N, C, C, B, B]
         self.D._info = {'is_sparse': 0, 'has_missing': 0}
-        self.D.perform1HotEncoding()
+        self.D.perform_hot_encoding()
 
         # Check if converted back to dense array
         self.assertIsInstance(self.D.data['X_train'], np.ndarray)

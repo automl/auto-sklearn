@@ -18,6 +18,8 @@
 from __future__ import print_function
 
 from argparse import ArgumentParser
+import os
+from numpy.lib.format import read_array
 
 import yaml
 
@@ -25,6 +27,12 @@ from autosklearn.scores.libscores import *  # Library of scores we implemented
 
 # Debug flag 0: no debug, 1: show all scores, 2: also show version amd
 # listing of dir
+from autosklearn.scores import sanitize_array, normalize_array, \
+    compute_all_scores, write_scores, show_platform, show_io, show_version, \
+    error_log, get_info
+from autosklearn.util import mkdir, ls
+from example.example_lib_score import filesep
+
 debug_mode = 1
 
 # Constant used for a missing score
@@ -154,7 +162,7 @@ if __name__ == '__main__':
 
     # Lots of debug stuff
     if debug_mode > 1:
-        swrite('\n*** SCORING PROGRAM: PLATFORM SPECIFICATIONS ***\n\n')
+        error_log('\n*** SCORING PROGRAM: PLATFORM SPECIFICATIONS ***\n\n')
         show_platform()
         show_io(input_dir, output_dir)
         show_version(scoring_version)
