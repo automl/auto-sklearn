@@ -40,3 +40,29 @@ def get_info_from_file(datadir, dataset):
             if info[key].isdigit():
                 info[key] = int(info[key])
     return info
+
+
+def _set_get_del_env_key(key):
+    env_key = key
+
+    def set_value(value):
+        env_value = os.environ.get(env_key)
+        if env_value is not None and int(env_value) != value:
+            raise ValueError('It seems you have already started an instance '
+                             'in this thread.')
+        else:
+            os.environ[env_key] = str(value)
+
+    def get_value():
+        value = os.environ[env_key]
+        assert value is not None
+        return int(value)
+
+    def del_value():
+        del os.environ[env_key]
+
+    return set_value, get_value, del_value
+
+
+set_auto_seed, get_auto_seed, del_auto_seed = _set_get_del_env_key(
+    "AUTOSKLEARN_SEED")

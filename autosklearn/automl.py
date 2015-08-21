@@ -19,7 +19,7 @@ from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.Xy_data_manager import XyDataManager
 from autosklearn.metalearning import metalearning
 from autosklearn.models import evaluator, paramsklearn
-from autosklearn.util import StopWatch, get_logger
+from autosklearn.util import StopWatch, get_logger, get_auto_seed, set_auto_seed, del_auto_seed
 
 
 def _write_file_with_data(filepath, data, name, log_function):
@@ -45,27 +45,6 @@ def _get_logger(log_dir, basename, seed):
                       name='AutoML_%s_%d' % (basename, seed))
 
 
-def _set_auto_seed(seed):
-    env_key = 'AUTOSKLEARN_SEED'
-    # Set environment variable:
-    env_seed = os.environ.get(env_key)
-    if env_seed is not None and int(env_seed) != seed:
-        raise ValueError('It seems you have already started an instance '
-                         'of AutoSklearn in this thread.')
-    else:
-        os.environ[env_key] = str(seed)
-
-
-def _get_auto_seed():
-    value = os.environ['AUTOSKLEARN_SEED']
-    assert value is not None
-    return int(value)
-
-
-def _del_auto_seed():
-    env_key = 'AUTOSKLEARN_SEED'
-    del os.environ[env_key]
-
 
 def _run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
               data_manager_path, configspace_path, initial_configurations,
@@ -90,7 +69,7 @@ def _run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
                                 cutoff_time=per_run_time_limit,
                                 initial_challengers=initial_configurations,
                                 memory_limit=ml_memory_limit,
-                                seed=_get_auto_seed())
+                                seed=get_auto_seed())
     log_function(smac_call)
     watcher.stop_task(task_name)
     return proc_smac
@@ -123,7 +102,7 @@ def _run_ensemble_builder(tmp_dir,
                                             output_dir=output_dir,
                                             ensemble_size=ensemble_size,
                                             ensemble_nbest=ensemble_nbest,
-                                            seed=_get_auto_seed(),
+                                            seed=get_auto_seed(),
                                             ensemble_indices_output_dir=ensemble_indices_dir)
     watcher.stop_task(task_name)
     return proc_ensembles
@@ -388,7 +367,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._task = data_d.info['task']
         self._target_num = data_d.info['target_num']
 
-        _set_auto_seed(self._seed)
+        set_auto_seed(self._seed)
 
         # load data
         self._save_ensemble_data(
@@ -505,7 +484,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             proc_ensembles.wait()
 
         # Delete AutoSklearn environment variable
-        _del_auto_seed()
+        del_auto_seed()
         return self
 
     def predict(self, data_x):
