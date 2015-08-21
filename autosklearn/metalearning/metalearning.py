@@ -37,6 +37,22 @@ class MetaLearning(object):
              'PCAFractionOfComponentsFor95PercentVariance',
              'PCAKurtosisFirstPC', 'PCASkewnessFirstPC'])
 
+    @property
+    def metafeatures_labels(self):
+        return self._metafeatures_labels
+
+    @metafeatures_labels.setter
+    def metafeatures_labels(self, value):
+        self._metafeatures_labels = value
+
+    @property
+    def metafeatures_encoded_labels(self):
+        return self._metafeatures_encoded_labels
+
+    @metafeatures_encoded_labels.setter
+    def metafeatures_encoded_labels(self, value):
+        self._metafeatures_encoded_labels = value
+
     def calculate_metafeatures_with_labels(self, X_train, Y_train, categorical,
                                            dataset_name):
         if self._metafeatures_labels is not None:

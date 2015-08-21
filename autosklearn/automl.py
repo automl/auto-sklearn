@@ -6,6 +6,7 @@ from os.path import join
 import traceback
 
 import numpy as np
+
 import lockfile
 from HPOlibConfigSpace.converters import pcs_parser
 from sklearn.base import BaseEstimator
@@ -155,6 +156,20 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
     return ml
 
 
+def _calculate_metafeatures_encoded(ml, basename, x_train, y_train, watcher,
+                                    log_funciton):
+    task_name = 'CalculateMetafeaturesEncoded'
+    watcher.start_task(task_name)
+    ml.calculate_metafeatures_encoded_labels(
+        X_train=x_train,
+        Y_train=y_train,
+        categorical=[False] * x_train.shape[0],
+        dataset_name=basename)
+    watcher.stop_task(task_name)
+    log_funciton(
+        'Calculating Metafeatures (encoded attributes) took %5.2fsec' %
+        watcher.wall_elapsed(task_name))
+
 def _create_search_space(tmp_dir, data_info, watcher, log_function):
     task_name = 'CreateConfigSpace'
     watcher.start_task(task_name)
@@ -168,6 +183,40 @@ def _create_search_space(tmp_dir, data_info, watcher, log_function):
 
     return configuration_space, configspace_path
 
+
+def _get_initial_configuration(ml, basename, metric, configuration_space,
+                               task, metadata_directory,
+                               initial_configurations_via_metalearning,
+                               is_sparse,
+                               watcher, log_function):
+    task_name = 'InitialConfigurations'
+    watcher.start_task(task_name)
+    try:
+        initial_configurations = ml.create_metalearning_string_for_smac_call(
+            configuration_space, basename, metric,
+            task, True if is_sparse == 1 else
+            False, initial_configurations_via_metalearning,
+            metadata_directory)
+    except Exception as e:
+        log_function(str(e))
+        log_function(traceback.format_exc())
+        initial_configurations = []
+    watcher.stop_task(task_name)
+    return initial_configurations
+
+
+def _print_debug_info_of_init_configuration(initial_configurations, basename,
+                                            time_for_task, debug_log, info_log,
+                                            watcher):
+    debug_log('Initial Configurations: (%d)' % len(initial_configurations))
+    for initial_configuration in initial_configurations:
+        debug_log(initial_configuration)
+    debug_log('Looking for initial configurations took %5.2fsec' %
+              watcher.wall_elapsed('InitialConfigurations'))
+    info_log(
+        'Time left for %s after finding initial configurations: %5.2fsec'
+        % (basename, time_for_task -
+           watcher.wall_elapsed(basename)))
 
 class AutoML(multiprocessing.Process, BaseEstimator):
 
@@ -238,31 +287,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 np.save(filepath, y_ensemble)
 
         watcher.stop_task(task_name)
-
-    def _calculate_metafeatures(self, data_feat_type, data_info_task, basename,
-                                metalearning_cnt, x_train, y_train, watcher):
-        # == Calculate metafeatures
-        watcher.start_task('CalculateMetafeatures')
-        categorical = [True if feat_type.lower() in ['categorical'] else False
-                       for feat_type in data_feat_type]
-
-        if metalearning_cnt <= 0:
-            ml = None
-        elif data_info_task in \
-                [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
-            ml = metalearning.MetaLearning()
-            self._debug('Start calculating metafeatures for %s' % basename)
-            ml.calculate_metafeatures_with_labels(x_train, y_train,
-                                                  categorical=categorical,
-                                                  dataset_name=basename)
-        else:
-            ml = None
-            self._critical('Metafeatures not calculated')
-        watcher.stop_task('CalculateMetafeatures')
-        self._debug(
-            'Calculating Metafeatures (categorical attributes) took %5.2f' %
-            watcher.wall_elapsed('CalculateMetafeatures'))
-        return ml
 
     def run(self):
         raise NotImplementedError()
@@ -357,7 +381,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         return time_for_load_data
 
     def _fit(self, data_d):
-
         # TODO: check that data and task definition fit together!
 
         self._metric = data_d.info['metric']
@@ -367,15 +390,20 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         _set_auto_seed(self._seed)
 
         # load data
-        self._save_ensemble_data(data_d.data['X_train'],
-                                 data_d.data['Y_train'], self._tmp_dir,
-                                 self._stopwatch)
+        self._save_ensemble_data(
+            data_d.data['X_train'],
+            data_d.data['Y_train'],
+            self._tmp_dir,
+            self._stopwatch)
 
         time_for_load_data = self._stopwatch.wall_elapsed(self._basename)
 
         if self._debug_mode:
-            self._print_load_time(self._basename, self._time_for_task,
-                                  time_for_load_data, self._info)
+            self._print_load_time(
+                self._basename,
+                self._time_for_task,
+                time_for_load_data,
+                self._info)
 
         # == Calculate metafeatures
         ml = _calculate_metafeatures(
@@ -394,7 +422,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._stopwatch.stop_task('OneHot')
 
         # == Pickle the data manager
-        data_manager_path = self._save_data_manager(data_d, self._tmp_dir,
+        data_manager_path = self._save_data_manager(
+            data_d, self._tmp_dir,
                                                     self._basename,
                                                     watcher=self._stopwatch, )
 
@@ -403,57 +432,50 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._tmp_dir,
             data_d.info,
             self._stopwatch,
-            self._debug
-        )
-        self.configuration_space_created_hook()
+            self._debug)
 
         if ml is None:
             initial_configurations = []
-        elif data_d.info['task'] in \
-                [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
-            self._stopwatch.start_task('CalculateMetafeaturesEncoded')
-            ml.calculate_metafeatures_encoded_labels(
-                X_train=data_d.data['X_train'],
-                Y_train=data_d.data['Y_train'],
-                categorical=[False] * data_d.data['X_train'].shape[0],
-                dataset_name=self._basename)
-            self._stopwatch.stop_task('CalculateMetafeaturesEncoded')
-            self._debug(
-                'Calculating Metafeatures (encoded attributes) took %5.2fsec' %
-                self._stopwatch.wall_elapsed('CalculateMetafeaturesEncoded'))
+        elif data_d.info['task'] in [MULTICLASS_CLASSIFICATION,
+                                     BINARY_CLASSIFICATION]:
 
-            self._debug(ml._metafeatures_labels.__repr__(verbosity=2))
-            self._debug(ml._metafeatures_encoded_labels.__repr__(verbosity=2))
+            _calculate_metafeatures_encoded(
+                ml,
+                self._basename,
+                data_d.data['X_train'],
+                data_d.data['Y_train'],
+                self._stopwatch,
+                self._debug)
 
-            self._stopwatch.start_task('InitialConfigurations')
-            try:
-                initial_configurations = ml.create_metalearning_string_for_smac_call(
-                    self.configuration_space, self._basename, self._metric,
-                    self._task, True if data_d.info['is_sparse'] == 1 else
-                    False, self._initial_configurations_via_metalearning,
-                    self._metadata_directory)
-            except Exception as e:
-                self._error(str(e))
-                self._error(traceback.format_exc())
-                initial_configurations = []
+            self._debug(ml.metafeatures_labels.__repr__(verbosity=2))
+            self._debug(ml.metafeatures_encoded_labels.__repr__(verbosity=2))
 
-            self._stopwatch.stop_task('InitialConfigurations')
+            initial_configurations = _get_initial_configuration(
+                ml,
+                self._basename,
+                self._metric,
+                self.configuration_space,
+                self._task,
+                self._metadata_directory,
+                self._initial_configurations_via_metalearning,
+                data_d.info[
+                    'is_sparse'],
+                self._stopwatch,
+                self._error)
 
-            self._debug('Initial Configurations: (%d)' %
-                        len(initial_configurations))
-            for initial_configuration in initial_configurations:
-                self._debug(initial_configuration)
-            self._debug('Looking for initial configurations took %5.2fsec' %
-                        self._stopwatch.wall_elapsed('InitialConfigurations'))
-            self._info(
-                'Time left for %s after finding initial configurations: %5.2fsec'
-                % (self._basename, self._time_for_task -
-                   self._stopwatch.wall_elapsed(self._basename)))
+            _print_debug_info_of_init_configuration(
+                initial_configurations,
+                self._basename,
+                self._time_for_task,
+                self._debug, self._info,
+                self._stopwatch)
+
         else:
             initial_configurations = []
             self._critical('Metafeatures encoded not calculated')
 
         # == RUN SMAC
+
         proc_smac = _run_smac(self._tmp_dir, self._basename,
                               self._time_for_task, self._ml_memory_limit,
                               data_manager_path, configspace_path,
@@ -474,7 +496,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._stopwatch,
             self._debug
         )
-        del data_d
 
         if self._queue is not None:
             self._queue.put([time_for_load_data, data_manager_path, proc_smac,
