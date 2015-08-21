@@ -91,6 +91,8 @@ class HPOlib_interfaceTest(unittest.TestCase):
                '--fold 0 --folds 1 --seed 1 ' \
                '--mode 3cv %s' % \
                (self.dataset_string, self.param_string)
+
+        print(call)
         proc = subprocess.Popen(call,
                                 shell=True,
                                 stdout=subprocess.PIPE,

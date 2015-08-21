@@ -94,6 +94,8 @@ class Test(unittest.TestCase):
             X_train, Y_train, X_test, Y_test = get_dataset(dataset_name)
             categorical = [False] * X_train.shape[1]
 
+            # todo
+            # теперь нет класса, поэтому заменить везде на функции
             ml = MetaLearning()
             ml.calculate_metafeatures_with_labels(X_train, Y_train,
                                                   categorical, dataset_name)

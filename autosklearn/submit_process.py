@@ -3,20 +3,19 @@ from __future__ import print_function
 
 import shlex
 import subprocess
-import fnmatch
 import os
 
 import lockfile
 
 import autosklearn.cli.SMAC_cli_holdout
 from autosklearn.constants import *
-from conf.settings import BINARIES_DIRECTORY, SCRIPT_FOLDER
+from autosklearn.util.io import search_prog, search_prog_in_binaries
+from conf.settings import SCRIPT_FOLDER
 
 
 def submit_call(call, seed, log_dir=None):
     print('Calling: ' + call)
     call = shlex.split(call)
-
 
     if log_dir is None:
         proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'))
@@ -51,33 +50,6 @@ def get_algo_exec(runsolver_limit, runsolver_delay, memory_limit, *args):
     return call
 
 
-def find_files(folder, pattern):
-    matches = []
-    for root, dirnames, filenames in os.walk(folder):
-      for filename in fnmatch.filter(filenames, pattern):
-        matches.append(os.path.join(root, filename))
-    return matches
-
-def search_prog_in_binaries(prog_name):
-    try:
-        files = find_files(BINARIES_DIRECTORY, prog_name)
-        assert files
-        result = os.path.normpath(files[0])
-    except Exception as e:
-        result = None
-    return result
-
-def search_prog(prog_name):
-    try:
-        p = subprocess.Popen(["whereis", prog_name], stdout=subprocess.PIPE)
-        (output, _) = p.communicate()
-        assert output, "Not found %s" % prog_name
-        paths = output.split()
-        assert paths, "Not found (whereis) prog - %s" % prog_name
-        result = paths[1]
-    except Exception as e:
-        result = None
-    return result
 
 def run_smac(dataset_name, dataset, tmp_dir, searchspace, instance_file, limit,
              cutoff_time, seed, memory_limit,

@@ -4,10 +4,6 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 
-def setup_logger():
-    logging.basicConfig(level=logging.DEBUG)
-
-
 def get_handler_std(level, log_format):
     handler = logging.StreamHandler()
     handler.setLevel(level)

@@ -147,6 +147,8 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
         ml = None
     elif data_info_task in \
             [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
+        # todo
+        # теперь нет класса, поэтому заменить везде на функции
         ml = MetaLearning()
         log_function('Start calculating metafeatures for %s' % basename)
         ml.calculate_metafeatures_with_labels(x_train, y_train,
@@ -246,7 +248,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._output_dir = output_dir
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
-        self._log_dir = log_dir
+        self._log_dir = log_dir if log_dir is not None else self._tmp_dir
         self._initial_configurations_via_metalearning = initial_configurations_via_metalearning
         self._ensemble_size = ensemble_size
         self._ensemble_nbest = ensemble_nbest
