@@ -12,7 +12,7 @@ import pyMetaLearn.optimizers.metalearn_optimizer.metalearner as metalearner
 from autosklearn.constants import *
 from autosklearn.util import get_logger
 
-logger = get_logger(__name__)
+logger = get_logger(os.path.basename(__file__))
 
 
 class MetaLearning(object):

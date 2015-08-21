@@ -24,21 +24,6 @@ from autosklearn.models import evaluator
 from autosklearn.util import StopWatch
 
 
-def _init_logger(filepath):
-    logging.basicConfig(filename=filepath,
-                        level=logging.DEBUG)
-
-
-def debug(*args):
-    logging.debug(*args)
-    print(args)
-
-
-def error(*args):
-    logging.error(*args)
-    print(args)
-
-
 def get_predictions(dir_path, dir_path_list, exclude_mask):
     result = []
     for i, f in enumerate(dir_path_list):

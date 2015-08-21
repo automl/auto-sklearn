@@ -19,7 +19,9 @@ from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.Xy_data_manager import XyDataManager
 from autosklearn.metalearning import metalearning
 from autosklearn.models import evaluator, paramsklearn
-from autosklearn.util import StopWatch, get_logger, get_auto_seed, set_auto_seed, del_auto_seed
+from autosklearn.util import StopWatch, get_logger, get_auto_seed, \
+    set_auto_seed, del_auto_seed, \
+    add_file_handler
 
 
 def _write_file_with_data(filepath, data, name, log_function):
@@ -41,8 +43,11 @@ def _check_path_for_save(filepath, name, log_function):
 
 
 def _get_logger(log_dir, basename, seed):
-    return get_logger(outputdir=log_dir,
-                      name='AutoML_%s_%d' % (basename, seed))
+    logger = get_logger(os.path.basename(__file__))
+    logger_file = os.path.join(log_dir, '%s.log' % str(
+        'AutoML_%s_%d' % (basename, seed)))
+    add_file_handler(logger, logger_file)
+    return logger
 
 
 
