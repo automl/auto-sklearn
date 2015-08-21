@@ -1,9 +1,8 @@
 # -*- encoding: utf-8 -*-
 import numpy as np
-
 import scipy.sparse
-from autosklearn.data import util as data_util
 from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
+from autosklearn.util import predict_RAM_usage
 
 
 class DataManager(object):
@@ -41,7 +40,7 @@ class DataManager(object):
         categorical = [True if feat_type.lower() == 'categorical' else False
                        for feat_type in self.feat_type]
 
-        predicted_RAM_usage = float(data_util.predict_RAM_usage(
+        predicted_RAM_usage = float(predict_RAM_usage(
             self.data['X_train'], categorical)) / 1024 / 1024
 
         if predicted_RAM_usage > 1000:

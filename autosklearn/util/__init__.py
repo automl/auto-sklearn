@@ -5,3 +5,4 @@ from .common import *
 from .logging_ import *
 from .stopwatch import *
 from .io import *
+from .data import *

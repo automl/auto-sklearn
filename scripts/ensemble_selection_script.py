@@ -17,7 +17,7 @@ import numpy as np
 
 import six.moves.cPickle as pickle
 from autosklearn.constants import STRING_TO_TASK_TYPES
-from autosklearn.data.util import save_predictions
+from autosklearn.util.data import save_predictions
 from autosklearn.models import evaluator
 from autosklearn.util import StopWatch, get_logger, add_file_handler
 

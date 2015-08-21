@@ -11,7 +11,6 @@ try:
 except ImportError:
     pass
 
-import logging
 import os
 import sys
 import time

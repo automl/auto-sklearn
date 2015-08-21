@@ -10,14 +10,14 @@ import unittest
 
 import numpy as np
 from numpy.linalg import LinAlgError
-
 import sklearn.datasets
+from ParamSklearn.util import get_dataset
+
 from autosklearn.constants import *
 from autosklearn.data.competition_data_manager import CompetitionDataManager
-from autosklearn.data.util import convert_to_bin
+from autosklearn.util.data import convert_to_bin
 from autosklearn.models.holdout_evaluator import HoldoutEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space
-from ParamSklearn.util import get_dataset
 
 N_TEST_RUNS = 10
 
