@@ -1,10 +1,5 @@
 # -*- encoding: utf-8 -*-
-"""Created on Apr 2, 2015.
-
-@author: Aaron Klein
-
-"""
-
+from os.path import join
 
 try:
     from __init__ import *
@@ -55,6 +50,15 @@ def pruning(predictions, labels, n_best, task_type, metric):
     indcies = np.argsort(perf)[perf.shape[0] - n_best:]
     return indcies
 
+
+def get_predictions(dir_path, dir_path_list, include_num_runs, re_num_run):
+    result = []
+    for i, model_name in enumerate(dir_path_list):
+        num_run = int(re_num_run.search(model_name).group(1))
+        if num_run in include_num_runs:
+            predictions = np.load(os.path.join(dir_path, model_name))
+            result.append(predictions)
+    return result
 
 def original_ensemble_selection(predictions, labels, ensemble_size, task_type,
                                 metric,
@@ -162,6 +166,19 @@ def ensemble_selection_bagging(predictions, labels, ensemble_size, task_type,
     return np.array(order_of_each_bag)
 
 
+def check_data(logger, len_ensemble_list, current_num_models):
+    for predict, exp in [
+        (len_ensemble_list == 0, 'Directories are empty'),
+        (len_ensemble_list <= current_num_models,
+         'Nothing has changed since the last time'),
+    ]:
+        if predict:
+            logger.debug(exp)
+            return True
+    return False
+
+
+
 def main(logger,
          predictions_dir,
          basename,
@@ -183,21 +200,20 @@ def main(logger,
     index_run = 0
     current_num_models = 0
 
+    dir_ensemble = join(predictions_dir, 'predictions_ensemble_%s/' % seed)
+    dir_valid = join(predictions_dir, 'predictions_valid_%s/' % seed)
+    dir_test = join(predictions_dir, 'predictions_test_%s/' % seed)
+    paths_ = [dir_ensemble, dir_valid, dir_test]
+
+    tru_labels_path = join(predictions_dir, 'true_labels_ensemble.npy')
+
     while used_time < limit:
         logger.debug('Time left: %f', limit - used_time)
         logger.debug('Time last iteration: %f', time_iter)
         # Load the true labels of the validation data
-        true_labels = np.load(os.path.join(predictions_dir,
-                                           'true_labels_ensemble.npy'))
+        true_labels = np.load(tru_labels_path)
 
         # Load the predictions from the models
-        dir_ensemble = os.path.join(predictions_dir,
-                                    'predictions_ensemble_%s/' % seed)
-        dir_valid = os.path.join(predictions_dir,
-                                 'predictions_valid_%s/' % seed)
-        dir_test = os.path.join(predictions_dir, 'predictions_test_%s/' % seed)
-
-        paths_ = [dir_ensemble, dir_valid, dir_test]
         exists = [os.path.isdir(dir_) for dir_ in paths_]
         if not exists[0]:  # all(exists):
             logger.debug('Prediction directory %s does not exist!' %
@@ -210,14 +226,7 @@ def main(logger,
         dir_valid_list = sorted(os.listdir(dir_valid)) if exists[1] else []
         dir_test_list = sorted(os.listdir(dir_test)) if exists[2] else []
 
-        if len(dir_ensemble_list) == 0:
-            logger.debug('Directories are empty')
-            time.sleep(2)
-            used_time = watch.wall_elapsed('ensemble_builder')
-            continue
-
-        if len(dir_ensemble_list) <= current_num_models:
-            logger.debug('Nothing has changed since the last time')
+        if check_data(logger, len(dir_ensemble_list), current_num_models):
             time.sleep(2)
             used_time = watch.wall_elapsed('ensemble_builder')
             continue
@@ -319,26 +328,19 @@ def main(logger,
 
         include_num_runs = set(include_num_runs)
 
-        all_predictions_train = []
-        for i, model_name in enumerate(dir_ensemble_list):
-            num_run = int(re_num_run.search(model_name).group(1))
-            if num_run in include_num_runs:
-                predictions = np.load(os.path.join(dir_ensemble, model_name))
-                all_predictions_train.append(predictions)
+        all_predictions_train = get_predictions(dir_ensemble,
+                                                dir_ensemble_list,
+                                                include_num_runs,
+                                                re_num_run)
+        all_predictions_valid = get_predictions(dir_valid,
+                                                dir_valid_list,
+                                                include_num_runs,
+                                                re_num_run)
 
-        all_predictions_valid = []
-        for i, model_name in enumerate(dir_valid_list):
-            num_run = int(re_num_run.search(model_name).group(1))
-            if num_run in include_num_runs:
-                predictions = np.load(os.path.join(dir_valid, model_name))
-                all_predictions_valid.append(predictions)
-
-        all_predictions_test = []
-        for i, model_name in enumerate(dir_test_list):
-            num_run = int(re_num_run.search(model_name).group(1))
-            if num_run in include_num_runs:
-                predictions = np.load(os.path.join(dir_test, model_name))
-                all_predictions_test.append(predictions)
+        all_predictions_test = get_predictions(dir_test,
+                                               dir_test_list,
+                                               include_num_runs,
+                                               re_num_run)
 
         if len(all_predictions_train) == len(all_predictions_test) == len(
                 all_predictions_valid) == 0:

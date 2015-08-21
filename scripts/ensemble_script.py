@@ -21,7 +21,7 @@ import numpy as np
 import cma
 from autosklearn.data import util as data_util
 from autosklearn.models import evaluator
-from autosklearn.util import StopWatch
+from autosklearn.util import StopWatch, get_logger, add_file_handler
 
 
 def get_predictions(dir_path, dir_path_list, exclude_mask):
@@ -47,10 +47,10 @@ def weighted_ensemble_error(weights, *args):
     return 1 - score
 
 
-def weighted_ensemble(predictions, true_labels, task_type, metric, weights,
+def weighted_ensemble(log_function, predictions, true_labels, task_type, metric, weights,
                       tolfun=1e-3):
     seed = np.random.randint(0, 1000)
-    debug('CMA-ES uses seed: ' + str(seed))
+    log_function('CMA-ES uses seed: ' + str(seed))
     n_models = predictions.shape[0]
     if n_models > 1:
         res = cma.fmin(weighted_ensemble_error, weights,
@@ -80,7 +80,7 @@ def ensemble_prediction(all_predictions, weights):
     return pred
 
 
-def check_data(len_ensemble_list, len_valid_list, len_test_list,
+def check_data(logger, len_ensemble_list, len_valid_list, len_test_list,
                current_num_models):
     for predict, exp in [
         (len_ensemble_list == 0, 'Directories are empty'),
@@ -90,17 +90,16 @@ def check_data(len_ensemble_list, len_valid_list, len_test_list,
          'Nothing has changed since the last time'),
     ]:
         if predict:
-            debug(exp)
+            logger.debug(exp)
             return True
     return False
 
 
-def main(predictions_dir, basename, task_type, metric, limit, output_dir,
+def main(logger, predictions_dir, basename, task_type, metric, limit, output_dir,
          ensemble_size=None):
     watch = StopWatch()
     watch.start_task('ensemble_builder')
 
-    _init_logger(os.path.join(predictions_dir, 'ensemble.log'))
 
     used_time = 0
     time_iter = 0
@@ -108,8 +107,8 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
     current_num_models = 0
 
     while used_time < limit:
-        debug('Time left: %f' % (limit - used_time))
-        debug('Time last iteration: %f' % time_iter)
+        logger.debug('Time left: %f' % (limit - used_time))
+        logger.debug('Time last iteration: %f' % time_iter)
         # Load the true labels of the validation data
         true_labels = np.load(os.path.join(predictions_dir,
                                            'true_labels_ensemble.npy'))
@@ -122,7 +121,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
 
         if not os.path.isdir(dir_ensemble) or not os.path.isdir(dir_valid) or \
                 not os.path.isdir(dir_test):
-            debug('Prediction directory does not exist')
+            logger.debug('Prediction directory does not exist')
             time.sleep(2)
             used_time = watch.wall_elapsed('ensemble_builder')
             continue
@@ -131,7 +130,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
         dir_valid_list = sorted(os.listdir(dir_valid))
         dir_test_list = sorted(os.listdir(dir_test))
 
-        if check_data(len(dir_ensemble_list), len(dir_valid_list),
+        if check_data(logger, len(dir_ensemble_list), len(dir_valid_list),
                       len(dir_test_list), current_num_models):
             time.sleep(2)
             used_time = watch.wall_elapsed('ensemble_builder')
@@ -158,7 +157,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
             if ensemble_size is not None:
                 if score <= 0.001:
                     exclude_mask.append(True)
-                    error('Model only predicts at random: ' + f +
+                    logger.error('Model only predicts at random: ' + f +
                                   ' has score: ' + str(score))
                 # If we have less model in our ensemble than ensemble_size add
                 # the current model if it is better than random
@@ -172,8 +171,8 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
 
                     # If the current model is better than the worst model in
                     # our ensemble replace it by the current model
-                    if (scores_nbest[idx] < score):
-                        debug(
+                    if scores_nbest[idx] < score:
+                        logger.debug(
                             'Worst model in our ensemble: %d with score %f will be replaced by model %d with score %f'
                             % (idx, scores_nbest[idx], model_idx, score))
                         scores_nbest[idx] = score
@@ -189,7 +188,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
                 # Load all predictions that are better than random
                 if score <= 0.001:
                     exclude_mask.append(True)
-                    error('Model only predicts at random: ' + f +
+                    logger.error('Model only predicts at random: ' + f +
                                   ' has score: ' + str(score))
                 else:
                     exclude_mask.append(False)
@@ -207,12 +206,12 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
 
         if len(all_predictions_train) == len(all_predictions_test) == len(
                 all_predictions_valid) == 0:
-            error('All models do just random guessing')
+            logger.error('All models do just random guessing')
             time.sleep(2)
             continue
 
         if len(all_predictions_train) == 1:
-            debug('Only one model so far we just copy its predictions')
+            logger.debug('Only one model so far we just copy its predictions')
             Y_valid = all_predictions_valid[0]
             Y_test = all_predictions_test[0]
         else:
@@ -222,15 +221,15 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
                 n_models = len(all_predictions_train)
                 init_weights = np.ones([n_models]) / n_models
 
-                weights = weighted_ensemble(np.array(all_predictions_train),
+                weights = weighted_ensemble(logger.debug, np.array(all_predictions_train),
                                             true_labels, task_type, metric,
                                             init_weights)
             except ValueError:
-                error('Caught ValueError!')
+                logger.error('Caught ValueError!')
                 used_time = watch.wall_elapsed('ensemble_builder')
                 continue
             except Exception:
-                error('Caught error!')
+                logger.error('Caught error!')
                 used_time = watch.wall_elapsed('ensemble_builder')
                 continue
 
@@ -264,11 +263,20 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
 
 
 if __name__ == '__main__':
+
+    seed = int(sys.argv[8])
+    predictions_dir = sys.argv[1]
+
+    logger = get_logger(os.path.basename(__file__))
+    add_file_handler(logger, os.path.join(predictions_dir, 'ensemble.log'))
+    logger.debug("Start script: %s" % __file__)
+
     main(predictions_dir=sys.argv[1],
          basename=sys.argv[2],
          task_type=sys.argv[3],
          metric=sys.argv[4],
          limit=float(sys.argv[5]),
          output_dir=sys.argv[6],
-         ensemble_size=int(sys.argv[7]))
+         ensemble_size=int(sys.argv[7]),
+         logger=logger)
     sys.exit(0)

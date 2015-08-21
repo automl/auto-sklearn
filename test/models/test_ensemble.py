@@ -13,6 +13,8 @@ from autosklearn.constants import *
 
 N_TEST_RUNS = 10
 
+def std_print(*args):
+    print(args)
 
 class Test(unittest.TestCase):
 
@@ -35,7 +37,7 @@ class Test(unittest.TestCase):
         metric = 'f1_metric'
         task_type = MULTICLASS_CLASSIFICATION
 
-        weights = scripts.ensemble_script.weighted_ensemble(
+        weights = scripts.ensemble_script.weighted_ensemble(std_print,
             predictions, true_labels, task_type, metric, weights)
 
         self.assertEqual(weights.shape[0], self.n_models)
