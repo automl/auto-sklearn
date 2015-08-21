@@ -1,19 +1,17 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
-import glob
 
-import os
 import shlex
 import subprocess
-
-import lockfile
-
 import fnmatch
 import os
+
+import lockfile
 
 import autosklearn.cli.SMAC_cli_holdout
 from autosklearn.constants import *
 from conf.settings import BINARIES_DIRECTORY
+
 
 def submit_call(call, seed, log_dir=None):
     print('Calling: ' + call)
@@ -139,12 +137,12 @@ def run_smac(dataset_name, dataset, tmp_dir, searchspace, instance_file, limit,
     if initial_challengers is None:
         initial_challengers = []
 
-    smac_path = search_prog(prog_name)
-    if smac_path is None:
-        smac_path = search_prog_in_binaries(prog_name)
-    assert smac_path is not None, "Not found smac binary file"
+    prog_path = search_prog(prog_name)
+    if prog_path is None:
+        prog_path = search_prog_in_binaries(prog_name)
+    assert prog_path is not None, "Not found smac binary file"
 
-    call = ' '.join([smac_path, '--numRun', str(seed), '--scenario',
+    call = ' '.join([prog_path, '--numRun', str(seed), '--scenario',
                      scenario_file] + initial_challengers)
 
     proc = submit_call(call, seed)
@@ -159,7 +157,7 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
         return
     path_to_root = os.path.dirname(os.path.abspath(__file__))
     wrapper_exec = os.path.join(path_to_root, 'ensemble_selection_script.py')
-    runsolver_exec = 'runsolver'
+    prog_name = 'runsolver'
     delay = 5
 
     task_type = TASK_TYPES_TO_STRING[task_type]
@@ -172,11 +170,16 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
     # be at least one (0 means infinity)
     limit = max(1, limit)
 
+    prog_path = search_prog(prog_name)
+    if prog_path is None:
+        prog_path = search_prog_in_binaries(prog_name)
+    assert prog_path is not None, "Not found %s binary file" % prog_name
+
     # Now add runsolver command
     # runsolver_cmd = "%s --watcher-data /dev/null -W %d" % \
     #                (runsolver_exec, limit)
     runsolver_cmd = '%s --watcher-data /dev/null -W %d -d %d' % \
-                    (runsolver_exec, limit, delay)
+                    (prog_path, limit, delay)
     call = runsolver_cmd + ' ' + call
 
     proc = submit_call(call, seed, log_dir=tmp_dir)
