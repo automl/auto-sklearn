@@ -14,15 +14,36 @@ from sklearn.base import BaseEstimator
 import six.moves.cPickle as pickle
 from autosklearn import submit_process
 from autosklearn.constants import *
-from autosklearn.data import split_data
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.Xy_data_manager import XyDataManager
-from autosklearn.metalearning import metalearning
+from autosklearn.data.split_data import split_data
+from autosklearn.metalearning.metalearning import MetaLearning
 from autosklearn.models import evaluator, paramsklearn
 from autosklearn.util import StopWatch, get_logger, get_auto_seed, \
     set_auto_seed, del_auto_seed, \
     add_file_handler
 
+
+def _save_ensemble_data(x_data, y_data, tmp_dir, watcher):
+    """Split dataset and store Data for the ensemble script.
+
+    :param x_data:
+    :param y_data:
+    :return:
+
+    """
+    task_name = 'LoadData'
+    watcher.start_task(task_name)
+    _, _, _, y_ensemble = split_data(x_data, y_data)
+
+    filepath = os.path.join(tmp_dir, 'true_labels_ensemble.npy')
+
+    lock_path = filepath + '.lock'
+    with lockfile.LockFile(lock_path):
+        if not os.path.exists(filepath):
+            np.save(filepath, y_ensemble)
+
+    watcher.stop_task(task_name)
 
 def _write_file_with_data(filepath, data, name, log_function):
     if _check_path_for_save(filepath, name, log_function):
@@ -126,7 +147,7 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
         ml = None
     elif data_info_task in \
             [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
-        ml = metalearning.MetaLearning()
+        ml = MetaLearning()
         log_function('Start calculating metafeatures for %s' % basename)
         ml.calculate_metafeatures_with_labels(x_train, y_train,
                                               categorical=categorical,
@@ -255,28 +276,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         os.mkdir(self._model_dir)
         os.mkdir(self._ensemble_indices_dir)
 
-    @staticmethod
-    def _save_ensemble_data(x_data, y_data, tmp_dir, watcher):
-        """Split dataset and store Data for the ensemble script.
-
-        :param x_data:
-        :param y_data:
-        :return:
-
-        """
-        task_name = 'LoadData'
-        watcher.start_task(task_name)
-        _, _, _, y_ensemble = split_data.split_data(x_data, y_data)
-
-        filepath = os.path.join(tmp_dir, 'true_labels_ensemble.npy')
-
-        lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path):
-            if not os.path.exists(filepath):
-                np.save(filepath, y_ensemble)
-
-        watcher.stop_task(task_name)
-
     def run(self):
         raise NotImplementedError()
 
@@ -379,7 +378,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         set_auto_seed(self._seed)
 
         # load data
-        self._save_ensemble_data(
+        _save_ensemble_data(
             data_d.data['X_train'],
             data_d.data['Y_train'],
             self._tmp_dir,
@@ -412,9 +411,10 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         # == Pickle the data manager
         data_manager_path = self._save_data_manager(
-            data_d, self._tmp_dir,
-                                                    self._basename,
-                                                    watcher=self._stopwatch, )
+            data_d,
+            self._tmp_dir,
+            self._basename,
+            watcher=self._stopwatch)
 
         # = Create a searchspace
         self.configuration_space, configspace_path = _create_search_space(

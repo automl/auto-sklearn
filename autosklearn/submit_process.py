@@ -183,6 +183,6 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
     call = runsolver_cmd + ' ' + call
 
     print('Calling: ' + call)
-    raise Exception("fsa")
+    # raise Exception("fsa")
     proc = submit_call(call, seed, log_dir=tmp_dir)
     return proc

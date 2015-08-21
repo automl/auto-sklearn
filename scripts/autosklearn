@@ -1,11 +1,5 @@
 #! /usr/bin/env python
 # -*- encoding: utf-8 -*-
-
-try:
-    from __init__ import *
-except ImportError:
-    pass
-
 from collections import deque
 import logging
 import random

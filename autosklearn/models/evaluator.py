@@ -6,13 +6,16 @@ import os
 import time
 
 import numpy as np
-
 import lockfile
-import six.moves.cPickle as pickle
-from autosklearn.constants import *
-from autosklearn.scores import libscores
 from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.regression import ParamSklearnRegressor
+
+import six.moves.cPickle as pickle
+from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
+    BINARY_CLASSIFICATION, REGRESSION, TASK_TYPES, REGRESSION_TASKS, \
+    MULTILABEL_CLASSIFICATION
+from autosklearn.scores import sanitize_array, a_metric, r2_metric, \
+    normalize_array, bac_metric, auc_metric, f1_metric, pac_metric, acc_metric
 
 
 def calculate_score(solution, prediction, task_type, metric, num_classes,
@@ -31,6 +34,7 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
     if task_type not in TASK_TYPES:
         raise NotImplementedError(task_type)
 
+    print(metric)
     scoring_func = getattr(libscores, metric)
     if solution.shape != prediction.shape:
         raise ValueError('Solution shape %s != prediction shape %s' %
@@ -39,31 +43,31 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
     if all_scoring_functions:
         score = dict()
         if task_type in REGRESSION_TASKS:
-            cprediction = libscores.sanitize_array(prediction)
-            score['a_metric'] = libscores.a_metric(solution, cprediction,
+            cprediction = sanitize_array(prediction)
+            score['a_metric'] = a_metric(solution, cprediction,
                                                    task=task_type)
-            score['r2_metric'] = libscores.r2_metric(solution, cprediction,
+            score['r2_metric'] = r2_metric(solution, cprediction,
                                                      task=task_type)
         else:
-            csolution, cprediction = libscores.normalize_array(solution,
+            csolution, cprediction = normalize_array(solution,
                                                                prediction)
-            score['bac_metric'] = libscores.bac_metric(csolution, cprediction,
+            score['bac_metric'] = bac_metric(csolution, cprediction,
                                                        task=task_type)
-            score['auc_metric'] = libscores.auc_metric(csolution, cprediction,
+            score['auc_metric'] = auc_metric(csolution, cprediction,
                                                        task=task_type)
-            score['f1_metric'] = libscores.f1_metric(csolution, cprediction,
+            score['f1_metric'] = f1_metric(csolution, cprediction,
                                                      task=task_type)
-            score['pac_metric'] = libscores.pac_metric(csolution, cprediction,
+            score['pac_metric'] = pac_metric(csolution, cprediction,
                                                        task=task_type)
-            score['acc_metric'] = libscores.acc_metric(csolution, cprediction,
+            score['acc_metric'] = acc_metric(csolution, cprediction,
                                                        task=task_type)
 
     else:
         if task_type in REGRESSION_TASKS:
-            cprediction = libscores.sanitize_array(prediction)
+            cprediction = sanitize_array(prediction)
             score = scoring_func(solution, cprediction, task=task_type)
         else:
-            csolution, cprediction = libscores.normalize_array(solution,
+            csolution, cprediction = normalize_array(solution,
                                                                prediction)
             score = scoring_func(csolution, cprediction, task=task_type)
     return score

@@ -7,7 +7,8 @@ from StringIO import StringIO
 
 import numpy as np
 import pyMetaLearn.metafeatures.metafeatures as metafeatures
-import pyMetaLearn.optimizers.metalearn_optimizer.metalearner as metalearner
+from pyMetaLearn.optimizers.metalearn_optimizer.metalearner import \
+    MetaLearningOptimizer
 
 from autosklearn.constants import *
 from autosklearn.util import get_logger
@@ -106,7 +107,7 @@ class MetaLearning(object):
         metafeatures_subset = list(metafeatures_subset)
 
         start = time.time()
-        ml = metalearner.MetaLearningOptimizer(
+        ml = MetaLearningOptimizer(
             dataset_name=dataset_name + self._sentinel,
             configuration_space=configuration_space,
             aslib_directory=metadata_directory,

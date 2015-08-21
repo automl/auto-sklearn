@@ -25,7 +25,7 @@ def main():
                                                output_folder='/tmp/auto_out',
                                                debug_mode=True,
                                                )
-    automl.fit(X_train, y_train)
+    automl.fit(X_train, y_train, dataset_name='example')
     print(automl.score(X_test, y_test))
 
 
