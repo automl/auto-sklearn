@@ -6,9 +6,9 @@ import time
 from StringIO import StringIO
 
 import numpy as np
-
 import pyMetaLearn.metafeatures.metafeatures as metafeatures
 import pyMetaLearn.optimizers.metalearn_optimizer.metalearner as metalearner
+
 from autosklearn.constants import *
 from autosklearn.util import get_logger
 
@@ -37,6 +37,22 @@ class MetaLearning(object):
              'LandmarkDecisionTree', 'LandmarkLDA', 'LandmarkNaiveBayes',
              'PCAFractionOfComponentsFor95PercentVariance',
              'PCAKurtosisFirstPC', 'PCASkewnessFirstPC'])
+
+    @property
+    def metafeatures_labels(self):
+        return self._metafeatures_labels
+
+    @metafeatures_labels.setter
+    def metafeatures_labels(self, value):
+        self._metafeatures_labels = value
+
+    @property
+    def metafeatures_encoded_labels(self):
+        return self._metafeatures_encoded_labels
+
+    @metafeatures_encoded_labels.setter
+    def metafeatures_encoded_labels(self, value):
+        self._metafeatures_encoded_labels = value
 
     def calculate_metafeatures_with_labels(self, X_train, Y_train, categorical,
                                            dataset_name):
