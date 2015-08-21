@@ -92,7 +92,7 @@ def _run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
                                 memory_limit=ml_memory_limit,
                                 seed=_get_auto_seed())
     log_function(smac_call)
-    watcher.stop_task('runSmac')
+    watcher.stop_task(task_name)
     return proc_smac
 
 
@@ -133,7 +133,8 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
                             metalearning_cnt, x_train, y_train, watcher,
                             log_function):
     # == Calculate metafeatures
-    watcher.start_task('CalculateMetafeatures')
+    task_name = 'CalculateMetafeatures'
+    watcher.start_task(task_name)
     categorical = [True if feat_type.lower() in ['categorical'] else False
                    for feat_type in data_feat_type]
 
@@ -149,10 +150,10 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
     else:
         ml = None
         log_function('Metafeatures not calculated')
-    watcher.stop_task('CalculateMetafeatures')
+    watcher.stop_task(task_name)
     log_function(
         'Calculating Metafeatures (categorical attributes) took %5.2f' %
-        watcher.wall_elapsed('CalculateMetafeatures'))
+        watcher.wall_elapsed(task_name))
     return ml
 
 
@@ -475,7 +476,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._critical('Metafeatures encoded not calculated')
 
         # == RUN SMAC
-
         proc_smac = _run_smac(self._tmp_dir, self._basename,
                               self._time_for_task, self._ml_memory_limit,
                               data_manager_path, configspace_path,

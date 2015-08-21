@@ -9,6 +9,8 @@ import tarfile
 import urllib
 from os.path import join
 
+from conf.settings import DOWNLOAD_DIRECTORY, BINARIES_DIRECTORY
+
 BASE_DIR = os.path.join(os.path.dirname(__file__), '..')
 
 SMAC_DOWNLOAD_LOCATION = 'http://aad.informatik.uni-freiburg.de/~feurerm/'
@@ -17,9 +19,6 @@ METADATA_LOCATION = 'http://aad.informatik.uni-freiburg.de/~feurerm/'
 METADATA_TAR_NAME = 'metadata_automl1_000.tar.gz'
 RUNSOLVER_LOCATION = 'http://www.cril.univ-artois.fr/~roussel/runsolver/'
 RUNSOLVER_TAR_NAME = 'runsolver-3.3.4.tar.bz2'
-DOWNLOAD_DIRECTORY = os.path.join(BASE_DIR, '.downloads')
-BINARIES_DIRECTORY = os.path.join(BASE_DIR, 'autosklearn/binaries')
-METADATA_DIRECTORY = os.path.join(BASE_DIR, 'autosklearn/metalearning/files')
 
 
 def load_file(data):

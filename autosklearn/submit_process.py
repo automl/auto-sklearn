@@ -1,14 +1,19 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
+import glob
 
 import os
 import shlex
 import subprocess
 
-import autosklearn.cli.SMAC_cli_holdout
 import lockfile
-from autosklearn.constants import *
 
+import fnmatch
+import os
+
+import autosklearn.cli.SMAC_cli_holdout
+from autosklearn.constants import *
+from conf.settings import BINARIES_DIRECTORY
 
 def submit_call(call, seed, log_dir=None):
     print('Calling: ' + call)
@@ -47,9 +52,39 @@ def get_algo_exec(runsolver_limit, runsolver_delay, memory_limit, *args):
     return call
 
 
+def find_files(folder, pattern):
+    matches = []
+    for root, dirnames, filenames in os.walk(folder):
+      for filename in fnmatch.filter(filenames, pattern):
+        matches.append(os.path.join(root, filename))
+    return matches
+
+def search_prog_in_binaries(prog_name):
+    try:
+        files = find_files(BINARIES_DIRECTORY, prog_name)
+        assert files
+        result = os.path.normpath(files[0])
+    except Exception as e:
+        result = None
+    return result
+
+def search_prog(prog_name):
+    try:
+        p = subprocess.Popen(["whereis", prog_name], stdout=subprocess.PIPE)
+        (output, _) = p.communicate()
+        assert output, "Not found %s" % prog_name
+        paths = output.split()
+        assert paths, "Not found (whereis) prog - %s" % prog_name
+        result = paths[1]
+    except Exception as e:
+        result = None
+    return result
+
 def run_smac(dataset_name, dataset, tmp_dir, searchspace, instance_file, limit,
              cutoff_time, seed, memory_limit,
              initial_challengers=None, ):
+    prog_name = "smac"
+
     if limit <= 0:
         # It makes no sense to start building ensembles_statistics
         return
@@ -104,7 +139,12 @@ def run_smac(dataset_name, dataset, tmp_dir, searchspace, instance_file, limit,
     if initial_challengers is None:
         initial_challengers = []
 
-    call = ' '.join(['smac', '--numRun', str(seed), '--scenario',
+    smac_path = search_prog(prog_name)
+    if smac_path is None:
+        smac_path = search_prog_in_binaries(prog_name)
+    assert smac_path is not None, "Not found smac binary file"
+
+    call = ' '.join([smac_path, '--numRun', str(seed), '--scenario',
                      scenario_file] + initial_challengers)
 
     proc = submit_call(call, seed)
