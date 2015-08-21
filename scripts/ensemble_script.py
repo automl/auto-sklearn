@@ -18,9 +18,9 @@ import time
 import numpy as np
 
 import cma
-from autosklearn.data import util as data_util
 from autosklearn.models import evaluator
-from autosklearn.util import StopWatch, get_logger, add_file_handler
+from autosklearn.util import StopWatch, get_logger, add_file_handler, \
+    save_predictions
 
 
 def get_predictions(dir_path, dir_path_list, exclude_mask):
@@ -244,13 +244,13 @@ def main(logger, predictions_dir, basename, task_type, metric, limit, output_dir
         filename_test = os.path.join(
             output_dir,
             basename + '_valid_' + str(index_run).zfill(3) + '.predict')
-        data_util.save_predictions(os.path.join(predictions_dir,
+        save_predictions(os.path.join(predictions_dir,
                                                 filename_test), Y_valid)
 
         filename_test = os.path.join(
             output_dir,
             basename + '_test_' + str(index_run).zfill(3) + '.predict')
-        data_util.save_predictions(os.path.join(predictions_dir,
+        save_predictions(os.path.join(predictions_dir,
                                                 filename_test), Y_test)
 
         current_num_models = len(dir_ensemble_list)

@@ -7,7 +7,7 @@ import time
 
 import lockfile
 import six.moves.cPickle as pickle
-from autosklearn.data.competition_data_manager import CompetitionDataManager
+from autosklearn.data_managers import CompetitionDataManager
 from autosklearn.models.cv_evaluator import CVEvaluator
 from autosklearn.models.evaluator import get_new_run_num
 from autosklearn.models.holdout_evaluator import HoldoutEvaluator

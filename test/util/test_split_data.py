@@ -9,8 +9,7 @@ from __future__ import print_function
 import unittest
 
 import numpy as np
-
-from autosklearn.data.split_data import split_data
+from autosklearn.util import split_data
 
 
 class Test(unittest.TestCase):

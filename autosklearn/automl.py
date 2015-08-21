@@ -13,16 +13,15 @@ from sklearn.base import BaseEstimator
 
 import six.moves.cPickle as pickle
 from autosklearn.constants import *
-from autosklearn.data.competition_data_manager import CompetitionDataManager
-from autosklearn.data.Xy_data_manager import XyDataManager
-from autosklearn.data.split_data import split_data
+from autosklearn.data_managers import CompetitionDataManager
+from autosklearn.data_managers import XYDataManager
 from autosklearn.metalearning.metalearning import \
     calc_meta_features, calc_meta_features_encoded, \
     create_metalearning_string_for_smac_call
 from autosklearn.models import evaluator, paramsklearn
 from autosklearn.util import StopWatch, get_logger, get_auto_seed, \
     set_auto_seed, del_auto_seed, \
-    add_file_handler, submit_process
+    add_file_handler, submit_process, split_data
 
 
 def _save_ensemble_data(x_data, y_data, tmp_dir, watcher):
@@ -302,7 +301,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         self._logger = _get_logger(self._log_dir, self._basename, self._seed)
 
-        loaded_data_manager = XyDataManager(data_x, y,
+        loaded_data_manager = XYDataManager(data_x, y,
                                             task=task,
                                             metric=metric,
                                             feat_type=feat_type,
@@ -374,19 +373,19 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                      (basename, time_left_after_reading))
         return time_for_load_data
 
-    def _fit(self, data_d):
+    def _fit(self, manager):
         # TODO: check that data and task definition fit together!
 
-        self._metric = data_d.info['metric']
-        self._task = data_d.info['task']
-        self._target_num = data_d.info['target_num']
+        self._metric = manager.info['metric']
+        self._task = manager.info['task']
+        self._target_num = manager.info['target_num']
 
         set_auto_seed(self._seed)
 
         # load data
         _save_ensemble_data(
-            data_d.data['X_train'],
-            data_d.data['Y_train'],
+            manager.data['X_train'],
+            manager.data['Y_train'],
             self._tmp_dir,
             self._stopwatch)
 
@@ -401,23 +400,23 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         # == Calculate metafeatures
         meta_features = _calculate_metafeatures(
-            data_feat_type=data_d.feat_type,
-            data_info_task=data_d.info['task'],
-            x_train=data_d.data['X_train'],
-            y_train=data_d.data['Y_train'],
+            data_feat_type=manager.feat_type,
+            data_info_task=manager.info['task'],
+            x_train=manager.data['X_train'],
+            y_train=manager.data['Y_train'],
             basename=self._basename,
             watcher=self._stopwatch,
             metalearning_cnt=self._initial_configurations_via_metalearning,
             log_function=self._debug)
 
         self._stopwatch.start_task('OneHot')
-        data_d.perform1HotEncoding()
-        self._ohe = data_d.encoder_
+        manager.perform1HotEncoding()
+        self._ohe = manager.encoder_
         self._stopwatch.stop_task('OneHot')
 
         # == Pickle the data manager
         data_manager_path = self._save_data_manager(
-            data_d,
+            manager,
             self._tmp_dir,
             self._basename,
             watcher=self._stopwatch)
@@ -425,19 +424,19 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         # = Create a searchspace
         self.configuration_space, configspace_path = _create_search_space(
             self._tmp_dir,
-            data_d.info,
+            manager.info,
             self._stopwatch,
             self._debug)
 
         if meta_features is None:
             initial_configurations = []
-        elif data_d.info['task'] in [MULTICLASS_CLASSIFICATION,
+        elif manager.info['task'] in [MULTICLASS_CLASSIFICATION,
                                      BINARY_CLASSIFICATION]:
 
             meta_features_encoded = _calculate_metafeatures_encoded(
                 self._basename,
-                data_d.data['X_train'],
-                data_d.data['Y_train'],
+                manager.data['X_train'],
+                manager.data['Y_train'],
                 self._stopwatch,
                 self._debug)
 
@@ -453,7 +452,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 self._task,
                 self._metadata_directory,
                 self._initial_configurations_via_metalearning,
-                data_d.info[
+                manager.info[
                     'is_sparse'],
                 self._stopwatch,
                 self._error)

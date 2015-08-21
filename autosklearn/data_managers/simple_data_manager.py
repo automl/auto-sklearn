@@ -1,11 +1,16 @@
 # -*- encoding: utf-8 -*-
+
+__all__ = [
+    'SimpleDataManager',
+]
+
 import numpy as np
 import scipy.sparse
 from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
 from autosklearn.util import predict_RAM_usage
 
 
-class DataManager(object):
+class SimpleDataManager(object):
 
     def __init__(self):
         self._data = dict()

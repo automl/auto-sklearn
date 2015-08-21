@@ -9,7 +9,7 @@ import time
 import autosklearn.models.holdout_evaluator
 import lockfile
 import six.moves.cPickle as pickle
-from autosklearn.data.data_manager import DataManager
+from autosklearn.data_managers import SimpleDataManager
 from autosklearn.models.paramsklearn import get_class
 from HPOlibConfigSpace import configuration_space
 
@@ -28,7 +28,7 @@ def store_and_or_load_data(outputdir, dataset, data_dir):
         # It is not yet sure, whether the file already exists
         try:
             if not os.path.exists(save_path):
-                D = DataManager(dataset, data_dir, verbose=True)
+                D = SimpleDataManager(dataset, data_dir, verbose=True)
                 fh = open(save_path, 'w')
                 pickle.dump(D, fh, -1)
                 fh.close()

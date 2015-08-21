@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 from autosklearn.constants import *
-from autosklearn.data.split_data import split_data
 from autosklearn.models.evaluator import Evaluator, calculate_score
+from autosklearn.util import split_data
 
 
 class HoldoutEvaluator(Evaluator):

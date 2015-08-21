@@ -1,16 +1,20 @@
 # -*- encoding: utf-8 -*-
+
+__all__ = [
+    'XYDataManager',
+]
 import numpy as np
 
 from autosklearn.constants import *
-from autosklearn.data.data_manager import DataManager
+from autosklearn.data_managers import SimpleDataManager
 from scipy import sparse
 
 
-class XyDataManager(DataManager):
+class XYDataManager(SimpleDataManager):
 
     def __init__(self, data_x, y, task, metric, feat_type, dataset_name,
                  encode_labels):
-        super(XyDataManager, self).__init__()
+        super(XYDataManager, self).__init__()
         self.info['task'] = task
         self.info['metric'] = metric
         self.info['is_sparse'] = 1 if sparse.issparse(data_x) else 0

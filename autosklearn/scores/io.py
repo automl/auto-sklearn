@@ -3,35 +3,30 @@ from __future__ import print_function
 
 import os
 import platform
-from glob import glob
 from os import getcwd as pwd
 from sys import stderr, version
 
 from pip import get_installed_distributions as lib
 import psutil
 import yaml
+
 from autosklearn.scores.classification_metrics import auc_metric, acc_metric
 from autosklearn.scores.regression_metrics import r2_metric, a_metric
 from autosklearn.scores.specialized_scores import npac_multiclass_score, \
     npac_binary_score, f1_multiclass_score, f1_binary_score, \
     nbac_multiclass_score, nbac_binary_score
 from autosklearn.scores.useful import sanitize_array, normalize_array
+from autosklearn.util import ls
 
-swrite = stderr.write
 
-
-def ls(filename):
-    return sorted(glob(filename))
+def error_log(*args):
+    stderr.write(*args)
 
 
 def write_list(lst):
     for item in lst:
-        swrite(item + '\n')
+        error_log(item + '\n')
 
-
-def mkdir(d):
-    if not os.path.exists(d):
-        os.makedirs(d)
 
 
 def get_info(filename):
@@ -60,45 +55,45 @@ def show_io(input_dir, output_dir):
     :param output_dir:
     :return:
     """
-    swrite('\n=== DIRECTORIES ===\n\n')
+    error_log('\n=== DIRECTORIES ===\n\n')
     # Show this directory
-    swrite('-- Current directory ' + pwd() + ':\n')
+    error_log('-- Current directory ' + pwd() + ':\n')
     write_list(ls('.'))
     write_list(ls('./*'))
     write_list(ls('./*/*'))
-    swrite('\n')
+    error_log('\n')
 
     # List input and output directories
-    swrite('-- Input directory ' + input_dir + ':\n')
+    error_log('-- Input directory ' + input_dir + ':\n')
     write_list(ls(input_dir))
     write_list(ls(input_dir + '/*'))
     write_list(ls(input_dir + '/*/*'))
     write_list(ls(input_dir + '/*/*/*'))
-    swrite('\n')
-    swrite('-- Output directory  ' + output_dir + ':\n')
+    error_log('\n')
+    error_log('-- Output directory  ' + output_dir + ':\n')
     write_list(ls(output_dir))
     write_list(ls(output_dir + '/*'))
-    swrite('\n')
+    error_log('\n')
 
     # write meta data to sdterr
-    swrite('\n=== METADATA ===\n\n')
-    swrite('-- Current directory ' + pwd() + ':\n')
+    error_log('\n=== METADATA ===\n\n')
+    error_log('-- Current directory ' + pwd() + ':\n')
     try:
         metadata = yaml.load(open('metadata', 'r'))
         for key, value in metadata.items():
-            swrite(key + ': ')
-            swrite(str(value) + '\n')
+            error_log(key + ': ')
+            error_log(str(value) + '\n')
     except Exception:
-        swrite('none\n')
-    swrite('-- Input directory ' + input_dir + ':\n')
+        error_log('none\n')
+    error_log('-- Input directory ' + input_dir + ':\n')
     try:
         metadata = yaml.load(open(os.path.join(input_dir, 'metadata'), 'r'))
         for key, value in metadata.items():
-            swrite(key + ': ')
-            swrite(str(value) + '\n')
-        swrite('\n')
+            error_log(key + ': ')
+            error_log(str(value) + '\n')
+        error_log('\n')
     except Exception:
-        swrite('none\n')
+        error_log('none\n')
 
 
 def show_version(scoring_version):
@@ -107,14 +102,14 @@ def show_version(scoring_version):
     :param scoring_version:
     :return:
     """
-    swrite('\n=== VERSIONS ===\n\n')
+    error_log('\n=== VERSIONS ===\n\n')
     # Scoring program version
-    swrite('Scoring program version: ' + str(scoring_version) + '\n\n')
+    error_log('Scoring program version: ' + str(scoring_version) + '\n\n')
     # Python version
-    swrite('Python version: ' + version + '\n\n')
+    error_log('Python version: ' + version + '\n\n')
     # Give information on the version installed
-    swrite('Versions of libraries installed:\n')
-    map(swrite, sorted(['%s==%s\n' % (i.key, i.version) for i in lib()]))
+    error_log('Versions of libraries installed:\n')
+    map(error_log, sorted(['%s==%s\n' % (i.key, i.version) for i in lib()]))
 
 
 def show_platform():
@@ -122,12 +117,12 @@ def show_platform():
     Show information on platform.
     :return:
     """
-    swrite('\n=== SYSTEM ===\n\n')
+    error_log('\n=== SYSTEM ===\n\n')
     try:
         linux_distribution = platform.linux_distribution()
     except Exception:
         linux_distribution = 'N/A'
-    swrite("""
+    error_log("""
     dist: %s
     linux_distribution: %s
     system: %s

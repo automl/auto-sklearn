@@ -4,8 +4,9 @@ from collections import defaultdict
 import numpy as np
 
 import sklearn.utils
-from autosklearn.data.split_data import get_CV_fold
+
 from autosklearn.models.evaluator import Evaluator, calculate_score
+from autosklearn.util import get_CV_fold
 
 
 class NestedCVEvaluator(Evaluator):

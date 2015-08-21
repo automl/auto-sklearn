@@ -14,7 +14,7 @@ import sklearn.datasets
 from ParamSklearn.util import get_dataset
 
 from autosklearn.constants import *
-from autosklearn.data.competition_data_manager import CompetitionDataManager
+from autosklearn.data_managers import CompetitionDataManager
 from autosklearn.util.data import convert_to_bin
 from autosklearn.models.holdout_evaluator import HoldoutEvaluator
 from autosklearn.models.paramsklearn import get_configuration_space

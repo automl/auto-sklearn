@@ -17,6 +17,10 @@
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 from __future__ import print_function
 
+__all__ = [
+    'CompetitionDataManager',
+]
+
 import os
 import re
 import time
@@ -25,20 +29,22 @@ import numpy as np
 import scipy.sparse
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
     STRING_TO_TASK_TYPES
-from autosklearn.constants import MULTICLASS_CLASSIFICATION
 
-from autosklearn.data.data_manager import DataManager
-from autosklearn.util import convert_to_num
+from autosklearn.data_managers import SimpleDataManager
+from autosklearn.util import convert_to_num, read_first_line, file_to_array
 
 try:
-    import autosklearn.data.competition_c_functions as competition_c_functions
+
+    from autosklearn.data_managers.competition_c_functions import \
+        read_dense_file, \
+        read_sparse_file, read_sparse_binary_file, read_dense_file_unknown_width
 
     competition_c_functions_is_there = True
 except Exception:
     competition_c_functions_is_there = False
 
 
-def data_dense(filename, feat_type=None, verbose=False):
+def _data_dense(filename, feat_type=None, verbose=False):
     # The 2nd parameter makes possible a using of the 3 functions of data
     # reading (data, data_sparse, data_binary_sparse) without changing
     # parameters
@@ -79,16 +85,16 @@ def data_dense(filename, feat_type=None, verbose=False):
         return data
 
 
-def data_sparse(filename, feat_type):
+def _data_sparse(filename, feat_type):
     # This function takes as argument a file representing a sparse matrix
     # sparse_matrix[i][j] = "a:b" means matrix[i][a] = b
     # It converts it into a numpy array, using sparse_list_to_array function,
     # and returns this array
-    sparse_list = sparse_file_to_sparse_list(filename)
-    return sparse_list_to_csr_sparse(sparse_list, len(feat_type))
+    sparse_list = _sparse_file_to_sparse_list(filename)
+    return _sparse_list_to_csr_sparse(sparse_list, len(feat_type))
 
 
-def data_binary_sparse(filename, feat_type):
+def _data_binary_sparse(filename, feat_type):
     # This function takes as an argument a file representing a binary sparse
     # matrix
     # binary_sparse_matrix[i][j] = a means matrix[i][j] = 1
@@ -106,30 +112,7 @@ def data_binary_sparse(filename, feat_type):
     return dok_sparse.tocsr()
 
 
-def file_to_array(filename, verbose=False):
-    # Converts a file to a list of list of STRING; It differs from
-    # np.genfromtxt in that the number of columns doesn't need to be constant
-    data = []
-    with open(filename, 'r') as data_file:
-        if verbose:
-            print('Reading {}...'.format(filename))
-        lines = data_file.readlines()
-        if verbose:
-            print('Converting {} to correct array...'.format(filename))
-        data = [lines[i].strip().split() for i in range(len(lines))]
-    return data
-
-
-def read_first_line(filename):
-    # Read fist line of file
-    data = []
-    with open(filename, 'r') as data_file:
-        line = data_file.readline()
-        data = line.strip().split()
-    return data
-
-
-def sparse_file_to_sparse_list(filename, verbose=True):
+def _sparse_file_to_sparse_list(filename, verbose=True):
     # Converts a sparse data file to a sparse list, so that:
     # sparse_list[i][j] = (a,b) means matrix[i][a]=b
     data_file = open(filename, 'r')
@@ -148,7 +131,7 @@ def sparse_file_to_sparse_list(filename, verbose=True):
             for i in range(len(data))]
 
 
-def sparse_list_to_csr_sparse(sparse_list, nbr_features, verbose=True):
+def _sparse_list_to_csr_sparse(sparse_list, nbr_features, verbose=True):
     # This function takes as argument a matrix of tuple representing a sparse
     # matrix and the number of features.
     # sparse_list[i][j] = (a,b) means matrix[i][a]=b
@@ -169,7 +152,7 @@ def sparse_list_to_csr_sparse(sparse_list, nbr_features, verbose=True):
     return dok_sparse.tocsr()
 
 
-class CompetitionDataManager(DataManager):
+class CompetitionDataManager(SimpleDataManager):
 
     ''' This class aims at loading and saving data easily with a cache and at generating a dictionary (self.info) in which each key is a feature (e.g. : name, format, feat_num,...).
     Methods defined here are :
@@ -254,9 +237,9 @@ class CompetitionDataManager(DataManager):
             self.getFormatData(filename)
         if competition_c_functions_is_there:
             data_func = {
-                'dense': competition_c_functions.read_dense_file,
-                'sparse': competition_c_functions.read_sparse_file,
-                'sparse_binary': competition_c_functions.read_sparse_binary_file
+                'dense': read_dense_file,
+                'sparse': read_sparse_file,
+                'sparse_binary': read_sparse_binary_file
             }
 
             data = data_func[self.info['format']](filename, num_points,
@@ -268,9 +251,9 @@ class CompetitionDataManager(DataManager):
                                      'not 0-indexed.')
         else:
             data_func = {
-                'dense': data_dense,
-                'sparse': data_sparse,
-                'sparse_binary': data_binary_sparse
+                'dense': _data_dense,
+                'sparse': _data_sparse,
+                'sparse_binary': _data_binary_sparse
             }
 
             data = data_func[self.info['format']](filename, self.feat_type)
@@ -290,16 +273,16 @@ class CompetitionDataManager(DataManager):
         if competition_c_functions_is_there:
             if self.info['task'] == MULTILABEL_CLASSIFICATION:
                 # cast into ints
-                label = (competition_c_functions.read_dense_file_unknown_width(
+                label = (read_dense_file_unknown_width(
                     filename, num_points)).astype(np.int)
             elif self.info['task'] == MULTICLASS_CLASSIFICATION:
-                label = competition_c_functions.read_dense_file_unknown_width(
+                label = read_dense_file_unknown_width(
                     filename, num_points)
                 # read the class from the only non zero entry in each line!
                 # should be ints right away
                 label = np.where(label != 0)[1]
             else:
-                label = competition_c_functions.read_dense_file_unknown_width(
+                label = read_dense_file_unknown_width(
                     filename, num_points)
         else:
             if self.info['task'] == MULTILABEL_CLASSIFICATION:
@@ -323,7 +306,7 @@ class CompetitionDataManager(DataManager):
         type_list = []
         if os.path.isfile(filename):
             if competition_c_functions_is_there:
-                type_list = competition_c_functions.file_to_array(
+                type_list = file_to_array(
                     filename,
                     verbose=False)
             else:
@@ -385,7 +368,7 @@ class CompetitionDataManager(DataManager):
                 self.info['format'] = 'dense'
             else:
                 if competition_c_functions_is_there:
-                    data = competition_c_functions.read_first_line(filename)
+                    data = read_first_line(filename)
                 else:
                     data = read_first_line(filename)
                 if ':' in data[0]:
@@ -394,7 +377,7 @@ class CompetitionDataManager(DataManager):
                     self.info['format'] = 'sparse_binary'
         else:
             if competition_c_functions_is_there:
-                data = competition_c_functions.file_to_array(filename)
+                data = file_to_array(filename)
             else:
                 data = file_to_array(filename)
             if ':' in data[0][0]:

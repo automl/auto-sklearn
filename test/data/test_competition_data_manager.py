@@ -3,7 +3,7 @@ import unittest
 
 import numpy as np
 
-from autosklearn.data.data_manager import DataManager
+from autosklearn.data_managers import SimpleDataManager
 from sklearn.utils.testing import assert_array_almost_equal
 
 dataset_train = [[2.5, 3.3, 2, 5, 1, 1], [1.0, 0.7, 1, 5, 1, 0], [1.3, 0.8, 1,
@@ -21,16 +21,16 @@ B = 'Binary'
 C = 'Categorical'
 
 
-class InitFreeDataManager(DataManager):
+class InitFreeSimpleDataManager(SimpleDataManager):
 
     def __init__(self):
-        super(InitFreeDataManager, self).__init__()
+        super(InitFreeSimpleDataManager, self).__init__()
 
 
 class DataManagerTest(unittest.TestCase):
 
     def setUp(self):
-        self.D = InitFreeDataManager()
+        self.D = InitFreeSimpleDataManager()
         self.D._data = {}
         self.D._data['X_train'] = dataset_train.copy()
         self.D._data['X_valid'] = dataset_valid.copy()
