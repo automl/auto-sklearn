@@ -204,8 +204,9 @@ def _get_initial_configuration(meta_features,
             meta_features,
             meta_features_encoded,
             configuration_space, basename, metric,
-            task, True if is_sparse == 1 else
-            False, initial_configurations_via_metalearning,
+            task,
+            is_sparse == 1,
+            initial_configurations_via_metalearning,
             metadata_directory
         )
     except Exception as e:
