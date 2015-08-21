@@ -12,16 +12,17 @@ from HPOlibConfigSpace.converters import pcs_parser
 from sklearn.base import BaseEstimator
 
 import six.moves.cPickle as pickle
-from autosklearn import submit_process
 from autosklearn.constants import *
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.Xy_data_manager import XyDataManager
 from autosklearn.data.split_data import split_data
-from autosklearn.metalearning.metalearning import MetaLearning
+from autosklearn.metalearning.metalearning import \
+    calc_meta_features, calc_meta_features_encoded, \
+    create_metalearning_string_for_smac_call
 from autosklearn.models import evaluator, paramsklearn
 from autosklearn.util import StopWatch, get_logger, get_auto_seed, \
     set_auto_seed, del_auto_seed, \
-    add_file_handler
+    add_file_handler, submit_process
 
 
 def _save_ensemble_data(x_data, y_data, tmp_dir, watcher):
@@ -144,39 +145,36 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
                    for feat_type in data_feat_type]
 
     if metalearning_cnt <= 0:
-        ml = None
+        result = None
     elif data_info_task in \
             [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
         # todo
         # теперь нет класса, поэтому заменить везде на функции
-        ml = MetaLearning()
         log_function('Start calculating metafeatures for %s' % basename)
-        ml.calculate_metafeatures_with_labels(x_train, y_train,
-                                              categorical=categorical,
-                                              dataset_name=basename)
+        result = calc_meta_features(x_train, y_train, categorical=categorical,
+                                    dataset_name=basename)
     else:
-        ml = None
+        result = None
         log_function('Metafeatures not calculated')
     watcher.stop_task(task_name)
     log_function(
         'Calculating Metafeatures (categorical attributes) took %5.2f' %
         watcher.wall_elapsed(task_name))
-    return ml
+    return result
 
 
-def _calculate_metafeatures_encoded(ml, basename, x_train, y_train, watcher,
+def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
                                     log_funciton):
     task_name = 'CalculateMetafeaturesEncoded'
     watcher.start_task(task_name)
-    ml.calculate_metafeatures_encoded_labels(
-        X_train=x_train,
-        Y_train=y_train,
-        categorical=[False] * x_train.shape[0],
-        dataset_name=basename)
+    result = calc_meta_features_encoded(X_train=x_train, Y_train=y_train,
+                                        categorical=[False] * x_train.shape[0],
+                                        dataset_name=basename)
     watcher.stop_task(task_name)
     log_funciton(
         'Calculating Metafeatures (encoded attributes) took %5.2fsec' %
         watcher.wall_elapsed(task_name))
+    return result
 
 def _create_search_space(tmp_dir, data_info, watcher, log_function):
     task_name = 'CreateConfigSpace'
@@ -192,7 +190,9 @@ def _create_search_space(tmp_dir, data_info, watcher, log_function):
     return configuration_space, configspace_path
 
 
-def _get_initial_configuration(ml, basename, metric, configuration_space,
+def _get_initial_configuration(meta_features,
+                               meta_features_encoded, basename, metric,
+                               configuration_space,
                                task, metadata_directory,
                                initial_configurations_via_metalearning,
                                is_sparse,
@@ -200,11 +200,14 @@ def _get_initial_configuration(ml, basename, metric, configuration_space,
     task_name = 'InitialConfigurations'
     watcher.start_task(task_name)
     try:
-        initial_configurations = ml.create_metalearning_string_for_smac_call(
+        initial_configurations = create_metalearning_string_for_smac_call(
+            meta_features,
+            meta_features_encoded,
             configuration_space, basename, metric,
             task, True if is_sparse == 1 else
             False, initial_configurations_via_metalearning,
-            metadata_directory)
+            metadata_directory
+        )
     except Exception as e:
         log_function(str(e))
         log_function(traceback.format_exc())
@@ -396,7 +399,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 self._info)
 
         # == Calculate metafeatures
-        ml = _calculate_metafeatures(
+        meta_features = _calculate_metafeatures(
             data_feat_type=data_d.feat_type,
             data_info_task=data_d.info['task'],
             x_train=data_d.data['X_train'],
@@ -425,24 +428,24 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._stopwatch,
             self._debug)
 
-        if ml is None:
+        if meta_features is None:
             initial_configurations = []
         elif data_d.info['task'] in [MULTICLASS_CLASSIFICATION,
                                      BINARY_CLASSIFICATION]:
 
-            _calculate_metafeatures_encoded(
-                ml,
+            meta_features_encoded = _calculate_metafeatures_encoded(
                 self._basename,
                 data_d.data['X_train'],
                 data_d.data['Y_train'],
                 self._stopwatch,
                 self._debug)
 
-            self._debug(ml.metafeatures_labels.__repr__(verbosity=2))
-            self._debug(ml.metafeatures_encoded_labels.__repr__(verbosity=2))
+            self._debug(meta_features.__repr__(verbosity=2))
+            self._debug(meta_features_encoded.__repr__(verbosity=2))
 
             initial_configurations = _get_initial_configuration(
-                ml,
+                meta_features,
+                meta_features_encoded,
                 self._basename,
                 self._metric,
                 self.configuration_space,

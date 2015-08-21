@@ -4,7 +4,9 @@ from __future__ import print_function
 import unittest
 
 from autosklearn.constants import *
-from autosklearn.metalearning.metalearning import MetaLearning
+from autosklearn.metalearning.metalearning import MetaLearning, \
+    calc_meta_features_encoded, \
+    create_metalearning_string_for_smac_call, calc_meta_features
 from autosklearn.models.paramsklearn import get_configuration_space
 from ParamSklearn.util import get_dataset
 
@@ -94,15 +96,16 @@ class Test(unittest.TestCase):
             X_train, Y_train, X_test, Y_test = get_dataset(dataset_name)
             categorical = [False] * X_train.shape[1]
 
-            # todo
-            # теперь нет класса, поэтому заменить везде на функции
-            ml = MetaLearning()
-            ml.calculate_metafeatures_with_labels(X_train, Y_train,
-                                                  categorical, dataset_name)
-            ml.calculate_metafeatures_encoded_labels(X_train, Y_train,
+            meta_features_label = calc_meta_features(X_train, Y_train,
                                                      categorical, dataset_name)
+            meta_features_encoded_label = calc_meta_features_encoded(X_train,
+                                                                     Y_train,
+                                                                     categorical,
+                                                                     dataset_name)
             initial_configuration_strings_for_smac = \
-                ml.create_metalearning_string_for_smac_call(
+                create_metalearning_string_for_smac_call(
+                    meta_features_label,
+                    meta_features_encoded_label,
                     configuration_space, dataset_name, metric,
                     MULTICLASS_CLASSIFICATION, False, 1, None)
 
