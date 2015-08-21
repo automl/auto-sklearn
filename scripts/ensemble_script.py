@@ -4,8 +4,12 @@
 @author: Aaron Klein
 
 """
-
 from __future__ import print_function
+
+try:
+    from __init__ import *
+except ImportError:
+    pass
 
 import logging
 import os
@@ -19,6 +23,29 @@ from autosklearn.data import util as data_util
 from autosklearn.models import evaluator
 from autosklearn.util import StopWatch
 
+
+def _init_logger(filepath):
+    logging.basicConfig(filename=filepath,
+                        level=logging.DEBUG)
+
+
+def debug(*args):
+    logging.debug(*args)
+    print(args)
+
+
+def error(*args):
+    logging.error(*args)
+    print(args)
+
+
+def get_predictions(dir_path, dir_path_list, exclude_mask):
+    result = []
+    for i, f in enumerate(dir_path_list):
+        predictions = np.load(os.path.join(dir_path, f))
+        if not exclude_mask[i]:
+            result.append(predictions)
+    return result
 
 def weighted_ensemble_error(weights, *args):
     predictions = args[0]
@@ -38,7 +65,7 @@ def weighted_ensemble_error(weights, *args):
 def weighted_ensemble(predictions, true_labels, task_type, metric, weights,
                       tolfun=1e-3):
     seed = np.random.randint(0, 1000)
-    logging.debug('CMA-ES uses seed: ' + str(seed))
+    debug('CMA-ES uses seed: ' + str(seed))
     n_models = predictions.shape[0]
     if n_models > 1:
         res = cma.fmin(weighted_ensemble_error, weights,
@@ -68,21 +95,36 @@ def ensemble_prediction(all_predictions, weights):
     return pred
 
 
+def check_data(len_ensemble_list, len_valid_list, len_test_list,
+               current_num_models):
+    for predict, exp in [
+        (len_ensemble_list == 0, 'Directories are empty'),
+        (len_ensemble_list != len_valid_list, 'Directories are inconsistent'),
+        (len_ensemble_list != len_test_list, 'Directories are inconsistent'),
+        (len_ensemble_list <= current_num_models,
+         'Nothing has changed since the last time'),
+    ]:
+        if predict:
+            debug(exp)
+            return True
+    return False
+
+
 def main(predictions_dir, basename, task_type, metric, limit, output_dir,
          ensemble_size=None):
     watch = StopWatch()
     watch.start_task('ensemble_builder')
 
+    _init_logger(os.path.join(predictions_dir, 'ensemble.log'))
+
     used_time = 0
     time_iter = 0
     index_run = 0
     current_num_models = 0
-    logging.basicConfig(filename=os.path.join(predictions_dir, 'ensemble.log'),
-                        level=logging.DEBUG)
 
     while used_time < limit:
-        logging.debug('Time left: %f' % (limit - used_time))
-        logging.debug('Time last iteration: %f' % time_iter)
+        debug('Time left: %f' % (limit - used_time))
+        debug('Time last iteration: %f' % time_iter)
         # Load the true labels of the validation data
         true_labels = np.load(os.path.join(predictions_dir,
                                            'true_labels_ensemble.npy'))
@@ -95,7 +137,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
 
         if not os.path.isdir(dir_ensemble) or not os.path.isdir(dir_valid) or \
                 not os.path.isdir(dir_test):
-            logging.debug('Prediction directory does not exist')
+            debug('Prediction directory does not exist')
             time.sleep(2)
             used_time = watch.wall_elapsed('ensemble_builder')
             continue
@@ -104,26 +146,8 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
         dir_valid_list = sorted(os.listdir(dir_valid))
         dir_test_list = sorted(os.listdir(dir_test))
 
-        if len(dir_ensemble_list) == 0:
-            logging.debug('Directories are empty')
-            time.sleep(2)
-            used_time = watch.wall_elapsed('ensemble_builder')
-            continue
-
-        if len(dir_ensemble_list) != len(dir_valid_list):
-            logging.debug('Directories are inconsistent')
-            time.sleep(2)
-            used_time = watch.wall_elapsed('ensemble_builder')
-            continue
-
-        if len(dir_ensemble_list) != len(dir_test_list):
-            logging.debug('Directories are inconsistent')
-            time.sleep(2)
-            used_time = watch.wall_elapsed('ensemble_builder')
-            continue
-
-        if len(dir_ensemble_list) <= current_num_models:
-            logging.debug('Nothing has changed since the last time')
+        if check_data(len(dir_ensemble_list), len(dir_valid_list),
+                      len(dir_test_list), current_num_models):
             time.sleep(2)
             used_time = watch.wall_elapsed('ensemble_builder')
             continue
@@ -149,7 +173,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
             if ensemble_size is not None:
                 if score <= 0.001:
                     exclude_mask.append(True)
-                    logging.error('Model only predicts at random: ' + f +
+                    error('Model only predicts at random: ' + f +
                                   ' has score: ' + str(score))
                 # If we have less model in our ensemble than ensemble_size add
                 # the current model if it is better than random
@@ -164,7 +188,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
                     # If the current model is better than the worst model in
                     # our ensemble replace it by the current model
                     if (scores_nbest[idx] < score):
-                        logging.debug(
+                        debug(
                             'Worst model in our ensemble: %d with score %f will be replaced by model %d with score %f'
                             % (idx, scores_nbest[idx], model_idx, score))
                         scores_nbest[idx] = score
@@ -180,7 +204,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
                 # Load all predictions that are better than random
                 if score <= 0.001:
                     exclude_mask.append(True)
-                    logging.error('Model only predicts at random: ' + f +
+                    error('Model only predicts at random: ' + f +
                                   ' has score: ' + str(score))
                 else:
                     exclude_mask.append(False)
@@ -189,26 +213,21 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
             model_idx += 1
             print(exclude_mask)
 
-        all_predictions_valid = []
-        for i, f in enumerate(dir_valid_list):
-            predictions = np.load(os.path.join(dir_valid, f))
-            if not exclude_mask[i]:
-                all_predictions_valid.append(predictions)
-
-        all_predictions_test = []
-        for i, f in enumerate(dir_test_list):
-            predictions = np.load(os.path.join(dir_test, f))
-            if not exclude_mask[i]:
-                all_predictions_test.append(predictions)
+        all_predictions_valid = get_predictions(dir_valid,
+                                                dir_valid_list,
+                                                exclude_mask)
+        all_predictions_test = get_predictions(dir_test,
+                                               dir_test_list,
+                                               exclude_mask)
 
         if len(all_predictions_train) == len(all_predictions_test) == len(
                 all_predictions_valid) == 0:
-            logging.error('All models do just random guessing')
+            error('All models do just random guessing')
             time.sleep(2)
             continue
 
         if len(all_predictions_train) == 1:
-            logging.debug('Only one model so far we just copy its predictions')
+            debug('Only one model so far we just copy its predictions')
             Y_valid = all_predictions_valid[0]
             Y_test = all_predictions_test[0]
         else:
@@ -221,12 +240,12 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
                 weights = weighted_ensemble(np.array(all_predictions_train),
                                             true_labels, task_type, metric,
                                             init_weights)
-            except (ValueError):
-                logging.error('Caught ValueError!')
+            except ValueError:
+                error('Caught ValueError!')
                 used_time = watch.wall_elapsed('ensemble_builder')
                 continue
             except Exception:
-                logging.error('Caught error!')
+                error('Caught error!')
                 used_time = watch.wall_elapsed('ensemble_builder')
                 continue
 

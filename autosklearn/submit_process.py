@@ -10,12 +10,13 @@ import lockfile
 
 import autosklearn.cli.SMAC_cli_holdout
 from autosklearn.constants import *
-from conf.settings import BINARIES_DIRECTORY
+from conf.settings import BINARIES_DIRECTORY, SCRIPT_FOLDER
 
 
 def submit_call(call, seed, log_dir=None):
     print('Calling: ' + call)
     call = shlex.split(call)
+
 
     if log_dir is None:
         proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'))
@@ -155,8 +156,7 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
     if limit <= 0:
         # It makes no sense to start building ensembles_statistics
         return
-    path_to_root = os.path.dirname(os.path.abspath(__file__))
-    wrapper_exec = os.path.join(path_to_root, 'ensemble_selection_script.py')
+    wrapper_exec = os.path.join(SCRIPT_FOLDER, 'ensemble_selection_script.py')
     prog_name = 'runsolver'
     delay = 5
 
@@ -182,5 +182,7 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
                     (prog_path, limit, delay)
     call = runsolver_cmd + ' ' + call
 
+    print('Calling: ' + call)
+    raise Exception("fsa")
     proc = submit_call(call, seed, log_dir=tmp_dir)
     return proc

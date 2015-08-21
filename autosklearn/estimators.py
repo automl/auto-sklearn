@@ -47,11 +47,12 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
                  seed=1,
                  ml_memory_limit=3000,
                  tmp_folder=None,
-                 output_folder=None):
+                 output_folder=None,
+                 debug_mode=False):
 
         self._tmp_dir, self._output_dir = self._prepare_create_folders(
             tmp_folder, output_folder)
-
+        self._debug_mode = debug_mode
         self._classes = []
         self._n_classes = []
         self._n_outputs = []
@@ -66,7 +67,9 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             ensemble_size=ensemble_size,
             ensemble_nbest=ensemble_nbest,
             seed=seed,
-            ml_memory_limit=ml_memory_limit)
+            ml_memory_limit=ml_memory_limit,
+            debug_mode=debug_mode
+        )
 
     @staticmethod
     def _prepare_create_folders(tmp_dir, output_dir):
@@ -76,12 +79,18 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             tmp_dir = '/tmp/autosklearn_tmp_%d_%d' % (pid, random_number)
         if output_dir is None:
             output_dir = '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
-        os.makedirs(output_dir)
-        os.makedirs(tmp_dir)
+
+        try:
+            os.makedirs(output_dir)
+            os.makedirs(tmp_dir)
+        except OSError:
+            pass
+
         return tmp_dir, output_dir
 
     def __del__(self):
-        self._delete_output_directories()
+        if not self._debug_mode:
+            self._delete_output_directories()
 
     def _create_output_directories(self):
         os.makedirs(self._output_dir)

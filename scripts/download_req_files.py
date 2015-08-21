@@ -1,5 +1,9 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
+try:
+    from __init__ import *
+except ImportError:
+    pass
 
 import os
 import shutil

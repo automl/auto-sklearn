@@ -88,22 +88,22 @@ def _run_ensemble_builder(tmp_dir,
                           log_function):
     task_name = 'runEnsemble'
     watcher.start_task(task_name)
-    time_left_for_ensembles = max(
-        0, time_for_task -
-           (watcher.wall_elapsed(basename)))
-    log_function('Start Ensemble with %5.2fsec time left' %
-                 time_left_for_ensembles)
-    proc_ensembles = \
-        submit_process.run_ensemble_builder(tmp_dir=tmp_dir,
-                                            dataset_name=basename,
-                                            task_type=task,
-                                            metric=metric,
-                                            limit=time_left_for_ensembles,
-                                            output_dir=output_dir,
-                                            ensemble_size=ensemble_size,
-                                            ensemble_nbest=ensemble_nbest,
-                                            seed=get_auto_seed(),
-                                            ensemble_indices_output_dir=ensemble_indices_dir)
+    time_left_for_ensembles = max(0, time_for_task - watcher.wall_elapsed(
+        basename))
+    log_function(
+        'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
+    proc_ensembles = submit_process.run_ensemble_builder(
+        tmp_dir=tmp_dir,
+        dataset_name=basename,
+        task_type=task,
+        metric=metric,
+        limit=time_left_for_ensembles,
+        output_dir=output_dir,
+        ensemble_size=ensemble_size,
+        ensemble_nbest=ensemble_nbest,
+        seed=get_auto_seed(),
+        ensemble_indices_output_dir=ensemble_indices_dir
+    )
     watcher.stop_task(task_name)
     return proc_ensembles
 
@@ -213,7 +213,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                  ml_memory_limit=3000,
                  metadata_directory=None,
                  queue=None,
-                 keep_models=True):
+                 keep_models=True,
+                 debug_mode=False):
         super(AutoML, self).__init__()
         self._tmp_dir = tmp_dir
         self._output_dir = output_dir
@@ -237,7 +238,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._metric = None
         self._target_num = None
 
-        self._debug_mode = False
+        self._debug_mode = debug_mode
 
         self._model_dir = join(self._tmp_dir, 'models_%d' % self._seed)
         self._ensemble_indices_dir = join(self._tmp_dir,
@@ -464,7 +465,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                               initial_configurations, self._per_run_time_limit,
                               self._stopwatch, self._debug)
 
-        raise Exception("Stop")
         # == RUN ensemble builder
         proc_ensembles = _run_ensemble_builder(
             self._tmp_dir,

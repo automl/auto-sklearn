@@ -4,6 +4,10 @@
 @author: Aaron Klein
 
 """
+try:
+    from __init__ import *
+except ImportError:
+    pass
 
 import logging
 import os
@@ -19,8 +23,10 @@ import six.moves.cPickle as pickle
 from autosklearn.constants import *
 from autosklearn.data import util as data_util
 from autosklearn.models import evaluator
-from autosklearn.util import StopWatch
+from autosklearn.util import StopWatch, get_logger
 
+def log(*args):
+    print(args)
 
 def build_ensemble(predictions_train, predictions_valid, predictions_test,
                    true_labels, ensemble_size, task_type, metric):
@@ -69,7 +75,7 @@ def original_ensemble_selection(predictions, labels, ensemble_size, task_type,
             ensemble_performance = evaluator.calculate_score(
                 labels, ensemble_, task_type, metric, ensemble_.shape[1])
             trajectory.append(ensemble_performance)
-        ensemble_size = ensemble_size - n_best
+        ensemble_size -= n_best
 
     for i in range(ensemble_size):
         scores = np.zeros([predictions.shape[0]])
@@ -106,7 +112,7 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric,
             ensemble_performance = evaluator.calculate_score(
                 labels, ensemble_, task_type, metric, ensemble_.shape[1])
             trajectory.append(ensemble_performance)
-        ensemble_size = ensemble_size - n_best
+        ensemble_size -= n_best
 
     for i in range(ensemble_size):
         scores = np.zeros([predictions.shape[0]])
@@ -160,6 +166,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
          ensemble_size=None,
          seed=1,
          indices_output_dir='.'):
+
     watch = StopWatch()
     watch.start_task('ensemble_builder')
 
@@ -258,7 +265,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
 
                     # If the current model is better than the worst model in
                     # our ensemble replace it by the current model
-                    if (scores_nbest[idx] < score):
+                    if scores_nbest[idx] < score:
                         logging.debug('Worst model in our ensemble: %s with '
                                       'score %f will be replaced by model %s '
                                       'with score %f', model_names[idx],
