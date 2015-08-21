@@ -200,7 +200,10 @@ def _print_debug_info_of_init_configuration(initial_configurations, basename,
 
 class AutoML(multiprocessing.Process, BaseEstimator):
 
-    def __init__(self, tmp_dir, output_dir, time_left_for_this_task,
+    def __init__(self,
+                 tmp_dir,
+                 output_dir,
+                 time_left_for_this_task,
                  per_run_time_limit,
                  log_dir=None,
                  initial_configurations_via_metalearning=25,
@@ -461,6 +464,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                               initial_configurations, self._per_run_time_limit,
                               self._stopwatch, self._debug)
 
+        raise Exception("Stop")
         # == RUN ensemble builder
         proc_ensembles = _run_ensemble_builder(
             self._tmp_dir,
