@@ -105,7 +105,7 @@ class SimpleEvaluator(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __init__(self, Datamanager, configuration,
+    def __init__(self, data_manager, configuration,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
@@ -116,13 +116,13 @@ class SimpleEvaluator(object):
         self.starttime = time.time()
 
         self.configuration = configuration
-        self.D = Datamanager
+        self.D = data_manager
 
-        self.X_valid = Datamanager.data.get('X_valid')
-        self.X_test = Datamanager.data.get('X_test')
+        self.X_valid = data_manager.data.get('X_valid')
+        self.X_test = data_manager.data.get('X_test')
 
-        self.metric = Datamanager.info['metric']
-        self.task_type = Datamanager.info['task']
+        self.metric = data_manager.info['metric']
+        self.task_type = data_manager.info['task']
         self.seed = seed
 
         if output_dir is None:

@@ -12,7 +12,7 @@ from autosklearn.util import split_data
 
 class HoldoutEvaluator(SimpleEvaluator):
 
-    def __init__(self, datamanager, configuration,
+    def __init__(self, data_manager, configuration,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
@@ -20,7 +20,7 @@ class HoldoutEvaluator(SimpleEvaluator):
                  output_y_test=False,
                  num_run=None):
         super(HoldoutEvaluator, self).__init__(
-            datamanager, configuration,
+            data_manager, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
@@ -28,10 +28,10 @@ class HoldoutEvaluator(SimpleEvaluator):
             output_y_test=output_y_test,
             num_run=num_run)
 
-        classification = datamanager.info['task'] in CLASSIFICATION_TASKS
+        classification = data_manager.info['task'] in CLASSIFICATION_TASKS
         self.X_train, self.X_optimization, self.Y_train, self.Y_optimization = \
-            split_data(datamanager.data['X_train'],
-                       datamanager.data['Y_train'],
+            split_data(data_manager.data['X_train'],
+                       data_manager.data['Y_train'],
                        classification=classification)
 
         self.model = self.model_class(self.configuration, self.seed)

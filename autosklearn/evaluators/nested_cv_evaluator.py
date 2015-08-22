@@ -16,7 +16,7 @@ from autosklearn.util import get_CV_fold
 
 class NestedCVEvaluator(SimpleEvaluator):
 
-    def __init__(self, Datamanager, configuration,
+    def __init__(self, data_manager, configuration,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
@@ -26,7 +26,7 @@ class NestedCVEvaluator(SimpleEvaluator):
                  outer_cv_folds=5,
                  num_run=None):
         super(NestedCVEvaluator, self).__init__(
-            Datamanager, configuration,
+            data_manager, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
@@ -40,8 +40,8 @@ class NestedCVEvaluator(SimpleEvaluator):
 
         self.outer_models = [None] * outer_cv_folds
         self.inner_models = [None] * outer_cv_folds
-        self.X_train = Datamanager.data['X_train']
-        self.Y_train = Datamanager.data['Y_train']
+        self.X_train = data_manager.data['X_train']
+        self.Y_train = data_manager.data['Y_train']
         for i in range(outer_cv_folds):
             self.inner_models[i] = [None] * inner_cv_folds
 

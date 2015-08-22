@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
+from autosklearn.constants import TASK_TYPES_TO_STRING
 
 """Right now, pyMetaLearn performs a OneHotEncoding if necessary, but it
 is really not necessary. This object helps to circumvent this by:
@@ -30,7 +31,7 @@ from pyMetaLearn.metafeatures.metafeatures import \
 from pyMetaLearn.optimizers.metalearn_optimizer.metalearner import \
     MetaLearningOptimizer
 
-from autosklearn.constants import *
+
 from autosklearn.util import get_logger
 
 logger = get_logger(os.path.basename(__file__))

@@ -9,12 +9,12 @@ from autosklearn.evaluators import calculate_score, \
 
 class TestEvaluator(SimpleEvaluator):
 
-    def __init__(self, Datamanager, configuration,
+    def __init__(self, data_manager, configuration,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1):
         super(TestEvaluator, self).__init__(
-            Datamanager, configuration,
+            data_manager, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
@@ -23,11 +23,11 @@ class TestEvaluator(SimpleEvaluator):
             num_run='dummy')
         self.configuration = configuration
 
-        self.X_train = Datamanager.data['X_train']
-        self.Y_train = Datamanager.data['Y_train']
+        self.X_train = data_manager.data['X_train']
+        self.Y_train = data_manager.data['Y_train']
 
-        self.X_test = Datamanager.data.get('X_test')
-        self.Y_test = Datamanager.data.get('Y_test')
+        self.X_test = data_manager.data.get('X_test')
+        self.Y_test = data_manager.data.get('Y_test')
 
         self.model = self.model_class(self.configuration, self.seed)
 

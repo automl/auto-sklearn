@@ -12,7 +12,7 @@ from autosklearn.util import get_CV_fold
 
 class CVEvaluator(SimpleEvaluator):
 
-    def __init__(self, Datamanager, configuration,
+    def __init__(self, data_manager, configuration,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
@@ -21,7 +21,7 @@ class CVEvaluator(SimpleEvaluator):
                  cv_folds=10,
                  num_run=None):
         super(CVEvaluator, self).__init__(
-            Datamanager, configuration,
+            data_manager, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
