@@ -135,7 +135,7 @@ class HPOlib_interfaceTest(unittest.TestCase):
     def test_nested_cv(self):
         call = 'python -m autosklearn.cli.HPOlib_interface --dataset %s ' \
                '--fold 0 --folds 1 --seed 1 ' \
-               '--mode 3/3-nested-cv %s' % \
+               '--mode 3/3-nested_cv %s' % \
                (self.dataset_string, self.param_string)
         proc = subprocess.Popen(call,
                                 shell=True,

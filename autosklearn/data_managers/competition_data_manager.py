@@ -32,13 +32,11 @@ from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
 
 from autosklearn.data_managers import SimpleDataManager
 from autosklearn.util import convert_to_num, read_first_line, file_to_array
-from autosklearn.data_managers.competition_c_functions import \
+from autosklearn.data_managers import \
     read_dense_file, \
     read_sparse_file, read_sparse_binary_file, read_dense_file_unknown_width
 try:
-
-
-    from autosklearn.data_managers.competition_c_functions import \
+    from autosklearn.data_managers import \
         read_first_line as c_read_first_line
     competition_c_functions_is_there = True
 except Exception:

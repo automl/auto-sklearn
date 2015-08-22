@@ -11,12 +11,12 @@ def main(dataset, mode, seed, fold, folds):
     if seed is None:
         seed = 1
 
-    if 'nested-cv' in mode:
+    if 'nested_cv' in mode:
         # Specifiy like this 5/5-nested-cv
-        cv_match = re.match(r"([0-9]+)/([0-9]+)-nested-cv", mode)
+        cv_match = re.match(r"([0-9]+)/([0-9]+)-nested_cv", mode)
         outer_folds = int(cv_match.group(1))
         inner_folds = int(cv_match.group(2))
-        mode = 'nested-cv'
+        mode = 'nested_cv'
         mode_args = {'inner_folds': inner_folds, 'outer_folds': outer_folds}
     elif mode.endswith('cv'):
         if folds == 1:

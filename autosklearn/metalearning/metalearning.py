@@ -1,7 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import print_function
-from autosklearn.constants import TASK_TYPES_TO_STRING
-
 """Right now, pyMetaLearn performs a OneHotEncoding if necessary, but it
 is really not necessary. This object helps to circumvent this by:
 
@@ -11,6 +8,7 @@ is really not necessary. This object helps to circumvent this by:
 3. call metafeatures.calculate_metafeatures_encoded_labels() for all
     other metafeatures need OneHotEncoded data.
 """
+from __future__ import print_function
 
 __all__ = [
     'calc_meta_features',
@@ -18,6 +16,9 @@ __all__ = [
     'convert_conf2smac_string',
     'create_metalearning_string_for_smac_call',
 ]
+
+
+from autosklearn.constants import TASK_TYPES_TO_STRING
 
 import os
 import time

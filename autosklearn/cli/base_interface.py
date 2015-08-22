@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
-
+from functools import partial
 import os
 import signal
 import time
@@ -71,6 +71,94 @@ def empty_signal_handler(signum, frame):
 signal.signal(15, signal_handler)
 
 
+def _get_base_dict():
+    return {
+        'with_predictions': True,
+        'all_scoring_functions': True,
+        'output_y_test': True,
+    }
+
+
+def make_mode_holdout(data, seed, configuration, num_run):
+    evaluator = HoldoutEvaluator(data, configuration,
+                                 seed=seed,
+                                 num_run=num_run,
+                                 **_get_base_dict())
+    evaluator.fit()
+    signal.signal(15, empty_signal_handler)
+    evaluator.finish_up()
+    model_directory = os.path.join(os.getcwd(), 'models_%d' % seed)
+    if os.path.exists(model_directory):
+        model_filename = os.path.join(model_directory,
+                                      '%s.model' % num_run)
+        with open(model_filename, 'w') as fh:
+            pickle.dump(evaluator.model, fh, -1)
+
+
+def make_mode_test(data, seed, configuration, metric):
+    evaluator = TestEvaluator(data,
+                              configuration,
+                              all_scoring_functions=True,
+                              seed=seed)
+    evaluator.fit()
+    scores = evaluator.predict()
+    duration = time.time() - evaluator.starttime
+
+    score = scores[metric]
+    additional_run_info = ';'.join(['%s: %s' % (m_, value)
+                                    for m_, value in scores.items()])
+    additional_run_info += ';' + 'duration: ' + str(duration)
+
+    print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
+          ('SAT', abs(duration), score, evaluator.seed,
+           additional_run_info))
+
+
+def make_mode_cv(data, seed, configuration, num_run, folds):
+    evaluator = CVEvaluator(data, configuration,
+                            cv_folds=folds,
+                            seed=seed,
+                            num_run=num_run,
+                            **_get_base_dict())
+    evaluator.fit()
+    signal.signal(15, empty_signal_handler)
+    evaluator.finish_up()
+
+
+def make_mode_partial_cv(data, seed, configuration, num_run, metric, fold,
+                         folds):
+    evaluator = CVEvaluator(data, configuration,
+                            all_scoring_functions=True,
+                            cv_folds=folds,
+                            seed=seed,
+                            num_run=num_run)
+    evaluator.partial_fit(fold)
+    scores = evaluator.predict()
+    duration = time.time() - evaluator.starttime
+
+    score = scores[metric]
+    additional_run_info = ';'.join(['%s: %s' % (m_, value)
+                                    for m_, value in scores.items()])
+    additional_run_info += ';' + 'duration: ' + str(duration)
+
+    print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
+          ('SAT', abs(duration), score, evaluator.seed,
+           additional_run_info))
+
+
+def make_mode_nested_cv(data, seed, configuration, num_run, inner_folds,
+                        outer_folds):
+    evaluator = NestedCVEvaluator(data, configuration,
+                                  inner_cv_folds=inner_folds,
+                                  outer_cv_folds=outer_folds,
+                                  seed=seed,
+                                  num_run=num_run,
+                                  **_get_base_dict())
+    evaluator.fit()
+    signal.signal(15, empty_signal_handler)
+    evaluator.finish_up()
+
+
 def main(dataset_info, mode, seed, params, mode_args=None):
     """This command line interface has three different operation modes:
 
@@ -81,6 +169,7 @@ def main(dataset_info, mode, seed, params, mode_args=None):
 
     It must by no means be used for the Auto part of the competition!
     """
+    num_run = None
     if mode != 'test':
         num_run = get_new_run_num()
 
@@ -108,84 +197,42 @@ def main(dataset_info, mode, seed, params, mode_args=None):
 
     global evaluator
     # Train/test split
-    if mode == 'holdout':
-        evaluator = HoldoutEvaluator(D, configuration,
-                                     with_predictions=True,
-                                     all_scoring_functions=True,
-                                     seed=seed,
-                                     output_y_test=True,
-                                     num_run=num_run)
-        evaluator.fit()
-        signal.signal(15, empty_signal_handler)
-        evaluator.finish_up()
-        model_directory = os.path.join(os.getcwd(), 'models_%d' % seed)
-        if os.path.exists(model_directory):
-            model_filename = os.path.join(model_directory,
-                                          '%s.model' % num_run)
-            with open(model_filename, 'w') as fh:
-                pickle.dump(evaluator.model, fh, -1)
 
-    elif mode == 'test':
-        evaluator = TestEvaluator(D, configuration,
-                                  all_scoring_functions=True,
-                                  seed=seed)
-        evaluator.fit()
-        scores = evaluator.predict()
-        duration = time.time() - evaluator.starttime
+    a = {
+        'holdout': partial(make_mode_holdout,
+                           [D,
+                            seed,
+                            configuration,
+                            num_run]),
+        'test': partial(make_mode_holdout,
+                        [D,
+                         seed,
+                         configuration, metric]),
+        'cv': partial(make_mode_cv,
+                      [D,
+                       seed,
+                       configuration,
+                       num_run,
+                       mode_args['folds']]),
+        'partial_cv': partial(make_mode_partial_cv,
+                              [D,
+                               seed,
+                               configuration,
+                               num_run,
+                               metric,
+                               mode_args['folds'],
+                               mode_args['fold']]),
+        'nested_cv': partial(make_mode_nested_cv,
+                             [D,
+                              seed,
+                              configuration,
+                              num_run,
+                              mode_args['inner_folds'],
+                              mode_args['outer_folds']]),
+    }
 
-        score = scores[metric]
-        additional_run_info = ';'.join(['%s: %s' % (m_, value)
-                                        for m_, value in scores.items()])
-        additional_run_info += ';' + 'duration: ' + str(duration)
-
-        print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
-              ('SAT', abs(duration), score, evaluator.seed,
-               additional_run_info))
-
-    # CV on the whole training set
-    elif mode == 'cv':
-        evaluator = CVEvaluator(D, configuration,
-                                with_predictions=True,
-                                all_scoring_functions=True,
-                                output_y_test=True,
-                                cv_folds=mode_args['folds'],
-                                seed=seed,
-                                num_run=num_run)
-        evaluator.fit()
-        signal.signal(15, empty_signal_handler)
-        evaluator.finish_up()
-
-    elif mode == 'partial_cv':
-        evaluator = CVEvaluator(D, configuration,
-                                all_scoring_functions=True,
-                                cv_folds=mode_args['folds'],
-                                seed=seed,
-                                num_run=num_run)
-        evaluator.partial_fit(mode_args['fold'])
-        scores = evaluator.predict()
-        duration = time.time() - evaluator.starttime
-
-        score = scores[metric]
-        additional_run_info = ';'.join(['%s: %s' % (m_, value)
-                                        for m_, value in scores.items()])
-        additional_run_info += ';' + 'duration: ' + str(duration)
-
-        print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
-              ('SAT', abs(duration), score, evaluator.seed,
-               additional_run_info))
-
-    elif mode == 'nested-cv':
-        evaluator = NestedCVEvaluator(D, configuration,
-                                      with_predictions=True,
-                                      inner_cv_folds=mode_args['inner_folds'],
-                                      outer_cv_folds=mode_args['outer_folds'],
-                                      all_scoring_functions=True,
-                                      output_y_test=True,
-                                      seed=seed,
-                                      num_run=num_run)
-        evaluator.fit()
-        signal.signal(15, empty_signal_handler)
-        evaluator.finish_up()
-
-    else:
+    processor = a.get(mode, None)
+    if processor is None:
         raise ValueError('Must choose a legal mode.')
+    else:
+        processor()

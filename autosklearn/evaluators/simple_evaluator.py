@@ -10,6 +10,7 @@ __all__ = [
 import abc
 import os
 import time
+import traceback
 
 import numpy as np
 import lockfile
@@ -168,7 +169,6 @@ class SimpleEvaluator(object):
                    additional_run_info))
         except Exception:
             self.duration = time.time() - self.starttime
-            import traceback
 
             print(traceback.format_exc())
             print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
