@@ -5,7 +5,6 @@
 
 """
 from __future__ import print_function
-
 try:
     from __init__ import *
 except ImportError:
@@ -18,7 +17,9 @@ import time
 import numpy as np
 
 import cma
-from autosklearn.models import evaluator
+
+from autosklearn.evaluators import calculate_score
+
 from autosklearn.util import StopWatch, get_logger, add_file_handler, \
     save_predictions
 
@@ -40,7 +41,7 @@ def weighted_ensemble_error(weights, *args):
     weight_prime = weights / weights.sum()
     weighted_predictions = ensemble_prediction(predictions, weight_prime)
 
-    score = evaluator.calculate_score(true_labels, weighted_predictions,
+    score = calculate_score(true_labels, weighted_predictions,
                                       task_type, metric,
                                       weighted_predictions.shape[1])
     return 1 - score
@@ -149,7 +150,7 @@ def main(logger, predictions_dir, basename, task_type, metric, limit, output_dir
         model_idx = 0
         for f in dir_ensemble_list:
             predictions = np.load(os.path.join(dir_ensemble, f))
-            score = evaluator.calculate_score(true_labels, predictions,
+            score = calculate_score(true_labels, predictions,
                                               task_type, metric,
                                               predictions.shape[1])
 

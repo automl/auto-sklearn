@@ -11,13 +11,14 @@ import unittest
 import numpy as np
 from numpy.linalg import LinAlgError
 import sklearn.datasets
+
 from ParamSklearn.util import get_dataset
 
-from autosklearn.constants import *
+from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
+    MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION, REGRESSION
 from autosklearn.data_managers import CompetitionDataManager
-from autosklearn.util.data import convert_to_bin
-from autosklearn.models.holdout_evaluator import HoldoutEvaluator
-from autosklearn.models.paramsklearn import get_configuration_space
+from autosklearn.util import convert_to_bin, get_configuration_space
+from autosklearn.evaluators import HoldoutEvaluator
 
 N_TEST_RUNS = 10
 

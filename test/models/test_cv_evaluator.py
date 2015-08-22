@@ -8,12 +8,12 @@ import unittest
 
 import numpy as np
 from numpy.linalg import LinAlgError
-
-from autosklearn.constants import *
-from autosklearn.data_managers import CompetitionDataManager
-from autosklearn.models.cv_evaluator import CVEvaluator
-from autosklearn.models.paramsklearn import get_configuration_space
 from ParamSklearn.util import get_dataset
+
+from autosklearn.constants import MULTICLASS_CLASSIFICATION
+from autosklearn.data_managers import CompetitionDataManager
+from autosklearn.evaluators import CVEvaluator
+from autosklearn.util.paramsklearn import get_configuration_space
 
 N_TEST_RUNS = 10
 

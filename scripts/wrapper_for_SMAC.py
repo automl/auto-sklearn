@@ -6,12 +6,14 @@ import signal
 import sys
 import time
 
-import autosklearn.models.holdout_evaluator
 import lockfile
+from HPOlibConfigSpace import configuration_space
+
+
 import six.moves.cPickle as pickle
 from autosklearn.data_managers import SimpleDataManager
-from autosklearn.models.paramsklearn import get_class
-from HPOlibConfigSpace import configuration_space
+from autosklearn.evaluators import HoldoutEvaluator
+from autosklearn.util.paramsklearn import get_class
 
 
 def store_and_or_load_data(outputdir, dataset, data_dir):
@@ -69,7 +71,7 @@ def main(basename, input_dir, params):
     configuration = configuration_space.Configuration(cs, **params)
 
     global evaluator
-    evaluator = autosklearn.models.holdout_evaluator.HoldoutEvaluator(
+    evaluator = HoldoutEvaluator(
         datamanager=D,
         configuration=configuration,
         with_predictions=True,

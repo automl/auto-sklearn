@@ -1,15 +1,20 @@
 # -*- encoding: utf-8 -*-
+
+__all__ = [
+    'NestedCVEvaluator',
+]
+
 from collections import defaultdict
 
 import numpy as np
 
 import sklearn.utils
 
-from autosklearn.models.evaluator import Evaluator, calculate_score
+from autosklearn.evaluators import SimpleEvaluator, calculate_score
 from autosklearn.util import get_CV_fold
 
 
-class NestedCVEvaluator(Evaluator):
+class NestedCVEvaluator(SimpleEvaluator):
 
     def __init__(self, Datamanager, configuration,
                  with_predictions=False,
@@ -167,7 +172,7 @@ class NestedCVEvaluator(Evaluator):
                     Y_train=self.Y_train[inner_train_indices])
                 scores = calculate_score(
                     Y_test, Y_hat, self.task_type, self.metric,
-                    self.D.info['target_num'],
+                    self.D. info['target_num'],
                     all_scoring_functions=self.all_scoring_functions)
                 if self.all_scoring_functions:
                     for score_name in scores:

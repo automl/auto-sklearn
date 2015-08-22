@@ -6,3 +6,4 @@ from .logging_ import *
 from .stopwatch import *
 from .io import *
 from .data import *
+from .paramsklearn import *

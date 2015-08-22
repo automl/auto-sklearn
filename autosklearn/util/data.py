@@ -10,6 +10,7 @@ __all__ = [
     'convert_to_num',
     'split_data',
     'get_CV_fold',
+    'convert_to_bin',
 ]
 import glob
 import os

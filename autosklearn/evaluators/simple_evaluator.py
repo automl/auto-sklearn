@@ -1,6 +1,12 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 
+__all__ = [
+    'SimpleEvaluator',
+    'get_new_run_num',
+    'calculate_score',
+]
+
 import abc
 import os
 import time
@@ -95,7 +101,7 @@ def get_new_run_num():
     return num
 
 
-class Evaluator(object):
+class SimpleEvaluator(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod

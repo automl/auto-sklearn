@@ -1,10 +1,16 @@
 # -*- encoding: utf-8 -*-
-from autosklearn.constants import *
-from autosklearn.models.evaluator import Evaluator, calculate_score
+
+__all__ = [
+    'HoldoutEvaluator',
+]
+
+from autosklearn.constants import CLASSIFICATION_TASKS
+from autosklearn.evaluators.simple_evaluator import SimpleEvaluator, \
+    calculate_score
 from autosklearn.util import split_data
 
 
-class HoldoutEvaluator(Evaluator):
+class HoldoutEvaluator(SimpleEvaluator):
 
     def __init__(self, datamanager, configuration,
                  with_predictions=False,

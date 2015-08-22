@@ -1,11 +1,16 @@
 # -*- encoding: utf-8 -*-
+
+__all__ = [
+    'CVEvaluator',
+]
 import numpy as np
 
-from autosklearn.models.evaluator import Evaluator, calculate_score
+from autosklearn.evaluators.simple_evaluator import SimpleEvaluator, \
+    calculate_score
 from autosklearn.util import get_CV_fold
 
 
-class CVEvaluator(Evaluator):
+class CVEvaluator(SimpleEvaluator):
 
     def __init__(self, Datamanager, configuration,
                  with_predictions=False,

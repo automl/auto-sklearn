@@ -1,7 +1,16 @@
 # -*- encoding: utf-8 -*-
-from autosklearn.constants import *
+
+__all__ = [
+    'get_configuration_space',
+    'get_class',
+    'get_model',
+]
+
 from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.regression import ParamSklearnRegressor
+
+from autosklearn.constants import REGRESSION_TASKS, MULTILABEL_CLASSIFICATION, \
+    REGRESSION, MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION
 
 
 def get_configuration_space(info,

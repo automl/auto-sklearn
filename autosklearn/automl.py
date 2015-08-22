@@ -12,16 +12,16 @@ from HPOlibConfigSpace.converters import pcs_parser
 from sklearn.base import BaseEstimator
 
 import six.moves.cPickle as pickle
-from autosklearn.constants import *
-from autosklearn.data_managers import CompetitionDataManager
-from autosklearn.data_managers import XYDataManager
+from autosklearn.constants import MULTICLASS_CLASSIFICATION, REGRESSION_TASKS
+from autosklearn.constants import BINARY_CLASSIFICATION
+from autosklearn.data_managers import CompetitionDataManager, XYDataManager
+from autosklearn.evaluators import calculate_score
 from autosklearn.metalearning import \
     calc_meta_features, calc_meta_features_encoded, \
     create_metalearning_string_for_smac_call
-from autosklearn.models import evaluator, paramsklearn
 from autosklearn.util import StopWatch, get_logger, get_auto_seed, \
     set_auto_seed, del_auto_seed, \
-    add_file_handler, submit_process, split_data
+    add_file_handler, submit_process, split_data, paramsklearn
 
 
 def _save_ensemble_data(x_data, y_data, tmp_dir, watcher):
@@ -546,7 +546,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
     def score(self, data_x, y):
         prediction = self.predict(data_x)
-        return evaluator.calculate_score(y, prediction, self._task,
+        return calculate_score(y, prediction, self._task,
                                          self._metric, self._target_num)
 
     def configuration_space_created_hook(self):

@@ -1,8 +1,13 @@
 # -*- encoding: utf-8 -*-
-import autosklearn.models.evaluator
+
+__all__ = [
+    'TestEvaluator',
+]
+from autosklearn.evaluators import calculate_score, \
+    SimpleEvaluator
 
 
-class TestEvaluator(autosklearn.models.evaluator.Evaluator):
+class TestEvaluator(SimpleEvaluator):
 
     def __init__(self, Datamanager, configuration,
                  with_predictions=False,
@@ -35,7 +40,7 @@ class TestEvaluator(autosklearn.models.evaluator.Evaluator):
         if train:
             Y_pred = self.predict_function(self.X_train, self.model,
                                            self.task_type, self.Y_train)
-            score = autosklearn.models.evaluator.calculate_score(
+            score = calculate_score(
                 solution=self.Y_train,
                 prediction=Y_pred,
                 task_type=self.task_type,
@@ -45,7 +50,7 @@ class TestEvaluator(autosklearn.models.evaluator.Evaluator):
         else:
             Y_pred = self.predict_function(self.X_test, self.model,
                                            self.task_type, self.Y_train)
-            score = autosklearn.models.evaluator.calculate_score(
+            score = calculate_score(
                 solution=self.Y_test,
                 prediction=Y_pred,
                 task_type=self.task_type,
