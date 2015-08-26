@@ -9,6 +9,7 @@ import numpy as np
 
 import lockfile
 from HPOlibConfigSpace.converters import pcs_parser
+import shutil
 from sklearn.base import BaseEstimator
 
 import six.moves.cPickle as pickle
@@ -278,8 +279,14 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
     def _create_folders(self):
         # == Set up a directory where all the trained models will be pickled to
-        os.mkdir(self._model_dir)
-        os.mkdir(self._ensemble_indices_dir)
+        try:
+            os.mkdir(self._model_dir)
+            os.mkdir(self._ensemble_indices_dir)
+        except OSError:
+            if not self._debug_mode:
+                shutil.rmtree(self._model_dir)
+                shutil.rmtree(self._ensemble_indices_dir)
+                self._create_folders()
 
     def run(self):
         raise NotImplementedError()
@@ -411,7 +418,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         self._stopwatch.start_task('OneHot')
         manager.perform_hot_encoding()
-        self._ohe = manager.encoder_
+        self._ohe = manager.encoder
         self._stopwatch.stop_task('OneHot')
 
         # == Pickle the data manager

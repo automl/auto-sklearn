@@ -33,11 +33,27 @@ class SimpleDataManager(object):
     def info(self, value):
         self._info = value
 
+    @property
+    def feat_type(self):
+        return self._feat_type
+
+    @feat_type.setter
+    def feat_type(self, value):
+        self._feat_type = value
+
+    @property
+    def encoder(self):
+        return self._encoder
+
+    @encoder.setter
+    def encoder(self, value):
+        self._encoder = value
+
     def perform_hot_encoding(self):
-        if not hasattr(self, 'data'):
+        if not hasattr(self, '_data') and self._data is not None:
             raise ValueError('perform1HotEncoding can only be called when '
                              'data is loaded')
-        if hasattr(self, 'encoder_'):
+        if hasattr(self, '_encoder') and self._encoder is not None:
             raise ValueError('perform1HotEncoding can only be called on '
                              'non-encoded data.')
 

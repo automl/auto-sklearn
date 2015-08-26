@@ -26,7 +26,7 @@ def main():
                                                debug_mode=True,
                                                )
     automl.fit(X_train, y_train, dataset_name='example')
-    print(automl.score(X_test, y_test))
+    # print(automl.score(X_test, y_test))
 
 
 if __name__ == '__main__':

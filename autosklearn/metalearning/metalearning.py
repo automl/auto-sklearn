@@ -9,6 +9,7 @@ is really not necessary. This object helps to circumvent this by:
     other metafeatures need OneHotEncoded data.
 """
 from __future__ import print_function
+from conf.settings import META_LEARNING_FOLDER
 
 __all__ = [
     'calc_meta_features',
@@ -137,12 +138,15 @@ def create_metalearning_string_for_smac_call(
                          'calculate_metafeatures_encoded_labels and '
                          'calculate_metafeatures_with_labels first!')
 
-    current_directory = os.path.dirname(__file__)
     if metadata_directory is None:
-        metadata_directory = os.path.join(current_directory, 'files',
+        metadata_directory = os.path.join(META_LEARNING_FOLDER,
                                           '%s_%s_%s' % (task, 'sparse' if
                                           sparse is True else
                                           'dense', metric))
+
+    # todo
+    # Установка эксепшена здесь не прерывает работу всей программы
+    # найти где пропускается эксепншн
 
     # Concatenate the metafeatures!
     mf = metafeatures_labels

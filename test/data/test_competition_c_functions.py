@@ -4,7 +4,7 @@ from __future__ import print_function
 import os
 import unittest
 
-import autosklearn.data_managers.competition_c_functions as competition_c_functions
+import autosklearn.c_utils.competition_c_functions as competition_c_functions
 
 
 class CHelperFunctionTest(unittest.TestCase):

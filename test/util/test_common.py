@@ -6,7 +6,6 @@ import unittest
 
 from autosklearn.util import set_auto_seed, get_auto_seed, del_auto_seed
 
-
 class TestUtilsCommon(unittest.TestCase):
 
     def setUp(self):
