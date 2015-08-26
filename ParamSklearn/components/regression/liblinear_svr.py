@@ -48,7 +48,7 @@ class LibLinear_SVR(ParamSklearnRegressionAlgorithm):
         return self.estimator.predict(X)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'Liblinear-SVR',
                 'name': 'Liblinear Support Vector Regression',
                 'handles_missing_values': False,
@@ -63,7 +63,7 @@ class LibLinear_SVR(ParamSklearnRegressionAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': False,
                 'handles_sparse': True,
-                'input': (SPARSE, DENSE),
+                'input': (SPARSE, DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 'preferred_dtype': None}
 

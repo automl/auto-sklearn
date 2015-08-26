@@ -65,7 +65,7 @@ class LibLinear_SVC(ParamSklearnClassificationAlgorithm):
         return softmax(df)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'Liblinear-SVC',
                 'name': 'Liblinear Support Vector Classification',
                 'handles_missing_values': False,
@@ -80,7 +80,7 @@ class LibLinear_SVC(ParamSklearnClassificationAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': False,
                 'handles_sparse': True,
-                'input': (SPARSE, DENSE),
+                'input': (SPARSE, DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 'preferred_dtype': None}
 

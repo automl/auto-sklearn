@@ -100,9 +100,17 @@ class ParamSklearnBaseEstimator(BaseEstimator):
 
             preproc_params.update(init_params_per_method[preproc_name])
 
-            preprocessor_object = components.preprocessing_components. \
-                _preprocessors[preproc_name](random_state=self.random_state,
-                                             **preproc_params)
+            if preproc_name in \
+                    components.feature_preprocessing_components._preprocessors:
+                _preprocessors = components.feature_preprocessing_components._preprocessors
+            elif preproc_name in \
+                    components.data_preprocessing_components._preprocessors:
+                _preprocessors = components.data_preprocessing_components._preprocessors
+            else:
+                raise ValueError()
+
+            preprocessor_object = _preprocessors[preproc_name](
+                random_state=self.random_state, **preproc_params)
 
             # Ducktyping...
             if hasattr(preprocessor_object, 'get_components'):
@@ -255,6 +263,13 @@ class ParamSklearnBaseEstimator(BaseEstimator):
             include = {}
         if exclude is None:
             exclude = {}
+
+        if 'sparse' not in dataset_properties:
+            # This dataset is probaby dense
+            dataset_properties['sparse'] = False
+        if 'signed' not in dataset_properties:
+            # This dataset probably contains unsigned data
+            dataset_properties['signed'] = False
 
         matches = ParamSklearn.create_searchspace_util.get_match_array(
             pipeline, dataset_properties, include=include, exclude=exclude)

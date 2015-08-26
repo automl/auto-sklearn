@@ -12,7 +12,7 @@ class BernoulliNBComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_classifier(BernoulliNB)
-            self.assertAlmostEqual(0.97999999999999998,
+            self.assertAlmostEqual(0.26000000000000001,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
 
@@ -20,6 +20,6 @@ class BernoulliNBComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_classifier_iterative_fit(BernoulliNB)
-            self.assertAlmostEqual(0.97999999999999998,
+            self.assertAlmostEqual(0.26000000000000001,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))

@@ -98,7 +98,7 @@ class RandomForest(ParamSklearnRegressionAlgorithm):
         return self.estimator.predict(X)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'RF',
                 'name': 'Random Forest Regressor',
                 'handles_missing_values': False,
@@ -112,7 +112,7 @@ class RandomForest(ParamSklearnRegressionAlgorithm):
                 'prefers_data_normalized': False,
                 'is_deterministic': True,
                 'handles_sparse': True,
-                'input': (DENSE, SPARSE),
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?

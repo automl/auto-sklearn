@@ -76,7 +76,7 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
 
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'LibSVM-SVC',
             'name': 'LibSVM Support Vector Classification',
             'handles_missing_values': False,
@@ -93,7 +93,7 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
             # TODO find out of this is right!
             # this here suggests so http://scikit-learn.org/stable/modules/svm.html#tips-on-practical-use
             'handles_sparse': True,
-            'input': (DENSE, SPARSE),
+            'input': (DENSE, SPARSE, UNSIGNED_DATA),
             'output': (PREDICTIONS,),
             # TODO find out what is best used here!
             # C-continouos and double precision...

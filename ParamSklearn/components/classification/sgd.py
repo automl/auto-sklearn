@@ -91,7 +91,7 @@ class SGD(ParamSklearnClassificationAlgorithm):
             return softmax(df)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'SGD Classifier',
                 'name': 'Stochastic Gradient Descent Classifier',
                 'handles_missing_values': False,
@@ -105,7 +105,7 @@ class SGD(ParamSklearnClassificationAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': True,
-                'input': (DENSE, SPARSE),
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 'preferred_dtype' : None}

@@ -58,7 +58,7 @@ class DecisionTree(ParamSklearnRegressionAlgorithm):
         return self.estimator.predict(X)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'DT',
                 'name': 'Decision Tree Classifier',
                 'handles_missing_values': False,
@@ -73,7 +73,7 @@ class DecisionTree(ParamSklearnRegressionAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': False,
                 'handles_sparse': True,
-                'input': (DENSE, SPARSE),
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?

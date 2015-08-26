@@ -1,5 +1,6 @@
 import numpy as np
 import sklearn.naive_bayes
+import scipy.sparse
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -40,6 +41,13 @@ class MultinomialNB(ParamSklearnClassificationAlgorithm):
                 alpha=self.alpha, fit_prior=self.fit_prior)
             self.classes_ = np.unique(y.astype(int))
 
+        # Because the pipeline guarantees that each feature is positive,
+        # clip all values below zero to zero
+        if scipy.sparse.issparse(X):
+            X.data[X.data < 0] = 0.0
+        else:
+            X[X < 0] = 0.0
+
         for iter in range(n_iter):
             start = min(self.n_iter * 1000, y.shape[0])
             stop = min((self.n_iter + 1) * 1000, y.shape[0])
@@ -72,7 +80,7 @@ class MultinomialNB(ParamSklearnClassificationAlgorithm):
         return self.estimator.predict_proba(X)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'MultinomialNB',
                 'name': 'Multinomial Naive Bayes classifier',
                 'handles_missing_values': False,
@@ -89,7 +97,7 @@ class MultinomialNB(ParamSklearnClassificationAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
-                'input': (DENSE, SPARSE),
+                'input': (DENSE, SPARSE, SIGNED_DATA),
                 'output': (PREDICTIONS,),
                 'preferred_dtype': np.float32}
 

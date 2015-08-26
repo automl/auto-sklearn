@@ -1,5 +1,3 @@
-__author__ = 'feurerm'
-
 import resource
 import sys
 import traceback
@@ -22,9 +20,9 @@ from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 import ParamSklearn.components.classification as classification_components
-import ParamSklearn.components.preprocessing as preprocessing_components
+import ParamSklearn.components.feature_preprocessing as preprocessing_components
 from ParamSklearn.util import get_dataset
-from ParamSklearn.constants import DENSE, SPARSE, PREDICTIONS
+from ParamSklearn.constants import *
 
 
 class TestParamSklearnClassifier(unittest.TestCase):
@@ -42,7 +40,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
             self.assertIsInstance(inp, tuple)
             self.assertIsInstance(output, tuple)
             for i in inp:
-                self.assertIn(i, (SPARSE, DENSE))
+                self.assertIn(i, (SPARSE, DENSE, SIGNED_DATA, UNSIGNED_DATA))
             self.assertEqual(output, (PREDICTIONS,))
             self.assertIn('handles_regression', props)
             self.assertFalse(props['handles_regression'])
@@ -103,32 +101,105 @@ class TestParamSklearnClassifier(unittest.TestCase):
                 predicted_probabiliets = cls.predict_proba(X_test_)
                 self.assertIsInstance(predicted_probabiliets, np.ndarray)
             except ValueError as e:
-                if "Floating-point under-/overflow occurred at epoch" in \
-                        e.message or \
-                    "removed all features" in e.message:
+                #if "Floating-point under-/overflow occurred at epoch" in \
+                #        e.message or \
+                if "removed all features" in e.message or \
+                        "all features are discarded" in e.message:
                     continue
                 else:
                     print config
                     print traceback.format_exc()
                     raise e
-            except LinAlgError as e:
-                if "not positive definite, even with jitter" in e.message:
+            # except LinAlgError as e:
+            #    if "not positive definite, even with jitter" in e.message:
+            #        continue
+            #    else:
+            #        print config
+            #        print traceback.format_exc()
+            #        raise e
+            #except AttributeError as e:
+            #    # Some error in QDA
+            #    if "log" == e.message:
+            #        print config
+            #        print traceback.format_exc()
+            #        raise e
+            #        continue
+            #    else:
+            #        print config
+            #        print traceback.format_exc()
+            #        raise e
+            except RuntimeWarning as e:
+                if "invalid value encountered in sqrt" in e.message:
+                    continue
+                elif "divide by zero encountered in divide" in e.message:
+                    continue
+                elif "invalid value encountered in divide" in e.message:
                     continue
                 else:
                     print config
                     print traceback.format_exc()
                     raise e
-            except KeyError as e:
-                # Some error in QDA
-                if "log" == e.message:
-                    print config
-                    print traceback.format_exc()
-                    raise e
+            except UserWarning as e:
+                if "FastICA did not converge" in e.message:
                     continue
                 else:
                     print config
                     print traceback.format_exc()
                     raise e
+            except MemoryError as e:
+                continue
+
+    def test_configurations_signed_data(self):
+        # Use a limit of ~4GiB
+        limit = 4000 * 1024 * 2014
+        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
+        cs = ParamSklearnClassifier.get_hyperparameter_search_space(
+            dataset_properties={'signed': True}
+        )
+
+        print cs
+
+        for i in range(10):
+            config = cs.sample_configuration()
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
+            cls = ParamSklearnClassifier(config, random_state=1)
+            print config
+            try:
+                cls.fit(X_train, Y_train)
+                X_test_ = X_test.copy()
+                predictions = cls.predict(X_test)
+                self.assertIsInstance(predictions, np.ndarray)
+                predicted_probabiliets = cls.predict_proba(X_test_)
+                self.assertIsInstance(predicted_probabiliets, np.ndarray)
+            except ValueError as e:
+                # if "Floating-point under-/overflow occurred at epoch" in \
+                #        e.message or \
+                if "removed all features" in e.message or \
+                                "all features are discarded" in e.message:
+                    continue
+                else:
+                    print config
+                    print traceback.format_exc()
+                    raise e
+            # except LinAlgError as e:
+            # if "not positive definite, even with jitter" in e.message:
+            #        continue
+            #    else:
+            #        print config
+            #        print traceback.format_exc()
+            #        raise e
+            #except AttributeError as e:
+            #    # Some error in QDA
+            #    if "log" == e.message:
+            #        print config
+            #        print traceback.format_exc()
+            #        raise e
+            #        continue
+            #    else:
+            #        print config
+            #        print traceback.format_exc()
+            #        raise e
             except RuntimeWarning as e:
                 if "invalid value encountered in sqrt" in e.message:
                     continue
@@ -151,6 +222,10 @@ class TestParamSklearnClassifier(unittest.TestCase):
                 continue
 
     def test_configurations_sparse(self):
+        # Use a limit of ~4GiB
+        limit = 4000 * 1024 * 2014
+        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
         print cs
@@ -163,28 +238,29 @@ class TestParamSklearnClassifier(unittest.TestCase):
             try:
                 cls.fit(X_train, Y_train)
                 predictions = cls.predict(X_test)
-            except ValueError as e:                                 
-                if "Floating-point under-/overflow occurred at epoch" in \
-                        e.message or \
-                                "removed all features" in e.message:
+            except ValueError as e:
+                # if "Floating-point under-/overflow occurred at epoch" in \
+                #        e.message or \
+                if "removed all features" in e.message or \
+                                "all features are discarded" in e.message:
                     continue
                 else:
                     print config
                     traceback.print_tb(sys.exc_info()[2])
                     raise e
-            except LinAlgError as e:
-                if "not positive definite, even with jitter" in e.message:
-                    continue
-                else:
-                    print config
-                    raise e
-            except AttributeError as e:
-                # Some error in QDA
-                if "log" == e.message:
-                    continue
-                else:
-                    print config
-                    raise e
+            # except LinAlgError as e:
+            #     if "not positive definite, even with jitter" in e.message:
+            #         continue
+            #     else:
+            #         print config
+            #         raise e
+            # except AttributeError as e:
+            #     # Some error in QDA
+            #     if "log" == e.message:
+            #         continue
+            #     else:
+            #         print config
+            #         raise e
             except RuntimeWarning as e:
                 if "invalid value encountered in sqrt" in e.message:
                     continue
@@ -204,8 +280,20 @@ class TestParamSklearnClassifier(unittest.TestCase):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space()
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
+
+        self.assertEqual(len(cs.get_hyperparameter(
+            'rescaling:__choice__').choices), 4)
+        self.assertEqual(len(cs.get_hyperparameter(
+            'classifier:__choice__').choices), 17)
+        self.assertEqual(len(cs.get_hyperparameter(
+            'preprocessor:__choice__').choices), 14)
+
         hyperparameters = cs.get_hyperparameters()
         self.assertEqual(146, len(hyperparameters))
+
+        #for hp in sorted([str(h) for h in hyperparameters]):
+        #    print hp
+
         # The four parameters which are always active are classifier,
         # preprocessor, imputation strategy and scaling strategy
         self.assertEqual(len(hyperparameters) - 5, len(conditions))
@@ -248,26 +336,16 @@ class TestParamSklearnClassifier(unittest.TestCase):
             "  preprocessor:nystroem_sampler:gamma, Value: 0.1\n"
             "  preprocessor:nystroem_sampler:kernel, Value: rbf\n"
             "  preprocessor:nystroem_sampler:n_components, Value: 100\n"
-            "  rescaling:strategy, Value: min/max\n"
+            "  rescaling:__choice__, Value: min/max\n"
             "violates forbidden clause \(Forbidden: classifier:__choice__ == random_forest && Forbidden: preprocessor:__choice__ == nystroem_sampler\)",
             ParamSklearnClassifier.get_hyperparameter_search_space,
             include={'preprocessor': ['nystroem_sampler']})
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
-        self.assertRaisesRegexp(ValueError, "Configuration:\n"
-            "  balancing:strategy, Value: none\n"
-            "  classifier:__choice__, Value: multinomial_nb\n"
-            "  classifier:multinomial_nb:alpha, Value: 1.0\n"
-            "  classifier:multinomial_nb:fit_prior, Value: True\n"
-            "  imputation:strategy, Value: mean\n"
-            "  preprocessor:__choice__, Value: truncatedSVD\n"
-            "  preprocessor:truncatedSVD:target_dim, Value: 128\n"
-            "  rescaling:strategy, Value: min/max\n"
-            "violates forbidden clause \(Forbidden: preprocessor:__choice__ == "
-            "truncatedSVD && Forbidden: classifier:__choice__ == multinomial_nb\)",
+        self.assertRaisesRegexp(AssertionError, "No valid pipeline found.",
                                 ParamSklearnClassifier.get_hyperparameter_search_space,
                                 include={'classifier': ['multinomial_nb'],
-                                         'preprocessor': ['truncatedSVD']},
+                                         'preprocessor': ['pca']},
                                 dataset_properties={'sparse':True})
 
         # It must also be catched that no classifiers which can handle sparse
@@ -285,7 +363,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
             "  classifier:liblinear_svc:tol, Value: 0.0001\n"
             "  imputation:strategy, Value: mean\n"
             "  preprocessor:__choice__, Value: densifier\n"
-            "  rescaling:strategy, Value: min/max\n"
+            "  rescaling:__choice__, Value: min/max\n"
             "violates forbidden clause \(Forbidden: classifier:__choice__ == liblinear_svc &&"
             " Forbidden: preprocessor:__choice__ == densifier\)",
                                 ParamSklearnClassifier.get_hyperparameter_search_space,
@@ -371,7 +449,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
                     'classifier:random_forest:max_leaf_nodes': 'None',
                     'classifier:random_forest:n_estimators': 100,
                     'classifier:random_forest:min_weight_fraction_leaf': 0.0,
-                    "rescaling:strategy": "min/max"})
+                    "rescaling:__choice__": "min/max"})
         cls = ParamSklearnClassifier(config)
 
         # Multiclass
@@ -454,7 +532,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
                                        'classifier:random_forest:max_features': 0.5,
                                        'classifier:random_forest:max_leaf_nodes': 'None',
                                        'classifier:random_forest:n_estimators': 100,
-                                       "rescaling:strategy": "min/max"})
+                                       "rescaling:__choice__": "min/max"})
 
         # Multiclass
         cls = ParamSklearnClassifier(config)

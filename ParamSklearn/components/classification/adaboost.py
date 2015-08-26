@@ -48,7 +48,7 @@ class AdaboostClassifier(ParamSklearnClassificationAlgorithm):
         return self.estimator.predict_proba(X)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'AB',
                 'name': 'AdaBoost Classifier',
                 'handles_missing_values': False,
@@ -63,7 +63,7 @@ class AdaboostClassifier(ParamSklearnClassificationAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
-                'input': (DENSE, SPARSE),
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?

@@ -89,7 +89,7 @@ class SGD(ParamSklearnRegressionAlgorithm):
         return self.scaler.inverse_transform(Y_pred)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'SGD Regressor',
                 'name': 'Stochastic Gradient Descent Regressor',
                 'handles_missing_values': False,
@@ -103,7 +103,7 @@ class SGD(ParamSklearnRegressionAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': True,
-                'input': (DENSE, SPARSE),
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 'preferred_dtype': None}

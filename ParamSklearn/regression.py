@@ -144,7 +144,7 @@ class ParamSklearnRegressor(RegressorMixin, ParamSklearnBaseEstimator):
 
         # A regressor which can handle sparse data after the densifier
         for key in regressors:
-            if SPARSE in available_regressors[key].get_properties()['input']:
+            if SPARSE in available_regressors[key].get_properties(dataset_properties=None)['input']:
                 if 'densifier' in preprocessors:
                     cs.add_forbidden_clause(
                         ForbiddenAndConjunction(
@@ -188,13 +188,14 @@ class ParamSklearnRegressor(RegressorMixin, ParamSklearnBaseEstimator):
         # Add the always active preprocessing components
         steps.extend(
             [["imputation",
-              components.preprocessing._preprocessors['imputation']],
+              components.data_preprocessing._preprocessors['imputation']],
              ["rescaling",
-              components.preprocessing._preprocessors['rescaling']]])
+              components.data_preprocessing._preprocessors['rescaling']]])
 
         # Add the preprocessing component
         steps.append(['preprocessor',
-                      components.preprocessing._preprocessors['preprocessor']])
+                      components.feature_preprocessing._preprocessors[
+                          'preprocessor']])
 
         # Add the classification component
         steps.append(['regressor',

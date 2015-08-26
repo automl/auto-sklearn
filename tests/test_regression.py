@@ -17,7 +17,7 @@ from ParamSklearn.regression import ParamSklearnRegressor
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
 from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 import ParamSklearn.components.regression as regression_components
-import ParamSklearn.components.preprocessing as preprocessing_components
+import ParamSklearn.components.feature_preprocessing as preprocessing_components
 from ParamSklearn.util import get_dataset
 from ParamSklearn.constants import *
 
@@ -38,7 +38,7 @@ class TestParamSKlearnRegressor(unittest.TestCase):
             self.assertIsInstance(inp, tuple)
             self.assertIsInstance(output, tuple)
             for i in inp:
-                self.assertIn(i, (SPARSE, DENSE))
+                self.assertIn(i, (SPARSE, DENSE, SIGNED_DATA, UNSIGNED_DATA))
             self.assertEqual(output, (PREDICTIONS,))
             self.assertIn('handles_regression', props)
             self.assertTrue(props['handles_regression'])
@@ -125,7 +125,7 @@ class TestParamSKlearnRegressor(unittest.TestCase):
             "  regressor:random_forest:min_samples_split, Value: 2\n"
             "  regressor:random_forest:min_weight_fraction_leaf, Constant: 0.0\n"
             "  regressor:random_forest:n_estimators, Constant: 100\n"
-            "  rescaling:strategy, Value: min/max\n"
+            "  rescaling:__choice__, Value: min/max\n"
             "violates forbidden clause \(Forbidden: regressor:__choice__ == random_forest"
             " && Forbidden: preprocessor:__choice__ == kitchen_sinks\)",
                                 ParamSklearnRegressor.get_hyperparameter_search_space,
@@ -141,7 +141,7 @@ class TestParamSKlearnRegressor(unittest.TestCase):
             "  regressor:ridge_regression:alpha, Value: 1.0\n"
             "  regressor:ridge_regression:fit_intercept, Constant: True\n"
             "  regressor:ridge_regression:tol, Value: 0.0001\n"
-            "  rescaling:strategy, Value: min/max\n"
+            "  rescaling:__choice__, Value: min/max\n"
             "violates forbidden clause \(Forbidden: regressor:__choice__ == "
             "ridge_regression && Forbidden: preprocessor:__choice__ == densifier\)",
                                 ParamSklearnRegressor.get_hyperparameter_search_space,

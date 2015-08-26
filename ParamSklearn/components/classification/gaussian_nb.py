@@ -62,7 +62,7 @@ class GaussianNB(ParamSklearnClassificationAlgorithm):
         return self.estimator.predict_proba(X)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'GaussianNB',
                 'name': 'Gaussian Naive Bayes classifier',
                 'handles_missing_values': False,
@@ -76,7 +76,7 @@ class GaussianNB(ParamSklearnClassificationAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
-                'input': (DENSE, ),
+                'input': (DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 'preferred_dtype': np.float32}
 

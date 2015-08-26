@@ -10,7 +10,7 @@ class ParamSklearnClassificationAlgorithm(object):
         self.properties = None
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         """Get the properties of the underlying algorithm. These are:
 
         * Short name
@@ -134,7 +134,7 @@ class ParamSklearnPreprocessingAlgorithm(object):
         self.preprocessor = None
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         """Get the properties of the underlying algorithm. These are:
 
         * Short name
@@ -249,7 +249,7 @@ class ParamSklearnRegressionAlgorithm(object):
         self.properties = None
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         """Get the properties of the underlying algorithm. These are:
 
         * Short name

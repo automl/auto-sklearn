@@ -109,7 +109,7 @@ class GradientBoostingClassifier(ParamSklearnClassificationAlgorithm):
         return self.estimator.predict_proba(X)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'GB',
                 'name': 'Gradient Boosting Classifier',
                 'handles_missing_values': False,
@@ -124,7 +124,7 @@ class GradientBoostingClassifier(ParamSklearnClassificationAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
-                'input': (DENSE, ),
+                'input': (DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?

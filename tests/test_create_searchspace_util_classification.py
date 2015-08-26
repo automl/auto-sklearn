@@ -9,16 +9,16 @@ from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 from ParamSklearn.components.classification.liblinear_svc import LibLinear_SVC
 from ParamSklearn.components.classification.lda import LDA
 
-from ParamSklearn.components.preprocessing.pca import PCA
-from ParamSklearn.components.preprocessing.truncatedSVD import TruncatedSVD
-from ParamSklearn.components.preprocessing.no_preprocessing import NoPreprocessing
-from ParamSklearn.components.preprocessing.fast_ica import FastICA
-from ParamSklearn.components.preprocessing.random_trees_embedding import RandomTreesEmbedding
+from ParamSklearn.components.feature_preprocessing.pca import PCA
+from ParamSklearn.components.feature_preprocessing.truncatedSVD import TruncatedSVD
+from ParamSklearn.components.feature_preprocessing.no_preprocessing import NoPreprocessing
+from ParamSklearn.components.feature_preprocessing.fast_ica import FastICA
+from ParamSklearn.components.feature_preprocessing.random_trees_embedding import RandomTreesEmbedding
 import ParamSklearn.create_searchspace_util
 
 class TestCreateClassificationSearchspace(unittest.TestCase):
 
-    def test_get_match_array(self):
+    def test_get_match_array_sparse_and_dense(self):
         # preproc is empty
         preprocessors = OrderedDict()
         preprocessors['pca'] = PCA
@@ -102,6 +102,9 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
         # PCA is forbidden, truncatedSVD allowed after random trees embedding
         # lda only allowed after truncatedSVD
         self.assertEqual(list(m[3].flatten()), [0, 0, 1, 1, 0, 1, 0, 1])
+
+    def test_get_match_array_signed_unsigned_and_binary(self):
+        pass
 
     @unittest.skip("Not currently working.")
     def test_add_forbidden(self):

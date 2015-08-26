@@ -47,7 +47,7 @@ class GaussianProcess(ParamSklearnRegressionAlgorithm):
         return self.scaler.inverse_transform(Y_pred)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'GP',
                 'name': 'Gaussian Process',
                 'handles_missing_values': False,
@@ -62,7 +62,7 @@ class GaussianProcess(ParamSklearnRegressionAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
-                'input': (DENSE, ),
+                'input': (DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?

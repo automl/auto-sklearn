@@ -32,7 +32,7 @@ class RidgeRegression(ParamSklearnRegressionAlgorithm):
         return self.estimator.predict(X)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'Rigde',
                 'name': 'Ridge Regression',
                 'handles_missing_values': False,
@@ -47,7 +47,7 @@ class RidgeRegression(ParamSklearnRegressionAlgorithm):
                 'prefers_data_normalized': True,
                 'is_deterministic': True,
                 'handles_sparse': True,
-                'input': (SPARSE, DENSE),
+                'input': (SPARSE, DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?

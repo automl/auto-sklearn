@@ -11,6 +11,7 @@ from ParamSklearn.constants import *
 def get_match_array(pipeline, dataset_properties,
                     include=None, exclude=None):
     sparse = dataset_properties.get('sparse')
+    signed = dataset_properties.get('signed')
 
     # Duck typing, not sure if it's good...
     node_i_is_choice = []
@@ -49,15 +50,27 @@ def get_match_array(pipeline, dataset_properties,
                                   enumerate(pipeline_instantiation_idxs)]
 
         data_is_sparse = sparse
+        dataset_is_signed = signed
         for node in pipeline_instantiation:
             node_input = node.get_properties()['input']
             node_output = node.get_properties()['output']
 
+            # First check if these two instantiations of this node can work
+            # together. Do this in multiple if statements to maintain
+            # readability
             if (data_is_sparse and SPARSE not in node_input) or \
                     not data_is_sparse and DENSE not in node_input:
                 matches[pipeline_instantiation_idxs] = 0
                 break
-            if INPUT in node_output or PREDICTIONS in node_output or\
+            # No need to check if the node can handle SIGNED_DATA; this is
+            # always assumed to be true
+            elif not dataset_is_signed and UNSIGNED_DATA not in node_input:
+                matches[pipeline_instantiation_idxs] = 0
+                break
+
+            if (INPUT in node_output and DENSE not in node_output and
+                        SPARSE not in node_output) or \
+                    PREDICTIONS in node_output or\
                     (not data_is_sparse and DENSE in node_input and
                         DENSE in node_output) or \
                     (data_is_sparse and SPARSE in node_input and
@@ -70,7 +83,22 @@ def get_match_array(pipeline, dataset_properties,
                 data_is_sparse = True
             else:
                 print node
-                print data_is_sparse
+                print "Data is sparse", data_is_sparse
+                print node_input, node_output
+                raise ValueError("This combination is not allowed!")
+
+            if PREDICTIONS in node_output:
+                pass
+            elif (INPUT in node_output and SIGNED_DATA not in node_output and
+                        UNSIGNED_DATA not in node_output):
+                pass
+            elif SIGNED_DATA in node_output:
+                dataset_is_signed = True
+            elif UNSIGNED_DATA in node_output:
+                dataset_is_signed = False
+            else:
+                print node
+                print "Data is signed", dataset_is_signed
                 print node_input, node_output
                 raise ValueError("This combination is not allowed!")
 
@@ -123,6 +151,7 @@ def add_forbidden(conf_space, pipeline, matches, dataset_properties,
                 exclude=node_exclude).values())
 
         else:
+            node_i_choices_names.append([node_name])
             node_i_choices.append([node])
 
     # Find out all chains of choices. Only in such a chain its possible to
@@ -148,7 +177,6 @@ def add_forbidden(conf_space, pipeline, matches, dataset_properties,
 
         # Add one to have also have chain_length in the range
         for sub_chain_length in range(2, chain_length + 1):
-
             for start_idx in range(chain_start, chain_stop - sub_chain_length + 1):
                 indices = range(start_idx, start_idx + sub_chain_length)
                 node_names = [pipeline[idx][0] for idx in indices]
@@ -161,7 +189,8 @@ def add_forbidden(conf_space, pipeline, matches, dataset_properties,
                     node = all_nodes[idx]
                     available_components = node.get_available_components(
                         dataset_properties,
-                        include=node_i_choices_names[idx-start_idx])
+                        include=node_i_choices_names[idx])
+                    assert len(available_components) > 0, len(available_components)
                     skip_array_shape.append(len(available_components))
                     num_node_choices.append(range(len(available_components)))
                     node_choice_names.append([name for name in available_components])
@@ -193,7 +222,8 @@ def add_forbidden(conf_space, pipeline, matches, dataset_properties,
 
                     # This prints the affected nodes
                     # print [node_choice_names[i][product[i]]
-                    #        for i in range(len(product))]
+                    #        for i in range(len(product))], \
+                    #     np.sum(matches[slices])
 
                     if np.sum(matches[slices]) == 0:
                         constraint = tuple([(node_names[i],

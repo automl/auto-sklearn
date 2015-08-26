@@ -74,7 +74,7 @@ class LibSVM_SVR(ParamSklearnRegressionAlgorithm):
         return self.scaler.inverse_transform(Y_pred)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'SVR',
                 'name': 'Support Vector Regression',
                 'handles_missing_values': False,
@@ -89,7 +89,7 @@ class LibSVM_SVR(ParamSklearnRegressionAlgorithm):
                 'prefers_data_normalized': True,
                 'is_deterministic': True,
                 'handles_sparse': True,
-                'input': (SPARSE, DENSE),
+                'input': (SPARSE, DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?

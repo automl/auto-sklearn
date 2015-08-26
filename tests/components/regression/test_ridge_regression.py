@@ -1,7 +1,7 @@
 import unittest
 
 from ParamSklearn.components.regression.ridge_regression import RidgeRegression
-from ParamSklearn.components.preprocessing.kitchen_sinks import RandomKitchenSinks
+from ParamSklearn.components.feature_preprocessing.kitchen_sinks import RandomKitchenSinks
 from ParamSklearn.util import _test_regressor, get_dataset
 
 import sklearn.metrics

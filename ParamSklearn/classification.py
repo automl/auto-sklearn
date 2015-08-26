@@ -11,7 +11,7 @@ from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConju
 from ParamSklearn import components as components
 from ParamSklearn.base import ParamSklearnBaseEstimator
 from ParamSklearn.constants import SPARSE
-from ParamSklearn.components.preprocessing.balancing import Balancing
+from ParamSklearn.components.data_preprocessing.balancing import Balancing
 import ParamSklearn.create_searchspace_util
 
 
@@ -154,10 +154,6 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         if dataset_properties is None or not isinstance(dataset_properties, dict):
             dataset_properties = dict()
 
-        if 'sparse' not in dataset_properties:
-            # This dataset is probaby dense
-            dataset_properties['sparse'] = False
-
         pipeline = cls._get_pipeline()
         cs = cls._get_hyperparameter_search_space(cs, dataset_properties,
                                                   exclude, include, pipeline)
@@ -206,24 +202,10 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                 pass
 
         # Won't work
-        # Multinomial NB etc does not work with negative values, don't use
-        # it with standardization, features learning, pca
-        classifiers_ = ["multinomial_nb", "bernoulli_nb"]
+        # Multinomial NB etc don't use with features learning, pca etc
+        classifiers_ = ["multinomial_nb"]
         preproc_with_negative_X = ["kitchen_sinks", "pca", "truncatedSVD",
                                    "fast_ica", "kernel_pca", "nystroem_sampler"]
-        scaling_strategies = ['standard', 'none', "normalize"]
-        for c in classifiers_:
-            if c not in classifiers:
-                continue
-            for scaling_strategy in scaling_strategies:
-                try:
-                    cs.add_forbidden_clause(ForbiddenAndConjunction(
-                        ForbiddenEqualsClause(cs.get_hyperparameter(
-                            "rescaling:strategy"), scaling_strategy),
-                        ForbiddenEqualsClause(cs.get_hyperparameter(
-                            "classifier:__choice__"), c)))
-                except KeyError:
-                    pass
 
         for c, f in product(classifiers_, preproc_with_negative_X):
             if c not in classifiers:
@@ -239,37 +221,6 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
             except KeyError:
                 pass
 
-        # Now try to add things for which we know that they don't work
-        forbidden_hyperparameter_combinations = \
-            [("preprocessor:select_percentile_classification:score_func", "chi2",
-              "rescaling:strategy", "standard"),
-             ("preprocessor:select_percentile_classification:score_func", "chi2",
-              "rescaling:strategy", "normalize"),
-             ("preprocessor:select_percentile_classification:score_func", "chi2",
-              "rescaling:strategy", "none"),
-             ("preprocessor:select_rates:score_func", "chi2",
-              "rescaling:strategy", "standard"),
-             ("preprocessor:select_rates:score_func", "chi2",
-              "rescaling:strategy", "none"),
-             ("preprocessor:select_rates:score_func", "chi2",
-              "rescaling:strategy", "normalize"),
-             ("preprocessor:nystroem_sampler:kernel", 'chi2', "rescaling:strategy",
-              "standard"),
-             ("preprocessor:nystroem_sampler:kernel", 'chi2', "rescaling:strategy",
-              "normalize"),
-             ("preprocessor:nystroem_sampler:kernel", 'chi2', "rescaling:strategy",
-              "none")]
-        for hp_name_1, hp_value_1, hp_name_2, hp_value_2 in \
-                forbidden_hyperparameter_combinations:
-            try:
-                cs.add_forbidden_clause(ForbiddenAndConjunction(
-                    ForbiddenEqualsClause(cs.get_hyperparameter(
-                        hp_name_1), hp_value_1),
-                    ForbiddenEqualsClause(cs.get_hyperparameter(
-                        hp_name_2), hp_value_2)
-                ))
-            except:
-                pass
 
         return cs
 
@@ -280,15 +231,15 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         # Add the always active preprocessing components
         steps.extend(
             [["imputation",
-              components.preprocessing._preprocessors['imputation']],
+              components.data_preprocessing._preprocessors['imputation']],
              ["rescaling",
-              components.preprocessing._preprocessors['rescaling']],
+              components.data_preprocessing._preprocessors['rescaling']],
              ["balancing",
-              components.preprocessing._preprocessors['balancing']]])
+              components.data_preprocessing._preprocessors['balancing']]])
 
         # Add the preprocessing component
         steps.append(['preprocessor',
-                      components.preprocessing._preprocessors['preprocessor']])
+                      components.feature_preprocessing._preprocessors['preprocessor']])
 
         # Add the classification component
         steps.append(['classifier',

@@ -35,7 +35,7 @@ class BernoulliNB(ParamSklearnClassificationAlgorithm):
         if self.estimator is None:
             self.n_iter = 0
             self.fully_fit_ = False
-            self.estimator = sklearn.naive_bayes.MultinomialNB(
+            self.estimator = sklearn.naive_bayes.BernoulliNB(
                 alpha=self.alpha, fit_prior=self.fit_prior)
             self.classes_ = np.unique(y.astype(int))
 
@@ -72,9 +72,9 @@ class BernoulliNB(ParamSklearnClassificationAlgorithm):
         return self.estimator.predict_proba(X)
 
     @staticmethod
-    def get_properties():
-        return {'shortname': 'MultinomialNB',
-                'name': 'Multinomial Naive Bayes classifier',
+    def get_properties(dataset_properties=None):
+        return {'shortname': 'BernoulliNB',
+                'name': 'Bernoulli Naive Bayes classifier',
                 'handles_missing_values': False,
                 'handles_nominal_values': False,
                 # sklearn website says: ... BernoulliNB is designed for
@@ -88,7 +88,7 @@ class BernoulliNB(ParamSklearnClassificationAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
-                'input': (DENSE, SPARSE),
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 'preferred_dtype': np.bool}
 

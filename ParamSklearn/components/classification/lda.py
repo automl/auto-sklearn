@@ -56,7 +56,7 @@ class LDA(ParamSklearnClassificationAlgorithm):
         return softmax(df)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'LDA',
                 'name': 'Linear Discriminant Analysis',
                 'handles_missing_values': False,
@@ -71,7 +71,7 @@ class LDA(ParamSklearnClassificationAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,
-                'input': (DENSE, ),
+                'input': (DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 'preferred_dtype': None}

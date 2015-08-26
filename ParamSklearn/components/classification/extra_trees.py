@@ -113,7 +113,7 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
         return self.estimator.predict_proba(X)
 
     @staticmethod
-    def get_properties():
+    def get_properties(dataset_properties=None):
         return {'shortname': 'ET',
                 'name': 'Extra Trees Classifier',
                 'handles_missing_values': False,
@@ -128,7 +128,7 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
                 'handles_multilabel': True,
                 'is_deterministic': True,
                 'handles_sparse': True,
-                'input': (DENSE, SPARSE),
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 # But rather fortran or C-contiguous?

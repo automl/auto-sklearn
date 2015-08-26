@@ -17,10 +17,10 @@ configuration on the iris dataset.
     >>> np.random.seed(1)
     >>> np.random.shuffle(indices)
     >>> configuration_space = ParamSklearnClassifier.get_hyperparameter_search_space()
-    >>> configuration_space.seed(1)
+    >>> configuration_space.seed(3)
     >>> configuration = configuration_space.sample_configuration()
     >>> cls = ParamSklearnClassifier(configuration, random_state=1)
     >>> cls = cls.fit(X[indices[:100]], Y[indices[:100]])
     >>> predictions = cls.predict(X[indices[100:]])
     >>> sklearn.metrics.accuracy_score(predictions, Y[indices[100:]])
-    0.93999999999999995
+    0.66000000000000003
