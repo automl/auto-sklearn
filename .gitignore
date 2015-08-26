@@ -69,3 +69,6 @@ download
 *.pkl
 num_run
 number_submission
+
+
+*.c
