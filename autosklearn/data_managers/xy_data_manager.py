@@ -4,8 +4,10 @@ __all__ = [
     'XYDataManager',
 ]
 import numpy as np
+from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
+    BINARY_CLASSIFICATION, REGRESSION, MULTILABEL_CLASSIFICATION
 
-from autosklearn.constants import *
+
 from autosklearn.data_managers import SimpleDataManager
 from scipy import sparse
 

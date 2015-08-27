@@ -7,6 +7,7 @@ import numpy as np
 
 import autosklearn.automl
 from autosklearn.constants import *
+from autosklearn.util import get_logger
 
 
 class AutoSklearnClassifier(autosklearn.automl.AutoML):
@@ -50,12 +51,12 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
                  output_folder=None,
                  debug_mode=False):
 
-        self._tmp_dir, self._output_dir = self._prepare_create_folders(
-            tmp_folder, output_folder)
         self._debug_mode = debug_mode
         self._classes = []
         self._n_classes = []
         self._n_outputs = []
+        self._tmp_dir, self._output_dir = self._prepare_create_folders(
+            tmp_folder, output_folder)
 
         super(AutoSklearnClassifier, self).__init__(
             time_left_for_this_task=time_left_for_this_task,
@@ -68,24 +69,16 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             ensemble_nbest=ensemble_nbest,
             seed=seed,
             ml_memory_limit=ml_memory_limit,
-            debug_mode=debug_mode
+            debug_mode=debug_mode,
         )
 
-    @staticmethod
-    def _prepare_create_folders(tmp_dir, output_dir):
+    def _prepare_create_folders(self, tmp_dir, output_dir):
         random_number = random.randint(0, 10000)
         pid = os.getpid()
         if tmp_dir is None:
             tmp_dir = '/tmp/autosklearn_tmp_%d_%d' % (pid, random_number)
         if output_dir is None:
             output_dir = '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
-
-        try:
-            os.makedirs(output_dir)
-            os.makedirs(tmp_dir)
-        except OSError:
-            pass
-
         return tmp_dir, output_dir
 
     def __del__(self):
@@ -93,11 +86,15 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             self._delete_output_directories()
 
     def _create_output_directories(self):
-        os.makedirs(self._output_dir)
+        self._debug("CREATE tmp folder: %s" % self._tmp_dir)
         os.makedirs(self._tmp_dir)
+        self._debug("CREATE output folder: %s" % self._output_dir)
+        os.makedirs(self._output_dir)
 
     def _delete_output_directories(self):
+        self._debug("DELETE tmp folder: %s" % self._tmp_dir)
         shutil.rmtree(self._tmp_dir)
+        self._debug("DELETE output folder: %s" % self._output_dir)
         shutil.rmtree(self._output_dir)
 
     def fit(self, data_x, y,
@@ -122,9 +119,6 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             continuous or categorical. Categorical attributes will
             automatically 1Hot encoded.
         """
-        # Fit is supposed to be idempotent!
-        self._delete_output_directories()
-        self._create_output_directories()
 
         y = np.atleast_1d(y)
 

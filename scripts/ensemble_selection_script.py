@@ -113,7 +113,7 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric,
             ensemble.append(predictions[idx])
             order.append(idx)
             ensemble_ = np.array(ensemble).mean(axis=0)
-            ensemble_performance = simple_evaluator.calculate_score(
+            ensemble_performance = calculate_score(
                 labels, ensemble_, task_type, metric, ensemble_.shape[1])
             trajectory.append(ensemble_performance)
         ensemble_size -= n_best
@@ -133,7 +133,7 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric,
             fant_ensemble_prediction = weighted_ensemble_prediction + (
                 1. / float(s + 1)) * pred
 
-            scores[j] = simple_evaluator.calculate_score(
+            scores[j] = calculate_score(
                 labels, fant_ensemble_prediction, task_type, metric,
                 fant_ensemble_prediction.shape[1])
             # ensemble.pop()

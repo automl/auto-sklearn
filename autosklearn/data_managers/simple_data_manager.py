@@ -96,18 +96,37 @@ class SimpleDataManager(object):
         return 'DataManager : ' + self._basename
 
     def __str__(self):
-        val = 'DataManager : ' + self._basename + '\ninfo:\n'
-        val += '\n'.join(
+        info_text = '\n'.join(
             ['\t%s =  %s' % (x, str(self.info[x])) for x in self.info])
-        val += 'data:\n'
+
+        data_text = ''
 
         for subset in self.data:
             dst = self.data[subset]  # data sub set
-            val += '\t%s = %s %s %s\n' % (subset, type(dst),
+            data_text += '\t%s = %s %s %s\n' % (subset, type(dst),
                                           str(dst.shape),
                                           str(dst.dtype))
             if isinstance(dst, scipy.sparse.spmatrix):
                 density = float(len(dst.data)) / dst.shape[0] / dst.shape[1]
-                val += '\tdensity: %f\n' % density
-        val = val + 'feat_type:\tarray' + str(self._feat_type.shape) + '\n'
-        return val
+                data_text += '\tdensity: %f\n' % density
+
+        if isinstance(self._feat_type, np.ndarray):
+            feat_type_str = str(self._feat_type.shape)
+        elif isinstance(self._feat_type, list):
+            feat_type_str = str(self._feat_type)
+        else:
+            raise ValueError("Feat type is't np.ndarray and list")
+
+        return "DataManager : " \
+               "{0}" \
+               "Info: " \
+               "{1}" \
+               "Data:" \
+               "{2}" \
+               "Feat_type: " \
+               "{3}".format(
+            self._basename,
+            info_text,
+            data_text,
+            feat_type_str,
+        )

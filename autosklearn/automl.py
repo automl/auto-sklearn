@@ -9,7 +9,6 @@ import numpy as np
 
 import lockfile
 from HPOlibConfigSpace.converters import pcs_parser
-import shutil
 from sklearn.base import BaseEstimator
 
 import six.moves.cPickle as pickle
@@ -64,7 +63,7 @@ def _check_path_for_save(filepath, name, log_function):
     return result
 
 
-def _get_logger(log_dir, basename, seed):
+def get_automl_logger(log_dir, basename, seed):
     logger = get_logger(os.path.basename(__file__))
     logger_file = os.path.join(log_dir, '%s.log' % str(
         'AutoML_%s_%d' % (basename, seed)))
@@ -135,7 +134,7 @@ def _run_ensemble_builder(tmp_dir,
     return proc_ensembles
 
 
-def _calculate_metafeatures(data_feat_type, data_info_task, basename,
+def _calculate_meta_features(data_feat_type, data_info_task, basename,
                             metalearning_cnt, x_train, y_train, watcher,
                             log_function):
     # == Calculate metafeatures
@@ -144,14 +143,13 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
     categorical = [True if feat_type.lower() in ['categorical'] else False
                    for feat_type in data_feat_type]
 
-    if metalearning_cnt <= 0:
-        result = None
-    elif data_info_task in \
+    if metalearning_cnt > 0 and data_info_task in \
             [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
-        # todo
-        # теперь нет класса, поэтому заменить везде на функции
+
         log_function('Start calculating metafeatures for %s' % basename)
-        result = calc_meta_features(x_train, y_train, categorical=categorical,
+        result = calc_meta_features(x_train,
+                                    y_train,
+                                    categorical=categorical,
                                     dataset_name=basename)
     else:
         result = None
@@ -163,7 +161,7 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
     return result
 
 
-def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
+def _calculate_meta_features_encoded(basename, x_train, y_train, watcher,
                                     log_funciton):
     task_name = 'CalculateMetafeaturesEncoded'
     watcher.start_task(task_name)
@@ -179,15 +177,15 @@ def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
 def _create_search_space(tmp_dir, data_info, watcher, log_function):
     task_name = 'CreateConfigSpace'
     watcher.start_task(task_name)
-    configspace_path = os.path.join(tmp_dir, 'space.pcs')
+    config_space_path = os.path.join(tmp_dir, 'space.pcs')
     configuration_space = paramsklearn.get_configuration_space(
         data_info)
     sp_string = pcs_parser.write(configuration_space)
-    _write_file_with_data(configspace_path, sp_string,
+    _write_file_with_data(config_space_path, sp_string,
                           'Configuration space', log_function)
     watcher.stop_task(task_name)
 
-    return configuration_space, configspace_path
+    return configuration_space, config_space_path
 
 
 def _get_initial_configuration(meta_features,
@@ -246,17 +244,24 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                  metadata_directory=None,
                  queue=None,
                  keep_models=True,
-                 debug_mode=False):
+                 debug_mode=False,
+                 logger=None):
         super(AutoML, self).__init__()
+        self._seed = seed
         self._tmp_dir = tmp_dir
         self._output_dir = output_dir
+        self._model_dir = join(self._tmp_dir, 'models_%d' % self._seed)
+        self._ensemble_indices_dir = join(self._tmp_dir,
+                                          'ensemble_indices_%d' % self._seed)
+        self._create_folder(self._tmp_dir, to_log=False)
+
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
         self._log_dir = log_dir if log_dir is not None else self._tmp_dir
         self._initial_configurations_via_metalearning = initial_configurations_via_metalearning
         self._ensemble_size = ensemble_size
         self._ensemble_nbest = ensemble_nbest
-        self._seed = seed
+
         self._ml_memory_limit = ml_memory_limit
         self._metadata_directory = metadata_directory
         self._queue = queue
@@ -264,29 +269,33 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         self._basename = None
         self._stopwatch = None
-        self._logger = None
+        self._logger = logger if logger is not None else get_automl_logger(
+            self._log_dir, self._basename, self._seed)
         self._ohe = None
         self._task = None
         self._metric = None
         self._target_num = None
 
         self._debug_mode = debug_mode
-
-        self._model_dir = join(self._tmp_dir, 'models_%d' % self._seed)
-        self._ensemble_indices_dir = join(self._tmp_dir,
-                                          'ensemble_indices_%d' % self._seed)
         self._create_folders()
+
+    def _create_folder(self, folder, to_log=True):
+        if to_log:
+            self._debug("CREATE folder: %s" % folder)
+        else:
+            print("CREATE folder: %s" % folder)
+        if os.path.isdir(folder):
+            if not self._debug_mode:
+                raise OSError("Folder '%s' exists" % folder)
+        else:
+            os.mkdir(folder)
 
     def _create_folders(self):
         # == Set up a directory where all the trained models will be pickled to
-        try:
-            os.mkdir(self._model_dir)
-            os.mkdir(self._ensemble_indices_dir)
-        except OSError:
-            if not self._debug_mode:
-                shutil.rmtree(self._model_dir)
-                shutil.rmtree(self._ensemble_indices_dir)
-                self._create_folders()
+
+        self._create_folder(self._output_dir)
+        self._create_folder(self._model_dir)
+        self._create_folder(self._ensemble_indices_dir)
 
     def run(self):
         raise NotImplementedError()
@@ -305,8 +314,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         self._stopwatch = StopWatch()
         self._stopwatch.start_task(self._basename)
-
-        self._logger = _get_logger(self._log_dir, self._basename, self._seed)
 
         loaded_data_manager = XYDataManager(data_x, y,
                                             task=task,
@@ -336,8 +343,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._stopwatch = StopWatch()
         self._stopwatch.start_task(self._basename)
 
-        self._logger = _get_logger(self._log_dir, self._basename,
-                                        self._seed)
+        self._logger = get_automl_logger(self._log_dir, self._basename,
+                                         self._seed)
 
         self._debug('======== Reading and converting data ==========')
         # Encoding the labels will be done after the metafeature calculation!
@@ -354,6 +361,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         task_name = 'StoreDatamanager'
 
         watcher.start_task(task_name)
+
         filepath = os.path.join(tmp_dir, basename + '_Manager.pkl')
 
         if _check_path_for_save(filepath, 'Data manager ', self._debug):
@@ -361,24 +369,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         watcher.stop_task(task_name)
         return filepath
-
-    @staticmethod
-    def _start_task(watcher, task_name):
-        watcher.start_task(task_name)
-
-    @staticmethod
-    def _stop_task(watcher, task_name):
-        watcher.stop_task(task_name)
-
-    @staticmethod
-    def _print_load_time(basename, time_left_for_this_task,
-                         time_for_load_data, log_function):
-
-        time_left_after_reading = max(
-            0, time_left_for_this_task - time_for_load_data)
-        log_function('Remaining time after reading %s %5.2f sec' %
-                     (basename, time_left_after_reading))
-        return time_for_load_data
 
     def _fit(self, manager):
         # TODO: check that data and task definition fit together!
@@ -399,22 +389,19 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         time_for_load_data = self._stopwatch.wall_elapsed(self._basename)
 
         if self._debug_mode:
-            self._print_load_time(
+            _print_load_time(
                 self._basename,
                 self._time_for_task,
                 time_for_load_data,
                 self._info)
 
         # == Calculate metafeatures
-        meta_features = _calculate_metafeatures(
+        meta_features = _calculate_meta_features(
             data_feat_type=manager.feat_type,
-            data_info_task=manager.info['task'],
-            x_train=manager.data['X_train'],
-            y_train=manager.data['Y_train'],
-            basename=self._basename,
-            watcher=self._stopwatch,
+            data_info_task=manager.info['task'], basename=self._basename,
             metalearning_cnt=self._initial_configurations_via_metalearning,
-            log_function=self._debug)
+            x_train=manager.data['X_train'], y_train=manager.data['Y_train'],
+            watcher=self._stopwatch, log_function=self._debug)
 
         self._stopwatch.start_task('OneHot')
         manager.perform_hot_encoding()
@@ -429,38 +416,32 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             watcher=self._stopwatch)
 
         # = Create a searchspace
-        self.configuration_space, configspace_path = _create_search_space(
+        self._configuration_space, configspace_path = _create_search_space(
             self._tmp_dir,
             manager.info,
             self._stopwatch,
             self._debug)
 
-        if meta_features is None:
-            initial_configurations = []
-        elif manager.info['task'] in [MULTICLASS_CLASSIFICATION,
-                                     BINARY_CLASSIFICATION]:
+        if meta_features is not None \
+                and manager.info['task'] in [MULTICLASS_CLASSIFICATION,
+                                             BINARY_CLASSIFICATION]:
 
-            meta_features_encoded = _calculate_metafeatures_encoded(
-                self._basename,
-                manager.data['X_train'],
-                manager.data['Y_train'],
-                self._stopwatch,
-                self._debug)
+            meta_features_encoded = _calculate_meta_features_encoded(
+                self._basename, manager.data['X_train'],
+                manager.data['Y_train'], self._stopwatch, self._debug)
 
-            self._debug(meta_features.__repr__(verbosity=2))
-            self._debug(meta_features_encoded.__repr__(verbosity=2))
-
+            self._debug(meta_features)
+            self._debug(meta_features_encoded)
             initial_configurations = _get_initial_configuration(
                 meta_features,
                 meta_features_encoded,
                 self._basename,
                 self._metric,
-                self.configuration_space,
+                self._configuration_space,
                 self._task,
                 self._metadata_directory,
                 self._initial_configurations_via_metalearning,
-                manager.info[
-                    'is_sparse'],
+                manager.info['is_sparse'],
                 self._stopwatch,
                 self._error)
 
@@ -512,6 +493,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
+
+        assert os.path.isdir(
+            self._model_dir), "Not found model directory: %s" % self._model_dir
 
         model_files = os.listdir(self._model_dir)
         models = []
@@ -568,3 +552,20 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         raise NotImplementedError('auto-sklearn does not implement '
                                   'set_params() because it is not intended to '
                                   'be optimized.')
+
+
+def _start_task(watcher, task_name):
+    watcher.start_task(task_name)
+
+
+def _stop_task(watcher, task_name):
+    watcher.stop_task(task_name)
+
+
+def _print_load_time(basename, time_left_for_this_task,
+                     time_for_load_data, log_function):
+    time_left_after_reading = max(
+        0, time_left_for_this_task - time_for_load_data)
+    log_function('Remaining time after reading %s %5.2f sec' %
+                 (basename, time_left_after_reading))
+    return time_for_load_data

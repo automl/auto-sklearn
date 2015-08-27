@@ -4,7 +4,7 @@ import os
 import pkg_resources
 
 from autosklearn.estimators import AutoSklearnClassifier
-
+from automl import get_automl_logger
 smac = pkg_resources.resource_filename(
     'autosklearn',
     'binaries/smac-v2.08.01-development-1/smac-v2.08.01-development-1/')
