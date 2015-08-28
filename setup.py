@@ -1,15 +1,18 @@
 # -*- encoding: utf-8 -*-
 import os
 import shutil
-import subprocess
-import sys
-import tarfile
-import urllib
 from distutils.extension import Extension
 
 import setuptools
 from setuptools.command.install import install
+from pip.req import parse_requirements
+
 from scripts import download_binaries
+
+install_reqs = parse_requirements('requirements.txt')
+
+
+
 
 SMAC_DOWNLOAD_LOCATION = 'http://aad.informatik.uni-freiburg.de/~feurerm/'
 SMAC_TAR_NAME = 'smac-v2.08.01-development-1.tar.gz'
@@ -43,19 +46,7 @@ setuptools.setup(
     ext_modules=[Extension('autosklearn.data.competition_c_functions',
                            ['autosklearn/data/competition_c_functions.c'])],
     packages=setuptools.find_packages(exclude=['test']),
-    install_requires=['numpy',
-                      'psutil',
-                      'pyyaml',
-                      'scipy',
-                      'scikit-learn==0.15.2',
-                      'nose',
-                      'lockfile',
-                      'HPOlibConfigSpace',
-                      'ParamSklearn',
-                      'pymetalearn',
-                      'cma',
-                      'six',
-                      'ConfigArgParse==0.9.3'],
+    install_requires=[str(ir.req) for ir in install_reqs],
     test_suite='nose.collector',
     cmdclass={'install': Download},
     scripts=['autosklearn/scripts/autosklearn'],
