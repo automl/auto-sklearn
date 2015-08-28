@@ -24,9 +24,7 @@ import numpy as np
 import scipy.sparse
 
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
-    STRING_TO_TASK_TYPES
-from autosklearn.constants import MULTICLASS_CLASSIFICATION
-
+    STRING_TO_TASK_TYPES,  MULTICLASS_CLASSIFICATION
 from autosklearn.data.data_manager import DataManager
 from autosklearn.util import convert_to_num
 

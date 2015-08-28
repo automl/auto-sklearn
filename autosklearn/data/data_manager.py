@@ -102,5 +102,5 @@ class DataManager(object):
                             (float(len(self.data[subset].data)) /
                              self.data[subset].shape[0] /
                              self.data[subset].shape[1])
-        val = val + 'feat_type:\tarray' + str(self.feat_type.shape) + '\n'
+        val = val + 'feat_type:\t' + str(self.feat_type) + '\n'
         return val
