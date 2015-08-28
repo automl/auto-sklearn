@@ -9,6 +9,7 @@ from distutils.extension import Extension
 
 import setuptools
 from setuptools.command.install import install
+from scripts import download_binaries
 
 SMAC_DOWNLOAD_LOCATION = 'http://aad.informatik.uni-freiburg.de/~feurerm/'
 SMAC_TAR_NAME = 'smac-v2.08.01-development-1.tar.gz'
@@ -24,74 +25,7 @@ METADATA_DIRECTORY = 'autosklearn/metalearning/files'
 class Download(install):
 
     def run(self):
-        # try:
-        #     shutil.rmtree(DOWNLOAD_DIRECTORY)
-        # except Exception:
-        #     pass
-        #
-        # try:
-        #     os.makedirs(DOWNLOAD_DIRECTORY)
-        # except Exception:
-        #     pass
-        #
-        # for download_url, filename in [
-        #     (SMAC_DOWNLOAD_LOCATION, SMAC_TAR_NAME),
-        #     # (METADATA_LOCATION, METADATA_TAR_NAME),
-        #     (RUNSOLVER_LOCATION, RUNSOLVER_TAR_NAME)
-        # ]:
-        #     # This can fail ungracefully, because having these files is
-        #     # crucial to AutoSklearn!
-        #     urllib.urlretrieve(
-        #         os.path.join(download_url, filename),
-        #         filename=os.path.join(DOWNLOAD_DIRECTORY, filename))
-        #
-        #     tfile = tarfile.open(os.path.join(DOWNLOAD_DIRECTORY, filename))
-        #     tfile.extractall(os.path.join(
-        #         DOWNLOAD_DIRECTORY,
-        #         filename.replace('.tar.gz', '').replace('.tar.bz2', '')))
-        #
-        # # Build the runsolver
-        # sys.stdout.write('Building runsolver\n')
-        # cur_pwd = os.getcwd()
-        # runsolver_source_path = os.path.join(DOWNLOAD_DIRECTORY,
-        #                                      'runsolver-3.3.4', 'runsolver',
-        #                                      'src')
-        # os.chdir(runsolver_source_path)
-        # subprocess.check_call('make')
-        # os.chdir(cur_pwd)
-        #
-        # # Create a fresh binaries directory
-        # try:
-        #     shutil.rmtree(BINARIES_DIRECTORY)
-        # except Exception:
-        #     pass
-        #
-        # try:
-        #     os.makedirs(BINARIES_DIRECTORY)
-        #     with open(os.path.join(BINARIES_DIRECTORY, '__init__.py')):
-        #         pass
-        # except Exception:
-        #     pass
-        #
-        # # Copy the runsolver into the sources so it gets copied
-        # shutil.move(os.path.join(runsolver_source_path, 'runsolver'),
-        #             os.path.join(BINARIES_DIRECTORY, 'runsolver'))
-        #
-        # # Copy SMAC
-        # shutil.move(os.path.join(DOWNLOAD_DIRECTORY,
-        #                          SMAC_TAR_NAME.replace('.tar.gz', '')),
-        #             BINARIES_DIRECTORY)
-
-        # try:
-        #    shutil.rmtree(METADATA_DIRECTORY)
-        # except Exception:
-        #    pass
-
-        # Copy the metadata
-        # shutil.move(os.path.join(DOWNLOAD_DIRECTORY,
-        #                         METADATA_TAR_NAME.replace(".tar.gz", ""),
-        #                         "files"),
-        #            METADATA_DIRECTORY)
+        download_binaries()
 
         # TODO: Normally one wants to call run(self), but this runs distutils and ignores install_requirements for unknown reasons
         # if anyone knows a better way, feel free to change
@@ -124,7 +58,7 @@ setuptools.setup(
                       'ConfigArgParse==0.9.3'],
     test_suite='nose.collector',
     cmdclass={'install': Download},
-    scripts=['autosklearn/scripts/_autosklearn'],
+    scripts=['autosklearn/scripts/autosklearn'],
     include_package_data=True,
     author='Matthias Feurer',
     author_email='feurerm@informatik.uni-freiburg.de',
