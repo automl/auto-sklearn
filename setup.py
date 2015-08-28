@@ -2,6 +2,7 @@
 import os
 import shutil
 from distutils.extension import Extension
+import subprocess
 
 import setuptools
 from setuptools.command.install import install
@@ -11,7 +12,7 @@ from scripts import download_binaries
 
 install_reqs = parse_requirements('requirements.txt')
 
-
+from autosklearn.conf import SCRIPT_COMPILE_C_UTILS
 
 
 SMAC_DOWNLOAD_LOCATION = 'http://aad.informatik.uni-freiburg.de/~feurerm/'
@@ -30,14 +31,11 @@ class Download(install):
     def run(self):
         download_binaries()
 
-        # TODO: Normally one wants to call run(self), but this runs distutils and ignores install_requirements for unknown reasons
-        # if anyone knows a better way, feel free to change
+        subprocess.check_output([
+            'bash',
+            SCRIPT_COMPILE_C_UTILS
+        ])
         install.do_egg_install(self)
-
-        # shutil.rmtree(os.path.join(METADATA_DIRECTORY))
-        shutil.rmtree(BINARIES_DIRECTORY)
-        shutil.rmtree(DOWNLOAD_DIRECTORY)
-
 
 setuptools.setup(
     name='AutoSklearn',
@@ -49,7 +47,7 @@ setuptools.setup(
     install_requires=[str(ir.req) for ir in install_reqs],
     test_suite='nose.collector',
     cmdclass={'install': Download},
-    scripts=['autosklearn/scripts/autosklearn'],
+    scripts=['scripts/autosklearn'],
     include_package_data=True,
     author='Matthias Feurer',
     author_email='feurerm@informatik.uni-freiburg.de',
