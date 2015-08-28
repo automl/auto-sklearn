@@ -15,8 +15,8 @@ ConfigArgParse==0.9.3
 #ParamSklearn
 #pymetalearn
 
--e git+https://github.com/mfeurer/HPOlibConfigSpace#egg=HPOlibConfigSpace0.1dev
--e git+https://git@bitbucket.org/mfeurer/paramsklearn.git@73d8643b2849db753ddc7b8909d01e6cee9bafc6 --no-deps
--e git+https://github.com/automl/HPOlib@development
--e git+https://bitbucket.org/mfeurer/pymetalearn/#egg=pyMetaLearn
+#-e git+https://github.com/mfeurer/HPOlibConfigSpace#egg=HPOlibConfigSpace0.1dev
+#-e git+https://git@bitbucket.org/mfeurer/paramsklearn.git@73d8643b2849db753ddc7b8909d01e6cee9bafc6#egg=ParamSklearn --install-option="--no-deps"
+#-e git+https://github.com/automl/HPOlib@development#egg=HPOlib
+#-e git+https://bitbucket.org/mfeurer/pymetalearn/#egg=pyMetaLearn
 
