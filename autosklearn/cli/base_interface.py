@@ -1,6 +1,12 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
-from functools import partial
+import datetime
+
+try:
+    from __init__ import *
+except ImportError:
+    pass
+
 import os
 import signal
 import time
@@ -79,20 +85,33 @@ def _get_base_dict():
     }
 
 
+def debug_log(text):
+    with open('/tmp/a.out', r'a+') as fio:
+        fio.write('%s: %s\n' % (str(datetime.datetime.now()), text))
+
 def make_mode_holdout(data, seed, configuration, num_run):
-    evaluator = HoldoutEvaluator(data, configuration,
-                                 seed=seed,
-                                 num_run=num_run,
-                                 **_get_base_dict())
-    evaluator.fit()
-    signal.signal(15, empty_signal_handler)
-    evaluator.finish_up()
-    model_directory = os.path.join(os.getcwd(), 'models_%d' % seed)
-    if os.path.exists(model_directory):
+    try:
+        debug_log("Run: %s" % make_mode_holdout.__name__)
+        evaluator = HoldoutEvaluator(data, configuration,
+                                     seed=seed,
+                                     num_run=num_run,
+                                     **_get_base_dict())
+        debug_log("Fit evaluator")
+        evaluator.fit()
+        signal.signal(15, empty_signal_handler)
+        debug_log("Fit finish up")
+        evaluator.finish_up()
+        model_directory = os.path.join(os.getcwd(), 'models_%d' % seed)
+        debug_log("Check model directory: %s" % model_directory)
+        assert os.path.exists(
+            model_directory), "Not found model directory: %s" % model_directory
+        debug_log("Save models in files")
         model_filename = os.path.join(model_directory,
                                       '%s.model' % num_run)
         with open(model_filename, 'w') as fh:
             pickle.dump(evaluator.model, fh, -1)
+    except AssertionError as e:
+        debug_log(str(e))
 
 
 def make_mode_test(data, seed, configuration, metric):
@@ -169,6 +188,8 @@ def main(dataset_info, mode, seed, params, mode_args=None):
 
     It must by no means be used for the Auto part of the competition!
     """
+
+    debug_log("Run script")
     num_run = None
     if mode != 'test':
         num_run = get_new_run_num()
@@ -197,42 +218,41 @@ def main(dataset_info, mode, seed, params, mode_args=None):
 
     global evaluator
     # Train/test split
+    if mode == 'holdout':
+        make_mode_holdout(
+            D,
+            seed,
+            configuration,
+            num_run)
+    elif mode == 'test':
+        make_mode_holdout(
+            D,
+            seed,
+            configuration, metric)
 
-    a = {
-        'holdout': partial(make_mode_holdout,
-                           [D,
-                            seed,
-                            configuration,
-                            num_run]),
-        'test': partial(make_mode_holdout,
-                        [D,
-                         seed,
-                         configuration, metric]),
-        'cv': partial(make_mode_cv,
-                      [D,
-                       seed,
-                       configuration,
-                       num_run,
-                       mode_args['folds']]),
-        'partial_cv': partial(make_mode_partial_cv,
-                              [D,
-                               seed,
-                               configuration,
-                               num_run,
-                               metric,
-                               mode_args['folds'],
-                               mode_args['fold']]),
-        'nested_cv': partial(make_mode_nested_cv,
-                             [D,
-                              seed,
-                              configuration,
-                              num_run,
-                              mode_args['inner_folds'],
-                              mode_args['outer_folds']]),
-    }
-
-    processor = a.get(mode, None)
-    if processor is None:
-        raise ValueError('Must choose a legal mode.')
+    elif mode == 'cv':
+        make_mode_cv(
+            D,
+            seed,
+            configuration,
+            num_run,
+            mode_args['folds'])
+    elif mode == 'partial_cv':
+        make_mode_partial_cv(
+            D,
+            seed,
+            configuration,
+            num_run,
+            metric,
+            mode_args['folds'],
+            mode_args['fold']),
+    elif mode == 'nested_cv':
+        make_mode_nested_cv(
+            D,
+            seed,
+            configuration,
+            num_run,
+            mode_args['inner_folds'],
+            mode_args['outer_folds']),
     else:
-        processor()
+        raise ValueError('Must choose a legal mode.')

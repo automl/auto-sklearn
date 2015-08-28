@@ -1,9 +1,10 @@
 mock
 nose
+numpy
+
 
 cython
 lockfile
-numpy
 psutil
 pyyaml
 scipy

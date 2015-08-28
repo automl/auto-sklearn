@@ -9,7 +9,7 @@ is really not necessary. This object helps to circumvent this by:
     other metafeatures need OneHotEncoded data.
 """
 from __future__ import print_function
-from conf.settings import META_LEARNING_FOLDER
+from autosklearn.conf import META_LEARNING_FOLDER
 
 __all__ = [
     'calc_meta_features',

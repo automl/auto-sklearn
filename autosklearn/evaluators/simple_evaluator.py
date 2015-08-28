@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
+from autosklearn.util import get_logger
 
 __all__ = [
     'SimpleEvaluator',
@@ -23,7 +24,7 @@ from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     MULTILABEL_CLASSIFICATION
 from autosklearn.scores import sanitize_array, a_metric, r2_metric, \
     normalize_array, bac_metric, auc_metric, f1_metric, pac_metric, acc_metric
-
+import autosklearn.scores.classification_metrics as classification_metrics
 
 def calculate_score(solution, prediction, task_type, metric, num_classes,
                     all_scoring_functions=False):
@@ -41,8 +42,10 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
     if task_type not in TASK_TYPES:
         raise NotImplementedError(task_type)
 
-    print(metric)
-    scoring_func = getattr(libscores, metric)
+
+    # todo
+    # надо чинить libscores
+    scoring_func = getattr(classification_metrics, metric)
     if solution.shape != prediction.shape:
         raise ValueError('Solution shape %s != prediction shape %s' %
                          (solution.shape, prediction.shape))
@@ -146,6 +149,8 @@ class SimpleEvaluator(object):
             num_run = get_new_run_num()
         self.num_run = num_run
 
+        self._logger = get_logger(os.path.basename(__file__))
+
     @abc.abstractmethod
     def fit(self):
         pass
@@ -164,19 +169,20 @@ class SimpleEvaluator(object):
         try:
             self.duration = time.time() - self.starttime
             result, additional_run_info = self.file_output()
-            print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
+            self._logger.debug('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
                   ('SAT', abs(self.duration), result, self.seed,
                    additional_run_info))
         except Exception:
             self.duration = time.time() - self.starttime
 
-            print(traceback.format_exc())
-            print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
+            self._logger.debug(traceback.format_exc())
+            self._logger.debug('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
                   ('TIMEOUT', abs(self.duration), 1.0, self.seed,
                    'No results were produced! Probably the training was not '
                    'finished and no valid model was generated!'))
 
     def file_output(self):
+
         seed = os.environ.get('AUTOSKLEARN_SEED')
         errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
         num_run = str(self.num_run).zfill(5)
@@ -195,6 +201,8 @@ class SimpleEvaluator(object):
                 with open(y_test_filename, 'w') as fh:
                     pickle.dump(self.Y_optimization.astype(np.float32), fh, -1)
 
+        # todo
+        # переписать все, ибо это говнокод
         ensemble_output_dir = os.path.join(self.output_dir,
                                            'predictions_ensemble_%s' % seed)
         if not os.path.exists(ensemble_output_dir):

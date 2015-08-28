@@ -1,13 +1,22 @@
 # -*- encoding: utf-8 -*-
+
+
 import hashlib
 import multiprocessing
 import os
 from os.path import join
 import traceback
+import sys
 
 import numpy as np
-
 import lockfile
+
+
+# todo
+# костыль века
+sys.path = ['/home/warmonger/Develop/Github/auto-sklearn/autosklearn/example', '/home/warmonger/Develop/venv/autosk2/src/pymetalearn', '/home/warmonger/Develop/venv/autosk2/local/lib/python2.7/site-packages/HPOlib-0.2.0.dev0-py2.7.egg', '/home/warmonger/Develop/venv/autosk2/lib/python2.7/site-packages/HPOlib-0.2.0.dev0-py2.7.egg', '/home/warmonger/Develop/Github/auto-sklearn', '/home/warmonger/Develop/venv/autosk2/lib/python2.7', '/home/warmonger/Develop/venv/autosk2/lib/python2.7/plat-x86_64-linux-gnu', '/home/warmonger/Develop/venv/autosk2/lib/python2.7/lib-tk', '/home/warmonger/Develop/venv/autosk2/lib/python2.7/lib-old', '/home/warmonger/Develop/venv/autosk2/lib/python2.7/lib-dynload', '/usr/lib/python2.7', '/usr/lib/python2.7/plat-x86_64-linux-gnu', '/usr/lib/python2.7/lib-tk', '/home/warmonger/Develop/venv/autosk2/local/lib/python2.7/site-packages', '/home/warmonger/Develop/venv/autosk2/lib/python2.7/site-packages']
+# sys.path.append('/home/warmonger/Develop/venv/autosk2/lib/python2.7/site-packages/')
+
 from HPOlibConfigSpace.converters import pcs_parser
 from sklearn.base import BaseEstimator
 
@@ -482,7 +491,10 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._queue.put([time_for_load_data, data_manager_path, proc_smac,
                              proc_ensembles])
         else:
+
+            self._debug("Real run SMAC")
             proc_smac.wait()
+            self._debug("Real run RUNSOLVER")
             proc_ensembles.wait()
 
         # Delete AutoSklearn environment variable
@@ -510,7 +522,10 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         if self._ohe is not None:
             data_x = self._ohe._transform(data_x)
 
-        indices_files = sorted(os.listdir(self._ensemble_indices_dir))
+        print(self._ensemble_indices_dir)
+        _ = os.listdir(self._ensemble_indices_dir)
+        assert len(_), "Not found ensemle indices"
+        indices_files = sorted(_)
         indices_file = os.path.join(self._ensemble_indices_dir,
                                     indices_files[-1])
         with open(indices_file) as fh:

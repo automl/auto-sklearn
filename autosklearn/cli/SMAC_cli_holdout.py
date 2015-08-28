@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 import sys
 
-from autosklearn.cli import base_interface
+import base_interface
 
 if __name__ == '__main__':
     dataset_info = sys.argv[1]

@@ -10,7 +10,17 @@ import lockfile
 import autosklearn.cli.SMAC_cli_holdout
 from autosklearn.constants import *
 from autosklearn.util.io import search_prog, search_prog_in_binaries
-from conf.settings import SCRIPT_FOLDER
+from autosklearn.conf import SCRIPT_FOLDER, SCRIPT_ENSEMBLE_SELECTION
+
+
+
+
+def get_prog_path(prog_name):
+    prog_path = search_prog(prog_name)
+    if prog_path is None:
+        prog_path = search_prog_in_binaries(prog_name)
+    assert prog_path is not None, "Not found %s binary file" % prog_name
+    return os.path.abspath(prog_path)
 
 
 def submit_call(call, seed, log_dir=None):
@@ -35,6 +45,11 @@ def submit_call(call, seed, log_dir=None):
 
 def get_algo_exec(runsolver_limit, runsolver_delay, memory_limit, *args):
     # Create call to autosklearn
+
+    # todo
+    # поменять местоположение этих скриптов и сделать нормальные названия
+    # потому что эти скрипты вызывают при выполненинии
+    # они не доступны при запуске без всей остальной штуки
     path_to_wrapper = os.path.dirname(
         os.path.abspath(autosklearn.cli.__file__))
     wrapper_exec = os.path.join(path_to_wrapper, 'SMAC_cli_holdout.py')
@@ -44,8 +59,10 @@ def get_algo_exec(runsolver_limit, runsolver_delay, memory_limit, *args):
     # be at least one (0 means infinity)
     runsolver_limit = max(1, runsolver_limit)
 
-    runsolver_prefix = 'runsolver --watcher-data /dev/null -W %d -d %d -M %d ' \
-                       % (runsolver_limit, runsolver_delay, memory_limit)
+    runsolver_prefix = '%s --watcher-data /dev/null -W %d -d %d -M %d ' \
+                       % (
+                       get_prog_path('runsolver'), runsolver_limit, runsolver_delay,
+                       memory_limit)
     call = '"' + runsolver_prefix + ' ' + call + ' ' + ' '.join(args) + '"'
     return call
 
@@ -110,12 +127,7 @@ def run_smac(dataset_name, dataset, tmp_dir, searchspace, instance_file, limit,
     if initial_challengers is None:
         initial_challengers = []
 
-    prog_path = search_prog(prog_name)
-    if prog_path is None:
-        prog_path = search_prog_in_binaries(prog_name)
-    assert prog_path is not None, "Not found smac binary file"
-
-    call = ' '.join([prog_path, '--numRun', str(seed), '--scenario',
+    call = ' '.join([get_prog_path('smac'), '--numRun', str(seed), '--scenario',
                      scenario_file] + initial_challengers)
 
     proc = submit_call(call, seed)
@@ -128,8 +140,8 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
     if limit <= 0:
         # It makes no sense to start building ensembles_statistics
         return
-    wrapper_exec = os.path.join(SCRIPT_FOLDER, 'ensemble_selection_script.py')
-    prog_name = 'runsolver'
+    wrapper_exec = SCRIPT_ENSEMBLE_SELECTION
+
     delay = 5
 
     task_type = TASK_TYPES_TO_STRING[task_type]
@@ -142,19 +154,16 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
     # be at least one (0 means infinity)
     limit = max(1, limit)
 
-    prog_path = search_prog(prog_name)
-    if prog_path is None:
-        prog_path = search_prog_in_binaries(prog_name)
-    assert prog_path is not None, "Not found %s binary file" % prog_name
+
 
     # Now add runsolver command
     # runsolver_cmd = "%s --watcher-data /dev/null -W %d" % \
     #                (runsolver_exec, limit)
     runsolver_cmd = '%s --watcher-data /dev/null -W %d -d %d' % \
-                    (prog_path, limit, delay)
+                    (get_prog_path('runsolver'), limit, delay)
     call = runsolver_cmd + ' ' + call
 
-    print('Calling(debug): ' + call)
+    # print('Calling(debug): ' + call)
     # raise Exception("fsa")
     proc = submit_call(call, seed, log_dir=tmp_dir)
     return proc

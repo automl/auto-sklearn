@@ -22,6 +22,10 @@ class SimpleDataManager(object):
         self._encoder = None
 
     @property
+    def basename(self):
+        return self._basename
+
+    @property
     def data(self):
         return self._data
 

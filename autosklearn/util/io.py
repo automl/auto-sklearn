@@ -4,7 +4,8 @@ from glob import glob
 import os
 import subprocess
 
-from conf.settings import BINARIES_DIRECTORY
+from autosklearn.conf import BINARIES_DIRECTORY
+
 
 def ls(filename):
     return sorted(glob(filename))

@@ -1,11 +1,12 @@
 # -*- encoding: utf-8 -*-
-from os.path import join
+from __future__ import print_function
 
 try:
     from __init__ import *
 except ImportError:
     pass
 
+from os.path import join
 import os
 import random
 import re
