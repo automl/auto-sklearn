@@ -4,10 +4,11 @@ import subprocess
 
 import setuptools
 from setuptools.command.install import install
+
 from pip.req import parse_requirements
+from conf import SCRIPT_COMPILE_C_UTILS
 
 from scripts import download_binaries
-from autosklearn.conf import SCRIPT_COMPILE_C_UTILS
 
 
 class Download(install):
@@ -25,8 +26,8 @@ setuptools.setup(
     name='AutoSklearn',
     description='Code to participate in the AutoML 2015 challenge.',
     version='0.0.2dev',
-    ext_modules=[Extension('autosklearn.data.competition_c_functions',
-                           ['autosklearn/data/competition_c_functions.c'])],
+    ext_modules=[Extension('autosklearn.c_utils.competition_c_functions',
+                           ['autosklearn/c_utils/competition_c_functions.c'])],
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=[str(ir.req) for ir in
                       parse_requirements('requirements.txt')],

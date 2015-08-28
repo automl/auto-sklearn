@@ -4,7 +4,7 @@ from glob import glob
 import os
 import subprocess
 
-from autosklearn.conf import BINARIES_DIRECTORY
+from conf import BINARIES_DIRECTORY
 
 
 def ls(filename):

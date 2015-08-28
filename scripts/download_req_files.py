@@ -13,7 +13,7 @@ import tarfile
 import urllib
 from os.path import join
 
-from autosklearn.conf import DOWNLOAD_DIRECTORY, BINARIES_DIRECTORY
+from conf import DOWNLOAD_DIRECTORY, BINARIES_DIRECTORY
 
 BASE_DIR = os.path.join(os.path.dirname(__file__), '..')
 

@@ -10,9 +10,7 @@ import lockfile
 import autosklearn.cli.SMAC_cli_holdout
 from autosklearn.constants import *
 from autosklearn.util.io import search_prog, search_prog_in_binaries
-from autosklearn.conf import SCRIPT_FOLDER, SCRIPT_ENSEMBLE_SELECTION
-
-
+from conf import SCRIPT_ENSEMBLE_SELECTION
 
 
 def get_prog_path(prog_name):
