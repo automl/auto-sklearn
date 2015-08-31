@@ -303,6 +303,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         # == Set up a directory where all the trained models will be pickled to
 
         self._create_folder(self._output_dir)
+        self._create_folder(self._log_dir)
         self._create_folder(self._model_dir)
         self._create_folder(self._ensemble_indices_dir)
 

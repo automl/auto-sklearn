@@ -25,7 +25,7 @@ def main():
     y_train = y[:1000]
     X_test = X[1000:]
     y_test = y[1000:]
-    debug_mode = False
+    debug_mode = True
 
     if debug_mode:
         automl = autosklearn.AutoSklearnClassifier(time_left_for_this_task=10,
