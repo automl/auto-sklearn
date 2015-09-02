@@ -43,7 +43,7 @@ else:
 setuptools.setup(
     name='AutoSklearn',
     description='Code to participate in the AutoML 2015 challenge.',
-    version='0.0.1dev',
+    version='0.0.2dev',
     ext_modules=[c_utils],
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=[str(ir.req) for ir in
