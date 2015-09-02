@@ -30,7 +30,7 @@ import numpy as np
 import scipy.sparse
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
     STRING_TO_TASK_TYPES, MULTICLASS_CLASSIFICATION
-from autosklearn.c_utils.competition_c_functions import read_dense_file, \
+from autosklearn.c_utils import read_dense_file, \
     read_sparse_file, read_sparse_binary_file, read_dense_file_unknown_width
 from autosklearn.data_managers import SimpleDataManager
 from autosklearn.util import convert_to_num, read_first_line, file_to_array
