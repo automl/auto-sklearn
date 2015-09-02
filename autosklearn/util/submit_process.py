@@ -26,9 +26,9 @@ def submit_call(call, seed, log_dir=None):
     call = shlex.split(call)
 
     if log_dir is None:
-        proc = subprocess.call(call, stdout=open(os.devnull, 'w'), shell=True)
+        proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'), shell=True)
     else:
-        proc = subprocess.call(
+        proc = subprocess.Popen(
             call,
             stdout=open(
                 os.path.join(
@@ -36,9 +36,8 @@ def submit_call(call, seed, log_dir=None):
                     'ensemble_out_%d.log' %
                     seed),
                 'w'),
-            stderr=open(os.path.join(log_dir, 'ensemble_err_%d.log' % seed),
-                        'w'),
-            shell=True)
+            stderr=open(os.path.join(log_dir, 'ensemble_err_%d.log' % seed), 'w'),
+        shell=True)
 
     return proc
 

@@ -492,6 +492,12 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         if self._queue is not None:
             self._queue.put([time_for_load_data, data_manager_path, proc_smac,
                              proc_ensembles])
+        else:
+
+            self._debug("Real run SMAC")
+            proc_smac.wait()
+            self._debug("Real run RUNSOLVER")
+            proc_ensembles.wait()
 
         # Delete AutoSklearn environment variable
         del_auto_seed()
