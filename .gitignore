@@ -14,6 +14,8 @@ runsolver-3.3.4.tar.bz2
 benchmarks/*/*_*/*
 runsolver-3.3.4.tar.bz2
 
+autosklearn/binaries
+
 # Java plugins
 HPOlib/dispatcher/MySQLDBTAE
 MySQLDBTAE.tar.gz
@@ -69,3 +71,5 @@ download
 *.pkl
 num_run
 number_submission
+
+
