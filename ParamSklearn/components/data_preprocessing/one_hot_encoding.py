@@ -1,21 +1,32 @@
-
-import sklearn.preprocessing
+import ParamSklearn.implementations.OneHotEncoder
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
+from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
+    UniformFloatHyperparameter
+from HPOlibConfigSpace.conditions import EqualsCondition
 
 from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.constants import *
 
 
-class Imputation(ParamSklearnPreprocessingAlgorithm):
-    def __init__(self, strategy, random_state=None):
+class OneHotEncoder(ParamSklearnPreprocessingAlgorithm):
+    def __init__(self, use_minimum_fraction, minimum_fraction,
+                 init_params=None, random_state=None):
         # TODO pay attention to the cases when a copy is made (CSR matrices)
-        self.strategy = strategy
+        self.use_minimum_fraction = use_minimum_fraction
+        self.minimum_fraction = minimum_fraction
+        self.init_params = init_params
 
     def fit(self, X, y=None):
-        self.preprocessor = sklearn.preprocessing.Imputer(
-            strategy=self.strategy, copy=False)
+        if self.use_minimum_fraction is None or \
+                self.use_minimum_fraction.lower() == 'False':
+            self.minimum_fraction = None
+        else:
+            self.minimum_fraction = float(self.minimum_fraction)
+
+        self.preprocessor = ParamSklearn.implementations.OneHotEncoder\
+            .OneHotEncoder(minimum_fraction=self.minimum_fraction,
+                           categorical_features=self.init_params)
         self.preprocessor = self.preprocessor.fit(X)
         return self
 
@@ -26,8 +37,8 @@ class Imputation(ParamSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'Imputation',
-                'name': 'Imputation',
+        return {'shortname': '1Hot',
+                'name': 'One Hot Encoder',
                 'handles_missing_values': True,
                 'handles_nominal_values': True,
                 'handles_numerical_features': True,
@@ -47,11 +58,13 @@ class Imputation(ParamSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        # TODO add replace by zero!
-        strategy = CategoricalHyperparameter(
-            "strategy", ["mean", "median", "most_frequent"], default="mean")
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(strategy)
+        use_minimum_fraction = cs.add_hyperparameter(CategoricalHyperparameter(
+            "use_minimum_fraction", ["True", "False"], default="True"))
+        minimum_fraction = cs.add_hyperparameter(UniformFloatHyperparameter(
+            "minimum_fraction", lower=.0001, upper=0.5, default=0.01, log=True))
+        cs.add_condition(EqualsCondition(minimum_fraction,
+                                         use_minimum_fraction, 'True'))
         return cs
 
     def __str__(self):
