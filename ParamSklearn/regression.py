@@ -187,7 +187,9 @@ class ParamSklearnRegressor(RegressorMixin, ParamSklearnBaseEstimator):
 
         # Add the always active preprocessing components
         steps.extend(
-            [["imputation",
+            [["one_hot_encoding",
+              components.data_preprocessing._preprocessors['one_hot_encoding']],
+            ["imputation",
               components.data_preprocessing._preprocessors['imputation']],
              ["rescaling",
               components.data_preprocessing._preprocessors['rescaling']]])

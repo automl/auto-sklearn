@@ -10,23 +10,29 @@ from ParamSklearn.constants import *
 
 
 class OneHotEncoder(ParamSklearnPreprocessingAlgorithm):
-    def __init__(self, use_minimum_fraction, minimum_fraction,
-                 init_params=None, random_state=None):
+    def __init__(self, use_minimum_fraction, minimum_fraction=None,
+                 categorical_features=None, random_state=None):
         # TODO pay attention to the cases when a copy is made (CSR matrices)
         self.use_minimum_fraction = use_minimum_fraction
         self.minimum_fraction = minimum_fraction
-        self.init_params = init_params
+        self.categorical_features = categorical_features
 
     def fit(self, X, y=None):
         if self.use_minimum_fraction is None or \
-                self.use_minimum_fraction.lower() == 'False':
+                self.use_minimum_fraction.lower() == 'false':
             self.minimum_fraction = None
         else:
             self.minimum_fraction = float(self.minimum_fraction)
 
+        if self.categorical_features is None:
+            categorical_features = []
+        else:
+            categorical_features = self.categorical_features
+
         self.preprocessor = ParamSklearn.implementations.OneHotEncoder\
             .OneHotEncoder(minimum_fraction=self.minimum_fraction,
-                           categorical_features=self.init_params)
+                           categorical_features=categorical_features)
+
         self.preprocessor = self.preprocessor.fit(X)
         return self
 

@@ -5,6 +5,7 @@ import numpy as np
 from scipy import sparse
 
 from ParamSklearn.components.data_preprocessing.one_hot_encoding import OneHotEncoder
+from ParamSklearn.util import _test_preprocessing
 
 
 class OneHotEncoderTest(unittest.TestCase):
@@ -58,7 +59,7 @@ class OneHotEncoderTest(unittest.TestCase):
             default = configuration_space.get_default_configuration()
 
             preprocessor = OneHotEncoder(random_state=1,
-                                         init_params=self.categorical,
+                                         categorical_features=self.categorical,
                                         **{hp_name: default[hp_name] for hp_name in
                                            default if default[hp_name] is not None})
 
@@ -68,6 +69,17 @@ class OneHotEncoderTest(unittest.TestCase):
             if len(transformations) > 1:
                 self.assertFalse(
                     (transformations[-1].todense() != transformations[-2].todense()).all())
+
+    def test_default_configuration_no_encoding(self):
+        transformations = []
+        for i in range(10):
+            transformation, original = _test_preprocessing(OneHotEncoder)
+            self.assertEqual(transformation.shape, original.shape)
+            self.assertTrue((transformation == original).all())
+            transformations.append(transformation)
+            if len(transformations) > 1:
+                self.assertTrue(
+                    (transformations[-1] == transformations[-2]).all())
 
     def test_default_configuration_sparse_data(self):
         transformations = []
@@ -80,7 +92,7 @@ class OneHotEncoderTest(unittest.TestCase):
             default = configuration_space.get_default_configuration()
 
             preprocessor = OneHotEncoder(random_state=1,
-                                         init_params=self.categorical,
+                                         categorical_features=self.categorical,
                                          **{hp_name: default[hp_name] for
                                             hp_name in
                                             default if
@@ -93,3 +105,16 @@ class OneHotEncoderTest(unittest.TestCase):
                 self.assertFalse(
                     (transformations[-1].todense() != transformations[
                         -2].todense()).all())
+
+    def test_default_configuration_sparse_no_encoding(self):
+        transformations = []
+
+        for i in range(10):
+            transformation, original = _test_preprocessing(OneHotEncoder,
+                                                           make_sparse=True)
+            self.assertEqual(transformation.shape, original.shape)
+            self.assertTrue((transformation.todense() == original.todense()).all())
+            transformations.append(transformation)
+            if len(transformations) > 1:
+                self.assertTrue(
+                    (transformations[-1].todense() == transformations[-2].todense()).all())

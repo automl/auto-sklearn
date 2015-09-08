@@ -86,8 +86,8 @@ class TestParamSKlearnRegressor(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(133, len(hyperparameters))
-        self.assertEqual(len(hyperparameters) - 4, len(conditions))
+        self.assertEqual(135, len(hyperparameters))
+        self.assertEqual(len(hyperparameters) - 5, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
         cs = ParamSklearnRegressor.get_hyperparameter_search_space(
@@ -112,6 +112,8 @@ class TestParamSKlearnRegressor(unittest.TestCase):
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(ValueError, "Configuration:\n"
             "  imputation:strategy, Value: mean\n"
+            "  one_hot_encoding:minimum_fraction, Value: 0.01\n"
+            "  one_hot_encoding:use_minimum_fraction, Value: True\n"
             "  preprocessor:__choice__, Value: kitchen_sinks\n"
             "  preprocessor:kitchen_sinks:gamma, Value: 1.0\n"
             "  preprocessor:kitchen_sinks:n_components, Value: 100\n"
@@ -136,6 +138,8 @@ class TestParamSKlearnRegressor(unittest.TestCase):
         # data are located behind the densifier
         self.assertRaisesRegexp(ValueError, "Configuration:\n"
             "  imputation:strategy, Value: mean\n"
+            "  one_hot_encoding:minimum_fraction, Value: 0.01\n"
+            "  one_hot_encoding:use_minimum_fraction, Value: True\n"
             "  preprocessor:__choice__, Value: densifier\n"
             "  regressor:__choice__, Value: ridge_regression\n"
             "  regressor:ridge_regression:alpha, Value: 1.0\n"

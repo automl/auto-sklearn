@@ -107,7 +107,7 @@ class ParamSklearnBaseEstimator(BaseEstimator):
                     components.data_preprocessing_components._preprocessors:
                 _preprocessors = components.data_preprocessing_components._preprocessors
             else:
-                raise ValueError()
+                raise ValueError(preproc_name)
 
             preprocessor_object = _preprocessors[preproc_name](
                 random_state=self.random_state, **preproc_params)

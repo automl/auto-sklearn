@@ -1,3 +1,4 @@
+import os
 import resource
 import sys
 import traceback
@@ -8,6 +9,7 @@ import numpy as np
 from scipy.linalg import LinAlgError
 import sklearn.datasets
 import sklearn.decomposition
+import sklearn.cross_validation
 import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.testing import assert_array_almost_equal
@@ -276,6 +278,73 @@ class TestParamSklearnClassifier(unittest.TestCase):
                     print config
                     raise e
 
+    def test_configurations_categorical_data(self):
+        # Use a limit of ~4GiB
+        limit = 4000 * 1024 * 2014
+        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
+        cs = ParamSklearnClassifier.get_hyperparameter_search_space(
+            dataset_properties={'sparse': True})
+        print cs
+        for i in range(10):
+            config = cs.sample_configuration()
+            print config
+            categorical = [True, True, True, False, False, True, True, True,
+                           False, True, True, True, True, True, True, True,
+                           True, True, True, True, True, True, True, True, True,
+                           True, True, True, True, True, True, True, False,
+                           False, False, True, True, True]
+            this_directory = os.path.dirname(__file__)
+            X = np.loadtxt(os.path.join(this_directory, "components",
+                                        "data_preprocessing", "dataset.pkl"))
+            y = X[:, -1].copy()
+            X = X[:,:-1]
+            X_train, X_test, Y_train, Y_test = \
+                sklearn.cross_validation.train_test_split(X, y)
+
+            cls = ParamSklearnClassifier(config, random_state=1,)
+            try:
+                cls.fit(X_train, Y_train,
+                        init_params={'one_hot_encoding:categorical_features': categorical})
+                predictions = cls.predict(X_test)
+            except ValueError as e:
+                # if "Floating-point under-/overflow occurred at epoch" in \
+                # e.message or \
+                if "removed all features" in e.message or \
+                                "all features are discarded" in e.message:
+                    continue
+                else:
+                    print config
+                    traceback.print_tb(sys.exc_info()[2])
+                    raise e
+            # except LinAlgError as e:
+            # if "not positive definite, even with jitter" in e.message:
+            #         continue
+            #     else:
+            #         print config
+            #         raise e
+            # except AttributeError as e:
+            #     # Some error in QDA
+            #     if "log" == e.message:
+            #         continue
+            #     else:
+            #         print config
+            #         raise e
+            except RuntimeWarning as e:
+                if "invalid value encountered in sqrt" in e.message:
+                    continue
+                elif "divide by zero encountered in divide" in e.message:
+                    continue
+                else:
+                    print config
+                    raise e
+            except UserWarning as e:
+                if "FastICA did not converge" in e.message:
+                    continue
+                else:
+                    print config
+                    raise e
+
     def test_get_hyperparameter_search_space(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space()
         self.assertIsInstance(cs, ConfigurationSpace)
@@ -289,14 +358,14 @@ class TestParamSklearnClassifier(unittest.TestCase):
             'preprocessor:__choice__').choices), 14)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(146, len(hyperparameters))
+        self.assertEqual(148, len(hyperparameters))
 
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
 
         # The four parameters which are always active are classifier,
         # preprocessor, imputation strategy and scaling strategy
-        self.assertEqual(len(hyperparameters) - 5, len(conditions))
+        self.assertEqual(len(hyperparameters) - 6, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
@@ -332,6 +401,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
             "  classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0\n"
             "  classifier:random_forest:n_estimators, Constant: 100\n"
             "  imputation:strategy, Value: mean\n"
+            "  one_hot_encoding:minimum_fraction, Value: 0.01\n"
+            "  one_hot_encoding:use_minimum_fraction, Value: True\n"
             "  preprocessor:__choice__, Value: nystroem_sampler\n"
             "  preprocessor:nystroem_sampler:gamma, Value: 0.1\n"
             "  preprocessor:nystroem_sampler:kernel, Value: rbf\n"
@@ -362,6 +433,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
             "  classifier:liblinear_svc:penalty, Value: l2\n"
             "  classifier:liblinear_svc:tol, Value: 0.0001\n"
             "  imputation:strategy, Value: mean\n"
+            "  one_hot_encoding:minimum_fraction, Value: 0.01\n"
+            "  one_hot_encoding:use_minimum_fraction, Value: True\n"
             "  preprocessor:__choice__, Value: densifier\n"
             "  rescaling:__choice__, Value: min/max\n"
             "violates forbidden clause \(Forbidden: classifier:__choice__ == liblinear_svc &&"
@@ -439,6 +512,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
             values={"balancing:strategy": "none",
                     "classifier:__choice__": "random_forest",
                     "imputation:strategy": "mean",
+                    "one_hot_encoding:minimum_fraction": 0.01,
+                    "one_hot_encoding:use_minimum_fraction": "True",
                     "preprocessor:__choice__": "no_preprocessing",
                     'classifier:random_forest:bootstrap': 'True',
                     'classifier:random_forest:criterion': 'gini',
@@ -522,6 +597,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
                                values={"balancing:strategy": "none",
                                        "classifier:__choice__": "random_forest",
                                        "imputation:strategy": "mean",
+                                       "one_hot_encoding:minimum_fraction": 0.01,
+                                       "one_hot_encoding:use_minimum_fraction": 'True',
                                        "preprocessor:__choice__": "no_preprocessing",
                                        'classifier:random_forest:bootstrap': 'True',
                                        'classifier:random_forest:criterion': 'gini',
