@@ -27,29 +27,20 @@ def _transform_selected(X, transform, selected="all", copy=True):
     -------
     X : array or sparse matrix, shape=(n_samples, n_features_new)
     """
-
     if selected == "all":
         return transform(X)
 
+    if len(selected) == 0:
+        return X
+
     X = check_array(X, accept_sparse='csc', force_all_finite=False)
+
     n_features = X.shape[1]
     ind = np.arange(n_features)
     sel = np.zeros(n_features, dtype=bool)
     sel[np.asarray(selected)] = True
     not_sel = np.logical_not(sel)
     n_selected = np.sum(sel)
-
-    # Add 1 to all categorical colums to avoid loosing them due to slicing
-    subtract = False
-    if sparse.isspmatrix_csr(X):
-        X.data += 1
-        subtract = True
-    X = check_array(X, copy=copy, force_all_finite=False, accept_sparse="csc")
-    if subtract:
-        X.data -= 1
-
-    if len(selected) == 0:
-        return X
 
     if n_selected == 0:
         # No features selected.
@@ -58,32 +49,17 @@ def _transform_selected(X, transform, selected="all", copy=True):
         # All features selected.
         return transform(X)
     else:
-        # Add 1 to all categorical columns to avoid loosing them due to slicing
-        if sparse.issparse(X):
-            for idx in range(n_features):
-                if idx in ind[sel]:
-                    X.data[X.indptr[idx]:X.indptr[idx + 1]] += 1
-            X_ = X[:, ind[sel]]
-            for idx in range(n_features):
-                if idx in ind[sel]:
-                    X.data[X.indptr[idx]:X.indptr[idx + 1]] -= 1
-            X_.data -= 1
-        else:
-            X_ = X[:, ind[sel]]
-
-        X_sel = transform(X_)
+        X_sel = transform(X[:, ind[sel]])
         X_not_sel = X[:, ind[not_sel]]
 
         if sparse.issparse(X_sel) or sparse.issparse(X_not_sel):
-            return sparse.hstack((X_sel, X_not_sel)).tocsr()
+            return sparse.hstack((X_sel, X_not_sel), format='csr')
         else:
             return np.hstack((X_sel, X_not_sel))
 
 
 class OneHotEncoder(BaseEstimator, TransformerMixin):
-    """Don't trust the documentation of this module!
-
-    Encode categorical integer features using a one-hot aka one-of-K scheme.
+    """Encode categorical integer features using a one-hot aka one-of-K scheme.
 
     The input to this transformer should be a matrix of integers, denoting
     the values taken on by categorical (discrete) features. The output will be
@@ -96,6 +72,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
 
     Parameters
     ----------
+
     categorical_features: "all" or array of indices or mask
         Specify what features are treated as categorical.
 
@@ -137,7 +114,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
     >>> enc.fit([[0, 0, 3], [1, 1, 0], [0, 2, 1], \
 [1, 0, 2]])  # doctest: +ELLIPSIS
     OneHotEncoder(categorical_features='all', dtype=<... 'float'>,
-           n_values='auto', sparse=True)
+           sparse=True, minimum_fraction=None)
     >>> enc.n_values_
     array([2, 3, 4])
     >>> enc.feature_indices_
@@ -153,11 +130,12 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
       encoding of dictionary items or strings.
     """
 
-    def __init__(self, categorical_features="all",
-                 dtype=np.float, sparse=True):
+    def __init__(self, categorical_features="all", dtype=np.float,
+                 sparse=True, minimum_fraction=None):
         self.categorical_features = categorical_features
         self.dtype = dtype
         self.sparse = sparse
+        self.minimum_fraction = minimum_fraction
 
     def fit(self, X, y=None):
         """Fit OneHotEncoder to X.
@@ -175,69 +153,110 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
         return self
 
     def _fit_transform(self, X):
+        """Assumes X contains only categorical features."""
 
-        # Add 1 to all categorical colums to avoid loosing them due to slicing
-        subtract = False
-        if sparse.isspmatrix_csr(X):
-            X.data += 1
-            subtract = True
-        X = check_array(X, accept_sparse="csc", force_all_finite=False)
-        if subtract:
-            X.data -= 1
+        # First increment everything by three to account for the fact that
+        # np.NaN will get an index of two, and 'other' values will get index of
+        # one, index of zero is not assigned to also work with sparse data
+        if sparse.issparse(X):
+            X.data += 3
+            X.data[~np.isfinite(X.data)] = 2
+        else:
+            X += 3
+            X[~np.isfinite(X)] = 2
 
+        X = check_array(X, accept_sparse='csc', force_all_finite=False,
+                        dtype=int)
+
+        if X.min() < 0:
+            raise ValueError("X needs to contain only non-negative integers.")
         n_samples, n_features = X.shape
 
-        # By replacing NaNs (which means a column full on NaNs in the
-        # original data matrix) with a 1, we add a column full of zeros to
-        # the array
-        if sparse.isspmatrix_csc(X):
-            n_values = [0]
-            for idx in range(n_features):
-                if X.indptr[idx] == X.indptr[idx+1]:
-                    values_for_idx = 1
+        # Remember which values should not be replaced by the value 'other'
+        if self.minimum_fraction is not None:
+            do_not_replace_by_other = list()
+            for column in range(X.shape[1]):
+                do_not_replace_by_other.append(list())
+
+
+                if sparse.issparse(X):
+                    indptr_start = X.indptr[column]
+                    indptr_end = X.indptr[column + 1]
+                    unique = np.unique(X.data[indptr_start:indptr_end])
+                    colsize = indptr_end - indptr_start
                 else:
-                    values_for_idx = np.nanmax(
-                        X.data[X.indptr[idx]:X.indptr[idx + 1]]) + 1
-                n_values.append(values_for_idx if
-                                np.isfinite(values_for_idx) else 1)
-            row_indices = X.indices
+                    unique = np.unique(X[:, column])
+                    colsize = X.shape[0]
+
+                for unique_value in unique:
+                    if np.isfinite(unique_value):
+                        if sparse.issparse(X):
+                            indptr_start = X.indptr[column]
+                            indptr_end = X.indptr[column + 1]
+                            count = np.nansum(unique_value ==
+                                              X.data[indptr_start:indptr_end])
+                        else:
+                            count = np.nansum(unique_value == X[:, column])
+                    else:
+                        if sparse.issparse(X):
+                            indptr_start = X.indptr[column]
+                            indptr_end = X.indptr[column + 1]
+                            count = np.nansum(~np.isfinite(
+                                X.data[indptr_start:indptr_end]))
+                        else:
+                            count = np.nansum(~np.isfinite(X[:, column]))
+
+                    fraction = float(count) / colsize
+                    if fraction >= self.minimum_fraction:
+                        do_not_replace_by_other[-1].append(unique_value)
+
+                for unique_value in unique:
+                    if unique_value not in do_not_replace_by_other[-1]:
+                        if sparse.issparse(X):
+                            indptr_start = X.indptr[column]
+                            indptr_end = X.indptr[column + 1]
+                            X.data[indptr_start:indptr_end][
+                                X.data[indptr_start:indptr_end] ==
+                                unique_value] = 1
+                        else:
+                            X[:, column][X[:, column] == unique_value] = 1
+
+            self.do_not_replace_by_other_ = do_not_replace_by_other
+
+        if sparse.issparse(X):
+            n_values = X.max(axis=0).toarray().flatten() + 2
         else:
-            n_values = np.hstack([[0], np.nanmax(X, axis=0) + 1])
-            n_values[~np.isfinite(n_values)] = 1
-            row_indices = np.tile(np.arange(n_samples, dtype=np.int32),
-                                  n_features)
+            n_values = np.max(X, axis=0) + 2
 
-        total_num_values = np.nansum(n_values)
+        self.n_values_ = n_values
+        n_values = np.hstack([[0], n_values])
+        indices = np.cumsum(n_values)
+        self.feature_indices_ = indices
 
-        column_indices = []
-        data = []
-        feature_indices = []
+        if sparse.issparse(X):
+            row_indices = X.indices
+            column_indices = []
+            for i in range(len(X.indptr) - 1):
+                nbr = X.indptr[i+1] - X.indptr[i]
+                column_indices_ = [indices[i]] * nbr
+                column_indices_ += X.data[X.indptr[i]:X.indptr[i+1]]
+                column_indices.extend(column_indices_)
+            data = np.ones(X.data.size)
+        else:
+            column_indices = (X + indices[:-1]).ravel()
+            row_indices = np.repeat(np.arange(n_samples, dtype=np.int32),
+                                    n_features)
+            data = np.ones(n_samples * n_features)
 
-        for idx in range(X.shape[1]):
-            if sparse.isspmatrix_csc(X):
-                values_ = X.getcol(idx).data
-            else:
-                values_ = X[:, idx]
-
-            offset = np.nansum(n_values[:idx+1])
-            column_indices_idx = [offset + value if np.isfinite(value)
-                                  else offset for value in values_]
-            data_idx = [1 if np.isfinite(value) else 0 for value in values_]
-            feature_indices_idx = {value: value + offset
-                                   for value in values_
-                                   if np.isfinite(value)}
-
-            column_indices.extend(column_indices_idx)
-            data.extend(data_idx)
-            feature_indices.append(feature_indices_idx)
-
-        self.feature_indices_ = feature_indices
-        self.n_values = n_values
-        # tocsr() removes zeros in the data which represent NaNs
         out = sparse.coo_matrix((data, (row_indices, column_indices)),
-                                shape=(n_samples, total_num_values),
-                                dtype=self.dtype).tocsr()
-        return out if self.sparse else out.toarray()
+                                shape=(n_samples, indices[-1]),
+                                dtype=self.dtype).tocsc()
+
+        mask = np.array(out.sum(axis=0)).ravel() != 0
+        active_features = np.where(mask)[0]
+        out = out[:, active_features]
+        self.active_features_ = active_features
+        return out.tocsr() if self.sparse else out.toarray()
 
     def fit_transform(self, X, y=None):
         """Fit OneHotEncoder to X, then transform X.
@@ -249,55 +268,91 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
                                    self.categorical_features, copy=True)
 
     def _transform(self, X):
-        """Assumes X contains only categorical features."""
-        X = check_array(X, dtype=np.int, accept_sparse='csc')
+        """Asssumes X contains only categorical features."""
 
-        # Add 1 to all categorical colums to avoid loosing them due to slicing
-        subtract = False
-        if sparse.isspmatrix_csr(X):
-            X.data += 1
-            subtract = True
-        X = check_array(X, accept_sparse="csc", force_all_finite=False)
-        if subtract:
-            X.data -= 1
+        # First increment everything by three to account for the fact that
+        # np.NaN will get an index of two, and 'other' values will get index of
+        #  one, index of zero is not assigned to also work with sparse data
+        if sparse.issparse(X):
+            X.data += 3
+            X.data[~np.isfinite(X.data)] = 2
+        else:
+            X += 3
+            X[~np.isfinite(X)] = 2
+
+        X = check_array(X, accept_sparse='csc', force_all_finite=False,
+                        dtype=int)
+        if X.min() < 0:
+            raise ValueError("X needs to contain only non-negative integers.")
         n_samples, n_features = X.shape
 
         indices = self.feature_indices_
-        if n_features != len(indices):
+        if n_features != indices.shape[0] - 1:
             raise ValueError("X has different shape than during fitting."
                              " Expected %d, got %d."
-                             % (len(indices), n_features))
+                             % (indices.shape[0] - 1, n_features))
 
-        if sparse.isspmatrix_csc(X):
-            row_indices = X.indices
+        # Replace all indicators which were below `minimum_fraction` in the 
+        # training set by 'other'
+        if self.minimum_fraction is not None:
+            for column in range(X.shape[1]):
+                if sparse.issparse(X):
+                    indptr_start = X.indptr[column]
+                    indptr_end = X.indptr[column + 1]
+                    unique = np.unique(X.data[indptr_start:indptr_end])
+                else:
+                    unique = np.unique(X[:, column])
+
+                for unique_value in unique:
+                    if unique_value not in self.do_not_replace_by_other_[
+                        column]:
+                        if sparse.issparse(X):
+                            indptr_start = X.indptr[column]
+                            indptr_end = X.indptr[column + 1]
+                            X.data[indptr_start:indptr_end][
+                                X.data[indptr_start:indptr_end] ==
+                                unique_value] = 1
+                        else:
+                            X[:, column][X[:, column] == unique_value] = 1
+
+        if sparse.issparse(X):
+            n_values_check = X.max(axis=0).toarray().flatten() + 1
         else:
-            row_indices = np.tile(np.arange(n_samples, dtype=np.int32),
-                                  n_features)
+            n_values_check = np.max(X, axis=0) + 1
 
-        data = []
-        column_indices = []
+        # Replace all indicators which are out of bounds by 'other' (index 0)
+        if (n_values_check > self.n_values_).any():
+            # raise ValueError("Feature out of bounds. Try setting n_values.")
+            for i, n_value_check in enumerate(n_values_check):
+                if (n_value_check - 1) >= self.n_values_[i]:
+                    if sparse.issparse(X):
+                        indptr_start = X.indptr[i]
+                        indptr_end = X.indptr[i+1]
+                        X.data[indptr_start:indptr_end][X.data
+                            [indptr_start:indptr_end] >= self.n_values_[i]] = 0
+                    else:
+                        X[:, i][X[:, i] >= self.n_values_[i]] = 0
 
-        for idx, feature in enumerate(range(n_features)):
-            if sparse.isspmatrix_csc(X):
-                values_ = X.getcol(idx).data
-            else:
-                values_ = X[:, idx]
-
-            offset = np.sum(self.n_values[:idx+1])
-            feature_indices_idx = self.feature_indices_[idx]
-            column_indices_idx = [feature_indices_idx.get(x, offset)
-                                  for x in values_]
-            data_idx = [1 if feature_indices_idx.get(x) is not None else 0
-                        for x in values_]
-
-            column_indices.extend(column_indices_idx)
-            data.extend(data_idx)
-
+        if sparse.issparse(X):
+            row_indices = X.indices
+            column_indices = []
+            for i in range(len(X.indptr) - 1):
+                nbr = X.indptr[i + 1] - X.indptr[i]
+                column_indices_ = [indices[i]] * nbr
+                column_indices_ += X.data[X.indptr[i]:X.indptr[i + 1]]
+                column_indices.extend(column_indices_)
+            data = np.ones(X.data.size)
+        else:
+            column_indices = (X + indices[:-1]).ravel()
+            row_indices = np.repeat(np.arange(n_samples, dtype=np.int32),
+                                    n_features)
+            data = np.ones(n_samples * n_features)
         out = sparse.coo_matrix((data, (row_indices, column_indices)),
-                                shape=(n_samples, np.sum(self.n_values)),
-                                dtype=self.dtype).tocsr()
+                                shape=(n_samples, indices[-1]),
+                                dtype=self.dtype).tocsc()
 
-        return out if self.sparse else out.toarray()
+        out = out[:, self.active_features_]
+        return out.tocsr() if self.sparse else out.toarray()
 
     def transform(self, X):
         """Transform X using one-hot encoding.
