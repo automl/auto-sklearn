@@ -1,44 +1,46 @@
+# -*- encoding: utf-8 -*-
+
 import logging
-import os
-import sys
+from logging.handlers import RotatingFileHandler
 
 
-def setup():
-    logging.basicConfig(level=logging.DEBUG)
+def get_handler_std(level, log_format):
+    handler = logging.StreamHandler()
+    handler.setLevel(level)
+    handler.setFormatter(logging.Formatter(fmt=log_format,
+                                           datefmt='%m-%d %H:%M:%S'))
+    return handler
 
 
-def get_logger(name, outputdir=None):
-    # Root logger with a stream and file handler
-    root = logging.getLogger()
-    formatter = logging.Formatter(fmt='[%(levelname)s] '
-                                      '[%(asctime)s:%(name)s]: %(message)s',
-                                  datefmt='%m-%d %H:%M:%S')
+def get_handler(filename, level, log_format):
+    handler = RotatingFileHandler(filename,
+                                  maxBytes=5 * 1024 * 1024,
+                                  backupCount=5)
+    handler.setLevel(level)
+    handler.setFormatter(logging.Formatter(fmt=log_format,
+                                           datefmt='%m-%d %H:%M:%S'))
+    return handler
 
-    if not any([isinstance(handler, logging.StreamHandler) for handler in
-            root.handlers]):
-        console = logging.StreamHandler(stream=sys.stdout)
-        console.setLevel(logging.INFO)
-        console.setFormatter(formatter)
-        root.addHandler(console)
 
-    if outputdir is not None:
-        logger_file = os.path.join(outputdir, '%s.log' % str(name))
+def get_log_format():
+    return '[%(levelname)s] [%(asctime)s:%(name)s]: %(message)s'
 
-        add = True
-        for handler in root.handlers:
-            if isinstance(handler, logging.FileHandler):
-                if handler.baseFilename == logger_file:
-                    add = False
 
-        if add:
-            file_handler = logging.FileHandler(filename=logger_file, mode="w")
-            file_handler.setLevel(logging.DEBUG)
-            file_handler.setFormatter(formatter)
-            root.addHandler(file_handler)
+def add_file_handler(logger, filepath):
+    logger.addHandler(
+        get_handler(filepath,
+                    logging.DEBUG, get_log_format())
+    )
 
-    # Create a logger
+
+def get_logger(name):
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
-    logger.debug("Logger created")
 
+    logger.addHandler(
+        get_handler_std(logging.DEBUG, get_log_format())
+    )
+
+    logger.debug('Logger created')
     return logger
+
