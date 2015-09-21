@@ -238,9 +238,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._stopwatch = StopWatch()
         self._stopwatch.start_task(self._basename)
 
-        self._logger = self._get_logger(self._log_dir,
-                                        self._basename,
-                                        self._seed)
+        self._logger = _get_logger(self._log_dir,
+                                   self._basename,
+                                   self._seed)
 
         self._debug('======== Reading and converting data ==========')
         # Encoding the labels will be done after the metafeature calculation!
