@@ -2,6 +2,7 @@
 from __future__ import print_function
 import copy
 import os
+import traceback
 import unittest
 
 import numpy as np
@@ -147,17 +148,20 @@ class NestedCVEvaluator_Test(unittest.TestCase):
                     'failed to create intent' in e.message:
                 pass
             else:
+                traceback.print_exc()
                 raise e
         except LinAlgError as e:
             if 'not positive definite, even with jitter' in e.message:
                 pass
             else:
+                traceback.print_exc()
                 raise e
         except AttributeError as e:
             # Some error in QDA
             if 'log' == e.message:
                 pass
             else:
+                traceback.print_exc()
                 raise e
         except RuntimeWarning as e:
             if 'invalid value encountered in sqrt' in e.message:
@@ -165,9 +169,11 @@ class NestedCVEvaluator_Test(unittest.TestCase):
             elif 'divide by zero encountered in divide' in e.message:
                 pass
             else:
+                traceback.print_exc()
                 raise e
         except UserWarning as e:
             if 'FastICA did not converge' in e.message:
                 pass
             else:
+                traceback.print_exc()
                 raise e

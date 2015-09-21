@@ -1,13 +1,13 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 
-from six.moves import cStringIO as cPickle
 import multiprocessing
 import os
 import shutil
 import unittest
 
 import numpy as np
+import six
 
 import autosklearn.automl
 import ParamSklearn.util as putil
@@ -22,7 +22,7 @@ class AutoMLTest(unittest.TestCase):
         try:
             shutil.rmtree(self.output)
         except Exception:
-            pass
+            print("Cannot remove existing output directory %s" % self.output)
         os.makedirs(self.output)
 
     def tearDown(self):
@@ -52,11 +52,13 @@ class AutoMLTest(unittest.TestCase):
             queue=queue)
         auto.fit_automl_dataset(dataset, data_dir)
         with open(data_manager_file) as fh:
-            D = cPickle.load(fh)
-            self.assertTrue(np.allclose(D.data['X_train'].data[:3], [1., 1.,
-                                                                     2.]))
+            D = six.moves.cPickle.load(fh)
+            self.assertTrue(np.allclose(D.data['X_train'].data[:3],
+                                        [1., 1., 2.]))
 
         time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles = \
             queue.get()
         proc_smac.wait()
+
+
         proc_ensembles.wait()
