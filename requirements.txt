@@ -6,7 +6,7 @@ lockfile
 numpy
 psutil
 pyyaml
-scipy>=0.14.1
+scipy<=0.14.1
 scikit-learn==0.15.2
 cma
 six
