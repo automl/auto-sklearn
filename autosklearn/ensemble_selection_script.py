@@ -395,6 +395,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
 
         # Save predictions for valid and test data set
         if len(dir_valid_list) == len(dir_ensemble_list):
+            all_predictions_valid = np.array(all_predictions_valid)
             ensemble_predictions_valid = np.mean(
                 all_predictions_valid[indices.astype(int)],
                 axis=0)
@@ -409,6 +410,7 @@ def main(predictions_dir, basename, task_type, metric, limit, output_dir,
                          'as ensemble predictions!.')
 
         if len(dir_test_list) == len(dir_ensemble_list):
+            all_predictions_test = np.array(all_predictions_test)
             ensemble_predictions_test = np.mean(
                 all_predictions_test[indices.astype(int)],
                 axis=0)
