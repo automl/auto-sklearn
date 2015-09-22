@@ -412,6 +412,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             datamanager.info,
             self._stopwatch,
             self._debug)
+        self.configuration_space_created_hook(datamanager)
 
         if ml is None:
             initial_configurations = []
@@ -535,7 +536,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         return evaluator.calculate_score(y, prediction, self._task,
                                          self._metric, self._target_num)
 
-    def configuration_space_created_hook(self):
+    def configuration_space_created_hook(self, datamanager):
         pass
 
     def get_params(self, deep=True):
