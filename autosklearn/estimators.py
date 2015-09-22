@@ -156,7 +156,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         return super(AutoSklearnClassifier, self).fit(data_x, y, task, metric,
                                                       feat_type, dataset_name)
 
-    def predict(self, data_x):
+    def predict(self, X):
         """Predict class for X.
 
         Parameters
@@ -169,7 +169,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             The predicted classes.
 
         """
-        return super(AutoSklearnClassifier, self).predict(data_x)
+        return super(AutoSklearnClassifier, self).predict(X)
 
 
 class AutoSklearnRegressor(autosklearn.automl.AutoML):

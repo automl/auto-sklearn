@@ -359,19 +359,19 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                      (basename, time_left_after_reading))
         return time_for_load_data
 
-    def _fit(self, data_d):
+    def _fit(self, datamanager):
         # TODO: check that data and task definition fit together!
 
-        self._metric = data_d.info['metric']
-        self._task = data_d.info['task']
-        self._target_num = data_d.info['target_num']
+        self._metric = datamanager.info['metric']
+        self._task = datamanager.info['task']
+        self._target_num = datamanager.info['target_num']
 
         set_auto_seed(self._seed)
 
         # load data
         self._save_ensemble_data(
-            data_d.data['X_train'],
-            data_d.data['Y_train'],
+            datamanager.data['X_train'],
+            datamanager.data['Y_train'],
             self._tmp_dir,
             self._stopwatch)
 
@@ -386,43 +386,43 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         # == Calculate metafeatures
         ml = _calculate_metafeatures(
-            data_feat_type=data_d.feat_type,
-            data_info_task=data_d.info['task'],
-            x_train=data_d.data['X_train'],
-            y_train=data_d.data['Y_train'],
+            data_feat_type=datamanager.feat_type,
+            data_info_task=datamanager.info['task'],
+            x_train=datamanager.data['X_train'],
+            y_train=datamanager.data['Y_train'],
             basename=self._basename,
             watcher=self._stopwatch,
             metalearning_cnt=self._initial_configurations_via_metalearning,
             log_function=self._debug)
 
         self._stopwatch.start_task('OneHot')
-        data_d.perform1HotEncoding()
-        self._ohe = data_d.encoder_
+        datamanager.perform1HotEncoding()
+        self._ohe = datamanager.encoder_
         self._stopwatch.stop_task('OneHot')
 
         # == Pickle the data manager
         data_manager_path = self._save_data_manager(
-            data_d, self._tmp_dir,
+            datamanager, self._tmp_dir,
                                                     self._basename,
                                                     watcher=self._stopwatch, )
 
         # = Create a searchspace
         self.configuration_space, configspace_path = _create_search_space(
             self._tmp_dir,
-            data_d.info,
+            datamanager.info,
             self._stopwatch,
             self._debug)
 
         if ml is None:
             initial_configurations = []
-        elif data_d.info['task'] in [MULTICLASS_CLASSIFICATION,
+        elif datamanager.info['task'] in [MULTICLASS_CLASSIFICATION,
                                      BINARY_CLASSIFICATION]:
 
             _calculate_metafeatures_encoded(
                 ml,
                 self._basename,
-                data_d.data['X_train'],
-                data_d.data['Y_train'],
+                datamanager.data['X_train'],
+                datamanager.data['Y_train'],
                 self._stopwatch,
                 self._debug)
 
@@ -437,7 +437,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 self._task,
                 self._metadata_directory,
                 self._initial_configurations_via_metalearning,
-                data_d.info[
+                datamanager.info[
                     'is_sparse'],
                 self._stopwatch,
                 self._error)
@@ -487,7 +487,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         del_auto_seed()
         return self
 
-    def predict(self, data_x):
+    def predict(self, X):
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
@@ -503,7 +503,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             raise ValueError('No models fitted!')
 
         if self._ohe is not None:
-            data_x = self._ohe._transform(data_x)
+            X = self._ohe._transform(X)
 
         indices_files = sorted(os.listdir(self._ensemble_indices_dir))
         indices_file = os.path.join(self._ensemble_indices_dir,
@@ -520,7 +520,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
             weight = ensemble_members_run_numbers[num_run]
 
-            X_ = data_x.copy()
+            X_ = X.copy()
             if self._task in REGRESSION_TASKS:
                 prediction = model.predict(X_)
             else:
@@ -530,8 +530,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         predictions = np.sum(np.array(predictions), axis=0)
         return predictions
 
-    def score(self, data_x, y):
-        prediction = self.predict(data_x)
+    def score(self, X, y):
+        prediction = self.predict(X)
         return evaluator.calculate_score(y, prediction, self._task,
                                          self._metric, self._target_num)
 
