@@ -4,6 +4,7 @@ from __future__ import print_function
 import multiprocessing
 import os
 import shutil
+import time
 import unittest
 
 import numpy as np
@@ -19,17 +20,27 @@ class AutoMLTest(unittest.TestCase):
     def setUp(self):
         self.test_dir = os.path.dirname(__file__)
         self.output = os.path.join(self.test_dir, '..', '.tmp')
+
+        if os.path.exists(self.output):
+            for i in range(10):
+                try:
+                    shutil.rmtree(self.output)
+                    break
+                except OSError:
+                    time.sleep(1)
         try:
-            shutil.rmtree(self.output)
-        except Exception:
-            print("Cannot remove existing output directory %s" % self.output)
-        os.makedirs(self.output)
+            os.makedirs(self.output)
+        except OSError:
+            pass
 
     def tearDown(self):
-        try:
-            shutil.rmtree(self.output)
-        except Exception as e:
-            print(e)
+        if os.path.exists(self.output):
+            for i in range(10):
+                try:
+                    shutil.rmtree(self.output)
+                    break
+                except OSError:
+                    time.sleep(1)
 
     def test_fit(self):
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
@@ -38,6 +49,7 @@ class AutoMLTest(unittest.TestCase):
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.9)
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
+        del automl
 
     def test_dataset_manager_pickling(self):
         data_dir = os.path.join(self.test_dir, '..', '.data')
@@ -59,6 +71,6 @@ class AutoMLTest(unittest.TestCase):
         time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles = \
             queue.get()
         proc_smac.wait()
-
-
         proc_ensembles.wait()
+
+        del auto

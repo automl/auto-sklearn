@@ -9,12 +9,12 @@ import signal
 import shutil
 import time
 
+from configargparse import ArgParser
 import pkg_resources
 import psutil
 
 import autosklearn.automl
 from autosklearn.util import setup_logger
-from autosklearn.external.configargparse import ArgParser
 
 
 def get_options():
@@ -104,7 +104,7 @@ def get_options():
 if __name__ == '__main__':
     raise NotImplementedError('This does not work at the moment. Please wait '
                               'until the refactoring is done!')
-    setup_logger()
+    logger = get_logger(os.path.basename(__file__))
     parser = get_options()
     args = parser.parse_args()
 

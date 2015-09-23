@@ -2,19 +2,12 @@
 import re
 import time
 
-from autosklearn.cli import base_interface
 from HPOlib.benchmarks.benchmark_util import parse_cli
 
-if __name__ == '__main__':
-    starttime = time.time()
-    args, params = parse_cli()
+from autosklearn.cli import base_interface
 
-    dataset = args['dataset']
-    mode = args['mode']
-    seed = args.get('seed')
-    fold = int(args['fold'])
-    folds = int(args['folds'])
 
+def main(dataset, mode, seed, fold, folds):
     if seed is None:
         seed = 1
 
@@ -43,3 +36,20 @@ if __name__ == '__main__':
         raise ValueError(mode)
 
     base_interface.main(dataset, mode, seed, params, mode_args=mode_args)
+
+
+if __name__ == '__main__':
+    starttime = time.time()
+    args, params = parse_cli()
+    assert 'dataset' in args
+    assert 'mode' in args
+    assert 'seed' in args
+    assert 'fold' in args and type(int(args['fold'])) == int
+    assert 'folds' in args and type(int(args['folds'])) == int
+
+    main(args['dataset'],
+         args['mode'],
+         args.get('seed'),
+         int(args['fold']),
+         int(args['folds']),
+         )

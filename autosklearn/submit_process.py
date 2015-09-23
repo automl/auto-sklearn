@@ -4,8 +4,9 @@ import os
 import shlex
 import subprocess
 
-import autosklearn.cli.SMAC_cli_holdout
 import lockfile
+
+import autosklearn.cli.SMAC_cli_holdout
 from autosklearn.constants import *
 
 
