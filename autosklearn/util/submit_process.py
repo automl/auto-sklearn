@@ -117,14 +117,13 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
     if limit <= 0:
         # It makes no sense to start building ensembles_statistics
         return
-    path_to_root = os.path.dirname(os.path.abspath(__file__))
-    wrapper_exec = os.path.join(path_to_root, 'ensemble_selection_script.py')
+    ensemble_script = 'python -m autosklearn.ensemble_selection_script'
     runsolver_exec = 'runsolver'
     delay = 5
 
     task_type = TASK_TYPES_TO_STRING[task_type]
 
-    call = ' '.join(['python', wrapper_exec, tmp_dir, dataset_name, task_type,
+    call = ' '.join([ensemble_script, tmp_dir, dataset_name, task_type,
                      metric, str(limit - 5), output_dir, str(ensemble_size),
                      str(seed), ensemble_indices_output_dir])
 
