@@ -21,11 +21,14 @@ import re
 import time
 
 import numpy as np
-
 import scipy.sparse
-from autosklearn.constants import *
-from autosklearn.data import util as data_util
+
+from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
+    STRING_TO_TASK_TYPES
+from autosklearn.constants import MULTICLASS_CLASSIFICATION
+
 from autosklearn.data.data_manager import DataManager
+from autosklearn.util import convert_to_num
 
 try:
     import autosklearn.data.competition_c_functions as competition_c_functions
@@ -302,7 +305,7 @@ class CompetitionDataManager(DataManager):
             if self.info['task'] == MULTILABEL_CLASSIFICATION:
                 label = self._data(filename)
             elif self.info['task'] == MULTICLASS_CLASSIFICATION:
-                label = data_util.convert_to_num(self._data(filename))
+                label = convert_to_num(self._data(filename))
             else:
                 label = np.ravel(data_util.data(filename)
                                  )  # get a column vector
@@ -384,7 +387,7 @@ class CompetitionDataManager(DataManager):
                 if competition_c_functions_is_there:
                     data = competition_c_functions.read_first_line(filename)
                 else:
-                    data = data_util.read_first_line(filename)
+                    data = read_first_line(filename)
                 if ':' in data[0]:
                     self.info['format'] = 'sparse'
                 else:
@@ -393,7 +396,7 @@ class CompetitionDataManager(DataManager):
             if competition_c_functions_is_there:
                 data = competition_c_functions.file_to_array(filename)
             else:
-                data = data_util.file_to_array(filename)
+                data = file_to_array(filename)
             if ':' in data[0][0]:
                 self.info['is_sparse'] = 1
                 self.info['format'] = 'sparse'
