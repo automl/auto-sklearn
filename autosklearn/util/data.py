@@ -2,18 +2,14 @@
 # Functions performing various data conversions for the ChaLearn AutoML
 # challenge
 
-# Main contributors: Arthur Pesah and Isabelle Guyon, August-October 2014
-
-# ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
-# ISABELLE GUYON, CHALEARN, AND/OR OTHER ORGANIZERS OR CODE AUTHORS DISCLAIM
-# ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR ANY PARTICULAR PURPOSE, AND THE
-# WARRANTY OF NON-INFRIGEMENT OF ANY THIRD PARTY'S INTELLECTUAL PROPERTY RIGHTS.
-# IN NO EVENT SHALL ISABELLE GUYON AND/OR OTHER ORGANIZERS BE LIABLE FOR ANY SPECIAL,
-# INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER ARISING OUT OF OR IN
-# CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS,
-# PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 from __future__ import print_function
+
+
+__all__ = [
+    'predict_RAM_usage',
+    'save_predictions',
+    'convert_to_num',
+]
 import glob
 import os
 
@@ -41,19 +37,17 @@ def multilabel_to_multiclass(array):
     return np.array([np.nonzero(array[i, :])[0][0] for i in range(len(array))])
 
 
-def convert_to_num(Ybin, verbose=True):
-    # Convert binary targets to numeric vector
-    # typically classification target values
-    if verbose:
-        print('\tConverting to numeric vector')
-    Ybin = np.array(Ybin)
-    if len(Ybin.shape) == 1:
-        return Ybin
-    classid = range(Ybin.shape[1])
-    Ycont = np.dot(Ybin, classid)
-    if verbose:
-        print(Ycont)
-    return Ycont
+def convert_to_num(Ybin):
+    """
+    Convert binary targets to numeric vector
+    typically classification target values
+    :param Ybin:
+    :return:
+    """
+    result = np.array(Ybin)
+    if len(Ybin.shape) != 1:
+        result = np.dot(Ybin, range(Ybin.shape[1]))
+    return result
 
 
 def convert_to_bin(Ycont, nval, verbose=True):
@@ -100,11 +94,11 @@ def inventory_data(input_dir):
     # alphabetical order
 
     # Assume first that there is a hierarchy dataname/dataname_train.data
-    training_names = inventory_data_dir(input_dir)
+    training_names = _inventory_data_dir(input_dir)
     ntr = len(training_names)
     if ntr == 0:
         # Try to see if there is a flat directory structure
-        training_names = inventory_data_nodir(input_dir)
+        training_names = _inventory_data_nodir(input_dir)
     ntr = len(training_names)
     if ntr == 0:
         print('WARNING: Inventory data - No data file found')
@@ -113,18 +107,18 @@ def inventory_data(input_dir):
     return training_names
 
 
-def inventory_data_nodir(input_dir):
+def _inventory_data_nodir(input_dir):
     # Inventory data, assuming flat directory structure
     training_names = glob.glob(os.path.join(input_dir, '*_train.data'))
     for i in range(0, len(training_names)):
         name = training_names[i]
         training_names[
             i] = name[-name[::-1].index(os.sep):-name[::-1].index('_') - 1]
-        check_dataset(input_dir, training_names[i])
+        _check_dataset(input_dir, training_names[i])
     return training_names
 
 
-def inventory_data_dir(input_dir):
+def _inventory_data_dir(input_dir):
     # Inventory data, assuming flat directory structure,
     # assuming a directory hierarchy.
 
@@ -134,12 +128,12 @@ def inventory_data_dir(input_dir):
         name = training_names[i]
         training_names[
             i] = name[-name[::-1].index(os.sep):-name[::-1].index('_') - 1]
-        check_dataset(os.path.join(input_dir, training_names[i]),
-                      training_names[i])
+        _check_dataset(os.path.join(input_dir, training_names[i]),
+                       training_names[i])
     return training_names
 
 
-def check_dataset(dirname, name):
+def _check_dataset(dirname, name):
     # Check the test and valid files are in the directory,
     # as well as the solution
     valid_file = os.path.join(dirname, name + '_valid.data')
