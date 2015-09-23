@@ -19,9 +19,11 @@ def main():
     y_train = y[:1000]
     X_test = X[1000:]
     y_test = y[1000:]
-    automl = autosklearn.AutoSklearnClassifier(time_left_for_this_task=10,
-                                               per_run_time_limit=1)
-    automl.fit(X_train, y_train)
+    automl = autosklearn.AutoSklearnClassifier(time_left_for_this_task=600,
+                                               per_run_time_limit=30,
+                                               tmp_folder='/tmp/autoslearn_example_tmp',
+                                               output_folder='/tmp/autosklearn_example_out')
+    automl.fit(X_train, y_train, dataset_name='digits')
     print(automl.score(X_test, y_test))
 
 
