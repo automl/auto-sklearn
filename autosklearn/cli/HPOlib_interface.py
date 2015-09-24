@@ -7,7 +7,7 @@ from HPOlib.benchmarks.benchmark_util import parse_cli
 from autosklearn.cli import base_interface
 
 
-def main(dataset, mode, seed, fold, folds):
+def parse_args(dataset, mode, seed, params, fold, folds):
     if seed is None:
         seed = 1
 
@@ -26,7 +26,7 @@ def main(dataset, mode, seed, fold, folds):
             mode = 'cv'
             mode_args = {'folds': real_folds}
         else:
-            mode = 'partial_cv'
+            mode = 'partial-cv'
             mode_args = {'fold': fold, 'folds': folds}
     elif mode == 'holdout':
         mode_args = None
@@ -34,12 +34,10 @@ def main(dataset, mode, seed, fold, folds):
         mode_args = None
     else:
         raise ValueError(mode)
-    print mode_args
     base_interface.main(dataset, mode, seed, params, mode_args=mode_args)
 
 
-if __name__ == '__main__':
-    starttime = time.time()
+def main():
     args, params = parse_cli()
     assert 'dataset' in args
     assert 'mode' in args
@@ -47,9 +45,14 @@ if __name__ == '__main__':
     assert 'fold' in args and type(int(args['fold'])) == int
     assert 'folds' in args and type(int(args['folds'])) == int
 
-    main(args['dataset'],
-         args['mode'],
-         args.get('seed'),
-         int(args['fold']),
-         int(args['folds']),
-         )
+    parse_args(args['dataset'],
+               args['mode'],
+               args.get('seed'),
+               params,
+               int(args['fold']),
+               int(args['folds']),
+        )
+
+
+if __name__ == '__main__':
+    main()

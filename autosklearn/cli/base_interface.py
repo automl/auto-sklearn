@@ -202,43 +202,18 @@ def main(dataset_info, mode, seed, params, mode_args=None):
     metric = D.info['metric']
 
     global evaluator
-    # Train/test split
-    print(mode_args)
-    a = {
-        'holdout': partial(make_mode_holdout,
-                           [D,
-                            seed,
-                            configuration,
-                            num_run]),
-        'test': partial(make_mode_holdout,
-                        [D,
-                         seed,
-                         configuration, metric]),
-        'cv': partial(make_mode_cv,
-                      [D,
-                       seed,
-                       configuration,
-                       num_run,
-                       mode_args['folds']]),
-        'partial-cv': partial(make_mode_partial_cv,
-                              [D,
-                               seed,
-                               configuration,
-                               num_run,
-                               metric,
-                               mode_args['folds'],
-                               mode_args['fold']]),
-        'nested-cv': partial(make_mode_nested_cv,
-                             [D,
-                              seed,
-                              configuration,
-                              num_run,
-                              mode_args['inner_folds'],
-                              mode_args['outer_folds']]),
-    }
 
-    processor = a.get(mode, None)
-    if processor is None:
-        raise ValueError('Must choose a legal mode.')
+    if mode == 'holdout':
+        make_mode_holdout(D, seed, configuration, num_run)
+    elif mode == 'test':
+        make_mode_test(D, seed, configuration, metric)
+    elif mode == 'cv':
+        make_mode_cv(D, seed, configuration, num_run, mode_args['folds'])
+    elif mode == 'partial-cv':
+        make_mode_partial_cv(D, seed, configuration, num_run,
+                             metric, mode_args['fold'], mode_args['folds'])
+    elif mode == 'nested-cv':
+        make_mode_nested_cv(D, seed, configuration, num_run,
+                            mode_args['inner_folds'], mode_args['outer_folds'])
     else:
-        processor()
+        raise ValueError('Must choose a legal mode.')
