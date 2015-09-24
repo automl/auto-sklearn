@@ -44,7 +44,7 @@ class DataManager(object):
         if hasattr(self, 'encoder_'):
             raise ValueError('perform1HotEncoding can only be called on '
                              'non-encoded data.')
-        self.encoder_ = None
+        self._encoder = None
 
         sparse = True if self.info['is_sparse'] == 1 else False
         has_missing = True if self.info['has_missing'] else False
@@ -81,7 +81,7 @@ class DataManager(object):
                 if 'X_test' in self.data:
                     self.data['X_test'] = self.data['X_test'].todense()
 
-            self.encoder_ = encoder
+            self.encoder = encoder
             self.info['is_sparse'] = 1 if sparse else 0
 
     def __repr__(self):

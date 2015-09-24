@@ -319,7 +319,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         self.assertEqual(250, np.sum(np.bincount(Y) == 1))
         D = Dummy()
         D.info = {
-            'metric': 'r2_metric',
+            'metric': 'acc_metric',
             'task': MULTICLASS_CLASSIFICATION,
             'is_sparse': False,
             'target_num': 1
@@ -386,7 +386,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         except Exception:
             pass
 
-        X_train, Y_train, X_test, Y_test = get_dataset('iris')
+        X_train, Y_train, X_test, Y_test = get_dataset('boston')
         X_valid = X_test[:25, ]
         Y_valid = Y_test[:25, ]
         X_test = X_test[25:, ]
@@ -394,8 +394,8 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {
-            'metric': 'bac_metric',
-            'task': MULTICLASS_CLASSIFICATION,
+            'metric': 'r2_metric',
+            'task': REGRESSION,
             'is_sparse': False,
             'target_num': 3
         }

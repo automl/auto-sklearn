@@ -5,9 +5,9 @@ import subprocess
 import sys
 import tarfile
 import urllib
-from distutils.extension import Extension
 
 import setuptools
+from setuptools.extension import Extension
 from setuptools.command.install import install
 
 SMAC_DOWNLOAD_LOCATION = 'http://aad.informatik.uni-freiburg.de/~feurerm/'
@@ -19,6 +19,13 @@ RUNSOLVER_TAR_NAME = 'runsolver-3.3.4.tar.bz2'
 DOWNLOAD_DIRECTORY = os.path.join(os.path.dirname(__file__), '.downloads')
 BINARIES_DIRECTORY = 'autosklearn/binaries'
 METADATA_DIRECTORY = 'autosklearn/metalearning/files'
+
+
+extensions = [Extension('autosklearn.data.competition_c_functions',
+                        sources=[
+                            'autosklearn/data/competition_c_functions.c'
+                        ])
+             ]
 
 
 class Download(install):
@@ -106,13 +113,13 @@ setuptools.setup(
     name='AutoSklearn',
     description='Code to participate in the AutoML 2015 challenge.',
     version='0.0.1dev',
-    ext_modules=[Extension('autosklearn.data.competition_c_functions',
-                           ['autosklearn/data/competition_c_functions.c'])],
+    ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
-    install_requires=['numpy',
+    install_requires=['setuptools',
+                      'numpy>=0.16.0',
                       'psutil',
                       'pyyaml',
-                      'scipy',
+                      'scipy<=0.14.1',
                       'scikit-learn==0.15.2',
                       'nose',
                       'lockfile',
@@ -121,7 +128,7 @@ setuptools.setup(
                       'pymetalearn',
                       'cma',
                       'six',
-                      'ConfigArgParse==0.9.3'],
+                      'ConfigArgParse'],
     test_suite='nose.collector',
     cmdclass={'install': Download},
     scripts=['scripts/autosklearn'],

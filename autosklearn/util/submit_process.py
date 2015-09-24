@@ -20,12 +20,9 @@ def submit_call(call, seed, log_dir=None):
         proc = subprocess.Popen(
             call,
             stdout=open(
-                os.path.join(
-                    log_dir,
-                    'ensemble_out_%d.log' %
-                    seed),
-                'w'),
-            stderr=open(os.path.join(log_dir, 'ensemble_err_%d.log' % seed), 'w'))
+                os.path.join(log_dir, 'ensemble_out_%d.log' % seed), 'w'),
+            stderr=open(
+                os.path.join(log_dir, 'ensemble_err_%d.log' % seed), 'w'))
 
     return proc
 

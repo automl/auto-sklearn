@@ -1,17 +1,21 @@
+setuptools
 mock
 nose
 
-cython
+numpy>=0.16.0
+scipy<=0.14.1
+
+scikit-learn==0.15.2
+
 lockfile
-numpy
 psutil
 pyyaml
-scipy<=0.14.1
-scikit-learn==0.15.2
 cma
 six
-# pip install git+https://github.com/mfeurer/HPOlibConfigSpace#egg=HPOlibConfigSpace0.1dev
-# pip install git+https://git@bitbucket.org/mfeurer/paramsklearn.git@73d8643b2849db753ddc7b8909d01e6cee9bafc6 --no-deps
-# pip install git+https://github.com/automl/HPOlib@development
-# pip install --editable git+https://bitbucket.org/mfeurer/pymetalearn/#egg=pyMetaLearn
-ConfigArgParse==0.9.3
+ConfigArgParse
+
+git+https://github.com/mfeurer/HPOlibConfigSpace#egg=HPOlibConfigSpace0.1dev
+git+https://git@bitbucket.org/mfeurer/paramsklearn.git@73d8643b2849db753ddc7b8909d01e6cee9bafc6 --no-deps
+git+https://github.com/automl/HPOlib@development
+git+https://bitbucket.org/mfeurer/pymetalearn/#egg=pyMetaLearn
+

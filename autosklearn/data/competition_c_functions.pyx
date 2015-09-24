@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 cimport numpy as np
+import numpy as np
 
 import scipy.sparse
 
