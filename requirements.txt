@@ -10,12 +10,11 @@ scikit-learn==0.15.2
 lockfile
 psutil
 pyyaml
-cma
 six
 ConfigArgParse
 
-git+https://github.com/mfeurer/HPOlibConfigSpace#egg=HPOlibConfigSpace0.1dev
-git+https://git@bitbucket.org/mfeurer/paramsklearn.git@73d8643b2849db753ddc7b8909d01e6cee9bafc6 --no-deps
-git+https://github.com/automl/HPOlib@development
+git+https://github.com/mfeurer/HPOlibConfigSpace/#egg=HPOlibConfigSpace
+git+https://git@bitbucket.org/mfeurer/paramsklearn.git@73d8643b2849db753ddc7b8909d01e6cee9bafc6#egg=ParamSklearn
+git+https://github.com/automl/HPOlib@development#egg=HPOlib
 git+https://bitbucket.org/mfeurer/pymetalearn/#egg=pyMetaLearn
 
