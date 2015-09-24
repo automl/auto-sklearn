@@ -57,7 +57,7 @@ class HPOlib_interfaceTest(unittest.TestCase):
         try:
             result = float(output[3])
         except Exception:
-            pass
+            print(output)
         additional = output[5]
         self.assertAlmostEqual(result, 0.740202)
         # Metrics in the additional data are seperated by a semicolon. Right

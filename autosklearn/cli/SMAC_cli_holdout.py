@@ -21,13 +21,8 @@ if __name__ == '__main__':
             p_name = p_name[1:]
         params[p_name] = sys.argv[i + 1].strip()
 
-    if instance_name == 'test':
-        mode = 'test'
-        mode_args = None
-    else:
-        mode = 'holdout'
-        mode_args = None
-
+    mode_args = None
+    mode = 'test' if instance_name == 'test' else 'holdout'
     base_interface.main(dataset_info, mode, seed, params, mode_args=None)
 
     sys.exit(0)

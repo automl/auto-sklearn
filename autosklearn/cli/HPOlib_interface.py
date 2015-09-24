@@ -34,7 +34,7 @@ def main(dataset, mode, seed, fold, folds):
         mode_args = None
     else:
         raise ValueError(mode)
-
+    print mode_args
     base_interface.main(dataset, mode, seed, params, mode_args=mode_args)
 
 

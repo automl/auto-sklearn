@@ -3,6 +3,7 @@ from __future__ import print_function
 import abc
 import os
 import time
+import traceback
 
 import numpy as np
 import lockfile
@@ -86,7 +87,6 @@ class AbstractEvaluator(object):
                    additional_run_info))
         except Exception:
             self.duration = time.time() - self.starttime
-            import traceback
 
             print(traceback.format_exc())
             print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
