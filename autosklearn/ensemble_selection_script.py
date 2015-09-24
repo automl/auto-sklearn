@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 
+import logging
 import os
 import random
 import re
@@ -13,10 +14,14 @@ import six.moves.cPickle as pickle
 from autosklearn.constants import STRING_TO_TASK_TYPES
 from autosklearn.util.data import save_predictions
 from autosklearn.evaluation.util import calculate_score
-from autosklearn.util import StopWatch, get_logger
+from autosklearn.util import StopWatch
 
 
-def build_ensemble(logger, predictions_train, predictions_valid,
+logging.basicConfig()
+logger = logging.getLogger(os.path.basename(__file__))
+
+
+def build_ensemble(predictions_train, predictions_valid,
                    predictions_test,
                    true_labels, ensemble_size, task_type, metric):
     indices, trajectory = ensemble_selection(predictions_train, true_labels,
@@ -160,8 +165,7 @@ def ensemble_selection_bagging(predictions, labels, ensemble_size, task_type,
     return np.array(order_of_each_bag)
 
 
-def main(logger,
-         predictions_dir,
+def main(predictions_dir,
          basename,
          task_type,
          metric,
@@ -170,6 +174,11 @@ def main(logger,
          ensemble_size=None,
          seed=1,
          indices_output_dir='.'):
+
+    try:
+        os.makedirs(indices_output_dir)
+    except:
+        pass
 
     watch = StopWatch()
     watch.start_task('ensemble_builder')
@@ -438,10 +447,10 @@ def main(logger,
 if __name__ == '__main__':
     seed = int(sys.argv[8])
     predictions_dir = sys.argv[1]
+    output_dir = sys.argv[6]
 
-    logger = get_logger(os.path.basename(__file__))
-    # add_file_handler(logger, os.path.join(predictions_dir,
-    # 'ensemble_%d.log' % seed))
+    log_file = os.path.join(os.getcwd(), "ensemble.out")
+    logger.setLevel(logging.DEBUG)
     logger.debug("Start script: %s" % __file__)
 
     main(predictions_dir=sys.argv[1],
@@ -452,6 +461,5 @@ if __name__ == '__main__':
          output_dir=sys.argv[6],
          ensemble_size=int(sys.argv[7]),
          seed=int(sys.argv[8]),
-         indices_output_dir=sys.argv[9],
-         logger=logger)
+         indices_output_dir=sys.argv[9])
     sys.exit(0)
