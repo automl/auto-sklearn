@@ -59,7 +59,7 @@ class HPOlib_interfaceTest(unittest.TestCase):
         except Exception:
             pass
         additional = output[5]
-        self.assertAlmostEqual(result, 0.710351)
+        self.assertAlmostEqual(result, 0.740202)
         # Metrics in the additional data are seperated by a semicolon. Right
         # now, we have five different metrics plus duration
         # holdout has an additional num_run field
@@ -82,7 +82,7 @@ class HPOlib_interfaceTest(unittest.TestCase):
         except Exception:
             print(output)
         additional = output[5]
-        self.assertAlmostEqual(0.701299, result)
+        self.assertAlmostEqual(0.670996, result)
         self.assertEqual(additional.count(';'), 5)
 
     def test_cv(self):
@@ -104,7 +104,7 @@ class HPOlib_interfaceTest(unittest.TestCase):
         additional = output[5]
         # Has num_run in the additional info
         self.assertEqual(additional.count(';'), 6)
-        self.assertEqual(0.803838, result)
+        self.assertEqual(0.779673, result)
 
     def test_partial_cv(self):
         results = []
@@ -127,7 +127,7 @@ class HPOlib_interfaceTest(unittest.TestCase):
             additional = output[5]
             results.append(result)
             self.assertEqual(additional.count(';'), 5)
-        self.assertEqual([0.816332, 0.827497, 0.767796], results)
+        self.assertEqual([0.795038, 0.827497, 0.716609], results)
 
     def test_nested_cv(self):
         call = 'python -m autosklearn.cli.HPOlib_interface --dataset %s ' \
@@ -148,4 +148,4 @@ class HPOlib_interfaceTest(unittest.TestCase):
         additional = output[5]
         # Has num_run in the additional info
         self.assertEqual(additional.count(';'), 11)
-        self.assertEqual(0.787191, result)
+        self.assertEqual(0.815061, result)

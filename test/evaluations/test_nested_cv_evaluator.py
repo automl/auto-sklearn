@@ -10,8 +10,8 @@ from numpy.linalg import LinAlgError
 
 from autosklearn.constants import *
 from autosklearn.data.competition_data_manager import CompetitionDataManager
-from autosklearn.models.nested_cv_evaluator import NestedCVEvaluator
-from autosklearn.models.paramsklearn import get_configuration_space
+from autosklearn.evaluation.nested_cv_evaluator import NestedCVEvaluator
+from autosklearn.util.paramsklearn import get_configuration_space
 from ParamSklearn.util import get_dataset
 
 N_TEST_RUNS = 10

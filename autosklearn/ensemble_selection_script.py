@@ -12,7 +12,7 @@ import six.moves.cPickle as pickle
 
 from autosklearn.constants import STRING_TO_TASK_TYPES
 from autosklearn.util.data import save_predictions
-from autosklearn.models import evaluator
+from autosklearn.evaluation.util import calculate_score
 from autosklearn.util import StopWatch, get_logger
 
 
@@ -38,8 +38,8 @@ def build_ensemble(logger, predictions_train, predictions_valid,
 def pruning(predictions, labels, n_best, task_type, metric):
     perf = np.zeros([predictions.shape[0]])
     for i, p in enumerate(predictions):
-        perf[i] = evaluator.calculate_score(labels, predictions, task_type,
-                                            metric, predictions.shape[1])
+        perf[i] = calculate_score(labels, predictions, task_type,
+                                  metric, predictions.shape[1])
 
     indcies = np.argsort(perf)[perf.shape[0] - n_best:]
     return indcies
@@ -70,7 +70,7 @@ def original_ensemble_selection(predictions, labels, ensemble_size, task_type,
             ensemble.append(predictions[idx])
             order.append(idx)
             ensemble_ = np.array(ensemble).mean(axis=0)
-            ensemble_performance = evaluator.calculate_score(
+            ensemble_performance = calculate_score(
                 labels, ensemble_, task_type, metric, ensemble_.shape[1])
             trajectory.append(ensemble_performance)
         ensemble_size -= n_best
@@ -80,9 +80,9 @@ def original_ensemble_selection(predictions, labels, ensemble_size, task_type,
         for j, pred in enumerate(predictions):
             ensemble.append(pred)
             ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-            scores[j] = evaluator.calculate_score(labels, ensemble_prediction,
-                                                  task_type, metric,
-                                                  ensemble_prediction.shape[1])
+            scores[j] = calculate_score(labels, ensemble_prediction,
+                                        task_type, metric,
+                                        ensemble_prediction.shape[1])
             ensemble.pop()
         best = np.nanargmax(scores)
         ensemble.append(predictions[best])
@@ -107,7 +107,7 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric,
             ensemble.append(predictions[idx])
             order.append(idx)
             ensemble_ = np.array(ensemble).mean(axis=0)
-            ensemble_performance = evaluator.calculate_score(
+            ensemble_performance = calculate_score(
                 labels, ensemble_, task_type, metric, ensemble_.shape[1])
             trajectory.append(ensemble_performance)
         ensemble_size -= n_best
@@ -127,7 +127,7 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric,
             fant_ensemble_prediction = weighted_ensemble_prediction + (
                 1. / float(s + 1)) * pred
 
-            scores[j] = evaluator.calculate_score(
+            scores[j] = calculate_score(
                 labels, fant_ensemble_prediction, task_type, metric,
                 fant_ensemble_prediction.shape[1])
             # ensemble.pop()
@@ -243,9 +243,9 @@ def main(logger,
         model_idx = 0
         for model_name in dir_ensemble_list:
             predictions = np.load(os.path.join(dir_ensemble, model_name))
-            score = evaluator.calculate_score(true_labels, predictions,
-                                              task_type, metric,
-                                              predictions.shape[1])
+            score = calculate_score(true_labels, predictions,
+                                    task_type, metric,
+                                    predictions.shape[1])
             model_names_to_scores[model_name] = score
             num_run = int(re_num_run.search(model_name).group(1))
 

@@ -1,13 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 
-__all__ = [
-    'calc_meta_features',
-    'calc_meta_features_encoded',
-    'convert_conf2smac_string',
-    'create_metalearning_string_for_smac_call',
-]
-
 import os
 import time
 from StringIO import StringIO
@@ -23,12 +16,19 @@ from pyMetaLearn.optimizers.metalearn_optimizer.metalearner import \
 from autosklearn.constants import *
 from autosklearn.util import get_logger
 
+__all__ = [
+    'calc_meta_features',
+    'calc_meta_features_encoded',
+    'convert_conf2smac_string',
+    'create_metalearning_string_for_smac_call',
+]
+
 logger = get_logger(os.path.basename(__file__))
 
 
 SENTINEL = 'uiaeo'
 
-EXCLUDE_META_FUTURES = set([
+EXCLUDE_META_FUTURES = {
     'Landmark1NN',
     'LandmarkDecisionNodeLearner',
     'LandmarkDecisionTree',
@@ -37,7 +37,7 @@ EXCLUDE_META_FUTURES = set([
     'PCAFractionOfComponentsFor95PercentVariance',
     'PCAKurtosisFirstPC',
     'PCASkewnessFirstPC'
-])
+}
 
 
 

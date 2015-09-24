@@ -7,6 +7,12 @@ from autosklearn.util import get_logger
 logger = get_logger(__name__)
 
 
+__all__ = [
+    'split_data',
+    'get_CV_fold'
+]
+
+
 def split_data(X, Y, classification=None):
     num_data_points = X.shape[0]
     num_labels = Y.shape[1] if len(Y.shape) > 1 else 1

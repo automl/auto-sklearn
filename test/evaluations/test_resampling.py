@@ -9,10 +9,10 @@ import unittest
 
 import numpy as np
 
-from autosklearn.data.split_data import split_data
+from autosklearn.evaluation.resampling import split_data
 
 
-class Test(unittest.TestCase):
+class ResamplingTest(unittest.TestCase):
 
     def test_split_data_regression(self):
         n_points = 1000

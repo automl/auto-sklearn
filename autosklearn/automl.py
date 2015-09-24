@@ -14,15 +14,14 @@ from sklearn.base import BaseEstimator
 import six.moves.cPickle as pickle
 from autosklearn.constants import *
 from autosklearn.data.competition_data_manager import CompetitionDataManager
-from autosklearn.data.Xy_data_manager import XyDataManager
-from autosklearn.data.split_data import split_data
+from autosklearn.data.xy_data_manager import XYDataManager
+from autosklearn.evaluation import resampling
 from autosklearn.metalearning.metalearning import \
     calc_meta_features, calc_meta_features_encoded, \
     create_metalearning_string_for_smac_call
-from autosklearn.models import evaluator, paramsklearn
+from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, get_auto_seed, \
-    set_auto_seed, del_auto_seed, \
-    submit_process
+    set_auto_seed, del_auto_seed, submit_process, paramsklearn
 
 
 def _save_ensemble_data(x_data, y_data, tmp_dir, watcher):
@@ -35,7 +34,7 @@ def _save_ensemble_data(x_data, y_data, tmp_dir, watcher):
     """
     task_name = 'LoadData'
     watcher.start_task(task_name)
-    _, _, _, y_ensemble = split_data(x_data, y_data)
+    _, _, _, y_ensemble = resampling.split_data(x_data, y_data)
 
     filepath = os.path.join(tmp_dir, 'true_labels_ensemble.npy')
 
@@ -297,7 +296,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         self._logger = _get_logger(self._log_dir, self._basename, self._seed)
 
-        loaded_data_manager = XyDataManager(data_x, y,
+        loaded_data_manager = XYDataManager(data_x, y,
                                             task=task,
                                             metric=metric,
                                             feat_type=feat_type,
@@ -544,8 +543,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
     def score(self, X, y):
         prediction = self.predict(X)
-        return evaluator.calculate_score(y, prediction, self._task,
-                                         self._metric, self._target_num)
+        return calculate_score(y, prediction, self._task,
+                               self._metric, self._target_num)
 
     def configuration_space_created_hook(self, datamanager):
         pass

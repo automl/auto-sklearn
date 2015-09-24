@@ -168,6 +168,9 @@ def sparse_list_to_csr_sparse(sparse_list, nbr_features, verbose=True):
         # but csr better for shuffling data or other tricks
     return dok_sparse.tocsr()
 
+def load_labels(filename):
+    return np.genfromtxt(filename, dtype=np.float64)
+
 
 class CompetitionDataManager(DataManager):
 
@@ -190,7 +193,7 @@ class CompetitionDataManager(DataManager):
     def __init__(self, basename, input_dir, verbose=False, encode_labels=True):
         super(CompetitionDataManager, self).__init__()
 
-        self.basename = basename
+        self._basename = basename
         if basename in input_dir:
             self.input_dir = input_dir
         else:
@@ -303,12 +306,11 @@ class CompetitionDataManager(DataManager):
                     filename, num_points)
         else:
             if self.info['task'] == MULTILABEL_CLASSIFICATION:
-                label = self._data(filename)
+                label = load_labels(filename)
             elif self.info['task'] == MULTICLASS_CLASSIFICATION:
-                label = convert_to_num(self._data(filename))
+                label = convert_to_num(load_labels(filename))
             else:
-                label = np.ravel(data_util.data(filename)
-                                 )  # get a column vector
+                label = np.ravel(load_labels(filename))  # get a column vector
 
         end = time.time()
         if verbose:

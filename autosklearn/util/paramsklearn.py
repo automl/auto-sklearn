@@ -4,6 +4,13 @@ from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.regression import ParamSklearnRegressor
 
 
+__all__ = [
+    'get_configuration_space',
+    'get_class',
+    'get_model'
+]
+
+
 def get_configuration_space(info,
                             include_estimators=None,
                             include_preprocessors=None):

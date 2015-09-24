@@ -9,6 +9,7 @@ __all__ = [
     'predict_RAM_usage',
     'save_predictions',
     'convert_to_num',
+    'convert_to_bin'
 ]
 import glob
 import os

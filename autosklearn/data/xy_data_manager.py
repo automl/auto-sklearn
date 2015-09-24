@@ -6,11 +6,11 @@ from autosklearn.data.data_manager import DataManager
 from scipy import sparse
 
 
-class XyDataManager(DataManager):
+class XYDataManager(DataManager):
 
     def __init__(self, data_x, y, task, metric, feat_type, dataset_name,
                  encode_labels):
-        super(XyDataManager, self).__init__()
+        super(XYDataManager, self).__init__()
         self.info['task'] = task
         self.info['metric'] = metric
         self.info['is_sparse'] = 1 if sparse.issparse(data_x) else 0
@@ -24,7 +24,7 @@ class XyDataManager(DataManager):
         }
 
         self.info['target_num'] = target_num[task]
-        self.basename = dataset_name
+        self._basename = dataset_name
 
         self.data['X_train'] = data_x
         self.data['Y_train'] = y

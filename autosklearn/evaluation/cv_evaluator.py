@@ -1,11 +1,17 @@
 # -*- encoding: utf-8 -*-
 import numpy as np
 
-from autosklearn.data.split_data import get_CV_fold
-from autosklearn.models.evaluator import Evaluator, calculate_score
+from autosklearn.evaluation.resampling import get_CV_fold
+from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
+from autosklearn.evaluation.util import calculate_score
 
 
-class CVEvaluator(Evaluator):
+__all__ = [
+    'CVEvaluator'
+]
+
+
+class CVEvaluator(AbstractEvaluator):
 
     def __init__(self, Datamanager, configuration,
                  with_predictions=False,

@@ -69,10 +69,10 @@ class DataManager(object):
             self.info['is_sparse'] = 1 if sparse else 0
 
     def __repr__(self):
-        return 'DataManager : ' + self.basename
+        return 'DataManager : ' + self._basename
 
     def __str__(self):
-        val = 'DataManager : ' + self.basename + '\ninfo:\n'
+        val = 'DataManager : ' + self._basename + '\ninfo:\n'
         for item in self.info:
             val = val + '\t' + item + ' = ' + str(self.info[item]) + '\n'
         val = val + 'data:\n'

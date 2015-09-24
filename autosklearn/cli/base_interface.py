@@ -6,14 +6,14 @@ import time
 
 import lockfile
 import six.moves.cPickle as pickle
-from autosklearn.data.competition_data_manager import CompetitionDataManager
-from autosklearn.models.cv_evaluator import CVEvaluator
-from autosklearn.models.evaluator import get_new_run_num
-from autosklearn.models.holdout_evaluator import HoldoutEvaluator
-from autosklearn.models.nested_cv_evaluator import NestedCVEvaluator
-from autosklearn.models.paramsklearn import get_configuration_space
-from autosklearn.models.test_evaluator import TestEvaluator
+
 from HPOlibConfigSpace import configuration_space
+
+from autosklearn.data.competition_data_manager import CompetitionDataManager
+from autosklearn.evaluation import CVEvaluator, HoldoutEvaluator, \
+    NestedCVEvaluator, TestEvaluator, get_new_run_num
+from autosklearn.util.paramsklearn import get_configuration_space
+
 
 
 def store_and_or_load_data(dataset_info, outputdir):
