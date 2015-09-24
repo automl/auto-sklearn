@@ -406,7 +406,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         self._stopwatch.start_task('OneHot')
         datamanager.perform1HotEncoding()
-        self._ohe = datamanager.encoder_
+        self._ohe = datamanager.encoder
         self._stopwatch.stop_task('OneHot')
 
         # == Pickle the data manager

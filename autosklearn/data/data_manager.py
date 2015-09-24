@@ -21,6 +21,22 @@ class DataManager(object):
     def info(self):
         return self._info
 
+    @property
+    def feat_type(self):
+        return self._feat_type
+
+    @feat_type.setter
+    def feat_type(self, value):
+        self._feat_type = value
+
+    @property
+    def encoder(self):
+        return self._encoder
+
+    @encoder.setter
+    def encoder(self, value):
+        self._encoder = value
+
     def perform1HotEncoding(self):
         if not hasattr(self, 'data'):
             raise ValueError('perform1HotEncoding can only be called when '
