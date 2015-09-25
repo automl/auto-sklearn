@@ -64,7 +64,8 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             tmp_dir=self._tmp_dir,
             output_dir=self._output_dir,
             log_dir=self._tmp_dir,
-            initial_configurations_via_metalearning=initial_configurations_via_metalearning,
+            initial_configurations_via_metalearning=
+                initial_configurations_via_metalearning,
             ensemble_size=ensemble_size,
             ensemble_nbest=ensemble_nbest,
             seed=seed,
@@ -73,13 +74,13 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
     @staticmethod
     def _prepare_create_folders(tmp_dir, output_dir):
         random_number = random.randint(0, 10000)
+
         pid = os.getpid()
         if tmp_dir is None:
             tmp_dir = '/tmp/autosklearn_tmp_%d_%d' % (pid, random_number)
         if output_dir is None:
             output_dir = '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
-        os.makedirs(output_dir)
-        os.makedirs(tmp_dir)
+
         return tmp_dir, output_dir
 
     def __del__(self):
@@ -87,11 +88,15 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
 
     def _create_output_directories(self):
         os.makedirs(self._output_dir)
-        os.makedirs(self._tmp_dir)
+        if self._output_dir != self._tmp_dir:
+            os.makedirs(self._tmp_dir)
 
     def _delete_output_directories(self):
-        shutil.rmtree(self._tmp_dir)
-        shutil.rmtree(self._output_dir)
+        for dir in [self._tmp_dir, self._output_dir]:
+            try:
+                shutil.rmtree(dir)
+            except Exception:
+                pass
 
     def fit(self, data_x, y,
             task=MULTICLASS_CLASSIFICATION,

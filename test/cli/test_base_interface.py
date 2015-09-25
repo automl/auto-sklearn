@@ -12,6 +12,7 @@ else:
 import autosklearn.cli.base_interface
 
 class Base_interfaceTest(unittest.TestCase):
+    _multiprocess_can_split_ = True
 
     def setUp(self):
         self.data_dir = os.path.join(os.path.dirname(__file__), '../.data')

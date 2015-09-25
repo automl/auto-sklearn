@@ -13,6 +13,7 @@ from autosklearn.util import StopWatch
 
 
 class Test(unittest.TestCase):
+    _multiprocess_can_split_ = True
 
     def test_stopwatch_overhead(self):
         # CPU overhead

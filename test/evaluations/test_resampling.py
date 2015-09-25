@@ -13,6 +13,7 @@ from autosklearn.evaluation.resampling import split_data
 
 
 class ResamplingTest(unittest.TestCase):
+    _multiprocess_can_split_ = True
 
     def test_split_data_regression(self):
         n_points = 1000

@@ -9,6 +9,7 @@ from autosklearn.util import set_auto_seed, get_auto_seed, del_auto_seed, \
 
 
 class TestUtilsCommon(unittest.TestCase):
+    _multiprocess_can_split_ = True
 
     def setUp(self):
         self.env_key = 'AUTOSKLEARN_SEED'

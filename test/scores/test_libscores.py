@@ -7,6 +7,7 @@ from autosklearn.metrics import acc_metric
 
 
 class LibScoresTest(unittest.TestCase):
+    _multiprocess_can_split_ = True
 
     def test_accuracy_metric_4_binary_classification(self):
         # 100% correct

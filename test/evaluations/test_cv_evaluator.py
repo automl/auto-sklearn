@@ -22,6 +22,7 @@ class Dummy(object):
 
 
 class CVEvaluator_Test(unittest.TestCase):
+    _multiprocess_can_split_ = True
 
     def test_evaluate_multiclass_classification(self):
         X_train, Y_train, X_test, Y_test = get_dataset('iris')

@@ -19,6 +19,8 @@ import test_meta_features
 
 
 class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest):
+    _multiprocess_can_split_ = True
+
     def setUp(self):
         self.cwd = os.getcwd()
         tests_dir = __file__

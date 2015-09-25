@@ -8,6 +8,8 @@ from autosklearn.metalearning.metalearning.meta_base import Run
 from sklearn.utils.testing import assert_array_almost_equal
 
 class kNDTest(unittest.TestCase):
+    _multiprocess_can_split_ = True
+
     def setUp(self):
         self.anneal = pd.Series({"number_of_instances": 898., "number_of_classes": 5.,
                             "number_of_features": 38.}, name=232)

@@ -15,6 +15,8 @@ class NameSpace(object):
 
 
 class DataManagerFactoryTest(unittest.TestCase):
+    _multiprocess_can_split_ = True
+
     def setUp(self):
         self.data_dir = os.path.join(os.path.dirname(__file__), '..', '.data')
 

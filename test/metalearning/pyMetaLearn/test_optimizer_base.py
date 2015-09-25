@@ -5,6 +5,8 @@ from autosklearn.metalearning.optimizers import optimizer_base
 
 
 class OptimizerBaseTest(unittest.TestCase):
+    _multiprocess_can_split_ = True
+
     def setUp(self):
         self.hyperparameters = OrderedDict()
         self.hyperparameters["x"] = [-5, 0, 5, 10]

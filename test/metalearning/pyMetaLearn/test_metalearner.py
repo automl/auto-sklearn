@@ -16,6 +16,8 @@ logging.basicConfig()
 
 
 class MetaLearnerTest(unittest.TestCase):
+    _multiprocess_can_split_ = True
+
     def setUp(self):
         self.cwd = os.getcwd()
         data_dir = os.path.dirname(__file__)

@@ -17,6 +17,8 @@ import autosklearn.metalearning.metafeatures.metafeatures as meta_features
 
 
 class MetaFeaturesTest(TestCase):
+    _multiprocess_can_split_ = True
+
     def setUp(self):
         self.cwd = os.getcwd()
         tests_dir = __file__

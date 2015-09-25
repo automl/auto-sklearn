@@ -20,6 +20,7 @@ class MetafeatureValueDummy(object):
 
 
 class Test(unittest.TestCase):
+    _multiprocess_can_split_ = True
 
     def setUp(self):
         self.X_train, self.Y_train, self.X_test, self.Y_test = \

@@ -17,6 +17,7 @@ import autosklearn.cli.HPOlib_interface as HPOlib_interface
 
 
 class HPOlib_interfaceTest(unittest.TestCase):
+    _multiprocess_can_split_ = True
 
     def setUp(self):
         self.data_dir = os.path.join(os.path.dirname(__file__), '../.data')

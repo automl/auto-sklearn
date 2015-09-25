@@ -7,6 +7,7 @@ import autosklearn.data.competition_c_functions as competition_c_functions
 
 
 class CHelperFunctionTest(unittest.TestCase):
+    _multiprocess_can_split_ = True
 
     def test_read_sparse_binary_file(self):
         filename = os.path.join(os.path.dirname(__file__),
