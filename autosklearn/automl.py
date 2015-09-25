@@ -256,7 +256,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._queue = queue
         self._keep_models = keep_models
 
-        self._basename = None
+        self._dataset_name = None
         self._stopwatch = None
         self._logger = None
         self._ohe = None
@@ -289,12 +289,12 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             m.update(data_x.data)
             dataset_name = m.hexdigest()
 
-        self._basename = dataset_name
+        self._dataset_name = dataset_name
 
         self._stopwatch = StopWatch()
-        self._stopwatch.start_task(self._basename)
+        self._stopwatch.start_task(self._dataset_name)
 
-        self._logger = _get_logger(self._log_dir, self._basename, self._seed)
+        self._logger = _get_logger(self._log_dir, self._dataset_name, self._seed)
 
         loaded_data_manager = XYDataManager(data_x, y,
                                             task=task,
@@ -319,17 +319,18 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
     def fit_automl_dataset(self, basename, input_dir):
         # == Creating a data object with data and information about it
-        self._basename = basename
+        self._dataset_name = basename
 
         self._stopwatch = StopWatch()
-        self._stopwatch.start_task(self._basename)
+        self._stopwatch.start_task(self._dataset_name)
 
-        self._logger = _get_logger(self._log_dir, self._basename,
+        self._logger = _get_logger(self._log_dir, self._dataset_name,
                                         self._seed)
 
         self._debug('======== Reading and converting data ==========')
         # Encoding the labels will be done after the metafeature calculation!
-        loaded_data_manager = CompetitionDataManager(self._basename, input_dir,
+        loaded_data_manager = CompetitionDataManager(self._dataset_name,
+                                                     input_dir,
                                                      verbose=True,
                                                      encode_labels=False)
         loaded_data_manager_str = str(loaded_data_manager).split('\n')
@@ -384,11 +385,11 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._tmp_dir,
             self._stopwatch)
 
-        time_for_load_data = self._stopwatch.wall_elapsed(self._basename)
+        time_for_load_data = self._stopwatch.wall_elapsed(self._dataset_name)
 
         if self._debug_mode:
             self._print_load_time(
-                self._basename,
+                self._dataset_name,
                 self._time_for_task,
                 time_for_load_data,
                 self._info)
@@ -399,7 +400,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             data_info_task=datamanager.info['task'],
             x_train=datamanager.data['X_train'],
             y_train=datamanager.data['Y_train'],
-            basename=self._basename,
+            basename=self._dataset_name,
             watcher=self._stopwatch,
             metalearning_cnt=self._initial_configurations_via_metalearning,
             log_function=self._debug)
@@ -413,7 +414,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         data_manager_path = self._save_data_manager(
             datamanager,
             self._tmp_dir,
-            self._basename,
+            self._dataset_name,
             watcher=self._stopwatch)
 
         # = Create a searchspace
@@ -430,7 +431,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                                      BINARY_CLASSIFICATION]:
 
             meta_features_encoded = _calculate_metafeatures_encoded(
-                self._basename,
+                self._dataset_name,
                 datamanager.data['X_train'],
                 datamanager.data['Y_train'],
                 self._stopwatch,
@@ -442,7 +443,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             initial_configurations = _get_initial_configuration(
                 meta_features,
                 meta_features_encoded,
-                self._basename,
+                self._dataset_name,
                 self._metric,
                 self.configuration_space,
                 self._task,
@@ -455,7 +456,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
             _print_debug_info_of_init_configuration(
                 initial_configurations,
-                self._basename,
+                self._dataset_name,
                 self._time_for_task,
                 self._debug, self._info,
                 self._stopwatch)
@@ -466,7 +467,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         # == RUN SMAC
 
-        proc_smac = _run_smac(self._tmp_dir, self._basename,
+        proc_smac = _run_smac(self._tmp_dir, self._dataset_name,
                               self._time_for_task, self._ml_memory_limit,
                               data_manager_path, configspace_path,
                               initial_configurations, self._per_run_time_limit,
@@ -476,7 +477,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         proc_ensembles = _run_ensemble_builder(
             self._tmp_dir,
             self._output_dir,
-            self._basename,
+            self._dataset_name,
             self._time_for_task,
             self._task,
             self._metric,

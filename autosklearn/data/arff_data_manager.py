@@ -51,7 +51,6 @@ def _load_arff(filename, target):
 class ARFFDataManager(DataManager):
     def __init__(self, dataset, task, metric,
                  target, encode_labels=True):
-        super(ARFFDataManager, self).__init__()
 
         if type(task) in types.StringTypes:
             task = STRING_TO_TASK_TYPES[task]
@@ -61,6 +60,8 @@ class ARFFDataManager(DataManager):
 
         X_train, y_train, train_relation, feat_type = _load_arff(train_file, target)
         X_test, y_test, test_relation, feat_type_test = _load_arff(test_file, target)
+
+        super(ARFFDataManager, self).__init__(train_relation)
 
         self.info['task'] = task
         self.info['metric'] = metric
@@ -84,8 +85,6 @@ class ARFFDataManager(DataManager):
                       MULTICLASS_CLASSIFICATION: 1,
                       MULTILABEL_CLASSIFICATION: y_train.shape[-1]}
         self.info['target_num'] = target_num[task]
-
-        self._basename = train_relation
 
         self.data['X_train'] = X_train
         self.data['Y_train'] = y_train

@@ -9,9 +9,14 @@ from autosklearn.util import predict_RAM_usage
 
 class DataManager(object):
 
-    def __init__(self):
+    def __init__(self, name):
         self._data = dict()
         self._info = dict()
+        self._name = name
+
+    @property
+    def name(self):
+        return self._name
 
     @property
     def data(self):
@@ -85,10 +90,10 @@ class DataManager(object):
             self.info['is_sparse'] = 1 if sparse else 0
 
     def __repr__(self):
-        return 'DataManager : ' + self._basename
+        return 'DataManager : ' + self.name
 
     def __str__(self):
-        val = 'DataManager : ' + self._basename + '\ninfo:\n'
+        val = 'DataManager : ' + self.name + '\ninfo:\n'
         for item in self.info:
             val = val + '\t' + item + ' = ' + str(self.info[item]) + '\n'
         val = val + 'data:\n'

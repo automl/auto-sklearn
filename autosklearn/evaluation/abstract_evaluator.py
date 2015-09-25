@@ -100,7 +100,7 @@ class AbstractEvaluator(object):
         num_run = str(self.num_run).zfill(5)
         pred_dump_name_template = os.path.join(
             self.output_dir, 'predictions_%s_%s',
-            self.D._basename + '_predictions_%s_' + num_run + '.npy')
+            self.D.name + '_predictions_%s_' + num_run + '.npy')
 
         if self.output_y_test:
             try:

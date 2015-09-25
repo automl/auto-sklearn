@@ -24,7 +24,7 @@ N_TEST_RUNS = 10
 
 class Dummy(object):
     def __init__(self):
-        self._basename = 'dummy'
+        self.name = 'dummy'
 
 
 class HoldoutEvaluator_Test(unittest.TestCase):
@@ -406,7 +406,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             'X_test': X_test
         }
         D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
-        D.basename = 'test'
+        D.name = 'test'
 
         configuration_space = get_configuration_space(D.info)
 

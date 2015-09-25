@@ -188,35 +188,34 @@ class CompetitionDataManager(DataManager):
         Fill the dictionary with an info file. Each line of the info file must have this format 'feature' : value
     '''
 
-    def __init__(self, basename, input_dir, verbose=False, encode_labels=True):
-        super(CompetitionDataManager, self).__init__()
+    def __init__(self, name, input_dir, verbose=False, encode_labels=True):
+        super(CompetitionDataManager, self).__init__(name)
 
-        self._basename = basename
-        if basename in input_dir:
+        if self.name in input_dir:
             self.input_dir = input_dir
         else:
-            self.input_dir = input_dir + '/' + basename + '/'
+            self.input_dir = input_dir + '/' + self.name + '/'
 
-        info_file = os.path.join(self.input_dir, basename + '_public.info')
+        info_file = os.path.join(self.input_dir, self.name + '_public.info')
         self.getInfo(info_file)
         self.feat_type = self.loadType(os.path.join(self.input_dir,
-                                                    basename + '_feat.type'),
+                                                    self.name + '_feat.type'),
                                        verbose=verbose)
 
         Xtr = self.loadData(
-            os.path.join(self.input_dir, basename + '_train.data'),
+            os.path.join(self.input_dir, self.name + '_train.data'),
             self.info['train_num'],
             verbose=verbose)
         Ytr = self.loadLabel(
-            os.path.join(self.input_dir, basename + '_train.solution'),
+            os.path.join(self.input_dir, self.name + '_train.solution'),
             self.info['train_num'],
             verbose=verbose)
         Xva = self.loadData(
-            os.path.join(self.input_dir, basename + '_valid.data'),
+            os.path.join(self.input_dir, self.name + '_valid.data'),
             self.info['valid_num'],
             verbose=verbose)
         Xte = self.loadData(
-            os.path.join(self.input_dir, basename + '_test.data'),
+            os.path.join(self.input_dir, self.name + '_test.data'),
             self.info['test_num'],
             verbose=verbose)
 
@@ -225,7 +224,7 @@ class CompetitionDataManager(DataManager):
         self._data['X_valid'] = Xva
         self._data['X_test'] = Xte
 
-        p = os.path.join(self.input_dir, basename + '_valid.solution')
+        p = os.path.join(self.input_dir, self.name + '_valid.solution')
         if os.path.exists(p):
             try:
                 self._data['Y_valid'] = self.loadLabel(p,
@@ -234,7 +233,7 @@ class CompetitionDataManager(DataManager):
             except (IOError, OSError):
                 pass
 
-        p = os.path.join(self.input_dir, basename + '_test.solution')
+        p = os.path.join(self.input_dir, self.name + '_test.solution')
         if os.path.exists(p):
             try:
                 self.data['Y_test'] = self.loadLabel(p, self.info['test_num'],
@@ -341,7 +340,7 @@ class CompetitionDataManager(DataManager):
         ''' Get all information {attribute = value} pairs from the filename (public.info file),
               if it exists, otherwise, output default values'''
         if filename is None:
-            basename = self.basename
+            basename = self.name
             input_dir = self.input_dir
         else:
             # Split away the _public.info (anyway, I don't know why its
