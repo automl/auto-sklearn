@@ -37,7 +37,7 @@ class CVEvaluator_Test(unittest.TestCase):
             'metric': 'bac_metric',
             'task': MULTICLASS_CLASSIFICATION,
             'is_sparse': False,
-            'target_num': 3
+            'label_num': 3
         }
         D.data = {
             'X_train': X_train,
@@ -101,7 +101,7 @@ class CVEvaluator_Test(unittest.TestCase):
             'metric': 'bac_metric',
             'task': MULTICLASS_CLASSIFICATION,
             'is_sparse': False,
-            'target_num': 3
+            'label_num': 3
         }
         D.data = {
             'X_train': X_train,

@@ -11,8 +11,9 @@ import six
 import autosklearn.automl
 import ParamSklearn.util as putil
 from autosklearn.constants import *
+from autosklearn.cli.base_interface import store_and_or_load_data
 
-from . import Base
+from base import Base
 
 class AutoMLTest(Base):
     _multiprocess_can_split_ = True
@@ -55,6 +56,24 @@ class AutoMLTest(Base):
             queue.get()
         proc_smac.wait()
         proc_ensembles.wait()
+
+        del auto
+        self._tearDown(output)
+
+    def test_do_dummy_prediction(self):
+        output = os.path.join(self.test_dir, '..',
+                              '.tmp_test_do_dummy_prediction')
+        self._setUp(output)
+
+        name = '401_bac'
+        dataset = os.path.join(self.test_dir, '..', '.data', name)
+
+        D = store_and_or_load_data(dataset, output)
+
+        auto = autosklearn.automl.AutoML(
+            output, output, 10, 10,
+            initial_configurations_via_metalearning=25)
+        auto._do_dummy_prediction(D)
 
         del auto
         self._tearDown(output)

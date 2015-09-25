@@ -68,12 +68,14 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
     return score
 
 
-def get_new_run_num():
+def get_new_run_num(lockdir=None):
     seed = os.environ.get('AUTOSKLEARN_SEED')
     counter_file = 'num_run'
     if seed is not None:
         counter_file = counter_file + ('_%s' % seed)
-    counter_file = os.path.join(os.getcwd(), counter_file)
+    if lockdir is None:
+        lockdir = os.getcwd()
+    counter_file = os.path.join(lockdir, counter_file)
     lock = lockfile.LockFile(counter_file)
     with lock:
         if not os.path.exists(counter_file):

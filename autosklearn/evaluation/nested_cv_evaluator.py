@@ -16,7 +16,7 @@ __all__ = [
 
 class NestedCVEvaluator(AbstractEvaluator):
 
-    def __init__(self, Datamanager, configuration,
+    def __init__(self, Datamanager, configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
@@ -126,7 +126,7 @@ class NestedCVEvaluator(AbstractEvaluator):
         for i in range(self.outer_cv_folds):
             scores = calculate_score(
                 Y_targets[i], Y_optimization_pred[i], self.task_type,
-                self.metric, self.D.info['target_num'],
+                self.metric, self.D.info['label_num'],
                 all_scoring_functions=self.all_scoring_functions)
             if self.all_scoring_functions:
                 for score_name in scores:
@@ -172,7 +172,7 @@ class NestedCVEvaluator(AbstractEvaluator):
                     Y_train=self.Y_train[inner_train_indices])
                 scores = calculate_score(
                     Y_test, Y_hat, self.task_type, self.metric,
-                    self.D.info['target_num'],
+                    self.D.info['label_num'],
                     all_scoring_functions=self.all_scoring_functions)
                 if self.all_scoring_functions:
                     for score_name in scores:

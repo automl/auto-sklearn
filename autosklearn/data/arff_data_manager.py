@@ -80,11 +80,11 @@ class ARFFDataManager(DataManager):
                      MULTICLASS_CLASSIFICATION: len(np.unique(y_train)),
                      MULTILABEL_CLASSIFICATION: y_train.shape[-1]}
         self.info['label_num'] = label_num[task]
-        target_num = {REGRESSION: 1,
+        label_num = {REGRESSION: 1,
                       BINARY_CLASSIFICATION: 1,
                       MULTICLASS_CLASSIFICATION: 1,
                       MULTILABEL_CLASSIFICATION: y_train.shape[-1]}
-        self.info['target_num'] = target_num[task]
+        self.info['label_num'] = label_num[task]
 
         self.data['X_train'] = X_train
         self.data['Y_train'] = y_train

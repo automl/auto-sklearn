@@ -5,7 +5,7 @@ import numpy as np
 import ParamSklearn.util as putil
 
 import autosklearn
-from . import Base
+from base import Base
 
 
 class EstimatorTest(Base):

@@ -15,7 +15,7 @@ import six.moves.cPickle as pickle
 from autosklearn.constants import *
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.evaluation import resampling
+from autosklearn.evaluation import resampling, HoldoutEvaluator, get_new_run_num
 from autosklearn.metalearning.mismbo import \
     calc_meta_features, calc_meta_features_encoded, \
     create_metalearning_string_for_smac_call
@@ -262,7 +262,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._ohe = None
         self._task = None
         self._metric = None
-        self._target_num = None
+        self._label_num = None
 
         self._debug_mode = debug_mode
 
@@ -368,12 +368,25 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                      (basename, time_left_after_reading))
         return time_for_load_data
 
-    def _fit(self, datamanager):
-        # TODO: check that data and task definition fit together!
+    def _do_dummy_prediction(self, datamanager):
+        num_run = get_new_run_num(self._tmp_dir)
+        he = HoldoutEvaluator(
+            datamanager, None,
+            with_predictions=True, num_run=num_run,
+            output_dir=self._tmp_dir, all_scoring_functions=True)
+        he.fit()
+        he.file_output()
+        model_directory = os.path.join(self._tmp_dir, 'models_%d' % self._seed)
+        if os.path.exists(model_directory):
+            model_filename = os.path.join(model_directory, "%s.model" % num_run)
+            with open(model_filename, 'w') as fh:
+                pickle.dump(he.model, fh, -1)
+        del he
 
+    def _fit(self, datamanager):
         self._metric = datamanager.info['metric']
         self._task = datamanager.info['task']
-        self._target_num = datamanager.info['target_num']
+        self._label_num = datamanager.info['label_num']
 
         set_auto_seed(self._seed)
 
@@ -392,6 +405,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 self._time_for_task,
                 time_for_load_data,
                 self._info)
+
+        # == Perform dummy predictions
+        self._do_dummy_prediction(datamanager)
 
         # == Calculate metafeatures
         meta_features = _calculate_metafeatures(
@@ -544,7 +560,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
     def score(self, X, y):
         prediction = self.predict(X)
         return calculate_score(y, prediction, self._task,
-                               self._metric, self._target_num)
+                               self._metric, self._label_num)
 
     def configuration_space_created_hook(self, datamanager):
         pass

@@ -9,6 +9,7 @@ import numpy as np
 import lockfile
 from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.regression import ParamSklearnRegressor
+from sklearn.dummy import DummyClassifier, DummyRegressor
 import six.moves.cPickle as pickle
 
 from autosklearn.constants import *
@@ -20,11 +21,35 @@ __all__ = [
 ]
 
 
+class MyDummyClassifier(DummyClassifier):
+    def __init__(self, *args):
+        super(MyDummyClassifier, self).__init__(strategy="most_frequent")
+
+    def fit(self, X, y):
+        return super(MyDummyClassifier, self).fit(np.ones((X.shape[0], 1)), y)
+
+    def predict_proba(self, X, batch_size=1000):
+        new_X = np.ones((X.shape[0], 1))
+        return super(MyDummyClassifier, self).predict_proba(new_X)
+
+
+class MyDummyRegressor(DummyRegressor):
+    def __init__(self, *args):
+        super(MyDummyRegressor, self).__init__(strategy='mean')
+
+    def fit(self, X, y):
+        return super(MyDummyRegressor, self).fit(np.ones((X.shape[0], 1)), y)
+
+    def predict(self, X, batch_size=1000):
+        new_X = np.ones((X.shape[0], 1))
+        return super(MyDummyRegressor, self).predict(new_X)
+
+
 class AbstractEvaluator(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __init__(self, Datamanager, configuration,
+    def __init__(self, Datamanager, configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
@@ -54,10 +79,16 @@ class AbstractEvaluator(object):
         self.all_scoring_functions = all_scoring_functions
 
         if self.task_type in REGRESSION_TASKS:
-            self.model_class = ParamSklearnRegressor
+            if self.configuration is None:
+                self.model_class = MyDummyRegressor
+            else:
+                self.model_class = ParamSklearnRegressor
             self.predict_function = self.predict_regression
         else:
-            self.model_class = ParamSklearnClassifier
+            if self.configuration is None:
+                self.model_class = MyDummyClassifier
+            else:
+                self.model_class = ParamSklearnClassifier
             self.predict_function = self.predict_proba
 
         if num_run is None:
@@ -176,7 +207,7 @@ class AbstractEvaluator(object):
         return Y_pred
 
     def _ensure_prediction_array_sizes(self, prediction, Y_train):
-        num_classes = self.D.info['target_num']
+        num_classes = self.D.info['label_num']
 
         if self.task_type == MULTICLASS_CLASSIFICATION and \
                 prediction.shape[1] < num_classes:

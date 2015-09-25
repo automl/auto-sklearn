@@ -10,7 +10,7 @@ __all__ = [
 
 class TestEvaluator(AbstractEvaluator):
 
-    def __init__(self, Datamanager, configuration,
+    def __init__(self, Datamanager, configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1):
@@ -46,7 +46,7 @@ class TestEvaluator(AbstractEvaluator):
                 prediction=Y_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                num_classes=self.D.info['target_num'],
+                num_classes=self.D.info['label_num'],
                 all_scoring_functions=self.all_scoring_functions)
         else:
             Y_pred = self.predict_function(self.X_test, self.model,
@@ -56,7 +56,7 @@ class TestEvaluator(AbstractEvaluator):
                 prediction=Y_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                num_classes=self.D.info['target_num'],
+                num_classes=self.D.info['label_num'],
                 all_scoring_functions=self.all_scoring_functions)
 
         if hasattr(score, '__len__'):

@@ -42,7 +42,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             'metric': 'bac_metric',
             'task': MULTICLASS_CLASSIFICATION,
             'is_sparse': False,
-            'target_num': 3
+            'label_num': 3
         }
         D.data = {
             'X_train': X_train,
@@ -87,7 +87,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             'metric': 'bac_metric',
             'task': MULTICLASS_CLASSIFICATION,
             'is_sparse': False,
-            'target_num': 3
+            'label_num': 3
         }
         D.data = {
             'X_train': X_train,
@@ -142,7 +142,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             'metric': 'f1_metric',
             'task': MULTILABEL_CLASSIFICATION,
             'is_sparse': False,
-            'target_num': 3
+            'label_num': 3
         }
         D.data = {
             'X_train': X_train,
@@ -195,7 +195,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             'metric': 'auc_metric',
             'task': BINARY_CLASSIFICATION,
             'is_sparse': False,
-            'target_num': 2
+            'label_num': 2
         }
         D.data = {
             'X_train': X_train,
@@ -241,7 +241,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             'metric': 'r2_metric',
             'task': REGRESSION,
             'is_sparse': False,
-            'target_num': 1
+            'label_num': 1
         }
         D.data = {
             'X_train': X_train,
@@ -324,7 +324,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             'metric': 'acc_metric',
             'task': MULTICLASS_CLASSIFICATION,
             'is_sparse': False,
-            'target_num': 1
+            'label_num': 1
         }
         D.data = {'X_train': X, 'Y_train': Y, 'X_valid': X, 'X_test': X}
         D.feat_type = ['numerical'] * 5000
@@ -399,7 +399,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             'metric': 'r2_metric',
             'task': REGRESSION,
             'is_sparse': False,
-            'target_num': 3
+            'label_num': 3
         }
         D.data = {
             'X_train': X_train,
@@ -458,7 +458,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             'metric': 'bac_metric',
             'task': task_type,
             'is_sparse': False,
-            'target_num': 3
+            'label_num': 3
         }
         D.data = {
             'X_train': X_train,

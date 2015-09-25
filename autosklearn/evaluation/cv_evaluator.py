@@ -13,7 +13,7 @@ __all__ = [
 
 class CVEvaluator(AbstractEvaluator):
 
-    def __init__(self, Datamanager, configuration,
+    def __init__(self, Datamanager, configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
@@ -114,7 +114,7 @@ class CVEvaluator(AbstractEvaluator):
         self.Y_optimization = Y_targets
         score = calculate_score(
             Y_targets, Y_optimization_pred, self.task_type, self.metric,
-            self.D.info['target_num'],
+            self.D.info['label_num'],
             all_scoring_functions=self.all_scoring_functions)
 
         if hasattr(score, '__len__'):

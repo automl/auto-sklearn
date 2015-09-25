@@ -342,20 +342,21 @@ def main(predictions_dir,
                                                include_num_runs,
                                                re_num_run)
 
+        print(all_predictions_train)
         if len(all_predictions_train) == len(all_predictions_test) == len(
                 all_predictions_valid) == 0:
             logger.error('All models do just random guessing')
             time.sleep(2)
             continue
 
-        elif len(all_predictions_train) == 1:
-            logger.debug('Only one model so far we just copy its predictions')
-            ensemble_members_run_numbers = {0: 1.0}
-            indices = np.array([0])
-
-            # Output the score
-            logger.info('Training performance: %f' %
-                         np.max(model_names_to_scores.values()))
+        # elif len(all_predictions_train) == 1:
+        #     logger.debug('Only one model so far we just copy its predictions')
+        #     ensemble_members_run_numbers = {0: 1.0}
+        #     indices = np.array([0])
+        #
+        #     # Output the score
+        #     logger.info('Training performance: %f' %
+        #                  np.max(model_names_to_scores.values()))
         else:
             try:
                 indices, trajectory = ensemble_selection(

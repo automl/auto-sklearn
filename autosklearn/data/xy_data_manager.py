@@ -16,14 +16,14 @@ class XYDataManager(DataManager):
         self.info['is_sparse'] = 1 if sparse.issparse(data_x) else 0
         self.info['has_missing'] = np.all(np.isfinite(data_x))
 
-        target_num = {
+        label_num = {
             REGRESSION: 1,
             BINARY_CLASSIFICATION: 2,
             MULTICLASS_CLASSIFICATION: len(np.unique(y)),
             MULTILABEL_CLASSIFICATION: y.shape[-1]
         }
 
-        self.info['target_num'] = target_num[task]
+        self.info['label_num'] = label_num[task]
 
         self.data['X_train'] = data_x
         self.data['Y_train'] = y
