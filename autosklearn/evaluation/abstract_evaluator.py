@@ -14,6 +14,7 @@ import six.moves.cPickle as pickle
 
 from autosklearn.constants import *
 from autosklearn.evaluation.util import get_new_run_num
+from autosklearn.util import Backend
 
 
 __all__ = [
@@ -95,6 +96,8 @@ class AbstractEvaluator(object):
             num_run = get_new_run_num()
         self.num_run = num_run
 
+        self.backend = Backend(None, self.output_dir)
+
     @abc.abstractmethod
     def fit(self):
         pass
@@ -116,14 +119,13 @@ class AbstractEvaluator(object):
             print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
                   ('SAT', abs(self.duration), result, self.seed,
                    additional_run_info))
-        except Exception:
+        except Exception as e:
             self.duration = time.time() - self.starttime
 
             print(traceback.format_exc())
             print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
                   ('TIMEOUT', abs(self.duration), 1.0, self.seed,
-                   'No results were produced! Probably the training was not '
-                   'finished and no valid model was generated!'))
+                   'No results were produced! Error is %s' % str(e)))
 
     def file_output(self):
         seed = os.environ.get('AUTOSKLEARN_SEED')
@@ -138,11 +140,9 @@ class AbstractEvaluator(object):
                 os.makedirs(self.output_dir)
             except OSError:
                 pass
-            y_test_filename = os.path.join(self.output_dir,
-                                           'y_optimization.npy')
-            with lockfile.LockFile(y_test_filename + '.lock'):
-                with open(y_test_filename, 'w') as fh:
-                    pickle.dump(self.Y_optimization.astype(np.float32), fh, -1)
+
+            self.backend.save_targets_ensemble(
+                self.Y_optimization.astype(np.float32))
 
         ensemble_output_dir = os.path.join(self.output_dir,
                                            'predictions_ensemble_%s' % seed)

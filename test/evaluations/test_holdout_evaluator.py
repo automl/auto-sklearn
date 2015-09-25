@@ -425,8 +425,8 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             evaluator.predict()
             evaluator.file_output()
 
-            self.assertTrue(os.path.exists(os.path.join(output_dir,
-                                                        'y_optimization.npy')))
+            self.assertTrue(os.path.exists(os.path.join(
+                output_dir, '.auto-sklearn', 'true_targets_ensemble.npy')))
             break
 
     def test_predict_proba_binary_classification(self):

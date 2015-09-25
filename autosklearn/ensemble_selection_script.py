@@ -14,7 +14,7 @@ import six.moves.cPickle as pickle
 from autosklearn.constants import STRING_TO_TASK_TYPES
 from autosklearn.util.data import save_predictions
 from autosklearn.evaluation.util import calculate_score
-from autosklearn.util import StopWatch
+from autosklearn.util import StopWatch, Backend
 
 
 logging.basicConfig()
@@ -190,6 +190,7 @@ def main(predictions_dir,
     index_run = 0
     current_num_models = 0
 
+    backend = Backend(output_dir, predictions_dir)
     dir_ensemble = os.path.join(predictions_dir,
                                 'predictions_ensemble_%s/' % seed)
     dir_valid = os.path.join(predictions_dir,
@@ -198,13 +199,11 @@ def main(predictions_dir,
                             'predictions_test_%s/' % seed)
     paths_ = [dir_ensemble, dir_valid, dir_test]
 
-    tru_labels_path = os.path.join(predictions_dir, 'true_labels_ensemble.npy')
+    targets_ensemble = backend.load_targets_ensemble()
 
     while used_time < limit:
         logger.debug('Time left: %f', limit - used_time)
         logger.debug('Time last iteration: %f', time_iter)
-        # Load the true labels of the validation data
-        true_labels = np.load(tru_labels_path)
 
         # Load the predictions from the models
         exists = [os.path.isdir(dir_) for dir_ in paths_]
@@ -252,7 +251,7 @@ def main(predictions_dir,
         model_idx = 0
         for model_name in dir_ensemble_list:
             predictions = np.load(os.path.join(dir_ensemble, model_name))
-            score = calculate_score(true_labels, predictions,
+            score = calculate_score(targets_ensemble, predictions,
                                     task_type, metric,
                                     predictions.shape[1])
             model_names_to_scores[model_name] = score
@@ -360,7 +359,7 @@ def main(predictions_dir,
         else:
             try:
                 indices, trajectory = ensemble_selection(
-                    np.array(all_predictions_train), true_labels,
+                    np.array(all_predictions_train), targets_ensemble,
                     ensemble_size, task_type, metric)
 
                 logger.info('Trajectory and indices!')

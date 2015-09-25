@@ -21,29 +21,8 @@ from autosklearn.metalearning.mismbo import \
     create_metalearning_string_for_smac_call
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, get_auto_seed, \
-    set_auto_seed, del_auto_seed, submit_process, paramsklearn
+    set_auto_seed, del_auto_seed, submit_process, paramsklearn, Backend
 
-
-def _save_ensemble_data(x_data, y_data, tmp_dir, watcher):
-    """Split dataset and store Data for the ensemble script.
-
-    :param x_data:
-    :param y_data:
-    :return:
-
-    """
-    task_name = 'LoadData'
-    watcher.start_task(task_name)
-    _, _, _, y_ensemble = resampling.split_data(x_data, y_data)
-
-    filepath = os.path.join(tmp_dir, 'true_labels_ensemble.npy')
-
-    lock_path = filepath + '.lock'
-    with lockfile.LockFile(lock_path):
-        if not os.path.exists(filepath):
-            np.save(filepath, y_ensemble)
-
-    watcher.stop_task(task_name)
 
 def _write_file_with_data(filepath, data, name, log_function):
     if _check_path_for_save(filepath, name, log_function):
@@ -270,6 +249,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._ensemble_indices_dir = join(self._tmp_dir,
                                           'ensemble_indices_%d' % self._seed)
         self._create_folders()
+        self._backend = Backend(self._output_dir, self._tmp_dir)
 
     def _create_folders(self):
         # == Set up a directory where all the trained models will be pickled to
@@ -391,11 +371,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         set_auto_seed(self._seed)
 
         # load data
-        _save_ensemble_data(
+        self._save_ensemble_data(
             datamanager.data['X_train'],
-            datamanager.data['Y_train'],
-            self._tmp_dir,
-            self._stopwatch)
+            datamanager.data['Y_train'])
 
         time_for_load_data = self._stopwatch.wall_elapsed(self._dataset_name)
 
@@ -561,6 +539,20 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         prediction = self.predict(X)
         return calculate_score(y, prediction, self._task,
                                self._metric, self._label_num)
+
+    def _save_ensemble_data(self, X, y):
+        """Split dataset and store Data for the ensemble script.
+
+        :param x_data:
+        :param y_data:
+        :return:
+
+        """
+        task_name = 'LoadData'
+        self._start_task(self._stopwatch, task_name)
+        _, _, _, y_ensemble = resampling.split_data(X, y)
+        self._backend.save_targets_ensemble(y_ensemble)
+        self._stop_task(self._stopwatch, task_name)
 
     def configuration_space_created_hook(self, datamanager):
         pass
