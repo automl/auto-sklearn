@@ -32,7 +32,7 @@ class AutoMLTest(Base):
         del automl
         self._tearDown(output)
 
-    def test_dataset_manager_pickling(self):
+    def test_automl_outputs(self):
         output = os.path.join(self.test_dir, '..',
                               '.tmp_test_dataset_manager_pickling')
         self._setUp(output)
@@ -47,6 +47,8 @@ class AutoMLTest(Base):
             initial_configurations_via_metalearning=25,
             queue=queue)
         auto.fit_automl_dataset(dataset)
+
+        # pickled data manager (with one hot encoding!)
         with open(data_manager_file) as fh:
             D = six.moves.cPickle.load(fh)
             self.assertTrue(np.allclose(D.data['X_train'].data[:3],
@@ -56,6 +58,13 @@ class AutoMLTest(Base):
             queue.get()
         proc_smac.wait()
         proc_ensembles.wait()
+
+        # Start time
+        start_time_file_path = os.path.join(output, '.auto-sklearn',
+                                            "start_time.txt")
+        with open(start_time_file_path, 'r') as fh:
+            start_time = float(fh.read())
+        self.assertGreaterEqual(time.time() - start_time, 10)
 
         del auto
         self._tearDown(output)

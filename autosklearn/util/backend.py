@@ -1,4 +1,5 @@
 import os
+import time
 
 import lockfile
 import numpy as np
@@ -43,9 +44,12 @@ class Backend(object):
             pass
 
     def _get_start_time_filename(self):
-        return os.path.join(self.internals_directory, "start_time.pkl")
+        return os.path.join(self.internals_directory, "start_time.txt")
 
-    def save_start_time(self, start_time):
+    def save_start_time(self):
+        self._make_internals_directory()
+        start_time = time.time()
+
         if not isinstance(start_time, float):
             raise ValueError("Start time must be a float, but is %s." %
                              type(start_time))
