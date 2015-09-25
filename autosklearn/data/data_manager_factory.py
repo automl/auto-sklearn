@@ -32,13 +32,7 @@ def get_data_manager(namespace, encode_labels=False):
                                namespace.metric, namespace.target,
                                encode_labels=encode_labels)
     elif data_format_ == 'automlcompetitionformat':
-        dataset = namespace.dataset
-        if dataset[-1] == '/':
-            dataset = dataset[-1]
-        dataset = os.path.split(dataset)
-        dir = dataset[0]
-        name = dataset[1]
-        return CompetitionDataManager(name, dir,
+        return CompetitionDataManager(namespace.dataset,
                                       encode_labels=encode_labels)
     else:
         raise NotImplemented('Data format %s not supported.' % data_format)

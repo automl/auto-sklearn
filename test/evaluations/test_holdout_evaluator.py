@@ -276,8 +276,9 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
     def test_with_abalone(self):
         dataset = 'abalone'
-        dataset_dir = os.path.join(os.path.dirname(__file__), '.datasets')
-        D = CompetitionDataManager(dataset, dataset_dir)
+        dataset_path = os.path.join(os.path.dirname(__file__), '.datasets',
+                                    dataset)
+        D = CompetitionDataManager(dataset_path)
         configuration_space = get_configuration_space(
             D.info,
             include_estimators=['extra_trees'],

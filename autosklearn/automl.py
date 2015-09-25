@@ -317,9 +317,10 @@ class AutoML(multiprocessing.Process, BaseEstimator):
     def _info(self, text):
         self._logger.info(text)
 
-    def fit_automl_dataset(self, basename, input_dir):
+    def fit_automl_dataset(self, dataset):
         # == Creating a data object with data and information about it
-        self._dataset_name = basename
+        name = os.path.basename(dataset)
+        self._dataset_name = name
 
         self._stopwatch = StopWatch()
         self._stopwatch.start_task(self._dataset_name)
@@ -329,9 +330,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         self._debug('======== Reading and converting data ==========')
         # Encoding the labels will be done after the metafeature calculation!
-        loaded_data_manager = CompetitionDataManager(self._dataset_name,
-                                                     input_dir,
-                                                     verbose=True,
+        loaded_data_manager = CompetitionDataManager(dataset,
                                                      encode_labels=False)
         loaded_data_manager_str = str(loaded_data_manager).split('\n')
         for part in loaded_data_manager_str:

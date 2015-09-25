@@ -52,17 +52,17 @@ class AutoMLTest(unittest.TestCase):
         del automl
 
     def test_dataset_manager_pickling(self):
-        data_dir = os.path.join(self.test_dir, '..', '.data')
-        dataset = '401_bac'
+        name = '401_bac'
+        dataset = os.path.join(self.test_dir, '..', '.data', name)
         data_manager_file = os.path.join(self.output,
-                                         '%s_Manager.pkl' % dataset)
+                                         '%s_Manager.pkl' % name)
 
         queue = multiprocessing.Queue()
         auto = autosklearn.automl.AutoML(
             self.output, self.output, 10, 10,
             initial_configurations_via_metalearning=25,
             queue=queue)
-        auto.fit_automl_dataset(dataset, data_dir)
+        auto.fit_automl_dataset(dataset)
         with open(data_manager_file) as fh:
             D = six.moves.cPickle.load(fh)
             self.assertTrue(np.allclose(D.data['X_train'].data[:3],

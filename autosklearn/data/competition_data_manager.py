@@ -3,18 +3,6 @@
 # Functions performing various input/output operations for the ChaLearn
 # AutoML challenge
 
-# Main contributor: Arthur Pesah, August 2014
-# Edits: Isabelle Guyon, October 2014
-
-# ALL INFORMATION, SOFTWARE, DOCUMENTATION, AND DATA ARE PROVIDED "AS-IS".
-# ISABELLE GUYON, CHALEARN, AND/OR OTHER ORGANIZERS OR CODE AUTHORS DISCLAIM
-# ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR ANY PARTICULAR PURPOSE, AND THE
-# WARRANTY OF NON-INFRIGEMENT OF ANY THIRD PARTY'S INTELLECTUAL PROPERTY RIGHTS.
-# IN NO EVENT SHALL ISABELLE GUYON AND/OR OTHER ORGANIZERS BE LIABLE FOR ANY SPECIAL,
-# INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER ARISING OUT OF OR IN
-# CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS,
-# PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 from __future__ import print_function
 import os
 import re
@@ -36,7 +24,7 @@ except Exception:
     competition_c_functions_is_there = False
 
 
-def data_dense(filename, feat_type=None, verbose=False):
+def data_dense(filename, feat_type=None):
     # The 2nd parameter makes possible a using of the 3 functions of data
     # reading (data, data_sparse, data_binary_sparse) without changing
     # parameters
@@ -59,7 +47,6 @@ def data_dense(filename, feat_type=None, verbose=False):
         elems = list(range(len(feat_type)))
 
         row = raw.split(delim)
-        # yield tuple([np.float64(row[i]) for i in elems])
         yield tuple([row[i] for i in elems])
         for raw in row_iter:
             while r_comment.match(raw) or r_empty.match(raw):
@@ -104,41 +91,39 @@ def data_binary_sparse(filename, feat_type):
     return dok_sparse.tocsr()
 
 
-def file_to_array(filename, verbose=False):
+def file_to_array(filename):
     # Converts a file to a list of list of STRING; It differs from
     # np.genfromtxt in that the number of columns doesn't need to be constant
-    data = []
     with open(filename, 'r') as data_file:
-        if verbose:
-            print('Reading {}...'.format(filename))
+        # if verbose:
+        #     print('Reading {}...'.format(filename))
         lines = data_file.readlines()
-        if verbose:
-            print('Converting {} to correct array...'.format(filename))
+        # if verbose:
+        #     print('Converting {} to correct array...'.format(filename))
         data = [lines[i].strip().split() for i in range(len(lines))]
     return data
 
 
 def read_first_line(filename):
     # Read fist line of file
-    data = []
     with open(filename, 'r') as data_file:
         line = data_file.readline()
         data = line.strip().split()
     return data
 
 
-def sparse_file_to_sparse_list(filename, verbose=True):
+def sparse_file_to_sparse_list(filename):
     # Converts a sparse data file to a sparse list, so that:
     # sparse_list[i][j] = (a,b) means matrix[i][a]=b
     data_file = open(filename, 'r')
-    if verbose:
-        print('Reading {}...'.format(filename))
+    # if verbose:
+    #     print('Reading {}...'.format(filename))
     lines = data_file.readlines()
-    if verbose:
-        print('Converting {} to correct array')
+    # if verbose:
+    #     print('Converting {} to correct array')
     data = [lines[i].split(' ') for i in range(len(lines))]
-    if verbose:
-        print('Converting {} to sparse list'.format(filename))
+    # if verbose:
+    #     print('Converting {} to sparse list'.format(filename))
 
     _converter = lambda a_: (int(a_[0]), np.float32(float(a_[1])))
     return [[_converter(data[i][j].rstrip().split(':'))
@@ -146,7 +131,7 @@ def sparse_file_to_sparse_list(filename, verbose=True):
             for i in range(len(data))]
 
 
-def sparse_list_to_csr_sparse(sparse_list, nbr_features, verbose=True):
+def sparse_list_to_csr_sparse(sparse_list, nbr_features):
     # This function takes as argument a matrix of tuple representing a sparse
     # matrix and the number of features.
     # sparse_list[i][j] = (a,b) means matrix[i][a]=b
@@ -155,16 +140,17 @@ def sparse_list_to_csr_sparse(sparse_list, nbr_features, verbose=True):
     # construction easier w/ dok_sparse...
     dok_sparse = scipy.sparse.dok_matrix((nbr_samples, nbr_features),
                                          dtype=np.float32)
-    if verbose:
-        print('\tConverting sparse list to dok sparse matrix')
+    # if verbose:
+    #     print('\tConverting sparse list to dok sparse matrix')
     for row in range(nbr_samples):
         for column in range(len(sparse_list[row])):
             (feature, value) = sparse_list[row][column]
             dok_sparse[row, feature - 1] = value
-    if verbose:
-        print('\tConverting dok sparse matrix to csr sparse matrix')
-        # but csr better for shuffling data or other tricks
+    # if verbose:
+    #    print('\tConverting dok sparse matrix to csr sparse matrix')
+    #     # but csr better for shuffling data or other tricks
     return dok_sparse.tocsr()
+
 
 def load_labels(filename):
     return np.genfromtxt(filename, dtype=np.float64)
@@ -172,52 +158,33 @@ def load_labels(filename):
 
 class CompetitionDataManager(DataManager):
 
-    ''' This class aims at loading and saving data easily with a cache and at generating a dictionary (self.info) in which each key is a feature (e.g. : name, format, feat_num,...).
-    Methods defined here are :
-    __init__ (...)
-        x.__init__([(feature, value)]) -> void
-        Initialize the info dictionary with the tuples (feature, value) given as argument. It recognizes the type of value (int, string) and assign value to info[feature]. An unlimited number of tuple can be sent.
+    def __init__(self, name, encode_labels=True):
+        input_dir = os.path.dirname(name)
+        if not input_dir:
+            input_dir = "."
+        name = os.path.basename(name)
 
-    getInfo (...)
-        x.getInfo (filename) -> void
-        Fill the dictionary with an info file. Each line of the info file must have this format 'feature' : value
-        The information is obtained from the public.info file if it exists, or inferred from the data files
-
-    getInfoFromFile (...)
-        x.getInfoFromFile (filename) -> void
-        Fill the dictionary with an info file. Each line of the info file must have this format 'feature' : value
-    '''
-
-    def __init__(self, name, input_dir, verbose=False, encode_labels=True):
         super(CompetitionDataManager, self).__init__(name)
-
-        if self.name in input_dir:
-            self.input_dir = input_dir
-        else:
-            self.input_dir = input_dir + '/' + self.name + '/'
+        self.input_dir = input_dir + '/' + self.name + '/'
 
         info_file = os.path.join(self.input_dir, self.name + '_public.info')
-        self.getInfo(info_file)
-        self.feat_type = self.loadType(os.path.join(self.input_dir,
-                                                    self.name + '_feat.type'),
-                                       verbose=verbose)
+        print(info_file)
+        self.get_info(info_file)
+        self.feat_type = self.load_type(os.path.join(self.input_dir,
+                                                    self.name + '_feat.type'))
 
-        Xtr = self.loadData(
+        Xtr = self.load_data(
             os.path.join(self.input_dir, self.name + '_train.data'),
-            self.info['train_num'],
-            verbose=verbose)
-        Ytr = self.loadLabel(
+            self.info['train_num'])
+        Ytr = self.load_label(
             os.path.join(self.input_dir, self.name + '_train.solution'),
-            self.info['train_num'],
-            verbose=verbose)
-        Xva = self.loadData(
+            self.info['train_num'])
+        Xva = self.load_data(
             os.path.join(self.input_dir, self.name + '_valid.data'),
-            self.info['valid_num'],
-            verbose=verbose)
-        Xte = self.loadData(
+            self.info['valid_num'])
+        Xte = self.load_data(
             os.path.join(self.input_dir, self.name + '_test.data'),
-            self.info['test_num'],
-            verbose=verbose)
+            self.info['test_num'])
 
         self._data['X_train'] = Xtr
         self._data['Y_train'] = Ytr
@@ -227,31 +194,30 @@ class CompetitionDataManager(DataManager):
         p = os.path.join(self.input_dir, self.name + '_valid.solution')
         if os.path.exists(p):
             try:
-                self._data['Y_valid'] = self.loadLabel(p,
-                                                       self.info['valid_num'],
-                                                       verbose=verbose)
+                self._data['Y_valid'] = self.load_label(p,
+                                                        self.info['valid_num'])
             except (IOError, OSError):
                 pass
 
         p = os.path.join(self.input_dir, self.name + '_test.solution')
         if os.path.exists(p):
             try:
-                self.data['Y_test'] = self.loadLabel(p, self.info['test_num'],
-                                                     verbose=verbose)
-            except (IOError, OSError) as e:
+                self.data['Y_test'] = self.load_label(p, self.info['test_num'])
+            except (IOError, OSError):
                 pass
 
         if encode_labels:
             self.perform1HotEncoding()
 
-    def loadData(self, filename, num_points, verbose=True):
-        ''' Get the data from a text file in one of 3 formats: matrix, sparse, binary_sparse'''
-        if verbose:
-            print('========= Reading ' + filename)
-        start = time.time()
+    def load_data(self, filename, num_points):
+        """Get the data from a text file in one of 3 formats:
+        matrix, sparse, binary_sparse"""
+        # if verbose:
+        #     print('========= Reading ' + filename)
+        # start = time.time()
 
         if 'format' not in self.info:
-            self.getFormatData(filename)
+            self.get_format_data(filename)
         if competition_c_functions_is_there:
             data_func = {
                 'dense': competition_c_functions.read_dense_file,
@@ -275,16 +241,16 @@ class CompetitionDataManager(DataManager):
 
             data = data_func[self.info['format']](filename, self.feat_type)
 
-        end = time.time()
-        if verbose:
-            print('[+] Success in %5.2f sec' % (end - start))
+        # end = time.time()
+        # if verbose:
+        #     print('[+] Success in %5.2f sec' % (end - start))
         return data
 
-    def loadLabel(self, filename, num_points, verbose=True):
+    def load_label(self, filename, num_points):
         """Get the solution/truth values."""
-        if verbose:
-            print('========= Reading ' + filename)
-        start = time.time()
+        # if verbose:
+        #     print('========= Reading ' + filename)
+        # start = time.time()
 
         # IG: Here change to accommodate the new multiclass label format
         if competition_c_functions_is_there:
@@ -309,36 +275,34 @@ class CompetitionDataManager(DataManager):
             else:
                 label = np.ravel(load_labels(filename))  # get a column vector
 
-        end = time.time()
-        if verbose:
-            print('[+] Success in %5.2f sec' % (end - start))
+        # end = time.time()
+        # if verbose:
+        #     print('[+] Success in %5.2f sec' % (end - start))
         return label
 
-    def loadType(self, filename, verbose=True):
+    def load_type(self, filename):
         """Get the variable types."""
-        if verbose:
-            print('========= Reading ' + filename)
-        start = time.time()
-        type_list = []
+        # if verbose:
+        #     print('========= Reading ' + filename)
+        # start = time.time()
+        # type_list = []
         if os.path.isfile(filename):
             if competition_c_functions_is_there:
-                type_list = competition_c_functions.file_to_array(
-                    filename,
-                    verbose=False)
+                type_list = competition_c_functions.file_to_array(filename)
             else:
-                type_list = file_to_array(filename, verbose=False)
+                type_list = file_to_array(filename)
         else:
             n = self.info['feat_num']
             type_list = [self.info['feat_type']] * n
         type_list = np.array(type_list).ravel()
-        end = time.time()
-        if verbose:
-            print('[+] Success in %5.2f sec' % (end - start))
+        # end = time.time()
+        # if verbose:
+        #     print('[+] Success in %5.2f sec' % (end - start))
         return type_list
 
-    def getInfo(self, filename, verbose=True):
-        ''' Get all information {attribute = value} pairs from the filename (public.info file),
-              if it exists, otherwise, output default values'''
+    def get_info(self, filename):
+        """Get all information {key = value} pairs from the filename
+        (public.info file), if it exists, otherwise, output default values"""
         if filename is None:
             basename = self.name
             input_dir = self.input_dir
@@ -348,11 +312,11 @@ class CompetitionDataManager(DataManager):
             basename = '_'.join(os.path.basename(filename).split('_')[:-1])
             input_dir = os.path.dirname(filename)
         if os.path.exists(filename):
-            self.getInfoFromFile(filename)
+            self.get_info_from_file(filename)
             print('Info file found : ' + os.path.abspath(filename))
             # Finds the data format ('dense', 'sparse', or 'sparse_binary')
-            self.getFormatData(os.path.join(input_dir,
-                                            basename + '_train.data'))
+            self.get_format_data(os.path.join(input_dir,
+                                              basename + '_train.data'))
         else:
             raise NotImplementedError('The user must always provide an info '
                                       'file.')
@@ -361,8 +325,8 @@ class CompetitionDataManager(DataManager):
 
         return self.info
 
-    def getInfoFromFile(self, filename):
-        ''' Get all information {attribute = value} pairs from the public.info file'''
+    def get_info_from_file(self, filename):
+        """Get all information {key = value} pairs from public.info file"""
         with open(filename, 'r') as info_file:
             lines = info_file.readlines()
             features_list = list(
@@ -374,7 +338,7 @@ class CompetitionDataManager(DataManager):
                     self.info[key] = int(self.info[key])
         return self.info
 
-    def getFormatData(self, filename):
+    def get_format_data(self, filename):
         """Get the data format directly from the data file (in case we do not
         have an info file)"""
         if 'format' in self.info.keys():

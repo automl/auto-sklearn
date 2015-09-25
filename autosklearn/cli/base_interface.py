@@ -23,7 +23,6 @@ def store_and_or_load_data(dataset_info, outputdir):
         save_path = dataset_info
     else:
         dataset = os.path.basename(dataset_info)
-        data_dir = os.path.dirname(dataset_info)
         save_path = os.path.join(outputdir, dataset + '_Manager.pkl')
 
     if not os.path.exists(save_path):
@@ -38,9 +37,7 @@ def store_and_or_load_data(dataset_info, outputdir):
         # It is not yet sure, whether the file already exists
         try:
             if not os.path.exists(save_path):
-                D = CompetitionDataManager(dataset, data_dir,
-                                           verbose=True,
-                                           encode_labels=True)
+                D = CompetitionDataManager(dataset_info, encode_labels=True)
                 fh = open(save_path, 'w')
                 pickle.dump(D, fh, -1)
                 fh.close()
