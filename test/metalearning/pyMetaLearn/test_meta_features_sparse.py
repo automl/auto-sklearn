@@ -43,18 +43,8 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest):
         # dense matrix to sparse, the values which are encoded to zero are lost
         X_sparse = X.copy()
         NaNs = ~np.isfinite(X_sparse)
-        zeros = X_sparse == 0
         X_sparse[NaNs] = 0
         X_sparse = sparse.csr_matrix(X_sparse)
-        counter = 0
-        for i, j in itertools.product(range(X.shape[0]), range(X.shape[1])):
-            # Set values which were originally zero back to zero
-            if zeros[i, j]:
-                X_sparse[i, j] = 0
-            # Set one fourth of the original NaNs back to NaN
-            if i % 2 == 0 and j % 2 == 0 and NaNs[i, j]:
-                X_sparse[i, j] = np.NaN
-                counter += 1
 
         ohe = OneHotEncoder(self.categorical)
         X_transformed = X_sparse.copy()
@@ -100,20 +90,20 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest):
         self.assertTrue(sparse.issparse(mf.value))
         self.assertEqual(mf.value.shape, self.X.shape)
         self.assertEqual(mf.value.dtype, np.bool)
-        self.assertEqual(5319, np.sum(mf.value.data))
+        self.assertEqual(0, np.sum(mf.value.data))
 
     def test_number_of_missing_values(self):
         mf = self.mf["NumberOfMissingValues"](self.X, self.y, self.categorical)
-        self.assertEqual(5319, mf.value)
+        self.assertEqual(0, mf.value)
 
     def test_percentage_missing_values(self):
         mf = self.mf["PercentageOfMissingValues"](self.X, self.y, self.categorical)
-        self.assertEqual(float(5319)/float(898*38), mf.value)
+        self.assertEqual(0, mf.value)
 
     def test_number_of_Instances_with_missing_values(self):
         mf = self.mf["NumberOfInstancesWithMissingValues"](
             self.X, self.y, self.categorical)
-        self.assertEqual(898/2, mf.value)
+        self.assertEqual(0, mf.value)
 
     def test_percentage_of_Instances_with_missing_values(self):
         self.mf.set_value("NumberOfInstancesWithMissingValues",
@@ -121,12 +111,12 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest):
                               self.X, self.y, self.categorical))
         mf = self.mf["PercentageOfInstancesWithMissingValues"](self.X, self.y,
                                                                self.categorical)
-        self.assertAlmostEqual(0.5, mf.value)
+        self.assertAlmostEqual(0, mf.value)
 
     def test_number_of_features_with_missing_values(self):
         mf = self.mf["NumberOfFeaturesWithMissingValues"](self.X, self.y,
                                                           self.categorical)
-        self.assertEqual(14, mf.value)
+        self.assertEqual(0, mf.value)
 
     def test_percentage_of_features_with_missing_values(self):
         self.mf.set_value("NumberOfFeaturesWithMissingValues",
@@ -134,21 +124,47 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest):
                               self.X, self.y, self.categorical))
         mf = self.mf["PercentageOfFeaturesWithMissingValues"](self.X, self.y,
                                                               self.categorical)
-        self.assertAlmostEqual(float(14)/float(38), mf.value)
+        self.assertAlmostEqual(0, mf.value)
+
+    def test_num_symbols(self):
+        mf = self.helpers["NumSymbols"](self.X, self.y, self.categorical)
+
+        symbol_frequency = [2, 0, 6, 0, 1, 3, 0, 0, 3, 1, 0, 0, 0, 1, 0, 0,
+                            0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 1, 2, 2]
+        self.assertEqual(mf.value, symbol_frequency)
+
+    def test_symbols_max(self):
+        # this is attribute steel
+        mf = self.mf["SymbolsMax"](self.X, self.y, self.categorical)
+        self.assertEqual(mf.value, 6)
+
+    def test_symbols_mean(self):
+        mf = self.mf["SymbolsMean"](self.X, self.y, self.categorical)
+        # Empty looking spaces denote empty attributes
+        symbol_frequency = [2, 6, 1, 3, 3, 1, 1, 2, 1, 1, 2, 2]
+        self.assertAlmostEqual(mf.value, np.mean(symbol_frequency))
+
+    def test_symbols_std(self):
+        mf = self.mf["SymbolsSTD"](self.X, self.y, self.categorical)
+        symbol_frequency = [2, 6, 1, 3, 3, 1, 1, 2, 1, 1, 2, 2]
+        self.assertAlmostEqual(mf.value, np.std(symbol_frequency))
+
+    def test_symbols_sum(self):
+        mf = self.mf["SymbolsSum"](self.X, self.y, self.categorical)
+        self.assertEqual(mf.value, 25)
 
     def test_skewnesses(self):
         mf = self.helpers["Skewnesses"](self.X_transformed, self.y)
-        self.assertEqual(str([0.0, np.nan, np.nan, 0.0, np.nan, np.nan, np.nan,
-                              np.nan, 0.0, 0.0, -2.1717380859814943, 0.0,
-                              np.nan, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                              -1.3406501827593897, 0.0, 0.0, 0.0, 0.0, np.nan,
-                              0.0, 0.0, 6.8652365656298615, 0.0, 0.0, 0.0, 0.0,
-                              8.456571731037167, 0.0, 0.0, 1.1517139198634414,
-                              0.0, 0.7689648524911159, 0.0, 0.0, 0.0, 0.0,
-                              7.856842927127302, 0.0, 0.0, 0.0,
-                              3.563940300169727, np.nan, 10.47659050196491,
-                              np.nan, 0.0, 0.0, 0.0, 0.0, np.nan, 0.0, 0.0,
-                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, np.nan, 0.0, 0.0,
+        self.assertEqual(str([np.nan, np.nan, np.nan, 0.0, np.nan, np.nan,
+                              np.nan, np.nan, 0.0, np.nan, np.nan, 0.0,
+                              np.nan, 0.0, 0.0, 0.0, 0.0, 0.0, np.nan, np.nan,
+                              0.0, np.nan, 0.0, 0.0, np.nan, 0.0, np.nan,
+                              np.nan, np.nan, 0.0, 0.0, 0.0, np.nan, 0.0,
+                              np.nan, np.nan, np.nan, np.nan, 0.0, np.nan,
+                              np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
+                              np.nan, np.nan, np.nan, np.nan, 0.0, 0.0, np.nan,
+                              np.nan, np.nan, np.nan, np.nan, 0.0, np.nan,
+                              0.0, np.nan, 0.0, 0.0, np.nan, 0.0, 0.0,
                               -0.6969708499033568, 0.626346013011263,
                               0.38099875966240376, 1.4762248835141034,
                               0.07687661087633728, 0.36889797830360116]),
@@ -156,30 +172,33 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest):
 
     def test_kurtosisses(self):
         mf = self.helpers["Kurtosisses"](self.X_transformed, self.y)
-        self.assertEqual(str([-3.0, np.nan, np.nan, -3.0, np.nan, np.nan, np.nan, np.nan, -3.0, -3.0,
-                              2.716446314102563, -3.0, np.nan, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0,
-                              -0.20265708746721423, -3.0, -3.0, -3.0, -3.0, np.nan, -3.0, -3.0,
-                              45.131473102061314, -3.0, -3.0, -3.0, -3.0, 69.51360544217692,
-                              -3.0, -3.0, -0.6735550467927869, -3.0, -1.4086930556333161, -3.0,
-                              -3.0, -3.0, -3.0, 59.729980781550324, -3.0, -3.0, -3.0,
-                              10.701670463173883, np.nan, 107.75894854586127, np.nan, -3.0, -3.0, -3.0,
-                              -3.0, np.nan, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, np.nan,
-                              -3.0, -3.0, -1.100583611425576, -1.1786325509475737,
-                              -1.2387998382327916, 1.3934382644137013, -0.9768209837948341,
+        self.assertEqual(str([np.nan, np.nan, np.nan, -3.0, np.nan, np.nan,
+                              np.nan, np.nan, -3.0, np.nan, np.nan, -3.0,
+                              np.nan, -3.0, -3.0, -3.0, -3.0, -3.0, np.nan,
+                              np.nan, -3.0, np.nan, -3.0, -3.0, np.nan, -3.0,
+                              np.nan, np.nan, np.nan, -3.0, -3.0, -3.0, np.nan,
+                              -3.0, np.nan, np.nan, np.nan, np.nan, -3.0,
+                              np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
+                              np.nan, np.nan, np.nan, np.nan, np.nan, -3.0,
+                              -3.0, np.nan, np.nan, np.nan, np.nan, np.nan,
+                              -3.0, np.nan, -3.0, np.nan, -3.0, -3.0, np.nan,
+                              -3.0, -3.0, -1.100583611425576,
+                              -1.1786325509475737, -1.2387998382327916,
+                              1.3934382644137013, -0.9768209837948341,
                               -1.7937072296512782]), str(mf.value))
 
     def test_pca_95percent(self):
         mf = self.mf["PCAFractionOfComponentsFor95PercentVariance"](
             self.X_transformed, self.y)
-        self.assertAlmostEqual(0.3611111111111111, mf.value)
+        self.assertAlmostEqual(0.20833333333333334, mf.value)
 
     def test_pca_kurtosis_first_pc(self):
         mf = self.mf["PCAKurtosisFirstPC"](self.X_transformed, self.y)
-        self.assertAlmostEqual(-1.72604693348, mf.value)
+        self.assertAlmostEqual(-0.29762845690133855, mf.value)
 
     def test_pca_skewness_first_pc(self):
         mf = self.mf["PCASkewnessFirstPC"](self.X_transformed, self.y)
-        self.assertAlmostEqual(-0.0158262, mf.value)
+        self.assertAlmostEqual(-0.42524696889893054, mf.value)
 
     def test_calculate_all_metafeatures(self):
         mf = meta_features.calculate_all_metafeatures(
