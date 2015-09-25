@@ -6,18 +6,6 @@ import numpy as np
 from autosklearn.constants import *
 
 
-def _read_array(filename):
-    """
-    Read array and convert to 2d np arrays.
-    :param filename:
-    :return:
-    """
-    array = np.genfromtxt(filename, dtype=float)
-    if len(array.shape) == 1:
-        array = array.reshape(-1, 1)
-    return array
-
-
 def binarize_predictions(array, task=BINARY_CLASSIFICATION):
     """
     Turn predictions into decisions {0,1} by selecting the class with largest

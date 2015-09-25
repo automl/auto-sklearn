@@ -3,7 +3,6 @@ from __future__ import print_function
 
 import numpy as np
 import scipy as sp
-from sklearn import metrics
 
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     BINARY_CLASSIFICATION
@@ -136,22 +135,3 @@ def prior_log_loss(frac_pos, task=BINARY_CLASSIFICATION):
         base_log_loss = np.sum(pos_class_log_loss_)
     return base_log_loss
 
-    # sklearn implementations for comparison
-
-
-def log_loss_(solution, prediction):
-    return metrics.log_loss(solution, prediction)
-
-
-def r2_score_(solution, prediction):
-    return metrics.r2_score(solution, prediction)
-
-
-def a_score_(solution, prediction):
-    mad = float(mv_mean(abs(solution - mv_mean(solution))))
-    return 1 - metrics.mean_absolute_error(solution, prediction) / mad
-
-
-def auc_score_(solution, prediction):
-    auc = metrics.roc_auc_score(solution, prediction, average=None)
-    return mv_mean(auc)

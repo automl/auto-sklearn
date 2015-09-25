@@ -24,7 +24,5 @@
 
 from .common import *
 from .classification_metrics import *
-from .specialized_scores import *
 from .util import *
-from .io import *
 from .regression_metrics import *
