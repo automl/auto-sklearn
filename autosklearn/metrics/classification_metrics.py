@@ -11,10 +11,10 @@ import scipy as sp
 
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     BINARY_CLASSIFICATION
-from autosklearn.scores.common import mv_mean, binarize_predictions, \
+from autosklearn.metrics.common import mv_mean, binarize_predictions, \
     acc_stat, \
     tied_rank
-from autosklearn.scores.util import log_loss, prior_log_loss
+from autosklearn.metrics.util import log_loss, prior_log_loss
 
 
 def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION):

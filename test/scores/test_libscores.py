@@ -3,7 +3,7 @@ import unittest
 
 import numpy as np
 
-from autosklearn.scores import acc_metric
+from autosklearn.metrics import acc_metric
 
 
 class LibScoresTest(unittest.TestCase):

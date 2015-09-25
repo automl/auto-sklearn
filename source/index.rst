@@ -115,7 +115,7 @@ A short guide to the code
 * `data`: code to read and store machine learning datasets.
 * `evaluation`: classes to control the execution of machine learning.
   algorithms and resampling of the data.
-* `scores`: contains metrics which can be optimized.
+* `metrics`: contains metrics which can be optimized.
 * `util`: several utilityy functions.
 
 Contributors

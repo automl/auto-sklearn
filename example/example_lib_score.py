@@ -7,7 +7,7 @@ from sys import stderr
 
 import numpy as np
 
-from autosklearn.scores.libscores import show_all_scores
+from autosklearn.metrics.libscores import show_all_scores
 
 swrite = stderr.write
 

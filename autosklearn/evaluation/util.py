@@ -4,7 +4,7 @@ import lockfile
 import numpy as np
 
 from autosklearn.constants import *
-from autosklearn.scores import sanitize_array, a_metric, r2_metric, \
+from autosklearn.metrics import sanitize_array, a_metric, r2_metric, \
     normalize_array, bac_metric, auc_metric, f1_metric, pac_metric, \
     acc_metric, regression_metrics, classification_metrics
 

@@ -7,7 +7,7 @@ from __future__ import print_function
 import numpy as np
 
 from autosklearn.constants import REGRESSION
-from autosklearn.scores.common import mv_mean
+from autosklearn.metrics.common import mv_mean
 
 
 def r2_metric(solution, prediction, task=REGRESSION):

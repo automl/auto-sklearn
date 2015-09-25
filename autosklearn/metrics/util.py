@@ -6,7 +6,7 @@ import scipy as sp
 
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     BINARY_CLASSIFICATION
-from autosklearn.scores.common import mv_mean, binarize_predictions
+from autosklearn.metrics.common import mv_mean, binarize_predictions
 
 
 def sanitize_array(array):
