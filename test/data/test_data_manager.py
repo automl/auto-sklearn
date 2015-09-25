@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 from sklearn.utils.testing import assert_array_almost_equal
 
-from autosklearn.data.data_manager import DataManager
+from autosklearn.data.abstract_data_manager import AbstractDataManager
 
 
 dataset_train = [[2.5, 3.3, 2, 5, 1, 1],
@@ -25,7 +25,7 @@ B = "Binary"
 C = "Categorical"
 
 
-class InitFreeDataManager(DataManager):
+class InitFreeDataManager(AbstractDataManager):
     def __init__(self):
         pass
 

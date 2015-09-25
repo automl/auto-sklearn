@@ -1,4 +1,6 @@
 # -*- encoding: utf-8 -*-
+import abc
+
 import numpy as np
 import scipy.sparse
 
@@ -7,7 +9,8 @@ from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
 from autosklearn.util import predict_RAM_usage
 
 
-class DataManager(object):
+class AbstractDataManager():
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, name):
         self._data = dict()

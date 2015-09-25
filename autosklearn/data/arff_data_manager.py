@@ -5,7 +5,7 @@ import arff
 import numpy as np
 from scipy import sparse
 
-from autosklearn.data.data_manager import DataManager
+from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.constants import *
 
 
@@ -48,7 +48,7 @@ def _load_arff(filename, target):
     return X, y, dataset_name, feat_type
 
 
-class ARFFDataManager(DataManager):
+class ARFFDataManager(AbstractDataManager):
     def __init__(self, dataset, task, metric,
                  target, encode_labels=True):
 
@@ -103,7 +103,7 @@ class ARFFDataManager(DataManager):
                              'datapoints, but have %d and %d.' % (X_train.shape[0],
                                                                   y_train.shape[0]))
         if self.feat_type is None:
-            self.feat_type = ['Numerical'] * X.shape[1]
+            self.feat_type = ['Numerical'] * X_train.shape[1]
         if X_train.shape[1] != len(self.feat_type):
             raise ValueError('X and feat type must have the same dimensions, '
                              'but are %d and %d.' %

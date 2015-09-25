@@ -13,7 +13,7 @@ import scipy.sparse
 
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
     STRING_TO_TASK_TYPES,  MULTICLASS_CLASSIFICATION
-from autosklearn.data.data_manager import DataManager
+from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.util import convert_to_num
 
 try:
@@ -156,7 +156,7 @@ def load_labels(filename):
     return np.genfromtxt(filename, dtype=np.float64)
 
 
-class CompetitionDataManager(DataManager):
+class CompetitionDataManager(AbstractDataManager):
 
     def __init__(self, name, encode_labels=True):
         input_dir = os.path.dirname(name)
