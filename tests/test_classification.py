@@ -6,7 +6,6 @@ import unittest
 
 import mock
 import numpy as np
-from scipy.linalg import LinAlgError
 import sklearn.datasets
 import sklearn.decomposition
 import sklearn.cross_validation
@@ -72,7 +71,6 @@ class TestParamSklearnClassifier(unittest.TestCase):
         for i in range(2):
             cs = ParamSklearnClassifier.get_hyperparameter_search_space()
             default = cs.get_default_configuration()
-            print cs
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
             auto = ParamSklearnClassifier(default)
             auto = auto.fit(X_train, Y_train)
@@ -83,18 +81,28 @@ class TestParamSklearnClassifier(unittest.TestCase):
 
     def test_configurations(self):
         # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 2014
+        limit = 4000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
 
         cs = ParamSklearnClassifier.get_hyperparameter_search_space()
 
-        print cs
+        print(cs)
+        cs.seed(1)
 
         for i in range(10):
             config = cs.sample_configuration()
+            config._populate_values()
+            if 'classifier:passive_aggresive:n_iter' in config and \
+                    config['classifier:passive_aggresive:n_iter'] is not None:
+                config._values['classifier:passive_aggresive:n_iter'] = 5
+            if 'classifier:sgd:n_iter' in config and \
+                    config['classifier:sgd:n_iter'] is not None:
+                config._values['classifier:sgd:n_iter'] = 5
+
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
             cls = ParamSklearnClassifier(config, random_state=1)
-            print config
+            print(config)
             try:
                 cls.fit(X_train, Y_train)
                 X_test_ = X_test.copy()
@@ -103,70 +111,59 @@ class TestParamSklearnClassifier(unittest.TestCase):
                 predicted_probabiliets = cls.predict_proba(X_test_)
                 self.assertIsInstance(predicted_probabiliets, np.ndarray)
             except ValueError as e:
-                #if "Floating-point under-/overflow occurred at epoch" in \
-                #        e.message or \
-                if "removed all features" in e.message or \
-                        "all features are discarded" in e.message:
+                if "Floating-point under-/overflow occurred at epoch" in \
+                        e.args[0] or \
+                        "removed all features" in e.args[0] or \
+                        "all features are discarded" in e.args[0]:
                     continue
                 else:
-                    print config
-                    print traceback.format_exc()
+                    print(config)
+                    print(traceback.format_exc())
                     raise e
-            # except LinAlgError as e:
-            #    if "not positive definite, even with jitter" in e.message:
-            #        continue
-            #    else:
-            #        print config
-            #        print traceback.format_exc()
-            #        raise e
-            #except AttributeError as e:
-            #    # Some error in QDA
-            #    if "log" == e.message:
-            #        print config
-            #        print traceback.format_exc()
-            #        raise e
-            #        continue
-            #    else:
-            #        print config
-            #        print traceback.format_exc()
-            #        raise e
             except RuntimeWarning as e:
-                if "invalid value encountered in sqrt" in e.message:
+                if "invalid value encountered in sqrt" in e.args[0]:
                     continue
-                elif "divide by zero encountered in divide" in e.message:
+                elif "divide by zero encountered in" in e.args[0]:
                     continue
-                elif "invalid value encountered in divide" in e.message:
+                elif "invalid value encountered in divide" in e.args[0]:
+                    continue
+                elif "invalid value encountered in true_divide" in e.args[0]:
                     continue
                 else:
-                    print config
-                    print traceback.format_exc()
+                    print(config)
+                    print(traceback.format_exc())
                     raise e
             except UserWarning as e:
-                if "FastICA did not converge" in e.message:
+                if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
-                    print config
-                    print traceback.format_exc()
+                    print(config)
+                    print(traceback.format_exc())
                     raise e
             except MemoryError as e:
                 continue
 
     def test_configurations_signed_data(self):
         # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 2014
+        limit = 4000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
-            dataset_properties={'signed': True}
-        )
+            dataset_properties={'signed': True})
 
-        print cs
+        print(cs)
 
         for i in range(10):
             config = cs.sample_configuration()
+            config._populate_values()
+            if config['classifier:passive_aggresive:n_iter'] is not None:
+                config._values['classifier:passive_aggresive:n_iter'] = 5
+            if config['classifier:sgd:n_iter'] is not None:
+                config._values['classifier:sgd:n_iter'] = 5
+
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
             cls = ParamSklearnClassifier(config, random_state=1)
-            print config
+            print(config)
             try:
                 cls.fit(X_train, Y_train)
                 X_test_ = X_test.copy()
@@ -175,65 +172,55 @@ class TestParamSklearnClassifier(unittest.TestCase):
                 predicted_probabiliets = cls.predict_proba(X_test_)
                 self.assertIsInstance(predicted_probabiliets, np.ndarray)
             except ValueError as e:
-                # if "Floating-point under-/overflow occurred at epoch" in \
-                #        e.message or \
-                if "removed all features" in e.message or \
-                                "all features are discarded" in e.message:
+                if "Floating-point under-/overflow occurred at epoch" in \
+                       e.args[0] or \
+                       "removed all features" in e.args[0] or \
+                                "all features are discarded" in e.args[0]:
                     continue
                 else:
-                    print config
-                    print traceback.format_exc()
+                    print(config)
+                    print(traceback.format_exc())
                     raise e
-            # except LinAlgError as e:
-            # if "not positive definite, even with jitter" in e.message:
-            #        continue
-            #    else:
-            #        print config
-            #        print traceback.format_exc()
-            #        raise e
-            #except AttributeError as e:
-            #    # Some error in QDA
-            #    if "log" == e.message:
-            #        print config
-            #        print traceback.format_exc()
-            #        raise e
-            #        continue
-            #    else:
-            #        print config
-            #        print traceback.format_exc()
-            #        raise e
             except RuntimeWarning as e:
-                if "invalid value encountered in sqrt" in e.message:
+                if "invalid value encountered in sqrt" in e.args[0]:
                     continue
-                elif "divide by zero encountered in divide" in e.message:
+                elif "divide by zero encountered in" in e.args[0]:
                     continue
-                elif "invalid value encountered in divide" in e.message:
+                elif "invalid value encountered in divide" in e.args[0]:
+                    continue
+                elif "invalid value encountered in true_divide" in e.args[0]:
                     continue
                 else:
-                    print config
-                    print traceback.format_exc()
+                    print(config)
+                    print(traceback.format_exc())
                     raise e
             except UserWarning as e:
-                if "FastICA did not converge" in e.message:
+                if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
-                    print config
-                    print traceback.format_exc()
+                    print(config)
+                    print(traceback.format_exc())
                     raise e
             except MemoryError as e:
                 continue
 
     def test_configurations_sparse(self):
         # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 2014
+        limit = 4000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
-        print cs
+        print(cs)
         for i in range(10):
             config = cs.sample_configuration()
-            print config
+            config._populate_values()
+            if config['classifier:passive_aggresive:n_iter'] is not None:
+                config._values['classifier:passive_aggresive:n_iter'] = 5
+            if config['classifier:sgd:n_iter'] is not None:
+                config._values['classifier:sgd:n_iter'] = 5
+
+            print(config)
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                            make_sparse=True)
             cls = ParamSklearnClassifier(config, random_state=1)
@@ -241,54 +228,51 @@ class TestParamSklearnClassifier(unittest.TestCase):
                 cls.fit(X_train, Y_train)
                 predictions = cls.predict(X_test)
             except ValueError as e:
-                # if "Floating-point under-/overflow occurred at epoch" in \
-                #        e.message or \
-                if "removed all features" in e.message or \
-                                "all features are discarded" in e.message:
+                if "Floating-point under-/overflow occurred at epoch" in \
+                       e.args[0] or \
+                        "removed all features" in e.args[0] or \
+                                "all features are discarded" in e.args[0]:
                     continue
                 else:
-                    print config
+                    print(config)
                     traceback.print_tb(sys.exc_info()[2])
                     raise e
-            # except LinAlgError as e:
-            #     if "not positive definite, even with jitter" in e.message:
-            #         continue
-            #     else:
-            #         print config
-            #         raise e
-            # except AttributeError as e:
-            #     # Some error in QDA
-            #     if "log" == e.message:
-            #         continue
-            #     else:
-            #         print config
-            #         raise e
             except RuntimeWarning as e:
-                if "invalid value encountered in sqrt" in e.message:
+                if "invalid value encountered in sqrt" in e.args[0]:
                     continue
-                elif "divide by zero encountered in divide" in e.message:
+                elif "divide by zero encountered in" in e.args[0]:
+                    continue
+                elif "invalid value encountered in divide" in e.args[0]:
+                    continue
+                elif "invalid value encountered in true_divide" in e.args[0]:
                     continue
                 else:
-                    print config
+                    print(config)
                     raise e
             except UserWarning as e:
-                if "FastICA did not converge" in e.message:
+                if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
-                    print config
+                    print(config)
                     raise e
 
     def test_configurations_categorical_data(self):
         # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 2014
+        limit = 4000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
-        print cs
+        print(cs)
         for i in range(10):
             config = cs.sample_configuration()
-            print config
+            config._populate_values()
+            if config['classifier:passive_aggresive:n_iter'] is not None:
+                config._values['classifier:passive_aggresive:n_iter'] = 5
+            if config['classifier:sgd:n_iter'] is not None:
+                config._values['classifier:sgd:n_iter'] = 5
+
+            print(config)
             categorical = [True, True, True, False, False, True, True, True,
                            False, True, True, True, True, True, True, True,
                            True, True, True, True, True, True, True, True, True,
@@ -308,41 +292,32 @@ class TestParamSklearnClassifier(unittest.TestCase):
                         init_params={'one_hot_encoding:categorical_features': categorical})
                 predictions = cls.predict(X_test)
             except ValueError as e:
-                # if "Floating-point under-/overflow occurred at epoch" in \
-                # e.message or \
-                if "removed all features" in e.message or \
-                                "all features are discarded" in e.message:
+                if "Floating-point under-/overflow occurred at epoch" in \
+                    e.args[0] or \
+                    "removed all features" in e.args[0] or \
+                                "all features are discarded" in e.args[0]:
                     continue
                 else:
-                    print config
+                    print(config)
                     traceback.print_tb(sys.exc_info()[2])
                     raise e
-            # except LinAlgError as e:
-            # if "not positive definite, even with jitter" in e.message:
-            #         continue
-            #     else:
-            #         print config
-            #         raise e
-            # except AttributeError as e:
-            #     # Some error in QDA
-            #     if "log" == e.message:
-            #         continue
-            #     else:
-            #         print config
-            #         raise e
             except RuntimeWarning as e:
-                if "invalid value encountered in sqrt" in e.message:
+                if "invalid value encountered in sqrt" in e.args[0]:
                     continue
-                elif "divide by zero encountered in divide" in e.message:
+                elif "divide by zero encountered in" in e.args[0]:
+                    continue
+                elif "invalid value encountered in divide" in e.args[0]:
+                    continue
+                elif "invalid value encountered in true_divide" in e.args[0]:
                     continue
                 else:
-                    print config
+                    print(config)
                     raise e
             except UserWarning as e:
-                if "FastICA did not converge" in e.message:
+                if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
-                    print config
+                    print(config)
                     raise e
 
     def test_get_hyperparameter_search_space(self):
@@ -465,15 +440,6 @@ class TestParamSklearnClassifier(unittest.TestCase):
         cs_mc_ml = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'multilabel': True, 'multiclass': True})
         self.assertEqual(cs_ml, cs_mc_ml)
-
-        # We now have a preprocessing method that handles this case
-        #self.assertRaisesRegexp(ValueError,
-        #                        "No classifier to build a configuration space "
-        #                        "for...", ParamSklearnClassifier.
-        #                        get_hyperparameter_search_space,
-        #                        dataset_properties={'multilabel': True,
-        #                                            'multiclass': True,
-        #                                            'sparse': True})
 
     def test_predict_batched(self):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space()

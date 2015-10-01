@@ -1,6 +1,5 @@
-from abc import ABCMeta, abstractmethod
-from collections import defaultdict, OrderedDict
-import copy
+from abc import ABCMeta
+from collections import defaultdict
 
 import numpy as np
 import sklearn
@@ -86,7 +85,6 @@ class ParamSklearnBaseEstimator(BaseEstimator):
 
         for preproc_name in preprocessors_names:
             preproc_params = {}
-
             for instantiated_hyperparameter in self.configuration:
                 if not instantiated_hyperparameter.startswith(
                         preproc_name + ":"):
@@ -97,8 +95,6 @@ class ParamSklearnBaseEstimator(BaseEstimator):
                 name_ = instantiated_hyperparameter.split(":")[-1]
                 preproc_params[name_] = self.configuration[
                     instantiated_hyperparameter]
-
-            preproc_params.update(init_params_per_method[preproc_name])
 
             if preproc_name in \
                     components.feature_preprocessing_components._preprocessors:
@@ -304,7 +300,6 @@ class ParamSklearnBaseEstimator(BaseEstimator):
                 cs.add_configuration_space(node_name,
                     node.get_hyperparameter_search_space(
                         dataset_properties, include=choices_list))
-
         # And now add forbidden parameter configurations
         # According to matches
         if np.sum(matches) < np.size(matches):

@@ -164,7 +164,6 @@ class Imputer(BaseEstimator, TransformerMixin):
                                                     self.missing_values,
                                                     self.axis)
             else:
-                print type(X), X.dtype, self.dtype
                 X = check_array(X, dtype=self.dtype, force_all_finite=False)
                 self.statistics_ = self._dense_fit(X,
                                                    self.strategy,

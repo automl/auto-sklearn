@@ -31,10 +31,12 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
     def fit(self, X, Y):
         try:
             soft, hard = resource.getrlimit(resource.RLIMIT_AS)
-            soft /= 1024 * 1024
-            print(soft,)
-            maxrss = resource.getrusage(resource.RUSAGE_SELF)[2] / 1024
-            cache_size = (soft - maxrss) / 1.5
+            if soft > 0:
+                soft /= 1024 * 1024
+                maxrss = resource.getrusage(resource.RUSAGE_SELF)[2] / 1024
+                cache_size = (soft - maxrss) / 1.5
+            else:
+                cache_size = 200
         except Exception:
             cache_size = 200
 

@@ -69,22 +69,16 @@ class BaseTest(unittest.TestCase):
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
                          16)
         self.assertEqual(409, len(cs.forbidden_clauses))
-        for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
-            print clause
-
-        print
-        print
-        print
-        print
-
+        #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
+        #    print(clause)
 
         cs = HPOlibConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'sparse': True, 'signed': True}
         cs = base._get_hyperparameter_search_space(cs, dataset_properties,
                                                    exclude, include, pipeline)
 
-        for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
-            print clause
+        #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
+        #    print(clause)
 
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
                          11)

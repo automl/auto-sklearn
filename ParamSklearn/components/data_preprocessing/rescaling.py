@@ -146,10 +146,10 @@ class RescalingChoice(object):
 
     @classmethod
     def get_components(cls):
-        return {'none': NoRescalingComponent,
-                'min/max': MinMaxScalerComponent,
-                'standardize': StandardScalerComponent,
-                'normalize': NormalizerComponent}
+        return OrderedDict((('none', NoRescalingComponent),
+                            ('min/max', MinMaxScalerComponent),
+                            ('standardize', StandardScalerComponent),
+                            ('normalize', NormalizerComponent)))
 
     @classmethod
     def get_available_components(cls, data_prop=None,
@@ -197,7 +197,8 @@ class RescalingChoice(object):
                     break
 
         preprocessor = CategoricalHyperparameter('__choice__',
-                                                 available_preprocessors.keys(),
+                                                 list(
+                                                     available_preprocessors.keys()),
                                                  default=default)
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors:

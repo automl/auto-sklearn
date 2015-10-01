@@ -13,7 +13,7 @@ class GEM(object):
 
 
     def fit(self, X, Y):
-        print X.shape, Y.shape
+        print(X.shape, Y.shape)
         self.N = min(self.N, X.shape[1]-2)
         y_max = int(np.max(Y) + 1)
         self.W = np.zeros((X.shape[1], self.N*y_max*(y_max-1)), dtype=X.dtype)

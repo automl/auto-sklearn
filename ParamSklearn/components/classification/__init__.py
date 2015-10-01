@@ -2,6 +2,7 @@ __author__ = 'feurerm'
 
 from collections import OrderedDict
 import copy
+import importlib
 import inspect
 import os
 import pkgutil
@@ -12,16 +13,14 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 from HPOlibConfigSpace.conditions import EqualsCondition
 
-from sklearn.base import BaseEstimator
-
 classifier_directory = os.path.split(__file__)[0]
-_classifiers = {}
+_classifiers = OrderedDict()
 
 
 for module_loader, module_name, ispkg in pkgutil.iter_modules([classifier_directory]):
     full_module_name = "%s.%s" % (__package__, module_name)
     if full_module_name not in sys.modules and not ispkg:
-        module = module_loader.find_module(module_name).load_module(full_module_name)
+        module = importlib.import_module(full_module_name)
 
         for member_name, obj in inspect.getmembers(module):
             if inspect.isclass(obj) and ParamSklearnClassificationAlgorithm in obj.__bases__:
@@ -98,7 +97,7 @@ class ClassifierChoice(object):
 
         if default is None:
             defaults = ['random_forest', 'liblinear_svc', 'sgd',
-                        'libsvm_svc'] + available_estimators.keys()
+                        'libsvm_svc'] + list(available_estimators.keys())
             for default_ in defaults:
                 if default_ in available_estimators:
                     if include is not None and default_ not in include:
@@ -109,11 +108,10 @@ class ClassifierChoice(object):
                     break
 
         estimator = CategoricalHyperparameter('__choice__',
-                                              available_estimators.keys(),
+                                              list(available_estimators.keys()),
                                               default=default)
         cs.add_hyperparameter(estimator)
         for estimator_name in available_estimators.keys():
-
             # We have to retrieve the configuration space every time because
             # we change the objects it returns. If we reused it, we could not
             # retrieve the conditions further down
@@ -158,7 +156,7 @@ class ClassifierChoice(object):
                         dlc.hyperparameter.name = "%s:%s" % (estimator_name,
                                                              dlc.hyperparameter.name)
                 cs.add_forbidden_clause(forbidden_clause)
-
+    
         return cs
 
 

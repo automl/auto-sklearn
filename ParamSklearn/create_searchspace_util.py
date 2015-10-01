@@ -29,12 +29,12 @@ def get_match_array(pipeline, dataset_properties,
             node_name) if exclude is not None else None
 
         if is_choice:
-            node_i_choices_names.append(node.get_available_components(
+            node_i_choices_names.append(list(node.get_available_components(
                 dataset_properties, include=node_include,
-                exclude=node_exclude).keys())
-            node_i_choices.append(node.get_available_components(
+                exclude=node_exclude).keys()))
+            node_i_choices.append(list(node.get_available_components(
                 dataset_properties, include=node_include,
-                exclude=node_exclude).values())
+                exclude=node_exclude).values()))
 
         else:
             node_i_choices.append([node])
@@ -82,9 +82,9 @@ def get_match_array(pipeline, dataset_properties,
             elif not data_is_sparse and SPARSE in node_output:
                 data_is_sparse = True
             else:
-                print node
-                print "Data is sparse", data_is_sparse
-                print node_input, node_output
+                print(node)
+                print("Data is sparse", data_is_sparse)
+                print(node_input, node_output)
                 raise ValueError("This combination is not allowed!")
 
             if PREDICTIONS in node_output:
@@ -97,9 +97,9 @@ def get_match_array(pipeline, dataset_properties,
             elif UNSIGNED_DATA in node_output:
                 dataset_is_signed = False
             else:
-                print node
-                print "Data is signed", dataset_is_signed
-                print node_input, node_output
+                print(node)
+                print("Data is signed", dataset_is_signed)
+                print(node_input, node_output)
                 raise ValueError("This combination is not allowed!")
 
     return matches

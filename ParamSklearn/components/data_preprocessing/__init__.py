@@ -1,7 +1,5 @@
-__author__ = 'feurerm'
-
-from collections import OrderedDict
-import copy
+import collections
+import importlib
 import inspect
 import os
 import pkgutil
@@ -12,14 +10,13 @@ from .rescaling import RescalingChoice
 
 
 preprocessors_directory = os.path.split(__file__)[0]
-_preprocessors = {}
+_preprocessors = collections.OrderedDict()
 
 for module_loader, module_name, ispkg in pkgutil.iter_modules(
         [preprocessors_directory]):
     full_module_name = "%s.%s" % (__package__, module_name)
     if full_module_name not in sys.modules and not ispkg:
-        module = module_loader.find_module(module_name).load_module(
-            full_module_name)
+        module = importlib.import_module(full_module_name)
 
         for member_name, obj in inspect.getmembers(module):
             if inspect.isclass(

@@ -55,11 +55,11 @@ class BalancingComponentTest(unittest.TestCase):
         init_params, fit_params = balancing.get_weights(
             Y, 'libsvm_svc', None, None, None)
         self.assertEqual(("classifier:class_weight", "auto"),
-                         init_params.items()[0])
+                         list(init_params.items())[0])
         init_params, fit_params = balancing.get_weights(
             Y, None, 'liblinear_svc_preprocessor', None, None)
         self.assertEqual(("preprocessor:class_weight", "auto"),
-                         init_params.items()[0])
+                         list(init_params.items())[0])
 
     def test_balancing_get_weights_ridge(self):
         Y = np.array([0] * 80 + [1] * 20)
@@ -115,7 +115,7 @@ class BalancingComponentTest(unittest.TestCase):
                 [('extra_trees_preproc_for_classification',
                   ExtraTreesPreprocessor, 0.892, 0.910),
                    ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
-                    0.906, 0.887)]:
+                    0.906, 0.909)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
 

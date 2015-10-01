@@ -1,7 +1,6 @@
-__author__ = ['Katharina Eggensperger', 'Matthias Feurer']
-
 from collections import OrderedDict
 import copy
+import importlib
 import inspect
 import os
 import pkgutil
@@ -13,13 +12,13 @@ from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 from HPOlibConfigSpace.conditions import EqualsCondition
 
 regressor_directory = os.path.split(__file__)[0]
-_regressors = {}
+_regressors = OrderedDict()
 
 
 for module_loader, module_name, ispkg in pkgutil.iter_modules([regressor_directory]):
     full_module_name = "%s.%s" % (__package__, module_name)
     if full_module_name not in sys.modules and not ispkg:
-        module = module_loader.find_module(module_name).load_module(full_module_name)
+        module = importlib.import_module(full_module_name)
 
         for member_name, obj in inspect.getmembers(module):
             if inspect.isclass(obj) and ParamSklearnRegressionAlgorithm in obj.__bases__:
@@ -89,7 +88,8 @@ class RegressorChoice(object):
             raise ValueError("No regressors found")
 
         if default is None:
-            defaults = ['random_forest', 'support_vector_regression'] + available_estimators.keys()
+            defaults = ['random_forest', 'support_vector_regression'] + \
+                list(available_estimators.keys())
             for default_ in defaults:
                 if default_ in available_estimators:
                     if include is not None and default_ not in include:
@@ -100,7 +100,7 @@ class RegressorChoice(object):
                     break
 
         estimator = CategoricalHyperparameter('__choice__',
-                                              available_estimators.keys(),
+                                              list(available_estimators.keys()),
                                               default=default)
         cs.add_hyperparameter(estimator)
         for estimator_name in available_estimators.keys():
