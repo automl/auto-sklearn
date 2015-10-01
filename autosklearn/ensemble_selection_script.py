@@ -9,16 +9,16 @@ import time
 from collections import Counter
 
 import numpy as np
-import six.moves.cPickle as pickle
 
 from autosklearn.constants import STRING_TO_TASK_TYPES
-from autosklearn.util.data import save_predictions
 from autosklearn.evaluation.util import calculate_score
 from autosklearn.util import StopWatch, Backend
 
 
-logging.basicConfig()
-logger = logging.getLogger(os.path.basename(__file__))
+logging.basicConfig(format='[%(levelname)s] [%(asctime)s:%(name)s] %('
+                           'message)s', datefmt='%H:%M:%S')
+logger = logging.getLogger("ensemble_selection_script.py")
+logger.setLevel(logging.DEBUG)
 
 
 def build_ensemble(predictions_train, predictions_valid,
@@ -172,13 +172,7 @@ def main(predictions_dir,
          limit,
          output_dir,
          ensemble_size=None,
-         seed=1,
-         indices_output_dir='.'):
-
-    try:
-        os.makedirs(indices_output_dir)
-    except:
-        pass
+         seed=1):
 
     watch = StopWatch()
     watch.start_task('ensemble_builder')
@@ -191,11 +185,11 @@ def main(predictions_dir,
     current_num_models = 0
 
     backend = Backend(output_dir, predictions_dir)
-    dir_ensemble = os.path.join(predictions_dir,
+    dir_ensemble = os.path.join(predictions_dir, '.auto-sklearn',
                                 'predictions_ensemble_%s/' % seed)
-    dir_valid = os.path.join(predictions_dir,
+    dir_valid = os.path.join(predictions_dir, '.auto-sklearn',
                              'predictions_valid_%s/' % seed)
-    dir_test = os.path.join(predictions_dir,
+    dir_test = os.path.join(predictions_dir, '.auto-sklearn',
                             'predictions_test_%s/' % seed)
     paths_ = [dir_ensemble, dir_valid, dir_test]
 
@@ -335,13 +329,11 @@ def main(predictions_dir,
                                                 dir_valid_list,
                                                 include_num_runs,
                                                 re_num_run)
-
         all_predictions_test = get_predictions(dir_test,
                                                dir_test_list,
                                                include_num_runs,
                                                re_num_run)
 
-        print(all_predictions_train)
         if len(all_predictions_train) == len(all_predictions_test) == len(
                 all_predictions_valid) == 0:
             logger.error('All models do just random guessing')
@@ -398,25 +390,16 @@ def main(predictions_dir,
             logger.info(ensemble_members_string)
 
         # Save the ensemble indices for later use!
-        filename_indices = os.path.join(indices_output_dir,
-                                        str(index_run).zfill(5) + '.indices')
-
-        logger.info(ensemble_members_run_numbers)
-        with open(filename_indices, 'w') as fh:
-            pickle.dump(ensemble_members_run_numbers, fh)
+        backend.save_ensemble_indices_weights(ensemble_members_run_numbers,
+                                              index_run)
 
         # Save predictions for valid and test data set
         if len(dir_valid_list) == len(dir_ensemble_list):
             all_predictions_valid = np.array(all_predictions_valid)
             ensemble_predictions_valid = np.mean(
-                all_predictions_valid[indices.astype(int)],
-                axis=0)
-            filename_test = os.path.join(
-                output_dir,
-                basename + '_valid_' + str(index_run).zfill(3) + '.predict')
-            save_predictions(
-                os.path.join(predictions_dir, filename_test),
-                ensemble_predictions_valid)
+                all_predictions_valid[indices.astype(int)], axis=0)
+            backend.save_predictions_as_txt(ensemble_predictions_valid,
+                                            'valid', index_run, prefix=basename)
         else:
             logger.info('Could not find as many validation set predictions '
                          'as ensemble predictions!.')
@@ -424,14 +407,9 @@ def main(predictions_dir,
         if len(dir_test_list) == len(dir_ensemble_list):
             all_predictions_test = np.array(all_predictions_test)
             ensemble_predictions_test = np.mean(
-                all_predictions_test[indices.astype(int)],
-                axis=0)
-            filename_test = os.path.join(
-                output_dir,
-                basename + '_test_' + str(index_run).zfill(3) + '.predict')
-            save_predictions(
-                os.path.join(predictions_dir, filename_test),
-                ensemble_predictions_test)
+                all_predictions_test[indices.astype(int)], axis=0)
+            backend.save_predictions_as_txt(ensemble_predictions_test,
+                                            'test', index_run, prefix=basename)
         else:
             logger.info('Could not find as many test set predictions as '
                          'ensemble predictions!')
@@ -450,7 +428,6 @@ if __name__ == '__main__':
     output_dir = sys.argv[6]
 
     log_file = os.path.join(os.getcwd(), "ensemble.out")
-    logger.setLevel(logging.DEBUG)
     logger.debug("Start script: %s" % __file__)
 
     main(predictions_dir=sys.argv[1],
@@ -460,6 +437,5 @@ if __name__ == '__main__':
          limit=float(sys.argv[5]),
          output_dir=sys.argv[6],
          ensemble_size=int(sys.argv[7]),
-         seed=int(sys.argv[8]),
-         indices_output_dir=sys.argv[9])
+         seed=int(sys.argv[8]))
     sys.exit(0)

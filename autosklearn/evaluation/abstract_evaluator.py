@@ -131,44 +131,24 @@ class AbstractEvaluator(object):
         seed = os.environ.get('AUTOSKLEARN_SEED')
         errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
         num_run = str(self.num_run).zfill(5)
-        pred_dump_name_template = os.path.join(
-            self.output_dir, 'predictions_%s_%s',
-            self.D.name + '_predictions_%s_' + num_run + '.npy')
 
         if self.output_y_test:
             try:
                 os.makedirs(self.output_dir)
             except OSError:
                 pass
+            self.backend.save_targets_ensemble(self.Y_optimization)
 
-            self.backend.save_targets_ensemble(
-                self.Y_optimization.astype(np.float32))
-
-        ensemble_output_dir = os.path.join(self.output_dir,
-                                           'predictions_ensemble_%s' % seed)
-        if not os.path.exists(ensemble_output_dir):
-            os.makedirs(ensemble_output_dir)
-        with open(pred_dump_name_template % ('ensemble', seed, 'ensemble'),
-                  'w') as fh:
-            pickle.dump(Y_optimization_pred.astype(np.float32), fh, -1)
+        self.backend.save_predictions_as_npy(Y_optimization_pred, 'ensemble',
+                                             seed, num_run)
 
         if Y_valid_pred is not None:
-            valid_output_dir = os.path.join(self.output_dir,
-                                            'predictions_valid_%s' % seed)
-            if not os.path.exists(valid_output_dir):
-                os.makedirs(valid_output_dir)
-            with open(pred_dump_name_template % ('valid', seed, 'valid'),
-                      'w') as fh:
-                pickle.dump(Y_valid_pred.astype(np.float32), fh, -1)
+            self.backend.save_predictions_as_npy(Y_valid_pred, 'valid',
+                                                 seed, num_run)
 
         if Y_test_pred is not None:
-            test_output_dir = os.path.join(self.output_dir,
-                                           'predictions_test_%s' % seed)
-            if not os.path.exists(test_output_dir):
-                os.makedirs(test_output_dir)
-            with open(pred_dump_name_template % ('test', seed, 'test'),
-                      'w') as fh:
-                pickle.dump(Y_test_pred.astype(np.float32), fh, -1)
+            self.backend.save_predictions_as_npy(Y_test_pred, 'test',
+                                                 seed, num_run)
 
         self.duration = time.time() - self.starttime
         err = errs[self.D.info['metric']]
@@ -176,9 +156,6 @@ class AbstractEvaluator(object):
                                         for metric, value in errs.items()])
         additional_run_info += ';' + 'duration: ' + str(self.duration)
         additional_run_info += ';' + 'num_run:' + num_run
-        # print "Saved predictions with shapes %s, %s, %s for num_run %s" % \
-        #       (Y_optimization_pred.shape, Y_valid_pred.shape,
-        #        Y_test_pred.shape, num_run)
         return err, additional_run_info
 
     def predict_proba(self, X, model, task_type, Y_train=None):

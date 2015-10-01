@@ -39,7 +39,8 @@ class AutoMLTest(Base):
 
         name = '401_bac'
         dataset = os.path.join(self.test_dir, '..', '.data', name)
-        data_manager_file = os.path.join(output, '%s_Manager.pkl' % name)
+        data_manager_file = os.path.join(output, '.auto-sklearn',
+                                         'datamanager.pkl')
 
         queue = multiprocessing.Queue()
         auto = autosklearn.automl.AutoML(
@@ -77,11 +78,11 @@ class AutoMLTest(Base):
         name = '401_bac'
         dataset = os.path.join(self.test_dir, '..', '.data', name)
 
-        D = store_and_or_load_data(dataset, output)
-
         auto = autosklearn.automl.AutoML(
             output, output, 10, 10,
             initial_configurations_via_metalearning=25)
+        auto._backend._make_internals_directory()
+        D = store_and_or_load_data(dataset, output)
         auto._do_dummy_prediction(D)
 
         del auto

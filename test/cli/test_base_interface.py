@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import os
+import shutil
 import sys
 import unittest
 
@@ -35,11 +36,16 @@ class Base_interfaceTest(unittest.TestCase):
             'rescaling:strategy': 'min/max'
         }
 
+        try:
+            path = os.path.join(os.path.dirname(__file__), '.auto-sklearn')
+            os.makedirs(path)
+        except Exception:
+            pass
+
     def tearDown(self):
         try:
-            manager = os.path.join(os.path.dirname(__file__),
-                                   '%s_Manager.pkl' % self.dataset)
-            os.remove(manager)
+            path = os.path.join(os.path.dirname(__file__), '.auto-sklearn')
+            shutil.rmtree(path)
         except Exception:
             pass
 

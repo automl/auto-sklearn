@@ -5,21 +5,25 @@ import sys
 
 
 def setup_logger():
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG,
+                        format='[%(levelname)s] [%(asctime)s:%(name)s] %('
+                               'message)s',
+                        datefmt='%H:%M:%S')
 
 
 def get_logger(name, outputdir=None):
     # Root logger with a stream and file handler
+    setup_logger()
     root = logging.getLogger()
-    formatter = logging.Formatter(fmt='[%(levelname)s] '
-                                  '[%(asctime)s:%(name)s]: %(message)s',
-                                  datefmt='%m-%d %H:%M:%S')
+    #formatter = logging.Formatter(fmt='[%(levelname)s] '
+    #                              '[%(asctime)s:%(name)s]: %(message)s',
+    #                              datefmt='%m-%d %H:%M:%S')
 
     if not any([isinstance(handler, logging.StreamHandler)
                 for handler in root.handlers]):
         console = logging.StreamHandler(stream=sys.stdout)
         console.setLevel(logging.INFO)
-        console.setFormatter(formatter)
+        #console.setFormatter(formatter)
         root.addHandler(console)
 
     if outputdir is not None:
@@ -34,7 +38,7 @@ def get_logger(name, outputdir=None):
         if add:
             file_handler = logging.FileHandler(filename=logger_file, mode='w')
             file_handler.setLevel(logging.DEBUG)
-            file_handler.setFormatter(formatter)
+            #file_handler.setFormatter(formatter)
             root.addHandler(file_handler)
 
     # Create a logger

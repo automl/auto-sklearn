@@ -1,7 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 
-from functools import partial
 import os
 import signal
 import time
@@ -15,40 +14,23 @@ from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.evaluation import CVEvaluator, HoldoutEvaluator, \
     NestedCVEvaluator, TestEvaluator, get_new_run_num
 from autosklearn.util.paramsklearn import get_configuration_space
+from autosklearn.util import Backend
 
 
 
 def store_and_or_load_data(dataset_info, outputdir):
-    if dataset_info.endswith('.pkl'):
-        save_path = dataset_info
-    else:
-        dataset = os.path.basename(dataset_info)
-        save_path = os.path.join(outputdir, dataset + '_Manager.pkl')
+    backend = Backend(None, outputdir)
 
-    if not os.path.exists(save_path):
-        lock = lockfile.LockFile(save_path)
-        while not lock.i_am_locking():
-            try:
-                lock.acquire(timeout=60)  # wait up to 60 seconds
-            except lockfile.LockTimeout:
-                lock.break_lock()
-                lock.acquire()
-        print('I locked', lock.path)
-        # It is not yet sure, whether the file already exists
-        try:
-            if not os.path.exists(save_path):
-                D = CompetitionDataManager(dataset_info, encode_labels=True)
-                fh = open(save_path, 'w')
-                pickle.dump(D, fh, -1)
-                fh.close()
-            else:
-                D = pickle.load(open(save_path, 'r'))
-        except Exception:
-            raise
-        finally:
-            lock.release()
-    else:
-        D = pickle.load(open(save_path, 'r'))
+    try:
+        D = backend.load_datamanager()
+    except IOError:
+        D = None
+
+    # Datamanager probably doesn't exist
+    if D is None:
+        D = CompetitionDataManager(dataset_info, encode_labels=True)
+        backend.save_datamanager(D)
+
     return D
 
 # signal handler seem to work only if they are globally defined
@@ -87,12 +69,10 @@ def make_mode_holdout(data, seed, configuration, num_run):
     evaluator.fit()
     signal.signal(15, empty_signal_handler)
     evaluator.finish_up()
-    model_directory = os.path.join(os.getcwd(), 'models_%d' % seed)
-    if os.path.exists(model_directory):
-        model_filename = os.path.join(model_directory,
-                                      '%s.model' % num_run)
-        with open(model_filename, 'w') as fh:
-            pickle.dump(evaluator.model, fh, -1)
+
+    backend = Backend(None, os.getcwd())
+    if os.path.exists(backend.get_model_dir()):
+        backend.save_model(evaluator.model, num_run)
 
 
 def make_mode_test(data, seed, configuration, metric):

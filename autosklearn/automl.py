@@ -2,16 +2,13 @@
 import hashlib
 import multiprocessing
 import os
-from os.path import join
 import traceback
 
 import numpy as np
 
-import lockfile
 from HPOlibConfigSpace.converters import pcs_parser
 from sklearn.base import BaseEstimator
 
-import six.moves.cPickle as pickle
 from autosklearn.constants import *
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
@@ -20,26 +17,9 @@ from autosklearn.metalearning.mismbo import \
     calc_meta_features, calc_meta_features_encoded, \
     create_metalearning_string_for_smac_call
 from autosklearn.evaluation import calculate_score
-from autosklearn.util import StopWatch, get_logger, get_auto_seed, \
-    set_auto_seed, del_auto_seed, submit_process, paramsklearn, Backend
-
-
-def _write_file_with_data(filepath, data, name, log_function):
-    if _check_path_for_save(filepath, name, log_function):
-        with open(filepath, 'w') as fh:
-            fh.write(data)
-
-
-def _check_path_for_save(filepath, name, log_function):
-    result = False
-    lock_file = filepath + '.lock'
-    with lockfile.LockFile(lock_file):
-        if not os.path.exists(lock_file):
-            result = True
-            log_function('Created %s file %s' % (name, filepath))
-        else:
-            log_function('%s file already present %s' % (name, filepath))
-    return result
+from autosklearn.util import StopWatch, get_logger, setup_logger, \
+    get_auto_seed, set_auto_seed, del_auto_seed, submit_process, paramsklearn, \
+    Backend
 
 
 def _get_logger(log_dir, basename, seed):
@@ -50,18 +30,18 @@ def _get_logger(log_dir, basename, seed):
 
 def _run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
               data_manager_path, configspace_path, initial_configurations,
-              per_run_time_limit, watcher, log_function):
+              per_run_time_limit, watcher, log_function, backend):
     task_name = 'runSmac'
     watcher.start_task(task_name)
 
     # = Create an empty instance file
     instance_file = os.path.join(tmp_dir, 'instances.txt')
-    _write_file_with_data(instance_file, 'holdout', 'Instances', log_function)
+    backend.write_txt_file(instance_file, 'holdout', 'Instances')
 
     # = Start SMAC
     time_smac = max(0, time_for_task - watcher.wall_elapsed(basename))
     log_function('Start SMAC with %5.2fsec time left' % time_smac)
-    proc_smac, smac_call = \
+    proc_smac = \
         submit_process.run_smac(dataset_name=basename,
                                 dataset=data_manager_path,
                                 tmp_dir=tmp_dir,
@@ -72,7 +52,6 @@ def _run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
                                 initial_challengers=initial_configurations,
                                 memory_limit=ml_memory_limit,
                                 seed=get_auto_seed())
-    log_function(smac_call)
     watcher.stop_task(task_name)
     return proc_smac
 
@@ -85,7 +64,6 @@ def _run_ensemble_builder(tmp_dir,
                           metric,
                           ensemble_size,
                           ensemble_nbest,
-                          ensemble_indices_dir,
                           watcher,
                           log_function):
     task_name = 'runEnsemble'
@@ -104,7 +82,6 @@ def _run_ensemble_builder(tmp_dir,
         ensemble_size=ensemble_size,
         ensemble_nbest=ensemble_nbest,
         seed=get_auto_seed(),
-        ensemble_indices_output_dir=ensemble_indices_dir
     )
     watcher.stop_task(task_name)
     return proc_ensembles
@@ -149,15 +126,15 @@ def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
         watcher.wall_elapsed(task_name))
     return result
 
-def _create_search_space(tmp_dir, data_info, watcher, log_function):
+def _create_search_space(tmp_dir, data_info, backend, watcher, log_function):
     task_name = 'CreateConfigSpace'
     watcher.start_task(task_name)
     configspace_path = os.path.join(tmp_dir, 'space.pcs')
     configuration_space = paramsklearn.get_configuration_space(
         data_info)
     sp_string = pcs_parser.write(configuration_space)
-    _write_file_with_data(configspace_path, sp_string,
-                          'Configuration space', log_function)
+    backend.write_txt_file(configspace_path, sp_string,
+                           'Configuration space')
     watcher.stop_task(task_name)
 
     return configuration_space, configspace_path
@@ -221,6 +198,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                  keep_models=True,
                  debug_mode=False):
         super(AutoML, self).__init__()
+
         self._tmp_dir = tmp_dir
         self._output_dir = output_dir
         self._time_for_task = time_left_for_this_task
@@ -244,17 +222,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._label_num = None
 
         self._debug_mode = debug_mode
-
-        self._model_dir = join(self._tmp_dir, 'models_%d' % self._seed)
-        self._ensemble_indices_dir = join(self._tmp_dir,
-                                          'ensemble_indices_%d' % self._seed)
-        self._create_folders()
         self._backend = Backend(self._output_dir, self._tmp_dir)
-
-    def _create_folders(self):
-        # == Set up a directory where all the trained models will be pickled to
-        os.mkdir(self._model_dir)
-        os.mkdir(self._ensemble_indices_dir)
 
     def run(self):
         raise NotImplementedError()
@@ -322,18 +290,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         return self._fit(loaded_data_manager)
 
-    def _save_data_manager(self, data_d, tmp_dir, basename, watcher):
-        task_name = 'StoreDatamanager'
-
-        watcher.start_task(task_name)
-        filepath = os.path.join(tmp_dir, basename + '_Manager.pkl')
-
-        if _check_path_for_save(filepath, 'Data manager ', self._debug):
-            pickle.dump(data_d, open(filepath, 'w'), protocol=-1)
-
-        watcher.stop_task(task_name)
-        return filepath
-
     @staticmethod
     def _start_task(watcher, task_name):
         watcher.start_task(task_name)
@@ -360,14 +316,16 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             output_dir=self._tmp_dir, all_scoring_functions=True)
         he.fit()
         he.file_output()
-        model_directory = os.path.join(self._tmp_dir, 'models_%d' % self._seed)
+        model_directory = self._backend.get_model_dir()
         if os.path.exists(model_directory):
-            model_filename = os.path.join(model_directory, "%s.model" % num_run)
-            with open(model_filename, 'w') as fh:
-                pickle.dump(he.model, fh, -1)
+            self._backend.save_model(he.model, num_run)
         del he
 
     def _fit(self, datamanager):
+        self._backend._make_internals_directory()
+        if self._keep_models:
+            os.mkdir(self._backend.get_model_dir())
+
         self._metric = datamanager.info['metric']
         self._task = datamanager.info['task']
         self._label_num = datamanager.info['label_num']
@@ -408,16 +366,13 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._stopwatch.stop_task('OneHot')
 
         # == Pickle the data manager
-        data_manager_path = self._save_data_manager(
-            datamanager,
-            self._tmp_dir,
-            self._dataset_name,
-            watcher=self._stopwatch)
+        data_manager_path = self._backend.save_datamanager(datamanager)
 
         # = Create a searchspace
         self.configuration_space, configspace_path = _create_search_space(
             self._tmp_dir,
             datamanager.info,
+            self._backend,
             self._stopwatch,
             self._debug)
         self.configuration_space_created_hook(datamanager)
@@ -463,12 +418,11 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._critical('Metafeatures encoded not calculated')
 
         # == RUN SMAC
-
         proc_smac = _run_smac(self._tmp_dir, self._dataset_name,
                               self._time_for_task, self._ml_memory_limit,
                               data_manager_path, configspace_path,
                               initial_configurations, self._per_run_time_limit,
-                              self._stopwatch, self._debug)
+                              self._stopwatch, self._debug, self._backend)
 
         # == RUN ensemble builder
         proc_ensembles = _run_ensemble_builder(
@@ -480,7 +434,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._metric,
             self._ensemble_size,
             self._ensemble_nbest,
-            self._ensemble_indices_dir,
             self._stopwatch,
             self._debug
         )
@@ -501,33 +454,22 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
 
-        model_files = os.listdir(self._model_dir)
-        models = []
-        for model_file in model_files:
-            model_file = os.path.join(self._model_dir, model_file)
-            with open(model_file) as fh:
-                models.append(pickle.load(fh))
-
+        models = self._backend.load_all_models()
         if len(models) == 0:
             raise ValueError('No models fitted!')
 
         if self._ohe is not None:
             X = self._ohe._transform(X)
 
-        indices_files = sorted(os.listdir(self._ensemble_indices_dir))
-        indices_file = os.path.join(self._ensemble_indices_dir,
-                                    indices_files[-1])
-        with open(indices_file) as fh:
-            ensemble_members_run_numbers = pickle.load(fh)
+        ensemble_indices = self._backend.load_ensemble_indices_weights()
 
         predictions = []
-        for model, model_file in zip(models, model_files):
-            num_run = int(model_file.split('.')[0])
-
-            if num_run not in ensemble_members_run_numbers:
+        for num_run in models:
+            if num_run not in ensemble_indices:
                 continue
 
-            weight = ensemble_members_run_numbers[num_run]
+            weight = ensemble_indices[num_run]
+            model = models[num_run]
 
             X_ = X.copy()
             if self._task in REGRESSION_TASKS:
