@@ -3,7 +3,7 @@ import setuptools
 setuptools.setup(name="ParamSklearn",
                  description="Scikit-Learn wrapper for automatic "
                              "hyperparameter configuration.",
-                 version="0.1dev",
+                 version="0.16.1.0",
                  packages=setuptools.find_packages(),
                  install_requires=["numpy>=1.9.0",
                                    "scipy>=0.14.0",
