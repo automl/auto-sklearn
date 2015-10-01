@@ -1,3 +1,5 @@
+import resource
+
 import sklearn.svm
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
@@ -27,6 +29,15 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
+        try:
+            soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+            soft /= 1024 * 1024
+            print(soft,)
+            maxrss = resource.getrusage(resource.RUSAGE_SELF)[2] / 1024
+            cache_size = (soft - maxrss) / 1.5
+        except Exception:
+            cache_size = 200
+
         self.C = float(self.C)
         if self.degree is None:
             self.degree = 3
@@ -57,7 +68,7 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
                                          class_weight=self.class_weight,
                                          max_iter=self.max_iter,
                                          random_state=self.random_state,
-                                         cache_size=1000)
+                                         cache_size=cache_size)
                                          # probability=True)
         self.estimator.fit(X, Y)
         return self

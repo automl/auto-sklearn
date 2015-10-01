@@ -1,3 +1,5 @@
+import resource
+
 import numpy as np
 import sklearn.svm
 
@@ -14,7 +16,7 @@ from ParamSklearn.constants import *
 
 class LibSVM_SVR(ParamSklearnRegressionAlgorithm):
     def __init__(self, kernel, C, epsilon, tol, shrinking, gamma=0.0,
-                 degree=3, coef0=0.0, cache_size=1000, verbose=False,
+                 degree=3, coef0=0.0, verbose=False,
                  max_iter=-1, random_state=None):
         self.kernel = kernel
         self.C = C
@@ -24,13 +26,22 @@ class LibSVM_SVR(ParamSklearnRegressionAlgorithm):
         self.degree = degree
         self.gamma = gamma
         self.coef0 = coef0
-        self.cache_size = cache_size
         self.verbose = verbose
         self.max_iter = max_iter
         self.random_state = random_state
         self.estimator = None
 
     def fit(self, X, Y):
+        try:
+            soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+            soft /= 1024 * 1024
+            print(soft, )
+            maxrss = resource.getrusage(resource.RUSAGE_SELF)[2] / 1024
+            cache_size = (soft - maxrss) / 1.5
+
+        except Exception:
+            cache_size = 200
+
         self.C = float(self.C)
         self.epsilon = float(self.epsilon)
         self.tol = float(self.tol)
@@ -41,7 +52,6 @@ class LibSVM_SVR(ParamSklearnRegressionAlgorithm):
             self.coef0 = 0.0
         else:
             self.coef0 = float(self.coef0)
-        self.cache_size = int(self.cache_size)
         self.verbose = int(self.verbose)
         self.max_iter = int(self.max_iter)
 
@@ -54,7 +64,7 @@ class LibSVM_SVR(ParamSklearnRegressionAlgorithm):
             degree=self.degree,
             gamma=self.gamma,
             coef0=self.coef0,
-            cache_size=self.cache_size,
+            cache_size=cache_size,
             verbose=self.verbose,
             max_iter=self.max_iter
         )
