@@ -22,4 +22,4 @@ configuration on the iris dataset.
     >>> cls = cls.fit(X[indices[:100]], Y[indices[:100]])
     >>> predictions = cls.predict(X[indices[100:]])
     >>> sklearn.metrics.accuracy_score(predictions, Y[indices[100:]])
-    0.80000000000000004
+    0.93999999999999995
