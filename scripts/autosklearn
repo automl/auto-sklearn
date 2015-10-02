@@ -14,8 +14,10 @@ import pkg_resources
 import psutil
 
 import autosklearn.automl
-from autosklearn.util import get_logger
-from autosklearn.data.data_manager_factory import populate_argparse_with_data_options
+from autosklearn.data.data_manager_factory import \
+    populate_argparse_with_data_options
+from autosklearn.util.smac import populate_argparse_with_resampling_arguments, \
+    namespace_to_automl_format
 
 
 def get_options():
@@ -104,6 +106,7 @@ def get_options():
              'on the performance of AutoSklearn.')
 
     parser = populate_argparse_with_data_options(parser)
+    parser = populate_argparse_with_resampling_arguments(parser)
 
     return parser
 
@@ -164,6 +167,9 @@ if __name__ == '__main__':
     os.environ['PATH'] = smac + os.pathsep + runsolver + os.pathsep + \
         os.environ['PATH']
 
+    resampling_strategy, resampling_strategy_arguments = \
+        namespace_to_automl_format(args)
+
     time_spent_so_far = time.time() - start_time
     time_left_for_smac = time_limit - time_spent_so_far
     queue = Queue()
@@ -183,10 +189,12 @@ if __name__ == '__main__':
         keep_models=False,
         debug_mode=False,
         include_estimators=args.include_estimators,
-        include_preprocessors=args.include_preprocessors)
+        include_preprocessors=args.include_preprocessors,
+        resampling_strategy=resampling_strategy,
+        resampling_strategy_arguments=resampling_strategy_arguments)
     automl.start_automl(args)
 
-    [time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles] \
+    [time_needed_to_load_data, data_manager_file, procs] \
         = queue.get()
 
     # == And now we wait till we run out of time

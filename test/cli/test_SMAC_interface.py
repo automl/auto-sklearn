@@ -60,7 +60,7 @@ class SMAC_interfaceTest(unittest.TestCase):
 
     @mock.patch('autosklearn.cli.base_interface.main')
     def test_holdout(self, patch):
-        call = 'autosklearn.cli.SMAC_interface %s holdout ' \
+        call = 'autosklearn.cli.SMAC_interface holdout %s ' \
                '1000000 0 -1 %s' % \
                (self.dataset_string, self.param_string)
         sys.argv = shlex.split(call)
@@ -74,7 +74,7 @@ class SMAC_interfaceTest(unittest.TestCase):
 
     @mock.patch('autosklearn.cli.base_interface.main')
     def test_testset(self, patch):
-        call = 'autosklearn.cli.SMAC_interface %s test ' \
+        call = 'autosklearn.cli.SMAC_interface test %s ' \
                '1000000 0 -1 %s' % \
                (self.dataset_string, self.param_string)
         sys.argv = shlex.split(call)
@@ -88,7 +88,7 @@ class SMAC_interfaceTest(unittest.TestCase):
 
     @mock.patch('autosklearn.cli.base_interface.main')
     def test_cv(self, patch):
-        call = 'autosklearn.cli.SMAC_interface %s cv:3 ' \
+        call = 'autosklearn.cli.SMAC_interface cv:3 %s ' \
                '1000000 0 -1 %s' % \
                (self.dataset_string, self.param_string)
         sys.argv = shlex.split(call)
@@ -103,9 +103,9 @@ class SMAC_interfaceTest(unittest.TestCase):
     @mock.patch('autosklearn.cli.base_interface.main')
     def test_partial_cv(self, patch):
         for fold in range(3):
-            call = 'autosklearn.cli.SMAC_interface %s partial-cv:%d/3 ' \
+            call = 'autosklearn.cli.SMAC_interface partial-cv:%d/3 %s ' \
                    '1000000 0 -1 %s' % \
-                   (self.dataset_string, fold, self.param_string)
+                   (fold, self.dataset_string, self.param_string)
             sys.argv = shlex.split(call)
 
             SMAC_interface.main()
@@ -118,7 +118,7 @@ class SMAC_interfaceTest(unittest.TestCase):
 
     @mock.patch('autosklearn.cli.base_interface.main')
     def test_nested_cv(self, patch):
-        call = 'autosklearn.cli.SMAC_interface %s nested-cv:3/3 ' \
+        call = 'autosklearn.cli.SMAC_interface nested-cv:3/3 %s ' \
                '1000000 0 -1 %s' % \
                (self.dataset_string, self.param_string)
         sys.argv = shlex.split(call)

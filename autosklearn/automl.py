@@ -21,39 +21,7 @@ from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     get_auto_seed, set_auto_seed, del_auto_seed, submit_process, paramsklearn, \
     Backend
-
-
-def _run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
-              data_manager_path, configspace_path, initial_configurations,
-              per_run_time_limit, watcher, logger, backend):
-    task_name = 'runSmac'
-    watcher.start_task(task_name)
-
-    # = Create an empty instance file
-    instance_file = os.path.join(tmp_dir, 'instances.txt')
-    backend.write_txt_file(instance_file, '%s holdout' % data_manager_path,
-                           'Instances')
-    test_instance_file = os.path.join(tmp_dir, 'test_instances.txt')
-    backend.write_txt_file(test_instance_file, '%s test' % data_manager_path,
-                           'Test instances')
-
-    # = Start SMAC
-    time_smac = max(0, time_for_task - watcher.wall_elapsed(basename))
-    logger.info('Start SMAC with %5.2fsec time left' % time_smac)
-    proc_smac = \
-        submit_process.run_smac(dataset_name=basename,
-                                dataset=data_manager_path,
-                                tmp_dir=tmp_dir,
-                                searchspace=configspace_path,
-                                instance_file=instance_file,
-                                test_instance_file=test_instance_file,
-                                limit=time_smac,
-                                cutoff_time=per_run_time_limit,
-                                initial_challengers=initial_configurations,
-                                memory_limit=ml_memory_limit,
-                                seed=get_auto_seed())
-    watcher.stop_task(task_name)
-    return proc_smac
+from autosklearn.util.smac import run_smac
 
 
 def _run_ensemble_builder(tmp_dir,
@@ -66,25 +34,29 @@ def _run_ensemble_builder(tmp_dir,
                           ensemble_nbest,
                           watcher,
                           logger):
-    task_name = 'runEnsemble'
-    watcher.start_task(task_name)
-    time_left_for_ensembles = max(0, time_for_task - watcher.wall_elapsed(
-        basename))
-    logger.info(
-        'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
-    proc_ensembles = submit_process.run_ensemble_builder(
-        tmp_dir=tmp_dir,
-        dataset_name=basename,
-        task_type=task,
-        metric=metric,
-        limit=time_left_for_ensembles,
-        output_dir=output_dir,
-        ensemble_size=ensemble_size,
-        ensemble_nbest=ensemble_nbest,
-        seed=get_auto_seed(),
-    )
-    watcher.stop_task(task_name)
-    return proc_ensembles
+    if ensemble_size > 0:
+        task_name = 'runEnsemble'
+        watcher.start_task(task_name)
+        time_left_for_ensembles = max(0, time_for_task - watcher.wall_elapsed(
+            basename))
+        logger.info(
+            'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
+        proc_ensembles = submit_process.run_ensemble_builder(
+            tmp_dir=tmp_dir,
+            dataset_name=basename,
+            task_type=task,
+            metric=metric,
+            limit=time_left_for_ensembles,
+            output_dir=output_dir,
+            ensemble_size=ensemble_size,
+            ensemble_nbest=ensemble_nbest,
+            seed=get_auto_seed(),
+        )
+        watcher.stop_task(task_name)
+        return proc_ensembles
+    else:
+        logger.info('Not starting ensemble script due to ensemble size 0.')
+        return None
 
 
 def _calculate_metafeatures(data_feat_type, data_info_task, basename,
@@ -201,7 +173,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                  keep_models=True,
                  debug_mode=False,
                  include_estimators=None,
-                 include_preprocessors=None):
+                 include_preprocessors=None,
+                 resampling_strategy='holdout',
+                 resampling_strategy_arguments=None):
         super(AutoML, self).__init__()
 
         self._tmp_dir = tmp_dir
@@ -220,6 +194,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._keep_models = keep_models
         self._include_estimators = include_estimators
         self._include_preprocessors = include_preprocessors
+        self._resampling_strategy = resampling_strategy
+        self._resampling_strategy_arguments = resampling_strategy_arguments
 
         self._dataset_name = None
         self._stopwatch = None
@@ -338,6 +314,16 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         del he
 
     def _fit(self, datamanager):
+        # Check arguments prior to doing anything!
+        if self._resampling_strategy not in ['holdout', 'cv', 'nested-cv',
+                                             'partial-cv']:
+            raise ValueError('Illegal resampling strategy: %s' %
+                             self._resampling_strategy)
+        if self._resampling_strategy == 'partial-cv' and \
+                self._ensemble_size != 0:
+            raise ValueError("Resampling strategy partial-cv cannot be used "
+                             "together with ensembles.")
+
         self._backend._make_internals_directory()
         if self._keep_models:
             os.mkdir(self._backend.get_model_dir())
@@ -436,11 +422,13 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._logger('Metafeatures encoded not calculated')
 
         # == RUN SMAC
-        proc_smac = _run_smac(self._tmp_dir, self._dataset_name,
-                              self._time_for_task, self._ml_memory_limit,
-                              data_manager_path, configspace_path,
-                              initial_configurations, self._per_run_time_limit,
-                              self._stopwatch, self._logger, self._backend)
+        proc_smac = run_smac(self._tmp_dir, self._dataset_name,
+                             self._time_for_task, self._ml_memory_limit,
+                             data_manager_path, configspace_path,
+                             initial_configurations, self._per_run_time_limit,
+                             self._stopwatch, self._backend, self._seed,
+                             self._resampling_strategy,
+                             self._resampling_strategy_arguments)
 
         # == RUN ensemble builder
         proc_ensembles = _run_ensemble_builder(
@@ -456,12 +444,15 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._logger
         )
 
+        procs = [proc_smac]
+        if proc_ensembles is not None:
+            procs.append(proc_ensembles)
+
         if self._queue is not None:
-            self._queue.put([time_for_load_data, data_manager_path, proc_smac,
-                             proc_ensembles])
+            self._queue.put([time_for_load_data, data_manager_path, procs])
         else:
-            proc_smac.wait()
-            proc_ensembles.wait()
+            for proc in procs:
+                proc.wait()
 
         # Delete AutoSklearn environment variable
         del_auto_seed()
@@ -478,6 +469,10 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
+        if self._resampling_strategy != 'holdout':
+            raise NotImplementedError(
+                'Predict is currently only implemented for resampling '
+                'strategy holdout.')
 
         models = self._backend.load_all_models()
         if len(models) == 0:

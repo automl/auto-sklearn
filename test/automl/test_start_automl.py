@@ -5,10 +5,12 @@ import multiprocessing
 import os
 import time
 
+import mock
 import numpy as np
 import six
 
 import autosklearn.automl
+from autosklearn.util import Backend
 import ParamSklearn.util as putil
 from autosklearn.constants import *
 from autosklearn.cli.base_interface import store_and_or_load_data
@@ -34,7 +36,7 @@ class AutoMLTest(Base):
 
     def test_automl_outputs(self):
         output = os.path.join(self.test_dir, '..',
-                              '.tmp_test_dataset_manager_pickling')
+                              '.tmp_test_automl_outputs')
         self._setUp(output)
 
         name = '401_bac'
@@ -55,10 +57,10 @@ class AutoMLTest(Base):
             self.assertTrue(np.allclose(D.data['X_train'].data[:3],
                                         [1., 1., 2.]))
 
-        time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles = \
+        time_needed_to_load_data, data_manager_file, procs = \
             queue.get()
-        proc_smac.wait()
-        proc_ensembles.wait()
+        for proc in procs:
+            proc.wait()
 
         # Start time
         start_time_file_path = os.path.join(output, '.auto-sklearn',

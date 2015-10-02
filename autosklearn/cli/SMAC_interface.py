@@ -20,12 +20,12 @@ def main():
             p_name = p_name[1:]
         params[p_name] = sys.argv[i + 1].strip()
 
-    if ":" in instance_specific_information:
-        instance_specific_information = instance_specific_information.split(":")
-        mode = instance_specific_information[0]
-        mode_args = instance_specific_information[1]
+    if ":" in instance_name:
+        instance_name = instance_name.split(":")
+        mode = instance_name[0]
+        mode_args = instance_name[1]
     else:
-        mode = instance_specific_information
+        mode = instance_name
 
     if mode == 'test':
         mode_args = None
@@ -46,7 +46,8 @@ def main():
     else:
         raise ValueError(mode)
 
-    base_interface.main(instance_name, mode, seed, params, mode_args=mode_args)
+    base_interface.main(instance_specific_information, mode,
+                        seed, params, mode_args=mode_args)
 
 
 if __name__ == '__main__':
