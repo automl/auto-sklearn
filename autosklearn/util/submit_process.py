@@ -6,7 +6,7 @@ import subprocess
 
 import lockfile
 
-import autosklearn.cli.SMAC_cli_holdout
+import autosklearn
 from autosklearn.constants import *
 from autosklearn.util import logging_ as logging
 
@@ -28,12 +28,12 @@ def submit_call(call, seed, logger, log_dir=None):
     return proc
 
 
-def get_algo_exec(runsolver_limit, runsolver_delay, memory_limit, dataset):
+def get_algo_exec(runsolver_limit, runsolver_delay, memory_limit):
     # Create call to autosklearn
     path_to_wrapper = os.path.dirname(
         os.path.abspath(autosklearn.cli.__file__))
-    wrapper_exec = os.path.join(path_to_wrapper, 'SMAC_cli_holdout.py')
-    call = 'python %s %s' % (wrapper_exec, dataset)
+    wrapper_exec = os.path.join(path_to_wrapper, 'SMAC_interface.py')
+    call = 'python %s ' % wrapper_exec
 
     # Runsolver does strange things if the time limit is negative. Set it to
     # be at least one (0 means infinity)
@@ -64,7 +64,7 @@ def run_smac(dataset_name, dataset, tmp_dir, searchspace, instance_file,
     runsolver_hardlimit_delay = 30
 
     algo_exec = get_algo_exec(runsolver_softlimit, runsolver_hardlimit_delay,
-                              memory_limit, dataset=dataset)
+                              memory_limit)
 
     scenario = {
         'cli-log-all-calls': 'false',

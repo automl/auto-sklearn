@@ -31,9 +31,11 @@ def _run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
 
     # = Create an empty instance file
     instance_file = os.path.join(tmp_dir, 'instances.txt')
-    backend.write_txt_file(instance_file, 'holdout', 'Instances')
+    backend.write_txt_file(instance_file, '%s holdout' % data_manager_path,
+                           'Instances')
     test_instance_file = os.path.join(tmp_dir, 'test_instances.txt')
-    backend.write_txt_file(test_instance_file, 'test', 'Test instances')
+    backend.write_txt_file(test_instance_file, '%s test' % data_manager_path,
+                           'Test instances')
 
     # = Start SMAC
     time_smac = max(0, time_for_task - watcher.wall_elapsed(basename))

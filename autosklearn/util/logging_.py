@@ -12,9 +12,7 @@ def setup_logger(output_file=None):
               'r') as fh:
         config = yaml.load(fh)
     if output_file is not None:
-        print config['handlers']['file_handler']
         config['handlers']['file_handler']['filename'] = output_file
-        print config['handlers']['file_handler']
     logging.config.dictConfig(config)
 
 
