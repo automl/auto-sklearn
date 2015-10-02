@@ -399,7 +399,7 @@ def main(predictions_dir,
 
         # Save the ensemble indices for later use!
         backend.save_ensemble_indices_weights(ensemble_members_run_numbers,
-                                              index_run)
+                                              index_run, seed)
 
         # Save predictions for valid and test data set
         if len(dir_valid_list) == len(dir_ensemble_list):

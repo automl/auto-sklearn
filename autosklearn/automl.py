@@ -23,31 +23,28 @@ from autosklearn.util import StopWatch, get_logger, setup_logger, \
     Backend
 
 
-def _get_logger(log_dir, basename, seed):
-    logger = get_logger(os.path.basename(__file__))
-    return logger
-
-
-
 def _run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
               data_manager_path, configspace_path, initial_configurations,
-              per_run_time_limit, watcher, log_function, backend):
+              per_run_time_limit, watcher, logger, backend):
     task_name = 'runSmac'
     watcher.start_task(task_name)
 
     # = Create an empty instance file
     instance_file = os.path.join(tmp_dir, 'instances.txt')
     backend.write_txt_file(instance_file, 'holdout', 'Instances')
+    test_instance_file = os.path.join(tmp_dir, 'test_instances.txt')
+    backend.write_txt_file(test_instance_file, 'test', 'Test instances')
 
     # = Start SMAC
     time_smac = max(0, time_for_task - watcher.wall_elapsed(basename))
-    log_function('Start SMAC with %5.2fsec time left' % time_smac)
+    logger.info('Start SMAC with %5.2fsec time left' % time_smac)
     proc_smac = \
         submit_process.run_smac(dataset_name=basename,
                                 dataset=data_manager_path,
                                 tmp_dir=tmp_dir,
                                 searchspace=configspace_path,
                                 instance_file=instance_file,
+                                test_instance_file=test_instance_file,
                                 limit=time_smac,
                                 cutoff_time=per_run_time_limit,
                                 initial_challengers=initial_configurations,
@@ -66,12 +63,12 @@ def _run_ensemble_builder(tmp_dir,
                           ensemble_size,
                           ensemble_nbest,
                           watcher,
-                          log_function):
+                          logger):
     task_name = 'runEnsemble'
     watcher.start_task(task_name)
     time_left_for_ensembles = max(0, time_for_task - watcher.wall_elapsed(
         basename))
-    log_function(
+    logger.info(
         'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
     proc_ensembles = submit_process.run_ensemble_builder(
         tmp_dir=tmp_dir,
@@ -90,7 +87,7 @@ def _run_ensemble_builder(tmp_dir,
 
 def _calculate_metafeatures(data_feat_type, data_info_task, basename,
                             metalearning_cnt, x_train, y_train, watcher,
-                            log_function):
+                            logger):
     # == Calculate metafeatures
     task_name = 'CalculateMetafeatures'
     watcher.start_task(task_name)
@@ -101,38 +98,42 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
         result = None
     elif data_info_task in \
             [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
-        log_function('Start calculating metafeatures for %s' % basename)
+        logger.info('Start calculating metafeatures for %s' % basename)
         result = calc_meta_features(x_train, y_train, categorical=categorical,
                                     dataset_name=basename)
     else:
         result = None
-        log_function('Metafeatures not calculated')
+        logger.info('Metafeatures not calculated')
     watcher.stop_task(task_name)
-    log_function(
+    logger.info(
         'Calculating Metafeatures (categorical attributes) took %5.2f' %
         watcher.wall_elapsed(task_name))
     return result
 
 
 def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
-                                    log_funciton):
+                                    logger):
     task_name = 'CalculateMetafeaturesEncoded'
     watcher.start_task(task_name)
     result = calc_meta_features_encoded(X_train=x_train, Y_train=y_train,
                                         categorical=[False] * x_train.shape[0],
                                         dataset_name=basename)
     watcher.stop_task(task_name)
-    log_funciton(
+    logger.info(
         'Calculating Metafeatures (encoded attributes) took %5.2fsec' %
         watcher.wall_elapsed(task_name))
     return result
 
-def _create_search_space(tmp_dir, data_info, backend, watcher, log_function):
+
+def _create_search_space(tmp_dir, data_info, backend, watcher, logger,
+                         include_estimators=None, include_preprocessors=None):
     task_name = 'CreateConfigSpace'
     watcher.start_task(task_name)
     configspace_path = os.path.join(tmp_dir, 'space.pcs')
     configuration_space = paramsklearn.get_configuration_space(
-        data_info)
+        data_info,
+        include_estimators=include_estimators,
+        include_preprocessors=include_preprocessors)
     sp_string = pcs_parser.write(configuration_space)
     backend.write_txt_file(configspace_path, sp_string,
                            'Configuration space')
@@ -147,7 +148,7 @@ def _get_initial_configuration(meta_features,
                                task, metadata_directory,
                                initial_configurations_via_metalearning,
                                is_sparse,
-                               watcher, log_function):
+                               watcher, logger):
     task_name = 'InitialConfigurations'
     watcher.start_task(task_name)
     try:
@@ -161,24 +162,24 @@ def _get_initial_configuration(meta_features,
             metadata_directory
         )
     except Exception as e:
-        log_function(str(e))
-        log_function(traceback.format_exc())
+        logger.error(str(e))
+        logger.error(traceback.format_exc())
         initial_configurations = []
     watcher.stop_task(task_name)
     return initial_configurations
 
 
 def _print_debug_info_of_init_configuration(initial_configurations, basename,
-                                            time_for_task, debug_log, info_log,
-                                            watcher):
-    debug_log('Initial Configurations: (%d)' % len(initial_configurations))
+                                            time_for_task, logger, watcher):
+    logger.debug('Initial Configurations: (%d)' % len(initial_configurations))
     for initial_configuration in initial_configurations:
-        debug_log(initial_configuration)
-    debug_log('Looking for initial configurations took %5.2fsec' %
-              watcher.wall_elapsed('InitialConfigurations'))
-    info_log(
+        logger.debug(initial_configuration)
+    logger.debug('Looking for initial configurations took %5.2fsec' %
+                 watcher.wall_elapsed('InitialConfigurations'))
+    logger.info(
         'Time left for %s after finding initial configurations: %5.2fsec'
         % (basename, time_for_task - watcher.wall_elapsed(basename)))
+
 
 class AutoML(multiprocessing.Process, BaseEstimator):
 
@@ -196,7 +197,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                  metadata_directory=None,
                  queue=None,
                  keep_models=True,
-                 debug_mode=False):
+                 debug_mode=False,
+                 include_estimators=None,
+                 include_preprocessors=None):
         super(AutoML, self).__init__()
 
         self._tmp_dir = tmp_dir
@@ -204,7 +207,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
         self._log_dir = log_dir if log_dir is not None else self._tmp_dir
-        self._initial_configurations_via_metalearning = initial_configurations_via_metalearning
+        self._initial_configurations_via_metalearning = \
+            initial_configurations_via_metalearning
         self._ensemble_size = ensemble_size
         self._ensemble_nbest = ensemble_nbest
         self._seed = seed
@@ -212,6 +216,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._metadata_directory = metadata_directory
         self._queue = queue
         self._keep_models = keep_models
+        self._include_estimators = include_estimators
+        self._include_preprocessors = include_preprocessors
 
         self._dataset_name = None
         self._stopwatch = None
@@ -229,9 +235,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         datamanager = get_data_manager(namespace=parser)
         self._stopwatch.start_task(datamanager.name)
 
-        self._logger = _get_logger(self._log_dir,
-                                   datamanager.name,
-                                   self._seed)
+        logger_name = 'AutoML(%d):%s' % (self._seed, datamanager.name)
+        setup_logger(os.path.join(self._tmp_dir, '%s.log' % str(logger_name)))
+        self._logger = get_logger(logger_name)
 
         self._datamanager = datamanager
         self._dataset_name = datamanager.name
@@ -262,7 +268,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._dataset_name = dataset_name
         self._stopwatch.start_task(self._dataset_name)
 
-        self._logger = _get_logger(self._log_dir, self._dataset_name, self._seed)
+        logger_name = 'AutoML(%d):%s' % (self._seed, dataset_name)
+        setup_logger(os.path.join(self._tmp_dir, '%s.log' % str(logger_name)))
+        self._logger = get_logger(logger_name)
 
         loaded_data_manager = XYDataManager(X, y,
                                             task=task,
@@ -273,18 +281,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         return self._fit(loaded_data_manager)
 
-    def _debug(self, text):
-        self._logger.debug(text)
-
-    def _critical(self, text):
-        self._logger.critical(text)
-
-    def _error(self, text):
-        self._logger.error(text)
-
-    def _info(self, text):
-        self._logger.info(text)
-
     def fit_automl_dataset(self, dataset):
         self._stopwatch = StopWatch()
         self._backend.save_start_time()
@@ -294,16 +290,17 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._start_task(self._stopwatch, name)
         self._dataset_name = name
 
-        self._logger = _get_logger(self._log_dir, self._dataset_name,
-                                        self._seed)
+        logger_name = 'AutoML(%d):%s' % (self._seed, name)
+        setup_logger(os.path.join(self._tmp_dir, '%s.log' % str(logger_name)))
+        self._logger = get_logger(logger_name)
 
-        self._debug('======== Reading and converting data ==========')
+        self._logger.debug('======== Reading and converting data ==========')
         # Encoding the labels will be done after the metafeature calculation!
         loaded_data_manager = CompetitionDataManager(dataset,
                                                      encode_labels=False)
         loaded_data_manager_str = str(loaded_data_manager).split('\n')
         for part in loaded_data_manager_str:
-            self._debug(part)
+            self._logger.debug(part)
 
         return self._fit(loaded_data_manager)
 
@@ -317,12 +314,12 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
     @staticmethod
     def _print_load_time(basename, time_left_for_this_task,
-                         time_for_load_data, log_function):
+                         time_for_load_data, logger):
 
         time_left_after_reading = max(
             0, time_left_for_this_task - time_for_load_data)
-        log_function('Remaining time after reading %s %5.2f sec' %
-                     (basename, time_left_after_reading))
+        logger.info('Remaining time after reading %s %5.2f sec' %
+                    (basename, time_left_after_reading))
         return time_for_load_data
 
     def _do_dummy_prediction(self, datamanager):
@@ -361,7 +358,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 self._dataset_name,
                 self._time_for_task,
                 time_for_load_data,
-                self._info)
+                self._logger)
 
         # == Perform dummy predictions
         self._do_dummy_prediction(datamanager)
@@ -375,7 +372,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             basename=self._dataset_name,
             watcher=self._stopwatch,
             metalearning_cnt=self._initial_configurations_via_metalearning,
-            log_function=self._debug)
+            logger=self._logger)
 
         self._stopwatch.start_task('OneHot')
         datamanager.perform1HotEncoding()
@@ -391,7 +388,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             datamanager.info,
             self._backend,
             self._stopwatch,
-            self._debug)
+            self._logger,
+            self._include_estimators,
+            self._include_preprocessors)
         self.configuration_space_created_hook(datamanager)
 
         if meta_features is None:
@@ -404,10 +403,10 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 datamanager.data['X_train'],
                 datamanager.data['Y_train'],
                 self._stopwatch,
-                self._debug)
+                self._logger)
 
-            self._debug(meta_features.__repr__(verbosity=2))
-            self._debug(meta_features_encoded.__repr__(verbosity=2))
+            self._logger.debug(meta_features.__repr__(verbosity=2))
+            self._logger.debug(meta_features_encoded.__repr__(verbosity=2))
 
             initial_configurations = _get_initial_configuration(
                 meta_features,
@@ -421,25 +420,25 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 datamanager.info[
                     'is_sparse'],
                 self._stopwatch,
-                self._error)
+                self._logger)
 
             _print_debug_info_of_init_configuration(
                 initial_configurations,
                 self._dataset_name,
                 self._time_for_task,
-                self._debug, self._info,
+                self._logger,
                 self._stopwatch)
 
         else:
             initial_configurations = []
-            self._critical('Metafeatures encoded not calculated')
+            self._logger('Metafeatures encoded not calculated')
 
         # == RUN SMAC
         proc_smac = _run_smac(self._tmp_dir, self._dataset_name,
                               self._time_for_task, self._ml_memory_limit,
                               data_manager_path, configspace_path,
                               initial_configurations, self._per_run_time_limit,
-                              self._stopwatch, self._debug, self._backend)
+                              self._stopwatch, self._logger, self._backend)
 
         # == RUN ensemble builder
         proc_ensembles = _run_ensemble_builder(
@@ -452,7 +451,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._ensemble_size,
             self._ensemble_nbest,
             self._stopwatch,
-            self._debug
+            self._logger
         )
 
         if self._queue is not None:
@@ -485,7 +484,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         if self._ohe is not None:
             X = self._ohe._transform(X)
 
-        ensemble_indices = self._backend.load_ensemble_indices_weights()
+        ensemble_indices = self._backend.load_ensemble_indices_weights(
+            self._seed)
 
         predictions = []
         for num_run in models:

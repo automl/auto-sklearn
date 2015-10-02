@@ -7,11 +7,11 @@ import os
 import arff
 import pandas as pd
 
-logger = logging.getLogger(__name__)
-
 
 class AlgorithmSelectionProblem(object):
     def __init__(self, directory):
+        self.logger = logging.getLogger(__name__)
+
         # Create data structures
         self.dir_ = directory
         self.algorithm_runs = None
@@ -48,14 +48,15 @@ class AlgorithmSelectionProblem(object):
         for expected_file in expected:
             full_path = os.path.join(self.dir_, expected_file)
             if not os.path.isfile(full_path):
-                logger.error("Not found: %s (has to be added)" % (full_path))
+                self.logger.error(
+                    "Not found: %s (has to be added)" % (full_path))
             else:
                 self.found_files.append(full_path)
 
         for expected_file in optional:
             full_path = os.path.join(self.dir_, expected_file)
             if not os.path.isfile(full_path):
-                logger.warning(
+                self.logger.warning(
                     "Not found: %s (maybe you want to add it)" % (full_path))
             else:
                 self.found_files.append(full_path)
@@ -75,13 +76,13 @@ class AlgorithmSelectionProblem(object):
             arff_dict = arff.load(fh)
 
         if arff_dict["attributes"][0][0].upper() != "INSTANCE_ID":
-            logger.error(
+            self.logger.error(
                 "instance_id as first attribute is missing in %s" % (filename))
         if arff_dict["attributes"][1][0].upper() != "REPETITION":
-            logger.error(
+            self.logger.error(
                 "repetition as second attribute is missing in %s" % (filename))
         if arff_dict["attributes"][2][0].upper() != "ALGORITHM":
-            logger.error(
+            self.logger.error(
                 "algorithm as third attribute is missing in %s" % (filename))
 
         performance_measures = [pm[0] for pm in arff_dict['attributes'][3:-1]]

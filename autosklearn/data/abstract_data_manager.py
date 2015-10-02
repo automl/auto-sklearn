@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 import abc
+import copy
 
 import numpy as np
 import scipy.sparse
@@ -13,6 +14,7 @@ class AbstractDataManager():
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, name):
+
         self._data = dict()
         self._info = dict()
         self._name = name

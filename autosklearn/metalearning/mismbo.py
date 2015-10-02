@@ -23,8 +23,6 @@ __all__ = [
     'create_metalearning_string_for_smac_call',
 ]
 
-logger = get_logger('autosklearn.metalearning.mismbo')
-
 
 SENTINEL = 'uiaeo'
 
@@ -114,6 +112,8 @@ def create_metalearning_string_for_smac_call(
     :param metadata_directory:
     :return:
     """
+    logger = get_logger('autosklearn.metalearning.mismbo')
+
     task = TASK_TYPES_TO_STRING[task]
 
     if metafeatures_encoded_labels is None or \
@@ -149,7 +149,6 @@ def create_metalearning_string_for_smac_call(
         subset='all')
     logger.info('Reading meta-data took %5.2f seconds',
                 time.time() - start)
-    print(ml.meta_base.configurations.keys())
     # TODO This is hacky, I must find a different way of adding a new
     # dataset!
     ml.meta_base.add_dataset(dataset_name + SENTINEL, mf)

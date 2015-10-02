@@ -1,6 +1,5 @@
 from collections import defaultdict, OrderedDict, deque
 import copy
-import logging
 import sys
 
 import numpy as np
@@ -17,10 +16,9 @@ from ParamSklearn.implementations.Imputation import Imputer
 from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
 from ParamSklearn.implementations.StandardScaler import StandardScaler
 
+from autosklearn.util.logging_ import get_logger
 from .metafeature import MetaFeature, HelperFunction, DatasetMetafeatures, \
     MetaFeatureValue
-
-logger = logging.getLogger(__name__)
 
 
 # TODO Allow multiple dependencies for a metafeature
@@ -566,10 +564,10 @@ class LandmarkLDA(MetaFeature):
                 accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
             return accuracy / 10
         except scipy.linalg.LinAlgError as e:
-            logging.warning("LDA failed: %s Returned 0 instead!" % e)
+            self.logger.warning("LDA failed: %s Returned 0 instead!" % e)
             return np.NaN
         except ValueError as e:
-            logging.warning("LDA failed: %s Returned 0 instead!" % e)
+            self.logger.warning("LDA failed: %s Returned 0 instead!" % e)
             return np.NaN
 
     def _calculate_sparse(self, X, y, categorical):
@@ -718,7 +716,7 @@ class PCA(HelperFunction):
                 return pca
             except LinAlgError as e:
                 pass
-        logging.warning("Failed to compute a Principle Component Analysis")
+        self.logger.warning("Failed to compute a Principle Component Analysis")
         return None
 
     def _calculate_sparse(self, X, y, categorical):
@@ -737,7 +735,7 @@ class PCA(HelperFunction):
                 return truncated_svd
             except LinAlgError as e:
                 pass
-        logging.warning("Failed to compute a Truncated SVD")
+        self.logger.warning("Failed to compute a Truncated SVD")
         return None
 
 
@@ -813,6 +811,8 @@ def calculate_all_metafeatures_with_labels(X, y, categorical, dataset_name,
 
 def calculate_all_metafeatures(X, y, categorical, dataset_name,
         calculate=None, dont_calculate=None, densify_threshold=1000):
+    logger = get_logger(__name__)
+
     """Calculate all metafeatures."""
     helper_functions.clear()
     metafeatures.clear()
@@ -894,14 +894,14 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name,
                 continue
             elif is_helper_function and not helper_functions.is_calculated(
                     dependency):
-                logging.info("%s: Going to calculate: %s", dataset_name,
-                             dependency)
+                logger.info("%s: Going to calculate: %s", dataset_name,
+                            dependency)
                 value = helper_functions[dependency](X_, y_, categorical_)
                 helper_functions.set_value(dependency, value)
                 mf_[dependency] = value
 
-        logging.info("%s: Going to calculate: %s", dataset_name,
-                     name)
+        logger.info("%s: Going to calculate: %s", dataset_name,
+                    name)
 
         value = metafeatures[name](X_, y_, categorical_)
         metafeatures.set_value(name, value)

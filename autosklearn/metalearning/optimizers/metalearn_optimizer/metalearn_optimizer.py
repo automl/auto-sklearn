@@ -18,7 +18,6 @@
 
 #!/usr/bin/env python
 
-import logging
 import os
 import StringIO
 
@@ -26,8 +25,6 @@ import HPOlib.cv as cv
 import HPOlib.wrapping_util as wrapping_util
 
 import pyMetaLearn.optimizers.metalearn_optimizer.metalearner as metalearner
-
-logger = logging.getLogger(__name__)
 
 
 def build_metalearn_call(config, options, optimizer_dir):

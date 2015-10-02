@@ -282,7 +282,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         D = CompetitionDataManager(dataset_path)
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['extra_trees'],
+            include_estimators=['lda'],
             include_preprocessors=['no_preprocessing'])
 
         errors = []
@@ -331,7 +331,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['extra_trees'],
+            include_estimators=['lda'],
             include_preprocessors=['no_preprocessing'])
         configuration = configuration_space.sample_configuration()
         D_ = copy.deepcopy(D)

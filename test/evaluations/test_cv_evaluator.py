@@ -157,14 +157,14 @@ class CVEvaluator_Test(unittest.TestCase):
         D = CompetitionDataManager(dataset_path)
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['extra_trees'],
+            include_estimators=['lda'],
             include_preprocessors=['no_preprocessing'])
 
         errors = []
         for i in range(N_TEST_RUNS):
             configuration = configuration_space.sample_configuration()
             D_ = copy.deepcopy(D)
-            evaluator = CVEvaluator(D_, configuration, cv_folds=5)
+            evaluator = CVEvaluator(D_, configuration, cv_folds=3)
             if not self._fit(evaluator):
                 continue
             err = evaluator.predict()

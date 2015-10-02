@@ -115,7 +115,7 @@ class NestedCVEvaluator_Test(unittest.TestCase):
         D = CompetitionDataManager(dataset_path)
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['extra_trees'],
+            include_estimators=['lda'],
             include_preprocessors=['no_preprocessing'])
 
         errors = []

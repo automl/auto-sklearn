@@ -6,13 +6,15 @@ import types
 import arff
 import scipy.sparse
 
+from autosklearn.util.logging_ import get_logger
+
 
 class AbstractMetaFeature(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
     def __init__(self):
-        pass
+        self.logger = get_logger(__name__)
 
     @abstractmethod
     def _calculate(cls, X, y, categorical):
@@ -40,11 +42,13 @@ class AbstractMetaFeature(object):
 
 class MetaFeature(AbstractMetaFeature):
     def __init__(self):
+        super(MetaFeature, self).__init__()
         self.type_ = "METAFEATURE"
 
 
 class HelperFunction(AbstractMetaFeature):
     def __init__(self):
+        super(HelperFunction, self).__init__()
         self.type_ = "HELPERFUNCTION"
 
 

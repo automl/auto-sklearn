@@ -83,11 +83,11 @@ def data_binary_sparse(filename, feat_type):
     nbr_samples = len(inner_data)
     # the construction is easier w/ dok_sparse
     dok_sparse = scipy.sparse.dok_matrix((nbr_samples, len(feat_type)))
-    print('Converting {} to dok sparse matrix'.format(filename))
+    # print('Converting {} to dok sparse matrix'.format(filename))
     for row in range(nbr_samples):
         for feature in inner_data[row]:
             dok_sparse[row, int(feature) - 1] = 1
-    print('Converting {} to csr sparse matrix'.format(filename))
+    # print('Converting {} to csr sparse matrix'.format(filename))
     return dok_sparse.tocsr()
 
 
@@ -170,7 +170,6 @@ class CompetitionDataManager(AbstractDataManager):
         self.input_dir = os.path.join(input_dir, name)
 
         info_file = os.path.join(self.input_dir, self.name + '_public.info')
-        print(info_file)
         self.get_info(info_file)
         self.feat_type = self.load_type(os.path.join(self.input_dir,
                                                     self.name + '_feat.type'))
@@ -315,7 +314,7 @@ class CompetitionDataManager(AbstractDataManager):
             input_dir = os.path.dirname(filename)
         if os.path.exists(filename):
             self.get_info_from_file(filename)
-            print('Info file found : ' + os.path.abspath(filename))
+            # print('Info file found : ' + os.path.abspath(filename))
             # Finds the data format ('dense', 'sparse', or 'sparse_binary')
             self.get_format_data(os.path.join(input_dir,
                                               basename + '_train.data'))

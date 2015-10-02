@@ -48,11 +48,10 @@ def get_options():
                         default=3600,
                         help='Total runtime of the AutoSklearn package in '
                              'seconds.')
-    parser.add_argument(
-        '--per-run-time-limit',
-        type=int,
-        default=360,
-        help='Runtime for a single call of a target algorithm.')
+    parser.add_argument('--per-run-time-limit',
+                        type=int,
+                        default=360,
+                        help='Runtime for a single call of a target algorithm.')
     parser.add_argument('--ml-memory-limit',
                         type=int,
                         default=3000,
@@ -78,6 +77,18 @@ def get_options():
                         default=1,
                         help='Consider only the best n models in the ensemble '
                              'building process.')
+
+    # Arguments concerning ParamSklearn
+    parser.add_argument('--include-estimators',
+                        nargs='*',
+                        default=None,
+                        type=str,
+                        help='Only use these estimators inside auto-sklearn')
+    parser.add_argument('--include-preprocessors',
+                        nargs='*',
+                        default=None,
+                        type=str,
+                        help='Only use these preprocessors inside auto-sklearn')
 
     # Other
     parser.add_argument('-s', '--seed',
@@ -138,14 +149,6 @@ if __name__ == '__main__':
                              % tmp_dataset_dir)
         tmp_dataset_dir = os.path.join(tmp_dataset_dir)
 
-    logger = get_logger('autosklearn_%d' % args.seed,
-                        outputdir=tmp_dataset_dir)
-    meta_base_logger = get_logger('pyMetaLearn.metalearning.meta_base')
-    meta_base_logger.setLevel(logging.DEBUG)
-    metalearn_logger = get_logger(
-        'pyMetaLearn.optimizers.metalearn_optimizer.metalearner')
-    metalearn_logger.setLevel(logging.DEBUG)
-
     BUFFER = 35  # time-left - BUFFER = timelimit for SMAC/ensemble_script.py
     BUFFER_BEFORE_SENDING_SIGTERM = 30  # We send SIGTERM to all processes
     DELAY_TO_SIGKILL = 15  # And after a delay we send a sigkill
@@ -178,7 +181,9 @@ if __name__ == '__main__':
         metadata_directory=args.metadata_directory,
         queue=queue,
         keep_models=False,
-        debug_mode=False)
+        debug_mode=False,
+        include_estimators=args.include_estimators,
+        include_preprocessors=args.include_preprocessors)
     automl.start_automl(args)
 
     [time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles] \

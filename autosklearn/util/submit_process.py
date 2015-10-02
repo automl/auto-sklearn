@@ -12,7 +12,7 @@ from autosklearn.util import logging_ as logging
 
 
 def submit_call(call, seed, logger, log_dir=None):
-    logger.debug('Calling: ' + call)
+    logger.info('Calling: ' + call)
     call = shlex.split(call)
 
     if log_dir is None:
@@ -45,8 +45,9 @@ def get_algo_exec(runsolver_limit, runsolver_delay, memory_limit, dataset):
     return call
 
 
-def run_smac(dataset_name, dataset, tmp_dir, searchspace, instance_file, limit,
-             cutoff_time, seed, memory_limit, initial_challengers=None):
+def run_smac(dataset_name, dataset, tmp_dir, searchspace, instance_file,
+             test_instance_file, limit, cutoff_time, seed, memory_limit,
+             initial_challengers=None):
     # This should stay here and not move to the backend as it is very
     # specific code!
     logger = logging.get_logger(__name__)
@@ -78,21 +79,13 @@ def run_smac(dataset_name, dataset, tmp_dir, searchspace, instance_file, limit,
         'totalNumRunsLimit': '2147483647',
         'outputDirectory': tmp_dir,
         'numConcurrentAlgoExecs': '1',
-        'maxIncumbentRuns': '2147483647',
-        'retryTargetAlgorithmRunCount': '0',
-        'intensification-percentage': '0.5',
-        'num-ei-random': '1000',
-        # Number of challengers for local search
-        'num-challengers': 100,
-        'initial-incumbent': 'DEFAULT',
-        'rf-split-min': '10',
-        'validation': 'false',
         'deterministic': 'true',
         'abort-on-first-run-crash': 'false',
         'pcs-file': os.path.abspath(searchspace),
         'execDir': tmp_dir,
         'transform-crashed-quality-value': '2',
-        'instances': instance_file
+        'instances': instance_file,
+        'test-instances': test_instance_file
     }
     scenario_file = os.path.join(tmp_dir, '%s.scenario' % dataset_name)
     scenario_file_lock = scenario_file + '.lock'
@@ -105,8 +98,20 @@ def run_smac(dataset_name, dataset, tmp_dir, searchspace, instance_file, limit,
     if initial_challengers is None:
         initial_challengers = []
 
+    smac_options = {
+        'retryTargetAlgorithmRunCount': '0',
+        'intensification-percentage': '0.5',
+        'num-ei-random': '1000',
+        'num-challengers': 100,
+        'initial-incumbent': 'DEFAULT',
+        'validation': 'false',
+    }
+
     call = ' '.join(['smac', '--numRun', str(seed), '--scenario',
-                     scenario_file] + initial_challengers)
+                     scenario_file] + ['--%s %s' % (opt, smac_options[opt])
+                                       for opt in smac_options]
+                    + initial_challengers,
+                    )
 
     proc = submit_call(call, seed, logger)
     return proc

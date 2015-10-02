@@ -7,7 +7,7 @@ from ..metafeatures.metafeature import DatasetMetafeatures
 from HPOlibConfigSpace.configuration_space import Configuration
 
 
-logger = logging.getLogger(__name__)
+
 
 
 class Run(object):
@@ -34,6 +34,8 @@ class MetaBase(object):
         - aslib_directory: directory with a problem instance in the aslib format
         """
 
+        self.logger = logging.getLogger(__name__)
+
         self.configuration_space = configuration_space
         self.aslib_directory = aslib_directory
 
@@ -49,7 +51,7 @@ class MetaBase(object):
                 configurations[algorithm_id] = \
                     (Configuration(configuration_space, values=configuration))
             except (ValueError, KeyError) as e:
-                logger.debug("Error reading configurations: %s", e)
+                self.logger.debug("Error reading configurations: %s", e)
 
         self.configurations = configurations
 

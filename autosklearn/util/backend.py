@@ -145,11 +145,12 @@ class Backend(object):
 
         return models
 
-    def get_ensemble_indices_dir(self):
-        return os.path.join(self.internals_directory, 'ensemble_indices')
+    def get_ensemble_indices_dir(self, seed):
+        return os.path.join(self.internals_directory, 'ensemble_indices_%d' %
+                            seed)
 
-    def load_ensemble_indices_weights(self):
-        indices_dir = self.get_ensemble_indices_dir()
+    def load_ensemble_indices_weights(self, seed):
+        indices_dir = self.get_ensemble_indices_dir(seed)
         indices_files = sorted(os.listdir(indices_dir))
         indices_file = os.path.join(indices_dir, indices_files[-1])
         with open(indices_file) as fh:
@@ -157,13 +158,13 @@ class Backend(object):
 
         return ensemble_members_run_numbers
 
-    def save_ensemble_indices_weights(self, indices, idx):
+    def save_ensemble_indices_weights(self, indices, idx, seed):
         try:
-            os.makedirs(self.get_ensemble_indices_dir())
+            os.makedirs(self.get_ensemble_indices_dir(seed))
         except Exception:
             pass
 
-        filepath = os.path.join(self.get_ensemble_indices_dir(),
+        filepath = os.path.join(self.get_ensemble_indices_dir(seed),
                                 str(idx).zfill(10) + '.indices')
         with open(filepath, 'wb') as fh:
             pickle.dump(indices, fh)

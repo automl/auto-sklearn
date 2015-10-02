@@ -111,6 +111,5 @@ class Test(unittest.TestCase):
                     configuration_space, dataset_name, metric,
                     MULTICLASS_CLASSIFICATION, False, 1, None)
 
-            print(metric)
             self.assertEqual(initial_challengers[metric],
                              initial_configuration_strings_for_smac)
