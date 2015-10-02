@@ -23,7 +23,7 @@ __all__ = [
     'create_metalearning_string_for_smac_call',
 ]
 
-logger = get_logger(os.path.basename(__file__))
+logger = get_logger('autosklearn.metalearning.mismbo')
 
 
 SENTINEL = 'uiaeo'

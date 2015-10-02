@@ -10,6 +10,7 @@ from HPOlibConfigSpace.converters import pcs_parser
 from sklearn.base import BaseEstimator
 
 from autosklearn.constants import *
+from autosklearn.data.data_manager_factory import get_data_manager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import resampling, HoldoutEvaluator, get_new_run_num
@@ -177,8 +178,7 @@ def _print_debug_info_of_init_configuration(initial_configurations, basename,
               watcher.wall_elapsed('InitialConfigurations'))
     info_log(
         'Time left for %s after finding initial configurations: %5.2fsec'
-        % (basename, time_for_task -
-           watcher.wall_elapsed(basename)))
+        % (basename, time_for_task - watcher.wall_elapsed(basename)))
 
 class AutoML(multiprocessing.Process, BaseEstimator):
 
@@ -224,30 +224,47 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._debug_mode = debug_mode
         self._backend = Backend(self._output_dir, self._tmp_dir)
 
-    def run(self):
-        raise NotImplementedError()
+    def start_automl(self, parser):
+        self._stopwatch = StopWatch()
+        datamanager = get_data_manager(namespace=parser)
+        self._stopwatch.start_task(datamanager.name)
 
-    def fit(self, data_x, y,
+        self._logger = _get_logger(self._log_dir,
+                                   datamanager.name,
+                                   self._seed)
+
+        self._datamanager = datamanager
+        self._dataset_name = datamanager.name
+        self.start()
+
+    def start(self):
+        if not hasattr(self, '_datamanager'):
+            raise ValueError('You must invoke start() only via start_automl()')
+        super(AutoML, self).start()
+
+    def run(self):
+        if not hasattr(self, '_datamanager'):
+            raise ValueError('You must invoke run() only via start_automl()')
+        self._fit(self._datamanager)
+
+    def fit(self, X, y,
             task=MULTICLASS_CLASSIFICATION,
             metric='acc_metric',
             feat_type=None,
             dataset_name=None):
         if dataset_name is None:
             m = hashlib.md5()
-            m.update(data_x.data)
+            m.update(X.data)
             dataset_name = m.hexdigest()
 
         self._backend.save_start_time()
         self._stopwatch = StopWatch()
-
         self._dataset_name = dataset_name
-
-
         self._stopwatch.start_task(self._dataset_name)
 
         self._logger = _get_logger(self._log_dir, self._dataset_name, self._seed)
 
-        loaded_data_manager = XYDataManager(data_x, y,
+        loaded_data_manager = XYDataManager(X, y,
                                             task=task,
                                             metric=metric,
                                             feat_type=feat_type,
@@ -273,9 +290,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._backend.save_start_time()
 
         name = os.path.basename(dataset)
+        self._stopwatch.start_task(name)
+        self._start_task(self._stopwatch, name)
         self._dataset_name = name
-
-        self._stopwatch.start_task(self._dataset_name)
 
         self._logger = _get_logger(self._log_dir, self._dataset_name,
                                         self._seed)
@@ -447,6 +464,13 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         # Delete AutoSklearn environment variable
         del_auto_seed()
+
+        # In case
+        try:
+            del self._datamanager
+        except Exception:
+            pass
+
         return self
 
     def predict(self, X):

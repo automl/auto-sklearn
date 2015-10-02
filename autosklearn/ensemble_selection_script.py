@@ -229,6 +229,7 @@ def main(predictions_dir,
         # List of num_runs (which are in the filename) which will be included
         #  later
         include_num_runs = []
+        backup_num_runs = []
         re_num_run = re.compile(r'_([0-9]*)\.npy$')
         if ensemble_size is not None:
             # Keeps track of the single scores of each model in our ensemble
@@ -256,6 +257,7 @@ def main(predictions_dir,
                     # include_num_runs.append(True)
                     logger.error('Model only predicts at random: ' +
                                   model_name + ' has score: ' + str(score))
+                    backup_num_runs.append(num_run)
                 # If we have less models in our ensemble than ensemble_size add
                 # the current model if it is better than random
                 elif len(scores_nbest) < ensemble_size:
@@ -298,10 +300,16 @@ def main(predictions_dir,
                     # include_num_runs.append(True)
                     logger.error('Model only predicts at random: ' +
                                   model_name + ' has score: ' + str(score))
+                    backup_num_runs.append(num_run)
                 else:
                     include_num_runs.append(num_run)
 
             model_idx += 1
+
+        # If there is no model better than random guessing, we have to use
+        # all models which do random guessing
+        if len(include_num_runs) == 0:
+            include_num_runs = backup_num_runs
 
         indices_to_model_names = dict()
         indices_to_run_num = dict()

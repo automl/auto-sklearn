@@ -159,13 +159,15 @@ def load_labels(filename):
 class CompetitionDataManager(AbstractDataManager):
 
     def __init__(self, name, encode_labels=True):
+        if name.endswith("/"):
+            name = name[:-1]
         input_dir = os.path.dirname(name)
         if not input_dir:
             input_dir = "."
         name = os.path.basename(name)
 
         super(CompetitionDataManager, self).__init__(name)
-        self.input_dir = input_dir + '/' + self.name + '/'
+        self.input_dir = os.path.join(input_dir, name)
 
         info_file = os.path.join(self.input_dir, self.name + '_public.info')
         print(info_file)

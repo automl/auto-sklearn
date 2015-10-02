@@ -98,7 +98,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             except Exception:
                 pass
 
-    def fit(self, data_x, y,
+    def fit(self, X, y,
             task=MULTICLASS_CLASSIFICATION,
             metric='acc_metric',
             feat_type=None,
@@ -158,7 +158,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         if y.shape[1] == 1:
             y = y.flatten()
 
-        return super(AutoSklearnClassifier, self).fit(data_x, y, task, metric,
+        return super(AutoSklearnClassifier, self).fit(X, y, task, metric,
                                                       feat_type, dataset_name)
 
     def predict(self, X):
