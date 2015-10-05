@@ -156,8 +156,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
-            if config['classifier:passive_aggresive:n_iter'] is not None:
-                config._values['classifier:passive_aggresive:n_iter'] = 5
+            if config['classifier:passive_aggressive:n_iter'] is not None:
+                config._values['classifier:passive_aggressive:n_iter'] = 5
             if config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
@@ -215,8 +215,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
-            if config['classifier:passive_aggresive:n_iter'] is not None:
-                config._values['classifier:passive_aggresive:n_iter'] = 5
+            if config['classifier:passive_aggressive:n_iter'] is not None:
+                config._values['classifier:passive_aggressive:n_iter'] = 5
             if config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
@@ -267,8 +267,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
-            if config['classifier:passive_aggresive:n_iter'] is not None:
-                config._values['classifier:passive_aggresive:n_iter'] = 5
+            if config['classifier:passive_aggressive:n_iter'] is not None:
+                config._values['classifier:passive_aggressive:n_iter'] = 5
             if config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
@@ -419,6 +419,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
                                          'preprocessor': ['densifier']},
                                 dataset_properties={'sparse': True})
 
+    @unittest.skip("Wait until HPOlibConfigSpace is fixed.")
     def test_get_hyperparameter_search_space_dataset_properties(self):
         cs_mc = ParamSklearnClassifier.get_hyperparameter_search_space(
             dataset_properties={'multiclass': True})

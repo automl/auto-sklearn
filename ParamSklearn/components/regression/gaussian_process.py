@@ -12,13 +12,12 @@ from ParamSklearn.constants import *
 
 class GaussianProcess(ParamSklearnRegressionAlgorithm):
     def __init__(self, nugget, thetaL, thetaU, normalize=False, copy_X=False, 
-            tol=0.001, optimizer='fmin_cobyla', random_state=None):
+                 random_state=None):
         self.nugget = float(nugget)
         self.thetaL = float(thetaL)
         self.thetaU = float(thetaU)
         self.normalize = normalize
         self.copy_X = copy_X
-        self.optimizer = optimizer
         # We ignore it
         self.random_state = random_state
         self.estimator = None
@@ -31,7 +30,9 @@ class GaussianProcess(ParamSklearnRegressionAlgorithm):
             theta0=np.ones(X.shape[1]) * 1e-1,
             thetaL=np.ones(X.shape[1]) * self.thetaL,
             thetaU=np.ones(X.shape[1]) * self.thetaU,
-            nugget=self.nugget)
+            nugget=self.nugget,
+            optimizer='Welch',
+            random_state=self.random_state)
         self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
         self.scaler.fit(Y)
         Y_scaled = self.scaler.transform(Y)

@@ -4,8 +4,7 @@ import numpy as np
 import sklearn.svm
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.conditions import EqualsCondition, OrConjunction, \
-    InCondition
+from HPOlibConfigSpace.conditions import InCondition
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter
