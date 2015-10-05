@@ -1,6 +1,7 @@
 import unittest
 
-from ParamSklearn.components.classification.passive_aggresive import PassiveAggressive
+from ParamSklearn.components.classification.passive_aggressive import \
+    PassiveAggressive
 from ParamSklearn.util import _test_classifier, _test_classifier_iterative_fit
 
 import sklearn.metrics
