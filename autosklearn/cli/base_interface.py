@@ -40,7 +40,7 @@ evaluator = None
 
 
 def signal_handler(signum, frame):
-    print('Aborting Training!')
+    print('Received signal %s. Aborting Training!' % str(signum))
     global evaluator
     evaluator.finish_up()
     exit(0)
@@ -62,6 +62,7 @@ def _get_base_dict():
 
 
 def make_mode_holdout(data, seed, configuration, num_run):
+    global evaluator
     evaluator = HoldoutEvaluator(data, configuration,
                                  seed=seed,
                                  num_run=num_run,
@@ -76,6 +77,7 @@ def make_mode_holdout(data, seed, configuration, num_run):
 
 
 def make_mode_test(data, seed, configuration, metric):
+    global evaluator
     evaluator = TestEvaluator(data,
                               configuration,
                               all_scoring_functions=True,
@@ -95,6 +97,7 @@ def make_mode_test(data, seed, configuration, metric):
 
 
 def make_mode_cv(data, seed, configuration, num_run, folds):
+    global evaluator
     evaluator = CVEvaluator(data, configuration,
                             cv_folds=folds,
                             seed=seed,
@@ -107,6 +110,7 @@ def make_mode_cv(data, seed, configuration, num_run, folds):
 
 def make_mode_partial_cv(data, seed, configuration, num_run, metric, fold,
                          folds):
+    global evaluator
     evaluator = CVEvaluator(data, configuration,
                             all_scoring_functions=True,
                             cv_folds=folds,
@@ -121,6 +125,7 @@ def make_mode_partial_cv(data, seed, configuration, num_run, metric, fold,
                                     for m_, value in scores.items()])
     additional_run_info += ';' + 'duration: ' + str(duration)
 
+    print(metric, score, additional_run_info)
     print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
           ('SAT', abs(duration), score, evaluator.seed,
            additional_run_info))
@@ -128,6 +133,7 @@ def make_mode_partial_cv(data, seed, configuration, num_run, metric, fold,
 
 def make_mode_nested_cv(data, seed, configuration, num_run, inner_folds,
                         outer_folds):
+    global evaluator
     evaluator = NestedCVEvaluator(data, configuration,
                                   inner_cv_folds=inner_folds,
                                   outer_cv_folds=outer_folds,
