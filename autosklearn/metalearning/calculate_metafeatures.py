@@ -10,9 +10,9 @@ import autosklearn.metalearning.metafeatures.metafeatures
 import autosklearn.metalearning.metafeatures.metafeature
 
 
-def calculate_metafeatures(D, output_dir, memory_limit=3000):
+def calculate_metafeatures(D, output_dir, memory_limit=3072):
     resource.setrlimit(resource.RLIMIT_AS, (memory_limit * 1048576L, -1L))
-    mf_filename = os.path.join(output_dir, "%s.arff" % D.basename)
+    mf_filename = os.path.join(output_dir, "%s.arff" % D.name)
 
     X = D.data["X_train"]
     y = D.data["Y_train"]
@@ -27,7 +27,7 @@ def calculate_metafeatures(D, output_dir, memory_limit=3000):
 
     _metafeatures_labels = autosklearn.metalearning.metafeatures.metafeatures. \
         calculate_all_metafeatures_with_labels(
-        X, y, categorical, D.basename)
+        X, y, categorical, D.name)
 
     # Dump the metafeatures for safety in case that there is a crash later
     # http://stackoverflow.com/questions/14906962/python-double-free-error-for-huge-datasets
@@ -41,13 +41,13 @@ def calculate_metafeatures(D, output_dir, memory_limit=3000):
     try:
         _metafeatures_encoded_labels = autosklearn.metalearning.metafeatures. \
             metafeatures.calculate_all_metafeatures_encoded_labels(
-            X, y, categorical, D.basename)
+            X, y, categorical, D.name)
     except MemoryError as e:
         # During the conversion of the dataset (rescaling, etc...), it can
         # happen that we run out of memory.
         _metafeatures_encoded_labels = \
             autosklearn.metalearning.metafeatures.metafeature.DatasetMetafeatures(
-                D.basename, dict())
+                D.name, dict())
         for metafeature_name in \
                 autosklearn.metalearning.metafeatures.metafeatures.npy_metafeatures:
             type_ = "HELPERFUNCTION" if metafeature_name not in \
@@ -70,7 +70,7 @@ def calculate_metafeatures(D, output_dir, memory_limit=3000):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--output-dir", type=str, required=True)
-    parser.add_argument("--memory_limit", type=int, default=3000)
+    parser.add_argument("--memory-limit", type=int, default=3072)
     parser = data_manager_factory.populate_argparse_with_data_options(parser)
     args = parser.parse_args()
 
