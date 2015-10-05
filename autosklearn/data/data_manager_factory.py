@@ -40,29 +40,21 @@ def get_data_manager(namespace, encode_labels=False):
 
 def populate_argparse_with_data_options(parser):
     # Support different parsers for different data types
-    subparsers = parser.add_subparsers(
-        title='data',
-        description='further arguments concerning how and which '
-                    'data is loaded.',
-        dest='data_format')
 
-    arff_parser = subparsers.add_parser('arff')
-    arff_parser.add_argument('--dataset', type=str, required=True,
-                             help='Unique identifier of the dataset.')
-    arff_parser.add_argument('--task', help='Task to execute on the dataset.',
-                             choices=TASK_TYPES_TO_STRING.values(),
-                             required=True)
-    arff_parser.add_argument('--metric', help='Loss function to optimize for.',
-                             choices=['acc_metric', 'auc_metric',
-                                      'bac_metric', 'f1_metric', 'pac_metric'],
-                             required=True)
-    arff_parser.add_argument('--target', help='Target attribute.',
-                             required=True)
-
-    automl_competition_parser = subparsers.add_parser(
-        'automl-competition-format')
-    automl_competition_parser.add_argument(
-        '--dataset', type=str, required=True,
-        help='Unique identifier of the dataset.')
+    parser.add_argument('--data-format', type=str, required=True,
+                        choices=["automl-competition-format", "arff"])
+    parser.add_argument('--dataset', type=str, required=True,
+                        help='Unique identifier of the dataset.')
+    parser.add_argument('--task', choices=TASK_TYPES_TO_STRING.values(),
+                        help='Task to execute on the dataset. Only necessary '
+                             'for data in arff format.')
+    parser.add_argument('--metric', choices=['acc_metric', 'auc_metric',
+                                             'bac_metric', 'f1_metric',
+                                             'pac_metric'],
+                        help='Loss function to optimize for. Only necessary '
+                             'for data in arff format.')
+    parser.add_argument('--target', type=str,
+                        help='Target attribute. Only necessary for data in '
+                             'arff format.')
 
     return parser
