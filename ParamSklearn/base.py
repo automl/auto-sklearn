@@ -257,8 +257,21 @@ class ParamSklearnBaseEstimator(BaseEstimator):
                                          include, pipeline):
         if include is None:
             include = {}
+
+        keys = [pair[0] for pair in pipeline]
+        for key in include:
+            if key not in keys:
+                raise ValueError('Invalid key in include: %s; should be one '
+                                 'of %s' % (key, keys))
+
         if exclude is None:
             exclude = {}
+
+        keys = [pair[0] for pair in pipeline]
+        for key in exclude:
+            if key not in keys:
+                raise ValueError('Invalid key in exclude: %s; should be one '
+                                 'of %s' % (key, keys))
 
         if 'sparse' not in dataset_properties:
             # This dataset is probaby dense
@@ -310,8 +323,10 @@ class ParamSklearnBaseEstimator(BaseEstimator):
 
         return cs
 
-    @staticmethod
-    def _get_pipeline():
+    @classmethod
+    def _get_pipeline(cls):
+        if cls == ParamSklearnBaseEstimator:
+            return []
         raise NotImplementedError()
 
     def _get_estimator_hyperparameter_name(self):

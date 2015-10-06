@@ -3,6 +3,8 @@ import sklearn.svm
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, Constant
+from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, \
+    ForbiddenAndConjunction
 
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
 from ParamSklearn.constants import *
@@ -74,7 +76,7 @@ class LibLinear_SVR(ParamSklearnRegressionAlgorithm):
             "C", 0.03125, 32768, log=True, default=1.0))
         loss = cs.add_hyperparameter(CategoricalHyperparameter(
             "loss", ["epsilon_insensitive", "squared_epsilon_insensitive"],
-            default="epsilon_insensitive"))
+            default="squared_epsilon_insensitive"))
         # Random Guess
         epsilon = cs.add_hyperparameter(UniformFloatHyperparameter(
             name="epsilon", lower=0.001, upper=1, default=0.1, log=True))
@@ -85,5 +87,11 @@ class LibLinear_SVR(ParamSklearnRegressionAlgorithm):
         fit_intercept = cs.add_hyperparameter(Constant("fit_intercept", "True"))
         intercept_scaling = cs.add_hyperparameter(Constant(
             "intercept_scaling", 1))
+
+        dual_and_loss = ForbiddenAndConjunction(
+            ForbiddenEqualsClause(dual, "False"),
+            ForbiddenEqualsClause(loss, "epsilon_insensitive")
+        )
+        cs.add_forbidden_clause(dual_and_loss)
 
         return cs

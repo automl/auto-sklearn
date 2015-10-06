@@ -50,6 +50,8 @@ class FeaturePreprocessorChoice(object):
 
         available_comp = cls.get_components()
 
+        # TODO check for task type classification and/or regression!
+
         components_dict = OrderedDict()
         for name in available_comp:
             if include is not None and name not in include:
@@ -63,14 +65,24 @@ class FeaturePreprocessorChoice(object):
             if entry == FeaturePreprocessorChoice or hasattr(entry, 'get_components'):
                 continue
 
-            if entry.get_properties()['handles_classification'] is False:
-                continue
-            if data_prop.get('multiclass') is True and entry.get_properties()[
-                'handles_multiclass'] is False:
-                continue
-            if data_prop.get('multilabel') is True and available_comp[name]. \
-                    get_properties()['handles_multilabel'] is False:
-                continue
+            target_type = data_prop['target_type']
+            if target_type == 'classification':
+                if entry.get_properties()['handles_classification'] is False:
+                    continue
+                if data_prop.get('multiclass') is True and \
+                        entry.get_properties()['handles_multiclass'] is False:
+                    continue
+                if data_prop.get('multilabel') is True and \
+                        entry.get_properties()['handles_multilabel'] is False:
+                    continue
+
+            elif target_type == 'regression':
+                if entry.get_properties()['handles_regression'] is False:
+                    continue
+
+            else:
+                raise ValueError('Unknown target type %s' % target_type)
+
             components_dict[name] = entry
 
         return components_dict

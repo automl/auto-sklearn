@@ -11,7 +11,7 @@ class BaseTest(unittest.TestCase):
         base = ParamSklearn.base.ParamSklearnBaseEstimator
 
         cs = HPOlibConfigSpace.configuration_space.ConfigurationSpace()
-        dataset_properties = {}
+        dataset_properties = {'target_type': 'classification'}
         exclude = {}
         include = {}
         pipeline = [('p0', ParamSklearn.components.feature_preprocessing._preprocessors[
@@ -31,7 +31,7 @@ class BaseTest(unittest.TestCase):
         self.assertEqual(151, len(cs.forbidden_clauses))
 
         cs = HPOlibConfigSpace.configuration_space.ConfigurationSpace()
-        dataset_properties = {'signed': True}
+        dataset_properties = {'target_type': 'classification', 'signed': True}
         include = {'c': ['multinomial_nb']}
         cs = base._get_hyperparameter_search_space(cs, dataset_properties,
                                                    exclude, include, pipeline)
@@ -47,7 +47,7 @@ class BaseTest(unittest.TestCase):
 
 
         cs = HPOlibConfigSpace.configuration_space.ConfigurationSpace()
-        dataset_properties = {'signed': True}
+        dataset_properties = {'target_type': 'classification', 'signed': True}
         include = {}
         cs = base._get_hyperparameter_search_space(cs, dataset_properties,
                                                    exclude, include, pipeline)
@@ -61,7 +61,7 @@ class BaseTest(unittest.TestCase):
 
 
         cs = HPOlibConfigSpace.configuration_space.ConfigurationSpace()
-        dataset_properties = {'sparse': True}
+        dataset_properties = {'target_type': 'classification', 'sparse': True}
         cs = base._get_hyperparameter_search_space(cs, dataset_properties,
                                                    exclude, include, pipeline)
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
@@ -73,7 +73,8 @@ class BaseTest(unittest.TestCase):
         #    print(clause)
 
         cs = HPOlibConfigSpace.configuration_space.ConfigurationSpace()
-        dataset_properties = {'sparse': True, 'signed': True}
+        dataset_properties = {'target_type': 'classification',
+                              'sparse': True, 'signed': True}
         cs = base._get_hyperparameter_search_space(cs, dataset_properties,
                                                    exclude, include, pipeline)
 

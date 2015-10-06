@@ -153,6 +153,10 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
 
         if dataset_properties is None or not isinstance(dataset_properties, dict):
             dataset_properties = dict()
+        if not 'target_type' in dataset_properties:
+            dataset_properties['target_type'] = 'classification'
+        if dataset_properties['target_type'] != 'classification':
+            dataset_properties['target_type'] = 'classification'
 
         pipeline = cls._get_pipeline()
         cs = cls._get_hyperparameter_search_space(cs, dataset_properties,
@@ -224,8 +228,8 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
 
         return cs
 
-    @staticmethod
-    def _get_pipeline():
+    @classmethod
+    def _get_pipeline(cls):
         steps = []
 
         # Add the always active preprocessing components

@@ -1,9 +1,12 @@
 __author__ = 'eggenspk'
 
 import copy
+import resource
+import traceback
 import unittest
 
 import mock
+import numpy as np
 import sklearn.datasets
 import sklearn.decomposition
 import sklearn.ensemble
@@ -67,6 +70,65 @@ class TestParamSKlearnRegressor(unittest.TestCase):
             self.assertIn(ParamSklearnPreprocessingAlgorithm,
                             preprocessors[key].__bases__)
 
+    def test_configurations(self):
+        # Use a limit of ~4GiB
+        limit = 4000 * 1024 * 1024
+        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
+        cs = ParamSklearnRegressor.get_hyperparameter_search_space()
+
+        print(cs)
+        cs.seed(1)
+
+        for i in range(10):
+            config = cs.sample_configuration()
+            config._populate_values()
+            if config['regressor:sgd:n_iter'] is not None:
+                config._values['regressor:sgd:n_iter'] = 5
+
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
+            cls = ParamSklearnRegressor(config, random_state=1)
+            print(config)
+            try:
+                cls.fit(X_train, Y_train)
+                X_test_ = X_test.copy()
+                predictions = cls.predict(X_test)
+                self.assertIsInstance(predictions, np.ndarray)
+                predicted_probabiliets = cls.predict(X_test_)
+                self.assertIsInstance(predicted_probabiliets, np.ndarray)
+            except ValueError as e:
+                if "Floating-point under-/overflow occurred at epoch" in \
+                        e.args[0] or \
+                                "removed all features" in e.args[0] or \
+                                "all features are discarded" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    print(traceback.format_exc())
+                    raise e
+            except RuntimeWarning as e:
+                if "invalid value encountered in sqrt" in e.args[0]:
+                    continue
+                elif "divide by zero encountered in" in e.args[0]:
+                    continue
+                elif "invalid value encountered in divide" in e.args[0]:
+                    continue
+                elif "invalid value encountered in true_divide" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    print(traceback.format_exc())
+                    raise e
+            except UserWarning as e:
+                if "FastICA did not converge" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    print(traceback.format_exc())
+                    raise e
+            except MemoryError as e:
+                continue
+
     def test_default_configuration(self):
         for i in range(2):
             cs = ParamSklearnRegressor.get_hyperparameter_search_space()
@@ -86,7 +148,7 @@ class TestParamSKlearnRegressor(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(135, len(hyperparameters))
+        self.assertEqual(114, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 5, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):

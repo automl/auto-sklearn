@@ -84,7 +84,6 @@ class TestParamSklearnClassifier(unittest.TestCase):
         limit = 4000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
-
         cs = ParamSklearnClassifier.get_hyperparameter_search_space()
 
         print(cs)
@@ -93,11 +92,9 @@ class TestParamSklearnClassifier(unittest.TestCase):
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
-            if 'classifier:passive_aggresive:n_iter' in config and \
-                    config['classifier:passive_aggresive:n_iter'] is not None:
-                config._values['classifier:passive_aggresive:n_iter'] = 5
-            if 'classifier:sgd:n_iter' in config and \
-                    config['classifier:sgd:n_iter'] is not None:
+            if config['classifier:passive_aggressive:n_iter'] is not None:
+                config._values['classifier:passive_aggressive:n_iter'] = 5
+            if config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')

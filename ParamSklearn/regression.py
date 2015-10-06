@@ -126,6 +126,10 @@ class ParamSklearnRegressor(RegressorMixin, ParamSklearnBaseEstimator):
 
         if dataset_properties is None or not isinstance(dataset_properties, dict):
             dataset_properties = dict()
+        if not 'target_type' in dataset_properties:
+            dataset_properties['target_type'] = 'regression'
+        if dataset_properties['target_type'] != 'regression':
+            dataset_properties['target_type'] = 'regression'
 
         if 'sparse' not in dataset_properties:
             # This dataset is probaby dense
@@ -159,7 +163,7 @@ class ParamSklearnRegressor(RegressorMixin, ParamSklearnBaseEstimator):
         # which would take too long
         # Combinations of tree-based models with feature learning:
         regressors_ = ["random_forest", "gradient_boosting", "gaussian_process"]
-        feature_learning_ = ["kitchen_sinks", "sparse_filtering"]
+        feature_learning_ = ["kitchen_sinks", "kernel_pca", "nystroem_sampler"]
 
         for r, f in product(regressors_, feature_learning_):
             if r not in regressors:
@@ -181,8 +185,8 @@ class ParamSklearnRegressor(RegressorMixin, ParamSklearnBaseEstimator):
     def _get_estimator_components():
         return components.regression_components._regressors
 
-    @staticmethod
-    def _get_pipeline():
+    @classmethod
+    def _get_pipeline(cls):
         steps = []
 
         # Add the always active preprocessing components

@@ -39,11 +39,11 @@ class PolynomialFeatures(ParamSklearnPreprocessingAlgorithm):
                 'prefers_data_scaled': True,
                 # Find out if this is good because of sparsity
                 'prefers_data_normalized': False,
-                'handles_regression': False,
+                'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': False,
-                'is_deterministic': False,
+                'handles_multilabel': True,
+                'is_deterministic': True,
                 # TODO find out of this is right!
                 # this here suggests so http://scikit-learn.org/stable/modules/svm.html#tips-on-practical-use
                 'handles_sparse': True,

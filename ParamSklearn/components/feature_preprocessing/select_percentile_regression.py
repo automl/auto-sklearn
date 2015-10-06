@@ -43,7 +43,7 @@ class SelectPercentileRegression(SelectPercentileBase,
                 'handles_sparse': False,
                 'handles_dense': True,
                 'input': (DENSE, UNSIGNED_DATA),
-                'output': (DENSE,),
+                'output': (INPUT,),
                 'preferred_dtype': None}
 
     @staticmethod
