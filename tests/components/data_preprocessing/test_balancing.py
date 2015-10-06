@@ -15,7 +15,6 @@ from ParamSklearn.components.classification.random_forest import RandomForest
 from ParamSklearn.components.classification.liblinear_svc import LibLinear_SVC
 from ParamSklearn.components.classification.libsvm_svc import LibSVM_SVC
 from ParamSklearn.components.classification.sgd import SGD
-from ParamSklearn.components.classification.ridge import Ridge
 from ParamSklearn.components.feature_preprocessing\
     .extra_trees_preproc_for_classification import ExtraTreesPreprocessor
 from ParamSklearn.components.feature_preprocessing.liblinear_svc_preprocessor import LibLinear_Preprocessor
@@ -61,14 +60,6 @@ class BalancingComponentTest(unittest.TestCase):
         self.assertEqual(("preprocessor:class_weight", "auto"),
                          list(init_params.items())[0])
 
-    def test_balancing_get_weights_ridge(self):
-        Y = np.array([0] * 80 + [1] * 20)
-        balancing = Balancing(strategy='weighting')
-        init_params, fit_params = balancing.get_weights(
-            Y, 'ridge', None, None, None)
-        self.assertAlmostEqual(0.4, init_params['classifier:class_weight'][0])
-        self.assertAlmostEqual(1.6, init_params['classifier:class_weight'][1])
-
     def test_weighting_effect(self):
         for name, clf, acc_no_weighting, acc_weighting in \
                 [('adaboost', AdaboostClassifier, 0.692, 0.719),
@@ -78,9 +69,7 @@ class BalancingComponentTest(unittest.TestCase):
                  ('random_forest', RandomForest, 0.886, 0.885),
                  ('libsvm_svc', LibSVM_SVC, 0.915, 0.937),
                  ('liblinear_svc', LibLinear_SVC, 0.920, 0.923),
-                 ('sgd', SGD, 0.811, 0.902),
-                 ('ridge', Ridge, 0.89071038251366119,
-                                  0.91013964784456591)]:
+                 ('sgd', SGD, 0.811, 0.902)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
                 # Fit
