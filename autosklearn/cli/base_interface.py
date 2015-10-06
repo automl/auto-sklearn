@@ -95,10 +95,13 @@ def make_mode_test(data, seed, configuration, metric):
     global evaluator
     evaluator = TestEvaluator(data,
                               configuration,
+                              seed=seed,
                               all_scoring_functions=True,
-                              seed=seed)
+                              with_predictions=True
+                              )
     evaluator.fit()
-    scores = evaluator.predict()
+    signal.signal(15, empty_signal_handler)
+    scores, _, _, _ = evaluator.predict()
     duration = time.time() - evaluator.starttime
 
     score = scores[metric]
@@ -127,12 +130,13 @@ def make_mode_partial_cv(data, seed, configuration, num_run, metric, fold,
                          folds):
     global evaluator
     evaluator = CVEvaluator(data, configuration,
-                            all_scoring_functions=True,
                             cv_folds=folds,
                             seed=seed,
-                            num_run=num_run)
+                            num_run=num_run,
+                            **_get_base_dict())
     evaluator.partial_fit(fold)
-    scores = evaluator.predict()
+    signal.signal(15, empty_signal_handler)
+    scores, _, _, _ = evaluator.predict()
     duration = time.time() - evaluator.starttime
 
     score = scores[metric]

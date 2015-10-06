@@ -65,5 +65,5 @@ class TestEvaluator(AbstractEvaluator):
             err = 1 - score
 
         if self.with_predictions:
-            return err, Y_pred
+            return err, Y_pred, Y_pred, Y_pred
         return err

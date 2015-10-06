@@ -124,10 +124,10 @@ def create_metalearning_string_for_smac_call(
 
     current_directory = os.path.dirname(__file__)
     if metadata_directory is None:
-        metadata_directory = os.path.join(current_directory, 'files',
-                                          '%s_%s_%s' % (task, 'sparse' if
-                                          sparse is True else
-                                          'dense', metric))
+        metadata_directory = os.path.join(
+            current_directory, 'files',
+            '%s_%s_%s' % (metric, task,
+                          'sparse' if sparse is True else 'dense'))
 
     # Concatenate the metafeatures!
     mf = metafeatures_labels
