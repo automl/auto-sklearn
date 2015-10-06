@@ -100,9 +100,10 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                         for result_ in result:
                             metric_, value = result_.split(":")
                             metric_ = metric_.replace(":", "").strip()
-                            value = float(value.strip())
+                            value = value.strip()
 
                             if metric_ == metric:
+                                value = float(value)
                                 best.append((value, i + 1))
 
             best.sort()
@@ -147,7 +148,12 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                                     # parser
                                     value = str(value)
                                 elif isinstance(hyperparameter, Constant):
-                                    value = value
+                                    if isinstance(hyperparameter.value, float):
+                                        value = float(value)
+                                    elif isinstance(hyperparameter.value, int):
+                                        value = int(value)
+                                    else:
+                                        value = value
                                 elif hyperparameter is None:
                                     value = ''
                                 else:
@@ -158,9 +164,10 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                             try:
                                 configuration = Configuration(
                                     configuration_space, configuration)
-                            except:
-                                print "Configuration %s not applicable!" \
-                                      % row[1]
+                            except Exception as e:
+                                print "Configuration %s not applicable " \
+                                      "because of %s!" \
+                                      % (row[1], e)
                                 break
 
                             if str(configuration) in \

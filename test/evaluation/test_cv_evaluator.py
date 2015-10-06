@@ -49,7 +49,7 @@ class CVEvaluator_Test(unittest.TestCase):
 
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['ridge'],
+            include_estimators=['extra_trees'],
             include_preprocessors=['select_rates'])
 
         err = np.zeros([N_TEST_RUNS])
@@ -113,7 +113,7 @@ class CVEvaluator_Test(unittest.TestCase):
 
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['ridge'],
+            include_estimators=['lda'],
             include_preprocessors=['select_rates'])
 
         err = np.zeros([N_TEST_RUNS])

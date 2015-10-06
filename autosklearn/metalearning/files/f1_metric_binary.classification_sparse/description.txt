@@ -57,9 +57,9 @@ features_deterministic: NumberOfInstances, LogNumberOfInstances, NumberOfClasses
 features_stochastic: 
 default_steps: NumberOfInstancesWithMissingValues, LogInverseDatasetRatio, PCASkewnessFirstPC, ClassEntropy, SymbolsMin, NumberOfFeatures, NumberOfCategoricalFeatures, PercentageOfMissingValues, PCA, LandmarkLDA, ClassProbabilityMax, KurtosisMax, Landmark1NN, LandmarkNaiveBayes, NumberOfMissingValues, NumSymbols, PercentageOfFeaturesWithMissingValues, PCAKurtosisFirstPC, NumberOfNumericFeatures, Kurtosisses, RatioNumericalToNominal, SkewnessMin, KurtosisMean, SkewnessMean, LogNumberOfFeatures, LandmarkDecisionNodeLearner, NumberOfClasses, SymbolsSum, SymbolsMean, PCAFractionOfComponentsFor95PercentVariance, NumberOfFeaturesWithMissingValues, ClassProbabilitySTD, LandmarkRandomNodeLearner, LogNumberOfInstances, Skewnesses, RatioNominalToNumerical, ClassProbabilityMean, ClassOccurences, KurtosisSTD, SkewnessSTD, KurtosisMin, SymbolsSTD, NumberOfInstances, InverseDatasetRatio, ClassProbabilityMin, LogDatasetRatio, LandmarkDecisionTree, PercentageOfInstancesWithMissingValues, SymbolsMax, MissingValues, SkewnessMax, DatasetRatio
 
-algorithms_deterministic: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24
+algorithms_deterministic: 1,2,3,4,5,6,7,8,9,10,11,12,13
 performance_type: solution_quality
-performance_measures: acc_metric
+performance_measures: f1_metric
 algorithms_stochastic: 
 
 scenario_id: openml

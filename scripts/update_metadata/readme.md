@@ -18,8 +18,9 @@
 
 ## 4. calculate metafeatures
 
-    python 04_autosklearn_calculate_metafeatures.py --output-dir /tmp/metadata/metafeatures --memory-limit 3072
+    python 04_autosklearn_calculate_metafeatures.py datasets_test.csv /tmp/metadata/metafeatures --memory-limit 3072
 
 ## 5. create aslib files
 
-    python 05_autosklearn_create_aslib_files.py
+    python 05_autosklearn_create_aslib_files.py /tmp/metadata/metafeatures
+    /tmp/metadata/metadata /tmp/metadata/aslib name 60 3072

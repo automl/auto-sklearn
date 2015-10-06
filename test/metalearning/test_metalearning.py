@@ -34,56 +34,21 @@ class Test(unittest.TestCase):
         dataset_name = 'digits'
 
         initial_challengers = {
-            'acc_metric': ["--initial-challengers \" "
-                           "-adaboost:algorithm 'SAMME.R' "
-                           "-adaboost:learning_rate '0.400363929326' "
-                           "-adaboost:max_depth '5' "
-                           "-adaboost:n_estimators '319' "
-                           "-balancing:strategy 'none' "
-                           "-classifier 'adaboost' "
-                           "-imputation:strategy 'most_frequent' "
-                           "-preprocessor 'no_preprocessing' "
-                           "-rescaling:strategy 'min/max'\""],
-            'auc_metric': ["--initial-challengers \" "
-                           "-adaboost:algorithm 'SAMME.R' "
-                           "-adaboost:learning_rate '0.966883114819' "
-                           "-adaboost:max_depth '5' "
-                           "-adaboost:n_estimators '412' "
-                           "-balancing:strategy 'weighting' "
-                           "-classifier 'adaboost' "
-                           "-imputation:strategy 'median' "
-                           "-preprocessor 'no_preprocessing' "
-                           "-rescaling:strategy 'min/max'\""],
-            'bac_metric': ["--initial-challengers \" "
-                           "-adaboost:algorithm 'SAMME.R' "
-                           "-adaboost:learning_rate '0.400363929326' "
-                           "-adaboost:max_depth '5' "
-                           "-adaboost:n_estimators '319' "
-                           "-balancing:strategy 'none' "
-                           "-classifier 'adaboost' "
-                           "-imputation:strategy 'most_frequent' "
-                           "-preprocessor 'no_preprocessing' "
-                           "-rescaling:strategy 'min/max'\""],
-            'f1_metric': ["--initial-challengers \" "
-                          "-adaboost:algorithm 'SAMME.R' "
-                          "-adaboost:learning_rate '0.966883114819' "
-                          "-adaboost:max_depth '5' "
-                          "-adaboost:n_estimators '412' "
-                          "-balancing:strategy 'weighting' "
-                          "-classifier 'adaboost' "
-                          "-imputation:strategy 'median' "
-                          "-preprocessor 'no_preprocessing' "
-                          "-rescaling:strategy 'min/max'\""],
-            'pac_metric': ["--initial-challengers \" "
-                           "-adaboost:algorithm 'SAMME.R' "
-                           "-adaboost:learning_rate '0.400363929326' "
-                           "-adaboost:max_depth '5' "
-                           "-adaboost:n_estimators '319' "
-                           "-balancing:strategy 'none' "
-                           "-classifier 'adaboost' "
-                           "-imputation:strategy 'most_frequent' "
-                           "-preprocessor 'no_preprocessing' "
-                           "-rescaling:strategy 'min/max'\""]
+            'acc_metric': "--initial-challengers \" "
+                          "-balancing:strategy 'none' "
+                          "-classifier:__choice__ 'random_forest'",
+            'auc_metric': "--initial-challengers \" "
+                          "-balancing:strategy 'none' "
+                          "-classifier:__choice__ 'random_forest'",
+            'bac_metric': "--initial-challengers \" "
+                          "-balancing:strategy 'none' "
+                          "-classifier:__choice__ 'random_forest'",
+            'f1_metric': "--initial-challengers \" "
+                         "-balancing:strategy 'none' "
+                         "-classifier:__choice__ 'random_forest'",
+            'pac_metric': "--initial-challengers \" "
+                          "-balancing:strategy 'none' "
+                          "-classifier:__choice__ 'random_forest'"
         }
 
         for metric in initial_challengers:
@@ -111,5 +76,7 @@ class Test(unittest.TestCase):
                     configuration_space, dataset_name, metric,
                     MULTICLASS_CLASSIFICATION, False, 1, None)
 
-            self.assertEqual(initial_challengers[metric],
-                             initial_configuration_strings_for_smac)
+            print(metric)
+            print(initial_configuration_strings_for_smac[0])
+            self.assertTrue(initial_configuration_strings_for_smac[
+                                0].startswith(initial_challengers[metric]))

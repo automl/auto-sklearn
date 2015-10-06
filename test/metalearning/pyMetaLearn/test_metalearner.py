@@ -28,7 +28,7 @@ class MetaLearnerTest(unittest.TestCase):
             .get_hyperparameter_search_space()
 
         self.meta_optimizer = metalearner.MetaLearningOptimizer(
-            '16_bac', self.cs, data_dir)
+            '38_acc', self.cs, data_dir)
 
     def tearDown(self):
         os.chdir(self.cwd)
@@ -46,29 +46,29 @@ class MetaLearnerTest(unittest.TestCase):
 
     def test_metalearning_suggest_all(self):
         ret = self.meta_optimizer.metalearning_suggest_all()
-        self.assertEqual(2, len(ret))
-        self.assertEqual('liblinear_svc', ret[0]['classifier'])
-        self.assertEqual('libsvm_svc', ret[1]['classifier'])
+        self.assertEqual(20, len(ret))
+        self.assertEqual('gradient_boosting', ret[0]['classifier:__choice__'])
+        self.assertEqual('random_forest', ret[1]['classifier:__choice__'])
         # There is no test for exclude_double_configuration as it's not present
         # in the test data
 
     def test_metalearning_suggest_all_nan_metafeatures(self):
-        self.meta_optimizer.meta_base.metafeatures.loc["16_bac"].iloc[:10] = \
+        self.meta_optimizer.meta_base.metafeatures.loc["38_acc"].iloc[:10] = \
             np.NaN
         ret = self.meta_optimizer.metalearning_suggest_all()
-        self.assertEqual(2, len(ret))
-        self.assertEqual('liblinear_svc', ret[0]['classifier'])
-        self.assertEqual('libsvm_svc', ret[1]['classifier'])
+        self.assertEqual(20, len(ret))
+        self.assertEqual('gradient_boosting', ret[0]['classifier:__choice__'])
+        self.assertEqual('random_forest', ret[1]['classifier:__choice__'])
 
     def test_metalearning_suggest(self):
         ret = self.meta_optimizer.metalearning_suggest([])
         self.assertIsInstance(ret, Configuration)
-        self.assertEqual('liblinear_svc', ret['classifier'])
+        self.assertEqual('gradient_boosting', ret['classifier:__choice__'])
         print ret
 
         ret2 = self.meta_optimizer.metalearning_suggest([ret])
         self.assertIsInstance(ret2, Configuration)
-        self.assertEqual('libsvm_svc', ret2['classifier'])
+        self.assertEqual('random_forest', ret2['classifier:__choice__'])
         print ret2
 
     def test_learn(self):
@@ -82,7 +82,7 @@ class MetaLearnerTest(unittest.TestCase):
             self.meta_optimizer._get_metafeatures()
         self.assertEqual(type(metafeatures), pd.Series)
         self.assertEqual(type(all_other_metafeatures), pd.DataFrame)
-        self.assertEqual(u'16_bac', metafeatures.name)
+        self.assertEqual(u'38_acc', metafeatures.name)
         self.assertLess(2, metafeatures.shape[0])
         self.meta_optimizer.use_features = ['number_of_classes']
         metafeatures, all_other_metafeatures = \
@@ -117,9 +117,9 @@ class MetaLearnerTest(unittest.TestCase):
         metafeatures = self.meta_optimizer.meta_base.metafeatures
 
         ds_metafeatures, other_metafeatures = self.meta_optimizer. \
-            _split_metafeature_array("16_bac", metafeatures)
+            _split_metafeature_array("38_acc", metafeatures)
         self.assertIsInstance(ds_metafeatures, pd.Series)
-        self.assertEqual(len(other_metafeatures.index), 122)
+        self.assertEqual(len(other_metafeatures.index), 139)
 
 
 if __name__ == "__main__":

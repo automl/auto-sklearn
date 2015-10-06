@@ -28,23 +28,23 @@ class MetaBaseTest(unittest.TestCase):
         runs = self.base.get_all_runs()
         self.assertIsInstance(runs, pd.DataFrame)
         # TODO update this ASAP
-        self.assertEqual((2, 74), runs.shape)
+        self.assertEqual((134, 24), runs.shape)
 
     def test_get_runs(self):
-        runs = self.base.get_runs('846_bac')
+        runs = self.base.get_runs('38_acc')
         # TODO update this ASAP
-        self.assertEqual(74, len(runs))
+        self.assertEqual(24, len(runs))
         self.assertIsInstance(runs, pd.Series)
 
     def test_get_metafeatures_as_pandas(self):
-        mf = self.base.get_metafeatures('846_bac')
+        mf = self.base.get_metafeatures('38_acc')
         self.assertTrue(np.isfinite(mf).all())
         self.assertEqual(type(mf), pd.Series)
-        self.assertEqual(mf.name, u'846_bac')
-        self.assertEqual(mf.loc['NumberOfInstances'], 11121.0)
+        self.assertEqual(mf.name, u'38_acc')
+        self.assertEqual(mf.loc['NumberOfInstances'], 2527.0)
 
     def test_get_all_metafeatures_as_pandas(self):
         mf = self.base.get_all_metafeatures()
         self.assertIsInstance(mf, pd.DataFrame)
-        self.assertEqual((123, 46), mf.shape)
+        self.assertEqual((140, 46), mf.shape)
 
