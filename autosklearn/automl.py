@@ -356,6 +356,23 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         # == Perform dummy predictions
         self._do_dummy_prediction(datamanager)
 
+        # = Create a searchspace
+        # Do this before One Hot Encoding to make sure that it creates a
+        # search space for a dense classifier even if one hot encoding would
+        # make it sparse (tradeoff; if one hot encoding would make it sparse,
+        #  densifier and truncatedSVD would probably lead to a MemoryError,
+        # like this we can't use some of the preprocessing methods in case
+        # the data became sparse)
+        self.configuration_space, configspace_path = _create_search_space(
+            self._tmp_dir,
+            datamanager.info,
+            self._backend,
+            self._stopwatch,
+            self._logger,
+            self._include_estimators,
+            self._include_preprocessors)
+        self.configuration_space_created_hook(datamanager)
+
         # == Calculate metafeatures
         meta_features = _calculate_metafeatures(
             data_feat_type=datamanager.feat_type,
@@ -371,17 +388,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         datamanager.perform1HotEncoding()
         self._ohe = datamanager.encoder
         self._stopwatch.stop_task('OneHot')
-
-        # = Create a searchspace
-        self.configuration_space, configspace_path = _create_search_space(
-            self._tmp_dir,
-            datamanager.info,
-            self._backend,
-            self._stopwatch,
-            self._logger,
-            self._include_estimators,
-            self._include_preprocessors)
-        self.configuration_space_created_hook(datamanager)
 
         if meta_features is None:
             initial_configurations = []
