@@ -195,6 +195,8 @@ def main(predictions_dir,
 
     targets_ensemble = backend.load_targets_ensemble()
 
+    dir_ensemble_list_mtimes = []
+
     while used_time < limit:
         logger.debug('Time left: %f', limit - used_time)
         logger.debug('Time last iteration: %f', time_iter)
@@ -212,13 +214,24 @@ def main(predictions_dir,
         dir_valid_list = sorted(os.listdir(dir_valid)) if exists[1] else []
         dir_test_list = sorted(os.listdir(dir_test)) if exists[2] else []
 
+        # Check the modification times because predictions can be updated
+        # over time!
+        old_dir_ensemble_list_mtimes = dir_ensemble_list_mtimes
+        dir_ensemble_list_mtimes = []
+
+        for dir_ensemble_file in dir_ensemble_list:
+            dir_ensemble_file = os.path.join(dir_ensemble, dir_ensemble_file)
+            mtime = os.path.getmtime(dir_ensemble_file)
+            dir_ensemble_list_mtimes.append(mtime)
+
         if len(dir_ensemble_list) == 0:
             logger.debug('Directories are empty')
             time.sleep(2)
             used_time = watch.wall_elapsed('ensemble_builder')
             continue
 
-        if len(dir_ensemble_list) <= current_num_models:
+        if len(dir_ensemble_list) <= current_num_models and \
+                old_dir_ensemble_list_mtimes == dir_ensemble_list_mtimes:
             logger.debug('Nothing has changed since the last time')
             time.sleep(2)
             used_time = watch.wall_elapsed('ensemble_builder')

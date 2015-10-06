@@ -10,7 +10,7 @@ import sklearn
 # TODO use balanced accuracy!
 import sklearn.metrics
 import sklearn.cross_validation
-from sklearn.utils import check_arrays
+from sklearn.utils import check_array
 
 from ParamSklearn.implementations.Imputation import Imputer
 from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
@@ -864,7 +864,9 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name,
                 # sorted in a strange way, but also prevents lda from failing in
                 # some cases.
                 # Because this is advanced indexing, a copy of the data is returned!!!
-                X_transformed = check_arrays(X_transformed, allow_nans=False)[0]
+                X_transformed = check_array(X_transformed,
+                                            force_all_finite=True,
+                                            accept_sparse='csr')
                 rs = np.random.RandomState(42)
                 indices = np.arange(X_transformed.shape[0])
                 rs.shuffle(indices)

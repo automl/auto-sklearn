@@ -76,6 +76,21 @@ def make_mode_holdout(data, seed, configuration, num_run):
         backend.save_model(evaluator.model, num_run)
 
 
+def make_mode_holdout_iterative_fit(data, seed, configuration, num_run):
+    global evaluator
+    evaluator = HoldoutEvaluator(data, configuration,
+                                 seed=seed,
+                                 num_run=num_run,
+                                 **_get_base_dict())
+    evaluator.iterative_fit()
+    signal.signal(15, empty_signal_handler)
+    evaluator.finish_up()
+
+    backend = Backend(None, os.getcwd())
+    if os.path.exists(backend.get_model_dir()):
+        backend.save_model(evaluator.model, num_run)
+
+
 def make_mode_test(data, seed, configuration, metric):
     global evaluator
     evaluator = TestEvaluator(data,
@@ -188,6 +203,8 @@ def main(dataset_info, mode, seed, params, mode_args=None):
 
     if mode == 'holdout':
         make_mode_holdout(D, seed, configuration, num_run)
+    elif mode == 'holdout-iterative-fit':
+        make_mode_holdout_iterative_fit(D, seed, configuration, num_run)
     elif mode == 'test':
         make_mode_test(D, seed, configuration, metric)
     elif mode == 'cv':

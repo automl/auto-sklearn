@@ -73,6 +73,21 @@ class SMAC_interfaceTest(unittest.TestCase):
         self.assertEqual(call_kwargs, {'mode_args': None})
 
     @mock.patch('autosklearn.cli.base_interface.main')
+    def test_holdout_iterative_fit(self, patch):
+        call = 'autosklearn.cli.SMAC_interface holdout-iterative-fit %s ' \
+               '1000000 0 -1 %s' % \
+               (self.dataset_string, self.param_string)
+        sys.argv = shlex.split(call)
+
+        SMAC_interface.main()
+        self.assertEqual(patch.call_count, 1)
+        call_args, call_kwargs = patch.call_args
+        self.assertEqual(call_args, (self.dataset_string,
+                                     'holdout-iterative-fit', 1,
+                                     self.params))
+        self.assertEqual(call_kwargs, {'mode_args': None})
+
+    @mock.patch('autosklearn.cli.base_interface.main')
     def test_testset(self, patch):
         call = 'autosklearn.cli.SMAC_interface test %s ' \
                '1000000 0 -1 %s' % \

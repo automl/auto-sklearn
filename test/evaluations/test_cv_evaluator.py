@@ -66,7 +66,7 @@ class CVEvaluator_Test(unittest.TestCase):
             e_, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
                 evaluator.predict()
             err[i] = e_
-            print(err[i], configuration['classifier'])
+            print(err[i], configuration['classifier:__choice__'])
 
             num_targets = len(np.unique(Y_train))
             self.assertTrue(np.isfinite(err[i]))
@@ -130,7 +130,7 @@ class CVEvaluator_Test(unittest.TestCase):
             e_, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
                 evaluator.predict()
             err[i] = e_
-            print(err[i], configuration['classifier'])
+            print(err[i], configuration['classifier:__choice__'])
 
             self.assertTrue(np.isfinite(err[i]))
             self.assertGreaterEqual(err[i], 0.0)
@@ -157,7 +157,7 @@ class CVEvaluator_Test(unittest.TestCase):
         D = CompetitionDataManager(dataset_path)
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['lda'],
+            include_estimators=['extra_trees'],
             include_preprocessors=['no_preprocessing'])
 
         errors = []

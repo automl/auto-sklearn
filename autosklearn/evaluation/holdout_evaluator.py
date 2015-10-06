@@ -1,4 +1,6 @@
 # -*- encoding: utf-8 -*-
+from __future__ import print_function
+
 from autosklearn.constants import *
 from autosklearn.evaluation.resampling import split_data
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
@@ -38,6 +40,23 @@ class HoldoutEvaluator(AbstractEvaluator):
 
     def fit(self):
         self.model.fit(self.X_train, self.Y_train)
+
+
+    def iterative_fit(self):
+        Xt, fit_params = self.model.pre_transform(self.X_train, self.Y_train)
+        if not self.model.estimator_supports_iterative_fit():
+            print("Model does not support iterative_fit(), reverting to " \
+                "regular fit().")
+
+            self.model.fit_estimator(Xt, self.Y_train, **fit_params)
+            return
+
+        n_iter = 1
+        while not self.model.configuration_fully_fitted():
+            self.model.iterative_fit(Xt, self.Y_train, n_iter=n_iter,
+                                     **fit_params)
+            self.file_output()
+            n_iter += 2
 
     def predict(self):
         Y_optimization_pred = self.predict_function(self.X_optimization,

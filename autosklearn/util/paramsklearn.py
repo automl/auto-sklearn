@@ -14,31 +14,30 @@ __all__ = [
 def get_configuration_space(info,
                             include_estimators=None,
                             include_preprocessors=None):
+    include = dict()
+    if include_preprocessors is not None:
+        include['preprocessor'] = include_preprocessors
     if info['task'] in REGRESSION_TASKS:
-        return _get_regression_configuration_space(info, include_estimators,
-                                                   include_preprocessors)
+        if include_estimators is not None:
+            include['regressor'] = include_estimators
+        return _get_regression_configuration_space(info, include)
     else:
-        return _get_classification_configuration_space(info,
-                                                       include_estimators,
-                                                       include_preprocessors)
+        if include_estimators is not None:
+            include['classifier'] = include_estimators
+        return _get_classification_configuration_space(info, include)
 
 
-def _get_regression_configuration_space(info,
-                                        include_estimators=None,
-                                        include_preprocessors=None):
+def _get_regression_configuration_space(info, include):
     sparse = False
     if info['is_sparse'] == 1:
         sparse = True
     configuration_space = ParamSklearnRegressor. \
-        get_hyperparameter_search_space(include_estimators=include_estimators,
-                                        include_preprocessors=include_preprocessors,
+        get_hyperparameter_search_space(include=include,
                                         dataset_properties={'sparse': sparse})
     return configuration_space
 
 
-def _get_classification_configuration_space(info,
-                                            include_estimators=None,
-                                            include_preprocessors=None):
+def _get_classification_configuration_space(info, include):
     task_type = info['task']
 
     multilabel = False
@@ -65,9 +64,7 @@ def _get_classification_configuration_space(info,
 
     return ParamSklearnClassifier.get_hyperparameter_search_space(
         dataset_properties=dataset_properties,
-        include_estimators=include_estimators,
-        include_preprocessors=include_preprocessors)
-    # exclude_preprocessors=["sparse_filtering"])
+        include=include)
 
 
 def get_model(configuration, seed):

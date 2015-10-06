@@ -54,8 +54,8 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['ridge'],
-            include_preprocessors=['select_rates'])
+            include_estimators=['lda'],
+            include_preprocessors=['pca'])
 
         err = np.zeros([N_TEST_RUNS])
         for i in range(N_TEST_RUNS):
@@ -99,8 +99,8 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['ridge'],
-            include_preprocessors=['select_rates'])
+            include_estimators=['lda'],
+            include_preprocessors=['pca'])
 
         # Test all scoring functions
         err = []
@@ -154,7 +154,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['random_forest'],
+            include_estimators=['extra_trees'],
             include_preprocessors=['no_preprocessing'])
 
         err = np.zeros([N_TEST_RUNS])
@@ -207,8 +207,8 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['ridge'],
-            include_preprocessors=['select_rates'])
+            include_estimators=['lda'],
+            include_preprocessors=['pca'])
 
         err = np.zeros([N_TEST_RUNS])
         for i in range(N_TEST_RUNS):
@@ -255,7 +255,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['random_forest'],
+            include_estimators=['extra_trees'],
             include_preprocessors=['no_preprocessing'])
 
         err = np.zeros([N_TEST_RUNS])
@@ -282,7 +282,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         D = CompetitionDataManager(dataset_path)
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['lda'],
+            include_estimators=['extra_trees'],
             include_preprocessors=['no_preprocessing'])
 
         errors = []
@@ -344,7 +344,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         try:
             evaluator.fit()
             return True
-        except ValueError as e:
+        except KeyError as e:
             if 'Floating-point under-/overflow occurred at epoch' in e.message or \
                     'removed all features' in e.message or \
                     'failed to create intent' in e.message:
@@ -482,5 +482,4 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    # import sys;sys.argv = ['', 'Test.test_evaluate']
     unittest.main()

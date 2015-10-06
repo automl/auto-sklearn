@@ -1,4 +1,6 @@
 # -*- encoding: utf-8 -*-
+from __future__ import print_function
+
 import hashlib
 import multiprocessing
 import os
@@ -315,8 +317,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
     def _fit(self, datamanager):
         # Check arguments prior to doing anything!
-        if self._resampling_strategy not in ['holdout', 'cv', 'nested-cv',
-                                             'partial-cv']:
+        if self._resampling_strategy not in ['holdout', 'holdout-iterative-fit',
+                                             'cv', 'nested-cv', 'partial-cv']:
             raise ValueError('Illegal resampling strategy: %s' %
                              self._resampling_strategy)
         if self._resampling_strategy == 'partial-cv' and \
@@ -334,7 +336,10 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         set_auto_seed(self._seed)
 
-        # load data
+        # == Pickle the data manager, here, because no more global
+        # OneHotEncoding
+        data_manager_path = self._backend.save_datamanager(datamanager)
+
         self._save_ensemble_data(
             datamanager.data['X_train'],
             datamanager.data['Y_train'])
@@ -366,9 +371,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         datamanager.perform1HotEncoding()
         self._ohe = datamanager.encoder
         self._stopwatch.stop_task('OneHot')
-
-        # == Pickle the data manager
-        data_manager_path = self._backend.save_datamanager(datamanager)
 
         # = Create a searchspace
         self.configuration_space, configspace_path = _create_search_space(

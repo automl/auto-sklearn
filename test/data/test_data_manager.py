@@ -75,15 +75,15 @@ class CompetitionDataManagerTest(unittest.TestCase):
         self.assertIsInstance(self.D.data['X_valid'], np.ndarray)
         self.assertIsInstance(self.D.data['X_test'], np.ndarray)
         # Check if the dimensions are correct
-        self.assertEqual((3, 13), self.D.data['X_train'].shape)
-        self.assertEqual((3, 13), self.D.data['X_valid'].shape)
-        self.assertEqual((3, 13), self.D.data['X_test'].shape)
+        self.assertEqual((3, 8), self.D.data['X_train'].shape)
+        self.assertEqual((3, 8), self.D.data['X_valid'].shape)
+        self.assertEqual((3, 8), self.D.data['X_test'].shape)
         # Some tests if encoding works
-        self.assertEqual(self.D.data['X_train'][:, :9].max(), 1)
-        self.assertEqual(self.D.data['X_valid'][:, :9].min(), 0)
-        self.assertEqual(self.D.data['X_test'][:, :9].min(), 0)
+        self.assertEqual(self.D.data['X_train'][:, :4].max(), 1)
+        self.assertEqual(self.D.data['X_valid'][:, :4].min(), 0)
+        self.assertEqual(self.D.data['X_test'][:, :4].min(), 0)
         # Test that other stuff is not encoded
-        self.assertEqual(self.D.data['X_train'][0, 9], 2.5)
+        self.assertEqual(self.D.data['X_train'][0, 4], 2.5)
 
     def test_perform1HotEncoding_binary_data_with_missing_values(self):
         # self.D.feat_type = [N, N, N, N, B, B]

@@ -28,9 +28,7 @@ def parse_args(dataset, mode, seed, params, fold, folds):
         else:
             mode = 'partial-cv'
             mode_args = {'fold': fold, 'folds': folds}
-    elif mode == 'holdout':
-        mode_args = None
-    elif mode == 'test':
+    elif mode in ('holdout', 'holdout-iterative-fit', 'test'):
         mode_args = None
     else:
         raise ValueError(mode)

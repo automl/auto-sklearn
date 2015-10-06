@@ -157,42 +157,28 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest):
 
     def test_skewnesses(self):
         mf = self.helpers["Skewnesses"](self.X_transformed, self.y)
-        self.assertEqual(str([np.nan, np.nan, np.nan, 0.0, np.nan, np.nan,
-                              np.nan, np.nan, 0.0, np.nan, np.nan, 0.0,
-                              np.nan, 0.0, 0.0, 0.0, 0.0, 0.0, np.nan, np.nan,
-                              0.0, np.nan, 0.0, 0.0, np.nan, 0.0, np.nan,
-                              np.nan, np.nan, 0.0, 0.0, 0.0, np.nan, 0.0,
-                              np.nan, np.nan, np.nan, np.nan, 0.0, np.nan,
-                              np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
-                              np.nan, np.nan, np.nan, np.nan, 0.0, 0.0, np.nan,
-                              np.nan, np.nan, np.nan, np.nan, 0.0, np.nan,
-                              0.0, np.nan, 0.0, 0.0, np.nan, 0.0, 0.0,
+        self.assertEqual(str([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                               -0.6969708499033568, 0.626346013011263,
-                              0.38099875966240376, 1.4762248835141034,
-                              0.07687661087633728, 0.36889797830360116]),
+                              0.3809987596624038, 1.4762248835141034,
+                              0.07687661087633726, 0.36889797830360116]),
                          str(mf.value))
 
     def test_kurtosisses(self):
         mf = self.helpers["Kurtosisses"](self.X_transformed, self.y)
-        self.assertEqual(str([np.nan, np.nan, np.nan, -3.0, np.nan, np.nan,
-                              np.nan, np.nan, -3.0, np.nan, np.nan, -3.0,
-                              np.nan, -3.0, -3.0, -3.0, -3.0, -3.0, np.nan,
-                              np.nan, -3.0, np.nan, -3.0, -3.0, np.nan, -3.0,
-                              np.nan, np.nan, np.nan, -3.0, -3.0, -3.0, np.nan,
-                              -3.0, np.nan, np.nan, np.nan, np.nan, -3.0,
-                              np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
-                              np.nan, np.nan, np.nan, np.nan, np.nan, -3.0,
-                              -3.0, np.nan, np.nan, np.nan, np.nan, np.nan,
-                              -3.0, np.nan, -3.0, np.nan, -3.0, -3.0, np.nan,
+        self.assertEqual(str([-3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0,
+                              -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0,
+                              -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0,
                               -3.0, -3.0, -1.100583611425576,
-                              -1.1786325509475737, -1.2387998382327916,
+                              -1.1786325509475737, -1.2387998382327914,
                               1.3934382644137013, -0.9768209837948341,
                               -1.7937072296512782]), str(mf.value))
 
     def test_pca_95percent(self):
         mf = self.mf["PCAFractionOfComponentsFor95PercentVariance"](
             self.X_transformed, self.y)
-        self.assertAlmostEqual(0.20833333333333334, mf.value)
+        self.assertAlmostEqual(0.4838709677419355, mf.value)
 
     def test_pca_kurtosis_first_pc(self):
         mf = self.mf["PCAKurtosisFirstPC"](self.X_transformed, self.y)

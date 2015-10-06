@@ -49,8 +49,8 @@ class NestedCVEvaluator_Test(unittest.TestCase):
 
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['ridge'],
-            include_preprocessors=['select_rates'])
+            include_estimators=['lda'],
+            include_preprocessors=['pca'])
 
         err = np.zeros([N_TEST_RUNS])
         num_models_better_than_random = 0
@@ -67,7 +67,7 @@ class NestedCVEvaluator_Test(unittest.TestCase):
             e_, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
                 evaluator.predict()
             err[i] = e_['acc_metric']
-            print(err[i], configuration['classifier'])
+            print(err[i], configuration['classifier:__choice__'])
             print(e_['outer:bac_metric'], e_['bac_metric'])
 
             # Test the outer CV
@@ -115,7 +115,7 @@ class NestedCVEvaluator_Test(unittest.TestCase):
         D = CompetitionDataManager(dataset_path)
         configuration_space = get_configuration_space(
             D.info,
-            include_estimators=['lda'],
+            include_estimators=['extra_trees'],
             include_preprocessors=['no_preprocessing'])
 
         errors = []

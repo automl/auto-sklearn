@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import copy
 import os
 import shutil
 import sys
@@ -22,18 +23,21 @@ class Base_interfaceTest(unittest.TestCase):
 
         self.params = {
             'balancing:strategy': 'none',
-            'classifier': 'random_forest',
+            'classifier:__choice__': 'random_forest',
             'imputation:strategy': 'mean',
-            'preprocessor': 'no_preprocessing',
-            'random_forest:bootstrap': 'True',
-            'random_forest:criterion': 'gini',
-            'random_forest:max_depth': 'None',
-            'random_forest:max_features': '1.0',
-            'random_forest:max_leaf_nodes': 'None',
-            'random_forest:min_samples_leaf': '1',
-            'random_forest:min_samples_split': '2',
-            'random_forest:n_estimators': '100',
-            'rescaling:strategy': 'min/max'
+            'preprocessor:__choice__': 'no_preprocessing',
+            'classifier:random_forest:bootstrap': 'True',
+            'classifier:random_forest:criterion': 'gini',
+            'classifier:random_forest:max_depth': 'None',
+            'classifier:random_forest:max_features': '1.0',
+            'classifier:random_forest:max_leaf_nodes': 'None',
+            'classifier:random_forest:min_weight_fraction_leaf': '0.0',
+            'classifier:random_forest:min_samples_leaf': '1',
+            'classifier:random_forest:min_samples_split': '2',
+            'classifier:random_forest:n_estimators': '100',
+            'one_hot_encoding:use_minimum_fraction': 'True',
+            'one_hot_encoding:minimum_fraction': '0.01',
+            'rescaling:__choice__': 'min/max'
         }
 
         try:
@@ -58,7 +62,18 @@ class Base_interfaceTest(unittest.TestCase):
         # Returns the actual call
         call_args = patch.call_args[0][0]
         result = call_args.split(",")[3].strip()
-        self.assertEqual('0.740202', result)
+        self.assertEqual('0.755128', result)
+
+    @mock.patch('__builtin__.print')
+    def test_holdout_iterative_fit(self, patch):
+        autosklearn.cli.base_interface.main(self.dataset_string,
+                                            'holdout-iterative-fit',
+                                            '1',
+                                            self.params)
+        # Returns the actual call
+        call_args = patch.call_args[0][0]
+        result = call_args.split(",")[3].strip()
+        self.assertEqual('0.725277', result)
 
     @mock.patch('__builtin__.print')
     def test_testset(self, patch):
@@ -69,7 +84,7 @@ class Base_interfaceTest(unittest.TestCase):
         # Returns the actual call
         call_args = patch.call_args[0][0]
         result = call_args.split(",")[3].strip()
-        self.assertEqual('0.670996', result)
+        self.assertEqual('0.772006', result)
 
     @mock.patch('__builtin__.print')
     def test_cv(self, patch):
@@ -81,16 +96,17 @@ class Base_interfaceTest(unittest.TestCase):
         # Returns the actual call
         call_args = patch.call_args[0][0]
         result = call_args.split(",")[3].strip()
-        self.assertEqual('0.779673', result)
+        self.assertEqual('0.766880', result)
 
     @mock.patch('__builtin__.print')
     def test_partial_cv(self, patch):
         results = []
         for fold in range(3):
+            params = copy.deepcopy(self.params)
             autosklearn.cli.base_interface.main(self.dataset_string,
                                                 'partial-cv',
                                                 '1',
-                                                self.params,
+                                                params,
                                                 mode_args={'folds': 3,
                                                            'fold': fold})
             # Returns the actual call
@@ -98,7 +114,7 @@ class Base_interfaceTest(unittest.TestCase):
             result = call_args.split(",")[3].strip()
             results.append(result)
 
-        self.assertEqual(['0.795038', '0.827497', '0.716609'], results)
+        self.assertEqual(['0.780112', '0.791236', '0.729430'], results)
 
     @mock.patch('__builtin__.print')
     def test_nested_cv(self, patch):
@@ -111,5 +127,5 @@ class Base_interfaceTest(unittest.TestCase):
         # Returns the actual call
         call_args = patch.call_args[0][0]
         result = call_args.split(",")[3].strip()
-        self.assertEqual('0.815061', result)
+        self.assertEqual('0.811493', result)
 

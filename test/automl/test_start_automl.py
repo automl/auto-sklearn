@@ -25,7 +25,7 @@ class AutoMLTest(Base):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = autosklearn.automl.AutoML(output, output, 10, 10)
+        automl = autosklearn.automl.AutoML(output, output, 12, 12)
         automl.fit(X_train, Y_train)
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.9)
@@ -39,7 +39,7 @@ class AutoMLTest(Base):
                               '.tmp_test_automl_outputs')
         self._setUp(output)
 
-        name = '401_bac'
+        name = '31_bac'
         dataset = os.path.join(self.test_dir, '..', '.data', name)
         data_manager_file = os.path.join(output, '.auto-sklearn',
                                          'datamanager.pkl')
@@ -51,11 +51,11 @@ class AutoMLTest(Base):
             queue=queue)
         auto.fit_automl_dataset(dataset)
 
-        # pickled data manager (with one hot encoding!)
+        # pickled data manager (without one hot encoding!)
         with open(data_manager_file) as fh:
             D = six.moves.cPickle.load(fh)
-            self.assertTrue(np.allclose(D.data['X_train'].data[:3],
-                                        [1., 1., 2.]))
+            self.assertTrue(np.allclose(D.data['X_train'][0, :3],
+                                        [1., 12., 2.]))
 
         time_needed_to_load_data, data_manager_file, procs = \
             queue.get()

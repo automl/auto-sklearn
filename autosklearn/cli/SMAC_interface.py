@@ -27,9 +27,7 @@ def main():
     else:
         mode = instance_name
 
-    if mode == 'test':
-        mode_args = None
-    elif mode == 'holdout':
+    if mode in ('holdout', 'holdout-iterative-fit', 'test'):
         mode_args = None
     elif mode == 'nested-cv':
         mode_args = mode_args.split("/")
