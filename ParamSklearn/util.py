@@ -44,13 +44,14 @@ def find_sklearn_classes(class_):
         print(classifier)
 
 
-def get_dataset(dataset='iris', make_sparse=False, add_NaNs=False):
+def get_dataset(dataset='iris', make_sparse=False, add_NaNs=False,
+                train_size_maximum=150):
     iris = getattr(sklearn.datasets, "load_%s" % dataset)()
     X = iris.data.astype(np.float32)
     Y = iris.target
     rs = np.random.RandomState(42)
     indices = np.arange(X.shape[0])
-    train_size = min(int(len(indices) / 3. * 2.), 150)
+    train_size = min(int(len(indices) / 3. * 2.), train_size_maximum)
     rs.shuffle(indices)
     X = X[indices]
     Y = Y[indices]
@@ -76,9 +77,11 @@ def get_dataset(dataset='iris', make_sparse=False, add_NaNs=False):
     return X_train, Y_train, X_test, Y_test
 
 
-def _test_classifier(classifier, dataset='iris', sparse=False):
+def _test_classifier(classifier, dataset='iris', sparse=False,
+                     train_size_maximum=150):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
-                                                   make_sparse=sparse)
+                                                   make_sparse=sparse,
+                                                   train_size_maximum=train_size_maximum)
     configuration_space = classifier.get_hyperparameter_search_space(
         dataset_properties={'sparse': sparse})
     default = configuration_space.get_default_configuration()
@@ -105,9 +108,11 @@ def _test_classifier_iterative_fit(classifier, dataset='iris', sparse=False):
     return predictions, Y_test
 
 
-def _test_classifier_predict_proba(classifier, dataset='iris', sparse=False):
+def _test_classifier_predict_proba(classifier, dataset='iris', sparse=False,
+                                   train_size_maximum=150):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
-                                                   make_sparse=sparse)
+                                                   make_sparse=sparse,
+                                                   train_size_maximum=train_size_maximum)
     configuration_space = classifier.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
     classifier = classifier(random_state=1,
