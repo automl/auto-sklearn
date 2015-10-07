@@ -14,6 +14,7 @@ pyyaml
 six
 ConfigArgParse
 liac-arff
+pandas
 
 git+https://github.com/mfeurer/HPOlibConfigSpace/#egg=HPOlibConfigSpace
 git+https://git@bitbucket.org/mfeurer/paramsklearn.git@73d8643b2849db753ddc7b8909d01e6cee9bafc6#egg=ParamSklearn
