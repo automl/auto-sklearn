@@ -131,9 +131,10 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
             raise NotImplementedError()
         # return self.estimator.predict_proba(X)
         decision = self.estimator.decision_function(X)
-        ovr_decision = _ovr_decision_function(decision < 0, decision,
+        if len(self.estimator.classes_) > 2:
+            decision = _ovr_decision_function(decision < 0, decision,
                                               len(self.estimator.classes_))
-        return softmax(ovr_decision)
+        return softmax(decision)
 
 
     @staticmethod
