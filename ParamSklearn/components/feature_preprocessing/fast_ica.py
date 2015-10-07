@@ -29,7 +29,16 @@ class FastICA(ParamSklearnPreprocessingAlgorithm):
         # Make the RuntimeWarning an Exception!
         with warnings.catch_warnings():
             warnings.filterwarnings("error")
-            self.preprocessor.fit(X)
+            try:
+                self.preprocessor.fit(X)
+            except ValueError as e:
+                if e.message == 'array must not contain infs or NaNs':
+                    raise ValueError("Bug in scikit-learn: https://github.com/scikit-learn/scikit-learn/pull/2738")
+                else:
+                    import traceback
+                    traceback.format_exc()
+                    raise ValueError()
+
         return self
 
     def transform(self, X):
