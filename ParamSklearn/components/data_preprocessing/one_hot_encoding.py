@@ -1,3 +1,6 @@
+import numpy as np
+import scipy.sparse
+
 import ParamSklearn.implementations.OneHotEncoder
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
@@ -37,9 +40,16 @@ class OneHotEncoder(ParamSklearnPreprocessingAlgorithm):
         return self
 
     def transform(self, X):
+        is_sparse = scipy.sparse.issparse(X)
         if self.preprocessor is None:
             raise NotImplementedError()
-        return self.preprocessor.transform(X)
+        X = self.preprocessor.transform(X)
+        if is_sparse:
+            return X
+        elif isinstance(X, np.ndarray):
+            return X
+        else:
+            return X.toarray()
 
     @staticmethod
     def get_properties(dataset_properties=None):

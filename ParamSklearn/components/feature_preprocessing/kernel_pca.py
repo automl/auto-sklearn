@@ -27,7 +27,8 @@ class KernelPCA(ParamSklearnPreprocessingAlgorithm):
     def fit(self, X, Y=None):
         self.preprocessor = sklearn.decomposition.KernelPCA(
             n_components=self.n_components, kernel=self.kernel,
-            degree=self.degree, gamma=self.gamma, coef0=self.coef0)
+            degree=self.degree, gamma=self.gamma, coef0=self.coef0,
+            remove_zero_eig=True)
         # Make the RuntimeWarning an Exception!
         if scipy.sparse.issparse(X):
             X = X.astype(np.float64)

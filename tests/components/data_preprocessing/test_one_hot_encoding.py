@@ -68,7 +68,7 @@ class OneHotEncoderTest(unittest.TestCase):
             transformations.append(Xt)
             if len(transformations) > 1:
                 self.assertFalse(
-                    (transformations[-1].todense() != transformations[-2].todense()).all())
+                    (transformations[-1] != transformations[-2]).all())
 
     def test_default_configuration_no_encoding(self):
         transformations = []
