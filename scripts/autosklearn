@@ -194,13 +194,31 @@ if __name__ == '__main__':
         resampling_strategy_arguments=resampling_strategy_arguments)
     automl.start_automl(args)
 
-    [time_needed_to_load_data, data_manager_file, procs] \
-        = queue.get()
+    while time.time() - start_time <= time_limit - \
+            BUFFER_BEFORE_SENDING_SIGTERM:
+
+        if automl.exitcode is not None and automl.exitcode != 0:
+            break
+
+        try:
+            [time_needed_to_load_data, data_manager_file, procs] \
+                = queue.get_nowait()
+            break
+        except:
+            time.sleep(1)
 
     # == And now we wait till we run out of time
     while time.time() - start_time <= time_limit - \
             BUFFER_BEFORE_SENDING_SIGTERM:
+        if automl.exitcode is not None and automl.exitcode != 0:
+            break
+
         time.sleep(1)
+
+    try:
+        automl.terminate()
+    except Exception:
+        pass
 
     # Kill all children, grand-children and so on
     process = psutil.Process()
@@ -243,10 +261,6 @@ if __name__ == '__main__':
         # the last iteration of killing processes to make sure that we killed
         #  them all.
         children.extendleft(visited)
-
-        while time.time() - start_time <= time_limit - \
-                (BUFFER_BEFORE_SENDING_SIGTERM - delay):
-            time.sleep(1)
 
     if remove_output_dir is True:
         shutil.rmtree(output_dir)
