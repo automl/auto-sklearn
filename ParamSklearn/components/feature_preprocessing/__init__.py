@@ -50,6 +50,12 @@ class FeaturePreprocessorChoice(object):
 
         available_comp = cls.get_components()
 
+        if include is not None:
+            for incl in include:
+                if incl not in available_comp:
+                    raise ValueError("Trying to include unknown component: "
+                                     "%s" % incl)
+
         # TODO check for task type classification and/or regression!
 
         components_dict = OrderedDict()

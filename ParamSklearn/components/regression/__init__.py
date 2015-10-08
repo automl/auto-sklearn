@@ -50,6 +50,12 @@ class RegressorChoice(object):
             raise ValueError(
                 "The argument include and exclude cannot be used together.")
 
+        if include is not None:
+            for incl in include:
+                if incl not in available_comp:
+                    raise ValueError("Trying to include unknown component: "
+                                     "%s" % incl)
+
         for name in available_comp:
             if include is not None and name not in include:
                 continue

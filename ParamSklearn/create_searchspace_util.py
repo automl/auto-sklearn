@@ -45,7 +45,7 @@ def get_match_array(pipeline, dataset_properties,
     matches = np.ones(matches_dimensions, dtype=int)
 
     pipeline_idxs = [range(dim) for dim in matches_dimensions]
-    for pipeline_instantiation_idxs  in itertools.product(*pipeline_idxs):
+    for pipeline_instantiation_idxs in itertools.product(*pipeline_idxs):
         pipeline_instantiation = [node_i_choices[i][idx] for i, idx in
                                   enumerate(pipeline_instantiation_idxs)]
 
