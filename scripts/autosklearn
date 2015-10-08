@@ -221,13 +221,16 @@ if __name__ == '__main__':
     children = deque()
     children.extendleft(process.children(recursive=True))
 
-    for proc in procs:
-        try:
-            process = psutil.Process(proc.pid)
-            children.appendleft(process)
-            children.extendleft(process.children(recursive=True))
-        except Exception as e:
-            print e
+    try:
+        for proc in procs:
+            try:
+                process = psutil.Process(proc.pid)
+                children.appendleft(process)
+                children.extendleft(process.children(recursive=True))
+            except Exception as e:
+                print e
+    except NameError:
+        pass
 
     for delay, sig in \
             [(0, signal.SIGINT),
