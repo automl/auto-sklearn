@@ -81,6 +81,11 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         if output_dir is None:
             output_dir = '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
 
+        if not os.path.exists(tmp_dir):
+            os.makedirs(tmp_dir)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
         return tmp_dir, output_dir
 
     def __del__(self):
