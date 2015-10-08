@@ -215,16 +215,19 @@ if __name__ == '__main__':
 
         time.sleep(1)
 
-    try:
-        automl.terminate()
-    except Exception:
-        pass
-
     # Kill all children, grand-children and so on
     process = psutil.Process()
     # All children which must be killed
     children = deque()
     children.extendleft(process.children(recursive=True))
+
+    for proc in procs:
+        try:
+            process = psutil.Process(proc.pid)
+            children.appendleft(process)
+            children.extendleft(process.children(recursive=True))
+        except Exception as e:
+            print e
 
     for delay, sig in \
             [(0, signal.SIGINT),
@@ -240,7 +243,7 @@ if __name__ == '__main__':
                 continue
 
             try:
-                grandchildren = process.children(recursive=True)
+                grandchildren = child.children(recursive=True)
                 for grandchild in grandchildren:
                     if grandchild in visited:
                         continue
@@ -261,6 +264,19 @@ if __name__ == '__main__':
         # the last iteration of killing processes to make sure that we killed
         #  them all.
         children.extendleft(visited)
+
+        while time.time() - start_time <= time_limit - delay:
+            if automl.exitcode is not None and automl.exitcode != 0:
+                break
+
+            time.sleep(1)
+
+    # Don't do this before killing children, because otherwise psutil cannot
+    # find them any more
+    try:
+        automl.terminate()
+    except Exception:
+        pass
 
     if remove_output_dir is True:
         shutil.rmtree(output_dir)
