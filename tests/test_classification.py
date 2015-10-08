@@ -360,29 +360,16 @@ class TestParamSklearnClassifier(unittest.TestCase):
         self.assertNotIn('select_percentile_classification', str(cs))
 
     def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(self):
-        self.assertRaisesRegexp(ValueError, "Configuration:\n"
-            "  balancing:strategy, Value: none\n"
-            "  classifier:__choice__, Value: random_forest\n"
-            "  classifier:random_forest:bootstrap, Value: True\n"
-            "  classifier:random_forest:criterion, Value: gini\n"
-            "  classifier:random_forest:max_depth, Constant: None\n"
-            "  classifier:random_forest:max_features, Value: 1.0\n"
-            "  classifier:random_forest:max_leaf_nodes, Constant: None\n"
-            "  classifier:random_forest:min_samples_leaf, Value: 1\n"
-            "  classifier:random_forest:min_samples_split, Value: 2\n"
-            "  classifier:random_forest:min_weight_fraction_leaf, Constant: 0.0\n"
-            "  classifier:random_forest:n_estimators, Constant: 100\n"
-            "  imputation:strategy, Value: mean\n"
-            "  one_hot_encoding:minimum_fraction, Value: 0.01\n"
-            "  one_hot_encoding:use_minimum_fraction, Value: True\n"
-            "  preprocessor:__choice__, Value: nystroem_sampler\n"
-            "  preprocessor:nystroem_sampler:gamma, Value: 0.1\n"
-            "  preprocessor:nystroem_sampler:kernel, Value: rbf\n"
-            "  preprocessor:nystroem_sampler:n_components, Value: 100\n"
-            "  rescaling:__choice__, Value: min/max\n"
-            "violates forbidden clause \(Forbidden: classifier:__choice__ == random_forest && Forbidden: preprocessor:__choice__ == nystroem_sampler\)",
-            ParamSklearnClassifier.get_hyperparameter_search_space,
+        cs = ParamSklearnClassifier.get_hyperparameter_search_space(
+            include={'preprocessor': ['densifier']},
+            dataset_properties={'sparse': True})
+        self.assertEqual(cs.get_hyperparameter('classifier:__choice__').default,
+                         'qda')
+
+        cs = ParamSklearnClassifier.get_hyperparameter_search_space(
             include={'preprocessor': ['nystroem_sampler']})
+        self.assertEqual(cs.get_hyperparameter('classifier:__choice__').default,
+                         'sgd')
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(AssertionError, "No valid pipeline found.",
@@ -393,24 +380,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
 
         # It must also be catched that no classifiers which can handle sparse
         #  data are located behind the densifier
-        self.assertRaisesRegexp(ValueError, "Configuration:\n"
-            "  balancing:strategy, Value: none\n"
-            "  classifier:__choice__, Value: liblinear_svc\n"
-            "  classifier:liblinear_svc:C, Value: 1.0\n"
-            "  classifier:liblinear_svc:dual, Constant: False\n"
-            "  classifier:liblinear_svc:fit_intercept, Constant: True\n"
-            "  classifier:liblinear_svc:intercept_scaling, Constant: 1\n"
-            "  classifier:liblinear_svc:loss, Value: squared_hinge\n"
-            "  classifier:liblinear_svc:multi_class, Constant: ovr\n"
-            "  classifier:liblinear_svc:penalty, Value: l2\n"
-            "  classifier:liblinear_svc:tol, Value: 0.0001\n"
-            "  imputation:strategy, Value: mean\n"
-            "  one_hot_encoding:minimum_fraction, Value: 0.01\n"
-            "  one_hot_encoding:use_minimum_fraction, Value: True\n"
-            "  preprocessor:__choice__, Value: densifier\n"
-            "  rescaling:__choice__, Value: min/max\n"
-            "violates forbidden clause \(Forbidden: classifier:__choice__ == liblinear_svc &&"
-            " Forbidden: preprocessor:__choice__ == densifier\)",
+        self.assertRaisesRegexp(ValueError, "Cannot find a legal default "
+                                            "configuration.",
                                 ParamSklearnClassifier.get_hyperparameter_search_space,
                                 include={'classifier': ['liblinear_svc'],
                                          'preprocessor': ['densifier']},

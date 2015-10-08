@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import copy
 from itertools import product
 
 import sklearn
@@ -146,23 +147,43 @@ class ParamSklearnRegressor(RegressorMixin, ParamSklearnBaseEstimator):
         available_preprocessors = pipeline[-2][1].get_available_components(
             dataset_properties)
 
+        possible_default_regressor = copy.copy(list(
+            available_regressors.keys()))
+        default = cs.get_hyperparameter('regressor:__choice__').default
+        del possible_default_regressor[
+            possible_default_regressor.index(default)]
+
         # A regressor which can handle sparse data after the densifier
         for key in regressors:
             if SPARSE in available_regressors[key].get_properties(dataset_properties=None)['input']:
                 if 'densifier' in preprocessors:
-                    cs.add_forbidden_clause(
-                        ForbiddenAndConjunction(
-                            ForbiddenEqualsClause(
-                                cs.get_hyperparameter(
-                                    'regressor:__choice__'), key),
-                            ForbiddenEqualsClause(
-                                cs.get_hyperparameter(
-                                    'preprocessor:__choice__'), 'densifier')
-                        ))
+                    while True:
+                        try:
+                            cs.add_forbidden_clause(
+                                ForbiddenAndConjunction(
+                                    ForbiddenEqualsClause(
+                                        cs.get_hyperparameter(
+                                            'regressor:__choice__'), key),
+                                    ForbiddenEqualsClause(
+                                        cs.get_hyperparameter(
+                                            'preprocessor:__choice__'), 'densifier')
+                                ))
+                            break
+                        except ValueError:
+                            # Change the default and try again
+                            try:
+                                default = possible_default_regressor.pop()
+                            except IndexError:
+                                raise ValueError(
+                                    "Cannot find a legal default configuration.")
+                            cs.get_hyperparameter(
+                                'regressor:__choice__').default = default
 
         # which would take too long
         # Combinations of tree-based models with feature learning:
-        regressors_ = ["random_forest", "gradient_boosting", "gaussian_process"]
+        regressors_ = ["adaboost", "decision_tree", "extra_trees",
+                       "gaussian_process", "gradient_boosting",
+                       "k_nearest_neighbors", "random_forest"]
         feature_learning_ = ["kitchen_sinks", "kernel_pca", "nystroem_sampler"]
 
         for r, f in product(regressors_, feature_learning_):
@@ -170,14 +191,25 @@ class ParamSklearnRegressor(RegressorMixin, ParamSklearnBaseEstimator):
                 continue
             if f not in preprocessors:
                 continue
-            try:
-                cs.add_forbidden_clause(ForbiddenAndConjunction(
-                    ForbiddenEqualsClause(cs.get_hyperparameter(
-                        "regressor:__choice__"), r),
-                    ForbiddenEqualsClause(cs.get_hyperparameter(
-                        "preprocessor:__choice__"), f)))
-            except KeyError:
-                pass
+            while True:
+                try:
+                    cs.add_forbidden_clause(ForbiddenAndConjunction(
+                        ForbiddenEqualsClause(cs.get_hyperparameter(
+                            "regressor:__choice__"), r),
+                        ForbiddenEqualsClause(cs.get_hyperparameter(
+                            "preprocessor:__choice__"), f)))
+                    break
+                except KeyError:
+                    break
+                except ValueError:
+                    # Change the default and try again
+                    try:
+                        default = possible_default_regressor.pop()
+                    except IndexError:
+                        raise ValueError(
+                            "Cannot find a legal default configuration.")
+                    cs.get_hyperparameter(
+                        'regressor:__choice__').default = default
 
         return cs
 

@@ -171,45 +171,30 @@ class TestParamSKlearnRegressor(unittest.TestCase):
             exclude={'preprocessor': ['no_preprocessing']})
         self.assertNotIn('no_preprocessing', str(cs))
 
+    def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(
+            self):
+        cs = ParamSklearnRegressor.get_hyperparameter_search_space(
+            include={'preprocessor': ['densifier']},
+            dataset_properties={'sparse': True})
+        self.assertEqual(cs.get_hyperparameter('regressor:__choice__').default,
+                         'gradient_boosting')
+
+        cs = ParamSklearnRegressor.get_hyperparameter_search_space(
+            include={'preprocessor': ['nystroem_sampler']})
+        self.assertEqual(cs.get_hyperparameter('regressor:__choice__').default,
+                         'sgd')
+
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
-        self.assertRaisesRegexp(ValueError, "Configuration:\n"
-            "  imputation:strategy, Value: mean\n"
-            "  one_hot_encoding:minimum_fraction, Value: 0.01\n"
-            "  one_hot_encoding:use_minimum_fraction, Value: True\n"
-            "  preprocessor:__choice__, Value: kitchen_sinks\n"
-            "  preprocessor:kitchen_sinks:gamma, Value: 1.0\n"
-            "  preprocessor:kitchen_sinks:n_components, Value: 100\n"
-            "  regressor:__choice__, Value: random_forest\n"
-            "  regressor:random_forest:bootstrap, Value: True\n"
-            "  regressor:random_forest:criterion, Constant: mse\n"
-            "  regressor:random_forest:max_depth, Constant: None\n"
-            "  regressor:random_forest:max_features, Value: 1.0\n"
-            "  regressor:random_forest:max_leaf_nodes, Constant: None\n"
-            "  regressor:random_forest:min_samples_leaf, Value: 1\n"
-            "  regressor:random_forest:min_samples_split, Value: 2\n"
-            "  regressor:random_forest:min_weight_fraction_leaf, Constant: 0.0\n"
-            "  regressor:random_forest:n_estimators, Constant: 100\n"
-            "  rescaling:__choice__, Value: min/max\n"
-            "violates forbidden clause \(Forbidden: regressor:__choice__ == random_forest"
-            " && Forbidden: preprocessor:__choice__ == kitchen_sinks\)",
+        self.assertRaisesRegexp(ValueError, "Cannot find a legal default "
+                                            "configuration.",
                                 ParamSklearnRegressor.get_hyperparameter_search_space,
                                 include={'regressor': ['random_forest'],
                                          'preprocessor': ['kitchen_sinks']})
 
         # It must also be catched that no classifiers which can handle sparse
         # data are located behind the densifier
-        self.assertRaisesRegexp(ValueError, "Configuration:\n"
-            "  imputation:strategy, Value: mean\n"
-            "  one_hot_encoding:minimum_fraction, Value: 0.01\n"
-            "  one_hot_encoding:use_minimum_fraction, Value: True\n"
-            "  preprocessor:__choice__, Value: densifier\n"
-            "  regressor:__choice__, Value: ridge_regression\n"
-            "  regressor:ridge_regression:alpha, Value: 1.0\n"
-            "  regressor:ridge_regression:fit_intercept, Constant: True\n"
-            "  regressor:ridge_regression:tol, Value: 0.0001\n"
-            "  rescaling:__choice__, Value: min/max\n"
-            "violates forbidden clause \(Forbidden: regressor:__choice__ == "
-            "ridge_regression && Forbidden: preprocessor:__choice__ == densifier\)",
+        self.assertRaisesRegexp(ValueError, "Cannot find a legal default "
+                                            "configuration",
                                 ParamSklearnRegressor.get_hyperparameter_search_space,
                                 include={'regressor': ['ridge_regression'],
                                          'preprocessor': ['densifier']},

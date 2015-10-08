@@ -1,4 +1,4 @@
-from collections import OrderedDict
+import copy
 from itertools import product
 
 import numpy as np
@@ -169,19 +169,37 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
         available_preprocessors = pipeline[-2][1].get_available_components(
             dataset_properties)
 
-        # A classifier which can handle sparse data after the densifier
+        possible_default_classifier = copy.copy(list(
+            available_classifiers.keys()))
+        default = cs.get_hyperparameter('classifier:__choice__').default
+        del possible_default_classifier[possible_default_classifier.index(default)]
+
+        # A classifier which can handle sparse data after the densifier is
+        # forbidden for memory issues
         for key in classifiers:
             if SPARSE in available_classifiers[key].get_properties()['input']:
                 if 'densifier' in preprocessors:
-                    cs.add_forbidden_clause(
-                        ForbiddenAndConjunction(
-                            ForbiddenEqualsClause(
-                                cs.get_hyperparameter(
-                                    'classifier:__choice__'), key),
-                            ForbiddenEqualsClause(
-                                cs.get_hyperparameter(
-                                    'preprocessor:__choice__'), 'densifier')
-                        ))
+                    while True:
+                        try:
+                            cs.add_forbidden_clause(
+                                ForbiddenAndConjunction(
+                                    ForbiddenEqualsClause(
+                                        cs.get_hyperparameter(
+                                            'classifier:__choice__'), key),
+                                    ForbiddenEqualsClause(
+                                        cs.get_hyperparameter(
+                                            'preprocessor:__choice__'), 'densifier')
+                                ))
+                            # Success
+                            break
+                        except ValueError:
+                            # Change the default and try again
+                            try:
+                                default = possible_default_classifier.pop()
+                            except IndexError:
+                                raise ValueError("Cannot find a legal default configuration.")
+                            cs.get_hyperparameter(
+                                'classifier:__choice__').default = default
 
         # which would take too long
         # Combinations of non-linear models with feature learning:
@@ -196,14 +214,25 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                 continue
             if f not in preprocessors:
                 continue
-            try:
-                cs.add_forbidden_clause(ForbiddenAndConjunction(
-                    ForbiddenEqualsClause(cs.get_hyperparameter(
-                        "classifier:__choice__"), c),
-                    ForbiddenEqualsClause(cs.get_hyperparameter(
-                        "preprocessor:__choice__"), f)))
-            except KeyError:
-                pass
+            while True:
+                try:
+                    cs.add_forbidden_clause(ForbiddenAndConjunction(
+                        ForbiddenEqualsClause(cs.get_hyperparameter(
+                            "classifier:__choice__"), c),
+                        ForbiddenEqualsClause(cs.get_hyperparameter(
+                            "preprocessor:__choice__"), f)))
+                    break
+                except KeyError:
+                    break
+                except ValueError as e:
+                    # Change the default and try again
+                    try:
+                        default = possible_default_classifier.pop()
+                    except IndexError:
+                        raise ValueError(
+                            "Cannot find a legal default configuration.")
+                    cs.get_hyperparameter(
+                        'classifier:__choice__').default = default
 
         # Won't work
         # Multinomial NB etc don't use with features learning, pca etc
@@ -216,15 +245,25 @@ class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):
                 continue
             if f not in preprocessors:
                 continue
-            try:
-                cs.add_forbidden_clause(ForbiddenAndConjunction(
-                    ForbiddenEqualsClause(cs.get_hyperparameter(
-                        "preprocessor:__choice__"), f),
-                    ForbiddenEqualsClause(cs.get_hyperparameter(
-                        "classifier:__choice__"), c)))
-            except KeyError:
-                pass
-
+            while True:
+                try:
+                    cs.add_forbidden_clause(ForbiddenAndConjunction(
+                        ForbiddenEqualsClause(cs.get_hyperparameter(
+                            "preprocessor:__choice__"), f),
+                        ForbiddenEqualsClause(cs.get_hyperparameter(
+                            "classifier:__choice__"), c)))
+                    break
+                except KeyError:
+                    break
+                except ValueError:
+                    # Change the default and try again
+                    try:
+                        default = possible_default_classifier.pop()
+                    except IndexError:
+                        raise ValueError(
+                            "Cannot find a legal default configuration.")
+                    cs.get_hyperparameter(
+                        'classifier:__choice__').default = default
 
         return cs
 
