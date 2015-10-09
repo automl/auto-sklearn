@@ -50,14 +50,15 @@ class Backend(object):
             self.logger.debug("_make_internals_directory: %s" % e)
             pass
 
-    def _get_start_time_filename(self):
-        return os.path.join(self.internals_directory, "start_time.txt")
+    def _get_start_time_filename(self, seed):
+        seed = int(seed)
+        return os.path.join(self.internals_directory, "start_time_%d" % seed)
 
-    def save_start_time(self):
+    def save_start_time(self, seed):
         self._make_internals_directory()
         start_time = time.time()
 
-        filepath = self._get_start_time_filename()
+        filepath = self._get_start_time_filename(seed)
 
         if not isinstance(start_time, float):
             raise ValueError("Start time must be a float, but is %s." %
@@ -68,8 +69,8 @@ class Backend(object):
 
         return filepath
 
-    def load_start_time(self):
-        with open(self._get_start_time_filename(), 'r') as fh:
+    def load_start_time(self, seed):
+        with open(self._get_start_time_filename(seed), 'r') as fh:
             start_time = float(fh.read())
         return start_time
 

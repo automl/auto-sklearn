@@ -48,7 +48,8 @@ class AutoMLTest(Base):
         auto = autosklearn.automl.AutoML(
             output, output, 10, 10,
             initial_configurations_via_metalearning=25,
-            queue=queue)
+            queue=queue,
+            seed=100)
         auto.fit_automl_dataset(dataset)
 
         # pickled data manager (without one hot encoding!)
@@ -63,8 +64,9 @@ class AutoMLTest(Base):
             proc.wait()
 
         # Start time
+        print(os.listdir(os.path.join(output, '.auto-sklearn')))
         start_time_file_path = os.path.join(output, '.auto-sklearn',
-                                            "start_time.txt")
+                                            "start_time_100")
         with open(start_time_file_path, 'r') as fh:
             start_time = float(fh.read())
         self.assertGreaterEqual(time.time() - start_time, 10)

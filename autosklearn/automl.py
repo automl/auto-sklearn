@@ -211,6 +211,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._backend = Backend(self._output_dir, self._tmp_dir)
 
     def start_automl(self, parser):
+        self._backend.save_start_time(self._seed)
         self._stopwatch = StopWatch()
         datamanager = get_data_manager(namespace=parser)
         self._stopwatch.start_task(datamanager.name)
@@ -243,7 +244,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             m.update(X.data)
             dataset_name = m.hexdigest()
 
-        self._backend.save_start_time()
+        self._backend.save_start_time(self._seed)
         self._stopwatch = StopWatch()
         self._dataset_name = dataset_name
         self._stopwatch.start_task(self._dataset_name)
@@ -263,7 +264,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
     def fit_automl_dataset(self, dataset):
         self._stopwatch = StopWatch()
-        self._backend.save_start_time()
+        self._backend.save_start_time(self._seed)
 
         name = os.path.basename(dataset)
         self._stopwatch.start_task(name)
