@@ -9,7 +9,7 @@
 
 ## 2. get the test performance of these configurations
 
-    bash 02_validate_autosklearn_metadata_runs.sh /tmp/metadata
+    bash 02_validate_autosklearn_metadata_runs.sh /tmp/metadata bac
 
 ## 3. convert smac-validate output into aslib format
 
