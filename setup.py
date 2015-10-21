@@ -125,7 +125,6 @@ setuptools.setup(
                       'lockfile',
                       'HPOlibConfigSpace',
                       'ParamSklearn',
-                      'cma',
                       'six',
                       'ConfigArgParse',
                       'liac-arff',
