@@ -92,7 +92,7 @@ def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
     task_name = 'CalculateMetafeaturesEncoded'
     watcher.start_task(task_name)
     result = calc_meta_features_encoded(X_train=x_train, Y_train=y_train,
-                                        categorical=[False] * x_train.shape[0],
+                                        categorical=[False] * x_train.shape[1],
                                         dataset_name=basename)
     watcher.stop_task(task_name)
     logger.info(
