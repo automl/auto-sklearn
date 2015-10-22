@@ -35,17 +35,17 @@ class Test(unittest.TestCase):
 
         initial_challengers = {
             'acc_metric': "--initial-challengers \" "
-                          "-balancing:strategy 'weighting' "
-                          "-classifier:__choice__ 'proj_logit'",
+                          "-balancing:strategy 'none' "
+                          "-classifier:__choice__ 'random_forest'",
             'auc_metric': "--initial-challengers \" "
                           "-balancing:strategy 'none' "
                           "-classifier:__choice__ 'random_forest'",
             'bac_metric': "--initial-challengers \" "
-                          "-balancing:strategy 'weighting' "
-                          "-classifier:__choice__ 'proj_logit'",
+                          "-balancing:strategy 'none' "
+                          "-classifier:__choice__ 'decision_tree'",
             'f1_metric': "--initial-challengers \" "
-                         "-balancing:strategy 'weighting' "
-                         "-classifier:__choice__ 'proj_logit'",
+                         "-balancing:strategy 'none' "
+                         "-classifier:__choice__ 'random_forest'",
             'pac_metric': "--initial-challengers \" "
                           "-balancing:strategy 'none' "
                           "-classifier:__choice__ 'random_forest'"
