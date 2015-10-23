@@ -4,6 +4,7 @@ from __future__ import print_function
 import hashlib
 import multiprocessing
 import os
+import shutil
 import traceback
 
 import numpy as np
@@ -200,10 +201,12 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._include_preprocessors = include_preprocessors
         self._resampling_strategy = resampling_strategy
         self._resampling_strategy_arguments = resampling_strategy_arguments
-        self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
+        self.delete_tmp_folder_after_terminate = \
+            delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = \
             delete_output_folder_after_terminate
 
+        self._datamanager = None
         self._dataset_name = None
         self._stopwatch = None
         self._logger = None
@@ -398,7 +401,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         if meta_features is None:
             initial_configurations = []
         elif datamanager.info['task'] in [MULTICLASS_CLASSIFICATION,
-                                     BINARY_CLASSIFICATION]:
+                                          BINARY_CLASSIFICATION]:
 
             meta_features_encoded = _calculate_metafeatures_encoded(
                 self._dataset_name,
@@ -433,7 +436,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         else:
             initial_configurations = []
-            self._logger('Metafeatures encoded not calculated')
+            self._logger.warn('Metafeatures encoded not calculated')
 
         # == RUN SMAC
         proc_smac = run_smac(self._tmp_dir, self._dataset_name,
@@ -524,8 +527,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
     def _save_ensemble_data(self, X, y):
         """Split dataset and store Data for the ensemble script.
 
-        :param x_data:
-        :param y_data:
+        :param X:
+        :param y:
         :return:
 
         """

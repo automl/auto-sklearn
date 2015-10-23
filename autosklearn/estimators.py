@@ -4,6 +4,7 @@ import random
 import shutil
 
 import numpy as np
+import six
 
 import autosklearn.automl
 from autosklearn.constants import *
@@ -45,13 +46,13 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         preprocessors to use
 
     resampling_strategy : string, optional ('holdout')
-        strategy to handle overfitting:
+        how to to handle overfitting, might need 'resampling_strategy_arguments'
             'holdout': 66:33 (train:test) split
             'holdout-iterative-fit':  66:33 (train:test) split, calls iterative
                                       fit where possible
-            'cv': crossvalidation, requires 'folds' arguments
-            'nested-cv': crossvalidation, requires 'outer-folds, 'inner-folds' arguments
-            'partial-cv': crossvalidation, requires 'folds' arguments, calls
+            'cv': crossvalidation, requires 'folds'
+            'nested-cv': crossvalidation, requires 'outer-folds, 'inner-folds'
+            'partial-cv': crossvalidation, requires 'folds' , calls
                           iterative fit where possible
 
     resampling_strategy_arguments : dict, (optional if 'holdout') None
@@ -111,7 +112,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             per_run_time_limit=per_run_time_limit,
             log_dir=self._tmp_dir,
             initial_configurations_via_metalearning=
-                initial_configurations_via_metalearning,
+            initial_configurations_via_metalearning,
             ensemble_size=ensemble_size,
             ensemble_nbest=ensemble_nbest,
             seed=seed,
@@ -123,7 +124,8 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             output_dir=self._output_dir,
             resampling_strategy_arguments=resampling_strategy_arguments,
             delete_tmp_folder_after_terminate=delete_tmp_folder_after_terminate,
-            delete_output_folder_after_terminate=delete_output_folder_after_terminate)
+            delete_output_folder_after_terminate=
+            delete_output_folder_after_terminate)
 
     @staticmethod
     def _prepare_create_folders(tmp_dir, output_dir):
@@ -188,7 +190,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         self._classes = []
         self._n_classes = []
 
-        for k in xrange(self._n_outputs):
+        for k in six.moves.range(self._n_outputs):
             classes_k, y[:, k] = np.unique(y[:, k], return_inverse=True)
             self._classes.append(classes_k)
             self._n_classes.append(classes_k.shape[0])
