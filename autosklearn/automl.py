@@ -177,7 +177,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                  include_estimators=None,
                  include_preprocessors=None,
                  resampling_strategy='holdout',
-                 resampling_strategy_arguments=None):
+                 resampling_strategy_arguments=None,
+                 delete_tmp_dir_after_terminate=false,
+                 delete_output_dir_after_terminate=false):
         super(AutoML, self).__init__()
 
         self._tmp_dir = tmp_dir
@@ -198,6 +200,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._include_preprocessors = include_preprocessors
         self._resampling_strategy = resampling_strategy
         self._resampling_strategy_arguments = resampling_strategy_arguments
+        self.delete_tmp_dir_after_terminate = delete_tmp_dir_after_terminate
+        self.delete_output_dir_after_terminate = \
+            delete_output_dir_after_terminate
 
         self._dataset_name = None
         self._stopwatch = None
@@ -542,3 +547,23 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         raise NotImplementedError('auto-sklearn does not implement '
                                   'set_params() because it is not intended to '
                                   'be optimized.')
+
+    def __del__(self):
+        self._delete_output_directories()
+
+    def _delete_output_directories(self):
+        if self.delete_output_dir_after_terminate:
+            try:
+                shutil.rmtree(self._output_dir)
+            except Exception:
+                self._logger.warn("Could not delete output dir: %s" %
+                                  self._output_dir)
+                pass
+
+        if self.delete_tmp_dir_after_terminate:
+            try:
+                shutil.rmtree(self._tmp_dir)
+            except Exception:
+                self._logger.warn("Could not delete tmp dir: %s" %
+                              self._tmp_dir)
+                pass
