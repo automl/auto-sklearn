@@ -178,8 +178,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                  include_preprocessors=None,
                  resampling_strategy='holdout',
                  resampling_strategy_arguments=None,
-                 delete_tmp_dir_after_terminate=false,
-                 delete_output_dir_after_terminate=false):
+                 delete_tmp_folder_after_terminate=False,
+                 delete_output_folder_after_terminate=False):
         super(AutoML, self).__init__()
 
         self._tmp_dir = tmp_dir
@@ -200,9 +200,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._include_preprocessors = include_preprocessors
         self._resampling_strategy = resampling_strategy
         self._resampling_strategy_arguments = resampling_strategy_arguments
-        self.delete_tmp_dir_after_terminate = delete_tmp_dir_after_terminate
-        self.delete_output_dir_after_terminate = \
-            delete_output_dir_after_terminate
+        self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
+        self.delete_output_folder_after_terminate = \
+            delete_output_folder_after_terminate
 
         self._dataset_name = None
         self._stopwatch = None
@@ -552,7 +552,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._delete_output_directories()
 
     def _delete_output_directories(self):
-        if self.delete_output_dir_after_terminate:
+        if self.delete_output_folder_after_terminate:
             try:
                 shutil.rmtree(self._output_dir)
             except Exception:
@@ -560,7 +560,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                                   self._output_dir)
                 pass
 
-        if self.delete_tmp_dir_after_terminate:
+        if self.delete_tmp_folder_after_terminate:
             try:
                 shutil.rmtree(self._tmp_dir)
             except Exception:

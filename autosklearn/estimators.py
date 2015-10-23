@@ -36,6 +36,48 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         learning algorithm allocates tries to allocate more memory,
         its evaluation will be stopped.
 
+    include_estimators : dict, optional (None)
+        If None all possible estimators are used. Otherwise specifies set of
+        estimators to use
+
+    include_preprocessors : dict, optional (None)
+        If None all possible preprocessors are used. Otherwise specifies set of
+        preprocessors to use
+
+    resampling_strategy : string, optional ('holdout')
+        strategy to handle overfitting:
+            'holdout': 66:33 (train:test) split
+            'holdout-iterative-fit':  66:33 (train:test) split, calls iterative
+                                      fit where possible
+            'cv': crossvalidation, requires 'folds' arguments
+            'nested-cv': crossvalidation, requires 'outer-folds, 'inner-folds' arguments
+            'partial-cv': crossvalidation, requires 'folds' arguments, calls
+                          iterative fit where possible
+
+    resampling_strategy_arguments : dict, (optional if 'holdout') None
+        Additional arguments for resampling_strategy
+        'holdout': None
+        'holdout-iterative-fit':  None
+        'cv': {'folds': int}
+        'nested-cv': {'outer_folds': int, 'inner_folds'
+        'partial-cv': {'folds': int}
+
+    tmp_folder : string, optional (None)
+        folder to store configuration output, if None automatically use
+        /tmp/autosklearn_tmp_$pid_$random_number
+
+    output_folder : string, optional (None)
+        folder to store trained models, if None automatically use
+        /tmp/autosklearn_output_$pid_$random_number
+
+    delete_tmp_folder_after_terminate: string, optional (True)
+        remove tmp_folder, when finished. If tmp_folder is None
+        tmp_dir will always be deleted
+
+    delete_output_folder_after_terminate, bool, optional (True)
+        remove output_folder, when finished. If output_folder is None
+        output_dir will always be deleted
+
     """
 
     def __init__(self,
@@ -46,10 +88,14 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
                  ensemble_nbest=50,
                  seed=1,
                  ml_memory_limit=3000,
+                 include_estimators=None,
+                 include_preprocessors=None,
+                 resampling_strategy='holdout',
+                 resampling_strategy_arguments=None,
                  tmp_folder=None,
                  output_folder=None,
-                 delete_tmp_dir_after_terminate=false,
-                 delete_output_dir_after_terminate=false):
+                 delete_tmp_folder_after_terminate=True,
+                 delete_output_folder_after_terminate=True):
 
         self._tmp_dir, self._output_dir = self._prepare_create_folders(
             tmp_folder,
@@ -63,8 +109,6 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         super(AutoSklearnClassifier, self).__init__(
             time_left_for_this_task=time_left_for_this_task,
             per_run_time_limit=per_run_time_limit,
-            tmp_dir=self._tmp_dir,
-            output_dir=self._output_dir,
             log_dir=self._tmp_dir,
             initial_configurations_via_metalearning=
                 initial_configurations_via_metalearning,
@@ -72,8 +116,14 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             ensemble_nbest=ensemble_nbest,
             seed=seed,
             ml_memory_limit=ml_memory_limit,
-            delete_tmp_dir_after_terminate=delete_tmp_dir_after_terminate,
-            delete_output_dir_after_terminate=delete_output_dir_after_terminate)
+            include_estimators=include_estimators,
+            include_preprocessors=include_preprocessors,
+            resampling_strategy=resampling_strategy,
+            tmp_dir=self._tmp_dir,
+            output_dir=self._output_dir,
+            resampling_strategy_arguments=resampling_strategy_arguments,
+            delete_tmp_folder_after_terminate=delete_tmp_folder_after_terminate,
+            delete_output_folder_after_terminate=delete_output_folder_after_terminate)
 
     @staticmethod
     def _prepare_create_folders(tmp_dir, output_dir):
