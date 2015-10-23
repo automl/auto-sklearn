@@ -62,6 +62,8 @@ def _write_instance_file(resampling_strategy, resampling_strategy_arguments,
     # = Create an instance file
     if resampling_strategy == 'holdout':
         instances = "holdout %s" % data_manager_path
+    elif resampling_strategy == 'holdout-iterative-fit':
+        instances = "holdout-iterative-fit %s" % data_manager_path
     elif resampling_strategy == 'nested-cv':
         instances = "nested-cv:%d/%d %s" % (
             resampling_strategy_arguments['inner_folds'],
@@ -90,7 +92,8 @@ def _write_instance_file(resampling_strategy, resampling_strategy_arguments,
 
 def populate_argparse_with_resampling_arguments(parser):
     parser.add_argument("--resampling-strategy",
-                        choices=["holdout", "cv", "partial-cv", "nested-cv"],
+                        choices=["holdout", "cv", "partial-cv", "nested-cv",
+                                 "holdout-iterative-fit"],
                         help="Resampling strategy used to estimate "
                              "generalization error.")
     parser.add_argument("--folds", type=int,
@@ -109,6 +112,9 @@ def populate_argparse_with_resampling_arguments(parser):
 def namespace_to_automl_format(namespace):
     if namespace.resampling_strategy == 'holdout':
         strategy = 'holdout'
+        arguments = None
+    elif namespace.resampling_strategy == 'holdout-iterative-fit':
+        strategy = 'holdout-iterative-fit'
         arguments = None
     elif namespace.resampling_strategy == 'cv':
         strategy = 'cv'
