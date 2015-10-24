@@ -11,6 +11,7 @@ import numpy as np
 
 from HPOlibConfigSpace.converters import pcs_parser
 from sklearn.base import BaseEstimator
+import six
 
 from autosklearn.constants import *
 from autosklearn.data.data_manager_factory import get_data_manager
@@ -213,6 +214,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._task = None
         self._metric = None
         self._label_num = None
+        self.models_ = None
+        self.ensemble_indices_ = None
 
         self._debug_mode = debug_mode
         self._backend = Backend(self._output_dir, self._tmp_dir)
@@ -324,6 +327,10 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         del he
 
     def _fit(self, datamanager):
+        # Reset learnt stuff
+        self.models_ = None
+        self.ensemble_indices_ = None
+
         # Check arguments prior to doing anything!
         if self._resampling_strategy not in ['holdout', 'holdout-iterative-fit',
                                              'cv', 'nested-cv', 'partial-cv']:
@@ -478,31 +485,22 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         except Exception:
             pass
 
+        if self._queue is None:
+            self._load_models()
+
         return self
 
     def predict(self, X):
-        if self._keep_models is not True:
-            raise ValueError(
-                "Predict can only be called if 'keep_models==True'")
-        if self._resampling_strategy != 'holdout':
-            raise NotImplementedError(
-                'Predict is currently only implemented for resampling '
-                'strategy holdout.')
-
-        models = self._backend.load_all_models()
-        if len(models) == 0:
-            raise ValueError('No models fitted!')
-
-        ensemble_indices = self._backend.load_ensemble_indices_weights(
-            self._seed)
+        if self.models_ is None:
+            self._load_models()
 
         predictions = []
-        for num_run in models:
-            if num_run not in ensemble_indices:
+        for num_run in self.models_:
+            if num_run not in self.ensemble_indices_:
                 continue
 
-            weight = ensemble_indices[num_run]
-            model = models[num_run]
+            weight = self.ensemble_indices_[num_run]
+            model = self.models_[num_run]
 
             X_ = X.copy()
             if self._task in REGRESSION_TASKS:
@@ -514,10 +512,49 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         predictions = np.sum(np.array(predictions), axis=0)
         return predictions
 
+    def _load_models(self):
+        if self._keep_models is not True:
+            raise ValueError(
+                "Predict can only be called if 'keep_models==True'")
+        if self._resampling_strategy != 'holdout':
+            raise NotImplementedError(
+                'Predict is currently only implemented for resampling '
+                'strategy holdout.')
+
+        self.models_ = self._backend.load_all_models()
+        if len(self.models_) == 0:
+            raise ValueError('No models fitted!')
+
+        self.ensemble_indices_ = self._backend.load_ensemble_indices_weights(
+            self._seed)
+
     def score(self, X, y):
         prediction = self.predict(X)
         return calculate_score(y, prediction, self._task,
                                self._metric, self._label_num)
+
+    def show_models(self):
+        if self.models_ is None:
+            self._load_models()
+
+        output = []
+        sio = six.StringIO()
+        for num_run in self.models_:
+            if num_run not in self.ensemble_indices_:
+                continue
+
+            weight = self.ensemble_indices_[num_run]
+            model = self.models_[num_run]
+            output.append((weight, model))
+
+        output.sort(reverse=True)
+
+        sio.write("[")
+        for weight, model in output:
+            sio.write("(%f, %s),\n" % (weight, model))
+        sio.write("]")
+
+        return sio.getvalue()
 
     def _save_ensemble_data(self, X, y):
         """Split dataset and store Data for the ensemble script.
@@ -550,7 +587,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._delete_output_directories()
 
     def _delete_output_directories(self):
-        print(self._logger)
         if self.delete_output_folder_after_terminate:
             try:
                 shutil.rmtree(self._output_dir)

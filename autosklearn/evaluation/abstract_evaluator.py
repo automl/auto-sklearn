@@ -23,11 +23,12 @@ __all__ = [
 
 
 class MyDummyClassifier(DummyClassifier):
-    def __init__(self, *args):
+    def __init__(self, configuration, random_states):
         super(MyDummyClassifier, self).__init__(strategy="most_frequent")
 
-    def fit(self, X, y):
-        return super(MyDummyClassifier, self).fit(np.ones((X.shape[0], 1)), y)
+    def fit(self, X, y, sample_weight=None):
+        return super(MyDummyClassifier, self).fit(np.ones((X.shape[0], 1)), y,
+                                                  sample_weight=sample_weight)
 
     def predict_proba(self, X, batch_size=1000):
         new_X = np.ones((X.shape[0], 1))
@@ -35,11 +36,12 @@ class MyDummyClassifier(DummyClassifier):
 
 
 class MyDummyRegressor(DummyRegressor):
-    def __init__(self, *args):
+    def __init__(self, configuration, random_states):
         super(MyDummyRegressor, self).__init__(strategy='mean')
 
-    def fit(self, X, y):
-        return super(MyDummyRegressor, self).fit(np.ones((X.shape[0], 1)), y)
+    def fit(self, X, y, sample_weight=None):
+        return super(MyDummyRegressor, self).fit(np.ones((X.shape[0], 1)), y,
+                                                 sample_weight=sample_weight)
 
     def predict(self, X, batch_size=1000):
         new_X = np.ones((X.shape[0], 1))

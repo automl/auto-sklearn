@@ -28,7 +28,7 @@ class AutoMLTest(Base):
         automl = autosklearn.automl.AutoML(output, output, 12, 12)
         automl.fit(X_train, Y_train)
         score = automl.score(X_test, Y_test)
-        self.assertGreaterEqual(score, 0.9)
+        self.assertGreaterEqual(score, 0.8)
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
