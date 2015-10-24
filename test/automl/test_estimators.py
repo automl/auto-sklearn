@@ -1,33 +1,26 @@
 # -*- encoding: utf-8 -*-
 import os
 
-import numpy as np
 import ParamSklearn.util as putil
 
 import autosklearn
+from autosklearn.constants import *
 from base import Base
 
 
 class EstimatorTest(Base):
     _multiprocess_can_split_ = True
 
-    def test_fit_OneHotEncoder(self):
-        output = os.path.join(self.test_dir, '..',
-                              '.tmp_test_fit_OneHotEncoder')
+    def test_fit(self):
+        output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit')
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        X_train = np.hstack((X_train,
-                             np.arange(X_train.shape[0]).reshape((-1, 1))))
-        cls = autosklearn.AutoSklearnClassifier(time_left_for_this_task=5,
-                                                per_run_time_limit=5,
-                                                output_folder=output,
-                                                tmp_folder=output)
-        cls.fit(X_train, Y_train,
-                feat_type=['NUMERICAL', 'NUMERICAL', 'NUMERICAL', 'NUMERICAL',
-                           'CATEGORICAL'])
-        self.assertEqual([False, False, False, False, True],
-                         cls._ohe.categorical_features)
+        automl = autosklearn.automl.AutoML(output, output, 12, 12)
+        automl.fit(X_train, Y_train)
+        score = automl.score(X_test, Y_test)
+        self.assertGreaterEqual(score, 0.9)
+        self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
-        del cls
+        del automl
         self._tearDown(output)

@@ -210,7 +210,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._dataset_name = None
         self._stopwatch = None
         self._logger = None
-        self._ohe = None
         self._task = None
         self._metric = None
         self._label_num = None
@@ -395,7 +394,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         self._stopwatch.start_task('OneHot')
         datamanager.perform1HotEncoding()
-        self._ohe = datamanager.encoder
         self._stopwatch.stop_task('OneHot')
 
         if meta_features is None:
@@ -495,9 +493,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         if len(models) == 0:
             raise ValueError('No models fitted!')
 
-        if self._ohe is not None:
-            X = self._ohe._transform(X)
-
         ensemble_indices = self._backend.load_ensemble_indices_weights(
             self._seed)
 
@@ -555,18 +550,27 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self._delete_output_directories()
 
     def _delete_output_directories(self):
+        print(self._logger)
         if self.delete_output_folder_after_terminate:
             try:
                 shutil.rmtree(self._output_dir)
             except Exception:
-                self._logger.warn("Could not delete output dir: %s" %
-                                  self._output_dir)
-                pass
+                if self._logger is not None:
+                    self._logger.warning("Could not delete output dir: %s" %
+                                         self._output_dir)
+                else:
+                    print("Could not delete output dir: %s" %
+                          self._output_dir)
+
 
         if self.delete_tmp_folder_after_terminate:
             try:
                 shutil.rmtree(self._tmp_dir)
             except Exception:
-                self._logger.warn("Could not delete tmp dir: %s" %
-                              self._tmp_dir)
-                pass
+                if self._logger is not None:
+                    self._logger.warning("Could not delete tmp dir: %s" %
+                                  self._tmp_dir)
+                    pass
+                else:
+                    print("Could not delete tmp dir: %s" %
+                          self._tmp_dir)
