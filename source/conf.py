@@ -22,6 +22,22 @@
 # If your documentation needs a minimal Sphinx version, state it here.
 # needs_sphinx = '1.0'
 
+# Mock out stuff for readthedocs.org
+import sys
+try:
+    from mock import Mock as MagicMock
+except:
+    from unittest.mock import MagicMock
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+            return Mock()
+
+MOCK_MODULES = ['numpy', 'scipy','scikit-learn', 'psutil','pyyaml','pandas',
+                'matplotlib', 'HPOlib', 'ParamSklearn', 'HPOlibConfigSpace']
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
@@ -32,7 +48,7 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary',
 # Configure the extensions
 numpydoc_show_class_members = False
 autosummary_generate = True
-autodoc_default_flags = ['members', 'inherited-members', 'show-inheritance']
+autodoc_default_flags = ['members', 'show-inheritance']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

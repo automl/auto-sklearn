@@ -47,21 +47,21 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
 
     resampling_strategy : string, optional ('holdout')
         how to to handle overfitting, might need 'resampling_strategy_arguments'
-            'holdout': 66:33 (train:test) split
-            'holdout-iterative-fit':  66:33 (train:test) split, calls iterative
-                                      fit where possible
-            'cv': crossvalidation, requires 'folds'
-            'nested-cv': crossvalidation, requires 'outer-folds, 'inner-folds'
-            'partial-cv': crossvalidation, requires 'folds' , calls
-                          iterative fit where possible
+        * 'holdout': 66:33 (train:test) split
+        * 'holdout-iterative-fit':  66:33 (train:test) split, calls iterative
+          fit where possible
+        * 'cv': crossvalidation, requires 'folds'
+        * 'nested-cv': crossvalidation, requires 'outer-folds, 'inner-folds'
+        * 'partial-cv': crossvalidation, requires 'folds' , calls
+          iterative fit where possible
 
     resampling_strategy_arguments : dict, (optional if 'holdout') None
         Additional arguments for resampling_strategy
-        'holdout': None
-        'holdout-iterative-fit':  None
-        'cv': {'folds': int}
-        'nested-cv': {'outer_folds': int, 'inner_folds'
-        'partial-cv': {'folds': int}
+        * 'holdout': None
+        * 'holdout-iterative-fit':  None
+        * 'cv': {'folds': int}
+        * 'nested-cv': {'outer_folds': int, 'inner_folds'
+        * 'partial-cv': {'folds': int}
 
     tmp_folder : string, optional (None)
         folder to store configuration output, if None automatically use
@@ -168,9 +168,10 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             'auc_metric', 'bac_metric', 'f1_metric', 'pac_metric']
 
         feat_type : list, optional (default=None)
-            List of :python:`len(X.shape[1])` describing if an attribute is
+            List of `len(X.shape[1])` describing if an attribute is
             continuous or categorical. Categorical attributes will
             automatically 1Hot encoded.
+
         """
         # Fit is supposed to be idempotent!
         self._delete_output_directories()
