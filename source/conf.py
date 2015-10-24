@@ -43,7 +43,13 @@ sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 # ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary',
               'sphinx.ext.doctest', 'sphinx.ext.coverage',
-              'sphinx.ext.mathjax', 'sphinx.ext.viewcode', 'numpydoc']
+              'sphinx.ext.mathjax', 'sphinx.ext.viewcode']
+
+try:
+    import numpydoc
+    extensions.append('numpydoc')
+except Exception:
+    pass
 
 # Configure the extensions
 numpydoc_show_class_members = False
