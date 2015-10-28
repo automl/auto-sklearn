@@ -4,6 +4,7 @@ import random
 import shutil
 
 import numpy as np
+from os import stat
 import six
 
 import autosklearn.automl
@@ -75,9 +76,12 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         remove tmp_folder, when finished. If tmp_folder is None
         tmp_dir will always be deleted
 
-    delete_output_folder_after_terminate, bool, optional (True)
+    delete_output_folder_after_terminate: bool, optional (True)
         remove output_folder, when finished. If output_folder is None
         output_dir will always be deleted
+
+    shared_mode: bool, optional (False)
+        run smac in shared-model-node. Then you must set delete_* to True
 
     """
 
@@ -96,12 +100,20 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
                  tmp_folder=None,
                  output_folder=None,
                  delete_tmp_folder_after_terminate=True,
-                 delete_output_folder_after_terminate=True):
+                 delete_output_folder_after_terminate=True,
+                 shared_mode=False):
 
+        # Call this before calling superconstructor as we feed tmp/output dir
+        # to superinit
         self._tmp_dir, self._output_dir = self._prepare_create_folders(
-            tmp_folder,
-            output_folder
+            tmp_dir=tmp_folder,
+            output_dir=output_folder,
+            shared_mode=shared_mode
         )
+
+        if shared_mode:
+            delete_output_folder_after_terminate = False
+            delete_tmp_folder_after_terminate = False
 
         self._classes = []
         self._n_classes = []
@@ -125,11 +137,15 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             resampling_strategy_arguments=resampling_strategy_arguments,
             delete_tmp_folder_after_terminate=delete_tmp_folder_after_terminate,
             delete_output_folder_after_terminate=
-            delete_output_folder_after_terminate)
+            delete_output_folder_after_terminate,
+            shared_mode=shared_mode)
 
     @staticmethod
-    def _prepare_create_folders(tmp_dir, output_dir):
-        random_number = random.randint(0, 10000)
+    def _prepare_create_folders(tmp_dir, output_dir, shared_mode):
+        if shared_mode:
+            random_number = 23
+        else:
+            random_number = random.randint(0, 10000)
 
         pid = os.getpid()
         if tmp_dir is None:
@@ -145,9 +161,14 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         return tmp_dir, output_dir
 
     def _create_output_directories(self):
-        os.makedirs(self._output_dir)
-        if self._output_dir != self._tmp_dir:
-            os.makedirs(self._tmp_dir)
+        try:
+            os.makedirs(self._output_dir)
+            if self._output_dir != self._tmp_dir:
+                os.makedirs(self._tmp_dir)
+        except OSError:
+            print("Did not create tmp/output_dir, already exists")
+            if not self._shared_mode:
+                raise
 
     def fit(self, X, y,
             task=MULTICLASS_CLASSIFICATION,
@@ -174,7 +195,10 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
 
         """
         # Fit is supposed to be idempotent!
-        self._delete_output_directories()
+
+        # But not if we use share_mode:
+        if not self._shared_mode:
+            self._delete_output_directories()
         self._create_output_directories()
 
         y = np.atleast_1d(y)

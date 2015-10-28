@@ -181,7 +181,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                  resampling_strategy='holdout',
                  resampling_strategy_arguments=None,
                  delete_tmp_folder_after_terminate=False,
-                 delete_output_folder_after_terminate=False):
+                 delete_output_folder_after_terminate=False,
+                 shared_mode=False):
         super(AutoML, self).__init__()
 
         self._tmp_dir = tmp_dir
@@ -206,6 +207,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = \
             delete_output_folder_after_terminate
+        self._shared_mode = shared_mode
 
         self._datamanager = None
         self._dataset_name = None
@@ -235,12 +237,12 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self.start()
 
     def start(self):
-        if not hasattr(self, '_datamanager'):
+        if self._datamanager is None:
             raise ValueError('You must invoke start() only via start_automl()')
         super(AutoML, self).start()
 
     def run(self):
-        if not hasattr(self, '_datamanager'):
+        if self._datamanager is None:
             raise ValueError('You must invoke run() only via start_automl()')
         self._fit(self._datamanager)
 
@@ -343,7 +345,12 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         self._backend._make_internals_directory()
         if self._keep_models:
-            os.mkdir(self._backend.get_model_dir())
+            try:
+                os.mkdir(self._backend.get_model_dir())
+            except OSError:
+                self._logger.warn("model directory already exists")
+                if not self._shared_mode:
+                    raise
 
         self._metric = datamanager.info['metric']
         self._task = datamanager.info['task']
@@ -443,14 +450,19 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             initial_configurations = []
             self._logger.warn('Metafeatures encoded not calculated')
 
-        # == RUN SMAC
-        proc_smac = run_smac(self._tmp_dir, self._dataset_name,
-                             self._time_for_task, self._ml_memory_limit,
-                             data_manager_path, configspace_path,
-                             initial_configurations, self._per_run_time_limit,
-                             self._stopwatch, self._backend, self._seed,
-                             self._resampling_strategy,
-                             self._resampling_strategy_arguments)
+        # == RUN SMACtmp_dir, basename, time_for_task, ml_memory_limit,
+        proc_smac = run_smac(tmp_dir=self._tmp_dir, basename=self._dataset_name,
+                             time_for_task=self._time_for_task,
+                             ml_memory_limit=self._ml_memory_limit,
+                             data_manager_path=data_manager_path,
+                             configspace_path=configspace_path,
+                             initial_configurations=initial_configurations,
+                             per_run_time_limit=self._per_run_time_limit,
+                             watcher=self._stopwatch, backend=self._backend,
+                             seed=self._seed,
+                             resampling_strategy=self._resampling_strategy,
+                             resampling_strategy_arguments=self._resampling_strategy_arguments,
+                             shared_mode=self._shared_mode)
 
         # == RUN ensemble builder
         proc_ensembles = _run_ensemble_builder(
@@ -597,7 +609,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 else:
                     print("Could not delete output dir: %s" %
                           self._output_dir)
-
 
         if self.delete_tmp_folder_after_terminate:
             try:
