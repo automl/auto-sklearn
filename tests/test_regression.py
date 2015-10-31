@@ -143,6 +143,13 @@ class TestParamSKlearnRegressor(unittest.TestCase):
             model_score = auto.score(copy.deepcopy(X_test), Y_test)
             self.assertEqual(model_score, r2_score)
 
+    def test_repr(self):
+        cs = ParamSklearnRegressor.get_hyperparameter_search_space()
+        default = cs.get_default_configuration()
+        representation = repr(ParamSklearnRegressor(default))
+        cls = eval(representation)
+        self.assertIsInstance(cls, ParamSklearnRegressor)
+
     def test_get_hyperparameter_search_space(self):
         cs = ParamSklearnRegressor.get_hyperparameter_search_space()
         self.assertIsInstance(cs, ConfigurationSpace)

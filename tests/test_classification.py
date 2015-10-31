@@ -79,6 +79,13 @@ class TestParamSklearnClassifier(unittest.TestCase):
                 sklearn.metrics.accuracy_score(predictions, Y_test))
             scores = auto.predict_proba(X_test)
 
+    def test_repr(self):
+        cs = ParamSklearnClassifier.get_hyperparameter_search_space()
+        default = cs.get_default_configuration()
+        representation = repr(ParamSklearnClassifier(default))
+        cls = eval(representation)
+        self.assertIsInstance(cls, ParamSklearnClassifier)
+
     def test_configurations(self):
         # Use a limit of ~4GiB
         limit = 4000 * 1024 * 1024

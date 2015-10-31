@@ -69,9 +69,9 @@ def get_dict(task_type="classifier", **kwargs):
     estimator = None
 
     for h in cs.get_hyperparameters():
-        if h.name == "preprocessor":
+        if h.name == "preprocessor:__choice__":
             preprocessor = h
-        elif h.name == task_type:
+        elif h.name == (task_type + ':__choice__'):
             estimator = h
 
     if estimator is None:
@@ -98,11 +98,12 @@ def get_dict(task_type="classifier", **kwargs):
         preprocessor_dict[i][UN] = 0
 
     for h in cs.get_hyperparameters():
-        if h.name == "preprocessor" or h.name == task_type:
+        if h.name == "preprocessor:__choice__" or \
+                h.name == (task_type + ':__choice__'):
             continue
         # walk over both dicts
         for d in (estimator_dict, preprocessor_dict):
-            est = h.name.split(":")[0]
+            est = h.name.split(":")[1]
             if est not in d:
                 continue
             if isinstance(h, HPOlibConfigSpace.hyperparameters.UniformIntegerHyperparameter):
@@ -119,14 +120,15 @@ def get_dict(task_type="classifier", **kwargs):
                 raise ValueError("Don't know that type: %s" % type(h))
 
     for h in cs.get_conditions():
-        if h.parent.name == task_type or h.parent.name == "preprocessor":
+        if h.parent.name == (task_type + ':__choice__') or h.parent.name == \
+                "preprocessor:__choice__":
             # ignore this condition
             # print "IGNORE", h
             continue
 
         # walk over both dicts and collect hyperparams
         for d in (estimator_dict, preprocessor_dict):
-            est = h.child.name.split(":")[0]
+            est = h.child.name.split(":")[1]
             if est not in d:
                 #print "Could not find %s" % est
                 continue

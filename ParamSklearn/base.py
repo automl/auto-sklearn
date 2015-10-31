@@ -323,6 +323,23 @@ class ParamSklearnBaseEstimator(BaseEstimator):
 
         return cs
 
+    def __repr__(self):
+        class_name = self.__class__.__name__
+
+        configuration = {}
+        self.configuration._populate_values()
+        for hp_name in self.configuration:
+            if self.configuration[hp_name] is not None:
+                configuration[hp_name] = self.configuration[hp_name]
+
+        configuration_string = ''.join(
+            ['configuration={\n  ',
+             ',\n  '.join(["'%s': %s" % (hp_name, repr(configuration[hp_name]))
+                                         for hp_name in sorted(configuration)]),
+             '}'])
+
+        return '%s(%s)' % (class_name, configuration_string)
+
     @classmethod
     def _get_pipeline(cls):
         if cls == ParamSklearnBaseEstimator:
@@ -331,5 +348,4 @@ class ParamSklearnBaseEstimator(BaseEstimator):
 
     def _get_estimator_hyperparameter_name(self):
         raise NotImplementedError()
-
 
