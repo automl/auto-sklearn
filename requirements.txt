@@ -18,5 +18,3 @@ pandas
 
 git+https://github.com/automl/HPOlibConfigSpace/#egg=HPOlibConfigSpace
 git+https://github.com/automl/paramsklearn.git@development
-git+https://github.com/automl/HPOlib@development#egg=HPOlib
-
