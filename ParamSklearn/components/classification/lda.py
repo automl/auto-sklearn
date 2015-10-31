@@ -1,4 +1,5 @@
 import sklearn.lda
+import sklearn.multiclass
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -9,7 +10,6 @@ from ParamSklearn.components.base import \
     ParamSklearnClassificationAlgorithm
 from ParamSklearn.constants import *
 from ParamSklearn.implementations.util import softmax
-
 
 
 class LDA(ParamSklearnClassificationAlgorithm):
@@ -36,11 +36,17 @@ class LDA(ParamSklearnClassificationAlgorithm):
         self.n_components = int(self.n_components)
         self.tol = float(self.tol)
 
-        self.estimator = sklearn.lda.LDA(n_components=self.n_components,
-                                         shrinkage=self.shrinkage,
-                                         tol=self.tol,
-                                         solver=solver)
-        self.estimator.fit(X, Y, tol=self.tol)
+        estimator = sklearn.lda.LDA(n_components=self.n_components,
+                                    shrinkage=self.shrinkage,
+                                    tol=self.tol,
+                                    solver=solver)
+
+        if len(Y.shape) == 2 and Y.shape[1] > 1:
+            self.estimator = sklearn.multiclass.OneVsRestClassifier(estimator, n_jobs=1)
+        else:
+            self.estimator = estimator
+
+        self.estimator.fit(X, Y)
         return self
 
     def predict(self, X):
@@ -68,7 +74,7 @@ class LDA(ParamSklearnClassificationAlgorithm):
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': False,
+                'handles_multilabel': True,
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'input': (DENSE, UNSIGNED_DATA),

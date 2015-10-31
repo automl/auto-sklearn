@@ -10,15 +10,20 @@ from ParamSklearn.implementations.util import softmax
 
 
 class QDA(ParamSklearnClassificationAlgorithm):
-    def __init__(self, reg_param, tol, random_state=None):
+
+    def __init__(self, reg_param, random_state=None):
         self.reg_param = float(reg_param)
-        self.tol = float(tol)
         self.estimator = None
 
     def fit(self, X, Y):
+        estimator = sklearn.qda.QDA(self.reg_param)
 
-        self.estimator = sklearn.qda.QDA(self.reg_param)
-        self.estimator.fit(X, Y, tol=self.tol)
+        if len(Y.shape) == 2 and Y.shape[1] > 1:
+            self.estimator = sklearn.multiclass.OneVsRestClassifier(estimator, n_jobs=1)
+        else:
+            self.estimator = estimator
+
+        self.estimator.fit(X, Y)
         return self
 
     def predict(self, X):
@@ -46,7 +51,7 @@ class QDA(ParamSklearnClassificationAlgorithm):
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': False,
+                'handles_multilabel': True,
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'input': (DENSE, UNSIGNED_DATA),
@@ -57,10 +62,7 @@ class QDA(ParamSklearnClassificationAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         reg_param = UniformFloatHyperparameter('reg_param', 0.0, 10.0,
-                                                    default=0.5)
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default=1e-4,
-                                         log=True)
+                                               default=0.5)
         cs = ConfigurationSpace()
         cs.add_hyperparameter(reg_param)
-        cs.add_hyperparameter(tol)
         return cs

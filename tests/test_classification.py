@@ -86,6 +86,84 @@ class TestParamSklearnClassifier(unittest.TestCase):
         cls = eval(representation)
         self.assertIsInstance(cls, ParamSklearnClassifier)
 
+    def test_multilabel(self):
+        # Use a limit of ~4GiB
+        limit = 4000 * 1024 * 1024
+        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
+        dataset_properties = {'multilabel': True}
+        cs = ParamSklearnClassifier.get_hyperparameter_search_space(dataset_properties=dataset_properties)
+
+        print(cs)
+        cs.seed(5)
+
+        for i in range(50):
+            X, Y = sklearn.datasets.\
+                    make_multilabel_classification(n_samples=150,
+                                                   n_features=20,
+                                                   n_classes=5,
+                                                   n_labels=2,
+                                                   length=50,
+                                                   allow_unlabeled=True,
+                                                   sparse=False,
+                                                   return_indicator=True,
+                                                   return_distributions=False,
+                                                   random_state=1)
+            X_train = X[:100, :]
+            Y_train = Y[:100, :]
+            X_test = X[101:, :]
+            Y_test = Y[101:, ]
+
+            config = cs.sample_configuration()
+            config._populate_values()
+
+            if 'classifier:passive_aggressive:n_iter' in config:
+                config._values['classifier:passive_aggressive:n_iter'] = 5
+            if 'classifier:sgd:n_iter' in config:
+                config._values['classifier:sgd:n_iter'] = 5
+
+            cls = ParamSklearnClassifier(config, random_state=1)
+            print(config)
+            try:
+                cls.fit(X_train, Y_train)
+                X_test_ = X_test.copy()
+                predictions = cls.predict(X_test)
+                self.assertIsInstance(predictions, np.ndarray)
+                predicted_probabilities = cls.predict_proba(X_test_)
+                [self.assertIsInstance(i, np.ndarray) for i in predicted_probabilities]
+            except ValueError as e:
+                if "Floating-point under-/overflow occurred at epoch" in \
+                        e.args[0] or \
+                        "removed all features" in e.args[0] or \
+                        "all features are discarded" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    print(traceback.format_exc())
+                    raise e
+            except RuntimeWarning as e:
+                if "invalid value encountered in sqrt" in e.args[0]:
+                    continue
+                elif "divide by zero encountered in" in e.args[0]:
+                    continue
+                elif "invalid value encountered in divide" in e.args[0]:
+                    continue
+                elif "invalid value encountered in true_divide" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    print(traceback.format_exc())
+                    raise e
+            except UserWarning as e:
+                if "FastICA did not converge" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    print(traceback.format_exc())
+                    raise e
+            except MemoryError as e:
+                continue
+
     def test_configurations(self):
         # Use a limit of ~4GiB
         limit = 4000 * 1024 * 1024
