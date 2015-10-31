@@ -1,6 +1,9 @@
 import numpy as np
 import sklearn.ensemble
 import sklearn.tree
+import sklearn.multiclass
+
+from ParamSklearn.implementations.MultilabelClassifier import MultilabelClassifier
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -27,14 +30,20 @@ class AdaboostClassifier(ParamSklearnClassificationAlgorithm):
         self.max_depth = int(self.max_depth)
         base_estimator = sklearn.tree.DecisionTreeClassifier(max_depth=self.max_depth)
 
-        self.estimator = sklearn.ensemble.AdaBoostClassifier(
+        estimator = sklearn.ensemble.AdaBoostClassifier(
             base_estimator=base_estimator,
             n_estimators=self.n_estimators,
             learning_rate=self.learning_rate,
             algorithm=self.algorithm,
             random_state=self.random_state
         )
-        self.estimator.fit(X, Y, sample_weight=sample_weight)
+
+        if len(Y.shape) == 2 and Y.shape[1] > 1:
+            self.estimator = MultilabelClassifier(estimator, n_jobs=1)
+            self.estimator.fit(X, Y, sample_weight=sample_weight)
+        else:
+            self.estimator.fit(X, Y, sample_weight=sample_weight)
+
         return self
 
     def predict(self, X):
@@ -55,12 +64,11 @@ class AdaboostClassifier(ParamSklearnClassificationAlgorithm):
                 'handles_nominal_values': False,
                 'handles_numerical_features': True,
                 'prefers_data_scaled': False,
-                # TODO find out if this is good because of sparcity...
                 'prefers_data_normalized': False,
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': False,
+                'handles_multilabel': True,
                 'is_deterministic': True,
                 'handles_sparse': False,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
