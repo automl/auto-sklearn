@@ -88,11 +88,11 @@ class TestParamSklearnClassifier(unittest.TestCase):
         cs = ParamSklearnClassifier.get_hyperparameter_search_space(dataset_properties=dataset_properties)
 
         print(cs)
-        cs.seed(1)
+        cs.seed(5)
 
         for i in range(50):
             X, Y = sklearn.datasets.\
-                    make_multilabel_classification(n_samples=100,
+                    make_multilabel_classification(n_samples=150,
                                                    n_features=20,
                                                    n_classes=5,
                                                    n_labels=2,
@@ -102,10 +102,10 @@ class TestParamSklearnClassifier(unittest.TestCase):
                                                    return_indicator=True,
                                                    return_distributions=False,
                                                    random_state=1)
-            X_train = X[:80, :]
-            Y_train = Y[:80, :]
-            X_test = X[81:, :]
-            Y_test = Y[81:, ]
+            X_train = X[:100, :]
+            Y_train = Y[:100, :]
+            X_test = X[101:, :]
+            Y_test = Y[101:, ]
 
             config = cs.sample_configuration()
             config._populate_values()
