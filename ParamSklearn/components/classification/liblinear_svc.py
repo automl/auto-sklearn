@@ -1,4 +1,5 @@
 import sklearn.svm
+import sklearn.multiclass
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -39,16 +40,22 @@ class LibLinear_SVC(ParamSklearnClassificationAlgorithm):
         if self.class_weight == "None":
             self.class_weight = None
 
-        self.estimator = sklearn.svm.LinearSVC(penalty=self.penalty,
-                                               loss=self.loss,
-                                               dual=self.dual,
-                                               tol=self.tol,
-                                               C=self.C,
-                                               class_weight=self.class_weight,
-                                               fit_intercept=self.fit_intercept,
-                                               intercept_scaling=self.intercept_scaling,
-                                               multi_class=self.multi_class,
-                                               random_state=self.random_state)
+        estimator = sklearn.svm.LinearSVC(penalty=self.penalty,
+                                          loss=self.loss,
+                                          dual=self.dual,
+                                          tol=self.tol,
+                                          C=self.C,
+                                          class_weight=self.class_weight,
+                                          fit_intercept=self.fit_intercept,
+                                          intercept_scaling=self.intercept_scaling,
+                                          multi_class=self.multi_class,
+                                          random_state=self.random_state)
+
+        if len(Y.shape) == 2 and Y.shape[1] > 1:
+            self.estimator = sklearn.multiclass.OneVsRestClassifier(estimator, n_jobs=1)
+        else:
+            self.estimator = estimator
+
         self.estimator.fit(X, Y)
         return self
 
@@ -77,7 +84,7 @@ class LibLinear_SVC(ParamSklearnClassificationAlgorithm):
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': False,
+                'handles_multilabel': True,
                 'is_deterministic': False,
                 'handles_sparse': True,
                 'input': (SPARSE, DENSE, UNSIGNED_DATA),
