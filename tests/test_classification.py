@@ -90,8 +90,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
         print(cs)
         cs.seed(1)
 
-        for i in range(10):
-
+        for i in range(50):
             X, Y = sklearn.datasets.\
                     make_multilabel_classification(n_samples=100,
                                                    n_features=20,

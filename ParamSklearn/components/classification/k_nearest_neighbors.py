@@ -1,4 +1,5 @@
 import sklearn.neighbors
+import sklearn.multiclass
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
@@ -17,11 +18,16 @@ class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
         self.random_state = random_state
 
     def fit(self, X, Y):
-        self.estimator = \
-            sklearn.neighbors.KNeighborsClassifier(
-                n_neighbors=self.n_neighbors,
-                weights=self.weights,
-                p=self.p)
+        estimator = \
+            sklearn.neighbors.KNeighborsClassifier(n_neighbors=self.n_neighbors,
+                                                   weights=self.weights,
+                                                   p=self.p)
+
+        if len(Y.shape) == 2 and Y.shape[1] > 1:
+            self.estimator = sklearn.multiclass.OneVsRestClassifier(estimator, n_jobs=1)
+        else:
+            self.estimator = estimator
+
         self.estimator.fit(X, Y)
         return self
 
@@ -48,7 +54,7 @@ class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': False,
+                'handles_multilabel': True,
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
