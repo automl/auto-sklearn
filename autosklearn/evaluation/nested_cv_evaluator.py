@@ -4,6 +4,7 @@ from collections import defaultdict
 import numpy as np
 
 import sklearn.utils
+from autosklearn.constants import *
 from autosklearn.evaluation.resampling import get_CV_fold
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.evaluation.util import calculate_score
@@ -187,8 +188,8 @@ class NestedCVEvaluator(AbstractEvaluator):
                 for key in inner_scores
             }
             outer_err = {
-                'outer:%s' % key: 1 - np.mean(outer_scores[key])
-                for key in outer_scores
+                'outer:%s' % METRIC_TO_STRING[key]: 1 - np.mean(outer_scores[
+                    key]) for key in outer_scores
             }
             inner_err.update(outer_err)
         else:

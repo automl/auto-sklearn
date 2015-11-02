@@ -29,7 +29,8 @@ def submit_call(call, seed, logger, log_dir=None):
 
 
 def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
-                         output_dir, ensemble_size, ensemble_nbest, seed):
+                         output_dir, ensemble_size, ensemble_nbest, seed,
+                         shared_mode):
     logger = logging.get_logger(__name__)
 
     if limit <= 0:
@@ -40,10 +41,21 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
     delay = 5
 
     task_type = TASK_TYPES_TO_STRING[task_type]
+    metric = METRIC_TO_STRING[metric]
 
-    call = ' '.join([ensemble_script, tmp_dir, dataset_name, task_type,
-                     metric, str(limit - 5), output_dir, str(ensemble_size),
-                     str(seed)])
+    call = [ensemble_script,
+         '--auto-sklearn-tmp-directory', tmp_dir,
+         '--basename', dataset_name,
+         '--task', task_type,
+         '--metric', metric,
+         '--limit', str(limit - 5),
+         '--output-directory', output_dir,
+         '--ensemble-size', str(ensemble_size),
+         '--auto-sklearn-seed', str(seed)]
+    if shared_mode:
+        call.append('--shared-mode')
+
+    call = ' '.join(call)
 
     # Runsolver does strange things if the time limit is negative. Set it to
     # be at least one (0 means infinity)

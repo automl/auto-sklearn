@@ -73,7 +73,7 @@ def make_mode_holdout(data, seed, configuration, num_run):
 
     backend = Backend(None, os.getcwd())
     if os.path.exists(backend.get_model_dir()):
-        backend.save_model(evaluator.model, num_run)
+        backend.save_model(evaluator.model, num_run, seed)
 
 
 def make_mode_holdout_iterative_fit(data, seed, configuration, num_run):
@@ -88,7 +88,7 @@ def make_mode_holdout_iterative_fit(data, seed, configuration, num_run):
 
     backend = Backend(None, os.getcwd())
     if os.path.exists(backend.get_model_dir()):
-        backend.save_model(evaluator.model, num_run)
+        backend.save_model(evaluator.model, num_run, seed)
 
 
 def make_mode_test(data, seed, configuration, metric):

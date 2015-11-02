@@ -55,6 +55,9 @@ class ARFFDataManager(AbstractDataManager):
         if type(task) in types.StringTypes:
             task = STRING_TO_TASK_TYPES[task]
 
+        if isinstance(metric, types.StringTypes):
+            metric = STRING_TO_METRIC[metric]
+
         train_file = os.path.join(dataset, 'train.arff')
         test_file = os.path.join(dataset, 'test.arff')
 

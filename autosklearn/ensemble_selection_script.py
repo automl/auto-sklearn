@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
 
+import argparse
+import glob
 import logging
 import os
 import random
@@ -10,7 +12,7 @@ from collections import Counter
 
 import numpy as np
 
-from autosklearn.constants import STRING_TO_TASK_TYPES
+from autosklearn.constants import STRING_TO_TASK_TYPES, STRING_TO_METRIC
 from autosklearn.evaluation.util import calculate_score
 from autosklearn.util import StopWatch, Backend
 
@@ -21,8 +23,7 @@ logger = logging.getLogger("ensemble_selection_script.py")
 logger.setLevel(logging.DEBUG)
 
 
-def build_ensemble(predictions_train, predictions_valid,
-                   predictions_test,
+def build_ensemble(predictions_train, predictions_valid, predictions_test,
                    true_labels, ensemble_size, task_type, metric):
     indices, trajectory = ensemble_selection(predictions_train, true_labels,
                                              ensemble_size, task_type, metric)
@@ -50,11 +51,14 @@ def pruning(predictions, labels, n_best, task_type, metric):
     return indcies
 
 
-def get_predictions(dir_path, dir_path_list, include_num_runs, re_num_run):
+def get_predictions(dir_path, dir_path_list, include_num_runs,
+                    model_and_automl_re):
     result = []
     for i, model_name in enumerate(dir_path_list):
-        num_run = int(re_num_run.search(model_name).group(1))
-        if num_run in include_num_runs:
+        match = model_and_automl_re.search(model_name)
+        automl_seed = int(match.group(1))
+        num_run = int(match.group(2))
+        if (automl_seed, num_run) in include_num_runs:
             predictions = np.load(os.path.join(dir_path, model_name))
             result.append(predictions)
     return result
@@ -165,32 +169,31 @@ def ensemble_selection_bagging(predictions, labels, ensemble_size, task_type,
     return np.array(order_of_each_bag)
 
 
-def main(predictions_dir,
+def main(autosklearn_tmp_dir,
          basename,
          task_type,
          metric,
          limit,
          output_dir,
          ensemble_size=None,
-         seed=1):
+         seed=1,
+         shared_mode=False):
 
     watch = StopWatch()
     watch.start_task('ensemble_builder')
-
-    task_type = STRING_TO_TASK_TYPES[task_type]
 
     used_time = 0
     time_iter = 0
     index_run = 0
     current_num_models = 0
 
-    backend = Backend(output_dir, predictions_dir)
-    dir_ensemble = os.path.join(predictions_dir, '.auto-sklearn',
-                                'predictions_ensemble_%s/' % seed)
-    dir_valid = os.path.join(predictions_dir, '.auto-sklearn',
-                             'predictions_valid_%s/' % seed)
-    dir_test = os.path.join(predictions_dir, '.auto-sklearn',
-                            'predictions_test_%s/' % seed)
+    backend = Backend(output_dir, autosklearn_tmp_dir)
+    dir_ensemble = os.path.join(autosklearn_tmp_dir, '.auto-sklearn',
+                                'predictions_ensemble')
+    dir_valid = os.path.join(autosklearn_tmp_dir, '.auto-sklearn',
+                             'predictions_valid')
+    dir_test = os.path.join(autosklearn_tmp_dir, '.auto-sklearn',
+                            'predictions_test')
     paths_ = [dir_ensemble, dir_valid, dir_test]
 
     targets_ensemble = backend.load_targets_ensemble()
@@ -210,9 +213,23 @@ def main(predictions_dir,
             used_time = watch.wall_elapsed('ensemble_builder')
             continue
 
-        dir_ensemble_list = sorted(os.listdir(dir_ensemble))
-        dir_valid_list = sorted(os.listdir(dir_valid)) if exists[1] else []
-        dir_test_list = sorted(os.listdir(dir_test)) if exists[2] else []
+        if shared_mode is False:
+            dir_ensemble_list = glob.glob(os.path.join(
+                dir_ensemble, 'predictions_ensemble_%s_*.npy' % seed))
+            if exists[1]:
+                dir_valid_list = glob.glob(os.path.join(
+                    dir_ensemble, 'predictions_valid_%s_*.npy' % seed))
+            else:
+                dir_valid_list = []
+            if exists[2]:
+                dir_test_list = glob.glob(os.path.join(
+                    dir_ensemble, 'predictions_test_%s_*.npy' % seed))
+            else:
+                dir_test_list = []
+        else:
+            dir_ensemble_list = sorted(os.listdir(dir_ensemble))
+            dir_valid_list = sorted(os.listdir(dir_valid)) if exists[1] else []
+            dir_test_list = sorted(os.listdir(dir_test)) if exists[2] else []
 
         # Check the modification times because predictions can be updated
         # over time!
@@ -243,7 +260,7 @@ def main(predictions_dir,
         #  later
         include_num_runs = []
         backup_num_runs = []
-        re_num_run = re.compile(r'_([0-9]*)\.npy$')
+        model_and_automl_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy$')
         if ensemble_size is not None:
             # Keeps track of the single scores of each model in our ensemble
             scores_nbest = []
@@ -251,8 +268,6 @@ def main(predictions_dir,
             indices_nbest = []
             # The names of the models
             model_names = []
-            # The num run of the models
-            num_runs = []
 
         model_names_to_scores = dict()
 
@@ -263,7 +278,9 @@ def main(predictions_dir,
                                     task_type, metric,
                                     predictions.shape[1])
             model_names_to_scores[model_name] = score
-            num_run = int(re_num_run.search(model_name).group(1))
+            match = model_and_automl_re.search(model_name)
+            automl_seed = int(match.group(1))
+            num_run = int(match.group(2))
 
             if ensemble_size is not None:
                 if score <= 0.001:
@@ -276,9 +293,8 @@ def main(predictions_dir,
                 elif len(scores_nbest) < ensemble_size:
                     scores_nbest.append(score)
                     indices_nbest.append(model_idx)
-                    include_num_runs.append(num_run)
+                    include_num_runs.append((automl_seed, num_run))
                     model_names.append(model_name)
-                    num_runs.append(num_run)
                 else:
                     # Take the worst performing model in our ensemble so far
                     idx = np.argmin(np.array([scores_nbest]))
@@ -296,11 +312,9 @@ def main(predictions_dir,
                         del include_num_runs[idx]
                         del indices_nbest[idx]
                         indices_nbest.append(model_idx)
-                        include_num_runs.append(num_run)
+                        include_num_runs.append((automl_seed, num_run))
                         del model_names[idx]
                         model_names.append(model_name)
-                        del num_runs[idx]
-                        num_runs.append(num_run)
 
                     # Otherwise exclude the current model from the ensemble
                     else:
@@ -313,9 +327,9 @@ def main(predictions_dir,
                     # include_num_runs.append(True)
                     logger.error('Model only predicts at random: ' +
                                   model_name + ' has score: ' + str(score))
-                    backup_num_runs.append(num_run)
+                    backup_num_runs.append((automl_seed, num_run))
                 else:
-                    include_num_runs.append(num_run)
+                    include_num_runs.append((automl_seed, num_run))
 
             model_idx += 1
 
@@ -327,11 +341,13 @@ def main(predictions_dir,
         indices_to_model_names = dict()
         indices_to_run_num = dict()
         for i, model_name in enumerate(dir_ensemble_list):
-            num_run = int(re_num_run.search(model_name).group(1))
-            if num_run in include_num_runs:
+            match = model_and_automl_re.search(model_name)
+            automl_seed = int(match.group(1))
+            num_run = int(match.group(2))
+            if (automl_seed, num_run) in include_num_runs:
                 num_indices = len(indices_to_model_names)
                 indices_to_model_names[num_indices] = model_name
-                indices_to_run_num[num_indices] = num_run
+                indices_to_run_num[num_indices] = (automl_seed, num_run)
 
         # logging.info("Indices to model names:")
         # logging.info(indices_to_model_names)
@@ -345,15 +361,15 @@ def main(predictions_dir,
         all_predictions_train = get_predictions(dir_ensemble,
                                                 dir_ensemble_list,
                                                 include_num_runs,
-                                                re_num_run)
+                                                model_and_automl_re)
         all_predictions_valid = get_predictions(dir_valid,
                                                 dir_valid_list,
                                                 include_num_runs,
-                                                re_num_run)
+                                                model_and_automl_re)
         all_predictions_test = get_predictions(dir_test,
                                                dir_test_list,
                                                include_num_runs,
-                                               re_num_run)
+                                               model_and_automl_re)
 
         if len(all_predictions_train) == len(all_predictions_test) == len(
                 all_predictions_valid) == 0:
@@ -361,14 +377,6 @@ def main(predictions_dir,
             time.sleep(2)
             continue
 
-        # elif len(all_predictions_train) == 1:
-        #     logger.debug('Only one model so far we just copy its predictions')
-        #     ensemble_members_run_numbers = {0: 1.0}
-        #     indices = np.array([0])
-        #
-        #     # Output the score
-        #     logger.info('Training performance: %f' %
-        #                  np.max(model_names_to_scores.values()))
         else:
             try:
                 indices, trajectory = ensemble_selection(
@@ -444,19 +452,50 @@ def main(predictions_dir,
 
 
 if __name__ == '__main__':
-    seed = int(sys.argv[8])
-    predictions_dir = sys.argv[1]
-    output_dir = sys.argv[6]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--auto-sklearn-tmp-directory', required=True,
+                        help='TMP directory of auto-sklearn. Predictions to '
+                             'build the ensemble will be read from here and '
+                             'the ensemble indices will be saved here.')
+    parser.add_argument('--basename', required=True,
+                        help='Name of the dataset. Used to prefix prediction '
+                             'output files.')
+    parser.add_argument('--task', required=True,
+                        choices=list(STRING_TO_TASK_TYPES.keys()))
+    parser.add_argument('--metric', required=True,
+                        choices=list(STRING_TO_METRIC.keys()))
+    parser.add_argument('--limit', required=True, type=float,
+                        help='Runtime limit given in seconds.')
+    parser.add_argument('--output-directory', required=True,
+                        help='Output directory of auto-sklearn. Ensemble '
+                             'predictions will be written here.')
+    parser.add_argument('--ensemble-size', required=True, type=int)
+    parser.add_argument('--auto-sklearn-seed', required=True, type=int,
+                        help='Only work on the output data of a specific '
+                             'auto-sklearn run, indicated by the seed. If '
+                             'negative, this script will work on the output '
+                             'of all available auto-sklearn runs.')
+    parser.add_argument('--shared-mode', action='store_true',
+                        help='If True, build ensemble with all available '
+                             'models. Otherwise, use only models produced by '
+                             'a SMAC run with the same seed.')
+
+    args = parser.parse_args()
+    seed = args.auto_sklearn_seed
 
     log_file = os.path.join(os.getcwd(), "ensemble.out")
     logger.debug("Start script: %s" % __file__)
 
-    main(predictions_dir=sys.argv[1],
-         basename=sys.argv[2],
-         task_type=sys.argv[3],
-         metric=sys.argv[4],
-         limit=float(sys.argv[5]),
-         output_dir=sys.argv[6],
-         ensemble_size=int(sys.argv[7]),
-         seed=int(sys.argv[8]))
+    task = STRING_TO_TASK_TYPES[args.task]
+    metric = STRING_TO_METRIC[args.metric]
+
+    main(autosklearn_tmp_dir=args.auto_sklearn_tmp_directory,
+         basename=args.basename,
+         task_type=task,
+         metric=metric,
+         limit=args.limit,
+         output_dir=args.output_directory,
+         ensemble_size=args.ensemble_size,
+         seed=args.auto_sklearn_seed,
+         shared_mode=args.shared_mode)
     sys.exit(0)

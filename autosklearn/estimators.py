@@ -81,7 +81,10 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         output_dir will always be deleted
 
     shared_mode: bool, optional (False)
-        run smac in shared-model-node. Then you must set delete_* to True
+        run smac in shared-model-node. This only works if arguments
+        tmp_folder and output_folder are given and sets both
+        delete_tmp_folder_after_terminate and
+        delete_output_folder_after_terminate to False.
 
     """
 
@@ -103,6 +106,18 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
                  delete_output_folder_after_terminate=True,
                  shared_mode=False):
 
+        # Check this before _prepare_create_folders assigns random output
+        # directories
+        if shared_mode:
+            delete_output_folder_after_terminate = False
+            delete_tmp_folder_after_terminate = False
+            if tmp_folder is None:
+                raise ValueError("If shared_mode == True tmp_folder must not "
+                                 "be None.")
+            if output_folder is None:
+                raise ValueError("If shared_mode == True output_folder must "
+                                 "not be None.")
+
         # Call this before calling superconstructor as we feed tmp/output dir
         # to superinit
         self._tmp_dir, self._output_dir = self._prepare_create_folders(
@@ -110,10 +125,6 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             output_dir=output_folder,
             shared_mode=shared_mode
         )
-
-        if shared_mode:
-            delete_output_folder_after_terminate = False
-            delete_tmp_folder_after_terminate = False
 
         self._classes = []
         self._n_classes = []
@@ -142,10 +153,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
 
     @staticmethod
     def _prepare_create_folders(tmp_dir, output_dir, shared_mode):
-        if shared_mode:
-            random_number = 23
-        else:
-            random_number = random.randint(0, 10000)
+        random_number = random.randint(0, 10000)
 
         pid = os.getpid()
         if tmp_dir is None:
@@ -199,6 +207,15 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         # But not if we use share_mode:
         if not self._shared_mode:
             self._delete_output_directories()
+        else:
+            # If this fails, it's likely that this is the first call to get
+            # the data manager
+            try:
+                D = self._backend.load_datamanager()
+                dataset_name = D.name
+            except IOError:
+                pass
+
         self._create_output_directories()
 
         y = np.atleast_1d(y)

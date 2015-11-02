@@ -48,9 +48,7 @@ def populate_argparse_with_data_options(parser):
     parser.add_argument('--task', choices=TASK_TYPES_TO_STRING.values(),
                         help='Task to execute on the dataset. Only necessary '
                              'for data in arff format.')
-    parser.add_argument('--metric', choices=['acc_metric', 'auc_metric',
-                                             'bac_metric', 'f1_metric',
-                                             'pac_metric'],
+    parser.add_argument('--metric', choices=list(STRING_TO_METRIC.keys()),
                         help='Loss function to optimize for. Only necessary '
                              'for data in arff format.')
     parser.add_argument('--target', type=str,

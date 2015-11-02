@@ -37,7 +37,8 @@ def _run_ensemble_builder(tmp_dir,
                           ensemble_size,
                           ensemble_nbest,
                           watcher,
-                          logger):
+                          logger,
+                          shared_mode):
     if ensemble_size > 0:
         task_name = 'runEnsemble'
         watcher.start_task(task_name)
@@ -55,6 +56,7 @@ def _run_ensemble_builder(tmp_dir,
             ensemble_size=ensemble_size,
             ensemble_nbest=ensemble_nbest,
             seed=get_auto_seed(),
+            shared_mode=shared_mode
         )
         watcher.stop_task(task_name)
         return proc_ensembles
@@ -265,6 +267,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         setup_logger(os.path.join(self._tmp_dir, '%s.log' % str(logger_name)))
         self._logger = get_logger(logger_name)
 
+        if isinstance(metric, str):
+            metric = STRING_TO_METRIC[metric]
+
         loaded_data_manager = XYDataManager(X, y,
                                             task=task,
                                             metric=metric,
@@ -325,7 +330,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         he.file_output()
         model_directory = self._backend.get_model_dir()
         if os.path.exists(model_directory):
-            self._backend.save_model(he.model, num_run)
+            self._backend.save_model(he.model, num_run, self._seed)
         del he
 
     def _fit(self, datamanager):
@@ -475,7 +480,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._ensemble_size,
             self._ensemble_nbest,
             self._stopwatch,
-            self._logger
+            self._logger,
+            self._shared_mode
         )
 
         procs = [proc_smac]
@@ -507,12 +513,12 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             self._load_models()
 
         predictions = []
-        for num_run in self.models_:
-            if num_run not in self.ensemble_indices_:
+        for identifier in self.models_:
+            if identifier not in self.ensemble_indices_:
                 continue
 
-            weight = self.ensemble_indices_[num_run]
-            model = self.models_[num_run]
+            weight = self.ensemble_indices_[identifier]
+            model = self.models_[identifier]
 
             X_ = X.copy()
             if self._task in REGRESSION_TASKS:
@@ -533,12 +539,17 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 'Predict is currently only implemented for resampling '
                 'strategy holdout.')
 
-        self.models_ = self._backend.load_all_models()
+        if self._shared_mode:
+            seed = -1
+        else:
+            seed = self._seed
+
+        self.models_ = self._backend.load_all_models(seed)
         if len(self.models_) == 0:
             raise ValueError('No models fitted!')
 
         self.ensemble_indices_ = self._backend.load_ensemble_indices_weights(
-            self._seed)
+            seed)
 
     def score(self, X, y):
         prediction = self.predict(X)

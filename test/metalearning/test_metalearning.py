@@ -34,21 +34,21 @@ class Test(unittest.TestCase):
         dataset_name = 'digits'
 
         initial_challengers = {
-            'acc_metric': "--initial-challengers \" "
-                          "-balancing:strategy 'weighting' "
-                          "-classifier:__choice__ 'proj_logit'",
-            'auc_metric': "--initial-challengers \" "
-                          "-balancing:strategy 'none' "
-                          "-classifier:__choice__ 'random_forest'",
-            'bac_metric': "--initial-challengers \" "
-                          "-balancing:strategy 'weighting' "
-                          "-classifier:__choice__ 'proj_logit'",
-            'f1_metric': "--initial-challengers \" "
-                         "-balancing:strategy 'weighting' "
-                         "-classifier:__choice__ 'proj_logit'",
-            'pac_metric': "--initial-challengers \" "
-                          "-balancing:strategy 'none' "
-                          "-classifier:__choice__ 'random_forest'"
+            ACC_METRIC: "--initial-challengers \" "
+                        "-balancing:strategy 'weighting' "
+                        "-classifier:__choice__ 'proj_logit'",
+            AUC_METRIC: "--initial-challengers \" "
+                        "-balancing:strategy 'none' "
+                        "-classifier:__choice__ 'random_forest'",
+            BAC_METRIC: "--initial-challengers \" "
+                        "-balancing:strategy 'weighting' "
+                        "-classifier:__choice__ 'proj_logit'",
+            F1_METRIC: "--initial-challengers \" "
+                       "-balancing:strategy 'weighting' "
+                       "-classifier:__choice__ 'proj_logit'",
+            PAC_METRIC: "--initial-challengers \" "
+                        "-balancing:strategy 'none' "
+                        "-classifier:__choice__ 'random_forest'"
         }
 
         for metric in initial_challengers:

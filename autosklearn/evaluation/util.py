@@ -4,9 +4,8 @@ import lockfile
 import numpy as np
 
 from autosklearn.constants import *
-from autosklearn.metrics import sanitize_array, a_metric, r2_metric, \
-    normalize_array, bac_metric, auc_metric, f1_metric, pac_metric, \
-    acc_metric, regression_metrics, classification_metrics
+from autosklearn.metrics import sanitize_array, \
+    normalize_array, regression_metrics, classification_metrics
 
 
 __all__ = [
@@ -39,32 +38,28 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
         score = dict()
         if task_type in REGRESSION_TASKS:
             cprediction = sanitize_array(prediction)
-            score['a_metric'] = a_metric(solution, cprediction,
-                                         task=task_type)
-            score['r2_metric'] = r2_metric(solution, cprediction,
-                                           task=task_type)
+            for metric_ in REGRESSION_METRIC:
+                score[metric_] = regression_metrics.calculate_score(metric_,
+                                                                    solution,
+                                                                    cprediction)
         else:
             csolution, cprediction = normalize_array(solution, prediction)
-            score['bac_metric'] = bac_metric(csolution, cprediction,
-                                             task=task_type)
-            score['auc_metric'] = auc_metric(csolution, cprediction,
-                                             task=task_type)
-            score['f1_metric'] = f1_metric(csolution, cprediction,
-                                           task=task_type)
-            score['pac_metric'] = pac_metric(csolution, cprediction,
-                                             task=task_type)
-            score['acc_metric'] = acc_metric(csolution, cprediction,
-                                             task=task_type)
+            for metric_ in CLASSIFICATION_METRICS:
+                score[metric_] = classification_metrics.calculate_score(
+                    metric_, csolution, cprediction, task_type)
 
     else:
         if task_type in REGRESSION_TASKS:
-            scoring_func = getattr(regression_metrics, metric)
             cprediction = sanitize_array(prediction)
-            score = scoring_func(solution, cprediction, task=task_type)
+            score = regression_metrics.calculate_score(metric,
+                                                       solution,
+                                                       cprediction)
         else:
-            scoring_func = getattr(classification_metrics, metric)
             csolution, cprediction = normalize_array(solution, prediction)
-            score = scoring_func(csolution, cprediction, task=task_type)
+            score = classification_metrics.calculate_score(metric,
+                                                           csolution,
+                                                           cprediction,
+                                                           task=task_type)
     return score
 
 

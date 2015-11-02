@@ -10,11 +10,16 @@ import numpy as np
 import scipy as sp
 
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
-    BINARY_CLASSIFICATION
+    BINARY_CLASSIFICATION, METRIC_TO_STRING
 from autosklearn.metrics.common import mv_mean, binarize_predictions, \
     acc_stat, \
     tied_rank
 from autosklearn.metrics.util import log_loss, prior_log_loss
+
+
+def calculate_score(metric, solution, prediction, task):
+    metric = METRIC_TO_STRING[metric]
+    return globals()[metric](solution, prediction, task)
 
 
 def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
