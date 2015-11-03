@@ -53,6 +53,7 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
          '--limit', str(limit - 5),
          '--output-directory', output_dir,
          '--ensemble-size', str(ensemble_size),
+         '--ensemble-nbest', str(ensemble_nbest),
          '--auto-sklearn-seed', str(seed),
          '--max-iterations', str(max_iterations)]
     if shared_mode:

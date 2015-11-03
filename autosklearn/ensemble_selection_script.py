@@ -176,6 +176,7 @@ def main(autosklearn_tmp_dir,
          limit,
          output_dir,
          ensemble_size=None,
+         ensemble_nbest=None,
          seed=1,
          shared_mode=False,
          max_iterations=-1):
@@ -265,7 +266,7 @@ def main(autosklearn_tmp_dir,
         include_num_runs = []
         backup_num_runs = []
         model_and_automl_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy$')
-        if ensemble_size is not None:
+        if ensemble_nbest is not None:
             # Keeps track of the single scores of each model in our ensemble
             scores_nbest = []
             # The indices of the model that are currently in our ensemble
@@ -286,15 +287,15 @@ def main(autosklearn_tmp_dir,
             automl_seed = int(match.group(1))
             num_run = int(match.group(2))
 
-            if ensemble_size is not None:
+            if ensemble_nbest is not None:
                 if score <= 0.001:
                     # include_num_runs.append(True)
                     logger.error('Model only predicts at random: ' +
                                   model_name + ' has score: ' + str(score))
                     backup_num_runs.append(num_run)
-                # If we have less models in our ensemble than ensemble_size add
+                # If we have less models in our ensemble than ensemble_nbest add
                 # the current model if it is better than random
-                elif len(scores_nbest) < ensemble_size:
+                elif len(scores_nbest) < ensemble_nbest:
                     scores_nbest.append(score)
                     indices_nbest.append(model_idx)
                     include_num_runs.append((automl_seed, num_run))
@@ -474,6 +475,7 @@ if __name__ == '__main__':
                         help='Output directory of auto-sklearn. Ensemble '
                              'predictions will be written here.')
     parser.add_argument('--ensemble-size', required=True, type=int)
+    parser.add_argument('--ensemble-nbest', required=True, type=int)
     parser.add_argument('--auto-sklearn-seed', required=True, type=int,
                         help='Only work on the output data of a specific '
                              'auto-sklearn run, indicated by the seed. If '
@@ -503,6 +505,7 @@ if __name__ == '__main__':
          limit=args.limit,
          output_dir=args.output_directory,
          ensemble_size=args.ensemble_size,
+         ensemble_nbest=args.ensemble_nbest,
          seed=args.auto_sklearn_seed,
          shared_mode=args.shared_mode,
          max_iterations=args.max_iterations)
