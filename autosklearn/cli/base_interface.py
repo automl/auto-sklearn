@@ -5,11 +5,9 @@ import os
 import signal
 import time
 
-import lockfile
-import six.moves.cPickle as pickle
-
 from HPOlibConfigSpace import configuration_space
 
+from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.evaluation import CVEvaluator, HoldoutEvaluator, \
     NestedCVEvaluator, TestEvaluator, get_new_run_num
@@ -177,31 +175,37 @@ def main(dataset_info, mode, seed, params, mode_args=None):
     if mode_args is None:
         mode_args = {}
 
+    output_dir = os.getcwd()
+
+    if not isinstance(dataset_info, AbstractDataManager):
+        D = store_and_or_load_data(dataset_info=dataset_info, outputdir=output_dir)
+    else:
+        D = dataset_info
+    metric = D.info['metric']
+
     num_run = None
     if mode != 'test':
         num_run = get_new_run_num()
 
-    for key in params:
-        try:
-            params[key] = int(params[key])
-        except Exception:
+    if params is not None:
+        for key in params:
             try:
-                params[key] = float(params[key])
+                params[key] = int(params[key])
             except Exception:
-                pass
+                try:
+                    params[key] = float(params[key])
+                except Exception:
+                    pass
+
+        cs = get_configuration_space(D.info)
+        configuration = configuration_space.Configuration(cs, params)
+    else:
+        configuration = None
 
     if seed is not None:
         seed = int(float(seed))
     else:
         seed = 1
-
-    output_dir = os.getcwd()
-
-    D = store_and_or_load_data(dataset_info=dataset_info, outputdir=output_dir)
-
-    cs = get_configuration_space(D.info)
-    configuration = configuration_space.Configuration(cs, params)
-    metric = D.info['metric']
 
     global evaluator
 

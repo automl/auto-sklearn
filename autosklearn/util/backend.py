@@ -90,8 +90,13 @@ class Backend(object):
 
         lock_path = filepath + '.lock'
         with lockfile.LockFile(lock_path):
-            if not os.path.exists(filepath):
-                np.save(filepath, targets.astype(np.float32))
+            if os.path.exists(filepath):
+                existing_targets = np.load(filepath)
+                if existing_targets.shape == targets.shape and np.allclose(
+                        existing_targets, targets):
+                    return filepath
+
+            np.save(filepath, targets.astype(np.float32))
 
         return filepath
 
@@ -167,7 +172,7 @@ class Backend(object):
         indices_dir = self.get_ensemble_indices_dir()
 
         if not os.path.exists(indices_dir):
-            print('Directory %s does not exist' % indices_dir)
+            self.logger.warning('Directory %s does not exist' % indices_dir)
             return {}
 
         if seed >= 0:

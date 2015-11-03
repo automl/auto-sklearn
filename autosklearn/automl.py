@@ -14,6 +14,7 @@ from sklearn.base import BaseEstimator
 import six
 
 from autosklearn.constants import *
+import autosklearn.cli.base_interface
 from autosklearn.data.data_manager_factory import get_data_manager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
@@ -284,17 +285,11 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         return time_for_load_data
 
     def _do_dummy_prediction(self, datamanager):
-        num_run = get_new_run_num(self._tmp_dir)
-        he = HoldoutEvaluator(
-            datamanager, None,
-            with_predictions=True, num_run=num_run,
-            output_dir=self._tmp_dir, all_scoring_functions=True)
-        he.fit()
-        he.file_output()
-        model_directory = self._backend.get_model_dir()
-        if os.path.exists(model_directory):
-            self._backend.save_model(he.model, num_run, self._seed)
-        del he
+        autosklearn.cli.base_interface.main(datamanager,
+                                            self._resampling_strategy,
+                                            None,
+                                            None,
+                                            mode_args=self._resampling_strategy_arguments)
 
     def _fit(self, datamanager):
         # Reset learnt stuff
@@ -555,17 +550,18 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                                self._metric, self._label_num)
 
     def show_models(self):
-        if self.models_ is None:
+        if self.models_ is None or len(self.models_) == 0 or len(
+                self.ensemble_indices_) == 0:
             self._load_models()
 
         output = []
         sio = six.StringIO()
-        for num_run in self.models_:
-            if num_run not in self.ensemble_indices_:
+        for identifier in self.models_:
+            if identifier not in self.ensemble_indices_:
                 continue
 
-            weight = self.ensemble_indices_[num_run]
-            model = self.models_[num_run]
+            weight = self.ensemble_indices_[identifier]
+            model = self.models_[identifier]
             output.append((weight, model))
 
         output.sort(reverse=True)

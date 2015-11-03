@@ -30,8 +30,6 @@ class TestEvaluator(AbstractEvaluator):
         self.X_test = Datamanager.data.get('X_test')
         self.Y_test = Datamanager.data.get('Y_test')
 
-        self.model = self.model_class(self.configuration, self.seed)
-
     def fit(self):
         self.model.fit(self.X_train, self.Y_train)
 

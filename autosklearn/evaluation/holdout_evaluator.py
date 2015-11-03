@@ -36,11 +36,9 @@ class HoldoutEvaluator(AbstractEvaluator):
                        datamanager.data['Y_train'],
                        classification=classification)
 
-        self.model = self.model_class(self.configuration, self.seed)
 
     def fit(self):
         self.model.fit(self.X_train, self.Y_train)
-
 
     def iterative_fit(self):
         Xt, fit_params = self.model.pre_transform(self.X_train, self.Y_train)
