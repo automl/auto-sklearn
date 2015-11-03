@@ -216,7 +216,7 @@ class Backend(object):
         # Write prediction scores in prescribed format
         filepath = os.path.join(self.output_directory,
                                 ('%s_' % prefix if prefix else '') +
-                                 '_%s_%s.predict' % (subset, str(idx).zfill(5)))
+                                 '%s_%s.predict' % (subset, str(idx).zfill(5)))
 
         with open(filepath, 'w') as output_file:
             for row in predictions:
