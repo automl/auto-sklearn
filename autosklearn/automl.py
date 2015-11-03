@@ -505,6 +505,15 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             return None
 
     def predict(self, X):
+        if self._keep_models is not True:
+            raise ValueError(
+                "Predict can only be called if 'keep_models==True'")
+        if self._resampling_strategy not in  ['holdout',
+                                              'holdout-iterative-fit']:
+            raise NotImplementedError(
+                'Predict is currently only implemented for resampling '
+                'strategy holdout.')
+
         if self.models_ is None or len(self.models_) == 0 or len(
                 self.ensemble_indices_) == 0:
             self._load_models()
@@ -528,14 +537,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         return predictions
 
     def _load_models(self):
-        if self._keep_models is not True:
-            raise ValueError(
-                "Predict can only be called if 'keep_models==True'")
-        if self._resampling_strategy != 'holdout':
-            raise NotImplementedError(
-                'Predict is currently only implemented for resampling '
-                'strategy holdout.')
-
         if self._shared_mode:
             seed = -1
         else:
