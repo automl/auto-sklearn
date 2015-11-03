@@ -203,7 +203,6 @@ def main(autosklearn_tmp_dir,
 
     dir_ensemble_list_mtimes = []
 
-    logger.info('%f %f %f %f', used_time, limit, max_iterations, num_iteration)
     while used_time < limit or (max_iterations > 0 and max_iterations >= num_iteration):
         num_iteration += 1
         logger.debug('Time left: %f', limit - used_time)
@@ -223,12 +222,12 @@ def main(autosklearn_tmp_dir,
                 dir_ensemble, 'predictions_ensemble_%s_*.npy' % seed))
             if exists[1]:
                 dir_valid_list = glob.glob(os.path.join(
-                    dir_ensemble, 'predictions_valid_%s_*.npy' % seed))
+                    dir_valid, 'predictions_valid_%s_*.npy' % seed))
             else:
                 dir_valid_list = []
             if exists[2]:
                 dir_test_list = glob.glob(os.path.join(
-                    dir_ensemble, 'predictions_test_%s_*.npy' % seed))
+                    dir_test, 'predictions_test_%s_*.npy' % seed))
             else:
                 dir_test_list = []
         else:
@@ -435,8 +434,9 @@ def main(autosklearn_tmp_dir,
             backend.save_predictions_as_txt(ensemble_predictions_valid,
                                             'valid', index_run, prefix=basename)
         else:
-            logger.info('Could not find as many validation set predictions '
-                         'as ensemble predictions!.')
+            logger.info('Could not find as many validation set predictions (%d)'
+                         'as ensemble predictions (%d)!.',
+                        len(dir_valid_list), len(dir_ensemble_list))
 
         if len(dir_test_list) == len(dir_ensemble_list):
             all_predictions_test = np.array(all_predictions_test)
@@ -445,8 +445,9 @@ def main(autosklearn_tmp_dir,
             backend.save_predictions_as_txt(ensemble_predictions_test,
                                             'test', index_run, prefix=basename)
         else:
-            logger.info('Could not find as many test set predictions as '
-                         'ensemble predictions!')
+            logger.info('Could not find as many test set predictions (%d) as '
+                         'ensemble predictions (%d)!',
+                        len(dir_test_list), len(dir_ensemble_list))
 
         current_num_models = len(dir_ensemble_list)
         watch.stop_task('ensemble_iter_' + str(index_run))
