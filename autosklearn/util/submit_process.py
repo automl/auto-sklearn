@@ -30,10 +30,12 @@ def submit_call(call, seed, logger, log_dir=None):
 
 def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
                          output_dir, ensemble_size, ensemble_nbest, seed,
-                         shared_mode):
+                         shared_mode, max_iterations):
     logger = logging.get_logger(__name__)
 
-    if limit <= 0:
+    if limit <= 0 and (max_iterations is None or max_iterations <= 0):
+        logger.warning("Not starting ensemble builder because it's not worth "
+                       "it.")
         # It makes no sense to start building ensembles_statistics
         return
     ensemble_script = 'python -m autosklearn.ensemble_selection_script'
@@ -51,7 +53,8 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
          '--limit', str(limit - 5),
          '--output-directory', output_dir,
          '--ensemble-size', str(ensemble_size),
-         '--auto-sklearn-seed', str(seed)]
+         '--auto-sklearn-seed', str(seed),
+         '--max-iterations', str(max_iterations)]
     if shared_mode:
         call.append('--shared-mode')
 
@@ -59,7 +62,10 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
 
     # Runsolver does strange things if the time limit is negative. Set it to
     # be at least one (0 means infinity)
-    limit = max(1, limit)
+    if limit <= 0:
+        limit = 0
+    else:
+        limit = max(1, limit)
 
     # Now add runsolver command
     # runsolver_cmd = "%s --watcher-data /dev/null -W %d" % \

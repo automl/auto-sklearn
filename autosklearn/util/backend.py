@@ -1,3 +1,4 @@
+from __future__ import print_function
 import glob
 import os
 import time
@@ -164,6 +165,10 @@ class Backend(object):
 
     def load_ensemble_indices_weights(self, seed):
         indices_dir = self.get_ensemble_indices_dir()
+
+        if not os.path.exists(indices_dir):
+            print('Directory %s does not exist' % indices_dir)
+            return {}
 
         if seed >= 0:
             indices_files = glob.glob(os.path.join(indices_dir,

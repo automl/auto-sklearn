@@ -29,6 +29,10 @@ def run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
 
     # = Start SMAC
     time_smac = max(0, time_for_task - watcher.wall_elapsed(basename))
+    if time_smac <= 0:
+        logger.info('No time left for SMAC')
+        return
+
     logger.info('Start SMAC with %5.2fsec time left' % time_smac)
 
     initial_challengers = initial_configurations

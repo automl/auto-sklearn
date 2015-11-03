@@ -28,43 +28,6 @@ from autosklearn.util import StopWatch, get_logger, setup_logger, \
 from autosklearn.util.smac import run_smac
 
 
-def _run_ensemble_builder(tmp_dir,
-                          output_dir,
-                          basename,
-                          time_for_task,
-                          task,
-                          metric,
-                          ensemble_size,
-                          ensemble_nbest,
-                          watcher,
-                          logger,
-                          shared_mode):
-    if ensemble_size > 0:
-        task_name = 'runEnsemble'
-        watcher.start_task(task_name)
-        time_left_for_ensembles = max(0, time_for_task - watcher.wall_elapsed(
-            basename))
-        logger.info(
-            'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
-        proc_ensembles = submit_process.run_ensemble_builder(
-            tmp_dir=tmp_dir,
-            dataset_name=basename,
-            task_type=task,
-            metric=metric,
-            limit=time_left_for_ensembles,
-            output_dir=output_dir,
-            ensemble_size=ensemble_size,
-            ensemble_nbest=ensemble_nbest,
-            seed=get_auto_seed(),
-            shared_mode=shared_mode
-        )
-        watcher.stop_task(task_name)
-        return proc_ensembles
-    else:
-        logger.info('Not starting ensemble script due to ensemble size 0.')
-        return None
-
-
 def _calculate_metafeatures(data_feat_type, data_info_task, basename,
                             metalearning_cnt, x_train, y_train, watcher,
                             logger):
@@ -213,7 +176,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         self._datamanager = None
         self._dataset_name = None
-        self._stopwatch = None
+        self._stopwatch = StopWatch()
         self._logger = None
         self._task = None
         self._metric = None
@@ -470,21 +433,12 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                              shared_mode=self._shared_mode)
 
         # == RUN ensemble builder
-        proc_ensembles = _run_ensemble_builder(
-            self._tmp_dir,
-            self._output_dir,
-            self._dataset_name,
-            self._time_for_task,
-            self._task,
-            self._metric,
-            self._ensemble_size,
-            self._ensemble_nbest,
-            self._stopwatch,
-            self._logger,
-            self._shared_mode
-        )
+        proc_ensembles = self.run_ensemble_builder()
 
-        procs = [proc_smac]
+        procs = []
+
+        if proc_smac is not None:
+            procs.append(proc_smac)
         if proc_ensembles is not None:
             procs.append(proc_ensembles)
 
@@ -508,8 +462,51 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         return self
 
+    def run_ensemble_builder(self,
+                             time_left_for_ensembles=None,
+                             max_iterations=None,
+                             ensemble_size=None):
+        if self._ensemble_size > 0 or ensemble_size is not None:
+            task_name = 'runEnsemble'
+            self._stopwatch.start_task(task_name)
+
+            if time_left_for_ensembles is None:
+                time_left_for_ensembles = max(0,
+                    self._time_for_task - self._stopwatch.wall_elapsed(
+                        self._dataset_name))
+            if max_iterations is None:
+                max_iterations = -1
+            if ensemble_size is None:
+                ensemble_size = self._ensemble_size
+
+            # It can happen that run_ensemble_builder is called without
+            # calling fit.
+            if self._logger:
+                self._logger.info(
+                    'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
+            proc_ensembles = submit_process.run_ensemble_builder(
+                tmp_dir=self._tmp_dir,
+                dataset_name=self._dataset_name,
+                task_type=self._task,
+                metric=self._metric,
+                limit=time_left_for_ensembles,
+                output_dir=self._output_dir,
+                ensemble_size=ensemble_size,
+                ensemble_nbest=self._ensemble_nbest,
+                seed=self._seed,
+                shared_mode=self._shared_mode,
+                max_iterations=max_iterations
+            )
+            self._stopwatch.stop_task(task_name)
+            return proc_ensembles
+        else:
+            self._logger.info('Not starting ensemble script due to ensemble '
+                             'size 0.')
+            return None
+
     def predict(self, X):
-        if self.models_ is None:
+        if self.models_ is None or len(self.models_) == 0 or len(
+                self.ensemble_indices_) == 0:
             self._load_models()
 
         predictions = []

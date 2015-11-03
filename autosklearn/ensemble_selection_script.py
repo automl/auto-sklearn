@@ -177,7 +177,8 @@ def main(autosklearn_tmp_dir,
          output_dir,
          ensemble_size=None,
          seed=1,
-         shared_mode=False):
+         shared_mode=False,
+         max_iterations=-1):
 
     watch = StopWatch()
     watch.start_task('ensemble_builder')
@@ -185,6 +186,7 @@ def main(autosklearn_tmp_dir,
     used_time = 0
     time_iter = 0
     index_run = 0
+    num_iteration = 0
     current_num_models = 0
 
     backend = Backend(output_dir, autosklearn_tmp_dir)
@@ -200,7 +202,9 @@ def main(autosklearn_tmp_dir,
 
     dir_ensemble_list_mtimes = []
 
-    while used_time < limit:
+    logger.info('%f %f %f %f', used_time, limit, max_iterations, num_iteration)
+    while used_time < limit or (max_iterations > 0 and max_iterations >= num_iteration):
+        num_iteration += 1
         logger.debug('Time left: %f', limit - used_time)
         logger.debug('Time last iteration: %f', time_iter)
 
@@ -475,6 +479,9 @@ if __name__ == '__main__':
                              'auto-sklearn run, indicated by the seed. If '
                              'negative, this script will work on the output '
                              'of all available auto-sklearn runs.')
+    parser.add_argument('--max-iterations', type=int, default=-1,
+                        help='Maximum number of iterations. If -1, run until '
+                             'time is up.')
     parser.add_argument('--shared-mode', action='store_true',
                         help='If True, build ensemble with all available '
                              'models. Otherwise, use only models produced by '
@@ -497,5 +504,6 @@ if __name__ == '__main__':
          output_dir=args.output_directory,
          ensemble_size=args.ensemble_size,
          seed=args.auto_sklearn_seed,
-         shared_mode=args.shared_mode)
+         shared_mode=args.shared_mode,
+         max_iterations=args.max_iterations)
     sys.exit(0)

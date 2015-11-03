@@ -65,7 +65,8 @@ class EstimatorTest(Base):
                                                    tmp_folder=output,
                                                    shared_mode=True,
                                                    seed=1,
-                                                   initial_configurations_via_metalearning=0)
+                                                   initial_configurations_via_metalearning=0,
+                                                   ensemble_size=0)
         automl.fit(X_train, Y_train)
 
         # Create a 'dummy model' for the first run, which has an accuracy of
@@ -98,13 +99,16 @@ class EstimatorTest(Base):
                                                    tmp_folder=output,
                                                    shared_mode=True,
                                                    seed=2,
-                                                   initial_configurations_via_metalearning=0)
+                                                   initial_configurations_via_metalearning=0,
+                                                   ensemble_size=0)
         automl.fit(X_train, Y_train)
+        automl.run_ensemble_builder(0, 1, 50).wait()
 
         score = automl.score(X_test, Y_test)
 
-        print(automl.show_models())
-        self.assertGreaterEqual(score, 0.8)
+        self.assertEqual(len(os.listdir(os.path.join(output, '.auto-sklearn',
+                                                     'ensemble_indices'))), 1)
+        self.assertGreaterEqual(score, 0.95)
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
