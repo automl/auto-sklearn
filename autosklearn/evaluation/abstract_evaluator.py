@@ -10,7 +10,6 @@ import lockfile
 from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.regression import ParamSklearnRegressor
 from sklearn.dummy import DummyClassifier, DummyRegressor
-import six.moves.cPickle as pickle
 
 from autosklearn.constants import *
 from autosklearn.evaluation.util import get_new_run_num
@@ -154,7 +153,9 @@ class AbstractEvaluator(object):
 
         self.duration = time.time() - self.starttime
         err = errs[self.D.info['metric']]
-        additional_run_info = ';'.join(['%s: %s' % (metric, value)
+        additional_run_info = ';'.join(['%s: %s' %
+            (METRIC_TO_STRING[metric] if metric in METRIC_TO_STRING else metric,
+                                                                     value)
                                         for metric, value in errs.items()])
         additional_run_info += ';' + 'duration: ' + str(self.duration)
         additional_run_info += ';' + 'num_run:' + num_run
