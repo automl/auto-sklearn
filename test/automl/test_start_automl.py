@@ -1,63 +1,93 @@
-import cPickle
+# -*- encoding: utf-8 -*-
+from __future__ import print_function
+
 import multiprocessing
 import os
-import shutil
-import unittest
+import time
 
 import mock
 import numpy as np
-
-import ParamSklearn.util as putil
+import six
 
 import autosklearn.automl
+from autosklearn.util import Backend
+import ParamSklearn.util as putil
 from autosklearn.constants import *
+from autosklearn.cli.base_interface import store_and_or_load_data
 
+from base import Base
 
-class AutoMLTest(unittest.TestCase):
-    def setUp(self):
-        self.test_dir = os.path.dirname(__file__)
-        self.output = os.path.join(self.test_dir, "..", ".tmp")
-        try:
-            shutil.rmtree(self.output)
-        except:
-            pass
-        os.makedirs(self.output)
-
-    def tearDown(self):
-        try:
-            shutil.rmtree(self.output)
-        except Exception as e:
-            print e
-        pass
+class AutoMLTest(Base):
+    _multiprocess_can_split_ = True
 
     def test_fit(self):
-        X_train, Y_train, X_test, Y_test = putil.get_dataset("iris")
-        automl = autosklearn.automl.AutoML(self.output, self.output,
-                                           10, 10)
+        output = os.path.join(self.test_dir, '..', '.tmp_test_fit')
+        self._setUp(output)
+
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        automl = autosklearn.automl.AutoML(output, output, 12, 12)
         automl.fit(X_train, Y_train)
         score = automl.score(X_test, Y_test)
-        self.assertGreaterEqual(score, 0.9)
-        self.assertEqual(automl.task_, MULTICLASS_CLASSIFICATION)
+        self.assertGreaterEqual(score, 0.8)
+        self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
-    def test_dataset_manager_pickling(self):
-        data_dir = os.path.join(self.test_dir, "..", ".data")
-        dataset = "401_bac"
-        data_manager_file = os.path.join(self.output, "%s_Manager.pkl" %
-                                         dataset)
+        del automl
+        self._tearDown(output)
+
+    def test_automl_outputs(self):
+        output = os.path.join(self.test_dir, '..',
+                              '.tmp_test_automl_outputs')
+        self._setUp(output)
+
+        name = '31_bac'
+        dataset = os.path.join(self.test_dir, '..', '.data', name)
+        data_manager_file = os.path.join(output, '.auto-sklearn',
+                                         'datamanager.pkl')
 
         queue = multiprocessing.Queue()
-        auto = autosklearn.automl.AutoML(self.output, self.output, 10, 10,
-                                         initial_configurations_via_metalearning=25,
-                                         queue=queue)
-        auto.fit_automl_dataset(dataset, data_dir)
+        auto = autosklearn.automl.AutoML(
+            output, output, 10, 10,
+            initial_configurations_via_metalearning=25,
+            queue=queue,
+            seed=100)
+        auto.fit_automl_dataset(dataset)
+
+        # pickled data manager (without one hot encoding!)
         with open(data_manager_file) as fh:
-            D = cPickle.load(fh)
-            self.assertTrue(np.allclose(D.data['X_train'].data[:3], [1., 1., 2.]))
+            D = six.moves.cPickle.load(fh)
+            self.assertTrue(np.allclose(D.data['X_train'][0, :3],
+                                        [1., 12., 2.]))
 
-        time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles = \
+        time_needed_to_load_data, data_manager_file, procs = \
             queue.get()
-        proc_smac.wait()
-        proc_ensembles.wait()
+        for proc in procs:
+            proc.wait()
 
+        # Start time
+        print(os.listdir(os.path.join(output, '.auto-sklearn')))
+        start_time_file_path = os.path.join(output, '.auto-sklearn',
+                                            "start_time_100")
+        with open(start_time_file_path, 'r') as fh:
+            start_time = float(fh.read())
+        self.assertGreaterEqual(time.time() - start_time, 10)
 
+        del auto
+        self._tearDown(output)
 
+    def test_do_dummy_prediction(self):
+        output = os.path.join(self.test_dir, '..',
+                              '.tmp_test_do_dummy_prediction')
+        self._setUp(output)
+
+        name = '401_bac'
+        dataset = os.path.join(self.test_dir, '..', '.data', name)
+
+        auto = autosklearn.automl.AutoML(
+            output, output, 10, 10,
+            initial_configurations_via_metalearning=25)
+        auto._backend._make_internals_directory()
+        D = store_and_or_load_data(dataset, output)
+        auto._do_dummy_prediction(D)
+
+        del auto
+        self._tearDown(output)

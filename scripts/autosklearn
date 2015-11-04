@@ -1,28 +1,118 @@
 #! /usr/bin/env python
+# -*- encoding: utf-8 -*-
 from collections import deque
 import logging
 import random
 from multiprocessing import Queue
 import os
-import pkg_resources
 import signal
 import shutil
 import time
 
+from configargparse import ArgParser
+import pkg_resources
 import psutil
 
-
 import autosklearn.automl
-import autosklearn.util.check_pid
-from autosklearn.util import logging_
-from autosklearn.util import options
+from autosklearn.data.data_manager_factory import \
+    populate_argparse_with_data_options
+from autosklearn.util.smac import populate_argparse_with_resampling_arguments, \
+    namespace_to_automl_format
 
 
-if __name__ == "__main__":
-    raise NotImplementedError("This does not work at the moment. Please wait "
-                              "until the refactoring is done!")
-    logging_.setup()
-    parser = options.get_options()
+def get_options():
+    parser = ArgParser()
+    parser.add_argument('-c', '--config',
+                        help='Path to a configuration file.',
+                        is_config_file=True)
+
+    # Arguments concerning the file output
+    parser.add_argument('--output-dir',
+                        type=str,
+                        default=None,
+                        help='AutoSklearn output directory. If not specified, '
+                             'a new directory under /tmp/ will be generated.')
+    parser.add_argument('--temporary-output-directory',
+                        type=str,
+                        help='Temporary output directory. If not specified, '
+                             'a new directory under /tmp/ will be generated.',
+                        default=None)
+    parser.add_argument('--keep-output',
+                        action='store_true',
+                        default=False,
+                        help='If output_dir and temporary_output_dir are not '
+                             'specified, setting this to False will make '
+                             'autosklearn not delete these two directories.')
+
+    # Arguments concerning the configuration procedure
+    parser.add_argument('--time-limit',
+                        type=int,
+                        default=3600,
+                        help='Total runtime of the AutoSklearn package in '
+                             'seconds.')
+    parser.add_argument('--per-run-time-limit',
+                        type=int,
+                        default=360,
+                        help='Runtime for a single call of a target algorithm.')
+    parser.add_argument('--ml-memory-limit',
+                        type=int,
+                        default=3000,
+                        help='Memory limit for the machine learning pipeline '
+                             'being optimized')
+
+    # Arguments concerning the metalearning part
+    parser.add_argument('--metalearning-configurations',
+                        type=int,
+                        default=25,
+                        help='Number of configurations which will be used as '
+                             'initial challengers for SMAC.')
+
+    # Arguments concerning the algorithm selection part
+    parser.add_argument('--ensemble-size',
+                        type=int,
+                        default=1,
+                        help='Maximum number of models in the ensemble. Set '
+                             'this to one in order to evaluate the single '
+                             'best.')
+    parser.add_argument('--ensemble-nbest',
+                        type=int,
+                        default=1,
+                        help='Consider only the best n models in the ensemble '
+                             'building process.')
+
+    # Arguments concerning ParamSklearn
+    parser.add_argument('--include-estimators',
+                        nargs='*',
+                        default=None,
+                        type=str,
+                        help='Only use these estimators inside auto-sklearn')
+    parser.add_argument('--include-preprocessors',
+                        nargs='*',
+                        default=None,
+                        type=str,
+                        help='Only use these preprocessors inside auto-sklearn')
+
+    # Other
+    parser.add_argument('-s', '--seed',
+                        type=int,
+                        default=1,
+                        help='Seed for random number generators.')
+    parser.add_argument('--exec-dir', type=str, help='Execution directory.')
+    parser.add_argument(
+        '--metadata-directory',
+        help='DO NOT CHANGE THIS UNLESS YOU KNOW WHAT YOU ARE DOING.'
+             '\nReads the metadata from a different directory. '
+             'This feature should only be used to perform studies '
+             'on the performance of AutoSklearn.')
+
+    parser = populate_argparse_with_data_options(parser)
+    parser = populate_argparse_with_resampling_arguments(parser)
+
+    return parser
+
+
+if __name__ == '__main__':
+    parser = get_options()
     args = parser.parse_args()
 
     time_limit = args.time_limit
@@ -42,35 +132,25 @@ if __name__ == "__main__":
     remove_tmp_dir = False
 
     if output_dir is None:
-        output_dir = "/tmp/autosklearn_output_%d_%d" % (pid, random_number)
+        output_dir = '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
         os.makedirs(output_dir)
         remove_output_dir = not args.keep_output
     else:
         if not os.path.isdir(output_dir):
-            raise ValueError("If output_dir is specified, it must exist: %s"
+            raise ValueError('If output_dir is specified, it must exist: %s'
                              % output_dir)
         output_dir = os.path.join(output_dir, str(args.seed))
         os.mkdir(output_dir)
 
     if tmp_dataset_dir is None:
-        tmp_dataset_dir = "/tmp/autosklearn_tmp_%d_%d" % (pid, random_number)
+        tmp_dataset_dir = '/tmp/autosklearn_tmp_%d_%d' % (pid, random_number)
         os.makedirs(tmp_dataset_dir)
         remove_tmp_dir = not args.keep_output
     else:
         if not os.path.isdir(tmp_dataset_dir):
-            raise ValueError("If tmp_dataset_dir is specified, it must exist: %s"
+            raise ValueError('If tmp_dataset_dir is specified, it must exist: %s'
                              % tmp_dataset_dir)
         tmp_dataset_dir = os.path.join(tmp_dataset_dir)
-
-    logger = logging_.get_logger("autosklearn_%d" % args.seed,
-                                 outputdir=tmp_dataset_dir)
-    meta_base_logger = logging.getLogger(
-        "pyMetaLearn.metalearning.meta_base")
-    meta_base_logger.setLevel(logging.DEBUG)
-    metalearn_logger = logging.getLogger(
-        "pyMetaLearn.optimizers.metalearn_optimizer.metalearner")
-    metalearn_logger.setLevel(logging.DEBUG)
-
 
     BUFFER = 35  # time-left - BUFFER = timelimit for SMAC/ensemble_script.py
     BUFFER_BEFORE_SENDING_SIGTERM = 30  # We send SIGTERM to all processes
@@ -78,35 +158,61 @@ if __name__ == "__main__":
 
     # Manipulate $PATH so that SMAC and the runsolver are in it.
     smac = pkg_resources.resource_filename(
-        "autosklearn",
-        "binaries/smac-v2.08.01-development-1/smac-v2.08.01-development-1/")
+        'autosklearn',
+        'binaries/smac-v2.08.01-development-1/smac-v2.08.01-development-1/')
     runsolver = pkg_resources.resource_filename(
-        "autosklearn",
-        "binaries/"
+        'autosklearn',
+        'binaries/'
     )
-    os.environ["PATH"] = smac + os.pathsep + runsolver + os.pathsep + \
-                         os.environ["PATH"]
+    os.environ['PATH'] = smac + os.pathsep + runsolver + os.pathsep + \
+        os.environ['PATH']
+
+    resampling_strategy, resampling_strategy_arguments = \
+        namespace_to_automl_format(args)
 
     time_spent_so_far = time.time() - start_time
     time_left_for_smac = time_limit - time_spent_so_far
     queue = Queue()
     automl = autosklearn.automl.AutoML(
-        args.dataset_name, args.data_dir, tmp_dataset_dir,
-        output_dir, time_left_for_smac, args.per_run_time_limit,
-        log_dir=tmp_dataset_dir, ensemble_size=args.ensemble_size,
+        tmp_dataset_dir,
+        output_dir,
+        time_left_for_smac,
+        args.per_run_time_limit,
+        log_dir=tmp_dataset_dir,
+        ensemble_size=args.ensemble_size,
         ensemble_nbest=args.ensemble_nbest,
-        initial_configurations_via_metalearning=args
-        .metalearning_configurations, seed=args.seed,
+        initial_configurations_via_metalearning=args.metalearning_configurations,
+        seed=args.seed,
         ml_memory_limit=args.ml_memory_limit,
         metadata_directory=args.metadata_directory,
-        queue=queue)
-    automl.start_automl()
+        queue=queue,
+        keep_models=False,
+        debug_mode=False,
+        include_estimators=args.include_estimators,
+        include_preprocessors=args.include_preprocessors,
+        resampling_strategy=resampling_strategy,
+        resampling_strategy_arguments=resampling_strategy_arguments)
+    automl.start_automl(args)
 
-    [time_needed_to_load_data, data_manager_file, proc_smac, proc_ensembles] \
-        = queue.get()
+    while time.time() - start_time <= time_limit - \
+            BUFFER_BEFORE_SENDING_SIGTERM:
+
+        if automl.exitcode is not None and automl.exitcode != 0:
+            break
+
+        try:
+            [time_needed_to_load_data, data_manager_file, procs] \
+                = queue.get_nowait()
+            break
+        except:
+            time.sleep(1)
 
     # == And now we wait till we run out of time
-    while time.time() - start_time <= time_limit - BUFFER_BEFORE_SENDING_SIGTERM:
+    while time.time() - start_time <= time_limit - \
+            BUFFER_BEFORE_SENDING_SIGTERM:
+        if automl.exitcode is not None and automl.exitcode != 0:
+            break
+
         time.sleep(1)
 
     # Kill all children, grand-children and so on
@@ -114,6 +220,17 @@ if __name__ == "__main__":
     # All children which must be killed
     children = deque()
     children.extendleft(process.children(recursive=True))
+
+    try:
+        for proc in procs:
+            try:
+                process = psutil.Process(proc.pid)
+                children.appendleft(process)
+                children.extendleft(process.children(recursive=True))
+            except Exception as e:
+                print e
+    except NameError:
+        pass
 
     for delay, sig in \
             [(0, signal.SIGINT),
@@ -129,7 +246,7 @@ if __name__ == "__main__":
                 continue
 
             try:
-                grandchildren = process.children(recursive=True)
+                grandchildren = child.children(recursive=True)
                 for grandchild in grandchildren:
                     if grandchild in visited:
                         continue
@@ -151,9 +268,18 @@ if __name__ == "__main__":
         #  them all.
         children.extendleft(visited)
 
-        while time.time() - start_time <= time_limit - \
-                (BUFFER_BEFORE_SENDING_SIGTERM - delay):
+        while time.time() - start_time <= time_limit - delay:
+            if automl.exitcode is not None and automl.exitcode != 0:
+                break
+
             time.sleep(1)
+
+    # Don't do this before killing children, because otherwise psutil cannot
+    # find them any more
+    try:
+        automl.terminate()
+    except Exception:
+        pass
 
     if remove_output_dir is True:
         shutil.rmtree(output_dir)

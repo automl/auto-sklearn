@@ -1,14 +1,18 @@
+# -*- encoding: utf-8 -*-
 import os
 import random
 import shutil
 
 import numpy as np
+from os import stat
+import six
 
 import autosklearn.automl
 from autosklearn.constants import *
 
 
 class AutoSklearnClassifier(autosklearn.automl.AutoML):
+
     """This class implements the classification task. It must not be pickled!
 
     Parameters
@@ -33,40 +37,153 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         Memory limit for the machine learning algorithm. If the machine
         learning algorithm allocates tries to allocate more memory,
         its evaluation will be stopped.
+
+    include_estimators : dict, optional (None)
+        If None all possible estimators are used. Otherwise specifies set of
+        estimators to use
+
+    include_preprocessors : dict, optional (None)
+        If None all possible preprocessors are used. Otherwise specifies set of
+        preprocessors to use
+
+    resampling_strategy : string, optional ('holdout')
+        how to to handle overfitting, might need 'resampling_strategy_arguments'
+        * 'holdout': 66:33 (train:test) split
+        * 'holdout-iterative-fit':  66:33 (train:test) split, calls iterative
+          fit where possible
+        * 'cv': crossvalidation, requires 'folds'
+        * 'nested-cv': crossvalidation, requires 'outer-folds, 'inner-folds'
+        * 'partial-cv': crossvalidation, requires 'folds' , calls
+          iterative fit where possible
+
+    resampling_strategy_arguments : dict, (optional if 'holdout') None
+        Additional arguments for resampling_strategy
+        * 'holdout': None
+        * 'holdout-iterative-fit':  None
+        * 'cv': {'folds': int}
+        * 'nested-cv': {'outer_folds': int, 'inner_folds'
+        * 'partial-cv': {'folds': int}
+
+    tmp_folder : string, optional (None)
+        folder to store configuration output, if None automatically use
+        /tmp/autosklearn_tmp_$pid_$random_number
+
+    output_folder : string, optional (None)
+        folder to store trained models, if None automatically use
+        /tmp/autosklearn_output_$pid_$random_number
+
+    delete_tmp_folder_after_terminate: string, optional (True)
+        remove tmp_folder, when finished. If tmp_folder is None
+        tmp_dir will always be deleted
+
+    delete_output_folder_after_terminate: bool, optional (True)
+        remove output_folder, when finished. If output_folder is None
+        output_dir will always be deleted
+
+    shared_mode: bool, optional (False)
+        run smac in shared-model-node. This only works if arguments
+        tmp_folder and output_folder are given and sets both
+        delete_tmp_folder_after_terminate and
+        delete_output_folder_after_terminate to False.
+
     """
 
-    def __init__(self, time_left_for_this_task=3600,
+    def __init__(self,
+                 time_left_for_this_task=3600,
                  per_run_time_limit=360,
                  initial_configurations_via_metalearning=25,
-                 ensemble_size=50, ensemble_nbest=50, seed=1,
-                 ml_memory_limit=3000):
+                 ensemble_size=50,
+                 ensemble_nbest=50,
+                 seed=1,
+                 ml_memory_limit=3000,
+                 include_estimators=None,
+                 include_preprocessors=None,
+                 resampling_strategy='holdout',
+                 resampling_strategy_arguments=None,
+                 tmp_folder=None,
+                 output_folder=None,
+                 delete_tmp_folder_after_terminate=True,
+                 delete_output_folder_after_terminate=True,
+                 shared_mode=False):
+
+        # Check this before _prepare_create_folders assigns random output
+        # directories
+        if shared_mode:
+            delete_output_folder_after_terminate = False
+            delete_tmp_folder_after_terminate = False
+            if tmp_folder is None:
+                raise ValueError("If shared_mode == True tmp_folder must not "
+                                 "be None.")
+            if output_folder is None:
+                raise ValueError("If shared_mode == True output_folder must "
+                                 "not be None.")
+
+        # Call this before calling superconstructor as we feed tmp/output dir
+        # to superinit
+        self._tmp_dir, self._output_dir = self._prepare_create_folders(
+            tmp_dir=tmp_folder,
+            output_dir=output_folder,
+            shared_mode=shared_mode
+        )
+
+        self._classes = []
+        self._n_classes = []
+        self._n_outputs = []
+
+        super(AutoSklearnClassifier, self).__init__(
+            time_left_for_this_task=time_left_for_this_task,
+            per_run_time_limit=per_run_time_limit,
+            log_dir=self._tmp_dir,
+            initial_configurations_via_metalearning=
+            initial_configurations_via_metalearning,
+            ensemble_size=ensemble_size,
+            ensemble_nbest=ensemble_nbest,
+            seed=seed,
+            ml_memory_limit=ml_memory_limit,
+            include_estimators=include_estimators,
+            include_preprocessors=include_preprocessors,
+            resampling_strategy=resampling_strategy,
+            tmp_dir=self._tmp_dir,
+            output_dir=self._output_dir,
+            resampling_strategy_arguments=resampling_strategy_arguments,
+            delete_tmp_folder_after_terminate=delete_tmp_folder_after_terminate,
+            delete_output_folder_after_terminate=
+            delete_output_folder_after_terminate,
+            shared_mode=shared_mode)
+
+    @staticmethod
+    def _prepare_create_folders(tmp_dir, output_dir, shared_mode):
         random_number = random.randint(0, 10000)
 
         pid = os.getpid()
-        output_dir = "/tmp/autosklearn_output_%d_%d" % (pid, random_number)
-        tmp_dir = "/tmp/autosklearn_tmp_%d_%d" % (pid, random_number)
-        os.makedirs(output_dir)
-        os.makedirs(tmp_dir)
+        if tmp_dir is None:
+            tmp_dir = '/tmp/autosklearn_tmp_%d_%d' % (pid, random_number)
+        if output_dir is None:
+            output_dir = '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
 
-        super(AutoSklearnClassifier, self).__init__(
-            tmp_dir, output_dir, time_left_for_this_task, per_run_time_limit,
-            log_dir=tmp_dir,
-            initial_configurations_via_metalearning=initial_configurations_via_metalearning,
-            ensemble_size=ensemble_size, ensemble_nbest=ensemble_nbest,
-            seed=seed, ml_memory_limit=ml_memory_limit)
+        if not os.path.exists(tmp_dir):
+            os.makedirs(tmp_dir)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
-    def __del__(self):
-        self._delete_output_directories()
+        return tmp_dir, output_dir
 
     def _create_output_directories(self):
-        os.makedirs(self.output_dir)
-        os.makedirs(self.tmp_dir)
+        try:
+            os.makedirs(self._output_dir)
+            if self._output_dir != self._tmp_dir:
+                os.makedirs(self._tmp_dir)
+        except OSError:
+            print("Did not create tmp/output_dir, already exists")
+            if not self._shared_mode:
+                raise
 
-    def _delete_output_directories(self):
-        shutil.rmtree(self.tmp_dir)
-        shutil.rmtree(self.output_dir)
-
-    def fit(self, X, y, metric='acc_metric', feat_type=None):
+    def fit(self, X, y,
+            task=MULTICLASS_CLASSIFICATION,
+            metric='acc_metric',
+            feat_type=None,
+            dataset_name=None,
+            ):
         """Fit *autosklearn* to given training set (X, y).
 
         X : array-like or sparse matrix of shape = [n_samples, n_features]
@@ -80,12 +197,25 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             'auc_metric', 'bac_metric', 'f1_metric', 'pac_metric']
 
         feat_type : list, optional (default=None)
-            List of :python:`len(X.shape[1])` describing if an attribute is
+            List of `len(X.shape[1])` describing if an attribute is
             continuous or categorical. Categorical attributes will
             automatically 1Hot encoded.
+
         """
         # Fit is supposed to be idempotent!
-        self._delete_output_directories()
+
+        # But not if we use share_mode:
+        if not self._shared_mode:
+            self._delete_output_directories()
+        else:
+            # If this fails, it's likely that this is the first call to get
+            # the data manager
+            try:
+                D = self._backend.load_datamanager()
+                dataset_name = D.name
+            except IOError:
+                pass
+
         self._create_output_directories()
 
         y = np.atleast_1d(y)
@@ -95,24 +225,24 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             # [:, np.newaxis] that does not.
             y = np.reshape(y, (-1, 1))
 
-        self.n_outputs_ = y.shape[1]
+        self._n_outputs = y.shape[1]
 
         y = np.copy(y)
 
-        self.classes_ = []
-        self.n_classes_ = []
+        self._classes = []
+        self._n_classes = []
 
-        for k in xrange(self.n_outputs_):
+        for k in six.moves.range(self._n_outputs):
             classes_k, y[:, k] = np.unique(y[:, k], return_inverse=True)
-            self.classes_.append(classes_k)
-            self.n_classes_.append(classes_k.shape[0])
+            self._classes.append(classes_k)
+            self._n_classes.append(classes_k.shape[0])
 
-        self.n_classes_ = np.array(self.n_classes_, dtype=np.int)
+        self._n_classes = np.array(self._n_classes, dtype=np.int)
 
-        if self.n_outputs_ > 1:
+        if self._n_outputs > 1:
             task = MULTILABEL_CLASSIFICATION
         else:
-            if len(self.classes_[0]) == 2:
+            if len(self._classes[0]) == 2:
                 task = BINARY_CLASSIFICATION
             else:
                 task = MULTICLASS_CLASSIFICATION
@@ -122,7 +252,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             y = y.flatten()
 
         return super(AutoSklearnClassifier, self).fit(X, y, task, metric,
-                                                   feat_type)
+                                                      feat_type, dataset_name)
 
     def predict(self, X):
         """Predict class for X.
@@ -135,10 +265,12 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         -------
         y : array of shape = [n_samples] or [n_samples, n_outputs]
             The predicted classes.
+
         """
         return super(AutoSklearnClassifier, self).predict(X)
 
 
 class AutoSklearnRegressor(autosklearn.automl.AutoML):
+
     def __init__(self, **kwargs):
         raise NotImplementedError()

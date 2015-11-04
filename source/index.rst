@@ -5,8 +5,16 @@ What is auto-sklearn?
 .. role:: bash(code)
     :language: bash
 
+.. role:: python(code)
+    :language: python
+
 *auto-sklearn* is an automated machine learning toolkit and a drop-in
-replacement for a scikit-learn estimator.
+replacement for a scikit-learn estimator:
+
+    >>> import autosklearn
+    >>> cls = autosklearn.AutoSklearnClassifier()
+    >>> cls.fit(X_train, y_train)
+    >>> predictions = cls.predict(X_test, y_test)
 
 *auto-sklearn* frees a machine learning user from algorithm selection and
 hyperparameter tuning. It leverages recent advantages in *Bayesian
@@ -34,13 +42,18 @@ Example
     >>> y_test = y[1000:]
     >>> automl = autosklearn.AutoSklearnClassifier()
     >>> automl.fit(X_train, y_train)
-    >>> print automl.score(X_test, y_test)
-    
-This will run for one hour should result in an accuracy above 0.99.
+    >>> print automl.score(X_test,y_test)
+
+
+This will run for one hour should result in an accuracy above 0.98.
+
 
 Installation
 ************
-**Prerequisities**: *auto-sklearn* is written in python (2.7) and was developed with Ubuntu. It should run on other Linux distributions, but won't work on a MAC or on a windows PC.
+**Prerequisities**: *auto-sklearn* is written in python (2.7) and was developed
+with Ubuntu. It should run on other Linux distributions, but won't work on a MAC
+or on a windows PC. It requires scikit-learn 0.15.2, which in turn requires
+numpy and scipy (version up to 0.14.1).
 
 *auto-sklearn* has several dependencies, which are not yet automatically
 resolved:
@@ -48,25 +61,18 @@ resolved:
 * `HPOlib <https://github.com/automl/HPOlib>`_
 * `HPOlibConfigSpace <https://github.com/automl/HPOlibConfigSpace>`_
 * `ParamSklearn <https://bitbucket.org/mfeurer/paramsklearn>`_
-* `pyMetaLearn <https://bitbucket.org/mfeurer/pymetalearn>`_
 
-Please install these manually, for example by:
+Please install these manually with:
 
 .. code:: bash
 
-    pip install scikit-learn==0.15.2
-    pip install git+https://github.com/mfeurer/HPOlibConfigSpace#egg=HPOlibConfigSpace0.1dev
-    pip install git+https://git@bitbucket.org/mfeurer/paramsklearn.git@73d8643b2849db753ddc7b8909d01e6cee9bafc6 --no-deps
-    pip install git+https://github.com/automl/HPOlib#egg=HPOlib0.2
-    pip install --editable git+https://bitbucket.org/mfeurer/pymetalearn/#egg=pyMetaLearn
+    pip install -r https://raw.githubusercontent.com/automl/auto-sklearn/development/requirements.txt
 
 Then install *auto-sklearn*
 
 .. code:: bash
 
-    git clone https://github.com/automl/auto-sklearn.git
-    cd auto-sklearn
-    python setup.py install
+    pip install git+https://github.com/automl/auto-sklearn.git#egg=autosklearn
 
 API
 ***
@@ -76,16 +82,47 @@ API
 
 License
 *******
-*auto-sklearn* features the same license as *scikit-learn*,
-namely the 3-clause BSD license. The subprojects it uses may have different
-licenses.
+*auto-sklearn* is licensed the same way as *scikit-learn*,
+namely the 3-clause BSD license. The subprojects it uses, most notably SMAC,
+may have different licenses.
+
+Contributing
+************
+*auto-sklearn* is developed mainly by the `Machine Learning for Automated
+Algorithm Design <http://aad.informatik.uni-freiburg.de>`_ group at the
+University of Freiburg.
+
+.. note::
+
+    To avoid spending time on duplicate work or features that are unlikely to
+    get merged, it is highly advised that you contact the developers
+    by opening a `github issue <https://github
+    .com/automl/auto-sklearn/issues>`_ before starting to work.
+
+Features under development
+--------------------------
+* support for arff files
+* support for scikit-learn 0.16.1
+* python 3 compability
+* MAC OS and windows compability
+* less dependencies
+* limiting the considered classifiers and preprocessors
+* command line interface
+
+A short guide to the code
+-------------------------
+* `automl.py`: main class which controls the workflow.
+* `estimators.py`: wraps a scikit-learn interface around automl.py.
+* `cli`: command line interface to the machine learning algorithm which is
+  used internally by SMAC.
+* `data`: code to read and store machine learning datasets.
+* `evaluation`: classes to control the execution of machine learning.
+  algorithms and resampling of the data.
+* `metrics`: contains metrics which can be optimized.
+* `util`: several utilityy functions.
 
 Contributors
 ************
-
-*auto-sklearn* is developed by the `Machine Learning for Automated Algorithm
-Design <http://aad.informatik.uni-freiburg.de>`_ group at the University of
-Freiburg. Contributors are:
 
 * Matthias Feurer
 * Katharina Eggensperger
@@ -95,6 +132,7 @@ Freiburg. Contributors are:
 * Stefan Falkner
 * Farooq Ahmed Zuberi
 * Frank Hutter
+* Alexander Sapronov
 
 ..
     Welcome to AutoSklearn's documentation!

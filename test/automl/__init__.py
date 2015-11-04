@@ -1,1 +1,1 @@
-__author__ = 'feurerm'
+# -*- encoding: utf-8 -*-

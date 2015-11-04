@@ -3,21 +3,6 @@ docs/build/*
 
 *.py[cod]
 
-# Optimizers
-*_src*
-
-# Runsolver
-runsolver/src/*
-runsolver-3.3.4.tar.bz2
-
-# benchmark runs
-benchmarks/*/*_*/*
-runsolver-3.3.4.tar.bz2
-
-# Java plugins
-HPOlib/dispatcher/MySQLDBTAE
-MySQLDBTAE.tar.gz
-
 # C extensions
 *.so
 
@@ -45,14 +30,6 @@ htmlcov
 .coverage
 .tox
 nosetests.xml
-
-# Translations
-*.mo
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
 
 # pycharm
 .idea

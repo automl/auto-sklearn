@@ -1,75 +1,165 @@
+# -*- encoding: utf-8 -*-
+from __future__ import print_function
+
 import os
-try:
-    import cPickle as pickle
-except:
-    import pickle
 import signal
 import time
 
-import lockfile
-
 from HPOlibConfigSpace import configuration_space
 
+from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
-from autosklearn.models.evaluator import get_new_run_num
-from autosklearn.models.holdout_evaluator import HoldoutEvaluator
-from autosklearn.models.cv_evaluator import CVEvaluator
-from autosklearn.models.test_evaluator import TestEvaluator
-from autosklearn.models.nested_cv_evaluator import NestedCVEvaluator
-from autosklearn.models.paramsklearn import get_configuration_space
+from autosklearn.evaluation import CVEvaluator, HoldoutEvaluator, \
+    NestedCVEvaluator, TestEvaluator, get_new_run_num
+from autosklearn.util.paramsklearn import get_configuration_space
+from autosklearn.util import Backend
+
 
 
 def store_and_or_load_data(dataset_info, outputdir):
-    if dataset_info.endswith(".pkl"):
-        save_path = dataset_info
-    else:
-        dataset = os.path.basename(dataset_info)
-        data_dir = os.path.dirname(dataset_info)
-        save_path = os.path.join(outputdir, dataset + "_Manager.pkl")
+    backend = Backend(None, outputdir)
 
-    if not os.path.exists(save_path):
-        lock = lockfile.LockFile(save_path)
-        while not lock.i_am_locking():
-            try:
-                lock.acquire(timeout=60)  # wait up to 60 seconds
-            except lockfile.LockTimeout:
-                lock.break_lock()
-                lock.acquire()
-        print "I locked", lock.path
-        # It is not yet sure, whether the file already exists
-        try:
-            if not os.path.exists(save_path):
-                D = CompetitionDataManager(dataset, data_dir, verbose=True,
-                                           encode_labels=True)
-                fh = open(save_path, 'w')
-                pickle.dump(D, fh, -1)
-                fh.close()
-            else:
-                D = pickle.load(open(save_path, 'r'))
-        except:
-            raise
-        finally:
-            lock.release()
-    else:
-        D = pickle.load(open(save_path, 'r'))
+    try:
+        D = backend.load_datamanager()
+    except IOError:
+        D = None
+
+    # Datamanager probably doesn't exist
+    if D is None:
+        D = CompetitionDataManager(dataset_info, encode_labels=True)
+        backend.save_datamanager(D)
+
     return D
-
 
 # signal handler seem to work only if they are globally defined
 # to give it access to the evaluator class, the evaluator name has to
 # be a global name. It's not the cleanest solution, but works for now.
 evaluator = None
 
+
 def signal_handler(signum, frame):
-    print "Aborting Training!"
+    print('Received signal %s. Aborting Training!' % str(signum))
     global evaluator
     evaluator.finish_up()
     exit(0)
 
+
 def empty_signal_handler(signum, frame):
-    print "Received Signal %s, but alread finishing up!" % str(signum)
+    print('Received Signal %s, but alread finishing up!' % str(signum))
+
 
 signal.signal(15, signal_handler)
+
+
+def _get_base_dict():
+    return {
+        'with_predictions': True,
+        'all_scoring_functions': True,
+        'output_y_test': True,
+    }
+
+
+def make_mode_holdout(data, seed, configuration, num_run):
+    global evaluator
+    evaluator = HoldoutEvaluator(data, configuration,
+                                 seed=seed,
+                                 num_run=num_run,
+                                 **_get_base_dict())
+    evaluator.fit()
+    signal.signal(15, empty_signal_handler)
+    evaluator.finish_up()
+
+    backend = Backend(None, os.getcwd())
+    if os.path.exists(backend.get_model_dir()):
+        backend.save_model(evaluator.model, num_run, seed)
+
+
+def make_mode_holdout_iterative_fit(data, seed, configuration, num_run):
+    global evaluator
+    evaluator = HoldoutEvaluator(data, configuration,
+                                 seed=seed,
+                                 num_run=num_run,
+                                 **_get_base_dict())
+    evaluator.iterative_fit()
+    signal.signal(15, empty_signal_handler)
+    evaluator.finish_up()
+
+    backend = Backend(None, os.getcwd())
+    if os.path.exists(backend.get_model_dir()):
+        backend.save_model(evaluator.model, num_run, seed)
+
+
+def make_mode_test(data, seed, configuration, metric):
+    global evaluator
+    evaluator = TestEvaluator(data,
+                              configuration,
+                              seed=seed,
+                              all_scoring_functions=True,
+                              with_predictions=True
+                              )
+    evaluator.fit()
+    signal.signal(15, empty_signal_handler)
+    scores, _, _, _ = evaluator.predict()
+    duration = time.time() - evaluator.starttime
+
+    score = scores[metric]
+    additional_run_info = ';'.join(['%s: %s' % (m_, value)
+                                    for m_, value in scores.items()])
+    additional_run_info += ';' + 'duration: ' + str(duration)
+
+    print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
+          ('SAT', abs(duration), score, evaluator.seed,
+           additional_run_info))
+
+
+def make_mode_cv(data, seed, configuration, num_run, folds):
+    global evaluator
+    evaluator = CVEvaluator(data, configuration,
+                            cv_folds=folds,
+                            seed=seed,
+                            num_run=num_run,
+                            **_get_base_dict())
+    evaluator.fit()
+    signal.signal(15, empty_signal_handler)
+    evaluator.finish_up()
+
+
+def make_mode_partial_cv(data, seed, configuration, num_run, metric, fold,
+                         folds):
+    global evaluator
+    evaluator = CVEvaluator(data, configuration,
+                            cv_folds=folds,
+                            seed=seed,
+                            num_run=num_run,
+                            **_get_base_dict())
+    evaluator.partial_fit(fold)
+    signal.signal(15, empty_signal_handler)
+    scores, _, _, _ = evaluator.predict()
+    duration = time.time() - evaluator.starttime
+
+    score = scores[metric]
+    additional_run_info = ';'.join(['%s: %s' % (m_, value)
+                                    for m_, value in scores.items()])
+    additional_run_info += ';' + 'duration: ' + str(duration)
+
+    print(metric, score, additional_run_info)
+    print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
+          ('SAT', abs(duration), score, evaluator.seed,
+           additional_run_info))
+
+
+def make_mode_nested_cv(data, seed, configuration, num_run, inner_folds,
+                        outer_folds):
+    global evaluator
+    evaluator = NestedCVEvaluator(data, configuration,
+                                  inner_cv_folds=inner_folds,
+                                  outer_cv_folds=outer_folds,
+                                  seed=seed,
+                                  num_run=num_run,
+                                  **_get_base_dict())
+    evaluator.fit()
+    signal.signal(15, empty_signal_handler)
+    evaluator.finish_up()
 
 
 def main(dataset_info, mode, seed, params, mode_args=None):
@@ -82,101 +172,56 @@ def main(dataset_info, mode, seed, params, mode_args=None):
 
     It must by no means be used for the Auto part of the competition!
     """
-    if mode != "test":
+    if mode_args is None:
+        mode_args = {}
+
+    output_dir = os.getcwd()
+
+    if not isinstance(dataset_info, AbstractDataManager):
+        D = store_and_or_load_data(dataset_info=dataset_info, outputdir=output_dir)
+    else:
+        D = dataset_info
+    metric = D.info['metric']
+
+    num_run = None
+    if mode != 'test':
         num_run = get_new_run_num()
 
-    for key in params:
-        try:
-            params[key] = int(params[key])
-        except:
+    if params is not None:
+        for key in params:
             try:
-                params[key] = float(params[key])
-            except:
-                pass
+                params[key] = int(params[key])
+            except Exception:
+                try:
+                    params[key] = float(params[key])
+                except Exception:
+                    pass
+
+        cs = get_configuration_space(D.info)
+        configuration = configuration_space.Configuration(cs, params)
+    else:
+        configuration = None
 
     if seed is not None:
         seed = int(float(seed))
     else:
         seed = 1
 
-    output_dir = os.getcwd()
-
-    D = store_and_or_load_data(dataset_info=dataset_info,
-                               outputdir=output_dir)
-
-    cs = get_configuration_space(D.info)
-    configuration = configuration_space.Configuration(cs, params)
-    metric = D.info['metric']
-
     global evaluator
-    # Train/test split
+
     if mode == 'holdout':
-        evaluator = HoldoutEvaluator(D, configuration,
-                                     with_predictions=True,
-                                     all_scoring_functions=True,
-                                     output_y_test=True,
-                                     seed=seed, num_run=num_run)
-        evaluator.fit()
-        signal.signal(15, empty_signal_handler)
-        evaluator.finish_up()
-        model_directory = os.path.join(os.getcwd(), "models_%d" % seed)
-        if os.path.exists(model_directory):
-            model_filename = os.path.join(model_directory, "%s.model" % num_run)
-            with open(model_filename, "w") as fh:
-                pickle.dump(evaluator.model, fh, -1)
-
+        make_mode_holdout(D, seed, configuration, num_run)
+    elif mode == 'holdout-iterative-fit':
+        make_mode_holdout_iterative_fit(D, seed, configuration, num_run)
     elif mode == 'test':
-        evaluator = TestEvaluator(D, configuration,
-                                  all_scoring_functions=True,
-                                  seed=seed)
-        evaluator.fit()
-        scores = evaluator.predict()
-        duration = time.time() - evaluator.starttime
-
-        score = scores[metric]
-        additional_run_info = ";".join(["%s: %s" % (m_, value)
-                                        for m_, value in scores.items()])
-        additional_run_info += ";" + "duration: " + str(duration)
-
-        print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % (
-            "SAT", abs(duration), score, evaluator.seed, additional_run_info)
-
-    # CV on the whole training set
+        make_mode_test(D, seed, configuration, metric)
     elif mode == 'cv':
-        evaluator = CVEvaluator(D, configuration, with_predictions=True,
-                                all_scoring_functions=True, output_y_test=True,
-                                cv_folds=mode_args['folds'], seed=seed,
-                                num_run=num_run)
-        evaluator.fit()
-        signal.signal(15, empty_signal_handler)
-        evaluator.finish_up()
-
-    elif mode == 'partial_cv':
-        evaluator = CVEvaluator(D, configuration, all_scoring_functions=True,
-                                cv_folds=mode_args['folds'], seed=seed,
-                                num_run=num_run)
-        evaluator.partial_fit(mode_args['fold'])
-        scores = evaluator.predict()
-        duration = time.time() - evaluator.starttime
-
-        score = scores[metric]
-        additional_run_info = ";".join(["%s: %s" % (m_, value)
-                                        for m_, value in scores.items()])
-        additional_run_info += ";" + "duration: " + str(duration)
-
-        print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % (
-            "SAT", abs(duration), score, evaluator.seed, additional_run_info)
-
+        make_mode_cv(D, seed, configuration, num_run, mode_args['folds'])
+    elif mode == 'partial-cv':
+        make_mode_partial_cv(D, seed, configuration, num_run,
+                             metric, mode_args['fold'], mode_args['folds'])
     elif mode == 'nested-cv':
-        evaluator = NestedCVEvaluator(D, configuration, with_predictions=True,
-                                      inner_cv_folds=mode_args['inner_folds'],
-                                      outer_cv_folds=mode_args['outer_folds'],
-                                      all_scoring_functions=True,
-                                      output_y_test=True, seed=seed,
-                                      num_run=num_run)
-        evaluator.fit()
-        signal.signal(15, empty_signal_handler)
-        evaluator.finish_up()
-
+        make_mode_nested_cv(D, seed, configuration, num_run,
+                            mode_args['inner_folds'], mode_args['outer_folds'])
     else:
-        raise ValueError("Must choose a legal mode.")
+        raise ValueError('Must choose a legal mode.')
