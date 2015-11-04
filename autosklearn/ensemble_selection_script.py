@@ -218,16 +218,16 @@ def main(autosklearn_tmp_dir,
             continue
 
         if shared_mode is False:
-            dir_ensemble_list = glob.glob(os.path.join(
-                dir_ensemble, 'predictions_ensemble_%s_*.npy' % seed))
+            dir_ensemble_list = sorted(glob.glob(os.path.join(
+                dir_ensemble, 'predictions_ensemble_%s_*.npy' % seed)))
             if exists[1]:
-                dir_valid_list = glob.glob(os.path.join(
-                    dir_valid, 'predictions_valid_%s_*.npy' % seed))
+                dir_valid_list = sorted(glob.glob(os.path.join(
+                    dir_valid, 'predictions_valid_%s_*.npy' % seed)))
             else:
                 dir_valid_list = []
             if exists[2]:
-                dir_test_list = glob.glob(os.path.join(
-                    dir_test, 'predictions_test_%s_*.npy' % seed))
+                dir_test_list = sorted(glob.glob(os.path.join(
+                    dir_test, 'predictions_test_%s_*.npy' % seed)))
             else:
                 dir_test_list = []
         else:
