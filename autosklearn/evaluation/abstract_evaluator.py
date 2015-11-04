@@ -133,11 +133,17 @@ class AbstractEvaluator(object):
     def file_output(self):
         seed = os.environ.get('AUTOSKLEARN_SEED')
 
+        errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
+
+        if self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
+            return 2, "Targets %s and prediction %s don't have the same " \
+            "length. Probably training didn't finish" % (
+                self.Y_optimization.shape, Y_optimization_pred.shape)
+
+        num_run = str(self.num_run).zfill(5)
+
         if os.path.exists(self.backend.get_model_dir()):
             self.backend.save_model(self.model, self.num_run, seed)
-
-        errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
-        num_run = str(self.num_run).zfill(5)
 
         if self.output_y_test:
             try:

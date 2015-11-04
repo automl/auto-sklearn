@@ -92,7 +92,7 @@ class Backend(object):
         with lockfile.LockFile(lock_path):
             if os.path.exists(filepath):
                 existing_targets = np.load(filepath)
-                if existing_targets.shape[0] == targets[0].shape or \
+                if existing_targets.shape[0] > targets.shape[0] or \
                         (existing_targets.shape == targets.shape and
                          np.allclose(existing_targets, targets)):
                     return filepath
