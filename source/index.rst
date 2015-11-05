@@ -66,7 +66,7 @@ Please install these manually with:
 
 .. code:: bash
 
-    pip install -r https://raw.githubusercontent.com/automl/auto-sklearn/development/requirements.txt
+    pip install -r https://raw.githubusercontent.com/automl/auto-sklearn/master/requ.txt
 
 Then install *auto-sklearn*
 
