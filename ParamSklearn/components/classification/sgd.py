@@ -116,17 +116,17 @@ class SGD(ParamSklearnClassificationAlgorithm):
 
         loss = cs.add_hyperparameter(CategoricalHyperparameter("loss",
             ["hinge", "log", "modified_huber", "squared_hinge", "perceptron"],
-            default="hinge"))
+            default="log"))
         penalty = cs.add_hyperparameter(CategoricalHyperparameter(
             "penalty", ["l1", "l2", "elasticnet"], default="l2"))
         alpha = cs.add_hyperparameter(UniformFloatHyperparameter(
             "alpha", 10e-7, 1e-1, log=True, default=0.0001))
         l1_ratio = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "l1_ratio", 0, 1, default=0.15))
+            "l1_ratio", 0, 1,  log=True, default=0.15))
         fit_intercept = cs.add_hyperparameter(UnParametrizedHyperparameter(
             "fit_intercept", "True"))
         n_iter = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            "n_iter", 5, 1000, default=20))
+            "n_iter", 5, 1000, log=True, default=20))
         epsilon = cs.add_hyperparameter(UniformFloatHyperparameter(
             "epsilon", 1e-5, 1e-1, default=1e-4, log=True))
         learning_rate = cs.add_hyperparameter(CategoricalHyperparameter(

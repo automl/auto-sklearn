@@ -67,7 +67,7 @@ class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
         cs = ConfigurationSpace()
 
         n_neighbors = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="n_neighbors", lower=1, upper=100, default=1))
+            name="n_neighbors", lower=1, upper=100, log=True, default=1))
         weights = cs.add_hyperparameter(CategoricalHyperparameter(
             name="weights", choices=["uniform", "distance"], default="uniform"))
         p = cs.add_hyperparameter(CategoricalHyperparameter(
