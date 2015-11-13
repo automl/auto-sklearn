@@ -9,6 +9,8 @@ import urllib
 import setuptools
 from setuptools.extension import Extension
 from setuptools.command.install import install
+import numpy as np
+from Cython.Build import cythonize
 
 SMAC_DOWNLOAD_LOCATION = 'http://aad.informatik.uni-freiburg.de/~feurerm/'
 SMAC_TAR_NAME = 'smac-v2.08.01-development-1.tar.gz'
@@ -21,11 +23,11 @@ BINARIES_DIRECTORY = 'autosklearn/binaries'
 METADATA_DIRECTORY = 'autosklearn/metalearning/files'
 
 
-extensions = [Extension('autosklearn.data.competition_c_functions',
-                        sources=[
-                            'autosklearn/data/competition_c_functions.pyx'
-                        ])
-             ]
+extensions = cythonize([Extension('autosklearn.data.competition_c_functions',
+                        sources=['autosklearn/data/competition_c_functions.pyx'],
+                        language='c',
+                        include_dirs=[np.get_include()])
+             ])
 
 
 class Download(install):
