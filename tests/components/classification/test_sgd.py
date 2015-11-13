@@ -10,7 +10,7 @@ class SGDComponentTest(unittest.TestCase):
     def test_default_configuration(self):
         for i in range(10):
             predictions, targets = _test_classifier(SGD)
-            self.assertAlmostEqual(1.0,
+            self.assertAlmostEqual(0.95999999999999996,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
 
@@ -18,7 +18,7 @@ class SGDComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = _test_classifier_iterative_fit(
                 SGD)
-            self.assertAlmostEqual(1.0,
+            self.assertAlmostEqual(0.95999999999999996,
                                    sklearn.metrics.accuracy_score(
                                        predictions, targets))
 
@@ -26,7 +26,7 @@ class SGDComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_classifier(SGD, dataset='digits')
-            self.assertAlmostEqual(0.89313904068002425,
+            self.assertAlmostEqual(0.91438979963570133,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
 
@@ -35,6 +35,6 @@ class SGDComponentTest(unittest.TestCase):
             predictions, targets = _test_classifier_iterative_fit(
                 SGD,
                 dataset='digits')
-            self.assertAlmostEqual(0.89313904068002425,
+            self.assertAlmostEqual(0.91438979963570133,
                                    sklearn.metrics.accuracy_score(
                                        predictions, targets))

@@ -39,11 +39,12 @@ class AdaboostClassifier(ParamSklearnClassificationAlgorithm):
         )
 
         if len(Y.shape) == 2 and Y.shape[1] > 1:
-            self.estimator = MultilabelClassifier(estimator, n_jobs=1)
-            self.estimator.fit(X, Y, sample_weight=sample_weight)
+            estimator = MultilabelClassifier(estimator, n_jobs=1)
+            estimator.fit(X, Y, sample_weight=sample_weight)
         else:
-            self.estimator.fit(X, Y, sample_weight=sample_weight)
+            estimator.fit(X, Y, sample_weight=sample_weight)
 
+        self.estimator = estimator
         return self
 
     def predict(self, X):

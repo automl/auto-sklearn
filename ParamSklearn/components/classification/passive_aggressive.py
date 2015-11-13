@@ -87,7 +87,8 @@ class PassiveAggressive(ParamSklearnClassificationAlgorithm):
                                          ["hinge", "squared_hinge"],
                                          default="hinge")
         fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
-        n_iter = UniformIntegerHyperparameter("n_iter", 5, 1000, default=20)
+        n_iter = UniformIntegerHyperparameter("n_iter", 5, 1000, default=20,
+                                              log=True)
         C = UniformFloatHyperparameter("C", 1e-5, 10, 1, log=True)
         cs = ConfigurationSpace()
         cs.add_hyperparameter(loss)

@@ -120,7 +120,7 @@ class SGD(ParamSklearnRegressionAlgorithm):
         alpha = cs.add_hyperparameter(UniformFloatHyperparameter(
             "alpha", 10e-7, 1e-1, log=True, default=0.01))
         l1_ratio = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "l1_ratio", 0., 1., log=True, default=0.15))
+            "l1_ratio", 1e-9, 1., log=True, default=0.15))
         fit_intercept = cs.add_hyperparameter(UnParametrizedHyperparameter(
             "fit_intercept", "True"))
         n_iter = cs.add_hyperparameter(UniformIntegerHyperparameter(

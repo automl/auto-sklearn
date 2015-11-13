@@ -415,7 +415,7 @@ class TestParamSklearnClassifier(unittest.TestCase):
             'preprocessor:__choice__').choices), 14)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(145, len(hyperparameters))
+        self.assertEqual(144, len(hyperparameters))
 
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
