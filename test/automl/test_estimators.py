@@ -108,7 +108,7 @@ class EstimatorTest(Base):
 
         self.assertEqual(len(os.listdir(os.path.join(output, '.auto-sklearn',
                                                      'ensemble_indices'))), 1)
-        self.assertGreaterEqual(score, 0.95)
+        self.assertGreaterEqual(score, 0.90)
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl

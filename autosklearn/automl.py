@@ -10,6 +10,7 @@ import traceback
 import numpy as np
 
 from HPOlibConfigSpace.converters import pcs_parser
+from HPOlibConfigSpace.configuration_space import Configuration
 from sklearn.base import BaseEstimator
 import six
 
@@ -21,7 +22,8 @@ from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import resampling, HoldoutEvaluator, get_new_run_num
 from autosklearn.metalearning.mismbo import \
     calc_meta_features, calc_meta_features_encoded, \
-    create_metalearning_string_for_smac_call
+    create_metalearning_string_for_smac_call, \
+    convert_conf2smac_string
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     get_auto_seed, set_auto_seed, del_auto_seed, submit_process, paramsklearn, \
@@ -416,7 +418,47 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             initial_configurations = []
             self._logger.warn('Metafeatures encoded not calculated')
 
-        # == RUN SMACtmp_dir, basename, time_for_task, ml_memory_limit,
+        # == RUN SMAC
+        if (datamanager.info["task"] == BINARY_CLASSIFICATION) or \
+            (datamanager.info["task"] == MULTICLASS_CLASSIFICATION):
+            config = {'balancing:strategy': 'weighting',
+                      'classifier:__choice__': 'sgd',
+                      'classifier:sgd:loss': 'hinge',
+                      'classifier:sgd:penalty': 'l2',
+                      'classifier:sgd:alpha': 0.0001,
+                      'classifier:sgd:fit_intercept': 'True',
+                      'classifier:sgd:n_iter': 5,
+                      'classifier:sgd:learning_rate': 'optimal',
+                      'classifier:sgd:eta0': 0.01,
+                      'classifier:sgd:average': 'True',
+                      'imputation:strategy': 'mean',
+                      'one_hot_encoding:use_minimum_fraction': 'True',
+                      'one_hot_encoding:minimum_fraction': 0.1,
+                      'preprocessor:__choice__': 'no_preprocessing',
+                      'rescaling:__choice__': 'min/max'}
+        elif datamanager.info["task"] == MULTILABEL_CLASSIFICATION:
+            config = {'classifier:__choice__': 'adaboost',
+                      'classifier:adaboost:algorithm': 'SAMME.R',
+                      'classifier:adaboost:learning_rate': 1.0,
+                      'classifier:adaboost:max_depth': 1,
+                      'classifier:adaboost:n_estimators': 50,
+                      'balancing:strategy': 'weighting',
+                      'imputation:strategy': 'mean',
+                      'one_hot_encoding:use_minimum_fraction': 'True',
+                      'one_hot_encoding:minimum_fraction': 0.1,
+                      'preprocessor:__choice__': 'no_preprocessing',
+                      'rescaling:__choice__': 'none'}
+        else:
+            config = None
+            self._logger.info("Tasktype unknown: %s" %
+                              TASK_TYPES_TO_STRING[datamanager.info["task"]])
+
+        if config is not None:
+            configuration = Configuration(self.configuration_space, config)
+            config_string = convert_conf2smac_string(configuration)
+            initial_configurations = [config_string] + initial_configurations
+
+        # == RUN SMAC
         proc_smac = run_smac(tmp_dir=self._tmp_dir, basename=self._dataset_name,
                              time_for_task=self._time_for_task,
                              ml_memory_limit=self._ml_memory_limit,
