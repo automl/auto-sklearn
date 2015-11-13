@@ -6,8 +6,13 @@ from __future__ import print_function
 
 import numpy as np
 
-from autosklearn.constants import REGRESSION
+from autosklearn.constants import REGRESSION, METRIC_TO_STRING
 from autosklearn.metrics.common import mv_mean
+
+
+def calculate_score(metric, solution, prediction):
+    metric = METRIC_TO_STRING[metric]
+    return globals()[metric](solution, prediction)
 
 
 def r2_metric(solution, prediction, task=REGRESSION):

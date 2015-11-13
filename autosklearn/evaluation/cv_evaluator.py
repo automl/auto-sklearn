@@ -38,7 +38,14 @@ class CVEvaluator(AbstractEvaluator):
         self.models = [None] * cv_folds
         self.indices = [None] * cv_folds
 
+        # Necessary for full CV. Makes full CV not write predictions if only
+        # a subset of folds is evaluated but time is up. Complicated, because
+        #  code must also work for partial CV, where we want exactly the
+        # opposite.
+        self.partial = True
+
     def fit(self):
+        self.partial = False
         for fold in range(self.cv_folds):
             self.partial_fit(fold)
 
@@ -65,7 +72,13 @@ class CVEvaluator(AbstractEvaluator):
         for i in range(self.cv_folds):
             # To support prediction when only partial_fit was called
             if self.models[i] is None:
-                continue
+                if self.partial:
+                    continue
+                else:
+                    raise ValueError('Did not fit all models for the CV fold. '
+                                     'Try increasing the time for the ML '
+                                     'algorithm or decrease the number of folds'
+                                     ' if this happens too often.')
 
             train_indices, test_indices = self.indices[i]
             opt_pred = self.predict_function(self.X_train[test_indices],

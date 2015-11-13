@@ -34,7 +34,7 @@ class CVEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {
-            'metric': 'bac_metric',
+            'metric': BAC_METRIC,
             'task': MULTICLASS_CLASSIFICATION,
             'is_sparse': False,
             'label_num': 3
@@ -98,7 +98,7 @@ class CVEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {
-            'metric': 'bac_metric',
+            'metric': BAC_METRIC,
             'task': MULTICLASS_CLASSIFICATION,
             'is_sparse': False,
             'label_num': 3

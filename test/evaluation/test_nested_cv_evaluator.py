@@ -34,7 +34,7 @@ class NestedCVEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {
-            'metric': 'acc_metric',
+            'metric': ACC_METRIC,
             'task': MULTICLASS_CLASSIFICATION,
             'is_sparse': False,
             'label_num': 3
@@ -66,9 +66,9 @@ class NestedCVEvaluator_Test(unittest.TestCase):
                 continue
             e_, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
                 evaluator.predict()
-            err[i] = e_['acc_metric']
+            err[i] = e_[ACC_METRIC]
             print(err[i], configuration['classifier:__choice__'])
-            print(e_['outer:bac_metric'], e_['bac_metric'])
+            print(e_['outer:bac_metric'], e_[BAC_METRIC])
 
             # Test the outer CV
             num_targets = len(np.unique(Y_train))

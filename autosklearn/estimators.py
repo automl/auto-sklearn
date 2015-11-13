@@ -4,6 +4,7 @@ import random
 import shutil
 
 import numpy as np
+from os import stat
 import six
 
 import autosklearn.automl
@@ -75,9 +76,15 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         remove tmp_folder, when finished. If tmp_folder is None
         tmp_dir will always be deleted
 
-    delete_output_folder_after_terminate, bool, optional (True)
+    delete_output_folder_after_terminate: bool, optional (True)
         remove output_folder, when finished. If output_folder is None
         output_dir will always be deleted
+
+    shared_mode: bool, optional (False)
+        run smac in shared-model-node. This only works if arguments
+        tmp_folder and output_folder are given and sets both
+        delete_tmp_folder_after_terminate and
+        delete_output_folder_after_terminate to False.
 
     """
 
@@ -96,11 +103,27 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
                  tmp_folder=None,
                  output_folder=None,
                  delete_tmp_folder_after_terminate=True,
-                 delete_output_folder_after_terminate=True):
+                 delete_output_folder_after_terminate=True,
+                 shared_mode=False):
 
+        # Check this before _prepare_create_folders assigns random output
+        # directories
+        if shared_mode:
+            delete_output_folder_after_terminate = False
+            delete_tmp_folder_after_terminate = False
+            if tmp_folder is None:
+                raise ValueError("If shared_mode == True tmp_folder must not "
+                                 "be None.")
+            if output_folder is None:
+                raise ValueError("If shared_mode == True output_folder must "
+                                 "not be None.")
+
+        # Call this before calling superconstructor as we feed tmp/output dir
+        # to superinit
         self._tmp_dir, self._output_dir = self._prepare_create_folders(
-            tmp_folder,
-            output_folder
+            tmp_dir=tmp_folder,
+            output_dir=output_folder,
+            shared_mode=shared_mode
         )
 
         self._classes = []
@@ -125,10 +148,11 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             resampling_strategy_arguments=resampling_strategy_arguments,
             delete_tmp_folder_after_terminate=delete_tmp_folder_after_terminate,
             delete_output_folder_after_terminate=
-            delete_output_folder_after_terminate)
+            delete_output_folder_after_terminate,
+            shared_mode=shared_mode)
 
     @staticmethod
-    def _prepare_create_folders(tmp_dir, output_dir):
+    def _prepare_create_folders(tmp_dir, output_dir, shared_mode):
         random_number = random.randint(0, 10000)
 
         pid = os.getpid()
@@ -145,9 +169,14 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         return tmp_dir, output_dir
 
     def _create_output_directories(self):
-        os.makedirs(self._output_dir)
-        if self._output_dir != self._tmp_dir:
-            os.makedirs(self._tmp_dir)
+        try:
+            os.makedirs(self._output_dir)
+            if self._output_dir != self._tmp_dir:
+                os.makedirs(self._tmp_dir)
+        except OSError:
+            print("Did not create tmp/output_dir, already exists")
+            if not self._shared_mode:
+                raise
 
     def fit(self, X, y,
             task=MULTICLASS_CLASSIFICATION,
@@ -174,7 +203,19 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
 
         """
         # Fit is supposed to be idempotent!
-        self._delete_output_directories()
+
+        # But not if we use share_mode:
+        if not self._shared_mode:
+            self._delete_output_directories()
+        else:
+            # If this fails, it's likely that this is the first call to get
+            # the data manager
+            try:
+                D = self._backend.load_datamanager()
+                dataset_name = D.name
+            except IOError:
+                pass
+
         self._create_output_directories()
 
         y = np.atleast_1d(y)

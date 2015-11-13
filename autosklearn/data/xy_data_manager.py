@@ -1,9 +1,11 @@
 # -*- encoding: utf-8 -*-
+import types
+
 import numpy as np
+from scipy import sparse
 
 from autosklearn.constants import *
 from autosklearn.data.abstract_data_manager import AbstractDataManager
-from scipy import sparse
 
 
 class XYDataManager(AbstractDataManager):
@@ -11,6 +13,13 @@ class XYDataManager(AbstractDataManager):
     def __init__(self, data_x, y, task, metric, feat_type, dataset_name,
                  encode_labels):
         super(XYDataManager, self).__init__(dataset_name)
+
+        if type(task) in types.StringTypes:
+            task = STRING_TO_TASK_TYPES[task]
+
+        if isinstance(metric, types.StringTypes):
+            metric = STRING_TO_METRIC[metric]
+
         self.info['task'] = task
         self.info['metric'] = metric
         self.info['is_sparse'] = 1 if sparse.issparse(data_x) else 0

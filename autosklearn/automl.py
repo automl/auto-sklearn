@@ -10,59 +10,23 @@ import traceback
 import numpy as np
 
 from HPOlibConfigSpace.converters import pcs_parser
-from HPOlibConfigSpace.configuration_space import Configuration
 from sklearn.base import BaseEstimator
 import six
 
 from autosklearn.constants import *
+import autosklearn.cli.base_interface
 from autosklearn.data.data_manager_factory import get_data_manager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import resampling, HoldoutEvaluator, get_new_run_num
 from autosklearn.metalearning.mismbo import \
     calc_meta_features, calc_meta_features_encoded, \
-    create_metalearning_string_for_smac_call, \
-    convert_conf2smac_string
+    create_metalearning_string_for_smac_call
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     get_auto_seed, set_auto_seed, del_auto_seed, submit_process, paramsklearn, \
     Backend
 from autosklearn.util.smac import run_smac
-
-
-def _run_ensemble_builder(tmp_dir,
-                          output_dir,
-                          basename,
-                          time_for_task,
-                          task,
-                          metric,
-                          ensemble_size,
-                          ensemble_nbest,
-                          watcher,
-                          logger):
-    if ensemble_size > 0:
-        task_name = 'runEnsemble'
-        watcher.start_task(task_name)
-        time_left_for_ensembles = max(0, time_for_task - watcher.wall_elapsed(
-            basename))
-        logger.info(
-            'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
-        proc_ensembles = submit_process.run_ensemble_builder(
-            tmp_dir=tmp_dir,
-            dataset_name=basename,
-            task_type=task,
-            metric=metric,
-            limit=time_left_for_ensembles,
-            output_dir=output_dir,
-            ensemble_size=ensemble_size,
-            ensemble_nbest=ensemble_nbest,
-            seed=get_auto_seed(),
-        )
-        watcher.stop_task(task_name)
-        return proc_ensembles
-    else:
-        logger.info('Not starting ensemble script due to ensemble size 0.')
-        return None
 
 
 def _calculate_metafeatures(data_feat_type, data_info_task, basename,
@@ -183,7 +147,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                  resampling_strategy='holdout',
                  resampling_strategy_arguments=None,
                  delete_tmp_folder_after_terminate=False,
-                 delete_output_folder_after_terminate=False):
+                 delete_output_folder_after_terminate=False,
+                 shared_mode=False):
         super(AutoML, self).__init__()
 
         self._tmp_dir = tmp_dir
@@ -208,10 +173,11 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = \
             delete_output_folder_after_terminate
+        self._shared_mode = shared_mode
 
         self._datamanager = None
         self._dataset_name = None
-        self._stopwatch = None
+        self._stopwatch = StopWatch()
         self._logger = None
         self._task = None
         self._metric = None
@@ -237,12 +203,12 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self.start()
 
     def start(self):
-        if not hasattr(self, '_datamanager'):
+        if self._datamanager is None:
             raise ValueError('You must invoke start() only via start_automl()')
         super(AutoML, self).start()
 
     def run(self):
-        if not hasattr(self, '_datamanager'):
+        if self._datamanager is None:
             raise ValueError('You must invoke run() only via start_automl()')
         self._fit(self._datamanager)
 
@@ -264,6 +230,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         logger_name = 'AutoML(%d):%s' % (self._seed, dataset_name)
         setup_logger(os.path.join(self._tmp_dir, '%s.log' % str(logger_name)))
         self._logger = get_logger(logger_name)
+
+        if isinstance(metric, str):
+            metric = STRING_TO_METRIC[metric]
 
         loaded_data_manager = XYDataManager(X, y,
                                             task=task,
@@ -316,17 +285,11 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         return time_for_load_data
 
     def _do_dummy_prediction(self, datamanager):
-        num_run = get_new_run_num(self._tmp_dir)
-        he = HoldoutEvaluator(
-            datamanager, None,
-            with_predictions=True, num_run=num_run,
-            output_dir=self._tmp_dir, all_scoring_functions=True)
-        he.fit()
-        he.file_output()
-        model_directory = self._backend.get_model_dir()
-        if os.path.exists(model_directory):
-            self._backend.save_model(he.model, num_run)
-        del he
+        autosklearn.cli.base_interface.main(datamanager,
+                                            self._resampling_strategy,
+                                            None,
+                                            None,
+                                            mode_args=self._resampling_strategy_arguments)
 
     def _fit(self, datamanager):
         # Reset learnt stuff
@@ -345,7 +308,12 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         self._backend._make_internals_directory()
         if self._keep_models:
-            os.mkdir(self._backend.get_model_dir())
+            try:
+                os.mkdir(self._backend.get_model_dir())
+            except OSError:
+                self._logger.warn("model directory already exists")
+                if not self._shared_mode:
+                    raise
 
         self._metric = datamanager.info['metric']
         self._task = datamanager.info['task']
@@ -485,29 +453,27 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             config_string = convert_conf2smac_string(configuration)
             initial_configurations = [config_string] + initial_configurations
 
-        proc_smac = run_smac(self._tmp_dir, self._dataset_name,
-                             self._time_for_task, self._ml_memory_limit,
-                             data_manager_path, configspace_path,
-                             initial_configurations, self._per_run_time_limit,
-                             self._stopwatch, self._backend, self._seed,
-                             self._resampling_strategy,
-                             self._resampling_strategy_arguments)
+        # == RUN SMAC
+        proc_smac = run_smac(tmp_dir=self._tmp_dir, basename=self._dataset_name,
+                             time_for_task=self._time_for_task,
+                             ml_memory_limit=self._ml_memory_limit,
+                             data_manager_path=data_manager_path,
+                             configspace_path=configspace_path,
+                             initial_configurations=initial_configurations,
+                             per_run_time_limit=self._per_run_time_limit,
+                             watcher=self._stopwatch, backend=self._backend,
+                             seed=self._seed,
+                             resampling_strategy=self._resampling_strategy,
+                             resampling_strategy_arguments=self._resampling_strategy_arguments,
+                             shared_mode=self._shared_mode)
 
         # == RUN ensemble builder
-        proc_ensembles = _run_ensemble_builder(
-            self._tmp_dir,
-            self._output_dir,
-            self._dataset_name,
-            self._time_for_task,
-            self._task,
-            self._metric,
-            self._ensemble_size,
-            self._ensemble_nbest,
-            self._stopwatch,
-            self._logger
-        )
+        proc_ensembles = self.run_ensemble_builder()
 
-        procs = [proc_smac]
+        procs = []
+
+        if proc_smac is not None:
+            procs.append(proc_smac)
         if proc_ensembles is not None:
             procs.append(proc_ensembles)
 
@@ -531,17 +497,69 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         return self
 
+    def run_ensemble_builder(self,
+                             time_left_for_ensembles=None,
+                             max_iterations=None,
+                             ensemble_size=None):
+        if self._ensemble_size > 0 or ensemble_size is not None:
+            task_name = 'runEnsemble'
+            self._stopwatch.start_task(task_name)
+
+            if time_left_for_ensembles is None:
+                time_left_for_ensembles = max(0,
+                    self._time_for_task - self._stopwatch.wall_elapsed(
+                        self._dataset_name))
+            if max_iterations is None:
+                max_iterations = -1
+            if ensemble_size is None:
+                ensemble_size = self._ensemble_size
+
+            # It can happen that run_ensemble_builder is called without
+            # calling fit.
+            if self._logger:
+                self._logger.info(
+                    'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
+            proc_ensembles = submit_process.run_ensemble_builder(
+                tmp_dir=self._tmp_dir,
+                dataset_name=self._dataset_name,
+                task_type=self._task,
+                metric=self._metric,
+                limit=time_left_for_ensembles,
+                output_dir=self._output_dir,
+                ensemble_size=ensemble_size,
+                ensemble_nbest=self._ensemble_nbest,
+                seed=self._seed,
+                shared_mode=self._shared_mode,
+                max_iterations=max_iterations
+            )
+            self._stopwatch.stop_task(task_name)
+            return proc_ensembles
+        else:
+            self._logger.info('Not starting ensemble script due to ensemble '
+                             'size 0.')
+            return None
+
     def predict(self, X):
-        if self.models_ is None:
+        if self._keep_models is not True:
+            raise ValueError(
+                "Predict can only be called if 'keep_models==True'")
+        if self._resampling_strategy not in  ['holdout',
+                                              'holdout-iterative-fit']:
+            raise NotImplementedError(
+                'Predict is currently only implemented for resampling '
+                'strategy holdout.')
+
+        if self.models_ is None or len(self.models_) == 0 or len(
+                self.ensemble_indices_) == 0:
             self._load_models()
 
         predictions = []
-        for num_run in self.models_:
-            if num_run not in self.ensemble_indices_:
+        for identifier in self.models_:
+            if identifier not in self.ensemble_indices_:
                 continue
 
-            weight = self.ensemble_indices_[num_run]
-            model = self.models_[num_run]
+            weight = self.ensemble_indices_[identifier]
+            model = self.models_[identifier]
 
             X_ = X.copy()
             if self._task in REGRESSION_TASKS:
@@ -554,20 +572,17 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         return predictions
 
     def _load_models(self):
-        if self._keep_models is not True:
-            raise ValueError(
-                "Predict can only be called if 'keep_models==True'")
-        if self._resampling_strategy != 'holdout':
-            raise NotImplementedError(
-                'Predict is currently only implemented for resampling '
-                'strategy holdout.')
+        if self._shared_mode:
+            seed = -1
+        else:
+            seed = self._seed
 
-        self.models_ = self._backend.load_all_models()
+        self.models_ = self._backend.load_all_models(seed)
         if len(self.models_) == 0:
             raise ValueError('No models fitted!')
 
         self.ensemble_indices_ = self._backend.load_ensemble_indices_weights(
-            self._seed)
+            seed)
 
     def score(self, X, y):
         prediction = self.predict(X)
@@ -575,17 +590,18 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                                self._metric, self._label_num)
 
     def show_models(self):
-        if self.models_ is None:
+        if self.models_ is None or len(self.models_) == 0 or len(
+                self.ensemble_indices_) == 0:
             self._load_models()
 
         output = []
         sio = six.StringIO()
-        for num_run in self.models_:
-            if num_run not in self.ensemble_indices_:
+        for identifier in self.models_:
+            if identifier not in self.ensemble_indices_:
                 continue
 
-            weight = self.ensemble_indices_[num_run]
-            model = self.models_[num_run]
+            weight = self.ensemble_indices_[identifier]
+            model = self.models_[identifier]
             output.append((weight, model))
 
         output.sort(reverse=True)
@@ -638,7 +654,6 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 else:
                     print("Could not delete output dir: %s" %
                           self._output_dir)
-
 
         if self.delete_tmp_folder_after_terminate:
             try:

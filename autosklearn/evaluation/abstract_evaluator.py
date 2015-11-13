@@ -10,7 +10,6 @@ import lockfile
 from ParamSklearn.classification import ParamSklearnClassifier
 from ParamSklearn.regression import ParamSklearnRegressor
 from sklearn.dummy import DummyClassifier, DummyRegressor
-import six.moves.cPickle as pickle
 
 from autosklearn.constants import *
 from autosklearn.evaluation.util import get_new_run_num
@@ -99,6 +98,7 @@ class AbstractEvaluator(object):
         self.num_run = num_run
 
         self.backend = Backend(None, self.output_dir)
+        self.model = self.model_class(self.configuration, self.seed)
 
     @abc.abstractmethod
     def fit(self):
@@ -118,9 +118,10 @@ class AbstractEvaluator(object):
         try:
             self.duration = time.time() - self.starttime
             result, additional_run_info = self.file_output()
-            print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
-                  ('SAT', abs(self.duration), result, self.seed,
-                   additional_run_info))
+            if self.configuration is not None:
+                print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
+                      ('SAT', abs(self.duration), result, self.seed,
+                       additional_run_info))
         except Exception as e:
             self.duration = time.time() - self.starttime
 
@@ -131,8 +132,18 @@ class AbstractEvaluator(object):
 
     def file_output(self):
         seed = os.environ.get('AUTOSKLEARN_SEED')
+
         errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
+
+        if self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
+            return 2, "Targets %s and prediction %s don't have the same " \
+            "length. Probably training didn't finish" % (
+                self.Y_optimization.shape, Y_optimization_pred.shape)
+
         num_run = str(self.num_run).zfill(5)
+
+        if os.path.exists(self.backend.get_model_dir()):
+            self.backend.save_model(self.model, self.num_run, seed)
 
         if self.output_y_test:
             try:
@@ -154,7 +165,9 @@ class AbstractEvaluator(object):
 
         self.duration = time.time() - self.starttime
         err = errs[self.D.info['metric']]
-        additional_run_info = ';'.join(['%s: %s' % (metric, value)
+        additional_run_info = ';'.join(['%s: %s' %
+            (METRIC_TO_STRING[metric] if metric in METRIC_TO_STRING else metric,
+                                                                     value)
                                         for metric, value in errs.items()])
         additional_run_info += ';' + 'duration: ' + str(self.duration)
         additional_run_info += ';' + 'num_run:' + num_run

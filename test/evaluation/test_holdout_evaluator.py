@@ -39,7 +39,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {
-            'metric': 'bac_metric',
+            'metric': BAC_METRIC,
             'task': MULTICLASS_CLASSIFICATION,
             'is_sparse': False,
             'label_num': 3
@@ -84,7 +84,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {
-            'metric': 'bac_metric',
+            'metric': BAC_METRIC,
             'task': MULTICLASS_CLASSIFICATION,
             'is_sparse': False,
             'label_num': 3
@@ -139,7 +139,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {
-            'metric': 'f1_metric',
+            'metric': F1_METRIC,
             'task': MULTILABEL_CLASSIFICATION,
             'is_sparse': False,
             'label_num': 3
@@ -192,7 +192,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {
-            'metric': 'auc_metric',
+            'metric': AUC_METRIC,
             'task': BINARY_CLASSIFICATION,
             'is_sparse': False,
             'label_num': 2
@@ -238,7 +238,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {
-            'metric': 'r2_metric',
+            'metric': R2_METRIC,
             'task': REGRESSION,
             'is_sparse': False,
             'label_num': 1
@@ -321,7 +321,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         self.assertEqual(250, np.sum(np.bincount(Y) == 1))
         D = Dummy()
         D.info = {
-            'metric': 'acc_metric',
+            'metric': ACC_METRIC,
             'task': MULTICLASS_CLASSIFICATION,
             'is_sparse': False,
             'label_num': 1
@@ -396,7 +396,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {
-            'metric': 'r2_metric',
+            'metric': R2_METRIC,
             'task': REGRESSION,
             'is_sparse': False,
             'label_num': 3
@@ -455,7 +455,7 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
         D = Dummy()
         D.info = {
-            'metric': 'bac_metric',
+            'metric': BAC_METRIC,
             'task': task_type,
             'is_sparse': False,
             'label_num': 3

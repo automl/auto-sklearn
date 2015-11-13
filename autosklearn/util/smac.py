@@ -10,7 +10,7 @@ from autosklearn.util import logging_ as logging
 def run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
               data_manager_path, configspace_path, initial_configurations,
               per_run_time_limit, watcher, backend, seed,
-              resampling_strategy, resampling_strategy_arguments):
+              resampling_strategy, resampling_strategy_arguments, shared_mode):
     logger = logging.get_logger(__name__)
 
     task_name = 'runSmac'
@@ -29,6 +29,10 @@ def run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
 
     # = Start SMAC
     time_smac = max(0, time_for_task - watcher.wall_elapsed(basename))
+    if time_smac <= 0:
+        logger.info('No time left for SMAC')
+        return
+
     logger.info('Start SMAC with %5.2fsec time left' % time_smac)
 
     initial_challengers = initial_configurations
@@ -41,8 +45,12 @@ def run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
         'num-ei-random': '1000',
         'num-challengers': 100,
         'initial-incumbent': 'DEFAULT',
-        'validation': 'false',
+        'validation': 'false'
     }
+
+    if shared_mode:
+        smac_options['shared-model-mode'] = 'true'
+        smac_options['shared-model-mode-frequency'] = '300'
 
     call = ' '.join(['smac', '--numRun', str(seed), '--scenario',
                      scenario_file_path] +

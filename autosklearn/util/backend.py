@@ -1,3 +1,5 @@
+from __future__ import print_function
+import glob
 import os
 import time
 
@@ -88,8 +90,14 @@ class Backend(object):
 
         lock_path = filepath + '.lock'
         with lockfile.LockFile(lock_path):
-            if not os.path.exists(filepath):
-                np.save(filepath, targets.astype(np.float32))
+            if os.path.exists(filepath):
+                existing_targets = np.load(filepath)
+                if existing_targets.shape[0] > targets.shape[0] or \
+                        (existing_targets.shape == targets.shape and
+                         np.allclose(existing_targets, targets)):
+                    return filepath
+
+            np.save(filepath, targets.astype(np.float32))
 
         return filepath
 
@@ -127,61 +135,85 @@ class Backend(object):
     def get_model_dir(self):
         return os.path.join(self.internals_directory, 'models')
 
-    def save_model(self, model, idx):
+    def save_model(self, model, idx, seed):
         # This should fail if no models directory exists
-        filepath = os.path.join(self.get_model_dir(), '%s.model' % idx)
+        filepath = os.path.join(self.get_model_dir(),
+                                '%s.%s.model' % (seed, idx))
 
         with open(filepath, 'wb') as fh:
             pickle.dump(model, fh, -1)
 
-    def load_all_models(self):
+    def load_all_models(self, seed):
         model_directory = self.get_model_dir()
 
-        model_files = os.listdir(model_directory)
+        if seed >= 0:
+            model_files = glob.glob(os.path.join(model_directory,
+                                                 '%s.*.model' % seed))
+        else:
+            model_files = os.listdir(model_directory)
+            model_files = [os.path.join(model_directory, mf) for mf in model_files]
+
         models = dict()
         for model_file in model_files:
-            idx = int(model_file.split('.')[0])
+            # File names are like: {seed}.{index}.model
+            if model_file.endswith('/'):
+                model_file = model_file[:-1]
+            basename = os.path.basename(model_file)
+            automl_seed = int(basename.split('.')[0])
+            idx = int(basename.split('.')[1])
             with open(os.path.join(model_directory, model_file)) as fh:
-                models[idx] = (pickle.load(fh))
+                models[(automl_seed, idx)] = (pickle.load(fh))
 
         return models
 
-    def get_ensemble_indices_dir(self, seed):
-        return os.path.join(self.internals_directory, 'ensemble_indices_%d' %
-                            seed)
+    def get_ensemble_indices_dir(self):
+        return os.path.join(self.internals_directory, 'ensemble_indices')
 
     def load_ensemble_indices_weights(self, seed):
-        indices_dir = self.get_ensemble_indices_dir(seed)
-        indices_files = sorted(os.listdir(indices_dir))
-        indices_file = os.path.join(indices_dir, indices_files[-1])
-        with open(indices_file) as fh:
+        indices_dir = self.get_ensemble_indices_dir()
+
+        if not os.path.exists(indices_dir):
+            self.logger.warning('Directory %s does not exist' % indices_dir)
+            return {}
+
+        if seed >= 0:
+            indices_files = glob.glob(os.path.join(indices_dir,
+                                                   '%s.*.indices' % seed))
+            indices_files.sort()
+        else:
+            indices_files = os.listdir(indices_dir)
+            indices_files = [os.path.join(indices_dir, f) for f in indices_files]
+            indices_files.sort(key=lambda f: time.ctime(os.path.getmtime(f)))
+
+        with open(indices_files[-1]) as fh:
             ensemble_members_run_numbers = pickle.load(fh)
 
         return ensemble_members_run_numbers
 
     def save_ensemble_indices_weights(self, indices, idx, seed):
         try:
-            os.makedirs(self.get_ensemble_indices_dir(seed))
+            os.makedirs(self.get_ensemble_indices_dir())
         except Exception:
             pass
 
-        filepath = os.path.join(self.get_ensemble_indices_dir(seed),
-                                str(idx).zfill(10) + '.indices')
+        filepath = os.path.join(self.get_ensemble_indices_dir(),
+                                '%s.%s.indices' % (str(seed), str(idx).zfill(
+                                    10)))
         with open(filepath, 'wb') as fh:
             pickle.dump(indices, fh)
 
-    def _get_prediction_output_dir(self, subset, automl_seed):
+    def _get_prediction_output_dir(self, subset):
         return os.path.join(self.internals_directory,
-                            'predictions_%s_%s' % (subset, str(automl_seed)))
+                            'predictions_%s' % subset)
 
     def save_predictions_as_npy(self, predictions, subset, automl_seed, idx):
-        output_dir = self._get_prediction_output_dir(subset, automl_seed)
+        output_dir = self._get_prediction_output_dir(subset)
         # Make sure an output directory exists
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        filepath = os.path.join(output_dir, 'predictions_%s_%s.npy' %
-                                            (subset, str(idx)))
+        filepath = os.path.join(output_dir, 'predictions_%s_%s_%s.npy' %
+                                            (subset, automl_seed, str(idx)))
 
         with open(filepath, 'wb') as fh:
             pickle.dump(predictions.astype(np.float32), fh, -1)
@@ -190,7 +222,7 @@ class Backend(object):
         # Write prediction scores in prescribed format
         filepath = os.path.join(self.output_directory,
                                 ('%s_' % prefix if prefix else '') +
-                                 '_%s_%s.predict' % (subset, str(idx).zfill(5)))
+                                 '%s_%s.predict' % (subset, str(idx).zfill(5)))
 
         with open(filepath, 'w') as output_file:
             for row in predictions:
