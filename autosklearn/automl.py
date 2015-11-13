@@ -10,6 +10,7 @@ import traceback
 import numpy as np
 
 from HPOlibConfigSpace.converters import pcs_parser
+from HPOlibConfigSpace.configuration_space import Configuration
 from sklearn.base import BaseEstimator
 import six
 
@@ -21,7 +22,8 @@ from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import resampling, HoldoutEvaluator, get_new_run_num
 from autosklearn.metalearning.mismbo import \
     calc_meta_features, calc_meta_features_encoded, \
-    create_metalearning_string_for_smac_call
+    create_metalearning_string_for_smac_call, \
+    convert_conf2smac_string
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     get_auto_seed, set_auto_seed, del_auto_seed, submit_process, paramsklearn, \
