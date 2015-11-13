@@ -59,11 +59,11 @@ def get_predictions(dir_path, dir_path_list, include_num_runs,
         automl_seed = int(match.group(1))
         num_run = int(match.group(2))
         if (automl_seed, num_run) in include_num_runs:
-            if precision is "16":
+            if precision == "16":
                 predictions = np.load(os.path.join(dir_path, model_name)).astype(dtype=np.float16)
-            elif precision is "32":
+            elif precision == "32":
                 predictions = np.load(os.path.join(dir_path, model_name)).astype(dtype=np.float32)
-            elif precision is "64":
+            elif precision == "64":
                 predictions = np.load(os.path.join(dir_path, model_name)).astype(dtype=np.float64)
             else:
                 predictions = np.load(os.path.join(dir_path, model_name))
@@ -72,8 +72,7 @@ def get_predictions(dir_path, dir_path_list, include_num_runs,
 
 
 def original_ensemble_selection(predictions, labels, ensemble_size, task_type,
-                                metric,
-                                do_pruning=False):
+                                metric, do_pruning=False):
     """Rich Caruana's ensemble selection method."""
 
     ensemble = []
@@ -514,7 +513,7 @@ if __name__ == '__main__':
                         help='If True, build ensemble with all available '
                              'models. Otherwise, use only models produced by '
                              'a SMAC run with the same seed.')
-    parser.add_argument('--precision', required=False, default="64",
+    parser.add_argument('--precision', required=False, default="32",
                         choices=list(["16", "32", "64"]))
 
     args = parser.parse_args()
