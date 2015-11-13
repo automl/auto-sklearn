@@ -43,7 +43,7 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
     if metalearning_cnt <= 0:
         result = None
     elif data_info_task in \
-            [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
+            [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
         logger.info('Start calculating metafeatures for %s' % basename)
         result = calc_meta_features(x_train, y_train, categorical=categorical,
                                     dataset_name=basename)
@@ -381,7 +381,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         if meta_features is None:
             initial_configurations = []
         elif datamanager.info['task'] in [MULTICLASS_CLASSIFICATION,
-                                          BINARY_CLASSIFICATION]:
+                                          BINARY_CLASSIFICATION,
+                                          MULTILABEL_CLASSIFICATION]:
 
             meta_features_encoded = _calculate_metafeatures_encoded(
                 self._dataset_name,

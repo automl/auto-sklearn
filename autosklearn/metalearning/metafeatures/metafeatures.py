@@ -11,6 +11,7 @@ import sklearn
 import sklearn.metrics
 import sklearn.cross_validation
 from sklearn.utils import check_array
+from sklearn.multiclass import OneVsRestClassifier
 
 from ParamSklearn.implementations.Imputation import Imputer
 from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
@@ -143,8 +144,17 @@ class LogNumberOfInstances(MetaFeature):
 
 @metafeatures.define("NumberOfClasses")
 class NumberOfClasses(MetaFeature):
+    """
+    Calculate the number of classes.
+
+    Calls np.unique on the targets. If the dataset is a multilabel dataset,
+    does this for each label seperately and returns the mean.
+    """
     def _calculate(self, X, y, categorical):
-        return float(len(np.unique(y)))
+        if len(y.shape) == 2:
+            return np.mean([len(np.unique(y[:,i])) for i in range(y.shape[1])])
+        else:
+            return float(len(np.unique(y)))
 
 @metafeatures.define("NumberOfFeatures")
 class NumberOfFeatures(MetaFeature):
@@ -296,47 +306,88 @@ class LogInverseDatasetRatio(MetaFeature):
 @helper_functions.define("ClassOccurences")
 class ClassOccurences(HelperFunction):
     def _calculate(self, X, y, categorical):
-        occurence_dict = defaultdict(float)
-        for value in y:
-            occurence_dict[value] += 1
-        return occurence_dict
+        if len(y.shape) == 2:
+            occurences = []
+            for i in range(y.shape[1]):
+                occurences.append(self._calculate(X, y[:, i], categorical))
+            return occurences
+        else:
+            occurence_dict = defaultdict(float)
+            for value in y:
+                occurence_dict[value] += 1
+            return occurence_dict
 
 @metafeatures.define("ClassProbabilityMin", dependency="ClassOccurences")
 class ClassProbabilityMin(MetaFeature):
     def _calculate(self, X, y, categorical):
-        occurence_dict = helper_functions.get_value("ClassOccurences")
+        occurences = helper_functions.get_value("ClassOccurences")
+
         min_value = np.iinfo(np.int64).max
-        for num_occurences in occurence_dict.itervalues():
-            if num_occurences < min_value:
-                min_value = num_occurences
-        return float(min_value) / float(y.size)
+        if len(y.shape) == 2:
+            for i in range(y.shape[1]):
+                for num_occurences in occurences[i].itervalues():
+                    if num_occurences < min_value:
+                        min_value = num_occurences
+        else:
+            for num_occurences in occurences.itervalues():
+                if num_occurences < min_value:
+                    min_value = num_occurences
+        return float(min_value) / float(y.shape[0])
 
 # aka default accuracy
 @metafeatures.define("ClassProbabilityMax", dependency="ClassOccurences")
 class ClassProbabilityMax(MetaFeature):
     def _calculate(self, X, y, categorical):
-        occurence_dict = helper_functions.get_value("ClassOccurences")
+        occurences = helper_functions.get_value("ClassOccurences")
         max_value = -1
-        for num_occurences in occurence_dict.itervalues():
-            if num_occurences > max_value:
-                max_value = num_occurences
-        return float(max_value) / float(y.size)
+
+        if len(y.shape) == 2:
+            for i in range(y.shape[1]):
+                for num_occurences in occurences[i].itervalues():
+                    if num_occurences > max_value:
+                        max_value = num_occurences
+        else:
+            for num_occurences in occurences.itervalues():
+                if num_occurences > max_value:
+                    max_value = num_occurences
+        return float(max_value) / float(y.shape[0])
 
 @metafeatures.define("ClassProbabilityMean", dependency="ClassOccurences")
 class ClassProbabilityMean(MetaFeature):
     def _calculate(self, X, y, categorical):
         occurence_dict = helper_functions.get_value("ClassOccurences")
-        occurences = np.array([occurrence for occurrence in occurence_dict.itervalues()],
-                             dtype=np.float64)
-        return (occurences / y.size).mean()
+
+        if len(y.shape) == 2:
+            occurences = []
+            for i in range(y.shape[1]):
+                occurences.extend(
+                    [occurrence for occurrence in occurence_dict[
+                        i].itervalues()])
+            occurences = np.array(occurences)
+        else:
+            occurences = np.array([occurrence for occurrence in occurence_dict.itervalues()],
+                                  dtype=np.float64)
+        return (occurences / y.shape[0]).mean()
 
 @metafeatures.define("ClassProbabilitySTD", dependency="ClassOccurences")
 class ClassProbabilitySTD(MetaFeature):
     def _calculate(self, X, y, categorical):
         occurence_dict = helper_functions.get_value("ClassOccurences")
-        occurences = np.array([occurrence for occurrence in occurence_dict.itervalues()],
-                             dtype=np.float64)
-        return (occurences / y.size).std()
+
+        if len(y.shape) == 2:
+            stds = []
+            for i in range(y.shape[1]):
+                std = np.array(
+                    [occurrence for occurrence in occurence_dict[
+                                                      i].itervalues()],
+                    dtype=np.float64)
+                std = (std / y.shape[0]).std()
+                stds.append(std)
+            return np.mean(stds)
+        else:
+            occurences = np.array([occurrence for occurrence in occurence_dict.itervalues()],
+                                 dtype=np.float64)
+            return (occurences / y.shape[0]).std()
 
 ################################################################################
 # Reif, A Comprehensive Dataset for Evaluating Approaches of various Meta-Learning Tasks
@@ -517,11 +568,19 @@ class SkewnessSTD(MetaFeature):
 @metafeatures.define("ClassEntropy")
 class ClassEntropy(MetaFeature):
     def _calculate(self, X, y, categorical):
-        occurence_dict = defaultdict(float)
-        for value in y:
-            occurence_dict[value] += 1
-        return scipy.stats.entropy([occurence_dict[key] for key in
-                                    occurence_dict], base=2)
+        labels = 1 if len(y.shape) == 1 else y.shape[1]
+        if labels == 1:
+            y = y.reshape((-1, 1))
+
+        entropies = []
+        for i in range(labels):
+            occurence_dict = defaultdict(float)
+            for value in y[:, i]:
+                occurence_dict[value] += 1
+            entropies.append(scipy.stats.entropy([occurence_dict[key] for key in
+                                                 occurence_dict], base=2))
+
+        return np.mean(entropies)
 
 #@metafeatures.define("normalized_class_entropy")
 
@@ -554,12 +613,22 @@ class ClassEntropy(MetaFeature):
 class LandmarkLDA(MetaFeature):
     def _calculate(self, X, y, categorical):
         import sklearn.lda
-        kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+        if len(y.shape) == 1 or y.shape[1] == 1:
+            kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+        else:
+            kf = sklearn.cross_validation.KFold(y.shape[0], n_folds=10)
+
         accuracy = 0.
         try:
             for train, test in kf:
                 lda = sklearn.lda.LDA()
-                lda.fit(X[train], y[train])
+
+                if len(y.shape) == 1 or y.shape[1] == 1:
+                    lda.fit(X[train], y[train])
+                else:
+                    lda = OneVsRestClassifier(lda)
+                    lda.fit(X[train], y[train])
+
                 predictions = lda.predict(X[test])
                 accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
             return accuracy / 10
@@ -578,11 +647,22 @@ class LandmarkLDA(MetaFeature):
 class LandmarkNaiveBayes(MetaFeature):
     def _calculate(self, X, y, categorical):
         import sklearn.naive_bayes
-        kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+
+        if len(y.shape) == 1 or y.shape[1] == 1:
+            kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+        else:
+            kf = sklearn.cross_validation.KFold(y.shape[0], n_folds=10)
+
         accuracy = 0.
         for train, test in kf:
             nb = sklearn.naive_bayes.GaussianNB()
-            nb.fit(X[train], y[train])
+
+            if len(y.shape) == 1 or y.shape[1] == 1:
+                nb.fit(X[train], y[train])
+            else:
+                nb = OneVsRestClassifier(nb)
+                nb.fit(X[train], y[train])
+
             predictions = nb.predict(X[test])
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
         return accuracy / 10
@@ -595,12 +675,23 @@ class LandmarkNaiveBayes(MetaFeature):
 class LandmarkDecisionTree(MetaFeature):
     def _calculate(self, X, y, categorical):
         import sklearn.tree
-        kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+
+        if len(y.shape) == 1 or y.shape[1] == 1:
+            kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+        else:
+            kf = sklearn.cross_validation.KFold(y.shape[0], n_folds=10)
+
         accuracy = 0.
         for train, test in kf:
             random_state = sklearn.utils.check_random_state(42)
             tree = sklearn.tree.DecisionTreeClassifier(random_state=random_state)
-            tree.fit(X[train], y[train])
+
+            if len(y.shape) == 1 or y.shape[1] == 1:
+                tree.fit(X[train], y[train])
+            else:
+                tree = OneVsRestClassifier(tree)
+                tree.fit(X[train], y[train])
+
             predictions = tree.predict(X[test])
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
         return accuracy / 10
@@ -618,14 +709,23 @@ as the dataset is later on used encoded."""
 class LandmarkDecisionNodeLearner(MetaFeature):
     def _calculate(self, X, y, categorical):
         import sklearn.tree
-        kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+
+        if len(y.shape) == 1 or y.shape[1] == 1:
+            kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+        else:
+            kf = sklearn.cross_validation.KFold(y.shape[0], n_folds=10)
+
         accuracy = 0.
         for train, test in kf:
             random_state = sklearn.utils.check_random_state(42)
             node = sklearn.tree.DecisionTreeClassifier(
                 criterion="entropy", max_depth=1, random_state=random_state,
                 min_samples_split=1, min_samples_leaf=1,  max_features=None)
-            node.fit(X[train], y[train])
+            if len(y.shape) == 1 or y.shape[1] == 1:
+                node.fit(X[train], y[train])
+            else:
+                node = OneVsRestClassifier(node)
+                node.fit(X[train], y[train])
             predictions = node.predict(X[test])
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
         return accuracy / 10
@@ -637,7 +737,11 @@ class LandmarkDecisionNodeLearner(MetaFeature):
 class LandmarkRandomNodeLearner(MetaFeature):
     def _calculate(self, X, y, categorical):
         import sklearn.tree
-        kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+
+        if len(y.shape) == 1 or y.shape[1] == 1:
+            kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+        else:
+            kf = sklearn.cross_validation.KFold(y.shape[0], n_folds=10)
         accuracy = 0.
 
         for train, test in kf:
@@ -645,7 +749,11 @@ class LandmarkRandomNodeLearner(MetaFeature):
             node = sklearn.tree.DecisionTreeClassifier(
                 criterion="entropy", max_depth=1, random_state=random_state,
                 min_samples_split=1, min_samples_leaf=1, max_features=1)
-            node.fit(X[train], y[train])
+            if len(y.shape) == 1 or y.shape[1] == 1:
+                node.fit(X[train], y[train])
+            else:
+                node = OneVsRestClassifier(node)
+                node.fit(X[train], y[train])
             predictions = node.predict(X[test])
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
         return accuracy / 10
@@ -683,11 +791,20 @@ def landmark_worst_node_learner(X, y):
 class Landmark1NN(MetaFeature):
     def _calculate(self, X, y, categorical):
         import sklearn.neighbors
-        kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+
+        if len(y.shape) == 1 or y.shape[1] == 1:
+            kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+        else:
+            kf = sklearn.cross_validation.KFold(y.shape[0], n_folds=10)
+
         accuracy = 0.
         for train, test in kf:
             kNN = sklearn.neighbors.KNeighborsClassifier(n_neighbors=1)
-            kNN.fit(X[train], y[train])
+            if len(y.shape) == 1 or y.shape[1] == 1:
+                kNN.fit(X[train], y[train])
+            else:
+                kNN = OneVsRestClassifier(kNN)
+                kNN.fit(X[train], y[train])
             predictions = kNN.predict(X[test])
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
         return accuracy / 10
