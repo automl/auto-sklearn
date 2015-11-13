@@ -11,9 +11,8 @@ import scipy as sp
 
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     BINARY_CLASSIFICATION, METRIC_TO_STRING
-from autosklearn.metrics.common import mv_mean, binarize_predictions, \
-    acc_stat, \
-    tied_rank
+from autosklearn.metrics.common import binarize_predictions, \
+    acc_stat, tied_rank
 from autosklearn.metrics.util import log_loss, prior_log_loss
 
 
@@ -91,7 +90,7 @@ def bac_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     else:
         bac = tpr
         base_bac = 1. / label_num  # random predictions for multiclass case
-    bac = mv_mean(bac)  # average over all classes
+    bac = np.mean(bac)  # average over all classes
     # Normalize: 0 for random, 1 for perfect
     score = (bac - base_bac) / sp.maximum(eps, (1 - base_bac))
     return score
@@ -134,8 +133,8 @@ def pac_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     # Exponentiate to turn into an accuracy-like score.
     # In the multi-label case, we need to average AFTER taking the exp
     # because it is an NL operation
-    pac = mv_mean(np.exp(-the_log_loss))
-    base_pac = mv_mean(np.exp(-the_base_log_loss))
+    pac = np.mean(np.exp(-the_log_loss))
+    base_pac = np.mean(np.exp(-the_base_log_loss))
     # Normalize: 0 for random, 1 for perfect
     score = (pac - base_pac) / sp.maximum(eps, (1 - base_pac))
     return score
@@ -169,7 +168,7 @@ def f1_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     # Harmonic mean:
     f1 = tpr * ppv / arithmetic_mean
     # Average over all classes
-    f1 = mv_mean(f1)
+    f1 = np.mean(f1)
     # Normalize: 0 for random, 1 for perfect
     if (task != MULTICLASS_CLASSIFICATION) or (label_num == 1):
         # How to choose the "base_f1"?
@@ -223,6 +222,6 @@ def auc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
         npos = sum(s_ == 1)
         nneg = sum(s_ < 1)
         auc[k] = (sum(r_[s_ == 1]) - npos * (npos + 1) / 2) / (nneg * npos)
-    return 2 * mv_mean(auc) - 1
+    return 2 * np.mean(auc) - 1
 
 # END CLASSIFICATION METRICS
