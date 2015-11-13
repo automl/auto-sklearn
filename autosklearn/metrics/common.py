@@ -81,28 +81,3 @@ def tied_rank(a):
     S[i] = R
     return S
 
-
-def mv_mean(R, axis=0):
-    """
-    Moving average to avoid rounding errors.
-
-    A bit slow, but... Computes the mean along the given axis, except if
-    this is a vector, in which case the mean is returned. Does NOT
-    flatten.
-
-    :param R:
-    :param axis:
-    :return:
-    """
-    if len(R.shape) == 0:
-        return R
-    average = lambda x: reduce(lambda i, j: (0, (j[0] / (j[0] + 1.)) * i[1] +
-                                             (1. / (j[0] + 1)) * j[1]),
-                               enumerate(x))[1]
-    R = np.array(R)
-    if len(R.shape) == 1:
-        return average(R)
-    if axis == 1:
-        return np.array(map(average, R))
-    else:
-        return np.array(map(average, R.transpose()))

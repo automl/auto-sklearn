@@ -7,7 +7,6 @@ from __future__ import print_function
 import numpy as np
 
 from autosklearn.constants import REGRESSION, METRIC_TO_STRING
-from autosklearn.metrics.common import mv_mean
 
 
 def calculate_score(metric, solution, prediction):
@@ -23,10 +22,10 @@ def r2_metric(solution, prediction, task=REGRESSION):
     :param task:
     :return:
     """
-    mse = mv_mean((solution - prediction) ** 2)
-    var = mv_mean((solution - mv_mean(solution)) ** 2)
+    mse = np.mean((solution - prediction) ** 2, axis=0)
+    var = np.mean((solution - np.mean(solution)) ** 2, axis=0)
     score = 1 - mse / var
-    return mv_mean(score)
+    return np.mean(score)
 
 
 def a_metric(solution, prediction, task=REGRESSION):
@@ -37,8 +36,8 @@ def a_metric(solution, prediction, task=REGRESSION):
     :param task:
     :return:
     """
-    mae = mv_mean(np.abs(solution - prediction))  # mean absolute error
-    mad = mv_mean(
-        np.abs(solution - mv_mean(solution)))  # mean absolute deviation
+    mae = np.mean(np.abs(solution - prediction))  # mean absolute error
+    mad = np.mean(
+        np.abs(solution - np.mean(solution)))  # mean absolute deviation
     score = 1 - mae / mad
-    return mv_mean(score)
+    return np.mean(score)

@@ -6,7 +6,7 @@ import scipy as sp
 
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     BINARY_CLASSIFICATION
-from autosklearn.metrics.common import mv_mean, binarize_predictions
+from autosklearn.metrics.common import binarize_predictions
 
 
 def sanitize_array(array):
@@ -16,10 +16,12 @@ def sanitize_array(array):
     :return:
     """
     a = np.ravel(array)
-    maxi = np.nanmax((filter(lambda x: x != float('inf'), a))
-                     )  # Max except NaN and Inf
-    mini = np.nanmin((filter(lambda x: x != float('-inf'), a))
-                     )  # Mini except NaN and Inf
+    #maxi = np.nanmax((filter(lambda x: x != float('inf'), a))
+    #                 )  # Max except NaN and Inf
+    #mini = np.nanmin((filter(lambda x: x != float('-inf'), a))
+    #                 )  # Mini except NaN and Inf
+    maxi = np.nanmax(a[np.isfinite(a)])
+    mini = np.nanmin(a[np.isfinite(a)])
     array[array == float('inf')] = maxi
     array[array == float('-inf')] = mini
     mid = (maxi + mini) / 2
@@ -42,10 +44,12 @@ def normalize_array(solution, prediction):
     """
     # Binarize solution
     sol = np.ravel(solution)  # convert to 1-d array
-    maxi = np.nanmax((filter(lambda x: x != float('inf'), sol))
-                     )  # Max except NaN and Inf
-    mini = np.nanmin((filter(lambda x: x != float('-inf'), sol))
-                     )  # Mini except NaN and Inf
+    #maxi = np.nanmax((filter(lambda x: x != float('inf'), sol))
+    #                 )  # Max except NaN and Inf
+    #mini = np.nanmin((filter(lambda x: x != float('-inf'), sol))
+    #                 )  # Mini except NaN and Inf
+    maxi = np.nanmax(sol[np.isfinite(sol)])
+    mini = np.nanmin(sol[np.isfinite(sol)])
     if maxi == mini:
         print('Warning, cannot normalize')
         return [solution, prediction]
@@ -87,11 +91,11 @@ def log_loss(solution, prediction, task=BINARY_CLASSIFICATION):
         # Bounding of predictions to avoid log(0),1/0,...
     pred = sp.minimum(1 - eps, sp.maximum(eps, pred))
     # Compute the log loss
-    pos_class_log_loss = -mv_mean(sol * np.log(pred), axis=0)
+    pos_class_log_loss = -np.mean(sol * np.log(pred), axis=0)
     if (task != MULTICLASS_CLASSIFICATION) or (label_num == 1):
         # The multi-label case is a bunch of binary problems.
         # The second class is the negative class for each column.
-        neg_class_log_loss = - mv_mean((1 - sol) * np.log(1 - pred), axis=0)
+        neg_class_log_loss = -np.mean((1 - sol) * np.log(1 - pred), axis=0)
         log_loss = pos_class_log_loss + neg_class_log_loss
         # Each column is an independent problem, so we average.
         # The probabilities in one line do not add up to one.

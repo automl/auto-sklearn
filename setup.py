@@ -23,7 +23,7 @@ METADATA_DIRECTORY = 'autosklearn/metalearning/files'
 
 extensions = [Extension('autosklearn.data.competition_c_functions',
                         sources=[
-                            'autosklearn/data/competition_c_functions.c'
+                            'autosklearn/data/competition_c_functions.pyx'
                         ])
              ]
 

@@ -150,7 +150,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                  resampling_strategy_arguments=None,
                  delete_tmp_folder_after_terminate=False,
                  delete_output_folder_after_terminate=False,
-                 shared_mode=False):
+                 shared_mode=False,
+                 precision=32):
         super(AutoML, self).__init__()
 
         self._tmp_dir = tmp_dir
@@ -176,6 +177,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self.delete_output_folder_after_terminate = \
             delete_output_folder_after_terminate
         self._shared_mode = shared_mode
+        self.precision = precision
 
         self._datamanager = None
         self._dataset_name = None
@@ -260,8 +262,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         self._logger.debug('======== Reading and converting data ==========')
         # Encoding the labels will be done after the metafeature calculation!
-        loaded_data_manager = CompetitionDataManager(dataset,
-                                                     encode_labels=False)
+        loaded_data_manager = CompetitionDataManager(
+            dataset, encode_labels=False,
+            max_memory_in_mb=float(self._ml_memory_limit) / 3)
         loaded_data_manager_str = str(loaded_data_manager).split('\n')
         for part in loaded_data_manager_str:
             self._logger.debug(part)
@@ -532,7 +535,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 ensemble_nbest=self._ensemble_nbest,
                 seed=self._seed,
                 shared_mode=self._shared_mode,
-                max_iterations=max_iterations
+                max_iterations=max_iterations,
+                precision=self.precision
             )
             self._stopwatch.stop_task(task_name)
             return proc_ensembles

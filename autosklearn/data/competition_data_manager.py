@@ -158,7 +158,8 @@ def load_labels(filename):
 
 class CompetitionDataManager(AbstractDataManager):
 
-    def __init__(self, name, encode_labels=True):
+    def __init__(self, name, encode_labels=True, max_memory_in_mb=1048576):
+        """ max_memory_size in Mb """
         if name.endswith("/"):
             name = name[:-1]
         input_dir = os.path.dirname(name)
@@ -174,18 +175,26 @@ class CompetitionDataManager(AbstractDataManager):
         self.feat_type = self.load_type(os.path.join(self.input_dir,
                                                     self.name + '_feat.type'))
 
+        # apply memory limit here for really large training sets
         Xtr = self.load_data(
             os.path.join(self.input_dir, self.name + '_train.data'),
-            self.info['train_num'])
+            self.info['train_num'],
+            max_memory_in_mb = max_memory_in_mb)
         Ytr = self.load_label(
             os.path.join(self.input_dir, self.name + '_train.solution'),
             self.info['train_num'])
+        # no restriction here
         Xva = self.load_data(
             os.path.join(self.input_dir, self.name + '_valid.data'),
-            self.info['valid_num'])
+            self.info['valid_num'],
+            max_memory_in_mb=1048576)
         Xte = self.load_data(
             os.path.join(self.input_dir, self.name + '_test.data'),
-            self.info['test_num'])
+            self.info['test_num'],
+            max_memory_in_mb=1048576)
+
+        # update the info in case the data has been cut off
+        self.info['train_num'] = Xtr.shape[0]
 
         self._data['X_train'] = Xtr
         self._data['Y_train'] = Ytr
@@ -210,7 +219,7 @@ class CompetitionDataManager(AbstractDataManager):
         if encode_labels:
             self.perform1HotEncoding()
 
-    def load_data(self, filename, num_points):
+    def load_data(self, filename, num_points, max_memory_in_mb):
         """Get the data from a text file in one of 3 formats:
         matrix, sparse, binary_sparse"""
         # if verbose:
@@ -227,7 +236,7 @@ class CompetitionDataManager(AbstractDataManager):
             }
 
             data = data_func[self.info['format']](filename, num_points,
-                                                  self.info['feat_num'])
+                                                  self.info['feat_num'], max_memory_in_mb)
 
             if scipy.sparse.issparse(data):
                 if not np.all(data.indices >= 0):
