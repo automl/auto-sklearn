@@ -258,8 +258,9 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         self._logger.debug('======== Reading and converting data ==========')
         # Encoding the labels will be done after the metafeature calculation!
-        loaded_data_manager = CompetitionDataManager(dataset,
-                                                     encode_labels=False)
+        loaded_data_manager = CompetitionDataManager(
+            dataset, encode_labels=False,
+            max_memory_in_mb=float(self._ml_memory_limit) / 3)
         loaded_data_manager_str = str(loaded_data_manager).split('\n')
         for part in loaded_data_manager_str:
             self._logger.debug(part)

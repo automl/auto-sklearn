@@ -23,7 +23,7 @@ def log_function(*args):
     So far, only ascii #32 (space) is recognized as a whitespace. If the entries are tab-separated (or any other chararcter), this could easily be implemented here.
     
 '''
-def read_sparse_file(char *filename, int num_points,int num_features, int initial_length = 262144, int offset = -1, int max_memory_in_mb = 1024):
+def read_sparse_file(char *filename, int num_points,int num_features, int initial_length = 262144, int offset = -1, int max_memory_in_mb = 1048576):
 
     #cdef np.ndarray[float, ndim=1] 
     data = np.zeros(initial_length,dtype=np.float32)
@@ -104,7 +104,7 @@ def read_sparse_file(char *filename, int num_points,int num_features, int initia
     see read_sparse_file, only difference: the value of every index present is 1, so there are no index:value pairs, but just indices.
     
 '''
-def read_sparse_binary_file(char *filename, int num_points, int num_features, int initial_length = 262144, int offset = -1, int max_memory_in_mb = 1024):
+def read_sparse_binary_file(char *filename, int num_points, int num_features, int initial_length = 262144, int offset = -1, int max_memory_in_mb = 1048576):
 
     data = np.zeros(initial_length,dtype=np.bool)
     indices = np.zeros(initial_length, dtype=np.int32)
@@ -183,7 +183,7 @@ def read_sparse_binary_file(char *filename, int num_points, int num_features, in
     
     The function does not check for EOF or missing values, so be cautious!
 '''
-def read_dense_file(filename, num_points, num_features, max_memory_in_mb = 1024):
+def read_dense_file(filename, num_points, num_features, max_memory_in_mb = 1048576):
 
     nbits = np.finfo(np.float32).nexp + np.finfo(np.float32).nmant+1
     num_points = int(min(num_points,max_memory_in_mb*1024*1024*8/nbits/num_features))
@@ -211,7 +211,7 @@ def read_dense_file(filename, num_points, num_features, max_memory_in_mb = 1024)
     return(data)
 
 
-def read_dense_file_unknown_width(filename, num_points, max_memory_in_mb = 1024):
+def read_dense_file_unknown_width(filename, num_points, max_memory_in_mb = 1048576):
     # variables for I/O
     cdef char* fname
     cdef FILE* cfile

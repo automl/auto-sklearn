@@ -12,7 +12,7 @@ import numpy as np
 import scipy.sparse
 
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
-    STRING_TO_TASK_TYPES,  MULTICLASS_CLASSIFICATION
+    STRING_TO_TASK_TYPES,  MULTICLASS_CLASSIFICATION, STRING_TO_METRIC
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.util import convert_to_num
 
@@ -158,7 +158,7 @@ def load_labels(filename):
 
 class CompetitionDataManager(AbstractDataManager):
 
-    def __init__(self, name, encode_labels=True, max_memory_in_mb = 1024):
+    def __init__(self, name, encode_labels=True, max_memory_in_mb=1048576):
         """ max_memory_size in Mb """
         if name.endswith("/"):
             name = name[:-1]
@@ -180,20 +180,18 @@ class CompetitionDataManager(AbstractDataManager):
             os.path.join(self.input_dir, self.name + '_train.data'),
             self.info['train_num'],
             max_memory_in_mb = max_memory_in_mb)
-        # the labels for the training sets shouldn't be a problem, but just in case
         Ytr = self.load_label(
             os.path.join(self.input_dir, self.name + '_train.solution'),
-            self.info['train_num'],
-            max_memory_in_mb = max_memory_in_mb)
-        # no real restriction here (just the hard limit from the competition)
+            self.info['train_num'])
+        # no restriction here
         Xva = self.load_data(
             os.path.join(self.input_dir, self.name + '_valid.data'),
             self.info['valid_num'],
-            max_memory_in_mb=3072)
+            max_memory_in_mb=1048576)
         Xte = self.load_data(
             os.path.join(self.input_dir, self.name + '_test.data'),
             self.info['test_num'],
-            max_memory_in_mb=3072)
+            max_memory_in_mb=1048576)
 
         # update the info in case the data has been cut off
         self.info['train_num'] = Xtr.shape[0]
@@ -334,6 +332,7 @@ class CompetitionDataManager(AbstractDataManager):
                                       'file.')
 
         self.info['task'] = STRING_TO_TASK_TYPES[self.info['task']]
+        self.info['metric'] = STRING_TO_METRIC[self.info['metric']]
 
         return self.info
 
