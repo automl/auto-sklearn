@@ -23,7 +23,7 @@ def log_function(*args):
     So far, only ascii #32 (space) is recognized as a whitespace. If the entries are tab-separated (or any other chararcter), this could easily be implemented here.
     
 '''
-def read_sparse_file(char *filename, int num_points,int num_features, int initial_length = 10000, int offset = -1):
+def read_sparse_file(char *filename, int num_points,int num_features, int initial_length = 262144, int offset = -1, int max_memory_in_mb = 1024):
 
     #cdef np.ndarray[float, ndim=1] 
     data = np.zeros(initial_length,dtype=np.float32)
@@ -64,8 +64,11 @@ def read_sparse_file(char *filename, int num_points,int num_features, int initia
         
         #enlarge the array if necessary
         if num_entries == data.shape[0]:
-            data.resize(data.shape[0]+initial_length)
-            indices.resize(data.shape[0])
+            if ((data.nbytes + indices.nbytes) < max_memory_in_mb*1024*1024):
+                data.resize(data.shape[0]+initial_length)
+                indices.resize(data.shape[0])
+            else:
+                break
         
         # check if we hit a endline next to recognize the next row
         # It is cumbersome, but a way to reliably do it!
@@ -101,7 +104,7 @@ def read_sparse_file(char *filename, int num_points,int num_features, int initia
     see read_sparse_file, only difference: the value of every index present is 1, so there are no index:value pairs, but just indices.
     
 '''
-def read_sparse_binary_file(char *filename, int num_points, int num_features, int initial_length = 10000, int offset = -1):
+def read_sparse_binary_file(char *filename, int num_points, int num_features, int initial_length = 262144, int offset = -1, int max_memory_in_mb = 1024):
 
     data = np.zeros(initial_length,dtype=np.bool)
     indices = np.zeros(initial_length, dtype=np.int32)
@@ -136,8 +139,11 @@ def read_sparse_binary_file(char *filename, int num_points, int num_features, in
         
         #enlarge the array if necessary
         if num_entries == data.shape[0]:
-            data.resize(data.shape[0]+initial_length)
-            indices.resize(data.shape[0])
+            if ((data.nbytes + indices.nbytes) < max_memory_in_mb*1024*1024):
+                data.resize(data.shape[0]+initial_length)
+                indices.resize(data.shape[0])
+            else:
+                break
         
         # check if we hit a endline next to recognize the next row
         # It is cumbersome, but a way to reliably do it!
@@ -177,8 +183,11 @@ def read_sparse_binary_file(char *filename, int num_points, int num_features, in
     
     The function does not check for EOF or missing values, so be cautious!
 '''
-def read_dense_file(filename, num_points, num_features):
+def read_dense_file(filename, num_points, num_features, max_memory_in_mb = 1024):
 
+    nbits = np.finfo(np.float32).nexp + np.finfo(np.float32).nmant+1
+    num_points = int(min(num_points,max_memory_in_mb*1024*1024*8/nbits/num_features))
+    
     cdef np.ndarray[float, ndim=2] data = np.zeros([num_points, num_features],dtype=np.float32)
     
     # variables for I/O
@@ -202,7 +211,7 @@ def read_dense_file(filename, num_points, num_features):
     return(data)
 
 
-def read_dense_file_unknown_width(filename, num_points):
+def read_dense_file_unknown_width(filename, num_points, max_memory_in_mb = 1024):
     # variables for I/O
     cdef char* fname
     cdef FILE* cfile
@@ -229,7 +238,7 @@ def read_dense_file_unknown_width(filename, num_points):
         if (rc == '\n'): break
     fclose(cfile)
 
-    data = read_dense_file(filename, num_points,num_cols)
+    data = read_dense_file(filename, num_points,num_cols, max_memory_in_mb)
 
     # if only one predictor is present, convert it into a 1D array
     if data.shape[1] == 1:
