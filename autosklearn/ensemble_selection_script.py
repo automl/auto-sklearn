@@ -403,10 +403,12 @@ def main(autosklearn_tmp_dir,
             except ValueError as e:
                 logger.error('Caught ValueError: ' + str(e))
                 used_time = watch.wall_elapsed('ensemble_builder')
+                time.sleep(2)
                 continue
             except Exception as e:
                 logger.error('Caught error! %s', e.message)
                 used_time = watch.wall_elapsed('ensemble_builder')
+                time.sleep(2)
                 continue
 
             # Output the score
