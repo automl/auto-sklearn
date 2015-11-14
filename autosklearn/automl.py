@@ -146,7 +146,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                  debug_mode=False,
                  include_estimators=None,
                  include_preprocessors=None,
-                 resampling_strategy='holdout',
+                 resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
                  delete_tmp_folder_after_terminate=False,
                  delete_output_folder_after_terminate=False,

@@ -56,6 +56,7 @@ class HoldoutEvaluator(AbstractEvaluator):
             self.file_output()
             n_iter += 2
 
+
     def predict(self):
         Y_optimization_pred = self.predict_function(self.X_optimization,
                                                     self.model, self.task_type)
