@@ -17,6 +17,8 @@ addons:
     packages:
     - libatlas-dev
     - liblapack-dev
+    - libatlas-base-dev
+    - gfortran
 
 #before_install:
 #  - sudo apt-get install -q libatlas3gf-base libatlas-dev liblapack-dev gfortran
