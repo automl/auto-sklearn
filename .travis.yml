@@ -17,7 +17,7 @@ sudo: false
 
 install:
   - easy_install -U distribute
-  - pip install numpy==0.16.0
+  - pip install numpy==1.6.1
   - pip install scipy==0.14.0
 
   # Install requirements from other repos
