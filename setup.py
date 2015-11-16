@@ -118,7 +118,7 @@ setuptools.setup(
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=['setuptools',
-                      'numpy>=0.16.0',
+                      'numpy>=1.6.1',
                       'psutil',
                       'pyyaml',
                       'scipy>=0.14.0',
