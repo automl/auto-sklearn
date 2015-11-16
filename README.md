@@ -8,7 +8,7 @@ Status for master branch:
 
 [![Build Status](https://travis-ci.org/automl/auto-sklearn.svg?branch=master)](https://travis-ci.org/automl/auto-sklearn)
 [![Code Health](https://landscape.io/github/automl/auto-sklearn/master/landscape.png)](https://landscape.io/github/automl/auto-sklearn/master)
-[![Documentation Status](https://readthedocs.org/projects/auto-sklearn/badge/?version=master)](http://hpolib.readthedocs.org/en/master/)
+[![Documentation Status](https://readthedocs.org/projects/auto-sklearn/badge/?version=master)](http://auto-sklearn.readthedocs.org/en/master/)
 
 Status for development branch
 
