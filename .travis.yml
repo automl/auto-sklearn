@@ -1,0 +1,36 @@
+language: python
+python:
+  - "2.7"
+  - "3.4"
+
+cache: pip
+cache:
+  directories:
+    - $HOME/.cache/pip
+
+sudo: false
+
+# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+
+addons:
+  apt:
+    packages:
+    - libatlas-dev
+    - liblapack-dev
+
+#before_install:
+#  - sudo apt-get install -q libatlas3gf-base libatlas-dev liblapack-dev gfortran
+
+install:
+  - easy_install -U distribute
+  - pip install numpy==1.6.1
+  - pip install scipy==0.16.1
+  - pip install scikit-learn==0.16.1
+
+  # Install requirements from other repos
+  - pip install git+https://github.com/automl/HPOlibConfigSpace.git
+
+  - python setup.py install
+
+# command to run tests, e.g. python setup.py test
+script:  python setup.py test
