@@ -18,7 +18,8 @@ sudo: false
 install:
   - easy_install -U distribute
   - pip install numpy==1.6.1
-  - pip install scipy==0.14.0
+  - pip install scipy==0.16.1
+  - pip install scikit-learn==0.16.1
 
   # Install requirements from other repos
   - pip install git+https://github.com/automl/HPOlibConfigSpace.git
