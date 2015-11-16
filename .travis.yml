@@ -4,14 +4,10 @@ python:
   - "3.4"
 
 cache: pip
-cache:
-  directories:
-    - $HOME/.cache/pip
 
 sudo: false
 
-# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-
+# command to install dependencies
 addons:
   apt:
     packages:
@@ -19,9 +15,6 @@ addons:
     - liblapack-dev
     - libatlas-base-dev
     - gfortran
-
-#before_install:
-#  - sudo apt-get install -q libatlas3gf-base libatlas-dev liblapack-dev gfortran
 
 install:
   - easy_install -U distribute
