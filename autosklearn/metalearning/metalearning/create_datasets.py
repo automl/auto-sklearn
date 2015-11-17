@@ -1,13 +1,9 @@
-from argparse import ArgumentParser
-import cPickle
+from __future__ import print_function
 import itertools
 import logging
 import numpy as np
-import os
 import pandas as pd
-import re
 import scipy.stats
-import StringIO
 
 
 def create_regression_dataset(metafeatures, experiments):
@@ -78,7 +74,7 @@ def create_predict_spearman_rank(metafeatures, experiments, iterator):
                 sorted(experiments_2, key=lambda t: str(t.configuration)))):
             # Test if the order of the params is the same
             exp_1, exp_2 = zipped
-            print exp_1.configuration, exp_2.configuration
+            print(exp_1.configuration, exp_2.configuration)
             assert exp_1.configuration == exp_2.configuration,\
                 (experiments_1, experiments_2)
             responses_1[idx] = exp_1.result if np.isfinite(exp_1.result) else 1
@@ -141,7 +137,7 @@ def create_predict_spearman_rank_with_cv(cv_metafeatures, cv_experiments,
 
     # Create inputs and targets
     for i, cross in enumerate(cross_product):
-        print "%d/%d: %s" % (i, len(cross_product), cross),
+        print("%d/%d: %s" % (i, len(cross_product), cross),)
         for folds in folds_product:
             name = "%s-%d_%s-%d" % (cross[0], folds[0], cross[1], folds[1])
             mf_1 = cv_metafeatures[cross[0]][folds[0]]

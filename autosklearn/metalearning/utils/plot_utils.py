@@ -19,7 +19,7 @@ def find_ground_truth(globstring):
         raise Exception("There must be only one ground truth directory for "
                         "%s" % globstring)
     elif len(glob_results) == 0:
-        print "Found no ground truth for %s" % globstring
+        print("Found no ground truth for %s" % globstring)
         return None
 
     with open(glob_results[0]) as fh:

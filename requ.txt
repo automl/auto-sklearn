@@ -15,6 +15,7 @@ six
 ConfigArgParse
 liac-arff
 pandas
+Cython
 
 git+https://github.com/automl/HPOlibConfigSpace/#egg=HPOlibConfigSpace
 git+https://github.com/automl/paramsklearn.git@development
