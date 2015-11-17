@@ -38,6 +38,7 @@ install:
   - pip install git+https://github.com/automl/HPOlibConfigSpace.git
   - pip install git+https://github.com/automl/paramsklearn.git
 
+script:
   - coverage run --source autosklearn setup.py test
 
 after_success: coveralls
