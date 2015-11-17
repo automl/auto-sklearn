@@ -18,4 +18,4 @@ pandas
 Cython
 
 git+https://github.com/automl/HPOlibConfigSpace@master
-git+https://github.com/automl/paramsklearn.git@development
+git+https://github.com/automl/paramsklearn@development
