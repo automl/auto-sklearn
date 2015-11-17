@@ -24,7 +24,7 @@ class SGDComponentTest(unittest.TestCase):
     def test_default_configuration_digits(self):
         for i in range(10):
             predictions, targets = _test_regressor(SGD, dataset='boston')
-            self.assertAlmostEqual(-2.916586651177552e+31,
+            self.assertAlmostEqual(-2.9165866511775523e+31,
                                    sklearn.metrics.r2_score(y_true=targets,
                                                             y_pred=predictions))
 
@@ -32,6 +32,6 @@ class SGDComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = _test_regressor_iterative_fit(SGD,
                                                                  dataset='boston')
-            self.assertAlmostEqual(-2.916586651177552e+31,
+            self.assertAlmostEqual(-2.9165866511775523e+31,
                                    sklearn.metrics.r2_score(y_true=targets,
                                                             y_pred=predictions))
