@@ -20,7 +20,7 @@ install:
   - easy_install -U distribute
   - pip install --upgrade pip
   - pip install numpy==1.9.0
-  - pip install scipy==0.16.1
+  - travis_wait pip install scipy==0.16.1
   - pip install scikit-learn==0.16.1
 
   # Install requirements from other repos
