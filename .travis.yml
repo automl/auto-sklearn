@@ -25,6 +25,8 @@ install:
   - travis_wait pip install scipy==0.16.1
   - pip install scikit-learn==0.16.1
   - pip install Cython
+  - pip install pandas
+  -
 
   # Install requirements from other repos
   - pip install git+https://github.com/automl/HPOlibConfigSpace.git
