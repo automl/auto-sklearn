@@ -3,9 +3,15 @@ python:
   - "2.7"
   - "3.4"
 
-cache: pip
+cache:
+  directories:
+    - $HOME/.cache/pip
+  pip: true
 
 sudo: false
+
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
 
 # command to install dependencies
 addons:
@@ -16,12 +22,15 @@ addons:
     - libatlas-base-dev
     - gfortran
 
+before_install:
+  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - conda update --yes conda
+
 install:
-  - easy_install -U distribute
-  - pip install --upgrade pip
-  - pip install numpy==1.9.0
-  - travis_wait pip install scipy==0.16.1
-  - pip install scikit-learn==0.16.1
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy==1.9.0 scipy==0.16.1 nose scikit-learn==0.16.1
+  - pip install pep8 python-coveralls
 
   # Install requirements from other repos
   - pip install git+https://github.com/automl/HPOlibConfigSpace.git
@@ -30,3 +39,5 @@ install:
 
 # command to run tests, e.g. python setup.py test
 script:  python setup.py test
+
+after_success: coveralls
