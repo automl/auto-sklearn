@@ -11,7 +11,7 @@ import autosklearn.metalearning.metafeatures.metafeature
 
 
 def calculate_metafeatures(D, output_dir, memory_limit=3072):
-    resource.setrlimit(resource.RLIMIT_AS, (memory_limit * 1048576L, -1L))
+    resource.setrlimit(resource.RLIMIT_AS, (memory_limit * 1048576, -1))
     mf_filename = os.path.join(output_dir, "%s.arff" % D.name)
 
     X = D.data["X_train"]

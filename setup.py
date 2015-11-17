@@ -4,7 +4,11 @@ import shutil
 import subprocess
 import sys
 import tarfile
-import urllib
+
+try:
+    from urllib import urlretrieve
+except:
+    from urllib.request import urlretrieve
 
 import setuptools
 from setuptools.extension import Extension
@@ -14,8 +18,6 @@ from Cython.Build import cythonize
 
 SMAC_DOWNLOAD_LOCATION = 'http://aad.informatik.uni-freiburg.de/~feurerm/'
 SMAC_TAR_NAME = 'smac-v2.08.01-development-1.tar.gz'
-# METADATA_LOCATION = "http://aad.informatik.uni-freiburg.de/~feurerm/"
-# METADATA_TAR_NAME = "metadata_automl1_000.tar.gz"
 RUNSOLVER_LOCATION = 'http://www.cril.univ-artois.fr/~roussel/runsolver/'
 RUNSOLVER_TAR_NAME = 'runsolver-3.3.4.tar.bz2'
 DOWNLOAD_DIRECTORY = os.path.join(os.path.dirname(__file__), '.downloads')
@@ -23,11 +25,12 @@ BINARIES_DIRECTORY = 'autosklearn/binaries'
 METADATA_DIRECTORY = 'autosklearn/metalearning/files'
 
 
-extensions = cythonize([Extension('autosklearn.data.competition_c_functions',
-                        sources=['autosklearn/data/competition_c_functions.pyx'],
-                        language='c',
-                        include_dirs=[np.get_include()])
-             ])
+extensions = cythonize(
+    [Extension('autosklearn.data.competition_c_functions',
+               ['autosklearn/data/competition_c_functions.pyx'],
+               language='c',
+               include_dirs=[np.get_include()])
+     ])
 
 
 class Download(install):
@@ -44,13 +47,11 @@ class Download(install):
             pass
 
         for download_url, filename in [
-            (SMAC_DOWNLOAD_LOCATION, SMAC_TAR_NAME),
-            # (METADATA_LOCATION, METADATA_TAR_NAME),
-            (RUNSOLVER_LOCATION, RUNSOLVER_TAR_NAME)
-        ]:
+                (SMAC_DOWNLOAD_LOCATION, SMAC_TAR_NAME),
+                (RUNSOLVER_LOCATION, RUNSOLVER_TAR_NAME)]:
             # This can fail ungracefully, because having these files is
             # crucial to AutoSklearn!
-            urllib.urlretrieve(
+            urlretrieve(
                 os.path.join(download_url, filename),
                 filename=os.path.join(DOWNLOAD_DIRECTORY, filename))
 
@@ -91,22 +92,11 @@ class Download(install):
                                  SMAC_TAR_NAME.replace('.tar.gz', '')),
                     BINARIES_DIRECTORY)
 
-        # try:
-        #    shutil.rmtree(METADATA_DIRECTORY)
-        # except Exception:
-        #    pass
-
-        # Copy the metadata
-        # shutil.move(os.path.join(DOWNLOAD_DIRECTORY,
-        #                         METADATA_TAR_NAME.replace(".tar.gz", ""),
-        #                         "files"),
-        #            METADATA_DIRECTORY)
-
-        # TODO: Normally one wants to call run(self), but this runs distutils and ignores install_requirements for unknown reasons
+        # Normally one wants to call run(self), but this runs distutils and
+        # ignores install_requirements for unknown reasons
         # if anyone knows a better way, feel free to change
         install.do_egg_install(self)
 
-        # shutil.rmtree(os.path.join(METADATA_DIRECTORY))
         shutil.rmtree(BINARIES_DIRECTORY)
         shutil.rmtree(DOWNLOAD_DIRECTORY)
 
@@ -118,6 +108,7 @@ setuptools.setup(
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=['setuptools',
+                      'Cython',
                       'numpy>=1.6.1',
                       'psutil',
                       'pyyaml',

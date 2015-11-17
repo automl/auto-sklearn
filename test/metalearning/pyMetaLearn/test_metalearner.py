@@ -1,6 +1,7 @@
+from __future__ import print_function
 from collections import OrderedDict
 import logging
-import StringIO
+from six import StringIO
 import numpy as np
 import os
 import unittest
@@ -64,12 +65,10 @@ class MetaLearnerTest(unittest.TestCase):
         ret = self.meta_optimizer.metalearning_suggest([])
         self.assertIsInstance(ret, Configuration)
         self.assertEqual('gradient_boosting', ret['classifier:__choice__'])
-        print ret
 
         ret2 = self.meta_optimizer.metalearning_suggest([ret])
         self.assertIsInstance(ret2, Configuration)
         self.assertEqual('random_forest', ret2['classifier:__choice__'])
-        print ret2
 
     def test_learn(self):
         # Test only some special cases which are probably not yet handled

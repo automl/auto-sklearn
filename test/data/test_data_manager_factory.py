@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 import unittest
 
@@ -24,7 +26,6 @@ class DataManagerFactoryTest(unittest.TestCase):
         dataset = os.path.join(self.data_dir, "31_bac")
         namespace = NameSpace(dataset, "automl-competition-format")
         D = factory.get_data_manager(namespace)
-        print D
 
     def test_arff_format(self):
         dataset = os.path.join(self.data_dir, "germancredit")
@@ -33,4 +34,3 @@ class DataManagerFactoryTest(unittest.TestCase):
                               metric='acc_metric',
                               target='class')
         D = factory.get_data_manager(namespace)
-        print D
