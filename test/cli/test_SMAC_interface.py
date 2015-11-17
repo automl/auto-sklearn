@@ -16,7 +16,6 @@ import autosklearn.cli.SMAC_interface as SMAC_interface
 
 
 class SMAC_interfaceTest(unittest.TestCase):
-    _multiprocess_can_split_ = True
 
     def setUp(self):
         self.data_dir = os.path.join(os.path.dirname(__file__), '../.data')
@@ -51,10 +50,16 @@ class SMAC_interfaceTest(unittest.TestCase):
             'rescaling:strategy': 'min/max'
         }
 
+        try:
+            path = os.path.join(os.getcwd(), '.auto-sklearn', 'datamanager.pkl')
+            os.remove(path)
+        except Exception:
+            pass
+
     def tearDown(self):
         try:
-            path = os.path.join(os.path.dirname(__file__), '.auto-sklearn')
-            shutil.rmtree(path)
+            path = os.path.join(os.getcwd(), '.auto-sklearn', 'datamanager.pkl')
+            os.remove(path)
         except Exception:
             pass
 

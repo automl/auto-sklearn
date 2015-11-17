@@ -4,6 +4,7 @@ import types
 import arff
 import numpy as np
 from scipy import sparse
+import six
 
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.constants import *
@@ -52,10 +53,10 @@ class ARFFDataManager(AbstractDataManager):
     def __init__(self, dataset, task, metric,
                  target, encode_labels=True):
 
-        if type(task) in types.StringTypes:
+        if isinstance(task, six.string_types):
             task = STRING_TO_TASK_TYPES[task]
 
-        if isinstance(metric, types.StringTypes):
+        if isinstance(metric, six.string_types):
             metric = STRING_TO_METRIC[metric]
 
         train_file = os.path.join(dataset, 'train.arff')

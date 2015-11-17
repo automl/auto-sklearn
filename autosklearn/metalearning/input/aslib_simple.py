@@ -1,6 +1,5 @@
 from collections import defaultdict, OrderedDict
 import csv
-from itertools import izip
 import logging
 import os
 

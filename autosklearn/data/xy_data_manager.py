@@ -3,6 +3,7 @@ import types
 
 import numpy as np
 from scipy import sparse
+import six
 
 from autosklearn.constants import *
 from autosklearn.data.abstract_data_manager import AbstractDataManager
@@ -14,10 +15,10 @@ class XYDataManager(AbstractDataManager):
                  encode_labels):
         super(XYDataManager, self).__init__(dataset_name)
 
-        if type(task) in types.StringTypes:
+        if isinstance(task, six.string_types):
             task = STRING_TO_TASK_TYPES[task]
 
-        if isinstance(metric, types.StringTypes):
+        if isinstance(metric, six.string_types):
             metric = STRING_TO_METRIC[metric]
 
         self.info['task'] = task

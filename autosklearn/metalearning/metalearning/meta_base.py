@@ -70,13 +70,13 @@ class MetaBase(object):
     def get_runs(self, dataset_name, performance_measure=None):
         """Return a list of all runs for a dataset."""
         if performance_measure is None:
-            performance_measure = self.algorithm_runs.keys()[0]
+            performance_measure = list(self.algorithm_runs.keys())[0]
         return self.algorithm_runs[performance_measure].loc[dataset_name]
 
     def get_all_runs(self, performance_measure=None):
         """Return a dictionary with a list of all runs"""
         if performance_measure is None:
-            performance_measure = self.algorithm_runs.keys()[0]
+            performance_measure = list(self.algorithm_runs.keys())[0]
         return self.algorithm_runs[performance_measure]
 
     def get_metafeatures(self, dataset_name):

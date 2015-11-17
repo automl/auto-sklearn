@@ -56,8 +56,8 @@ class MetaLearningOptimizer(object):
         self.logger = logging.getLogger(__name__)
 
     def perform_sequential_optimization(self, target_algorithm=test_function,
-                                        time_budget=sys.maxint,
-                                        evaluation_budget=sys.maxint):
+                                        time_budget=None,
+                                        evaluation_budget=None):
         raise NotImplementedError("Right now this is not implemented due to "
                                   "timing issues.")
         time_taken = 0
@@ -66,10 +66,11 @@ class MetaLearningOptimizer(object):
 
         self.logger.info("Taking distance measure %s" % self.distance)
         while True:
-            if time_taken >= time_budget:
+            if time_budget is not None and time_taken >= time_budget:
                 self.logger.info("Reached time budget. Exiting optimization.")
                 break
-            if num_evaluations >= evaluation_budget:
+            if evaluation_budget is not None and \
+                    num_evaluations >= evaluation_budget:
                 self.logger.info("Reached maximum number of evaluations. Exiting "
                             "optimization.")
                 break

@@ -3,7 +3,7 @@ from __future__ import print_function
 
 import os
 import time
-from StringIO import StringIO
+from six import StringIO
 
 import numpy as np
 from autosklearn.metalearning.metafeatures.metafeatures import \

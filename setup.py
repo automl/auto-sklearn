@@ -27,10 +27,23 @@ METADATA_DIRECTORY = 'autosklearn/metalearning/files'
 
 extensions = cythonize(
     [Extension('autosklearn.data.competition_c_functions',
-               ['autosklearn/data/competition_c_functions.pyx'],
+               sources=['autosklearn/data/competition_c_functions.pyx'],
                language='c',
                include_dirs=[np.get_include()])
      ])
+
+requirements_file = os.path.join(os.path.dirname(__file__), 'requ.txt')
+requirements = []
+with open(requirements_file) as fh:
+    for line in fh:
+        line = line.strip()
+        if line:
+            # Make sure the github URLs work here as well
+            line = line.split('@')
+            line = line[0]
+            line = line.split('/')
+            line = line[-1]
+            requirements.append(line)
 
 
 class Download(install):
@@ -107,21 +120,7 @@ setuptools.setup(
     version='0.0.1dev',
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
-    install_requires=['setuptools',
-                      'Cython',
-                      'numpy>=1.6.1',
-                      'psutil',
-                      'pyyaml',
-                      'scipy>=0.14.0',
-                      'scikit-learn==0.16.1',
-                      'nose',
-                      'lockfile',
-                      'HPOlibConfigSpace',
-                      'ParamSklearn',
-                      'six',
-                      'ConfigArgParse',
-                      'liac-arff',
-                      'pandas'],
+    install_requires=requirements,
     test_suite='nose.collector',
     cmdclass={'install': Download},
     scripts=['scripts/autosklearn'],

@@ -72,9 +72,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             self.assertTrue(np.isfinite(err[i]))
             self.assertGreaterEqual(err[i], 0.0)
 
-        print('Number of times it was worse than random guessing:' +
-              str(np.sum(err > 1)))
-
     def test_evaluate_multiclass_classification_all_metrics(self):
         X_train, Y_train, X_test, Y_test = get_dataset('iris')
         X_valid = X_test[:25, ]
@@ -122,9 +119,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
                 self.assertTrue(np.isfinite(err[-1][key]))
                 self.assertGreaterEqual(err[-1][key], 0.0)
 
-        print('Number of times it was worse than random guessing:' +
-              str(np.sum(err > 1)))
-
     def test_evaluate_multilabel_classification(self):
         X_train, Y_train, X_test, Y_test = get_dataset('iris')
         Y_train = np.array(convert_to_bin(Y_train, 3))
@@ -170,9 +164,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
             self.assertTrue(np.isfinite(err[i]))
             self.assertGreaterEqual(err[i], 0.0)
-
-        print('Number of times it was worse than random guessing:' +
-              str(np.sum(err > 1)))
 
     def test_evaluate_binary_classification(self):
         X_train, Y_train, X_test, Y_test = get_dataset('iris')
@@ -225,9 +216,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
 
             self.assertGreaterEqual(err[i], 0.0)
 
-        print('Number of times it was worse than random guessing:' +
-              str(np.sum(err > 1)))
-
     def test_evaluate_regression(self):
         X_train, Y_train, X_test, Y_test = get_dataset('boston')
 
@@ -271,9 +259,6 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             print(err[i])
 
             self.assertGreaterEqual(err[i], 0.0)
-
-        print('Number of times it was worse than random guessing:' +
-              str(np.sum(err > 1)))
 
     def test_with_abalone(self):
         dataset = 'abalone'
@@ -345,36 +330,36 @@ class HoldoutEvaluator_Test(unittest.TestCase):
             evaluator.fit()
             return True
         except KeyError as e:
-            if 'Floating-point under-/overflow occurred at epoch' in e.message or \
-                    'removed all features' in e.message or \
-                    'failed to create intent' in e.message:
+            if 'Floating-point under-/overflow occurred at epoch' in e.args[0] or \
+                    'removed all features' in e.args[0] or \
+                    'failed to create intent' in e.args[0]:
                 pass
             else:
                 traceback.print_exc()
                 raise e
         except LinAlgError as e:
-            if 'not positive definite, even with jitter' in e.message:
+            if 'not positive definite, even with jitter' in e.args[0]:
                 pass
             else:
                 traceback.print_exc()
                 raise e
         except AttributeError as e:
             # Some error in QDA
-            if 'log' == e.message:
+            if 'log' == e.args[0]:
                 pass
             else:
                 traceback.print_exc()
                 raise e
         except RuntimeWarning as e:
-            if 'invalid value encountered in sqrt' in e.message:
+            if 'invalid value encountered in sqrt' in e.args[0]:
                 pass
-            elif 'divide by zero encountered in divide' in e.message:
+            elif 'divide by zero encountered in divide' in e.args[0]:
                 pass
             else:
                 traceback.print_exc()
                 raise e
         except UserWarning as e:
-            if 'FastICA did not converge' in e.message:
+            if 'FastICA did not converge' in e.args[0]:
                 pass
             else:
                 traceback.print_exc()
@@ -480,6 +465,3 @@ class HoldoutEvaluator_Test(unittest.TestCase):
         for i in range(len(expected)):
             self.assertEqual(expected[i], pred[i])
 
-
-if __name__ == '__main__':
-    unittest.main()

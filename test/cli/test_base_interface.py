@@ -13,8 +13,16 @@ else:
 
 import autosklearn.cli.base_interface
 
+try:
+    import __builtin__
+    _ = __builtin__.print
+    patch_string = '__builtin__.print'
+except ImportError:
+    import builtins
+    _ = builtins.print
+    patch_string = 'builtins.print'
+
 class Base_interfaceTest(unittest.TestCase):
-    _multiprocess_can_split_ = True
 
     def setUp(self):
         self.data_dir = os.path.join(os.path.dirname(__file__), '../.data')
@@ -41,19 +49,19 @@ class Base_interfaceTest(unittest.TestCase):
         }
 
         try:
-            path = os.path.join(os.path.dirname(__file__), '.auto-sklearn')
-            os.makedirs(path)
+            path = os.path.join(os.getcwd(), '.auto-sklearn', 'datamanager.pkl')
+            os.remove(path)
         except Exception:
             pass
 
     def tearDown(self):
         try:
-            path = os.path.join(os.path.dirname(__file__), '.auto-sklearn')
-            shutil.rmtree(path)
+            path = os.path.join(os.getcwd(), '.auto-sklearn', 'datamanager.pkl')
+            os.remove(path)
         except Exception:
             pass
 
-    @mock.patch('__builtin__.print')
+    @mock.patch(patch_string)
     def test_holdout(self, patch):
         autosklearn.cli.base_interface.main(self.dataset_string,
                                             'holdout',
@@ -64,7 +72,7 @@ class Base_interfaceTest(unittest.TestCase):
         result = call_args.split(",")[3].strip()
         self.assertEqual('0.755128', result)
 
-    @mock.patch('__builtin__.print')
+    @mock.patch(patch_string)
     def test_holdout_iterative_fit(self, patch):
         autosklearn.cli.base_interface.main(self.dataset_string,
                                             'holdout-iterative-fit',
@@ -75,7 +83,7 @@ class Base_interfaceTest(unittest.TestCase):
         result = call_args.split(",")[3].strip()
         self.assertEqual('0.725277', result)
 
-    @mock.patch('__builtin__.print')
+    @mock.patch(patch_string)
     def test_testset(self, patch):
         autosklearn.cli.base_interface.main(self.dataset_string,
                                             'test',
@@ -86,7 +94,7 @@ class Base_interfaceTest(unittest.TestCase):
         result = call_args.split(",")[3].strip()
         self.assertEqual('0.772006', result)
 
-    @mock.patch('__builtin__.print')
+    @mock.patch(patch_string)
     def test_cv(self, patch):
         autosklearn.cli.base_interface.main(self.dataset_string,
                                             'cv',
@@ -98,7 +106,7 @@ class Base_interfaceTest(unittest.TestCase):
         result = call_args.split(",")[3].strip()
         self.assertEqual('0.766880', result)
 
-    @mock.patch('__builtin__.print')
+    @mock.patch(patch_string)
     def test_partial_cv(self, patch):
         results = []
         for fold in range(3):
@@ -116,7 +124,7 @@ class Base_interfaceTest(unittest.TestCase):
 
         self.assertEqual(['0.780112', '0.791236', '0.729430'], results)
 
-    @mock.patch('__builtin__.print')
+    @mock.patch(patch_string)
     def test_nested_cv(self, patch):
         autosklearn.cli.base_interface.main(self.dataset_string,
                                             'nested-cv',

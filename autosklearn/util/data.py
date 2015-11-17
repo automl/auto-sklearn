@@ -3,6 +3,7 @@
 # challenge
 
 from __future__ import print_function
+from six.moves import range
 
 import numpy as np
 
@@ -51,7 +52,7 @@ def convert_to_bin(Ycont, nval, verbose=True):
     # Convert numeric vector to binary (typically classification target values)
     if verbose:
         pass
-    Ybin = [[0] * nval for x in xrange(len(Ycont))]
+    Ybin = [[0] * nval for x in range(len(Ycont))]
     for i in range(len(Ybin)):
         line = Ybin[i]
         line[np.int(Ycont[i])] = 1

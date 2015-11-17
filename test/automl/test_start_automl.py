@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import multiprocessing
 import os
+import sys
 import time
 
 import mock
@@ -15,6 +16,7 @@ import ParamSklearn.util as putil
 from autosklearn.constants import *
 from autosklearn.cli.base_interface import store_and_or_load_data
 
+sys.path.append(os.path.dirname(__file__))
 from base import Base
 
 class AutoMLTest(Base):
@@ -53,7 +55,7 @@ class AutoMLTest(Base):
         auto.fit_automl_dataset(dataset)
 
         # pickled data manager (without one hot encoding!)
-        with open(data_manager_file) as fh:
+        with open(data_manager_file, 'rb') as fh:
             D = six.moves.cPickle.load(fh)
             self.assertTrue(np.allclose(D.data['X_train'][0, :3],
                                         [1., 12., 2.]))

@@ -325,11 +325,11 @@ class ClassProbabilityMin(MetaFeature):
         min_value = np.iinfo(np.int64).max
         if len(y.shape) == 2:
             for i in range(y.shape[1]):
-                for num_occurences in occurences[i].itervalues():
+                for num_occurences in occurences[i].values():
                     if num_occurences < min_value:
                         min_value = num_occurences
         else:
-            for num_occurences in occurences.itervalues():
+            for num_occurences in occurences.values():
                 if num_occurences < min_value:
                     min_value = num_occurences
         return float(min_value) / float(y.shape[0])
@@ -343,11 +343,11 @@ class ClassProbabilityMax(MetaFeature):
 
         if len(y.shape) == 2:
             for i in range(y.shape[1]):
-                for num_occurences in occurences[i].itervalues():
+                for num_occurences in occurences[i].values():
                     if num_occurences > max_value:
                         max_value = num_occurences
         else:
-            for num_occurences in occurences.itervalues():
+            for num_occurences in occurences.values():
                 if num_occurences > max_value:
                     max_value = num_occurences
         return float(max_value) / float(y.shape[0])
@@ -362,10 +362,10 @@ class ClassProbabilityMean(MetaFeature):
             for i in range(y.shape[1]):
                 occurences.extend(
                     [occurrence for occurrence in occurence_dict[
-                        i].itervalues()])
+                        i].values()])
             occurences = np.array(occurences)
         else:
-            occurences = np.array([occurrence for occurrence in occurence_dict.itervalues()],
+            occurences = np.array([occurrence for occurrence in occurence_dict.values()],
                                   dtype=np.float64)
         return (occurences / y.shape[0]).mean()
 
@@ -379,13 +379,13 @@ class ClassProbabilitySTD(MetaFeature):
             for i in range(y.shape[1]):
                 std = np.array(
                     [occurrence for occurrence in occurence_dict[
-                                                      i].itervalues()],
+                                                      i].values()],
                     dtype=np.float64)
                 std = (std / y.shape[0]).std()
                 stds.append(std)
             return np.mean(stds)
         else:
-            occurences = np.array([occurrence for occurrence in occurence_dict.itervalues()],
+            occurences = np.array([occurrence for occurrence in occurence_dict.values()],
                                  dtype=np.float64)
             return (occurences / y.shape[0]).std()
 
@@ -419,11 +419,11 @@ class SymbolsMin(MetaFeature):
         # The minimum can only be zero if there are no nominal features,
         # otherwise it is at least one
         # TODO: shouldn't this rather be two?
-        minimum = sys.maxint
+        minimum = None
         for unique in helper_functions.get_value("NumSymbols"):
-            if unique > 0 and unique < minimum:
+            if unique > 0 and (minimum is None or unique < minimum):
                 minimum = unique
-        return minimum if minimum < sys.maxint else 0
+        return minimum if minimum is not None else 0
 
 @metafeatures.define("SymbolsMax", dependency="NumSymbols")
 class SymbolsMax(MetaFeature):

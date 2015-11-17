@@ -90,13 +90,13 @@ class MetaLearnerTest(unittest.TestCase):
 
 
     def test_read_task_list(self):
-        task_list_file = StringIO.StringIO()
+        task_list_file = StringIO()
         task_list_file.write('a\nb\nc\nd\n')
         task_list_file.seek(0)
         task_list = self.meta_optimizer.read_task_list(task_list_file)
         self.assertEqual(4, len(task_list))
 
-        task_list_file = StringIO.StringIO()
+        task_list_file = StringIO()
         task_list_file.write('a\n\nc\nd\n')
         task_list_file.seek(0)
         self.assertRaisesRegexp(ValueError, 'Blank lines in the task list are not supported.',
@@ -104,7 +104,7 @@ class MetaLearnerTest(unittest.TestCase):
                                 task_list_file)
 
     def test_read_experiments_list(self):
-        experiments_list_file = StringIO.StringIO()
+        experiments_list_file = StringIO()
         experiments_list_file.write('a\nb\n\nc d\n')
         experiments_list_file.seek(0)
         experiments_list = self.meta_optimizer.read_experiments_list(

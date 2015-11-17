@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from itertools import product
-import StringIO
+from six import StringIO
 import subprocess
 
 
@@ -69,7 +69,7 @@ def parse_hyperparameter_string(param_string):
 
 
 def construct_cli_call(cli_target, params):
-    cli_call = StringIO.StringIO()
+    cli_call = StringIO()
     cli_call.write(cli_target)
     params = OrderedDict(sorted(params.items(), key=lambda t: t[0]))
     for param in params:

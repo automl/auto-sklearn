@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 import os
+import sys
 
 import numpy as np
 import ParamSklearn.util as putil
@@ -8,6 +9,8 @@ import ParamSklearn.util as putil
 import autosklearn
 from autosklearn.util.backend import Backend
 from autosklearn.constants import *
+
+sys.path.append(os.path.dirname(__file__))
 from base import Base
 
 
