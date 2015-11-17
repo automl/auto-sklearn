@@ -59,7 +59,7 @@ numpy and scipy.
 resolved:
 
 * `HPOlibConfigSpace <https://github.com/automl/HPOlibConfigSpace>`_
-* `ParamSklearn <https://bitbucket.org/mfeurer/paramsklearn>`_
+* `ParamSklearn <https://github.com/automl/paramsklearn>`_
 
 Please install these manually with:
 
