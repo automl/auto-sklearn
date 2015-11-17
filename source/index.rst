@@ -52,13 +52,12 @@ Installation
 ************
 **Prerequisities**: *auto-sklearn* is written in python (2.7) and was developed
 with Ubuntu. It should run on other Linux distributions, but won't work on a MAC
-or on a windows PC. It requires scikit-learn 0.15.2, which in turn requires
-numpy and scipy (version up to 0.14.1).
+or on a windows PC. It requires scikit-learn 0.16.1, which in turn requires
+numpy and scipy.
 
 *auto-sklearn* has several dependencies, which are not yet automatically
 resolved:
 
-* `HPOlib <https://github.com/automl/HPOlib>`_
 * `HPOlibConfigSpace <https://github.com/automl/HPOlibConfigSpace>`_
 * `ParamSklearn <https://bitbucket.org/mfeurer/paramsklearn>`_
 
@@ -99,14 +98,15 @@ University of Freiburg.
     by opening a `github issue <https://github
     .com/automl/auto-sklearn/issues>`_ before starting to work.
 
+When developing new features, please create a new branch from the development
+branch. Prior to submitting a pull request, make sure that all tests are
+still passing.
+
 Features under development
 --------------------------
 * support for arff files
-* support for scikit-learn 0.16.1
+* support for scikit-learn 0.17
 * python 3 compability
-* MAC OS and windows compability
-* less dependencies
-* limiting the considered classifiers and preprocessors
 * command line interface
 
 A short guide to the code
