@@ -39,6 +39,8 @@ install:
   - python setup.py install
 
 # command to run tests, e.g. python setup.py test
-script:  nosetests --with-coverage
+script:
+  - coverage run --source autosklearn setup.py test
+
 
 after_success: coveralls
