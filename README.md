@@ -25,8 +25,10 @@ Status for master branch:
 
 [![Build Status](https://travis-ci.org/automl/paramsklearn.svg?branch=master)](https://travis-ci.org/automl/paramsklearn)
 [![Code Health](https://landscape.io/github/automl/paramsklearn/master/landscape.png)](https://landscape.io/github/automl/paramsklearn/master)
+[![Coverage Status](https://coveralls.io/repos/automl/paramsklearn/badge.svg?branch=master&service=github)](https://coveralls.io/github/automl/paramsklearn?branch=master)
 
 Status for development branch
 
 [![Build Status](https://travis-ci.org/automl/paramsklearn.svg?branch=development)](https://travis-ci.org/automl/paramsklearn)
 [![Code Health](https://landscape.io/github/automl/paramsklearn/development/landscape.png)](https://landscape.io/github/automl/paramsklearn/development)
+[![Coverage Status](https://coveralls.io/repos/automl/paramsklearn/badge.svg?branch=development&service=github)](https://coveralls.io/github/automl/paramsklearn?branch=development)
