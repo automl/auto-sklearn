@@ -16,14 +16,24 @@ def submit_call(call, seed, logger, log_dir=None):
     call = shlex.split(call)
 
     if log_dir is None:
-        proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'))
+        try:
+            proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'))
+        except OSError as e:
+            logger.critical(e)
+            logger.critical('Problem starting subprocess, see error message '
+                            'above. PATH is %s' % os.environ['PATH'])
     else:
-        proc = subprocess.Popen(
-            call,
-            stdout=open(
-                os.path.join(log_dir, 'ensemble_out_%d.log' % seed), 'w'),
-            stderr=open(
-                os.path.join(log_dir, 'ensemble_err_%d.log' % seed), 'w'))
+        try:
+            proc = subprocess.Popen(
+                call,
+                stdout=open(
+                    os.path.join(log_dir, 'ensemble_out_%d.log' % seed), 'w'),
+                stderr=open(
+                    os.path.join(log_dir, 'ensemble_err_%d.log' % seed), 'w'))
+        except OSError as e:
+            logger.critical(e)
+            logger.critical('Problem starting subprocess, see error message '
+                            'above. PATH is %s' % os.environ['PATH'])
 
     return proc
 
