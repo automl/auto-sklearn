@@ -39,7 +39,15 @@ class Mock(MagicMock):
             return BaseEstimator
         return Mock()
 
-MOCK_MODULES = ['numpy',
+MOCK_MODULES = ['lockfile',
+                'joblib',
+                'psutil',
+                'pyyaml',
+                'ConfigArgParse',
+                'liac-arff',
+                'pandas',
+                'Cython',
+                'numpy',
                 'scipy', 'scipy.sparse', 'scipy.stats', 'scipy.linalg',
                 'sklearn',
                 'sklearn.base',
