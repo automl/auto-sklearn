@@ -34,9 +34,16 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
             return Mock()
 
-MOCK_MODULES = ['numpy', 'scipy','scikit-learn', 'psutil','pyyaml','pandas',
+MOCK_MODULES = ['numpy', 'scipy','sklearn', 'psutil','pyyaml','pandas',
                 'matplotlib', 'HPOlib', 'ParamSklearn', 'HPOlibConfigSpace']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+
+# Add the parent directory of this file to the PYTHONPATH
+import os
+current_directory = os.path.dirname(__file__)
+parent_directory = os.path.join(current_directory, '..')
+parent_directory = os.path.abspath(parent_directory)
+sys.path.append(parent_directory)
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
