@@ -40,6 +40,7 @@ install:
   # Install requirements from other repos
   - pip install git+https://github.com/automl/HPOlibConfigSpace.git
   - pip install git+https://github.com/automl/paramsklearn.git
+  - python setup.py install
 
 script:
   # - coverage run --source autosklearn setup.py test
