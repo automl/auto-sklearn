@@ -32,10 +32,35 @@ except:
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
-            return Mock()
+        if 'BaseEstimator' in name:
+            class BaseEstimator(object):
+                pass
 
-MOCK_MODULES = ['numpy', 'scipy','sklearn', 'psutil','pyyaml','pandas',
-                'matplotlib', 'HPOlib', 'ParamSklearn', 'HPOlibConfigSpace']
+            return BaseEstimator
+        return Mock()
+
+MOCK_MODULES = ['numpy',
+                'scipy', 'scipy.sparse', 'scipy.stats', 'scipy.linalg',
+                'sklearn.base',
+                'sklearn.cross_validation',
+                'sklearn.dummy',
+                'sklearn.metrics',
+                'sklearn.multiclass',
+                'sklearn.neighbors',
+                'sklearn.utils',
+                'psutil','pyyaml','pandas',
+                'matplotlib',
+                'ParamSklearn',
+                'ParamSklearn.implementations',
+                'ParamSklearn.implementations.OneHotEncoder',
+                'ParamSklearn.implementations.Imputation',
+                'ParamSklearn.implementations.StandardScaler',
+                'ParamSklearn.classification',
+                'ParamSklearn.regression',
+                'HPOlibConfigSpace',
+                'HPOlibConfigSpace.converters',
+                'HPOlibConfigSpace.configuration_space']
+
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # Add the parent directory of this file to the PYTHONPATH

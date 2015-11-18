@@ -127,7 +127,7 @@ def _print_debug_info_of_init_configuration(initial_configurations, basename,
         % (basename, time_for_task - watcher.wall_elapsed(basename)))
 
 
-class AutoML(multiprocessing.Process, BaseEstimator):
+class AutoML(BaseEstimator, multiprocessing.Process):
 
     def __init__(self,
                  tmp_dir,
