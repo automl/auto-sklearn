@@ -41,6 +41,7 @@ class Mock(MagicMock):
 
 MOCK_MODULES = ['numpy',
                 'scipy', 'scipy.sparse', 'scipy.stats', 'scipy.linalg',
+                'sklearn',
                 'sklearn.base',
                 'sklearn.cross_validation',
                 'sklearn.dummy',
