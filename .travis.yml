@@ -42,6 +42,7 @@ install:
   - pip install git+https://github.com/automl/paramsklearn.git
 
 script:
-  - coverage run --source autosklearn setup.py test
+  # - coverage run --source autosklearn setup.py test
+  - cd test && nosetests --with-coverage
 
 after_success: coveralls

@@ -73,6 +73,12 @@ Then install *auto-sklearn*
 
     pip install git+https://github.com/automl/auto-sklearn.git#egg=autosklearn
 
+We recommend installing *auto-sklearn* into a `virtual environment
+<http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or into an
+`anaconda environment <https://www.continuum.io/downloads>`_ because we have
+seen strange things happening when installing it using
+:bash:`python setup.py --user`.
+
 API
 ***
 
@@ -116,7 +122,7 @@ A short guide to the code
 * `cli`: command line interface to the machine learning algorithm which is
   used internally by SMAC.
 * `data`: code to read and store machine learning datasets.
-* `evaluation`: classes to control the execution of machine learning.
+* `evaluation`: classes to control the execution of machine learning,
   algorithms and resampling of the data.
 * `metrics`: contains metrics which can be optimized.
 * `util`: several utilityy functions.
