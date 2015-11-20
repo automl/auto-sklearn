@@ -162,7 +162,6 @@ class ParamSklearnBaseEstimator(BaseEstimator):
                                                    **fit_params)
 
     def estimator_supports_iterative_fit(self):
-        check_is_fitted(self, 'pipeline_')
         return hasattr(self.pipeline_.steps[-1][-1], 'iterative_fit')
 
     def configuration_fully_fitted(self):
