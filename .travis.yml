@@ -2,6 +2,7 @@ language: python
 python:
   - "2.7"
   - "3.4"
+  - "3.5"
 
 cache:
   directories:
@@ -29,7 +30,7 @@ before_install:
   - conda update --yes conda
 
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy=1.9.0 scipy=0.16.0 nose scikit-learn=0.16.1 mock
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy=1.9 scipy=0.16 nose scikit-learn=0.16.1 mock
   - pip install pep8 python-coveralls
   - pip install coverage
 
