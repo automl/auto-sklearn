@@ -131,6 +131,8 @@ class TestParamSklearnClassifier(unittest.TestCase):
                 self.assertIsInstance(predictions, np.ndarray)
                 predicted_probabilities = cls.predict_proba(X_test_)
                 [self.assertIsInstance(i, np.ndarray) for i in predicted_probabilities]
+            except np.linalg.LinAlgError:
+                continue
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
                         e.args[0] or \
