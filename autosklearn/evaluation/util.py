@@ -24,7 +24,7 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
         except IndexError as e:
             if logger is not None:
                 logger.error("Prediction shape: %s, solution "
-                             "shape %s" % prediction.shape, solution.shape)
+                             "shape %s", prediction.shape, solution.shape)
                 raise e
 
         for i in range(solution_binary.shape[0]):
