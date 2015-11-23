@@ -15,9 +15,17 @@ __all__ = [
 
 
 def calculate_score(solution, prediction, task_type, metric, num_classes,
-                    all_scoring_functions=False):
+                    all_scoring_functions=False, logger=None):
     if task_type == MULTICLASS_CLASSIFICATION:
-        solution_binary = np.zeros((prediction.shape[0], num_classes))
+        # This used to crash on travis-ci; special treatment to find out why
+        # it crashed!
+        try:
+            solution_binary = np.zeros((prediction.shape[0], num_classes))
+        except IndexError as e:
+            if logger is not None:
+                logger.error(e)
+                raise e
+
         for i in range(solution_binary.shape[0]):
             label = solution[i]
             solution_binary[i, label] = 1

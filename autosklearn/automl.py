@@ -594,7 +594,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
     def score(self, X, y):
         prediction = self.predict(X)
         return calculate_score(y, prediction, self._task,
-                               self._metric, self._label_num)
+                               self._metric, self._label_num,
+                               logger=self._logger)
 
     def show_models(self):
         if self.models_ is None or len(self.models_) == 0 or len(
