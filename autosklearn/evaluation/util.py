@@ -23,7 +23,7 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
             solution_binary = np.zeros((prediction.shape[0], num_classes))
         except IndexError as e:
             if logger is not None:
-                logger.error(e)
+                logger.error(prediction.shape)
                 raise e
 
         for i in range(solution_binary.shape[0]):
