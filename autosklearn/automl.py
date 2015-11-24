@@ -316,7 +316,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             try:
                 os.mkdir(self._backend.get_model_dir())
             except OSError:
-                self._logger.warn("model directory already exists")
+                self._logger.warning("model directory already exists")
                 if not self._shared_mode:
                     raise
 
@@ -417,7 +417,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
 
         else:
             initial_configurations = []
-            self._logger.warn('Metafeatures encoded not calculated')
+            self._logger.warning('Metafeatures encoded not calculated')
 
         # == RUN SMAC
         if (datamanager.info["task"] == BINARY_CLASSIFICATION) or \
@@ -573,6 +573,10 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                 prediction = model.predict(X_)
             else:
                 prediction = model.predict_proba(X_)
+
+            if len(prediction.shape) < 1 or prediction.shape[0] != X_.shape[0]:
+                self._logger.warning("Prediction shape for model %s is %s" %
+                                     (model, prediction.shape))
             predictions.append(prediction * weight)
 
         predictions = np.sum(np.array(predictions), axis=0)
