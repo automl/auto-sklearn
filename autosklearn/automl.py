@@ -574,9 +574,12 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             else:
                 prediction = model.predict_proba(X_)
 
-            if len(prediction.shape) < 1 or prediction.shape[0] != X_.shape[0]:
-                self._logger.warning("Prediction shape for model %s is %s" %
-                                     (model, prediction.shape))
+            if len(prediction.shape) < 1 or len(X_.shape) < 1 or \
+                    X_.shape[0] < 1 or prediction.shape[0] != X_.shape[0]:
+                self._logger.warning("Prediction shape for model %s is %s "
+                                     "while X_.shape is %s" %
+                                     (model, str(prediction.shape),
+                                      str(X_.shape)))
             predictions.append(prediction * weight)
 
         predictions = np.sum(np.array(predictions), axis=0)

@@ -47,13 +47,13 @@ class EstimatorTest(Base):
         self.assertRaisesRegexp(ValueError,
                                 "If shared_mode == True tmp_folder must not "
                                 "be None.",
-                                autosklearn.AutoSklearnClassifier,
+                                AutoSklearnClassifier,
                                 shared_mode=True)
 
         self.assertRaisesRegexp(ValueError,
                                 "If shared_mode == True output_folder must not "
                                 "be None.",
-                                autosklearn.AutoSklearnClassifier,
+                                AutoSklearnClassifier,
                                 shared_mode=True,
                                 tmp_folder='/tmp/duitaredxtvbedb')
 
