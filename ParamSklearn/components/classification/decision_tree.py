@@ -8,8 +8,6 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from ParamSklearn.components.base import \
     ParamSklearnClassificationAlgorithm
 from ParamSklearn.constants import *
-# get our own forests to replace the sklearn ones
-from sklearn.tree import DecisionTreeClassifier
 
 
 class DecisionTree(ParamSklearnClassificationAlgorithm):
@@ -29,6 +27,8 @@ class DecisionTree(ParamSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None):
+        from sklearn.tree import DecisionTreeClassifier
+
         self.max_features = float(self.max_features)
         if self.max_depth == "None":
             self.max_depth = None

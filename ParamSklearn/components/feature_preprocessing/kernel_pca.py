@@ -1,8 +1,6 @@
 import warnings
 
 import numpy as np
-import scipy.sparse
-import sklearn.decomposition
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
@@ -25,6 +23,9 @@ class KernelPCA(ParamSklearnPreprocessingAlgorithm):
         self.random_state = random_state
 
     def fit(self, X, Y=None):
+        import scipy.sparse
+        import sklearn.decomposition
+
         self.preprocessor = sklearn.decomposition.KernelPCA(
             n_components=self.n_components, kernel=self.kernel,
             degree=self.degree, gamma=self.gamma, coef0=self.coef0,

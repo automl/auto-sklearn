@@ -7,7 +7,6 @@ if sklearn.__version__ != "0.16.1":
     raise ValueError("ParamSklearn supports only sklearn version 0.16.1, "
                      "you installed %s." % sklearn.__version__)
 from sklearn.base import RegressorMixin
-import numpy as np
 
 from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
@@ -15,7 +14,6 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from ParamSklearn import components as components
 from ParamSklearn.base import ParamSklearnBaseEstimator
 from ParamSklearn.constants import SPARSE
-import ParamSklearn.create_searchspace_util
 
 
 class ParamSklearnRegressor(RegressorMixin, ParamSklearnBaseEstimator):

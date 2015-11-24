@@ -1,7 +1,6 @@
 import resource
 
 import numpy as np
-import sklearn.svm
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.conditions import EqualsCondition, InCondition
@@ -75,6 +74,8 @@ class LibSVM_SVC(ParamSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
+        import sklearn.svm
+
         try:
             soft, hard = resource.getrlimit(resource.RLIMIT_AS)
             if soft > 0:

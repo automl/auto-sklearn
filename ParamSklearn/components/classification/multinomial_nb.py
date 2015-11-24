@@ -1,6 +1,4 @@
 import numpy as np
-import sklearn.naive_bayes
-import scipy.sparse
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -31,6 +29,9 @@ class MultinomialNB(ParamSklearnClassificationAlgorithm):
         return self
 
     def iterative_fit(self, X, y, n_iter=1, refit=False):
+        import sklearn.naive_bayes
+        import scipy.sparse
+
         if refit:
             self.estimator = None
 

@@ -8,8 +8,6 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
 from ParamSklearn.constants import *
 
-from sklearn.ensemble import ExtraTreesRegressor as ETR
-
 
 class ExtraTreesRegressor(ParamSklearnRegressionAlgorithm):
     def __init__(self, n_estimators, criterion, min_samples_leaf,
@@ -67,6 +65,8 @@ class ExtraTreesRegressor(ParamSklearnRegressionAlgorithm):
         return self
 
     def iterative_fit(self, X, y, n_iter=1, refit=False):
+        from sklearn.ensemble import ExtraTreesRegressor as ETR
+
         if refit:
             self.estimator = None
 

@@ -1,5 +1,3 @@
-import sklearn.kernel_approximation
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter
@@ -22,7 +20,10 @@ class RandomKitchenSinks(ParamSklearnPreprocessingAlgorithm):
         self.random_state = random_state
 
     def fit(self, X, Y=None):
-        self.preprocessor = sklearn.kernel_approximation.RBFSampler(self.gamma, self.n_components, self.random_state)
+        import sklearn.kernel_approximation
+
+        self.preprocessor = sklearn.kernel_approximation.RBFSampler(
+            self.gamma, self.n_components, self.random_state)
         self.preprocessor.fit(X)
         return self
     

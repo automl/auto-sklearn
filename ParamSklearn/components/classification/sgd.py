@@ -1,5 +1,3 @@
-from sklearn.linear_model.stochastic_gradient import SGDClassifier
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, UnParametrizedHyperparameter, \
@@ -37,6 +35,8 @@ class SGD(ParamSklearnClassificationAlgorithm):
         return self
 
     def iterative_fit(self, X, y, n_iter=1, refit=False):
+        from sklearn.linear_model.stochastic_gradient import SGDClassifier
+
         if refit:
             self.estimator = None
 

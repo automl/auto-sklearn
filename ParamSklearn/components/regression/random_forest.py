@@ -7,9 +7,6 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from ParamSklearn.components.base import ParamSklearnRegressionAlgorithm
 from ParamSklearn.constants import *
-# get our own forests to replace the sklearn ones
-#from ParamSklearn.implementations import forest
-from sklearn.ensemble import RandomForestRegressor
 
 
 class RandomForest(ParamSklearnRegressionAlgorithm):
@@ -40,6 +37,8 @@ class RandomForest(ParamSklearnRegressionAlgorithm):
         return self
 
     def iterative_fit(self, X, y, n_iter=1, refit=False):
+        from sklearn.ensemble import RandomForestRegressor
+
         if refit:
             self.estimator = None
 

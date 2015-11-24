@@ -1,5 +1,4 @@
 import numpy as np
-import sklearn.linear_model
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -18,6 +17,7 @@ class RidgeRegression(ParamSklearnRegressionAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
+        import sklearn.linear_model
         self.estimator = sklearn.linear_model.Ridge(alpha=self.alpha,
                                                     fit_intercept=self.fit_intercept,
                                                     tol=self.tol,

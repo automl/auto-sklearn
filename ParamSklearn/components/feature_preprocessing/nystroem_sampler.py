@@ -1,6 +1,4 @@
 import numpy as np
-import scipy.sparse
-import sklearn.kernel_approximation
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -23,6 +21,9 @@ class Nystroem(ParamSklearnPreprocessingAlgorithm):
         self.random_state = random_state
 
     def fit(self, X, Y=None):
+        import scipy.sparse
+        import sklearn.kernel_approximation
+
         self.preprocessor = sklearn.kernel_approximation.Nystroem(
             kernel=self.kernel, n_components=self.n_components,
             gamma=self.gamma, degree=self.degree, coef0=self.coef0,
@@ -40,6 +41,8 @@ class Nystroem(ParamSklearnPreprocessingAlgorithm):
         return self
 
     def transform(self, X):
+        import scipy.sparse
+
         # Because the pipeline guarantees that each feature is positive,
         # clip all values below zero to zero
         if self.kernel == 'chi2':

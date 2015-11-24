@@ -1,6 +1,3 @@
-
-import sklearn.preprocessing
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 
@@ -14,6 +11,8 @@ class Imputation(ParamSklearnPreprocessingAlgorithm):
         self.strategy = strategy
 
     def fit(self, X, y=None):
+        import sklearn.preprocessing
+
         self.preprocessor = sklearn.preprocessing.Imputer(
             strategy=self.strategy, copy=False)
         self.preprocessor = self.preprocessor.fit(X)

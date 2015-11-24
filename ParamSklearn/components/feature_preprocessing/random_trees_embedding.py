@@ -1,5 +1,3 @@
-import sklearn.ensemble
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformIntegerHyperparameter, \
     UnParametrizedHyperparameter, Constant
@@ -24,6 +22,8 @@ class RandomTreesEmbedding(ParamSklearnPreprocessingAlgorithm):
         self.random_state = random_state
 
     def fit(self, X, Y=None):
+        import sklearn.ensemble
+
         if self.max_depth == "None":
             self.max_depth = None
         else:

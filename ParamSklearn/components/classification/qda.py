@@ -1,5 +1,3 @@
-import sklearn.qda
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
 
@@ -16,6 +14,8 @@ class QDA(ParamSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
+        import sklearn.qda
+
         estimator = sklearn.qda.QDA(self.reg_param)
 
         if len(Y.shape) == 2 and Y.shape[1] > 1:

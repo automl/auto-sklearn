@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.sparse
 
 import ParamSklearn.implementations.OneHotEncoder
 
@@ -40,6 +39,8 @@ class OneHotEncoder(ParamSklearnPreprocessingAlgorithm):
         return self
 
     def transform(self, X):
+        import scipy.sparse
+
         is_sparse = scipy.sparse.issparse(X)
         if self.preprocessor is None:
             raise NotImplementedError()

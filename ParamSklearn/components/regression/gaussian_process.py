@@ -1,8 +1,5 @@
 import numpy as np
 
-import sklearn.gaussian_process 
-import sklearn.preprocessing
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
 
@@ -24,6 +21,9 @@ class GaussianProcess(ParamSklearnRegressionAlgorithm):
         self.scaler = None
 
     def fit(self, X, Y):
+        import sklearn.gaussian_process
+        import sklearn.preprocessing
+
         # Instanciate a Gaussian Process model
         self.estimator = sklearn.gaussian_process.GaussianProcess(
             corr='squared_exponential', 

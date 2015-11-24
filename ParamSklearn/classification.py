@@ -12,7 +12,6 @@ from ParamSklearn import components as components
 from ParamSklearn.base import ParamSklearnBaseEstimator
 from ParamSklearn.constants import SPARSE
 from ParamSklearn.components.data_preprocessing.balancing import Balancing
-import ParamSklearn.create_searchspace_util
 
 
 class ParamSklearnClassifier(ClassifierMixin, ParamSklearnBaseEstimator):

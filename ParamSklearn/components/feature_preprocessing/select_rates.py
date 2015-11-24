@@ -2,9 +2,6 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, Constant
 
-import scipy.sparse
-import sklearn.feature_selection
-
 from ParamSklearn.components.base import \
     ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.constants import *
@@ -13,6 +10,8 @@ from ParamSklearn.constants import *
 class SelectRates(ParamSklearnPreprocessingAlgorithm):
     def __init__(self, alpha, mode='fpr',
                  score_func="chi2", random_state=None):
+        import sklearn.feature_selection
+
         self.random_state = random_state  # We don't use this
         self.alpha = float(alpha)
 
@@ -27,6 +26,9 @@ class SelectRates(ParamSklearnPreprocessingAlgorithm):
         self.mode = mode
 
     def fit(self, X, y):
+        import scipy.sparse
+        import sklearn.feature_selection
+
         self.preprocessor = sklearn.feature_selection.GenericUnivariateSelect(
             score_func=self.score_func, param=self.alpha, mode=self.mode)
 
@@ -42,6 +44,9 @@ class SelectRates(ParamSklearnPreprocessingAlgorithm):
         return self
 
     def transform(self, X):
+        import scipy.sparse
+        import sklearn.feature_selection
+
         # Because the pipeline guarantees that each feature is positive,
         # clip all values below zero to zero
         if self.score_func == sklearn.feature_selection.chi2:

@@ -1,5 +1,4 @@
 import numpy as np
-import sklearn.cluster
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
@@ -26,6 +25,8 @@ class FeatureAgglomeration(ParamSklearnPreprocessingAlgorithm):
                                          max=np.max)
 
     def fit(self, X, Y=None):
+        import sklearn.cluster
+
         n_clusters = min(self.n_clusters, X.shape[1])
         if not callable(self.pooling_func):
             self.pooling_func = self.pooling_func_mapping[self.pooling_func]

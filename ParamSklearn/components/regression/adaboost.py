@@ -1,6 +1,4 @@
 import numpy as np
-import sklearn.ensemble
-import sklearn.tree
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -21,6 +19,9 @@ class AdaboostRegressor(ParamSklearnRegressionAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
+        import sklearn.ensemble
+        import sklearn.tree
+
         self.n_estimators = int(self.n_estimators)
         self.learning_rate = float(self.learning_rate)
         self.max_depth = int(self.max_depth)

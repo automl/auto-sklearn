@@ -1,8 +1,6 @@
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, UnParametrizedHyperparameter
 
-import sklearn.feature_selection
-
 from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.components.feature_preprocessing.select_percentile import SelectPercentileBase
 from ParamSklearn.constants import *
@@ -18,6 +16,7 @@ class SelectPercentileRegression(SelectPercentileBase,
         score_func : callable, Function taking two arrays X and y, and
                      returning a pair of arrays (scores, pvalues).
         """
+        import sklearn.feature_selection
 
         self.random_state = random_state  # We don't use this
         self.percentile = int(float(percentile))

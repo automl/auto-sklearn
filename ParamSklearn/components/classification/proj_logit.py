@@ -10,7 +10,6 @@ from ParamSklearn.constants import *
 from ParamSklearn.implementations import ProjLogit
 
 
-
 class ProjLogitCLassifier(ParamSklearnClassificationAlgorithm):
 
     def __init__(self, max_epochs = 2, random_state=None, n_jobs=1):

@@ -1,5 +1,3 @@
-import sklearn.svm
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, Constant, UnParametrizedHyperparameter
@@ -29,6 +27,8 @@ class LibLinear_Preprocessor(ParamSklearnPreprocessingAlgorithm):
         self.preprocessor = None
 
     def fit(self, X, Y):
+        import sklearn.svm
+
         self.C = float(self.C)
         self.tol = float(self.tol)
 

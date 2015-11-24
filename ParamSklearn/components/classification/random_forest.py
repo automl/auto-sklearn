@@ -1,5 +1,4 @@
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -42,6 +41,8 @@ class RandomForest(ParamSklearnClassificationAlgorithm):
         return self
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
+        from sklearn.ensemble import RandomForestClassifier
+
         if refit:
             self.estimator = None
 

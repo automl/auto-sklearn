@@ -1,7 +1,5 @@
 import warnings
 
-import sklearn.decomposition
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
     UniformIntegerHyperparameter
@@ -22,6 +20,8 @@ class FastICA(ParamSklearnPreprocessingAlgorithm):
         self.random_state = random_state
 
     def fit(self, X, Y=None):
+        import sklearn.decomposition
+
         self.preprocessor = sklearn.decomposition.FastICA(
             n_components=self.n_components, algorithm=self.algorithm,
             fun=self.fun, whiten=self.whiten, random_state=self.random_state

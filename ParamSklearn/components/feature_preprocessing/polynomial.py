@@ -1,5 +1,3 @@
-import sklearn.preprocessing
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
     UniformIntegerHyperparameter
@@ -18,6 +16,8 @@ class PolynomialFeatures(ParamSklearnPreprocessingAlgorithm):
         self.preprocessor = None
 
     def fit(self, X, Y):
+        import sklearn.preprocessing
+
         self.preprocessor = sklearn.preprocessing.PolynomialFeatures(
             degree=self.degree, interaction_only=self.interaction_only,
             include_bias=self.include_bias)

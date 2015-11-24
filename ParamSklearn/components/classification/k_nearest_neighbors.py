@@ -1,6 +1,3 @@
-import sklearn.neighbors
-import sklearn.multiclass
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
     Constant, UniformIntegerHyperparameter
@@ -18,6 +15,9 @@ class KNearestNeighborsClassifier(ParamSklearnClassificationAlgorithm):
         self.random_state = random_state
 
     def fit(self, X, Y):
+        import sklearn.neighbors
+        import sklearn.multiclass
+
         estimator = \
             sklearn.neighbors.KNeighborsClassifier(n_neighbors=self.n_neighbors,
                                                    weights=self.weights,

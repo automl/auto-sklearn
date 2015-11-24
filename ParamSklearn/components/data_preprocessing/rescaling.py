@@ -5,10 +5,6 @@ from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 from HPOlibConfigSpace.conditions import EqualsCondition, AbstractConjunction
 
-from ParamSklearn.implementations.StandardScaler import StandardScaler
-from ParamSklearn.implementations.MinMaxScaler import MinMaxScaler
-from ParamSklearn.implementations.Normalizer import Normalizer
-from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.constants import *
 
 
@@ -62,6 +58,7 @@ class NoRescalingComponent(Rescaling):
 
 class MinMaxScalerComponent(Rescaling):
     def __init__(self, random_state):
+        from ParamSklearn.implementations.MinMaxScaler import MinMaxScaler
         self.preprocessor = MinMaxScaler()
 
     @staticmethod
@@ -88,6 +85,7 @@ class MinMaxScalerComponent(Rescaling):
 
 class StandardScalerComponent(Rescaling):
     def __init__(self, random_state):
+        from ParamSklearn.implementations.StandardScaler import StandardScaler
         self.preprocessor = StandardScaler()
 
     @staticmethod
@@ -114,6 +112,7 @@ class StandardScalerComponent(Rescaling):
 
 class NormalizerComponent(Rescaling):
     def __init__(self, random_state):
+        from ParamSklearn.implementations.Normalizer import Normalizer
         self.preprocessor = Normalizer()
 
     @staticmethod

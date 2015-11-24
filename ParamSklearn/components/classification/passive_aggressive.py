@@ -1,5 +1,4 @@
 import numpy as np
-from sklearn.linear_model.passive_aggressive import PassiveAggressiveClassifier
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -28,6 +27,9 @@ class PassiveAggressive(ParamSklearnClassificationAlgorithm):
         return self
 
     def iterative_fit(self, X, y, n_iter=1, refit=False):
+        from sklearn.linear_model.passive_aggressive import \
+            PassiveAggressiveClassifier
+
         if refit:
             self.estimator = None
 

@@ -1,7 +1,5 @@
 import numpy as np
 
-import sklearn.decomposition
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformIntegerHyperparameter
 
@@ -16,6 +14,8 @@ class TruncatedSVD(ParamSklearnPreprocessingAlgorithm):
         self.preprocessor = None
 
     def fit(self, X, Y):
+        import sklearn.decomposition
+
         target_dim = min(self.target_dim, X.shape[1] - 1)
         self.preprocessor = sklearn.decomposition.TruncatedSVD(
             target_dim, algorithm='randomized')

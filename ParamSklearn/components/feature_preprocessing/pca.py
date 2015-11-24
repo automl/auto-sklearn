@@ -1,5 +1,4 @@
 import numpy as np
-import sklearn.decomposition
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -16,6 +15,7 @@ class PCA(ParamSklearnPreprocessingAlgorithm):
         self.random_state = random_state
 
     def fit(self, X, Y=None):
+        import sklearn.decomposition
         n_components = float(self.keep_variance)
         self.preprocessor = sklearn.decomposition.PCA(n_components=n_components,
                                                       whiten=self.whiten,

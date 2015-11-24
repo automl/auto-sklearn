@@ -1,5 +1,4 @@
 import numpy as np
-import sklearn.ensemble
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -43,6 +42,8 @@ class GradientBoosting(ParamSklearnRegressionAlgorithm):
         return self
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
+        import sklearn.ensemble
+
         # Special fix for gradient boosting!
         if isinstance(X, np.ndarray):
             X = np.ascontiguousarray(X, dtype=X.dtype)

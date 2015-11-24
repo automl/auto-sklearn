@@ -1,13 +1,9 @@
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, CategoricalHyperparameter, Constant
 
-import sklearn.feature_selection
-
 from ParamSklearn.components.base import ParamSklearnPreprocessingAlgorithm
 from ParamSklearn.components.feature_preprocessing.select_percentile import SelectPercentileBase
 from ParamSklearn.constants import *
-
-import scipy.sparse
 
 
 class SelectPercentileClassification(SelectPercentileBase,
@@ -20,6 +16,8 @@ class SelectPercentileClassification(SelectPercentileBase,
         score_func : callable, Function taking two arrays X and y, and
                      returning a pair of arrays (scores, pvalues).
         """
+        import sklearn.feature_selection
+
         self.random_state = random_state  # We don't use this
         self.percentile = int(float(percentile))
         if score_func == "chi2":
@@ -31,6 +29,9 @@ class SelectPercentileClassification(SelectPercentileBase,
                              "but is: %s" % score_func)
 
     def fit(self, X, y):
+        import scipy.sparse
+        import sklearn.feature_selection
+
         self.preprocessor = sklearn.feature_selection.SelectPercentile(
             score_func=self.score_func,
                 percentile=self.percentile)
@@ -47,6 +48,9 @@ class SelectPercentileClassification(SelectPercentileBase,
         return self
 
     def transform(self, X):
+        import scipy.sparse
+        import sklearn.feature_selection
+
         # Because the pipeline guarantees that each feature is positive,
         # clip all values below zero to zero
         if self.score_func == sklearn.feature_selection.chi2:

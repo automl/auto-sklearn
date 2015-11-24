@@ -1,5 +1,3 @@
-from scipy import sparse
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 
 from ParamSklearn.components.base import \
@@ -15,6 +13,7 @@ class Densifier(ParamSklearnPreprocessingAlgorithm):
         return self
 
     def transform(self, X):
+        from scipy import sparse
         if sparse.issparse(X):
             return X.todense().getA()
         else:

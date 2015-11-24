@@ -1,6 +1,3 @@
-import sklearn.lda
-import sklearn.multiclass
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
@@ -22,6 +19,9 @@ class LDA(ParamSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
+        import sklearn.lda
+        import sklearn.multiclass
+
         if self.shrinkage == "None":
             self.shrinkage = None
             solver = 'svd'

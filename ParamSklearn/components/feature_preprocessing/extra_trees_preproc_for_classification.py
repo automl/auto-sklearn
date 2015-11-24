@@ -1,5 +1,4 @@
 import numpy as np
-from sklearn.ensemble import ExtraTreesClassifier
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -62,6 +61,8 @@ class ExtraTreesPreprocessor(ParamSklearnPreprocessingAlgorithm):
         self.preprocessor = None
 
     def fit(self, X, Y, sample_weight=None):
+        from sklearn.ensemble import ExtraTreesClassifier
+
         num_features = X.shape[1]
         max_features = int(
             float(self.max_features) * (np.log(num_features) + 1))

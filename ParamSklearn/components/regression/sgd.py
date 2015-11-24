@@ -1,6 +1,3 @@
-from sklearn.linear_model.stochastic_gradient import SGDRegressor
-import sklearn.preprocessing
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, UnParametrizedHyperparameter, \
@@ -38,6 +35,9 @@ class SGD(ParamSklearnRegressionAlgorithm):
         return self
 
     def iterative_fit(self, X, y, n_iter=1, refit=False):
+        from sklearn.linear_model.stochastic_gradient import SGDRegressor
+        import sklearn.preprocessing
+
         if refit:
             self.estimator = None
             self.scaler = None

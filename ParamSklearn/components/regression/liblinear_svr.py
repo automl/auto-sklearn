@@ -1,5 +1,3 @@
-import sklearn.svm
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, Constant
@@ -25,6 +23,8 @@ class LibLinear_SVR(ParamSklearnRegressionAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
+        import sklearn.svm
+
         self.C = float(self.C)
         self.tol = float(self.tol)
         self.epsilon = float(self.epsilon)

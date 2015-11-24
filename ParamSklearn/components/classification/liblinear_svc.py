@@ -1,6 +1,3 @@
-import sklearn.svm
-import sklearn.multiclass
-
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, Constant
@@ -30,6 +27,9 @@ class LibLinear_SVC(ParamSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
+        import sklearn.svm
+        import sklearn.multiclass
+
         self.C = float(self.C)
         self.tol = float(self.tol)
 

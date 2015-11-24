@@ -8,8 +8,6 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.constants import *
 
-from sklearn.ensemble import ExtraTreesClassifier as ETC
-
 
 class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
 
@@ -71,6 +69,8 @@ class ExtraTreesClassifier(ParamSklearnClassificationAlgorithm):
         return self
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
+        from sklearn.ensemble import ExtraTreesClassifier as ETC
+
         if refit:
             self.estimator = None
 

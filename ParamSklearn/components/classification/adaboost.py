@@ -1,7 +1,4 @@
 import numpy as np
-import sklearn.ensemble
-import sklearn.tree
-import sklearn.multiclass
 
 from ParamSklearn.implementations.MultilabelClassifier import MultilabelClassifier
 
@@ -25,6 +22,10 @@ class AdaboostClassifier(ParamSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y, sample_weight=None):
+        import sklearn.ensemble
+        import sklearn.tree
+        import sklearn.multiclass
+
         self.n_estimators = int(self.n_estimators)
         self.learning_rate = float(self.learning_rate)
         self.max_depth = int(self.max_depth)
