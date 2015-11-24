@@ -11,8 +11,8 @@ What is auto-sklearn?
 *auto-sklearn* is an automated machine learning toolkit and a drop-in
 replacement for a scikit-learn estimator:
 
-    >>> import autosklearn
-    >>> cls = autosklearn.AutoSklearnClassifier()
+    >>> import autosklearn.classification
+    >>> cls = autosklearn.classification.AutoSklearnClassifier()
     >>> cls.fit(X_train, y_train)
     >>> predictions = cls.predict(X_test, y_test)
 
@@ -26,7 +26,7 @@ the `AutoML workshop@ICML 2015 <https://sites.google.com/site/automlwsicml15/>`_
 Example
 *******
 
-    >>> import autosklearn
+    >>> import autosklearn.classification
     >>> import sklearn.datasets
     >>> digits = sklearn.datasets.load_digits()
     >>> X = digits.data
@@ -40,9 +40,9 @@ Example
     >>> y_train = y[:1000]
     >>> X_test = X[1000:]
     >>> y_test = y[1000:]
-    >>> automl = autosklearn.AutoSklearnClassifier()
+    >>> automl = autosklearn.classification.AutoSklearnClassifier()
     >>> automl.fit(X_train, y_train)
-    >>> print automl.score(X_test,y_test)
+    >>> print(automl.score(X_test,y_test))
 
 
 This will run for one hour should result in an accuracy above 0.98.
