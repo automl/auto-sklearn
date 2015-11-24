@@ -582,6 +582,13 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                       str(X_.shape)))
             predictions.append(prediction * weight)
 
+        if len(predictions) == 0:
+            raise ValueError('Something went wrong reading the predictions. '
+                             'The ensemble should consist of the following '
+                             'models: %s, the following models were loaded: '
+                             '%s' % (str(list(self.ensemble_indices_.keys())),
+                                     str(list(self.models_.keys()))))
+
         predictions = np.sum(np.array(predictions), axis=0)
         return predictions
 
