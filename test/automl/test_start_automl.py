@@ -27,7 +27,7 @@ class AutoMLTest(Base):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = autosklearn.automl.AutoML(output, output, 12, 12)
+        automl = autosklearn.automl.AutoML(output, output, 15, 15)
         automl.fit(X_train, Y_train)
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
@@ -48,7 +48,7 @@ class AutoMLTest(Base):
 
         queue = multiprocessing.Queue()
         auto = autosklearn.automl.AutoML(
-            output, output, 10, 10,
+            output, output, 15, 15,
             initial_configurations_via_metalearning=25,
             queue=queue,
             seed=100)
@@ -85,7 +85,7 @@ class AutoMLTest(Base):
         dataset = os.path.join(self.test_dir, '..', '.data', name)
 
         auto = autosklearn.automl.AutoML(
-            output, output, 10, 10,
+            output, output, 15, 15,
             initial_configurations_via_metalearning=25)
         auto._backend._make_internals_directory()
         D = store_and_or_load_data(dataset, output)

@@ -583,7 +583,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             predictions.append(prediction * weight)
 
         if len(predictions) == 0:
-            raise ValueError('Something went wrong reading the predictions. '
+            raise ValueError('Something went wrong generating the predictions. '
                              'The ensemble should consist of the following '
                              'models: %s, the following models were loaded: '
                              '%s' % (str(list(self.ensemble_indices_.keys())),

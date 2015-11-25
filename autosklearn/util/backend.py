@@ -188,6 +188,10 @@ class Backend(object):
         with open(indices_files[-1], 'rb') as fh:
             ensemble_members_run_numbers = pickle.load(fh)
 
+        if len(ensemble_members_run_numbers) == 0:
+            self.logger.error('Ensemble indices file %s does not contain any '
+                              'ensemble information.', indices_files[-1])
+
         return ensemble_members_run_numbers
 
     def save_ensemble_indices_weights(self, indices, idx, seed):

@@ -29,8 +29,8 @@ class EstimatorTest(Base):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=12,
-                                       per_run_time_limit=12,
+        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+                                       per_run_time_limit=15,
                                        tmp_folder=output,
                                        output_folder=output)
         automl.fit(X_train, Y_train)
@@ -97,8 +97,8 @@ class EstimatorTest(Base):
         backend = Backend(output, output)
         backend.save_model(dummy, 30, 1)
 
-        automl = AutoSklearnClassifier(time_left_for_this_task=10,
-                                       per_run_time_limit=10,
+        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+                                       per_run_time_limit=15,
                                        output_folder=output,
                                        tmp_folder=output,
                                        shared_mode=True,
