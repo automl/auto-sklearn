@@ -10,6 +10,12 @@ class Base(unittest.TestCase):
     def setUp(self):
         self.test_dir = os.path.dirname(__file__)
 
+        try:
+            travis = os.environ['TRAVIS']
+            self.travis = True
+        except Exception:
+            self.travis = False
+
     def _setUp(self, output):
         if os.path.exists(output):
             for i in range(10):

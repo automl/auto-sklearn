@@ -2,6 +2,7 @@
 from __future__ import print_function
 import os
 import sys
+import unittest
 
 import numpy as np
 import ParamSklearn.util as putil
@@ -25,6 +26,10 @@ class EstimatorTest(Base):
     _multiprocess_can_split_ = True
 
     def test_fit(self):
+        if self.travis:
+            self.skipTest('This test does currently not run on travis-ci. '
+                          'Make sure it runs locally on your machine!')
+
         output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit')
         self._setUp(output)
 
