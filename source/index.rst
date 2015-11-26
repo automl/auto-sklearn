@@ -82,7 +82,7 @@ seen strange things happening when installing it using
 API
 ***
 
-.. autoclass:: autosklearn.AutoSklearnClassifier
+.. autoclass:: autosklearn.classification.AutoSklearnClassifier
 
 
 License
