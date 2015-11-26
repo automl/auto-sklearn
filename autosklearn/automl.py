@@ -238,6 +238,14 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         if isinstance(metric, str):
             metric = STRING_TO_METRIC[metric]
 
+        if feat_type is not None and len(feat_type) != X.shape[1]:
+            raise ValueError('Array feat_type does not have same number of '
+                             'variables as X has features. %d vs %d.' %
+                             (len(feat_type), X.shape[1]))
+        if feat_type is not None and not all([isinstance(f, bool)
+                                              for f in feat_type]):
+            raise ValueError('Array feat_type must only contain bools.')
+
         loaded_data_manager = XYDataManager(X, y,
                                             task=task,
                                             metric=metric,

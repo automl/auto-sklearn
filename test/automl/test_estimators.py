@@ -62,6 +62,21 @@ class EstimatorTest(Base):
                                 shared_mode=True,
                                 tmp_folder='/tmp/duitaredxtvbedb')
 
+    def test_feat_type_wrong_arguments(self):
+        cls = AutoSklearnClassifier()
+        X = np.zeros((100, 100))
+        y = np.zeros((100, ))
+        self.assertRaisesRegexp(ValueError,
+                                'Array feat_type does not have same number of '
+                                'variables as X has features. 1 vs 100.',
+                                cls.fit,
+                                X=X, y=y, feat_type=[True])
+
+        self.assertRaisesRegexp(ValueError,
+                                'Array feat_type must only contain bools.',
+                                cls.fit,
+                                X=X, y=y, feat_type=['Car']*100)
+
     def test_fit_pSMAC(self):
         output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
         self._setUp(output)
