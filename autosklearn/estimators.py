@@ -7,12 +7,11 @@ import numpy as np
 from os import stat
 import six
 
-import autosklearn.automl
+from autosklearn.automl import AutoML
 from autosklearn.constants import *
 
 
-class AutoSklearnClassifier(autosklearn.automl.AutoML):
-
+class AutoSklearnClassifier(AutoML):
     """This class implements the classification task. It must not be pickled!
 
     Parameters
@@ -48,6 +47,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
 
     resampling_strategy : string, optional ('holdout')
         how to to handle overfitting, might need 'resampling_strategy_arguments'
+
         * 'holdout': 66:33 (train:test) split
         * 'holdout-iterative-fit':  66:33 (train:test) split, calls iterative
           fit where possible
@@ -56,7 +56,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         * 'partial-cv': crossvalidation, requires 'folds' , calls
           iterative fit where possible
 
-    resampling_strategy_arguments : dict, (optional if 'holdout') None
+    resampling_strategy_arguments : dict, optional if 'holdout' (None)
         Additional arguments for resampling_strategy
         * 'holdout': None
         * 'holdout-iterative-fit':  None
@@ -179,12 +179,14 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
                 raise
 
     def fit(self, X, y,
-            task=MULTICLASS_CLASSIFICATION,
             metric='acc_metric',
             feat_type=None,
             dataset_name=None,
             ):
         """Fit *autosklearn* to given training set (X, y).
+
+        Parameters
+        ----------
 
         X : array-like or sparse matrix of shape = [n_samples, n_features]
             The training input samples.
@@ -194,12 +196,23 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
 
         metric : str, optional (default='acc_metric')
             The metric to optimize for. Can be one of: ['acc_metric',
-            'auc_metric', 'bac_metric', 'f1_metric', 'pac_metric']
+            'auc_metric', 'bac_metric', 'f1_metric', 'pac_metric']. A
+            description of the metrics can be found in `the paper describing
+            the AutoML Challenge
+            <http://www.causality.inf.ethz.ch/AutoML/automl_ijcnn15.pdf>`_.
 
         feat_type : list, optional (default=None)
-            List of `len(X.shape[1])` describing if an attribute is
+            List of Bools of `len(X.shape[1])` describing if an attribute is
             continuous or categorical. Categorical attributes will
             automatically 1Hot encoded.
+
+        dataset_name : str, optional (default=None)
+            Create nicer output. If None, a string will be determined by the
+            md5 hash of the dataset.
+
+        Returns
+        -------
+        self
 
         """
         # Fit is supposed to be idempotent!
@@ -270,7 +283,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         return super(AutoSklearnClassifier, self).predict(X)
 
 
-class AutoSklearnRegressor(autosklearn.automl.AutoML):
+class AutoSklearnRegressor(AutoML):
 
     def __init__(self, **kwargs):
         raise NotImplementedError()

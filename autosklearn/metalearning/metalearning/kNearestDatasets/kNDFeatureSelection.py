@@ -1,4 +1,5 @@
-from collections import namedtuple, defaultdict
+from __future__ import print_function
+from collections import defaultdict
 import itertools
 import logging
 import os
@@ -10,10 +11,10 @@ import pandas as pd
 import sklearn
 import scipy.stats
 
-import pyMetaLearn.directory_manager
-from pyMetaLearn.metalearning.meta_base import MetaBase
+from autosklearn.metalearning.metalearning.meta_base import MetaBase
 import HPOlib.benchmark_util as benchmark_util
-from pyMetaLearn.metalearning.kNearestDatasets.kND import LearnedDistanceRF
+from autosklearn.metalearning.metalearning.kNearestDatasets.kND import \
+    LearnedDistanceRF
 
 logger = logging.getLogger(__name__)
 
@@ -74,8 +75,8 @@ if __name__ == "__main__":
     starttime = time.time()
     args, params = benchmark_util.parse_cli()
     os.chdir(args['metalearning_directory'])
-    pyMetaLearn.directory_manager.set_local_directory(
-        args['metalearning_directory'])
+    #pyMetaLearn.directory_manager.set_local_directory(
+    #    args['metalearning_directory'])
 
     with open(args["task_files_list"]) as fh:
         task_files_list = fh.readlines()
@@ -105,20 +106,20 @@ if __name__ == "__main__":
     with open("test.pkl", "w") as fh:
         cPickle.dump((X, Y, metafeatures), fh, -1)
 
-    print "Metafeatures", metafeatures.shape
-    print "X", X.shape, np.isfinite(X).all().all()
-    print "Y", Y.shape, np.isfinite(Y).all()
+    print("Metafeatures", metafeatures.shape)
+    print("X", X.shape, np.isfinite(X).all().all())
+    print("Y", Y.shape, np.isfinite(Y).all())
 
     metafeature_sets = Queue.Queue()
     if 'forward_selection' in args:
         used_metafeatures = []
         metafeature_performance = []
-        print "Starting forward selection ",
+        print("Starting forward selection ",)
         i = 0
         for m1, m2 in itertools.combinations(metafeatures.columns, 2):
             metafeature_sets.put(pd.Index([m1, m2]))
             i += 1
-        print "with %d metafeature combinations" % i
+        print("with %d metafeature combinations" % i)
     elif 'embedded_selection' in args:
         metafeature_performance = []
         metafeature_sets.put(metafeatures.columns)
@@ -132,15 +133,15 @@ if __name__ == "__main__":
         loo_rho = []
         loo_mse = []
 
-        print "###############################################################"
-        print "New iteration of FS with:"
-        print metafeature_set
-        print "Dataset Mae MSE Rho"
+        print("###############################################################")
+        print("New iteration of FS with:")
+        print(metafeature_set)
+        print("Dataset Mae MSE Rho")
         # Leave one out CV
         for idx in range(metafeatures.shape[0]):
             leave_out_dataset = metafeatures.index[idx]
             if 'forward_selection' not in args:
-                print leave_out_dataset,
+                print(leave_out_dataset,)
 
             columns = np.hstack(("0_" + metafeature_set,
                                  "1_" + metafeature_set))
@@ -149,7 +150,7 @@ if __name__ == "__main__":
             mae, mse, rho = _validate_rf_without_one_dataset(X_, Y, rf,
                                                              leave_out_dataset)
             if 'forward_selection' not in args:
-                print mae, mse, rho
+                print(mae, mse, rho)
 
             loo_mae.append(mae)
             loo_rho.append(rho)
@@ -175,9 +176,9 @@ if __name__ == "__main__":
         mean_ranks.sort()
 
         # TODO: save only validate-best runs!
-        print "MAE", mae, mae_std
-        print "MSE", mse, mse_std
-        print "Mean tau", rho, rho_std
+        print("MAE", mae, mae_std)
+        print("MSE", mse, mse_std)
+        print("Mean tau", rho, rho_std)
         duration = time.time() - starttime
 
         if 'forward_selection' in args:
@@ -188,11 +189,11 @@ if __name__ == "__main__":
                 if len(used_metafeatures) == 10:
                     break
 
-                print "#######################################################"
-                print "#######################################################"
-                print "Adding a new feature to the feature set"
+                print("#######################################################")
+                print("#######################################################")
+                print("Adding a new feature to the feature set")
                 metafeature_performance.sort()
-                print metafeature_performance
+                print(metafeature_performance)
                 used_metafeatures = metafeature_performance[0][1]
                 for metafeature in metafeatures.columns:
                     if metafeature in used_metafeatures:
@@ -212,19 +213,19 @@ if __name__ == "__main__":
             # because the metafeature is preceeded by the index of the
             # dataset which is either 0_ or 1_
             remove = mean_ranks[-1][1][2:]
-            print "Going to remove", remove
+            print("Going to remove", remove)
             keep = pd.Index([mf_name for mf_name in metafeature_set if
                              mf_name != remove])
-            print "I will keep", keep
+            print("I will keep", keep)
             metafeature_sets.put(keep)
 
         else:
             for rank in mean_ranks:
-                print rank
+                print(rank)
 
     if 'forward_selection' in args:
         metafeature_performance.sort()
-        print metafeature_performance
+        print(metafeature_performance)
         mse = metafeature_performance[0][0]
-    print "Result for ParamILS: %s, %f, 1, %f, %d, %s" % \
-          ("SAT", abs(duration), mse, -1, str(__file__))
+    print("Result for ParamILS: %s, %f, 1, %f, %d, %s" % \
+          ("SAT", abs(duration), mse, -1, str(__file__)))

@@ -4,16 +4,20 @@ import shutil
 import subprocess
 import sys
 import tarfile
-import urllib
+
+try:
+    from urllib import urlretrieve
+except:
+    from urllib.request import urlretrieve
 
 import setuptools
 from setuptools.extension import Extension
 from setuptools.command.install import install
+import numpy as np
+from Cython.Build import cythonize
 
 SMAC_DOWNLOAD_LOCATION = 'http://aad.informatik.uni-freiburg.de/~feurerm/'
 SMAC_TAR_NAME = 'smac-v2.08.01-development-1.tar.gz'
-# METADATA_LOCATION = "http://aad.informatik.uni-freiburg.de/~feurerm/"
-# METADATA_TAR_NAME = "metadata_automl1_000.tar.gz"
 RUNSOLVER_LOCATION = 'http://www.cril.univ-artois.fr/~roussel/runsolver/'
 RUNSOLVER_TAR_NAME = 'runsolver-3.3.4.tar.bz2'
 DOWNLOAD_DIRECTORY = os.path.join(os.path.dirname(__file__), '.downloads')
@@ -21,11 +25,31 @@ BINARIES_DIRECTORY = 'autosklearn/binaries'
 METADATA_DIRECTORY = 'autosklearn/metalearning/files'
 
 
-extensions = [Extension('autosklearn.data.competition_c_functions',
-                        sources=[
-                            'autosklearn/data/competition_c_functions.pyx'
-                        ])
-             ]
+extensions = cythonize(
+    [Extension('autosklearn.data.competition_c_functions',
+               sources=['autosklearn/data/competition_c_functions.pyx'],
+               language='c',
+               include_dirs=[np.get_include()])
+     ])
+
+requirements_file = os.path.join(os.path.dirname(__file__), 'requ.txt')
+requirements = []
+dependency_links = []
+with open(requirements_file) as fh:
+    for line in fh:
+        line = line.strip()
+        if line:
+            # Make sure the github URLs work here as well
+            split = line.split('@')
+            split = split[0]
+            split = split.split('/')
+            url = '/'.join(split[:-1])
+            requirement = split[-1]
+            requirements.append(requirement)
+            # Add the rest of the URL to the dependency links to allow
+            # setup.py test to work
+            if 'git+https' in url:
+                dependency_links.append(line.replace('git+', ''))
 
 
 class Download(install):
@@ -42,13 +66,11 @@ class Download(install):
             pass
 
         for download_url, filename in [
-            (SMAC_DOWNLOAD_LOCATION, SMAC_TAR_NAME),
-            # (METADATA_LOCATION, METADATA_TAR_NAME),
-            (RUNSOLVER_LOCATION, RUNSOLVER_TAR_NAME)
-        ]:
+                (SMAC_DOWNLOAD_LOCATION, SMAC_TAR_NAME),
+                (RUNSOLVER_LOCATION, RUNSOLVER_TAR_NAME)]:
             # This can fail ungracefully, because having these files is
             # crucial to AutoSklearn!
-            urllib.urlretrieve(
+            urlretrieve(
                 os.path.join(download_url, filename),
                 filename=os.path.join(DOWNLOAD_DIRECTORY, filename))
 
@@ -89,24 +111,19 @@ class Download(install):
                                  SMAC_TAR_NAME.replace('.tar.gz', '')),
                     BINARIES_DIRECTORY)
 
-        # try:
-        #    shutil.rmtree(METADATA_DIRECTORY)
-        # except Exception:
-        #    pass
-
-        # Copy the metadata
-        # shutil.move(os.path.join(DOWNLOAD_DIRECTORY,
-        #                         METADATA_TAR_NAME.replace(".tar.gz", ""),
-        #                         "files"),
-        #            METADATA_DIRECTORY)
-
-        # TODO: Normally one wants to call run(self), but this runs distutils and ignores install_requirements for unknown reasons
+        # Normally one wants to call run(self), but this runs distutils and
+        # ignores install_requirements for unknown reasons
         # if anyone knows a better way, feel free to change
         install.do_egg_install(self)
 
-        # shutil.rmtree(os.path.join(METADATA_DIRECTORY))
-        shutil.rmtree(BINARIES_DIRECTORY)
-        shutil.rmtree(DOWNLOAD_DIRECTORY)
+        try:
+            shutil.rmtree(BINARIES_DIRECTORY)
+        except OSError:
+            pass
+        try:
+            shutil.rmtree(DOWNLOAD_DIRECTORY)
+        except OSError:
+            pass
 
 
 setuptools.setup(
@@ -115,20 +132,8 @@ setuptools.setup(
     version='0.0.1dev',
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
-    install_requires=['setuptools',
-                      'numpy>=0.16.0',
-                      'psutil',
-                      'pyyaml',
-                      'scipy>=0.14.0',
-                      'scikit-learn==0.16.1',
-                      'nose',
-                      'lockfile',
-                      'HPOlibConfigSpace',
-                      'ParamSklearn',
-                      'six',
-                      'ConfigArgParse',
-                      'liac-arff',
-                      'pandas'],
+    install_requires=requirements,
+    dependency_links=dependency_links,
     test_suite='nose.collector',
     cmdclass={'install': Download},
     scripts=['scripts/autosklearn'],

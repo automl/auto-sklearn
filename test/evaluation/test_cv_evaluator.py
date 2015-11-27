@@ -189,32 +189,32 @@ class CVEvaluator_Test(unittest.TestCase):
             function_handle()
             return True
         except ValueError as e:
-            if 'Floating-point under-/overflow occurred at epoch' in e.message or \
-                    'removed all features' in e.message or \
-                    'failed to create intent' in e.message:
+            if 'Floating-point under-/overflow occurred at epoch' in e.args[0] or \
+                    'removed all features' in e.args[0] or \
+                    'failed to create intent' in e.args[0]:
                 pass
             else:
                 raise e
         except LinAlgError as e:
-            if 'not positive definite, even with jitter' in e.message:
+            if 'not positive definite, even with jitter' in e.args[0]:
                 pass
             else:
                 raise e
         except AttributeError as e:
             # Some error in QDA
-            if 'log' == e.message:
+            if 'log' == e.args[0]:
                 pass
             else:
                 raise e
         except RuntimeWarning as e:
-            if 'invalid value encountered in sqrt' in e.message:
+            if 'invalid value encountered in sqrt' in e.args[0]:
                 pass
-            elif 'divide by zero encountered in divide' in e.message:
+            elif 'divide by zero encountered in divide' in e.args[0]:
                 pass
             else:
                 raise e
         except UserWarning as e:
-            if 'FastICA did not converge' in e.message:
+            if 'FastICA did not converge' in e.args[0]:
                 pass
             else:
                 raise e

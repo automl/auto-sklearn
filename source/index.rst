@@ -11,8 +11,8 @@ What is auto-sklearn?
 *auto-sklearn* is an automated machine learning toolkit and a drop-in
 replacement for a scikit-learn estimator:
 
-    >>> import autosklearn
-    >>> cls = autosklearn.AutoSklearnClassifier()
+    >>> import autosklearn.classification
+    >>> cls = autosklearn.classification.AutoSklearnClassifier()
     >>> cls.fit(X_train, y_train)
     >>> predictions = cls.predict(X_test, y_test)
 
@@ -26,7 +26,7 @@ the `AutoML workshop@ICML 2015 <https://sites.google.com/site/automlwsicml15/>`_
 Example
 *******
 
-    >>> import autosklearn
+    >>> import autosklearn.classification
     >>> import sklearn.datasets
     >>> digits = sklearn.datasets.load_digits()
     >>> X = digits.data
@@ -40,9 +40,9 @@ Example
     >>> y_train = y[:1000]
     >>> X_test = X[1000:]
     >>> y_test = y[1000:]
-    >>> automl = autosklearn.AutoSklearnClassifier()
+    >>> automl = autosklearn.classification.AutoSklearnClassifier()
     >>> automl.fit(X_train, y_train)
-    >>> print automl.score(X_test,y_test)
+    >>> print(automl.score(X_test,y_test))
 
 
 This will run for one hour should result in an accuracy above 0.98.
@@ -52,15 +52,14 @@ Installation
 ************
 **Prerequisities**: *auto-sklearn* is written in python (2.7) and was developed
 with Ubuntu. It should run on other Linux distributions, but won't work on a MAC
-or on a windows PC. It requires scikit-learn 0.15.2, which in turn requires
-numpy and scipy (version up to 0.14.1).
+or on a windows PC. It requires scikit-learn 0.16.1, which in turn requires
+numpy and scipy.
 
 *auto-sklearn* has several dependencies, which are not yet automatically
 resolved:
 
-* `HPOlib <https://github.com/automl/HPOlib>`_
 * `HPOlibConfigSpace <https://github.com/automl/HPOlibConfigSpace>`_
-* `ParamSklearn <https://bitbucket.org/mfeurer/paramsklearn>`_
+* `ParamSklearn <https://github.com/automl/paramsklearn>`_
 
 Please install these manually with:
 
@@ -74,10 +73,16 @@ Then install *auto-sklearn*
 
     pip install git+https://github.com/automl/auto-sklearn.git#egg=autosklearn
 
+We recommend installing *auto-sklearn* into a `virtual environment
+<http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or into an
+`anaconda environment <https://www.continuum.io/downloads>`_ because we have
+seen strange things happening when installing it using
+:bash:`python setup.py --user`.
+
 API
 ***
 
-.. autoclass:: autosklearn.AutoSklearnClassifier
+.. autoclass:: autosklearn.classification.AutoSklearnClassifier
 
 
 License
@@ -99,14 +104,15 @@ University of Freiburg.
     by opening a `github issue <https://github
     .com/automl/auto-sklearn/issues>`_ before starting to work.
 
+When developing new features, please create a new branch from the development
+branch. Prior to submitting a pull request, make sure that all tests are
+still passing.
+
 Features under development
 --------------------------
 * support for arff files
-* support for scikit-learn 0.16.1
+* support for scikit-learn 0.17
 * python 3 compability
-* MAC OS and windows compability
-* less dependencies
-* limiting the considered classifiers and preprocessors
 * command line interface
 
 A short guide to the code
@@ -116,7 +122,7 @@ A short guide to the code
 * `cli`: command line interface to the machine learning algorithm which is
   used internally by SMAC.
 * `data`: code to read and store machine learning datasets.
-* `evaluation`: classes to control the execution of machine learning.
+* `evaluation`: classes to control the execution of machine learning,
   algorithms and resampling of the data.
 * `metrics`: contains metrics which can be optimized.
 * `util`: several utilityy functions.

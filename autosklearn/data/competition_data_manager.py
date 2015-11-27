@@ -12,7 +12,7 @@ import numpy as np
 import scipy.sparse
 
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
-    STRING_TO_TASK_TYPES,  MULTICLASS_CLASSIFICATION, STRING_TO_METRIC
+    STRING_TO_TASK_TYPES, MULTICLASS_CLASSIFICATION, STRING_TO_METRIC
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.util import convert_to_num
 
@@ -96,7 +96,7 @@ def file_to_array(filename):
     # np.genfromtxt in that the number of columns doesn't need to be constant
     with open(filename, 'r') as data_file:
         # if verbose:
-        #     print('Reading {}...'.format(filename))
+        # print('Reading {}...'.format(filename))
         lines = data_file.readlines()
         # if verbose:
         #     print('Converting {} to correct array...'.format(filename))
@@ -117,7 +117,7 @@ def sparse_file_to_sparse_list(filename):
     # sparse_list[i][j] = (a,b) means matrix[i][a]=b
     data_file = open(filename, 'r')
     # if verbose:
-    #     print('Reading {}...'.format(filename))
+    # print('Reading {}...'.format(filename))
     lines = data_file.readlines()
     # if verbose:
     #     print('Converting {} to correct array')
@@ -141,7 +141,7 @@ def sparse_list_to_csr_sparse(sparse_list, nbr_features):
     dok_sparse = scipy.sparse.dok_matrix((nbr_samples, nbr_features),
                                          dtype=np.float32)
     # if verbose:
-    #     print('\tConverting sparse list to dok sparse matrix')
+    # print('\tConverting sparse list to dok sparse matrix')
     for row in range(nbr_samples):
         for column in range(len(sparse_list[row])):
             (feature, value) = sparse_list[row][column]
@@ -157,7 +157,6 @@ def load_labels(filename):
 
 
 class CompetitionDataManager(AbstractDataManager):
-
     def __init__(self, name, encode_labels=True, max_memory_in_mb=1048576):
         """ max_memory_size in Mb """
         if name.endswith("/"):
@@ -173,13 +172,13 @@ class CompetitionDataManager(AbstractDataManager):
         info_file = os.path.join(self.input_dir, self.name + '_public.info')
         self.get_info(info_file)
         self.feat_type = self.load_type(os.path.join(self.input_dir,
-                                                    self.name + '_feat.type'))
+                                                     self.name + '_feat.type'))
 
         # apply memory limit here for really large training sets
         Xtr = self.load_data(
             os.path.join(self.input_dir, self.name + '_train.data'),
             self.info['train_num'],
-            max_memory_in_mb = max_memory_in_mb)
+            max_memory_in_mb=max_memory_in_mb)
         Ytr = self.load_label(
             os.path.join(self.input_dir, self.name + '_train.solution'),
             self.info['train_num'])
@@ -223,7 +222,7 @@ class CompetitionDataManager(AbstractDataManager):
         """Get the data from a text file in one of 3 formats:
         matrix, sparse, binary_sparse"""
         # if verbose:
-        #     print('========= Reading ' + filename)
+        # print('========= Reading ' + filename)
         # start = time.time()
 
         if 'format' not in self.info:
@@ -236,7 +235,8 @@ class CompetitionDataManager(AbstractDataManager):
             }
 
             data = data_func[self.info['format']](filename, num_points,
-                                                  self.info['feat_num'], max_memory_in_mb)
+                                                  self.info['feat_num'],
+                                                  max_memory_in_mb)
 
             if scipy.sparse.issparse(data):
                 if not np.all(data.indices >= 0):
@@ -259,7 +259,7 @@ class CompetitionDataManager(AbstractDataManager):
     def load_label(self, filename, num_points):
         """Get the solution/truth values."""
         # if verbose:
-        #     print('========= Reading ' + filename)
+        # print('========= Reading ' + filename)
         # start = time.time()
 
         # IG: Here change to accommodate the new multiclass label format
@@ -293,7 +293,7 @@ class CompetitionDataManager(AbstractDataManager):
     def load_type(self, filename):
         """Get the variable types."""
         # if verbose:
-        #     print('========= Reading ' + filename)
+        # print('========= Reading ' + filename)
         # start = time.time()
         # type_list = []
         if os.path.isfile(filename):

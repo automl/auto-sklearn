@@ -161,7 +161,7 @@ class Backend(object):
             basename = os.path.basename(model_file)
             automl_seed = int(basename.split('.')[0])
             idx = int(basename.split('.')[1])
-            with open(os.path.join(model_directory, model_file)) as fh:
+            with open(os.path.join(model_directory, model_file), 'rb') as fh:
                 models[(automl_seed, idx)] = (pickle.load(fh))
 
         return models
@@ -185,8 +185,12 @@ class Backend(object):
             indices_files = [os.path.join(indices_dir, f) for f in indices_files]
             indices_files.sort(key=lambda f: time.ctime(os.path.getmtime(f)))
 
-        with open(indices_files[-1]) as fh:
+        with open(indices_files[-1], 'rb') as fh:
             ensemble_members_run_numbers = pickle.load(fh)
+
+        if len(ensemble_members_run_numbers) == 0:
+            self.logger.error('Ensemble indices file %s does not contain any '
+                              'ensemble information.', indices_files[-1])
 
         return ensemble_members_run_numbers
 

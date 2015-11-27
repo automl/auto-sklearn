@@ -1,3 +1,4 @@
+from __future__ import print_function
 from collections import OrderedDict
 import itertools
 
@@ -90,7 +91,7 @@ class LearnedDistanceRF(object):
 
         filled_runs = {}
         for name in runs:
-            print ".",
+            print(".",)
             run = runs[name]
             # Transfer all previous experiments
             filled_runs[name] = run

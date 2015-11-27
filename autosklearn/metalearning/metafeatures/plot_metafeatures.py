@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import argparse
 import cPickle
 import itertools
@@ -15,7 +17,7 @@ try:
     from sklearn.metrics.pairwise import PAIRWISE_DISTANCE_FUNCTIONS
     import sklearn.metrics.pairwise
 except:
-    print "Failed to load TSNE, probably you're using sklearn 0.14.X"
+    print("Failed to load TSNE, probably you're using sklearn 0.14.X")
 
 from pyMetaLearn.metalearning.meta_base import MetaBase
 import pyMetaLearn.metalearning.create_datasets
@@ -182,7 +184,7 @@ def plot_metafeatures(metafeatures_plot_dir, metafeatures, metafeatures_times,
     transformation_max = np.nanmax(transformation, axis=0)
     transformation = (transformation - transformation_min) / \
                      (transformation_max - transformation_min)
-    print transformation_min, transformation_max
+    print(transformation_min, transformation_max)
 
     #for i, dataset in enumerate(directory_content):
     #    print dataset, meta_feature_array[i]
@@ -329,8 +331,9 @@ def plot_metafeatures(metafeatures_plot_dir, metafeatures, metafeatures_times,
 
                     if best_found > after and before > after:
                         improvement = True
-                        print before, after
-                        print "Depth %d: Swapped %s with %s" % (depth, key1, key2)
+                        print(before, after)
+                        print("Depth %d: Swapped %s with %s" %
+                              (depth, key1, key2))
                     else:       # swap back...
                         tmp = label_positions[key1]
                         label_positions[key1] = label_positions[key2]
@@ -342,16 +345,16 @@ def plot_metafeatures(metafeatures_plot_dir, metafeatures, metafeatures_times,
                 # If it is not yet sorted perfectly, do another pass with
                 # two-step lookahead
                 if before == 0:
-                    print "Sorted perfectly..."
+                    print("Sorted perfectly...")
                     break
-                print depth, two_step_look_ahead
+                print(depth, two_step_look_ahead)
                 if two_step_look_ahead:
                     break
                 if maxdepth == depth:
-                    print "Reached maximum recursion depth..."
+                    print("Reached maximum recursion depth...")
                     break
                 if not improvement and depth < maxdepth:
-                    print "Still %d errors, trying two-step lookahead" % before
+                    print("Still %d errors, trying two-step lookahead" % before)
                     two_step_look_ahead = True
 
         swap(label_positions, marker_positions, maxdepth=maxdepth)

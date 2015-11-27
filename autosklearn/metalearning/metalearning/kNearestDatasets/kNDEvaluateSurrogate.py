@@ -1,3 +1,4 @@
+from __future__ import print_function
 import logging
 import os
 import time
@@ -77,7 +78,7 @@ if __name__ == "__main__":
     # Now sort the arrays so we can compare it to the ground truth in run
     for name in runs:
         filled_runs[name].sort()
-        print len(filled_runs[name]), len(runs[name])
+        print(len(filled_runs[name]), len(runs[name]))
         offset = 0
         a1 = []
         a2 = []
@@ -93,10 +94,10 @@ if __name__ == "__main__":
         a2 = pd.Series(a2)
         a1.fillna(1, inplace=True)
         a2.fillna(1, inplace=True)
-        print sklearn.metrics.mean_absolute_error(a1, a2), \
+        print(sklearn.metrics.mean_absolute_error(a1, a2), \
               sklearn.metrics.mean_squared_error(a1, a2), \
               np.sqrt(sklearn.metrics.mean_squared_error(a1, a2)), \
-              scipy.stats.spearmanr(a1, a2)[0]
+              scipy.stats.spearmanr(a1, a2)[0])
 
 
 

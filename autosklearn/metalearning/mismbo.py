@@ -3,7 +3,7 @@ from __future__ import print_function
 
 import os
 import time
-from StringIO import StringIO
+from six import StringIO
 
 import numpy as np
 from autosklearn.metalearning.metafeatures.metafeatures import \
@@ -114,6 +114,7 @@ def create_metalearning_string_for_smac_call(
     """
     logger = get_logger('autosklearn.metalearning.mismbo')
 
+    task = task if task != MULTILABEL_CLASSIFICATION else MULTICLASS_CLASSIFICATION
     task = TASK_TYPES_TO_STRING[task]
 
     if metafeatures_encoded_labels is None or \
@@ -122,13 +123,14 @@ def create_metalearning_string_for_smac_call(
                          'calculate_metafeatures_encoded_labels and '
                          'calculate_metafeatures_with_labels first!')
 
+    logger.warning(task)
     current_directory = os.path.dirname(__file__)
     if metadata_directory is None:
         metadata_directory = os.path.join(
             current_directory, 'files',
             '%s_%s_%s' % (METRIC_TO_STRING[metric], task,
                           'sparse' if sparse is True else 'dense'))
-
+    logger.warning(metadata_directory)
     # Concatenate the metafeatures!
     mf = metafeatures_labels
     mf.metafeature_values.update(

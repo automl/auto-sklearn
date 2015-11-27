@@ -52,20 +52,27 @@ def pruning(predictions, labels, n_best, task_type, metric):
 
 
 def get_predictions(dir_path, dir_path_list, include_num_runs,
-                    model_and_automl_re):
+                    model_and_automl_re, precision="32"):
     result = []
     for i, model_name in enumerate(dir_path_list):
         match = model_and_automl_re.search(model_name)
         automl_seed = int(match.group(1))
         num_run = int(match.group(2))
         if (automl_seed, num_run) in include_num_runs:
-            predictions = np.load(os.path.join(dir_path, model_name))
+            if precision == "16":
+                predictions = np.load(os.path.join(dir_path, model_name)).astype(dtype=np.float16)
+            elif precision == "32":
+                predictions = np.load(os.path.join(dir_path, model_name)).astype(dtype=np.float32)
+            elif precision == "64":
+                predictions = np.load(os.path.join(dir_path, model_name)).astype(dtype=np.float64)
+            else:
+                predictions = np.load(os.path.join(dir_path, model_name))
             result.append(predictions)
     return result
 
+
 def original_ensemble_selection(predictions, labels, ensemble_size, task_type,
-                                metric,
-                                do_pruning=False):
+                                metric, do_pruning=False):
     """Rich Caruana's ensemble selection method."""
 
     ensemble = []
@@ -179,7 +186,8 @@ def main(autosklearn_tmp_dir,
          ensemble_nbest=None,
          seed=1,
          shared_mode=False,
-         max_iterations=-1):
+         max_iterations=-1,
+         precision="32"):
 
     watch = StopWatch()
     watch.start_task('ensemble_builder')
@@ -277,7 +285,14 @@ def main(autosklearn_tmp_dir,
 
         model_idx = 0
         for model_name in dir_ensemble_list:
-            predictions = np.load(os.path.join(dir_ensemble, model_name))
+            if precision is "16":
+                predictions = np.load(os.path.join(dir_ensemble, model_name)).astype(dtype=np.float16)
+            elif precision is "32":
+                predictions = np.load(os.path.join(dir_ensemble, model_name)).astype(dtype=np.float32)
+            elif precision is "64":
+                predictions = np.load(os.path.join(dir_ensemble, model_name)).astype(dtype=np.float64)
+            else:
+                predictions = np.load(os.path.join(dir_ensemble, model_name))
             score = calculate_score(targets_ensemble, predictions,
                                     task_type, metric,
                                     predictions.shape[1])
@@ -365,18 +380,12 @@ def main(autosklearn_tmp_dir,
         all_predictions_train = get_predictions(dir_ensemble,
                                                 dir_ensemble_list,
                                                 include_num_runs,
-                                                model_and_automl_re)
-        all_predictions_valid = get_predictions(dir_valid,
-                                                dir_valid_list,
-                                                include_num_runs,
-                                                model_and_automl_re)
-        all_predictions_test = get_predictions(dir_test,
-                                               dir_test_list,
-                                               include_num_runs,
-                                               model_and_automl_re)
+                                                model_and_automl_re,
+                                                precision)
 
-        if len(all_predictions_train) == len(all_predictions_test) == len(
-                all_predictions_valid) == 0:
+#        if len(all_predictions_train) == len(all_predictions_test) == len(
+#                all_predictions_valid) == 0:
+        if len(include_num_runs) == 0:
             logger.error('All models do just random guessing')
             time.sleep(2)
             continue
@@ -394,10 +403,12 @@ def main(autosklearn_tmp_dir,
             except ValueError as e:
                 logger.error('Caught ValueError: ' + str(e))
                 used_time = watch.wall_elapsed('ensemble_builder')
+                time.sleep(2)
                 continue
             except Exception as e:
                 logger.error('Caught error! %s', e.message)
                 used_time = watch.wall_elapsed('ensemble_builder')
+                time.sleep(2)
                 continue
 
             # Output the score
@@ -426,6 +437,12 @@ def main(autosklearn_tmp_dir,
         backend.save_ensemble_indices_weights(ensemble_members_run_numbers,
                                               index_run, seed)
 
+        all_predictions_valid = get_predictions(dir_valid,
+                                                dir_valid_list,
+                                                include_num_runs,
+                                                model_and_automl_re,
+                                                precision)
+
         # Save predictions for valid and test data set
         if len(dir_valid_list) == len(dir_ensemble_list):
             all_predictions_valid = np.array(all_predictions_valid)
@@ -438,6 +455,13 @@ def main(autosklearn_tmp_dir,
                          'as ensemble predictions (%d)!.',
                         len(dir_valid_list), len(dir_ensemble_list))
 
+        del all_predictions_valid
+        all_predictions_test = get_predictions(dir_test,
+                                               dir_test_list,
+                                               include_num_runs,
+                                               model_and_automl_re,
+                                               precision)
+
         if len(dir_test_list) == len(dir_ensemble_list):
             all_predictions_test = np.array(all_predictions_test)
             ensemble_predictions_test = np.mean(
@@ -448,6 +472,8 @@ def main(autosklearn_tmp_dir,
             logger.info('Could not find as many test set predictions (%d) as '
                          'ensemble predictions (%d)!',
                         len(dir_test_list), len(dir_ensemble_list))
+
+        del all_predictions_test
 
         current_num_models = len(dir_ensemble_list)
         watch.stop_task('ensemble_iter_' + str(index_run))
@@ -489,6 +515,8 @@ if __name__ == '__main__':
                         help='If True, build ensemble with all available '
                              'models. Otherwise, use only models produced by '
                              'a SMAC run with the same seed.')
+    parser.add_argument('--precision', required=False, default="32",
+                        choices=list(["16", "32", "64"]))
 
     args = parser.parse_args()
     seed = args.auto_sklearn_seed
@@ -498,7 +526,6 @@ if __name__ == '__main__':
 
     task = STRING_TO_TASK_TYPES[args.task]
     metric = STRING_TO_METRIC[args.metric]
-
     main(autosklearn_tmp_dir=args.auto_sklearn_tmp_directory,
          basename=args.basename,
          task_type=task,
@@ -509,5 +536,6 @@ if __name__ == '__main__':
          ensemble_nbest=args.ensemble_nbest,
          seed=args.auto_sklearn_seed,
          shared_mode=args.shared_mode,
-         max_iterations=args.max_iterations)
+         max_iterations=args.max_iterations,
+         precision=args.precision)
     sys.exit(0)

@@ -16,21 +16,31 @@ def submit_call(call, seed, logger, log_dir=None):
     call = shlex.split(call)
 
     if log_dir is None:
-        proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'))
+        try:
+            proc = subprocess.Popen(call, stdout=open(os.devnull, 'w'))
+        except OSError as e:
+            logger.critical(e)
+            logger.critical('Problem starting subprocess, see error message '
+                            'above. PATH is %s' % os.environ['PATH'])
     else:
-        proc = subprocess.Popen(
-            call,
-            stdout=open(
-                os.path.join(log_dir, 'ensemble_out_%d.log' % seed), 'w'),
-            stderr=open(
-                os.path.join(log_dir, 'ensemble_err_%d.log' % seed), 'w'))
+        try:
+            proc = subprocess.Popen(
+                call,
+                stdout=open(
+                    os.path.join(log_dir, 'ensemble_out_%d.log' % seed), 'w'),
+                stderr=open(
+                    os.path.join(log_dir, 'ensemble_err_%d.log' % seed), 'w'))
+        except OSError as e:
+            logger.critical(e)
+            logger.critical('Problem starting subprocess, see error message '
+                            'above. PATH is %s' % os.environ['PATH'])
 
     return proc
 
 
 def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
                          output_dir, ensemble_size, ensemble_nbest, seed,
-                         shared_mode, max_iterations):
+                         shared_mode, max_iterations, precision):
     logger = logging.get_logger(__name__)
 
     if limit <= 0 and (max_iterations is None or max_iterations <= 0):
@@ -55,7 +65,8 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
          '--ensemble-size', str(ensemble_size),
          '--ensemble-nbest', str(ensemble_nbest),
          '--auto-sklearn-seed', str(seed),
-         '--max-iterations', str(max_iterations)]
+         '--max-iterations', str(max_iterations),
+         '--precision', str(precision)]
     if shared_mode:
         call.append('--shared-mode')
 

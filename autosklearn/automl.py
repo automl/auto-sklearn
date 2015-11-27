@@ -10,6 +10,7 @@ import traceback
 import numpy as np
 
 from HPOlibConfigSpace.converters import pcs_parser
+from HPOlibConfigSpace.configuration_space import Configuration
 from sklearn.base import BaseEstimator
 import six
 
@@ -21,7 +22,8 @@ from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import resampling, HoldoutEvaluator, get_new_run_num
 from autosklearn.metalearning.mismbo import \
     calc_meta_features, calc_meta_features_encoded, \
-    create_metalearning_string_for_smac_call
+    create_metalearning_string_for_smac_call, \
+    convert_conf2smac_string
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     get_auto_seed, set_auto_seed, del_auto_seed, submit_process, paramsklearn, \
@@ -41,7 +43,7 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
     if metalearning_cnt <= 0:
         result = None
     elif data_info_task in \
-            [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION]:
+            [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
         logger.info('Start calculating metafeatures for %s' % basename)
         result = calc_meta_features(x_train, y_train, categorical=categorical,
                                     dataset_name=basename)
@@ -125,7 +127,7 @@ def _print_debug_info_of_init_configuration(initial_configurations, basename,
         % (basename, time_for_task - watcher.wall_elapsed(basename)))
 
 
-class AutoML(multiprocessing.Process, BaseEstimator):
+class AutoML(BaseEstimator, multiprocessing.Process):
 
     def __init__(self,
                  tmp_dir,
@@ -144,11 +146,12 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                  debug_mode=False,
                  include_estimators=None,
                  include_preprocessors=None,
-                 resampling_strategy='holdout',
+                 resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
                  delete_tmp_folder_after_terminate=False,
                  delete_output_folder_after_terminate=False,
-                 shared_mode=False):
+                 shared_mode=False,
+                 precision=32):
         super(AutoML, self).__init__()
 
         self._tmp_dir = tmp_dir
@@ -174,6 +177,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         self.delete_output_folder_after_terminate = \
             delete_output_folder_after_terminate
         self._shared_mode = shared_mode
+        self.precision = precision
 
         self._datamanager = None
         self._dataset_name = None
@@ -233,6 +237,14 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         if isinstance(metric, str):
             metric = STRING_TO_METRIC[metric]
+
+        if feat_type is not None and len(feat_type) != X.shape[1]:
+            raise ValueError('Array feat_type does not have same number of '
+                             'variables as X has features. %d vs %d.' %
+                             (len(feat_type), X.shape[1]))
+        if feat_type is not None and not all([isinstance(f, bool)
+                                              for f in feat_type]):
+            raise ValueError('Array feat_type must only contain bools.')
 
         loaded_data_manager = XYDataManager(X, y,
                                             task=task,
@@ -312,7 +324,7 @@ class AutoML(multiprocessing.Process, BaseEstimator):
             try:
                 os.mkdir(self._backend.get_model_dir())
             except OSError:
-                self._logger.warn("model directory already exists")
+                self._logger.warning("model directory already exists")
                 if not self._shared_mode:
                     raise
 
@@ -377,7 +389,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
         if meta_features is None:
             initial_configurations = []
         elif datamanager.info['task'] in [MULTICLASS_CLASSIFICATION,
-                                          BINARY_CLASSIFICATION]:
+                                          BINARY_CLASSIFICATION,
+                                          MULTILABEL_CLASSIFICATION]:
 
             meta_features_encoded = _calculate_metafeatures_encoded(
                 self._dataset_name,
@@ -412,9 +425,49 @@ class AutoML(multiprocessing.Process, BaseEstimator):
 
         else:
             initial_configurations = []
-            self._logger.warn('Metafeatures encoded not calculated')
+            self._logger.warning('Metafeatures encoded not calculated')
 
-        # == RUN SMACtmp_dir, basename, time_for_task, ml_memory_limit,
+        # == RUN SMAC
+        if (datamanager.info["task"] == BINARY_CLASSIFICATION) or \
+            (datamanager.info["task"] == MULTICLASS_CLASSIFICATION):
+            config = {'balancing:strategy': 'weighting',
+                      'classifier:__choice__': 'sgd',
+                      'classifier:sgd:loss': 'hinge',
+                      'classifier:sgd:penalty': 'l2',
+                      'classifier:sgd:alpha': 0.0001,
+                      'classifier:sgd:fit_intercept': 'True',
+                      'classifier:sgd:n_iter': 5,
+                      'classifier:sgd:learning_rate': 'optimal',
+                      'classifier:sgd:eta0': 0.01,
+                      'classifier:sgd:average': 'True',
+                      'imputation:strategy': 'mean',
+                      'one_hot_encoding:use_minimum_fraction': 'True',
+                      'one_hot_encoding:minimum_fraction': 0.1,
+                      'preprocessor:__choice__': 'no_preprocessing',
+                      'rescaling:__choice__': 'min/max'}
+        elif datamanager.info["task"] == MULTILABEL_CLASSIFICATION:
+            config = {'classifier:__choice__': 'adaboost',
+                      'classifier:adaboost:algorithm': 'SAMME.R',
+                      'classifier:adaboost:learning_rate': 1.0,
+                      'classifier:adaboost:max_depth': 1,
+                      'classifier:adaboost:n_estimators': 50,
+                      'balancing:strategy': 'weighting',
+                      'imputation:strategy': 'mean',
+                      'one_hot_encoding:use_minimum_fraction': 'True',
+                      'one_hot_encoding:minimum_fraction': 0.1,
+                      'preprocessor:__choice__': 'no_preprocessing',
+                      'rescaling:__choice__': 'none'}
+        else:
+            config = None
+            self._logger.info("Tasktype unknown: %s" %
+                              TASK_TYPES_TO_STRING[datamanager.info["task"]])
+
+        if config is not None:
+            configuration = Configuration(self.configuration_space, config)
+            config_string = convert_conf2smac_string(configuration)
+            initial_configurations = [config_string] + initial_configurations
+
+        # == RUN SMAC
         proc_smac = run_smac(tmp_dir=self._tmp_dir, basename=self._dataset_name,
                              time_for_task=self._time_for_task,
                              ml_memory_limit=self._ml_memory_limit,
@@ -491,7 +544,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 ensemble_nbest=self._ensemble_nbest,
                 seed=self._seed,
                 shared_mode=self._shared_mode,
-                max_iterations=max_iterations
+                max_iterations=max_iterations,
+                precision=self.precision
             )
             self._stopwatch.stop_task(task_name)
             return proc_ensembles
@@ -527,7 +581,21 @@ class AutoML(multiprocessing.Process, BaseEstimator):
                 prediction = model.predict(X_)
             else:
                 prediction = model.predict_proba(X_)
+
+            if len(prediction.shape) < 1 or len(X_.shape) < 1 or \
+                    X_.shape[0] < 1 or prediction.shape[0] != X_.shape[0]:
+                self._logger.warning("Prediction shape for model %s is %s "
+                                     "while X_.shape is %s" %
+                                     (model, str(prediction.shape),
+                                      str(X_.shape)))
             predictions.append(prediction * weight)
+
+        if len(predictions) == 0:
+            raise ValueError('Something went wrong generating the predictions. '
+                             'The ensemble should consist of the following '
+                             'models: %s, the following models were loaded: '
+                             '%s' % (str(list(self.ensemble_indices_.keys())),
+                                     str(list(self.models_.keys()))))
 
         predictions = np.sum(np.array(predictions), axis=0)
         return predictions
@@ -548,7 +616,8 @@ class AutoML(multiprocessing.Process, BaseEstimator):
     def score(self, X, y):
         prediction = self.predict(X)
         return calculate_score(y, prediction, self._task,
-                               self._metric, self._label_num)
+                               self._metric, self._label_num,
+                               logger=self._logger)
 
     def show_models(self):
         if self.models_ is None or len(self.models_) == 0 or len(

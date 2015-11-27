@@ -1,13 +1,13 @@
-from StringIO import StringIO
-import itertools
+from __future__ import print_function
+from six import StringIO
 from unittest import TestCase
 import unittest
 import os
 
 import arff
 import numpy as np
-from scipy import sparse
 from sklearn.preprocessing.imputation import Imputer
+from sklearn.datasets import make_multilabel_classification
 
 from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
 from ParamSklearn.implementations.StandardScaler import StandardScaler
@@ -79,6 +79,14 @@ class MetaFeaturesTest(TestCase):
     def tearDown(self):
         os.chdir(self.cwd)
 
+    def get_multilabel(self):
+        return make_multilabel_classification(n_samples=100,
+                                              n_features=10,
+                                              n_classes=5,
+                                              n_labels=5,
+                                              return_indicator=True,
+                                              random_state=1)
+
     def test_number_of_instance(self):
         mf = self.mf["NumberOfInstances"](self.X, self.y, self.categorical)
         self.assertEqual(mf.value, 898)
@@ -87,6 +95,12 @@ class MetaFeaturesTest(TestCase):
     def test_number_of_classes(self):
         mf = self.mf["NumberOfClasses"](self.X, self.y, self.categorical)
         self.assertEqual(mf.value, 5)
+        self.assertIsInstance(mf, MetaFeatureValue)
+
+    def test_number_of_classes_multilabel(self):
+        X, y = self.get_multilabel()
+        mf = self.mf["NumberOfClasses"](X, y)
+        self.assertEqual(mf.value, 2)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_number_of_features(self):
@@ -179,14 +193,45 @@ class MetaFeaturesTest(TestCase):
         self.assertAlmostEqual(mf.value, float(898)/float(38))
         self.assertIsInstance(mf, MetaFeatureValue)
 
+    def test_class_occurences(self):
+        mf = self.helpers["ClassOccurences"](self.X, self.y, self.categorical)
+        self.assertEqual(mf.value,
+                         {0.0: 8.0, 1.0: 99.0, 2.0: 684.0, 4.0: 67.0, 5.0: 40.0})
+
+    def test_class_occurences_multilabel(self):
+        X, y = self.get_multilabel()
+        mf = self.helpers["ClassOccurences"](X, y)
+        self.assertEqual(mf.value,
+                         [{0: 16.0, 1: 84.0},
+                          {0: 8.0, 1: 92.0},
+                          {0: 68.0, 1: 32.0},
+                          {0: 15.0, 1: 85.0},
+                          {0: 28.0, 1: 72.0}])
+
     def test_class_probability_min(self):
         mf = self.mf["ClassProbabilityMin"](self.X, self.y, self.categorical)
         self.assertAlmostEqual(mf.value, float(8)/float(898))
         self.assertIsInstance(mf, MetaFeatureValue)
 
+    def test_class_probability_min_multilabel(self):
+        X, y = self.get_multilabel()
+        self.helpers.set_value("ClassOccurences",
+                               self.helpers["ClassOccurences"](X, y))
+        mf = self.mf["ClassProbabilityMin"](X, y)
+        self.assertAlmostEqual(mf.value, float(8) / float(100))
+        self.assertIsInstance(mf, MetaFeatureValue)
+
     def test_class_probability_max(self):
         mf = self.mf["ClassProbabilityMax"](self.X, self.y, self.categorical)
         self.assertAlmostEqual(mf.value, float(684)/float(898))
+        self.assertIsInstance(mf, MetaFeatureValue)
+
+    def test_class_probability_max_multilabel(self):
+        X, y = self.get_multilabel()
+        self.helpers.set_value("ClassOccurences",
+                               self.helpers["ClassOccurences"](X, y))
+        mf = self.mf["ClassProbabilityMax"](X, y)
+        self.assertAlmostEqual(mf.value, float(92) / float(100))
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_class_probability_mean(self):
@@ -196,11 +241,31 @@ class MetaFeaturesTest(TestCase):
         self.assertAlmostEqual(mf.value, prob_mean)
         self.assertIsInstance(mf, MetaFeatureValue)
 
+    def test_class_probability_mean_multilabel(self):
+        X, y = self.get_multilabel()
+        self.helpers.set_value("ClassOccurences",
+                               self.helpers["ClassOccurences"](X, y))
+        mf = self.mf["ClassProbabilityMean"](X, y)
+        classes = [(16, 84), (8, 92), (68, 32), (15, 85), (28, 72)]
+        probas = np.mean([np.mean(np.array(cls_)) / 100 for cls_ in classes])
+        self.assertAlmostEqual(mf.value, probas)
+        self.assertIsInstance(mf, MetaFeatureValue)
+
     def test_class_probability_std(self):
         mf = self.mf["ClassProbabilitySTD"](self.X, self.y, self.categorical)
         classes = np.array((8, 99, 684, 67, 40), dtype=np.float64)
         prob_std = (classes / float(898)).std()
         self.assertAlmostEqual(mf.value, prob_std)
+        self.assertIsInstance(mf, MetaFeatureValue)
+
+    def test_class_probability_std_multilabel(self):
+        X, y = self.get_multilabel()
+        self.helpers.set_value("ClassOccurences",
+                               self.helpers["ClassOccurences"](X, y))
+        mf = self.mf["ClassProbabilitySTD"](X, y)
+        classes = [(16, 84), (8, 92), (68, 32), (15, 85), (28, 72)]
+        probas = np.mean([np.std(np.array(cls_) / 100.) for cls_ in classes])
+        self.assertAlmostEqual(mf.value, probas)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_num_symbols(self):
@@ -290,27 +355,67 @@ class MetaFeaturesTest(TestCase):
         classes = np.array((8, 99, 684, 67, 40), dtype=np.float64)
         classes = classes / sum(classes)
         entropy = -np.sum([c * np.log2(c) for c in classes])
+
         self.assertAlmostEqual(mf.value, entropy)
+
+    def test_class_entropy_multilabel(self):
+        X, y = self.get_multilabel()
+        mf = self.mf["ClassEntropy"](X, y)
+
+        classes = [(16, 84), (8, 92), (68, 32), (15, 85), (28, 72)]
+        entropies = []
+        for cls in classes:
+            cls = np.array(cls, dtype=np.float32)
+            cls = cls / sum(cls)
+            entropy = -np.sum([c * np.log2(c) for c in cls])
+            entropies.append(entropy)
+
+        self.assertAlmostEqual(mf.value, np.mean(entropies))
 
     def test_landmark_lda(self):
         # TODO: somehow compute the expected output?
         mf = self.mf["LandmarkLDA"](self.X_transformed, self.y)
 
+    def test_landmark_lda_multilabel(self):
+        X, y = self.get_multilabel()
+        mf = self.mf["LandmarkLDA"](X, y)
+        self.assertTrue(np.isfinite(mf.value))
+
     def test_landmark_naive_bayes(self):
         # TODO: somehow compute the expected output?
         mf = self.mf["LandmarkNaiveBayes"](self.X_transformed, self.y)
+
+    def test_landmark_naive_bayes_multilabel(self):
+        X, y = self.get_multilabel()
+        mf = self.mf["LandmarkNaiveBayes"](X, y)
+        self.assertTrue(np.isfinite(mf.value))
 
     def test_landmark_decision_tree(self):
         # TODO: somehow compute the expected output?
         mf = self.mf["LandmarkDecisionTree"](self.X_transformed, self.y)
 
+    def test_landmark_decision_tree_multilabel(self):
+        X, y = self.get_multilabel()
+        mf = self.mf["LandmarkDecisionTree"](X, y)
+        self.assertTrue(np.isfinite(mf.value))
+
     def test_decision_node(self):
         # TODO: somehow compute the expected output?
         mf = self.mf["LandmarkDecisionNodeLearner"](self.X_transformed, self.y)
 
+    def test_landmark_decision_node_multilabel(self):
+        X, y = self.get_multilabel()
+        mf = self.mf["LandmarkDecisionNodeLearner"](X, y)
+        self.assertTrue(np.isfinite(mf.value))
+
     def test_random_node(self):
         # TODO: somehow compute the expected output?
         mf = self.mf["LandmarkRandomNodeLearner"](self.X_transformed, self.y)
+
+    def test_landmark_random_node_multilabel(self):
+        X, y = self.get_multilabel()
+        mf = self.mf["LandmarkRandomNodeLearner"](X, y)
+        self.assertTrue(np.isfinite(mf.value))
 
     @unittest.skip("Currently not implemented!")
     def test_worst_node(self):
@@ -320,6 +425,11 @@ class MetaFeaturesTest(TestCase):
     def test_1NN(self):
         # TODO: somehow compute the expected output?
         mf = self.mf["Landmark1NN"](self.X_transformed, self.y)
+
+    def test_1NN_multilabel(self):
+        X, y = self.get_multilabel()
+        mf = self.mf["Landmark1NN"](X, y)
+        self.assertTrue(np.isfinite(mf.value))
 
     def test_pca(self):
         hf = self.helpers["PCA"](self.X_transformed, self.y)
@@ -342,6 +452,16 @@ class MetaFeaturesTest(TestCase):
         self.assertEqual(52, len(mf.metafeature_values))
         self.assertEqual(mf.metafeature_values[
                              'NumberOfCategoricalFeatures'].value, 32)
+        sio = StringIO()
+        mf.dump(sio)
+
+    def test_calculate_all_metafeatures_multilabel(self):
+        self.helpers.clear()
+        X, y = self.get_multilabel()
+        categorical = [False] * 10
+        mf = meta_features.calculate_all_metafeatures(
+            X, y, categorical, "Generated")
+        self.assertEqual(52, len(mf.metafeature_values))
         sio = StringIO()
         mf.dump(sio)
 

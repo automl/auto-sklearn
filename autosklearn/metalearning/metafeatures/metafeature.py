@@ -1,10 +1,11 @@
 from abc import ABCMeta, abstractmethod
-from StringIO import StringIO
+from six import StringIO
 import time
 import types
 
 import arff
 import scipy.sparse
+import six
 
 from autosklearn.util.logging_ import get_logger
 
@@ -107,7 +108,7 @@ class DatasetMetafeatures(object):
     def dump(self, path_or_filehandle):
         output = self._get_arff()
 
-        if isinstance(path_or_filehandle, types.StringTypes):
+        if isinstance(path_or_filehandle, six.string_types):
             with open(path_or_filehandle, "w") as fh:
                 arff.dump(output, fh)
         else:
@@ -116,7 +117,7 @@ class DatasetMetafeatures(object):
     @classmethod
     def load(cls, path_or_filehandle):
 
-        if isinstance(path_or_filehandle, types.StringTypes):
+        if isinstance(path_or_filehandle, six.string_types):
             with open(path_or_filehandle) as fh:
                 input = arff.load(fh)
         else:

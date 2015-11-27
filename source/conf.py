@@ -32,11 +32,52 @@ except:
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
-            return Mock()
+        if 'BaseEstimator' in name:
+            class BaseEstimator(object):
+                pass
 
-MOCK_MODULES = ['numpy', 'scipy','scikit-learn', 'psutil','pyyaml','pandas',
-                'matplotlib', 'HPOlib', 'ParamSklearn', 'HPOlibConfigSpace']
+            return BaseEstimator
+        return Mock()
+
+MOCK_MODULES = ['lockfile',
+                'joblib',
+                'psutil',
+                'pyyaml',
+                'ConfigArgParse',
+                'arff',
+                'pandas',
+                'Cython',
+                'numpy',
+                'scipy', 'scipy.sparse', 'scipy.stats', 'scipy.linalg',
+                'sklearn',
+                'sklearn.base',
+                'sklearn.cross_validation',
+                'sklearn.dummy',
+                'sklearn.metrics',
+                'sklearn.multiclass',
+                'sklearn.neighbors',
+                'sklearn.utils',
+                'psutil','pyyaml','pandas',
+                'matplotlib',
+                'ParamSklearn',
+                'ParamSklearn.implementations',
+                'ParamSklearn.implementations.OneHotEncoder',
+                'ParamSklearn.implementations.Imputation',
+                'ParamSklearn.implementations.StandardScaler',
+                'ParamSklearn.classification',
+                'ParamSklearn.regression',
+                'HPOlibConfigSpace',
+                'HPOlibConfigSpace.converters',
+                'HPOlibConfigSpace.configuration_space']
+
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+
+# Add the parent directory of this file to the PYTHONPATH
+import os
+current_directory = os.path.dirname(__file__)
+parent_directory = os.path.join(current_directory, '..')
+parent_directory = os.path.abspath(parent_directory)
+sys.path.append(parent_directory)
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom

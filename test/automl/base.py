@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from __future__ import print_function
 import os
 import shutil
 import time
@@ -8,6 +9,12 @@ import unittest
 class Base(unittest.TestCase):
     def setUp(self):
         self.test_dir = os.path.dirname(__file__)
+
+        try:
+            travis = os.environ['TRAVIS']
+            self.travis = True
+        except Exception:
+            self.travis = False
 
     def _setUp(self, output):
         if os.path.exists(output):
