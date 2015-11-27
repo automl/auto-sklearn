@@ -3,6 +3,7 @@ from __future__ import print_function
 import os
 import unittest
 
+
 import autosklearn.data.competition_c_functions as competition_c_functions
 
 class CHelperFunctionTest(unittest.TestCase):
@@ -35,3 +36,5 @@ class CHelperFunctionTest(unittest.TestCase):
             filename, 670, 20, 0.01)
         self.assertEqual(data.shape, (131, 20))
 
+if __name__ == "__main__":
+    unittest.main()
