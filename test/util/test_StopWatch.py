@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
         wall_overhead = dur - watch.wall_sum()
 
         self.assertLess(wall_overhead, 2)
-        self.assertLess(cpu_overhead, wall_overhead)
+        self.assertLess(cpu_overhead, 1.2*wall_overhead)
 
 
 if __name__ == '__main__':
