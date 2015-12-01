@@ -6,12 +6,10 @@ import os
 import sys
 import time
 
-import mock
 import numpy as np
 import six
 
 import autosklearn.automl
-from autosklearn.util import Backend
 import ParamSklearn.util as putil
 from autosklearn.constants import *
 from autosklearn.cli.base_interface import store_and_or_load_data
@@ -41,44 +39,65 @@ class AutoMLTest(Base):
         self._tearDown(output)
 
     def test_automl_outputs(self):
+        print("1.")
         output = os.path.join(self.test_dir, '..',
                               '.tmp_test_automl_outputs')
+        print("2.")
         self._setUp(output)
-
+        print("3.")
         name = '31_bac'
+        print("4.")
         dataset = os.path.join(self.test_dir, '..', '.data', name)
+        print("5.")
         data_manager_file = os.path.join(output, '.auto-sklearn',
                                          'datamanager.pkl')
+        print("6.")
 
         queue = multiprocessing.Queue()
+        print("7.")
         auto = autosklearn.automl.AutoML(
             output, output, 15, 15,
             initial_configurations_via_metalearning=25,
             queue=queue,
             seed=100)
+        print("8.")
         auto.fit_automl_dataset(dataset)
+        print("9.")
 
         # pickled data manager (without one hot encoding!)
         with open(data_manager_file, 'rb') as fh:
+            print("10.")
             D = six.moves.cPickle.load(fh)
+            print("11.")
             self.assertTrue(np.allclose(D.data['X_train'][0, :3],
                                         [1., 12., 2.]))
+            print("12.")
 
+        print("13.")
         time_needed_to_load_data, data_manager_file, procs = \
             queue.get()
+        print("14.")
         for proc in procs:
             proc.wait()
+        print("15.")
 
         # Start time
         print(os.listdir(os.path.join(output, '.auto-sklearn')))
+        print("16.")
         start_time_file_path = os.path.join(output, '.auto-sklearn',
                                             "start_time_100")
+        print("17.")
         with open(start_time_file_path, 'r') as fh:
+            print("18.")
             start_time = float(fh.read())
+            print("19.")
         self.assertGreaterEqual(time.time() - start_time, 10)
+        print("20.")
 
         del auto
+        print("21.")
         self._tearDown(output)
+        print("22.")
 
     def test_do_dummy_prediction(self):
         output = os.path.join(self.test_dir, '..',

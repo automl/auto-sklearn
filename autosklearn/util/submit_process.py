@@ -4,9 +4,8 @@ import os
 import shlex
 import subprocess
 
-import lockfile
+import psutil
 
-import autosklearn
 from autosklearn.constants import *
 from autosklearn.util import logging_ as logging
 
@@ -35,7 +34,9 @@ def submit_call(call, seed, logger, log_dir=None):
             logger.critical('Problem starting subprocess, see error message '
                             'above. PATH is %s' % os.environ['PATH'])
 
-    return proc
+    pid = proc.pid
+    process = psutil.Process(pid)
+    return process
 
 
 def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
