@@ -161,7 +161,7 @@ class Backend(object):
             basename = os.path.basename(model_file)
             automl_seed = int(basename.split('.')[0])
             idx = int(basename.split('.')[1])
-            with open(os.path.join(model_directory, model_file), 'rb') as fh:
+            with open(os.path.join(model_directory, basename), 'rb') as fh:
                 models[(automl_seed, idx)] = (pickle.load(fh))
 
         return models

@@ -165,9 +165,9 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                                 configuration = Configuration(
                                     configuration_space, configuration)
                             except Exception as e:
-                                print "Configuration %s not applicable " \
+                                print("Configuration %s not applicable " \
                                       "because of %s!" \
-                                      % (row[1], e)
+                                      % (row[1], e))
                                 break
 
                             if str(configuration) in \

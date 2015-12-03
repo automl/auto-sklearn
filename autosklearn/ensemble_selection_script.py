@@ -58,15 +58,20 @@ def get_predictions(dir_path, dir_path_list, include_num_runs,
         match = model_and_automl_re.search(model_name)
         automl_seed = int(match.group(1))
         num_run = int(match.group(2))
+
+        if model_name.endswith("/"):
+            model_name = model_name[:-1]
+        basename = os.path.basename(model_name)
+
         if (automl_seed, num_run) in include_num_runs:
             if precision == "16":
-                predictions = np.load(os.path.join(dir_path, model_name)).astype(dtype=np.float16)
+                predictions = np.load(os.path.join(dir_path, basename)).astype(dtype=np.float16)
             elif precision == "32":
-                predictions = np.load(os.path.join(dir_path, model_name)).astype(dtype=np.float32)
+                predictions = np.load(os.path.join(dir_path, basename)).astype(dtype=np.float32)
             elif precision == "64":
-                predictions = np.load(os.path.join(dir_path, model_name)).astype(dtype=np.float64)
+                predictions = np.load(os.path.join(dir_path, basename)).astype(dtype=np.float64)
             else:
-                predictions = np.load(os.path.join(dir_path, model_name))
+                predictions = np.load(os.path.join(dir_path, basename))
             result.append(predictions)
     return result
 
@@ -249,7 +254,10 @@ def main(autosklearn_tmp_dir,
         dir_ensemble_list_mtimes = []
 
         for dir_ensemble_file in dir_ensemble_list:
-            dir_ensemble_file = os.path.join(dir_ensemble, dir_ensemble_file)
+            if dir_ensemble_file.endswith("/"):
+                dir_ensemble_file = dir_ensemble_file[:-1]
+            basename = os.path.basename(dir_ensemble_file)
+            dir_ensemble_file = os.path.join(dir_ensemble, basename)
             mtime = os.path.getmtime(dir_ensemble_file)
             dir_ensemble_list_mtimes.append(mtime)
 
@@ -285,14 +293,18 @@ def main(autosklearn_tmp_dir,
 
         model_idx = 0
         for model_name in dir_ensemble_list:
+            if model_name.endswith("/"):
+                model_name = model_name[:-1]
+            basename = os.path.basename(model_name)
+
             if precision is "16":
-                predictions = np.load(os.path.join(dir_ensemble, model_name)).astype(dtype=np.float16)
+                predictions = np.load(os.path.join(dir_ensemble, basename)).astype(dtype=np.float16)
             elif precision is "32":
-                predictions = np.load(os.path.join(dir_ensemble, model_name)).astype(dtype=np.float32)
+                predictions = np.load(os.path.join(dir_ensemble, basename)).astype(dtype=np.float32)
             elif precision is "64":
-                predictions = np.load(os.path.join(dir_ensemble, model_name)).astype(dtype=np.float64)
+                predictions = np.load(os.path.join(dir_ensemble, basename)).astype(dtype=np.float64)
             else:
-                predictions = np.load(os.path.join(dir_ensemble, model_name))
+                predictions = np.load(os.path.join(dir_ensemble, basename))
             score = calculate_score(targets_ensemble, predictions,
                                     task_type, metric,
                                     predictions.shape[1])
