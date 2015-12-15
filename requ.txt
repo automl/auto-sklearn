@@ -2,7 +2,7 @@ setuptools
 mock
 nose
 
-numpy>=0.16.0
+numpy>=1.9.0
 scipy>=0.14.1
 
 scikit-learn==0.16.1
