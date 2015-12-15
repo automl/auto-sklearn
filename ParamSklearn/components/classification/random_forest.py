@@ -7,8 +7,6 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from ParamSklearn.components.base import ParamSklearnClassificationAlgorithm
 from ParamSklearn.constants import *
-# get our own forests to replace the sklearn ones
-#from ParamSklearn.implementations import forest
 
 
 class RandomForest(ParamSklearnClassificationAlgorithm):

@@ -1,8 +1,10 @@
 __author__ = 'feurerm'
 
+import copy
 import unittest
 
 import numpy as np
+import sklearn.datasets
 import sklearn.metrics
 
 from ParamSklearn.components.data_preprocessing.balancing import Balancing
@@ -18,8 +20,6 @@ from ParamSklearn.components.classification.sgd import SGD
 from ParamSklearn.components.feature_preprocessing\
     .extra_trees_preproc_for_classification import ExtraTreesPreprocessor
 from ParamSklearn.components.feature_preprocessing.liblinear_svc_preprocessor import LibLinear_Preprocessor
-from ParamSklearn.components.feature_preprocessing.random_trees_embedding import RandomTreesEmbedding
-from ParamSklearn.util import get_dataset
 
 
 class BalancingComponentTest(unittest.TestCase):
@@ -61,19 +61,30 @@ class BalancingComponentTest(unittest.TestCase):
                          list(init_params.items())[0])
 
     def test_weighting_effect(self):
+        data = sklearn.datasets.make_classification(
+            n_samples=1000, n_features=20, n_redundant=5, n_informative=5,
+            n_repeated=2, n_clusters_per_class=2, weights=[0.8, 0.2],
+            random_state=1)
+
         for name, clf, acc_no_weighting, acc_weighting in \
-                [('adaboost', AdaboostClassifier, 0.692, 0.719),
-                 ('decision_tree', DecisionTree, 0.712, 0.668),
-                 ('extra_trees', ExtraTreesClassifier, 0.901, 0.919),
-                 ('gradient_boosting', GradientBoostingClassifier, 0.879, 0.883),
-                 ('random_forest', RandomForest, 0.886, 0.885),
-                 ('libsvm_svc', LibSVM_SVC, 0.915, 0.937),
-                 ('liblinear_svc', LibLinear_SVC, 0.920, 0.923),
-                 ('sgd', SGD, 0.908, 0.901)]:
+                [('adaboost', AdaboostClassifier, 0.709, 0.662),
+                 ('decision_tree', DecisionTree, 0.683, 0.726),
+                 ('extra_trees', ExtraTreesClassifier, 0.812, 0.812),
+                 ('gradient_boosting', GradientBoostingClassifier,
+                    0.800, 0.760),
+                 ('random_forest', RandomForest, 0.849, 0.780),
+                 ('libsvm_svc', LibSVM_SVC, 0.571, 0.658),
+                 ('liblinear_svc', LibLinear_SVC, 0.685, 0.699),
+                 ('sgd', SGD, 0.602, 0.720)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
                 # Fit
-                X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
+                data_ = copy.copy(data)
+                X_train = data_[0][:700]
+                Y_train = data_[1][:700]
+                X_test = data_[0][700:]
+                Y_test = data_[1][700:]
+
                 cs = ParamSklearnClassifier.get_hyperparameter_search_space(
                     include={'classifier': [name]})
                 default = cs.get_default_configuration()
@@ -82,11 +93,16 @@ class BalancingComponentTest(unittest.TestCase):
                 predictor = classifier.fit(X_train, Y_train)
                 predictions = predictor.predict(X_test)
                 self.assertAlmostEqual(acc,
-                    sklearn.metrics.accuracy_score(predictions, Y_test),
+                    sklearn.metrics.f1_score(predictions, Y_test),
                     places=3)
 
                 # pre_transform and fit_estimator
-                X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
+                data_ = copy.copy(data)
+                X_train = data_[0][:700]
+                Y_train = data_[1][:700]
+                X_test = data_[0][700:]
+                Y_test = data_[1][700:]
+
                 cs = ParamSklearnClassifier.get_hyperparameter_search_space(
                     include={'classifier': [name]})
                 default = cs.get_default_configuration()
@@ -96,19 +112,23 @@ class BalancingComponentTest(unittest.TestCase):
                 classifier.fit_estimator(Xt, Y_train, fit_params=fit_params)
                 predictions = classifier.predict(X_test)
                 self.assertAlmostEqual(acc,
-                                       sklearn.metrics.accuracy_score(
+                                       sklearn.metrics.f1_score(
                                            predictions, Y_test),
                                        places=3)
 
         for name, pre, acc_no_weighting, acc_weighting in \
                 [('extra_trees_preproc_for_classification',
-                  ExtraTreesPreprocessor, 0.911, 0.902),
-                   ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
-                    0.893, 0.894)]:
+                    ExtraTreesPreprocessor, 0.682, 0.634),
+                 ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
+                    0.714, 0.596)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
+                data_ = copy.copy(data)
+                X_train = data_[0][:700]
+                Y_train = data_[1][:700]
+                X_test = data_[0][700:]
+                Y_test = data_[1][700:]
 
-                X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
                 cs = ParamSklearnClassifier.get_hyperparameter_search_space(
                     include={'classifier': ['sgd'], 'preprocessor': [name]})
                 default = cs.get_default_configuration()
@@ -117,12 +137,17 @@ class BalancingComponentTest(unittest.TestCase):
                 predictor = classifier.fit(X_train, Y_train)
                 predictions = predictor.predict(X_test)
                 self.assertAlmostEqual(acc,
-                                       sklearn.metrics.accuracy_score(
+                                       sklearn.metrics.f1_score(
                                            predictions, Y_test),
                                        places=3)
 
                 # pre_transform and fit_estimator
-                X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
+                data_ = copy.copy(data)
+                X_train = data_[0][:700]
+                Y_train = data_[1][:700]
+                X_test = data_[0][700:]
+                Y_test = data_[1][700:]
+
                 cs = ParamSklearnClassifier.get_hyperparameter_search_space(
                     include={'classifier': ['sgd'], 'preprocessor': [name]})
                 default = cs.get_default_configuration()
@@ -132,6 +157,6 @@ class BalancingComponentTest(unittest.TestCase):
                 classifier.fit_estimator(Xt, Y_train, fit_params=fit_params)
                 predictions = classifier.predict(X_test)
                 self.assertAlmostEqual(acc,
-                                       sklearn.metrics.accuracy_score(
+                                       sklearn.metrics.f1_score(
                                            predictions, Y_test),
                                        places=3)
