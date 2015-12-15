@@ -44,6 +44,6 @@ install:
 
 script:
   # - coverage run --source autosklearn setup.py test
-  - cd test && nosetests -v --with-coverage
+  - cd test && nosetests -v --with-coverage --cover-package=autosklearn
 
 after_success: coveralls
