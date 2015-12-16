@@ -5,8 +5,8 @@ import shlex
 import subprocess
 
 import HPOlibConfigSpace.hyperparameters
-import ParamSklearn.classification
-import ParamSklearn.regression
+import autosklearn.pipeline.classification
+import autosklearn.pipeline.regression
 
 # Some macros
 COND = "conditional"
@@ -59,9 +59,11 @@ def get_dict(task_type="classifier", **kwargs):
     assert task_type in ("classifier", "regressor")
 
     if task_type == "classifier":
-        cs = ParamSklearn.classification.ParamSklearnClassifier.get_hyperparameter_search_space(dataset_properties=kwargs)
+        cs = autosklearn.pipeline.classification.SimpleClassificationPipeline\
+            .get_hyperparameter_search_space(dataset_properties=kwargs)
     elif task_type == "regressor":
-        cs = ParamSklearn.regression.ParamSklearnRegressor.get_hyperparameter_search_space(dataset_properties=kwargs)
+        cs = autosklearn.pipeline.regression.SimpleRegressionPipeline\
+            .get_hyperparameter_search_space(dataset_properties=kwargs)
     else:
         raise ValueError("'task_type' is not in ('classifier', 'regressor')")
 
@@ -149,7 +151,7 @@ def get_dict(task_type="classifier", **kwargs):
                 d[est][COND][UN] += 1
             else:
                 raise ValueError("Don't know that type: %s" % type(h))
-    print preprocessor_dict
+    print(preprocessor_dict)
     return (estimator_dict, preprocessor_dict)
 
 
@@ -202,7 +204,7 @@ def main():
 
     tex_doc = template_string % "\n".join([est_table, preproc_table])
     if args.save is None:
-        print tex_doc
+        print(tex_doc)
     else:
         fh = open(args.save, "w")
         fh.write(tex_doc)

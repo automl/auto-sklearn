@@ -11,7 +11,7 @@ from HPOlibConfigSpace.hyperparameters import IntegerHyperparameter, \
     FloatHyperparameter, CategoricalHyperparameter, Constant
 
 from autosklearn.constants import *
-from autosklearn.util import paramsklearn
+from autosklearn.util import pipeline
 
 
 def retrieve_matadata(validation_directory, metric, configuration_space,
@@ -295,7 +295,7 @@ def main():
             output_dir_ = os.path.join(output_dir, '%s_%s_%s' % (
                 metric, TASK_TYPES_TO_STRING[task], 'sparse' if sparse else 'dense'))
 
-            configuration_space = paramsklearn.get_configuration_space(
+            configuration_space = pipeline.get_configuration_space(
                 {'is_sparse': sparse, 'task': task}
             )
 

@@ -3,13 +3,13 @@ from __future__ import print_function
 
 import unittest
 
-from ParamSklearn.util import get_dataset
+from autosklearn.pipeline.util import get_dataset
 
 from autosklearn.constants import *
 from autosklearn.metalearning.mismbo import calc_meta_features, \
     calc_meta_features_encoded, \
     create_metalearning_string_for_smac_call
-from autosklearn.util.paramsklearn import get_configuration_space
+from autosklearn.util.pipeline import get_configuration_space
 
 
 class MetafeatureValueDummy(object):

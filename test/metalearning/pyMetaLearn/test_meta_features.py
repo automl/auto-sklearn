@@ -9,8 +9,8 @@ import numpy as np
 from sklearn.preprocessing.imputation import Imputer
 from sklearn.datasets import make_multilabel_classification
 
-from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
-from ParamSklearn.implementations.StandardScaler import StandardScaler
+from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
+from autosklearn.pipeline.implementations.StandardScaler import StandardScaler
 
 from autosklearn.metalearning.metafeatures.metafeature import MetaFeatureValue
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features

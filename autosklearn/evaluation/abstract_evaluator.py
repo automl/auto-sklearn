@@ -7,8 +7,8 @@ import traceback
 
 import numpy as np
 import lockfile
-from ParamSklearn.classification import ParamSklearnClassifier
-from ParamSklearn.regression import ParamSklearnRegressor
+from autosklearn.pipeline.classification import SimpleClassificationPipeline
+from autosklearn.pipeline.regression import SimpleRegressionPipeline
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
 from autosklearn.constants import *
@@ -106,13 +106,13 @@ class AbstractEvaluator(object):
             if self.configuration is None:
                 self.model_class = MyDummyRegressor
             else:
-                self.model_class = ParamSklearnRegressor
+                self.model_class = SimpleRegressionPipeline
             self.predict_function = self.predict_regression
         else:
             if self.configuration is None:
                 self.model_class = MyDummyClassifier
             else:
-                self.model_class = ParamSklearnClassifier
+                self.model_class = SimpleClassificationPipeline
             self.predict_function = self.predict_proba
 
         if num_run is None:

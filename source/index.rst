@@ -55,11 +55,9 @@ with Ubuntu. It should run on other Linux distributions, but won't work on a MAC
 or on a windows PC. It requires scikit-learn 0.16.1, which in turn requires
 numpy and scipy.
 
-*auto-sklearn* has several dependencies, which are not yet automatically
-resolved:
+*auto-sklearn* has a dependency, which are not yet automatically resolved:
 
 * `HPOlibConfigSpace <https://github.com/automl/HPOlibConfigSpace>`_
-* `ParamSklearn <https://github.com/automl/paramsklearn>`_
 
 Please install these manually with:
 

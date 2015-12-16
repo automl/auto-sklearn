@@ -11,8 +11,8 @@ import numpy as np
 from scipy import sparse
 from sklearn.preprocessing.imputation import Imputer
 
-from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
-from ParamSklearn.implementations.StandardScaler import StandardScaler
+from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
+from autosklearn.pipeline.implementations.StandardScaler import StandardScaler
 
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features
 import test_meta_features
