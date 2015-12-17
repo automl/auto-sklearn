@@ -38,7 +38,7 @@ class,added,comment
 <class 'sklearn.linear_model.ridge.Ridge'>,True,
 <class 'sklearn.linear_model.ridge.RidgeCV'>,False,We want to perform CV ourselves
 <class 'sklearn.linear_model.stochastic_gradient.BaseSGDRegressor'>,False,
-<class 'sklearn.linear_model.stochastic_gradient.SGDRegressor'>,,
+<class 'sklearn.linear_model.stochastic_gradient.SGDRegressor'>,True,
 <class 'sklearn.linear_model.tests.test_sgd.SparseSGDRegressor'>,FALSE,This regressor is inside a test module
 <class 'sklearn.linear_model.theil_sen.TheilSenRegressor'>,,
 <class 'sklearn.neighbors.regression.KNeighborsRegressor'>,True,
