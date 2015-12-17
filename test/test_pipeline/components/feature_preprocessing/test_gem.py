@@ -1,6 +1,6 @@
 import unittest
 
-from autosklearn.pipeline.components.classification.proj_logit import ProjLogitCLassifier
+from autosklearn.pipeline.components.classification.sgd import SGD
 from autosklearn.pipeline.components.feature_preprocessing.gem import GEM
 from autosklearn.pipeline.util import _test_preprocessing, PreprocessingTestCase, get_dataset
 import sklearn.metrics
@@ -26,11 +26,13 @@ class GEMComponentTest(PreprocessingTestCase):
             X_test_trans = preprocessor.transform(X_test)
 
             # fit a classifier on top
-            classifier = ProjLogitCLassifier(max_epochs = 5, random_state=1)
+            config = SGD.get_hyperparameter_search_space( \
+                ).get_default_configuration()
+            classifier = SGD(random_state=1, **config._values)
             predictor = classifier.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
             accuracy = sklearn.metrics.accuracy_score(predictions, Y_test)
-            self.assertGreaterEqual(accuracy, 0.94)
+            self.assertGreaterEqual(accuracy, 0.85)
 
     def test_preprocessing_dtype(self):
         super(GEMComponentTest, self)._test_preprocessing_dtype(GEM,
