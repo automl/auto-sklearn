@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 from autosklearn.constants import *
-from ParamSklearn.classification import ParamSklearnClassifier
-from ParamSklearn.regression import ParamSklearnRegressor
+from autosklearn.pipeline.classification import SimpleClassificationPipeline
+from autosklearn.pipeline.regression import SimpleRegressionPipeline
 
 
 __all__ = [
@@ -31,7 +31,7 @@ def _get_regression_configuration_space(info, include):
     sparse = False
     if info['is_sparse'] == 1:
         sparse = True
-    configuration_space = ParamSklearnRegressor. \
+    configuration_space = SimpleRegressionPipeline. \
         get_hyperparameter_search_space(include=include,
                                         dataset_properties={'sparse': sparse})
     return configuration_space
@@ -62,20 +62,20 @@ def _get_classification_configuration_space(info, include):
         'sparse': sparse
     }
 
-    return ParamSklearnClassifier.get_hyperparameter_search_space(
+    return SimpleClassificationPipeline.get_hyperparameter_search_space(
         dataset_properties=dataset_properties,
         include=include)
 
 
 def get_model(configuration, seed):
     if 'classifier' in configuration:
-        return ParamSklearnClassifier(configuration, seed)
+        return SimpleClassificationPipeline(configuration, seed)
     elif 'regressor' in configuration:
-        return ParamSklearnRegressor(configuration, seed)
+        return SimpleRegressionPipeline(configuration, seed)
 
 
 def get_class(info):
     if info['task'] in REGRESSION_TASKS:
-        return ParamSklearnRegressor
+        return SimpleRegressionPipeline
     else:
-        return ParamSklearnClassifier
+        return SimpleClassificationPipeline

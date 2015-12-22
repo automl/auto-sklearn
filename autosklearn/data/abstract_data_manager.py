@@ -5,7 +5,7 @@ import copy
 import numpy as np
 import scipy.sparse
 
-from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
+from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
 
 from autosklearn.util import predict_RAM_usage
 

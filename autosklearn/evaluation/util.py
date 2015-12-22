@@ -47,7 +47,7 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
         score = dict()
         if task_type in REGRESSION_TASKS:
             cprediction = sanitize_array(prediction)
-            for metric_ in REGRESSION_METRIC:
+            for metric_ in REGRESSION_METRICS:
                 score[metric_] = regression_metrics.calculate_score(metric_,
                                                                     solution,
                                                                     cprediction)

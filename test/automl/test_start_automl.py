@@ -6,13 +6,12 @@ import os
 import sys
 import time
 
-import mock
 import numpy as np
 import six
+import sklearn.datasets
 
 import autosklearn.automl
-from autosklearn.util import Backend
-import ParamSklearn.util as putil
+import autosklearn.pipeline.util as putil
 from autosklearn.constants import *
 from autosklearn.cli.base_interface import store_and_or_load_data
 
@@ -40,11 +39,40 @@ class AutoMLTest(Base):
         del automl
         self._tearDown(output)
 
+    def test_binary_score(self):
+        """
+        Test fix for binary classification prediction
+        taking the index 1 of second dimension in prediction matrix
+        """
+        if self.travis:
+            self.skipTest('This test does currently not run on travis-ci. '
+                          'Make sure it runs locally on your machine!')
+
+        output = os.path.join(self.test_dir, '..', '.tmp_test_binary_score')
+        self._setUp(output)
+
+        data = sklearn.datasets.make_classification(
+            n_samples=1000, n_features=20, n_redundant=5, n_informative=5,
+            n_repeated=2, n_clusters_per_class=2, random_state=1)
+        X_train = data[0][:700]
+        Y_train = data[1][:700]
+        X_test = data[0][700:]
+        Y_test = data[1][700:]
+
+        automl = autosklearn.automl.AutoML(output, output, 15, 15)
+        automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION)
+        self.assertEqual(automl._task, BINARY_CLASSIFICATION)
+
+        score = automl.score(X_test, Y_test)
+        self.assertGreaterEqual(score, 0.5)
+
+        del automl
+        self._tearDown(output)
+
     def test_automl_outputs(self):
         output = os.path.join(self.test_dir, '..',
                               '.tmp_test_automl_outputs')
         self._setUp(output)
-
         name = '31_bac'
         dataset = os.path.join(self.test_dir, '..', '.data', name)
         data_manager_file = os.path.join(output, '.auto-sklearn',

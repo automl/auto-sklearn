@@ -26,7 +26,7 @@ from autosklearn.metalearning.mismbo import \
     convert_conf2smac_string
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
-    get_auto_seed, set_auto_seed, del_auto_seed, submit_process, paramsklearn, \
+    get_auto_seed, set_auto_seed, del_auto_seed, submit_process, pipeline, \
     Backend
 from autosklearn.util.smac import run_smac
 
@@ -76,7 +76,7 @@ def _create_search_space(tmp_dir, data_info, backend, watcher, logger,
     task_name = 'CreateConfigSpace'
     watcher.start_task(task_name)
     configspace_path = os.path.join(tmp_dir, 'space.pcs')
-    configuration_space = paramsklearn.get_configuration_space(
+    configuration_space = pipeline.get_configuration_space(
         data_info,
         include_estimators=include_estimators,
         include_preprocessors=include_preprocessors)
@@ -614,7 +614,11 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             seed)
 
     def score(self, X, y):
+        # fix: Consider only index 1 of second dimension
+        # Don't know if the reshaping should be done there or in calculate_score
         prediction = self.predict(X)
+        if self._task == BINARY_CLASSIFICATION:
+            prediction = prediction[:, 1].reshape((-1, 1))
         return calculate_score(y, prediction, self._task,
                                self._metric, self._label_num,
                                logger=self._logger)

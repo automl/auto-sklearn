@@ -5,7 +5,7 @@ import sys
 import unittest
 
 import numpy as np
-import ParamSklearn.util as putil
+import autosklearn.pipeline.util as putil
 
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.util.backend import Backend

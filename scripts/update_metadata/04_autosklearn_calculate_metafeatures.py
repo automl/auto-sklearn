@@ -23,12 +23,12 @@ def calculate_metafeatures(dataset, output_dir, cache_only):
             mf = DatasetMetafeatures.load(fh)
 
     elif cache_only is False:
-        print dataset_name
+        print(dataset_name)
 
         call = "python -m autosklearn.metalearning.calculate_metafeatures " \
                "--data-format automl-competition-format --dataset %s " \
                "--output-dir %s" % (dataset, output_dir)
-        print call
+        print(call)
         retval = subprocess.call(call, shell=True)
 
         if retval != 0:

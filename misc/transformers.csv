@@ -1,0 +1,99 @@
+class,added,comment
+<class 'sklearn.base.TransformerMixin'>,FALSE,BaseClass
+<class 'sklearn.cluster._feature_agglomeration.AgglomerationTransform'>,FALSE,Mixin class for feature agglomeration.
+<class 'sklearn.cluster.birch.Birch'>,,
+<class 'sklearn.cluster.hierarchical.FeatureAgglomeration'>,TRUE,try out
+<class 'sklearn.cluster.hierarchical.WardAgglomeration'>,FALSE,deprecated
+<class 'sklearn.cluster.k_means_.KMeans'>,FALSE,We expect this to not work better than PCA
+<class 'sklearn.cluster.k_means_.MiniBatchKMeans'>,False,BaseClass
+<class 'sklearn.cross_decomposition.cca_.CCA'>,FALSE,works only if there are known correlated data points
+<class 'sklearn.cross_decomposition.pls_._PLS'>,FALSE,Base class; https://www.stat.washington.edu/research/reports/2000/tr371.pdf
+<class 'sklearn.cross_decomposition.pls_.PLSCanonical'>,FALSE,Regression only
+<class 'sklearn.cross_decomposition.pls_.PLSRegression'>,FALSE,Regression only
+<class 'sklearn.cross_decomposition.pls_.PLSSVD'>,FALSE,Regression only
+<class 'sklearn.decomposition.base._BasePCA'>,,
+<class 'sklearn.decomposition.dict_learning.DictionaryLearning'>,TRUE,try out
+<class 'sklearn.decomposition.dict_learning.MiniBatchDictionaryLearning'>,FALSE,
+<class 'sklearn.decomposition.dict_learning.SparseCoder'>,FALSE,What is the difference to Tobis implementation?
+<class 'sklearn.decomposition.dict_learning.SparseCodingMixin'>,FALSE,Mixin class for sparse coding
+<class 'sklearn.decomposition.factor_analysis.FactorAnalysis'>,FALSE,
+<class 'sklearn.decomposition.fastica_.FastICA'>,TRUE,try out
+<class 'sklearn.decomposition.incremental_pca.IncrementalPCA'>,,
+<class 'sklearn.decomposition.kernel_pca.KernelPCA'>,TRUE,try out
+<class 'sklearn.decomposition.nmf.NMF'>,FALSE,Special case of sparse coding
+<class 'sklearn.decomposition.nmf.ProjectedGradientNMF'>,FALSE,see above
+<class 'sklearn.decomposition.pca.PCA'>,TRUE,
+<class 'sklearn.decomposition.pca.ProbabilisticPCA'>,FALSE,same output as above
+<class 'sklearn.decomposition.pca.RandomizedPCA'>,FALSE,?
+<class 'sklearn.decomposition.sparse_pca.MiniBatchSparsePCA'>,FALSE,?
+<class 'sklearn.decomposition.sparse_pca.SparsePCA'>,FALSE,should not use according to the scikit-learn docs
+<class 'sklearn.decomposition.truncated_svd.TruncatedSVD'>,True,
+<class 'sklearn.ensemble.forest.BaseForest'>,FALSE,Base class
+<class 'sklearn.ensemble.forest.ExtraTreesClassifier'>,TRUE,try out
+<class 'sklearn.ensemble.forest.ExtraTreesRegressor'>,FALSE,Only classification so far
+<class 'sklearn.ensemble.forest.ForestClassifier'>,FALSE,Base class
+<class 'sklearn.ensemble.forest.ForestRegressor'>,FALSE,Base class
+<class 'sklearn.ensemble.forest.RandomForestClassifier'>,FALSE,use ExtraTreesClassifier
+<class 'sklearn.ensemble.forest.RandomForestRegressor'>,FALSE,Only classification so far
+<class 'sklearn.ensemble.forest.RandomTreesEmbedding'>,True,
+<class 'sklearn.ensemble.gradient_boosting.BaseGradientBoosting'>,FALSE,Base class
+<class 'sklearn.ensemble.gradient_boosting.GradientBoostingClassifier'>,FALSE,use ExtraTreesClassifier
+<class 'sklearn.ensemble.gradient_boosting.GradientBoostingRegressor'>,FALSE,use ExtraTreesClassifier
+<class 'sklearn.feature_extraction.dict_vectorizer.DictVectorizer'>,FALSE,Similar to 1HotEncoding
+<class 'sklearn.feature_extraction.hashing.FeatureHasher'>,FALSE,Useful when working with strings
+<class 'sklearn.feature_extraction.text.TfidfTransformer'>,FALSE,no text classification atm
+<class 'sklearn.feature_selection.base.SelectorMixin'>,FALSE,subclass of TransformerMixin
+<class 'sklearn.feature_selection.from_model._LearntSelectorMixin'>,FALSE,subclass of TransformerMixin
+<class 'sklearn.feature_selection.rfe.RFE'>,FALSE,"Metaclass, can blow up the configuration space"
+<class 'sklearn.feature_selection.rfe.RFECV'>,FALSE,"Metaclass, with cross validation"
+<class 'sklearn.feature_selection.tests.test_base.StepSelector'>,FALSE,lives in the test module
+<class 'sklearn.feature_selection.univariate_selection._BaseFilter'>,FALSE,Base class
+<class 'sklearn.feature_selection.univariate_selection.GenericUnivariateSelect'>,FALSE,Base class
+<class 'sklearn.feature_selection.univariate_selection.SelectFdr'>,TRUE,try out
+<class 'sklearn.feature_selection.univariate_selection.SelectFpr'>,TRUE,try out
+<class 'sklearn.feature_selection.univariate_selection.SelectFwe'>,TRUE,try out
+<class 'sklearn.feature_selection.univariate_selection.SelectKBest'>,FALSE,as as below but different formulation
+<class 'sklearn.feature_selection.univariate_selection.SelectPercentile'>,True,
+<class 'sklearn.feature_selection.variance_threshold.VarianceThreshold'>,FALSE,Same as above but different formulation
+<class 'sklearn.isotonic.IsotonicRegression'>,FALSE,output transformation
+<class 'sklearn.kernel_approximation.AdditiveChi2Sampler'>,FALSE,very special case
+<class 'sklearn.kernel_approximation.Nystroem'>,TRUE,try out
+<class 'sklearn.kernel_approximation.RBFSampler'>,True,
+<class 'sklearn.kernel_approximation.SkewedChi2Sampler'>,FALSE,very specia case
+<class 'sklearn.lda.LDA'>,FALSE,Special case of GEM
+<class 'sklearn.linear_model.logistic.LogisticRegression'>,FALSE,same as LibLinear
+<class 'sklearn.linear_model.logistic.LogisticRegressionCV'>,,
+<class 'sklearn.linear_model.perceptron.Perceptron'>,FALSE,same as SGD
+<class 'sklearn.linear_model.randomized_l1.BaseRandomizedLinearModel'>,FALSE,Base class
+<class 'sklearn.linear_model.randomized_l1.RandomizedLasso'>,FALSE,not right now
+<class 'sklearn.linear_model.randomized_l1.RandomizedLogisticRegression'>,FALSE,not right now
+<class 'sklearn.linear_model.stochastic_gradient.SGDClassifier'>,FALSE,not right now
+<class 'sklearn.linear_model.stochastic_gradient.SGDRegressor'>,FALSE,not right now
+<class 'sklearn.linear_model.tests.test_sgd.SparseSGDClassifier'>,FALSE,test class
+<class 'sklearn.linear_model.tests.test_sgd.SparseSGDRegressor'>,FALSE,test class
+<class 'sklearn.manifold.isomap.Isomap'>,FALSE,only look at if clustering helps
+<class 'sklearn.manifold.locally_linear.LocallyLinearEmbedding'>,FALSE,only look at if clustering helps
+<class 'sklearn.neighbors.approximate.GaussianRandomProjectionHash'>,,
+<class 'sklearn.neural_network.rbm.BernoulliRBM'>,FALSE,handles only binary input
+<class 'sklearn.pipeline.FeatureUnion'>,FALSE,"Right now, we do not have different feature sources."
+<class 'sklearn.preprocessing.data.Binarizer'>,FALSE,"Right now, we have no need to binarize data"
+<class 'sklearn.preprocessing.data.KernelCenterer'>,FALSE,"Right now, we have no need to center a kernel"
+<class 'sklearn.preprocessing.data.MinMaxScaler'>,TRUE,
+<class 'sklearn.preprocessing.data.Normalizer'>,TRUE,
+<class 'sklearn.preprocessing.data.OneHotEncoder'>,TRUE,
+<class 'sklearn.preprocessing.data.PolynomialFeatures'>,TRUE,
+<class 'sklearn.preprocessing.data.StandardScaler'>,TRUE,
+<class 'sklearn.preprocessing.imputation.Imputer'>,TRUE,
+<class 'sklearn.preprocessing.label.LabelBinarizer'>,FALSE,"Right now, we have 1HotEncoding"
+<class 'sklearn.preprocessing.label.LabelEncoder'>,FALSE,This should be done before passing data to scikit-learn and thus not configured.
+<class 'sklearn.preprocessing.label.MultiLabelBinarizer'>,FALSE,…
+<class 'sklearn.random_projection.BaseRandomProjection'>,FALSE,Base class
+<class 'sklearn.random_projection.GaussianRandomProjection'>,FALSE,use kitchen sinks instead
+<class 'sklearn.random_projection.SparseRandomProjection'>,FALSE,use kitchen sinks
+<class 'sklearn.svm.classes.LinearSVC'>,TRUE,
+<class 'sklearn.tests.test_grid_search.LinearSVCNoScore'>,FALSE,Is in a test package
+<class 'sklearn.tree.tree.BaseDecisionTree'>,FALSE,Base class
+<class 'sklearn.tree.tree.DecisionTreeClassifier'>,FALSE,Use forests
+<class 'sklearn.tree.tree.DecisionTreeRegressor'>,FALSE,Use forests
+<class 'sklearn.tree.tree.ExtraTreeClassifier'>,FALSE,Use forests
+<class 'sklearn.tree.tree.ExtraTreeRegressor'>,FALSE,Use forests

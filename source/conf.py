@@ -15,7 +15,6 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-# sys.path.insert(0, os.path.abspath('.'))
 
 # -- General configuration ------------------------------------------------
 
@@ -59,13 +58,13 @@ MOCK_MODULES = ['lockfile',
                 'sklearn.utils',
                 'psutil','pyyaml','pandas',
                 'matplotlib',
-                'ParamSklearn',
-                'ParamSklearn.implementations',
-                'ParamSklearn.implementations.OneHotEncoder',
-                'ParamSklearn.implementations.Imputation',
-                'ParamSklearn.implementations.StandardScaler',
-                'ParamSklearn.classification',
-                'ParamSklearn.regression',
+                'autosklearn.pipeline',
+                'autosklearn.pipeline.implementations',
+                'autosklearn.pipeline.implementations.OneHotEncoder',
+                'autosklearn.pipeline.implementations.Imputation',
+                'autosklearn.pipeline.implementations.StandardScaler',
+                'autosklearn.pipeline.classification',
+                'autosklearn.pipeline.regression',
                 'HPOlibConfigSpace',
                 'HPOlibConfigSpace.converters',
                 'HPOlibConfigSpace.configuration_space']

@@ -13,9 +13,9 @@ import sklearn.cross_validation
 from sklearn.utils import check_array
 from sklearn.multiclass import OneVsRestClassifier
 
-from ParamSklearn.implementations.Imputation import Imputer
-from ParamSklearn.implementations.OneHotEncoder import OneHotEncoder
-from ParamSklearn.implementations.StandardScaler import StandardScaler
+from autosklearn.pipeline.implementations.Imputation import Imputer
+from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
+from autosklearn.pipeline.implementations.StandardScaler import StandardScaler
 
 from autosklearn.util.logging_ import get_logger
 from .metafeature import MetaFeature, HelperFunction, DatasetMetafeatures, \

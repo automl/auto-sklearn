@@ -11,7 +11,7 @@ from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.evaluation import CVEvaluator, HoldoutEvaluator, \
     NestedCVEvaluator, TestEvaluator, get_new_run_num
-from autosklearn.util.paramsklearn import get_configuration_space
+from autosklearn.util.pipeline import get_configuration_space
 from autosklearn.util import Backend
 
 

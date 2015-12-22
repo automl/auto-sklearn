@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-import ParamSklearn.classification
+import autosklearn.pipeline.classification
 from autosklearn.metalearning.metalearning.meta_base import MetaBase, Run
 
 
@@ -18,7 +18,8 @@ class MetaBaseTest(unittest.TestCase):
         data_dir = os.path.join(data_dir, 'test_meta_base_data')
         os.chdir(data_dir)
 
-        cs = ParamSklearn.classification.ParamSklearnClassifier.get_hyperparameter_search_space()
+        cs = autosklearn.pipeline.classification.SimpleClassificationPipeline\
+            .get_hyperparameter_search_space()
 
         self.base = MetaBase(cs, data_dir)
 

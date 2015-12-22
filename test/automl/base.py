@@ -7,6 +7,9 @@ import unittest
 
 
 class Base(unittest.TestCase):
+    """All tests which are a subclass of this must define their own output
+    directory and call self._setUp."""
+
     def setUp(self):
         self.test_dir = os.path.dirname(__file__)
 

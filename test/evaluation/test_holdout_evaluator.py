@@ -11,13 +11,13 @@ import numpy as np
 from numpy.linalg import LinAlgError
 import sklearn.datasets
 
-from ParamSklearn.util import get_dataset
+from autosklearn.pipeline.util import get_dataset
 
 from autosklearn.constants import *
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.evaluation.holdout_evaluator import HoldoutEvaluator
 from autosklearn.util.data import convert_to_bin
-from autosklearn.util.paramsklearn import get_configuration_space
+from autosklearn.util.pipeline import get_configuration_space
 
 N_TEST_RUNS = 10
 
