@@ -352,7 +352,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                 self._logger)
 
         # == Perform dummy predictions
-        self._do_dummy_prediction(datamanager)
+        if self._resampling_strategy in ['holdout', 'holdout-iterative-fit']:
+            self._do_dummy_prediction(datamanager)
 
         # = Create a searchspace
         # Do this before One Hot Encoding to make sure that it creates a
