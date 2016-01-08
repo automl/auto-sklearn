@@ -1,7 +1,12 @@
 import functools
 import os
+import sys
 import traceback
-import unittest
+
+if sys.version_info[0] == 2:
+    import unittest2 as unittest
+else:
+    import unittest
 
 import numpy as np
 from numpy.linalg import LinAlgError
@@ -71,7 +76,7 @@ class BaseEvaluatorTest(unittest.TestCase):
 
 def get_multiclass_classification_datamanager():
     X_train, Y_train, X_test, Y_test = get_dataset('iris')
-    indices = range(X_train.shape[0])
+    indices = list(range(X_train.shape[0]))
     np.random.seed(1)
     np.random.shuffle(indices)
     X_train = X_train[indices]
@@ -109,7 +114,7 @@ def get_abalone_datamanager():
 
 def get_multilabel_classification_datamanager():
     X_train, Y_train, X_test, Y_test = get_dataset('iris')
-    indices = range(X_train.shape[0])
+    indices = list(range(X_train.shape[0]))
     np.random.seed(1)
     np.random.shuffle(indices)
     X_train = X_train[indices]
@@ -144,7 +149,7 @@ def get_multilabel_classification_datamanager():
 
 def get_binary_classification_datamanager():
     X_train, Y_train, X_test, Y_test = get_dataset('iris')
-    indices = range(X_train.shape[0])
+    indices = list(range(X_train.shape[0]))
     np.random.seed(1)
     np.random.shuffle(indices)
     X_train = X_train[indices]
@@ -182,7 +187,7 @@ def get_binary_classification_datamanager():
 
 def get_regression_datamanager():
     X_train, Y_train, X_test, Y_test = get_dataset('boston')
-    indices = range(X_train.shape[0])
+    indices = list(range(X_train.shape[0]))
     np.random.seed(1)
     np.random.shuffle(indices)
     X_train = X_train[indices]

@@ -110,6 +110,10 @@ def original_ensemble_selection(predictions, labels, ensemble_size, task_type,
         trajectory.append(scores[best])
         order.append(best)
 
+        # Handle special case
+        if len(predictions) == 1:
+            break
+
     return np.array(order), np.array(trajectory)
 
 
@@ -156,6 +160,10 @@ def ensemble_selection(predictions, labels, ensemble_size, task_type, metric,
         ensemble.append(predictions[best])
         trajectory.append(scores[best])
         order.append(best)
+
+        # Handle special case
+        if len(predictions) == 1:
+            break
 
     return np.array(order), np.array(trajectory)
 
