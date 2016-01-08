@@ -18,8 +18,8 @@ class ARDRegression(AutoSklearnRegressionAlgorithm):
         self.tol = float(tol)
         self.alpha_1 = float(alpha_1)
         self.alpha_2 = float(alpha_2)
-        self.lamda_1 = float(lambda_1)
-        self.lamda_2 = float(lambda_2)
+        self.lambda_1 = float(lambda_1)
+        self.lambda_2 = float(lambda_2)
         self.threshold_lambda = float(threshold_lambda)
         self.fit_intercept = fit_intercept == True
 
@@ -30,8 +30,8 @@ class ARDRegression(AutoSklearnRegressionAlgorithm):
                           tol=self.tol,
                           alpha_1=self.alpha_1,
                           alpha_2=self.alpha_2,
-                          lambda_1=self.lamda_1,
-                          lambda_2=self.lamda_2,
+                          lambda_1=self.lambda_1,
+                          lambda_2=self.lambda_2,
                           compute_score=False,
                           threshold_lambda=self.threshold_lambda,
                           fit_intercept=True,
@@ -90,7 +90,7 @@ class ARDRegression(AutoSklearnRegressionAlgorithm):
         lambda_2 = cs.add_hyperparameter(
                 UniformFloatHyperparameter(name="lambda_2", log=True,
                                            lower=10 ** -10, upper=10 ** -3,
-                                           default=10 ** -06))
+                                           default=10 ** -6))
         threshold_lambda = cs.add_hyperparameter(
                 UniformFloatHyperparameter(name="threshold_lambda",
                                            log=True,
