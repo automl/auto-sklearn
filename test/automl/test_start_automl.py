@@ -12,6 +12,7 @@ import sklearn.datasets
 
 import autosklearn.automl
 import autosklearn.pipeline.util as putil
+from autosklearn.util import setup_logger, get_logger
 from autosklearn.constants import *
 from autosklearn.cli.base_interface import store_and_or_load_data
 
@@ -119,9 +120,18 @@ class AutoMLTest(Base):
         auto = autosklearn.automl.AutoML(
             output, output, 15, 15,
             initial_configurations_via_metalearning=25)
+        setup_logger()
+        auto._logger = get_logger('test_do_dummy_predictions')
         auto._backend._make_internals_directory()
         D = store_and_or_load_data(dataset, output)
         auto._do_dummy_prediction(D)
+
+        # Assure that the dummy predictions are not in the current working
+        # directory, but in the output directory (under output)
+        self.assertFalse(os.path.exists(os.path.join(os.getcwd(),
+                                                     '.auto-sklearn')))
+        self.assertTrue(os.path.exists(os.path.join(output,
+                                                    '.auto-sklearn')))
 
         del auto
         self._tearDown(output)

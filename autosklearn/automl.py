@@ -298,11 +298,14 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         return time_for_load_data
 
     def _do_dummy_prediction(self, datamanager):
+        self._logger.info("Starting to create dummy predictions.")
         autosklearn.cli.base_interface.main(datamanager,
                                             self._resampling_strategy,
                                             None,
                                             None,
-                                            mode_args=self._resampling_strategy_arguments)
+                                            mode_args=self._resampling_strategy_arguments,
+                                            output_dir=self._tmp_dir)
+        self._logger.info("Finished creating dummy predictions.")
 
     def _fit(self, datamanager):
         # Reset learnt stuff

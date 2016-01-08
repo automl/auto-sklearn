@@ -417,6 +417,11 @@ def main(autosklearn_tmp_dir,
                 used_time = watch.wall_elapsed('ensemble_builder')
                 time.sleep(2)
                 continue
+            except IndexError as e:
+                logger.error('Caught IndexError: ' + str(e))
+                used_time = watch.wall_elapsed('ensemble_builder')
+                time.sleep(2)
+                continue
             except Exception as e:
                 logger.error('Caught error! %s', e.message)
                 used_time = watch.wall_elapsed('ensemble_builder')

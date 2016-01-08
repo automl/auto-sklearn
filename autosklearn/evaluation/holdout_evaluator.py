@@ -14,19 +14,18 @@ __all__ = [
 
 class HoldoutEvaluator(AbstractEvaluator):
 
-    def __init__(self, datamanager, configuration=None,
+    def __init__(self, datamanager, output_dir,
+                 configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
-                 output_dir=None,
                  output_y_test=False,
                  num_run=None):
         super(HoldoutEvaluator, self).__init__(
-            datamanager, configuration,
+            datamanager, output_dir, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
-            output_dir=output_dir,
             output_y_test=output_y_test,
             num_run=num_run)
 
