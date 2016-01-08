@@ -82,7 +82,7 @@ def parse_cli():
     return args, parameters
 
 
-def parse_args(dataset, mode, seed, params, fold, folds):
+def parse_args(dataset, mode, seed, params, fold, folds, output_dir=None):
     if seed is None:
         seed = 1
 
@@ -107,10 +107,11 @@ def parse_args(dataset, mode, seed, params, fold, folds):
         mode_args = None
     else:
         raise ValueError(mode)
-    base_interface.main(dataset, mode, seed, params, mode_args=mode_args)
+    base_interface.main(dataset, mode, seed, params, mode_args=mode_args,
+                        output_dir=output_dir)
 
 
-def main():
+def main(output_dir=None):
     args, params = parse_cli()
     assert 'dataset' in args
     assert 'mode' in args
@@ -124,6 +125,7 @@ def main():
                params,
                int(args['fold']),
                int(args['folds']),
+               output_dir=output_dir
         )
 
 
