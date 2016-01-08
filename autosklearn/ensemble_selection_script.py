@@ -182,7 +182,7 @@ def ensemble_selection_bagging(predictions, labels, ensemble_size, task_type,
 
 
 def main(autosklearn_tmp_dir,
-         basename,
+         dataset_name,
          task_type,
          metric,
          limit,
@@ -315,10 +315,9 @@ def main(autosklearn_tmp_dir,
 
             if ensemble_nbest is not None:
                 if score <= 0.001:
-                    # include_num_runs.append(True)
                     logger.error('Model only predicts at random: ' +
                                   model_name + ' has score: ' + str(score))
-                    backup_num_runs.append(num_run)
+                    backup_num_runs.append((automl_seed, num_run))
                 # If we have less models in our ensemble than ensemble_nbest add
                 # the current model if it is better than random
                 elif len(scores_nbest) < ensemble_nbest:
@@ -466,7 +465,7 @@ def main(autosklearn_tmp_dir,
             ensemble_predictions_valid = np.mean(
                 all_predictions_valid[indices.astype(int)], axis=0)
             backend.save_predictions_as_txt(ensemble_predictions_valid,
-                                            'valid', index_run, prefix=basename)
+                                            'valid', index_run, prefix=dataset_name)
         else:
             logger.info('Could not find as many validation set predictions (%d)'
                          'as ensemble predictions (%d)!.',
@@ -484,7 +483,7 @@ def main(autosklearn_tmp_dir,
             ensemble_predictions_test = np.mean(
                 all_predictions_test[indices.astype(int)], axis=0)
             backend.save_predictions_as_txt(ensemble_predictions_test,
-                                            'test', index_run, prefix=basename)
+                                            'test', index_run, prefix=dataset_name)
         else:
             logger.info('Could not find as many test set predictions (%d) as '
                          'ensemble predictions (%d)!',
@@ -506,7 +505,7 @@ if __name__ == '__main__':
                         help='TMP directory of auto-sklearn. Predictions to '
                              'build the ensemble will be read from here and '
                              'the ensemble indices will be saved here.')
-    parser.add_argument('--basename', required=True,
+    parser.add_argument('--dataset_name', required=True,
                         help='Name of the dataset. Used to prefix prediction '
                              'output files.')
     parser.add_argument('--task', required=True,
@@ -544,7 +543,7 @@ if __name__ == '__main__':
     task = STRING_TO_TASK_TYPES[args.task]
     metric = STRING_TO_METRIC[args.metric]
     main(autosklearn_tmp_dir=args.auto_sklearn_tmp_directory,
-         basename=args.basename,
+         dataset_name=args.dataset_name,
          task_type=task,
          metric=metric,
          limit=args.limit,

@@ -58,7 +58,7 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
 
     call = [ensemble_script,
          '--auto-sklearn-tmp-directory', tmp_dir,
-         '--basename', dataset_name,
+         '--dataset_name', dataset_name,
          '--task', task_type,
          '--metric', metric,
          '--limit', str(limit - 5),

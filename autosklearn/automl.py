@@ -375,6 +375,12 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             self._include_preprocessors)
         self.configuration_space_created_hook(datamanager)
 
+        # == RUN ensemble builder
+        # Do this before calculating the meta-features to make sure that the
+        # dummy predictions are actually included in the ensemble even if
+        # calculating the meta-features takes very long
+        proc_ensembles = self.run_ensemble_builder()
+
         # == Calculate metafeatures
         meta_features = _calculate_metafeatures(
             data_feat_type=datamanager.feat_type,
@@ -484,9 +490,6 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                              resampling_strategy=self._resampling_strategy,
                              resampling_strategy_arguments=self._resampling_strategy_arguments,
                              shared_mode=self._shared_mode)
-
-        # == RUN ensemble builder
-        proc_ensembles = self.run_ensemble_builder()
 
         procs = []
 
