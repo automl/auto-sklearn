@@ -93,10 +93,15 @@ def get_CV_fold(X, Y, fold, folds, shuffle=True, random_state=None):
         raise ValueError('The first dimension of the X and Y array must '
                          'be equal.')
 
-    kf = sklearn.cross_validation.StratifiedKFold(Y,
-                                                  n_folds=folds,
-                                                  shuffle=shuffle,
-                                                  random_state=random_state)
+    if len(Y.shape) > 1:
+        kf = sklearn.cross_validation.KFold(n=Y.shape[0], n_folds=folds,
+                                            shuffle=shuffle,
+                                            random_state=random_state)
+    else:
+        kf = sklearn.cross_validation.StratifiedKFold(Y,
+                                                      n_folds=folds,
+                                                      shuffle=shuffle,
+                                                      random_state=random_state)
     for idx, split in enumerate(kf):
         if idx == fold:
             break
