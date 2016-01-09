@@ -18,7 +18,7 @@ from autosklearn.pipeline.components.classification.liblinear_svc import LibLine
 from autosklearn.pipeline.components.classification.libsvm_svc import LibSVM_SVC
 from autosklearn.pipeline.components.classification.sgd import SGD
 from autosklearn.pipeline.components.feature_preprocessing\
-    .extra_trees_preproc_for_classification import ExtraTreesPreprocessor
+    .extra_trees_preproc_for_classification import ExtraTreesPreprocessorClassification
 from autosklearn.pipeline.components.feature_preprocessing.liblinear_svc_preprocessor import LibLinear_Preprocessor
 
 
@@ -119,7 +119,7 @@ class BalancingComponentTest(unittest.TestCase):
 
         for name, pre, acc_no_weighting, acc_weighting in \
                 [('extra_trees_preproc_for_classification',
-                    ExtraTreesPreprocessor, 0.682, 0.634),
+                    ExtraTreesPreprocessorClassification, 0.685, 0.589),
                  ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
                     0.714, 0.596)]:
             for strategy, acc in [('none', acc_no_weighting),

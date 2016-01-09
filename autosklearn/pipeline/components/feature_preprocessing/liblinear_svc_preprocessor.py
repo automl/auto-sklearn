@@ -59,8 +59,8 @@ class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'Liblinear-Preprocessor',
-                'name': 'Liblinear Support Vector Preprocessing',
+        return {'shortname': 'LinearSVC Preprocessor',
+                'name': 'Liblinear Support Vector Classification Preprocessing',
                 'handles_missing_values': False,
                 'handles_nominal_values': False,
                 'handles_numerical_features': True,

@@ -68,7 +68,7 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
         # Use at most half of the features
         max_features = max(1, min(int(X.shape[1] / 2), max_features))
         self.preprocessor = ExtraTreesRegressor(
-            n_estimators=0, criterion=self.criterion,
+            n_estimators=self.n_estimators, criterion=self.criterion,
             max_depth=self.max_depth, min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,
             max_features=max_features, max_leaf_nodes=self.max_leaf_nodes,

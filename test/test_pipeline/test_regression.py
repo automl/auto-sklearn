@@ -98,9 +98,13 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 self.assertIsInstance(predicted_probabiliets, np.ndarray)
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
-                        e.args[0] or \
-                                "removed all features" in e.args[0] or \
-                                "all features are discarded" in e.args[0]:
+                        e.args[0]:
+                    continue
+                elif "all features are discarded" in e.args[0]:
+                    continue
+                elif "removed all features" in e.args[0]:
+                    continue
+                elif "Bug in scikit-learn:" in e.args[0]:
                     continue
                 else:
                     print(config)
