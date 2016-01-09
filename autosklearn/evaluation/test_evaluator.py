@@ -10,16 +10,16 @@ __all__ = [
 
 class TestEvaluator(AbstractEvaluator):
 
-    def __init__(self, Datamanager, configuration=None,
+    def __init__(self, Datamanager, output_dir,
+                 configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1):
         super(TestEvaluator, self).__init__(
-            Datamanager, configuration,
+            Datamanager, output_dir, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
-            output_dir=None,
             output_y_test=False,
             num_run='dummy')
         self.configuration = configuration

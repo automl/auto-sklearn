@@ -12,6 +12,7 @@ import sklearn.datasets
 
 import autosklearn.automl
 import autosklearn.pipeline.util as putil
+from autosklearn.util import setup_logger, get_logger
 from autosklearn.constants import *
 from autosklearn.cli.base_interface import store_and_or_load_data
 
@@ -109,19 +110,28 @@ class AutoMLTest(Base):
         self._tearDown(output)
 
     def test_do_dummy_prediction(self):
-        output = os.path.join(self.test_dir, '..',
-                              '.tmp_test_do_dummy_prediction')
-        self._setUp(output)
+        for name in ['401_bac', '31_bac', 'adult', 'cadata']:
+            output = os.path.join(self.test_dir, '..',
+                                  '.tmp_test_do_dummy_prediction')
+            self._setUp(output)
 
-        name = '401_bac'
-        dataset = os.path.join(self.test_dir, '..', '.data', name)
+            dataset = os.path.join(self.test_dir, '..', '.data', name)
 
-        auto = autosklearn.automl.AutoML(
-            output, output, 15, 15,
-            initial_configurations_via_metalearning=25)
-        auto._backend._make_internals_directory()
-        D = store_and_or_load_data(dataset, output)
-        auto._do_dummy_prediction(D)
+            auto = autosklearn.automl.AutoML(
+                output, output, 15, 15,
+                initial_configurations_via_metalearning=25)
+            setup_logger()
+            auto._logger = get_logger('test_do_dummy_predictions')
+            auto._backend._make_internals_directory()
+            D = store_and_or_load_data(dataset, output)
+            auto._do_dummy_prediction(D)
 
-        del auto
-        self._tearDown(output)
+            # Assure that the dummy predictions are not in the current working
+            # directory, but in the output directory (under output)
+            self.assertFalse(os.path.exists(os.path.join(os.getcwd(),
+                                                         '.auto-sklearn')))
+            self.assertTrue(os.path.exists(os.path.join(output,
+                                                        '.auto-sklearn')))
+
+            del auto
+            self._tearDown(output)

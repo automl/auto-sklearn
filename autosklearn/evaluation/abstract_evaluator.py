@@ -73,16 +73,16 @@ class AbstractEvaluator(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __init__(self, Datamanager, configuration=None,
+    def __init__(self, Datamanager, output_dir, configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
-                 output_dir=None,
                  output_y_test=False,
                  num_run=None):
 
         self.starttime = time.time()
 
+        self.output_dir = output_dir
         self.configuration = configuration
         self.D = Datamanager
 
@@ -92,11 +92,6 @@ class AbstractEvaluator(object):
         self.metric = Datamanager.info['metric']
         self.task_type = Datamanager.info['task']
         self.seed = seed
-
-        if output_dir is None:
-            self.output_dir = os.getcwd()
-        else:
-            self.output_dir = output_dir
 
         self.output_y_test = output_y_test
         self.with_predictions = with_predictions

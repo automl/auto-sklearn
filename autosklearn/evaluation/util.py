@@ -27,6 +27,9 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
                              "shape %s", prediction.shape, solution.shape)
                 raise e
 
+        #indices = np.ones(solution_binary.shape[0], dtype=int) * solution
+        #solution_binary[:, indices] = 1.0
+
         for i in range(solution_binary.shape[0]):
             label = solution[i]
             solution_binary[i, label] = 1

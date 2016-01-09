@@ -298,11 +298,14 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         return time_for_load_data
 
     def _do_dummy_prediction(self, datamanager):
+        self._logger.info("Starting to create dummy predictions.")
         autosklearn.cli.base_interface.main(datamanager,
                                             self._resampling_strategy,
                                             None,
                                             None,
-                                            mode_args=self._resampling_strategy_arguments)
+                                            mode_args=self._resampling_strategy_arguments,
+                                            output_dir=self._tmp_dir)
+        self._logger.info("Finished creating dummy predictions.")
 
     def _fit(self, datamanager):
         # Reset learnt stuff
@@ -371,6 +374,12 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             self._include_estimators,
             self._include_preprocessors)
         self.configuration_space_created_hook(datamanager)
+
+        # == RUN ensemble builder
+        # Do this before calculating the meta-features to make sure that the
+        # dummy predictions are actually included in the ensemble even if
+        # calculating the meta-features takes very long
+        proc_ensembles = self.run_ensemble_builder()
 
         # == Calculate metafeatures
         meta_features = _calculate_metafeatures(
@@ -481,9 +490,6 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                              resampling_strategy=self._resampling_strategy,
                              resampling_strategy_arguments=self._resampling_strategy_arguments,
                              shared_mode=self._shared_mode)
-
-        # == RUN ensemble builder
-        proc_ensembles = self.run_ensemble_builder()
 
         procs = []
 

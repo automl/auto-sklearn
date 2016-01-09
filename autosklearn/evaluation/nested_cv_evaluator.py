@@ -17,21 +17,20 @@ __all__ = [
 
 class NestedCVEvaluator(AbstractEvaluator):
 
-    def __init__(self, Datamanager, configuration=None,
+    def __init__(self, Datamanager, output_dir,
+                 configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
-                 output_dir=None,
                  output_y_test=False,
                  inner_cv_folds=5,
                  outer_cv_folds=5,
                  num_run=None):
         super(NestedCVEvaluator, self).__init__(
-            Datamanager, configuration,
+            Datamanager, output_dir, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
-            output_dir=output_dir,
             output_y_test=output_y_test,
             num_run=num_run)
 
