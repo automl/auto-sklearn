@@ -2,6 +2,7 @@ from collections import OrderedDict
 import copy
 from itertools import product
 
+import numpy as np
 from sklearn.base import RegressorMixin
 
 from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
@@ -65,6 +66,27 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             X, Y, fit_params=fit_params, init_params=init_params)
         self.num_targets = 1 if len(Y.shape) == 1 else Y.shape[1]
         return X, fit_params
+
+    def fit_estimator(self, X, y, fit_params=None):
+        self.y_max_ = np.nanmax(y)
+        self.y_min_ = np.nanmin(y)
+        return super(SimpleRegressionPipeline, self).fit_estimator(
+            X, y, fit_params=fit_params)
+
+    def iterative_fit(self, X, y, fit_params=None, n_iter=1):
+        self.y_max_ = np.nanmax(y)
+        self.y_min_ = np.nanmin(y)
+        return super(SimpleRegressionPipeline, self).iterative_fit(
+            X, y, fit_params=fit_params, n_iter=n_iter)
+
+    def predict(self, X, batch_size=None):
+        y = super(SimpleRegressionPipeline, self).predict(X, batch_size=batch_size)
+        y[y > (2 * self.y_max_)] = 2 * self.y_max_
+        if self.y_min_ < 0:
+            y[y < (2 * self.y_min_)] = 2 * self.y_min_
+        elif self.y_min_ > 0:
+            y[y < (0.5 * self.y_min_)] = 0.5 * self.y_min_
+        return y
 
     @classmethod
     def get_available_components(cls, available_comp, data_prop, inc, exc):
