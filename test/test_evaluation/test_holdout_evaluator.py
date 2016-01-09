@@ -77,7 +77,8 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
         configuration = configuration_space.sample_configuration()
 
         evaluator = HoldoutEvaluator(D, self.output_dir, configuration)
-        pred = evaluator.predict_proba(None, model, task_type)
+        pred = evaluator.predict_proba(None, model, task_type,
+                                       D.data['Y_train'])
         expected = [[0.9], [0.3]]
         for i in range(len(expected)):
             self.assertEqual(expected[i], pred[i])

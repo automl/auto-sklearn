@@ -217,7 +217,7 @@ def get_regression_datamanager():
     return D, 1.05
 
 
-def get_5000_classes_datamanager():
+def get_500_classes_datamanager():
     weights = ([0.002] * 475) + ([0.001] * 25)
     X, Y = sklearn.datasets.make_classification(n_samples=1000,
                                                 n_features=20,
@@ -244,7 +244,7 @@ def get_5000_classes_datamanager():
         'label_num': 500
     }
     D.data = {'X_train': X, 'Y_train': Y, 'X_valid': X, 'X_test': X}
-    D.feat_type = ['numerical'] * 500
+    D.feat_type = ['numerical'] * 20
     return D, 1.01
 
 
@@ -252,6 +252,6 @@ def get_dataset_getters():
     return [get_binary_classification_datamanager,
             get_multiclass_classification_datamanager,
             get_multilabel_classification_datamanager,
-            get_5000_classes_datamanager,
+            get_500_classes_datamanager,
             get_abalone_datamanager,
             get_regression_datamanager]

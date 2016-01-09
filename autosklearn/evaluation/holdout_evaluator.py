@@ -58,15 +58,18 @@ class HoldoutEvaluator(AbstractEvaluator):
 
     def predict(self):
         Y_optimization_pred = self.predict_function(self.X_optimization,
-                                                    self.model, self.task_type)
+                                                    self.model, self.task_type,
+                                                    self.Y_train)
         if self.X_valid is not None:
             Y_valid_pred = self.predict_function(self.X_valid, self.model,
-                                                 self.task_type)
+                                                 self.task_type,
+                                                 self.Y_train)
         else:
             Y_valid_pred = None
         if self.X_test is not None:
             Y_test_pred = self.predict_function(self.X_test, self.model,
-                                                self.task_type)
+                                                self.task_type,
+                                                self.Y_train)
         else:
             Y_test_pred = None
 

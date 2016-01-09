@@ -190,7 +190,7 @@ class AbstractEvaluator(object):
         additional_run_info += ';' + 'num_run:' + num_run
         return err, additional_run_info
 
-    def predict_proba(self, X, model, task_type, Y_train=None):
+    def predict_proba(self, X, model, task_type, Y_train):
         Y_pred = model.predict_proba(X, batch_size=1000)
 
         if task_type == MULTILABEL_CLASSIFICATION:
@@ -220,12 +220,9 @@ class AbstractEvaluator(object):
 
         if self.task_type == MULTICLASS_CLASSIFICATION and \
                 prediction.shape[1] < num_classes:
-            classes = list(np.unique(self.D.data['Y_train']))
-            if num_classes == prediction.shape[1]:
-                return prediction
-
-            if Y_train is not None:
-                classes = list(np.unique(Y_train))
+            if Y_train is None:
+                raise ValueError('Y_train must not be None!')
+            classes = list(np.unique(Y_train))
 
             mapping = dict()
             for class_number in range(num_classes):
@@ -233,6 +230,7 @@ class AbstractEvaluator(object):
                     index = classes.index(class_number)
                     mapping[index] = class_number
             new_predictions = np.zeros((prediction.shape[0], num_classes))
+
             for index in mapping:
                 class_index = mapping[index]
                 new_predictions[:, class_index] = prediction[:, index]
