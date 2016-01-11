@@ -27,3 +27,19 @@ class RandomForestComponentTest(unittest.TestCase):
             self.assertAlmostEqual(0.95999999999999996,
                                    sklearn.metrics.accuracy_score(
                                        predictions, targets))
+
+    def test_default_configuration_binary(self):
+        for i in range(10):
+            predictions, targets = _test_classifier(RandomForest,
+                                                    make_binary=True)
+            self.assertAlmostEqual(1.0,
+                                   sklearn.metrics.accuracy_score(
+                                       predictions, targets))
+
+    def test_default_configuration_multilabel(self):
+        for i in range(10):
+            predictions, targets = _test_classifier(RandomForest,
+                                                    make_multilabel=True)
+            self.assertAlmostEqual(0.95999999999999996,
+                                   sklearn.metrics.accuracy_score(
+                                       predictions, targets))

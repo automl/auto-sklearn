@@ -85,7 +85,7 @@ class BernoulliNB(AutoSklearnClassificationAlgorithm):
                 'prefers_data_normalized': False,
                 'handles_regression': False,
                 'handles_classification': True,
-                'handles_multiclass': False,
+                'handles_multiclass': True,
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': False,

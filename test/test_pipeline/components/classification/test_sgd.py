@@ -38,3 +38,10 @@ class SGDComponentTest(unittest.TestCase):
             self.assertAlmostEqual(0.91438979963570133,
                                    sklearn.metrics.accuracy_score(
                                        predictions, targets))
+
+    def test_default_configuration_binary(self):
+        for i in range(10):
+            predictions, targets = _test_classifier(SGD, make_binary=True)
+            self.assertAlmostEqual(1.0,
+                                   sklearn.metrics.accuracy_score(predictions,
+                                                                  targets))

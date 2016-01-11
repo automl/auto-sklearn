@@ -29,3 +29,20 @@ class KNearestNeighborsComponentTest(unittest.TestCase):
                 _test_classifier_predict_proba(KNearestNeighborsClassifier)
             self.assertAlmostEqual(1.381551055796429,
                 sklearn.metrics.log_loss(targets, predictions))
+
+    def test_default_configuration_binary(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(KNearestNeighborsClassifier, make_binary=True)
+            self.assertAlmostEqual(1.0,
+                                   sklearn.metrics.accuracy_score(predictions,
+                                                                  targets))
+
+    def test_default_configuration_multilabel(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(KNearestNeighborsClassifier,
+                                 make_multilabel=True)
+            self.assertAlmostEqual(0.959999999999999,
+                                   sklearn.metrics.accuracy_score(predictions,
+                                                                  targets))

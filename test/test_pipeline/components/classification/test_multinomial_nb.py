@@ -43,3 +43,11 @@ class MultinomialNBComponentTest(unittest.TestCase):
         prediction = cls.predict(X_test)
         self.assertAlmostEqual(np.nanmean(prediction == Y_test),
                                0.88888888888888884)
+
+    def test_default_configuration_binary(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(MultinomialNB, make_binary=True)
+            self.assertAlmostEqual(1.0,
+                                   sklearn.metrics.accuracy_score(
+                                       predictions, targets))

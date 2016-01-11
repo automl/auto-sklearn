@@ -23,3 +23,11 @@ class QDAComponentTest(unittest.TestCase):
             self.assertAlmostEqual(0.18882817243472982,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
+
+    def test_default_configuration_binary(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(QDA, make_binary=True)
+            self.assertAlmostEqual(1.0,
+                                   sklearn.metrics.accuracy_score(predictions,
+                                                                  targets))

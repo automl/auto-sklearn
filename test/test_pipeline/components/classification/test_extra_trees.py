@@ -30,3 +30,19 @@ class ExtraTreesComponentTest(unittest.TestCase):
             self.assertAlmostEqual(0.95999999999999996,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
+
+    def test_default_configuration_binary(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(ExtraTreesClassifier, make_binary=True)
+            self.assertAlmostEqual(1,
+                                   sklearn.metrics.accuracy_score(predictions,
+                                                                  targets))
+
+    def test_default_configuration_multilabel(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(ExtraTreesClassifier, make_multilabel=True)
+            self.assertAlmostEqual(0.97060428849902536,
+                                   sklearn.metrics.average_precision_score(
+                                       predictions, targets))

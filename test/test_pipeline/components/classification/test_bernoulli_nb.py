@@ -23,3 +23,11 @@ class BernoulliNBComponentTest(unittest.TestCase):
             self.assertAlmostEqual(0.26000000000000001,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
+
+    def test_default_configuration_binary(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(BernoulliNB, make_binary=True)
+            self.assertAlmostEqual(0.73999999999999999,
+                                   sklearn.metrics.accuracy_score(
+                                       predictions, targets))

@@ -30,3 +30,32 @@ class AdaBoostComponentTest(unittest.TestCase):
                                  dataset='digits')
             self.assertAlmostEqual(0.6915604128718883,
                                    sklearn.metrics.accuracy_score(predictions, targets))
+
+    def test_default_configuration_digits_sparse(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(classifier=AdaboostClassifier,
+                                 dataset='digits', sparse=True)
+            self.assertAlmostEqual(0.39344262295081966,
+                                   sklearn.metrics.accuracy_score(predictions,
+                                                                  targets))
+
+    def test_default_configuration_multilabel(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(classifier=AdaboostClassifier,
+                                 dataset='digits', sparse=True,
+                                 make_multilabel=True)
+            self.assertAlmostEqual(0.44825927886240696,
+                                   sklearn.metrics.average_precision_score(
+                                       predictions, targets))
+
+    def test_default_configuration_binary(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(classifier=AdaboostClassifier,
+                                 dataset='digits', sparse=True,
+                                 make_binary=True)
+            self.assertAlmostEqual(0.93199757134183359,
+                                   sklearn.metrics.accuracy_score(
+                                       predictions, targets))

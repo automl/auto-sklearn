@@ -38,3 +38,11 @@ class PassiveAggressiveComponentTest(unittest.TestCase):
             self.assertAlmostEqual(0.91924711596842745,
                                    sklearn.metrics.accuracy_score(
                                        predictions, targets))
+
+    def test_default_configuration_binary(self):
+        for i in range(10):
+            predictions, targets = _test_classifier(PassiveAggressive,
+                                                    make_binary=True)
+            self.assertAlmostEqual(1.0,
+                                   sklearn.metrics.accuracy_score(predictions,
+                                                                  targets))

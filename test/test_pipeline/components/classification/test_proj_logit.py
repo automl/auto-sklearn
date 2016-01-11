@@ -19,3 +19,11 @@ class ProjLogitComponentTest(unittest.TestCase):
                                                     dataset='digits')
             self.assertAlmostEqual(0.8986035215543412,
                 sklearn.metrics.accuracy_score(predictions, targets))
+
+    def test_default_configuration_binary(self):
+        for i in range(10):
+            predictions, targets = _test_classifier(ProjLogitCLassifier,
+                                                    make_binary=True)
+            self.assertAlmostEqual(1.0,
+                                   sklearn.metrics.accuracy_score(predictions,
+                                                                  targets))

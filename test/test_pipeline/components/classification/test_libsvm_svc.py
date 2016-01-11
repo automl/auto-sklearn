@@ -53,3 +53,11 @@ class LibSVM_SVCComponentTest(unittest.TestCase):
             prediction = cls.predict_proba(X_test)
             self.assertAlmostEqual(sklearn.metrics.log_loss(Y_test, prediction),
                                    0.69323680119641773)
+
+    def test_default_configuration_binary(self):
+        for i in range(10):
+            predictions, targets = _test_classifier(LibSVM_SVC,
+                                                    make_binary=True)
+            self.assertAlmostEqual(1.0,
+                                   sklearn.metrics.accuracy_score(
+                                       predictions, targets))
