@@ -144,7 +144,7 @@ class AbstractEvaluator(object):
 
             print(traceback.format_exc())
             print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
-                  ('TIMEOUT', abs(self.duration), 1.0, self.seed,
+                  ('TIMEOUT', abs(self.duration), 2.0, self.seed,
                    'No results were produced! Error is %s' % str(e)))
 
     def file_output(self):
