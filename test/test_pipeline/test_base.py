@@ -1,6 +1,6 @@
 import unittest
 
-import HPOlibConfigSpace.configuration_space
+import ConfigSpace.configuration_space
 
 import autosklearn.pipeline.base
 import autosklearn.pipeline.components.feature_preprocessing
@@ -10,7 +10,7 @@ class BaseTest(unittest.TestCase):
     def test_get_hyperparameter_configuration_space_3choices(self):
         base = autosklearn.pipeline.base.BasePipeline
 
-        cs = HPOlibConfigSpace.configuration_space.ConfigurationSpace()
+        cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification'}
         exclude = {}
         include = {}
@@ -29,7 +29,7 @@ class BaseTest(unittest.TestCase):
         #    print clause
         self.assertEqual(151, len(cs.forbidden_clauses))
 
-        cs = HPOlibConfigSpace.configuration_space.ConfigurationSpace()
+        cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification', 'signed': True}
         include = {'c': ['multinomial_nb']}
         cs = base._get_hyperparameter_search_space(cs, dataset_properties,
@@ -45,7 +45,7 @@ class BaseTest(unittest.TestCase):
         self.assertEqual(74, len(cs.forbidden_clauses))
 
 
-        cs = HPOlibConfigSpace.configuration_space.ConfigurationSpace()
+        cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification', 'signed': True}
         include = {}
         cs = base._get_hyperparameter_search_space(cs, dataset_properties,
@@ -59,7 +59,7 @@ class BaseTest(unittest.TestCase):
         self.assertEqual(126, len(cs.forbidden_clauses))
 
 
-        cs = HPOlibConfigSpace.configuration_space.ConfigurationSpace()
+        cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification', 'sparse': True}
         cs = base._get_hyperparameter_search_space(cs, dataset_properties,
                                                    exclude, include, pipeline)
@@ -71,7 +71,7 @@ class BaseTest(unittest.TestCase):
         #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #    print(clause)
 
-        cs = HPOlibConfigSpace.configuration_space.ConfigurationSpace()
+        cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification',
                               'sparse': True, 'signed': True}
         cs = base._get_hyperparameter_search_space(cs, dataset_properties,

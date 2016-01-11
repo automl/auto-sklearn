@@ -2,10 +2,10 @@ import warnings
 
 import numpy as np
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
     UniformIntegerHyperparameter, UniformFloatHyperparameter
-from HPOlibConfigSpace.conditions import EqualsCondition, InCondition
+from ConfigSpace.conditions import EqualsCondition, InCondition
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm

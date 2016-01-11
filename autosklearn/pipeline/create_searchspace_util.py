@@ -2,8 +2,8 @@ import itertools
 
 import numpy as np
 
-from HPOlibConfigSpace.forbidden import ForbiddenAndConjunction
-from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause
+from ConfigSpace.forbidden import ForbiddenAndConjunction
+from ConfigSpace.forbidden import ForbiddenEqualsClause
 
 from autosklearn.pipeline.constants import *
 

@@ -11,7 +11,7 @@ import sklearn.preprocessing
 import sklearn.utils
 
 from pyMetaLearn.metalearning.meta_base import MetaBase, Run
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.configuration_space import ConfigurationSpace
 
 logging.basicConfig()
 

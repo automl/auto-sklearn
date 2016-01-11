@@ -1,6 +1,6 @@
 # import unittest
 #
-# from HPOlibConfigSpace.configuration_space import ConfigurationSpace
+# from ConfigSpace.configuration_space import ConfigurationSpace
 #
 # from autosklearn.pipeline.textclassification import autosklearn.pipelineTextClassifier
 #
