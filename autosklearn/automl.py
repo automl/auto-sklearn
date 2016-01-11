@@ -4,13 +4,15 @@ from __future__ import print_function
 import hashlib
 import multiprocessing
 import os
+import sys
 import shutil
 import traceback
+import pynisher
 
 import numpy as np
 
-from HPOlibConfigSpace.converters import pcs_parser
-from HPOlibConfigSpace.configuration_space import Configuration
+from ConfigSpace.io import pcs
+from ConfigSpace.configuration_space import Configuration
 from sklearn.base import BaseEstimator
 import six
 
@@ -20,56 +22,13 @@ from autosklearn.data.data_manager_factory import get_data_manager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import resampling, HoldoutEvaluator, get_new_run_num
-from autosklearn.metalearning.mismbo import \
-    calc_meta_features, calc_meta_features_encoded, \
-    create_metalearning_string_for_smac_call, \
-    convert_conf2smac_string
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     get_auto_seed, set_auto_seed, del_auto_seed, submit_process, pipeline, \
     Backend
-from autosklearn.util.smac import run_smac
-
-
-def _calculate_metafeatures(data_feat_type, data_info_task, basename,
-                            metalearning_cnt, x_train, y_train, watcher,
-                            logger):
-    # == Calculate metafeatures
-    task_name = 'CalculateMetafeatures'
-    watcher.start_task(task_name)
-    categorical = [True if feat_type.lower() in ['categorical'] else False
-                   for feat_type in data_feat_type]
-
-    if metalearning_cnt <= 0:
-        result = None
-    elif data_info_task in \
-            [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
-        logger.info('Start calculating metafeatures for %s' % basename)
-        result = calc_meta_features(x_train, y_train, categorical=categorical,
-                                    dataset_name=basename)
-    else:
-        result = None
-        logger.info('Metafeatures not calculated')
-    watcher.stop_task(task_name)
-    logger.info(
-        'Calculating Metafeatures (categorical attributes) took %5.2f' %
-        watcher.wall_elapsed(task_name))
-    return result
-
-
-def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
-                                    logger):
-    task_name = 'CalculateMetafeaturesEncoded'
-    watcher.start_task(task_name)
-    result = calc_meta_features_encoded(X_train=x_train, Y_train=y_train,
-                                        categorical=[False] * x_train.shape[1],
-                                        dataset_name=basename)
-    watcher.stop_task(task_name)
-    logger.info(
-        'Calculating Metafeatures (encoded attributes) took %5.2fsec' %
-        watcher.wall_elapsed(task_name))
-    return result
-
+from autosklearn.ensemble_selection_script import main as ensemble_main
+#from autosklearn.util.smac import run_smac
+from autosklearn.smbo import AutoMLSMBO
 
 def _create_search_space(tmp_dir, data_info, backend, watcher, logger,
                          include_estimators=None, include_preprocessors=None):
@@ -80,52 +39,62 @@ def _create_search_space(tmp_dir, data_info, backend, watcher, logger,
         data_info,
         include_estimators=include_estimators,
         include_preprocessors=include_preprocessors)
-    sp_string = pcs_parser.write(configuration_space)
+    sp_string = pcs.write(configuration_space)
     backend.write_txt_file(configspace_path, sp_string,
                            'Configuration space')
     watcher.stop_task(task_name)
 
     return configuration_space, configspace_path
 
+class EnsembleProcess(multiprocessing.Process):
 
-def _get_initial_configuration(meta_features,
-                               meta_features_encoded, basename, metric,
-                               configuration_space,
-                               task, metadata_directory,
-                               initial_configurations_via_metalearning,
-                               is_sparse,
-                               watcher, logger):
-    task_name = 'InitialConfigurations'
-    watcher.start_task(task_name)
-    try:
-        initial_configurations = create_metalearning_string_for_smac_call(
-            meta_features,
-            meta_features_encoded,
-            configuration_space, basename, metric,
-            task,
-            is_sparse == 1,
-            initial_configurations_via_metalearning,
-            metadata_directory
-        )
-    except Exception as e:
-        logger.error(str(e))
-        logger.error(traceback.format_exc())
-        initial_configurations = []
-    watcher.stop_task(task_name)
-    return initial_configurations
+    """
+    Wrap the ensemble script into its own process.
+    """
+    
+    def __init__(self, tmp_dir, dataset_name, task_type, metric, limit,
+                 output_dir, ensemble_size, ensemble_nbest, seed,
+                 shared_mode, precision, max_iterations = None, silent=True):
+        super(EnsembleProcess, self).__init__()
 
+        self.tmp_dir = tmp_dir
+        self.dataset_name = dataset_name
+        self.task_type = task_type
+        self.metric = metric
+        self.limit = limit
+        self.output_dir = output_dir
+        self.ensemble_size = ensemble_size
+        self.ensemble_nbest = ensemble_nbest
+        self.seed = seed
+        self.shared_mode = shared_mode
+        self.max_iterations = max_iterations
+        self.precision = precision
+        self.silent = silent
+        if self.max_iterations is None:
+            self.max_iterations = -1
+        if self.limit <= 0:
+            self.limit = None
+        else:
+            self.limit = max(1, self.limit)
 
-def _print_debug_info_of_init_configuration(initial_configurations, basename,
-                                            time_for_task, logger, watcher):
-    logger.debug('Initial Configurations: (%d)' % len(initial_configurations))
-    for initial_configuration in initial_configurations:
-        logger.debug(initial_configuration)
-    logger.debug('Looking for initial configurations took %5.2fsec' %
-                 watcher.wall_elapsed('InitialConfigurations'))
-    logger.info(
-        'Time left for %s after finding initial configurations: %5.2fsec'
-        % (basename, time_for_task - watcher.wall_elapsed(basename)))
-
+    def run(self):
+        if self.silent:
+            f = open(os.devnull, 'w')
+            sys.stdout = f
+            sys.stderr = f
+        safe_ensemble_script = pynisher.enforce_limits()(ensemble_main)
+        safe_ensemble_script(autosklearn_tmp_dir = self.tmp_dir,
+                             dataset_name = self.dataset_name,
+                             task_type = self.task_type,
+                             metric = self.metric,
+                             limit = self.limit,
+                             output_dir = self.output_dir,
+                             ensemble_size = self.ensemble_size,
+                             ensemble_nbest = self.ensemble_nbest,
+                             seed = self.seed,
+                             shared_mode = self.shared_mode,
+                             max_iterations = self.max_iterations,
+                             precision = self.precision)
 
 class AutoML(BaseEstimator, multiprocessing.Process):
 
@@ -151,7 +120,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                  delete_tmp_folder_after_terminate=False,
                  delete_output_folder_after_terminate=False,
                  shared_mode=False,
-                 precision=32):
+                 precision=32,
+                 max_iter_smac=None):
         super(AutoML, self).__init__()
 
         self._tmp_dir = tmp_dir
@@ -172,6 +142,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._include_preprocessors = include_preprocessors
         self._resampling_strategy = resampling_strategy
         self._resampling_strategy_arguments = resampling_strategy_arguments
+        self._max_iter_smac = max_iter_smac
         self.delete_tmp_folder_after_terminate = \
             delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = \
@@ -186,6 +157,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._task = None
         self._metric = None
         self._label_num = None
+        self._paraser = None
         self.models_ = None
         self.ensemble_indices_ = None
 
@@ -193,9 +165,20 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._backend = Backend(self._output_dir, self._tmp_dir)
 
     def start_automl(self, parser):
+        self._parser = parser
+        self.start()
+
+    def start(self):
+        if self._parser is None:
+            raise ValueError('You must invoke start() only via start_automl()')
+        super(AutoML, self).start()
+
+    def run(self):
+        if self._parser is None:
+            raise ValueError('You must invoke run() only via start_automl()')
         self._backend.save_start_time(self._seed)
         self._stopwatch = StopWatch()
-        datamanager = get_data_manager(namespace=parser)
+        datamanager = get_data_manager(namespace=self._parser)
         self._stopwatch.start_task(datamanager.name)
 
         logger_name = 'AutoML(%d):%s' % (self._seed, datamanager.name)
@@ -204,16 +187,6 @@ class AutoML(BaseEstimator, multiprocessing.Process):
 
         self._datamanager = datamanager
         self._dataset_name = datamanager.name
-        self.start()
-
-    def start(self):
-        if self._datamanager is None:
-            raise ValueError('You must invoke start() only via start_automl()')
-        super(AutoML, self).start()
-
-    def run(self):
-        if self._datamanager is None:
-            raise ValueError('You must invoke run() only via start_automl()')
         self._fit(self._datamanager)
 
     def fit(self, X, y,
@@ -337,8 +310,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
 
         set_auto_seed(self._seed)
 
-        # == Pickle the data manager, here, because no more global
-        # OneHotEncoding
+        # == Pickle the data manager to speed up loading
         data_manager_path = self._backend.save_datamanager(datamanager)
 
         self._save_ensemble_data(
@@ -379,65 +351,38 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         # Do this before calculating the meta-features to make sure that the
         # dummy predictions are actually included in the ensemble even if
         # calculating the meta-features takes very long
-        proc_ensembles = self.run_ensemble_builder()
-
-        # == Calculate metafeatures
-        meta_features = _calculate_metafeatures(
-            data_feat_type=datamanager.feat_type,
-            data_info_task=datamanager.info['task'],
-            x_train=datamanager.data['X_train'],
-            y_train=datamanager.data['Y_train'],
-            basename=self._dataset_name,
-            watcher=self._stopwatch,
-            metalearning_cnt=self._initial_configurations_via_metalearning,
-            logger=self._logger)
-
-        self._stopwatch.start_task('OneHot')
-        datamanager.perform1HotEncoding()
-        self._stopwatch.stop_task('OneHot')
-
-        if meta_features is None:
-            initial_configurations = []
-        elif datamanager.info['task'] in [MULTICLASS_CLASSIFICATION,
-                                          BINARY_CLASSIFICATION,
-                                          MULTILABEL_CLASSIFICATION]:
-
-            meta_features_encoded = _calculate_metafeatures_encoded(
-                self._dataset_name,
-                datamanager.data['X_train'],
-                datamanager.data['Y_train'],
-                self._stopwatch,
-                self._logger)
-
-            self._logger.debug(meta_features.__repr__(verbosity=2))
-            self._logger.debug(meta_features_encoded.__repr__(verbosity=2))
-
-            initial_configurations = _get_initial_configuration(
-                meta_features,
-                meta_features_encoded,
-                self._dataset_name,
-                self._metric,
-                self.configuration_space,
-                self._task,
-                self._metadata_directory,
-                self._initial_configurations_via_metalearning,
-                datamanager.info[
-                    'is_sparse'],
-                self._stopwatch,
-                self._logger)
-
-            _print_debug_info_of_init_configuration(
-                initial_configurations,
-                self._dataset_name,
-                self._time_for_task,
-                self._logger,
-                self._stopwatch)
-
+        ensemble_task_name = 'runEnsemble'
+        self._stopwatch.start_task(ensemble_task_name)
+        time_left_for_ensembles = max(0,self._time_for_task \
+                                      - self._stopwatch.wall_elapsed(self._dataset_name))
+        if self._logger:
+            self._logger.info(
+                'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
+        if time_left_for_ensembles <= 0:
+            logger.warning("Not starting ensemble builder because it's not worth it")
+            self._proc_ensemble = None
         else:
-            initial_configurations = []
-            self._logger.warning('Metafeatures encoded not calculated')
+            self._proc_ensemble = EnsembleProcess(
+                tmp_dir=self._tmp_dir,
+                dataset_name=self._dataset_name,
+                task_type=self._task,
+                metric=self._metric,
+                limit=time_left_for_ensembles,
+                output_dir=self._output_dir,
+                ensemble_size=self._ensemble_size,
+                ensemble_nbest=self._ensemble_nbest,
+                seed=self._seed,
+                shared_mode=self._shared_mode,
+                precision=self.precision,
+                # JTS TODO: enable silent again and check that it works
+                silent=False 
+            )
+            self._proc_ensemble.start()
+        self._stopwatch.stop_task(ensemble_task_name)
 
-        # == RUN SMAC
+        # == RUN SMBO
+        default_configs = []
+        # == set default configurations
         if (datamanager.info["task"] == BINARY_CLASSIFICATION) or \
             (datamanager.info["task"] == MULTICLASS_CLASSIFICATION):
             config = {'balancing:strategy': 'weighting',
@@ -455,6 +400,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                       'one_hot_encoding:minimum_fraction': 0.1,
                       'preprocessor:__choice__': 'no_preprocessing',
                       'rescaling:__choice__': 'min/max'}
+            default_configs.append(Configuration(self.configuration_space, config))
         elif datamanager.info["task"] == MULTILABEL_CLASSIFICATION:
             config = {'classifier:__choice__': 'adaboost',
                       'classifier:adaboost:algorithm': 'SAMME.R',
@@ -467,99 +413,55 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                       'one_hot_encoding:minimum_fraction': 0.1,
                       'preprocessor:__choice__': 'no_preprocessing',
                       'rescaling:__choice__': 'none'}
+            default_configs.append(Configuration(self.configuration_space, config))
         else:
             config = None
             self._logger.info("Tasktype unknown: %s" %
                               TASK_TYPES_TO_STRING[datamanager.info["task"]])
 
-        if config is not None:
-            configuration = Configuration(self.configuration_space, config)
-            config_string = convert_conf2smac_string(configuration)
-            initial_configurations = [config_string] + initial_configurations
-
-        # == RUN SMAC
-        proc_smac = run_smac(tmp_dir=self._tmp_dir, basename=self._dataset_name,
-                             time_for_task=self._time_for_task,
-                             ml_memory_limit=self._ml_memory_limit,
-                             data_manager_path=data_manager_path,
-                             configspace_path=configspace_path,
-                             initial_configurations=initial_configurations,
-                             per_run_time_limit=self._per_run_time_limit,
-                             watcher=self._stopwatch, backend=self._backend,
-                             seed=self._seed,
-                             resampling_strategy=self._resampling_strategy,
-                             resampling_strategy_arguments=self._resampling_strategy_arguments,
-                             shared_mode=self._shared_mode)
+        # kill the datamanager as it will be re-loaded anyways from sub processes
+        try:
+            del self._datamanager
+        except Exception:
+            pass
+            
+        # => RUN SMAC
+        # JTS TODO: check difference between cutoff time and limit
+        self._proc_smac = AutoMLSMBO(config_space = self.configuration_space,
+                                     dataset_name = self._dataset_name,
+                                     tmp_dir = self._tmp_dir,
+                                     output_dir = self._output_dir,
+                                     limit = self._time_for_task,
+                                     cutoff_time = self._time_for_task,
+                                     memory_limit = self._ml_memory_limit,
+                                     logger = self._logger,
+                                     watcher = self._stopwatch,
+                                     default_cfgs = default_configs,
+                                     num_metalearning_cfgs = self._initial_configurations_via_metalearning,
+                                     config_file = configspace_path,
+                                     smac_iters = self._max_iter_smac,
+                                     metadata_directory=self._metadata_directory)
+        self._proc_smac.start()
 
         procs = []
-
-        if proc_smac is not None:
-            procs.append(proc_smac)
-        if proc_ensembles is not None:
-            procs.append(proc_ensembles)
+        if self._proc_smac is not None:
+            procs.append(self._proc_smac)
+        if self._proc_ensemble is not None:
+            procs.append(self._proc_ensemble)
 
         if self._queue is not None:
             self._queue.put([time_for_load_data, data_manager_path, procs])
         else:
             for proc in procs:
-                proc.wait()
+                proc.join()
 
         # Delete AutoSklearn environment variable
         del_auto_seed()
-
-        # In case
-        try:
-            del self._datamanager
-        except Exception:
-            pass
 
         if self._queue is None:
             self._load_models()
 
         return self
-
-    def run_ensemble_builder(self,
-                             time_left_for_ensembles=None,
-                             max_iterations=None,
-                             ensemble_size=None):
-        if self._ensemble_size > 0 or ensemble_size is not None:
-            task_name = 'runEnsemble'
-            self._stopwatch.start_task(task_name)
-
-            if time_left_for_ensembles is None:
-                time_left_for_ensembles = max(0,
-                    self._time_for_task - self._stopwatch.wall_elapsed(
-                        self._dataset_name))
-            if max_iterations is None:
-                max_iterations = -1
-            if ensemble_size is None:
-                ensemble_size = self._ensemble_size
-
-            # It can happen that run_ensemble_builder is called without
-            # calling fit.
-            if self._logger:
-                self._logger.info(
-                    'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
-            proc_ensembles = submit_process.run_ensemble_builder(
-                tmp_dir=self._tmp_dir,
-                dataset_name=self._dataset_name,
-                task_type=self._task,
-                metric=self._metric,
-                limit=time_left_for_ensembles,
-                output_dir=self._output_dir,
-                ensemble_size=ensemble_size,
-                ensemble_nbest=self._ensemble_nbest,
-                seed=self._seed,
-                shared_mode=self._shared_mode,
-                max_iterations=max_iterations,
-                precision=self.precision
-            )
-            self._stopwatch.stop_task(task_name)
-            return proc_ensembles
-        else:
-            self._logger.info('Not starting ensemble script due to ensemble '
-                             'size 0.')
-            return None
 
     def predict(self, X):
         if self._keep_models is not True:

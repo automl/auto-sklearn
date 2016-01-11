@@ -168,6 +168,7 @@ class AbstractEvaluator(object):
             print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
                   ('TIMEOUT', abs(self.duration), 2.0, self.seed,
                    'No results were produced! Error is %s' % str(e)))
+        return self.duration, result, self.seed, additional_run_info
 
     def file_output(self):
         seed = os.environ.get('AUTOSKLEARN_SEED')

@@ -94,26 +94,11 @@ def convert_conf2smac_string(configuration):
     config_string.write("\"")
     return config_string.getvalue()
 
-
-def create_metalearning_string_for_smac_call(
+def suggest_via_metalearning(
         metafeatures_labels, metafeatures_encoded_labels,
         configuration_space, dataset_name, metric, task, sparse,
         num_initial_configurations, metadata_directory):
-    """
-
-    :param metafeatures_labels:
-    :param metafeatures_encoded_labels:
-    :param configuration_space:
-    :param dataset_name:
-    :param metric:
-    :param task:
-    :param sparse:
-    :param num_initial_configurations:
-    :param metadata_directory:
-    :return:
-    """
     logger = get_logger('autosklearn.metalearning.mismbo')
-
     task = task if task != MULTILABEL_CLASSIFICATION else MULTICLASS_CLASSIFICATION
     task = TASK_TYPES_TO_STRING[task]
 
@@ -155,6 +140,29 @@ def create_metalearning_string_for_smac_call(
     # dataset!
     ml.meta_base.add_dataset(dataset_name + SENTINEL, mf)
     runs = ml.metalearning_suggest_all(exclude_double_configurations=True)
+    return runs[:num_initial_configurations]
+
+def create_metalearning_string_for_smac_call(
+        metafeatures_labels, metafeatures_encoded_labels,
+        configuration_space, dataset_name, metric, task, sparse,
+        num_initial_configurations, metadata_directory):
+    """
+
+    :param metafeatures_labels:
+    :param metafeatures_encoded_labels:
+    :param configuration_space:
+    :param dataset_name:
+    :param metric:
+    :param task:
+    :param sparse:
+    :param num_initial_configurations:
+    :param metadata_directory:
+    :return:
+    """
+    runs = suggest_via_metalearning(metafeatures_labels, metafeatures_encoded_labels,
+                                    configuration_space, dataset_name, metric,
+                                    task, sparse, num_initial_configurations,
+                                    metadata_directory)
 
     # = Convert these configurations into the SMAC CLI configuration format
     smac_initial_configuration_strings = []
