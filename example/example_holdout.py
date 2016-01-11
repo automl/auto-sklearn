@@ -5,7 +5,7 @@ import numpy as np
 import sklearn.datasets
 import sklearn.metrics
 
-import autosklearn.classification
+import autosklearn
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
     X_test = X[1000:]
     y_test = y[1000:]
     automl = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=60, per_run_time_limit=30,
+        time_left_for_this_task=600, per_run_time_limit=30,
         tmp_folder='/tmp/autoslearn_example_tmp',
         output_folder='/tmp/autosklearn_example_out')
     automl.fit(X_train, y_train, dataset_name='digits')

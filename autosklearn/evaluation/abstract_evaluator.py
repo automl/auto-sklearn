@@ -212,6 +212,10 @@ class AbstractEvaluator(object):
             print(traceback.format_exc())
             self._output_SMAC_string(self.duration, 2.0, self.seed,
                 'No results were produced! Error is %s' % str(e))
+        print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
+              ('TIMEOUT', abs(self.duration), 2.0, self.seed,
+               'No results were produced! Error is %s' % str(e)))
+        return self.duration, result, self.seed, additional_run_info
 
     def _output_SMAC_string(self, duration, loss, seed, additional_run_info):
         print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
