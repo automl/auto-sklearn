@@ -5,8 +5,8 @@ from itertools import product
 import numpy as np
 from sklearn.base import RegressorMixin
 
-from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
+from ConfigSpace.configuration_space import ConfigurationSpace
 
 from autosklearn.pipeline.components import regression as regression_components
 from autosklearn.pipeline.components import data_preprocessing as \
@@ -28,11 +28,11 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     possible parameters in the __init__ function because we only know the
     available regressors at runtime. For this reason the user must
     specifiy the parameters by passing an instance of
-    HPOlibConfigSpace.configuration_space.Configuration.
+    ConfigSpace.configuration_space.Configuration.
 
     Parameters
     ----------
-    configuration : HPOlibConfigSpace.configuration_space.Configuration
+    configuration : ConfigSpace.configuration_space.Configuration
         The configuration to evaluate.
 
     random_state : int, RandomState instance or None, optional (default=None)
@@ -147,7 +147,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
         Returns
         -------
-        cs : HPOlibConfigSpace.configuration_space.Configuration
+        cs : ConfigSpace.configuration_space.Configuration
             The configuration space describing the SimpleRegressionClassifier.
         """
         cs = ConfigurationSpace()

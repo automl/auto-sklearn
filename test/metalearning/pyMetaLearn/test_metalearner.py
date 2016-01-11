@@ -8,7 +8,7 @@ import unittest
 
 import pandas as pd
 
-from HPOlibConfigSpace.configuration_space import Configuration
+from ConfigSpace.configuration_space import Configuration
 import autosklearn.pipeline.classification
 
 import autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner as metalearner

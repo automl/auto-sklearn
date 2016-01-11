@@ -1,9 +1,9 @@
 from collections import OrderedDict
 import copy
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
-from HPOlibConfigSpace.conditions import EqualsCondition, AbstractConjunction
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import CategoricalHyperparameter
+from ConfigSpace.conditions import EqualsCondition, AbstractConjunction
 
 from autosklearn.pipeline.constants import *
 
