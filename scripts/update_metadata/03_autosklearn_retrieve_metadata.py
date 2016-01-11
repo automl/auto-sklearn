@@ -6,8 +6,8 @@ import os
 import arff
 import numpy as np
 
-from HPOlibConfigSpace.configuration_space import Configuration
-from HPOlibConfigSpace.hyperparameters import IntegerHyperparameter, \
+from ConfigSpace.configuration_space import Configuration
+from ConfigSpace.hyperparameters import IntegerHyperparameter, \
     FloatHyperparameter, CategoricalHyperparameter, Constant
 
 from autosklearn.constants import *

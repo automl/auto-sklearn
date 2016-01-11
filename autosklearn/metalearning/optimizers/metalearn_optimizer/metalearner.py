@@ -26,7 +26,7 @@ class MetaLearningOptimizer(object):
         dataset_name : str
             Name of the dataset
 
-        configuration_space : HPOlibConfigSpace.configuration_space.ConfigurationSpace
+        configuration_space : ConfigSpace.configuration_space.ConfigurationSpace
 
         datasets_file : str
             Path to an aslib directory

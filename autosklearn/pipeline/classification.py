@@ -5,8 +5,8 @@ import numpy as np
 
 from sklearn.base import ClassifierMixin
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 from autosklearn.pipeline import components as components
 from autosklearn.pipeline.base import BasePipeline
@@ -25,11 +25,11 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
     possible parameters in the __init__ function because we only know the
     available classifiers at runtime. For this reason the user must
     specifiy the parameters by passing an instance of
-    HPOlibConfigSpace.configuration_space.Configuration.
+    ConfigSpace.configuration_space.Configuration.
 
     Parameters
     ----------
-    configuration : HPOlibConfigSpace.configuration_space.Configuration
+    configuration : ConfigSpace.configuration_space.Configuration
         The configuration to evaluate.
 
     random_state : int, RandomState instance or None, optional (default=None)

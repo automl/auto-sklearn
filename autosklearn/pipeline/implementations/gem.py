@@ -36,7 +36,8 @@ class GEM(object):
                 gev = np.dot(E, U[:, :self.N])
                 self.W[:, off:off+self.N] = gev
                 off += self.N
-        print("DONE")
+        if self.verbose:
+            print("DONE")
         return self
 
     
