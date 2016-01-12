@@ -14,7 +14,7 @@ import autosklearn.automl
 import autosklearn.pipeline.util as putil
 from autosklearn.util import setup_logger, get_logger
 from autosklearn.constants import *
-from autosklearn.cli.base_interface import store_and_or_load_data
+from autosklearn.smbo import load_data
 
 sys.path.append(os.path.dirname(__file__))
 from base import Base
@@ -123,7 +123,8 @@ class AutoMLTest(Base):
             setup_logger()
             auto._logger = get_logger('test_do_dummy_predictions')
             auto._backend._make_internals_directory()
-            D = store_and_or_load_data(dataset, output)
+            D = load_data(dataset, output)
+            auto._backend.save_datamanager(D)
             auto._do_dummy_prediction(D)
 
             # Assure that the dummy predictions are not in the current working

@@ -22,7 +22,9 @@ from autosklearn.util import StopWatch, get_logger, setup_logger
 from autosklearn.util import Backend
 
 # dataset helpers
-def load_data(dataset_info, outputdir, tmp_dir, max_mem=None):
+def load_data(dataset_info, outputdir, tmp_dir=None, max_mem=None):
+    if tmp_dir is None:
+        tmp_dir = outputdir
     backend = Backend(outputdir, tmp_dir)
 
     if max_mem is None:
@@ -123,6 +125,14 @@ def _print_debug_info_of_init_configuration(initial_configurations, basename,
 
 evaluator = None
 
+    
+def _get_base_dict():
+    return {
+        'with_predictions': True,
+        'all_scoring_functions': True,
+        'output_y_test': True,
+    }
+
 # create closure for evaluating an algorithm
 def _eval_config_and_save(configuration, data, output_dir, seed, num_run):
     global evaluator
@@ -153,13 +163,6 @@ def signal_handler(signum, frame):
     exit(0)
 
 signal.signal(15, signal_handler)
-    
-def _get_base_dict():
-    return {
-        'with_predictions': True,
-        'all_scoring_functions': True,
-        'output_y_test': True,
-    }
 
 
 class AutoMLScenario(Scenario):
