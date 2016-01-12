@@ -18,4 +18,5 @@ liac-arff
 pandas
 Cython
 
-git+https://github.com/automl/HPOlibConfigSpace@master
+git+https://github.com/automl/HPOlibConfigSpace@refactor
+git+https://github.com/sfalkner/pynisher@master
