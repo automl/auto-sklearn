@@ -17,14 +17,13 @@ from sklearn.base import BaseEstimator
 import six
 
 from autosklearn.constants import *
-import autosklearn.cli.base_interface
 from autosklearn.data.data_manager_factory import get_data_manager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import resampling, HoldoutEvaluator, get_new_run_num
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
-    get_auto_seed, set_auto_seed, del_auto_seed, submit_process, pipeline, \
+    get_auto_seed, set_auto_seed, del_auto_seed, pipeline, \
     Backend
 from autosklearn.ensemble_selection_script import main as ensemble_main
 #from autosklearn.util.smac import run_smac
@@ -82,6 +81,7 @@ class EnsembleProcess(multiprocessing.Process):
             f = open(os.devnull, 'w')
             sys.stdout = f
             sys.stderr = f
+        # TODO LIMITS
         safe_ensemble_script = pynisher.enforce_limits()(ensemble_main)
         safe_ensemble_script(autosklearn_tmp_dir = self.tmp_dir,
                              dataset_name = self.dataset_name,
@@ -271,13 +271,30 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         return time_for_load_data
 
     def _do_dummy_prediction(self, datamanager):
+        def dummy_prediction_call(datamanager):
+            out_dir = self._tmp_dir
+            num_run = get_new_run_num()
+            evaluator = HoldoutEvaluator(datamanager,
+                                         output_dir=out_dir,
+                                         configuration=None,
+                                         seed=1,
+                                         num_run=0,
+                                         with_predictions=True,
+                                         all_scoring_functions=True,
+                                         output_y_test=True)
+            evaluator.fit()
+            evaluator.finish_up()
+            backend = Backend(None, out_dir)
+            if os.path.exists(backend.get_model_dir()):
+                backend.save_model(evaluator.model, num_run, 1)
+    
         self._logger.info("Starting to create dummy predictions.")
-        autosklearn.cli.base_interface.main(datamanager,
-                                            self._resampling_strategy,
-                                            None,
-                                            None,
-                                            mode_args=self._resampling_strategy_arguments,
-                                            output_dir=self._tmp_dir)
+        # TODO enforce limits
+        safe_call = pynisher.enforce_limits()(dummy_prediction_call)
+        try:
+            safe_call(datamanager)
+        except:
+            pass
         self._logger.info("Finished creating dummy predictions.")
 
     def _fit(self, datamanager):

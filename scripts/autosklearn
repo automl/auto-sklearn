@@ -16,9 +16,27 @@ import psutil
 import autosklearn.automl
 from autosklearn.data.data_manager_factory import \
     populate_argparse_with_data_options
-from autosklearn.util.smac import populate_argparse_with_resampling_arguments, \
-    namespace_to_automl_format
 
+def namespace_to_automl_format(namespace):
+    if namespace.resampling_strategy == 'holdout':
+        strategy = 'holdout'
+        arguments = None
+    elif namespace.resampling_strategy == 'holdout-iterative-fit':
+        strategy = 'holdout-iterative-fit'
+        arguments = None
+    elif namespace.resampling_strategy == 'cv':
+        strategy = 'cv'
+        arguments = {'folds': namespace.folds}
+    elif namespace.resampling_strategy == 'partial-cv':
+        strategy = 'partial-cv'
+        arguments = {'folds': namespace.folds}
+    elif namespace.resampling_strategy == 'nested-cv':
+        strategy = 'nested-cv'
+        arguments = {'inner_folds': namespace.inner_folds,
+                     'outer_folds': namespace.outer_folds}
+    else:
+        raise ValueError(namespace.resampling_strategy)
+    return strategy, arguments
 
 def get_options():
     parser = ArgParser()
@@ -106,7 +124,6 @@ def get_options():
              'on the performance of AutoSklearn.')
 
     parser = populate_argparse_with_data_options(parser)
-    parser = populate_argparse_with_resampling_arguments(parser)
 
     return parser
 
@@ -155,17 +172,6 @@ if __name__ == '__main__':
     BUFFER = 35  # time-left - BUFFER = timelimit for SMAC/ensemble_script.py
     BUFFER_BEFORE_SENDING_SIGTERM = 30  # We send SIGTERM to all processes
     DELAY_TO_SIGKILL = 15  # And after a delay we send a sigkill
-
-    # Manipulate $PATH so that SMAC and the runsolver are in it.
-    smac = pkg_resources.resource_filename(
-        'autosklearn',
-        'binaries/smac-v2.08.01-development-1/smac-v2.08.01-development-1/')
-    runsolver = pkg_resources.resource_filename(
-        'autosklearn',
-        'binaries/'
-    )
-    os.environ['PATH'] = smac + os.pathsep + runsolver + os.pathsep + \
-        os.environ['PATH']
 
     resampling_strategy, resampling_strategy_arguments = \
         namespace_to_automl_format(args)
