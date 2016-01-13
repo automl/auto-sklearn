@@ -6,6 +6,8 @@ from autosklearn.pipeline.components.base import \
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
 
+import numpy as np
+
 
 class QDA(AutoSklearnClassificationAlgorithm):
 
@@ -24,6 +26,20 @@ class QDA(AutoSklearnClassificationAlgorithm):
             self.estimator = estimator
 
         self.estimator.fit(X, Y)
+
+        if len(Y.shape) == 2 and Y.shape[1] > 1:
+            problems = []
+            for est in self.estimator.estimators_:
+                problem = np.any(np.any([np.any(s <= 0.0) for s in
+                                         est.scalings_]))
+                problems.append(problem)
+            problem = np.any(problems)
+        else:
+            problem = np.any(np.any([np.any(s <= 0.0) for s in
+                                     self.estimator.scalings_]))
+        if problem:
+            raise ValueError('Numerical problems in QDA. QDA.scalings_ '
+                             'contains values <= 0.0')
         return self
 
     def predict(self, X):
