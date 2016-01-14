@@ -55,5 +55,5 @@ class PassiveAggressiveComponentTest(unittest.TestCase):
 
         X = np.random.random((10, 10))
         y = np.random.randint(0, 1, size=(10, 10))
-        self.assertRaisesRegex(ValueError, 'bad input shape \(10, 10\)',
-                               cls.fit, X, y)
+        self.assertRaisesRegexp(ValueError, 'bad input shape \(10, 10\)',
+                                cls.fit, X, y)

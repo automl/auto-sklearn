@@ -48,10 +48,10 @@ class QDAComponentTest(unittest.TestCase):
             'preprocessor:gem:precond': 0.12360249797270745,
             'rescaling:__choice__': 'none'})
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        self.assertRaisesRegex(ValueError, 'Numerical problems in '
-                                           'QDA. QDA.scalings_ contains '
-                                           'values <= 0.0',
-                               p.fit, X_train, Y_train)
+        self.assertRaisesRegexp(ValueError, 'Numerical problems in '
+                                            'QDA. QDA.scalings_ contains '
+                                            'values <= 0.0',
+                                p.fit, X_train, Y_train)
         # p.fit(X_train, Y_train)
         # print(p.pipeline_.steps[-1][1].estimator.scalings_)
         # print(p.predict_proba(X_test))
@@ -78,5 +78,5 @@ class QDAComponentTest(unittest.TestCase):
         cls = sklearn.qda.QDA()
         X = np.random.random((10, 10))
         y = np.random.randint(0, 1, size=(10, 10))
-        self.assertRaisesRegex(ValueError, 'bad input shape \(10, 10\)',
-                               cls.fit, X, y)
+        self.assertRaisesRegexp(ValueError, 'bad input shape \(10, 10\)',
+                                cls.fit, X, y)
