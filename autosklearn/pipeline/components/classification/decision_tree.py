@@ -8,6 +8,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from autosklearn.pipeline.components.base import \
     AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 
 
 class DecisionTree(AutoSklearnClassificationAlgorithm):
@@ -62,7 +63,9 @@ class DecisionTree(AutoSklearnClassificationAlgorithm):
     def predict_proba(self, X):
         if self.estimator is None:
             raise NotImplementedError()
-        return self.estimator.predict_proba(X)
+        probas = self.estimator.predict_proba(X)
+        probas = convert_multioutput_multiclass_to_multilabel(probas)
+        return probas
 
     @staticmethod
     def get_properties(dataset_properties=None):

@@ -121,9 +121,13 @@ def get_multilabel_classification_datamanager():
     Y_train = Y_train[indices]
 
     Y_train = np.array(convert_to_bin(Y_train, 3))
-    Y_train[:, -1] = 1
+    #for i in range(Y_train_.shape[0]):
+    #    Y_train_[:, Y_train[i]] = 1
+    #Y_train = Y_train_
     Y_test = np.array(convert_to_bin(Y_test, 3))
-    Y_test[:, -1] = 1
+    #for i in range(Y_test_.shape[0]):
+    #    Y_test_[:, Y_test[i]] = 1
+    #Y_test = Y_test_
 
     X_valid = X_test[:25, ]
     Y_valid = Y_test[:25, ]
@@ -144,7 +148,7 @@ def get_multilabel_classification_datamanager():
         'X_test': X_test
     }
     D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
-    return D, 0.51
+    return D, 0.67
 
 
 def get_binary_classification_datamanager():

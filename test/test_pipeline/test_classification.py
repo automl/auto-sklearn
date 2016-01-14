@@ -601,17 +601,18 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         # Multilabel
         cls = SimpleClassificationPipeline(default)
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
-        Y_train = np.array([(y, 26 - y) for y in Y_train])
+        Y_train_ = np.zeros((Y_train.shape[0], 10))
+        for i, y in enumerate(Y_train):
+            Y_train_[i][y] = 1
+        Y_train = Y_train_
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         cls_predict = mock.Mock(wraps=cls.pipeline_.steps[-1][1])
         cls.pipeline_.steps[-1] = ("estimator", cls_predict)
         prediction = cls.predict_proba(X_test, batch_size=20)
-        self.assertIsInstance(prediction, list)
-        self.assertEqual(2, len(prediction))
-        self.assertEqual((1647, 10), prediction[0].shape)
-        self.assertEqual((1647, 10), prediction[1].shape)
+        self.assertIsInstance(prediction, np.ndarray)
+        self.assertEqual(prediction.shape, ((1647, 10)))
         self.assertEqual(84, cls_predict.predict_proba.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
@@ -656,17 +657,18 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cls = SimpleClassificationPipeline(config)
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                        make_sparse=True)
-        Y_train = np.array([(y, 26 - y) for y in Y_train])
+        Y_train_ = np.zeros((Y_train.shape[0], 10))
+        for i, y in enumerate(Y_train):
+            Y_train_[i][y] = 1
+        Y_train = Y_train_
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         cls_predict = mock.Mock(wraps=cls.pipeline_.steps[-1][1])
         cls.pipeline_.steps[-1] = ("estimator", cls_predict)
         prediction = cls.predict_proba(X_test, batch_size=20)
-        self.assertIsInstance(prediction, list)
-        self.assertEqual(2, len(prediction))
-        self.assertEqual((1647, 10), prediction[0].shape)
-        self.assertEqual((1647, 10), prediction[1].shape)
+        self.assertEqual(prediction.shape, ((1647, 10)))
+        self.assertIsInstance(prediction, np.ndarray)
         self.assertEqual(84, cls_predict.predict_proba.call_count)
         assert_array_almost_equal(prediction_, prediction)
 

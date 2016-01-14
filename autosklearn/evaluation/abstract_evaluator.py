@@ -14,6 +14,7 @@ from sklearn.dummy import DummyClassifier, DummyRegressor
 from autosklearn.constants import *
 from autosklearn.evaluation.util import get_new_run_num
 from autosklearn.util import Backend
+from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 
 
 __all__ = [
@@ -39,7 +40,9 @@ class MyDummyClassifier(DummyClassifier):
 
     def predict_proba(self, X, batch_size=1000):
         new_X = np.ones((X.shape[0], 1))
-        return super(MyDummyClassifier, self).predict_proba(new_X)
+        probas = super(MyDummyClassifier, self).predict_proba(new_X)
+        probas = convert_multioutput_multiclass_to_multilabel(probas)
+        return probas
 
     def estimator_supports_iterative_fit(self):
         return False
@@ -193,15 +196,16 @@ class AbstractEvaluator(object):
     def predict_proba(self, X, model, task_type, Y_train):
         Y_pred = model.predict_proba(X, batch_size=1000)
 
-        if task_type == MULTILABEL_CLASSIFICATION:
-            Y_pred = np.hstack([Y_pred[i][:, -1].reshape((-1, 1))
-                                for i in range(len(Y_pred))])
+        #if task_type == MULTILABEL_CLASSIFICATION:
+        #    Y_pred = np.hstack([Y_pred[i][:, -1].reshape((-1, 1))
+        #                        for i in range(len(Y_pred))])
 
-        elif task_type == BINARY_CLASSIFICATION:
+        if task_type == BINARY_CLASSIFICATION:
             if len(Y_pred.shape) != 1:
                 Y_pred = Y_pred[:, 1].reshape(-1, 1)
 
-        elif task_type == MULTICLASS_CLASSIFICATION:
+        elif task_type == [MULTICLASS_CLASSIFICATION,
+                           MULTILABEL_CLASSIFICATION]:
             pass
 
         Y_pred = self._ensure_prediction_array_sizes(Y_pred, Y_train)

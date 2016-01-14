@@ -1,9 +1,11 @@
 import unittest
 
 from autosklearn.pipeline.components.classification.qda import QDA
-from autosklearn.pipeline.util import _test_classifier
+from autosklearn.pipeline.util import _test_classifier, _test_classifier_predict_proba
 
+import numpy as np
 import sklearn.metrics
+import sklearn.qda
 
 
 class QDAComponentTest(unittest.TestCase):
@@ -61,3 +63,20 @@ class QDAComponentTest(unittest.TestCase):
             self.assertAlmostEqual(0.99456140350877187,
                                    sklearn.metrics.average_precision_score(
                                        predictions, targets))
+
+    def test_default_configuration_predict_proba_multilabel(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier_predict_proba(QDA,
+                                               make_multilabel=True)
+            self.assertEqual(predictions.shape, ((50, 3)))
+            self.assertAlmostEqual(1.0,
+                                   sklearn.metrics.average_precision_score(
+                                       targets, predictions))
+
+    def test_target_algorithm_multioutput_multiclass_support(self):
+        cls = sklearn.qda.QDA()
+        X = np.random.random((10, 10))
+        y = np.random.randint(0, 1, size=(10, 10))
+        self.assertRaisesRegex(ValueError, 'bad input shape \(10, 10\)',
+                               cls.fit, X, y)

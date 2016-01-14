@@ -1,9 +1,11 @@
 import unittest
 
+import numpy as np
 import sklearn.metrics
+import sklearn.svm
 
 from autosklearn.pipeline.components.classification.liblinear_svc import LibLinear_SVC
-from autosklearn.pipeline.util import _test_classifier
+from autosklearn.pipeline.util import _test_classifier, _test_classifier_predict_proba
 
 
 class LibLinearComponentTest(unittest.TestCase):
@@ -31,3 +33,11 @@ class LibLinearComponentTest(unittest.TestCase):
                                                     make_multilabel=True)
             self.assertAlmostEquals(0.84479797979797977, sklearn.metrics.average_precision_score(
                 targets, predictions))
+
+    def test_target_algorithm_multioutput_multiclass_support(self):
+        cls = sklearn.svm.LinearSVC()
+
+        X = np.random.random((10, 10))
+        y = np.random.randint(0, 1, size=(10, 10))
+        self.assertRaisesRegex(ValueError, 'bad input shape \(10, 10\)',
+                               cls.fit, X, y)

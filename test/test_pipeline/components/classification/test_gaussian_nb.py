@@ -4,7 +4,9 @@ from autosklearn.pipeline.components.classification.gaussian_nb import \
     GaussianNB
 from autosklearn.pipeline.util import _test_classifier, _test_classifier_iterative_fit
 
+import numpy as np
 import sklearn.metrics
+import sklearn.naive_bayes
 
 
 class GaussianNBComponentTest(unittest.TestCase):
@@ -31,3 +33,10 @@ class GaussianNBComponentTest(unittest.TestCase):
             self.assertAlmostEqual(1.0,
                                    sklearn.metrics.average_precision_score(
                                        predictions, targets))
+
+    def test_target_algorithm_multioutput_multiclass_support(self):
+        cls = sklearn.naive_bayes.GaussianNB()
+        X = np.random.random((10, 10))
+        y = np.random.randint(0, 1, size=(10, 10))
+        self.assertRaisesRegex(ValueError, 'bad input shape \(10, 10\)',
+                               cls.fit, X, y)
