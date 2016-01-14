@@ -15,6 +15,7 @@ from autosklearn.constants import *
 from autosklearn.evaluation.util import get_new_run_num
 from autosklearn.util import Backend
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
+from autosklearn.evaluation.util import calculate_score
 
 
 __all__ = [
@@ -128,6 +129,24 @@ class AbstractEvaluator(object):
     def predict(self):
         pass
 
+    def loss_and_predict(self):
+        Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
+        err = self.loss(self.Y_optimization, Y_optimization_pred)
+        return err, Y_optimization_pred, Y_valid_pred, Y_test_pred
+
+    def loss(self, y_true, y_hat):
+        score = calculate_score(
+            y_true, y_hat, self.task_type,
+            self.metric, self.D.info['label_num'],
+            all_scoring_functions=self.all_scoring_functions)
+
+        if hasattr(score, '__len__'):
+            err = {key: 1 - score[key] for key in score}
+        else:
+            err = 1 - score
+
+        return err
+
     # This function does everything necessary after the fitting is done:
     #        predicting
     #        saving the files for the ensembles_statistics
@@ -153,7 +172,13 @@ class AbstractEvaluator(object):
     def file_output(self):
         seed = os.environ.get('AUTOSKLEARN_SEED')
 
-        errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
+        if self.configuration is None:
+            # Do not calculate the score when creating dummy predictions!
+            Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
+            errs = {self.D.info['metric']: 2.0}
+        else:
+            errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
+                self.loss_and_predict()
 
         if self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
             return 2, "Targets %s and prediction %s don't have the same " \
@@ -195,10 +220,6 @@ class AbstractEvaluator(object):
 
     def predict_proba(self, X, model, task_type, Y_train):
         Y_pred = model.predict_proba(X, batch_size=1000)
-
-        #if task_type == MULTILABEL_CLASSIFICATION:
-        #    Y_pred = np.hstack([Y_pred[i][:, -1].reshape((-1, 1))
-        #                        for i in range(len(Y_pred))])
 
         if task_type == BINARY_CLASSIFICATION:
             if len(Y_pred.shape) != 1:

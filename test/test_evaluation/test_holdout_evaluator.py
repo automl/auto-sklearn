@@ -50,7 +50,7 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
 
             if not self._fit(evaluator):
                 continue
-            evaluator.predict()
+            evaluator.loss_and_predict()
             evaluator.file_output()
 
             self.assertTrue(os.path.exists(os.path.join(
@@ -99,8 +99,7 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
                     evaluator = HoldoutEvaluator(D_, self.output_directory, None)
 
                     evaluator.fit()
-
-                    err[i] = evaluator.predict()
+                    err[i] = evaluator.loss_and_predict()[0]
 
                     self.assertTrue(np.isfinite(err[i]))
                     self.assertLessEqual(err[i], upper_error_bound)

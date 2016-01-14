@@ -91,8 +91,7 @@ class NestedCVEvaluator(AbstractEvaluator):
     def predict(self):
         # First, obtain the predictions for the ensembles, the validation and
         #  the test set!
-        outer_scores = defaultdict(list)
-        inner_scores = defaultdict(list)
+        self.outer_scores_ = defaultdict(list)
         Y_optimization_pred = [None] * self.outer_cv_folds
         Y_targets = [None] * self.outer_cv_folds
         Y_valid_pred = [None] * self.outer_cv_folds
@@ -130,9 +129,9 @@ class NestedCVEvaluator(AbstractEvaluator):
                 all_scoring_functions=self.all_scoring_functions)
             if self.all_scoring_functions:
                 for score_name in scores:
-                    outer_scores[score_name].append(scores[score_name])
+                    self.outer_scores_[score_name].append(scores[score_name])
             else:
-                outer_scores[self.metric].append(scores)
+                self.outer_scores_[self.metric].append(scores)
 
         Y_optimization_pred = np.concatenate(
             [Y_optimization_pred[i] for i in range(self.outer_cv_folds)
@@ -159,7 +158,12 @@ class NestedCVEvaluator(AbstractEvaluator):
 
         self.Y_optimization = Y_targets
 
-        # Second, calculate the inner score
+        return Y_optimization_pred, Y_valid_pred, Y_test_pred
+
+    def loss_and_predict(self):
+        Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
+        inner_scores = defaultdict(list)
+
         for outer_fold in range(self.outer_cv_folds):
             for inner_fold in range(self.inner_cv_folds):
                 inner_train_indices, inner_test_indices = self.inner_indices[
@@ -167,6 +171,7 @@ class NestedCVEvaluator(AbstractEvaluator):
                 Y_test = self.Y_train[inner_test_indices]
                 X_test = self.X_train[inner_test_indices]
                 model = self.inner_models[outer_fold][inner_fold]
+
                 Y_hat = self.predict_function(
                     X_test, model, self.task_type,
                     Y_train=self.Y_train[inner_train_indices])
@@ -174,6 +179,7 @@ class NestedCVEvaluator(AbstractEvaluator):
                     Y_test, Y_hat, self.task_type, self.metric,
                     self.D.info['label_num'],
                     all_scoring_functions=self.all_scoring_functions)
+
                 if self.all_scoring_functions:
                     for score_name in scores:
                         inner_scores[score_name].append(scores[score_name])
@@ -183,17 +189,15 @@ class NestedCVEvaluator(AbstractEvaluator):
         # Average the scores!
         if self.all_scoring_functions:
             inner_err = {
-                key: 1 - np.mean(inner_scores[key])
-                for key in inner_scores
-            }
+                key: 1 - np.mean(inner_scores[key]) for key in inner_scores}
             outer_err = {
-                'outer:%s' % METRIC_TO_STRING[key]: 1 - np.mean(outer_scores[
-                    key]) for key in outer_scores
-            }
+                'outer:%s' % METRIC_TO_STRING[key]:
+                    1 - np.mean(self.outer_scores_[key])
+                for key in self.outer_scores_
+                }
             inner_err.update(outer_err)
         else:
             inner_err = 1 - np.mean(inner_scores[self.metric])
 
-        if self.with_predictions:
-            return inner_err, Y_optimization_pred, Y_valid_pred, Y_test_pred
-        return inner_err
+        return inner_err, Y_optimization_pred, Y_valid_pred, Y_test_pred
+

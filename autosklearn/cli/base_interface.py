@@ -135,17 +135,17 @@ def make_mode_partial_cv(data, seed, configuration, num_run, metric, fold,
                             **_get_base_dict())
     evaluator.partial_fit(fold)
     signal.signal(15, empty_signal_handler)
-    scores, _, _, _ = evaluator.predict()
+    losses, _, _, _ = evaluator.loss_and_predict()
     duration = time.time() - evaluator.starttime
 
-    score = scores[metric]
+    loss = losses[metric]
     additional_run_info = ';'.join(['%s: %s' % (m_, value)
-                                    for m_, value in scores.items()])
+                                    for m_, value in losses.items()])
     additional_run_info += ';' + 'duration: ' + str(duration)
 
-    print(metric, score, additional_run_info)
+    print(metric, loss, additional_run_info)
     print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
-          ('SAT', abs(duration), score, evaluator.seed,
+          ('SAT', abs(duration), loss, evaluator.seed,
            additional_run_info))
 
 

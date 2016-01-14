@@ -31,8 +31,7 @@ class CVEvaluator_Test(BaseEvaluatorTest):
                     evaluator = CVEvaluator(D_, output_directory, None)
 
                     evaluator.fit()
-
-                    err[i] = evaluator.predict()
+                    err[i] = evaluator.loss_and_predict()[0]
 
                     self.assertTrue(np.isfinite(err[i]))
                     self.assertLessEqual(err[i], upper_error_bound)

@@ -3,7 +3,6 @@ import numpy as np
 
 from autosklearn.evaluation.resampling import get_CV_fold
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
-from autosklearn.evaluation.util import calculate_score
 
 
 __all__ = [
@@ -124,16 +123,5 @@ class CVEvaluator(AbstractEvaluator):
                 Y_test_pred = np.nanmean(Y_test_pred, axis=0)
 
         self.Y_optimization = Y_targets
-        score = calculate_score(
-            Y_targets, Y_optimization_pred, self.task_type, self.metric,
-            self.D.info['label_num'],
-            all_scoring_functions=self.all_scoring_functions)
 
-        if hasattr(score, '__len__'):
-            err = {key: 1 - score[key] for key in score}
-        else:
-            err = 1 - score
-
-        if self.with_predictions:
-            return err, Y_optimization_pred, Y_valid_pred, Y_test_pred
-        return err
+        return Y_optimization_pred, Y_valid_pred, Y_test_pred

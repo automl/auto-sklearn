@@ -4,7 +4,6 @@ from __future__ import print_function
 from autosklearn.constants import *
 from autosklearn.evaluation.resampling import split_data
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
-from autosklearn.evaluation.util import calculate_score
 
 
 __all__ = [
@@ -73,16 +72,5 @@ class HoldoutEvaluator(AbstractEvaluator):
         else:
             Y_test_pred = None
 
-        score = calculate_score(
-            self.Y_optimization, Y_optimization_pred, self.task_type,
-            self.metric, self.D.info['label_num'],
-            all_scoring_functions=self.all_scoring_functions)
+        return Y_optimization_pred, Y_valid_pred, Y_test_pred
 
-        if hasattr(score, '__len__'):
-            err = {key: 1 - score[key] for key in score}
-        else:
-            err = 1 - score
-
-        if self.with_predictions:
-            return err, Y_optimization_pred, Y_valid_pred, Y_test_pred
-        return err
