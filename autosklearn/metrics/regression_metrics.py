@@ -23,7 +23,7 @@ def r2_metric(solution, prediction, task=REGRESSION):
     :return:
     """
     mse = np.mean((solution - prediction) ** 2, axis=0)
-    var = np.mean((solution - np.mean(solution)) ** 2, axis=0)
+    var = np.mean((solution - np.mean(solution, axis=0)) ** 2, axis=0)
     score = 1 - mse / var
     return np.mean(score)
 
@@ -36,8 +36,9 @@ def a_metric(solution, prediction, task=REGRESSION):
     :param task:
     :return:
     """
-    mae = np.mean(np.abs(solution - prediction))  # mean absolute error
+    mae = np.mean(np.abs(solution - prediction), axis=0)  # mean absolute error
     mad = np.mean(
-        np.abs(solution - np.mean(solution)))  # mean absolute deviation
+        np.abs(solution - np.mean(solution, axis=0)), axis=0)  # mean absolute
+    # deviation
     score = 1 - mae / mad
     return np.mean(score)

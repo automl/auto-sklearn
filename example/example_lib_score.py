@@ -2,12 +2,16 @@
 
 from __future__ import print_function
 
+import functools
 import os
 from sys import stderr
 
 import numpy as np
 
-from autosklearn.metrics.libscores import show_all_scores
+from autosklearn.metrics.classification_metrics import bac_metric, f1_metric,\
+    auc_metric, pac_metric
+from autosklearn.metrics.regression_metrics import a_metric, r2_metric
+from autosklearn.metrics.util import sanitize_array, normalize_array
 
 swrite = stderr.write
 
@@ -15,6 +19,44 @@ if (os.name == 'nt'):
     filesep = '\\'
 else:
     filesep = '/'
+
+
+def compute_all_scores(solution, prediction):
+    ''' Compute all the scores and return them as a dist'''
+    missing_score = -0.999999
+    scoring = {'BAC (multilabel)': functools.partial(bac_metric, task=1),
+               'BAC (multiclass)': functools.partial(bac_metric, task=2),
+               'F1  (multilabel)': functools.partial(f1_metric, task=1),
+               'F1  (multiclass)': functools.partial(f1_metric, task=2),
+               'Regression ABS  ': a_metric,
+               'Regression R2   ': r2_metric,
+               'AUC (multilabel)': auc_metric,
+               'PAC (multilabel)': functools.partial(pac_metric, task=1),
+               'PAC (multiclass)': functools.partial(pac_metric, task=2)}
+    # Normalize/sanitize inputs
+    [csolution, cprediction] = normalize_array(solution, prediction)
+    solution = sanitize_array(solution)
+    prediction = sanitize_array(prediction)
+    # Compute all scores
+    score_names = sorted(scoring.keys())
+    scores = {}
+    for key in score_names:
+        scoring_func = scoring[key]
+        try:
+            if key == 'Regression R2   ' or key == 'Regression ABS  ':
+                scores[key] = scoring_func(solution, prediction)
+            else:
+                scores[key] = scoring_func(csolution, cprediction)
+        except:
+            scores[key] = missing_score
+    return scores
+
+
+def show_all_scores(solution, prediction):
+    ''' Compute and display all the scores for debug purposes'''
+    scores = compute_all_scores(solution, prediction)
+    for key in scores.keys():
+        print(key + " --> " + str(scores[key]))
 
 
 def main():

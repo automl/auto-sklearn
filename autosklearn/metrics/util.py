@@ -6,7 +6,6 @@ import scipy as sp
 
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     BINARY_CLASSIFICATION
-from autosklearn.metrics.common import binarize_predictions
 
 
 def sanitize_array(array):
@@ -138,4 +137,30 @@ def prior_log_loss(frac_pos, task=BINARY_CLASSIFICATION):
         pos_class_log_loss_ = -frac_pos * np.log(fp)
         base_log_loss = np.sum(pos_class_log_loss_)
     return base_log_loss
+
+
+def binarize_predictions(array, task=BINARY_CLASSIFICATION):
+    """
+    Turn predictions into decisions {0,1} by selecting the class with largest
+    score for multi class problems and thresh holding at 0.5 for other cases.
+
+    :param array:
+    :param task:
+    :return:
+    """
+    # add a very small random value as tie breaker (a bit bad because
+    # this changes the score every time)
+    # so to make sure we get the same result every time, we seed it
+    # eps = 1e-15
+    # np.random.seed(sum(array.shape))
+    # array = array + eps*np.random.rand(array.shape[0],array.shape[1])
+    bin_array = np.zeros(array.shape)
+    if (task != MULTICLASS_CLASSIFICATION) or (array.shape[1] == 1):
+        bin_array[array >= 0.5] = 1
+    else:
+        sample_num = array.shape[0]
+        argmax = np.argmax(array, axis=1)
+        for i in range(sample_num):
+            bin_array[i, argmax[i]] = 1
+    return bin_array
 
