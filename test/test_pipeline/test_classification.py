@@ -26,6 +26,44 @@ from autosklearn.pipeline.util import get_dataset
 from autosklearn.pipeline.constants import *
 
 
+class DummyClassifier(AutoSklearnClassificationAlgorithm):
+    @staticmethod
+    def get_properties(dataset_properties=None):
+        return {'shortname': 'AB',
+                'name': 'AdaBoost Classifier',
+                'handles_regression': False,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': True,
+                'is_deterministic': True,
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'output': (PREDICTIONS,)}
+
+    @staticmethod
+    def get_hyperparameter_search_space(dataset_properties=None):
+        cs = ConfigurationSpace()
+        return cs
+
+
+class DummyPreprocessor(AutoSklearnPreprocessingAlgorithm):
+    @staticmethod
+    def get_properties(dataset_properties=None):
+        return {'shortname': 'AB',
+                'name': 'AdaBoost Classifier',
+                'handles_regression': False,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': True,
+                'is_deterministic': True,
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'output': (INPUT,)}
+
+    @staticmethod
+    def get_hyperparameter_search_space(dataset_properties=None):
+        cs = ConfigurationSpace()
+        return cs
+
+
 class SimpleClassificationPipelineTest(unittest.TestCase):
     def test_io_dict(self):
         classifiers = classification_components._classifiers
@@ -689,3 +727,20 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_get_params(self):
         pass
+
+    def test_add_classifier(self):
+        self.assertEqual(len(classification_components._addons.components), 0)
+        classification_components.add_classifier(DummyClassifier)
+        self.assertEqual(len(classification_components._addons.components), 1)
+        cs = SimpleClassificationPipeline.get_hyperparameter_search_space()
+        self.assertIn('DummyClassifier', str(cs))
+        del classification_components._addons.components['DummyClassifier']
+
+    def test_add_preprocessor(self):
+        self.assertEqual(len(preprocessing_components._addons.components), 0)
+        preprocessing_components.add_preprocessor(DummyPreprocessor)
+        self.assertEqual(len(preprocessing_components._addons.components), 1)
+        cs = SimpleClassificationPipeline.get_hyperparameter_search_space()
+        self.assertIn('DummyPreprocessor', str(cs))
+        del preprocessing_components._addons.components['DummyPreprocessor']
+

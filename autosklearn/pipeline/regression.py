@@ -250,12 +250,11 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
         # Add the preprocessing component
         steps.append(['preprocessor',
-                      components.feature_preprocessing._preprocessors[
-                          'preprocessor']])
+                      components.feature_preprocessing.FeaturePreprocessorChoice])
 
         # Add the classification component
         steps.append(['regressor',
-                      components.regression_components._regressors['regressor']])
+                      components.regression_components.RegressorChoice])
         return steps
 
     def _get_estimator_hyperparameter_name(self):

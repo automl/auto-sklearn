@@ -53,21 +53,13 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': 'KernelPCA',
                 'name': 'Kernel Principal Component Analysis',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': True,
-                'prefers_data_normalized': True,
                 'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': False,
-                'handles_sparse': True,
-                'handles_dense': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (DENSE, UNSIGNED_DATA),
-                'preferred_dtype': None}
+                'output': (DENSE, UNSIGNED_DATA)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

@@ -55,11 +55,12 @@ with Ubuntu. It should run on other Linux distributions, but won't work on a MAC
 or on a windows PC. It requires scikit-learn 0.16.1, which in turn requires
 numpy and scipy.
 
-*auto-sklearn* has a dependency, which are not yet automatically resolved:
+*auto-sklearn* has at least one dependency, which is not yet automatically
+resolved:
 
 * `HPOlibConfigSpace <https://github.com/automl/HPOlibConfigSpace>`_
 
-Please install these manually with:
+Please install all dependencies manually with:
 
 .. code:: bash
 
@@ -77,10 +78,11 @@ We recommend installing *auto-sklearn* into a `virtual environment
 seen strange things happening when installing it using
 :bash:`python setup.py --user`.
 
-API
-***
+Manual
+******
 
-.. autoclass:: autosklearn.classification.AutoSklearnClassifier
+* :ref:`API`
+* :ref:`extending`
 
 
 License

@@ -75,11 +75,8 @@ class BasePipeline(BaseEstimator):
                 method, param = init_param.split(":")
                 init_params_per_method[method][param] = value
 
-        # List of preprocessing steps (and their order)
-        preprocessors_names = [preprocessor[0] for
-                               preprocessor in self._get_pipeline()[:-1]]
-
-        for preproc_name in preprocessors_names:
+        # Instantiate preprocessor objects
+        for preproc_name, preproc_class in self._get_pipeline()[:-1]:
             preproc_params = {}
             for instantiated_hyperparameter in self.configuration:
                 if not instantiated_hyperparameter.startswith(
@@ -92,20 +89,11 @@ class BasePipeline(BaseEstimator):
                 preproc_params[name_] = self.configuration[
                     instantiated_hyperparameter]
 
-            if preproc_name in \
-                    components.feature_preprocessing_components._preprocessors:
-                _preprocessors = components.feature_preprocessing_components._preprocessors
-            elif preproc_name in \
-                    components.data_preprocessing_components._preprocessors:
-                _preprocessors = components.data_preprocessing_components._preprocessors
-            else:
-                raise ValueError(preproc_name)
-
-            preprocessor_object = _preprocessors[preproc_name](
+            preprocessor_object = preproc_class(
                 random_state=self.random_state, **preproc_params)
 
             # Ducktyping...
-            if hasattr(preprocessor_object, 'get_components'):
+            if hasattr(preproc_class, 'get_components'):
                 preprocessor_object = preprocessor_object.choice
 
             steps.append((preproc_name, preprocessor_object))

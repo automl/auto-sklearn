@@ -29,21 +29,13 @@ class SelectPercentileRegression(SelectPercentileBase,
     def get_properties(dataset_properties=None):
         return {'shortname': 'SPR',
                 'name': 'Select Percentile Regression',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': False,
-                'prefers_data_normalized': False,
                 'handles_regression': True,
                 'handles_classification': False,
                 'handles_multiclass': False,
                 'handles_multilabel': False,
                 'is_deterministic': True,
-                'handles_sparse': False,
-                'handles_dense': True,
                 'input': (DENSE, UNSIGNED_DATA),
-                'output': (INPUT,),
-                'preferred_dtype': None}
+                'output': (INPUT,)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

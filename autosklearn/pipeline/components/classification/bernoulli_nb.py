@@ -76,22 +76,13 @@ class BernoulliNB(AutoSklearnClassificationAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': 'BernoulliNB',
                 'name': 'Bernoulli Naive Bayes classifier',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                # sklearn website says: ... BernoulliNB is designed for
-                # binary/boolean features.
-                'handles_numerical_features': False,
-                'prefers_data_scaled': False,
-                'prefers_data_normalized': False,
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': False,
                 'is_deterministic': True,
-                'handles_sparse': False,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,),
-                'preferred_dtype': np.bool}
+                'output': (PREDICTIONS,)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

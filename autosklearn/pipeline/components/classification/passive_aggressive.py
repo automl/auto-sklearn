@@ -65,23 +65,14 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
     @staticmethod
     def get_properties(dataset_properties=None):
         return {'shortname': 'PassiveAggressive Classifier',
-                'name': 'Passive Aggressive Stochastic Gradient Descent '
-                        'Classifier',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': True,
-                'prefers_data_normalized': True,
+                'name': 'Passive Aggressive Classifier',
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': False,
                 'is_deterministic': True,
-                'handles_sparse': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,),
-                # TODO find out what is best used here!
-                'preferred_dtype': None}
+                'output': (PREDICTIONS,)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

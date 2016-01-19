@@ -8,14 +8,19 @@ APIs
 Main modules
 ============
 
-.. autoclass:: ParamSklearn.classification.ParamSklearnClassifier
+.. autoclass:: autosklearn.classification.AutoSklearnClassifier
+
+Pipeline modules
+================
+
+.. autoclass:: autosklearn.pipeline.classification.SimpleClassificationPipeline
 
 
 Extension Interfaces
 ====================
 
-.. autoclass:: ParamSklearn.components.classification_base.ParamSklearnClassificationAlgorithm
+.. autoclass:: autosklearn.pipeline.components.classification.AutoSklearnClassificationAlgorithm
 
-.. autoclass:: ParamSklearn.components.regression_base.ParamSklearnRegressionAlgorithm
+.. autoclass:: autosklearn.pipeline.components.regression.AutoSklearnRegressionAlgorithm
     
-.. autoclass:: ParamSklearn.components.preprocessor_base.ParamSklearnPreprocessingAlgorithm
+.. autoclass:: autosklearn.pipeline.components.feature_preprocessing.AutoSklearnPreprocessingAlgorithm

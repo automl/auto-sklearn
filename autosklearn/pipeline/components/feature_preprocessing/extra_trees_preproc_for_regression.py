@@ -87,23 +87,13 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': 'ETR',
                 'name': 'Extra Trees Regressor Preprocessing',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': False,
-                # TODO find out if this is good because of sparcity...
-                'prefers_data_normalized': False,
                 'handles_regression': True,
                 'handles_classification': False,
                 'handles_multiclass': False,
                 'handles_multilabel': False,
                 'is_deterministic': True,
-                'handles_sparse': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (INPUT,),
-                # TODO find out what is best used here!
-                # But rather fortran or C-contiguous?
-                'preferred_dtype': np.float32}
+                'output': (INPUT,)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

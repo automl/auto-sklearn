@@ -285,11 +285,11 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
         # Add the preprocessing component
         steps.append(['preprocessor',
-                      components.feature_preprocessing._preprocessors['preprocessor']])
+                      components.feature_preprocessing.FeaturePreprocessorChoice])
 
         # Add the classification component
         steps.append(['classifier',
-                      components.classification_components._classifiers['classifier']])
+                      components.classification_components.ClassifierChoice])
         return steps
 
     def _get_estimator_hyperparameter_name(self):

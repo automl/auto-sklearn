@@ -20,56 +20,61 @@
 
 # If your documentation needs a minimal Sphinx version, state it here.
 # needs_sphinx = '1.0'
+import os
+import sys
+
 
 # Mock out stuff for readthedocs.org
-import sys
-try:
-    from mock import Mock as MagicMock
-except:
-    from unittest.mock import MagicMock
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+if on_rtd:
 
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-        if 'BaseEstimator' in name:
-            class BaseEstimator(object):
-                pass
+    try:
+        from mock import Mock as MagicMock
+    except:
+        from unittest.mock import MagicMock
 
-            return BaseEstimator
-        return Mock()
+    class Mock(MagicMock):
+        @classmethod
+        def __getattr__(cls, name):
+            if 'BaseEstimator' in name:
+                class BaseEstimator(object):
+                    pass
 
-MOCK_MODULES = ['lockfile',
-                'joblib',
-                'psutil',
-                'pyyaml',
-                'ConfigArgParse',
-                'arff',
-                'pandas',
-                'Cython',
-                'numpy',
-                'scipy', 'scipy.sparse', 'scipy.stats', 'scipy.linalg',
-                'sklearn',
-                'sklearn.base',
-                'sklearn.cross_validation',
-                'sklearn.dummy',
-                'sklearn.metrics',
-                'sklearn.multiclass',
-                'sklearn.neighbors',
-                'sklearn.utils',
-                'psutil','pyyaml','pandas',
-                'matplotlib',
-                'autosklearn.pipeline',
-                'autosklearn.pipeline.implementations',
-                'autosklearn.pipeline.implementations.OneHotEncoder',
-                'autosklearn.pipeline.implementations.Imputation',
-                'autosklearn.pipeline.implementations.StandardScaler',
-                'autosklearn.pipeline.classification',
-                'autosklearn.pipeline.regression',
-                'HPOlibConfigSpace',
-                'HPOlibConfigSpace.converters',
-                'HPOlibConfigSpace.configuration_space']
+                return BaseEstimator
+            return Mock()
 
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+    MOCK_MODULES = ['lockfile',
+                    'joblib',
+                    'psutil',
+                    'pyyaml',
+                    'ConfigArgParse',
+                    'arff',
+                    'pandas',
+                    'Cython',
+                    'numpy',
+                    'scipy', 'scipy.sparse', 'scipy.stats', 'scipy.linalg',
+                    'sklearn',
+                    'sklearn.base',
+                    'sklearn.cross_validation',
+                    'sklearn.dummy',
+                    'sklearn.metrics',
+                    'sklearn.multiclass',
+                    'sklearn.neighbors',
+                    'sklearn.utils',
+                    'psutil','pyyaml','pandas',
+                    'matplotlib',
+                    'autosklearn.pipeline',
+                    'autosklearn.pipeline.implementations',
+                    'autosklearn.pipeline.implementations.OneHotEncoder',
+                    'autosklearn.pipeline.implementations.Imputation',
+                    'autosklearn.pipeline.implementations.StandardScaler',
+                    'autosklearn.pipeline.classification',
+                    'autosklearn.pipeline.regression',
+                    'HPOlibConfigSpace',
+                    'HPOlibConfigSpace.converters',
+                    'HPOlibConfigSpace.configuration_space']
+
+    sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # Add the parent directory of this file to the PYTHONPATH
 import os
@@ -110,7 +115,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'AutoSklearn'
-copyright = u'2015, Matthias Feurer, Aaron Klein, Katharina Eggensperger'
+copyright = u'2014-2016, Matthias Feurer, Aaron Klein, Katharina ' \
+            u'Eggensperger, Jost Tobias Springenberg, Manuel Blum, Frank Hutter'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

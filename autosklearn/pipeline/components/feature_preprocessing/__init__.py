@@ -6,28 +6,21 @@ import os
 import pkgutil
 import sys
 
-from ..base import AutoSklearnPreprocessingAlgorithm
+from ..base import AutoSklearnPreprocessingAlgorithm, find_components, \
+    ThirdPartyComponents
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 from HPOlibConfigSpace.conditions import EqualsCondition, AbstractConjunction
 
+classifier_directory = os.path.split(__file__)[0]
+_preprocessors = find_components(__package__,
+                                 classifier_directory,
+                                 AutoSklearnPreprocessingAlgorithm)
+_addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
 
-preprocessors_directory = os.path.split(__file__)[0]
-_preprocessors = OrderedDict()
 
-
-for module_loader, module_name, ispkg in pkgutil.iter_modules([preprocessors_directory]):
-    full_module_name = "%s.%s" % (__package__, module_name)
-    if full_module_name not in sys.modules and not ispkg:
-        module = importlib.import_module(full_module_name)
-
-        for member_name, obj in inspect.getmembers(module):
-            if inspect.isclass(obj) and AutoSklearnPreprocessingAlgorithm in obj.__bases__:
-                # TODO test if the obj implements the interface
-                # Keep in mind that this only instantiates the ensemble_wrapper,
-                # but not the real target classifier
-                preprocessor = obj
-                _preprocessors[module_name] = preprocessor
+def add_preprocessor(preprocessor):
+    _addons.add_component(preprocessor)
 
 
 class FeaturePreprocessorChoice(object):
@@ -38,7 +31,10 @@ class FeaturePreprocessorChoice(object):
 
     @classmethod
     def get_components(cls):
-        return _preprocessors
+        components = OrderedDict()
+        components.update(_preprocessors)
+        components.update(_addons.components)
+        return components
 
     @classmethod
     def get_available_components(cls, data_prop,
@@ -162,6 +158,3 @@ class FeaturePreprocessorChoice(object):
                 cs.add_forbidden_clause(forbidden_clause)
 
         return cs
-
-
-_preprocessors['preprocessor'] = FeaturePreprocessorChoice
