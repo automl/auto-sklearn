@@ -189,14 +189,10 @@ class NumberOfInstancesWithMissingValues(MetaFeature):
 
     def _calculate_sparse(self, X, y, categorical):
         missing = helper_functions.get_value("MissingValues")
-        num_missing = []
-        if scipy.sparse.isspmatrix_csr(missing):
-            num_missing = [
-                np.sum(missing.data[missing.indptr[i]:missing.indptr[i + 1]])
-                                    for i in range(missing.shape[0])]
-        elif scipy.sparse.isspmatrix_csc(missing):
-            num_missing = [np.sum(missing.data[missing.indices == i])
-                           for i in range(missing.shape[0])]
+        new_missing = missing.tocsr()
+        num_missing = [
+            np.sum(new_missing.data[new_missing.indptr[i]:new_missing.indptr[i + 1]])
+                                for i in range(new_missing.shape[0])]
 
         return float(np.sum([1 if num > 0 else 0 for num in num_missing]))
 
@@ -217,13 +213,11 @@ class NumberOfFeaturesWithMissingValues(MetaFeature):
 
     def _calculate_sparse(self, X, y, categorical):
         missing = helper_functions.get_value("MissingValues")
-        num_missing = []
-        if scipy.sparse.isspmatrix_csr(missing):
-            num_missing = [np.sum(missing.data[missing.indices == i])
-                           for i in range(missing.shape[1])]
-        elif scipy.sparse.isspmatrix_csc(missing):
-            num_missing = [np.sum(missing.data[missing.indptr[i]:missing.indptr[i+1]])
-                           for i in range(missing.shape[1])]
+        new_missing = missing.tocsc()
+        num_missing = [np.sum(
+            new_missing.data[new_missing.indptr[i]:new_missing.indptr[i+1]])
+                       for i in range(missing.shape[1])]
+
         return float(np.sum([1 if num > 0 else 0 for num in num_missing]))
 
 @metafeatures.define("PercentageOfFeaturesWithMissingValues",
@@ -406,9 +400,10 @@ class NumSymbols(HelperFunction):
 
     def _calculate_sparse(self, X, y, categorical):
         symbols_per_column = []
-        for i in range(X.shape[1]):
+        new_X = X.tocsc()
+        for i in range(new_X.shape[1]):
             if categorical[i]:
-                unique_values = np.unique(X.getcol(i).data)
+                unique_values = np.unique(new_X.getcol(i).data)
                 num_unique = np.sum(np.isfinite(unique_values))
                 symbols_per_column.append(num_unique)
         return symbols_per_column
