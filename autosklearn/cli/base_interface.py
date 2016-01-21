@@ -5,7 +5,7 @@ import os
 import signal
 import time
 
-from HPOlibConfigSpace import configuration_space
+from ConfigSpace import configuration_space
 
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
