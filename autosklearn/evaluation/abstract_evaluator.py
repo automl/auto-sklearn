@@ -22,7 +22,6 @@ __all__ = [
     'AbstractEvaluator'
 ]
 
-
 class MyDummyClassifier(DummyClassifier):
     def __init__(self, configuration, random_states):
         super(MyDummyClassifier, self).__init__(strategy="most_frequent")
@@ -41,7 +40,8 @@ class MyDummyClassifier(DummyClassifier):
 
     def predict_proba(self, X, batch_size=1000):
         new_X = np.ones((X.shape[0], 1))
-        probas = super(MyDummyClassifier, self).predict_proba(new_X)
+        probas = super(MyDummyClassifier, self).predict_proba(new_X).astype(
+            np.float32)
         probas = convert_multioutput_multiclass_to_multilabel(probas)
         return probas
 
@@ -67,7 +67,7 @@ class MyDummyRegressor(DummyRegressor):
 
     def predict(self, X, batch_size=1000):
         new_X = np.ones((X.shape[0], 1))
-        return super(MyDummyRegressor, self).predict(new_X)
+        return super(MyDummyRegressor, self).predict(new_X).astype(np.float32)
 
     def estimator_supports_iterative_fit(self):
         return False
@@ -209,7 +209,11 @@ class AbstractEvaluator(object):
                                                  seed, num_run)
 
         self.duration = time.time() - self.starttime
-        err = errs[self.D.info['metric']]
+        if isinstance(errs, dict):
+            err = errs[self.D.info['metric']]
+        else:
+            err = errs
+            errs = {}
         additional_run_info = ';'.join(['%s: %s' %
             (METRIC_TO_STRING[metric] if metric in METRIC_TO_STRING else metric,
                                                                      value)
@@ -254,7 +258,8 @@ class AbstractEvaluator(object):
                 if class_number in classes:
                     index = classes.index(class_number)
                     mapping[index] = class_number
-            new_predictions = np.zeros((prediction.shape[0], num_classes))
+            new_predictions = np.zeros((prediction.shape[0], num_classes),
+                                       dtype=np.float32)
 
             for index in mapping:
                 class_index = mapping[index]

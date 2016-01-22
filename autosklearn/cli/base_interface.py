@@ -54,7 +54,6 @@ signal.signal(15, signal_handler)
 def _get_base_dict():
     return {
         'with_predictions': True,
-        'all_scoring_functions': True,
         'output_y_test': True,
     }
 
@@ -64,6 +63,7 @@ def make_mode_holdout(data, seed, configuration, num_run, output_dir):
     evaluator = HoldoutEvaluator(data, output_dir, configuration,
                                  seed=seed,
                                  num_run=num_run,
+                                 all_scoring_functions=False,
                                  **_get_base_dict())
     evaluator.fit()
     signal.signal(15, empty_signal_handler)
@@ -80,6 +80,7 @@ def make_mode_holdout_iterative_fit(data, seed, configuration, num_run,
     evaluator = HoldoutEvaluator(data, output_dir, configuration,
                                  seed=seed,
                                  num_run=num_run,
+                                 all_scoring_functions=False,
                                  **_get_base_dict())
     evaluator.iterative_fit()
     signal.signal(15, empty_signal_handler)
@@ -119,6 +120,7 @@ def make_mode_cv(data, seed, configuration, num_run, folds, output_dir):
                             cv_folds=folds,
                             seed=seed,
                             num_run=num_run,
+                            all_scoring_functions=False,
                             **_get_base_dict())
     evaluator.fit()
     signal.signal(15, empty_signal_handler)
@@ -132,16 +134,14 @@ def make_mode_partial_cv(data, seed, configuration, num_run, metric, fold,
                             cv_folds=folds,
                             seed=seed,
                             num_run=num_run,
+                            all_scoring_functions=False,
                             **_get_base_dict())
     evaluator.partial_fit(fold)
     signal.signal(15, empty_signal_handler)
-    losses, _, _, _ = evaluator.loss_and_predict()
+    loss, _, _, _ = evaluator.loss_and_predict()
     duration = time.time() - evaluator.starttime
 
-    loss = losses[metric]
-    additional_run_info = ';'.join(['%s: %s' % (m_, value)
-                                    for m_, value in losses.items()])
-    additional_run_info += ';' + 'duration: ' + str(duration)
+    additional_run_info = 'duration: ' + str(duration)
 
     print(metric, loss, additional_run_info)
     print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
@@ -156,6 +156,7 @@ def make_mode_nested_cv(data, seed, configuration, num_run, inner_folds,
                                   inner_cv_folds=inner_folds,
                                   outer_cv_folds=outer_folds,
                                   seed=seed,
+                                  all_scoring_functions=False,
                                   num_run=num_run,
                                   **_get_base_dict())
     evaluator.fit()

@@ -11,7 +11,6 @@ __all__ = [
 
 
 class CVEvaluator(AbstractEvaluator):
-
     def __init__(self, Datamanager, output_dir,
                  configuration=None,
                  with_predictions=False,

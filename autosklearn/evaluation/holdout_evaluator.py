@@ -34,7 +34,6 @@ class HoldoutEvaluator(AbstractEvaluator):
                        datamanager.data['Y_train'],
                        classification=classification)
 
-
     def fit(self):
         self.model.fit(self.X_train, self.Y_train)
 
@@ -53,7 +52,6 @@ class HoldoutEvaluator(AbstractEvaluator):
                                      **fit_params)
             self.file_output()
             n_iter += 2
-
 
     def predict(self):
         Y_optimization_pred = self.predict_function(self.X_optimization,
