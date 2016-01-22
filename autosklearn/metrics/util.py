@@ -4,7 +4,6 @@ import numpy as np
 import scipy as sp
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     BINARY_CLASSIFICATION
-from autosklearn.metrics.common import binarize_predictions
 
 
 def sanitize_array(array):
@@ -14,10 +13,6 @@ def sanitize_array(array):
     :return:
     """
     a = np.ravel(array)
-    # maxi = np.nanmax((filter(lambda x: x != float('inf'), a))
-    #                 )  # Max except NaN and Inf
-    # mini = np.nanmin((filter(lambda x: x != float('-inf'), a))
-    #                 )  # Mini except NaN and Inf
     maxi = np.nanmax(a[np.isfinite(a)])
     mini = np.nanmin(a[np.isfinite(a)])
     array[array == float('inf')] = maxi
@@ -42,10 +37,6 @@ def normalize_array(solution, prediction):
     """
     # Binarize solution
     sol = np.ravel(solution)  # convert to 1-d array
-    # maxi = np.nanmax((filter(lambda x: x != float('inf'), sol))
-    #                 )  # Max except NaN and Inf
-    # mini = np.nanmin((filter(lambda x: x != float('-inf'), sol))
-    #                 )  # Mini except NaN and Inf
     maxi = np.nanmax(sol[np.isfinite(sol)])
     mini = np.nanmin(sol[np.isfinite(sol)])
     if maxi == mini:
@@ -137,3 +128,62 @@ def prior_log_loss(frac_pos, task=BINARY_CLASSIFICATION):
         base_log_loss = np.sum(pos_class_log_loss_)
     return base_log_loss
 
+
+def binarize_predictions(array, task=BINARY_CLASSIFICATION):
+    """
+    Turn predictions into decisions {0,1} by selecting the class with largest
+    score for multi class problems and thresh holding at 0.5 for other cases.
+
+    :param array:
+    :param task:
+    :return:
+    """
+    # add a very small random value as tie breaker (a bit bad because
+    # this changes the score every time)
+    # so to make sure we get the same result every time, we seed it
+    # eps = 1e-15
+    # np.random.seed(sum(array.shape))
+    # array = array + eps*np.random.rand(array.shape[0],array.shape[1])
+    bin_array = np.zeros(array.shape)
+    if (task != MULTICLASS_CLASSIFICATION) or (array.shape[1] == 1):
+        bin_array[array >= 0.5] = 1
+    else:
+        sample_num = array.shape[0]
+        for i in range(sample_num):
+            j = np.argmax(array[i, :])
+            bin_array[i, j] = 1
+    return bin_array
+
+
+def tied_rank(a):
+    """Return the ranks (with base 1) of a list resolving ties by averaging.
+
+    This works for numpy arrays.
+
+    """
+    m = len(a)
+    # Sort a in ascending order (sa=sorted vals, i=indices)
+    i = a.argsort()
+    sa = a[i]
+    # Find unique values
+    uval = np.unique(a)
+    # Test whether there are ties
+    R = np.arange(m, dtype=float) + 1  # Ranks with base 1
+    if len(uval) != m:
+        # Average the ranks for the ties
+        oldval = sa[0]
+        newval = sa[0]
+        k0 = 0
+        for k in range(1, m):
+            newval = sa[k]
+            if newval == oldval:
+                # moving average
+                R[k0:k + 1] = R[k - 1] * (k - k0) / (k - k0 +
+                                                     1) + R[k] / (k - k0 + 1)
+            else:
+                k0 = k
+                oldval = newval
+    # Invert the index
+    S = np.empty(m)
+    S[i] = R
+    return S
