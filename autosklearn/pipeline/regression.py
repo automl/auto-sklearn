@@ -60,6 +60,10 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     --------
 
     """
+    def __init__(self, configuration, random_state=None):
+        self._output_dtype = np.float32
+        super(SimpleRegressionPipeline, self).__init__(configuration,
+                                                       random_state)
 
     def pre_transform(self, X, Y, fit_params=None, init_params=None):
         X, fit_params = super(SimpleRegressionPipeline, self).pre_transform(
@@ -80,7 +84,8 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             X, y, fit_params=fit_params, n_iter=n_iter)
 
     def predict(self, X, batch_size=None):
-        y = super(SimpleRegressionPipeline, self).predict(X, batch_size=batch_size)
+        y = super(SimpleRegressionPipeline, self).\
+            predict(X, batch_size=batch_size)
         y[y > (2 * self.y_max_)] = 2 * self.y_max_
         if self.y_min_ < 0:
             y[y < (2 * self.y_min_)] = 2 * self.y_min_

@@ -171,16 +171,17 @@ class BasePipeline(BaseEstimator):
         # TODO check if fit() was called before...
 
         if batch_size is None:
-            return self.pipeline_.predict(X)
+            return self.pipeline_.predict(X).astype(self._output_dtype)
         else:
             if type(batch_size) is not int or batch_size <= 0:
                 raise Exception("batch_size must be a positive integer")
 
             else:
                 if self.num_targets == 1:
-                    y = np.zeros((X.shape[0],))
+                    y = np.zeros((X.shape[0],), dtype=self._output_dtype)
                 else:
-                    y = np.zeros((X.shape[0], self.num_targets))
+                    y = np.zeros((X.shape[0], self.num_targets),
+                                 dtype=self._output_dtype)
 
                 # Copied and adapted from the scikit-learn GP code
                 for k in range(max(1, int(np.ceil(float(X.shape[0]) /

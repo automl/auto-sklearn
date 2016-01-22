@@ -62,6 +62,11 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
     """
 
+    def __init__(self, configuration, random_state=None):
+        self._output_dtype = np.int32
+        super(SimpleClassificationPipeline, self).__init__(configuration,
+                                                           random_state)
+
     def pre_transform(self, X, y, fit_params=None, init_params=None):
         self.num_targets = 1 if len(y.shape) == 1 else y.shape[1]
 
@@ -111,7 +116,8 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
                 # Binary or Multiclass
                 if len(target) == 1:
-                    y = np.zeros((X.shape[0], target.shape[1]))
+                    y = np.zeros((X.shape[0], target.shape[1]),
+                                 dtype=np.float32)
 
                     for k in range(max(1, int(np.ceil(float(X.shape[0]) /
                             batch_size)))):
@@ -119,10 +125,12 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                         batch_to = min([(k + 1) * batch_size, X.shape[0]])
                         y[batch_from:batch_to] = \
                             self.predict_proba(X[batch_from:batch_to],
-                                               batch_size=None)
+                                               batch_size=None).\
+                                astype(np.float32)
 
                 elif len(target) > 1:
-                    y = [np.zeros((X.shape[0], target[i].shape[1]))
+                    y = [np.zeros((X.shape[0], target[i].shape[1]),
+                                  dtype=np.float32)
                          for i in range(len(target))]
 
                     for k in range(max(1, int(np.ceil(float(X.shape[0]) /
@@ -131,7 +139,8 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                         batch_to = min([(k + 1) * batch_size, X.shape[0]])
                         predictions = \
                             self.predict_proba(X[batch_from:batch_to],
-                                               batch_size=None)
+                                               batch_size=None).\
+                                astype(np.float32)
 
                         for i in range(len(target)):
                             y[i][batch_from:batch_to] = predictions[i]
