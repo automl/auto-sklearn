@@ -120,7 +120,7 @@ def make_mode_cv(data, seed, configuration, num_run, folds, output_dir):
                             cv_folds=folds,
                             seed=seed,
                             num_run=num_run,
-                            all_scoring_functions=False,
+                            all_scoring_functions=True,
                             **_get_base_dict())
     evaluator.fit()
     signal.signal(15, empty_signal_handler)

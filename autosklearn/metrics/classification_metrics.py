@@ -10,15 +10,19 @@ import scipy as sp
 import scipy.stats
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     BINARY_CLASSIFICATION, METRIC_TO_STRING
-from autosklearn.metrics.util import log_loss, prior_log_loss, binarize_predictions
+from autosklearn.metrics.util import log_loss, prior_log_loss, \
+    binarize_predictions, normalize_array
+
+from memory_profiler import profile
 
 
-def calculate_score(metric, solution, prediction, task):
+def calculate_score(metric, solution, prediction, task, copy=True):
     metric = METRIC_TO_STRING[metric]
-    return globals()[metric](solution, prediction, task)
+    return globals()[metric](solution, prediction, task, copy)
 
 
-def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
+@profile
+def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     """
     Compute the accuracy.
 
@@ -61,7 +65,8 @@ def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     return score
 
 
-def bac_metric(solution, prediction, task=BINARY_CLASSIFICATION):
+@profile
+def bac_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     """
     Compute the normalized balanced accuracy.
 
@@ -102,7 +107,8 @@ def bac_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     return score
 
 
-def pac_metric(solution, prediction, task=BINARY_CLASSIFICATION):
+@profile
+def pac_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     """
     Probabilistic Accuracy based on log_loss metric.
 
@@ -113,29 +119,18 @@ def pac_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     :param task:
     :return:
     """
+    solution, prediction = normalize_array(solution, prediction, copy=copy)
     debug_flag = False
     [sample_num, label_num] = solution.shape
     if label_num == 1:
         task = BINARY_CLASSIFICATION
     eps = 1e-7
-    the_log_loss = log_loss(solution, prediction, task)
     # Compute the base log loss (using the prior probabilities)
     pos_num = 1. * np.sum(solution, axis=0, dtype=float)  # float conversion!
     frac_pos = pos_num / sample_num  # prior proba of positive class
     the_base_log_loss = prior_log_loss(frac_pos, task)
-    # Alternative computation of the same thing (slower)
-    # Should always return the same thing except in the multi-label case
-    # For which the analytic solution makes more sense
-    if debug_flag:
-        base_prediction = np.empty(prediction.shape)
-        for k in range(sample_num):
-            base_prediction[k, :] = frac_pos
-        base_log_loss = log_loss(solution, base_prediction, task)
-        diff = np.array(abs(the_base_log_loss - base_log_loss))
-        if len(diff.shape) > 0:
-            diff = max(diff)
-        if (diff) > 1e-10:
-            print('Arrggh {} != {}'.format(the_base_log_loss, base_log_loss))
+    the_log_loss = log_loss(solution, prediction, task)
+
     # Exponentiate to turn into an accuracy-like score.
     # In the multi-label case, we need to average AFTER taking the exp
     # because it is an NL operation
@@ -146,7 +141,8 @@ def pac_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     return score
 
 
-def f1_metric(solution, prediction, task=BINARY_CLASSIFICATION):
+@profile
+def f1_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     """
     Compute the normalized f1 measure.
 
@@ -160,7 +156,6 @@ def f1_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     :return:
     """
     label_num = solution.shape[1]
-    score = np.zeros(label_num)
     bin_prediction = binarize_predictions(prediction, task)
 
     # Bounding to avoid division by 0
@@ -202,7 +197,8 @@ def f1_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     return score
 
 
-def auc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
+@profile
+def auc_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     """
     Normarlized Area under ROC curve (AUC).
 
@@ -220,6 +216,8 @@ def auc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     # auc = metrics.roc_auc_score(solution, prediction, average=None)
     # There is a bug in metrics.roc_auc_score: auc([1,0,0],[1e-10,0,0])
     # incorrect
+    solution, prediction = normalize_array(solution, prediction, copy=copy)
+
     label_num = solution.shape[1]
     auc = np.empty(label_num)
     for k in range(label_num):

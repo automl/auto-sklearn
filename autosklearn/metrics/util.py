@@ -5,7 +5,10 @@ import scipy as sp
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     BINARY_CLASSIFICATION
 
+from memory_profiler import profile
 
+
+@profile
 def sanitize_array(array):
     """
     Replace NaN and Inf (there should not be any!)
@@ -22,7 +25,8 @@ def sanitize_array(array):
     return array
 
 
-def normalize_array(solution, prediction):
+@profile
+def normalize_array(solution, prediction, copy=True):
     """
     Use min and max of solution as scaling factors to normalize prediction,
     then threshold it to [0, 1].
@@ -44,12 +48,25 @@ def normalize_array(solution, prediction):
         return [solution, prediction]
     diff = maxi - mini
     mid = (maxi + mini) / 2.
-    new_solution = np.copy(solution)
+
+    if copy:
+        new_solution = np.copy(solution)
+    else:
+        new_solution = solution
+
     new_solution[solution >= mid] = 1
     new_solution[solution < mid] = 0
     # Normalize and threshold predictions (takes effect only if solution not
     # in {0, 1})
-    new_prediction = (np.copy(prediction) - float(mini)) / float(diff)
+
+    if copy:
+        new_prediction = (np.copy(prediction) - float(mini)) / float(diff)
+    else:
+        new_prediction = prediction
+
+    new_prediction -= float(mini)
+    new_prediction /= float(diff)
+
     # and if predictions exceed the bounds [0, 1]
     new_prediction[new_prediction > 1] = 1
     new_prediction[new_prediction < 0] = 0
@@ -58,33 +75,37 @@ def normalize_array(solution, prediction):
     return [new_solution, new_prediction]
 
 
+@profile
 def log_loss(solution, prediction, task=BINARY_CLASSIFICATION):
     """Log loss for binary and multiclass."""
     [sample_num, label_num] = solution.shape
     # Lower gives problems with float32!
     eps = 0.00000003
-    pred = np.copy(prediction
-                   )  # beware: changes in prediction occur through this
-    sol = np.copy(solution)
+
     if (task == MULTICLASS_CLASSIFICATION) and (label_num > 1):
         # Make sure the lines add up to one for multi-class classification
         norma = np.sum(prediction, axis=1)
         for k in range(sample_num):
-            pred[k, :] /= sp.maximum(norma[k], eps)
-        # Make sure there is a single label active per line for multi-class
-        # classification
-        sol = binarize_predictions(solution, task=MULTICLASS_CLASSIFICATION)
+            prediction[k, :] /= sp.maximum(norma[k], eps)
+
+        sample_num = solution.shape[0]
+        for i in range(sample_num):
+            j = np.argmax(solution[i, :])
+            solution[i, :] = 0
+            solution[i, j] = 1
+
+        sol = solution.astype(np.int32, copy=False)
         # For the base prediction, this solution is ridiculous in the
         # multi-label case
 
         # Bounding of predictions to avoid log(0),1/0,...
-    pred = sp.minimum(1 - eps, sp.maximum(eps, pred))
+    prediction = sp.minimum(1 - eps, sp.maximum(eps, prediction))
     # Compute the log loss
-    pos_class_log_loss = -np.mean(sol * np.log(pred), axis=0)
+    pos_class_log_loss = -np.mean(solution * np.log(prediction), axis=0)
     if (task != MULTICLASS_CLASSIFICATION) or (label_num == 1):
         # The multi-label case is a bunch of binary problems.
         # The second class is the negative class for each column.
-        neg_class_log_loss = -np.mean((1 - sol) * np.log(1 - pred), axis=0)
+        neg_class_log_loss = -np.mean((1 - solution) * np.log(1 - prediction), axis=0)
         log_loss = pos_class_log_loss + neg_class_log_loss
         # Each column is an independent problem, so we average.
         # The probabilities in one line do not add up to one.
@@ -101,6 +122,7 @@ def log_loss(solution, prediction, task=BINARY_CLASSIFICATION):
     return log_loss
 
 
+@profile
 def prior_log_loss(frac_pos, task=BINARY_CLASSIFICATION):
     """Baseline log loss.
 
@@ -129,6 +151,7 @@ def prior_log_loss(frac_pos, task=BINARY_CLASSIFICATION):
     return base_log_loss
 
 
+@profile
 def binarize_predictions(array, task=BINARY_CLASSIFICATION):
     """
     Turn predictions into decisions {0,1} by selecting the class with largest
@@ -144,7 +167,7 @@ def binarize_predictions(array, task=BINARY_CLASSIFICATION):
     # eps = 1e-15
     # np.random.seed(sum(array.shape))
     # array = array + eps*np.random.rand(array.shape[0],array.shape[1])
-    bin_array = np.zeros(array.shape)
+    bin_array = np.zeros(array.shape, dtype=np.int32)
     if (task != MULTICLASS_CLASSIFICATION) or (array.shape[1] == 1):
         bin_array[array >= 0.5] = 1
     else:
@@ -155,35 +178,15 @@ def binarize_predictions(array, task=BINARY_CLASSIFICATION):
     return bin_array
 
 
-def tied_rank(a):
-    """Return the ranks (with base 1) of a list resolving ties by averaging.
+@profile
+def create_multiclass_solution(solution, prediction):
+    solution_binary = np.zeros((prediction.shape), dtype=np.int32)
 
-    This works for numpy arrays.
-
-    """
-    m = len(a)
-    # Sort a in ascending order (sa=sorted vals, i=indices)
-    i = a.argsort()
-    sa = a[i]
-    # Find unique values
-    uval = np.unique(a)
-    # Test whether there are ties
-    R = np.arange(m, dtype=float) + 1  # Ranks with base 1
-    if len(uval) != m:
-        # Average the ranks for the ties
-        oldval = sa[0]
-        newval = sa[0]
-        k0 = 0
-        for k in range(1, m):
-            newval = sa[k]
-            if newval == oldval:
-                # moving average
-                R[k0:k + 1] = R[k - 1] * (k - k0) / (k - k0 +
-                                                     1) + R[k] / (k - k0 + 1)
-            else:
-                k0 = k
-                oldval = newval
-    # Invert the index
-    S = np.empty(m)
-    S[i] = R
-    return S
+    for i in range(solution_binary.shape[0]):
+        try:
+            solution_binary[i, solution[i]] = 1
+        except IndexError as e:
+            raise IndexError('too many indices to array. array has shape %s, '
+                             'indices are "%s %s"' %
+                             (solution_binary.shape, str(i), solution[i]))
+    return solution_binary

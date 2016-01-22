@@ -9,12 +9,12 @@ import numpy as np
 from autosklearn.constants import REGRESSION, METRIC_TO_STRING
 
 
-def calculate_score(metric, solution, prediction):
+def calculate_score(metric, solution, prediction, copy=True):
     metric = METRIC_TO_STRING[metric]
-    return globals()[metric](solution, prediction)
+    return globals()[metric](solution, prediction, copy)
 
 
-def r2_metric(solution, prediction, task=REGRESSION):
+def r2_metric(solution, prediction, task=REGRESSION, copy=True):
     """
     1 - Mean squared error divided by variance
     :param solution:
@@ -28,7 +28,7 @@ def r2_metric(solution, prediction, task=REGRESSION):
     return np.mean(score)
 
 
-def a_metric(solution, prediction, task=REGRESSION):
+def a_metric(solution, prediction, task=REGRESSION, copy=True):
     """
     1 - Mean absolute error divided by mean absolute deviation
     :param solution:
