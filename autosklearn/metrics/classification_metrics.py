@@ -5,15 +5,13 @@
 # normalize_array
 
 from __future__ import print_function
-
 import numpy as np
 import scipy as sp
-import scipy.stats
-
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     BINARY_CLASSIFICATION, METRIC_TO_STRING
-from autosklearn.metrics.util import log_loss, prior_log_loss, \
-    binarize_predictions
+from autosklearn.metrics.common import binarize_predictions, \
+    acc_stat, tied_rank
+from autosklearn.metrics.util import log_loss, prior_log_loss
 
 
 def calculate_score(metric, solution, prediction, task):
@@ -37,14 +35,9 @@ def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
 
     label_num = solution.shape[1]
     bin_predictions = binarize_predictions(prediction, task)
+    tn, fp, tp, fn = acc_stat(solution, bin_predictions)
     # Bounding to avoid division by 0
     eps = np.float(1e-15)
-
-    tn = np.sum(np.multiply((1 - solution), (1 - bin_predictions)))
-    fn = np.sum(np.multiply(solution, (1 - bin_predictions)))
-    tp = np.sum(np.multiply(solution, bin_predictions))
-    fp = np.sum(np.multiply((1 - solution), bin_predictions))
-
     tp = np.sum(tp)
     fp = np.sum(fp)
     tn = np.sum(tn)
@@ -78,19 +71,15 @@ def bac_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     :return:
     """
     label_num = solution.shape[1]
+    score = np.zeros(label_num)
     bin_prediction = binarize_predictions(prediction, task)
-
+    [tn, fp, tp, fn] = acc_stat(solution, bin_prediction)
     # Bounding to avoid division by 0
     eps = 1e-15
-    fn = np.sum(np.multiply(solution, (1 - bin_prediction)), axis=0)
-    tp = np.sum(np.multiply(solution, bin_prediction), axis=0)
     tp = sp.maximum(eps, tp)
     pos_num = sp.maximum(eps, tp + fn)
     tpr = tp / pos_num  # true positive rate (sensitivity)
-
     if (task != MULTICLASS_CLASSIFICATION) or (label_num == 1):
-        tn = np.sum(np.multiply((1 - solution), (1 - bin_prediction)), axis=0)
-        fp = np.sum(np.multiply((1 - solution), bin_prediction), axis=0)
         tn = sp.maximum(eps, tn)
         neg_num = sp.maximum(eps, tn + fp)
         tnr = tn / neg_num  # true negative rate (specificity)
@@ -123,7 +112,7 @@ def pac_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     eps = 1e-15
     the_log_loss = log_loss(solution, prediction, task)
     # Compute the base log loss (using the prior probabilities)
-    pos_num = 1. * np.sum(solution, axis=0)  # float conversion!
+    pos_num = 1. * sum(solution)  # float conversion!
     frac_pos = pos_num / sample_num  # prior proba of positive class
     the_base_log_loss = prior_log_loss(frac_pos, task)
     # Alternative computation of the same thing (slower)
@@ -165,13 +154,7 @@ def f1_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     label_num = solution.shape[1]
     score = np.zeros(label_num)
     bin_prediction = binarize_predictions(prediction, task)
-
-    fn = np.sum(np.multiply(solution, (1 - bin_prediction)), axis=0)
-    tp = np.sum(np.multiply(solution, bin_prediction), axis=0)
-    fp = np.sum(np.multiply((1 - solution), bin_prediction), axis=0)
-    #print(np.multiply(solution, (1 - bin_prediction)).shape, fn.shape,
-     #     np.sum(np.multiply(solution, (1 - bin_prediction)), axis=0).shape)
-
+    [tn, fp, tp, fn] = acc_stat(solution, bin_prediction)
     # Bounding to avoid division by 0
     eps = 1e-15
     true_pos_num = sp.maximum(eps, tp + fn)
@@ -229,15 +212,14 @@ def auc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     label_num = solution.shape[1]
     auc = np.empty(label_num)
     for k in range(label_num):
-        r_ = scipy.stats.rankdata(prediction[:, k])
+        r_ = tied_rank(prediction[:, k])
         s_ = solution[:, k]
-        if np.sum(s_) == 0:
+        if sum(s_) == 0:
             print(
                 'WARNING: no positive class example in class {}'.format(k + 1))
-        npos = np.sum(s_ == 1)
-        nneg = np.sum(s_ < 1)
-        auc[k] = (np.sum(r_[s_ == 1]) -
-                  npos * (npos + 1) / 2) / (nneg * npos)
+        npos = sum(s_ == 1)
+        nneg = sum(s_ < 1)
+        auc[k] = (sum(r_[s_ == 1]) - npos * (npos + 1) / 2) / (nneg * npos)
     auc[~np.isfinite(auc)] = 0
     return 2 * np.mean(auc) - 1
 

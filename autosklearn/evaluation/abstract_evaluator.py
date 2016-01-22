@@ -40,9 +40,9 @@ class MyDummyClassifier(DummyClassifier):
 
     def predict_proba(self, X, batch_size=1000):
         new_X = np.ones((X.shape[0], 1))
-        probas = super(MyDummyClassifier, self).predict_proba(new_X).astype(
+        probas = super(MyDummyClassifier, self).predict_proba(new_X)
+        probas = convert_multioutput_multiclass_to_multilabel(probas).astype(
             np.float32)
-        probas = convert_multioutput_multiclass_to_multilabel(probas)
         return probas
 
     def estimator_supports_iterative_fit(self):
