@@ -139,7 +139,6 @@ class Backend(object):
         # This should fail if no models directory exists
         filepath = os.path.join(self.get_model_dir(),
                                 '%s.%s.model' % (seed, idx))
-
         with open(filepath, 'wb') as fh:
             pickle.dump(model, fh, -1)
 

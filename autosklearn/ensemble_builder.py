@@ -19,7 +19,7 @@ from autosklearn.util import StopWatch, Backend
 
 logging.basicConfig(format='[%(levelname)s] [%(asctime)s:%(name)s] %('
                            'message)s', datefmt='%H:%M:%S')
-logger = logging.getLogger("ensemble_selection_script.py")
+logger = logging.getLogger("ensemble_builder")
 logger.setLevel(logging.DEBUG)
 
 

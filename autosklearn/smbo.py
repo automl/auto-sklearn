@@ -134,17 +134,18 @@ def _get_base_dict():
     }
 
 # create closure for evaluating an algorithm
-def _eval_config_and_save(configuration, data, output_dir, seed, num_run):
+def _eval_config_and_save(configuration, data, tmp_dir, seed, num_run):
     global evaluator
     try:
-        evaluator = HoldoutEvaluator(data, output_dir, configuration,
+        print(tmp_dir)
+        evaluator = HoldoutEvaluator(data, tmp_dir, configuration,
                                      seed=seed,
                                      num_run=num_run,
                                      **_get_base_dict())
         evaluator.fit()
         #signal.signal(15, empty_signal_handler)
         duration, result, seed, run_info = evaluator.finish_up()
-        backend = Backend(None, output_dir)
+        backend = Backend(None, tmp_dir)
         if os.path.exists(backend.get_model_dir()):
             backend.save_model(evaluator.model, num_run, seed)
         status = StatusType.SUCCESS
@@ -204,7 +205,8 @@ class AutoMLSMBO(multiprocessing.Process):
     def __init__(self, config_space, dataset_name,
                  output_dir, tmp_dir,
                  limit, cutoff_time, memory_limit,
-                 logger, watcher, default_cfgs = [],
+                 logger, watcher, start_num_run = 2,
+                 default_cfgs = [],
                  num_metalearning_cfgs = 25,
                  config_file = None, smac_iters=1000,
                  metadata_directory = None):
@@ -231,6 +233,7 @@ class AutoMLSMBO(multiprocessing.Process):
         self.config_file = config_file
         self.metadata_directory = metadata_directory
         self.smac_iters = smac_iters
+        self.start_num_run = start_num_run
 
     def reset_data_manager(self, max_mem=None):
         if self.datamanager is not None:
@@ -351,7 +354,7 @@ class AutoMLSMBO(multiprocessing.Process):
                                       + self.collect_metalearning_suggestions_with_limits()
 
         # == first evaluate all metelearning configurations
-        num_run = 0 # JTS: TODO figure out what we need for num_run
+        num_run = self.start_num_run
 
         for config in metalearning_configurations:
             # JTS: reset the data manager before each configuration since
@@ -359,7 +362,7 @@ class AutoMLSMBO(multiprocessing.Process):
             # NOTE: this is where we could also apply some memory limits
             self.reset_data_manager()
             evaluator, info = _eval_config_and_save(config, self.datamanager,
-                                                    self.output_dir, seed, num_run)
+                                                    self.tmp_dir, seed, num_run)
             (duration, result, _, additional_run_info, status) = info
             run_history.add(config = config, cost = result,
                             time = duration , status = status,
@@ -377,7 +380,7 @@ class AutoMLSMBO(multiprocessing.Process):
             next_config = smac.choose_next(X_cfg, Y_cfg)
             self.reset_data_manager()
             evaluator, info = _eval_config_and_save(next_config, self.datamanager,
-                                                    self.output_dir, seed, num_run)
+                                                    self.tmp_dir, seed, num_run)
             (duration, result, _, additional_run_info, status) = info
             run_history.add(config = next_config, cost = result,
                             time = duration , status = status,

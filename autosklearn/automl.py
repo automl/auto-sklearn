@@ -25,7 +25,7 @@ from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     get_auto_seed, set_auto_seed, del_auto_seed, pipeline, \
     Backend
-from autosklearn.ensemble_selection_script import main as ensemble_main
+from autosklearn.ensemble_builder import main as ensemble_main
 #from autosklearn.util.smac import run_smac
 from autosklearn.smbo import AutoMLSMBO
 
@@ -270,10 +270,9 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                     (basename, time_left_after_reading))
         return time_for_load_data
 
-    def _do_dummy_prediction(self, datamanager):
+    def _do_dummy_prediction(self, datamanager, num_run):
         def dummy_prediction_call(datamanager):
             out_dir = self._tmp_dir
-            num_run = get_new_run_num()
             evaluator = HoldoutEvaluator(datamanager,
                                          output_dir=out_dir,
                                          configuration=None,
@@ -344,8 +343,9 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                 self._logger)
 
         # == Perform dummy predictions
+        num_run = 1
         if self._resampling_strategy in ['holdout', 'holdout-iterative-fit']:
-            self._do_dummy_prediction(datamanager)
+            self._do_dummy_prediction(datamanager, num_run)
 
         # = Create a searchspace
         # Do this before One Hot Encoding to make sure that it creates a
@@ -453,6 +453,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                      memory_limit = self._ml_memory_limit,
                                      logger = self._logger,
                                      watcher = self._stopwatch,
+                                     start_num_run = num_run,
                                      default_cfgs = default_configs,
                                      num_metalearning_cfgs = self._initial_configurations_via_metalearning,
                                      config_file = configspace_path,
