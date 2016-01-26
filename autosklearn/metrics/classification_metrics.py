@@ -11,18 +11,15 @@ import scipy.stats
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     BINARY_CLASSIFICATION, METRIC_TO_STRING
 from autosklearn.metrics.util import log_loss, prior_log_loss, \
-    binarize_predictions, normalize_array
-
-from memory_profiler import profile
+    binarize_predictions, normalize_array, create_multiclass_solution
 
 
-def calculate_score(metric, solution, prediction, task, copy=True):
+def calculate_score(metric, solution, prediction, task):
     metric = METRIC_TO_STRING[metric]
-    return globals()[metric](solution, prediction, task, copy)
+    return globals()[metric](solution, prediction, task)
 
 
-@profile
-def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
+def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     """
     Compute the accuracy.
 
@@ -35,9 +32,15 @@ def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     :param task:
     :return:
     """
+    if task == BINARY_CLASSIFICATION:
+        if len(solution.shape) == 1:
+            solution = solution.reshape((-1, 1))
+    elif task == MULTICLASS_CLASSIFICATION:
+        if solution.shape != prediction.shape:
+            solution = create_multiclass_solution(solution, prediction)
+    bin_predictions = binarize_predictions(prediction, task)
 
     label_num = solution.shape[1]
-    bin_predictions = binarize_predictions(prediction, task)
     tn = np.sum(np.multiply((1 - solution), (1 - bin_predictions)))
     fn = np.sum(np.multiply(solution, (1 - bin_predictions)))
     tp = np.sum(np.multiply(solution, bin_predictions))
@@ -65,8 +68,7 @@ def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     return score
 
 
-@profile
-def bac_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
+def bac_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     """
     Compute the normalized balanced accuracy.
 
@@ -77,8 +79,15 @@ def bac_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     :param task:
     :return:
     """
-    label_num = solution.shape[1]
+    if task == BINARY_CLASSIFICATION:
+        if len(solution.shape) == 1:
+            solution = solution.reshape((-1, 1))
+    elif task == MULTICLASS_CLASSIFICATION:
+        if solution.shape != prediction.shape:
+            solution = create_multiclass_solution(solution, prediction)
     bin_prediction = binarize_predictions(prediction, task)
+
+    label_num = solution.shape[1]
     fn = np.sum(np.multiply(solution, (1 - bin_prediction)), axis=0,
                 dtype=float)
     tp = np.sum(np.multiply(solution, bin_prediction), axis=0, dtype=float)
@@ -107,8 +116,7 @@ def bac_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     return score
 
 
-@profile
-def pac_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
+def pac_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     """
     Probabilistic Accuracy based on log_loss metric.
 
@@ -119,8 +127,16 @@ def pac_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     :param task:
     :return:
     """
-    solution, prediction = normalize_array(solution, prediction, copy=copy)
-    debug_flag = False
+    if task == BINARY_CLASSIFICATION:
+        if len(solution.shape) == 1:
+            solution = solution.reshape((-1, 1)).copy()
+    elif task == MULTICLASS_CLASSIFICATION:
+        if solution.shape != prediction.shape:
+            solution = create_multiclass_solution(solution, prediction)
+    else:
+        solution = solution.copy()
+    solution, prediction = normalize_array(solution, prediction.copy())
+
     [sample_num, label_num] = solution.shape
     if label_num == 1:
         task = BINARY_CLASSIFICATION
@@ -141,8 +157,7 @@ def pac_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     return score
 
 
-@profile
-def f1_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
+def f1_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     """
     Compute the normalized f1 measure.
 
@@ -155,9 +170,15 @@ def f1_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     :param task:
     :return:
     """
-    label_num = solution.shape[1]
+    if task == BINARY_CLASSIFICATION:
+        if len(solution.shape) == 1:
+            solution = solution.reshape((-1, 1))
+    elif task == MULTICLASS_CLASSIFICATION:
+        if solution.shape != prediction.shape:
+            solution = create_multiclass_solution(solution, prediction)
     bin_prediction = binarize_predictions(prediction, task)
 
+    label_num = solution.shape[1]
     # Bounding to avoid division by 0
     eps = 1e-15
     fn = np.sum(np.multiply(solution, (1 - bin_prediction)), axis=0, dtype=float)
@@ -197,8 +218,7 @@ def f1_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     return score
 
 
-@profile
-def auc_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
+def auc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     """
     Normarlized Area under ROC curve (AUC).
 
@@ -213,10 +233,15 @@ def auc_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     :param task:
     :return:
     """
-    # auc = metrics.roc_auc_score(solution, prediction, average=None)
-    # There is a bug in metrics.roc_auc_score: auc([1,0,0],[1e-10,0,0])
-    # incorrect
-    solution, prediction = normalize_array(solution, prediction, copy=copy)
+    if task == BINARY_CLASSIFICATION:
+        if len(solution.shape) == 1:
+            solution = solution.reshape((-1, 1)).copy()
+    elif task == MULTICLASS_CLASSIFICATION:
+        if solution.shape != prediction.shape:
+            solution = create_multiclass_solution(solution, prediction)
+    else:
+        solution = solution.copy()
+    solution, prediction = normalize_array(solution, prediction.copy())
 
     label_num = solution.shape[1]
     auc = np.empty(label_num)
@@ -232,4 +257,3 @@ def auc_metric(solution, prediction, task=BINARY_CLASSIFICATION, copy=True):
     auc[~np.isfinite(auc)] = 0
     return 2 * np.mean(auc) - 1
 
-# END CLASSIFICATION METRICS

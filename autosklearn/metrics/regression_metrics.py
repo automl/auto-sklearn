@@ -10,6 +10,8 @@ from autosklearn.constants import REGRESSION, METRIC_TO_STRING
 
 
 def calculate_score(metric, solution, prediction, copy=True):
+    if len(solution.shape) == 1:
+        solution = solution.reshape((-1, 1))
     metric = METRIC_TO_STRING[metric]
     return globals()[metric](solution, prediction, copy)
 

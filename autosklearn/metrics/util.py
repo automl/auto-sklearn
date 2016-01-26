@@ -5,10 +5,7 @@ import scipy as sp
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     BINARY_CLASSIFICATION
 
-from memory_profiler import profile
 
-
-@profile
 def sanitize_array(array):
     """
     Replace NaN and Inf (there should not be any!)
@@ -25,8 +22,7 @@ def sanitize_array(array):
     return array
 
 
-@profile
-def normalize_array(solution, prediction, copy=True):
+def normalize_array(solution, prediction):
     """
     Use min and max of solution as scaling factors to normalize prediction,
     then threshold it to [0, 1].
@@ -49,33 +45,22 @@ def normalize_array(solution, prediction, copy=True):
     diff = maxi - mini
     mid = (maxi + mini) / 2.
 
-    if copy:
-        new_solution = np.copy(solution)
-    else:
-        new_solution = solution
-
-    new_solution[solution >= mid] = 1
-    new_solution[solution < mid] = 0
+    solution[solution >= mid] = 1
+    solution[solution < mid] = 0
     # Normalize and threshold predictions (takes effect only if solution not
     # in {0, 1})
 
-    if copy:
-        new_prediction = (np.copy(prediction) - float(mini)) / float(diff)
-    else:
-        new_prediction = prediction
-
-    new_prediction -= float(mini)
-    new_prediction /= float(diff)
+    prediction -= float(mini)
+    prediction /= float(diff)
 
     # and if predictions exceed the bounds [0, 1]
-    new_prediction[new_prediction > 1] = 1
-    new_prediction[new_prediction < 0] = 0
+    prediction[prediction > 1] = 1
+    prediction[prediction < 0] = 0
     # Make probabilities smoother
     # new_prediction = np.power(new_prediction, (1./10))
-    return [new_solution, new_prediction]
+    return [solution, prediction]
 
 
-@profile
 def log_loss(solution, prediction, task=BINARY_CLASSIFICATION):
     """Log loss for binary and multiclass."""
     [sample_num, label_num] = solution.shape
@@ -94,7 +79,7 @@ def log_loss(solution, prediction, task=BINARY_CLASSIFICATION):
             solution[i, :] = 0
             solution[i, j] = 1
 
-        sol = solution.astype(np.int32, copy=False)
+        solution = solution.astype(np.int32, copy=False)
         # For the base prediction, this solution is ridiculous in the
         # multi-label case
 
@@ -122,7 +107,6 @@ def log_loss(solution, prediction, task=BINARY_CLASSIFICATION):
     return log_loss
 
 
-@profile
 def prior_log_loss(frac_pos, task=BINARY_CLASSIFICATION):
     """Baseline log loss.
 
@@ -151,7 +135,6 @@ def prior_log_loss(frac_pos, task=BINARY_CLASSIFICATION):
     return base_log_loss
 
 
-@profile
 def binarize_predictions(array, task=BINARY_CLASSIFICATION):
     """
     Turn predictions into decisions {0,1} by selecting the class with largest
@@ -178,7 +161,6 @@ def binarize_predictions(array, task=BINARY_CLASSIFICATION):
     return bin_array
 
 
-@profile
 def create_multiclass_solution(solution, prediction):
     solution_binary = np.zeros((prediction.shape), dtype=np.int32)
 

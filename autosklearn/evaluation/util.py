@@ -19,18 +19,6 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
     if task_type not in TASK_TYPES:
         raise NotImplementedError(task_type)
 
-    # TODO let every metric decide itself whether it wants to copy or alter
-    # the input data
-    if task_type in [BINARY_CLASSIFICATION, REGRESSION]:
-        if len(solution.shape) == 1:
-            solution = solution.reshape((-1, 1))
-    elif task_type == MULTICLASS_CLASSIFICATION:
-        solution = create_multiclass_solution(solution, prediction)
-
-    if solution.shape[0] != prediction.shape[0]:
-        raise ValueError('Solution shape %s != prediction shape %s' %
-                         (solution.shape, prediction.shape))
-
     if all_scoring_functions:
         score = dict()
         if task_type in REGRESSION_TASKS:
@@ -38,21 +26,21 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
             cprediction = sanitize_array(prediction)
             for metric_ in REGRESSION_METRICS:
                 score[metric_] = regression_metrics.calculate_score(
-                    metric_, solution, cprediction, copy=True)
+                    metric_, solution, cprediction)
         else:
             for metric_ in CLASSIFICATION_METRICS:
                 score[metric_] = classification_metrics.calculate_score(
-                    metric_, solution, prediction, task_type, copy=True)
+                    metric_, solution, prediction, task_type)
 
     else:
         if task_type in REGRESSION_TASKS:
             # TODO put this into the regression metric itself
             cprediction = sanitize_array(prediction)
             score = regression_metrics.calculate_score(
-                metric, solution, cprediction, copy=False)
+                metric, solution, cprediction)
         else:
             score = classification_metrics.calculate_score(
-                metric, solution, prediction, task=task_type, copy=False)
+                metric, solution, prediction, task=task_type)
     return score
 
 

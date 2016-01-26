@@ -873,8 +873,8 @@ class PACTest(unittest.TestCase):
                 pred = pred.astype(np.float32)
                 with self.subTest('task%d_%s' % (task, testname)):
                     sol, pred = copy_and_preprocess_arrays(sol, pred)
-                    bac = pac_metric(sol, pred, task=task)
+                    pac = pac_metric(sol, pred, task=task)
 
                     # Another weak test
-                    if bac != -1.1860048034278985 and result != -1.20522116785:
-                        self.assertAlmostEqual(bac, result, places=3)
+                    if pac != -1.1860048034278985 and result != -1.20522116785:
+                        self.assertAlmostEqual(pac, result, places=3)
