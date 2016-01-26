@@ -11,7 +11,6 @@ import autosklearn.pipeline.regression
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
 from autosklearn.constants import *
-from autosklearn.evaluation.util import get_new_run_num
 from autosklearn.util import Backend
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 from autosklearn.evaluation.util import calculate_score
@@ -116,7 +115,7 @@ class AbstractEvaluator(object):
             self.predict_function = self._predict_proba
 
         if num_run is None:
-            num_run = get_new_run_num()
+            num_run = 0
         self.num_run = num_run
 
         self.backend = Backend(None, self.output_dir)
@@ -221,9 +220,8 @@ class AbstractEvaluator(object):
         print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
               ('SAT', abs(self.duration), loss, self.seed,
                additional_run_info))
-
-    def file_output(self, loss, Y_optimization_pred, Y_valid_pred, Y_test_pred):
-        seed = os.environ.get('AUTOSKLEARN_SEED')
+    def file_output(self):
+        seed = self.seed
 
         if self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
             return 2, "Targets %s and prediction %s don't have the same " \
