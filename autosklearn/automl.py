@@ -80,8 +80,10 @@ class EnsembleProcess(multiprocessing.Process):
             f = open(os.devnull, 'w')
             sys.stdout = f
             sys.stderr = f
-        # TODO LIMITS
-        safe_ensemble_script = pynisher.enforce_limits()(ensemble_main)
+        # TODO What LIMITS do we want on memory consumption here ?
+        buffer_time = 5
+        time_left = self.limit - buffer_time
+        safe_ensemble_script = pynisher.enforce_limits(wall_time_in_s=time_left)(ensemble_main)
         safe_ensemble_script(autosklearn_tmp_dir = self.tmp_dir,
                              dataset_name = self.dataset_name,
                              task_type = self.task_type,
@@ -293,8 +295,11 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                 backend.save_model(evaluator.model, num_run, 1)
     
         self._logger.info("Starting to create dummy predictions.")
-        # TODO enforce limits
-        safe_call = pynisher.enforce_limits()(dummy_prediction_call)
+        # TODO which limits do we want to enforce here ?
+        time_limit = self._time_for_task / 4.
+        memory_limit = self._ml_memory_limit,
+        safe_call = pynisher.enforce_limits(cpu_time_in_s=time_limit,
+                                            mem_in_mb=memory_limit)(dummy_prediction_call)
         try:
             safe_call(datamanager)
         except:
