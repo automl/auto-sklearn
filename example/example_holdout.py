@@ -5,7 +5,7 @@ import numpy as np
 import sklearn.datasets
 import sklearn.metrics
 
-import autosklearn
+import autosklearn.classification
 
 
 def main():

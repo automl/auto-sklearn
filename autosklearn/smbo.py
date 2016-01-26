@@ -137,7 +137,6 @@ def _get_base_dict():
 def _eval_config_and_save(configuration, data, tmp_dir, seed, num_run):
     global evaluator
     try:
-        print(tmp_dir)
         evaluator = HoldoutEvaluator(data, tmp_dir, configuration,
                                      seed=seed,
                                      num_run=num_run,
@@ -209,7 +208,7 @@ class AutoMLSMBO(multiprocessing.Process):
                  default_cfgs = [],
                  num_metalearning_cfgs = 25,
                  config_file = None, smac_iters=1000,
-                 seed = 1
+                 seed = 1,
                  metadata_directory = None):
         super(AutoMLSMBO, self).__init__()
         # data related
@@ -232,6 +231,7 @@ class AutoMLSMBO(multiprocessing.Process):
         self.default_cfgs = default_cfgs
         self.num_metalearning_cfgs = num_metalearning_cfgs
         self.config_file = config_file
+        self.seed = seed
         self.metadata_directory = metadata_directory
         self.smac_iters = smac_iters
         self.start_num_run = start_num_run
@@ -303,8 +303,8 @@ class AutoMLSMBO(multiprocessing.Process):
     def collect_metalearning_suggestions_with_limits(self):
         try:
             safe_suggest = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
-                                            cpu_time_in_s=self.scenario.cutoff,
-                                            wall_time_in_s=self.scenario.wallclock_limit,
+                                            cpu_time_in_s=int(self.scenario.cutoff),
+                                            wall_time_in_s=int(self.scenario.wallclock_limit),
                                             grace_period_in_s=5)(self.collect_metalearning_suggestions)
             res = safe_suggest()
         except:
@@ -317,8 +317,8 @@ class AutoMLSMBO(multiprocessing.Process):
     def run(self):
         # we use pynisher here to enforce limits
         safe_smbo = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
-                                            cpu_time_in_s=self.cutoff_time,
-                                            wall_time_in_s=self.limit,
+                                            cpu_time_in_s=int(self.cutoff_time),
+                                            wall_time_in_s=int(self.limit),
                                             grace_period_in_s=5)(self.run_smbo)
         safe_smbo(max_iters = self.smac_iters)
         

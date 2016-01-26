@@ -20,7 +20,7 @@ from autosklearn.constants import *
 from autosklearn.data.data_manager_factory import get_data_manager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.evaluation import resampling, HoldoutEvaluator, get_new_run_num
+from autosklearn.evaluation import resampling, HoldoutEvaluator
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline, Backend
@@ -83,7 +83,7 @@ class EnsembleProcess(multiprocessing.Process):
         # TODO What LIMITS do we want on memory consumption here ?
         buffer_time = 5
         time_left = self.limit - buffer_time
-        safe_ensemble_script = pynisher.enforce_limits(wall_time_in_s=time_left)(ensemble_main)
+        safe_ensemble_script = pynisher.enforce_limits(wall_time_in_s=int(time_left))(ensemble_main)
         safe_ensemble_script(autosklearn_tmp_dir = self.tmp_dir,
                              dataset_name = self.dataset_name,
                              task_type = self.task_type,
@@ -296,8 +296,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
     
         self._logger.info("Starting to create dummy predictions.")
         # TODO which limits do we want to enforce here ?
-        time_limit = self._time_for_task / 4.
-        memory_limit = self._ml_memory_limit,
+        time_limit = int(self._time_for_task / 4.)
+        memory_limit = int(self._ml_memory_limit)
         safe_call = pynisher.enforce_limits(cpu_time_in_s=time_limit,
                                             mem_in_mb=memory_limit)(dummy_prediction_call)
         try:
