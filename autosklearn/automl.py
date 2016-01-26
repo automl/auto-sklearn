@@ -23,8 +23,7 @@ from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import resampling, HoldoutEvaluator, get_new_run_num
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
-    get_auto_seed, set_auto_seed, del_auto_seed, pipeline, \
-    Backend
+    pipeline, Backend
 from autosklearn.ensemble_builder import main as ensemble_main
 #from autosklearn.util.smac import run_smac
 from autosklearn.smbo import AutoMLSMBO
@@ -330,8 +329,6 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._task = datamanager.info['task']
         self._label_num = datamanager.info['label_num']
 
-        set_auto_seed(self._seed)
-
         # == Pickle the data manager to speed up loading
         data_manager_path = self._backend.save_datamanager(datamanager)
 
@@ -487,6 +484,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                      num_metalearning_cfgs = self._initial_configurations_via_metalearning,
                                      config_file = configspace_path,
                                      smac_iters = self._max_iter_smac,
+                                     seed = self._seed,
                                      metadata_directory=self._metadata_directory)
         self._proc_smac.start()
 >>>>>>> reorganize automl and start using smac3
@@ -502,9 +500,6 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         else:
             for proc in procs:
                 proc.join()
-
-        # Delete AutoSklearn environment variable
-        del_auto_seed()
 
         if self._queue is None:
             self._load_models()

@@ -209,6 +209,7 @@ class AutoMLSMBO(multiprocessing.Process):
                  default_cfgs = [],
                  num_metalearning_cfgs = 25,
                  config_file = None, smac_iters=1000,
+                 seed = 1
                  metadata_directory = None):
         super(AutoMLSMBO, self).__init__()
         # data related
@@ -330,7 +331,7 @@ class AutoMLSMBO(multiprocessing.Process):
         
         # == Initialize SMBO stuff
         # first create a scenario
-        seed = 0 # TODO
+        seed = self.seed # TODO
         self.scenario = AutoMLScenario(self.config_space, self.config_file,
                                        self.limit, self.cutoff_time,
                                        self.memory_limit, self.logger)
