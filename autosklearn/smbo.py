@@ -136,7 +136,7 @@ def _get_base_dict():
 # create closure for evaluating an algorithm
 def _eval_config_and_save(configuration, data, tmp_dir, seed, num_run):
     global evaluator
-    try:
+    if True:
         evaluator = HoldoutEvaluator(data, tmp_dir, configuration,
                                      seed=seed,
                                      num_run=num_run,
@@ -149,7 +149,7 @@ def _eval_config_and_save(configuration, data, tmp_dir, seed, num_run):
             backend.save_model(evaluator.model, num_run, seed)
         status = StatusType.SUCCESS
         return evaluator, (duration, result, seed, run_info, status)
-    except:
+    else:
         status = StatusType.CRASHED
         return evaluator, (None, None, seed, None, status)
     
@@ -317,12 +317,17 @@ class AutoMLSMBO(multiprocessing.Process):
 
     def eval_with_limits(self, config, seed, num_run):
         # TODO JTS: which limits do we want for an individual evaluation ?
+        import sys
         safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                             cpu_time_in_s=int(self.cutoff_time),
                                             wall_time_in_s=int(self.limit),
                                             grace_period_in_s=5)(_eval_config_and_save)
         try:
-            evaluator, info = safe_eval(config, self.datamanager, self.tmp_dir, seed, num_run)
+            # JTS: this does not work currently, not sure why, probably becaus of
+            #      the signal handler stuff
+            #res = safe_eval(config, self.datamanager, self.tmp_dir, seed, num_run)
+            #print(res)
+            evaluator, info = _eval_config_and_save(config, self.datamanager, self.tmp_dir, seed, num_run)
         except:
             evaluator = None
             status = StatusType.CRASHED
@@ -392,6 +397,7 @@ class AutoMLSMBO(multiprocessing.Process):
             # JTS TODO: handle the case that run_history is empty
             X_cfg, Y_cfg = rh2EPM.transform(run_history)
             self.logger.debug("SMAC iteration : {}".format(smac_iter))
+            print("NEXT")
             next_config = smac.choose_next(X_cfg, Y_cfg)
             self.reset_data_manager()
             evaluator, info = self.eval_with_limits(config, seed, num_run)
