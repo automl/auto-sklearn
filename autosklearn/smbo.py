@@ -315,6 +315,20 @@ class AutoMLSMBO(multiprocessing.Process):
         else:
             return res
 
+    def eval_with_limits(self, config, seed, num_run):
+        # TODO JTS: which limits do we want for an individual evaluation ?
+        safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
+                                            cpu_time_in_s=int(self.cutoff_time),
+                                            wall_time_in_s=int(self.limit),
+                                            grace_period_in_s=5)(_eval_config_and_save)
+        try:
+            evaluator, info = safe_eval(config, self.datamanager, self.tmp_dir, seed, num_run)
+        except:
+            evaluator = None
+            status = StatusType.CRASHED
+            info = (None, None, seed, None, status)
+        return evaluator, info
+        
     def run(self):
         # we use pynisher here to enforce limits
         safe_smbo = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
@@ -363,8 +377,7 @@ class AutoMLSMBO(multiprocessing.Process):
             #      we work on the data in-place
             # NOTE: this is where we could also apply some memory limits
             self.reset_data_manager()
-            evaluator, info = _eval_config_and_save(config, self.datamanager,
-                                                    self.tmp_dir, seed, num_run)
+            evaluator, info = self.eval_with_limits(config, seed, num_run)
             (duration, result, _, additional_run_info, status) = info
             run_history.add(config = config, cost = result,
                             time = duration , status = status,
@@ -381,8 +394,7 @@ class AutoMLSMBO(multiprocessing.Process):
             self.logger.debug("SMAC iteration : {}".format(smac_iter))
             next_config = smac.choose_next(X_cfg, Y_cfg)
             self.reset_data_manager()
-            evaluator, info = _eval_config_and_save(next_config, self.datamanager,
-                                                    self.tmp_dir, seed, num_run)
+            evaluator, info = self.eval_with_limits(config, seed, num_run)
             (duration, result, _, additional_run_info, status) = info
             run_history.add(config = next_config, cost = result,
                             time = duration , status = status,
