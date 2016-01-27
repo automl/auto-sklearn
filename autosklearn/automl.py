@@ -408,6 +408,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         # == RUN SMBO
         default_configs = []
         # == set default configurations
+        # first enqueue the default configuration from our config space
+        default_configs.append(self.configuration_space.get_default_configuration())
         if (datamanager.info["task"] == BINARY_CLASSIFICATION) or \
             (datamanager.info["task"] == MULTICLASS_CLASSIFICATION):
             config = {'balancing:strategy': 'weighting',
