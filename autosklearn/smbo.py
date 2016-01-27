@@ -301,6 +301,7 @@ class AutoMLSMBO(multiprocessing.Process):
         
         
     def collect_metalearning_suggestions_with_limits(self):
+        res = None
         try:
             safe_suggest = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                             cpu_time_in_s=int(self.scenario.cutoff),
