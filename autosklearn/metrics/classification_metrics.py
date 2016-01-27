@@ -92,13 +92,14 @@ def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
                 dtype=float)
     # Bounding to avoid division by 0, 1e-7 because of float32
     eps = np.float(1e-7)
+    """
     tp = np.sum(tp)
     fp = np.sum(fp)
     tn = np.sum(tn)
     fn = np.sum(fn)
-
+   """
     if task in (BINARY_CLASSIFICATION, MULTILABEL_CLASSIFICATION):
-        accuracy = (np.sum(tp) + np.sum(tn)) / (
+       accuracy = (np.sum(tp) + np.sum(tn)) / (
             np.sum(tp) + np.sum(fp) + np.sum(tn) + np.sum(fn)
         )
     elif task == MULTICLASS_CLASSIFICATION:
