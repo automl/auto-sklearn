@@ -224,15 +224,6 @@ class AbstractEvaluator(object):
 
     def predict_proba(self, X, model, task_type, Y_train):
         Y_pred = model.predict_proba(X, batch_size=1000)
-
-        if task_type == BINARY_CLASSIFICATION:
-            if len(Y_pred.shape) != 1:
-                Y_pred = Y_pred[:, 1].reshape(-1, 1)
-
-        elif task_type == [MULTICLASS_CLASSIFICATION,
-                           MULTILABEL_CLASSIFICATION]:
-            pass
-
         Y_pred = self._ensure_prediction_array_sizes(Y_pred, Y_train)
         return Y_pred
 
