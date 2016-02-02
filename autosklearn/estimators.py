@@ -122,9 +122,7 @@ class AutoSklearnClassifier(AutoML):
         # to superinit
         self._tmp_dir, self._output_dir = self._prepare_create_folders(
             tmp_dir=tmp_folder,
-            output_dir=output_folder,
-            shared_mode=shared_mode
-        )
+            output_dir=output_folder)
 
         self._classes = []
         self._n_classes = []
@@ -152,7 +150,7 @@ class AutoSklearnClassifier(AutoML):
             shared_mode=shared_mode)
 
     @staticmethod
-    def _prepare_create_folders(tmp_dir, output_dir, shared_mode):
+    def _prepare_create_folders(tmp_dir, output_dir):
         random_number = random.randint(0, 10000)
 
         pid = os.getpid()
@@ -161,22 +159,29 @@ class AutoSklearnClassifier(AutoML):
         if output_dir is None:
             output_dir = '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
 
-        if not os.path.exists(tmp_dir):
+        # Totally weird, this has to be created here, will be deleted in the
+        # first lines of fit(). If not there, creating the Backend object in the
+        # superclass will fail
+        try:
             os.makedirs(tmp_dir)
-        if not os.path.exists(output_dir):
+        except OSError:
+            pass
+        try:
             os.makedirs(output_dir)
+        except OSError:
+            pass
 
         return tmp_dir, output_dir
 
     def _create_output_directories(self):
         try:
-            os.makedirs(self._output_dir)
-            if self._output_dir != self._tmp_dir:
-                os.makedirs(self._tmp_dir)
+            os.makedirs(self._tmp_dir)
         except OSError:
-            print("Did not create tmp/output_dir, already exists")
-            if not self._shared_mode:
-                raise
+            pass
+        try:
+            os.makedirs(self._output_dir)
+        except OSError:
+            pass
 
     def fit(self, X, y,
             metric='acc_metric',
