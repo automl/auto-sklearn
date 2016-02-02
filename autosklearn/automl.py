@@ -624,8 +624,6 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         # fix: Consider only index 1 of second dimension
         # Don't know if the reshaping should be done there or in calculate_score
         prediction = self.predict(X)
-        if self._task == BINARY_CLASSIFICATION:
-            prediction = prediction[:, 1].reshape((-1, 1))
         return calculate_score(y, prediction, self._task,
                                self._metric, self._label_num,
                                logger=self._logger)
