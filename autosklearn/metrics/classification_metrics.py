@@ -15,6 +15,11 @@ from autosklearn.metrics.util import log_loss, prior_log_loss, \
 
 
 def calculate_score(metric, solution, prediction, task):
+    if solution.shape[0] != prediction.shape[0]:
+        raise ValueError('Solution and prediction have different number of '
+                         'samples: %d and %d' % (solution.shape[0],
+                                                 prediction.shape[0]))
+
     metric = METRIC_TO_STRING[metric]
     return globals()[metric](solution, prediction, task)
 

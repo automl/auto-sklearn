@@ -220,14 +220,17 @@ def main(autosklearn_tmp_dir,
                             'predictions_test')
     paths_ = [dir_ensemble, dir_valid, dir_test]
 
-    targets_ensemble = backend.load_targets_ensemble()
-
     dir_ensemble_list_mtimes = []
 
     while used_time < limit or (max_iterations > 0 and max_iterations >= num_iteration):
         num_iteration += 1
         logger.debug('Time left: %f', limit - used_time)
         logger.debug('Time last iteration: %f', time_iter)
+
+        # Reload the ensemble targets every iteration, important, because cv may
+        # update the ensemble targets in the cause of running auto-sklearn
+        # TODO update cv in order to not need this any more!
+        targets_ensemble = backend.load_targets_ensemble()
 
         # Load the predictions from the models
         exists = [os.path.isdir(dir_) for dir_ in paths_]
@@ -313,9 +316,14 @@ def main(autosklearn_tmp_dir,
                 predictions = np.load(os.path.join(dir_ensemble, basename)).astype(dtype=np.float64)
             else:
                 predictions = np.load(os.path.join(dir_ensemble, basename))
-            score = calculate_score(targets_ensemble, predictions,
-                                    task_type, metric,
-                                    predictions.shape[1])
+
+            try:
+                score = calculate_score(targets_ensemble, predictions,
+                                        task_type, metric,
+                                        predictions.shape[1])
+            except:
+                score = -1
+
             model_names_to_scores[model_name] = score
             match = model_and_automl_re.search(model_name)
             automl_seed = int(match.group(1))
