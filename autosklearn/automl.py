@@ -188,6 +188,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._label_num = None
         self.models_ = None
         self.ensemble_indices_ = None
+        self._can_predict = False
 
         self._debug_mode = debug_mode
         self._backend = Backend(self._output_dir, self._tmp_dir)
@@ -561,12 +562,30 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                              'size 0.')
             return None
 
+    def refit(self, X, y):
+        if self._keep_models is not True:
+            raise ValueError(
+                "Predict can only be called if 'keep_models==True'")
+        if self.models_ is None or len(self.models_) == 0 or len(
+                self.ensemble_indices_) == 0:
+            self._load_models()
+
+        for identifier in self.models_:
+            if identifier in self.ensemble_indices_:
+                model = self.models_[identifier]
+                # this updates the model inplace, it can then later be used in
+                # predict method
+                model.fit(X.copy(), y.copy())
+
+        self._can_predict = True
+
     def predict(self, X):
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
-        if self._resampling_strategy not in  ['holdout',
-                                              'holdout-iterative-fit']:
+        if not self._can_predict and \
+                self._resampling_strategy not in  \
+                        ['holdout', 'holdout-iterative-fit']:
             raise NotImplementedError(
                 'Predict is currently only implemented for resampling '
                 'strategy holdout.')
