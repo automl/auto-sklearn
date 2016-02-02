@@ -24,7 +24,9 @@ def main():
         tmp_folder='/tmp/autoslearn_example_tmp',
         output_folder='/tmp/autosklearn_example_out')
     automl.fit(X_train, y_train, dataset_name='digits')
-    print(automl.score(X_test, y_test))
+
+    print(automl.show_models())
+    print("Accuracy score", automl.score(X_test, y_test))
 
 
 if __name__ == '__main__':
