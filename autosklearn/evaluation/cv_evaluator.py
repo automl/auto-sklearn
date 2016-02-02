@@ -112,6 +112,8 @@ class CVEvaluator(AbstractEvaluator):
             # Average the predictions of several models
             if len(Y_valid_pred.shape) == 3:
                 Y_valid_pred = np.nanmean(Y_valid_pred, axis=0)
+        else:
+            Y_valid_pred = None
 
         if self.X_test is not None:
             Y_test_pred = np.array([Y_test_pred[i]
@@ -120,6 +122,8 @@ class CVEvaluator(AbstractEvaluator):
             # Average the predictions of several models
             if len(Y_test_pred.shape) == 3:
                 Y_test_pred = np.nanmean(Y_test_pred, axis=0)
+        else:
+            Y_test_pred = None
 
         self.Y_optimization = Y_targets
 
