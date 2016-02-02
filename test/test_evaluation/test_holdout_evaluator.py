@@ -81,7 +81,7 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
                                        D.data['Y_train'])
         expected = [[0.9], [0.3]]
         for i in range(len(expected)):
-            self.assertEqual(expected[i], pred[i])
+            self.assertEqual(expected[i], pred[i][1])
 
     def test_datasets(self):
         for getter in get_dataset_getters():
