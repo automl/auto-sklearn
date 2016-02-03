@@ -4,7 +4,6 @@ import argparse
 import glob
 import logging
 import os
-import random
 import re
 import sys
 import time
@@ -15,40 +14,13 @@ import numpy as np
 from autosklearn.constants import STRING_TO_TASK_TYPES, STRING_TO_METRIC
 from autosklearn.evaluation.util import calculate_score
 from autosklearn.util import StopWatch, Backend
+from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 
 
 logging.basicConfig(format='[%(levelname)s] [%(asctime)s:%(name)s] %('
                            'message)s', datefmt='%H:%M:%S')
 logger = logging.getLogger("ensemble_selection_script.py")
 logger.setLevel(logging.DEBUG)
-
-
-def build_ensemble(predictions_train, predictions_valid, predictions_test,
-                   true_labels, ensemble_size, task_type, metric):
-    indices, trajectory = ensemble_selection(predictions_train, true_labels,
-                                             ensemble_size, task_type, metric)
-    ensemble_predictions_valid = np.mean(
-        predictions_valid[indices.astype(int)],
-        axis=0)
-    ensemble_predictions_test = np.mean(predictions_test[indices.astype(int)],
-                                        axis=0)
-
-    logger.info('Trajectory and indices!')
-    logger.info(trajectory)
-    logger.info(indices)
-
-    return ensemble_predictions_valid, ensemble_predictions_test, \
-        trajectory[-1], indices
-
-
-def pruning(predictions, labels, n_best, task_type, metric):
-    perf = np.zeros([predictions.shape[0]])
-    for i, p in enumerate(predictions):
-        perf[i] = calculate_score(labels, predictions, task_type,
-                                  metric, predictions.shape[1])
-
-    indcies = np.argsort(perf)[perf.shape[0] - n_best:]
-    return indcies
 
 
 def get_predictions(dir_path, dir_path_list, include_num_runs,
@@ -74,119 +46,6 @@ def get_predictions(dir_path, dir_path_list, include_num_runs,
                 predictions = np.load(os.path.join(dir_path, basename))
             result.append(predictions)
     return result
-
-
-def original_ensemble_selection(predictions, labels, ensemble_size, task_type,
-                                metric, do_pruning=False):
-    """Rich Caruana's ensemble selection method."""
-
-    ensemble = []
-    trajectory = []
-    order = []
-
-    if do_pruning:
-        n_best = 20
-        indices = pruning(predictions, labels, n_best, task_type, metric)
-        for idx in indices:
-            ensemble.append(predictions[idx])
-            order.append(idx)
-            ensemble_ = np.array(ensemble).mean(axis=0)
-            ensemble_performance = calculate_score(
-                labels, ensemble_, task_type, metric, ensemble_.shape[1])
-            trajectory.append(ensemble_performance)
-        ensemble_size -= n_best
-
-    for i in range(ensemble_size):
-        scores = np.zeros([predictions.shape[0]])
-        for j, pred in enumerate(predictions):
-            ensemble.append(pred)
-            ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-            scores[j] = calculate_score(labels, ensemble_prediction,
-                                        task_type, metric,
-                                        ensemble_prediction.shape[1])
-            ensemble.pop()
-        best = np.nanargmax(scores)
-        ensemble.append(predictions[best])
-        trajectory.append(scores[best])
-        order.append(best)
-
-        # Handle special case
-        if len(predictions) == 1:
-            break
-
-    return np.array(order), np.array(trajectory)
-
-
-def ensemble_selection(predictions, labels, ensemble_size, task_type, metric,
-                       do_pruning=False):
-    """Fast version of Rich Caruana's ensemble selection method."""
-
-    ensemble = []
-    trajectory = []
-    order = []
-
-    if do_pruning:
-        n_best = 20
-        indices = pruning(predictions, labels, n_best, task_type, metric)
-        for idx in indices:
-            ensemble.append(predictions[idx])
-            order.append(idx)
-            ensemble_ = np.array(ensemble).mean(axis=0)
-            ensemble_performance = calculate_score(
-                labels, ensemble_, task_type, metric, ensemble_.shape[1])
-            trajectory.append(ensemble_performance)
-        ensemble_size -= n_best
-
-    for i in range(ensemble_size):
-        scores = np.zeros([predictions.shape[0]])
-        s = len(ensemble)
-        if s == 0:
-            weighted_ensemble_prediction = np.zeros(predictions[0].shape)
-        else:
-            ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-            weighted_ensemble_prediction = (s / float(s + 1)
-                                            ) * ensemble_prediction
-        for j, pred in enumerate(predictions):
-            # ensemble.append(pred)
-            # ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-            fant_ensemble_prediction = weighted_ensemble_prediction + (
-                1. / float(s + 1)) * pred
-
-            scores[j] = calculate_score(
-                labels, fant_ensemble_prediction, task_type, metric,
-                fant_ensemble_prediction.shape[1])
-            # ensemble.pop()
-        best = np.nanargmax(scores)
-        ensemble.append(predictions[best])
-        trajectory.append(scores[best])
-        order.append(best)
-
-        # Handle special case
-        if len(predictions) == 1:
-            break
-
-    return np.array(order), np.array(trajectory)
-
-
-def ensemble_selection_bagging(predictions, labels, ensemble_size, task_type,
-                               metric,
-                               fraction=0.5,
-                               n_bags=20,
-                               do_pruning=False):
-    """Rich Caruana's ensemble selection method with bagging."""
-    n_models = predictions.shape[0]
-    bag_size = int(n_models * fraction)
-
-    order_of_each_bag = []
-    for j in range(n_bags):
-        # Bagging a set of models
-        indices = sorted(random.sample(range(0, n_models), bag_size))
-        bag = predictions[indices, :, :]
-        order, _ = ensemble_selection(bag, labels, ensemble_size, task_type,
-                                      metric, do_pruning)
-        order_of_each_bag.append(order)
-
-    return np.array(order_of_each_bag)
 
 
 def main(autosklearn_tmp_dir,
@@ -395,37 +254,26 @@ def main(autosklearn_tmp_dir,
                 indices_to_model_names[num_indices] = model_name
                 indices_to_run_num[num_indices] = (automl_seed, num_run)
 
-        # logging.info("Indices to model names:")
-        # logging.info(indices_to_model_names)
-
-        # for i, item in enumerate(sorted(model_names_to_scores.items(),
-        #                                key=lambda t: t[1])):
-        #    logging.info("%d: %s", i, item)
-
-        include_num_runs = set(include_num_runs)
-
         all_predictions_train = get_predictions(dir_ensemble,
                                                 dir_ensemble_list,
                                                 include_num_runs,
                                                 model_and_automl_re,
                                                 precision)
 
-#        if len(all_predictions_train) == len(all_predictions_test) == len(
-#                all_predictions_valid) == 0:
         if len(include_num_runs) == 0:
             logger.error('All models do just random guessing')
             time.sleep(2)
             continue
 
         else:
-            try:
-                indices, trajectory = ensemble_selection(
-                    np.array(all_predictions_train), targets_ensemble,
-                    ensemble_size, task_type, metric)
+            ensemble = EnsembleSelection(ensemble_size=ensemble_size,
+                                         task_type=task_type,
+                                         metric=metric)
 
-                logger.info('Trajectory and indices!')
-                logger.info(trajectory)
-                logger.info(indices)
+            try:
+                ensemble.fit(all_predictions_train, targets_ensemble,
+                             include_num_runs)
+                logger.info(ensemble)
 
             except ValueError as e:
                 logger.error('Caught ValueError: ' + str(e))
@@ -444,30 +292,10 @@ def main(autosklearn_tmp_dir,
                 continue
 
             # Output the score
-            logger.info('Training performance: %f' % trajectory[-1])
+            logger.info('Training performance: %f' % ensemble.train_score_)
 
-            # Print the ensemble members:
-            ensemble_members_run_numbers = dict()
-            ensemble_members = Counter(indices).most_common()
-            ensemble_members_string = 'Ensemble members:\n'
-            logger.info(ensemble_members)
-            for ensemble_member in ensemble_members:
-                weight = float(ensemble_member[1]) / len(indices)
-                ensemble_members_string += \
-                    ('    %s; weight: %10f; performance: %10f\n' %
-                     (indices_to_model_names[ensemble_member[0]],
-                      weight,
-                      model_names_to_scores[
-                         indices_to_model_names[ensemble_member[0]]]))
-
-                ensemble_members_run_numbers[
-                    indices_to_run_num[
-                        ensemble_member[0]]] = weight
-            logger.info(ensemble_members_string)
-
-        # Save the ensemble indices for later use!
-        backend.save_ensemble_indices_weights(ensemble_members_run_numbers,
-                                              index_run, seed)
+        # Save the ensemble for later use in the main auto-sklearn module!
+        backend.save_ensemble(ensemble, index_run, seed)
 
         all_predictions_valid = get_predictions(dir_valid,
                                                 dir_valid_list,
@@ -478,8 +306,7 @@ def main(autosklearn_tmp_dir,
         # Save predictions for valid and test data set
         if len(dir_valid_list) == len(dir_ensemble_list):
             all_predictions_valid = np.array(all_predictions_valid)
-            ensemble_predictions_valid = np.mean(
-                all_predictions_valid[indices.astype(int)], axis=0)
+            ensemble_predictions_valid = ensemble.predict(all_predictions_valid)
             backend.save_predictions_as_txt(ensemble_predictions_valid,
                                             'valid', index_run, prefix=dataset_name)
         else:
@@ -496,8 +323,7 @@ def main(autosklearn_tmp_dir,
 
         if len(dir_test_list) == len(dir_ensemble_list):
             all_predictions_test = np.array(all_predictions_test)
-            ensemble_predictions_test = np.mean(
-                all_predictions_test[indices.astype(int)], axis=0)
+            ensemble_predictions_test = ensemble.predict(all_predictions_test)
             backend.save_predictions_as_txt(ensemble_predictions_test,
                                             'test', index_run, prefix=dataset_name)
         else:

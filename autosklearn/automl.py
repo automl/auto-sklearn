@@ -187,7 +187,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._metric = None
         self._label_num = None
         self.models_ = None
-        self.ensemble_indices_ = None
+        self.ensemble_ = None
         self._can_predict = False
 
         self._debug_mode = debug_mode
@@ -311,7 +311,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
     def _fit(self, datamanager):
         # Reset learnt stuff
         self.models_ = None
-        self.ensemble_indices_ = None
+        self.ensemble_ = None
 
         # Check arguments prior to doing anything!
         if self._resampling_strategy not in ['holdout', 'holdout-iterative-fit',
@@ -566,12 +566,12 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
-        if self.models_ is None or len(self.models_) == 0 or len(
-                self.ensemble_indices_) == 0:
+        if self.models_ is None or len(self.models_) == 0 or \
+                self.ensemble_ is None:
             self._load_models()
 
         for identifier in self.models_:
-            if identifier in self.ensemble_indices_:
+            if identifier in self.ensemble_.get_model_identifiers():
                 model = self.models_[identifier]
                 # this updates the model inplace, it can then later be used in
                 # predict method
@@ -590,16 +590,12 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                 'Predict is currently only implemented for resampling '
                 'strategy holdout.')
 
-        if self.models_ is None or len(self.models_) == 0 or len(
-                self.ensemble_indices_) == 0:
+        if self.models_ is None or len(self.models_) == 0 or \
+                self.ensemble_ is None:
             self._load_models()
 
-        predictions = []
-        for identifier in self.models_:
-            if identifier not in self.ensemble_indices_:
-                continue
-
-            weight = self.ensemble_indices_[identifier]
+        all_predictions = []
+        for identifier in self.ensemble_.get_model_identifiers():
             model = self.models_[identifier]
 
             X_ = X.copy()
@@ -614,16 +610,16 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                      "while X_.shape is %s" %
                                      (model, str(prediction.shape),
                                       str(X_.shape)))
-            predictions.append(prediction * weight)
+            all_predictions.append(prediction)
 
-        if len(predictions) == 0:
+        if len(all_predictions) == 0:
             raise ValueError('Something went wrong generating the predictions. '
                              'The ensemble should consist of the following '
                              'models: %s, the following models were loaded: '
                              '%s' % (str(list(self.ensemble_indices_.keys())),
                                      str(list(self.models_.keys()))))
 
-        predictions = np.sum(np.array(predictions), axis=0)
+        predictions = self.ensemble_.predict(all_predictions)
         return predictions
 
     def _load_models(self):
@@ -636,8 +632,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         if len(self.models_) == 0:
             raise ValueError('No models fitted!')
 
-        self.ensemble_indices_ = self._backend.load_ensemble_indices_weights(
-            seed)
+        self.ensemble_ = self._backend.load_ensemble(seed)
 
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
@@ -648,28 +643,12 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                logger=self._logger)
 
     def show_models(self):
-        if self.models_ is None or len(self.models_) == 0 or len(
-                self.ensemble_indices_) == 0:
+
+        if self.models_ is None or len(self.models_) == 0 or \
+                self.ensemble_ is None:
             self._load_models()
 
-        output = []
-        sio = six.StringIO()
-        for identifier in self.models_:
-            if identifier not in self.ensemble_indices_:
-                continue
-
-            weight = self.ensemble_indices_[identifier]
-            model = self.models_[identifier]
-            output.append((weight, model))
-
-        output.sort(reverse=True)
-
-        sio.write("[")
-        for weight, model in output:
-            sio.write("(%f, %s),\n" % (weight, model))
-        sio.write("]")
-
-        return sio.getvalue()
+        return self.ensemble_.pprint_ensemble_string(self.models_)
 
     def _save_ensemble_data(self, X, y):
         """Split dataset and store Data for the ensemble script.
