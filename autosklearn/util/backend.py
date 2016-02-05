@@ -174,11 +174,11 @@ class Backend(object):
 
         if not os.path.exists(ensemble_dir):
             self.logger.warning('Directory %s does not exist' % ensemble_dir)
-            return {}
+            return None
 
         if seed >= 0:
             indices_files = glob.glob(os.path.join(ensemble_dir,
-                                                   '%s.*.indices' % seed))
+                                                   '%s.*.ensemble' % seed))
             indices_files.sort()
         else:
             indices_files = os.listdir(ensemble_dir)
@@ -197,7 +197,7 @@ class Backend(object):
             pass
 
         filepath = os.path.join(self.get_ensemble_dir(),
-                                '%s.%s.indices' % (str(seed), str(idx).zfill(
+                                '%s.%s.ensemble' % (str(seed), str(idx).zfill(
                                     10)))
         with open(filepath, 'wb') as fh:
             pickle.dump(ensemble, fh)

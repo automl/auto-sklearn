@@ -131,7 +131,7 @@ class EstimatorTest(Base):
         score = automl.score(X_test, Y_test)
 
         self.assertEqual(len(os.listdir(os.path.join(output, '.auto-sklearn',
-                                                     'ensemble_indices'))), 1)
+                                                     'ensembles'))), 1)
         self.assertGreaterEqual(score, 0.90)
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
