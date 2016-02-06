@@ -70,9 +70,9 @@ if on_rtd:
                     'autosklearn.pipeline.implementations.StandardScaler',
                     'autosklearn.pipeline.classification',
                     'autosklearn.pipeline.regression',
-                    'HPOlibConfigSpace',
-                    'HPOlibConfigSpace.converters',
-                    'HPOlibConfigSpace.configuration_space']
+                    'ConfigSpace',
+                    'ConfigSpace.converters',
+                    'ConfigSpace.configuration_space']
 
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 

@@ -2,10 +2,10 @@ import numpy as np
 
 import autosklearn.pipeline.implementations.OneHotEncoder
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
     UniformFloatHyperparameter
-from HPOlibConfigSpace.conditions import EqualsCondition
+from ConfigSpace.conditions import EqualsCondition
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *

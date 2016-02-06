@@ -3,8 +3,8 @@ from collections import OrderedDict
 import unittest
 import numpy
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from autosklearn.pipeline.components.classification.liblinear_svc import LibLinear_SVC
 from autosklearn.pipeline.components.classification.lda import LDA

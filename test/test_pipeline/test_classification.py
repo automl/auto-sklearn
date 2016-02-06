@@ -13,9 +13,9 @@ import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.testing import assert_array_almost_equal
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace, \
+from ConfigSpace.configuration_space import ConfigurationSpace, \
     Configuration
-from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
+from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.components.base import \
@@ -516,7 +516,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                          'preprocessor': ['densifier']},
                                 dataset_properties={'sparse': True})
 
-    @unittest.skip("Wait until HPOlibConfigSpace is fixed.")
+    @unittest.skip("Wait until ConfigSpace is fixed.")
     def test_get_hyperparameter_search_space_dataset_properties(self):
         cs_mc = SimpleClassificationPipeline.get_hyperparameter_search_space(
             dataset_properties={'multiclass': True})
