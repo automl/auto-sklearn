@@ -266,7 +266,7 @@ def main(autosklearn_tmp_dir,
             continue
 
         else:
-            ensemble = EnsembleSelection(ensemble_size=ensemble_size,
+            ensemble = Stacking(ensemble_size=ensemble_size,
                                          task_type=task_type,
                                          metric=metric)
 
