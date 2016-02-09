@@ -580,6 +580,9 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._can_predict = True
 
     def predict(self, X):
+        return np.argmax(self.predict_proba(X), axis=1)
+
+    def predict_proba(self, X):
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
@@ -637,7 +640,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
         # Don't know if the reshaping should be done there or in calculate_score
-        prediction = self.predict(X)
+        prediction = self.predict_proba(X)
         return calculate_score(y, prediction, self._task,
                                self._metric, self._label_num,
                                logger=self._logger)

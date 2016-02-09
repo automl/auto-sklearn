@@ -200,7 +200,7 @@ class EnsembleSelection(AbstractEnsemble):
             if weight > 0.0:
                 output.append((weight, model))
 
-        output.sort(reverse=True)
+        output.sort(reverse=True, key=lambda t: t[0])
 
         sio.write("[")
         for weight, model in output:

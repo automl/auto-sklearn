@@ -32,7 +32,9 @@ def main():
     automl.refit(X_train.copy(), y_train.copy())
 
     print(automl.show_models())
-    print("Accuracy score", automl.score(X_test, y_test))
+
+    predictions = automl.predict(X_test)
+    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
 
 if __name__ == '__main__':

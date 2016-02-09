@@ -273,7 +273,7 @@ class AutoSklearnClassifier(AutoML):
                                                       feat_type, dataset_name)
 
     def predict(self, X):
-        """Predict class for X.
+        """Predict classes for X.
 
         Parameters
         ----------
@@ -281,11 +281,25 @@ class AutoSklearnClassifier(AutoML):
 
         Returns
         -------
-        y : array of shape = [n_samples] or [n_samples, n_outputs]
+        y : array of shape = [n_samples] or [n_samples, n_labels]
             The predicted classes.
 
         """
         return super(AutoSklearnClassifier, self).predict(X)
+
+    def predict_proba(self, X):
+        """Predict probabilities of classes for all samples X.
+
+        Parameters
+        ----------
+        X : array-like or sparse matrix of shape = [n_samples, n_features]
+
+        Returns
+        -------
+        y : array of shape = [n_samples, n_classes] or [n_samples, n_labels]
+            The predicted class probabilities.
+        """
+        return super(AutoSklearnClassifier, self).predict_proba(X)
 
 
 class AutoSklearnRegressor(AutoML):
