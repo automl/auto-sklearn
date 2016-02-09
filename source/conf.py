@@ -68,6 +68,7 @@ if on_rtd:
                     'autosklearn.pipeline.implementations.OneHotEncoder',
                     'autosklearn.pipeline.implementations.Imputation',
                     'autosklearn.pipeline.implementations.StandardScaler',
+                    'autosklearn.pipeline.implementations.util'
                     'autosklearn.pipeline.classification',
                     'autosklearn.pipeline.regression',
                     'HPOlibConfigSpace',
