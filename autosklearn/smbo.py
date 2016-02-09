@@ -304,8 +304,7 @@ class AutoMLSMBO(multiprocessing.Process):
         res = None
         try:
             safe_suggest = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
-                                            cpu_time_in_s=int(self.scenario.cutoff),
-                                            wall_time_in_s=int(self.scenario.wallclock_limit),
+                                            wall_time_in_s=int(self.scenario.wallclock_limit/4),
                                             grace_period_in_s=5)(self.collect_metalearning_suggestions)
             res = safe_suggest()
         except:
@@ -319,8 +318,8 @@ class AutoMLSMBO(multiprocessing.Process):
         # TODO JTS: which limits do we want for an individual evaluation ?
         import sys
         safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
-                                            cpu_time_in_s=int(self.cutoff_time),
-                                            wall_time_in_s=int(self.limit),
+                        #cpu_time_in_s=int(self.cutoff_time/4),
+                                            wall_time_in_s=int(self.limit/4),
                                             grace_period_in_s=5)(_eval_config_and_save)
         try:
             # JTS: this does not work currently, not sure why, probably becaus of
