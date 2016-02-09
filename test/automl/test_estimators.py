@@ -73,7 +73,13 @@ class EstimatorTest(Base):
                                 X=X, y=y, feat_type=[True])
 
         self.assertRaisesRegexp(ValueError,
-                                'Array feat_type must only contain bools.',
+                                'Array feat_type must only contain strings.',
+                                cls.fit,
+                                X=X, y=y, feat_type=[True]*100)
+
+        self.assertRaisesRegexp(ValueError,
+                                'Only `Categorical` and `Numerical` are '
+                                'valid feature types, you passed `Car`',
                                 cls.fit,
                                 X=X, y=y, feat_type=['Car']*100)
 

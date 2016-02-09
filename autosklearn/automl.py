@@ -245,7 +245,12 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                              (len(feat_type), X.shape[1]))
         if feat_type is not None and not all([isinstance(f, str)
                                               for f in feat_type]):
-            raise ValueError('Array feat_type must only contain bools.')
+            raise ValueError('Array feat_type must only contain strings.')
+        if feat_type is not None:
+            for ft in feat_type:
+                if ft.lower() not in ['categorical', 'numerical']:
+                    raise ValueError('Only `Categorical` and `Numerical` are '
+                                     'valid feature types, you passed `%s`' % ft)
 
         loaded_data_manager = XYDataManager(X, y,
                                             task=task,
