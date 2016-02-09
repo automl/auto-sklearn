@@ -66,20 +66,13 @@ class GaussianNB(AutoSklearnClassificationAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': 'GaussianNB',
                 'name': 'Gaussian Naive Bayes classifier',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': False,
-                'prefers_data_normalized': False,
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': False,
                 'is_deterministic': True,
-                'handles_sparse': False,
                 'input': (DENSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,),
-                'preferred_dtype': np.float32}
+                'output': (PREDICTIONS,)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

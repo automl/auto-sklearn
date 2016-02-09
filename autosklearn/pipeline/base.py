@@ -75,11 +75,8 @@ class BasePipeline(BaseEstimator):
                 method, param = init_param.split(":")
                 init_params_per_method[method][param] = value
 
-        # List of preprocessing steps (and their order)
-        preprocessors_names = [preprocessor[0] for
-                               preprocessor in self._get_pipeline()[:-1]]
-
-        for preproc_name in preprocessors_names:
+        # Instantiate preprocessor objects
+        for preproc_name, preproc_class in self._get_pipeline()[:-1]:
             preproc_params = {}
             for instantiated_hyperparameter in self.configuration:
                 if not instantiated_hyperparameter.startswith(
@@ -92,20 +89,11 @@ class BasePipeline(BaseEstimator):
                 preproc_params[name_] = self.configuration[
                     instantiated_hyperparameter]
 
-            if preproc_name in \
-                    components.feature_preprocessing_components._preprocessors:
-                _preprocessors = components.feature_preprocessing_components._preprocessors
-            elif preproc_name in \
-                    components.data_preprocessing_components._preprocessors:
-                _preprocessors = components.data_preprocessing_components._preprocessors
-            else:
-                raise ValueError(preproc_name)
-
-            preprocessor_object = _preprocessors[preproc_name](
+            preprocessor_object = preproc_class(
                 random_state=self.random_state, **preproc_params)
 
             # Ducktyping...
-            if hasattr(preprocessor_object, 'get_components'):
+            if hasattr(preproc_class, 'get_components'):
                 preprocessor_object = preprocessor_object.choice
 
             steps.append((preproc_name, preprocessor_object))
@@ -183,16 +171,17 @@ class BasePipeline(BaseEstimator):
         # TODO check if fit() was called before...
 
         if batch_size is None:
-            return self.pipeline_.predict(X)
+            return self.pipeline_.predict(X).astype(self._output_dtype)
         else:
             if type(batch_size) is not int or batch_size <= 0:
                 raise Exception("batch_size must be a positive integer")
 
             else:
                 if self.num_targets == 1:
-                    y = np.zeros((X.shape[0],))
+                    y = np.zeros((X.shape[0],), dtype=self._output_dtype)
                 else:
-                    y = np.zeros((X.shape[0], self.num_targets))
+                    y = np.zeros((X.shape[0], self.num_targets),
+                                 dtype=self._output_dtype)
 
                 # Copied and adapted from the scikit-learn GP code
                 for k in range(max(1, int(np.ceil(float(X.shape[0]) /

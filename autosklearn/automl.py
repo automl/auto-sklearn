@@ -187,7 +187,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._metric = None
         self._label_num = None
         self.models_ = None
-        self.ensemble_indices_ = None
+        self.ensemble_ = None
+        self._can_predict = False
 
         self._debug_mode = debug_mode
         self._backend = Backend(self._output_dir, self._tmp_dir)
@@ -242,9 +243,14 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             raise ValueError('Array feat_type does not have same number of '
                              'variables as X has features. %d vs %d.' %
                              (len(feat_type), X.shape[1]))
-        if feat_type is not None and not all([isinstance(f, bool)
+        if feat_type is not None and not all([isinstance(f, str)
                                               for f in feat_type]):
-            raise ValueError('Array feat_type must only contain bools.')
+            raise ValueError('Array feat_type must only contain strings.')
+        if feat_type is not None:
+            for ft in feat_type:
+                if ft.lower() not in ['categorical', 'numerical']:
+                    raise ValueError('Only `Categorical` and `Numerical` are '
+                                     'valid feature types, you passed `%s`' % ft)
 
         loaded_data_manager = XYDataManager(X, y,
                                             task=task,
@@ -298,16 +304,19 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         return time_for_load_data
 
     def _do_dummy_prediction(self, datamanager):
+        self._logger.info("Starting to create dummy predictions.")
         autosklearn.cli.base_interface.main(datamanager,
                                             self._resampling_strategy,
                                             None,
                                             None,
-                                            mode_args=self._resampling_strategy_arguments)
+                                            mode_args=self._resampling_strategy_arguments,
+                                            output_dir=self._tmp_dir)
+        self._logger.info("Finished creating dummy predictions.")
 
     def _fit(self, datamanager):
         # Reset learnt stuff
         self.models_ = None
-        self.ensemble_indices_ = None
+        self.ensemble_ = None
 
         # Check arguments prior to doing anything!
         if self._resampling_strategy not in ['holdout', 'holdout-iterative-fit',
@@ -352,7 +361,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                 self._logger)
 
         # == Perform dummy predictions
-        self._do_dummy_prediction(datamanager)
+        if self._resampling_strategy in ['holdout', 'holdout-iterative-fit']:
+            self._do_dummy_prediction(datamanager)
 
         # = Create a searchspace
         # Do this before One Hot Encoding to make sure that it creates a
@@ -370,6 +380,12 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             self._include_estimators,
             self._include_preprocessors)
         self.configuration_space_created_hook(datamanager)
+
+        # == RUN ensemble builder
+        # Do this before calculating the meta-features to make sure that the
+        # dummy predictions are actually included in the ensemble even if
+        # calculating the meta-features takes very long
+        proc_ensembles = self.run_ensemble_builder()
 
         # == Calculate metafeatures
         meta_features = _calculate_metafeatures(
@@ -481,9 +497,6 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                              resampling_strategy_arguments=self._resampling_strategy_arguments,
                              shared_mode=self._shared_mode)
 
-        # == RUN ensemble builder
-        proc_ensembles = self.run_ensemble_builder()
-
         procs = []
 
         if proc_smac is not None:
@@ -554,26 +567,43 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                              'size 0.')
             return None
 
-    def predict(self, X):
+    def refit(self, X, y):
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
-        if self._resampling_strategy not in  ['holdout',
-                                              'holdout-iterative-fit']:
+        if self.models_ is None or len(self.models_) == 0 or \
+                self.ensemble_ is None:
+            self._load_models()
+
+        for identifier in self.models_:
+            if identifier in self.ensemble_.get_model_identifiers():
+                model = self.models_[identifier]
+                # this updates the model inplace, it can then later be used in
+                # predict method
+                model.fit(X.copy(), y.copy())
+
+        self._can_predict = True
+
+    def predict(self, X):
+        return np.argmax(self.predict_proba(X), axis=1)
+
+    def predict_proba(self, X):
+        if self._keep_models is not True:
+            raise ValueError(
+                "Predict can only be called if 'keep_models==True'")
+        if not self._can_predict and \
+                self._resampling_strategy not in  \
+                        ['holdout', 'holdout-iterative-fit']:
             raise NotImplementedError(
                 'Predict is currently only implemented for resampling '
                 'strategy holdout.')
 
-        if self.models_ is None or len(self.models_) == 0 or len(
-                self.ensemble_indices_) == 0:
+        if self.models_ is None or len(self.models_) == 0 or \
+                self.ensemble_ is None:
             self._load_models()
 
-        predictions = []
-        for identifier in self.models_:
-            if identifier not in self.ensemble_indices_:
-                continue
-
-            weight = self.ensemble_indices_[identifier]
+        all_predictions = []
+        for identifier in self.ensemble_.get_model_identifiers():
             model = self.models_[identifier]
 
             X_ = X.copy()
@@ -588,16 +618,16 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                      "while X_.shape is %s" %
                                      (model, str(prediction.shape),
                                       str(X_.shape)))
-            predictions.append(prediction * weight)
+            all_predictions.append(prediction)
 
-        if len(predictions) == 0:
+        if len(all_predictions) == 0:
             raise ValueError('Something went wrong generating the predictions. '
                              'The ensemble should consist of the following '
                              'models: %s, the following models were loaded: '
                              '%s' % (str(list(self.ensemble_indices_.keys())),
                                      str(list(self.models_.keys()))))
 
-        predictions = np.sum(np.array(predictions), axis=0)
+        predictions = self.ensemble_.predict(all_predictions)
         return predictions
 
     def _load_models(self):
@@ -610,42 +640,23 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         if len(self.models_) == 0:
             raise ValueError('No models fitted!')
 
-        self.ensemble_indices_ = self._backend.load_ensemble_indices_weights(
-            seed)
+        self.ensemble_ = self._backend.load_ensemble(seed)
 
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
         # Don't know if the reshaping should be done there or in calculate_score
-        prediction = self.predict(X)
-        if self._task == BINARY_CLASSIFICATION:
-            prediction = prediction[:, 1].reshape((-1, 1))
+        prediction = self.predict_proba(X)
         return calculate_score(y, prediction, self._task,
                                self._metric, self._label_num,
                                logger=self._logger)
 
     def show_models(self):
-        if self.models_ is None or len(self.models_) == 0 or len(
-                self.ensemble_indices_) == 0:
+
+        if self.models_ is None or len(self.models_) == 0 or \
+                self.ensemble_ is None:
             self._load_models()
 
-        output = []
-        sio = six.StringIO()
-        for identifier in self.models_:
-            if identifier not in self.ensemble_indices_:
-                continue
-
-            weight = self.ensemble_indices_[identifier]
-            model = self.models_[identifier]
-            output.append((weight, model))
-
-        output.sort(reverse=True)
-
-        sio.write("[")
-        for weight, model in output:
-            sio.write("(%f, %s),\n" % (weight, model))
-        sio.write("]")
-
-        return sio.getvalue()
+        return self.ensemble_.pprint_ensemble_string(self.models_)
 
     def _save_ensemble_data(self, X, y):
         """Split dataset and store Data for the ensemble script.

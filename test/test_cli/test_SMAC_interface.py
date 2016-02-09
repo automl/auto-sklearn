@@ -49,17 +49,17 @@ class SMAC_interfaceTest(unittest.TestCase):
             'random_forest:n_estimators': '100',
             'rescaling:strategy': 'min/max'
         }
+        self.output_directory = os.path.join(os.getcwd(),
+                                             '.test_SMAC_interface')
 
         try:
-            path = os.path.join(os.getcwd(), '.auto-sklearn', 'datamanager.pkl')
-            os.remove(path)
+            shutil.rmtree(self.output_directory)
         except Exception:
             pass
 
     def tearDown(self):
         try:
-            path = os.path.join(os.getcwd(), '.auto-sklearn', 'datamanager.pkl')
-            os.remove(path)
+            shutil.rmtree(self.output_directory)
         except Exception:
             pass
 
@@ -70,12 +70,13 @@ class SMAC_interfaceTest(unittest.TestCase):
                (self.dataset_string, self.param_string)
         sys.argv = shlex.split(call)
 
-        SMAC_interface.main()
+        SMAC_interface.main(output_dir=self.output_directory)
         self.assertEqual(patch.call_count, 1)
         call_args, call_kwargs = patch.call_args
         self.assertEqual(call_args, (self.dataset_string, 'holdout', 1,
                                      self.params))
-        self.assertEqual(call_kwargs, {'mode_args': None})
+        self.assertEqual(call_kwargs, {'mode_args': None,
+                                       'output_dir': self.output_directory})
 
     @mock.patch('autosklearn.cli.base_interface.main')
     def test_holdout_iterative_fit(self, patch):
@@ -84,13 +85,14 @@ class SMAC_interfaceTest(unittest.TestCase):
                (self.dataset_string, self.param_string)
         sys.argv = shlex.split(call)
 
-        SMAC_interface.main()
+        SMAC_interface.main(output_dir=self.output_directory)
         self.assertEqual(patch.call_count, 1)
         call_args, call_kwargs = patch.call_args
         self.assertEqual(call_args, (self.dataset_string,
                                      'holdout-iterative-fit', 1,
                                      self.params))
-        self.assertEqual(call_kwargs, {'mode_args': None})
+        self.assertEqual(call_kwargs, {'mode_args': None,
+                                       'output_dir': self.output_directory})
 
     @mock.patch('autosklearn.cli.base_interface.main')
     def test_testset(self, patch):
@@ -99,12 +101,13 @@ class SMAC_interfaceTest(unittest.TestCase):
                (self.dataset_string, self.param_string)
         sys.argv = shlex.split(call)
 
-        SMAC_interface.main()
+        SMAC_interface.main(output_dir=self.output_directory)
         self.assertEqual(patch.call_count, 1)
         call_args, call_kwargs = patch.call_args
         self.assertEqual(call_args, (self.dataset_string, 'test', 1,
                                      self.params))
-        self.assertEqual(call_kwargs, {'mode_args': None})
+        self.assertEqual(call_kwargs, {'mode_args': None,
+                                       'output_dir': self.output_directory})
 
     @mock.patch('autosklearn.cli.base_interface.main')
     def test_cv(self, patch):
@@ -113,12 +116,13 @@ class SMAC_interfaceTest(unittest.TestCase):
                (self.dataset_string, self.param_string)
         sys.argv = shlex.split(call)
 
-        SMAC_interface.main()
+        SMAC_interface.main(output_dir=self.output_directory)
         self.assertEqual(patch.call_count, 1)
         call_args, call_kwargs = patch.call_args
         self.assertEqual(call_args, (self.dataset_string, 'cv', 1,
                                      self.params))
-        self.assertEqual(call_kwargs, {'mode_args': {'folds': 3}})
+        self.assertEqual(call_kwargs, {'mode_args': {'folds': 3},
+                                       'output_dir': self.output_directory})
 
     @mock.patch('autosklearn.cli.base_interface.main')
     def test_partial_cv(self, patch):
@@ -128,13 +132,14 @@ class SMAC_interfaceTest(unittest.TestCase):
                    (fold, self.dataset_string, self.param_string)
             sys.argv = shlex.split(call)
 
-            SMAC_interface.main()
+            SMAC_interface.main(output_dir=self.output_directory)
             self.assertEqual(patch.call_count, fold + 1)
             call_args, call_kwargs = patch.call_args
             self.assertEqual(call_args, (self.dataset_string, 'partial-cv', 1,
                                          self.params))
             self.assertEqual(call_kwargs, {'mode_args': {'folds': 3,
-                                                         'fold': fold}})
+                                                         'fold': fold},
+                                           'output_dir': self.output_directory})
 
     @mock.patch('autosklearn.cli.base_interface.main')
     def test_nested_cv(self, patch):
@@ -143,10 +148,11 @@ class SMAC_interfaceTest(unittest.TestCase):
                (self.dataset_string, self.param_string)
         sys.argv = shlex.split(call)
 
-        SMAC_interface.main()
+        SMAC_interface.main(output_dir=self.output_directory)
         self.assertEqual(patch.call_count, 1)
         call_args, call_kwargs = patch.call_args
         self.assertEqual(call_args, (self.dataset_string, 'nested-cv', 1,
                                      self.params))
         self.assertEqual(call_kwargs, {'mode_args': {'outer_folds': 3,
-                                                     'inner_folds': 3}})
+                                                     'inner_folds': 3},
+                                       'output_dir': self.output_directory})

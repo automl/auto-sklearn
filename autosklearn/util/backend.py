@@ -166,45 +166,41 @@ class Backend(object):
 
         return models
 
-    def get_ensemble_indices_dir(self):
-        return os.path.join(self.internals_directory, 'ensemble_indices')
+    def get_ensemble_dir(self):
+        return os.path.join(self.internals_directory, 'ensembles')
 
-    def load_ensemble_indices_weights(self, seed):
-        indices_dir = self.get_ensemble_indices_dir()
+    def load_ensemble(self, seed):
+        ensemble_dir = self.get_ensemble_dir()
 
-        if not os.path.exists(indices_dir):
-            self.logger.warning('Directory %s does not exist' % indices_dir)
-            return {}
+        if not os.path.exists(ensemble_dir):
+            self.logger.warning('Directory %s does not exist' % ensemble_dir)
+            return None
 
         if seed >= 0:
-            indices_files = glob.glob(os.path.join(indices_dir,
-                                                   '%s.*.indices' % seed))
+            indices_files = glob.glob(os.path.join(ensemble_dir,
+                                                   '%s.*.ensemble' % seed))
             indices_files.sort()
         else:
-            indices_files = os.listdir(indices_dir)
-            indices_files = [os.path.join(indices_dir, f) for f in indices_files]
+            indices_files = os.listdir(ensemble_dir)
+            indices_files = [os.path.join(ensemble_dir, f) for f in indices_files]
             indices_files.sort(key=lambda f: time.ctime(os.path.getmtime(f)))
 
         with open(indices_files[-1], 'rb') as fh:
             ensemble_members_run_numbers = pickle.load(fh)
 
-        if len(ensemble_members_run_numbers) == 0:
-            self.logger.error('Ensemble indices file %s does not contain any '
-                              'ensemble information.', indices_files[-1])
-
         return ensemble_members_run_numbers
 
-    def save_ensemble_indices_weights(self, indices, idx, seed):
+    def save_ensemble(self, ensemble, idx, seed):
         try:
-            os.makedirs(self.get_ensemble_indices_dir())
+            os.makedirs(self.get_ensemble_dir())
         except Exception:
             pass
 
-        filepath = os.path.join(self.get_ensemble_indices_dir(),
-                                '%s.%s.indices' % (str(seed), str(idx).zfill(
+        filepath = os.path.join(self.get_ensemble_dir(),
+                                '%s.%s.ensemble' % (str(seed), str(idx).zfill(
                                     10)))
         with open(filepath, 'wb') as fh:
-            pickle.dump(indices, fh)
+            pickle.dump(ensemble, fh)
 
     def _get_prediction_output_dir(self, subset):
         return os.path.join(self.internals_directory,

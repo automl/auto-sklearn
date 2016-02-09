@@ -47,17 +47,17 @@ class Base_interfaceTest(unittest.TestCase):
             'one_hot_encoding:minimum_fraction': '0.01',
             'rescaling:__choice__': 'min/max'
         }
+        self.output_directory = os.path.join(os.getcwd(),
+                                             '.test_base_interface')
 
         try:
-            path = os.path.join(os.getcwd(), '.auto-sklearn', 'datamanager.pkl')
-            os.remove(path)
+            shutil.rmtree(self.output_directory)
         except Exception:
             pass
 
     def tearDown(self):
         try:
-            path = os.path.join(os.getcwd(), '.auto-sklearn', 'datamanager.pkl')
-            os.remove(path)
+            shutil.rmtree(self.output_directory)
         except Exception:
             pass
 
@@ -66,7 +66,8 @@ class Base_interfaceTest(unittest.TestCase):
         autosklearn.cli.base_interface.main(self.dataset_string,
                                             'holdout',
                                             '1',
-                                            self.params)
+                                            self.params,
+                                            output_dir=self.output_directory)
         # Returns the actual call
         call_args = patch.call_args[0][0]
         result = call_args.split(",")[3].strip()
@@ -77,7 +78,8 @@ class Base_interfaceTest(unittest.TestCase):
         autosklearn.cli.base_interface.main(self.dataset_string,
                                             'holdout-iterative-fit',
                                             '1',
-                                            self.params)
+                                            self.params,
+                                            output_dir=self.output_directory)
         # Returns the actual call
         call_args = patch.call_args[0][0]
         result = call_args.split(",")[3].strip()
@@ -88,7 +90,8 @@ class Base_interfaceTest(unittest.TestCase):
         autosklearn.cli.base_interface.main(self.dataset_string,
                                             'test',
                                             '1',
-                                            self.params)
+                                            self.params,
+                                            output_dir=self.output_directory)
         # Returns the actual call
         call_args = patch.call_args[0][0]
         result = call_args.split(",")[3].strip()
@@ -100,7 +103,8 @@ class Base_interfaceTest(unittest.TestCase):
                                             'cv',
                                             '1',
                                             self.params,
-                                            mode_args={'folds': 3})
+                                            mode_args={'folds': 3},
+                                            output_dir=self.output_directory)
         # Returns the actual call
         call_args = patch.call_args[0][0]
         result = call_args.split(",")[3].strip()
@@ -116,7 +120,8 @@ class Base_interfaceTest(unittest.TestCase):
                                                 '1',
                                                 params,
                                                 mode_args={'folds': 3,
-                                                           'fold': fold})
+                                                           'fold': fold},
+                                                output_dir=self.output_directory)
             # Returns the actual call
             call_args = patch.call_args[0][0]
             result = call_args.split(",")[3].strip()
@@ -131,7 +136,8 @@ class Base_interfaceTest(unittest.TestCase):
                                             '1',
                                             self.params,
                                             mode_args={'outer_folds': 3,
-                                                       'inner_folds': 3})
+                                                       'inner_folds': 3},
+                                            output_dir=self.output_directory)
         # Returns the actual call
         call_args = patch.call_args[0][0]
         result = call_args.split(",")[3].strip()

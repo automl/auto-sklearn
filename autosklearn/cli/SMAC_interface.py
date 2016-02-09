@@ -3,7 +3,8 @@ import sys
 
 from autosklearn.cli import base_interface
 
-def main():
+
+def main(output_dir=None):
     instance_name = sys.argv[1]
     instance_specific_information = sys.argv[2]
     cutoff_time = float(sys.argv[3])
@@ -45,7 +46,7 @@ def main():
         raise ValueError(mode)
 
     base_interface.main(instance_specific_information, mode,
-                        seed, params, mode_args=mode_args)
+                        seed, params, mode_args=mode_args, output_dir=output_dir)
 
 
 if __name__ == '__main__':

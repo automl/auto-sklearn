@@ -6,20 +6,20 @@ import time
 import traceback
 
 import numpy as np
-import lockfile
-from autosklearn.pipeline.classification import SimpleClassificationPipeline
-from autosklearn.pipeline.regression import SimpleRegressionPipeline
+import autosklearn.pipeline.classification
+import autosklearn.pipeline.regression
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
 from autosklearn.constants import *
 from autosklearn.evaluation.util import get_new_run_num
 from autosklearn.util import Backend
+from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
+from autosklearn.evaluation.util import calculate_score
 
 
 __all__ = [
     'AbstractEvaluator'
 ]
-
 
 class MyDummyClassifier(DummyClassifier):
     def __init__(self, configuration, random_states):
@@ -39,7 +39,10 @@ class MyDummyClassifier(DummyClassifier):
 
     def predict_proba(self, X, batch_size=1000):
         new_X = np.ones((X.shape[0], 1))
-        return super(MyDummyClassifier, self).predict_proba(new_X)
+        probas = super(MyDummyClassifier, self).predict_proba(new_X)
+        probas = convert_multioutput_multiclass_to_multilabel(probas).astype(
+            np.float32)
+        return probas
 
     def estimator_supports_iterative_fit(self):
         return False
@@ -63,7 +66,7 @@ class MyDummyRegressor(DummyRegressor):
 
     def predict(self, X, batch_size=1000):
         new_X = np.ones((X.shape[0], 1))
-        return super(MyDummyRegressor, self).predict(new_X)
+        return super(MyDummyRegressor, self).predict(new_X).astype(np.float32)
 
     def estimator_supports_iterative_fit(self):
         return False
@@ -73,16 +76,16 @@ class AbstractEvaluator(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def __init__(self, Datamanager, configuration=None,
+    def __init__(self, Datamanager, output_dir, configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
-                 output_dir=None,
                  output_y_test=False,
                  num_run=None):
 
         self.starttime = time.time()
 
+        self.output_dir = output_dir
         self.configuration = configuration
         self.D = Datamanager
 
@@ -93,11 +96,6 @@ class AbstractEvaluator(object):
         self.task_type = Datamanager.info['task']
         self.seed = seed
 
-        if output_dir is None:
-            self.output_dir = os.getcwd()
-        else:
-            self.output_dir = output_dir
-
         self.output_y_test = output_y_test
         self.with_predictions = with_predictions
         self.all_scoring_functions = all_scoring_functions
@@ -106,13 +104,15 @@ class AbstractEvaluator(object):
             if self.configuration is None:
                 self.model_class = MyDummyRegressor
             else:
-                self.model_class = SimpleRegressionPipeline
+                self.model_class = \
+                    autosklearn.pipeline.regression.SimpleRegressionPipeline
             self.predict_function = self.predict_regression
         else:
             if self.configuration is None:
                 self.model_class = MyDummyClassifier
             else:
-                self.model_class = SimpleClassificationPipeline
+                self.model_class = \
+                    autosklearn.pipeline.classification.SimpleClassificationPipeline
             self.predict_function = self.predict_proba
 
         if num_run is None:
@@ -129,6 +129,24 @@ class AbstractEvaluator(object):
     @abc.abstractmethod
     def predict(self):
         pass
+
+    def loss_and_predict(self):
+        Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
+        err = self.loss(self.Y_optimization, Y_optimization_pred)
+        return err, Y_optimization_pred, Y_valid_pred, Y_test_pred
+
+    def loss(self, y_true, y_hat):
+        score = calculate_score(
+            y_true, y_hat, self.task_type,
+            self.metric, self.D.info['label_num'],
+            all_scoring_functions=self.all_scoring_functions)
+
+        if hasattr(score, '__len__'):
+            err = {key: 1 - score[key] for key in score}
+        else:
+            err = 1 - score
+
+        return err
 
     # This function does everything necessary after the fitting is done:
     #        predicting
@@ -149,13 +167,19 @@ class AbstractEvaluator(object):
 
             print(traceback.format_exc())
             print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
-                  ('TIMEOUT', abs(self.duration), 1.0, self.seed,
+                  ('TIMEOUT', abs(self.duration), 2.0, self.seed,
                    'No results were produced! Error is %s' % str(e)))
 
     def file_output(self):
         seed = os.environ.get('AUTOSKLEARN_SEED')
 
-        errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
+        if self.configuration is None:
+            # Do not calculate the score when creating dummy predictions!
+            Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
+            errs = {self.D.info['metric']: 2.0}
+        else:
+            errs, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
+                self.loss_and_predict()
 
         if self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
             return 2, "Targets %s and prediction %s don't have the same " \
@@ -186,7 +210,11 @@ class AbstractEvaluator(object):
                                                  seed, num_run)
 
         self.duration = time.time() - self.starttime
-        err = errs[self.D.info['metric']]
+        if isinstance(errs, dict):
+            err = errs[self.D.info['metric']]
+        else:
+            err = errs
+            errs = {}
         additional_run_info = ';'.join(['%s: %s' %
             (METRIC_TO_STRING[metric] if metric in METRIC_TO_STRING else metric,
                                                                      value)
@@ -195,20 +223,8 @@ class AbstractEvaluator(object):
         additional_run_info += ';' + 'num_run:' + num_run
         return err, additional_run_info
 
-    def predict_proba(self, X, model, task_type, Y_train=None):
+    def predict_proba(self, X, model, task_type, Y_train):
         Y_pred = model.predict_proba(X, batch_size=1000)
-
-        if task_type == MULTILABEL_CLASSIFICATION:
-            Y_pred = np.hstack([Y_pred[i][:, -1].reshape((-1, 1))
-                                for i in range(len(Y_pred))])
-
-        elif task_type == BINARY_CLASSIFICATION:
-            if len(Y_pred.shape) != 1:
-                Y_pred = Y_pred[:, 1].reshape(-1, 1)
-
-        elif task_type == MULTICLASS_CLASSIFICATION:
-            pass
-
         Y_pred = self._ensure_prediction_array_sizes(Y_pred, Y_train)
         return Y_pred
 
@@ -225,19 +241,18 @@ class AbstractEvaluator(object):
 
         if self.task_type == MULTICLASS_CLASSIFICATION and \
                 prediction.shape[1] < num_classes:
-            classes = list(np.unique(self.D.data['Y_train']))
-            if num_classes == prediction.shape[1]:
-                return prediction
-
-            if Y_train is not None:
-                classes = list(np.unique(Y_train))
+            if Y_train is None:
+                raise ValueError('Y_train must not be None!')
+            classes = list(np.unique(Y_train))
 
             mapping = dict()
             for class_number in range(num_classes):
                 if class_number in classes:
                     index = classes.index(class_number)
                     mapping[index] = class_number
-            new_predictions = np.zeros((prediction.shape[0], num_classes))
+            new_predictions = np.zeros((prediction.shape[0], num_classes),
+                                       dtype=np.float32)
+
             for index in mapping:
                 class_index = mapping[index]
                 new_predictions[:, class_index] = prediction[:, index]

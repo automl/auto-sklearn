@@ -1,17 +1,15 @@
 # -*- encoding: utf-8 -*-
 import os
 import random
-import shutil
 
 import numpy as np
-from os import stat
 import six
 
-from autosklearn.automl import AutoML
+import autosklearn.automl
 from autosklearn.constants import *
 
 
-class AutoSklearnClassifier(AutoML):
+class AutoSklearnClassifier(autosklearn.automl.AutoML):
     """This class implements the classification task. It must not be pickled!
 
     Parameters
@@ -122,9 +120,7 @@ class AutoSklearnClassifier(AutoML):
         # to superinit
         self._tmp_dir, self._output_dir = self._prepare_create_folders(
             tmp_dir=tmp_folder,
-            output_dir=output_folder,
-            shared_mode=shared_mode
-        )
+            output_dir=output_folder)
 
         self._classes = []
         self._n_classes = []
@@ -152,7 +148,7 @@ class AutoSklearnClassifier(AutoML):
             shared_mode=shared_mode)
 
     @staticmethod
-    def _prepare_create_folders(tmp_dir, output_dir, shared_mode):
+    def _prepare_create_folders(tmp_dir, output_dir):
         random_number = random.randint(0, 10000)
 
         pid = os.getpid()
@@ -161,22 +157,29 @@ class AutoSklearnClassifier(AutoML):
         if output_dir is None:
             output_dir = '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
 
-        if not os.path.exists(tmp_dir):
+        # Totally weird, this has to be created here, will be deleted in the
+        # first lines of fit(). If not there, creating the Backend object in the
+        # superclass will fail
+        try:
             os.makedirs(tmp_dir)
-        if not os.path.exists(output_dir):
+        except OSError:
+            pass
+        try:
             os.makedirs(output_dir)
+        except OSError:
+            pass
 
         return tmp_dir, output_dir
 
     def _create_output_directories(self):
         try:
-            os.makedirs(self._output_dir)
-            if self._output_dir != self._tmp_dir:
-                os.makedirs(self._tmp_dir)
+            os.makedirs(self._tmp_dir)
         except OSError:
-            print("Did not create tmp/output_dir, already exists")
-            if not self._shared_mode:
-                raise
+            pass
+        try:
+            os.makedirs(self._output_dir)
+        except OSError:
+            pass
 
     def fit(self, X, y,
             metric='acc_metric',
@@ -202,9 +205,9 @@ class AutoSklearnClassifier(AutoML):
             <http://www.causality.inf.ethz.ch/AutoML/automl_ijcnn15.pdf>`_.
 
         feat_type : list, optional (default=None)
-            List of Bools of `len(X.shape[1])` describing if an attribute is
-            continuous or categorical. Categorical attributes will
-            automatically 1Hot encoded.
+            List of str of `len(X.shape[1])` describing the attribute type.
+            Possible types are `Categorical` and `Numerical`. `Categorical`
+            attributes will be automatically One-Hot encoded.
 
         dataset_name : str, optional (default=None)
             Create nicer output. If None, a string will be determined by the
@@ -268,7 +271,7 @@ class AutoSklearnClassifier(AutoML):
                                                       feat_type, dataset_name)
 
     def predict(self, X):
-        """Predict class for X.
+        """Predict classes for X.
 
         Parameters
         ----------
@@ -276,14 +279,28 @@ class AutoSklearnClassifier(AutoML):
 
         Returns
         -------
-        y : array of shape = [n_samples] or [n_samples, n_outputs]
+        y : array of shape = [n_samples] or [n_samples, n_labels]
             The predicted classes.
 
         """
         return super(AutoSklearnClassifier, self).predict(X)
 
+    def predict_proba(self, X):
+        """Predict probabilities of classes for all samples X.
 
-class AutoSklearnRegressor(AutoML):
+        Parameters
+        ----------
+        X : array-like or sparse matrix of shape = [n_samples, n_features]
+
+        Returns
+        -------
+        y : array of shape = [n_samples, n_classes] or [n_samples, n_labels]
+            The predicted class probabilities.
+        """
+        return super(AutoSklearnClassifier, self).predict_proba(X)
+
+
+class AutoSklearnRegressor(autosklearn.automl.AutoML):
 
     def __init__(self, **kwargs):
         raise NotImplementedError()

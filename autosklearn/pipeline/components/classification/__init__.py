@@ -2,33 +2,23 @@ __author__ = 'feurerm'
 
 from collections import OrderedDict
 import copy
-import importlib
-import inspect
 import os
-import pkgutil
-import sys
 
-from ..base import AutoSklearnClassificationAlgorithm
+from ..base import AutoSklearnClassificationAlgorithm, find_components, \
+    ThirdPartyComponents
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 from HPOlibConfigSpace.conditions import EqualsCondition
 
 classifier_directory = os.path.split(__file__)[0]
-_classifiers = OrderedDict()
+_classifiers = find_components(__package__,
+                               classifier_directory,
+                               AutoSklearnClassificationAlgorithm)
+_addons = ThirdPartyComponents(AutoSklearnClassificationAlgorithm)
 
 
-for module_loader, module_name, ispkg in pkgutil.iter_modules([classifier_directory]):
-    full_module_name = "%s.%s" % (__package__, module_name)
-    if full_module_name not in sys.modules and not ispkg:
-        module = importlib.import_module(full_module_name)
-
-        for member_name, obj in inspect.getmembers(module):
-            if inspect.isclass(obj) and AutoSklearnClassificationAlgorithm in obj.__bases__:
-                # TODO test if the obj implements the interface
-                # Keep in mind that this only instantiates the ensemble_wrapper,
-                # but not the real target classifier
-                classifier = obj
-                _classifiers[module_name] = classifier
+def add_classifier(classifier):
+    _addons.add_component(classifier)
 
 
 class ClassifierChoice(object):
@@ -39,7 +29,10 @@ class ClassifierChoice(object):
 
     @classmethod
     def get_components(cls):
-        return _classifiers
+        components = OrderedDict()
+        components.update(_classifiers)
+        components.update(_addons.components)
+        return components
 
     @classmethod
     def get_available_components(cls, data_prop,
@@ -164,6 +157,3 @@ class ClassifierChoice(object):
                 cs.add_forbidden_clause(forbidden_clause)
     
         return cs
-
-
-_classifiers['classifier'] = ClassifierChoice

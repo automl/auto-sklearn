@@ -10,7 +10,8 @@ from autosklearn.pipeline.components.base import \
 from autosklearn.pipeline.constants import *
 
 
-class ExtraTreesPreprocessor(AutoSklearnPreprocessingAlgorithm):
+class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
+
     def __init__(self, n_estimators, criterion, min_samples_leaf,
                  min_samples_split, max_features,
                  max_leaf_nodes_or_max_depth="max_depth",
@@ -69,21 +70,14 @@ class ExtraTreesPreprocessor(AutoSklearnPreprocessingAlgorithm):
         # Use at most half of the features
         max_features = max(1, min(int(X.shape[1] / 2), max_features))
         self.preprocessor = ExtraTreesClassifier(
-            n_estimators=0, criterion=self.criterion,
+            n_estimators=self.n_estimators, criterion=self.criterion,
             max_depth=self.max_depth, min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,
             max_features=max_features, max_leaf_nodes=self.max_leaf_nodes,
             oob_score=self.oob_score, n_jobs=self.n_jobs, verbose=self.verbose,
-            random_state=self.random_state, class_weight=self.class_weight,
-            warm_start=True
+            random_state=self.random_state, class_weight=self.class_weight
         )
-        # JTS TODO: I think we might have to copy here if we want self.estimator
-        # to always be consistent on sigabort
-        while len(self.preprocessor.estimators_) < self.n_estimators:
-            tmp = self.preprocessor  # TODO copy ?
-            tmp.n_estimators += self.estimator_increment
-            tmp.fit(X, Y, sample_weight=sample_weight)
-            self.preprocessor = tmp
+        self.preprocessor.fit(X, Y, sample_weight=sample_weight)
         return self
 
     def transform(self, X):
@@ -93,25 +87,15 @@ class ExtraTreesPreprocessor(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'ET',
+        return {'shortname': 'ETC',
                 'name': 'Extra Trees Classifier Preprocessing',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': False,
-                # TODO find out if this is good because of sparcity...
-                'prefers_data_normalized': False,
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                'handles_sparse': False,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (INPUT,),
-                # TODO find out what is best used here!
-                # But rather fortran or C-contiguous?
-                'preferred_dtype': np.float32}
+                'output': (INPUT,)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

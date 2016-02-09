@@ -55,21 +55,13 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': 'RandomTreesEmbedding',
                 'name': 'Random Trees Embedding',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': False,
-                'prefers_data_normalized': False,
                 'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                'handles_sparse': False,
-                'handles_dense': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (SPARSE, SIGNED_DATA),
-                'preferred_dtype': None}
+                'output': (SPARSE, SIGNED_DATA)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

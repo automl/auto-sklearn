@@ -20,9 +20,14 @@
 
 # If your documentation needs a minimal Sphinx version, state it here.
 # needs_sphinx = '1.0'
+import os
+import sys
+
 
 # Mock out stuff for readthedocs.org
-import sys
+#on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+#if on_rtd:
+
 try:
     from mock import Mock as MagicMock
 except:
@@ -46,8 +51,9 @@ MOCK_MODULES = ['lockfile',
                 'arff',
                 'pandas',
                 'Cython',
-                'numpy',
+                'numpy', 'numpy.random',
                 'scipy', 'scipy.sparse', 'scipy.stats', 'scipy.linalg',
+                'scipy.sparse.linalg',
                 'sklearn',
                 'sklearn.base',
                 'sklearn.cross_validation',
@@ -58,16 +64,19 @@ MOCK_MODULES = ['lockfile',
                 'sklearn.utils',
                 'psutil','pyyaml','pandas',
                 'matplotlib',
-                'autosklearn.pipeline',
-                'autosklearn.pipeline.implementations',
+                'autosklearn.cli.base_interface',
                 'autosklearn.pipeline.implementations.OneHotEncoder',
                 'autosklearn.pipeline.implementations.Imputation',
                 'autosklearn.pipeline.implementations.StandardScaler',
+                'autosklearn.pipeline.implementations.MultilabelClassifier',
                 'autosklearn.pipeline.classification',
                 'autosklearn.pipeline.regression',
                 'HPOlibConfigSpace',
                 'HPOlibConfigSpace.converters',
-                'HPOlibConfigSpace.configuration_space']
+                'HPOlibConfigSpace.configuration_space',
+                'HPOlibConfigSpace.hyperparameters',
+                'HPOlibConfigSpace.conditions',
+                'HPOlibConfigSpace.forbidden']
 
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
@@ -110,7 +119,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'AutoSklearn'
-copyright = u'2015, Matthias Feurer, Aaron Klein, Katharina Eggensperger'
+copyright = u'2014-2016, Matthias Feurer, Aaron Klein, Katharina ' \
+            u'Eggensperger, Jost Tobias Springenberg, Manuel Blum, Frank Hutter'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

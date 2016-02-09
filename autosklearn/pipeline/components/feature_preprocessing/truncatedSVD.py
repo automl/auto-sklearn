@@ -36,21 +36,13 @@ class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': 'TSVD',
                 'name': 'Truncated Singular Value Decomposition',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': False,
-                'prefers_data_normalized': False,
                 'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                'handles_sparse': True,
-                'handles_dense': False,
                 'input': (SPARSE, UNSIGNED_DATA),
-                'output': (DENSE, INPUT),
-                'preferred_dtype': np.float32}
+                'output': (DENSE, INPUT)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

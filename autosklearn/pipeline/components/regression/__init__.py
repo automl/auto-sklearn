@@ -6,27 +6,21 @@ import os
 import pkgutil
 import sys
 
-from ..base import AutoSklearnRegressionAlgorithm
+from ..base import AutoSklearnRegressionAlgorithm, find_components, \
+    ThirdPartyComponents
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
 from HPOlibConfigSpace.conditions import EqualsCondition
 
 regressor_directory = os.path.split(__file__)[0]
-_regressors = OrderedDict()
+_regressors = find_components(__package__,
+                              regressor_directory,
+                              AutoSklearnRegressionAlgorithm)
+_addons = ThirdPartyComponents(AutoSklearnRegressionAlgorithm)
 
 
-for module_loader, module_name, ispkg in pkgutil.iter_modules([regressor_directory]):
-    full_module_name = "%s.%s" % (__package__, module_name)
-    if full_module_name not in sys.modules and not ispkg:
-        module = importlib.import_module(full_module_name)
-
-        for member_name, obj in inspect.getmembers(module):
-            if inspect.isclass(obj) and AutoSklearnRegressionAlgorithm in obj.__bases__:
-                # TODO test if the obj implements the interface
-                # Keep in mind that this only instantiates the ensemble_wrapper,
-                # but not the real target classifier
-                classifier = obj
-                _regressors[module_name] = classifier
+def add_regressor(regressor):
+    _addons.add_component(regressor)
 
 
 class RegressorChoice(object):
@@ -37,7 +31,10 @@ class RegressorChoice(object):
 
     @classmethod
     def get_components(cls):
-        return _regressors
+        components = OrderedDict()
+        components.update(_regressors)
+        components.update(_addons.components)
+        return components
 
     @classmethod
     def get_available_components(cls, data_prop,
@@ -157,6 +154,3 @@ class RegressorChoice(object):
                 cs.add_forbidden_clause(forbidden_clause)
 
         return cs
-
-
-_regressors['regressor'] = RegressorChoice

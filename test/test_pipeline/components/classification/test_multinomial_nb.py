@@ -7,6 +7,7 @@ from autosklearn.pipeline.util import _test_classifier, _test_classifier_iterati
 
 import numpy as np
 import sklearn.metrics
+import sklearn.naive_bayes
 
 
 class MultinomialNBComponentTest(unittest.TestCase):
@@ -43,3 +44,18 @@ class MultinomialNBComponentTest(unittest.TestCase):
         prediction = cls.predict(X_test)
         self.assertAlmostEqual(np.nanmean(prediction == Y_test),
                                0.88888888888888884)
+
+    def test_default_configuration_binary(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(MultinomialNB, make_binary=True)
+            self.assertAlmostEqual(1.0,
+                                   sklearn.metrics.accuracy_score(
+                                       predictions, targets))
+
+    def test_target_algorithm_multioutput_multiclass_support(self):
+        cls = sklearn.naive_bayes.MultinomialNB()
+        X = np.random.random((10, 10))
+        y = np.random.randint(0, 1, size=(10, 10))
+        self.assertRaisesRegexp(ValueError, 'bad input shape \(10, 10\)',
+                                cls.fit, X, y)

@@ -22,7 +22,6 @@
 # CONNECTION WITH THE USE OR PERFORMANCE OF SOFTWARE, DOCUMENTS, MATERIALS,
 # PUBLICATIONS, OR INFORMATION MADE AVAILABLE FOR THE CHALLENGE.
 
-from .common import *
 from .classification_metrics import *
 from .util import *
 from .regression_metrics import *

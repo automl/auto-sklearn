@@ -36,25 +36,14 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': 'PCA',
                 'name': 'Principle Component Analysis',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                # TODO write a test to make sure that the PCA scales data itself
-                'prefers_data_scaled': False,
-                # TODO find out if this is good because of sparsity...
-                'prefers_data_normalized': False,
                 'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 # TODO document that we have to be very careful
                 'is_deterministic': False,
-                'handles_sparse': False,
-                'handles_dense': True,
                 'input': (DENSE, UNSIGNED_DATA),
-                'output': (DENSE, UNSIGNED_DATA),
-                # TODO find out what is best used here!
-                'preferred_dtype': None}
+                'output': (DENSE, UNSIGNED_DATA)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
