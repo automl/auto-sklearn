@@ -1,17 +1,15 @@
 # -*- encoding: utf-8 -*-
 import os
 import random
-import shutil
 
 import numpy as np
-from os import stat
 import six
 
-from autosklearn.automl import AutoML
+import autosklearn.automl
 from autosklearn.constants import *
 
 
-class AutoSklearnClassifier(AutoML):
+class AutoSklearnClassifier(autosklearn.automl.AutoML):
     """This class implements the classification task. It must not be pickled!
 
     Parameters
@@ -302,7 +300,7 @@ class AutoSklearnClassifier(AutoML):
         return super(AutoSklearnClassifier, self).predict_proba(X)
 
 
-class AutoSklearnRegressor(AutoML):
+class AutoSklearnRegressor(autosklearn.automl.AutoML):
 
     def __init__(self, **kwargs):
         raise NotImplementedError()

@@ -6,9 +6,8 @@ import time
 import traceback
 
 import numpy as np
-import lockfile
-from autosklearn.pipeline.classification import SimpleClassificationPipeline
-from autosklearn.pipeline.regression import SimpleRegressionPipeline
+import autosklearn.pipeline.classification
+import autosklearn.pipeline.regression
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
 from autosklearn.constants import *
@@ -105,13 +104,15 @@ class AbstractEvaluator(object):
             if self.configuration is None:
                 self.model_class = MyDummyRegressor
             else:
-                self.model_class = SimpleRegressionPipeline
+                self.model_class = \
+                    autosklearn.pipeline.regression.SimpleRegressionPipeline
             self.predict_function = self.predict_regression
         else:
             if self.configuration is None:
                 self.model_class = MyDummyClassifier
             else:
-                self.model_class = SimpleClassificationPipeline
+                self.model_class = \
+                    autosklearn.pipeline.classification.SimpleClassificationPipeline
             self.predict_function = self.predict_proba
 
         if num_run is None:

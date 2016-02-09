@@ -25,57 +25,60 @@ import sys
 
 
 # Mock out stuff for readthedocs.org
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-if on_rtd:
+#on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+#if on_rtd:
 
-    try:
-        from mock import Mock as MagicMock
-    except:
-        from unittest.mock import MagicMock
+try:
+    from mock import Mock as MagicMock
+except:
+    from unittest.mock import MagicMock
 
-    class Mock(MagicMock):
-        @classmethod
-        def __getattr__(cls, name):
-            if 'BaseEstimator' in name:
-                class BaseEstimator(object):
-                    pass
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+        if 'BaseEstimator' in name:
+            class BaseEstimator(object):
+                pass
 
-                return BaseEstimator
-            return Mock()
+            return BaseEstimator
+        return Mock()
 
-    MOCK_MODULES = ['lockfile',
-                    'joblib',
-                    'psutil',
-                    'pyyaml',
-                    'ConfigArgParse',
-                    'arff',
-                    'pandas',
-                    'Cython',
-                    'numpy',
-                    'scipy', 'scipy.sparse', 'scipy.stats', 'scipy.linalg',
-                    'sklearn',
-                    'sklearn.base',
-                    'sklearn.cross_validation',
-                    'sklearn.dummy',
-                    'sklearn.metrics',
-                    'sklearn.multiclass',
-                    'sklearn.neighbors',
-                    'sklearn.utils',
-                    'psutil','pyyaml','pandas',
-                    'matplotlib',
-                    'autosklearn.pipeline',
-                    'autosklearn.pipeline.implementations',
-                    'autosklearn.pipeline.implementations.OneHotEncoder',
-                    'autosklearn.pipeline.implementations.Imputation',
-                    'autosklearn.pipeline.implementations.StandardScaler',
-                    'autosklearn.pipeline.implementations.util'
-                    'autosklearn.pipeline.classification',
-                    'autosklearn.pipeline.regression',
-                    'HPOlibConfigSpace',
-                    'HPOlibConfigSpace.converters',
-                    'HPOlibConfigSpace.configuration_space']
+MOCK_MODULES = ['lockfile',
+                'joblib',
+                'psutil',
+                'pyyaml',
+                'ConfigArgParse',
+                'arff',
+                'pandas',
+                'Cython',
+                'numpy', 'numpy.random',
+                'scipy', 'scipy.sparse', 'scipy.stats', 'scipy.linalg',
+                'scipy.sparse.linalg',
+                'sklearn',
+                'sklearn.base',
+                'sklearn.cross_validation',
+                'sklearn.dummy',
+                'sklearn.metrics',
+                'sklearn.multiclass',
+                'sklearn.neighbors',
+                'sklearn.utils',
+                'psutil','pyyaml','pandas',
+                'matplotlib',
+                'autosklearn.cli.base_interface',
+                'autosklearn.pipeline.implementations.OneHotEncoder',
+                'autosklearn.pipeline.implementations.Imputation',
+                'autosklearn.pipeline.implementations.StandardScaler',
+                'autosklearn.pipeline.implementations.MultilabelClassifier',
+                'autosklearn.pipeline.classification',
+                'autosklearn.pipeline.regression',
+                'HPOlibConfigSpace',
+                'HPOlibConfigSpace.converters',
+                'HPOlibConfigSpace.configuration_space',
+                'HPOlibConfigSpace.hyperparameters',
+                'HPOlibConfigSpace.conditions',
+                'HPOlibConfigSpace.forbidden']
 
-    sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # Add the parent directory of this file to the PYTHONPATH
 import os

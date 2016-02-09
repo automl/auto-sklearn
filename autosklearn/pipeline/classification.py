@@ -8,7 +8,12 @@ from sklearn.base import ClassifierMixin
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
-from autosklearn.pipeline import components as components
+from autosklearn.pipeline.components import classification as \
+    classification_components
+from autosklearn.pipeline.components import data_preprocessing as \
+    data_preprocessing_components
+from autosklearn.pipeline.components import feature_preprocessing as \
+    feature_preprocessing_components
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
 from autosklearn.pipeline.components.data_preprocessing.balancing import Balancing
@@ -284,21 +289,21 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         # Add the always active preprocessing components
         steps.extend(
             [["one_hot_encoding",
-              components.data_preprocessing._preprocessors['one_hot_encoding']],
+              data_preprocessing_components._preprocessors['one_hot_encoding']],
              ["imputation",
-              components.data_preprocessing._preprocessors['imputation']],
+              data_preprocessing_components._preprocessors['imputation']],
              ["rescaling",
-              components.data_preprocessing._preprocessors['rescaling']],
+              data_preprocessing_components._preprocessors['rescaling']],
              ["balancing",
-              components.data_preprocessing._preprocessors['balancing']]])
+              data_preprocessing_components._preprocessors['balancing']]])
 
         # Add the preprocessing component
         steps.append(['preprocessor',
-                      components.feature_preprocessing.FeaturePreprocessorChoice])
+                      feature_preprocessing_components.FeaturePreprocessorChoice])
 
         # Add the classification component
         steps.append(['classifier',
-                      components.classification_components.ClassifierChoice])
+                      classification_components.ClassifierChoice])
         return steps
 
     def _get_estimator_hyperparameter_name(self):

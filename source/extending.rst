@@ -11,15 +11,16 @@ feature preprocessing methods. In order to do so, a user has to implement a
 wrapper class and make it known to auto-sklearn. This manual will walk you
 through the process.
 
+
 Writing a component
 ===================
 
 Depending on the purpose, the component has to be a subclass of one of the
 following base classes:
 
-* classification: :class:`autosklearn.pipeline.components.classification.AutoSklearnClassificationAlgorithm`
-* regression: :class:`autosklearn.pipeline.components.regression.AutoSklearnRegressionAlgorithm`
-* proprocessing: :class:`autosklearn.pipeline.components.feature_preprocessing.AutoSklearnPreprocessingAlgorithm`
+* classification: :class:`autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm`
+* regression: :class:`autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm`
+* proprocessing: :class:`autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm`
 
 In general, these classes are wrappers around existing machine learning
 models and only add the functionality auto-sklearn needs. Of course you can
@@ -51,9 +52,9 @@ Return an instance of ``HPOlibConfigSpace.configuration_space
 .ConfigurationSpace``.
 
 See also the abstract definitions:
-:meth:`AutoSklearnClassificationAlgorithm.get_hyperparameter_search_space() <autosklearn.pipeline.components.classification.AutoSklearnClassificationAlgorithm.get_hyperparameter_search_space>`
-:meth:`AutoSklearnRegressionAlgorithm.get_hyperparameter_search_space() <autosklearn.pipeline.components.regression.AutoSklearnRegressionAlgorithm.get_hyperparameter_search_space>`
-:meth:`AutoSklearnPreprocessingAlgorithm.get_hyperparameter_search_space() <autosklearn.pipeline.components.feature_preprocessing.AutoSklearnPreprocessingAlgorithm.get_hyperparameter_search_space>`
+:meth:`AutoSklearnClassificationAlgorithm.get_hyperparameter_search_space() <autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.get_hyperparameter_search_space>`
+:meth:`AutoSklearnRegressionAlgorithm.get_hyperparameter_search_space() <autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.get_hyperparameter_search_space>`
+:meth:`AutoSklearnPreprocessingAlgorithm.get_hyperparameter_search_space() <autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.get_hyperparameter_search_space>`
 
 To find out about how to create a ``ConfigurationSpace``-object, please look
 at the source code on `github.com <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/classification>`_.
@@ -123,9 +124,9 @@ Classification
 
 In addition two `get_properties()` and `get_hyperparameter_search_space()`
 you have to implement
-:meth:`AutoSklearnClassificationAlgorithm.fit() <autosklearn.pipeline.components.classification.AutoSklearnClassificationAlgorithm.fit>`
+:meth:`AutoSklearnClassificationAlgorithm.fit() <autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.fit>`
 and
-:meth:`AutoSklearnClassificationAlgorithm.predict() <autosklearn.pipeline.components.classification.AutoSklearnClassificationAlgorithm.predict>`
+:meth:`AutoSklearnClassificationAlgorithm.predict() <autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict>`
 . These are an implementation of the `scikit-learn predictor API
 <http://scikit-learn.org/stable/developers/index.html#apis-of-scikit-learn-objects>`_.
 
@@ -134,9 +135,9 @@ Regression
 
 In addition two `get_properties()` and `get_hyperparameter_search_space()`
 you have to implement
-:meth:`AutoSklearnRegressionAlgorithm.fit() <autosklearn.pipeline.components.regression.AutoSklearnRegressionAlgorithm.fit>`
+:meth:`AutoSklearnRegressionAlgorithm.fit() <autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.fit>`
 and
-:meth:`AutoSklearnRegressionAlgorithm.predict() <autosklearn.pipeline.components.regression.AutoSklearnRegressionAlgorithm.predict>`
+:meth:`AutoSklearnRegressionAlgorithm.predict() <autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict>`
 . These are an implementation of the `scikit-learn predictor API
 <http://scikit-learn.org/stable/developers/index.html#apis-of-scikit-learn-objects>`_.
 
@@ -145,8 +146,8 @@ Feature Preprocessing
 
 In addition two `get_properties()` and `get_hyperparameter_search_space()`
 you have to implement
-:meth:`AutoSklearnPreprocessingAlgorithm.fit() <autosklearn.pipeline.components.feature_preprocessing.AutoSklearnPreprocessingAlgorithm.fit>`
+:meth:`AutoSklearnPreprocessingAlgorithm.fit() <autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.fit>`
 and
-:meth:`AutoSklearnPreprocessingAlgorithm.transform() <autosklearn.pipeline.components.feature_preprocessing.AutoSklearnPreprocessingAlgorithm.transform>`
+:meth:`AutoSklearnPreprocessingAlgorithm.transform() <autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.transform>`
 . These are an implementation of the `scikit-learn predictor API
 <http://scikit-learn.org/stable/developers/index.html#apis-of-scikit-learn-objects>`_.
