@@ -207,9 +207,9 @@ class AutoSklearnClassifier(AutoML):
             <http://www.causality.inf.ethz.ch/AutoML/automl_ijcnn15.pdf>`_.
 
         feat_type : list, optional (default=None)
-            List of Bools of `len(X.shape[1])` describing if an attribute is
-            continuous or categorical. Categorical attributes will
-            automatically 1Hot encoded.
+            List of str of `len(X.shape[1])` describing the attribute type.
+            Possible types are `Categorical` and `Numerical`. `Categorical`
+            attributes will be automatically One-Hot encoded.
 
         dataset_name : str, optional (default=None)
             Create nicer output. If None, a string will be determined by the
