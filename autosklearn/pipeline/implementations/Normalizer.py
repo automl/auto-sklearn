@@ -1,10 +1,10 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import check_array
-from sklearn.utils import warn_if_not_float
 from sklearn.utils.extmath import row_norms
 from sklearn.utils.sparsefuncs_fast import inplace_csr_row_normalize_l1
 from sklearn.utils.sparsefuncs_fast import inplace_csr_row_normalize_l2
 
+from autosklearn.util.common import warn_if_not_float
 import numpy as np
 from scipy import sparse
 

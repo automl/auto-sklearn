@@ -2,10 +2,11 @@ import numpy as np
 from scipy import sparse
 
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.utils.validation import check_array, warn_if_not_float, check_is_fitted
+from sklearn.utils.validation import check_array, check_is_fitted
 from sklearn.utils.sparsefuncs import inplace_column_scale, \
     mean_variance_axis
 
+from autosklearn.util.common import warn_if_not_float
 
 def _mean_and_std(X, axis=0, with_mean=True, with_std=True):
     """Compute mean and std deviation for centering, scaling.
