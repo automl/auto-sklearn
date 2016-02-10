@@ -15,7 +15,6 @@ from autosklearn.util.pipeline import get_configuration_space
 from autosklearn.util import Backend
 
 
-
 def store_and_or_load_data(dataset_info, outputdir):
     backend = Backend(None, outputdir)
 

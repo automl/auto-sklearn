@@ -118,6 +118,8 @@ def _test_classifier(classifier, dataset='iris', sparse=False,
 
 
 def _test_classifier_iterative_fit(classifier, dataset='iris', sparse=False):
+    """Fit only for ten iterations. Usually, the result is much worse which
+    indicates that iterative_fit() works"""
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
                                                    make_sparse=sparse)
     configuration_space = classifier.get_hyperparameter_search_space(
@@ -126,7 +128,7 @@ def _test_classifier_iterative_fit(classifier, dataset='iris', sparse=False):
     classifier = classifier(random_state=1,
                             **{hp_name: default[hp_name] for hp_name in
                                default if default[hp_name] is not None})
-    while not classifier.configuration_fully_fitted():
+    for i in range(10):
         predictor = classifier.iterative_fit(X_train, Y_train)
     predictions = predictor.predict(X_test)
     return predictions, Y_test

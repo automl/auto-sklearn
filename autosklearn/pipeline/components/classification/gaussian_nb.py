@@ -31,16 +31,29 @@ class GaussianNB(AutoSklearnClassificationAlgorithm):
             self.estimator = sklearn.naive_bayes.GaussianNB()
             self.classes_ = np.unique(y.astype(int))
 
-        for iter in range(n_iter):
-            start = min(self.n_iter * 1000, y.shape[0])
-            stop = min((self.n_iter + 1) * 1000, y.shape[0])
-            self.estimator.partial_fit(X[start:stop], y[start:stop],
-                                       self.classes_)
-            self.n_iter += 1
+        # Fallback for multilabel classification
+        if len(y.shape) > 1 and y.shape[1] > 1:
+            import sklearn.multiclass
+            self.estimator.n_iter = self.n_iter
+            self.estimator = sklearn.multiclass.OneVsRestClassifier(
+                self.estimator, n_jobs=1)
+            self.estimator.fit(X, y)
+            self.fully_fit_ = True
+        else:
+            for iter in range(n_iter):
+                start = min(self.n_iter * 1000, y.shape[0])
+                stop = min((self.n_iter + 1) * 1000, y.shape[0])
+                if X[start:stop].shape[0] == 0:
+                    self.fully_fit_ = True
+                    break
 
-            if stop >= len(y):
-                self.fully_fit_ = True
-                break
+                self.estimator.partial_fit(X[start:stop], y[start:stop],
+                                           self.classes_)
+                self.n_iter += 1
+
+                if stop >= len(y):
+                    self.fully_fit_ = True
+                    break
 
         return self
 
@@ -69,7 +82,7 @@ class GaussianNB(AutoSklearnClassificationAlgorithm):
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': False,
+                'handles_multilabel': True,
                 'is_deterministic': True,
                 'input': (DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,)}

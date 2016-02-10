@@ -47,6 +47,11 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
         with warnings.catch_warnings():
             warnings.filterwarnings("error")
             X_new = self.preprocessor.transform(X)
+
+            # TODO write a unittest for this case
+            if X_new.shape[1] == 0:
+                raise ValueError("KernelPCA removed all features!")
+
             return X_new
 
     @staticmethod

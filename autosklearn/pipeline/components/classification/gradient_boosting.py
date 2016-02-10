@@ -6,6 +6,8 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.implementations.MultilabelClassifier import \
+    MultilabelClassifier
 from autosklearn.pipeline.constants import *
 
 
@@ -86,18 +88,31 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 warm_start=True,
             )
 
-        tmp = self.estimator  # TODO copy ?
-        tmp.n_estimators += n_iter
-        tmp.fit(X, y, sample_weight=sample_weight)
-        self.estimator = tmp
+        # Fallback for multilabel classification
+        if len(y.shape) > 1 and y.shape[1] > 1:
+            import sklearn.multiclass
+            self.estimator.n_estimators = self.n_estimators
+            self.estimator = MultilabelClassifier(self.estimator, n_jobs=1)
+            self.estimator.fit(X, y)
+            self.fully_fit_ = True
+        else:
+            tmp = self.estimator  # TODO copy ?
+            tmp.n_estimators += n_iter
+            tmp.fit(X, y, sample_weight=sample_weight)
+            self.estimator = tmp
+
+            if self.estimator.n_estimators >= self.n_estimators:
+                self.fully_fit_ = True
 
         return self
-
 
     def configuration_fully_fitted(self):
         if self.estimator is None:
             return False
-        return not len(self.estimator.estimators_) < self.n_estimators
+        elif not hasattr(self, 'fully_fit_'):
+            return False
+        else:
+            return self.fully_fit_
 
     def predict(self, X):
         if self.estimator is None:
@@ -116,7 +131,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': False,
+                'handles_multilabel': True,
                 'is_deterministic': True,
                 'input': (DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,)}

@@ -3,7 +3,7 @@ import unittest
 from autosklearn.pipeline.components.classification.multinomial_nb import \
     MultinomialNB
 from autosklearn.pipeline.util import _test_classifier, _test_classifier_iterative_fit, \
-    get_dataset
+    get_dataset, _test_classifier_predict_proba
 
 import numpy as np
 import sklearn.metrics
@@ -52,6 +52,26 @@ class MultinomialNBComponentTest(unittest.TestCase):
             self.assertAlmostEqual(1.0,
                                    sklearn.metrics.accuracy_score(
                                        predictions, targets))
+
+    def test_default_configuration_multilabel(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(classifier=MultinomialNB,
+                                 dataset='digits',
+                                 make_multilabel=True)
+            self.assertAlmostEqual(0.81239938943608647,
+                                   sklearn.metrics.average_precision_score(
+                                       targets, predictions))
+
+    def test_default_configuration_multilabel_predict_proba(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier_predict_proba(classifier=MultinomialNB,
+                                               make_multilabel=True)
+            self.assertEqual(predictions.shape, ((50, 3)))
+            self.assertAlmostEqual(0.76548981051208942,
+                                   sklearn.metrics.average_precision_score(
+                                       targets, predictions))
 
     def test_target_algorithm_multioutput_multiclass_support(self):
         cls = sklearn.naive_bayes.MultinomialNB()

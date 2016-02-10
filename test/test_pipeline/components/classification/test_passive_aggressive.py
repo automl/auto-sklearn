@@ -14,7 +14,7 @@ class PassiveAggressiveComponentTest(unittest.TestCase):
     def test_default_configuration(self):
         for i in range(10):
             predictions, targets = _test_classifier(PassiveAggressive)
-            self.assertAlmostEqual(0.97999999999999998,
+            self.assertAlmostEqual(0.76000000000000001,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
 
@@ -22,7 +22,7 @@ class PassiveAggressiveComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = _test_classifier_iterative_fit(
                 PassiveAggressive)
-            self.assertAlmostEqual(0.97999999999999998,
+            self.assertAlmostEqual(0.68000000000000005,
                                    sklearn.metrics.accuracy_score(
                                        predictions, targets))
 
@@ -30,7 +30,7 @@ class PassiveAggressiveComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_classifier(classifier=PassiveAggressive, dataset='digits')
-            self.assertAlmostEqual(0.91924711596842745,
+            self.assertAlmostEqual(0.90710382513661203,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
 
@@ -38,7 +38,7 @@ class PassiveAggressiveComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = _test_classifier_iterative_fit(classifier=PassiveAggressive,
                                                     dataset='digits')
-            self.assertAlmostEqual(0.91924711596842745,
+            self.assertAlmostEqual(0.91317547055251969,
                                    sklearn.metrics.accuracy_score(
                                        predictions, targets))
 
@@ -49,6 +49,26 @@ class PassiveAggressiveComponentTest(unittest.TestCase):
             self.assertAlmostEqual(1.0,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
+
+    def test_default_configuration_multilabel(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier(classifier=PassiveAggressive,
+                                 dataset='digits',
+                                 make_multilabel=True)
+            self.assertAlmostEqual(0.8975269956947447,
+                                   sklearn.metrics.average_precision_score(
+                                       targets, predictions))
+
+    def test_default_configuration_multilabel_predict_proba(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_classifier_predict_proba(classifier=PassiveAggressive,
+                                               make_multilabel=True)
+            self.assertEqual(predictions.shape, ((50, 3)))
+            self.assertAlmostEqual(0.99703892466326138,
+                                   sklearn.metrics.average_precision_score(
+                                       targets, predictions))
 
     def test_target_algorithm_multioutput_multiclass_support(self):
         cls = sklearn.linear_model.PassiveAggressiveClassifier()

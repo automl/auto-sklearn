@@ -135,7 +135,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         print(cs)
         cs.seed(5)
 
-        for i in range(50):
+        for i in range(10):
             X, Y = sklearn.datasets.\
                     make_multilabel_classification(n_samples=150,
                                                    n_features=20,
@@ -153,11 +153,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             Y_test = Y[101:, ]
 
             config = cs.sample_configuration()
-            config._populate_values()
 
-            if 'classifier:passive_aggressive:n_iter' in config:
+            if 'classifier:passive_aggressive:n_iter' in config and \
+                    config['classifier:passive_aggressive:n_iter'] is not None:
                 config._values['classifier:passive_aggressive:n_iter'] = 5
-            if 'classifier:sgd:n_iter' in config:
+            if 'classifier:sgd:n_iter' in config and \
+                    config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
             cls = SimpleClassificationPipeline(config, random_state=1)
@@ -217,9 +218,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
-            if config['classifier:passive_aggressive:n_iter'] is not None:
+
+            if 'classifier:passive_aggressive:n_iter' in config and \
+                    config['classifier:passive_aggressive:n_iter'] is not None:
                 config._values['classifier:passive_aggressive:n_iter'] = 5
-            if config['classifier:sgd:n_iter'] is not None:
+            if 'classifier:sgd:n_iter' in config and \
+                    config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
@@ -282,9 +286,11 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
-            if config['classifier:passive_aggressive:n_iter'] is not None:
+            if 'classifier:passive_aggressive:n_iter' in config and \
+                    config['classifier:passive_aggressive:n_iter'] is not None:
                 config._values['classifier:passive_aggressive:n_iter'] = 5
-            if config['classifier:sgd:n_iter'] is not None:
+            if 'classifier:sgd:n_iter' in config and \
+                    config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
@@ -341,9 +347,11 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
-            if config['classifier:passive_aggressive:n_iter'] is not None:
+            if 'classifier:passive_aggressive:n_iter' in config and \
+                    config['classifier:passive_aggressive:n_iter'] is not None:
                 config._values['classifier:passive_aggressive:n_iter'] = 5
-            if config['classifier:sgd:n_iter'] is not None:
+            if 'classifier:sgd:n_iter' in config and \
+                    config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
             print(config)
@@ -393,9 +401,11 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
-            if config['classifier:passive_aggressive:n_iter'] is not None:
+            if 'classifier:passive_aggressive:n_iter' in config and \
+                    config['classifier:passive_aggressive:n_iter'] is not None:
                 config._values['classifier:passive_aggressive:n_iter'] = 5
-            if config['classifier:sgd:n_iter'] is not None:
+            if 'classifier:sgd:n_iter' in config and \
+                    config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
             print(config)
