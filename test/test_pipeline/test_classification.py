@@ -65,6 +65,8 @@ class DummyPreprocessor(AutoSklearnPreprocessingAlgorithm):
 
 
 class SimpleClassificationPipelineTest(unittest.TestCase):
+    _multiprocess_can_split_ = True
+
     def test_io_dict(self):
         classifiers = classification_components._classifiers
         for c in classifiers:

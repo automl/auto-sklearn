@@ -17,6 +17,7 @@ from autosklearn.pipeline.components.feature_preprocessing.random_trees_embeddin
 import autosklearn.pipeline.create_searchspace_util
 
 class TestCreateClassificationSearchspace(unittest.TestCase):
+    _multiprocess_can_split_ = True
 
     def test_get_match_array_sparse_and_dense(self):
         # preproc is empty

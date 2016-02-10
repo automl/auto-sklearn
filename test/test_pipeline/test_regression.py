@@ -1,7 +1,6 @@
-__author__ = 'eggenspk'
-
 import copy
 import resource
+import sys
 import traceback
 import unittest
 
@@ -26,6 +25,7 @@ from autosklearn.pipeline.constants import *
 
 
 class SimpleRegressionPipelineTest(unittest.TestCase):
+    _multiprocess_can_split_ = True
 
     def test_io_dict(self):
         regressors = regression_components._regressors
@@ -132,6 +132,126 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     raise e
             except MemoryError as e:
                 continue
+
+    def test_configurations_signed_data(self):
+        # Use a limit of ~4GiB
+        limit = 4000 * 1024 * 1024
+        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+            dataset_properties={'signed': True})
+
+        print(cs)
+
+        for i in range(10):
+            config = cs.sample_configuration()
+            config._populate_values()
+            if 'classifier:passive_aggressive:n_iter' in config and \
+                            config[
+                                'classifier:passive_aggressive:n_iter'] is not None:
+                config._values['classifier:passive_aggressive:n_iter'] = 5
+            if 'classifier:sgd:n_iter' in config and \
+                            config['classifier:sgd:n_iter'] is not None:
+                config._values['classifier:sgd:n_iter'] = 5
+
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
+            cls = SimpleRegressionPipeline(config, random_state=1)
+            print(config)
+            try:
+                cls.fit(X_train, Y_train)
+                X_test_ = X_test.copy()
+                predictions = cls.predict(X_test)
+                self.assertIsInstance(predictions, np.ndarray)
+                predicted_probabiliets = cls.predict(X_test_)
+                self.assertIsInstance(predicted_probabiliets, np.ndarray)
+            except ValueError as e:
+                if "Floating-point under-/overflow occurred at epoch" in \
+                        e.args[0] or \
+                                "removed all features" in e.args[0] or \
+                                "all features are discarded" in e.args[0] or \
+                        "Bug in scikit-learn" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    print(traceback.format_exc())
+                    raise e
+            except RuntimeWarning as e:
+                if "invalid value encountered in sqrt" in e.args[0]:
+                    continue
+                elif "divide by zero encountered in" in e.args[0]:
+                    continue
+                elif "invalid value encountered in divide" in e.args[0]:
+                    continue
+                elif "invalid value encountered in true_divide" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    print(traceback.format_exc())
+                    raise e
+            except UserWarning as e:
+                if "FastICA did not converge" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    print(traceback.format_exc())
+                    raise e
+            except MemoryError as e:
+                continue
+
+    def test_configurations_sparse(self):
+        # Use a limit of ~4GiB
+        limit = 4000 * 1024 * 1024
+        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+            dataset_properties={'sparse': True})
+        print(cs)
+        for i in range(10):
+            config = cs.sample_configuration()
+            config._populate_values()
+            if 'classifier:passive_aggressive:n_iter' in config and \
+                            config[
+                                'classifier:passive_aggressive:n_iter'] is not None:
+                config._values['classifier:passive_aggressive:n_iter'] = 5
+            if 'classifier:sgd:n_iter' in config and \
+                            config['classifier:sgd:n_iter'] is not None:
+                config._values['classifier:sgd:n_iter'] = 5
+
+            print(config)
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston',
+                                                           make_sparse=True)
+            cls = SimpleRegressionPipeline(config, random_state=1)
+            try:
+                cls.fit(X_train, Y_train)
+                predictions = cls.predict(X_test)
+            except ValueError as e:
+                if "Floating-point under-/overflow occurred at epoch" in \
+                        e.args[0] or \
+                                "removed all features" in e.args[0] or \
+                                "all features are discarded" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    traceback.print_tb(sys.exc_info()[2])
+                    raise e
+            except RuntimeWarning as e:
+                if "invalid value encountered in sqrt" in e.args[0]:
+                    continue
+                elif "divide by zero encountered in" in e.args[0]:
+                    continue
+                elif "invalid value encountered in divide" in e.args[0]:
+                    continue
+                elif "invalid value encountered in true_divide" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    raise e
+            except UserWarning as e:
+                if "FastICA did not converge" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    raise e
 
     def test_default_configuration(self):
         for i in range(2):
