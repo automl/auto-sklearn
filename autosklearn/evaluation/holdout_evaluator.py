@@ -34,8 +34,9 @@ class HoldoutEvaluator(AbstractEvaluator):
                        datamanager.data['Y_train'],
                        classification=classification)
 
-    def fit(self):
+    def fit_predict_and_loss(self):
         self.model.fit(self.X_train, self.Y_train)
+        return self.predict_and_loss()
 
     def iterative_fit(self):
         Xt, fit_params = self.model.pre_transform(self.X_train, self.Y_train)
@@ -50,10 +51,13 @@ class HoldoutEvaluator(AbstractEvaluator):
         while not self.model.configuration_fully_fitted():
             self.model.iterative_fit(Xt, self.Y_train, n_iter=n_iter,
                                      **fit_params)
-            self.file_output()
+            loss, Y_optimization_pred, Y_valid_pred, Y_test_pred \
+                = self.predict_and_loss()
+            self.file_output(loss, Y_optimization_pred,
+                             Y_valid_pred, Y_test_pred)
             n_iter += 2
 
-    def predict(self):
+    def _predict(self):
         Y_optimization_pred = self.predict_function(self.X_optimization,
                                                     self.model, self.task_type,
                                                     self.Y_train)
@@ -71,4 +75,9 @@ class HoldoutEvaluator(AbstractEvaluator):
             Y_test_pred = None
 
         return Y_optimization_pred, Y_valid_pred, Y_test_pred
+
+    def predict_and_loss(self):
+        Y_optimization_pred, Y_valid_pred, Y_test_pred = self._predict()
+        loss = self._loss(self.Y_optimization, Y_optimization_pred)
+        return loss, Y_optimization_pred, Y_valid_pred, Y_test_pred
 

@@ -65,9 +65,8 @@ def make_mode_holdout(data, seed, configuration, num_run, output_dir):
                                  num_run=num_run,
                                  all_scoring_functions=False,
                                  **_get_base_dict())
-    evaluator.fit()
-    signal.signal(15, empty_signal_handler)
-    evaluator.finish_up()
+    loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
+    evaluator.finish_up(loss, opt_pred, valid_pred, test_pred)
 
     backend = Backend(None, output_dir)
     if os.path.exists(backend.get_model_dir()):
@@ -122,10 +121,8 @@ def make_mode_cv(data, seed, configuration, num_run, folds, output_dir):
                             num_run=num_run,
                             all_scoring_functions=False,
                             **_get_base_dict())
-    evaluator.fit()
-    signal.signal(15, empty_signal_handler)
-    evaluator.finish_up()
-
+    loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
+    evaluator.finish_up(loss, opt_pred, valid_pred, test_pred)
 
 def make_mode_partial_cv(data, seed, configuration, num_run, metric, fold,
                          folds, output_dir):
@@ -136,9 +133,9 @@ def make_mode_partial_cv(data, seed, configuration, num_run, metric, fold,
                             num_run=num_run,
                             all_scoring_functions=False,
                             **_get_base_dict())
-    evaluator.partial_fit(fold)
-    signal.signal(15, empty_signal_handler)
-    loss, _, _, _ = evaluator.loss_and_predict()
+
+    loss, opt_pred, valid_pred, test_pred = \
+        evaluator.partial_fit_predict_and_loss(fold)
     duration = time.time() - evaluator.starttime
 
     additional_run_info = 'duration: ' + str(duration)
@@ -159,9 +156,9 @@ def make_mode_nested_cv(data, seed, configuration, num_run, inner_folds,
                                   all_scoring_functions=False,
                                   num_run=num_run,
                                   **_get_base_dict())
-    evaluator.fit()
-    signal.signal(15, empty_signal_handler)
-    evaluator.finish_up()
+
+    loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
+    evaluator.finish_up(loss, opt_pred, valid_pred, test_pred)
 
 
 def main(dataset_info, mode, seed, params,

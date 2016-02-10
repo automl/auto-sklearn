@@ -16,6 +16,9 @@ __all__ = [
 
 
 class NestedCVEvaluator(AbstractEvaluator):
+    # TODO this code is not yet optimized for memory efficiency! Do some kind
+    #  of alternating cross-validation to only have one model in memory at
+    # the time!
 
     def __init__(self, Datamanager, output_dir,
                  configuration=None,
@@ -52,7 +55,7 @@ class NestedCVEvaluator(AbstractEvaluator):
 
         self.random_state = sklearn.utils.check_random_state(seed)
 
-    def fit(self):
+    def _fit(self):
         seed = self.random_state.randint(1000000)
         for outer_fold in range(self.outer_cv_folds):
             # First perform the fit for the outer cross validation
@@ -88,7 +91,7 @@ class NestedCVEvaluator(AbstractEvaluator):
                 model = model.fit(X_train, Y_train)
                 self.inner_models[outer_fold][inner_fold] = model
 
-    def predict(self):
+    def _predict(self):
         # First, obtain the predictions for the ensembles, the validation and
         #  the test set!
         self.outer_scores_ = defaultdict(list)
@@ -160,8 +163,7 @@ class NestedCVEvaluator(AbstractEvaluator):
 
         return Y_optimization_pred, Y_valid_pred, Y_test_pred
 
-    def loss_and_predict(self):
-        Y_optimization_pred, Y_valid_pred, Y_test_pred = self.predict()
+    def _loss(self, Y_optimization_pred, Y_valid_pred, Y_test_pred):
         inner_scores = defaultdict(list)
 
         for outer_fold in range(self.outer_cv_folds):
@@ -200,4 +202,9 @@ class NestedCVEvaluator(AbstractEvaluator):
             inner_err = 1 - np.mean(inner_scores[self.metric])
 
         return inner_err, Y_optimization_pred, Y_valid_pred, Y_test_pred
+
+    def fit_predict_and_loss(self):
+        self._fit()
+        Y_optimization_pred, Y_valid_pred, Y_test_pred = self._predict()
+        return self._loss(Y_optimization_pred, Y_valid_pred, Y_test_pred)
 

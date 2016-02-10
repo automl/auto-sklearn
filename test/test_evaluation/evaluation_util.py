@@ -101,7 +101,7 @@ def get_multiclass_classification_datamanager():
         'X_test': X_test
     }
     D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
-    return D, 1.01
+    return D
 
 
 def get_abalone_datamanager():
@@ -109,7 +109,7 @@ def get_abalone_datamanager():
     dataset_path = os.path.join(os.path.dirname(__file__), '.datasets',
                                 dataset)
     D = CompetitionDataManager(dataset_path)
-    return D, 0.87
+    return D
 
 
 def get_multilabel_classification_datamanager():
@@ -148,7 +148,7 @@ def get_multilabel_classification_datamanager():
         'X_test': X_test
     }
     D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
-    return D, 0.67
+    return D
 
 
 def get_binary_classification_datamanager():
@@ -186,7 +186,7 @@ def get_binary_classification_datamanager():
         'X_test': X_test
     }
     D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
-    return D, 1.01
+    return D
 
 
 def get_regression_datamanager():
@@ -218,7 +218,7 @@ def get_regression_datamanager():
     D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical',
                    'numerical', 'numerical', 'numerical', 'numerical',
                    'numerical', 'numerical', 'numerical']
-    return D, 1.05
+    return D
 
 
 def get_500_classes_datamanager():
@@ -249,7 +249,7 @@ def get_500_classes_datamanager():
     }
     D.data = {'X_train': X, 'Y_train': Y, 'X_valid': X, 'X_test': X}
     D.feat_type = ['numerical'] * 20
-    return D, 1.01
+    return D
 
 
 def get_dataset_getters():

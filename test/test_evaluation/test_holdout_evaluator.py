@@ -36,39 +36,39 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
     def test_file_output(self):
         self.output_dir = os.path.join(os.getcwd(), '.test')
 
-        D, _ = get_regression_datamanager()
+        D = get_regression_datamanager()
         D.name = 'test'
 
         configuration_space = get_configuration_space(D.info)
 
-        while True:
-            configuration = configuration_space.sample_configuration()
-            evaluator = HoldoutEvaluator(D, self.output_dir, configuration,
-                                         with_predictions=True,
-                                         all_scoring_functions=True,
-                                         output_y_test=True)
+        configuration = configuration_space.sample_configuration()
+        evaluator = HoldoutEvaluator(D, self.output_dir, configuration,
+                                     with_predictions=True,
+                                     all_scoring_functions=True,
+                                     output_y_test=True)
 
-            if not self._fit(evaluator):
-                continue
-            evaluator.loss_and_predict()
-            evaluator.file_output()
+        loss, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
+            evaluator.fit_predict_and_loss()
+        evaluator.file_output(loss, Y_optimization_pred, Y_valid_pred,
+                              Y_test_pred)
 
-            self.assertTrue(os.path.exists(os.path.join(
-                self.output_dir, '.auto-sklearn', 'true_targets_ensemble.npy')))
-            break
+        self.assertTrue(os.path.exists(os.path.join(
+            self.output_dir, '.auto-sklearn', 'true_targets_ensemble.npy')))
 
     def test_predict_proba_binary_classification(self):
         self.output_dir = os.path.join(os.getcwd(),
                                        '.test_predict_proba_binary_classification')
-        D, _ = get_binary_classification_datamanager()
+        D = get_binary_classification_datamanager()
 
         class Dummy2(object):
 
             def predict_proba(self, y, batch_size=200):
-                return np.array([[0.1, 0.9], [0.7, 0.3]])
+                return np.array([[0.1, 0.9]] * 23)
+
+            def fit(self, X, y):
+                return self
 
         model = Dummy2()
-        task_type = BINARY_CLASSIFICATION
 
         configuration_space = get_configuration_space(
             D.info,
@@ -77,11 +77,12 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
         configuration = configuration_space.sample_configuration()
 
         evaluator = HoldoutEvaluator(D, self.output_dir, configuration)
-        pred = evaluator.predict_proba(None, model, task_type,
-                                       D.data['Y_train'])
-        expected = [[0.9], [0.3]]
-        for i in range(len(expected)):
-            self.assertEqual(expected[i], pred[i][1])
+        evaluator.model = model
+        loss, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
+            evaluator.fit_predict_and_loss()
+
+        for i in range(23):
+            self.assertEqual(0.9, Y_optimization_pred[i][1])
 
     def test_datasets(self):
         for getter in get_dataset_getters():
@@ -89,7 +90,7 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
                                   replace('.pyc', '').replace('.py', ''),
                                   getter.__name__)
             with self.subTest(testname):
-                D, upper_error_bound = getter()
+                D = getter()
                 output_directory = os.path.join(os.getcwd(), '.%s' % testname)
                 self.output_directory = output_directory
 
@@ -98,37 +99,6 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
                     D_ = copy.deepcopy(D)
                     evaluator = HoldoutEvaluator(D_, self.output_directory, None)
 
-                    evaluator.fit()
-                    err[i] = evaluator.loss_and_predict()[0]
+                    err[i] = evaluator.fit_predict_and_loss()[0]
 
                     self.assertTrue(np.isfinite(err[i]))
-                    self.assertLessEqual(err[i], upper_error_bound)
-
-
-# def generate(D, upper_error_bound, output_directory):
-#     def run_test(self):
-#         self.output_directory = output_directory
-#
-#         err = np.zeros([N_TEST_RUNS])
-#         for i in range(N_TEST_RUNS):
-#             D_ = copy.deepcopy(D)
-#             evaluator = HoldoutEvaluator(D_, self.output_directory, None)
-#
-#             evaluator.fit()
-#
-#             err[i] = evaluator.predict()
-#
-#             self.assertTrue(np.isfinite(err[i]))
-#             self.assertLessEqual(err[i], upper_error_bound)
-#
-#     return run_test
-#
-#
-# for getter in get_dataset_getters():
-#     D, upper_error_bound = getter()
-#     testname = '%s_%s' % (os.path.basename(__file__).
-#                           replace('.pyc', '').replace('.py', ''),
-#                           getter.__name__)
-#     output_directory = os.path.join(os.getcwd(), '.%s' % testname)
-#     setattr(HoldoutEvaluatorTest, 'test_%s' % testname,
-#             generate(D, upper_error_bound, output_directory))
