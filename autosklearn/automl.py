@@ -479,9 +479,12 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                               TASK_TYPES_TO_STRING[datamanager.info["task"]])
 
         if config is not None:
-            configuration = Configuration(self.configuration_space, config)
-            config_string = convert_conf2smac_string(configuration)
-            initial_configurations = [config_string] + initial_configurations
+            try:
+                configuration = Configuration(self.configuration_space, config)
+                config_string = convert_conf2smac_string(configuration)
+                initial_configurations = [config_string] + initial_configurations
+            except ValueError:
+                pass
 
         # == RUN SMAC
         proc_smac = run_smac(tmp_dir=self._tmp_dir, basename=self._dataset_name,
