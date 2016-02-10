@@ -1,6 +1,7 @@
 from __future__ import print_function
 import glob
 import os
+import tempfile
 import time
 
 import lockfile
@@ -66,8 +67,11 @@ class Backend(object):
             raise ValueError("Start time must be a float, but is %s." %
                              type(start_time))
 
-        with open(filepath, 'w') as fh:
+        with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(filepath),
+                delete=False) as fh:
             fh.write(str(start_time))
+            tempname = fh.name
+        os.rename(tempname, filepath)
 
         return filepath
 
@@ -97,7 +101,12 @@ class Backend(object):
                          np.allclose(existing_targets, targets)):
                     return filepath
 
-            np.save(filepath, targets.astype(np.float32))
+            with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                    filepath), delete=False) as fh:
+                np.save(fh, targets.astype(np.float32))
+                tempname = fh.name
+
+            os.rename(tempname, filepath)
 
         return filepath
 
@@ -120,8 +129,11 @@ class Backend(object):
         lock_path = filepath + '.lock'
         with lockfile.LockFile(lock_path):
             if not os.path.exists(filepath):
-                with open(filepath, 'wb') as fh:
+                with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                        filepath), delete=False) as fh:
                     pickle.dump(datamanager, fh, -1)
+                    tempname = fh.name
+                os.rename(tempname, filepath)
 
         return filepath
 
@@ -140,8 +152,11 @@ class Backend(object):
         filepath = os.path.join(self.get_model_dir(),
                                 '%s.%s.model' % (seed, idx))
 
-        with open(filepath, 'wb') as fh:
+        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                filepath), delete=False) as fh:
             pickle.dump(model, fh, -1)
+            tempname = fh.name
+        os.rename(tempname, filepath)
 
     def load_all_models(self, seed):
         model_directory = self.get_model_dir()
@@ -197,10 +212,13 @@ class Backend(object):
             pass
 
         filepath = os.path.join(self.get_ensemble_dir(),
-                                '%s.%s.ensemble' % (str(seed), str(idx).zfill(
-                                    10)))
-        with open(filepath, 'wb') as fh:
+                                '%s.%s.ensemble' % (str(seed),
+                                                    str(idx).zfill(10)))
+        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                filepath), delete=False) as fh:
             pickle.dump(ensemble, fh)
+            tempname = fh.name
+        os.rename(tempname, filepath)
 
     def _get_prediction_output_dir(self, subset):
         return os.path.join(self.internals_directory,
@@ -215,8 +233,11 @@ class Backend(object):
         filepath = os.path.join(output_dir, 'predictions_%s_%s_%s.npy' %
                                             (subset, automl_seed, str(idx)))
 
-        with open(filepath, 'wb') as fh:
+        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                filepath), delete=False) as fh:
             pickle.dump(predictions.astype(np.float32), fh, -1)
+            tempname = fh.name
+        os.rename(tempname, filepath)
 
     def save_predictions_as_txt(self, predictions, subset, idx, prefix=None):
         # Write prediction scores in prescribed format
@@ -224,20 +245,26 @@ class Backend(object):
                                 ('%s_' % prefix if prefix else '') +
                                  '%s_%s.predict' % (subset, str(idx).zfill(5)))
 
-        with open(filepath, 'w') as output_file:
+        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                filepath), delete=False) as output_file:
             for row in predictions:
                 if not isinstance(row, np.ndarray) and not isinstance(row, list):
                     row = [row]
                 for val in row:
                     output_file.write('{:g} '.format(float(val)))
                 output_file.write('\n')
+            tempname = output_file.name
+        os.rename(tempname, filepath)
 
     def write_txt_file(self, filepath, data, name):
         lock_file = filepath + '.lock'
         with lockfile.LockFile(lock_file):
             if not os.path.exists(lock_file):
-                with open(filepath, 'w') as fh:
+                with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
+                        filepath), delete=False) as fh:
                     fh.write(data)
+                    tempname = fh.name
+                os.rename(tempname, filepath)
                 self.logger.debug('Created %s file %s' % (name, filepath))
             else:
                 self.logger.debug('%s file already present %s' %
