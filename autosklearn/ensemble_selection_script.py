@@ -48,6 +48,24 @@ def get_predictions(dir_path, dir_path_list, include_num_runs,
     return result
 
 
+def get_all_predictions(dir_train, dir_train_list,
+                        dir_valid, dir_valid_list,
+                        dir_test, dir_test_list,
+                        include_num_runs,
+                        model_and_automl_re, precision="32"):
+
+        train_pred = get_predictions(dir_train, dir_train_list,
+                                     include_num_runs,
+                                     model_and_automl_re, precision)
+        valid_pred = get_predictions(dir_valid, dir_valid_list,
+                                     include_num_runs,
+                                     model_and_automl_re, precision)
+        test_pred = get_predictions(dir_test, dir_test_list,
+                                     include_num_runs,
+                                     model_and_automl_re, precision)
+        return train_pred, valid_pred, test_pred
+
+
 def main(autosklearn_tmp_dir,
          dataset_name,
          task_type,
@@ -254,11 +272,17 @@ def main(autosklearn_tmp_dir,
                 indices_to_model_names[num_indices] = model_name
                 indices_to_run_num[num_indices] = (automl_seed, num_run)
 
-        all_predictions_train = get_predictions(dir_ensemble,
-                                                dir_ensemble_list,
-                                                include_num_runs,
-                                                model_and_automl_re,
-                                                precision)
+        try:
+            all_predictions_train, all_predictions_valid, all_predictions_test =\
+                get_all_predictions(dir_ensemble, dir_ensemble_list,
+                                    dir_valid, dir_valid_list,
+                                    dir_test, dir_test_list,
+                                    include_num_runs,
+                                    model_and_automl_re,
+                                    precision)
+        except IOError:
+            logger.error('Could not load the predictions.')
+            continue
 
         if len(include_num_runs) == 0:
             logger.error('All models do just random guessing')
@@ -297,12 +321,6 @@ def main(autosklearn_tmp_dir,
         # Save the ensemble for later use in the main auto-sklearn module!
         backend.save_ensemble(ensemble, index_run, seed)
 
-        all_predictions_valid = get_predictions(dir_valid,
-                                                dir_valid_list,
-                                                include_num_runs,
-                                                model_and_automl_re,
-                                                precision)
-
         # Save predictions for valid and test data set
         if len(dir_valid_list) == len(dir_ensemble_list):
             all_predictions_valid = np.array(all_predictions_valid)
@@ -315,11 +333,6 @@ def main(autosklearn_tmp_dir,
                         len(dir_valid_list), len(dir_ensemble_list))
 
         del all_predictions_valid
-        all_predictions_test = get_predictions(dir_test,
-                                               dir_test_list,
-                                               include_num_runs,
-                                               model_and_automl_re,
-                                               precision)
 
         if len(dir_test_list) == len(dir_ensemble_list):
             all_predictions_test = np.array(all_predictions_test)
