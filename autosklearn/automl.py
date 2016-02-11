@@ -284,9 +284,13 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                             mem_in_mb=memory_limit)(
             _eval_config_and_save)
         try:
-            safe_call(None, datamanager, self._tmp_dir, self._seed, num_run)
+            queue = multiprocessing.Queue()
+            safe_call(queue, None, datamanager, self._tmp_dir, self._seed,
+                      num_run)
             self._logger.info("Finished creating dummy predictions.")
         except Exception as e:
+            # No error handling with the queue because there will be no
+            # predictions or losses
             self._logger.error('Error creating dummy predictions', e)
 
     def _fit(self, datamanager):

@@ -1,6 +1,7 @@
 import multiprocessing
 import os
 import signal
+import time
 import traceback
 
 import pynisher
@@ -59,7 +60,7 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
         result = None
     elif data_info_task in \
             [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
-        logger.info('Start calculating metafeatures for %s' % basename)
+        logger.info('Start calculating metafeatures for %s', basename)
         result = calc_meta_features(x_train, y_train, categorical=categorical,
                                     dataset_name=basename)
     else:
@@ -67,7 +68,7 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
         logger.info('Metafeatures not calculated')
     watcher.stop_task(task_name)
     logger.info(
-        'Calculating Metafeatures (categorical attributes) took %5.2f' %
+        'Calculating Metafeatures (categorical attributes) took %5.2f',
         watcher.wall_elapsed(task_name))
     return result
 
@@ -81,7 +82,7 @@ def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
                                         dataset_name=basename)
     watcher.stop_task(task_name)
     logger.info(
-        'Calculating Metafeatures (encoded attributes) took %5.2fsec' %
+        'Calculating Metafeatures (encoded attributes) took %5.2fsec',
         watcher.wall_elapsed(task_name))
     return result
 
@@ -116,11 +117,11 @@ def _print_debug_info_of_init_configuration(initial_configurations, basename,
     logger.debug('Initial Configurations: (%d)' % len(initial_configurations))
     for initial_configuration in initial_configurations:
         logger.debug(initial_configuration)
-    logger.debug('Looking for initial configurations took %5.2fsec' %
+    logger.debug('Looking for initial configurations took %5.2fsec',
                  watcher.wall_elapsed('InitialConfigurations'))
     logger.info(
-        'Time left for %s after finding initial configurations: %5.2fsec'
-        % (basename, time_for_task - watcher.wall_elapsed(basename)))
+        'Time left for %s after finding initial configurations: %5.2fsec',
+        basename, time_for_task - watcher.wall_elapsed(basename))
 
 # helpers for evaluating a configuration
 
@@ -135,30 +136,26 @@ def _get_base_dict():
     }
 
 # create closure for evaluating an algorithm
-def _eval_config_and_save(configuration, data, tmp_dir, seed, num_run):
-    global evaluator
-    if True:
-        evaluator = HoldoutEvaluator(data, tmp_dir, configuration,
-                                     seed=seed,
-                                     num_run=num_run,
-                                     **_get_base_dict())
-        loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
-        duration, result, seed, run_info = evaluator.finish_up(
-            loss, opt_pred, valid_pred, test_pred)
-        status = StatusType.SUCCESS
-        return evaluator, (duration, result, seed, run_info, status)
-    else:
-        status = StatusType.CRASHED
-        return evaluator, (None, None, seed, None, status)
+def _eval_config_and_save(queue, configuration, data, tmp_dir, seed, num_run):
+    evaluator = HoldoutEvaluator(data, tmp_dir, configuration,
+                                 seed=seed,
+                                 num_run=num_run,
+                                 **_get_base_dict())
 
+    def signal_handler(signum, frame):
+        print('Received signal %s. Aborting Training!', str(signum))
+        global evaluator
+        duration, result, seed, run_info = evaluator.finish_up()
+        # TODO use status type for stopped, but yielded a result
+        queue.put((duration, result, seed, run_info, StatusType.SUCCESS))
 
-def signal_handler(signum, frame):
-    print('Received signal %s. Aborting Training!' % str(signum))
-    global evaluator
-    evaluator.finish_up()
-    exit(0)
+    signal.signal(15, signal_handler)
 
-signal.signal(15, signal_handler)
+    loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
+    duration, result, seed, run_info = evaluator.finish_up(
+        loss, opt_pred, valid_pred, test_pred)
+    status = StatusType.SUCCESS
+    queue.put((duration, result, seed, run_info, status))
 
 
 class AutoMLScenario(Scenario):
@@ -284,7 +281,6 @@ class AutoMLSMBO(multiprocessing.Process):
                 self.datamanager.info['is_sparse'],
                 self.watcher,
                 self.logger)
-            print(metalearning_configurations)
             _print_debug_info_of_init_configuration(
                 metalearning_configurations,
                 self.dataset_name,
@@ -312,21 +308,36 @@ class AutoMLSMBO(multiprocessing.Process):
             return res
 
     def eval_with_limits(self, config, seed, num_run):
-        import sys
+        start_time = time.time()
+        queue = multiprocessing.Queue()
         safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                             wall_time_in_s=self.func_eval_time_limit,
                                             grace_period_in_s=5)(_eval_config_and_save)
         try:
-            # JTS: this does not work currently, not sure why, probably becaus of
-            #      the signal handler stuff
-            #res = safe_eval(config, self.datamanager, self.tmp_dir, seed, num_run)
-            #print(res)
-            evaluator, info = _eval_config_and_save(config, self.datamanager, self.tmp_dir, seed, num_run)
-        except:
-            evaluator = None
-            status = StatusType.CRASHED
-            info = (None, None, seed, None, status)
-        return evaluator, info
+            safe_eval(queue, config, self.datamanager, self.tmp_dir,
+                      seed, num_run)
+            info = queue.get_nowait()
+        except Exception as e:
+            if isinstance(e, MemoryError):
+                is_memory_error = True
+            else:
+                is_memory_error = False
+            try:
+                # This happens if a timeout is reached and a half-way trained
+                #  model can be used to predict something
+                info = queue.get_nowait()
+            except Exception as e:
+                # This happens if a timeout is reached and the model does not
+                #  support iterative_fit()
+                duration = time.time() - start_time
+                if is_memory_error:
+                    status = StatusType.MEMOUT
+                elif duration >= self.func_eval_time_limit:
+                    status = StatusType.TIMEOUT
+                else:
+                    status = StatusType.CRASHED
+                info = (duration, 2.0, seed, str(e), status)
+        return  info
         
     def run(self):
         # we use pynisher here to enforce limits
@@ -374,14 +385,19 @@ class AutoMLSMBO(multiprocessing.Process):
             # JTS: reset the data manager before each configuration since
             #      we work on the data in-place
             # NOTE: this is where we could also apply some memory limits
+            self.logger.info("Starting to evaluate meta-learning configuration "
+                             "%d.", num_run)
+            self.logger.info(config)
             self.reset_data_manager()
-            evaluator, info = self.eval_with_limits(config, seed, num_run)
+            info = self.eval_with_limits(config, seed, num_run)
             (duration, result, _, additional_run_info, status) = info
             run_history.add(config=config, cost=result,
                             time=duration , status=status,
                             instance_id=0, seed=seed)
+            self.logger.info("Finished evaluating meta-learning configuration "
+                             "%d. Duration %f; loss %f; additional run info: "
+                             "%s ", num_run, duration, result, additional_run_info)
             num_run += 1
-            print(duration, result, additional_run_info, status)
 
         # == after metalearning run SMAC loop
         smac = SMBO(self.scenario, seed)
@@ -390,15 +406,21 @@ class AutoMLSMBO(multiprocessing.Process):
         while not finished:
             # JTS TODO: handle the case that run_history is empty
             X_cfg, Y_cfg = rh2EPM.transform(run_history)
-            self.logger.debug("SMAC iteration : {}".format(smac_iter))
             next_config = smac.choose_next(X_cfg, Y_cfg)
+            self.logger.info("Starting to evaluate SMAC configuration "
+                             "%d.", num_run)
+            self.logger.info(next_config)
             self.reset_data_manager()
-            evaluator, info = self.eval_with_limits(next_config, seed, num_run)
+            info = self.eval_with_limits(next_config, seed, num_run)
             (duration, result, _, additional_run_info, status) = info
             run_history.add(config=next_config, cost=result,
                             time=duration , status=status,
                             instance_id=0, seed=seed)
 
+            self.logger.info("Finished evaluating SMAC configuration "
+                             "%d. Duration %f; loss %f; additional run info: "
+                             "%s ", num_run, duration, result,
+                             additional_run_info)
             smac_iter += 1
             num_run += 1
             if max_iters is not None:
