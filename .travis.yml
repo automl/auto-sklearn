@@ -38,7 +38,10 @@ install:
   - pip install psutil
 
   # Install requirements from other repos
-  - pip install git+https://github.com/automl/HPOlibConfigSpace.git
+  - pip install git+https://github.com/automl/HPOlibConfigSpace@refactor
+  - pip install git+https://github.com/sfalkner/pynisher@master
+  - pip install git+https://bitbucket.org/aadfreiburg/smac3@development
+  - pip install git+https://bitbucket.org/aadfreiburg/random_forest_run@master
 
   - python setup.py install
 

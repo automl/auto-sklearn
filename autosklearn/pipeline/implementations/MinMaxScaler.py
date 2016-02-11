@@ -2,7 +2,9 @@ import numpy as np
 from scipy import sparse
 
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.utils.validation import check_is_fitted, check_array, warn_if_not_float
+from sklearn.utils.validation import check_is_fitted, check_array
+
+from autosklearn.util.common import warn_if_not_float
 
 
 class MinMaxScaler(BaseEstimator, TransformerMixin):

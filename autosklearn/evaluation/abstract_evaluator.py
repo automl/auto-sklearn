@@ -11,7 +11,6 @@ import autosklearn.pipeline.regression
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
 from autosklearn.constants import *
-from autosklearn.evaluation.util import get_new_run_num
 from autosklearn.util import Backend
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 from autosklearn.evaluation.util import calculate_score
@@ -116,7 +115,7 @@ class AbstractEvaluator(object):
             self.predict_function = self._predict_proba
 
         if num_run is None:
-            num_run = get_new_run_num()
+            num_run = 0
         self.num_run = num_run
 
         self.backend = Backend(None, self.output_dir)
@@ -204,22 +203,15 @@ class AbstractEvaluator(object):
             additional_run_info += ';' + 'duration: ' + str(self.duration)
             additional_run_info += ';' + 'num_run:' + num_run
 
-            if self.configuration is not None:
-                self._output_SMAC_string(self.duration, loss, self.seed,
-                                         additional_run_info)
         except Exception as e:
             self.duration = time.time() - self.starttime
-            print(traceback.format_exc())
-            self._output_SMAC_string(self.duration, 2.0, self.seed,
-                'No results were produced! Error is %s' % str(e))
+            loss = 2.0
+            additional_run_info = traceback.format_exc()
 
-    def _output_SMAC_string(self, duration, loss, seed, additional_run_info):
-        print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
-              ('SAT', abs(self.duration), loss, self.seed,
-               additional_run_info))
+        return self.duration, loss, self.seed, additional_run_info
 
     def file_output(self, loss, Y_optimization_pred, Y_valid_pred, Y_test_pred):
-        seed = os.environ.get('AUTOSKLEARN_SEED')
+        seed = self.seed
 
         if self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
             return 2, "Targets %s and prediction %s don't have the same " \

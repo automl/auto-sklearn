@@ -5,7 +5,6 @@ import scipy as sp
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     BINARY_CLASSIFICATION
 
-
 def sanitize_array(array):
     """
     Replace NaN and Inf (there should not be any!)
@@ -20,6 +19,7 @@ def sanitize_array(array):
     mid = (maxi + mini) / 2
     array[np.isnan(array)] = mid
     return array
+
 
 
 def normalize_array(solution, prediction):

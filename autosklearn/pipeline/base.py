@@ -203,7 +203,7 @@ class BasePipeline(BaseEstimator):
         assembles a list of available estimators and preprocessor components,
         _get_hyperparameter_search_space can be called to do the work of
         creating the actual
-        HPOlibConfigSpace.configuration_space.ConfigurationSpace object.
+        ConfigSpace.configuration_space.ConfigurationSpace object.
 
         Parameters
         ----------
@@ -230,7 +230,7 @@ class BasePipeline(BaseEstimator):
 
         Returns
         -------
-        cs : HPOlibConfigSpace.configuration_space.Configuration
+        cs : ConfigSpace.configuration_space.Configuration
             The configuration space describing the AutoSklearnClassifier.
 
         """

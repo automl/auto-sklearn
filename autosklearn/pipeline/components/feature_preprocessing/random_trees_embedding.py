@@ -1,5 +1,5 @@
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformIntegerHyperparameter, \
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import UniformIntegerHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
