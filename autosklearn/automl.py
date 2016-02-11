@@ -6,7 +6,6 @@ import multiprocessing
 import os
 import sys
 import shutil
-import traceback
 import pynisher
 
 import numpy as np
@@ -14,7 +13,6 @@ import numpy as np
 from ConfigSpace.io import pcs
 from ConfigSpace.configuration_space import Configuration
 from sklearn.base import BaseEstimator
-import six
 
 from autosklearn.constants import *
 from autosklearn.data.data_manager_factory import get_data_manager
@@ -25,7 +23,6 @@ from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline, Backend
 from autosklearn.ensemble_builder import main as ensemble_main
-#from autosklearn.util.smac import run_smac
 from autosklearn.smbo import AutoMLSMBO
 
 def _create_search_space(tmp_dir, data_info, backend, watcher, logger,
