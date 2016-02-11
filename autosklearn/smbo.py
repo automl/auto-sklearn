@@ -5,6 +5,7 @@ import time
 import traceback
 
 import pynisher
+import six
 
 # JTS TODO: notify aaron to clean up these nasty nested modules
 from smac.smbo.smbo import SMBO
@@ -216,8 +217,8 @@ class AutoMLSMBO(multiprocessing.Process):
         self.config_space = config_space
 
         # and a bunch of useful limits
-        self.total_walltime_limit = total_walltime_limit
-        self.func_eval_time_limit = func_eval_time_limit
+        self.total_walltime_limit = int(total_walltime_limit)
+        self.func_eval_time_limit = int(func_eval_time_limit)
         self.memory_limit = memory_limit
         self.watcher = watcher
         self.default_cfgs = default_cfgs
@@ -299,7 +300,8 @@ class AutoMLSMBO(multiprocessing.Process):
         try:
             safe_suggest = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                             wall_time_in_s=int(self.scenario.wallclock_limit/4),
-                                            grace_period_in_s=5)(self.collect_metalearning_suggestions)
+                                            grace_period_in_s=30)(
+                self.collect_metalearning_suggestions)
             res = safe_suggest()
         except:
             pass
@@ -313,21 +315,23 @@ class AutoMLSMBO(multiprocessing.Process):
         queue = multiprocessing.Queue()
         safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                             wall_time_in_s=self.func_eval_time_limit,
-                                            grace_period_in_s=5)(_eval_config_and_save)
+                                            grace_period_in_s=30)(
+            _eval_config_and_save)
         try:
             safe_eval(queue, config, self.datamanager, self.tmp_dir,
                       seed, num_run)
             info = queue.get_nowait()
-        except Exception as e:
-            if isinstance(e, MemoryError):
+        except Exception as e0:
+            if isinstance(e0, MemoryError):
                 is_memory_error = True
             else:
                 is_memory_error = False
+
             try:
                 # This happens if a timeout is reached and a half-way trained
                 #  model can be used to predict something
                 info = queue.get_nowait()
-            except Exception as e:
+            except Exception as e1:
                 # This happens if a timeout is reached and the model does not
                 #  support iterative_fit()
                 duration = time.time() - start_time
@@ -337,8 +341,8 @@ class AutoMLSMBO(multiprocessing.Process):
                     status = StatusType.TIMEOUT
                 else:
                     status = StatusType.CRASHED
-                info = (duration, 2.0, seed, str(e), status)
-        return  info
+                info = (duration, 2.0, seed, str(e0), status)
+        return info
         
     def run(self):
         # we use pynisher here to enforce limits
@@ -379,6 +383,7 @@ class AutoMLSMBO(multiprocessing.Process):
         # and add the suggestions from metalearning behind it
         if self.default_cfgs:
             self.default_cfgs = []
+        self.default_cfgs.insert(0, self.config_space.get_default_configuration())
         metalearning_configurations = self.default_cfgs \
                                       + self.collect_metalearning_suggestions_with_limits()
 
@@ -387,11 +392,12 @@ class AutoMLSMBO(multiprocessing.Process):
             # JTS: reset the data manager before each configuration since
             #      we work on the data in-place
             # NOTE: this is where we could also apply some memory limits
-            config_name = 'meta-learning' if num_run > len(self.default_cfgs) \
-                else 'default'
+            config_name = 'meta-learning' if (num_run - self.start_num_run) >\
+                    len(self.default_cfgs) else 'default'
 
             self.logger.info("Starting to evaluate %d. configuration "
-                             "(%s configuration).", num_run, config_name)
+                             "(%s configuration) with time limit %ds.",
+                             num_run, config_name, self.func_eval_time_limit)
             self.logger.info(config)
             self.reset_data_manager()
             info = self.eval_with_limits(config, seed, num_run)
@@ -399,10 +405,10 @@ class AutoMLSMBO(multiprocessing.Process):
             run_history.add(config=config, cost=result,
                             time=duration , status=status,
                             instance_id=0, seed=seed)
-            self.logger.info("Finished evaluating configuration "
-                             "%d. Duration %f; loss %f; additional run info: "
-                             "%s ", num_run, duration, result,
-                             additional_run_info)
+            self.logger.info("Finished evaluating %d. configuration. "
+                             "Duration %f; loss %f; status %s; additional run "
+                             "info: %s ", num_run, duration, result,
+                             str(status), additional_run_info)
             num_run += 1
 
         # == after metalearning run SMAC loop
@@ -413,8 +419,9 @@ class AutoMLSMBO(multiprocessing.Process):
             # JTS TODO: handle the case that run_history is empty
             X_cfg, Y_cfg = rh2EPM.transform(run_history)
             next_config = smac.choose_next(X_cfg, Y_cfg)
-            self.logger.info("Starting to evaluate configuration %d. (from "
-                             "SMAC)", num_run)
+            self.logger.info("Starting to evaluate %d. configuration (from "
+                             "SMAC) with time limit %ds.", num_run,
+                             self.func_eval_time_limit)
             self.logger.info(next_config)
             self.reset_data_manager()
             info = self.eval_with_limits(next_config, seed, num_run)
@@ -423,10 +430,10 @@ class AutoMLSMBO(multiprocessing.Process):
                             time=duration , status=status,
                             instance_id=0, seed=seed)
 
-            self.logger.info("Finished evaluating configuration "
-                             "%d. Duration: %f; loss: %f; additional run info: "
-                             "%s ", num_run, duration, result,
-                             additional_run_info)
+            self.logger.info("Finished evaluating %d. configuration. "
+                             "Duration: %f; loss: %f; status %s; additional "
+                             "run info: %s ", num_run, duration, result,
+                             str(status), additional_run_info)
             smac_iter += 1
             num_run += 1
             if max_iters is not None:

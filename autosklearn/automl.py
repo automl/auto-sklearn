@@ -162,6 +162,15 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._can_predict = False
 
         self._debug_mode = debug_mode
+
+        if not isinstance(self._time_for_task, int):
+            raise ValueError("time_left_for_this_task not of type integer, "
+                             "but %s" % str(type(self._time_for_task)))
+        if not isinstance(self._per_run_time_limit, int):
+            raise ValueError("per_run_time_limit not of type integer, but %s" %
+                             str(type(self._per_run_time_limit)))
+
+        # After assignging and checking variables...
         self._backend = Backend(self._output_dir, self._tmp_dir)
 
     def start_automl(self, parser):
@@ -280,7 +289,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         # TODO which limits do we want to enforce here ?
         time_limit = int(self._time_for_task / 4.)
         memory_limit = int(self._ml_memory_limit)
-        safe_call = pynisher.enforce_limits(cpu_time_in_s=time_limit,
+        safe_call = pynisher.enforce_limits(cpu_time_in_s=int(time_limit),
                                             mem_in_mb=memory_limit)(
             _eval_config_and_save)
         try:
@@ -397,7 +406,6 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         default_configs = []
         # == set default configurations
         # first enqueue the default configuration from our config space
-        default_configs.append(self.configuration_space.get_default_configuration())
         if (datamanager.info["task"] == BINARY_CLASSIFICATION) or \
             (datamanager.info["task"] == MULTICLASS_CLASSIFICATION):
             config_dict = {'balancing:strategy': 'weighting',

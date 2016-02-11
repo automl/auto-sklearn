@@ -182,31 +182,31 @@ class AbstractEvaluator(object):
         We use it as the signal handler so we can recycle the code for the
         normal usecase and when the runsolver kills us here :)"""
 
-        try:
-            self.duration = time.time() - self.starttime
-            if loss is None:
-                loss, opt_pred, valid_pred, test_pred = self.predict_and_loss()
-            self.file_output(loss, opt_pred, valid_pred, test_pred)
-            self.duration = time.time() - self.starttime
+        # try:
+        self.duration = time.time() - self.starttime
+        if loss is None:
+            loss, opt_pred, valid_pred, test_pred = self.predict_and_loss()
+        self.file_output(loss, opt_pred, valid_pred, test_pred)
+        self.duration = time.time() - self.starttime
 
-            num_run = str(self.num_run).zfill(5)
-            if isinstance(loss, dict):
-                loss_ = loss
-                loss = loss_[self.D.info['metric']]
-            else:
-                loss_ = {}
-            additional_run_info = ';'.join(['%s: %s' %
-                                    (METRIC_TO_STRING[
-                                         metric] if metric in METRIC_TO_STRING else metric,
-                                     value)
-                                    for metric, value in loss_.items()])
-            additional_run_info += ';' + 'duration: ' + str(self.duration)
-            additional_run_info += ';' + 'num_run:' + num_run
+        num_run = str(self.num_run).zfill(5)
+        if isinstance(loss, dict):
+            loss_ = loss
+            loss = loss_[self.D.info['metric']]
+        else:
+            loss_ = {}
+        additional_run_info = ';'.join(['%s: %s' %
+                                (METRIC_TO_STRING[
+                                     metric] if metric in METRIC_TO_STRING else metric,
+                                 value)
+                                for metric, value in loss_.items()])
+        additional_run_info += ';' + 'duration: ' + str(self.duration)
+        additional_run_info += ';' + 'num_run:' + num_run
 
-        except Exception as e:
-            self.duration = time.time() - self.starttime
-            loss = 2.0
-            additional_run_info = traceback.format_exc()
+        # except Exception as e:
+        #    self.duration = time.time() - self.starttime
+        #    loss = 2.0
+        #    additional_run_info = "Error in finish_up: %s" % str(e)
 
         return self.duration, loss, self.seed, additional_run_info
 
