@@ -1,6 +1,8 @@
+import multiprocessing
 import os
 import signal
-import multiprocessing
+import traceback
+
 import pynisher
 
 # JTS TODO: notify aaron to clean up these nasty nested modules
@@ -197,7 +199,7 @@ class AutoMLSMBO(multiprocessing.Process):
 
     def __init__(self, config_space, dataset_name,
                  output_dir, tmp_dir,
-                 limit, cutoff_time, memory_limit,
+                 total_walltime_limit, func_eval_time_limit, memory_limit,
                  watcher, start_num_run = 2,
                  default_cfgs = [],
                  num_metalearning_cfgs = 25,
@@ -217,8 +219,8 @@ class AutoMLSMBO(multiprocessing.Process):
         self.config_space = config_space
 
         # and a bunch of useful limits
-        self.limit = limit
-        self.cutoff_time = cutoff_time
+        self.total_walltime_limit = total_walltime_limit
+        self.func_eval_time_limit = func_eval_time_limit
         self.memory_limit = memory_limit
         self.watcher = watcher
         self.default_cfgs = default_cfgs
@@ -286,7 +288,7 @@ class AutoMLSMBO(multiprocessing.Process):
             _print_debug_info_of_init_configuration(
                 metalearning_configurations,
                 self.dataset_name,
-                self.limit,
+                self.total_walltime_limit,
                 self.logger,
                 self.watcher)
 
@@ -310,11 +312,9 @@ class AutoMLSMBO(multiprocessing.Process):
             return res
 
     def eval_with_limits(self, config, seed, num_run):
-        # TODO JTS: which limits do we want for an individual evaluation ?
         import sys
         safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
-                        #cpu_time_in_s=int(self.cutoff_time/4),
-                                            wall_time_in_s=int(self.limit/4),
+                                            wall_time_in_s=self.func_eval_time_limit,
                                             grace_period_in_s=5)(_eval_config_and_save)
         try:
             # JTS: this does not work currently, not sure why, probably becaus of
@@ -331,8 +331,7 @@ class AutoMLSMBO(multiprocessing.Process):
     def run(self):
         # we use pynisher here to enforce limits
         safe_smbo = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
-                                            cpu_time_in_s=int(self.cutoff_time),
-                                            wall_time_in_s=int(self.limit),
+                                            wall_time_in_s=int(self.total_walltime_limit),
                                             grace_period_in_s=5)(self.run_smbo)
         safe_smbo(max_iters = self.smac_iters)
         
@@ -347,7 +346,7 @@ class AutoMLSMBO(multiprocessing.Process):
         # first create a scenario
         seed = self.seed # TODO
         self.scenario = AutoMLScenario(self.config_space, self.config_file,
-                                       self.limit, self.cutoff_time,
+                                       self.total_walltime_limit, self.func_eval_time_limit,
                                        self.memory_limit)
         num_params = len(self.config_space.get_hyperparameters())
         # allocate a run history
@@ -372,16 +371,15 @@ class AutoMLSMBO(multiprocessing.Process):
         num_run = self.start_num_run
 
         for config in metalearning_configurations:
-            print("Evaluating config %d" % num_run)
             # JTS: reset the data manager before each configuration since
             #      we work on the data in-place
             # NOTE: this is where we could also apply some memory limits
             self.reset_data_manager()
             evaluator, info = self.eval_with_limits(config, seed, num_run)
             (duration, result, _, additional_run_info, status) = info
-            run_history.add(config = config, cost = result,
-                            time = duration , status = status,
-                            instance_id = 0, seed = seed)
+            run_history.add(config=config, cost=result,
+                            time=duration , status=status,
+                            instance_id=0, seed=seed)
             num_run += 1
             print(duration, result, additional_run_info, status)
 
@@ -395,11 +393,11 @@ class AutoMLSMBO(multiprocessing.Process):
             self.logger.debug("SMAC iteration : {}".format(smac_iter))
             next_config = smac.choose_next(X_cfg, Y_cfg)
             self.reset_data_manager()
-            evaluator, info = self.eval_with_limits(config, seed, num_run)
+            evaluator, info = self.eval_with_limits(next_config, seed, num_run)
             (duration, result, _, additional_run_info, status) = info
-            run_history.add(config = next_config, cost = result,
-                            time = duration , status = status,
-                            instance_id = 0, seed = seed)
+            run_history.add(config=next_config, cost=result,
+                            time=duration , status=status,
+                            instance_id=0, seed=seed)
 
             smac_iter += 1
             num_run += 1

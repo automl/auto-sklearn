@@ -367,8 +367,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             self._logger.info(
                 'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
         if time_left_for_ensembles <= 0:
-            self._logger.warning("Not starting ensemble builder because it's "
-                                "not worth it")
+            self._logger.warning("Not starting ensemble builder because there "
+                                 "is no time left!")
             self._proc_ensemble = None
         else:
             self._proc_ensemble = EnsembleProcess(
@@ -448,23 +448,36 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             pass
             
         # => RUN SMAC
-        # JTS TODO: check difference between cutoff time and limit
-        self._proc_smac = AutoMLSMBO(config_space = self.configuration_space,
-                                     dataset_name = self._dataset_name,
-                                     tmp_dir = self._tmp_dir,
-                                     output_dir = self._output_dir,
-                                     limit = self._time_for_task,
-                                     cutoff_time = self._time_for_task,
-                                     memory_limit = self._ml_memory_limit,
-                                     watcher = self._stopwatch,
-                                     start_num_run = num_run,
-                                     default_cfgs = default_configs,
-                                     num_metalearning_cfgs = self._initial_configurations_via_metalearning,
-                                     config_file = configspace_path,
-                                     smac_iters = self._max_iter_smac,
-                                     seed = self._seed,
-                                     metadata_directory=self._metadata_directory)
-        self._proc_smac.start()
+        smac_task_name = 'runSMAC'
+        self._stopwatch.start_task(smac_task_name)
+        time_left_for_smac = max(0,
+            self._time_for_task - self._stopwatch.wall_elapsed(
+            self._dataset_name))
+
+        if self._logger:
+            self._logger.info(
+                'Start SMAC with %5.2fsec time left' % time_left_for_smac)
+        if time_left_for_smac <= 0:
+            self._logger.warning("Not starting SMAC because there is no time "
+                                 "left.")
+            self._procsmac = None
+        else:
+            self._proc_smac = AutoMLSMBO(config_space=self.configuration_space,
+                                         dataset_name=self._dataset_name,
+                                         tmp_dir=self._tmp_dir,
+                                         output_dir=self._output_dir,
+                                         total_walltime_limit=time_left_for_smac,
+                                         func_eval_time_limit=self._per_run_time_limit,
+                                         memory_limit=self._ml_memory_limit,
+                                         watcher=self._stopwatch,
+                                         start_num_run=num_run,
+                                         default_cfgs=default_configs,
+                                         num_metalearning_cfgs=self._initial_configurations_via_metalearning,
+                                         config_file=configspace_path,
+                                         smac_iters=self._max_iter_smac,
+                                         seed=self._seed,
+                                         metadata_directory=self._metadata_directory)
+            self._proc_smac.start()
 
         psutil_procs = []
         procs = []
