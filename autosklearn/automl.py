@@ -446,29 +446,6 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             self._logger.info("Tasktype unknown: %s" %
                               TASK_TYPES_TO_STRING[datamanager.info["task"]])
 
-<<<<<<< 8514e7adae6ac803e00a1b11ccb1111e7de9e316
-        if config is not None:
-            try:
-                configuration = Configuration(self.configuration_space, config)
-                config_string = convert_conf2smac_string(configuration)
-                initial_configurations = [config_string] + initial_configurations
-            except ValueError:
-                pass
-
-        # == RUN SMAC
-        proc_smac = run_smac(tmp_dir=self._tmp_dir, basename=self._dataset_name,
-                             time_for_task=self._time_for_task,
-                             ml_memory_limit=self._ml_memory_limit,
-                             data_manager_path=data_manager_path,
-                             configspace_path=configspace_path,
-                             initial_configurations=initial_configurations,
-                             per_run_time_limit=self._per_run_time_limit,
-                             watcher=self._stopwatch, backend=self._backend,
-                             seed=self._seed,
-                             resampling_strategy=self._resampling_strategy,
-                             resampling_strategy_arguments=self._resampling_strategy_arguments,
-                             shared_mode=self._shared_mode)
-=======
         # kill the datamanager as it will be re-loaded anyways from sub processes
         try:
             del self._datamanager
@@ -494,7 +471,6 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                      seed = self._seed,
                                      metadata_directory=self._metadata_directory)
         self._proc_smac.start()
->>>>>>> reorganize automl and start using smac3
 
         procs = []
         if self._proc_smac is not None:

@@ -396,7 +396,6 @@ class AutoMLSMBO(multiprocessing.Process):
             # JTS TODO: handle the case that run_history is empty
             X_cfg, Y_cfg = rh2EPM.transform(run_history)
             self.logger.debug("SMAC iteration : {}".format(smac_iter))
-            print("NEXT")
             next_config = smac.choose_next(X_cfg, Y_cfg)
             self.reset_data_manager()
             evaluator, info = self.eval_with_limits(config, seed, num_run)
