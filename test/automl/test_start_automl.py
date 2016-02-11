@@ -98,8 +98,28 @@ class AutoMLTest(Base):
         for proc in procs:
             proc.wait()
 
+        # Check that all directories are there
+        fixture = ['predictions_valid', 'true_targets_ensemble.npy',
+                   'start_time_100', 'datamanager.pkl', 'predictions_ensemble',
+                   'ensembles', 'predictions_test', 'models']
+        self.assertEqual(os.listdir(os.path.join(output, '.auto-sklearn')),
+                         fixture)
+
+        # At least one ensemble, one validation, one test prediction and one
+        # model and one ensemble
+        fixture = os.listdir(os.path.join(output, '.auto-sklearn',
+                                          'predictions_ensemble'))
+        self.assertIn('predictions_ensemble_100_00001.npy', fixture)
+
+        fixture = os.listdir(os.path.join(output, '.auto-sklearn',
+                                          'models'))
+        self.assertIn('100.1.model', fixture)
+
+        fixture = os.listdir(os.path.join(output, '.auto-sklearn',
+                                          'ensembles'))
+        self.assertIn('100.0000000000.ensemble', fixture)
+
         # Start time
-        print(os.listdir(os.path.join(output, '.auto-sklearn')))
         start_time_file_path = os.path.join(output, '.auto-sklearn',
                                             "start_time_100")
         with open(start_time_file_path, 'r') as fh:
@@ -125,14 +145,15 @@ class AutoMLTest(Base):
             auto._backend._make_internals_directory()
             D = load_data(dataset, output)
             auto._backend.save_datamanager(D)
-            auto._do_dummy_prediction(D)
+            auto._do_dummy_prediction(D, 1)
 
-            # Assure that the dummy predictions are not in the current working
+            # Ensure that the dummy predictions are not in the current working
             # directory, but in the output directory (under output)
             self.assertFalse(os.path.exists(os.path.join(os.getcwd(),
                                                          '.auto-sklearn')))
-            self.assertTrue(os.path.exists(os.path.join(output,
-                                                        '.auto-sklearn')))
+            self.assertTrue(os.path.exists(os.path.join(
+                output, '.auto-sklearn', 'predictions_ensemble',
+                'predictions_ensemble_1_00001.npy')))
 
             del auto
             self._tearDown(output)

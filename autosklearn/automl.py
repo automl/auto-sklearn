@@ -9,6 +9,7 @@ import shutil
 import pynisher
 
 import numpy as np
+import psutil
 
 from ConfigSpace.io import pcs
 from ConfigSpace.configuration_space import Configuration
@@ -23,7 +24,7 @@ from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline, Backend
 from autosklearn.ensemble_builder import main as ensemble_main
-from autosklearn.smbo import AutoMLSMBO
+from autosklearn.smbo import AutoMLSMBO, _eval_config_and_save
 
 def _create_search_space(tmp_dir, data_info, backend, watcher, logger,
                          include_estimators=None, include_preprocessors=None):
@@ -49,7 +50,7 @@ class EnsembleProcess(multiprocessing.Process):
     
     def __init__(self, tmp_dir, dataset_name, task_type, metric, limit,
                  output_dir, ensemble_size, ensemble_nbest, seed,
-                 shared_mode, precision, max_iterations = None, silent=True):
+                 shared_mode, precision, max_iterations=None, silent=True):
         super(EnsembleProcess, self).__init__()
 
         self.tmp_dir = tmp_dir
@@ -275,33 +276,18 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         return time_for_load_data
 
     def _do_dummy_prediction(self, datamanager, num_run):
-        def dummy_prediction_call(datamanager):
-            out_dir = self._tmp_dir
-            evaluator = HoldoutEvaluator(datamanager,
-                                         output_dir=out_dir,
-                                         configuration=None,
-                                         seed=1,
-                                         num_run=0,
-                                         with_predictions=True,
-                                         all_scoring_functions=True,
-                                         output_y_test=True)
-            evaluator.fit()
-            evaluator.finish_up()
-            backend = Backend(None, out_dir)
-            if os.path.exists(backend.get_model_dir()):
-                backend.save_model(evaluator.model, num_run, 1)
-    
         self._logger.info("Starting to create dummy predictions.")
         # TODO which limits do we want to enforce here ?
         time_limit = int(self._time_for_task / 4.)
         memory_limit = int(self._ml_memory_limit)
         safe_call = pynisher.enforce_limits(cpu_time_in_s=time_limit,
-                                            mem_in_mb=memory_limit)(dummy_prediction_call)
+                                            mem_in_mb=memory_limit)(
+            _eval_config_and_save)
         try:
-            safe_call(datamanager)
-        except:
-            pass
-        self._logger.info("Finished creating dummy predictions.")
+            safe_call(None, datamanager, self._tmp_dir, self._seed, num_run)
+            self._logger.info("Finished creating dummy predictions.")
+        except Exception as e:
+            self._logger.error('Error creating dummy predictions', e)
 
     def _fit(self, datamanager):
         # Reset learnt stuff
@@ -470,7 +456,6 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                      limit = self._time_for_task,
                                      cutoff_time = self._time_for_task,
                                      memory_limit = self._ml_memory_limit,
-                                     logger = self._logger,
                                      watcher = self._stopwatch,
                                      start_num_run = num_run,
                                      default_cfgs = default_configs,
@@ -481,14 +466,19 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                      metadata_directory=self._metadata_directory)
         self._proc_smac.start()
 
+        psutil_procs = []
         procs = []
         if self._proc_smac is not None:
+            proc_smac = psutil.Process(self._proc_smac.pid)
+            psutil_procs.append(proc_smac)
             procs.append(self._proc_smac)
         if self._proc_ensemble is not None:
+            proc_ensemble = psutil.Process(self._proc_ensemble.pid)
+            psutil_procs.append(proc_ensemble)
             procs.append(self._proc_ensemble)
 
         if self._queue is not None:
-            self._queue.put([time_for_load_data, data_manager_path, procs])
+            self._queue.put([time_for_load_data, data_manager_path, psutil_procs])
         else:
             for proc in procs:
                 proc.join()

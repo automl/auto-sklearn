@@ -245,7 +245,7 @@ class Backend(object):
                                 ('%s_' % prefix if prefix else '') +
                                  '%s_%s.predict' % (subset, str(idx).zfill(5)))
 
-        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+        with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
                 filepath), delete=False) as output_file:
             for row in predictions:
                 if not isinstance(row, np.ndarray) and not isinstance(row, list):

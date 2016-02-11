@@ -3,7 +3,6 @@ import signal
 import multiprocessing
 import pynisher
 
-import smac
 # JTS TODO: notify aaron to clean up these nasty nested modules
 from smac.smbo.smbo import SMBO
 from smac.scenario.scenario import Scenario
@@ -18,7 +17,7 @@ from autosklearn.metalearning.mismbo import \
     suggest_via_metalearning
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
-from autosklearn.util import StopWatch, get_logger, setup_logger
+from autosklearn.util import get_logger
 from autosklearn.util import Backend
 
 # dataset helpers
@@ -166,8 +165,8 @@ class AutoMLScenario(Scenario):
     to create it in code, without actually reading a smac scenario file
     """
 
-    def __init__(self, config_space, config_file, limit, cutoff_time, memory_limit, logger):
-        self.logger = logger
+    def __init__(self, config_space, config_file, limit, cutoff_time, memory_limit):
+        self.logger = get_logger(self.__class__.__name__)
         # we don't actually have a target algorithm here
         # we will implement algorithm calling and the SMBO loop ourselves
         self.ta = None
@@ -199,7 +198,7 @@ class AutoMLSMBO(multiprocessing.Process):
     def __init__(self, config_space, dataset_name,
                  output_dir, tmp_dir,
                  limit, cutoff_time, memory_limit,
-                 logger, watcher, start_num_run = 2,
+                 watcher, start_num_run = 2,
                  default_cfgs = [],
                  num_metalearning_cfgs = 25,
                  config_file = None, smac_iters=1000,
@@ -221,7 +220,6 @@ class AutoMLSMBO(multiprocessing.Process):
         self.limit = limit
         self.cutoff_time = cutoff_time
         self.memory_limit = memory_limit
-        self.logger = logger
         self.watcher = watcher
         self.default_cfgs = default_cfgs
         self.num_metalearning_cfgs = num_metalearning_cfgs
@@ -230,6 +228,8 @@ class AutoMLSMBO(multiprocessing.Process):
         self.metadata_directory = metadata_directory
         self.smac_iters = smac_iters
         self.start_num_run = start_num_run
+
+        self.logger = get_logger(self.__class__.__name__)
 
     def reset_data_manager(self, max_mem=None):
         if self.datamanager is not None:
@@ -348,7 +348,7 @@ class AutoMLSMBO(multiprocessing.Process):
         seed = self.seed # TODO
         self.scenario = AutoMLScenario(self.config_space, self.config_file,
                                        self.limit, self.cutoff_time,
-                                       self.memory_limit, self.logger)
+                                       self.memory_limit)
         num_params = len(self.config_space.get_hyperparameters())
         # allocate a run history
         run_history = RunHistory()
