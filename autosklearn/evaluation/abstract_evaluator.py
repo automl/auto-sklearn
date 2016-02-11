@@ -203,24 +203,14 @@ class AbstractEvaluator(object):
             additional_run_info += ';' + 'duration: ' + str(self.duration)
             additional_run_info += ';' + 'num_run:' + num_run
 
-            if self.configuration is not None:
-                self._output_SMAC_string(self.duration, loss, self.seed,
-                                         additional_run_info)
         except Exception as e:
             self.duration = time.time() - self.starttime
-            print(traceback.format_exc())
-            self._output_SMAC_string(self.duration, 2.0, self.seed,
-                'No results were produced! Error is %s' % str(e))
-        print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
-              ('TIMEOUT', abs(self.duration), 2.0, self.seed,
-               'No results were produced! Error is %s' % str(e)))
-        return self.duration, result, self.seed, additional_run_info
+            loss = 2.0
+            additional_run_info = traceback.format_exc()
 
-    def _output_SMAC_string(self, duration, loss, seed, additional_run_info):
-        print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
-              ('SAT', abs(self.duration), loss, self.seed,
-               additional_run_info))
-    def file_output(self):
+        return self.duration, loss, self.seed, additional_run_info
+
+    def file_output(self, loss, Y_optimization_pred, Y_valid_pred, Y_test_pred):
         seed = self.seed
 
         if self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:

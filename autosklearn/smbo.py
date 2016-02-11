@@ -141,19 +141,14 @@ def _eval_config_and_save(configuration, data, tmp_dir, seed, num_run):
                                      seed=seed,
                                      num_run=num_run,
                                      **_get_base_dict())
-        evaluator.fit()
-        #signal.signal(15, empty_signal_handler)
-        duration, result, seed, run_info = evaluator.finish_up()
-        backend = Backend(None, tmp_dir)
-        if os.path.exists(backend.get_model_dir()):
-            backend.save_model(evaluator.model, num_run, seed)
+        loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
+        duration, result, seed, run_info = evaluator.finish_up(
+            loss, opt_pred, valid_pred, test_pred)
         status = StatusType.SUCCESS
         return evaluator, (duration, result, seed, run_info, status)
     else:
         status = StatusType.CRASHED
         return evaluator, (None, None, seed, None, status)
-    
-    
 
 
 def signal_handler(signum, frame):
@@ -377,6 +372,7 @@ class AutoMLSMBO(multiprocessing.Process):
         num_run = self.start_num_run
 
         for config in metalearning_configurations:
+            print("Evaluating config %d" % num_run)
             # JTS: reset the data manager before each configuration since
             #      we work on the data in-place
             # NOTE: this is where we could also apply some memory limits
@@ -387,6 +383,7 @@ class AutoMLSMBO(multiprocessing.Process):
                             time = duration , status = status,
                             instance_id = 0, seed = seed)
             num_run += 1
+            print(duration, result, additional_run_info, status)
 
         # == after metalearning run SMAC loop
         smac = SMBO(self.scenario, seed)
