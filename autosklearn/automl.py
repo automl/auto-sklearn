@@ -384,7 +384,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             self._logger.info(
                 'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
         if time_left_for_ensembles <= 0:
-            logger.warning("Not starting ensemble builder because it's not worth it")
+            self._logger.warning("Not starting ensemble builder because it's "
+                                "not worth it")
             self._proc_ensemble = None
         else:
             self._proc_ensemble = EnsembleProcess(
@@ -412,37 +413,48 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         default_configs.append(self.configuration_space.get_default_configuration())
         if (datamanager.info["task"] == BINARY_CLASSIFICATION) or \
             (datamanager.info["task"] == MULTICLASS_CLASSIFICATION):
-            config = {'balancing:strategy': 'weighting',
-                      'classifier:__choice__': 'sgd',
-                      'classifier:sgd:loss': 'hinge',
-                      'classifier:sgd:penalty': 'l2',
-                      'classifier:sgd:alpha': 0.0001,
-                      'classifier:sgd:fit_intercept': 'True',
-                      'classifier:sgd:n_iter': 5,
-                      'classifier:sgd:learning_rate': 'optimal',
-                      'classifier:sgd:eta0': 0.01,
-                      'classifier:sgd:average': 'True',
-                      'imputation:strategy': 'mean',
-                      'one_hot_encoding:use_minimum_fraction': 'True',
-                      'one_hot_encoding:minimum_fraction': 0.1,
-                      'preprocessor:__choice__': 'no_preprocessing',
-                      'rescaling:__choice__': 'min/max'}
-            default_configs.append(Configuration(self.configuration_space, config))
+            config_dict = {'balancing:strategy': 'weighting',
+                           'classifier:__choice__': 'sgd',
+                           'classifier:sgd:loss': 'hinge',
+                           'classifier:sgd:penalty': 'l2',
+                           'classifier:sgd:alpha': 0.0001,
+                           'classifier:sgd:fit_intercept': 'True',
+                           'classifier:sgd:n_iter': 5,
+                           'classifier:sgd:learning_rate': 'optimal',
+                           'classifier:sgd:eta0': 0.01,
+                           'classifier:sgd:average': 'True',
+                           'imputation:strategy': 'mean',
+                           'one_hot_encoding:use_minimum_fraction': 'True',
+                           'one_hot_encoding:minimum_fraction': 0.1,
+                           'preprocessor:__choice__': 'no_preprocessing',
+                           'rescaling:__choice__': 'min/max'}
+            try:
+                config = Configuration(self.configuration_space, config_dict)
+                default_configs.append(config)
+            except ValueError as e:
+                self._logger.warning("Second default configurations %s cannot"
+                                     " be evaluated because of %s" %
+                                     (config_dict, e))
         elif datamanager.info["task"] == MULTILABEL_CLASSIFICATION:
-            config = {'classifier:__choice__': 'adaboost',
-                      'classifier:adaboost:algorithm': 'SAMME.R',
-                      'classifier:adaboost:learning_rate': 1.0,
-                      'classifier:adaboost:max_depth': 1,
-                      'classifier:adaboost:n_estimators': 50,
-                      'balancing:strategy': 'weighting',
-                      'imputation:strategy': 'mean',
-                      'one_hot_encoding:use_minimum_fraction': 'True',
-                      'one_hot_encoding:minimum_fraction': 0.1,
-                      'preprocessor:__choice__': 'no_preprocessing',
-                      'rescaling:__choice__': 'none'}
-            default_configs.append(Configuration(self.configuration_space, config))
+            config_dict = {'classifier:__choice__': 'adaboost',
+                           'classifier:adaboost:algorithm': 'SAMME.R',
+                           'classifier:adaboost:learning_rate': 1.0,
+                           'classifier:adaboost:max_depth': 1,
+                           'classifier:adaboost:n_estimators': 50,
+                           'balancing:strategy': 'weighting',
+                           'imputation:strategy': 'mean',
+                           'one_hot_encoding:use_minimum_fraction': 'True',
+                           'one_hot_encoding:minimum_fraction': 0.1,
+                           'preprocessor:__choice__': 'no_preprocessing',
+                           'rescaling:__choice__': 'none'}
+            try:
+                config = Configuration(self.configuration_space, config_dict)
+                default_configs.append(config)
+            except ValueError as e:
+                self._logger.warning("Second default configurations %s cannot"
+                                     " be evaluated because of %s" %
+                                     (config_dict, e))
         else:
-            config = None
             self._logger.info("Tasktype unknown: %s" %
                               TASK_TYPES_TO_STRING[datamanager.info["task"]])
 
