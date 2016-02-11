@@ -158,7 +158,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._task = None
         self._metric = None
         self._label_num = None
-        self._paraser = None
+        self._parser = None
         self.models_ = None
         self.ensemble_ = None
         self._can_predict = False
