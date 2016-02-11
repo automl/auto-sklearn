@@ -148,6 +148,9 @@ class EnsembleSelection(AbstractEnsemble):
             weight = float(ensemble_member[1]) / self.ensemble_size
             weights[ensemble_member[0]] = weight
 
+        if np.sum(weights) < 1:
+            weights = weights / np.sum(weights)
+
         self.weights_ = weights
 
     def _sorted_initialization(self, predictions, labels, n_best):
