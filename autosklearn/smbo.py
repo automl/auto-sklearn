@@ -198,7 +198,7 @@ class AutoMLSMBO(multiprocessing.Process):
                  output_dir, tmp_dir,
                  total_walltime_limit, func_eval_time_limit, memory_limit,
                  watcher, start_num_run = 2,
-                 default_cfgs = [],
+                 default_cfgs=None,
                  num_metalearning_cfgs = 25,
                  config_file = None, smac_iters=1000,
                  seed = 1,
@@ -228,6 +228,7 @@ class AutoMLSMBO(multiprocessing.Process):
         self.smac_iters = smac_iters
         self.start_num_run = start_num_run
 
+        self.config_space.seed(self.seed)
         self.logger = get_logger(self.__class__.__name__)
 
     def reset_data_manager(self, max_mem=None):
@@ -365,6 +366,7 @@ class AutoMLSMBO(multiprocessing.Process):
         rh2EPM = RunHistory2EPM(num_params = num_params, cutoff_time = self.scenario.cutoff,
                                 success_states = None, impute_censored_data = False,
                                 impute_state = None)
+        num_run = self.start_num_run
 
         # == Train on subset
         #    before doing anything, let us run the default_cfgs
@@ -375,18 +377,21 @@ class AutoMLSMBO(multiprocessing.Process):
         # == METALEARNING suggestions
         # we start by evaluating the defaults on the full dataset again
         # and add the suggestions from metalearning behind it
+        if self.default_cfgs:
+            self.default_cfgs = []
         metalearning_configurations = self.default_cfgs \
                                       + self.collect_metalearning_suggestions_with_limits()
 
-        # == first evaluate all metelearning configurations
-        num_run = self.start_num_run
-
+        # == first, evaluate all metelearning and default configurations
         for config in metalearning_configurations:
             # JTS: reset the data manager before each configuration since
             #      we work on the data in-place
             # NOTE: this is where we could also apply some memory limits
-            self.logger.info("Starting to evaluate meta-learning configuration "
-                             "%d.", num_run)
+            config_name = 'meta-learning' if num_run > len(self.default_cfgs) \
+                else 'default'
+
+            self.logger.info("Starting to evaluate %d. configuration "
+                             "(%s configuration).", num_run, config_name)
             self.logger.info(config)
             self.reset_data_manager()
             info = self.eval_with_limits(config, seed, num_run)
@@ -394,9 +399,10 @@ class AutoMLSMBO(multiprocessing.Process):
             run_history.add(config=config, cost=result,
                             time=duration , status=status,
                             instance_id=0, seed=seed)
-            self.logger.info("Finished evaluating meta-learning configuration "
+            self.logger.info("Finished evaluating configuration "
                              "%d. Duration %f; loss %f; additional run info: "
-                             "%s ", num_run, duration, result, additional_run_info)
+                             "%s ", num_run, duration, result,
+                             additional_run_info)
             num_run += 1
 
         # == after metalearning run SMAC loop
@@ -407,8 +413,8 @@ class AutoMLSMBO(multiprocessing.Process):
             # JTS TODO: handle the case that run_history is empty
             X_cfg, Y_cfg = rh2EPM.transform(run_history)
             next_config = smac.choose_next(X_cfg, Y_cfg)
-            self.logger.info("Starting to evaluate SMAC configuration "
-                             "%d.", num_run)
+            self.logger.info("Starting to evaluate configuration %d. (from "
+                             "SMAC)", num_run)
             self.logger.info(next_config)
             self.reset_data_manager()
             info = self.eval_with_limits(next_config, seed, num_run)
@@ -417,8 +423,8 @@ class AutoMLSMBO(multiprocessing.Process):
                             time=duration , status=status,
                             instance_id=0, seed=seed)
 
-            self.logger.info("Finished evaluating SMAC configuration "
-                             "%d. Duration %f; loss %f; additional run info: "
+            self.logger.info("Finished evaluating configuration "
+                             "%d. Duration: %f; loss: %f; additional run info: "
                              "%s ", num_run, duration, result,
                              additional_run_info)
             smac_iter += 1
