@@ -17,6 +17,7 @@ from autosklearn.util import StopWatch, Backend
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 
 
+# TODO make this a class and make the logger know the dataset name!
 logging.basicConfig(format='[%(levelname)s] [%(asctime)s:%(name)s] %('
                            'message)s', datefmt='%H:%M:%S')
 logger = logging.getLogger("ensemble_builder")
@@ -87,6 +88,8 @@ def main(autosklearn_tmp_dir,
     index_run = 0
     num_iteration = 0
     current_num_models = 0
+    last_hash = None
+    current_hash = None
 
     backend = Backend(output_dir, autosklearn_tmp_dir)
     dir_ensemble = os.path.join(autosklearn_tmp_dir, '.auto-sklearn',
@@ -317,6 +320,27 @@ def main(autosklearn_tmp_dir,
 
             # Output the score
             logger.info('Training performance: %f' % ensemble.train_score_)
+
+        ensemble_predictions = ensemble.predict(all_predictions_train)
+        if sys.version_info[0] == 2:
+            current_hash = hash(ensemble_predictions.data)
+        else:
+            current_hash = hash(ensemble_predictions.data.tobytes())
+
+        # Only output a new ensemble and new predictions if the output of the
+        # ensemble would actually change!
+        # TODO this is neither safe (collisions, tests only with the ensemble
+        #  prediction, but not the ensemble), implement a hash function for
+        # each possible ensemble builder.
+        if last_hash is not None:
+            if current_hash == last_hash:
+                logger.info('Ensemble output did not change.')
+                time.sleep(2)
+                continue
+            else:
+                last_hash = current_hash
+        else:
+            last_hash = current_hash
 
         # Save the ensemble for later use in the main auto-sklearn module!
         backend.save_ensemble(ensemble, index_run, seed)
