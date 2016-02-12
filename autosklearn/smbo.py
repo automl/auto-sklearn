@@ -256,7 +256,9 @@ class AutoMLSMBO(multiprocessing.Process):
         self.start_num_run = start_num_run
 
         self.config_space.seed(self.seed)
-        self.logger = get_logger(self.__class__.__name__)
+        logger_name = self.__class__.__name__ + \
+                      (":" + dataset_name if dataset_name is not None else "")
+        self.logger = get_logger(logger_name)
 
     def reset_data_manager(self, max_mem=None):
         if max_mem is None:
