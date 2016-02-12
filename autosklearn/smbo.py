@@ -132,7 +132,7 @@ evaluator = None
 def _get_base_dict():
     return {
         'with_predictions': True,
-        'all_scoring_functions': True,
+        'all_scoring_functions': False,
         'output_y_test': True,
     }
 
@@ -315,6 +315,7 @@ class AutoMLSMBO(multiprocessing.Process):
         queue = multiprocessing.Queue()
         safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                             wall_time_in_s=self.func_eval_time_limit,
+                                            cpu_time_in_s=self.func_eval_time_limit,
                                             grace_period_in_s=30)(
             _eval_config_and_save)
         try:
