@@ -10,6 +10,8 @@ import numpy as np
 import scipy.sparse
 
 # JTS TODO: notify aaron to clean up these nasty nested modules
+from ConfigSpace.configuration_space import Configuration
+
 from smac.smbo.smbo import SMBO
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_ta_run import StatusType
@@ -156,8 +158,18 @@ def _eval_config_and_save(queue, configuration, data, tmp_dir, seed, num_run):
     status = StatusType.SUCCESS
     queue.put((duration, result, seed, run_info, status))
 
-def _eval_on_subset_and_save(queue, configuration, Xfull, Yfull, data_subset, tmp_dir, seed, num_run):
-    evaluator = HoldoutEvaluator(data_subset, tmp_dir, configuration,
+def _eval_on_subset_and_save(queue, configuration, n_data_subsample, data, tmp_dir, seed, num_run):
+    n_data = data.data['X_train'].shape[0]
+    # TODO get random states
+    # get pointers to the full data
+    Xfull = data.data['X_train']
+    Yfull = data.data['Y_train']
+    # create a random subset
+    indices = np.random.randint(0, n_data, n_data_subsample)
+    data.data['X_train'] = Xfull[indices, :]
+    data.data['Y_train'] = Yfull[indices]
+
+    evaluator = HoldoutEvaluator(data, tmp_dir, configuration,
                                  seed=seed,
                                  num_run=num_run,
                                  **_get_base_dict())
@@ -275,6 +287,63 @@ class AutoMLSMBO(multiprocessing.Process):
         self.metric = self.datamanager.info['metric']
         self.task = self.datamanager.info['task']
 
+    def collect_defaults(self):
+        # TODO Matthias adapt this
+        default_configs = []
+        # == set default configurations
+        # first enqueue the default configuration from our config space
+        if (self.datamanager.info["task"] == BINARY_CLASSIFICATION) or \
+            (self.datamanager.info["task"] == MULTICLASS_CLASSIFICATION):
+            config_dict = {'balancing:strategy': 'weighting',
+                           'classifier:__choice__': 'sgd',
+                           'classifier:sgd:loss': 'hinge',
+                           'classifier:sgd:penalty': 'l2',
+                           'classifier:sgd:alpha': 0.0001,
+                           'classifier:sgd:fit_intercept': 'True',
+                           'classifier:sgd:n_iter': 5,
+                           'classifier:sgd:learning_rate': 'optimal',
+                           'classifier:sgd:eta0': 0.01,
+                           'classifier:sgd:average': 'True',
+                           'imputation:strategy': 'mean',
+                           'one_hot_encoding:use_minimum_fraction': 'True',
+                           'one_hot_encoding:minimum_fraction': 0.1,
+                           'preprocessor:__choice__': 'no_preprocessing',
+                           'rescaling:__choice__': 'min/max'}
+            try:
+                config = Configuration(self.config_space, config_dict)
+                default_configs.append(config)
+            except ValueError as e:
+                self._logger.warning("Second default configurations %s cannot"
+                                     " be evaluated because of %s" %
+                                     (config_dict, e))
+        elif self.datamanager.info["task"] == MULTILABEL_CLASSIFICATION:
+            config_dict = {'classifier:__choice__': 'adaboost',
+                           'classifier:adaboost:algorithm': 'SAMME.R',
+                           'classifier:adaboost:learning_rate': 1.0,
+                           'classifier:adaboost:max_depth': 1,
+                           'classifier:adaboost:n_estimators': 50,
+                           'balancing:strategy': 'weighting',
+                           'imputation:strategy': 'mean',
+                           'one_hot_encoding:use_minimum_fraction': 'True',
+                           'one_hot_encoding:minimum_fraction': 0.1,
+                           'preprocessor:__choice__': 'no_preprocessing',
+                           'rescaling:__choice__': 'none'}
+            try:
+                config = Configuration(self.config_space, config_dict)
+                default_configs.append(config)
+            except ValueError as e:
+                self._logger.warning("Second default configurations %s cannot"
+                                     " be evaluated because of %s" %
+                                     (config_dict, e))
+        else:
+            self._logger.info("Tasktype unknown: %s" %
+                              TASK_TYPES_TO_STRING[datamanager.info["task"]])
+        return default_configs
+        
+    def collect_additional_subset_defaults(self):
+        # TODO Matthias: implement this
+        return []
+
     def collect_metalearning_suggestions(self):
         meta_features = _calculate_metafeatures(
             data_feat_type=self.datamanager.feat_type,
@@ -377,15 +446,17 @@ class AutoMLSMBO(multiprocessing.Process):
                 info = (duration, 2.0, seed, str(e0), status)
         return info
 
-    def eval_on_subset_with_limits(self, config, Xfull, Yfull, seed, num_run):
+    def eval_on_subset_with_limits(self, config, n_data_subsample, seed, num_run, time_limit=None):
         start_time = time.time()
         queue = multiprocessing.Queue()
+        if time_limit is None:
+            time_limit = self.func_eval_time_limit
         safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
-                                            wall_time_in_s=self.func_eval_time_limit,
+                                            wall_time_in_s=time_limit,
                                             grace_period_in_s=30)(
                                             _eval_on_subset_and_save)
         try:
-            safe_eval(queue, config, Xfull, Yfull, self.datamanager, self.tmp_dir,
+            safe_eval(queue, config, n_data_subsample, self.datamanager, self.tmp_dir,
                       seed, num_run)
             info = queue.get_nowait()
         except Exception as e0:
@@ -441,15 +512,17 @@ class AutoMLSMBO(multiprocessing.Process):
 
         # Create array for default configurations!
         if self.default_cfgs is None:
-            self.default_cfgs = []
-        self.default_cfgs.insert(0, self.config_space.get_default_configuration())
+            default_cfgs = []
+        else:
+            default_cfgs = self.default_cfgs
+        default_cfgs.insert(0, self.config_space.get_default_configuration())
+        # add the standard defaults we want to evaluate
+        default_cfgs += self.collect_defaults()
 
         # == Train on subset
         #    before doing anything, let us run the default_cfgs
         #    on a subset of the available data to ensure that
         #    we at least have some models
-
-        self.reset_data_manager()
         n_data = self.datamanager.data['X_train'].shape[0]
         subset_ratio = 1000. / n_data
         if subset_ratio > 1.0 and int(n_data * subset_ratio) > 50:
@@ -458,36 +531,55 @@ class AutoMLSMBO(multiprocessing.Process):
                          "%d/%d data points." %
                          (int(n_data * subset_ratio), n_data))
 
-        for cfg in self.default_cfgs:
-            self.reset_data_manager()
-            n_data_subsample = int(n_data * subset_ratio)
-            # TODO get random states
-            indices = np.random.randint(0, n_data, n_data_subsample)
-            Xfull = self.datamanager.data['X_train'].copy()
-            Yfull = self.datamanager.data['Y_train'].copy()
-            self.datamanager.data['X_train'] = self.datamanager.data['X_train'][indices, :]
-            self.datamanager.data['Y_train'] = self.datamanager.data['Y_train'][indices]
+        # we will try three different ratios of decreasing magnitude
+        # in the hope that at least on the last one we will be able
+        # to get a model
+        subset_ratios = [subset_ratio, subset_ratio/2., subset_ratio/4]
+        # the time limit for these function evaluations is rigorously
+        # set to only 1/2 of a full function evaluation
+        subset_time_limit = self.func_eval_time_limit / 2
+        # the configs we want to run on the data subset are:
+        # 1) the default configs
+        # 2) a set of configs we selected for training on a subset
+        subset_configs = default_cfgs \
+                         + self.collect_additional_subset_defaults()
+        for ratio in subset_ratios:
+            training_success = True
+            for cfg in subset_configs:
+                self.reset_data_manager()
+                n_data_subsample = int(n_data * ratio)
 
-            # run the config, but throw away the result afterwards
-            # since this cfg was evaluated only on a subset
-            # and we don't want  to confuse SMAC
-            self.logger.info("Starting to evaluate %d on SUBSET "
-                             "with size %d and time limit %ds.",
-                             num_run, n_data_subsample,
-                             self.func_eval_time_limit)
-            _info = self.eval_on_subset_with_limits(cfg, Xfull, Yfull, seed, num_run)
-            (duration, result, _, additional_run_info, status) = _info
-            self.logger.info("Finished evaluating %d. configuration on SUBSET. "
-                             "Duration %f; loss %f; status %s; additional run "
-                             "info: %s ", num_run, duration, result,
-                             str(status), additional_run_info)
-            num_run += 1
-            del Xfull, Yfull
+                # run the config, but throw away the result afterwards
+                # since this cfg was evaluated only on a subset
+                # and we don't want  to confuse SMAC
+                self.logger.info("Starting to evaluate %d on SUBSET "
+                                 "with size %d and time limit %ds.",
+                                 num_run, n_data_subsample,
+                                 self.func_eval_time_limit)
+                _info = self.eval_on_subset_with_limits(cfg, n_data_subsample,
+                                                        seed, num_run,
+                                                        time_limit = subset_time_limit)
+                (duration, result, _, additional_run_info, status) = _info
+                self.logger.info("Finished evaluating %d. configuration on SUBSET. "
+                                 "Duration %f; loss %f; status %s; additional run "
+                                 "info: %s ", num_run, duration, result,
+                                 str(status), additional_run_info)
+                if status != StatusType.SUCCESS:
+                    self.logger.info("A CONFIG did not finish "
+                                     " for subset ratio %f -> going smaller",
+                                     ratio)
+                    training_success = False
+                    break
+                num_run += 1
+            if training_success:
+                self.logger.info("Finished SUBSET training sucessfully for "
+                                 "all models with ratio %f", ratio)
+                break
 
         # == METALEARNING suggestions
         # we start by evaluating the defaults on the full dataset again
         # and add the suggestions from metalearning behind it
-        metalearning_configurations = self.default_cfgs \
+        metalearning_configurations = default_cfgs \
                                       + self.collect_metalearning_suggestions_with_limits()
 
         # == first, evaluate all metelearning and default configurations
@@ -496,7 +588,7 @@ class AutoMLSMBO(multiprocessing.Process):
             #      we work on the data in-place
             # NOTE: this is where we could also apply some memory limits
             config_name = 'meta-learning' if (num_run - self.start_num_run) >\
-                    len(self.default_cfgs) else 'default'
+                    len(default_cfgs) else 'default'
 
             self.logger.info("Starting to evaluate %d. configuration "
                              "(%s configuration) with time limit %ds.",
