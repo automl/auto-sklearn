@@ -29,8 +29,7 @@ def load_data(dataset_info, outputdir, tmp_dir=None, max_mem=None):
     if tmp_dir is None:
         tmp_dir = outputdir
     backend = Backend(outputdir, tmp_dir)
-
-    if max_mem is None:
+    if max_mem is None or dataset_info is None:
         try:
             D = backend.load_datamanager()
         except IOError:
@@ -43,7 +42,7 @@ def load_data(dataset_info, outputdir, tmp_dir=None, max_mem=None):
         if max_mem is None:
             D = CompetitionDataManager(dataset_info, encode_labels=True)
         else:
-            D = CompetitionDataManager(dataset_info, encode_labels=True, max_mem=max_mem)
+            D = CompetitionDataManager(dataset_info, encode_labels=True, max_memory_in_mb=max_mem)
     return D
 
 
@@ -199,6 +198,7 @@ class AutoMLSMBO(multiprocessing.Process):
                  output_dir, tmp_dir,
                  total_walltime_limit, func_eval_time_limit, memory_limit,
                  watcher, start_num_run = 2,
+                 data_memory_limit=None,
                  default_cfgs=None,
                  num_metalearning_cfgs = 25,
                  config_file = None, smac_iters=1000,
@@ -220,6 +220,7 @@ class AutoMLSMBO(multiprocessing.Process):
         self.total_walltime_limit = int(total_walltime_limit)
         self.func_eval_time_limit = int(func_eval_time_limit)
         self.memory_limit = memory_limit
+        self.data_memory_limit = data_memory_limit
         self.watcher = watcher
         self.default_cfgs = default_cfgs
         self.num_metalearning_cfgs = num_metalearning_cfgs
@@ -233,6 +234,8 @@ class AutoMLSMBO(multiprocessing.Process):
         self.logger = get_logger(self.__class__.__name__)
 
     def reset_data_manager(self, max_mem=None):
+        if max_mem is None:
+            max_mem = self.data_memory_limit
         if self.datamanager is not None:
             del self.datamanager
         if isinstance(self.dataset_name, AbstractDataManager):
@@ -376,12 +379,23 @@ class AutoMLSMBO(multiprocessing.Process):
         #    before doing anything, let us run the default_cfgs
         #    on a subset of the available data to ensure that
         #    we at least have some models
-        # TODO
-
+        mem_limit_subset = 500
+        """
+        for cfg in self.default_cfgs:
+            self.reset_data_manager(max_mem = mem_limit_subset)
+            # run the config, but throw away the result afterwards
+            # since this cfg was evaluated only on a subset
+            # and we don't want  to confuse SMAC
+            self.logger.info("Starting to evaluate %d on SUBSET"
+                             "with time limit %ds.",
+                             num_run, self.func_eval_time_limit)
+            _info = self.eval_with_limits(config, seed, num_run)
+            num_run += 1
+        """
         # == METALEARNING suggestions
         # we start by evaluating the defaults on the full dataset again
         # and add the suggestions from metalearning behind it
-        if self.default_cfgs:
+        if self.default_cfgs is None:
             self.default_cfgs = []
         self.default_cfgs.insert(0, self.config_space.get_default_configuration())
         metalearning_configurations = self.default_cfgs \
