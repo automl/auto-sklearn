@@ -10,6 +10,8 @@ import numpy as np
 import scipy.sparse
 
 # JTS TODO: notify aaron to clean up these nasty nested modules
+from ConfigSpace.configuration_space import Configuration
+
 from smac.smbo.smbo import SMBO
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_ta_run import StatusType
@@ -283,6 +285,63 @@ class AutoMLSMBO(multiprocessing.Process):
         self.metric = self.datamanager.info['metric']
         self.task = self.datamanager.info['task']
 
+    def collect_defaults(self):
+        # TODO Matthias adapt this
+        default_configs = []
+        # == set default configurations
+        # first enqueue the default configuration from our config space
+        if (self.datamanager.info["task"] == BINARY_CLASSIFICATION) or \
+            (self.datamanager.info["task"] == MULTICLASS_CLASSIFICATION):
+            config_dict = {'balancing:strategy': 'weighting',
+                           'classifier:__choice__': 'sgd',
+                           'classifier:sgd:loss': 'hinge',
+                           'classifier:sgd:penalty': 'l2',
+                           'classifier:sgd:alpha': 0.0001,
+                           'classifier:sgd:fit_intercept': 'True',
+                           'classifier:sgd:n_iter': 5,
+                           'classifier:sgd:learning_rate': 'optimal',
+                           'classifier:sgd:eta0': 0.01,
+                           'classifier:sgd:average': 'True',
+                           'imputation:strategy': 'mean',
+                           'one_hot_encoding:use_minimum_fraction': 'True',
+                           'one_hot_encoding:minimum_fraction': 0.1,
+                           'preprocessor:__choice__': 'no_preprocessing',
+                           'rescaling:__choice__': 'min/max'}
+            try:
+                config = Configuration(self.config_space, config_dict)
+                default_configs.append(config)
+            except ValueError as e:
+                self._logger.warning("Second default configurations %s cannot"
+                                     " be evaluated because of %s" %
+                                     (config_dict, e))
+        elif self.datamanager.info["task"] == MULTILABEL_CLASSIFICATION:
+            config_dict = {'classifier:__choice__': 'adaboost',
+                           'classifier:adaboost:algorithm': 'SAMME.R',
+                           'classifier:adaboost:learning_rate': 1.0,
+                           'classifier:adaboost:max_depth': 1,
+                           'classifier:adaboost:n_estimators': 50,
+                           'balancing:strategy': 'weighting',
+                           'imputation:strategy': 'mean',
+                           'one_hot_encoding:use_minimum_fraction': 'True',
+                           'one_hot_encoding:minimum_fraction': 0.1,
+                           'preprocessor:__choice__': 'no_preprocessing',
+                           'rescaling:__choice__': 'none'}
+            try:
+                config = Configuration(self.config_space, config_dict)
+                default_configs.append(config)
+            except ValueError as e:
+                self._logger.warning("Second default configurations %s cannot"
+                                     " be evaluated because of %s" %
+                                     (config_dict, e))
+        else:
+            self._logger.info("Tasktype unknown: %s" %
+                              TASK_TYPES_TO_STRING[datamanager.info["task"]])
+        return default_configs
+        
+    def collect_additional_subset_defaults(self):
+        # TODO Matthias: implement this
+        return []
+
     def collect_metalearning_suggestions(self):
         meta_features = _calculate_metafeatures(
             data_feat_type=self.datamanager.feat_type,
@@ -449,8 +508,12 @@ class AutoMLSMBO(multiprocessing.Process):
 
         # Create array for default configurations!
         if self.default_cfgs is None:
-            self.default_cfgs = []
-        self.default_cfgs.insert(0, self.config_space.get_default_configuration())
+            default_cfgs = []
+        else:
+            default_cfgs = self.default_cfgs
+        default_cfgs.insert(0, self.config_space.get_default_configuration())
+        # add the standard defaults we want to evaluate
+        default_cfgs += self.collect_defaults()
 
         # == Train on subset
         #    before doing anything, let us run the default_cfgs
@@ -471,9 +534,14 @@ class AutoMLSMBO(multiprocessing.Process):
         # the time limit for these function evaluations is rigorously
         # set to only 1/2 of a full function evaluation
         subset_time_limit = self.func_eval_time_limit / 2
+        # the configs we want to run on the data subset are:
+        # 1) the default configs
+        # 2) a set of configs we selected for training on a subset
+        subset_configs = default_cfgs \
+                         + self.collect_additional_subset_defaults()
         for ratio in subset_ratios:
             training_success = True
-            for cfg in self.default_cfgs:
+            for cfg in subset_configs:
                 self.reset_data_manager()
                 n_data_subsample = int(n_data * ratio)
 
@@ -507,7 +575,7 @@ class AutoMLSMBO(multiprocessing.Process):
         # == METALEARNING suggestions
         # we start by evaluating the defaults on the full dataset again
         # and add the suggestions from metalearning behind it
-        metalearning_configurations = self.default_cfgs \
+        metalearning_configurations = default_cfgs \
                                       + self.collect_metalearning_suggestions_with_limits()
 
         # == first, evaluate all metelearning and default configurations
@@ -516,7 +584,7 @@ class AutoMLSMBO(multiprocessing.Process):
             #      we work on the data in-place
             # NOTE: this is where we could also apply some memory limits
             config_name = 'meta-learning' if (num_run - self.start_num_run) >\
-                    len(self.default_cfgs) else 'default'
+                    len(default_cfgs) else 'default'
 
             self.logger.info("Starting to evaluate %d. configuration "
                              "(%s configuration) with time limit %ds.",
