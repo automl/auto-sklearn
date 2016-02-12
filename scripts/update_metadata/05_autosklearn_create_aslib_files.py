@@ -38,15 +38,28 @@ if __name__ == "__main__":
     for sparse, task in [(1, BINARY_CLASSIFICATION),
                          (1, MULTICLASS_CLASSIFICATION),
                          (0, BINARY_CLASSIFICATION),
-                         (0, MULTICLASS_CLASSIFICATION)]:
+                         (0, MULTICLASS_CLASSIFICATION),
+                         (1, REGRESSION),
+                         (0, REGRESSION)]:
 
         for metric in ['acc_metric', 'auc_metric', 'bac_metric', 'f1_metric',
-                       'pac_metric']:
+                       'pac_metric', 'a_metric', 'r2_metric']:
+
+            if STRING_TO_METRIC[metric] not in REGRESSION_METRICS and task in \
+                    REGRESSION_TASKS:
+                continue
+            if STRING_TO_METRIC[metric] not in CLASSIFICATION_METRICS and \
+                            task in CLASSIFICATION_TASKS:
+                continue
 
             dir_name = '%s_%s_%s' % (metric, TASK_TYPES_TO_STRING[task],
                 'sparse' if sparse else 'dense')
             output_dir_ = os.path.join(output_directory, dir_name)
             results_dir_ = os.path.join(results_dir, dir_name)
+
+            if not os.path.exists(results_dir_):
+                print("Results directory %s does not exist!") % results_dir_
+                continue
 
             try:
                 os.makedirs(output_dir_)

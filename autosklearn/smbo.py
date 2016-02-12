@@ -57,11 +57,11 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
 
     if metalearning_cnt <= 0:
         result = None
-    elif data_info_task in \
-            [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
+    elif data_info_task in [MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION,
+                            MULTILABEL_CLASSIFICATION, REGRESSION]:
         logger.info('Start calculating metafeatures for %s', basename)
         result = calc_meta_features(x_train, y_train, categorical=categorical,
-                                    dataset_name=basename)
+                                    dataset_name=basename, task=data_info_task)
     else:
         result = None
         logger.info('Metafeatures not calculated')
@@ -73,12 +73,12 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
 
 
 def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
-                                    logger):
+                                    task, logger):
     task_name = 'CalculateMetafeaturesEncoded'
     watcher.start_task(task_name)
     result = calc_meta_features_encoded(X_train=x_train, Y_train=y_train,
                                         categorical=[False] * x_train.shape[1],
-                                        dataset_name=basename)
+                                        dataset_name=basename, task=task)
     watcher.stop_task(task_name)
     logger.info(
         'Calculating Metafeatures (encoded attributes) took %5.2fsec',
@@ -292,13 +292,15 @@ class AutoMLSMBO(multiprocessing.Process):
         have_metafeatures = meta_features is not None
         known_task = self.datamanager.info['task'] in [MULTICLASS_CLASSIFICATION,
                                                        BINARY_CLASSIFICATION,
-                                                       MULTILABEL_CLASSIFICATION]
+                                                       MULTILABEL_CLASSIFICATION,
+                                                       REGRESSION]
         if have_metafeatures and known_task :
             meta_features_encoded = _calculate_metafeatures_encoded(
                 self.dataset_name,
                 self.datamanager.data['X_train'],
                 self.datamanager.data['Y_train'],
                 self.watcher,
+                self.datamanager.info['task'],
                 self.logger)
 
             metalearning_configurations = _get_metalearning_configurations(

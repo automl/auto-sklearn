@@ -26,7 +26,7 @@ __all__ = [
 
 SENTINEL = 'uiaeo'
 
-EXCLUDE_META_FUTURES = {
+EXCLUDE_META_FEATURES_CLASSIFICATION = {
     'Landmark1NN',
     'LandmarkDecisionNodeLearner',
     'LandmarkDecisionTree',
@@ -34,12 +34,33 @@ EXCLUDE_META_FUTURES = {
     'LandmarkNaiveBayes',
     'PCAFractionOfComponentsFor95PercentVariance',
     'PCAKurtosisFirstPC',
-    'PCASkewnessFirstPC'
+    'PCASkewnessFirstPC',
+    'PCA'
+}
+
+EXCLUDE_META_FEATURES_REGRESSION = {
+    'Landmark1NN',
+    'LandmarkDecisionNodeLearner',
+    'LandmarkDecisionTree',
+    'LandmarkLDA',
+    'LandmarkNaiveBayes',
+    'PCAFractionOfComponentsFor95PercentVariance',
+    'PCAKurtosisFirstPC',
+    'PCASkewnessFirstPC',
+    'NumberOfClasses',
+    'ClassOccurences',
+    'ClassProbabilityMin',
+    'ClassProbabilityMax',
+    'ClassProbabilityMean',
+    'ClassProbabilitySTD',
+    'ClassEntropy',
+    'LandmarkRandomNodeLearner',
+    'PCA',
 }
 
 
 
-def calc_meta_features(X_train, Y_train, categorical, dataset_name):
+def calc_meta_features(X_train, Y_train, categorical, dataset_name, task):
     """
     Calculate meta features with label
     :param X_train:
@@ -48,12 +69,16 @@ def calc_meta_features(X_train, Y_train, categorical, dataset_name):
     :param dataset_name:
     :return:
     """
+    EXCLUDE_META_FEATURES = EXCLUDE_META_FEATURES_CLASSIFICATION \
+        if task in CLASSIFICATION_TASKS else EXCLUDE_META_FEATURES_REGRESSION
+
     return calculate_all_metafeatures_with_labels(
         X_train, Y_train, categorical, dataset_name + SENTINEL,
-        dont_calculate=EXCLUDE_META_FUTURES)
+        dont_calculate=EXCLUDE_META_FEATURES)
 
 
-def calc_meta_features_encoded(X_train, Y_train, categorical, dataset_name):
+def calc_meta_features_encoded(X_train, Y_train, categorical, dataset_name,
+                               task):
     """
     Calculate meta features with encoded labels
     :param X_train:
@@ -62,12 +87,15 @@ def calc_meta_features_encoded(X_train, Y_train, categorical, dataset_name):
     :param dataset_name:
     :return:
     """
+    EXCLUDE_META_FEATURES = EXCLUDE_META_FEATURES_CLASSIFICATION \
+        if task in CLASSIFICATION_TASKS else EXCLUDE_META_FEATURES_REGRESSION
+
     if np.sum(categorical) != 0:
         raise ValueError("Training matrix doesn't look OneHotEncoded!")
 
     return calculate_all_metafeatures_encoded_labels(
         X_train, Y_train, categorical, dataset_name + SENTINEL,
-        dont_calculate=EXCLUDE_META_FUTURES)
+        dont_calculate=EXCLUDE_META_FEATURES)
 
 
 def convert_conf2smac_string(configuration):
@@ -99,7 +127,10 @@ def suggest_via_metalearning(
         configuration_space, dataset_name, metric, task, sparse,
         num_initial_configurations, metadata_directory):
     logger = get_logger('autosklearn.metalearning.mismbo')
-    task = task if task != MULTILABEL_CLASSIFICATION else MULTICLASS_CLASSIFICATION
+
+    if task == MULTILABEL_CLASSIFICATION:
+        task = MULTICLASS_CLASSIFICATION
+
     task = TASK_TYPES_TO_STRING[task]
 
     if metafeatures_encoded_labels is None or \
@@ -121,8 +152,11 @@ def suggest_via_metalearning(
     mf.metafeature_values.update(
         metafeatures_encoded_labels.metafeature_values)
 
+    EXCLUDE_META_FEATURES = EXCLUDE_META_FEATURES_CLASSIFICATION \
+        if task in CLASSIFICATION_TASKS else EXCLUDE_META_FEATURES_REGRESSION
+
     metafeatures_subset = subsets['all']
-    metafeatures_subset.difference_update(EXCLUDE_META_FUTURES)
+    metafeatures_subset.difference_update(EXCLUDE_META_FEATURES)
     metafeatures_subset = list(metafeatures_subset)
 
     start = time.time()
