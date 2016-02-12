@@ -7,11 +7,11 @@ import os
 import re
 import sys
 import time
-from collections import Counter
 
 import numpy as np
 
-from autosklearn.constants import STRING_TO_TASK_TYPES, STRING_TO_METRIC
+from autosklearn.constants import STRING_TO_TASK_TYPES, STRING_TO_METRIC, \
+    BINARY_CLASSIFICATION
 from autosklearn.evaluation.util import calculate_score
 from autosklearn.util import StopWatch, Backend
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
@@ -325,6 +325,8 @@ def main(autosklearn_tmp_dir,
         if len(dir_valid_list) == len(dir_ensemble_list):
             all_predictions_valid = np.array(all_predictions_valid)
             ensemble_predictions_valid = ensemble.predict(all_predictions_valid)
+            if task_type == BINARY_CLASSIFICATION:
+                ensemble_predictions_valid = ensemble_predictions_valid[:,1]
             backend.save_predictions_as_txt(ensemble_predictions_valid,
                                             'valid', index_run, prefix=dataset_name)
         else:
@@ -337,6 +339,8 @@ def main(autosklearn_tmp_dir,
         if len(dir_test_list) == len(dir_ensemble_list):
             all_predictions_test = np.array(all_predictions_test)
             ensemble_predictions_test = ensemble.predict(all_predictions_test)
+            if task_type == BINARY_CLASSIFICATION:
+                ensemble_predictions_valid = ensemble_predictions_test[:, 1]
             backend.save_predictions_as_txt(ensemble_predictions_test,
                                             'test', index_run, prefix=dataset_name)
         else:
