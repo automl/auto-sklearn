@@ -5,9 +5,9 @@ import time
 import traceback
 
 import pynisher
-import six
 
 import numpy as np
+import scipy.sparse
 
 # JTS TODO: notify aaron to clean up these nasty nested modules
 from smac.smbo.smbo import SMBO
@@ -218,13 +218,16 @@ class AutoMLSMBO(multiprocessing.Process):
 
     def __init__(self, config_space, dataset_name,
                  output_dir, tmp_dir,
-                 total_walltime_limit, func_eval_time_limit, memory_limit,
-                 watcher, start_num_run = 2,
+                 total_walltime_limit,
+                 func_eval_time_limit,
+                 memory_limit,
+                 watcher, start_num_run=1,
                  data_memory_limit=None,
                  default_cfgs=None,
-                 num_metalearning_cfgs = 25,
-                 config_file = None, smac_iters=1000,
-                 seed = 1,
+                 num_metalearning_cfgs=25,
+                 config_file = None,
+                 smac_iters=1000,
+                 seed=1,
                  metadata_directory = None):
         super(AutoMLSMBO, self).__init__()
         # data related
@@ -427,26 +430,40 @@ class AutoMLSMBO(multiprocessing.Process):
         num_params = len(self.config_space.get_hyperparameters())
         # allocate a run history
         run_history = RunHistory()
-        rh2EPM = RunHistory2EPM(num_params = num_params, cutoff_time = self.scenario.cutoff,
-                                success_states = None, impute_censored_data = False,
-                                impute_state = None)
+        rh2EPM = RunHistory2EPM(num_params=num_params, cutoff_time=self.scenario.cutoff,
+                                success_states=None, impute_censored_data=False,
+                                impute_state=None)
         num_run = self.start_num_run
+
+        # Create array for default configurations!
+        if self.default_cfgs is None:
+            self.default_cfgs = []
+        self.default_cfgs.insert(0, self.config_space.get_default_configuration())
 
         # == Train on subset
         #    before doing anything, let us run the default_cfgs
         #    on a subset of the available data to ensure that
         #    we at least have some models
-        subset_ratio = 1./3.
+
+        self.reset_data_manager()
+        n_data = self.datamanager.data['X_train'].shape[0]
+        subset_ratio = 1000. / n_data
+        if subset_ratio > 1.0 and int(n_data * subset_ratio) > 50:
+            subset_ratio = 0.33
+        self.logger.info("Training default configurations on a subset of "
+                         "%d/%d data points." %
+                         (int(n_data * subset_ratio), n_data))
+
         for cfg in self.default_cfgs:
             self.reset_data_manager()
-            n_data = self.datamanager.data['X_train'].shape[0]
             n_data_subsample = int(n_data * subset_ratio)
+            # TODO get random states
             indices = np.random.randint(0, n_data, n_data_subsample)
-            Xfull = np.copy(self.datamanager.data['X_train'][indices, :])
-            Yfull = np.copy(self.datamanager.data['Y_train'])
+            Xfull = self.datamanager.data['X_train'].copy()
+            Yfull = self.datamanager.data['Y_train'].copy()
             self.datamanager.data['X_train'] = self.datamanager.data['X_train'][indices, :]
             self.datamanager.data['Y_train'] = self.datamanager.data['Y_train'][indices]
-            
+
             # run the config, but throw away the result afterwards
             # since this cfg was evaluated only on a subset
             # and we don't want  to confuse SMAC
@@ -455,14 +472,17 @@ class AutoMLSMBO(multiprocessing.Process):
                              num_run, n_data_subsample,
                              self.func_eval_time_limit)
             _info = self.eval_on_subset_with_limits(cfg, Xfull, Yfull, seed, num_run)
+            (duration, result, _, additional_run_info, status) = _info
+            self.logger.info("Finished evaluating %d. configuration on SUBSET. "
+                             "Duration %f; loss %f; status %s; additional run "
+                             "info: %s ", num_run, duration, result,
+                             str(status), additional_run_info)
             num_run += 1
             del Xfull, Yfull
+
         # == METALEARNING suggestions
         # we start by evaluating the defaults on the full dataset again
         # and add the suggestions from metalearning behind it
-        if self.default_cfgs is None:
-            self.default_cfgs = []
-        self.default_cfgs.insert(0, self.config_space.get_default_configuration())
         metalearning_configurations = self.default_cfgs \
                                       + self.collect_metalearning_suggestions_with_limits()
 

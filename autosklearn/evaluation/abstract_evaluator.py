@@ -3,26 +3,32 @@ from __future__ import print_function
 import abc
 import os
 import time
-import traceback
 
 import numpy as np
-import autosklearn.pipeline.classification
-import autosklearn.pipeline.regression
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
+import autosklearn.pipeline.classification
+import autosklearn.pipeline.regression
 from autosklearn.constants import *
 from autosklearn.util import Backend
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 from autosklearn.evaluation.util import calculate_score
+
+from ConfigSpace import Configuration
 
 
 __all__ = [
     'AbstractEvaluator'
 ]
 
+
 class MyDummyClassifier(DummyClassifier):
     def __init__(self, configuration, random_states):
-        super(MyDummyClassifier, self).__init__(strategy="most_frequent")
+        self.configuration = configuration
+        if configuration == 1:
+            super(MyDummyClassifier, self).__init__(strategy="uniform")
+        else:
+            super(MyDummyClassifier, self).__init__(strategy="most_frequent")
 
     def pre_transform(self, X, y, fit_params=None, init_params=None):
         if fit_params is None:
@@ -49,7 +55,11 @@ class MyDummyClassifier(DummyClassifier):
 
 class MyDummyRegressor(DummyRegressor):
     def __init__(self, configuration, random_states):
-        super(MyDummyRegressor, self).__init__(strategy='mean')
+        self.configuration = configuration
+        if configuration == 1:
+            super(MyDummyRegressor, self).__init__(strategy='mean')
+        else:
+            super(MyDummyRegressor, self).__init__(strategy='median')
 
     def pre_transform(self, X, y, fit_params=None, init_params=None):
         if fit_params is None:
@@ -100,14 +110,14 @@ class AbstractEvaluator(object):
         self.all_scoring_functions = all_scoring_functions
 
         if self.task_type in REGRESSION_TASKS:
-            if self.configuration is None:
+            if not isinstance(self.configuration, Configuration):
                 self.model_class = MyDummyRegressor
             else:
                 self.model_class = \
                     autosklearn.pipeline.regression.SimpleRegressionPipeline
             self.predict_function = self._predict_regression
         else:
-            if self.configuration is None:
+            if not isinstance(self.configuration, Configuration):
                 self.model_class = MyDummyClassifier
             else:
                 self.model_class = \
@@ -154,7 +164,7 @@ class AbstractEvaluator(object):
         raise NotImplementedError()
 
     def _loss(self, y_true, y_hat):
-        if self.configuration is None:
+        if not isinstance(self.configuration, Configuration):
             if self.all_scoring_functions:
                 return {self.metric: 1.0}
             else:

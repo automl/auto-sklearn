@@ -290,20 +290,39 @@ class AutoML(BaseEstimator, multiprocessing.Process):
     def _do_dummy_prediction(self, datamanager, num_run):
         self._logger.info("Starting to create dummy predictions.")
         # TODO which limits do we want to enforce here ?
-        time_limit = int(self._time_for_task / 4.)
+        time_limit = int(self._time_for_task / 6.)
         memory_limit = int(self._ml_memory_limit)
+
         safe_call = pynisher.enforce_limits(cpu_time_in_s=int(time_limit),
                                             mem_in_mb=memory_limit)(
             _eval_config_and_save)
         try:
             queue = multiprocessing.Queue()
-            safe_call(queue, None, datamanager, self._tmp_dir, self._seed,
+            safe_call(queue, 1, datamanager, self._tmp_dir, self._seed,
                       num_run)
-            self._logger.info("Finished creating dummy predictions.")
+            self._logger.info("Finished creating dummy prediction 1/2.")
         except Exception as e:
             # No error handling with the queue because there will be no
             # predictions or losses
-            self._logger.error('Error creating dummy predictions', e)
+            self._logger.error('Error creating dummy prediction 1/2', e)
+
+        num_run += 1
+
+        safe_call = pynisher.enforce_limits(cpu_time_in_s=int(time_limit),
+                                            mem_in_mb=memory_limit)(
+            _eval_config_and_save)
+        try:
+            queue = multiprocessing.Queue()
+            safe_call(queue, 2, datamanager, self._tmp_dir, self._seed,
+                      num_run)
+            self._logger.info("Finished creating dummy prediction 2/2.")
+        except Exception as e:
+            # No error handling with the queue because there will be no
+            # predictions or losses
+            self._logger.error('Error creating dummy prediction 2/2', e)
+
+        num_run += 1
+        return num_run
 
     def _fit(self, datamanager):
         # Reset learnt stuff
@@ -352,7 +371,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         # == Perform dummy predictions
         num_run = 1
         if self._resampling_strategy in ['holdout', 'holdout-iterative-fit']:
-            self._do_dummy_prediction(datamanager, num_run)
+            num_run = self._do_dummy_prediction(datamanager, num_run)
 
         # = Create a searchspace
         # Do this before One Hot Encoding to make sure that it creates a
