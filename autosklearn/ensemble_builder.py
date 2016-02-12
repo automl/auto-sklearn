@@ -310,7 +310,7 @@ def main(autosklearn_tmp_dir,
                 time.sleep(2)
                 continue
             except Exception as e:
-                logger.error('Caught error! %s', e.message)
+                logger.error('Caught error! %s', str(e))
                 used_time = watch.wall_elapsed('ensemble_builder')
                 time.sleep(2)
                 continue
