@@ -321,6 +321,9 @@ def main(autosklearn_tmp_dir,
             # Output the score
             logger.info('Training performance: %f' % ensemble.train_score_)
 
+            logger.info('Building the ensmble took %f seconds' %
+                        watch.wall_elapsed('ensemble_iter_' + str(index_run)))
+
         ensemble_predictions = ensemble.predict(all_predictions_train)
         if sys.version_info[0] == 2:
             ensemble_predictions.flags.writeable = False
