@@ -186,6 +186,10 @@ def _eval_on_subset_and_save(queue, configuration, n_data_subsample, data, tmp_d
     loss, _opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
     # predict on the whole dataset, needed for ensemble
     opt_pred = evaluator.predict_function(Xfull, evaluator.model, evaluator.task_type, Yfull)
+    # TODO remove this hack
+    evaluator.output_y_test = False
+    evaluator.Y_optimization = Yfull
+
     duration, result, seed, run_info = evaluator.finish_up(
         loss, opt_pred, valid_pred, test_pred)
     status = StatusType.SUCCESS
@@ -288,12 +292,10 @@ class AutoMLSMBO(multiprocessing.Process):
         self.task = self.datamanager.info['task']
 
     def collect_defaults(self):
-        # TODO Matthias adapt this
         default_configs = []
         # == set default configurations
         # first enqueue the default configuration from our config space
-        if (self.datamanager.info["task"] == BINARY_CLASSIFICATION) or \
-            (self.datamanager.info["task"] == MULTICLASS_CLASSIFICATION):
+        if self.datamanager.info["task"] in CLASSIFICATION_TASKS:
             config_dict = {'balancing:strategy': 'weighting',
                            'classifier:__choice__': 'sgd',
                            'classifier:sgd:loss': 'hinge',
@@ -313,31 +315,140 @@ class AutoMLSMBO(multiprocessing.Process):
                 config = Configuration(self.config_space, config_dict)
                 default_configs.append(config)
             except ValueError as e:
-                self._logger.warning("Second default configurations %s cannot"
+                self.logger.warning("Second default configurations %s cannot"
                                      " be evaluated because of %s" %
                                      (config_dict, e))
-        elif self.datamanager.info["task"] == MULTILABEL_CLASSIFICATION:
-            config_dict = {'classifier:__choice__': 'adaboost',
-                           'classifier:adaboost:algorithm': 'SAMME.R',
-                           'classifier:adaboost:learning_rate': 1.0,
-                           'classifier:adaboost:max_depth': 1,
-                           'classifier:adaboost:n_estimators': 50,
-                           'balancing:strategy': 'weighting',
-                           'imputation:strategy': 'mean',
-                           'one_hot_encoding:use_minimum_fraction': 'True',
-                           'one_hot_encoding:minimum_fraction': 0.1,
-                           'preprocessor:__choice__': 'no_preprocessing',
-                           'rescaling:__choice__': 'none'}
+
+            if self.datamanager.info["is_sparse"]:
+                config_dict = {'classifier:__choice__': 'extra_trees',
+                               'classifier:extra_trees:bootstrap': 'False',
+                               'classifier:extra_trees:criterion': 'gini',
+                               'classifier:extra_trees:max_depth': 'None',
+                               'classifier:extra_trees:max_features': 1.0,
+                               'classifier:extra_trees:min_samples_leaf': 5,
+                               'classifier:extra_trees:min_samples_split': 5,
+                               'classifier:extra_trees:min_weight_fraction_leaf': 0.0,
+                               'classifier:extra_trees:n_estimators': 100,
+                               'balancing:strategy': 'weighting',
+                               'imputation:strategy': 'mean',
+                               'one_hot_encoding:use_minimum_fraction': 'True',
+                               'one_hot_encoding:minimum_fraction': 0.1,
+                               'preprocessor:__choice__': 'truncatedSVD',
+                               'preprocessor:truncatedSVD:target_dim': 20,
+                               'rescaling:__choice__': 'min/max'}
+            else:
+                n_data_points = self.datamanager.data['X_train'].shape[0]
+                percentile = 20. / n_data_points
+                percentile = max(percentile, 2.)
+
+                config_dict = {'classifier:__choice__': 'extra_trees',
+                               'classifier:extra_trees:bootstrap': 'False',
+                               'classifier:extra_trees:criterion': 'gini',
+                               'classifier:extra_trees:max_depth': 'None',
+                               'classifier:extra_trees:max_features': 1.0,
+                               'classifier:extra_trees:min_samples_leaf': 5,
+                               'classifier:extra_trees:min_samples_split': 5,
+                               'classifier:extra_trees:min_weight_fraction_leaf': 0.0,
+                               'classifier:extra_trees:n_estimators': 100,
+                               'balancing:strategy': 'weighting',
+                               'imputation:strategy': 'mean',
+                               'one_hot_encoding:use_minimum_fraction': 'True',
+                               'one_hot_encoding:minimum_fraction': 0.1,
+                               'preprocessor:__choice__': 'select_percentile_classification',
+                               'preprocessor:select_percentile_classification:percentile': percentile,
+                               'preprocessor:select_percentile_classification:score_func': 'chi2',
+                               'rescaling:__choice__': 'min/max'}
+
             try:
                 config = Configuration(self.config_space, config_dict)
                 default_configs.append(config)
             except ValueError as e:
-                self._logger.warning("Second default configurations %s cannot"
+                self.logger.warning("Third default configurations %s cannot"
                                      " be evaluated because of %s" %
                                      (config_dict, e))
+
+            config_dict = {'balancing:strategy': 'weighting',
+                           'classifier:__choice__': 'gaussian_nb',
+                           'imputation:strategy': 'mean',
+                           'one_hot_encoding:use_minimum_fraction': 'True',
+                           'one_hot_encoding:minimum_fraction': 0.1,
+                           'preprocessor:__choice__': 'no_preprocessing',
+                           'rescaling:__choice__': 'standardize'}
+            try:
+                config = Configuration(self.config_space, config_dict)
+                default_configs.append(config)
+            except ValueError as e:
+                self.logger.warning("Forth default configurations %s cannot"
+                                    " be evaluated because of %s" %
+                                    (config_dict, e))
+
+        elif self.datamanager.info["task"] in REGRESSION_TASKS:
+            config_dict = {'regressor:__choice__': 'sgd',
+                           'regressor:sgd:loss': 'squared_loss',
+                           'regressor:sgd:penalty': 'l2',
+                           'regressor:sgd:alpha': 0.0001,
+                           'regressor:sgd:fit_intercept': 'True',
+                           'regressor:sgd:n_iter': 5,
+                           'regressor:sgd:learning_rate': 'optimal',
+                           'regressor:sgd:eta0': 0.01,
+                           'regressor:sgd:average': 'True',
+                           'imputation:strategy': 'mean',
+                           'one_hot_encoding:use_minimum_fraction': 'True',
+                           'one_hot_encoding:minimum_fraction': 0.1,
+                           'preprocessor:__choice__': 'no_preprocessing',
+                           'rescaling:__choice__': 'min/max'}
+            try:
+                config = Configuration(self.config_space, config_dict)
+                default_configs.append(config)
+            except ValueError as e:
+                self.logger.warning("Second default configurations %s cannot"
+                                    " be evaluated because of %s" %
+                                    (config_dict, e))
+
+            if self.datamanager.info["is_sparse"]:
+                config_dict = {'regressor:__choice__': 'extra_trees',
+                               'regressor:extra_trees:bootstrap': 'False',
+                               'regressor:extra_trees:criterion': 'mse',
+                               'regressor:extra_trees:max_depth': 'None',
+                               'regressor:extra_trees:max_features': 1.0,
+                               'regressor:extra_trees:min_samples_leaf': 5,
+                               'regressor:extra_trees:min_samples_split': 5,
+                               'regressor:extra_trees:n_estimators': 100,
+                               'imputation:strategy': 'mean',
+                               'one_hot_encoding:use_minimum_fraction': 'True',
+                               'one_hot_encoding:minimum_fraction': 0.1,
+                               'preprocessor:__choice__': 'truncatedSVD',
+                               'preprocessor:truncatedSVD:target_dim': 10,
+                               'rescaling:__choice__': 'min/max'}
+            else:
+                config_dict = {'regressor:__choice__': 'extra_trees',
+                               'regressor:extra_trees:bootstrap': 'False',
+                               'regressor:extra_trees:criterion': 'mse',
+                               'regressor:extra_trees:max_depth': 'None',
+                               'regressor:extra_trees:max_features': 1.0,
+                               'regressor:extra_trees:min_samples_leaf': 5,
+                               'regressor:extra_trees:min_samples_split': 5,
+                               'regressor:extra_trees:n_estimators': 100,
+                               'imputation:strategy': 'mean',
+                               'one_hot_encoding:use_minimum_fraction': 'True',
+                               'one_hot_encoding:minimum_fraction': 0.1,
+                               'preprocessor:__choice__': 'pca',
+                               'preprocessor:pca:keep_variance': 0.9,
+                               'preprocessor:pca:whiten': 'False',
+                               'rescaling:__choice__': 'min/max'}
+
+            try:
+                config = Configuration(self.config_space, config_dict)
+                default_configs.append(config)
+            except ValueError as e:
+                self.logger.warning("Third default configurations %s cannot"
+                                    " be evaluated because of %s" %
+                                    (config_dict, e))
+
         else:
-            self._logger.info("Tasktype unknown: %s" %
-                              TASK_TYPES_TO_STRING[datamanager.info["task"]])
+            self.logger.info("Tasktype unknown: %s" %
+                              TASK_TYPES_TO_STRING[self.datamanager.info[
+                                  "task"]])
         return default_configs
         
     def collect_additional_subset_defaults(self):
@@ -523,29 +634,31 @@ class AutoMLSMBO(multiprocessing.Process):
         #    before doing anything, let us run the default_cfgs
         #    on a subset of the available data to ensure that
         #    we at least have some models
+        #    we will try three different ratios of decreasing magnitude
+        #    in the hope that at least on the last one we will be able
+        #    to get a model
         n_data = self.datamanager.data['X_train'].shape[0]
-        subset_ratio = 1000. / n_data
+        subset_ratio = 10000. / n_data
         if subset_ratio > 1.0 and int(n_data * subset_ratio) > 50:
             subset_ratio = 0.33
+            subset_ratios = [subset_ratio, subset_ratio / 2., subset_ratio / 3.]
+        else:
+            subset_ratios = [subset_ratio, subset_ratio /2., 1000. / n_data]
         self.logger.info("Training default configurations on a subset of "
                          "%d/%d data points." %
                          (int(n_data * subset_ratio), n_data))
 
-        # we will try three different ratios of decreasing magnitude
-        # in the hope that at least on the last one we will be able
-        # to get a model
-        subset_ratios = [subset_ratio, subset_ratio/2., subset_ratio/4]
+
         # the time limit for these function evaluations is rigorously
         # set to only 1/2 of a full function evaluation
-        subset_time_limit = self.func_eval_time_limit / 2
+        subset_time_limit = max(5, int(self.func_eval_time_limit / 2))
         # the configs we want to run on the data subset are:
         # 1) the default configs
         # 2) a set of configs we selected for training on a subset
         subset_configs = default_cfgs \
                          + self.collect_additional_subset_defaults()
-        for ratio in subset_ratios:
-            training_success = True
-            for cfg in subset_configs:
+        for cfg in subset_configs:
+            for ratio in subset_ratios:
                 self.reset_data_manager()
                 n_data_subsample = int(n_data * ratio)
 
@@ -555,7 +668,7 @@ class AutoMLSMBO(multiprocessing.Process):
                 self.logger.info("Starting to evaluate %d on SUBSET "
                                  "with size %d and time limit %ds.",
                                  num_run, n_data_subsample,
-                                 self.func_eval_time_limit)
+                                 subset_time_limit)
                 _info = self.eval_on_subset_with_limits(cfg, n_data_subsample,
                                                         seed, num_run,
                                                         time_limit = subset_time_limit)
@@ -568,12 +681,11 @@ class AutoMLSMBO(multiprocessing.Process):
                     self.logger.info("A CONFIG did not finish "
                                      " for subset ratio %f -> going smaller",
                                      ratio)
-                    training_success = False
-                    break
+                    continue
+
                 num_run += 1
-            if training_success:
-                self.logger.info("Finished SUBSET training sucessfully for "
-                                 "all models with ratio %f", ratio)
+                self.logger.info("Finished SUBSET training sucessfully "
+                                 "with ratio %f", ratio)
                 break
 
         # == METALEARNING suggestions

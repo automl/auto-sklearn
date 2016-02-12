@@ -196,8 +196,11 @@ class AbstractEvaluator(object):
         self.duration = time.time() - self.starttime
         if loss is None:
             loss, opt_pred, valid_pred, test_pred = self.predict_and_loss()
-        self.file_output(loss, opt_pred, valid_pred, test_pred)
-        self.duration = time.time() - self.starttime
+        loss_, additional_run_info_ = self.file_output(loss, opt_pred,
+                                                       valid_pred, test_pred)
+
+        if loss_ is not None:
+            return self.duration, loss_, self.seed, additional_run_info_
 
         num_run = str(self.num_run).zfill(5)
         if isinstance(loss, dict):
@@ -212,11 +215,6 @@ class AbstractEvaluator(object):
                                 for metric, value in loss_.items()])
         additional_run_info += ';' + 'duration: ' + str(self.duration)
         additional_run_info += ';' + 'num_run:' + num_run
-
-        # except Exception as e:
-        #    self.duration = time.time() - self.starttime
-        #    loss = 2.0
-        #    additional_run_info = "Error in finish_up: %s" % str(e)
 
         return self.duration, loss, self.seed, additional_run_info
 
@@ -249,6 +247,8 @@ class AbstractEvaluator(object):
         if Y_test_pred is not None:
             self.backend.save_predictions_as_npy(Y_test_pred, 'test',
                                                  seed, num_run)
+
+        return None, None
 
     def _predict_proba(self, X, model, task_type, Y_train):
         Y_pred = model.predict_proba(X, batch_size=1000)
