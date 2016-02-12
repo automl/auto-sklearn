@@ -383,11 +383,13 @@ class AutoMLSMBO(multiprocessing.Process):
                 info = (duration, 2.0, seed, str(e0), status)
         return info
 
-    def eval_on_subset_with_limits(self, config, n_data_subsample, seed, num_run):
+    def eval_on_subset_with_limits(self, config, n_data_subsample, seed, num_run, time_limit=None):
         start_time = time.time()
         queue = multiprocessing.Queue()
+        if time_limit is None:
+            time_limit = self.func_eval_time_limit
         safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
-                                            wall_time_in_s=self.func_eval_time_limit,
+                                            wall_time_in_s=time_limit,
                                             grace_period_in_s=30)(
                                             _eval_on_subset_and_save)
         try:
@@ -462,24 +464,45 @@ class AutoMLSMBO(multiprocessing.Process):
                          "%d/%d data points." %
                          (int(n_data * subset_ratio), n_data))
 
-        for cfg in self.default_cfgs:
-            self.reset_data_manager()
-            n_data_subsample = int(n_data * subset_ratio)
+        # we will try three different ratios of decreasing magnitude
+        # in the hope that at least on the last one we will be able
+        # to get a model
+        subset_ratios = [subset_ratio, subset_ratio/2., subset_ratio/4]
+        # the time limit for these function evaluations is rigorously
+        # set to only 1/2 of a full function evaluation
+        subset_time_limit = self.func_eval_time_limit / 2
+        for ratio in subset_ratios:
+            training_success = True
+            for cfg in self.default_cfgs:
+                self.reset_data_manager()
+                n_data_subsample = int(n_data * ratio)
 
-            # run the config, but throw away the result afterwards
-            # since this cfg was evaluated only on a subset
-            # and we don't want  to confuse SMAC
-            self.logger.info("Starting to evaluate %d on SUBSET "
-                             "with size %d and time limit %ds.",
-                             num_run, n_data_subsample,
-                             self.func_eval_time_limit)
-            _info = self.eval_on_subset_with_limits(cfg, n_data_subsample, seed, num_run)
-            (duration, result, _, additional_run_info, status) = _info
-            self.logger.info("Finished evaluating %d. configuration on SUBSET. "
-                             "Duration %f; loss %f; status %s; additional run "
-                             "info: %s ", num_run, duration, result,
-                             str(status), additional_run_info)
-            num_run += 1
+                # run the config, but throw away the result afterwards
+                # since this cfg was evaluated only on a subset
+                # and we don't want  to confuse SMAC
+                self.logger.info("Starting to evaluate %d on SUBSET "
+                                 "with size %d and time limit %ds.",
+                                 num_run, n_data_subsample,
+                                 self.func_eval_time_limit)
+                _info = self.eval_on_subset_with_limits(cfg, n_data_subsample,
+                                                        seed, num_run,
+                                                        time_limit = subset_time_limit)
+                (duration, result, _, additional_run_info, status) = _info
+                self.logger.info("Finished evaluating %d. configuration on SUBSET. "
+                                 "Duration %f; loss %f; status %s; additional run "
+                                 "info: %s ", num_run, duration, result,
+                                 str(status), additional_run_info)
+                if status != StatusType.SUCCESS:
+                    self.logger.info("A CONFIG did not finish "
+                                     " for subset ratio %f -> going smaller",
+                                     ratio)
+                    training_success = False
+                    break
+                num_run += 1
+            if training_success:
+                self.logger.info("Finished SUBSET training sucessfully for "
+                                 "all models with ratio %f", ratio)
+                break
 
         # == METALEARNING suggestions
         # we start by evaluating the defaults on the full dataset again
