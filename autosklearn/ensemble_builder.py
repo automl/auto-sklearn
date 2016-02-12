@@ -323,6 +323,7 @@ def main(autosklearn_tmp_dir,
 
         ensemble_predictions = ensemble.predict(all_predictions_train)
         if sys.version_info[0] == 2:
+            ensemble_predictions.flags.writeable = False
             current_hash = hash(ensemble_predictions.data)
         else:
             current_hash = hash(ensemble_predictions.data.tobytes())
