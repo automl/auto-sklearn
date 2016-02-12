@@ -156,8 +156,18 @@ def _eval_config_and_save(queue, configuration, data, tmp_dir, seed, num_run):
     status = StatusType.SUCCESS
     queue.put((duration, result, seed, run_info, status))
 
-def _eval_on_subset_and_save(queue, configuration, Xfull, Yfull, data_subset, tmp_dir, seed, num_run):
-    evaluator = HoldoutEvaluator(data_subset, tmp_dir, configuration,
+def _eval_on_subset_and_save(queue, configuration, n_data_subsample, data, tmp_dir, seed, num_run):
+    n_data = data.data['X_train'].shape[0]
+    # TODO get random states
+    # get pointers to the full data
+    Xfull = data.data['X_train']
+    Yfull = data.data['Y_train']
+    # create a random subset
+    indices = np.random.randint(0, n_data, n_data_subsample)
+    data.data['X_train'] = Xfull[indices, :]
+    data.data['Y_train'] = Yfull[indices]
+
+    evaluator = HoldoutEvaluator(data, tmp_dir, configuration,
                                  seed=seed,
                                  num_run=num_run,
                                  **_get_base_dict())
@@ -373,7 +383,7 @@ class AutoMLSMBO(multiprocessing.Process):
                 info = (duration, 2.0, seed, str(e0), status)
         return info
 
-    def eval_on_subset_with_limits(self, config, Xfull, Yfull, seed, num_run):
+    def eval_on_subset_with_limits(self, config, n_data_subsample, seed, num_run):
         start_time = time.time()
         queue = multiprocessing.Queue()
         safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
@@ -381,7 +391,7 @@ class AutoMLSMBO(multiprocessing.Process):
                                             grace_period_in_s=30)(
                                             _eval_on_subset_and_save)
         try:
-            safe_eval(queue, config, Xfull, Yfull, self.datamanager, self.tmp_dir,
+            safe_eval(queue, config, n_data_subsample, self.datamanager, self.tmp_dir,
                       seed, num_run)
             info = queue.get_nowait()
         except Exception as e0:
@@ -444,8 +454,6 @@ class AutoMLSMBO(multiprocessing.Process):
         #    before doing anything, let us run the default_cfgs
         #    on a subset of the available data to ensure that
         #    we at least have some models
-
-        self.reset_data_manager()
         n_data = self.datamanager.data['X_train'].shape[0]
         subset_ratio = 1000. / n_data
         if subset_ratio > 1.0 and int(n_data * subset_ratio) > 50:
@@ -457,12 +465,6 @@ class AutoMLSMBO(multiprocessing.Process):
         for cfg in self.default_cfgs:
             self.reset_data_manager()
             n_data_subsample = int(n_data * subset_ratio)
-            # TODO get random states
-            indices = np.random.randint(0, n_data, n_data_subsample)
-            Xfull = self.datamanager.data['X_train'].copy()
-            Yfull = self.datamanager.data['Y_train'].copy()
-            self.datamanager.data['X_train'] = self.datamanager.data['X_train'][indices, :]
-            self.datamanager.data['Y_train'] = self.datamanager.data['Y_train'][indices]
 
             # run the config, but throw away the result afterwards
             # since this cfg was evaluated only on a subset
@@ -471,14 +473,13 @@ class AutoMLSMBO(multiprocessing.Process):
                              "with size %d and time limit %ds.",
                              num_run, n_data_subsample,
                              self.func_eval_time_limit)
-            _info = self.eval_on_subset_with_limits(cfg, Xfull, Yfull, seed, num_run)
+            _info = self.eval_on_subset_with_limits(cfg, n_data_subsample, seed, num_run)
             (duration, result, _, additional_run_info, status) = _info
             self.logger.info("Finished evaluating %d. configuration on SUBSET. "
                              "Duration %f; loss %f; status %s; additional run "
                              "info: %s ", num_run, duration, result,
                              str(status), additional_run_info)
             num_run += 1
-            del Xfull, Yfull
 
         # == METALEARNING suggestions
         # we start by evaluating the defaults on the full dataset again
