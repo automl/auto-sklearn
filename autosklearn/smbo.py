@@ -7,6 +7,8 @@ import traceback
 import pynisher
 import six
 
+import numpy as np
+
 # JTS TODO: notify aaron to clean up these nasty nested modules
 from smac.smbo.smbo import SMBO
 from smac.scenario.scenario import Scenario
@@ -29,13 +31,9 @@ def load_data(dataset_info, outputdir, tmp_dir=None, max_mem=None):
     if tmp_dir is None:
         tmp_dir = outputdir
     backend = Backend(outputdir, tmp_dir)
-
-    if max_mem is None:
-        try:
-            D = backend.load_datamanager()
-        except IOError:
-            D = None
-    else:
+    try:
+        D = backend.load_datamanager()
+    except IOError:
         D = None
 
     # Datamanager probably doesn't exist
@@ -43,7 +41,7 @@ def load_data(dataset_info, outputdir, tmp_dir=None, max_mem=None):
         if max_mem is None:
             D = CompetitionDataManager(dataset_info, encode_labels=True)
         else:
-            D = CompetitionDataManager(dataset_info, encode_labels=True, max_mem=max_mem)
+            D = CompetitionDataManager(dataset_info, encode_labels=True, max_memory_in_mb=max_mem)
     return D
 
 
@@ -158,6 +156,29 @@ def _eval_config_and_save(queue, configuration, data, tmp_dir, seed, num_run):
     status = StatusType.SUCCESS
     queue.put((duration, result, seed, run_info, status))
 
+def _eval_on_subset_and_save(queue, configuration, Xfull, Yfull, data_subset, tmp_dir, seed, num_run):
+    evaluator = HoldoutEvaluator(data_subset, tmp_dir, configuration,
+                                 seed=seed,
+                                 num_run=num_run,
+                                 **_get_base_dict())
+
+    def signal_handler(signum, frame):
+        print('Received signal %s. Aborting Training!', str(signum))
+        global evaluator
+        duration, result, seed, run_info = evaluator.finish_up()
+        # TODO use status type for stopped, but yielded a result
+        queue.put((duration, result, seed, run_info, StatusType.SUCCESS))
+
+    signal.signal(15, signal_handler)
+
+    loss, _opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
+    # predict on the whole dataset, needed for ensemble
+    opt_pred = evaluator.predict_function(Xfull, evaluator.model, evaluator.task_type, Yfull)
+    duration, result, seed, run_info = evaluator.finish_up(
+        loss, opt_pred, valid_pred, test_pred)
+    status = StatusType.SUCCESS
+    queue.put((duration, result, seed, run_info, status))
+    
 
 class AutoMLScenario(Scenario):
     """
@@ -199,6 +220,7 @@ class AutoMLSMBO(multiprocessing.Process):
                  output_dir, tmp_dir,
                  total_walltime_limit, func_eval_time_limit, memory_limit,
                  watcher, start_num_run = 2,
+                 data_memory_limit=None,
                  default_cfgs=None,
                  num_metalearning_cfgs = 25,
                  config_file = None, smac_iters=1000,
@@ -220,6 +242,7 @@ class AutoMLSMBO(multiprocessing.Process):
         self.total_walltime_limit = int(total_walltime_limit)
         self.func_eval_time_limit = int(func_eval_time_limit)
         self.memory_limit = memory_limit
+        self.data_memory_limit = data_memory_limit
         self.watcher = watcher
         self.default_cfgs = default_cfgs
         self.num_metalearning_cfgs = num_metalearning_cfgs
@@ -233,6 +256,8 @@ class AutoMLSMBO(multiprocessing.Process):
         self.logger = get_logger(self.__class__.__name__)
 
     def reset_data_manager(self, max_mem=None):
+        if max_mem is None:
+            max_mem = self.data_memory_limit
         if self.datamanager is not None:
             del self.datamanager
         if isinstance(self.dataset_name, AbstractDataManager):
@@ -344,7 +369,41 @@ class AutoMLSMBO(multiprocessing.Process):
                     status = StatusType.CRASHED
                 info = (duration, 2.0, seed, str(e0), status)
         return info
-        
+
+    def eval_on_subset_with_limits(self, config, Xfull, Yfull, seed, num_run):
+        start_time = time.time()
+        queue = multiprocessing.Queue()
+        safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
+                                            wall_time_in_s=self.func_eval_time_limit,
+                                            grace_period_in_s=30)(
+                                            _eval_on_subset_and_save)
+        try:
+            safe_eval(queue, config, Xfull, Yfull, self.datamanager, self.tmp_dir,
+                      seed, num_run)
+            info = queue.get_nowait()
+        except Exception as e0:
+            if isinstance(e0, MemoryError):
+                is_memory_error = True
+            else:
+                is_memory_error = False
+
+            try:
+                # This happens if a timeout is reached and a half-way trained
+                #  model can be used to predict something
+                info = queue.get_nowait()
+            except Exception as e1:
+                # This happens if a timeout is reached and the model does not
+                #  support iterative_fit()
+                duration = time.time() - start_time
+                if is_memory_error:
+                    status = StatusType.MEMOUT
+                elif duration >= self.func_eval_time_limit:
+                    status = StatusType.TIMEOUT
+                else:
+                    status = StatusType.CRASHED
+                info = (duration, 2.0, seed, str(e0), status)
+        return info
+    
     def run(self):
         # we use pynisher here to enforce limits
         safe_smbo = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
@@ -377,12 +436,31 @@ class AutoMLSMBO(multiprocessing.Process):
         #    before doing anything, let us run the default_cfgs
         #    on a subset of the available data to ensure that
         #    we at least have some models
-        # TODO
-
+        subset_ratio = 1./3.
+        for cfg in self.default_cfgs:
+            self.reset_data_manager()
+            n_data = self.datamanager.data['X_train'].shape[0]
+            n_data_subsample = int(n_data * subset_ratio)
+            indices = np.random.randint(0, n_data, n_data_subsample)
+            Xfull = np.copy(self.datamanager.data['X_train'][indices, :])
+            Yfull = np.copy(self.datamanager.data['Y_train'])
+            self.datamanager.data['X_train'] = self.datamanager.data['X_train'][indices, :]
+            self.datamanager.data['Y_train'] = self.datamanager.data['Y_train'][indices]
+            
+            # run the config, but throw away the result afterwards
+            # since this cfg was evaluated only on a subset
+            # and we don't want  to confuse SMAC
+            self.logger.info("Starting to evaluate %d on SUBSET "
+                             "with size %d and time limit %ds.",
+                             num_run, n_data_subsample,
+                             self.func_eval_time_limit)
+            _info = self.eval_on_subset_with_limits(cfg, Xfull, Yfull, seed, num_run)
+            num_run += 1
+            del Xfull, Yfull
         # == METALEARNING suggestions
         # we start by evaluating the defaults on the full dataset again
         # and add the suggestions from metalearning behind it
-        if self.default_cfgs:
+        if self.default_cfgs is None:
             self.default_cfgs = []
         self.default_cfgs.insert(0, self.config_space.get_default_configuration())
         metalearning_configurations = self.default_cfgs \

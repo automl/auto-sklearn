@@ -134,6 +134,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._ensemble_nbest = ensemble_nbest
         self._seed = seed
         self._ml_memory_limit = ml_memory_limit
+        self._data_memory_limit = None
         self._metadata_directory = metadata_directory
         self._queue = queue
         self._keep_models = keep_models
@@ -233,6 +234,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                     raise ValueError('Only `Categorical` and `Numerical` are '
                                      'valid feature types, you passed `%s`' % ft)
 
+        self._data_memory_limit = None
         loaded_data_manager = XYDataManager(X, y,
                                             task=task,
                                             metric=metric,
@@ -257,9 +259,10 @@ class AutoML(BaseEstimator, multiprocessing.Process):
 
         self._logger.debug('======== Reading and converting data ==========')
         # Encoding the labels will be done after the metafeature calculation!
+        self._data_memory_limit = float(self._ml_memory_limit) / 3
         loaded_data_manager = CompetitionDataManager(
             dataset, encode_labels=False,
-            max_memory_in_mb=float(self._ml_memory_limit) / 3)
+            max_memory_in_mb=self._data_memory_limit)
         loaded_data_manager_str = str(loaded_data_manager).split('\n')
         for part in loaded_data_manager_str:
             self._logger.debug(part)
@@ -481,6 +484,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                          total_walltime_limit=time_left_for_smac,
                                          func_eval_time_limit=self._per_run_time_limit,
                                          memory_limit=self._ml_memory_limit,
+                                         data_memory_limit=self._data_memory_limit,
                                          watcher=self._stopwatch,
                                          start_num_run=num_run,
                                          default_cfgs=default_configs,
