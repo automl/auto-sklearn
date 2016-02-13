@@ -1,14 +1,14 @@
 # -*- encoding: utf-8 -*-
 
-
 import os
-import sys
 from sklearn.externals import six
+import warnings
 
 __all__ = [
     'check_pid',
     'warn_if_not_float'
 ]
+
 
 def warn_if_not_float(X, estimator='This algorithm'):
     """Warning utility function to check that data type is floating point.
@@ -22,6 +22,7 @@ def warn_if_not_float(X, estimator='This algorithm'):
                       "got %s" % (estimator, X.dtype))
         return True
     return False
+
 
 def check_pid(pid):
     """Check For the existence of a unix pid."""
