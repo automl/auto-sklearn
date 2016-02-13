@@ -90,7 +90,7 @@ def create_predict_spearman_rank(metafeatures, experiments, iterator):
 
     X = pd.DataFrame(X)
     Y = pd.Series(Y, index=Y_names)
-    logging.info("Metafeatures", metafeatures.shape)
+    logging.info("Metafeatures %s", metafeatures.shape)
     logging.info("X.shape %s", X.shape)
     logging.info("Y.shape %s", Y.shape)
     assert X.shape == (len(cross_product), metafeatures.shape[1] * 2), \
