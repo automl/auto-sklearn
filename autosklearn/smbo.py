@@ -229,7 +229,9 @@ class AutoMLSMBO(multiprocessing.Process):
     def collect_defaults(self):
         # TODO each pipeline should know about its preferred default
         # configurations!
-
+        return []
+        
+    def collect_additional_subset_defaults(self):
         default_configs = []
         # == set default configurations
         # first enqueue the default configuration from our config space
@@ -254,8 +256,8 @@ class AutoMLSMBO(multiprocessing.Process):
                 default_configs.append(config)
             except ValueError as e:
                 self.logger.warning("Second default configurations %s cannot"
-                                     " be evaluated because of %s" %
-                                     (config_dict, e))
+                                    " be evaluated because of %s" %
+                                    (config_dict, e))
 
             if self.datamanager.info["is_sparse"]:
                 config_dict = {'classifier:__choice__': 'extra_trees',
@@ -302,16 +304,27 @@ class AutoMLSMBO(multiprocessing.Process):
                 default_configs.append(config)
             except ValueError as e:
                 self.logger.warning("Third default configurations %s cannot"
-                                     " be evaluated because of %s" %
-                                     (config_dict, e))
+                                    " be evaluated because of %s" %
+                                    (config_dict, e))
 
-            config_dict = {'balancing:strategy': 'weighting',
-                           'classifier:__choice__': 'gaussian_nb',
-                           'imputation:strategy': 'mean',
-                           'one_hot_encoding:use_minimum_fraction': 'True',
-                           'one_hot_encoding:minimum_fraction': 0.1,
-                           'preprocessor:__choice__': 'no_preprocessing',
-                           'rescaling:__choice__': 'standardize'}
+            if self.datamanager.info["is_sparse"]:
+                config_dict = {'balancing:strategy': 'weighting',
+                               'classifier:__choice__': 'multinomial_nb',
+                               'classifier:multinomial_nb:alpha': 1.0,
+                               'classifier:multinomial_nb:fit_prior': 'True',
+                               'imputation:strategy': 'mean',
+                               'one_hot_encoding:use_minimum_fraction': 'True',
+                               'one_hot_encoding:minimum_fraction': 0.1,
+                               'preprocessor:__choice__': 'no_preprocessing',
+                               'rescaling:__choice__': 'min/max'}
+            else:
+                config_dict = {'balancing:strategy': 'weighting',
+                               'classifier:__choice__': 'gaussian_nb',
+                               'imputation:strategy': 'mean',
+                               'one_hot_encoding:use_minimum_fraction': 'True',
+                               'one_hot_encoding:minimum_fraction': 0.1,
+                               'preprocessor:__choice__': 'no_preprocessing',
+                               'rescaling:__choice__': 'standardize'}
             try:
                 config = Configuration(self.config_space, config_dict)
                 default_configs.append(config)
@@ -385,13 +398,10 @@ class AutoMLSMBO(multiprocessing.Process):
 
         else:
             self.logger.info("Tasktype unknown: %s" %
-                              TASK_TYPES_TO_STRING[self.datamanager.info[
-                                  "task"]])
+                             TASK_TYPES_TO_STRING[self.datamanager.info[
+                                 "task"]])
+
         return default_configs
-        
-    def collect_additional_subset_defaults(self):
-        # TODO Matthias: implement this
-        return []
 
     def collect_metalearning_suggestions(self):
         meta_features = _calculate_metafeatures(
@@ -654,7 +664,7 @@ class AutoMLSMBO(multiprocessing.Process):
             #      we work on the data in-place
             # NOTE: this is where we could also apply some memory limits
             config_name = 'meta-learning' if (num_run - self.start_num_run) >\
-                    len(default_cfgs) else 'default'
+                (len(default_cfgs) + len(subset_configs)) else 'default'
 
             self.logger.info("Starting to evaluate %d. configuration "
                              "(%s configuration) with time limit %ds.",
