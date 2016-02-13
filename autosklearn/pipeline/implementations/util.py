@@ -23,10 +23,15 @@ def convert_multioutput_multiclass_to_multilabel(probas):
     if isinstance(probas, list):
         multioutput_probas = np.ndarray((probas[0].shape[0], len(probas)))
         for i, output in enumerate(probas):
-            # Only copy the probability of something having class 1
-            multioutput_probas[:, i] = output[:, 1]
             if output.shape[1] > 2:
                 raise ValueError('Multioutput-Multiclass supported by '
                                  'scikit-learn, but not by auto-sklearn!')
+            # Only copy the probability of something having class 1
+            elif output.shape[1] == 2:
+                multioutput_probas[:, i] = output[:, 1]
+            # This label was never observed positive in the training data,
+            # therefore it is only the probability for the label being False
+            else:
+                multioutput_probas[:, i] = 0
         probas = multioutput_probas
     return probas
