@@ -316,7 +316,7 @@ class AutoMLSMBO(multiprocessing.Process):
                                'one_hot_encoding:use_minimum_fraction': 'True',
                                'one_hot_encoding:minimum_fraction': 0.1,
                                'preprocessor:__choice__': 'no_preprocessing',
-                               'rescaling:__choice__': 'min/max'}
+                               'rescaling:__choice__': 'none'}
             else:
                 config_dict = {'balancing:strategy': 'weighting',
                                'classifier:__choice__': 'gaussian_nb',
@@ -602,13 +602,13 @@ class AutoMLSMBO(multiprocessing.Process):
         #    in the hope that at least on the last one we will be able
         #    to get a model
         n_data = self.datamanager.data['X_train'].shape[0]
-        subset_ratio = 7500. / n_data
+        subset_ratio = 10000. / n_data
         if subset_ratio > 1.0:
             subset_ratio = 0.33
             subset_ratios = [subset_ratio, subset_ratio * 0.5,
                              subset_ratio * 0.10]
         else:
-            subset_ratios = [subset_ratio, subset_ratio /2.,
+            subset_ratios = [subset_ratio, 3500. / n_data,
                              500. / n_data]
         self.logger.info("Training default configurations on a subset of "
                          "%d/%d data points." %
@@ -670,16 +670,20 @@ class AutoMLSMBO(multiprocessing.Process):
         # == METALEARNING suggestions
         # we start by evaluating the defaults on the full dataset again
         # and add the suggestions from metalearning behind it
-        metalearning_configurations = default_cfgs \
-                                      + self.collect_metalearning_suggestions_with_limits()
+        metalearning_configurations = self.collect_metalearning_suggestions_with_limits()
 
         # == first, evaluate all metelearning and default configurations
-        for config in metalearning_configurations:
+        for i, config in enumerate((default_cfgs +
+                                        metalearning_configurations)):
+            # Do not evaluate default configurations more than once
+            if i >= len(default_cfgs) and config in default_cfgs:
+                continue
+
             # JTS: reset the data manager before each configuration since
             #      we work on the data in-place
             # NOTE: this is where we could also apply some memory limits
-            config_name = 'meta-learning' if (num_run - self.start_num_run) >\
-                (len(default_cfgs) + len(subset_configs)) else 'default'
+            config_name = 'meta-learning' if i >= len(default_cfgs) \
+                else 'default'
 
             self.logger.info("Starting to evaluate %d. configuration "
                              "(%s configuration) with time limit %ds.",
