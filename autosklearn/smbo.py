@@ -602,16 +602,17 @@ class AutoMLSMBO(multiprocessing.Process):
         #    in the hope that at least on the last one we will be able
         #    to get a model
         n_data = self.datamanager.data['X_train'].shape[0]
-        subset_ratio = 10000. / n_data
-        if subset_ratio > 1.0 and int(n_data * subset_ratio) > 50:
+        subset_ratio = 7500. / n_data
+        if subset_ratio > 1.0:
             subset_ratio = 0.33
-            subset_ratios = [subset_ratio, subset_ratio / 2., subset_ratio / 3.]
+            subset_ratios = [subset_ratio, subset_ratio * 0.5,
+                             subset_ratio * 0.10]
         else:
-            subset_ratios = [subset_ratio, subset_ratio /2., 1000. / n_data]
+            subset_ratios = [subset_ratio, subset_ratio /2.,
+                             500. / n_data]
         self.logger.info("Training default configurations on a subset of "
                          "%d/%d data points." %
                          (int(n_data * subset_ratio), n_data))
-
 
         # the time limit for these function evaluations is rigorously
         # set to only 1/2 of a full function evaluation
