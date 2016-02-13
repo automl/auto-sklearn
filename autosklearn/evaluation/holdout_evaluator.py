@@ -1,13 +1,22 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
+import signal
+
+import numpy as np
+from smac.tae.execute_ta_run import StatusType
 
 from autosklearn.constants import *
 from autosklearn.evaluation.resampling import split_data
-from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
+from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator, \
+    _get_base_dict
 
 
 __all__ = [
-    'HoldoutEvaluator'
+    'HoldoutEvaluator',
+    'eval_holdout',
+    'eval_holdout_on_subset',
+    'eval_iterative_holdout',
+    'eval_iterative_holdout_on_subset'
 ]
 
 
@@ -81,3 +90,101 @@ class HoldoutEvaluator(AbstractEvaluator):
         loss = self._loss(self.Y_optimization, Y_optimization_pred)
         return loss, Y_optimization_pred, Y_valid_pred, Y_test_pred
 
+
+# create closure for evaluating an algorithm
+def eval_holdout(queue, configuration, data, tmp_dir, seed, num_run,
+                 iterative=False):
+    evaluator = HoldoutEvaluator(data, tmp_dir, configuration,
+                                 seed=seed,
+                                 num_run=num_run,
+                                 **_get_base_dict())
+
+    def signal_handler(signum, frame):
+        print('Received signal %s. Aborting Training!', str(signum))
+        global evaluator
+        duration, result, seed, run_info = evaluator.finish_up()
+        # TODO use status type for stopped, but yielded a result
+        queue.put((duration, result, seed, run_info, StatusType.SUCCESS))
+
+    def empty_signal_handler(signum, frame):
+        pass
+
+    if iterative:
+        signal.signal(15, signal_handler)
+        evaluator.iterative_fit()
+        signal.signal(15, empty_signal_handler)
+        duration, result, seed, run_info = evaluator.finish_up()
+    else:
+        loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
+        duration, result, seed, run_info = evaluator.finish_up(
+            loss, opt_pred, valid_pred, test_pred)
+
+    status = StatusType.SUCCESS
+    queue.put((duration, result, seed, run_info, status))
+
+
+def eval_iterative_holdout(queue, configuration, data, tmp_dir, seed, num_run):
+    eval_holdout(queue, configuration, data, tmp_dir, seed, num_run, True)
+
+
+def eval_holdout_on_subset(queue, configuration, n_data_subsample, data,
+                           tmp_dir, seed, num_run, iterative=False):
+    # Get full optimization split - TODO refactor this!
+    evaluator_ = HoldoutEvaluator(data, tmp_dir, configuration,
+                                  seed=seed,
+                                  num_run=num_run,
+                                  **_get_base_dict())
+    X_optimization = evaluator_.X_optimization
+    Y_optimization = evaluator_.Y_optimization
+    del evaluator_
+
+    n_data = data.data['X_train'].shape[0]
+    # TODO get random states
+    # get pointers to the full data
+    Xfull = data.data['X_train']
+    Yfull = data.data['Y_train']
+    # create a random subset
+    indices = np.random.randint(0, n_data, n_data_subsample)
+    data.data['X_train'] = Xfull[indices, :]
+    data.data['Y_train'] = Yfull[indices]
+
+    evaluator = HoldoutEvaluator(data, tmp_dir, configuration,
+                                 seed=seed,
+                                 num_run=num_run,
+                                 **_get_base_dict())
+
+    def signal_handler(signum, frame):
+        print('Received signal %s. Aborting Training!', str(signum))
+        global evaluator
+        duration, result, seed, run_info = evaluator.finish_up()
+        # TODO use status type for stopped, but yielded a result
+        queue.put((duration, result, seed, run_info, StatusType.SUCCESS))
+
+    def empty_signal_handler(signum, frame):
+        pass
+
+    if iterative:
+        signal.signal(15, signal_handler)
+        evaluator.iterative_fit()
+        signal.signal(15, empty_signal_handler)
+        loss, _opt_pred, valid_pred, test_pred = evaluator.predict_and_loss()
+    else:
+        loss, _opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
+
+    # predict on the whole dataset, needed for ensemble
+    opt_pred = evaluator.predict_function(X_optimization, evaluator.model,
+                                          evaluator.task_type, Yfull)
+    # TODO remove this hack
+    evaluator.output_y_test = False
+    evaluator.Y_optimization = Y_optimization
+
+    duration, result, seed, run_info = evaluator.finish_up(
+        loss, opt_pred, valid_pred, test_pred)
+    status = StatusType.SUCCESS
+    queue.put((duration, result, seed, run_info, status))
+
+
+def eval_iterative_holdout_on_subset(queue, configuration, n_data_subsample,
+                                     data, tmp_dir, seed, num_run):
+    eval_holdout_on_subset(queue, configuration, n_data_subsample, data,
+                           tmp_dir, seed, num_run, True)

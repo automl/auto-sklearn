@@ -1,13 +1,10 @@
 import multiprocessing
 import os
-import signal
 import time
 import traceback
 
 import pynisher
 
-import numpy as np
-import scipy.sparse
 
 # JTS TODO: notify aaron to clean up these nasty nested modules
 from ConfigSpace.configuration_space import Configuration
@@ -19,7 +16,8 @@ from smac.runhistory.runhistory import RunHistory
 from smac.runhistory.runhistory2epm import RunHistory2EPM
 
 from autosklearn.constants import *
-from autosklearn.evaluation import HoldoutEvaluator
+from autosklearn.evaluation import eval_holdout,eval_holdout_on_subset, \
+    eval_iterative_holdout, eval_iterative_holdout_on_subset
 from autosklearn.metalearning.mismbo import \
     calc_meta_features, calc_meta_features_encoded, \
     suggest_via_metalearning
@@ -124,87 +122,6 @@ def _print_debug_info_of_init_configuration(initial_configurations, basename,
         'Time left for %s after finding initial configurations: %5.2fsec',
         basename, time_for_task - watcher.wall_elapsed(basename))
 
-# helpers for evaluating a configuration
-
-evaluator = None
-
-    
-def _get_base_dict():
-    return {
-        'with_predictions': True,
-        'all_scoring_functions': False,
-        'output_y_test': True,
-    }
-
-# create closure for evaluating an algorithm
-def _eval_config_and_save(queue, configuration, data, tmp_dir, seed, num_run):
-    evaluator = HoldoutEvaluator(data, tmp_dir, configuration,
-                                 seed=seed,
-                                 num_run=num_run,
-                                 **_get_base_dict())
-
-    def signal_handler(signum, frame):
-        print('Received signal %s. Aborting Training!', str(signum))
-        global evaluator
-        duration, result, seed, run_info = evaluator.finish_up()
-        # TODO use status type for stopped, but yielded a result
-        queue.put((duration, result, seed, run_info, StatusType.SUCCESS))
-
-    signal.signal(15, signal_handler)
-
-    loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
-    duration, result, seed, run_info = evaluator.finish_up(
-        loss, opt_pred, valid_pred, test_pred)
-    status = StatusType.SUCCESS
-    queue.put((duration, result, seed, run_info, status))
-
-def _eval_on_subset_and_save(queue, configuration, n_data_subsample, data, tmp_dir, seed, num_run):
-    # Get full optimization split - TODO refactor this!
-    evaluator_ = HoldoutEvaluator(data, tmp_dir, configuration,
-                                  seed=seed,
-                                  num_run=num_run,
-                                  **_get_base_dict())
-    X_optimization = evaluator_.X_optimization
-    Y_optimization = evaluator_.Y_optimization
-    del evaluator_
-
-    n_data = data.data['X_train'].shape[0]
-    # TODO get random states
-    # get pointers to the full data
-    Xfull = data.data['X_train']
-    Yfull = data.data['Y_train']
-    # create a random subset
-    indices = np.random.randint(0, n_data, n_data_subsample)
-    data.data['X_train'] = Xfull[indices, :]
-    data.data['Y_train'] = Yfull[indices]
-
-    evaluator = HoldoutEvaluator(data, tmp_dir, configuration,
-                                 seed=seed,
-                                 num_run=num_run,
-                                 **_get_base_dict())
-
-    def signal_handler(signum, frame):
-        print('Received signal %s. Aborting Training!', str(signum))
-        global evaluator
-        duration, result, seed, run_info = evaluator.finish_up()
-        # TODO use status type for stopped, but yielded a result
-        queue.put((duration, result, seed, run_info, StatusType.SUCCESS))
-
-    signal.signal(15, signal_handler)
-
-    loss, _opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
-    # predict on the whole dataset, needed for ensemble
-    opt_pred = evaluator.predict_function(X_optimization, evaluator.model,
-                                          evaluator.task_type, Yfull)
-    # TODO remove this hack
-    evaluator.output_y_test = False
-    evaluator.Y_optimization = Y_optimization
-
-    duration, result, seed, run_info = evaluator.finish_up(
-        loss, opt_pred, valid_pred, test_pred)
-    status = StatusType.SUCCESS
-    queue.put((duration, result, seed, run_info, status))
-    
 
 class AutoMLScenario(Scenario):
     """
@@ -251,10 +168,12 @@ class AutoMLSMBO(multiprocessing.Process):
                  data_memory_limit=None,
                  default_cfgs=None,
                  num_metalearning_cfgs=25,
-                 config_file = None,
+                 config_file=None,
                  smac_iters=1000,
                  seed=1,
-                 metadata_directory = None):
+                 metadata_directory=None,
+                 resampling_strategy='holdout',
+                 resampling_strategy_args=None):
         super(AutoMLSMBO, self).__init__()
         # data related
         self.dataset_name = dataset_name
@@ -266,6 +185,12 @@ class AutoMLSMBO(multiprocessing.Process):
 
         # the configuration space
         self.config_space = config_space
+
+        # Evaluation
+        self.resampling_strategy = resampling_strategy
+        if resampling_strategy_args is None:
+            resampling_strategy_args = {}
+        self.resampling_strategy_args = resampling_strategy_args
 
         # and a bunch of useful limits
         self.total_walltime_limit = int(total_walltime_limit)
@@ -302,6 +227,9 @@ class AutoMLSMBO(multiprocessing.Process):
         self.task = self.datamanager.info['task']
 
     def collect_defaults(self):
+        # TODO each pipeline should know about its preferred default
+        # configurations!
+
         default_configs = []
         # == set default configurations
         # first enqueue the default configuration from our config space
@@ -533,13 +461,21 @@ class AutoMLSMBO(multiprocessing.Process):
             return res
 
     def eval_with_limits(self, config, seed, num_run):
+        if self.resampling_strategy == 'holdout':
+            eval_function = eval_holdout
+        elif self.resampling_strategy == 'holdout-iterative-fit':
+            eval_function = eval_iterative_holdout
+        else:
+            raise ValueError('Unknown resampling strategy %s' %
+                             self.resampling_strategy)
+
         start_time = time.time()
         queue = multiprocessing.Queue()
         safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                             wall_time_in_s=self.func_eval_time_limit,
                                             cpu_time_in_s=self.func_eval_time_limit,
                                             grace_period_in_s=30)(
-            _eval_config_and_save)
+            eval_function)
         try:
             safe_eval(queue, config, self.datamanager, self.tmp_dir,
                       seed, num_run)
@@ -568,6 +504,14 @@ class AutoMLSMBO(multiprocessing.Process):
         return info
 
     def eval_on_subset_with_limits(self, config, n_data_subsample, seed, num_run, time_limit=None):
+        if self.resampling_strategy == 'holdout':
+            eval_function = eval_holdout_on_subset
+        elif self.resampling_strategy == 'holdout-iterative-fit':
+            eval_function = eval_iterative_holdout_on_subset
+        else:
+            raise ValueError('Unknown resampling strategy %s' %
+                             self.resampling_strategy)
+
         start_time = time.time()
         queue = multiprocessing.Queue()
         if time_limit is None:
@@ -575,7 +519,7 @@ class AutoMLSMBO(multiprocessing.Process):
         safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                             wall_time_in_s=time_limit,
                                             grace_period_in_s=30)(
-                                            _eval_on_subset_and_save)
+            eval_function)
         try:
             safe_eval(queue, config, n_data_subsample, self.datamanager, self.tmp_dir,
                       seed, num_run)

@@ -19,12 +19,13 @@ from autosklearn.constants import *
 from autosklearn.data.data_manager_factory import get_data_manager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.evaluation import resampling, HoldoutEvaluator
+from autosklearn.evaluation import resampling, eval_holdout, \
+    eval_iterative_holdout
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline, Backend
 from autosklearn.ensemble_builder import main as ensemble_main
-from autosklearn.smbo import AutoMLSMBO, _eval_config_and_save
+from autosklearn.smbo import AutoMLSMBO
 
 def _create_search_space(tmp_dir, data_info, backend, watcher, logger,
                          include_estimators=None, include_preprocessors=None):
@@ -288,6 +289,14 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         return time_for_load_data
 
     def _do_dummy_prediction(self, datamanager, num_run):
+        if self._resampling_strategy == 'holdout':
+            eval_function = eval_holdout
+        elif self._resampling_strategy == 'holdout-iterative-fit':
+            eval_function = eval_iterative_holdout
+        else:
+            raise ValueError('Unknown resampling strategy %s' %
+                             self.resampling_strategy)
+
         self._logger.info("Starting to create dummy predictions.")
         # TODO which limits do we want to enforce here ?
         time_limit = int(self._time_for_task / 6.)
@@ -295,7 +304,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
 
         safe_call = pynisher.enforce_limits(cpu_time_in_s=int(time_limit),
                                             mem_in_mb=memory_limit)(
-            _eval_config_and_save)
+            eval_function)
         try:
             queue = multiprocessing.Queue()
             safe_call(queue, 1, datamanager, self._tmp_dir, self._seed,
@@ -310,7 +319,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
 
         safe_call = pynisher.enforce_limits(cpu_time_in_s=int(time_limit),
                                             mem_in_mb=memory_limit)(
-            _eval_config_and_save)
+            eval_function)
         try:
             queue = multiprocessing.Queue()
             safe_call(queue, 2, datamanager, self._tmp_dir, self._seed,
