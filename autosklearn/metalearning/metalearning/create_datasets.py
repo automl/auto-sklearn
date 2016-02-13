@@ -177,7 +177,7 @@ def create_predict_spearman_rank_with_cv(cv_metafeatures, cv_experiments,
 
     X = pd.DataFrame(X)
     Y = pd.Series(Y, index=Y_names)
-    logging.info("CV_Metafeatures", cv_metafeatures.shape)
+    logging.info("CV_Metafeatures %s", cv_metafeatures.shape)
     logging.info("X.shape %s", X.shape)
     logging.info("Y.shape %s", Y.shape)
     # train sklearn regressor (tree) with 10fold CV
