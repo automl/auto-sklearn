@@ -105,7 +105,7 @@ def main(autosklearn_tmp_dir,
     while used_time < limit or (max_iterations > 0 and max_iterations >= num_iteration):
         num_iteration += 1
         logger.debug('Time left: %f', limit - used_time)
-        logger.debug('Time last iteration: %f', time_iter)
+        logger.debug('Time last ensemble building: %f', time_iter)
 
         # Reload the ensemble targets every iteration, important, because cv may
         # update the ensemble targets in the cause of running auto-sklearn
@@ -165,7 +165,8 @@ def main(autosklearn_tmp_dir,
             used_time = watch.wall_elapsed('ensemble_builder')
             continue
 
-        watch.start_task('ensemble_iter_' + str(index_run))
+        watch.start_task('index_run' + str(index_run))
+        watch.start_task('ensemble_iter_' + str(num_iteration))
 
         # List of num_runs (which are in the filename) which will be included
         #  later
@@ -321,8 +322,12 @@ def main(autosklearn_tmp_dir,
             # Output the score
             logger.info('Training performance: %f' % ensemble.train_score_)
 
-            logger.info('Building the ensmble took %f seconds' %
-                        watch.wall_elapsed('ensemble_iter_' + str(index_run)))
+            logger.info('Building the ensemble took %f seconds' %
+                        watch.wall_elapsed('ensemble_iter_' + str(num_iteration)))
+
+        # Set this variable here to avoid re-running the ensemble builder
+        # every two seconds in case the ensemble did not change
+        current_num_models = len(dir_ensemble_list)
 
         ensemble_predictions = ensemble.predict(all_predictions_train)
         if sys.version_info[0] == 2:
@@ -354,7 +359,7 @@ def main(autosklearn_tmp_dir,
             all_predictions_valid = np.array(all_predictions_valid)
             ensemble_predictions_valid = ensemble.predict(all_predictions_valid)
             if task_type == BINARY_CLASSIFICATION:
-                ensemble_predictions_valid = ensemble_predictions_valid[:,1]
+                ensemble_predictions_valid = ensemble_predictions_valid[:, 1]
             backend.save_predictions_as_txt(ensemble_predictions_valid,
                                             'valid', index_run, prefix=dataset_name)
         else:
@@ -368,7 +373,7 @@ def main(autosklearn_tmp_dir,
             all_predictions_test = np.array(all_predictions_test)
             ensemble_predictions_test = ensemble.predict(all_predictions_test)
             if task_type == BINARY_CLASSIFICATION:
-                ensemble_predictions_valid = ensemble_predictions_test[:, 1]
+                ensemble_predictions_test = ensemble_predictions_test[:, 1]
             backend.save_predictions_as_txt(ensemble_predictions_test,
                                             'test', index_run, prefix=dataset_name)
         else:
@@ -379,8 +384,8 @@ def main(autosklearn_tmp_dir,
         del all_predictions_test
 
         current_num_models = len(dir_ensemble_list)
-        watch.stop_task('ensemble_iter_' + str(index_run))
-        time_iter = watch.get_wall_dur('ensemble_iter_' + str(index_run))
+        watch.stop_task('index_run' + str(index_run))
+        time_iter = watch.get_wall_dur('index_run' + str(index_run))
         used_time = watch.wall_elapsed('ensemble_builder')
         index_run += 1
     return
