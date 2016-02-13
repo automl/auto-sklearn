@@ -159,6 +159,15 @@ def _eval_config_and_save(queue, configuration, data, tmp_dir, seed, num_run):
     queue.put((duration, result, seed, run_info, status))
 
 def _eval_on_subset_and_save(queue, configuration, n_data_subsample, data, tmp_dir, seed, num_run):
+    # Get full optimization split - TODO refactor this!
+    evaluator_ = HoldoutEvaluator(data, tmp_dir, configuration,
+                                  seed=seed,
+                                  num_run=num_run,
+                                  **_get_base_dict())
+    X_optimization = evaluator_.X_optimization
+    Y_optimization = evaluator_.Y_optimization
+    del evaluator_
+
     n_data = data.data['X_train'].shape[0]
     # TODO get random states
     # get pointers to the full data
@@ -185,10 +194,11 @@ def _eval_on_subset_and_save(queue, configuration, n_data_subsample, data, tmp_d
 
     loss, _opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
     # predict on the whole dataset, needed for ensemble
-    opt_pred = evaluator.predict_function(Xfull, evaluator.model, evaluator.task_type, Yfull)
+    opt_pred = evaluator.predict_function(X_optimization, evaluator.model,
+                                          evaluator.task_type, Yfull)
     # TODO remove this hack
     evaluator.output_y_test = False
-    evaluator.Y_optimization = Yfull
+    evaluator.Y_optimization = Y_optimization
 
     duration, result, seed, run_info = evaluator.finish_up(
         loss, opt_pred, valid_pred, test_pred)
