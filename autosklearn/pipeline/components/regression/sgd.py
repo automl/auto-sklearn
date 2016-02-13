@@ -77,7 +77,6 @@ class SGD(AutoSklearnRegressionAlgorithm):
 
         self.estimator.n_iter = n_iter
         self._iterations += n_iter
-        print(n_iter)
         self.estimator.partial_fit(X, Y_scaled)
         return self
 
