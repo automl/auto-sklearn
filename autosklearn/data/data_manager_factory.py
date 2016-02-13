@@ -35,7 +35,7 @@ def get_data_manager(namespace, encode_labels=False):
         return CompetitionDataManager(namespace.dataset,
                                       encode_labels=encode_labels)
     else:
-        raise NotImplemented('Data format %s not supported.' % data_format)
+        raise NotImplementedError('Data format %s not supported.' % data_format)
 
 
 def populate_argparse_with_data_options(parser):
