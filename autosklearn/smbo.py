@@ -702,15 +702,14 @@ class AutoMLSMBO(multiprocessing.Process):
         smac_iter = 0
         finished = False
         while not finished:
-            # JTS TODO: handle the case that run_history is empty
-            X_cfg, Y_cfg = rh2EPM.transform(run_history)
-
             # TODO get_nearest_neighbor crashed once for regression; cannot
             # reproduce this right now, add a try/catch and revert to random
             # sampling in case of a crash
             try:
+                # JTS TODO: handle the case that run_history is empty
+                X_cfg, Y_cfg = rh2EPM.transform(run_history)
                 next_config = smac.choose_next(X_cfg, Y_cfg)
-            except ValueError as e:
+            except Exception as e:
                 print(e)
                 next_config = self.config_space.sample_configuration()
 
