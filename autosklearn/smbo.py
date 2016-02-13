@@ -622,7 +622,7 @@ class AutoMLSMBO(multiprocessing.Process):
         subset_configs = default_cfgs \
                          + self.collect_additional_subset_defaults()
         for cfg in subset_configs:
-            for ratio in subset_ratios:
+            for i, ratio in enumerate(subset_ratios):
                 self.reset_data_manager()
                 n_data_subsample = int(n_data * ratio)
 
@@ -641,16 +641,30 @@ class AutoMLSMBO(multiprocessing.Process):
                                  "Duration %f; loss %f; status %s; additional run "
                                  "info: %s ", num_run, duration, result,
                                  str(status), additional_run_info)
-                if status != StatusType.SUCCESS:
-                    self.logger.info("A CONFIG did not finish "
-                                     " for subset ratio %f -> going smaller",
-                                     ratio)
-                    continue
 
-                num_run += 1
-                self.logger.info("Finished SUBSET training sucessfully "
-                                 "with ratio %f", ratio)
-                break
+                if i < 2:
+                    if status != StatusType.SUCCESS:
+                        self.logger.info("A CONFIG did not finish "
+                                         " for subset ratio %f -> going smaller",
+                                         ratio)
+                        continue
+                    else:
+                        num_run += 1
+                        self.logger.info("Finished SUBSET training sucessfully "
+                                         "with ratio %f", ratio)
+                        break
+                else:
+                    if status != StatusType.SUCCESS:
+                        self.logger.info("A CONFIG did not finish "
+                                         " for subset ratio %f.",
+                                         ratio)
+                        num_run += 1
+                        continue
+                    else:
+                        num_run += 1
+                        self.logger.info("Finished SUBSET training sucessfully "
+                                         "with ratio %f", ratio)
+                        break
 
         # == METALEARNING suggestions
         # we start by evaluating the defaults on the full dataset again
