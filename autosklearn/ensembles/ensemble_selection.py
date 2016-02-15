@@ -45,6 +45,9 @@ class EnsembleSelection(AbstractEnsemble):
             self._slow(predictions, labels)
         return self
 
+    def get_train_score(self):
+        return self.train_score_
+
     def _fast(self, predictions, labels):
         """Fast version of Rich Caruana's ensemble selection method."""
         self.num_input_models_ = len(predictions)

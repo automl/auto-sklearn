@@ -27,6 +27,18 @@ class AbstractEnsemble(object):
         pass
 
     @abstractmethod
+    def get_train_score(self):
+        """ Reports the methods score during training.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        float
+        """
+
+    @abstractmethod
     def predict(self, base_models_predictions):
         """Create ensemble predictions from the base model predictions.
 
@@ -37,7 +49,7 @@ class AbstractEnsemble(object):
 
         Returns
         -------
-        array : [n_data_points]
+        array : [n_data_points, n_targets]
         """
         self
 

@@ -41,7 +41,7 @@ def submit_call(call, seed, logger, log_dir=None):
 
 def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
                          output_dir, ensemble_size, ensemble_nbest, seed,
-                         shared_mode, max_iterations, precision):
+                         shared_mode, max_iterations, precision, ensemble_method):
     logger = logging.get_logger(__name__)
 
     if limit <= 0 and (max_iterations is None or max_iterations <= 0):
@@ -67,7 +67,8 @@ def run_ensemble_builder(tmp_dir, dataset_name, task_type, metric, limit,
          '--ensemble-nbest', str(ensemble_nbest),
          '--auto-sklearn-seed', str(seed),
          '--max-iterations', str(max_iterations),
-         '--precision', str(precision)]
+         '--precision', str(precision),
+         '--ensemble-method', str(ensemble_method)]
     if shared_mode:
         call.append('--shared-mode')
 

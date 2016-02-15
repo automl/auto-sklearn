@@ -151,7 +151,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                  delete_tmp_folder_after_terminate=False,
                  delete_output_folder_after_terminate=False,
                  shared_mode=False,
-                 precision=32):
+                 precision=32,
+                 ensemble_method="EnsembleSelection"):
         super(AutoML, self).__init__()
 
         self._tmp_dir = tmp_dir
@@ -178,6 +179,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             delete_output_folder_after_terminate
         self._shared_mode = shared_mode
         self.precision = precision
+        self.ensemble_method = ensemble_method
 
         self._datamanager = None
         self._dataset_name = None
@@ -553,7 +555,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                 seed=self._seed,
                 shared_mode=self._shared_mode,
                 max_iterations=max_iterations,
-                precision=self.precision
+                precision=self.precision,
+                ensemble_method = self.ensemble_method
             )
             self._stopwatch.stop_task(task_name)
             return proc_ensembles

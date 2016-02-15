@@ -104,7 +104,8 @@ class AutoSklearnClassifier(AutoML):
                  output_folder=None,
                  delete_tmp_folder_after_terminate=True,
                  delete_output_folder_after_terminate=True,
-                 shared_mode=False):
+                 shared_mode=False,
+                 ensemble_method="EnsembleSelection"):
 
         # Check this before _prepare_create_folders assigns random output
         # directories
@@ -147,7 +148,8 @@ class AutoSklearnClassifier(AutoML):
             delete_tmp_folder_after_terminate=delete_tmp_folder_after_terminate,
             delete_output_folder_after_terminate=
             delete_output_folder_after_terminate,
-            shared_mode=shared_mode)
+            shared_mode=shared_mode,
+            ensemble_method = ensemble_method)
 
     @staticmethod
     def _prepare_create_folders(tmp_dir, output_dir):

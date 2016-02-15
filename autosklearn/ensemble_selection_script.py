@@ -14,6 +14,7 @@ import numpy as np
 from autosklearn.constants import STRING_TO_TASK_TYPES, STRING_TO_METRIC
 from autosklearn.evaluation.util import calculate_score
 from autosklearn.util import StopWatch, Backend
+from autosklearn.ensembles.stacking import Stacking
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 
 
@@ -59,7 +60,8 @@ def main(autosklearn_tmp_dir,
          seed=1,
          shared_mode=False,
          max_iterations=-1,
-         precision="32"):
+         precision="32",
+         ensemble_method="EnsembleSelection"):
 
     watch = StopWatch()
     watch.start_task('ensemble_builder')
@@ -266,9 +268,16 @@ def main(autosklearn_tmp_dir,
             continue
 
         else:
-            ensemble = Stacking(ensemble_size=ensemble_size,
+            if ensemble_method == "EnsembleSelection":
+                ensemble = EnsembleSelection(ensemble_size=ensemble_size,
                                          task_type=task_type,
                                          metric=metric)
+            elif ensemble_method == "Stacking":
+                 ensemble = Stacking(ensemble_size=ensemble_size,
+                                         task_type=task_type,
+                                         metric=metric)
+            else:
+                logger.error('Unkown ensemble method: ' + ensemble_method)
 
             try:
                 ensemble.fit(all_predictions_train, targets_ensemble,
@@ -292,7 +301,7 @@ def main(autosklearn_tmp_dir,
                 continue
 
             # Output the score
-            logger.info('Training performance: %f' % ensemble.train_score_)
+            logger.info('Training performance: %f' % ensemble.get_train_score())
 
         # Save the ensemble for later use in the main auto-sklearn module!
         backend.save_ensemble(ensemble, index_run, seed)
@@ -375,6 +384,8 @@ if __name__ == '__main__':
                              'a SMAC run with the same seed.')
     parser.add_argument('--precision', required=False, default="32",
                         choices=list(["16", "32", "64"]))
+    parser.add_argument('--ensemble-method', required=False, default="EnsembleSelection",choices=list(["EnsembleSelection","Stacking"]),
+                        type=str,help='Allows to select the ensemble method.')
 
     args = parser.parse_args()
     seed = args.auto_sklearn_seed
@@ -395,5 +406,6 @@ if __name__ == '__main__':
          seed=args.auto_sklearn_seed,
          shared_mode=args.shared_mode,
          max_iterations=args.max_iterations,
-         precision=args.precision)
+         precision=args.precision,
+         ensemble_method=args.ensemble_method)
     sys.exit(0)
