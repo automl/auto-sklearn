@@ -639,11 +639,16 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         else:
             seed = self._seed
 
-        self.models_ = self._backend.load_all_models(seed)
+        self.ensemble_ = self._backend.load_ensemble(seed)
+        if self.ensemble_:
+            identifiers = self.ensemble_.identifiers_
+            self.models_ = self._backend.load_models_by_ids(identifiers)
+        else:
+            self.models_ = self._backend.load_all_models(seed)
+
         if len(self.models_) == 0:
             raise ValueError('No models fitted!')
 
-        self.ensemble_ = self._backend.load_ensemble(seed)
 
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension

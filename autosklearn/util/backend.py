@@ -162,24 +162,48 @@ class Backend(object):
         model_directory = self.get_model_dir()
 
         if seed >= 0:
-            model_files = glob.glob(os.path.join(model_directory,
-                                                 '%s.*.model' % seed))
+            model_files = glob.glob(os.path.join(model_directory, '%s.*.model' % seed))
         else:
             model_files = os.listdir(model_directory)
             model_files = [os.path.join(model_directory, mf) for mf in model_files]
 
+        models = self.load_models_by_file_names(model_files)
+
+        return models
+
+    def load_models_by_file_names(self, model_file_names):
         models = dict()
-        for model_file in model_files:
+
+        for model_file in model_file_names:
             # File names are like: {seed}.{index}.model
             if model_file.endswith('/'):
                 model_file = model_file[:-1]
             basename = os.path.basename(model_file)
-            automl_seed = int(basename.split('.')[0])
-            idx = int(basename.split('.')[1])
-            with open(os.path.join(model_directory, basename), 'rb') as fh:
-                models[(automl_seed, idx)] = (pickle.load(fh))
+
+            basename_parts = basename.split('.')
+            seed = int(basename_parts[0])
+            id = int(basename_parts[1])
+
+            models[(seed, id)] = self.load_model_by_seed_and_id(seed, id)
 
         return models
+
+    def load_models_by_ids(self, identifiers):
+        models = dict()
+
+        for identifier in identifiers:
+            seed, id = identifier
+            models[identifier] = self.load_model_by_seed_and_id(seed, id)
+
+        return models
+
+    def load_model_by_seed_and_id(self, seed, id):
+        model_directory = self.get_model_dir()
+        model_file_name = '%s.%s.model' % (seed, id)
+        model_file_path = os.path.join(model_directory, model_file_name)
+
+        with open(model_file_path, 'rb') as fh:
+            return (pickle.load(fh))
 
     def get_ensemble_dir(self):
         return os.path.join(self.internals_directory, 'ensembles')
