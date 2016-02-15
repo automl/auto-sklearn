@@ -603,7 +603,7 @@ class AutoMLSMBO(multiprocessing.Process):
         #    to get a model
         n_data = self.datamanager.data['X_train'].shape[0]
         subset_ratio = 10000. / n_data
-        if subset_ratio > 1.0:
+        if subset_ratio >= 0.5:
             subset_ratio = 0.33
             subset_ratios = [subset_ratio, subset_ratio * 0.5,
                              subset_ratio * 0.10]
@@ -643,8 +643,10 @@ class AutoMLSMBO(multiprocessing.Process):
                                  "info: %s ", num_run, duration, result,
                                  str(status), additional_run_info)
 
-                if i < 2:
+                if i < len(subset_ratios) - 1:
                     if status != StatusType.SUCCESS:
+                        # Do not increase num_run here, because we will try
+                        # the same configuration with less data
                         self.logger.info("A CONFIG did not finish "
                                          " for subset ratio %f -> going smaller",
                                          ratio)
@@ -714,7 +716,7 @@ class AutoMLSMBO(multiprocessing.Process):
                 X_cfg, Y_cfg = rh2EPM.transform(run_history)
                 next_config = smac.choose_next(X_cfg, Y_cfg)
             except Exception as e:
-                print(e)
+                self.logger.warning(e)
                 next_config = self.config_space.sample_configuration()
 
             self.logger.info("Starting to evaluate %d. configuration (from "
