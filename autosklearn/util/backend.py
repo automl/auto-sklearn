@@ -162,7 +162,8 @@ class Backend(object):
         model_directory = self.get_model_dir()
 
         if seed >= 0:
-            model_files = glob.glob(os.path.join(model_directory, '%s.*.model' % seed))
+            model_files = glob.glob(os.path.join(model_directory,
+                                                 '%s.*.model' % seed))
         else:
             model_files = os.listdir(model_directory)
             model_files = [os.path.join(model_directory, mf) for mf in model_files]
@@ -182,24 +183,24 @@ class Backend(object):
 
             basename_parts = basename.split('.')
             seed = int(basename_parts[0])
-            id = int(basename_parts[1])
+            idx = int(basename_parts[1])
 
-            models[(seed, id)] = self.load_model_by_seed_and_id(seed, id)
+            models[(seed, idx)] = self.load_model_by_seed_and_id(seed, idx)
 
         return models
 
-    def load_models_by_ids(self, identifiers):
+    def load_models_by_identifiers(self, identifiers):
         models = dict()
 
         for identifier in identifiers:
-            seed, id = identifier
-            models[identifier] = self.load_model_by_seed_and_id(seed, id)
+            seed, idx = identifier
+            models[identifier] = self.load_model_by_seed_and_id(seed, idx)
 
         return models
 
-    def load_model_by_seed_and_id(self, seed, id):
+    def load_model_by_seed_and_id(self, seed, idx):
         model_directory = self.get_model_dir()
-        model_file_name = '%s.%s.model' % (seed, id)
+        model_file_name = '%s.%s.model' % (seed, idx)
         model_file_path = os.path.join(model_directory, model_file_name)
 
         with open(model_file_path, 'rb') as fh:

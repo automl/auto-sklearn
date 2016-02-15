@@ -642,7 +642,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self.ensemble_ = self._backend.load_ensemble(seed)
         if self.ensemble_:
             identifiers = self.ensemble_.identifiers_
-            self.models_ = self._backend.load_models_by_ids(identifiers)
+            self.models_ = self._backend.load_models_by_identifiers(identifiers)
         else:
             self.models_ = self._backend.load_all_models(seed)
 
