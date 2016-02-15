@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
-import abc
 import os
 import time
 
@@ -90,9 +89,6 @@ class MyDummyRegressor(DummyRegressor):
 
 
 class AbstractEvaluator(object):
-    __metaclass__ = abc.ABCMeta
-
-    @abc.abstractmethod
     def __init__(self, Datamanager, output_dir, configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
@@ -204,6 +200,7 @@ class AbstractEvaluator(object):
         self.duration = time.time() - self.starttime
         if loss is None:
             loss, opt_pred, valid_pred, test_pred = self.predict_and_loss()
+
         loss_, additional_run_info_ = self.file_output(loss, opt_pred,
                                                        valid_pred, test_pred)
 
@@ -230,9 +227,18 @@ class AbstractEvaluator(object):
         seed = self.seed
 
         if self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
-            return 2, "Targets %s and prediction %s don't have the same " \
+            return 2.0, "Targets %s and prediction %s don't have the same " \
             "length. Probably training didn't finish" % (
                 self.Y_optimization.shape, Y_optimization_pred.shape)
+
+        if not np.all(np.isfinite(Y_optimization_pred)):
+            return 2.0, 'Model predictions for optimization set contains NaNs.'
+        if Y_valid_pred is not None and \
+                not np.all(np.isfinite(Y_valid_pred)):
+            return 2.0, 'Model predictions for validation set contains NaNs.'
+        if Y_test_pred is not None and \
+                not np.all(np.isfinite(Y_test_pred)):
+            return 2.0, 'Model predictions for test set contains NaNs.'
 
         num_run = str(self.num_run).zfill(5)
         if os.path.exists(self.backend.get_model_dir()):
