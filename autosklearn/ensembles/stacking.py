@@ -1,8 +1,4 @@
 # -*- encoding: utf-8 -*-
-"""
-Copyright 2015 University of Freiburg
-Misgana Negassi <negassim@tf.uni-freiburg.de>
-"""
 
 import numpy as np
 from cvxopt import matrix, solvers 
