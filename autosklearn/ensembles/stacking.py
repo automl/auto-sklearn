@@ -19,8 +19,7 @@ class Stacking(AbstractEnsemble):
 
     def __init__(self, ensemble_size, task_type, metric,
                  sorted_initialization=False, bagging=False, mode='fast'):
-        logger.error("constructor was called")
-
+        
 
     @staticmethod
     def compute_y(l, N, true_labels):
