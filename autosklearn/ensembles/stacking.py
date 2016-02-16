@@ -18,18 +18,31 @@ logger.setLevel(logging.DEBUG)
 
 class Stacking(AbstractEnsemble):
     """
+    Class for stacked classification. Implements ideas from: "Issues in Stacked Generalization" by Kai Ming Ting, and Ian H. Witten in JAIR 99
     """
 
     def __init__(self, ensemble_size, task_type, metric,
                  sorted_initialization=False, bagging=False, mode='fast'):
-        pass
+        logger.error("constructor was called")
 
 
     @staticmethod
     def compute_y(l, N, true_labels):
-        """
-        compute_y checks  for each instance in the prediction_test if it and its true label,is in class l,  \
+    
+        """ Checks  for each instance if true_targets,is in class l,  \
         and assign them to 1, and 0 Otherwise.
+
+        Parameters
+        ----------
+        l : number of classes: array of shape = [n_base_models, n_data_points]
+        N: array of shape = [n_data_points]
+        true_targets : array of shape [n_data_points]
+
+
+        Returns
+        -------
+        y: array of shape = [n_base_models]
+
         """
         y = true_labels
         y[y != l] = 0
@@ -53,7 +66,8 @@ class Stacking(AbstractEnsemble):
         alpha : array of shape = [n_base_models]
 
         """
-
+        Z = np.array(base_models_predictions) 
+        y = true_targets
         K = Z.shape[0]
         N = Z.shape[1]
         A = np.dot(Z, Z.transpose()) 
@@ -89,20 +103,23 @@ class Stacking(AbstractEnsemble):
         self
 
         """
+
         self.model_identifiers = model_identifiers
         Z = np.array(base_models_predictions) 
         y = true_targets
-    
-        L = Z.shape[0]
+
+        logger.error("Z shape %s" % str(Z.shape))
+
+        K = Z.shape[0]
         N = Z.shape[1]
-        K = Z.shape[2]
+        L = Z.shape[2]
         self.Alpha = np.zeros([K, L])
         if not((y.shape[0] == N )):
             print("check if y is of shape Nx1")
         for l in range(0,  L):
-            Zl = Z[l, :, :] # Do I need to remove singleton dimensions? no
+            Zl = Z[:, :, l] # Do I need to remove singleton dimensions? no
             y_prob = Stacking.compute_y(l, N, y)
-            alpha = Stacking.compute_alpha(Zl.transpose(), y_prob)
+            alpha = Stacking.compute_alpha(Zl, y_prob)
             self.Alpha[:, l] = alpha
 
         self.L = L # save these for consitency checks when making predictions
@@ -125,16 +142,14 @@ class Stacking(AbstractEnsemble):
         L = self.L
         K = self.K
         N_test = Z_test.shape[1]
-        LR = np.zeros([N_test, K])           #LR : Is LxN_test matrix
-        if not((Z_test.shape[0] == L) and (Z_test.shape[2] == K)):
-            logger.error("check if predictions_test is of shape L x N_test x K")
+        LR = np.zeros([N_test, L])        
 
-        # for l in range(0, L):
-        #     LR[l, :] = np.dot(self.Alpha[:, l].transpose() , Z_test[l].transpose()) 
-        # return LR.T
+        if not((Z_test.shape[0] == K) and (Z_test.shape[2] == L)):
+            logger.error("check if predictions_test is of shape K x N_test x L")
 
-        for k in range(0, K):
-            LR[:, k] = np.dot(self.Alpha[k, :], Z_test[:, :, k]) 
+
+        for l in range(0, L):
+            LR[:, l] = np.dot(self.Alpha[:, l],Z_test[:, :, l])
         LR = LR / np.sum(LR, axis=1)[:, None] # normalize so we get probabilities
         return LR
         
