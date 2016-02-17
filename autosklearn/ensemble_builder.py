@@ -11,7 +11,7 @@ import time
 import numpy as np
 
 from autosklearn.constants import STRING_TO_TASK_TYPES, STRING_TO_METRIC, \
-    BINARY_CLASSIFICATION
+    BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION
 from autosklearn.evaluation.util import calculate_score
 from autosklearn.util import StopWatch, Backend
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
