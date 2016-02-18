@@ -11,7 +11,9 @@ import time
 import numpy as np
 
 from autosklearn.constants import STRING_TO_TASK_TYPES, STRING_TO_METRIC, \
-    BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION
+    BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
+    MULTILABEL_CLASSIFICATION, CLASSIFICATION_TASKS, REGRESSION_TASKS, \
+    BAC_METRIC, F1_METRIC
 from autosklearn.evaluation.util import calculate_score
 from autosklearn.util import StopWatch, Backend
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
@@ -364,9 +366,25 @@ def main(autosklearn_tmp_dir,
             if low_precision:
                 if task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
                     ensemble_predictions_valid[ensemble_predictions_valid < 1e-4] = 0.
+                if metric in [BAC_METRIC, F1_METRIC]:
+                    bin_array = np.zeros(ensemble_predictions_valid.shape, dtype=np.int32)
+                    if (task != MULTICLASS_CLASSIFICATION) or (
+                        ensemble_predictions_valid.shape[1] == 1):
+                        bin_array[ensemble_predictions_valid >= 0.5] = 1
+                    else:
+                        sample_num = ensemble_predictions_valid.shape[0]
+                        for i in range(sample_num):
+                            j = np.argmax(ensemble_predictions_valid[i, :])
+                            bin_array[i, j] = 1
+                    ensemble_predictions_valid = bin_array
+                if task_type in CLASSIFICATION_TASKS:
+                    precision = 2
+                else:
+                    precision = 3
+
             backend.save_predictions_as_txt(ensemble_predictions_valid,
                                             'valid', index_run, prefix=dataset_name,
-                                            low_precision=low_precision)
+                                            precision=precision)
         else:
             logger.info('Could not find as many validation set predictions (%d)'
                          'as ensemble predictions (%d)!.',
@@ -382,9 +400,26 @@ def main(autosklearn_tmp_dir,
             if low_precision:
                 if task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
                     ensemble_predictions_test[ensemble_predictions_test < 1e-4] = 0.
+                if metric in [BAC_METRIC, F1_METRIC]:
+                    bin_array = np.zeros(ensemble_predictions_valid.shape,
+                                         dtype=np.int32)
+                    if (task != MULTICLASS_CLASSIFICATION) or (
+                                ensemble_predictions_valid.shape[1] == 1):
+                        bin_array[ensemble_predictions_valid >= 0.5] = 1
+                    else:
+                        sample_num = ensemble_predictions_valid.shape[0]
+                        for i in range(sample_num):
+                            j = np.argmax(ensemble_predictions_valid[i, :])
+                            bin_array[i, j] = 1
+                    ensemble_predictions_valid = bin_array
+                if task_type in CLASSIFICATION_TASKS:
+                    precision = 2
+                else:
+                    precision = 3
+
             backend.save_predictions_as_txt(ensemble_predictions_test,
                                             'test', index_run, prefix=dataset_name,
-                                            low_precision=low_precision)
+                                            precision=precision)
         else:
             logger.info('Could not find as many test set predictions (%d) as '
                          'ensemble predictions (%d)!',

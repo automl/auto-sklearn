@@ -239,22 +239,21 @@ class Backend(object):
             tempname = fh.name
         os.rename(tempname, filepath)
 
-    def save_predictions_as_txt(self, predictions, subset, idx, prefix=None, low_precision=False):
+    def save_predictions_as_txt(self, predictions, subset, idx, prefix=None,
+                                precision=3):
         # Write prediction scores in prescribed format
         filepath = os.path.join(self.output_directory,
                                 ('%s_' % prefix if prefix else '') +
                                  '%s_%s.predict' % (subset, str(idx).zfill(5)))
 
+        format_string = '{:.%dg} ' % precision
         with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
                 filepath), delete=False) as output_file:
             for row in predictions:
                 if not isinstance(row, np.ndarray) and not isinstance(row, list):
                     row = [row]
                 for val in row:
-                    if low_precision:
-                        output_file.write('{:.3g} '.format(float(val)))
-                    else:
-                        output_file.write('{:g} '.format(float(val)))
+                    output_file.write(format_string.format(float(val)))
                 output_file.write('\n')
             tempname = output_file.name
         os.rename(tempname, filepath)
