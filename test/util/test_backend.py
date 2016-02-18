@@ -4,6 +4,12 @@ import unittest
 import mock
 from autosklearn.util.backend import Backend
 
+from sys import version_info
+if version_info.major == 2:
+    import __builtin__ as builtins
+else:
+    import builtins
+
 
 class BackendModelsTest(unittest.TestCase):
 
@@ -18,7 +24,7 @@ class BackendModelsTest(unittest.TestCase):
         self.backend.get_model_dir = lambda: self.model_directory
 
     @mock.patch('six.moves.cPickle.load')
-    @mock.patch('__builtin__.open')
+    @mock.patch.object(builtins, 'open')
     def test_loads_model_by_seed_and_id(self, openMock, pickleLoadMock):
         seed = 13
         idx = 17
@@ -29,7 +35,7 @@ class BackendModelsTest(unittest.TestCase):
         self.assertEqual(expected_model, actual_model)
 
     @mock.patch('six.moves.cPickle.load')
-    @mock.patch('__builtin__.open')
+    @mock.patch.object(builtins, 'open')
     def test_loads_models_by_identifiers(self, openMock, pickleLoadMock):
         seed = 13
         idx = 17
