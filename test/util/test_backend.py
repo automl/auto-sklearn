@@ -9,14 +9,13 @@ class BackendModelsTest(unittest.TestCase):
 
     class BackendStub(Backend):
 
-        def __init__(self, model_directory):
+        def __init__(self):
             self.__class__ = Backend
-            self.get_model_dir = lambda: model_directory
 
     def setUp(self):
         self.model_directory = '/model_directory/'
-        self.backend = self.BackendStub(self.model_directory)
-        self.BackendStub.get_model_dir = lambda x: 42
+        self.backend = self.BackendStub()
+        self.backend.get_model_dir = lambda: self.model_directory
 
     @mock.patch('six.moves.cPickle.load')
     @mock.patch('__builtin__.open')

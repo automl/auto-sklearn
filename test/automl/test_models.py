@@ -6,7 +6,7 @@ from autosklearn.automl import AutoML
 from autosklearn.util.backend import Backend
 
 
-class AutoMLStub(object):
+class AutoMLStub(AutoML):
 
     def __init__(self):
         self.__class__ = AutoML
