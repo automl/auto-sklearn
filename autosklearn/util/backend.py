@@ -239,7 +239,7 @@ class Backend(object):
             tempname = fh.name
         os.rename(tempname, filepath)
 
-    def save_predictions_as_txt(self, predictions, subset, idx, prefix=None):
+    def save_predictions_as_txt(self, predictions, subset, idx, prefix=None, low_precision=False):
         # Write prediction scores in prescribed format
         filepath = os.path.join(self.output_directory,
                                 ('%s_' % prefix if prefix else '') +
@@ -251,7 +251,10 @@ class Backend(object):
                 if not isinstance(row, np.ndarray) and not isinstance(row, list):
                     row = [row]
                 for val in row:
-                    output_file.write('{:g} '.format(float(val)))
+                    if low_precision:
+                        output_file.write('{:.3g} '.format(float(val)))
+                    else:
+                        output_file.write('{:g} '.format(float(val)))
                 output_file.write('\n')
             tempname = output_file.name
         os.rename(tempname, filepath)

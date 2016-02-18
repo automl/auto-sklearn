@@ -11,7 +11,7 @@ import time
 import numpy as np
 
 from autosklearn.constants import STRING_TO_TASK_TYPES, STRING_TO_METRIC, \
-    BINARY_CLASSIFICATION
+    BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION
 from autosklearn.evaluation.util import calculate_score
 from autosklearn.util import StopWatch, Backend
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
@@ -78,7 +78,8 @@ def main(autosklearn_tmp_dir,
          seed=1,
          shared_mode=False,
          max_iterations=-1,
-         precision="32"):
+         precision="32",
+         low_precision=True):
 
     watch = StopWatch()
     watch.start_task('ensemble_builder')
@@ -360,8 +361,12 @@ def main(autosklearn_tmp_dir,
             ensemble_predictions_valid = ensemble.predict(all_predictions_valid)
             if task_type == BINARY_CLASSIFICATION:
                 ensemble_predictions_valid = ensemble_predictions_valid[:, 1]
+            if low_precision:
+                if task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
+                    ensemble_predictions_valid[ensemble_predictions_valid < 0.01] = 0.
             backend.save_predictions_as_txt(ensemble_predictions_valid,
-                                            'valid', index_run, prefix=dataset_name)
+                                            'valid', index_run, prefix=dataset_name,
+                                            low_precision=low_precision)
         else:
             logger.info('Could not find as many validation set predictions (%d)'
                          'as ensemble predictions (%d)!.',
@@ -374,8 +379,12 @@ def main(autosklearn_tmp_dir,
             ensemble_predictions_test = ensemble.predict(all_predictions_test)
             if task_type == BINARY_CLASSIFICATION:
                 ensemble_predictions_test = ensemble_predictions_test[:, 1]
+            if low_precision:
+                if task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
+                    ensemble_predictions_test[ensemble_predictions_test < 0.01] = 0.
             backend.save_predictions_as_txt(ensemble_predictions_test,
-                                            'test', index_run, prefix=dataset_name)
+                                            'test', index_run, prefix=dataset_name,
+                                            low_precision=low_precision)
         else:
             logger.info('Could not find as many test set predictions (%d) as '
                          'ensemble predictions (%d)!',
