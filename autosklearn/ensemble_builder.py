@@ -363,7 +363,7 @@ def main(autosklearn_tmp_dir,
                 ensemble_predictions_valid = ensemble_predictions_valid[:, 1]
             if low_precision:
                 if task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
-                    ensemble_predictions_valid[ensemble_predictions_valid < 0.01] = 0.
+                    ensemble_predictions_valid[ensemble_predictions_valid < 1e-4] = 0.
             backend.save_predictions_as_txt(ensemble_predictions_valid,
                                             'valid', index_run, prefix=dataset_name,
                                             low_precision=low_precision)
@@ -381,7 +381,7 @@ def main(autosklearn_tmp_dir,
                 ensemble_predictions_test = ensemble_predictions_test[:, 1]
             if low_precision:
                 if task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
-                    ensemble_predictions_test[ensemble_predictions_test < 0.01] = 0.
+                    ensemble_predictions_test[ensemble_predictions_test < 1e-4] = 0.
             backend.save_predictions_as_txt(ensemble_predictions_test,
                                             'test', index_run, prefix=dataset_name,
                                             low_precision=low_precision)
