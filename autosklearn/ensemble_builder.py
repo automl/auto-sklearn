@@ -368,7 +368,7 @@ def main(autosklearn_tmp_dir,
                     ensemble_predictions_valid[ensemble_predictions_valid < 1e-4] = 0.
                 if metric in [BAC_METRIC, F1_METRIC]:
                     bin_array = np.zeros(ensemble_predictions_valid.shape, dtype=np.int32)
-                    if (task != MULTICLASS_CLASSIFICATION) or (
+                    if (task_type != MULTICLASS_CLASSIFICATION) or (
                         ensemble_predictions_valid.shape[1] == 1):
                         bin_array[ensemble_predictions_valid >= 0.5] = 1
                     else:
@@ -378,9 +378,16 @@ def main(autosklearn_tmp_dir,
                             bin_array[i, j] = 1
                     ensemble_predictions_valid = bin_array
                 if task_type in CLASSIFICATION_TASKS:
-                    precision = 2
+                    if ensemble_predictions_valid.size < (20000 * 20):
+                        precision = 3
+                    else:
+                        precision = 2
                 else:
-                    precision = 3
+                    if ensemble_predictions_valid.size > 1000000:
+                        precision = 4
+                    else:
+                        # File size maximally 2.1MB
+                        precision = 6
 
             backend.save_predictions_as_txt(ensemble_predictions_valid,
                                             'valid', index_run, prefix=dataset_name,
@@ -401,21 +408,27 @@ def main(autosklearn_tmp_dir,
                 if task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
                     ensemble_predictions_test[ensemble_predictions_test < 1e-4] = 0.
                 if metric in [BAC_METRIC, F1_METRIC]:
-                    bin_array = np.zeros(ensemble_predictions_valid.shape,
+                    bin_array = np.zeros(ensemble_predictions_test.shape,
                                          dtype=np.int32)
-                    if (task != MULTICLASS_CLASSIFICATION) or (
-                                ensemble_predictions_valid.shape[1] == 1):
-                        bin_array[ensemble_predictions_valid >= 0.5] = 1
+                    if (task_type != MULTICLASS_CLASSIFICATION) or (
+                                ensemble_predictions_test.shape[1] == 1):
+                        bin_array[ensemble_predictions_test >= 0.5] = 1
                     else:
-                        sample_num = ensemble_predictions_valid.shape[0]
+                        sample_num = ensemble_predictions_test.shape[0]
                         for i in range(sample_num):
-                            j = np.argmax(ensemble_predictions_valid[i, :])
+                            j = np.argmax(ensemble_predictions_test[i, :])
                             bin_array[i, j] = 1
-                    ensemble_predictions_valid = bin_array
+                    ensemble_predictions_test = bin_array
                 if task_type in CLASSIFICATION_TASKS:
-                    precision = 2
+                    if ensemble_predictions_test.size < (20000 * 20):
+                        precision = 3
+                    else:
+                        precision = 2
                 else:
-                    precision = 3
+                    if ensemble_predictions_test.size > 1000000:
+                        precision = 4
+                    else:
+                        precision = 6
 
             backend.save_predictions_as_txt(ensemble_predictions_test,
                                             'test', index_run, prefix=dataset_name,
