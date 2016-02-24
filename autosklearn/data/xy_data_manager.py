@@ -23,8 +23,12 @@ class XYDataManager(AbstractDataManager):
 
         self.info['task'] = task
         self.info['metric'] = metric
-        self.info['is_sparse'] = 1 if sparse.issparse(data_x) else 0
-        self.info['has_missing'] = np.all(np.isfinite(data_x))
+        if sparse.issparse(data_x):
+            self.info['is_sparse'] = 1
+            self.info['has_missing'] = np.all(np.isfinite(data_x.data))
+        else:
+            self.info['is_sparse'] = 0
+            self.info['has_missing'] = np.all(np.isfinite(data_x))
 
         label_num = {
             REGRESSION: 1,
