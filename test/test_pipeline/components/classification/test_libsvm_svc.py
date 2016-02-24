@@ -6,6 +6,7 @@ from autosklearn.pipeline.util import _test_classifier, \
 
 import numpy as np
 import sklearn.metrics
+import sklearn.svm
 
 
 class LibSVM_SVCComponentTest(unittest.TestCase):
@@ -53,3 +54,19 @@ class LibSVM_SVCComponentTest(unittest.TestCase):
             prediction = cls.predict_proba(X_test)
             self.assertAlmostEqual(sklearn.metrics.log_loss(Y_test, prediction),
                                    0.69323680119641773)
+
+    def test_default_configuration_binary(self):
+        for i in range(10):
+            predictions, targets = _test_classifier(LibSVM_SVC,
+                                                    make_binary=True)
+            self.assertAlmostEqual(1.0,
+                                   sklearn.metrics.accuracy_score(
+                                       predictions, targets))
+
+    def test_target_algorithm_multioutput_multiclass_support(self):
+        cls = sklearn.svm.SVC()
+
+        X = np.random.random((10, 10))
+        y = np.random.randint(0, 1, size=(10, 10))
+        self.assertRaisesRegexp(ValueError, 'bad input shape \(10, 10\)',
+                                cls.fit, X, y)

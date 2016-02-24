@@ -33,24 +33,13 @@ class PolynomialFeatures(AutoSklearnPreprocessingAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': 'PolynomialFeatures',
                 'name': 'PolynomialFeatures',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': True,
-                # Find out if this is good because of sparsity
-                'prefers_data_normalized': False,
                 'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                # TODO find out of this is right!
-                # this here suggests so http://scikit-learn.org/stable/modules/svm.html#tips-on-practical-use
-                'handles_sparse': True,
                 'input': (DENSE, UNSIGNED_DATA),
-                'output': (INPUT,),
-                # TODO find out what is best used here!
-                'preferred_dtype': None}
+                'output': (INPUT,)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

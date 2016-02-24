@@ -16,22 +16,24 @@ __all__ = [
 
 
 class NestedCVEvaluator(AbstractEvaluator):
+    # TODO this code is not yet optimized for memory efficiency! Do some kind
+    #  of alternating cross-validation to only have one model in memory at
+    # the time!
 
-    def __init__(self, Datamanager, configuration=None,
+    def __init__(self, Datamanager, output_dir,
+                 configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
-                 output_dir=None,
                  output_y_test=False,
                  inner_cv_folds=5,
                  outer_cv_folds=5,
                  num_run=None):
         super(NestedCVEvaluator, self).__init__(
-            Datamanager, configuration,
+            Datamanager, output_dir, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
-            output_dir=output_dir,
             output_y_test=output_y_test,
             num_run=num_run)
 
@@ -53,7 +55,7 @@ class NestedCVEvaluator(AbstractEvaluator):
 
         self.random_state = sklearn.utils.check_random_state(seed)
 
-    def fit(self):
+    def _fit(self):
         seed = self.random_state.randint(1000000)
         for outer_fold in range(self.outer_cv_folds):
             # First perform the fit for the outer cross validation
@@ -89,11 +91,10 @@ class NestedCVEvaluator(AbstractEvaluator):
                 model = model.fit(X_train, Y_train)
                 self.inner_models[outer_fold][inner_fold] = model
 
-    def predict(self):
+    def _predict(self):
         # First, obtain the predictions for the ensembles, the validation and
         #  the test set!
-        outer_scores = defaultdict(list)
-        inner_scores = defaultdict(list)
+        self.outer_scores_ = defaultdict(list)
         Y_optimization_pred = [None] * self.outer_cv_folds
         Y_targets = [None] * self.outer_cv_folds
         Y_valid_pred = [None] * self.outer_cv_folds
@@ -131,9 +132,9 @@ class NestedCVEvaluator(AbstractEvaluator):
                 all_scoring_functions=self.all_scoring_functions)
             if self.all_scoring_functions:
                 for score_name in scores:
-                    outer_scores[score_name].append(scores[score_name])
+                    self.outer_scores_[score_name].append(scores[score_name])
             else:
-                outer_scores[self.metric].append(scores)
+                self.outer_scores_[self.metric].append(scores)
 
         Y_optimization_pred = np.concatenate(
             [Y_optimization_pred[i] for i in range(self.outer_cv_folds)
@@ -160,7 +161,11 @@ class NestedCVEvaluator(AbstractEvaluator):
 
         self.Y_optimization = Y_targets
 
-        # Second, calculate the inner score
+        return Y_optimization_pred, Y_valid_pred, Y_test_pred
+
+    def _loss(self, Y_optimization_pred, Y_valid_pred, Y_test_pred):
+        inner_scores = defaultdict(list)
+
         for outer_fold in range(self.outer_cv_folds):
             for inner_fold in range(self.inner_cv_folds):
                 inner_train_indices, inner_test_indices = self.inner_indices[
@@ -168,6 +173,7 @@ class NestedCVEvaluator(AbstractEvaluator):
                 Y_test = self.Y_train[inner_test_indices]
                 X_test = self.X_train[inner_test_indices]
                 model = self.inner_models[outer_fold][inner_fold]
+
                 Y_hat = self.predict_function(
                     X_test, model, self.task_type,
                     Y_train=self.Y_train[inner_train_indices])
@@ -175,6 +181,7 @@ class NestedCVEvaluator(AbstractEvaluator):
                     Y_test, Y_hat, self.task_type, self.metric,
                     self.D.info['label_num'],
                     all_scoring_functions=self.all_scoring_functions)
+
                 if self.all_scoring_functions:
                     for score_name in scores:
                         inner_scores[score_name].append(scores[score_name])
@@ -184,17 +191,20 @@ class NestedCVEvaluator(AbstractEvaluator):
         # Average the scores!
         if self.all_scoring_functions:
             inner_err = {
-                key: 1 - np.mean(inner_scores[key])
-                for key in inner_scores
-            }
+                key: 1 - np.mean(inner_scores[key]) for key in inner_scores}
             outer_err = {
-                'outer:%s' % METRIC_TO_STRING[key]: 1 - np.mean(outer_scores[
-                    key]) for key in outer_scores
-            }
+                'outer:%s' % METRIC_TO_STRING[key]:
+                    1 - np.mean(self.outer_scores_[key])
+                for key in self.outer_scores_
+                }
             inner_err.update(outer_err)
         else:
             inner_err = 1 - np.mean(inner_scores[self.metric])
 
-        if self.with_predictions:
-            return inner_err, Y_optimization_pred, Y_valid_pred, Y_test_pred
-        return inner_err
+        return inner_err, Y_optimization_pred, Y_valid_pred, Y_test_pred
+
+    def fit_predict_and_loss(self):
+        self._fit()
+        Y_optimization_pred, Y_valid_pred, Y_test_pred = self._predict()
+        return self._loss(Y_optimization_pred, Y_valid_pred, Y_test_pred)
+

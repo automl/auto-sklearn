@@ -34,21 +34,40 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
             self.estimator = None
 
         if self.estimator is None:
+            self._iterations = 0
+
             self.estimator = PassiveAggressiveClassifier(
                 C=self.C, fit_intercept=self.fit_intercept, n_iter=1,
                 loss=self.loss, shuffle=True, random_state=self.random_state,
                 warm_start=True)
             self.classes_ = np.unique(y.astype(int))
 
-        self.estimator.n_iter += n_iter
-        self.estimator.fit(X, y)
+        # Fallback for multilabel classification
+        if len(y.shape) > 1 and y.shape[1] > 1:
+            import sklearn.multiclass
+            self.estimator.n_iter = self.n_iter
+            self.estimator = sklearn.multiclass.OneVsRestClassifier(
+                self.estimator, n_jobs=1)
+            self.estimator.fit(X, y)
+            self.fully_fit_ = True
+        else:
+            # In the first iteration, there is not yet an intercept
+
+            self.estimator.n_iter = n_iter
+            self.estimator.partial_fit(X, y, classes=np.unique(y))
+            if self._iterations >= self.n_iter:
+                self.fully_fit_ = True
+            self._iterations += n_iter
 
         return self
 
     def configuration_fully_fitted(self):
         if self.estimator is None:
             return False
-        return not self.estimator.n_iter < self.n_iter
+        elif not hasattr(self, 'fully_fit_'):
+            return False
+        else:
+            return self.fully_fit_
 
     def predict(self, X):
         if self.estimator is None:
@@ -65,23 +84,14 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
     @staticmethod
     def get_properties(dataset_properties=None):
         return {'shortname': 'PassiveAggressive Classifier',
-                'name': 'Passive Aggressive Stochastic Gradient Descent '
-                        'Classifier',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': True,
-                'prefers_data_normalized': True,
+                'name': 'Passive Aggressive Classifier',
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': False,
+                'handles_multilabel': True,
                 'is_deterministic': True,
-                'handles_sparse': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,),
-                # TODO find out what is best used here!
-                'preferred_dtype': None}
+                'output': (PREDICTIONS,)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

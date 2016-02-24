@@ -26,7 +26,47 @@ from autosklearn.pipeline.util import get_dataset
 from autosklearn.pipeline.constants import *
 
 
+class DummyClassifier(AutoSklearnClassificationAlgorithm):
+    @staticmethod
+    def get_properties(dataset_properties=None):
+        return {'shortname': 'AB',
+                'name': 'AdaBoost Classifier',
+                'handles_regression': False,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': True,
+                'is_deterministic': True,
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'output': (PREDICTIONS,)}
+
+    @staticmethod
+    def get_hyperparameter_search_space(dataset_properties=None):
+        cs = ConfigurationSpace()
+        return cs
+
+
+class DummyPreprocessor(AutoSklearnPreprocessingAlgorithm):
+    @staticmethod
+    def get_properties(dataset_properties=None):
+        return {'shortname': 'AB',
+                'name': 'AdaBoost Classifier',
+                'handles_regression': False,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': True,
+                'is_deterministic': True,
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'output': (INPUT,)}
+
+    @staticmethod
+    def get_hyperparameter_search_space(dataset_properties=None):
+        cs = ConfigurationSpace()
+        return cs
+
+
 class SimpleClassificationPipelineTest(unittest.TestCase):
+    _multiprocess_can_split_ = True
+
     def test_io_dict(self):
         classifiers = classification_components._classifiers
         for c in classifiers:
@@ -97,7 +137,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         print(cs)
         cs.seed(5)
 
-        for i in range(50):
+        for i in range(10):
             X, Y = sklearn.datasets.\
                     make_multilabel_classification(n_samples=150,
                                                    n_features=20,
@@ -115,11 +155,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             Y_test = Y[101:, ]
 
             config = cs.sample_configuration()
-            config._populate_values()
 
-            if 'classifier:passive_aggressive:n_iter' in config:
+            if 'classifier:passive_aggressive:n_iter' in config and \
+                    config['classifier:passive_aggressive:n_iter'] is not None:
                 config._values['classifier:passive_aggressive:n_iter'] = 5
-            if 'classifier:sgd:n_iter' in config:
+            if 'classifier:sgd:n_iter' in config and \
+                    config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
             cls = SimpleClassificationPipeline(config, random_state=1)
@@ -179,9 +220,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
-            if config['classifier:passive_aggressive:n_iter'] is not None:
+
+            if 'classifier:passive_aggressive:n_iter' in config and \
+                    config['classifier:passive_aggressive:n_iter'] is not None:
                 config._values['classifier:passive_aggressive:n_iter'] = 5
-            if config['classifier:sgd:n_iter'] is not None:
+            if 'classifier:sgd:n_iter' in config and \
+                    config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
@@ -196,9 +240,13 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 self.assertIsInstance(predicted_probabiliets, np.ndarray)
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
-                        e.args[0] or \
-                        "removed all features" in e.args[0] or \
-                        "all features are discarded" in e.args[0]:
+                        e.args[0]:
+                    continue
+                elif "removed all features" in e.args[0]:
+                    continue
+                elif "all features are discarded" in e.args[0]:
+                    continue
+                elif "Numerical problems in QDA" in e.args[0]:
                     continue
                 else:
                     print(config)
@@ -240,9 +288,11 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
-            if config['classifier:passive_aggressive:n_iter'] is not None:
+            if 'classifier:passive_aggressive:n_iter' in config and \
+                    config['classifier:passive_aggressive:n_iter'] is not None:
                 config._values['classifier:passive_aggressive:n_iter'] = 5
-            if config['classifier:sgd:n_iter'] is not None:
+            if 'classifier:sgd:n_iter' in config and \
+                    config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
@@ -299,9 +349,11 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
-            if config['classifier:passive_aggressive:n_iter'] is not None:
+            if 'classifier:passive_aggressive:n_iter' in config and \
+                    config['classifier:passive_aggressive:n_iter'] is not None:
                 config._values['classifier:passive_aggressive:n_iter'] = 5
-            if config['classifier:sgd:n_iter'] is not None:
+            if 'classifier:sgd:n_iter' in config and \
+                    config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
             print(config)
@@ -351,9 +403,11 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
-            if config['classifier:passive_aggressive:n_iter'] is not None:
+            if 'classifier:passive_aggressive:n_iter' in config and \
+                    config['classifier:passive_aggressive:n_iter'] is not None:
                 config._values['classifier:passive_aggressive:n_iter'] = 5
-            if config['classifier:sgd:n_iter'] is not None:
+            if 'classifier:sgd:n_iter' in config and \
+                    config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
             print(config)
@@ -597,17 +651,18 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         # Multilabel
         cls = SimpleClassificationPipeline(default)
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
-        Y_train = np.array([(y, 26 - y) for y in Y_train])
+        Y_train_ = np.zeros((Y_train.shape[0], 10))
+        for i, y in enumerate(Y_train):
+            Y_train_[i][y] = 1
+        Y_train = Y_train_
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         cls_predict = mock.Mock(wraps=cls.pipeline_.steps[-1][1])
         cls.pipeline_.steps[-1] = ("estimator", cls_predict)
         prediction = cls.predict_proba(X_test, batch_size=20)
-        self.assertIsInstance(prediction, list)
-        self.assertEqual(2, len(prediction))
-        self.assertEqual((1647, 10), prediction[0].shape)
-        self.assertEqual((1647, 10), prediction[1].shape)
+        self.assertIsInstance(prediction, np.ndarray)
+        self.assertEqual(prediction.shape, ((1647, 10)))
         self.assertEqual(84, cls_predict.predict_proba.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
@@ -652,17 +707,18 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cls = SimpleClassificationPipeline(config)
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                        make_sparse=True)
-        Y_train = np.array([(y, 26 - y) for y in Y_train])
+        Y_train_ = np.zeros((Y_train.shape[0], 10))
+        for i, y in enumerate(Y_train):
+            Y_train_[i][y] = 1
+        Y_train = Y_train_
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         cls_predict = mock.Mock(wraps=cls.pipeline_.steps[-1][1])
         cls.pipeline_.steps[-1] = ("estimator", cls_predict)
         prediction = cls.predict_proba(X_test, batch_size=20)
-        self.assertIsInstance(prediction, list)
-        self.assertEqual(2, len(prediction))
-        self.assertEqual((1647, 10), prediction[0].shape)
-        self.assertEqual((1647, 10), prediction[1].shape)
+        self.assertEqual(prediction.shape, ((1647, 10)))
+        self.assertIsInstance(prediction, np.ndarray)
         self.assertEqual(84, cls_predict.predict_proba.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
@@ -683,3 +739,20 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_get_params(self):
         pass
+
+    def test_add_classifier(self):
+        self.assertEqual(len(classification_components._addons.components), 0)
+        classification_components.add_classifier(DummyClassifier)
+        self.assertEqual(len(classification_components._addons.components), 1)
+        cs = SimpleClassificationPipeline.get_hyperparameter_search_space()
+        self.assertIn('DummyClassifier', str(cs))
+        del classification_components._addons.components['DummyClassifier']
+
+    def test_add_preprocessor(self):
+        self.assertEqual(len(preprocessing_components._addons.components), 0)
+        preprocessing_components.add_preprocessor(DummyPreprocessor)
+        self.assertEqual(len(preprocessing_components._addons.components), 1)
+        cs = SimpleClassificationPipeline.get_hyperparameter_search_space()
+        self.assertIn('DummyPreprocessor', str(cs))
+        del preprocessing_components._addons.components['DummyPreprocessor']
+

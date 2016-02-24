@@ -8,7 +8,12 @@ from sklearn.base import ClassifierMixin
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
-from autosklearn.pipeline import components as components
+from autosklearn.pipeline.components import classification as \
+    classification_components
+from autosklearn.pipeline.components import data_preprocessing as \
+    data_preprocessing_components
+from autosklearn.pipeline.components import feature_preprocessing as \
+    feature_preprocessing_components
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
 from autosklearn.pipeline.components.data_preprocessing.balancing import Balancing
@@ -62,6 +67,11 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
     """
 
+    def __init__(self, configuration, random_state=None):
+        self._output_dtype = np.int32
+        super(SimpleClassificationPipeline, self).__init__(configuration,
+                                                           random_state)
+
     def pre_transform(self, X, y, fit_params=None, init_params=None):
         self.num_targets = 1 if len(y.shape) == 1 else y.shape[1]
 
@@ -111,7 +121,8 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
                 # Binary or Multiclass
                 if len(target) == 1:
-                    y = np.zeros((X.shape[0], target.shape[1]))
+                    y = np.zeros((X.shape[0], target.shape[1]),
+                                 dtype=np.float32)
 
                     for k in range(max(1, int(np.ceil(float(X.shape[0]) /
                             batch_size)))):
@@ -119,10 +130,12 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                         batch_to = min([(k + 1) * batch_size, X.shape[0]])
                         y[batch_from:batch_to] = \
                             self.predict_proba(X[batch_from:batch_to],
-                                               batch_size=None)
+                                               batch_size=None).\
+                                astype(np.float32)
 
                 elif len(target) > 1:
-                    y = [np.zeros((X.shape[0], target[i].shape[1]))
+                    y = [np.zeros((X.shape[0], target[i].shape[1]),
+                                  dtype=np.float32)
                          for i in range(len(target))]
 
                     for k in range(max(1, int(np.ceil(float(X.shape[0]) /
@@ -131,7 +144,8 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                         batch_to = min([(k + 1) * batch_size, X.shape[0]])
                         predictions = \
                             self.predict_proba(X[batch_from:batch_to],
-                                               batch_size=None)
+                                               batch_size=None).\
+                                astype(np.float32)
 
                         for i in range(len(target)):
                             y[i][batch_from:batch_to] = predictions[i]
@@ -275,21 +289,21 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         # Add the always active preprocessing components
         steps.extend(
             [["one_hot_encoding",
-              components.data_preprocessing._preprocessors['one_hot_encoding']],
+              data_preprocessing_components._preprocessors['one_hot_encoding']],
              ["imputation",
-              components.data_preprocessing._preprocessors['imputation']],
+              data_preprocessing_components._preprocessors['imputation']],
              ["rescaling",
-              components.data_preprocessing._preprocessors['rescaling']],
+              data_preprocessing_components._preprocessors['rescaling']],
              ["balancing",
-              components.data_preprocessing._preprocessors['balancing']]])
+              data_preprocessing_components._preprocessors['balancing']]])
 
         # Add the preprocessing component
         steps.append(['preprocessor',
-                      components.feature_preprocessing._preprocessors['preprocessor']])
+                      feature_preprocessing_components.FeaturePreprocessorChoice])
 
         # Add the classification component
         steps.append(['classifier',
-                      components.classification_components._classifiers['classifier']])
+                      classification_components.ClassifierChoice])
         return steps
 
     def _get_estimator_hyperparameter_name(self):

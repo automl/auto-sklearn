@@ -35,23 +35,14 @@ class RidgeRegression(AutoSklearnRegressionAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': 'Rigde',
                 'name': 'Ridge Regression',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': True,
-                # TODO find out if this is good because of sparcity...
                 'handles_regression': True,
                 'handles_classification': False,
                 'handles_multiclass': False,
                 'handles_multilabel': False,
                 'prefers_data_normalized': True,
                 'is_deterministic': True,
-                'handles_sparse': True,
                 'input': (SPARSE, DENSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,),
-                # TODO find out what is best used here!
-                # But rather fortran or C-contiguous?
-                'preferred_dtype': np.float32}
+                'output': (PREDICTIONS,)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

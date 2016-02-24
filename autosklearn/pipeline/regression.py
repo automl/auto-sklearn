@@ -2,12 +2,17 @@ from collections import OrderedDict
 import copy
 from itertools import product
 
+import numpy as np
 from sklearn.base import RegressorMixin
 
 from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
 
-from autosklearn.pipeline import components as components
+from autosklearn.pipeline.components import regression as regression_components
+from autosklearn.pipeline.components import data_preprocessing as \
+    data_preprocessing_components
+from autosklearn.pipeline.components import  feature_preprocessing as \
+    feature_preprocessing_components
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
 
@@ -59,12 +64,38 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     --------
 
     """
+    def __init__(self, configuration, random_state=None):
+        self._output_dtype = np.float32
+        super(SimpleRegressionPipeline, self).__init__(configuration,
+                                                       random_state)
 
     def pre_transform(self, X, Y, fit_params=None, init_params=None):
         X, fit_params = super(SimpleRegressionPipeline, self).pre_transform(
             X, Y, fit_params=fit_params, init_params=init_params)
         self.num_targets = 1 if len(Y.shape) == 1 else Y.shape[1]
         return X, fit_params
+
+    def fit_estimator(self, X, y, fit_params=None):
+        self.y_max_ = np.nanmax(y)
+        self.y_min_ = np.nanmin(y)
+        return super(SimpleRegressionPipeline, self).fit_estimator(
+            X, y, fit_params=fit_params)
+
+    def iterative_fit(self, X, y, fit_params=None, n_iter=1):
+        self.y_max_ = np.nanmax(y)
+        self.y_min_ = np.nanmin(y)
+        return super(SimpleRegressionPipeline, self).iterative_fit(
+            X, y, fit_params=fit_params, n_iter=n_iter)
+
+    def predict(self, X, batch_size=None):
+        y = super(SimpleRegressionPipeline, self).\
+            predict(X, batch_size=batch_size)
+        y[y > (2 * self.y_max_)] = 2 * self.y_max_
+        if self.y_min_ < 0:
+            y[y < (2 * self.y_min_)] = 2 * self.y_min_
+        elif self.y_min_ > 0:
+            y[y < (0.5 * self.y_min_)] = 0.5 * self.y_min_
+        return y
 
     @classmethod
     def get_available_components(cls, available_comp, data_prop, inc, exc):
@@ -211,7 +242,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
     @staticmethod
     def _get_estimator_components():
-        return components.regression_components._regressors
+        return regression_components._regressors
 
     @classmethod
     def _get_pipeline(cls):
@@ -220,20 +251,19 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         # Add the always active preprocessing components
         steps.extend(
             [["one_hot_encoding",
-              components.data_preprocessing._preprocessors['one_hot_encoding']],
+              data_preprocessing_components._preprocessors['one_hot_encoding']],
             ["imputation",
-              components.data_preprocessing._preprocessors['imputation']],
+             data_preprocessing_components._preprocessors['imputation']],
              ["rescaling",
-              components.data_preprocessing._preprocessors['rescaling']]])
+              data_preprocessing_components._preprocessors['rescaling']]])
 
         # Add the preprocessing component
         steps.append(['preprocessor',
-                      components.feature_preprocessing._preprocessors[
-                          'preprocessor']])
+                      feature_preprocessing_components.FeaturePreprocessorChoice])
 
         # Add the classification component
         steps.append(['regressor',
-                      components.regression_components._regressors['regressor']])
+                      regression_components.RegressorChoice])
         return steps
 
     def _get_estimator_hyperparameter_name(self):

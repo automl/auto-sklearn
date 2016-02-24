@@ -7,6 +7,7 @@ from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 
 
 class RandomForest(AutoSklearnClassificationAlgorithm):
@@ -103,28 +104,21 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
     def predict_proba(self, X):
         if self.estimator is None:
             raise NotImplementedError()
-        return self.estimator.predict_proba(X)
+        probas = self.estimator.predict_proba(X)
+        probas = convert_multioutput_multiclass_to_multilabel(probas)
+        return probas
 
     @staticmethod
     def get_properties(dataset_properties=None):
         return {'shortname': 'RF',
                 'name': 'Random Forest Classifier',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': False,
-                'prefers_data_normalized': False,
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                'handles_sparse': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,),
-                # TODO find out what is best used here!
-                # But rather fortran or C-contiguous?
-                'preferred_dtype': np.float32}
+                'output': (PREDICTIONS,)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

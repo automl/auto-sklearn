@@ -16,7 +16,7 @@ class,added,comment
 <class 'sklearn.isotonic.IsotonicRegression'>,False,Calibration instead of prediction method
 <class 'sklearn.kernel_ridge.KernelRidge'>,False,Add
 <class 'sklearn.linear_model.base.LinearRegression'>,False,No
-<class 'sklearn.linear_model.bayes.ARDRegression'>,False,Wait for Tobias' feedback
+<class 'sklearn.linear_model.bayes.ARDRegression'>,True,
 <class 'sklearn.linear_model.bayes.BayesianRidge'>,False,Wait for Tobias' feedback
 <class 'sklearn.linear_model.coordinate_descent.ElasticNet'>,False,Wait for Tobias' feedback
 <class 'sklearn.linear_model.coordinate_descent.ElasticNetCV'>,False,

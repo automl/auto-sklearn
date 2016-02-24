@@ -45,7 +45,8 @@ def find_sklearn_classes(class_):
 
 
 def get_dataset(dataset='iris', make_sparse=False, add_NaNs=False,
-                train_size_maximum=150):
+                train_size_maximum=150, make_multilabel=False,
+                make_binary=False):
     iris = getattr(sklearn.datasets, "load_%s" % dataset)()
     X = iris.data.astype(np.float32)
     Y = iris.target
@@ -74,14 +75,37 @@ def get_dataset(dataset='iris', make_sparse=False, add_NaNs=False,
         X_test = scipy.sparse.csc_matrix(X_test)
         X_test.eliminate_zeros()
 
+    if make_binary and make_multilabel:
+        raise ValueError('Can convert dataset only to one of the two '
+                         'options binary or multilabel!')
+
+    if make_binary:
+        Y_train[Y_train > 1] = 1
+        Y_test[Y_test > 1] = 1
+
+    if make_multilabel:
+        num_classes = len(np.unique(Y))
+        Y_train_ = np.zeros((Y_train.shape[0], num_classes))
+        for i in range(Y_train.shape[0]):
+            Y_train_[i, Y_train[i]] = 1
+        Y_train = Y_train_
+        Y_test_ = np.zeros((Y_test.shape[0], num_classes))
+        for i in range(Y_test.shape[0]):
+            Y_test_[i, Y_test[i]] = 1
+        Y_test = Y_test_
+
     return X_train, Y_train, X_test, Y_test
 
 
 def _test_classifier(classifier, dataset='iris', sparse=False,
-                     train_size_maximum=150):
+                     train_size_maximum=150, make_multilabel=False,
+                     make_binary=False):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
                                                    make_sparse=sparse,
-                                                   train_size_maximum=train_size_maximum)
+                                                   train_size_maximum=train_size_maximum,
+                                                   make_multilabel=make_multilabel,
+                                                   make_binary=make_binary)
+
     configuration_space = classifier.get_hyperparameter_search_space(
         dataset_properties={'sparse': sparse})
     default = configuration_space.get_default_configuration()
@@ -94,6 +118,8 @@ def _test_classifier(classifier, dataset='iris', sparse=False,
 
 
 def _test_classifier_iterative_fit(classifier, dataset='iris', sparse=False):
+    """Fit only for ten iterations. Usually, the result is much worse which
+    indicates that iterative_fit() works"""
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
                                                    make_sparse=sparse)
     configuration_space = classifier.get_hyperparameter_search_space(
@@ -102,17 +128,21 @@ def _test_classifier_iterative_fit(classifier, dataset='iris', sparse=False):
     classifier = classifier(random_state=1,
                             **{hp_name: default[hp_name] for hp_name in
                                default if default[hp_name] is not None})
-    while not classifier.configuration_fully_fitted():
+    for i in range(10):
         predictor = classifier.iterative_fit(X_train, Y_train)
     predictions = predictor.predict(X_test)
     return predictions, Y_test
 
 
 def _test_classifier_predict_proba(classifier, dataset='iris', sparse=False,
-                                   train_size_maximum=150):
+                                   train_size_maximum=150,
+                                   make_multilabel=False,
+                                   make_binary=False):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
                                                    make_sparse=sparse,
-                                                   train_size_maximum=train_size_maximum)
+                                                   train_size_maximum=train_size_maximum,
+                                                   make_multilabel=make_multilabel,
+                                                   make_binary=make_binary)
     configuration_space = classifier.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
     classifier = classifier(random_state=1,

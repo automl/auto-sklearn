@@ -6,6 +6,8 @@ from autosklearn.pipeline.components.base import \
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
 
+import numpy as np
+
 
 class QDA(AutoSklearnClassificationAlgorithm):
 
@@ -24,6 +26,20 @@ class QDA(AutoSklearnClassificationAlgorithm):
             self.estimator = estimator
 
         self.estimator.fit(X, Y)
+
+        if len(Y.shape) == 2 and Y.shape[1] > 1:
+            problems = []
+            for est in self.estimator.estimators_:
+                problem = np.any(np.any([np.any(s <= 0.0) for s in
+                                         est.scalings_]))
+                problems.append(problem)
+            problem = np.any(problems)
+        else:
+            problem = np.any(np.any([np.any(s <= 0.0) for s in
+                                     self.estimator.scalings_]))
+        if problem:
+            raise ValueError('Numerical problems in QDA. QDA.scalings_ '
+                             'contains values <= 0.0')
         return self
 
     def predict(self, X):
@@ -42,22 +58,13 @@ class QDA(AutoSklearnClassificationAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': 'QDA',
                 'name': 'Quadratic Discriminant Analysis',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': True,
-                # Find out if this is good because of sparsity
-                'prefers_data_normalized': False,
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                'handles_sparse': False,
                 'input': (DENSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,),
-                # TODO find out what is best used here!
-                'preferred_dtype': None}
+                'output': (PREDICTIONS,)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

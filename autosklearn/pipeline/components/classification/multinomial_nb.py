@@ -49,16 +49,29 @@ class MultinomialNB(AutoSklearnClassificationAlgorithm):
         else:
             X[X < 0] = 0.0
 
-        for iter in range(n_iter):
-            start = min(self.n_iter * 1000, y.shape[0])
-            stop = min((self.n_iter + 1) * 1000, y.shape[0])
-            self.estimator.partial_fit(X[start:stop], y[start:stop],
-                                       self.classes_)
-            self.n_iter += 1
+        # Fallback for multilabel classification
+        if len(y.shape) > 1 and y.shape[1] > 1:
+            import sklearn.multiclass
+            self.estimator.n_iter = self.n_iter
+            self.estimator = sklearn.multiclass.OneVsRestClassifier(
+                self.estimator, n_jobs=1)
+            self.estimator.fit(X, y)
+            self.fully_fit_ = True
+        else:
+            for iter in range(n_iter):
+                start = min(self.n_iter * 1000, y.shape[0])
+                stop = min((self.n_iter + 1) * 1000, y.shape[0])
+                if X[start:stop].shape[0] == 0:
+                    self.fully_fit_ = True
+                    break
 
-            if stop >= len(y):
-                self.fully_fit_ = True
-                break
+                self.estimator.partial_fit(X[start:stop], y[start:stop],
+                                           self.classes_)
+                self.n_iter += 1
+
+                if stop >= len(y):
+                    self.fully_fit_ = True
+                    break
 
         return self
 
@@ -84,23 +97,13 @@ class MultinomialNB(AutoSklearnClassificationAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': 'MultinomialNB',
                 'name': 'Multinomial Naive Bayes classifier',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                # sklearn website says:  The multinomial distribution normally
-                # requires integer feature counts. However, in practice,
-                # fractional counts such as tf-idf may also work.
-                'handles_numerical_features': True,
-                'prefers_data_scaled': False,
-                'prefers_data_normalized': False,
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': False,
+                'handles_multilabel': True,
                 'is_deterministic': True,
-                'handles_sparse': False,
                 'input': (DENSE, SPARSE, SIGNED_DATA),
-                'output': (PREDICTIONS,),
-                'preferred_dtype': np.float32}
+                'output': (PREDICTIONS,)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

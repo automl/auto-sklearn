@@ -43,6 +43,8 @@ class SGD(AutoSklearnRegressionAlgorithm):
             self.scaler = None
 
         if self.estimator is None:
+            self._iterations = 0
+
             self.alpha = float(self.alpha)
             self.fit_intercept = self.fit_intercept == 'True'
             self.n_iter = int(self.n_iter)
@@ -73,14 +75,16 @@ class SGD(AutoSklearnRegressionAlgorithm):
 
         Y_scaled = self.scaler.transform(y)
 
-        self.estimator.n_iter += n_iter
-        self.estimator.fit(X, Y_scaled)
+        self.estimator.n_iter = n_iter
+        self._iterations += n_iter
+        print(n_iter)
+        self.estimator.partial_fit(X, Y_scaled)
         return self
 
     def configuration_fully_fitted(self):
         if self.estimator is None:
             return False
-        return not self.estimator.n_iter < self.n_iter
+        return not self._iterations < self.n_iter
 
     def predict(self, X):
         if self.estimator is None:

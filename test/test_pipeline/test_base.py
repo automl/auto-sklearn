@@ -14,12 +14,11 @@ class BaseTest(unittest.TestCase):
         dataset_properties = {'target_type': 'classification'}
         exclude = {}
         include = {}
-        pipeline = [('p0', autosklearn.pipeline.components.feature_preprocessing._preprocessors[
-                        'preprocessor']),
-                    ('p1', autosklearn.pipeline.components.feature_preprocessing._preprocessors[
-                        'preprocessor']),
-                    ('c', autosklearn.pipeline.components.classification._classifiers[
-                        'classifier'])]
+        pipeline = [('p0',
+                     autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice),
+                    ('p1',
+                     autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice),
+                    ('c', autosklearn.pipeline.components.classification.ClassifierChoice)]
         cs = base._get_hyperparameter_search_space(cs, dataset_properties,
                                                    exclude, include, pipeline)
 

@@ -25,21 +25,13 @@ class GEM(AutoSklearnPreprocessingAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': 'GEM',
                 'name': 'Generalized Eigenvector extraction',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': True,
-                'prefers_data_normalized': True,
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': False,
                 'is_deterministic': True,
-                'handles_sparse': False,
-                'handles_dense': True,
                 'input': (DENSE, UNSIGNED_DATA),
-                'output': (INPUT, UNSIGNED_DATA),
-                'preferred_dtype': None}
+                'output': (INPUT, UNSIGNED_DATA)}
 
 
     @staticmethod

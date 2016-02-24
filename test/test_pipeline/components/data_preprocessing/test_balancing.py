@@ -18,7 +18,7 @@ from autosklearn.pipeline.components.classification.liblinear_svc import LibLine
 from autosklearn.pipeline.components.classification.libsvm_svc import LibSVM_SVC
 from autosklearn.pipeline.components.classification.sgd import SGD
 from autosklearn.pipeline.components.feature_preprocessing\
-    .extra_trees_preproc_for_classification import ExtraTreesPreprocessor
+    .extra_trees_preproc_for_classification import ExtraTreesPreprocessorClassification
 from autosklearn.pipeline.components.feature_preprocessing.liblinear_svc_preprocessor import LibLinear_Preprocessor
 
 
@@ -75,7 +75,7 @@ class BalancingComponentTest(unittest.TestCase):
                  ('random_forest', RandomForest, 0.849, 0.780),
                  ('libsvm_svc', LibSVM_SVC, 0.571, 0.658),
                  ('liblinear_svc', LibLinear_SVC, 0.685, 0.699),
-                 ('sgd', SGD, 0.602, 0.720)]:
+                 ('sgd', SGD, 0.65384615384615385, 0.38795986622073581)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
                 # Fit
@@ -119,9 +119,10 @@ class BalancingComponentTest(unittest.TestCase):
 
         for name, pre, acc_no_weighting, acc_weighting in \
                 [('extra_trees_preproc_for_classification',
-                    ExtraTreesPreprocessor, 0.682, 0.634),
+                    ExtraTreesPreprocessorClassification, 0.7142857142857143,
+                    0.72180451127819545),
                  ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
-                    0.714, 0.596)]:
+                    0.5934065934065933, 0.71111111111111114)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
                 data_ = copy.copy(data)

@@ -1,6 +1,7 @@
 from __future__ import print_function
 import glob
 import os
+import tempfile
 import time
 
 import lockfile
@@ -66,8 +67,11 @@ class Backend(object):
             raise ValueError("Start time must be a float, but is %s." %
                              type(start_time))
 
-        with open(filepath, 'w') as fh:
+        with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(filepath),
+                delete=False) as fh:
             fh.write(str(start_time))
+            tempname = fh.name
+        os.rename(tempname, filepath)
 
         return filepath
 
@@ -97,7 +101,12 @@ class Backend(object):
                          np.allclose(existing_targets, targets)):
                     return filepath
 
-            np.save(filepath, targets.astype(np.float32))
+            with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                    filepath), delete=False) as fh:
+                np.save(fh, targets.astype(np.float32))
+                tempname = fh.name
+
+            os.rename(tempname, filepath)
 
         return filepath
 
@@ -120,8 +129,11 @@ class Backend(object):
         lock_path = filepath + '.lock'
         with lockfile.LockFile(lock_path):
             if not os.path.exists(filepath):
-                with open(filepath, 'wb') as fh:
+                with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                        filepath), delete=False) as fh:
                     pickle.dump(datamanager, fh, -1)
+                    tempname = fh.name
+                os.rename(tempname, filepath)
 
         return filepath
 
@@ -140,8 +152,11 @@ class Backend(object):
         filepath = os.path.join(self.get_model_dir(),
                                 '%s.%s.model' % (seed, idx))
 
-        with open(filepath, 'wb') as fh:
+        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                filepath), delete=False) as fh:
             pickle.dump(model, fh, -1)
+            tempname = fh.name
+        os.rename(tempname, filepath)
 
     def load_all_models(self, seed):
         model_directory = self.get_model_dir()
@@ -153,58 +168,82 @@ class Backend(object):
             model_files = os.listdir(model_directory)
             model_files = [os.path.join(model_directory, mf) for mf in model_files]
 
+        models = self.load_models_by_file_names(model_files)
+
+        return models
+
+    def load_models_by_file_names(self, model_file_names):
         models = dict()
-        for model_file in model_files:
+
+        for model_file in model_file_names:
             # File names are like: {seed}.{index}.model
             if model_file.endswith('/'):
                 model_file = model_file[:-1]
             basename = os.path.basename(model_file)
-            automl_seed = int(basename.split('.')[0])
-            idx = int(basename.split('.')[1])
-            with open(os.path.join(model_directory, basename), 'rb') as fh:
-                models[(automl_seed, idx)] = (pickle.load(fh))
+
+            basename_parts = basename.split('.')
+            seed = int(basename_parts[0])
+            idx = int(basename_parts[1])
+
+            models[(seed, idx)] = self.load_model_by_seed_and_id(seed, idx)
 
         return models
 
-    def get_ensemble_indices_dir(self):
-        return os.path.join(self.internals_directory, 'ensemble_indices')
+    def load_models_by_identifiers(self, identifiers):
+        models = dict()
 
-    def load_ensemble_indices_weights(self, seed):
-        indices_dir = self.get_ensemble_indices_dir()
+        for identifier in identifiers:
+            seed, idx = identifier
+            models[identifier] = self.load_model_by_seed_and_id(seed, idx)
 
-        if not os.path.exists(indices_dir):
-            self.logger.warning('Directory %s does not exist' % indices_dir)
-            return {}
+        return models
+
+    def load_model_by_seed_and_id(self, seed, idx):
+        model_directory = self.get_model_dir()
+        model_file_name = '%s.%s.model' % (seed, idx)
+        model_file_path = os.path.join(model_directory, model_file_name)
+
+        with open(model_file_path, 'rb') as fh:
+            return (pickle.load(fh))
+
+    def get_ensemble_dir(self):
+        return os.path.join(self.internals_directory, 'ensembles')
+
+    def load_ensemble(self, seed):
+        ensemble_dir = self.get_ensemble_dir()
+
+        if not os.path.exists(ensemble_dir):
+            self.logger.warning('Directory %s does not exist' % ensemble_dir)
+            return None
 
         if seed >= 0:
-            indices_files = glob.glob(os.path.join(indices_dir,
-                                                   '%s.*.indices' % seed))
+            indices_files = glob.glob(os.path.join(ensemble_dir,
+                                                   '%s.*.ensemble' % seed))
             indices_files.sort()
         else:
-            indices_files = os.listdir(indices_dir)
-            indices_files = [os.path.join(indices_dir, f) for f in indices_files]
+            indices_files = os.listdir(ensemble_dir)
+            indices_files = [os.path.join(ensemble_dir, f) for f in indices_files]
             indices_files.sort(key=lambda f: time.ctime(os.path.getmtime(f)))
 
         with open(indices_files[-1], 'rb') as fh:
             ensemble_members_run_numbers = pickle.load(fh)
 
-        if len(ensemble_members_run_numbers) == 0:
-            self.logger.error('Ensemble indices file %s does not contain any '
-                              'ensemble information.', indices_files[-1])
-
         return ensemble_members_run_numbers
 
-    def save_ensemble_indices_weights(self, indices, idx, seed):
+    def save_ensemble(self, ensemble, idx, seed):
         try:
-            os.makedirs(self.get_ensemble_indices_dir())
+            os.makedirs(self.get_ensemble_dir())
         except Exception:
             pass
 
-        filepath = os.path.join(self.get_ensemble_indices_dir(),
-                                '%s.%s.indices' % (str(seed), str(idx).zfill(
-                                    10)))
-        with open(filepath, 'wb') as fh:
-            pickle.dump(indices, fh)
+        filepath = os.path.join(self.get_ensemble_dir(),
+                                '%s.%s.ensemble' % (str(seed),
+                                                    str(idx).zfill(10)))
+        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                filepath), delete=False) as fh:
+            pickle.dump(ensemble, fh)
+            tempname = fh.name
+        os.rename(tempname, filepath)
 
     def _get_prediction_output_dir(self, subset):
         return os.path.join(self.internals_directory,
@@ -219,8 +258,11 @@ class Backend(object):
         filepath = os.path.join(output_dir, 'predictions_%s_%s_%s.npy' %
                                             (subset, automl_seed, str(idx)))
 
-        with open(filepath, 'wb') as fh:
+        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                filepath), delete=False) as fh:
             pickle.dump(predictions.astype(np.float32), fh, -1)
+            tempname = fh.name
+        os.rename(tempname, filepath)
 
     def save_predictions_as_txt(self, predictions, subset, idx, prefix=None):
         # Write prediction scores in prescribed format
@@ -228,20 +270,26 @@ class Backend(object):
                                 ('%s_' % prefix if prefix else '') +
                                  '%s_%s.predict' % (subset, str(idx).zfill(5)))
 
-        with open(filepath, 'w') as output_file:
+        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                filepath), delete=False) as output_file:
             for row in predictions:
                 if not isinstance(row, np.ndarray) and not isinstance(row, list):
                     row = [row]
                 for val in row:
                     output_file.write('{:g} '.format(float(val)))
                 output_file.write('\n')
+            tempname = output_file.name
+        os.rename(tempname, filepath)
 
     def write_txt_file(self, filepath, data, name):
         lock_file = filepath + '.lock'
         with lockfile.LockFile(lock_file):
             if not os.path.exists(lock_file):
-                with open(filepath, 'w') as fh:
+                with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
+                        filepath), delete=False) as fh:
                     fh.write(data)
+                    tempname = fh.name
+                os.rename(tempname, filepath)
                 self.logger.debug('Created %s file %s' % (name, filepath))
             else:
                 self.logger.debug('%s file already present %s' %

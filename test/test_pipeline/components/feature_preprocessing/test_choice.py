@@ -9,7 +9,7 @@ class FeatureProcessingTest(unittest.TestCase):
     def test_get_available_components(self):
         # Target type
         for target_type, num_values in [('classification', 16),
-                                        ('regression', 12)]:
+                                        ('regression', 13)]:
             data_properties = {'target_type': target_type}
 
             available_components = fp.FeaturePreprocessorChoice\
