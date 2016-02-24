@@ -3,6 +3,7 @@ from __future__ import print_function
 import os
 import sys
 import unittest
+import mock
 
 import numpy as np
 import autosklearn.pipeline.util as putil
@@ -10,6 +11,7 @@ import autosklearn.pipeline.util as putil
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.util.backend import Backend
 from autosklearn.constants import *
+from autosklearn.automl import AutoML
 
 sys.path.append(os.path.dirname(__file__))
 from base import Base
@@ -145,3 +147,43 @@ class EstimatorTest(Base):
         del automl
         self._tearDown(output)
 
+
+class AutoSklearnClassifierTest(unittest.TestCase):
+
+    class AutoSklearnClassifierStub(AutoSklearnClassifier):
+
+        def __init__(self):
+            self.__class__ = AutoSklearnClassifier
+            self._delete_output_directories = lambda: 0
+
+    @mock.patch.object(AutoML, 'predict')
+    def test_multiclass_prediction(self, automl_predict_mock):
+        classes = [['a', 'b', 'c']]
+        predicted_indexes = [2, 1, 0, 1, 2]
+        expected_result = ['c', 'b', 'a', 'b', 'c']
+
+        classifier = self.AutoSklearnClassifierStub()
+        classifier._classes = [np.array(classes)]
+        classifier._n_outputs = 1
+        classifier._n_classes = np.array([3])
+        automl_predict_mock.return_value = np.array(predicted_indexes)
+
+        actual_result = classifier.predict([None] * len(predicted_indexes))
+
+        np.testing.assert_array_equal(expected_result, actual_result)
+
+    @mock.patch.object(AutoML, 'predict')
+    def test_multilabel_prediction(self, automl_predict_mock):
+        classes = [['a', 'b', 'c'], [13, 17]]
+        predicted_indexes = [[2, 0], [1, 0], [0, 1], [1, 1], [2, 1]]
+        expected_result = [['c', 13], ['b', 13], ['a', 17], ['b', 17], ['c', 17]]
+
+        classifier = self.AutoSklearnClassifierStub()
+        classifier._classes = list(map(np.array, classes))
+        classifier._n_outputs = 2
+        classifier._n_classes = np.array([3, 2])
+        automl_predict_mock.return_value = np.array(predicted_indexes)
+
+        actual_result = classifier.predict([None] * len(predicted_indexes))
+
+        np.testing.assert_array_equal(expected_result, actual_result)
