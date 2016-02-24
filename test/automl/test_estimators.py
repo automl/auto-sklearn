@@ -176,7 +176,7 @@ class AutoSklearnClassifierTest(unittest.TestCase):
     def test_multilabel_prediction(self, automl_predict_mock):
         classes = [['a', 'b', 'c'], [13, 17]]
         predicted_indexes = [[2, 0], [1, 0], [0, 1], [1, 1], [2, 1]]
-        expected_result = [['c', 13], ['b', 13], ['a', 17], ['b', 17], ['c', 17]]
+        expected_result = np.array([['c', 13], ['b', 13], ['a', 17], ['b', 17], ['c', 17]], dtype=object)
 
         classifier = self.AutoSklearnClassifierStub()
         classifier._classes = list(map(np.array, classes))
