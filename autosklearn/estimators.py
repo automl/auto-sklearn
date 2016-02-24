@@ -124,7 +124,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
 
         self._classes = []
         self._n_classes = []
-        self._n_outputs = []
+        self._n_outputs = 0
 
         super(AutoSklearnClassifier, self).__init__(
             time_left_for_this_task=time_left_for_this_task,
@@ -283,7 +283,24 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             The predicted classes.
 
         """
-        return super(AutoSklearnClassifier, self).predict(X)
+        predicted_indexes = super(AutoSklearnClassifier, self).predict(X)
+        if self._n_outputs == 1:
+            predicted_indexes = predicted_indexes.reshape((len(X), 1))
+
+        predicted_classes = []
+
+        for k in six.moves.range(self._n_outputs):
+            output_predicted_indexes = predicted_indexes[:, k]
+            output_predicted_classes = self._classes[k].take(output_predicted_indexes)
+            predicted_classes.append(output_predicted_classes)
+
+        prediction = np.vstack(predicted_classes)
+        if self._n_outputs > 1:
+            prediction = prediction.transpose()
+        else:
+            prediction = prediction.flatten()
+
+        return prediction
 
     def predict_proba(self, X):
         """Predict probabilities of classes for all samples X.
