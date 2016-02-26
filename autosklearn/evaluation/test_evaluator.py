@@ -1,8 +1,7 @@
 # -*- encoding: utf-8 -*-
 from smac.tae.execute_ta_run import StatusType
 
-from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator, \
-    _get_base_dict
+from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.evaluation.util import calculate_score
 
 
@@ -71,14 +70,16 @@ class TestEvaluator(AbstractEvaluator):
 
 
 # create closure for evaluating an algorithm
-def eval_test(queue, configuration, data, tmp_dir, seed, num_run, folds):
-    evaluator = TestEvaluator(data, tmp_dir, configuration,
-                              seed=seed,
-                              **_get_base_dict())
+def eval_test(queue, config, data, tmp_dir, seed, num_run, subsample,
+              with_predictions, all_scoring_functions,
+              output_y_test):
+    evaluator = TestEvaluator(data, tmp_dir, config,
+                              seed=seed, with_predictions=with_predictions,
+                              all_scoring_functions=all_scoring_functions)
 
     loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
     duration, result, seed, run_info = evaluator.finish_up(
-        loss, opt_pred, valid_pred, test_pred)
+        loss, opt_pred, valid_pred, test_pred, file_output=False)
 
     status = StatusType.SUCCESS
     queue.put((duration, result, seed, run_info, status))

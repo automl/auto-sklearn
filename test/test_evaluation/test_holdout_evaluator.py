@@ -135,28 +135,29 @@ class FunctionsTest(unittest.TestCase):
 
     def test_eval_holdout(self):
         eval_holdout(self.queue, self.configuration, self.data, self.tmp_dir,
-                     1, 1)
+                     1, 1, None, True, False, True)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.05)
         self.assertEqual(info[2], 1)
 
     def test_eval_holdout_on_subset(self):
         eval_holdout(self.queue, self.configuration, self.data,
-                     self.tmp_dir, 1, 1, subsample=43)
+                     self.tmp_dir, 1, 1, 43, True, False, True)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.1)
         self.assertEqual(info[2], 1)
 
     def test_eval_holdout_iterative_fit_no_timeout(self):
         eval_iterative_holdout(self.queue, self.configuration, self.data,
-                               self.tmp_dir, 1, 1)
+                               self.tmp_dir, 1, 1, None, True, False, True)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.05)
         self.assertEqual(info[2], 1)
 
     def test_eval_holdout_iterative_fit_on_subset_no_timeout(self):
         eval_iterative_holdout(self.queue, self.configuration,
-                               self.data, self.tmp_dir, 1, 1, subsample=43)
+                               self.data, self.tmp_dir, 1, 1, 43, True, False,
+                               True)
 
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.1)

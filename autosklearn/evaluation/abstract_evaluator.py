@@ -21,14 +21,6 @@ __all__ = [
 ]
 
 
-def _get_base_dict():
-    return {
-        'with_predictions': True,
-        'all_scoring_functions': False,
-        'output_y_test': True,
-    }
-
-
 class MyDummyClassifier(DummyClassifier):
     def __init__(self, configuration, random_states):
         self.configuration = configuration

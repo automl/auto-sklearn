@@ -18,7 +18,10 @@ from .util import *
 def eval_with_limits(datamanager, tmp_dir, config, seed, num_run,
                      resampling_strategy,
                      resampling_strategy_args, memory_limit,
-                     func_eval_time_limit, subsample=None):
+                     func_eval_time_limit, subsample=None,
+                     with_predictions=True,
+                     all_scoring_functions=False,
+                     output_y_test=True):
     if resampling_strategy_args is None:
         resampling_strategy_args = {}
 
@@ -32,6 +35,8 @@ def eval_with_limits(datamanager, tmp_dir, config, seed, num_run,
         eval_function = eval_partial_cv
     elif resampling_strategy == 'test':
         eval_function = eval_test
+        output_y_test = False
+        with_predictions = False
     else:
         raise ValueError('Unknown resampling strategy %s' %
                          resampling_strategy)
@@ -47,7 +52,11 @@ def eval_with_limits(datamanager, tmp_dir, config, seed, num_run,
     try:
         safe_eval(queue=queue, config=config, data=datamanager,
                   tmp_dir=tmp_dir, seed=seed, num_run=num_run,
-                  subsample=subsample, **resampling_strategy_args)
+                  subsample=subsample,
+                  with_predictions=with_predictions,
+                  all_scoring_functions=all_scoring_functions,
+                  output_y_test=output_y_test,
+                  **resampling_strategy_args)
         info = queue.get(block=True, timeout=1)
     except Exception as e0:
         if isinstance(e0, MemoryError):

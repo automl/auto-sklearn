@@ -7,8 +7,7 @@ from smac.tae.execute_ta_run import StatusType
 
 from autosklearn.constants import *
 from autosklearn.evaluation.resampling import split_data
-from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator, \
-    _get_base_dict
+from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 
 
 __all__ = [
@@ -120,12 +119,15 @@ class HoldoutEvaluator(AbstractEvaluator):
 
 # create closure for evaluating an algorithm
 def eval_holdout(queue, config, data, tmp_dir, seed, num_run,
-                 iterative=False, subsample=None):
+                 subsample, with_predictions, all_scoring_functions,
+                 output_y_test, iterative=False):
     evaluator = HoldoutEvaluator(data, tmp_dir, config,
                                  seed=seed,
                                  num_run=num_run,
                                  subsample=subsample,
-                                 **_get_base_dict())
+                                 with_predictions=with_predictions,
+                                 all_scoring_functions=all_scoring_functions,
+                                 output_y_test=output_y_test)
 
     def signal_handler(signum, frame):
         print('Received signal %s. Aborting Training!', str(signum))
@@ -152,6 +154,8 @@ def eval_holdout(queue, config, data, tmp_dir, seed, num_run,
 
 
 def eval_iterative_holdout(queue, config, data, tmp_dir, seed,
-                           num_run, subsample=None):
-    eval_holdout(queue, config, data, tmp_dir, seed, num_run, True,
-                 subsample=subsample)
+                           num_run, subsample, with_predictions,
+                           all_scoring_functions, output_y_test):
+    eval_holdout(queue, config, data, tmp_dir, seed, num_run, subsample,
+                 with_predictions, all_scoring_functions, output_y_test,
+                 iterative = True)

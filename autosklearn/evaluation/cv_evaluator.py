@@ -5,8 +5,7 @@ import numpy as np
 from smac.tae.execute_ta_run import StatusType
 
 from autosklearn.evaluation.resampling import get_CV_fold
-from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator, \
-    _get_base_dict
+from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 
 
 __all__ = [
@@ -155,13 +154,16 @@ class CVEvaluator(AbstractEvaluator):
 
 
 def eval_partial_cv(queue, config, data, tmp_dir, seed, num_run, fold,
-                    folds, subsample=None):
+                    folds, subsample, with_predictions, all_scoring_functions,
+                    output_y_test):
     evaluator = CVEvaluator(data, tmp_dir, config,
                             seed=seed,
                             num_run=num_run,
                             cv_folds=folds,
                             subsample=subsample,
-                            **_get_base_dict())
+                            with_predictions=with_predictions,
+                            all_scoring_functions=all_scoring_functions,
+                            output_y_test=output_y_test)
 
     loss, opt_pred, valid_pred, test_pred = \
         evaluator.partial_fit_predict_and_loss(fold)
@@ -174,13 +176,16 @@ def eval_partial_cv(queue, config, data, tmp_dir, seed, num_run, fold,
 
 # create closure for evaluating an algorithm
 def eval_cv(queue, config, data, tmp_dir, seed, num_run, folds,
-            subsample=None):
+            subsample, with_predictions, all_scoring_functions,
+            output_y_test):
     evaluator = CVEvaluator(data, tmp_dir, config,
                             seed=seed,
                             num_run=num_run,
                             cv_folds=folds,
                             subsample=subsample,
-                            **_get_base_dict())
+                            with_predictions=with_predictions,
+                            all_scoring_functions=all_scoring_functions,
+                            output_y_test=output_y_test)
 
     loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
     duration, result, seed, run_info = evaluator.finish_up(

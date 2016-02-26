@@ -88,14 +88,14 @@ class FunctionsTest(unittest.TestCase):
 
     def test_eval_cv(self):
         eval_cv(self.queue, self.configuration, self.data, self.tmp_dir,
-                1, 1, 5)
+                1, 1, 5, None, True, False, True)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.079637096774193727)
         self.assertEqual(info[2], 1)
 
     def test_eval_cv_on_subset(self):
         eval_cv(self.queue, self.configuration, self.data,
-                          self.tmp_dir, 1, 1, 5, subsample=45)
+                          self.tmp_dir, 1, 1, 5, 45, True, False, True)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.063004032258064502)
         self.assertEqual(info[2], 1)
@@ -108,7 +108,7 @@ class FunctionsTest(unittest.TestCase):
                    0.0]
         for fold in range(5):
             eval_partial_cv(self.queue, self.configuration, self.data,
-                            self.tmp_dir, 1, 1, fold, 5)
+                            self.tmp_dir, 1, 1, fold, 5, None, True, False, True)
             info = self.queue.get()
             results.append(info[1])
             self.assertAlmostEqual(info[1], results[fold])
@@ -123,7 +123,7 @@ class FunctionsTest(unittest.TestCase):
         for fold in range(5):
             eval_partial_cv(self.queue, self.configuration,
                                       self.data, self.tmp_dir, 1, 1,
-                                      fold, 5, subsample=80)
+                                      fold, 5, 80, True, False, True)
 
             info = self.queue.get()
             self.assertAlmostEqual(info[1], results[fold])
@@ -137,7 +137,7 @@ class FunctionsTest(unittest.TestCase):
         for fold in range(5):
             eval_partial_cv(self.queue, self.configuration,
                                       self.data, self.tmp_dir, 1, 1,
-                                      fold, 5, subsample=43)
+                                      fold, 5, 43, True, False, True)
 
             info = self.queue.get()
             self.assertAlmostEqual(info[1], results[fold])
