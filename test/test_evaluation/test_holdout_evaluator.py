@@ -139,6 +139,17 @@ class FunctionsTest(unittest.TestCase):
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.05)
         self.assertEqual(info[2], 1)
+        self.assertNotIn('bac_metric', info[3])
+
+    def test_eval_holdout_all_loss_functions(self):
+        eval_holdout(self.queue, self.configuration, self.data, self.tmp_dir,
+                     1, 1, None, True, True, True)
+        info = self.queue.get()
+        self.assertIn('f1_metric: 0.0480549199085;pac_metric: 0.135572680594;'
+                      'acc_metric: 0.0454545454545;auc_metric: 0.0;'
+                      'bac_metric: 0.05;duration: ', info[3])
+        self.assertAlmostEqual(info[1], 0.05)
+        self.assertEqual(info[2], 1)
 
     def test_eval_holdout_on_subset(self):
         eval_holdout(self.queue, self.configuration, self.data,

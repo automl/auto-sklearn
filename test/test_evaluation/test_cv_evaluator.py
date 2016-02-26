@@ -92,6 +92,17 @@ class FunctionsTest(unittest.TestCase):
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.079637096774193727)
         self.assertEqual(info[2], 1)
+        self.assertNotIn('bac_metric', info[3])
+
+    def test_eval_cv_all_loss_functions(self):
+        eval_cv(self.queue, self.configuration, self.data, self.tmp_dir,
+                1, 1, 5, None, True, True, True)
+        info = self.queue.get()
+        self.assertIn('f1_metric: 0.0794451450189;pac_metric: 0.344745492187;'
+                      'acc_metric: 0.075;auc_metric: 0.0285222960152;'
+                      'bac_metric: 0.0796370967742;duration: ', info[3])
+        self.assertAlmostEqual(info[1], 0.079637096774193727)
+        self.assertEqual(info[2], 1)
 
     def test_eval_cv_on_subset(self):
         eval_cv(self.queue, self.configuration, self.data,
