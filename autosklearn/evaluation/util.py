@@ -1,16 +1,13 @@
-import os
-
-import lockfile
-import numpy as np
-
 from autosklearn.constants import *
 from autosklearn.metrics import sanitize_array, \
-    regression_metrics, classification_metrics, create_multiclass_solution
+    regression_metrics, classification_metrics
 
 
 __all__ = [
     'calculate_score',
 ]
+
+
 
 
 def calculate_score(solution, prediction, task_type, metric, num_classes,

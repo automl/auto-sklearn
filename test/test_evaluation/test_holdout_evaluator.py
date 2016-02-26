@@ -1,20 +1,24 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 import copy
+import multiprocessing
 import os
 import shutil
 import sys
+import unittest
 
 import numpy as np
 
 from autosklearn.constants import *
-from autosklearn.evaluation.holdout_evaluator import HoldoutEvaluator
+from autosklearn.evaluation.holdout_evaluator import HoldoutEvaluator, \
+    eval_holdout, eval_iterative_holdout
 from autosklearn.util.pipeline import get_configuration_space
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 from evaluation_util import get_regression_datamanager, BaseEvaluatorTest, \
-    get_binary_classification_datamanager, get_dataset_getters
+    get_binary_classification_datamanager, get_dataset_getters, \
+    get_multiclass_classification_datamanager
 
 N_TEST_RUNS = 10
 
@@ -33,8 +37,14 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
         except Exception:
             pass
 
+        for output_dir in self.output_directories:
+            try:
+                shutil.rmtree(output_dir)
+            except Exception:
+                pass
+
     def test_file_output(self):
-        self.output_dir = os.path.join(os.getcwd(), '.test')
+        self.output_dir = os.path.join(os.getcwd(), '.test_file_output')
 
         D = get_regression_datamanager()
         D.name = 'test'
@@ -91,8 +101,10 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
                                   getter.__name__)
             with self.subTest(testname):
                 D = getter()
-                output_directory = os.path.join(os.getcwd(), '.%s' % testname)
+                output_directory = os.path.join(os.path.dirname(__file__),
+                                                '.%s' % testname)
                 self.output_directory = output_directory
+                self.output_directories.append(output_directory)
 
                 err = np.zeros([N_TEST_RUNS])
                 for i in range(N_TEST_RUNS):
@@ -102,3 +114,50 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
                     err[i] = evaluator.fit_predict_and_loss()[0]
 
                     self.assertTrue(np.isfinite(err[i]))
+
+
+
+class FunctionsTest(unittest.TestCase):
+    def setUp(self):
+        self.queue = multiprocessing.Queue()
+        self.configuration = get_configuration_space(
+            {'task': MULTICLASS_CLASSIFICATION,
+             'is_sparse': False}).get_default_configuration()
+        self.data = get_multiclass_classification_datamanager()
+        self.tmp_dir = os.path.join(os.path.dirname(__file__),
+                                    '.test_holdout_functions')
+
+    def tearDown(self):
+        try:
+            shutil.rmtree(self.tmp_dir)
+        except Exception:
+            pass
+
+    def test_eval_holdout(self):
+        eval_holdout(self.queue, self.configuration, self.data, self.tmp_dir,
+                     1, 1)
+        info = self.queue.get()
+        self.assertAlmostEqual(info[1], 0.05)
+        self.assertEqual(info[2], 1)
+
+    def test_eval_holdout_on_subset(self):
+        eval_holdout(self.queue, self.configuration, self.data,
+                     self.tmp_dir, 1, 1, subsample=43)
+        info = self.queue.get()
+        self.assertAlmostEqual(info[1], 0.1)
+        self.assertEqual(info[2], 1)
+
+    def test_eval_holdout_iterative_fit_no_timeout(self):
+        eval_iterative_holdout(self.queue, self.configuration, self.data,
+                               self.tmp_dir, 1, 1)
+        info = self.queue.get()
+        self.assertAlmostEqual(info[1], 0.05)
+        self.assertEqual(info[2], 1)
+
+    def test_eval_holdout_iterative_fit_on_subset_no_timeout(self):
+        eval_iterative_holdout(self.queue, self.configuration,
+                               self.data, self.tmp_dir, 1, 1, subsample=43)
+
+        info = self.queue.get()
+        self.assertAlmostEqual(info[1], 0.1)
+        self.assertEqual(info[2], 1)

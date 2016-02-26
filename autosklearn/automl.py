@@ -12,15 +12,14 @@ import numpy as np
 import psutil
 
 from ConfigSpace.io import pcs
-from ConfigSpace.configuration_space import Configuration
 from sklearn.base import BaseEstimator
+from smac.tae.execute_ta_run import StatusType
 
 from autosklearn.constants import *
 from autosklearn.data.data_manager_factory import get_data_manager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.evaluation import resampling, eval_holdout, \
-    eval_iterative_holdout
+from autosklearn.evaluation import resampling, eval_with_limits
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline, Backend
@@ -289,46 +288,34 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         return time_for_load_data
 
     def _do_dummy_prediction(self, datamanager, num_run):
-        if self._resampling_strategy == 'holdout':
-            eval_function = eval_holdout
-        elif self._resampling_strategy == 'holdout-iterative-fit':
-            eval_function = eval_iterative_holdout
-        else:
-            raise ValueError('Unknown resampling strategy %s' %
-                             self.resampling_strategy)
 
         self._logger.info("Starting to create dummy predictions.")
-        # TODO which limits do we want to enforce here ?
         time_limit = int(self._time_for_task / 6.)
         memory_limit = int(self._ml_memory_limit)
 
-        safe_call = pynisher.enforce_limits(cpu_time_in_s=int(time_limit),
-                                            mem_in_mb=memory_limit)(
-            eval_function)
-        try:
-            queue = multiprocessing.Queue()
-            safe_call(queue, 1, datamanager, self._tmp_dir, self._seed,
-                      num_run)
+        _info = eval_with_limits(datamanager, self._tmp_dir, 1,
+                                 self._seed, num_run,
+                                 self._resampling_strategy,
+                                 self._resampling_strategy_arguments,
+                                 memory_limit, time_limit)
+        if _info[4] == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy prediction 1/2.")
-        except Exception as e:
-            # No error handling with the queue because there will be no
-            # predictions or losses
-            self._logger.error('Error creating dummy prediction 1/2', e)
+        else:
+            self._logger.error('Error creating dummy prediction 1/2:%s ',
+                               _info[3])
 
         num_run += 1
 
-        safe_call = pynisher.enforce_limits(cpu_time_in_s=int(time_limit),
-                                            mem_in_mb=memory_limit)(
-            eval_function)
-        try:
-            queue = multiprocessing.Queue()
-            safe_call(queue, 2, datamanager, self._tmp_dir, self._seed,
-                      num_run)
+        _info = eval_with_limits(datamanager, self._tmp_dir, 2,
+                                 self._seed, num_run,
+                                 self._resampling_strategy,
+                                 self._resampling_strategy_arguments,
+                                 memory_limit, time_limit)
+        if _info[4] == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy prediction 2/2.")
-        except Exception as e:
-            # No error handling with the queue because there will be no
-            # predictions or losses
-            self._logger.error('Error creating dummy prediction 2/2', e)
+        else:
+            self._logger.error('Error creating dummy prediction 2/2 %s',
+                               _info[3])
 
         num_run += 1
         return num_run
@@ -379,8 +366,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
 
         # == Perform dummy predictions
         num_run = 1
-        if self._resampling_strategy in ['holdout', 'holdout-iterative-fit']:
-            num_run = self._do_dummy_prediction(datamanager, num_run)
+        #if self._resampling_strategy in ['holdout', 'holdout-iterative-fit']:
+        num_run = self._do_dummy_prediction(datamanager, num_run)
 
         # = Create a searchspace
         # Do this before One Hot Encoding to make sure that it creates a
@@ -469,7 +456,9 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                          config_file=configspace_path,
                                          smac_iters=self._max_iter_smac,
                                          seed=self._seed,
-                                         metadata_directory=self._metadata_directory)
+                                         metadata_directory=self._metadata_directory,
+                                         resampling_strategy=self._resampling_strategy,
+                                         resampling_strategy_args=self._resampling_strategy_arguments)
             self._proc_smac.start()
 
         psutil_procs = []

@@ -94,7 +94,8 @@ class AbstractEvaluator(object):
                  all_scoring_functions=False,
                  seed=1,
                  output_y_test=False,
-                 num_run=None):
+                 num_run=None,
+                 subsample=None,):
 
         self.starttime = time.time()
 
@@ -131,6 +132,8 @@ class AbstractEvaluator(object):
         if num_run is None:
             num_run = 0
         self.num_run = num_run
+
+        self.subsample = subsample
 
         self.backend = Backend(None, self.output_dir)
         self.model = self.model_class(self.configuration, self.seed)
@@ -187,7 +190,7 @@ class AbstractEvaluator(object):
         return err
 
     def finish_up(self, loss=None, opt_pred=None, valid_pred=None,
-                  test_pred=None):
+                  test_pred=None, file_output=True):
         """This function does everything necessary after the fitting is done:
 
         * predicting
@@ -201,8 +204,11 @@ class AbstractEvaluator(object):
         if loss is None:
             loss, opt_pred, valid_pred, test_pred = self.predict_and_loss()
 
-        loss_, additional_run_info_ = self.file_output(loss, opt_pred,
-                                                       valid_pred, test_pred)
+        if file_output:
+            loss_, additional_run_info_ = self.file_output(
+                loss, opt_pred, valid_pred, test_pred)
+        else:
+            loss_, additional_run_info_ = None, None
 
         if loss_ is not None:
             return self.duration, loss_, self.seed, additional_run_info_

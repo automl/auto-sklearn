@@ -14,9 +14,7 @@ from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator, \
 __all__ = [
     'HoldoutEvaluator',
     'eval_holdout',
-    'eval_holdout_on_subset',
     'eval_iterative_holdout',
-    'eval_iterative_holdout_on_subset'
 ]
 
 
@@ -28,14 +26,16 @@ class HoldoutEvaluator(AbstractEvaluator):
                  all_scoring_functions=False,
                  seed=1,
                  output_y_test=False,
-                 num_run=None):
+                 num_run=None,
+                 subsample=None):
         super(HoldoutEvaluator, self).__init__(
             datamanager, output_dir, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
             output_y_test=output_y_test,
-            num_run=num_run)
+            num_run=num_run,
+            subsample=subsample)
 
         classification = datamanager.info['task'] in CLASSIFICATION_TASKS
         self.X_train, self.X_optimization, self.Y_train, self.Y_optimization = \
@@ -44,27 +44,54 @@ class HoldoutEvaluator(AbstractEvaluator):
                        classification=classification)
 
     def fit_predict_and_loss(self):
-        self.model.fit(self.X_train, self.Y_train)
+        num_train_points = self.X_train.shape[0]
+
+        if self.subsample is not None:
+            n_data_subsample = min(self.subsample, num_train_points)
+            indices = np.array(([True] * n_data_subsample) + \
+                               ([False] * (num_train_points - n_data_subsample)),
+                               dtype=np.bool)
+            rs = np.random.RandomState(self.seed)
+            rs.shuffle(indices)
+            X_train, Y_train = self.X_train[indices], self.Y_train[indices]
+        else:
+            X_train, Y_train = self.X_train, self.Y_train
+
+        self.model.fit(X_train, Y_train)
         return self.predict_and_loss()
 
     def iterative_fit(self):
-        Xt, fit_params = self.model.pre_transform(self.X_train, self.Y_train)
+        num_train_points = self.X_train.shape[0]
+
+        if self.subsample is not None:
+            n_data_subsample = min(self.subsample, num_train_points)
+            indices = np.array(([True] * n_data_subsample) + \
+                               (
+                               [False] * (num_train_points - n_data_subsample)),
+                               dtype=np.bool)
+            rs = np.random.RandomState(self.seed)
+            rs.shuffle(indices)
+            X_train, Y_train = self.X_train[indices], self.Y_train[indices]
+        else:
+            X_train, Y_train = self.X_train, self.Y_train
+
+        Xt, fit_params = self.model.pre_transform(X_train, Y_train)
         if not self.model.estimator_supports_iterative_fit():
             print("Model does not support iterative_fit(), reverting to " \
                 "regular fit().")
 
-            self.model.fit_estimator(Xt, self.Y_train, **fit_params)
+            self.model.fit_estimator(Xt, Y_train, **fit_params)
             return
 
         n_iter = 1
         while not self.model.configuration_fully_fitted():
-            self.model.iterative_fit(Xt, self.Y_train, n_iter=n_iter,
+            self.model.iterative_fit(Xt, Y_train, n_iter=n_iter,
                                      **fit_params)
             loss, Y_optimization_pred, Y_valid_pred, Y_test_pred \
                 = self.predict_and_loss()
             self.file_output(loss, Y_optimization_pred,
                              Y_valid_pred, Y_test_pred)
-            n_iter += 2
+            n_iter *= 2
 
     def _predict(self):
         Y_optimization_pred = self.predict_function(self.X_optimization,
@@ -92,11 +119,12 @@ class HoldoutEvaluator(AbstractEvaluator):
 
 
 # create closure for evaluating an algorithm
-def eval_holdout(queue, configuration, data, tmp_dir, seed, num_run,
-                 iterative=False):
-    evaluator = HoldoutEvaluator(data, tmp_dir, configuration,
+def eval_holdout(queue, config, data, tmp_dir, seed, num_run,
+                 iterative=False, subsample=None):
+    evaluator = HoldoutEvaluator(data, tmp_dir, config,
                                  seed=seed,
                                  num_run=num_run,
+                                 subsample=subsample,
                                  **_get_base_dict())
 
     def signal_handler(signum, frame):
@@ -123,68 +151,7 @@ def eval_holdout(queue, configuration, data, tmp_dir, seed, num_run,
     queue.put((duration, result, seed, run_info, status))
 
 
-def eval_iterative_holdout(queue, configuration, data, tmp_dir, seed, num_run):
-    eval_holdout(queue, configuration, data, tmp_dir, seed, num_run, True)
-
-
-def eval_holdout_on_subset(queue, configuration, n_data_subsample, data,
-                           tmp_dir, seed, num_run, iterative=False):
-    # Get full optimization split - TODO refactor this!
-    evaluator_ = HoldoutEvaluator(data, tmp_dir, configuration,
-                                  seed=seed,
-                                  num_run=num_run,
-                                  **_get_base_dict())
-    X_optimization = evaluator_.X_optimization
-    Y_optimization = evaluator_.Y_optimization
-    del evaluator_
-
-    n_data = data.data['X_train'].shape[0]
-    # TODO get random states
-    # get pointers to the full data
-    Xfull = data.data['X_train']
-    Yfull = data.data['Y_train']
-    # create a random subset
-    indices = np.random.randint(0, n_data, n_data_subsample)
-    data.data['X_train'] = Xfull[indices, :]
-    data.data['Y_train'] = Yfull[indices]
-
-    evaluator = HoldoutEvaluator(data, tmp_dir, configuration,
-                                 seed=seed,
-                                 num_run=num_run,
-                                 **_get_base_dict())
-
-    def signal_handler(signum, frame):
-        print('Received signal %s. Aborting Training!', str(signum))
-        global evaluator
-        duration, result, seed, run_info = evaluator.finish_up()
-        # TODO use status type for stopped, but yielded a result
-        queue.put((duration, result, seed, run_info, StatusType.SUCCESS))
-
-    def empty_signal_handler(signum, frame):
-        pass
-
-    if iterative:
-        signal.signal(15, signal_handler)
-        evaluator.iterative_fit()
-        signal.signal(15, empty_signal_handler)
-        loss, _opt_pred, valid_pred, test_pred = evaluator.predict_and_loss()
-    else:
-        loss, _opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
-
-    # predict on the whole dataset, needed for ensemble
-    opt_pred = evaluator.predict_function(X_optimization, evaluator.model,
-                                          evaluator.task_type, Yfull)
-    # TODO remove this hack
-    evaluator.output_y_test = False
-    evaluator.Y_optimization = Y_optimization
-
-    duration, result, seed, run_info = evaluator.finish_up(
-        loss, opt_pred, valid_pred, test_pred)
-    status = StatusType.SUCCESS
-    queue.put((duration, result, seed, run_info, status))
-
-
-def eval_iterative_holdout_on_subset(queue, configuration, n_data_subsample,
-                                     data, tmp_dir, seed, num_run):
-    eval_holdout_on_subset(queue, configuration, n_data_subsample, data,
-                           tmp_dir, seed, num_run, True)
+def eval_iterative_holdout(queue, config, data, tmp_dir, seed,
+                           num_run, subsample=None):
+    eval_holdout(queue, config, data, tmp_dir, seed, num_run, True,
+                 subsample=subsample)

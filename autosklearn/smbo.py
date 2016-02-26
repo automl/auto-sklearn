@@ -1,6 +1,5 @@
 import multiprocessing
 import os
-import time
 import traceback
 
 import pynisher
@@ -16,13 +15,12 @@ from smac.runhistory.runhistory import RunHistory
 from smac.runhistory.runhistory2epm import RunHistory2EPM
 
 from autosklearn.constants import *
-from autosklearn.evaluation import eval_holdout,eval_holdout_on_subset, \
-    eval_iterative_holdout, eval_iterative_holdout_on_subset
 from autosklearn.metalearning.mismbo import \
     calc_meta_features, calc_meta_features_encoded, \
     suggest_via_metalearning
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
+from autosklearn.evaluation import eval_with_limits
 from autosklearn.util import get_logger
 from autosklearn.util import Backend
 
@@ -454,7 +452,6 @@ class AutoMLSMBO(multiprocessing.Process):
             metalearning_configurations = []
         return metalearning_configurations
         
-        
     def collect_metalearning_suggestions_with_limits(self):
         res = None
         try:
@@ -469,93 +466,6 @@ class AutoMLSMBO(multiprocessing.Process):
             return []
         else:
             return res
-
-    def eval_with_limits(self, config, seed, num_run):
-        if self.resampling_strategy == 'holdout':
-            eval_function = eval_holdout
-        elif self.resampling_strategy == 'holdout-iterative-fit':
-            eval_function = eval_iterative_holdout
-        else:
-            raise ValueError('Unknown resampling strategy %s' %
-                             self.resampling_strategy)
-
-        start_time = time.time()
-        queue = multiprocessing.Queue()
-        safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
-                                            wall_time_in_s=self.func_eval_time_limit,
-                                            cpu_time_in_s=self.func_eval_time_limit,
-                                            grace_period_in_s=30)(
-            eval_function)
-        try:
-            safe_eval(queue, config, self.datamanager, self.tmp_dir,
-                      seed, num_run)
-            info = queue.get_nowait()
-        except Exception as e0:
-            if isinstance(e0, MemoryError):
-                is_memory_error = True
-            else:
-                is_memory_error = False
-
-            try:
-                # This happens if a timeout is reached and a half-way trained
-                #  model can be used to predict something
-                info = queue.get_nowait()
-            except Exception as e1:
-                # This happens if a timeout is reached and the model does not
-                #  support iterative_fit()
-                duration = time.time() - start_time
-                if is_memory_error:
-                    status = StatusType.MEMOUT
-                elif duration >= self.func_eval_time_limit:
-                    status = StatusType.TIMEOUT
-                else:
-                    status = StatusType.CRASHED
-                info = (duration, 2.0, seed, str(e0), status)
-        return info
-
-    def eval_on_subset_with_limits(self, config, n_data_subsample, seed, num_run, time_limit=None):
-        if self.resampling_strategy == 'holdout':
-            eval_function = eval_holdout_on_subset
-        elif self.resampling_strategy == 'holdout-iterative-fit':
-            eval_function = eval_iterative_holdout_on_subset
-        else:
-            raise ValueError('Unknown resampling strategy %s' %
-                             self.resampling_strategy)
-
-        start_time = time.time()
-        queue = multiprocessing.Queue()
-        if time_limit is None:
-            time_limit = self.func_eval_time_limit
-        safe_eval = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
-                                            wall_time_in_s=time_limit,
-                                            grace_period_in_s=30)(
-            eval_function)
-        try:
-            safe_eval(queue, config, n_data_subsample, self.datamanager, self.tmp_dir,
-                      seed, num_run)
-            info = queue.get_nowait()
-        except Exception as e0:
-            if isinstance(e0, MemoryError):
-                is_memory_error = True
-            else:
-                is_memory_error = False
-
-            try:
-                # This happens if a timeout is reached and a half-way trained
-                #  model can be used to predict something
-                info = queue.get_nowait()
-            except Exception as e1:
-                # This happens if a timeout is reached and the model does not
-                #  support iterative_fit()
-                duration = time.time() - start_time
-                if is_memory_error:
-                    status = StatusType.MEMOUT
-                elif duration >= self.func_eval_time_limit:
-                    status = StatusType.TIMEOUT
-                else:
-                    status = StatusType.CRASHED
-                info = (duration, 2.0, seed, str(e0), status)
-        return info
     
     def run(self):
         # we use pynisher here to enforce limits
@@ -622,7 +532,7 @@ class AutoMLSMBO(multiprocessing.Process):
         # 2) a set of configs we selected for training on a subset
         subset_configs = default_cfgs \
                          + self.collect_additional_subset_defaults()
-        for cfg in subset_configs:
+        for config in subset_configs:
             for i, ratio in enumerate(subset_ratios):
                 self.reset_data_manager()
                 n_data_subsample = int(n_data * ratio)
@@ -634,9 +544,13 @@ class AutoMLSMBO(multiprocessing.Process):
                                  "with size %d and time limit %ds.",
                                  num_run, n_data_subsample,
                                  subset_time_limit)
-                _info = self.eval_on_subset_with_limits(cfg, n_data_subsample,
-                                                        seed, num_run,
-                                                        time_limit = subset_time_limit)
+                _info = eval_with_limits(
+                    self.datamanager, self.tmp_dir, config,
+                    seed, num_run,
+                    self.resampling_strategy,
+                    self.resampling_strategy_args,
+                    self.memory_limit,
+                    subset_time_limit, n_data_subsample)
                 (duration, result, _, additional_run_info, status) = _info
                 self.logger.info("Finished evaluating %d. configuration on SUBSET. "
                                  "Duration %f; loss %f; status %s; additional run "
@@ -692,7 +606,12 @@ class AutoMLSMBO(multiprocessing.Process):
                              num_run, config_name, self.func_eval_time_limit)
             self.logger.info(config)
             self.reset_data_manager()
-            info = self.eval_with_limits(config, seed, num_run)
+            info = eval_with_limits(self.datamanager, self.tmp_dir, config,
+                                    seed, num_run,
+                                    self.resampling_strategy,
+                                    self.resampling_strategy_args,
+                                    self.memory_limit,
+                                    self.func_eval_time_limit)
             (duration, result, _, additional_run_info, status) = info
             run_history.add(config=config, cost=result,
                             time=duration , status=status,
@@ -724,7 +643,12 @@ class AutoMLSMBO(multiprocessing.Process):
                              self.func_eval_time_limit)
             self.logger.info(next_config)
             self.reset_data_manager()
-            info = self.eval_with_limits(next_config, seed, num_run)
+            info = eval_with_limits(self.datamanager, self.tmp_dir, config,
+                                    seed, num_run,
+                                    self.resampling_strategy,
+                                    self.resampling_strategy_args,
+                                    self.memory_limit,
+                                    self.func_eval_time_limit)
             (duration, result, _, additional_run_info, status) = info
             run_history.add(config=next_config, cost=result,
                             time=duration , status=status,

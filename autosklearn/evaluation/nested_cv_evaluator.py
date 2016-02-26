@@ -28,14 +28,16 @@ class NestedCVEvaluator(AbstractEvaluator):
                  output_y_test=False,
                  inner_cv_folds=5,
                  outer_cv_folds=5,
-                 num_run=None):
+                 num_run=None,
+                 subsample=None):
         super(NestedCVEvaluator, self).__init__(
             Datamanager, output_dir, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
             output_y_test=output_y_test,
-            num_run=num_run)
+            num_run=num_run,
+            subsample=subsample)
 
         self.inner_cv_folds = inner_cv_folds
         self.outer_cv_folds = outer_cv_folds

@@ -4,15 +4,12 @@ import copy
 import os
 import shutil
 import sys
-
 import numpy as np
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 from evaluation_util import get_dataset_getters, BaseEvaluatorTest
-
-from autosklearn.evaluation import NestedCVEvaluator
-
+from autosklearn.evaluation import TestEvaluator
 
 N_TEST_RUNS = 10
 
@@ -21,7 +18,7 @@ class Dummy(object):
     pass
 
 
-class NestedCVEvaluator_Test(BaseEvaluatorTest):
+class TestEvaluator_Test(BaseEvaluatorTest):
     _multiprocess_can_split_ = True
 
     def teardown(self):
@@ -49,14 +46,9 @@ class NestedCVEvaluator_Test(BaseEvaluatorTest):
                 err = np.zeros([N_TEST_RUNS])
                 for i in range(N_TEST_RUNS):
                     D_ = copy.deepcopy(D)
-                    evaluator = NestedCVEvaluator(D_, output_directory, None)
+                    evaluator = TestEvaluator(D_, output_directory, None)
 
                     err[i] = evaluator.fit_predict_and_loss()[0]
 
                     self.assertTrue(np.isfinite(err[i]))
-                    for model_idx in range(5):
-                        model = evaluator.outer_models[model_idx]
-                        self.assertIsNotNone(model)
-                        model = evaluator.inner_models[model_idx]
-                        self.assertIsNotNone(model)
 

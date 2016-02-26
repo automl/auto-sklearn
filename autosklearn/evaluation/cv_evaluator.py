@@ -1,12 +1,18 @@
 # -*- encoding: utf-8 -*-
+import signal
+
 import numpy as np
+from smac.tae.execute_ta_run import StatusType
 
 from autosklearn.evaluation.resampling import get_CV_fold
-from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
+from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator, \
+    _get_base_dict
 
 
 __all__ = [
-    'CVEvaluator'
+    'CVEvaluator',
+    'eval_cv',
+    'eval_partial_cv',
 ]
 
 
@@ -18,21 +24,24 @@ class CVEvaluator(AbstractEvaluator):
                  seed=1,
                  output_y_test=False,
                  cv_folds=10,
-                 num_run=None):
+                 num_run=None,
+                 subsample=None,
+                 keep_models=False):
         super(CVEvaluator, self).__init__(
             Datamanager, output_dir, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
             output_y_test=output_y_test,
-            num_run=num_run)
+            num_run=num_run,
+            subsample=subsample)
 
         self.cv_folds = cv_folds
         self.X_train = self.D.data['X_train']
         self.Y_train = self.D.data['Y_train']
         self.Y_optimization = None
         self.Y_targets = [None] * cv_folds
-
+        self.models = [None] * cv_folds
         self.indices = [None] * cv_folds
 
         # Necessary for full CV. Makes full CV not write predictions if only
@@ -40,6 +49,7 @@ class CVEvaluator(AbstractEvaluator):
         #  code must also work for partial CV, where we want exactly the
         # opposite.
         self.partial = True
+        self.keep_models = keep_models
 
     def fit_predict_and_loss(self):
         Y_optimization_pred = [None] * self.cv_folds
@@ -95,14 +105,23 @@ class CVEvaluator(AbstractEvaluator):
     def _partial_fit_and_predict(self, fold):
         model = self.model_class(self.configuration, self.seed)
 
-        train_indices, test_indices = \
-            get_CV_fold(self.X_train, self.Y_train, fold=fold,
-                        folds=self.cv_folds, shuffle=True,
-                        random_state=self.seed)
+        train_indices, test_indices = self.get_train_test_split(fold)
+
+        if self.subsample is not None:
+            n_data_subsample = min(self.subsample, len(train_indices))
+            indices = np.array(([True] * n_data_subsample) + \
+                               ([False] * (len(train_indices) - n_data_subsample)),
+                               dtype=np.bool)
+            rs = np.random.RandomState(self.seed)
+            rs.shuffle(indices)
+            train_indices = train_indices[indices]
 
         self.indices[fold] = ((train_indices, test_indices))
         model.fit(self.X_train[train_indices],
                   self.Y_train[train_indices])
+
+        if self.keep_models:
+            self.models[fold] = model
 
         train_indices, test_indices = self.indices[fold]
         self.Y_targets[fold] = self.Y_train[test_indices]
@@ -111,16 +130,61 @@ class CVEvaluator(AbstractEvaluator):
                                          model, self.task_type,
                                          self.Y_train[train_indices])
 
-        X_valid = self.X_valid.copy()
-        valid_pred = self.predict_function(X_valid, model,
-                                           self.task_type,
-                                           self.Y_train[train_indices])
+        if self.X_valid is not None:
+            X_valid = self.X_valid.copy()
+            valid_pred = self.predict_function(X_valid, model,
+                                               self.task_type,
+                                               self.Y_train[train_indices])
+        else:
+            valid_pred = None
 
-        X_test = self.X_test.copy()
-        test_pred = self.predict_function(X_test, model,
-                                          self.task_type,
-                                          self.Y_train[train_indices])
+        if self.X_test is not None:
+            X_test = self.X_test.copy()
+            test_pred = self.predict_function(X_test, model,
+                                              self.task_type,
+                                              self.Y_train[train_indices])
+        else:
+            test_pred = None
 
         return opt_pred, valid_pred, test_pred
 
+    def get_train_test_split(self, fold):
+        return get_CV_fold(self.X_train, self.Y_train, fold=fold,
+                            folds=self.cv_folds, shuffle=True,
+                            random_state=self.seed)
 
+
+def eval_partial_cv(queue, config, data, tmp_dir, seed, num_run, fold,
+                    folds, subsample=None):
+    evaluator = CVEvaluator(data, tmp_dir, config,
+                            seed=seed,
+                            num_run=num_run,
+                            cv_folds=folds,
+                            subsample=subsample,
+                            **_get_base_dict())
+
+    loss, opt_pred, valid_pred, test_pred = \
+        evaluator.partial_fit_predict_and_loss(fold)
+    duration, result, seed, run_info = evaluator.finish_up(
+        loss, opt_pred, valid_pred, test_pred, False)
+
+    status = StatusType.SUCCESS
+    queue.put((duration, result, seed, run_info, status))
+
+
+# create closure for evaluating an algorithm
+def eval_cv(queue, config, data, tmp_dir, seed, num_run, folds,
+            subsample=None):
+    evaluator = CVEvaluator(data, tmp_dir, config,
+                            seed=seed,
+                            num_run=num_run,
+                            cv_folds=folds,
+                            subsample=subsample,
+                            **_get_base_dict())
+
+    loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
+    duration, result, seed, run_info = evaluator.finish_up(
+        loss, opt_pred, valid_pred, test_pred)
+
+    status = StatusType.SUCCESS
+    queue.put((duration, result, seed, run_info, status))
