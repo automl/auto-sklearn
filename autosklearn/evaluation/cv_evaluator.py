@@ -111,15 +111,17 @@ class CVEvaluator(AbstractEvaluator):
                                          model, self.task_type,
                                          self.Y_train[train_indices])
 
-        X_valid = self.X_valid.copy()
-        valid_pred = self.predict_function(X_valid, model,
-                                           self.task_type,
-                                           self.Y_train[train_indices])
+        if self.X_valid is not None:
+            X_valid = self.X_valid.copy()
+            valid_pred = self.predict_function(X_valid, model,
+                                               self.task_type,
+                                               self.Y_train[train_indices])
 
-        X_test = self.X_test.copy()
-        test_pred = self.predict_function(X_test, model,
-                                          self.task_type,
-                                          self.Y_train[train_indices])
+        if self.X_test is not None:
+            X_test = self.X_test.copy()
+            test_pred = self.predict_function(X_test, model,
+                                              self.task_type,
+                                              self.Y_train[train_indices])
 
         return opt_pred, valid_pred, test_pred
 
