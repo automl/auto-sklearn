@@ -3,7 +3,6 @@ python:
   - "2.7"
   - "3.4"
 
-
 cache:
   directories:
     - $HOME/.cache/pip
@@ -17,11 +16,16 @@ before_cache:
 # command to install dependencies
 addons:
   apt:
+    sources:
+    - ubuntu-toolchain-r-test
     packages:
     - libatlas-dev
     - liblapack-dev
     - libatlas-base-dev
     - gfortran
+    packages:
+    - gcc-4.8
+    - g++-4.8
 
 before_install:
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
@@ -30,6 +34,7 @@ before_install:
   - conda update --yes conda
 
 install:
+  - export CXX="g++-4.8" CC="gcc-4.8"
   - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy=1.9 scipy=0.16 nose scikit-learn=0.16.1 Cython pandas
   - pip install mock --no-deps
   - pip install lockfile==0.10.2 --no-deps
