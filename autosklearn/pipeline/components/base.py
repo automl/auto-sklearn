@@ -32,7 +32,7 @@ class ThirdPartyComponents(object):
         self.components = OrderedDict()
 
     def add_component(self, obj):
-        if inspect.isclass(obj) and self.base_class in obj.__bases__:
+        if inspect.isclass(obj) and self.base_class in inspect.getmro(obj):
             name = obj.__name__
             classifier = obj
         else:
