@@ -35,7 +35,7 @@ before_install:
 
 install:
   - export CXX="g++-4.8" CC="gcc-4.8"
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy=1.9 scipy=0.16 nose scikit-learn=0.16.1 Cython pandas
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy=1.9.1 scipy=0.16.1 nose scikit-learn=0.16.1 Cython pandas
   - pip install mock --no-deps
   - pip install lockfile==0.10.2 --no-deps
   - pip install pep8 python-coveralls
