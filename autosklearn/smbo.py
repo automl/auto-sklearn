@@ -129,31 +129,17 @@ class AutoMLScenario(Scenario):
 
     def __init__(self, config_space, config_file, limit, cutoff_time, memory_limit):
         self.logger = get_logger(self.__class__.__name__)
-        # we don't actually have a target algorithm here
-        # we will implement algorithm calling and the SMBO loop ourselves
-        self.ta = None
-        self.execdir = None
-        self.pcs_fn = os.path.abspath(config_file)
-        self.run_obj = 'QUALITY'
-        self.overall_obj = self.run_obj
 
         # Give SMAC at least 5 seconds
         soft_limit = max(5, cutoff_time - 35)
-        self.cutoff = soft_limit
-        self.algo_runs_timelimit = soft_limit
-        self.wallclock_limit = limit
 
-        # no instances
-        self.train_inst_fn = None
-        self.test_inst_fn = None
-        self.feature_fn = None
-        self.train_insts = []
-        self.test_inst = []
-        self.feature_dict = {}
-        self.feature_array = None
+        scenario_dict = {'cs': config_space,
+                         'run_obj': 'QUALITY',
+                         'cutoff': soft_limit,
+                         'algo_runs_timelimit': soft_limit,
+                         'wallclock_limit': limit}
 
-        # save reference to config_space
-        self.cs = config_space
+        super(AutoMLScenario, self).__init__(scenario_dict)
 
 class AutoMLSMBO(multiprocessing.Process):
 
@@ -490,7 +476,7 @@ class AutoMLSMBO(multiprocessing.Process):
         num_params = len(self.config_space.get_hyperparameters())
         # allocate a run history
         run_history = RunHistory()
-        rh2EPM = RunHistory2EPM(num_params=num_params, cutoff_time=self.scenario.cutoff,
+        rh2EPM = RunHistory2EPM(num_params=num_params, scenario=self.scenario,
                                 success_states=None, impute_censored_data=False,
                                 impute_state=None)
         num_run = self.start_num_run
@@ -627,40 +613,46 @@ class AutoMLSMBO(multiprocessing.Process):
         smac_iter = 0
         finished = False
         while not finished:
+            next_configs = []
             # TODO get_nearest_neighbor crashed once for regression; cannot
             # reproduce this right now, add a try/catch and revert to random
             # sampling in case of a crash
             try:
                 # JTS TODO: handle the case that run_history is empty
                 X_cfg, Y_cfg = rh2EPM.transform(run_history)
-                next_config = smac.choose_next(X_cfg, Y_cfg)
+                next_configs = smac.choose_next(X_cfg, Y_cfg, n_return=2)
+                next_configs.extend(next_configs)
             except Exception as e:
-                self.logger.warning(e)
+                self.logger.error(e)
+                self.logger.error("Error in getting next configurations "
+                                  "with SMAC. Using random configuration!")
                 next_config = self.config_space.sample_configuration()
+                next_configs.append(next_config)
 
-            self.logger.info("Starting to evaluate %d. configuration (from "
-                             "SMAC) with time limit %ds.", num_run,
-                             self.func_eval_time_limit)
-            self.logger.info(next_config)
-            self.reset_data_manager()
-            info = eval_with_limits(self.datamanager, self.tmp_dir, config,
-                                    seed, num_run,
-                                    self.resampling_strategy,
-                                    self.resampling_strategy_args,
-                                    self.memory_limit,
-                                    self.func_eval_time_limit)
-            (duration, result, _, additional_run_info, status) = info
-            run_history.add(config=next_config, cost=result,
-                            time=duration , status=status,
-                            instance_id=0, seed=seed)
+            for next_config in next_configs:
+                self.logger.info("Starting to evaluate %d. configuration (from "
+                                 "SMAC) with time limit %ds.", num_run,
+                                 self.func_eval_time_limit)
+                self.logger.info(next_config)
+                self.reset_data_manager()
+                info = eval_with_limits(self.datamanager, self.tmp_dir, config,
+                                        seed, num_run,
+                                        self.resampling_strategy,
+                                        self.resampling_strategy_args,
+                                        self.memory_limit,
+                                        self.func_eval_time_limit)
+                (duration, result, _, additional_run_info, status) = info
+                run_history.add(config=next_config, cost=result,
+                                time=duration , status=status,
+                                instance_id=0, seed=seed)
 
-            self.logger.info("Finished evaluating %d. configuration. "
-                             "Duration: %f; loss: %f; status %s; additional "
-                             "run info: %s ", num_run, duration, result,
-                             str(status), additional_run_info)
-            smac_iter += 1
-            num_run += 1
-            if max_iters is not None:
-                finished = (smac_iter < max_iters)
+                self.logger.info("Finished evaluating %d. configuration. "
+                                 "Duration: %f; loss: %f; status %s; additional "
+                                 "run info: %s ", num_run, duration, result,
+                                 str(status), additional_run_info)
+                smac_iter += 1
+                num_run += 1
+                if max_iters is not None:
+                    finished = (smac_iter < max_iters)
         
         
