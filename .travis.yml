@@ -1,6 +1,5 @@
 language: python
 
-
 sudo: false
 
 cache:
@@ -36,7 +35,9 @@ before_install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - conda update --yes conda
 
-install: source ci_scripts/install.sh
+install:
+  - export CXX="g++-4.8" CC="gcc-4.8"
+  - source ci_scripts/install.sh
 script: bash ci_scripts/test.sh
 after_success: source ci_scripts/success.sh
 
