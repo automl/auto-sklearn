@@ -1,9 +1,5 @@
 language: python
 
-cache:
-  directories:
-    - $HOME/.cache/pip
-  pip: true
 
 sudo: false
 
@@ -14,6 +10,7 @@ cache:
   directories:
   - $HOME/.cache/pip
   - $HOME/download
+  pip: true
 
 # command to install dependencies
 addons:
@@ -30,8 +27,8 @@ env:
   - TEST_DIR=/tmp/test_dir/
   - MODULE=autosklearn
   matrix:
-  - DISTRIB="conda" PYTHON_VERSION="2.7" NUMPY_VERSION="1.9.2" SCIPY_VERSION="0.15.1" CYTHON_VERSION="0.21"
-  - DISTRIB="conda" PYTHON_VERSION="3.4" COVERAGE="true" NUMPY_VERSION="1.9.2" SCIPY_VERSION="0.15.1" CYTHON_VERSION="0.23.4"
+  - DISTRIB="conda" PYTHON_VERSION="2.7" NUMPY_VERSION="1.9.2" SCIPY_VERSION="0.15.1"
+  - DISTRIB="conda" PYTHON_VERSION="3.4" COVERAGE="true" NUMPY_VERSION="1.9.2" SCIPY_VERSION="0.15.1"
 
 before_install:
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
