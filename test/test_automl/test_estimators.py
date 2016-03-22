@@ -22,7 +22,7 @@ class ArrayReturningDummyPredictor(object):
     def predict_proba(self, X):
         return self.arr
 
-class EstimatorTest(Base):
+class EstimatorTest(Base, unittest.TestCase):
     _multiprocess_can_split_ = True
 
     def test_fit(self):

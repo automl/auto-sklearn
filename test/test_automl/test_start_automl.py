@@ -5,6 +5,7 @@ import multiprocessing
 import os
 import sys
 import time
+import unittest
 
 import numpy as np
 import six
@@ -19,7 +20,7 @@ from autosklearn.smbo import load_data
 sys.path.append(os.path.dirname(__file__))
 from base import Base
 
-class AutoMLTest(Base):
+class AutoMLTest(Base, unittest.TestCase):
     _multiprocess_can_split_ = True
 
     def test_fit(self):

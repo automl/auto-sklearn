@@ -1,0 +1,49 @@
+[DEBUG] [2016-03-10 10:09:02,218:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[DEBUG] [2016-03-10 10:09:02,219:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[DEBUG] [2016-03-10 10:09:02,330:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:02,344:test_do_dummy_predictions] Starting to create dummy predictions.
+[DEBUG] [2016-03-10 10:09:02,351:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[DEBUG] [2016-03-10 10:09:02,355:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:02,393:test_do_dummy_predictions] Finished creating dummy prediction 1/2.
+[DEBUG] [2016-03-10 10:09:02,398:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[DEBUG] [2016-03-10 10:09:02,403:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:02,438:test_do_dummy_predictions] Finished creating dummy prediction 2/2.
+[DEBUG] [2016-03-10 10:09:02,460:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[DEBUG] [2016-03-10 10:09:02,460:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[DEBUG] [2016-03-10 10:09:02,482:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:02,492:test_do_dummy_predictions] Starting to create dummy predictions.
+[DEBUG] [2016-03-10 10:09:02,498:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[DEBUG] [2016-03-10 10:09:02,502:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:02,541:test_do_dummy_predictions] Finished creating dummy prediction 1/2.
+[DEBUG] [2016-03-10 10:09:02,546:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[DEBUG] [2016-03-10 10:09:02,549:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:02,586:test_do_dummy_predictions] Finished creating dummy prediction 2/2.
+[DEBUG] [2016-03-10 10:09:02,607:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[DEBUG] [2016-03-10 10:09:02,607:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[DEBUG] [2016-03-10 10:09:02,948:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:03,276:test_do_dummy_predictions] Starting to create dummy predictions.
+[DEBUG] [2016-03-10 10:09:03,284:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:03,284:autosklearn.evaluation.resampling] Multilabel dataset, do a random split.
+
+[DEBUG] [2016-03-10 10:09:03,304:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:03,366:test_do_dummy_predictions] Finished creating dummy prediction 1/2.
+[DEBUG] [2016-03-10 10:09:03,372:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:03,372:autosklearn.evaluation.resampling] Multilabel dataset, do a random split.
+
+[DEBUG] [2016-03-10 10:09:03,730:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:03,770:test_do_dummy_predictions] Finished creating dummy prediction 2/2.
+[DEBUG] [2016-03-10 10:09:03,811:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[DEBUG] [2016-03-10 10:09:03,812:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[DEBUG] [2016-03-10 10:09:03,897:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:03,918:test_do_dummy_predictions] Starting to create dummy predictions.
+[DEBUG] [2016-03-10 10:09:03,926:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:03,927:autosklearn.evaluation.resampling] Too few samples of one class or maybe a regression dataset, use shuffle split.
+
+[DEBUG] [2016-03-10 10:09:03,931:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:03,971:test_do_dummy_predictions] Finished creating dummy prediction 1/2.
+[DEBUG] [2016-03-10 10:09:03,979:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:03,980:autosklearn.evaluation.resampling] Too few samples of one class or maybe a regression dataset, use shuffle split.
+
+[DEBUG] [2016-03-10 10:09:03,984:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_do_dummy_prediction/.auto-sklearn'
+[INFO] [2016-03-10 10:09:04,020:test_do_dummy_predictions] Finished creating dummy prediction 2/2.
+[DEBUG] [2016-03-10 10:09:04,038:autosklearn.util.backend] _make_internals_directory: [Errno 17] File exists: '/home/feurerm/projects/automl_competition_2015/auto-sklearn/test/test_automl/../.tmp_test_fit/.auto-sklearn'
