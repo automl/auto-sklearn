@@ -162,6 +162,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             if 'classifier:sgd:n_iter' in config and \
                     config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
+            if 'classifier:adaboost:n_estimators' in config and \
+                    config['classifier:adaboost:n_estimators'] is not None:
+                config._values['classifier:adaboost:n_estimators'] = 50
+            if 'classifier:adaboost:max_depth' in config and \
+                    config['classifier:adaboost:max_depth'] is not None:
+                config._values['classifier:adaboost:max_depth'] = 1
 
             cls = SimpleClassificationPipeline(config, random_state=1)
             print(config)
@@ -176,9 +182,15 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 continue
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
-                        e.args[0] or \
-                        "removed all features" in e.args[0] or \
-                        "all features are discarded" in e.args[0]:
+                        e.args[0]:
+                    continue
+                elif "removed all features" in e.args[0]:
+                    continue
+                elif "all features are discarded" in e.args[0]:
+                    continue
+                elif "Numerical problems in QDA" in e.args[0]:
+                    continue
+                elif 'Bug in scikit-learn' in e.args[0]:
                     continue
                 else:
                     print(config)
@@ -248,6 +260,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     continue
                 elif "Numerical problems in QDA" in e.args[0]:
                     continue
+                elif 'Bug in scikit-learn' in e.args[0]:
+                    continue
                 else:
                     print(config)
                     print(traceback.format_exc())
@@ -294,6 +308,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             if 'classifier:sgd:n_iter' in config and \
                     config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
+            if 'classifier:adaboost:n_estimators' in config and \
+                    config['classifier:adaboost:n_estimators'] is not None:
+                config._values['classifier:adaboost:n_estimators'] = 50
+            if 'classifier:adaboost:max_depth' in config and \
+                    config['classifier:adaboost:max_depth'] is not None:
+                config._values['classifier:adaboost:max_depth'] = 1
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
             cls = SimpleClassificationPipeline(config, random_state=1)
@@ -307,9 +327,15 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 self.assertIsInstance(predicted_probabiliets, np.ndarray)
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
-                       e.args[0] or \
-                       "removed all features" in e.args[0] or \
-                                "all features are discarded" in e.args[0]:
+                        e.args[0]:
+                    continue
+                elif "removed all features" in e.args[0]:
+                    continue
+                elif "all features are discarded" in e.args[0]:
+                    continue
+                elif "Numerical problems in QDA" in e.args[0]:
+                    continue
+                elif 'Bug in scikit-learn' in e.args[0]:
                     continue
                 else:
                     print(config)
@@ -355,6 +381,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             if 'classifier:sgd:n_iter' in config and \
                     config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
+            if 'classifier:adaboost:n_estimators' in config and \
+                    config['classifier:adaboost:n_estimators'] is not None:
+                config._values['classifier:adaboost:n_estimators'] = 50
+            if 'classifier:adaboost:max_depth' in config and \
+                    config['classifier:adaboost:max_depth'] is not None:
+                config._values['classifier:adaboost:max_depth'] = 1
 
             print(config)
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
@@ -365,13 +397,19 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 predictions = cls.predict(X_test)
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
-                       e.args[0] or \
-                        "removed all features" in e.args[0] or \
-                                "all features are discarded" in e.args[0]:
+                        e.args[0]:
+                    continue
+                elif "removed all features" in e.args[0]:
+                    continue
+                elif "all features are discarded" in e.args[0]:
+                    continue
+                elif "Numerical problems in QDA" in e.args[0]:
+                    continue
+                elif 'Bug in scikit-learn' in e.args[0]:
                     continue
                 else:
                     print(config)
-                    traceback.print_tb(sys.exc_info()[2])
+                    print(traceback.format_exc())
                     raise e
             except RuntimeWarning as e:
                 if "invalid value encountered in sqrt" in e.args[0]:
@@ -409,6 +447,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             if 'classifier:sgd:n_iter' in config and \
                     config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
+            if 'classifier:adaboost:n_estimators' in config and \
+                    config['classifier:adaboost:n_estimators'] is not None:
+                config._values['classifier:adaboost:n_estimators'] = 50
+            if 'classifier:adaboost:max_depth' in config and \
+                            config['classifier:adaboost:max_depth'] is not None:
+                config._values['classifier:adaboost:max_depth'] = 1
 
             print(config)
             categorical = [True, True, True, False, False, True, True, True,
@@ -431,13 +475,19 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 predictions = cls.predict(X_test)
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
-                    e.args[0] or \
-                    "removed all features" in e.args[0] or \
-                                "all features are discarded" in e.args[0]:
+                        e.args[0]:
+                    continue
+                elif "removed all features" in e.args[0]:
+                    continue
+                elif "all features are discarded" in e.args[0]:
+                    continue
+                elif "Numerical problems in QDA" in e.args[0]:
+                    continue
+                elif 'Bug in scikit-learn' in e.args[0]:
                     continue
                 else:
                     print(config)
-                    traceback.print_tb(sys.exc_info()[2])
+                    print(traceback.format_exc())
                     raise e
             except RuntimeWarning as e:
                 if "invalid value encountered in sqrt" in e.args[0]:

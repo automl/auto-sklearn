@@ -110,7 +110,7 @@ class BalancingComponentTest(unittest.TestCase):
                 default._values['balancing:strategy'] = strategy
                 classifier = SimpleClassificationPipeline(default, random_state=1)
                 Xt, fit_params = classifier.pre_transform(X_train, Y_train)
-                classifier.fit_estimator(Xt, Y_train, fit_params=fit_params)
+                classifier.fit_estimator(Xt, Y_train, **fit_params)
                 predictions = classifier.predict(X_test)
                 self.assertAlmostEqual(acc,
                                        sklearn.metrics.f1_score(
@@ -156,7 +156,7 @@ class BalancingComponentTest(unittest.TestCase):
                 default._values['balancing:strategy'] = strategy
                 classifier = SimpleClassificationPipeline(default, random_state=1)
                 Xt, fit_params = classifier.pre_transform(X_train, Y_train)
-                classifier.fit_estimator(Xt, Y_train, fit_params=fit_params)
+                classifier.fit_estimator(Xt, Y_train, **fit_params)
                 predictions = classifier.predict(X_test)
                 self.assertAlmostEqual(acc,
                                        sklearn.metrics.f1_score(

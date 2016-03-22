@@ -6,7 +6,7 @@ from autosklearn.evaluation.util import calculate_score
 
 
 __all__ = [
-    'eval_test',
+    'eval_t',
     'TestEvaluator'
 ]
 
@@ -70,9 +70,10 @@ class TestEvaluator(AbstractEvaluator):
 
 
 # create closure for evaluating an algorithm
-def eval_test(queue, config, data, tmp_dir, seed, num_run, subsample,
-              with_predictions, all_scoring_functions,
-              output_y_test):
+# Has a stupid name so nosetests doesn't regard it as a test
+def eval_t(queue, config, data, tmp_dir, seed, num_run, subsample,
+           with_predictions, all_scoring_functions,
+           output_y_test):
     evaluator = TestEvaluator(data, tmp_dir, config,
                               seed=seed, with_predictions=with_predictions,
                               all_scoring_functions=all_scoring_functions)
