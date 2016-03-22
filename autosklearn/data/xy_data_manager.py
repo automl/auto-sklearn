@@ -7,6 +7,7 @@ import six
 
 from autosklearn.constants import *
 from autosklearn.data.abstract_data_manager import AbstractDataManager
+from autosklearn.metrics import get_metric
 
 
 class XYDataManager(AbstractDataManager):
@@ -18,8 +19,7 @@ class XYDataManager(AbstractDataManager):
         if isinstance(task, six.string_types):
             task = STRING_TO_TASK_TYPES[task]
 
-        if isinstance(metric, six.string_types):
-            metric = STRING_TO_METRIC[metric]
+        metric = get_metric(metric)
 
         self.info['task'] = task
         self.info['metric'] = metric

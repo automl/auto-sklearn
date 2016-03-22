@@ -7,6 +7,7 @@ import six
 
 import autosklearn.automl
 from autosklearn.constants import *
+from autosklearn.metrics import get_metric_from_loss
 
 
 class AutoSklearnClassifier(autosklearn.automl.AutoML):
@@ -183,6 +184,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
 
     def fit(self, X, y,
             metric='acc_metric',
+            loss=None,
             feat_type=None,
             dataset_name=None,
             ):
@@ -197,12 +199,14 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         y : array-like, shape = [n_samples] or [n_samples, n_outputs]
             The target classes.
 
-        metric : str, optional (default='acc_metric')
+        metric : str or callable, optional (default='acc_metric')
             The metric to optimize for. Can be one of: ['acc_metric',
             'auc_metric', 'bac_metric', 'f1_metric', 'pac_metric']. A
             description of the metrics can be found in `the paper describing
             the AutoML Challenge
             <http://www.causality.inf.ethz.ch/AutoML/automl_ijcnn15.pdf>`_.
+
+        loss : callable, optional (default=None)
 
         feat_type : list, optional (default=None)
             List of str of `len(X.shape[1])` describing the attribute type.
@@ -266,6 +270,11 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         # TODO: fix metafeatures calculation to allow this!
         if y.shape[1] == 1:
             y = y.flatten()
+
+        if loss:
+            metric = get_metric_from_loss(loss, task)
+        elif not metric:
+            raise Exception('No metric or loss function provided.')
 
         return super(AutoSklearnClassifier, self).fit(X, y, task, metric,
                                                       feat_type, dataset_name)

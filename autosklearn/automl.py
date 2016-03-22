@@ -25,6 +25,7 @@ from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline, Backend
 from autosklearn.ensemble_builder import main as ensemble_main
 from autosklearn.smbo import AutoMLSMBO
+from autosklearn.metrics import get_metric
 
 def _create_search_space(tmp_dir, data_info, backend, watcher, logger,
                          include_estimators=None, include_preprocessors=None):
@@ -218,8 +219,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         setup_logger(os.path.join(self._tmp_dir, '%s.log' % str(logger_name)))
         self._logger = get_logger(logger_name)
 
-        if isinstance(metric, str):
-            metric = STRING_TO_METRIC[metric]
+        metric = get_metric(metric, task)
 
         if feat_type is not None and len(feat_type) != X.shape[1]:
             raise ValueError('Array feat_type does not have same number of '

@@ -12,7 +12,7 @@ import numpy as np
 import scipy.sparse
 
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
-    STRING_TO_TASK_TYPES, MULTICLASS_CLASSIFICATION, STRING_TO_METRIC
+    STRING_TO_TASK_TYPES, MULTICLASS_CLASSIFICATION
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.util import convert_to_num
 

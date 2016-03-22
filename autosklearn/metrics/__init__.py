@@ -25,3 +25,17 @@
 from .classification_metrics import *
 from .util import *
 from .regression_metrics import *
+from .factory import MetricFactory, MetricFromLossFactory, KnownMetricFactory
+
+
+def get_metric(metric, task_type=None):
+    factory = MetricFactory()
+    return factory.create(metric, task_type)
+
+def get_metric_from_loss(loss, task_type=None):
+    factory = MetricFromLossFactory()
+    return factory.create(loss, task_type)
+
+def get_all_known_metrics(task_type):
+    factory = KnownMetricFactory(task_type)
+    return factory.get_all()

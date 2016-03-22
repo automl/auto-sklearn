@@ -6,9 +6,9 @@ from __future__ import print_function
 
 import numpy as np
 
-from autosklearn.constants import REGRESSION, METRIC_TO_STRING
+from autosklearn.constants import REGRESSION
 
-
+'''
 def calculate_score(metric, solution, prediction, copy=True):
     if solution.shape[0] != prediction.shape[0]:
         raise ValueError('Solution and prediction have different number of '
@@ -17,9 +17,10 @@ def calculate_score(metric, solution, prediction, copy=True):
 
     if len(solution.shape) == 1:
         solution = solution.reshape((-1, 1))
-    metric = METRIC_TO_STRING[metric]
-    return globals()[metric](solution, prediction, copy)
-
+    #metric = METRIC_TO_STRING[metric]
+    #return globals()[metric](solution, prediction, copy)
+    return metric(solution, prediction, copy)
+'''
 
 def r2_metric(solution, prediction, task=REGRESSION, copy=True):
     """

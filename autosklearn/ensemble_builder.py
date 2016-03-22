@@ -10,10 +10,11 @@ import time
 
 import numpy as np
 
-from autosklearn.constants import STRING_TO_TASK_TYPES, STRING_TO_METRIC, \
+from autosklearn.constants import STRING_TO_TASK_TYPES, \
     BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
-    MULTILABEL_CLASSIFICATION, CLASSIFICATION_TASKS, REGRESSION_TASKS, \
-    BAC_METRIC, F1_METRIC
+    MULTILABEL_CLASSIFICATION, CLASSIFICATION_TASKS, REGRESSION_TASKS
+   # BAC_METRIC, F1_METRIC
+from autosklearn.metrics.factory import STRING_TO_METRIC
 from autosklearn.evaluation.util import calculate_score
 from autosklearn.util import StopWatch, Backend
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
@@ -366,7 +367,7 @@ def main(autosklearn_tmp_dir,
             if low_precision:
                 if task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
                     ensemble_predictions_valid[ensemble_predictions_valid < 1e-4] = 0.
-                if metric in [BAC_METRIC, F1_METRIC]:
+                if metric.name in ['bac_metric', 'f1_metric']:
                     bin_array = np.zeros(ensemble_predictions_valid.shape, dtype=np.int32)
                     if (task_type != MULTICLASS_CLASSIFICATION) or (
                         ensemble_predictions_valid.shape[1] == 1):
@@ -407,7 +408,7 @@ def main(autosklearn_tmp_dir,
             if low_precision:
                 if task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
                     ensemble_predictions_test[ensemble_predictions_test < 1e-4] = 0.
-                if metric in [BAC_METRIC, F1_METRIC]:
+                if metric.name in ['bac_metric', 'f1_metric']:
                     bin_array = np.zeros(ensemble_predictions_test.shape,
                                          dtype=np.int32)
                     if (task_type != MULTICLASS_CLASSIFICATION) or (
