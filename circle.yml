@@ -43,7 +43,7 @@ test:
     - cat ~/log.txt && if grep -q "Traceback (most recent call last):" ~/log.txt; then false; else true; fi
 deployment:
   push:
-    branch: develop
+    branch: development
     commands:
       - bash ci_scripts/push_doc.sh
 general:
@@ -54,4 +54,4 @@ general:
   # Restric the build to the branch master only
   branches:
     only:
-       - develop
+       - development
