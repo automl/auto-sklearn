@@ -10,8 +10,13 @@ cache:
 
 sudo: false
 
-before_cache:
-  - rm -f $HOME/.cache/pip/log/debug.log
+cache:
+  apt: true
+  # We use three different cache directory
+  # to work around a Travis bug with multi-platform cache
+  directories:
+  - $HOME/.cache/pip
+  - $HOME/download
 
 # command to install dependencies
 addons:
@@ -19,13 +24,17 @@ addons:
     sources:
     - ubuntu-toolchain-r-test
     packages:
-    - libatlas-dev
-    - liblapack-dev
-    - libatlas-base-dev
-    - gfortran
-    packages:
     - gcc-4.8
     - g++-4.8
+
+env:
+  global:
+  # Directory where tests are run from
+  - TEST_DIR=/tmp/test_dir/
+  - MODULE=autosklearn
+  matrix:
+  - DISTRIB="conda" PYTHON_VERSION="2.7" NUMPY_VERSION="1.9.2" SCIPY_VERSION="0.15.1" CYTHON_VERSION="0.21"
+  - DISTRIB="conda" PYTHON_VERSION="3.4" COVERAGE="true" NUMPY_VERSION="1.9.2" SCIPY_VERSION="0.15.1" CYTHON_VERSION="0.23.4"
 
 before_install:
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
@@ -33,26 +42,7 @@ before_install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - conda update --yes conda
 
-install:
-  - export CXX="g++-4.8" CC="gcc-4.8"
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy=1.9.2 scipy=0.15.1 nose scikit-learn=0.16.1 Cython pandas
-  - pip install mock --no-deps
-  - pip install lockfile==0.10.2 --no-deps
-  - pip install pep8 python-coveralls
-  - pip install coverage
-  - pip install psutil
+install: source ci_scripts/install.sh
+script: bash ci_scripts/test.sh
+after_success: source ci_scripts/success.sh
 
-  # Install requirements from other repos
-  - pip install git+https://github.com/automl/HPOlibConfigSpace@refactor
-  - pip install git+https://github.com/sfalkner/pynisher@master
-  - pip install git+https://bitbucket.org/aadfreiburg/random_forest_run@master
-  - pip install git+https://bitbucket.org/aadfreiburg/smac3@development
-
-  - python setup.py install
-
-# command to run tests, e.g. python setup.py test
-script:
-  # - coverage run --source autosklearn setup.py test
-  - cd test && nosetests -v --with-coverage --cover-package=autosklearn
-
-after_success: coveralls
