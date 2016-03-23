@@ -16,96 +16,35 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-# -- General configuration ------------------------------------------------
-
-# If your documentation needs a minimal Sphinx version, state it here.
-# needs_sphinx = '1.0'
 import os
 import sys
-
-
-# Mock out stuff for readthedocs.org
-#on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-#if on_rtd:
-
-try:
-    from mock import Mock as MagicMock
-except:
-    from unittest.mock import MagicMock
-
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-        if 'BaseEstimator' in name:
-            class BaseEstimator(object):
-                pass
-
-            return BaseEstimator
-        return Mock()
-
-MOCK_MODULES = ['lockfile',
-                'joblib',
-                'psutil',
-                'pyyaml',
-                'ConfigArgParse',
-                'arff',
-                'pandas',
-                'Cython',
-                'numpy', 'numpy.random',
-                'scipy', 'scipy.sparse', 'scipy.stats', 'scipy.linalg',
-                'scipy.sparse.linalg',
-                'sklearn',
-                'sklearn.base',
-                'sklearn.cross_validation',
-                'sklearn.dummy',
-                'sklearn.externals',
-                'sklearn.metrics',
-                'sklearn.multiclass',
-                'sklearn.neighbors',
-                'sklearn.utils',
-                'psutil','pyyaml','pandas',
-                'matplotlib',
-                'autosklearn.smbo',
-                'autosklearn.pipeline.implementations.OneHotEncoder',
-                'autosklearn.pipeline.implementations.Imputation',
-                'autosklearn.pipeline.implementations.StandardScaler',
-                'autosklearn.pipeline.implementations.MultilabelClassifier',
-                'autosklearn.pipeline.classification',
-                'autosklearn.pipeline.regression',
-                'ConfigSpace',
-                'ConfigSpace.converters',
-                'ConfigSpace.conditions',
-                'ConfigSpace.configuration_space',
-                'ConfigSpace.forbidden',
-                'ConfigSpace.hyperparameters',
-                'ConfigSpace.io']
-
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-
+import sphinx_bootstrap_theme
+import autosklearn
 # Add the parent directory of this file to the PYTHONPATH
 import os
+
 current_directory = os.path.dirname(__file__)
 parent_directory = os.path.join(current_directory, '..')
 parent_directory = os.path.abspath(parent_directory)
 sys.path.append(parent_directory)
+
+# -- General configuration ------------------------------------------------
+
+# If your documentation needs a minimal Sphinx version, state it here.
+# needs_sphinx = '1.0'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary',
               'sphinx.ext.doctest', 'sphinx.ext.coverage',
-              'sphinx.ext.mathjax', 'sphinx.ext.viewcode']
-
-try:
-    import numpydoc
-    extensions.append('numpydoc')
-except Exception:
-    pass
+              'sphinx.ext.mathjax', 'sphinx.ext.viewcode',
+              'numpydoc']
 
 # Configure the extensions
 numpydoc_show_class_members = False
 autosummary_generate = True
-autodoc_default_flags = ['members', 'show-inheritance']
+autodoc_default_flags = ['members', 'inherited-members']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -145,7 +84,7 @@ release = '0.0.1dev'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = []
+exclude_patterns = ['_build', '_templates', '_static']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -175,15 +114,74 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'alabaster'
+html_theme = 'bootstrap'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {}
+html_theme_options = {
+    # Navigation bar title. (Default: ``project`` value)
+    'navbar_title': "auto-sklearn",
+
+    # Tab name for entire site. (Default: "Site")
+    # 'navbar_site_name': "Site",
+
+    # A list of tuples containting pages to link to.  The value should
+    # be in the form [(name, page), ..]
+    'navbar_links': [
+        ('Start', 'index'),
+        ('API', 'api'),
+        ('Extending', 'extending'),
+        ('Resampling', 'resampling'),
+    ],
+
+    # Render the next and previous page links in navbar. (Default: true)
+    'navbar_sidebarrel': False,
+
+    # Render the current pages TOC in the navbar. (Default: true)
+    'navbar_pagenav': False,
+
+    # Tab name for the current pages TOC. (Default: "Page")
+    'navbar_pagenav_name': "On this page",
+
+    # Global TOC depth for "site" navbar tab. (Default: 1)
+    # Switching to -1 shows all levels.
+    'globaltoc_depth': 1,
+
+    # Include hidden TOCs in Site navbar?
+    #
+    # Note: If this is "false", you cannot have mixed ``:hidden:`` and
+    # non-hidden ``toctree`` directives in the same page, or else the build
+    # will break.
+    #
+    # Values: "true" (default) or "false"
+    'globaltoc_includehidden': "false",
+
+    # HTML navbar class (Default: "navbar") to attach to <div> element.
+    # For black navbar, do "navbar navbar-inverse"
+    'navbar_class': "navbar",
+
+    # Fix navigation bar to top of page?
+    # Values: "true" (default) or "false"
+    'navbar_fixed_top': "true",
+
+    # Location of link to source.
+    # Options are "nav" (default), "footer" or anything else to exclude.
+    'source_link_position': "footer",
+
+    # Bootswatch (http://bootswatch.com/) theme.
+    #
+    # Options are nothing with "" (default) or the name of a valid theme
+    # such as "amelia" or "cosmo".
+    'bootswatch_theme': "cosmo",
+
+    # Choose Bootstrap version.
+    # Values: "3" (default) or "2" (in quotes)
+    'bootstrap_version': "3",
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
-# html_theme_path = []
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -220,7 +218,7 @@ html_static_path = ['_static']
 # html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-# html_sidebars = {}
+html_sidebars = {'**': ['localtoc.html']}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
