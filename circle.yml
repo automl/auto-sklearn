@@ -28,6 +28,9 @@ dependencies:
     # Installing required packages for `make -C doc check command` to work.
     - sudo -E apt-get -yq update
     - sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install dvipng texlive-latex-base texlive-latex-extra
+    # Installing packages to build the random forest
+    - sudo -E apt-get -yq gcc-4.8 g++-4.8
+    - export CXX="g++-4.8" CC="gcc-4.8"
     # finally install the requirements of the package to allow autodoc
     - pip install -r requ.txt
 

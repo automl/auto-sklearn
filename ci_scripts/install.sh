@@ -25,11 +25,11 @@ popd
 # Configure the conda environment and put it in the path using the
 # provided versions
 conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
-   numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION cython matplotlib
+   numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION cython
 source activate testenv
 
 # Install requirements in correct order
-cat requ.txt | xargs pip install
+cat requ.txt | xargs -n 1 -L 1 pip install
 
 if [[ "$COVERAGE" == "true" ]]; then
     pip install coverage coveralls
