@@ -19,6 +19,10 @@ addons:
     packages:
     - gcc-4.8
     - g++-4.8
+    - libatlas-dev
+    - liblapack-dev
+    - libatlas-base-dev
+    - gfortran
 
 env:
   global:

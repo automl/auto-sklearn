@@ -24,9 +24,12 @@ popd
 
 # Configure the conda environment and put it in the path using the
 # provided versions
-conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
-   numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION cython
+conda create -n testenv --yes python=$PYTHON_VERSION pip nose cython
 source activate testenv
+
+# First install exact numpy and scipy version from pip
+pip install numpy==1.9.3
+pip install scipy==0.15.1
 
 # Install requirements in correct order
 cat requ.txt | xargs -n 1 -L 1 pip install
