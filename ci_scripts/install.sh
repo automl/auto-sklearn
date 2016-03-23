@@ -13,7 +13,7 @@ ls -l
 echo
 if [[ ! -f miniconda.sh ]]
    then
-   wget http://repo.continuum.io/miniconda/Miniconda-3.6.0-Linux-x86_64.sh \
+   wget http://repo.continuum.io/miniconda/MMiniconda-latest-Linux-x86_64.sh \
        -O miniconda.sh
    fi
 chmod +x miniconda.sh && ./miniconda.sh -b
