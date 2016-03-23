@@ -16,7 +16,7 @@ if [[ ! -f miniconda.sh ]]
    wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh \
        -O miniconda.sh
    fi
-chmod +x miniconda.sh && ./miniconda.sh -b
+chmod +x miniconda.sh && ./miniconda.sh -b -p $HOME/miniconda
 cd ..
 export PATH=/home/travis/miniconda/bin:$PATH
 conda update --yes conda
