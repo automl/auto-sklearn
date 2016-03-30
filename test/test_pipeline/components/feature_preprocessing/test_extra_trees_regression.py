@@ -1,6 +1,6 @@
 import unittest
 
-from sklearn.linear_model import Ridge
+from sklearn.ensemble import ExtraTreesRegressor
 from autosklearn.pipeline.components.feature_preprocessing.\
     extra_trees_preproc_for_regression import \
     ExtraTreesPreprocessorRegression
@@ -31,11 +31,11 @@ class ExtreTreesRegressionComponentTest(PreprocessingTestCase):
             X_test_trans = preprocessor.transform(X_test)
 
             # fit a regressor on top
-            regressor = Ridge()
+            regressor = ExtraTreesRegressor(random_state=1)
             predictor = regressor.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
             accuracy = sklearn.metrics.mean_squared_error(predictions, Y_test)
-            self.assertAlmostEqual(accuracy, 28.596860630944015, places=2)
+            self.assertAlmostEqual(accuracy, 19.812321348314608, places=2)
 
     def test_default_configuration_classify_sparse(self):
         for i in range(2):
@@ -52,11 +52,11 @@ class ExtreTreesRegressionComponentTest(PreprocessingTestCase):
             X_test_trans = preprocessor.transform(X_test)
 
             # fit a regressor on top
-            regressor = Ridge()
+            regressor = ExtraTreesRegressor(random_state=1)
             predictor = regressor.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
             accuracy = sklearn.metrics.mean_squared_error(predictions, Y_test)
-            self.assertAlmostEqual(accuracy, 78.854181039533088, places=2)
+            self.assertAlmostEqual(accuracy, 62.741933389903252, places=2)
 
     def test_preprocessing_dtype(self):
         super(ExtreTreesRegressionComponentTest, self).\

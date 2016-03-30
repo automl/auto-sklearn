@@ -103,8 +103,9 @@ class AutoMLTest(Base, unittest.TestCase):
         fixture = ['predictions_valid', 'true_targets_ensemble.npy',
                    'start_time_100', 'datamanager.pkl', 'predictions_ensemble',
                    'ensembles', 'predictions_test', 'models']
-        self.assertEqual(os.listdir(os.path.join(output, '.auto-sklearn')),
-                         fixture)
+        self.assertEqual(sorted(os.listdir(os.path.join(output,
+                                                       '.auto-sklearn'))),
+                         sorted(fixture))
 
         # At least one ensemble, one validation, one test prediction and one
         # model and one ensemble
