@@ -518,7 +518,7 @@ class AutoMLSMBO(multiprocessing.Process):
         # 2) a set of configs we selected for training on a subset
         subset_configs = default_cfgs \
                          + self.collect_additional_subset_defaults()
-        for config in subset_configs:
+        for next_config in subset_configs:
             for i, ratio in enumerate(subset_ratios):
                 self.reset_data_manager()
                 n_data_subsample = int(n_data * ratio)
@@ -530,8 +530,9 @@ class AutoMLSMBO(multiprocessing.Process):
                                  "with size %d and time limit %ds.",
                                  num_run, n_data_subsample,
                                  subset_time_limit)
+                self.logger.info(next_config)
                 _info = eval_with_limits(
-                    self.datamanager, self.tmp_dir, config,
+                    self.datamanager, self.tmp_dir, next_config,
                     seed, num_run,
                     self.resampling_strategy,
                     self.resampling_strategy_args,
@@ -575,10 +576,10 @@ class AutoMLSMBO(multiprocessing.Process):
         metalearning_configurations = self.collect_metalearning_suggestions_with_limits()
 
         # == first, evaluate all metelearning and default configurations
-        for i, config in enumerate((default_cfgs +
+        for i, next_config in enumerate((default_cfgs +
                                         metalearning_configurations)):
             # Do not evaluate default configurations more than once
-            if i >= len(default_cfgs) and config in default_cfgs:
+            if i >= len(default_cfgs) and next_config in default_cfgs:
                 continue
 
             # JTS: reset the data manager before each configuration since
@@ -590,16 +591,16 @@ class AutoMLSMBO(multiprocessing.Process):
             self.logger.info("Starting to evaluate %d. configuration "
                              "(%s configuration) with time limit %ds.",
                              num_run, config_name, self.func_eval_time_limit)
-            self.logger.info(config)
+            self.logger.info(next_config)
             self.reset_data_manager()
-            info = eval_with_limits(self.datamanager, self.tmp_dir, config,
+            info = eval_with_limits(self.datamanager, self.tmp_dir, next_config,
                                     seed, num_run,
                                     self.resampling_strategy,
                                     self.resampling_strategy_args,
                                     self.memory_limit,
                                     self.func_eval_time_limit)
             (duration, result, _, additional_run_info, status) = info
-            run_history.add(config=config, cost=result,
+            run_history.add(config=next_config, cost=result,
                             time=duration , status=status,
                             instance_id=0, seed=seed)
             self.logger.info("Finished evaluating %d. configuration. "
@@ -635,7 +636,7 @@ class AutoMLSMBO(multiprocessing.Process):
                                  self.func_eval_time_limit)
                 self.logger.info(next_config)
                 self.reset_data_manager()
-                info = eval_with_limits(self.datamanager, self.tmp_dir, config,
+                info = eval_with_limits(self.datamanager, self.tmp_dir, next_config,
                                         seed, num_run,
                                         self.resampling_strategy,
                                         self.resampling_strategy_args,
