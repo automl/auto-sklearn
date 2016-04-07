@@ -19,7 +19,7 @@ class XYDataManager(AbstractDataManager):
         if isinstance(task, six.string_types):
             task = STRING_TO_TASK_TYPES[task]
 
-        metric = get_metric(metric)
+        metric = get_metric(metric, task)
 
         self.info['task'] = task
         self.info['metric'] = metric

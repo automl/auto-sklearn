@@ -8,6 +8,7 @@ import six
 
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.constants import *
+from autosklearn.metrics import get_metric
 
 
 def _load_arff(filename, target):
@@ -56,8 +57,7 @@ class ARFFDataManager(AbstractDataManager):
         if isinstance(task, six.string_types):
             task = STRING_TO_TASK_TYPES[task]
 
-        if isinstance(metric, six.string_types):
-            metric = STRING_TO_METRIC[metric]
+        metric = get_metric(metric, task)
 
         train_file = os.path.join(dataset, 'train.arff')
         test_file = os.path.join(dataset, 'test.arff')

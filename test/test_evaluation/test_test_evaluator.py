@@ -87,8 +87,8 @@ class FunctionsTest(unittest.TestCase):
         eval_test(self.queue, self.configuration, self.data, self.tmp_dir,
                   1, 1, None, True, True, True)
         info = self.queue.get()
-        self.assertIn('f1_metric: 0.0511508951407;pac_metric: 0.273385527265;'
-                      'acc_metric: 0.06;auc_metric: 0.00917546505782;'
+        self.assertIn('acc_metric: 0.06;pac_metric: 0.273385527265;'
+                      'auc_metric: 0.00917546505782;f1_metric: 0.0511508951407;'
                       'bac_metric: 0.0416666666667;duration: ', info[3])
         self.assertAlmostEqual(info[1], 0.041666666666666852)
         self.assertEqual(info[2], 1)

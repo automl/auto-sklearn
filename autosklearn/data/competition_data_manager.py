@@ -15,7 +15,7 @@ from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
     STRING_TO_TASK_TYPES, MULTICLASS_CLASSIFICATION
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.util import convert_to_num
-
+from autosklearn.metrics import get_metric
 try:
     import autosklearn.data.competition_c_functions as competition_c_functions
 
@@ -332,7 +332,7 @@ class CompetitionDataManager(AbstractDataManager):
                                       'file.')
 
         self.info['task'] = STRING_TO_TASK_TYPES[self.info['task']]
-        self.info['metric'] = STRING_TO_METRIC[self.info['metric']]
+        self.info['metric'] = get_metric(self.info['metric'], self.info['task'])
 
         return self.info
 

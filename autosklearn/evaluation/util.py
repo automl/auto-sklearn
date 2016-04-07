@@ -1,6 +1,6 @@
 from autosklearn.constants import *
 from autosklearn.metrics import sanitize_array, \
-    regression_metrics, classification_metrics, get_all_known_metrics
+    regression_metrics, classification_metrics, get_all_known_metrics, get_metric
 
 
 __all__ = [
@@ -12,6 +12,8 @@ __all__ = [
 
 def calculate_score(solution, prediction, task_type, metric, num_classes,
                     all_scoring_functions=False, logger=None):
+    metric = get_metric(metric, task_type)
+
     if task_type not in TASK_TYPES:
         raise NotImplementedError(task_type)
 

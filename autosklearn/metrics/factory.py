@@ -49,12 +49,10 @@ class KnownMetric(Metric):
     def __init__(self, name, scoring_function, task_type):
         self.name = name
         self.task_type = task_type
-        #self._scoring_function = scoring_function
+        self._scoring_function = scoring_function
 
     def calculate_score(self, solution, prediction):
-        #return self._scoring_function(solution, prediction, self.task_type)
-        scoring_function = STRING_TO_METRIC[self.name]
-        return scoring_function(solution, prediction, self.task_type)
+        return self._scoring_function(solution, prediction, self.task_type)
 
 
 class MetricBuilder():
@@ -82,58 +80,66 @@ class MetricBuilder():
             raise ValueError('Task type %s is not supported by the builder.'
                              % task_type)
 
+    def get_scoring_function(self):
+        pass
+
 class AMetricBuilder(MetricBuilder):
     metric_name = 'a_metric'
-    scoring_function = a_metric
+    scoring_function = staticmethod(a_metric)
     possible_metric_names = ['a_metric', 'a']
     possible_task_types = [REGRESSION]
 
 class R2MetricBuilder(MetricBuilder):
     metric_name = 'r2_metric'
-    scoring_function = r2_metric
+    scoring_function = staticmethod(r2_metric)
     possible_metric_names = ['r2_metric', 'r2']
     possible_task_types = [REGRESSION]
 
 class ACCMetricBuilder(MetricBuilder):
     metric_name = 'acc_metric'
-    scoring_function = acc_metric
+    scoring_function = staticmethod(acc_metric)
     possible_metric_names = ['acc_metric', 'acc']
-    possible_task_types = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION]
+    possible_task_types = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION,
+                           MULTILABEL_CLASSIFICATION]
 
 class BACMetricBuilder(MetricBuilder):
     metric_name = 'bac_metric'
-    scoring_function = bac_metric
+    scoring_function = staticmethod(bac_metric)
     possible_metric_names = ['bac_metric', 'bac']
-    possible_task_types = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION]
+    possible_task_types = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION,
+                           MULTILABEL_CLASSIFICATION]
 
 class PACMetricBuilder(MetricBuilder):
     metric_name = 'pac_metric'
-    scoring_function = pac_metric
+    scoring_function = staticmethod(pac_metric)
     possible_metric_names = ['pac_metric', 'pac']
-    possible_task_types = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION]
+    possible_task_types = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION,
+                           MULTILABEL_CLASSIFICATION]
 
 class F1MetricBuilder(MetricBuilder):
     metric_name = 'f1_metric'
-    scoring_function = f1_metric
+    scoring_function = staticmethod(f1_metric)
     possible_metric_names = ['f1_metric', 'f1']
-    possible_task_types = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION]
+    possible_task_types = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION,
+                           MULTILABEL_CLASSIFICATION]
 
 class AUCMetricBuilder(MetricBuilder):
     metric_name = 'auc_metric'
-    scoring_function = auc_metric
+    scoring_function = staticmethod(auc_metric)
     possible_metric_names = ['auc_metric', 'auc']
-    possible_task_types = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION]
+    possible_task_types = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION,
+                           MULTILABEL_CLASSIFICATION]
 
 
 class KnownMetricFactory():
 
-    all_builders = [AMetricBuilder(),
-                    R2MetricBuilder(),
-                    ACCMetricBuilder(),
-                    BACMetricBuilder(),
+    all_builders = [F1MetricBuilder(),
                     PACMetricBuilder(),
-                    F1MetricBuilder(),
-                    AUCMetricBuilder()]
+                    ACCMetricBuilder(),
+                    AUCMetricBuilder(),
+                    AMetricBuilder(),
+                    BACMetricBuilder(),
+                    R2MetricBuilder()]
 
     def __init__(self, task_type):
         self.task_type = task_type
@@ -158,7 +164,32 @@ class KnownMetricFactory():
                              % metric_name)
 
     def get_all(self):
-        return self.builders_for_task_type
+        for builder in self.builders_for_task_type:
+            yield builder.build(self.task_type)
+
+
+class PackageMetric(CustomMetric):
+
+    def __init__(self, package, scoring_function):
+        self.name = package
+        CustomMetric.__init__(self, scoring_function)
+
+import importlib
+
+class PackageMetricFactory():
+
+    def create(self, package):
+        last_dot_index = package.rfind('.')
+        module_name = package[:last_dot_index]
+        function_name = package[last_dot_index + 1:]
+
+        module = importlib.import_module(module_name)
+        scoring_function = getattr(module, function_name)
+
+        if not callable(scoring_function):
+            raise Exception('Package %s endpoint is not a function' % package)
+
+        return PackageMetric(package, scoring_function)
 
 
 class MetricFactory():
@@ -170,7 +201,9 @@ class MetricFactory():
             return CustomMetric(metric)
         elif isinstance(metric, six.string_types):
             if '.' in metric:
-                return
+                package_metric_factory = PackageMetricFactory()
+                metric = package_metric_factory.create(metric)
+                return metric
             else:
                 known_metric_factory = KnownMetricFactory(task_type)
                 metric = known_metric_factory.create(metric_name=metric)

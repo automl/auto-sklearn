@@ -45,7 +45,7 @@ class ArffDataManagerTest(unittest.TestCase):
         self.assertIsInstance(adm.data['X_test'], np.ndarray)
         self.assertIsInstance(adm.data['Y_test'], np.ndarray)
         self.assertEqual(adm.info['task'], BINARY_CLASSIFICATION)
-        self.assertEqual(adm.info['metric'], ACC_METRIC)
+        self.assertEqual(adm.info['metric'].name, 'acc_metric')
         self.assertEqual(adm.info['is_sparse'], 0)
         self.assertFalse(adm.info['has_missing'])
 

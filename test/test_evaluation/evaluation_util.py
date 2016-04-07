@@ -93,7 +93,7 @@ def get_multiclass_classification_datamanager():
 
     D = Dummy()
     D.info = {
-        'metric': BAC_METRIC,
+        'metric': 'bac_metric',
         'task': MULTICLASS_CLASSIFICATION,
         'is_sparse': False,
         'label_num': 3
@@ -142,7 +142,7 @@ def get_multilabel_classification_datamanager():
 
     D = Dummy()
     D.info = {
-        'metric': ACC_METRIC,
+        'metric': 'acc_metric',
         'task': MULTILABEL_CLASSIFICATION,
         'is_sparse': False,
         'label_num': 3
@@ -182,7 +182,7 @@ def get_binary_classification_datamanager():
 
     D = Dummy()
     D.info = {
-        'metric': AUC_METRIC,
+        'metric': 'auc_metric',
         'task': BINARY_CLASSIFICATION,
         'is_sparse': False,
         'label_num': 2
@@ -214,7 +214,7 @@ def get_regression_datamanager():
 
     D = Dummy()
     D.info = {
-        'metric': R2_METRIC,
+        'metric': 'r2_metric',
         'task': REGRESSION,
         'is_sparse': False,
         'label_num': 1
@@ -254,7 +254,7 @@ def get_500_classes_datamanager():
     assert (25 == np.sum(np.bincount(Y) == 1), np.sum(np.bincount(Y) == 1))
     D = Dummy()
     D.info = {
-        'metric': ACC_METRIC,
+        'metric': 'acc_metric',
         'task': MULTICLASS_CLASSIFICATION,
         'is_sparse': False,
         'label_num': 500

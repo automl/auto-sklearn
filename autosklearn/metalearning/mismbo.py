@@ -144,7 +144,7 @@ def suggest_via_metalearning(
     if metadata_directory is None:
         metadata_directory = os.path.join(
             current_directory, 'files',
-            '%s_%s_%s' % (METRIC_TO_STRING[metric], task,
+            '%s_%s_%s' % (metric, task,
                           'sparse' if sparse is True else 'dense'))
     logger.warning(metadata_directory)
     # Concatenate the metafeatures!
