@@ -46,8 +46,6 @@ def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
             if solution.shape[1] > 1:
                 raise ValueError('Solution array must only contain one class '
                                  'label, but contains %d' % solution.shape[1])
-            else:
-                solution = solution.reshape((-1, 1))
         else:
             raise ValueError('Solution.shape %s' % solution.shape)
 
@@ -135,8 +133,6 @@ def bac_metric(solution, prediction, task=BINARY_CLASSIFICATION):
             if solution.shape[1] > 1:
                 raise ValueError('Solution array must only contain one class '
                                  'label, but contains %d' % solution.shape[1])
-            else:
-                solution = solution.reshape((-1, 1))
         else:
             raise ValueError('Solution.shape %s' % solution.shape)
 
@@ -219,8 +215,6 @@ def pac_metric(solution, prediction, task=BINARY_CLASSIFICATION):
             if solution.shape[1] > 1:
                 raise ValueError('Solution array must only contain one class '
                                  'label, but contains %d' % solution.shape[1])
-            else:
-                solution = solution[:, 1]
         else:
             raise ValueError('Solution.shape %s' % solution.shape)
         solution = solution.copy()
@@ -295,8 +289,6 @@ def f1_metric(solution, prediction, task=BINARY_CLASSIFICATION):
             if solution.shape[1] > 1:
                 raise ValueError('Solution array must only contain one class '
                                  'label, but contains %d' % solution.shape[1])
-            else:
-                solution = solution.reshape((-1, 1))
         else:
             raise ValueError('Solution.shape %s' % solution.shape)
 
@@ -392,8 +384,6 @@ def auc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
             if solution.shape[1] > 1:
                 raise ValueError('Solution array must only contain one class '
                                  'label, but contains %d' % solution.shape[1])
-            else:
-                solution = solution[:, 1]
         else:
             raise ValueError('Solution.shape %s' % solution.shape)
         solution = solution.copy()
@@ -403,8 +393,9 @@ def auc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
                 raise ValueError('A prediction array with probability values '
                                  'for %d classes is not a binary '
                                  'classification problem' % prediction.shape[1])
-            # Prediction will be copied into a new binary array - no copy
-            prediction = prediction[:, 1].reshape((-1, 1))
+            elif prediction.shape[1] == 2:
+                # Prediction will be copied into a new binary array - no copy
+                prediction = prediction[:, 1].reshape((-1, 1))
         else:
             raise ValueError('Invalid prediction shape %s' % prediction.shape)
 

@@ -189,11 +189,11 @@ def get_binary_classification_datamanager():
     }
     D.data = {
         'X_train': X_train,
-        'Y_train': Y_train,
+        'Y_train': Y_train.reshape((-1, 1)),
         'X_valid': X_valid,
-        'Y_valid': Y_valid,
+        'Y_valid': Y_valid.reshape((-1, 1)),
         'X_test': X_test,
-        'Y_test': Y_test
+        'Y_test': Y_test.reshape((-1, 1))
     }
     D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
     return D
@@ -221,11 +221,11 @@ def get_regression_datamanager():
     }
     D.data = {
         'X_train': X_train,
-        'Y_train': Y_train,
+        'Y_train': Y_train.reshape((-1, 1)),
         'X_valid': X_valid,
-        'Y_valid': Y_valid,
+        'Y_valid': Y_valid.reshape((-1, 1)),
         'X_test': X_test,
-        'Y_test': Y_test
+        'Y_test': Y_test.reshape((-1, 1))
     }
     D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical',
                    'numerical', 'numerical', 'numerical', 'numerical',
