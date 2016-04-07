@@ -19,7 +19,7 @@ class LDA(AutoSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
-        import sklearn.lda
+        import sklearn.discriminant_analysis
         import sklearn.multiclass
 
         if self.shrinkage == "None":
@@ -36,10 +36,9 @@ class LDA(AutoSklearnClassificationAlgorithm):
         self.n_components = int(self.n_components)
         self.tol = float(self.tol)
 
-        estimator = sklearn.lda.LDA(n_components=self.n_components,
-                                    shrinkage=self.shrinkage,
-                                    tol=self.tol,
-                                    solver=solver)
+        estimator = sklearn.discriminant_analysis.LinearDiscriminantAnalysis(
+            n_components=self.n_components, shrinkage=self.shrinkage,
+            tol=self.tol, solver=solver)
 
         if len(Y.shape) == 2 and Y.shape[1] > 1:
             self.estimator = sklearn.multiclass.OneVsRestClassifier(estimator, n_jobs=1)

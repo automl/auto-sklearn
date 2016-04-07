@@ -25,7 +25,7 @@ class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
         self.n_estimators = int(self.n_estimators)
         self.learning_rate = float(self.learning_rate)
         self.max_depth = int(self.max_depth)
-        base_estimator = sklearn.tree.DecisionTreeClassifier(
+        base_estimator = sklearn.tree.DecisionTreeRegressor(
             max_depth=self.max_depth)
 
         self.estimator = sklearn.ensemble.AdaBoostRegressor(

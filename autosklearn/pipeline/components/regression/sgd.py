@@ -71,9 +71,9 @@ class SGD(AutoSklearnRegressionAlgorithm):
                                           random_state=self.random_state)
 
             self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
-            self.scaler.fit(y)
+            self.scaler.fit(y.reshape((-1, 1)))
 
-        Y_scaled = self.scaler.transform(y)
+        Y_scaled = self.scaler.transform(y.reshape((-1, 1))).ravel()
 
         self.estimator.n_iter = n_iter
         self._iterations += n_iter

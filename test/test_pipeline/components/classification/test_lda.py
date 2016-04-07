@@ -5,7 +5,7 @@ from autosklearn.pipeline.util import _test_classifier, _test_classifier_predict
 
 import numpy as np
 import sklearn.metrics
-import sklearn.lda
+import sklearn.discriminant_analysis
 
 
 class LDAComponentTest(unittest.TestCase):
@@ -53,7 +53,7 @@ class LDAComponentTest(unittest.TestCase):
                                        targets, predictions))
 
     def test_target_algorithm_multioutput_multiclass_support(self):
-        cls = sklearn.lda.LDA()
+        cls = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
         X = np.random.random((10, 10))
         y = np.random.randint(0, 1, size=(10, 10))
         self.assertRaisesRegexp(ValueError, 'bad input shape \(10, 10\)',

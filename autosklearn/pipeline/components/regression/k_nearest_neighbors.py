@@ -1,6 +1,6 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
-    Constant, UniformIntegerHyperparameter
+    UniformIntegerHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
@@ -17,7 +17,7 @@ class KNearestNeighborsRegressor(AutoSklearnRegressionAlgorithm):
         import sklearn.neighbors
 
         self.estimator = \
-            sklearn.neighbors.KNeighborsClassifier(
+            sklearn.neighbors.KNeighborsRegressor(
                 n_neighbors=self.n_neighbors,
                 weights=self.weights,
                 p=self.p)

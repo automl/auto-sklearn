@@ -34,7 +34,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=['numpy>=1.9.0',
                       'scipy>=0.14.1',
-                      'scikit-learn==0.16.1',
+                      'scikit-learn==0.17.1',
                       'lockfile',
                       'psutil',
                       'pyyaml',

@@ -67,12 +67,12 @@ class BalancingComponentTest(unittest.TestCase):
             random_state=1)
 
         for name, clf, acc_no_weighting, acc_weighting in \
-                [('adaboost', AdaboostClassifier, 0.709, 0.662),
-                 ('decision_tree', DecisionTree, 0.683, 0.726),
-                 ('extra_trees', ExtraTreesClassifier, 0.812, 0.812),
+                [('adaboost', AdaboostClassifier, 0.709, 0.658),
+                 ('decision_tree', DecisionTree, 0.683, 0.701),
+                 ('extra_trees', ExtraTreesClassifier, 0.812, 0.8),
                  ('gradient_boosting', GradientBoostingClassifier,
                     0.800, 0.760),
-                 ('random_forest', RandomForest, 0.849, 0.780),
+                 ('random_forest', RandomForest, 0.846, 0.792),
                  ('libsvm_svc', LibSVM_SVC, 0.571, 0.658),
                  ('liblinear_svc', LibLinear_SVC, 0.685, 0.699),
                  ('sgd', SGD, 0.65384615384615385, 0.38795986622073581)]:

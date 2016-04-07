@@ -41,7 +41,7 @@ class GaussianNBComponentTest(unittest.TestCase):
                 _test_classifier(classifier=GaussianNB,
                                  dataset='digits',
                                  make_multilabel=True)
-            self.assertAlmostEqual(0.70602999913720499,
+            self.assertAlmostEqual(0.71507312748717466,
                                    sklearn.metrics.average_precision_score(
                                        targets, predictions))
 

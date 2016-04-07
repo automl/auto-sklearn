@@ -40,7 +40,7 @@ class GradientBoostingComponentTest(unittest.TestCase):
                 _test_classifier(classifier=GradientBoostingClassifier,
                                  dataset='digits',
                                  make_multilabel=True)
-            self.assertAlmostEqual(0.83835860291198527,
+            self.assertAlmostEqual(0.84004577632243804,
                                    sklearn.metrics.average_precision_score(
                                        targets, predictions))
 
