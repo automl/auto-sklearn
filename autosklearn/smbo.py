@@ -134,7 +134,7 @@ class AutoMLScenario(Scenario):
         soft_limit = max(5, cutoff_time - 35)
 
         scenario_dict = {'cs': config_space,
-                         'run_obj': 'QUALITY',
+                         'run_obj': 'quality',
                          'cutoff': soft_limit,
                          'algo_runs_timelimit': soft_limit,
                          'wallclock_limit': limit}
@@ -476,10 +476,13 @@ class AutoMLSMBO(multiprocessing.Process):
         num_params = len(self.config_space.get_hyperparameters())
         # allocate a run history
         run_history = RunHistory()
-        rh2EPM = RunHistory2EPM(num_params=num_params, scenario=self.scenario,
-                                success_states=None, impute_censored_data=False,
+        rh2EPM = RunHistory2EPM(num_params=num_params,
+                                scenario=self.scenario,
+                                success_states=None,
+                                impute_censored_data=False,
                                 impute_state=None)
         num_run = self.start_num_run
+        smac = SMBO(self.scenario, seed)
 
         # Create array for default configurations!
         if self.default_cfgs is None:
@@ -603,26 +606,28 @@ class AutoMLSMBO(multiprocessing.Process):
             run_history.add(config=next_config, cost=result,
                             time=duration , status=status,
                             instance_id=0, seed=seed)
+            run_history.update_cost(next_config, result)
             self.logger.info("Finished evaluating %d. configuration. "
                              "Duration %f; loss %f; status %s; additional run "
                              "info: %s ", num_run, duration, result,
                              str(status), additional_run_info)
             num_run += 1
+            if smac.incumbent is None:
+                smac.incumbent = next_config
+            elif result < run_history.get_cost(smac.incumbent):
+                smac.incumbent = next_config
 
         # == after metalearning run SMAC loop
-        smac = SMBO(self.scenario, seed)
+        smac.runhistory = run_history
         smac_iter = 0
         finished = False
         while not finished:
             next_configs = []
-            # TODO get_nearest_neighbor crashed once for regression; cannot
-            # reproduce this right now, add a try/catch and revert to random
-            # sampling in case of a crash
             try:
                 # JTS TODO: handle the case that run_history is empty
                 X_cfg, Y_cfg = rh2EPM.transform(run_history)
-                next_configs = smac.choose_next(X_cfg, Y_cfg, n_return=2)
-                next_configs.extend(next_configs)
+                next_configs = smac.choose_next(X_cfg, Y_cfg)
+                next_configs.extend(next_configs[:2])
             except Exception as e:
                 self.logger.error(e)
                 self.logger.error("Error in getting next configurations "
@@ -646,6 +651,14 @@ class AutoMLSMBO(multiprocessing.Process):
                 run_history.add(config=next_config, cost=result,
                                 time=duration , status=status,
                                 instance_id=0, seed=seed)
+                run_history.update_cost(next_config, result)
+
+                # TODO add unittest to make sure everything works fine and
+                # this does not get outdated!
+                if smac.incumbent is None:
+                    smac.incumbent = next_config
+                elif result < run_history.get_cost(smac.incumbent):
+                    smac.incumbent = next_config
 
                 self.logger.info("Finished evaluating %d. configuration. "
                                  "Duration: %f; loss: %f; status %s; additional "
