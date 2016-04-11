@@ -8,11 +8,15 @@ import pynisher
 # JTS TODO: notify aaron to clean up these nasty nested modules
 from ConfigSpace.configuration_space import Configuration
 
-from smac.smbo.smbo import SMBO
+from smac.smbo.smbo import SMBO, get_types
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_ta_run import StatusType
 from smac.runhistory.runhistory import RunHistory
-from smac.runhistory.runhistory2epm import RunHistory2EPM
+from smac.runhistory.runhistory2epm import RunHistory2EPM4Cost, \
+    RunHistory2EPM4EIPS
+from smac.epm.uncorrelated_mo_rf_with_instances import \
+    UncorrelatedMultiObjectiveRandomForestWithInstances
+from smac.smbo.acquisition import EIPS
 
 from autosklearn.constants import *
 from autosklearn.metalearning.mismbo import \
@@ -157,7 +161,8 @@ class AutoMLSMBO(multiprocessing.Process):
                  seed=1,
                  metadata_directory=None,
                  resampling_strategy='holdout',
-                 resampling_strategy_args=None):
+                 resampling_strategy_args=None,
+                 acquisition_function='EI'):
         super(AutoMLSMBO, self).__init__()
         # data related
         self.dataset_name = dataset_name
@@ -189,6 +194,7 @@ class AutoMLSMBO(multiprocessing.Process):
         self.metadata_directory = metadata_directory
         self.smac_iters = smac_iters
         self.start_num_run = start_num_run
+        self.acquisition_function = acquisition_function
 
         self.config_space.seed(self.seed)
         logger_name = self.__class__.__name__ + \
@@ -476,13 +482,29 @@ class AutoMLSMBO(multiprocessing.Process):
         num_params = len(self.config_space.get_hyperparameters())
         # allocate a run history
         run_history = RunHistory()
-        rh2EPM = RunHistory2EPM(num_params=num_params,
-                                scenario=self.scenario,
-                                success_states=None,
-                                impute_censored_data=False,
-                                impute_state=None)
         num_run = self.start_num_run
-        smac = SMBO(self.scenario, seed)
+        if self.acquisition_function == 'EI':
+            rh2EPM = RunHistory2EPM4Cost(num_params=num_params,
+                                         scenario=self.scenario,
+                                         success_states=None,
+                                         impute_censored_data=False,
+                                         impute_state=None)
+            smac = SMBO(self.scenario, rng=seed)
+        elif self.acquisition_function == 'EIPS':
+            rh2EPM = RunHistory2EPM4EIPS(num_params=num_params,
+                                         scenario=self.scenario,
+                                         success_states=None,
+                                         impute_censored_data=False,
+                                         impute_state=None)
+            types = get_types(self.config_space)
+            model = UncorrelatedMultiObjectiveRandomForestWithInstances(
+                ['cost', 'runtime'], types)
+            acquisition_function = EIPS(model)
+            smac = SMBO(self.scenario, acquisition_function=acquisition_function,
+                        model=model, runhistory2epm=rh2EPM, rng=seed)
+        else:
+            raise ValueError('Unknown acquisition function value %s!' %
+                             self.acquisition_function)
 
         # Create array for default configurations!
         if self.default_cfgs is None:
@@ -628,7 +650,7 @@ class AutoMLSMBO(multiprocessing.Process):
                 X_cfg, Y_cfg = rh2EPM.transform(run_history)
                 next_configs = smac.choose_next(X_cfg, Y_cfg)
                 next_configs.extend(next_configs[:2])
-            except Exception as e:
+            except KeyError as e:
                 self.logger.error(e)
                 self.logger.error("Error in getting next configurations "
                                   "with SMAC. Using random configuration!")
