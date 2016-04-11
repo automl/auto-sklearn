@@ -26,21 +26,6 @@ from autosklearn.util import StopWatch, get_logger, setup_logger, \
 from autosklearn.ensemble_builder import main as ensemble_main
 from autosklearn.smbo import AutoMLSMBO
 
-def _create_search_space(tmp_dir, data_info, backend, watcher, logger,
-                         include_estimators=None, include_preprocessors=None):
-    task_name = 'CreateConfigSpace'
-    watcher.start_task(task_name)
-    configspace_path = os.path.join(tmp_dir, 'space.pcs')
-    configuration_space = pipeline.get_configuration_space(
-        data_info,
-        include_estimators=include_estimators,
-        include_preprocessors=include_preprocessors)
-    sp_string = pcs.write(configuration_space)
-    backend.write_txt_file(configspace_path, sp_string,
-                           'Configuration space')
-    watcher.stop_task(task_name)
-
-    return configuration_space, configspace_path
 
 class EnsembleProcess(multiprocessing.Process):
 
@@ -378,15 +363,11 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         #  densifier and truncatedSVD would probably lead to a MemoryError,
         # like this we can't use some of the preprocessing methods in case
         # the data became sparse)
-        self.configuration_space, configspace_path = _create_search_space(
+        self.configuration_space, configspace_path = self._create_search_space(
             self._tmp_dir,
-            datamanager.info,
             self._backend,
-            self._stopwatch,
-            self._logger,
             self._include_estimators,
             self._include_preprocessors)
-        self.configuration_space_created_hook(datamanager)
 
         # == RUN ensemble builder
         # Do this before calculating the meta-features to make sure that the
@@ -595,6 +576,26 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         _, _, _, y_ensemble = resampling.split_data(X, y)
         self._backend.save_targets_ensemble(y_ensemble)
         self._stop_task(self._stopwatch, task_name)
+
+    def _create_search_space(self, tmp_dir, backend,
+                             include_estimators=None,
+                             include_preprocessors=None):
+        task_name = 'CreateConfigSpace'
+
+        self._stopwatch.start_task(task_name)
+        configspace_path = os.path.join(tmp_dir, 'space.pcs')
+        configuration_space = pipeline.get_configuration_space(
+            self._datamanager.info,
+            include_estimators=include_estimators,
+            include_preprocessors=include_preprocessors)
+        configuration_space = self.configuration_space_created_hook(
+            self._datamanager, configuration_space)
+        sp_string = pcs.write(configuration_space)
+        backend.write_txt_file(configspace_path, sp_string,
+                               'Configuration space')
+        self._stopwatch.stop_task(task_name)
+
+        return configuration_space, configspace_path
 
     def configuration_space_created_hook(self, datamanager):
         pass
