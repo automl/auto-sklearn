@@ -109,7 +109,7 @@ def _test_classifier(classifier, dataset='iris', sparse=False,
     configuration_space = classifier.get_hyperparameter_search_space(
         dataset_properties={'sparse': sparse})
     default = configuration_space.get_default_configuration()
-    classifier = classifier(random_state=1,
+    classifier = classifier(random_state=np.random.RandomState(1),
                             **{hp_name: default[hp_name] for hp_name in
                                default if default[hp_name] is not None})
     predictor = classifier.fit(X_train, Y_train)
