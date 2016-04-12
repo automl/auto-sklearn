@@ -570,7 +570,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             include={'preprocessor': ['densifier']},
             dataset_properties={'sparse': True})
         self.assertEqual(cs.get_hyperparameter('classifier:__choice__').default,
-                         'xgradient_boosting')
+                         'qda')
 
         cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
             include={'preprocessor': ['nystroem_sampler']})
