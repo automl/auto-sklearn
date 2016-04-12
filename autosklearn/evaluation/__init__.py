@@ -34,7 +34,7 @@ def eval_with_limits(datamanager, tmp_dir, config, seed, num_run,
     elif resampling_strategy == 'partial-cv':
         eval_function = eval_partial_cv
     elif resampling_strategy == 'test':
-        eval_function = eval_test
+        eval_function = eval_t
         output_y_test = False
         with_predictions = False
     else:

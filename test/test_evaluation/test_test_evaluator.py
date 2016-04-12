@@ -14,7 +14,9 @@ sys.path.append(this_directory)
 from evaluation_util import get_dataset_getters, BaseEvaluatorTest, \
     get_multiclass_classification_datamanager
 from autosklearn.constants import *
-from autosklearn.evaluation import TestEvaluator, eval_test
+from autosklearn.evaluation import TestEvaluator
+# Otherwise nosetests thinks this is a test to run...
+from autosklearn.evaluation import eval_t
 from autosklearn.util.pipeline import get_configuration_space
 
 N_TEST_RUNS = 10
@@ -76,16 +78,16 @@ class FunctionsTest(unittest.TestCase):
             pass
 
     def test_eval_test(self):
-        eval_test(self.queue, self.configuration, self.data, self.tmp_dir,
-                  1, 1, None, True, False, True)
+        eval_t(self.queue, self.configuration, self.data, self.tmp_dir,
+               1, 1, None, True, False, True)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.041666666666666852)
         self.assertEqual(info[2], 1)
         self.assertNotIn('bac_metric', info[3])
 
     def test_eval_test_all_loss_functions(self):
-        eval_test(self.queue, self.configuration, self.data, self.tmp_dir,
-                  1, 1, None, True, True, True)
+        eval_t(self.queue, self.configuration, self.data, self.tmp_dir,
+               1, 1, None, True, True, True)
         info = self.queue.get()
         self.assertIn('acc_metric: 0.06;pac_metric: 0.273385527265;'
                       'auc_metric: 0.00917546505782;f1_metric: 0.0511508951407;'

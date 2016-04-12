@@ -20,7 +20,7 @@ replacement for a scikit-learn estimator:
 hyperparameter tuning. It leverages recent advantages in *Bayesian
 optimization*, *meta-learning* and *ensemble construction*. Learn more about
 the technology behind *auto-sklearn* by reading a paper we just published at
-the `AutoML workshop@ICML 2015 <https://sites.google.com/site/automlwsicml15/>`_
+the `NIPS 2015 <http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf>`_
 .
 
 Example

@@ -60,7 +60,7 @@ class BasePipeline(BaseEstimator):
         """
         X, fit_params = self.pre_transform(X, y, fit_params=fit_params,
                                           init_params=init_params)
-        self.fit_estimator(X, y, fit_params=fit_params)
+        self.fit_estimator(X, y, **fit_params)
         return self
 
     def pre_transform(self, X, y, fit_params=None, init_params=None):
@@ -131,14 +131,14 @@ class BasePipeline(BaseEstimator):
         X, fit_params = self.pipeline_._pre_transform(X, y, **fit_params)
         return X, fit_params
 
-    def fit_estimator(self, X, y, fit_params=None):
+    def fit_estimator(self, X, y, **fit_params):
         check_is_fitted(self, 'pipeline_')
         if fit_params is None:
             fit_params = {}
         self.pipeline_.steps[-1][-1].fit(X, y, **fit_params)
         return self
 
-    def iterative_fit(self, X, y, fit_params=None, n_iter=1):
+    def iterative_fit(self, X, y, n_iter=1, **fit_params):
         check_is_fitted(self, 'pipeline_')
         if fit_params is None:
             fit_params = {}

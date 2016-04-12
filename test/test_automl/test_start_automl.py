@@ -5,6 +5,7 @@ import multiprocessing
 import os
 import sys
 import time
+import unittest
 
 import numpy as np
 import six
@@ -19,7 +20,7 @@ from autosklearn.smbo import load_data
 sys.path.append(os.path.dirname(__file__))
 from base import Base
 
-class AutoMLTest(Base):
+class AutoMLTest(Base, unittest.TestCase):
     _multiprocess_can_split_ = True
 
     def test_fit(self):
@@ -102,8 +103,9 @@ class AutoMLTest(Base):
         fixture = ['predictions_valid', 'true_targets_ensemble.npy',
                    'start_time_100', 'datamanager.pkl', 'predictions_ensemble',
                    'ensembles', 'predictions_test', 'models']
-        self.assertEqual(os.listdir(os.path.join(output, '.auto-sklearn')),
-                         fixture)
+        self.assertEqual(sorted(os.listdir(os.path.join(output,
+                                                       '.auto-sklearn'))),
+                         sorted(fixture))
 
         # At least one ensemble, one validation, one test prediction and one
         # model and one ensemble

@@ -8,7 +8,8 @@ import sklearn.metrics
 
 class GaussianProcessComponentTest(unittest.TestCase):
     def test_default_configuration(self):
-        for i in range(10):
+        # Only twice to reduce the number of warning printed to the command line
+        for i in range(2):
             # Float32 leads to numeric instabilities
             predictions, targets = _test_regressor(GaussianProcess,
                                                    dataset='boston')

@@ -6,7 +6,7 @@ nose
 numpy>=1.9.0
 scipy>=0.14.1
 
-scikit-learn==0.16.1
+scikit-learn==0.17.1
 
 lockfile
 joblib
@@ -20,5 +20,5 @@ Cython
 
 git+https://github.com/automl/HPOlibConfigSpace@refactor
 git+https://github.com/sfalkner/pynisher@master
-git+https://bitbucket.org/aadfreiburg/smac3@development
 git+https://bitbucket.org/aadfreiburg/random_forest_run@master
+git+https://bitbucket.org/aadfreiburg/smac3@development

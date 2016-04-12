@@ -8,11 +8,15 @@ import pynisher
 # JTS TODO: notify aaron to clean up these nasty nested modules
 from ConfigSpace.configuration_space import Configuration
 
-from smac.smbo.smbo import SMBO
+from smac.smbo.smbo import SMBO, get_types
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_ta_run import StatusType
 from smac.runhistory.runhistory import RunHistory
-from smac.runhistory.runhistory2epm import RunHistory2EPM
+from smac.runhistory.runhistory2epm import RunHistory2EPM4Cost, \
+    RunHistory2EPM4EIPS
+from smac.epm.uncorrelated_mo_rf_with_instances import \
+    UncorrelatedMultiObjectiveRandomForestWithInstances
+from smac.smbo.acquisition import EIPS
 
 from autosklearn.constants import *
 from autosklearn.metalearning.mismbo import \
@@ -129,31 +133,17 @@ class AutoMLScenario(Scenario):
 
     def __init__(self, config_space, config_file, limit, cutoff_time, memory_limit):
         self.logger = get_logger(self.__class__.__name__)
-        # we don't actually have a target algorithm here
-        # we will implement algorithm calling and the SMBO loop ourselves
-        self.ta = None
-        self.execdir = None
-        self.pcs_fn = os.path.abspath(config_file)
-        self.run_obj = 'QUALITY'
-        self.overall_obj = self.run_obj
 
         # Give SMAC at least 5 seconds
         soft_limit = max(5, cutoff_time - 35)
-        self.cutoff = soft_limit
-        self.algo_runs_timelimit = soft_limit
-        self.wallclock_limit = limit
 
-        # no instances
-        self.train_inst_fn = None
-        self.test_inst_fn = None
-        self.feature_fn = None
-        self.train_insts = []
-        self.test_inst = []
-        self.feature_dict = {}
-        self.feature_array = None
+        scenario_dict = {'cs': config_space,
+                         'run_obj': 'quality',
+                         'cutoff': soft_limit,
+                         'algo_runs_timelimit': soft_limit,
+                         'wallclock_limit': limit}
 
-        # save reference to config_space
-        self.cs = config_space
+        super(AutoMLScenario, self).__init__(scenario_dict)
 
 class AutoMLSMBO(multiprocessing.Process):
 
@@ -171,7 +161,8 @@ class AutoMLSMBO(multiprocessing.Process):
                  seed=1,
                  metadata_directory=None,
                  resampling_strategy='holdout',
-                 resampling_strategy_args=None):
+                 resampling_strategy_args=None,
+                 acquisition_function='EI'):
         super(AutoMLSMBO, self).__init__()
         # data related
         self.dataset_name = dataset_name
@@ -203,6 +194,7 @@ class AutoMLSMBO(multiprocessing.Process):
         self.metadata_directory = metadata_directory
         self.smac_iters = smac_iters
         self.start_num_run = start_num_run
+        self.acquisition_function = acquisition_function
 
         self.config_space.seed(self.seed)
         logger_name = self.__class__.__name__ + \
@@ -490,10 +482,29 @@ class AutoMLSMBO(multiprocessing.Process):
         num_params = len(self.config_space.get_hyperparameters())
         # allocate a run history
         run_history = RunHistory()
-        rh2EPM = RunHistory2EPM(num_params=num_params, cutoff_time=self.scenario.cutoff,
-                                success_states=None, impute_censored_data=False,
-                                impute_state=None)
         num_run = self.start_num_run
+        if self.acquisition_function == 'EI':
+            rh2EPM = RunHistory2EPM4Cost(num_params=num_params,
+                                         scenario=self.scenario,
+                                         success_states=None,
+                                         impute_censored_data=False,
+                                         impute_state=None)
+            smac = SMBO(self.scenario, rng=seed)
+        elif self.acquisition_function == 'EIPS':
+            rh2EPM = RunHistory2EPM4EIPS(num_params=num_params,
+                                         scenario=self.scenario,
+                                         success_states=None,
+                                         impute_censored_data=False,
+                                         impute_state=None)
+            types = get_types(self.config_space)
+            model = UncorrelatedMultiObjectiveRandomForestWithInstances(
+                ['cost', 'runtime'], types)
+            acquisition_function = EIPS(model)
+            smac = SMBO(self.scenario, acquisition_function=acquisition_function,
+                        model=model, runhistory2epm=rh2EPM, rng=seed)
+        else:
+            raise ValueError('Unknown acquisition function value %s!' %
+                             self.acquisition_function)
 
         # Create array for default configurations!
         if self.default_cfgs is None:
@@ -532,7 +543,7 @@ class AutoMLSMBO(multiprocessing.Process):
         # 2) a set of configs we selected for training on a subset
         subset_configs = default_cfgs \
                          + self.collect_additional_subset_defaults()
-        for config in subset_configs:
+        for next_config in subset_configs:
             for i, ratio in enumerate(subset_ratios):
                 self.reset_data_manager()
                 n_data_subsample = int(n_data * ratio)
@@ -544,8 +555,9 @@ class AutoMLSMBO(multiprocessing.Process):
                                  "with size %d and time limit %ds.",
                                  num_run, n_data_subsample,
                                  subset_time_limit)
+                self.logger.info(next_config)
                 _info = eval_with_limits(
-                    self.datamanager, self.tmp_dir, config,
+                    self.datamanager, self.tmp_dir, next_config,
                     seed, num_run,
                     self.resampling_strategy,
                     self.resampling_strategy_args,
@@ -589,10 +601,10 @@ class AutoMLSMBO(multiprocessing.Process):
         metalearning_configurations = self.collect_metalearning_suggestions_with_limits()
 
         # == first, evaluate all metelearning and default configurations
-        for i, config in enumerate((default_cfgs +
+        for i, next_config in enumerate((default_cfgs +
                                         metalearning_configurations)):
             # Do not evaluate default configurations more than once
-            if i >= len(default_cfgs) and config in default_cfgs:
+            if i >= len(default_cfgs) and next_config in default_cfgs:
                 continue
 
             # JTS: reset the data manager before each configuration since
@@ -604,46 +616,9 @@ class AutoMLSMBO(multiprocessing.Process):
             self.logger.info("Starting to evaluate %d. configuration "
                              "(%s configuration) with time limit %ds.",
                              num_run, config_name, self.func_eval_time_limit)
-            self.logger.info(config)
-            self.reset_data_manager()
-            info = eval_with_limits(self.datamanager, self.tmp_dir, config,
-                                    seed, num_run,
-                                    self.resampling_strategy,
-                                    self.resampling_strategy_args,
-                                    self.memory_limit,
-                                    self.func_eval_time_limit)
-            (duration, result, _, additional_run_info, status) = info
-            run_history.add(config=config, cost=result,
-                            time=duration , status=status,
-                            instance_id=0, seed=seed)
-            self.logger.info("Finished evaluating %d. configuration. "
-                             "Duration %f; loss %f; status %s; additional run "
-                             "info: %s ", num_run, duration, result,
-                             str(status), additional_run_info)
-            num_run += 1
-
-        # == after metalearning run SMAC loop
-        smac = SMBO(self.scenario, seed)
-        smac_iter = 0
-        finished = False
-        while not finished:
-            # TODO get_nearest_neighbor crashed once for regression; cannot
-            # reproduce this right now, add a try/catch and revert to random
-            # sampling in case of a crash
-            try:
-                # JTS TODO: handle the case that run_history is empty
-                X_cfg, Y_cfg = rh2EPM.transform(run_history)
-                next_config = smac.choose_next(X_cfg, Y_cfg)
-            except Exception as e:
-                self.logger.warning(e)
-                next_config = self.config_space.sample_configuration()
-
-            self.logger.info("Starting to evaluate %d. configuration (from "
-                             "SMAC) with time limit %ds.", num_run,
-                             self.func_eval_time_limit)
             self.logger.info(next_config)
             self.reset_data_manager()
-            info = eval_with_limits(self.datamanager, self.tmp_dir, config,
+            info = eval_with_limits(self.datamanager, self.tmp_dir, next_config,
                                     seed, num_run,
                                     self.resampling_strategy,
                                     self.resampling_strategy_args,
@@ -653,14 +628,67 @@ class AutoMLSMBO(multiprocessing.Process):
             run_history.add(config=next_config, cost=result,
                             time=duration , status=status,
                             instance_id=0, seed=seed)
-
+            run_history.update_cost(next_config, result)
             self.logger.info("Finished evaluating %d. configuration. "
-                             "Duration: %f; loss: %f; status %s; additional "
-                             "run info: %s ", num_run, duration, result,
+                             "Duration %f; loss %f; status %s; additional run "
+                             "info: %s ", num_run, duration, result,
                              str(status), additional_run_info)
-            smac_iter += 1
             num_run += 1
-            if max_iters is not None:
-                finished = (smac_iter < max_iters)
+            if smac.incumbent is None:
+                smac.incumbent = next_config
+            elif result < run_history.get_cost(smac.incumbent):
+                smac.incumbent = next_config
+
+        # == after metalearning run SMAC loop
+        smac.runhistory = run_history
+        smac_iter = 0
+        finished = False
+        while not finished:
+            next_configs = []
+            try:
+                # JTS TODO: handle the case that run_history is empty
+                X_cfg, Y_cfg = rh2EPM.transform(run_history)
+                next_configs = smac.choose_next(X_cfg, Y_cfg)
+                next_configs.extend(next_configs[:2])
+            except KeyError as e:
+                self.logger.error(e)
+                self.logger.error("Error in getting next configurations "
+                                  "with SMAC. Using random configuration!")
+                next_config = self.config_space.sample_configuration()
+                next_configs.append(next_config)
+
+            for next_config in next_configs:
+                self.logger.info("Starting to evaluate %d. configuration (from "
+                                 "SMAC) with time limit %ds.", num_run,
+                                 self.func_eval_time_limit)
+                self.logger.info(next_config)
+                self.reset_data_manager()
+                info = eval_with_limits(self.datamanager, self.tmp_dir, next_config,
+                                        seed, num_run,
+                                        self.resampling_strategy,
+                                        self.resampling_strategy_args,
+                                        self.memory_limit,
+                                        self.func_eval_time_limit)
+                (duration, result, _, additional_run_info, status) = info
+                run_history.add(config=next_config, cost=result,
+                                time=duration , status=status,
+                                instance_id=0, seed=seed)
+                run_history.update_cost(next_config, result)
+
+                # TODO add unittest to make sure everything works fine and
+                # this does not get outdated!
+                if smac.incumbent is None:
+                    smac.incumbent = next_config
+                elif result < run_history.get_cost(smac.incumbent):
+                    smac.incumbent = next_config
+
+                self.logger.info("Finished evaluating %d. configuration. "
+                                 "Duration: %f; loss: %f; status %s; additional "
+                                 "run info: %s ", num_run, duration, result,
+                                 str(status), additional_run_info)
+                smac_iter += 1
+                num_run += 1
+                if max_iters is not None:
+                    finished = (smac_iter < max_iters)
         
         

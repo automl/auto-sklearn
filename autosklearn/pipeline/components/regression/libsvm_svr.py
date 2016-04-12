@@ -71,8 +71,8 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
         )
         self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
 
-        self.scaler.fit(Y)
-        Y_scaled = self.scaler.transform(Y)
+        self.scaler.fit(Y.reshape((-1, 1)))
+        Y_scaled = self.scaler.transform(Y.reshape((-1, 1))).ravel()
         self.estimator.fit(X, Y_scaled)
         return self
 

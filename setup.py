@@ -25,25 +25,6 @@ extensions = cythonize(
                include_dirs=[np.get_include()])
      ])
 
-requirements_file = os.path.join(os.path.dirname(__file__), 'requ.txt')
-requirements = []
-dependency_links = []
-with open(requirements_file) as fh:
-    for line in fh:
-        line = line.strip()
-        if line:
-            # Make sure the github URLs work here as well
-            split = line.split('@')
-            split = split[0]
-            split = split.split('/')
-            url = '/'.join(split[:-1])
-            requirement = split[-1]
-            requirements.append(requirement)
-            # Add the rest of the URL to the dependency links to allow
-            # setup.py test to work
-            if 'git+https' in url:
-                dependency_links.append(line.replace('git+', ''))
-
 
 setuptools.setup(
     name='AutoSklearn',
@@ -51,10 +32,22 @@ setuptools.setup(
     version='0.0.1dev',
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
-    install_requires=requirements,
-    dependency_links=dependency_links,
+    install_requires=['numpy>=1.9.0',
+                      'scipy>=0.14.1',
+                      'scikit-learn==0.17.1',
+                      'lockfile',
+                      'psutil',
+                      'pyyaml',
+                      'six',
+                      'ConfigArgParse',
+                      'liac-arff',
+                      'pandas',
+                      'Cython',
+                      'ConfigSpace',
+                      'pynisher',
+                      'smac',
+                      'pyrfr'],
     test_suite='nose.collector',
-    #cmdclass={'install': Download},
     scripts=['scripts/autosklearn'],
     include_package_data=True,
     author='Matthias Feurer',

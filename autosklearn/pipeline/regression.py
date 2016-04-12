@@ -78,14 +78,18 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     def fit_estimator(self, X, y, fit_params=None):
         self.y_max_ = np.nanmax(y)
         self.y_min_ = np.nanmin(y)
+        if fit_params is None:
+            fit_params = {}
         return super(SimpleRegressionPipeline, self).fit_estimator(
-            X, y, fit_params=fit_params)
+            X, y, **fit_params)
 
     def iterative_fit(self, X, y, fit_params=None, n_iter=1):
         self.y_max_ = np.nanmax(y)
         self.y_min_ = np.nanmin(y)
+        if fit_params is None:
+            fit_params = {}
         return super(SimpleRegressionPipeline, self).iterative_fit(
-            X, y, fit_params=fit_params, n_iter=n_iter)
+            X, y, n_iter=n_iter, **fit_params)
 
     def predict(self, X, batch_size=None):
         y = super(SimpleRegressionPipeline, self).\

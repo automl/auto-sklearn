@@ -11,19 +11,19 @@ class RandomForestComponentTest(unittest.TestCase):
         for i in range(10):
 
             predictions, targets = _test_regressor(RandomForest)
-            self.assertAlmostEqual(0.41224692924630502,
+            self.assertAlmostEqual(0.40965687834764064,
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
 
 
     def test_default_configuration_sparse(self):
         for i in range(10):
             predictions, targets = _test_regressor(RandomForest, sparse=True)
-            self.assertAlmostEqual(0.24117530425422551,
+            self.assertAlmostEqual(0.24147637508106434,
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
 
     def test_default_configuration_iterative_fit(self):
         for i in range(10):
             predictions, targets = \
                 _test_regressor_iterative_fit(RandomForest)
-            self.assertAlmostEqual(0.41224692924630502,
+            self.assertAlmostEqual(0.40965687834764064,
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))

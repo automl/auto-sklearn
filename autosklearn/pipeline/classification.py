@@ -117,38 +117,19 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
             else:
                 # Probe for the target array dimensions
-                target = self.predict_proba(X[0].copy())
+                target = self.predict_proba(X[0:2].copy())
 
-                # Binary or Multiclass
-                if len(target) == 1:
-                    y = np.zeros((X.shape[0], target.shape[1]),
-                                 dtype=np.float32)
+                y = np.zeros((X.shape[0], target.shape[1]),
+                             dtype=np.float32)
 
-                    for k in range(max(1, int(np.ceil(float(X.shape[0]) /
-                            batch_size)))):
-                        batch_from = k * batch_size
-                        batch_to = min([(k + 1) * batch_size, X.shape[0]])
-                        y[batch_from:batch_to] = \
-                            self.predict_proba(X[batch_from:batch_to],
-                                               batch_size=None).\
-                                astype(np.float32)
-
-                elif len(target) > 1:
-                    y = [np.zeros((X.shape[0], target[i].shape[1]),
-                                  dtype=np.float32)
-                         for i in range(len(target))]
-
-                    for k in range(max(1, int(np.ceil(float(X.shape[0]) /
-                            batch_size)))):
-                        batch_from = k * batch_size
-                        batch_to = min([(k + 1) * batch_size, X.shape[0]])
-                        predictions = \
-                            self.predict_proba(X[batch_from:batch_to],
-                                               batch_size=None).\
-                                astype(np.float32)
-
-                        for i in range(len(target)):
-                            y[i][batch_from:batch_to] = predictions[i]
+                for k in range(max(1, int(np.ceil(float(X.shape[0]) /
+                        batch_size)))):
+                    batch_from = k * batch_size
+                    batch_to = min([(k + 1) * batch_size, X.shape[0]])
+                    y[batch_from:batch_to] = \
+                        self.predict_proba(X[batch_from:batch_to],
+                                           batch_size=None).\
+                            astype(np.float32)
 
                 return y
 
