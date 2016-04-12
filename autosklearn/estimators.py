@@ -201,12 +201,16 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
 
         metric : str or callable, optional (default='acc_metric')
             The metric to optimize for. Can be one of: ['acc_metric',
-            'auc_metric', 'bac_metric', 'f1_metric', 'pac_metric']. A
-            description of the metrics can be found in `the paper describing
-            the AutoML Challenge
+            'auc_metric', 'bac_metric', 'f1_metric', 'pac_metric'], a package
+            name i.e. 'sklearn.metrics.accuracy_score' or a callable object
+            with a signature 'foo(true, prediction)'. A description of the
+            metrics can be found in `the paper describing the AutoML Challenge
             <http://www.causality.inf.ethz.ch/AutoML/automl_ijcnn15.pdf>`_.
 
-        loss : callable, optional (default=None)
+        loss : a package name or a callable, optional (default=None)
+            If specified, defines the objective ignoring the metric argument.
+            While the metric argument specifies a maximization objective,
+            the loss argument specifies a minimization one.
 
         feat_type : list, optional (default=None)
             List of str of `len(X.shape[1])` describing the attribute type.

@@ -1,11 +1,13 @@
 import six
-
-from ..constants import BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
-                        MULTILABEL_CLASSIFICATION, REGRESSION
+import importlib
+from autosklearn.constants import BINARY_CLASSIFICATION, \
+    MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION, REGRESSION
 from classification_metrics import acc_metric, bac_metric, pac_metric, \
     f1_metric, auc_metric
 from regression_metrics import a_metric, r2_metric
 
+
+### Metric base class and implementations ###
 
 class Metric():
 
@@ -13,6 +15,17 @@ class Metric():
 
     def calculate_score(self, solution, prediction):
         pass
+
+
+class KnownMetric(Metric):
+
+    def __init__(self, name, scoring_function, task_type):
+        self.name = name
+        self.task_type = task_type
+        self._scoring_function = scoring_function
+
+    def calculate_score(self, solution, prediction):
+        return self._scoring_function(solution, prediction, self.task_type)
 
 
 class CustomMetric(Metric):
@@ -24,6 +37,15 @@ class CustomMetric(Metric):
 
     def calculate_score(self, solution, prediction):
         return self._scoring_function(solution, prediction)
+
+
+class PackageMetric(CustomMetric):
+
+    def __init__(self, package, scoring_function):
+        self.name = package
+        CustomMetric.__init__(self, scoring_function)
+
+###
 
 
 STRING_TO_METRIC = {
@@ -42,17 +64,6 @@ STRING_TO_METRIC = {
     'a': a_metric,
     'a_metric': a_metric
 }
-
-
-class KnownMetric(Metric):
-
-    def __init__(self, name, scoring_function, task_type):
-        self.name = name
-        self.task_type = task_type
-        self._scoring_function = scoring_function
-
-    def calculate_score(self, solution, prediction):
-        return self._scoring_function(solution, prediction, self.task_type)
 
 
 class MetricBuilder():
@@ -83,17 +94,27 @@ class MetricBuilder():
     def get_scoring_function(self):
         pass
 
+'''
+    Metric builders specify:
+        - the name of the metric they build
+        - scoring function of the metric
+        - possible names, by which the metric is accessible (aliases)
+        - possible task types, for which this metric can be returned
+'''
+
 class AMetricBuilder(MetricBuilder):
     metric_name = 'a_metric'
     scoring_function = staticmethod(a_metric)
     possible_metric_names = ['a_metric', 'a']
     possible_task_types = [REGRESSION]
 
+
 class R2MetricBuilder(MetricBuilder):
     metric_name = 'r2_metric'
     scoring_function = staticmethod(r2_metric)
     possible_metric_names = ['r2_metric', 'r2']
     possible_task_types = [REGRESSION]
+
 
 class ACCMetricBuilder(MetricBuilder):
     metric_name = 'acc_metric'
@@ -102,12 +123,14 @@ class ACCMetricBuilder(MetricBuilder):
     possible_task_types = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION,
                            MULTILABEL_CLASSIFICATION]
 
+
 class BACMetricBuilder(MetricBuilder):
     metric_name = 'bac_metric'
     scoring_function = staticmethod(bac_metric)
     possible_metric_names = ['bac_metric', 'bac']
     possible_task_types = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION,
                            MULTILABEL_CLASSIFICATION]
+
 
 class PACMetricBuilder(MetricBuilder):
     metric_name = 'pac_metric'
@@ -116,12 +139,14 @@ class PACMetricBuilder(MetricBuilder):
     possible_task_types = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION,
                            MULTILABEL_CLASSIFICATION]
 
+
 class F1MetricBuilder(MetricBuilder):
     metric_name = 'f1_metric'
     scoring_function = staticmethod(f1_metric)
     possible_metric_names = ['f1_metric', 'f1']
     possible_task_types = [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION,
                            MULTILABEL_CLASSIFICATION]
+
 
 class AUCMetricBuilder(MetricBuilder):
     metric_name = 'auc_metric'
@@ -168,14 +193,6 @@ class KnownMetricFactory():
             yield builder.build(self.task_type)
 
 
-class PackageMetric(CustomMetric):
-
-    def __init__(self, package, scoring_function):
-        self.name = package
-        CustomMetric.__init__(self, scoring_function)
-
-import importlib
-
 class PackageMetricFactory():
 
     def create(self, package):
@@ -208,31 +225,3 @@ class MetricFactory():
                 known_metric_factory = KnownMetricFactory(task_type)
                 metric = known_metric_factory.create(metric_name=metric)
                 return metric
-
-
-class LossMetricDecorator(Metric):
-
-    def __init__(self, loss_metric):
-        self.loss_metric = loss_metric
-
-    @property
-    def name(self):
-        return "reverted_" + self.loss_metric.name
-
-    def calculate_score(self, solution, prediction):
-        loss_score = self.loss_metric.calculate_score(solution, prediction)
-        metric_score = 1 - loss_score
-
-        return metric_score
-
-
-class MetricFromLossFactory():
-
-    def __init__(self):
-        self.factory = MetricFactory()
-
-    def create(self, loss, task_type=None):
-        loss_metric = self.factory.create(loss, task_type)
-        metric = LossMetricDecorator(loss_metric)
-
-        return metric

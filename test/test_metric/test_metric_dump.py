@@ -3,13 +3,14 @@ import os
 
 from autosklearn.util import Backend
 from autosklearn.metrics import get_metric, get_metric_from_loss
-from autosklearn.metrics.factory import KnownMetric, CustomMetric,\
-    LossMetricDecorator, PackageMetric
+from autosklearn.metrics.factories import KnownMetric, CustomMetric, \
+    PackageMetric
+from autosklearn.metrics.loss_factory import LossMetricDecorator
 from autosklearn.constants import MULTICLASS_CLASSIFICATION
 
 
-sys.path.append(os.path.dirname(__file__))
-from ..automl.base import Base
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from ..test_automl.base import Base
 
 
 def metric_function(true, prediction):

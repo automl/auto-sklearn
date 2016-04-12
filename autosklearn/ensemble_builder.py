@@ -14,7 +14,7 @@ from autosklearn.constants import STRING_TO_TASK_TYPES, \
     BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
     MULTILABEL_CLASSIFICATION, CLASSIFICATION_TASKS, REGRESSION_TASKS
    # BAC_METRIC, F1_METRIC
-from autosklearn.metrics.factory import STRING_TO_METRIC
+from autosklearn.metrics.factories import STRING_TO_METRIC
 from autosklearn.evaluation.util import calculate_score
 from autosklearn.util import StopWatch, Backend
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
