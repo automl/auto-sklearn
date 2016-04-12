@@ -11,11 +11,11 @@ class GradientBoostingComponentTest(unittest.TestCase):
         for i in range(10):
 
             predictions, targets = _test_regressor(GradientBoosting)
-            self.assertAlmostEqual(0.35273007696557712,
+            self.assertAlmostEqual(0.37192663934006487,
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
 
     def test_default_configuration_iterative_fit(self):
         for i in range(10):
             predictions, targets = _test_regressor(GradientBoosting)
-            self.assertAlmostEqual(0.35273007696557712,
+            self.assertAlmostEqual(0.37192663934006487,
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
