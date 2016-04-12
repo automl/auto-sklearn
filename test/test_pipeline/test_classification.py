@@ -575,7 +575,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
             include={'preprocessor': ['nystroem_sampler']})
         self.assertEqual(cs.get_hyperparameter('classifier:__choice__').default,
-                         'sgd')
+                         'xgradient_boosting')
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(AssertionError, "No valid pipeline found.",

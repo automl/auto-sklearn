@@ -67,7 +67,7 @@ class BaseTest(unittest.TestCase):
                          11)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
                          16)
-        self.assertEqual(409, len(cs.forbidden_clauses))
+        self.assertEqual(466, len(cs.forbidden_clauses))
         #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #    print(clause)
 
