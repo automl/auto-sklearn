@@ -531,12 +531,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(len(cs.get_hyperparameter(
             'rescaling:__choice__').choices), 4)
         self.assertEqual(len(cs.get_hyperparameter(
-            'classifier:__choice__').choices), 16)
+            'classifier:__choice__').choices), 17)
         self.assertEqual(len(cs.get_hyperparameter(
             'preprocessor:__choice__').choices), 14)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(144, len(hyperparameters))
+        self.assertEqual(157, len(hyperparameters))
 
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
@@ -570,7 +570,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             include={'preprocessor': ['densifier']},
             dataset_properties={'sparse': True})
         self.assertEqual(cs.get_hyperparameter('classifier:__choice__').default,
-                         'qda')
+                         'xgradient_boosting')
 
         cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
             include={'preprocessor': ['nystroem_sampler']})

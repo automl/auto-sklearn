@@ -1,51 +1,95 @@
-import numpy as np
+import numpy
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant, \
     CategoricalHyperparameter
 
-from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
-from autosklearn.pipeline.implementations.MultilabelClassifier import \
-    MultilabelClassifier
+from autosklearn.pipeline.components.base import \
+    AutoSklearnClassificationAlgorithm
+
 from autosklearn.pipeline.constants import *
 
 
-class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
-    def __init__(self, loss, learning_rate, n_estimators, subsample,
-                 min_samples_split, min_samples_leaf,
-                 min_weight_fraction_leaf, max_depth, max_features,
-                 max_leaf_nodes, init=None, random_state=None, verbose=0):
-        self.loss = loss
+class XGradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
+    def __init__(self, learning_rate, n_estimators, subsample,
+                 max_depth, colsample_bylevel, colsample_bytree, gamma,
+                 min_child_weight, max_delta_step, reg_alpha, reg_lambda,
+                 base_score, scale_pos_weight, nthread=1, init=None,
+                 random_state=None, verbose=0):
+        ## Do not exist
+        # self.loss = loss
+        # self.min_samples_split = min_samples_split
+        # self.min_samples_leaf = min_samples_leaf
+        # self.min_weight_fraction_leaf = min_weight_fraction_leaf
+        # self.max_leaf_nodes = max_leaf_nodes
+
         self.learning_rate = learning_rate
         self.n_estimators = n_estimators
         self.subsample = subsample
-        self.min_samples_split = min_samples_split
-        self.min_samples_leaf = min_samples_leaf
-        self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.max_depth = max_depth
-        self.max_features = max_features
-        self.max_leaf_nodes = max_leaf_nodes
+
+        ## called differently
+        # max_features: Subsample ratio of columns for each split, in each level.
+        self.colsample_bylevel = colsample_bylevel
+
+        # min_weight_fraction_leaf: Minimum sum of instance weight(hessian)
+        # needed in a child.
+        self.min_child_weight = min_child_weight
+
+        # Whether to print messages while running boosting.
+        if verbose:
+            self.silent = False
+        else:
+            self.silent = True
+
+        # Random number seed.
+        if random_state is None:
+            self.seed = numpy.random.randint(1, 10000, size=1)[0]
+        else:
+            self.seed = random_state.randint(1, 10000, size=1)[0]
+
+        ## new paramaters
+        # Subsample ratio of columns when constructing each tree.
+        self.colsample_bytree = colsample_bytree
+
+        # Minimum loss reduction required to make a further partition on a leaf
+        # node of the tree.
+        self.gamma = gamma
+
+        # Maximum delta step we allow each tree's weight estimation to be.
+        self.max_delta_step = max_delta_step
+
+        # L2 regularization term on weights
+        self.reg_alpha = reg_alpha
+
+        # L1 regularization term on weights
+        self.reg_lambda = reg_lambda
+
+        # Balancing of positive and negative weights.
+        self.scale_pos_weight = scale_pos_weight
+
+        # The initial prediction score of all instances, global bias.
+        self.base_score = base_score
+
+        # Number of parallel threads used to run xgboost.
+        self.nthread = nthread
+
+        ## Were there before, didn't touch
         self.init = init
-        self.random_state = random_state
-        self.verbose = verbose
         self.estimator = None
 
-    def fit(self, X, y, sample_weight=None, refit=False):
+    def fit(self, X, y, refit=False):
         if self.estimator is None or refit:
-            self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight,
-                               refit=refit)
+            self.iterative_fit(X, y, n_iter=1, refit=refit)
 
         while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight)
+            self.iterative_fit(X, y, n_iter=1)
         return self
 
-    def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
-        import sklearn.ensemble
+    def iterative_fit(self, X, y, n_iter=1, refit=False):
+        import xgboost as xgb
 
-        # Special fix for gradient boosting!
-        if isinstance(X, np.ndarray):
-            X = np.ascontiguousarray(X, dtype=X.dtype)
         if refit:
             self.estimator = None
 
@@ -53,56 +97,55 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             self.learning_rate = float(self.learning_rate)
             self.n_estimators = int(self.n_estimators)
             self.subsample = float(self.subsample)
-            self.min_samples_split = int(self.min_samples_split)
-            self.min_samples_leaf = int(self.min_samples_leaf)
-            self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
-            if self.max_depth == "None":
-                self.max_depth = None
-            else:
-                self.max_depth = int(self.max_depth)
-            num_features = X.shape[1]
-            max_features = int(
-                float(self.max_features) * (np.log(num_features) + 1))
-            # Use at most half of the features
-            max_features = max(1, min(int(X.shape[1] / 2), max_features))
-            if self.max_leaf_nodes == "None":
-                self.max_leaf_nodes = None
-            else:
-                self.max_leaf_nodes = int(self.max_leaf_nodes)
-            self.verbose = int(self.verbose)
+            self.max_depth = int(self.max_depth)
 
-            self.estimator = sklearn.ensemble.GradientBoostingClassifier(
-                loss=self.loss,
-                learning_rate=self.learning_rate,
-                n_estimators=0,
-                subsample=self.subsample,
-                min_samples_split=self.min_samples_split,
-                min_samples_leaf=self.min_samples_leaf,
-                min_weight_fraction_leaf=self.min_weight_fraction_leaf,
-                max_depth=self.max_depth,
-                max_features=max_features,
-                max_leaf_nodes=self.max_leaf_nodes,
-                init=self.init,
-                random_state=self.random_state,
-                verbose=self.verbose,
-                warm_start=True,
-            )
+            # (TODO) Gb used at most half of the features, here we use all
+            self.colsample_bylevel = float(self.colsample_bylevel)
 
-        # Fallback for multilabel classification
-        if len(y.shape) > 1 and y.shape[1] > 1:
-            import sklearn.multiclass
-            self.estimator.n_estimators = self.n_estimators
-            self.estimator = MultilabelClassifier(self.estimator, n_jobs=1)
-            self.estimator.fit(X, y)
+            self.colsample_bytree = float(self.colsample_bytree)
+            self.gamma = float(self.gamma)
+            self.min_child_weight = int(self.min_child_weight)
+            self.max_delta_step = int(self.max_delta_step)
+            self.reg_alpha = float(self.reg_alpha)
+            self.reg_lambda = float(self.reg_lambda)
+            self.nthread = int(self.nthread)
+            self.base_score = float(self.base_score)
+            self.scale_pos_weight = float(self.scale_pos_weight)
+
+            # We don't support multilabel, so we only need 1 objective function
+            if len(numpy.unique(y) == 2):
+                # We probably have binary classification
+                self.objective = 'binary:logistic'
+            else:
+                self.objective = 'multi:softprob'
+
+            self.estimator = xgb.XGBClassifier(
+                    max_depth=self.max_depth,
+                    learning_rate=self.learning_rate,
+                    n_estimators=self.n_estimators,
+                    silent=self.silent,
+                    objective=self.objective,
+                    nthread=self.nthread,
+                    gamma=self.gamma,
+                    scale_pos_weight=self.scale_pos_weight,
+                    min_child_weight=self.min_child_weight,
+                    max_delta_step=self.max_delta_step,
+                    subsample=self.subsample,
+                    colsample_bytree=self.colsample_bytree,
+                    colsample_bylevel=self.colsample_bylevel,
+                    reg_alpha=self.reg_alpha,
+                    reg_lambda=self.reg_lambda,
+                    base_score=self.base_score,
+                    seed=self.seed
+                    )
+
+        tmp = self.estimator  # TODO copy ?
+        tmp.n_estimators += n_iter
+        tmp.fit(X, y)
+        self.estimator = tmp
+
+        if self.estimator.n_estimators >= self.n_estimators:
             self.fully_fit_ = True
-        else:
-            tmp = self.estimator  # TODO copy ?
-            tmp.n_estimators += n_iter
-            tmp.fit(X, y, sample_weight=sample_weight)
-            self.estimator = tmp
-
-            if self.estimator.n_estimators >= self.n_estimators:
-                self.fully_fit_ = True
 
         return self
 
@@ -126,12 +169,12 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'GB',
-                'name': 'Gradient Boosting Classifier',
+        return {'shortname': 'XGB',
+                'name': 'XGradient Boosting Classifier',
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': True,
+                'handles_multilabel': False,
                 'is_deterministic': True,
                 'input': (DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,)}
@@ -139,24 +182,36 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
-        loss = cs.add_hyperparameter(Constant("loss", "deviance"))
-        learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
-            name="learning_rate", lower=0.0001, upper=1, default=0.1, log=True))
-        n_estimators = cs.add_hyperparameter(Constant("n_estimators", 100))
+
+        # Parameterized Hyperparameters
         max_depth = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="max_depth", lower=1, upper=10, default=3))
-        min_samples_split = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="min_samples_split", lower=2, upper=20, default=2, log=False))
-        min_samples_leaf = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="min_samples_leaf", lower=1, upper=20, default=1, log=False))
-        min_weight_fraction_leaf = cs.add_hyperparameter(
-            UnParametrizedHyperparameter("min_weight_fraction_leaf", 0.))
+                name="max_depth", lower=1, upper=10, default=3))
+        learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
+                name="learning_rate", lower=0.0001, upper=1, default=0.1,
+                log=True))
+        n_estimators = cs.add_hyperparameter(Constant("n_estimators", 100))
         subsample = cs.add_hyperparameter(UniformFloatHyperparameter(
-                name="subsample", lower=0.01, upper=1.0, default=1.0, log=False))
-        max_features = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default=1))
-        max_leaf_nodes = cs.add_hyperparameter(UnParametrizedHyperparameter(
-            name="max_leaf_nodes", value="None"))
+                name="subsample", lower=0.01, upper=1.0, default=1.0,
+                log=False))
+        min_child_weight = cs.add_hyperparameter(UniformIntegerHyperparameter(
+                name="min_child_weight", lower=1, upper=20, default=1,
+                log=False))
 
+        # Unparameterized Hyperparameters
+        max_delta_step = cs.add_hyperparameter(UnParametrizedHyperparameter(
+                name="max_delta_step", value=0))
+        colsample_bytree = cs.add_hyperparameter(UnParametrizedHyperparameter(
+                name="colsample_bytree", value=1))
+        gamma = cs.add_hyperparameter(UnParametrizedHyperparameter(
+                name="gamma", value=0))
+        colsample_bylevel = cs.add_hyperparameter(UnParametrizedHyperparameter(
+                name="colsample_bylevel", value=1))
+        reg_alpha = cs.add_hyperparameter(UnParametrizedHyperparameter(
+                name="reg_alpha", value=0))
+        reg_lambda = cs.add_hyperparameter(UnParametrizedHyperparameter(
+                name="reg_lambda", value=1))
+        base_score = cs.add_hyperparameter(UnParametrizedHyperparameter(
+                name="base_score", value=0.5))
+        scale_pos_weight = cs.add_hyperparameter(UnParametrizedHyperparameter(
+                name="scale_pos_weight", value=1))
         return cs
-
