@@ -17,6 +17,7 @@ ConfigArgParse
 liac-arff
 pandas
 Cython
+xgboost
 
 git+https://github.com/automl/HPOlibConfigSpace@refactor
 git+https://github.com/sfalkner/pynisher@master
