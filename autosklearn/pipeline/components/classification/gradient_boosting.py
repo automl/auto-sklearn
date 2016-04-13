@@ -101,9 +101,6 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             tmp.fit(X, y, sample_weight=sample_weight)
             self.estimator = tmp
 
-            if self.estimator.n_estimators >= self.n_estimators:
-                self.fully_fit_ = True
-
         return self
 
     def configuration_fully_fitted(self):
