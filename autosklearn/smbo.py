@@ -643,10 +643,15 @@ class AutoMLSMBO(multiprocessing.Process):
         if self.metadata_directory is None:
             metalearning_directory = os.path.dirname(
                 autosklearn.metalearning.__file__)
+            # There is no multilabel data in OpenML
+            if self.task == MULTILABEL_CLASSIFICATION:
+                meta_task = BINARY_CLASSIFICATION
+            else:
+                meta_task = self.task
             metadata_directory = os.path.join(
                 metalearning_directory, 'files',
                 '%s_%s_%s' % (METRIC_TO_STRING[self.metric],
-                              TASK_TYPES_TO_STRING[self.task],
+                              TASK_TYPES_TO_STRING[meta_task],
                               'sparse' if self.datamanager.info['is_sparse']
                               else 'dense'))
         self.logger.info('Metadata directory: %s', metadata_directory)
