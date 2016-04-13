@@ -187,8 +187,7 @@ class XGradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         max_depth = cs.add_hyperparameter(UniformIntegerHyperparameter(
                 name="max_depth", lower=1, upper=10, default=3))
         learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
-                name="learning_rate", lower=0.001, upper=1, default=0.1,
-                log=False))
+                name="learning_rate", lower=0.01, upper=1, default=0.1, log=True))
         n_estimators = cs.add_hyperparameter(Constant("n_estimators", 100))
         subsample = cs.add_hyperparameter(UniformFloatHyperparameter(
                 name="subsample", lower=0.01, upper=1.0, default=1.0,
