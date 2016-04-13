@@ -322,6 +322,11 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             raise ValueError("Resampling strategy partial-cv cannot be used "
                              "together with ensembles.")
 
+        acquisition_functions = ['EI', 'EIPS']
+        if self.acquisition_function not in acquisition_functions:
+            raise ValueError('Illegal acquisition %s: Must be one of %s.' %
+                             (self.acquisition_function, acquisition_functions))
+
         self._backend._make_internals_directory()
         if self._keep_models:
             try:
@@ -366,6 +371,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self.configuration_space, configspace_path = self._create_search_space(
             self._tmp_dir,
             self._backend,
+            datamanager,
             self._include_estimators,
             self._include_preprocessors)
 
@@ -577,7 +583,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._backend.save_targets_ensemble(y_ensemble)
         self._stop_task(self._stopwatch, task_name)
 
-    def _create_search_space(self, tmp_dir, backend,
+    def _create_search_space(self, tmp_dir, backend, datamanager,
                              include_estimators=None,
                              include_preprocessors=None):
         task_name = 'CreateConfigSpace'
@@ -585,11 +591,11 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._stopwatch.start_task(task_name)
         configspace_path = os.path.join(tmp_dir, 'space.pcs')
         configuration_space = pipeline.get_configuration_space(
-            self._datamanager.info,
+            datamanager.info,
             include_estimators=include_estimators,
             include_preprocessors=include_preprocessors)
         configuration_space = self.configuration_space_created_hook(
-            self._datamanager, configuration_space)
+            datamanager, configuration_space)
         sp_string = pcs.write(configuration_space)
         backend.write_txt_file(configspace_path, sp_string,
                                'Configuration space')

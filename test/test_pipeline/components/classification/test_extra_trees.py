@@ -22,7 +22,7 @@ class ExtraTreesComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_classifier_predict_proba(ExtraTreesClassifier)
-            self.assertAlmostEqual(0.12052046298054782,
+            self.assertAlmostEqual(0.1086791056721286,
                                    sklearn.metrics.log_loss(
                                        targets, predictions))
 
@@ -64,7 +64,7 @@ class ExtraTreesComponentTest(unittest.TestCase):
                 _test_classifier_predict_proba(ExtraTreesClassifier,
                                                make_multilabel=True)
             self.assertEqual(predictions.shape, ((50, 3)))
-            self.assertAlmostEqual(0.98976738180772728,
+            self.assertAlmostEqual(0.99401797442008899,
                                    sklearn.metrics.average_precision_score(
                                        targets, predictions))
 

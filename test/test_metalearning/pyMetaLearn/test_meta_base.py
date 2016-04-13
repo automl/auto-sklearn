@@ -38,15 +38,29 @@ class MetaBaseTest(unittest.TestCase):
         self.assertEqual(24, len(runs))
         self.assertIsInstance(runs, pd.Series)
 
-    def test_get_metafeatures_as_pandas(self):
+    def test_get_metafeatures_single_dataset(self):
         mf = self.base.get_metafeatures('38_acc')
-        self.assertTrue(np.isfinite(mf).all())
-        self.assertEqual(type(mf), pd.Series)
+        self.assertIsInstance(mf, pd.Series)
         self.assertEqual(mf.name, u'38_acc')
         self.assertEqual(mf.loc['NumberOfInstances'], 2527.0)
 
-    def test_get_all_metafeatures_as_pandas(self):
-        mf = self.base.get_all_metafeatures()
+    def test_get_metafeatures_single_feature(self):
+        mf = self.base.get_metafeatures(features='NumberOfInstances')
+        self.assertIsInstance(mf, pd.Series)
+        self.assertEqual(mf.shape, (140, ))
+
+    def test_get_metafeatures_single_dataset_and_single_feature(self):
+        mf = self.base.get_metafeatures('38_acc', features='NumberOfInstances')
+        self.assertEqual(mf.shape, ())
+
+    def test_get_metafeatures_multiple_datasets(self):
+        mf = self.base.get_metafeatures(['38_acc', '24_acc'])
         self.assertIsInstance(mf, pd.DataFrame)
-        self.assertEqual((140, 46), mf.shape)
+        self.assertEqual(mf.shape, (2, 46))
+
+    def test_get_metafeatures_multiple_features(self):
+        mf = self.base.get_metafeatures(features=['NumberOfInstances',
+                                                  'NumberOfClasses'])
+        self.assertIsInstance(mf, pd.DataFrame)
+        self.assertEqual(mf.shape, (140, 2))
 
