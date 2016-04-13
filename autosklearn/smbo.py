@@ -543,6 +543,7 @@ class AutoMLSMBO(multiprocessing.Process):
         num_params = len(self.config_space.get_hyperparameters())
         # allocate a run history
         run_history = RunHistory()
+        meta_runhistory = RunHistory()
         num_run = self.start_num_run
         instance_id = self.dataset_name + SENTINEL
 
@@ -695,6 +696,7 @@ class AutoMLSMBO(multiprocessing.Process):
                                        meta_features_dict)
 
         types = get_types(self.config_space, self.scenario.feature_array)
+        self.acquisition_function = 'EIPS'
         if self.acquisition_function == 'EI':
             rh2EPM = RunHistory2EPM4Cost(num_params=num_params,
                                          scenario=self.scenario,
@@ -735,9 +737,9 @@ class AutoMLSMBO(multiprocessing.Process):
                         runtime = meta_durations.loc[meta_dataset,
                                                      meta_configuration]
                         # TODO read out other status types!
-                        run_history.add(config, cost, runtime,
-                                        StatusType.SUCCESS,
-                                        instance_id=meta_dataset)
+                        meta_runhistory.add(config, cost, runtime,
+                                            StatusType.SUCCESS,
+                                            instance_id=meta_dataset)
                     except:
                         # TODO maybe add warning
                         pass
@@ -750,8 +752,9 @@ class AutoMLSMBO(multiprocessing.Process):
                                              success_states=None,
                                              impute_censored_data=False,
                                              impute_state=None)
-        X_runtime, y_runtime = runtime_rh2EPM.transform(run_history)
+        X_runtime, y_runtime = runtime_rh2EPM.transform(meta_runhistory)
         runtime_rf.train(X_runtime, y_runtime[:, 1].flatten())
+        X_meta, Y_meta = rh2EPM.transform(meta_runhistory)
 
         # == first, evaluate all metelearning and default configurations
         for i, next_config in enumerate((default_cfgs +
@@ -799,6 +802,8 @@ class AutoMLSMBO(multiprocessing.Process):
             try:
                 # JTS TODO: handle the case that run_history is empty
                 X_cfg, Y_cfg = rh2EPM.transform(run_history)
+                X_cfg = np.concatenate((X_meta, X_cfg))
+                Y_cfg = np.concatenate((Y_meta, Y_cfg))
                 self.logger.info('Using %d training points for SMAC.' %
                                  X_cfg.shape[0])
                 choose_next_start_time = time.time()
