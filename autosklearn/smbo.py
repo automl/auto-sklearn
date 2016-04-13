@@ -155,6 +155,7 @@ def _get_metalearning_configurations(meta_base, basename, metric,
             initial_configurations_via_metalearning
         )
     except Exception as e:
+        logger.error("Error getting metalearning configurations!")
         logger.error(str(e))
         logger.error(traceback.format_exc())
         metalearning_configurations = []
@@ -444,24 +445,16 @@ class AutoMLSMBO(multiprocessing.Process):
         return default_configs
 
     def collect_metalearning_suggestions(self, meta_base):
-        known_task = self.datamanager.info['task'] in [
-            MULTICLASS_CLASSIFICATION,
-            BINARY_CLASSIFICATION,
-            MULTILABEL_CLASSIFICATION,
-            REGRESSION]
-        if not known_task:
-            return []
-
         metalearning_configurations = _get_metalearning_configurations(
-            meta_base,
-            self.dataset_name+SENTINEL,
-            self.metric,
-            self.config_space,
-            self.task,
-            self.datamanager.info['is_sparse'],
-            self.num_metalearning_cfgs,
-            self.watcher,
-            self.logger)
+            meta_base=meta_base,
+            basename=self.dataset_name+SENTINEL,
+            metric=self.metric,
+            configuration_space=self.config_space,
+            task=self.task,
+            is_sparse=self.datamanager.info['is_sparse'],
+            initial_configurations_via_metalearning=self.num_metalearning_cfgs,
+            watcher=self.watcher,
+            logger=self.logger)
         _print_debug_info_of_init_configuration(
             metalearning_configurations,
             self.dataset_name,
@@ -675,8 +668,6 @@ class AutoMLSMBO(multiprocessing.Process):
                 self._calculate_metafeatures_encoded_with_limits(
                     metafeature_calculation_time_limit)
 
-        self.logger.info('%s %s', meta_features, meta_features_encoded)
-
         meta_features.metafeature_values.update(
             meta_features_encoded.metafeature_values)
 
@@ -691,7 +682,7 @@ class AutoMLSMBO(multiprocessing.Process):
             meta_base)
         self.reset_data_manager()
 
-        self.logger.critical('%s', meta_features)
+        self.logger.info('%s', meta_features)
 
         # Convert meta-features into a dictionary because the scenario
         # expects a dictionary

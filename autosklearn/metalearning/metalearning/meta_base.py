@@ -41,9 +41,6 @@ class MetaBase(object):
         self.algorithm_runs = aslib_reader.algorithm_runs
         self.configurations = aslib_reader.configurations
 
-        self.logger.critical('%s %s %s', self.metafeatures,
-                             self.algorithm_runs, self.configurations)
-
         configurations = dict()
         for algorithm_id in self.configurations:
             configuration = self.configurations[algorithm_id]
