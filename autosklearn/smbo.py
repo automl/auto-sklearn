@@ -696,7 +696,6 @@ class AutoMLSMBO(multiprocessing.Process):
                                        meta_features_dict)
 
         types = get_types(self.config_space, self.scenario.feature_array)
-        self.acquisition_function = 'EIPS'
         if self.acquisition_function == 'EI':
             rh2EPM = RunHistory2EPM4Cost(num_params=num_params,
                                          scenario=self.scenario,
@@ -726,8 +725,11 @@ class AutoMLSMBO(multiprocessing.Process):
                              self.acquisition_function)
 
         meta_runs = meta_base.get_all_runs(METRIC_TO_STRING[self.metric])
+        meta_runs_dataset_indices = {}
+        meta_runs_index = 0
         meta_durations = meta_base.get_all_runs('runtime')
         for meta_dataset in meta_runs.index:
+            meta_dataset_start_index = meta_runs_index
             for meta_configuration in meta_runs.columns:
                 if np.isfinite(meta_runs.loc[meta_dataset, meta_configuration]):
                     try:
@@ -740,9 +742,13 @@ class AutoMLSMBO(multiprocessing.Process):
                         meta_runhistory.add(config, cost, runtime,
                                             StatusType.SUCCESS,
                                             instance_id=meta_dataset)
+                        meta_runs_index += 1
                     except:
                         # TODO maybe add warning
                         pass
+
+            meta_runs_dataset_indices[meta_dataset] = (
+                meta_dataset_start_index, meta_runs_index)
 
         runtime_rf = RandomForestWithInstances(types,
                                                instance_features=meta_features_list,
@@ -755,6 +761,18 @@ class AutoMLSMBO(multiprocessing.Process):
         X_runtime, y_runtime = runtime_rh2EPM.transform(meta_runhistory)
         runtime_rf.train(X_runtime, y_runtime[:, 1].flatten())
         X_meta, Y_meta = rh2EPM.transform(meta_runhistory)
+        # Transform Y_meta on a per-dataset base
+        for meta_dataset in meta_runs_dataset_indices:
+            start_index, end_index = meta_runs_dataset_indices[meta_dataset]
+            end_index += 1  # Python indexing
+            Y_meta[start_index:end_index, 0]\
+                [Y_meta[start_index:end_index, 0] >2.0] =  2.0
+            dataset_minimum = np.min(Y_meta[start_index:end_index, 0])
+            Y_meta[start_index:end_index, 0] = 1 - (
+                (1. - Y_meta[start_index:end_index, 0]) /
+                (1. - dataset_minimum))
+            Y_meta[start_index:end_index, 0]\
+                  [Y_meta[start_index:end_index, 0] > 2] = 2
 
         # == first, evaluate all metelearning and default configurations
         for i, next_config in enumerate((default_cfgs +
@@ -800,8 +818,15 @@ class AutoMLSMBO(multiprocessing.Process):
             next_configs = []
             time_for_choose_next = -1
             try:
-                # JTS TODO: handle the case that run_history is empty
                 X_cfg, Y_cfg = rh2EPM.transform(run_history)
+
+                if not run_history.empty():
+                    # Update costs by normalization
+                    dataset_minimum = np.min(Y_cfg[:, 0])
+                    Y_cfg[:, 0] = 1 - ((1. - Y_cfg[:, 0]) /
+                                       (1. - dataset_minimum))
+                    Y_cfg[:, 0][Y_cfg[:, 0] > 2] = 2
+
                 X_cfg = np.concatenate((X_meta, X_cfg))
                 Y_cfg = np.concatenate((Y_meta, Y_cfg))
                 self.logger.info('Using %d training points for SMAC.' %
@@ -848,6 +873,7 @@ class AutoMLSMBO(multiprocessing.Process):
                                 time=duration , status=status,
                                 instance_id=instance_id, seed=seed)
                 run_history.update_cost(next_config, result)
+
                 self.logger.info('Predicted runtime %g, true runtime %g',
                                  predicted_runtime, duration)
 
