@@ -603,8 +603,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
 
         return configuration_space, configspace_path
 
-    def configuration_space_created_hook(self, datamanager, cs):
-        return cs
+    def configuration_space_created_hook(self, datamanager, configuration_space):
+        return configuration_space
 
     def get_params(self, deep=True):
         raise NotImplementedError('auto-sklearn does not implement '

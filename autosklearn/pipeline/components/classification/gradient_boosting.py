@@ -141,7 +141,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         cs = ConfigurationSpace()
         loss = cs.add_hyperparameter(Constant("loss", "deviance"))
         learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
-            name="learning_rate", lower=0.0001, upper=1, default=0.1, log=True))
+            name="learning_rate", lower=0.01, upper=1, default=0.1, log=True))
         n_estimators = cs.add_hyperparameter(Constant("n_estimators", 100))
         max_depth = cs.add_hyperparameter(UniformIntegerHyperparameter(
             name="max_depth", lower=1, upper=10, default=3))
