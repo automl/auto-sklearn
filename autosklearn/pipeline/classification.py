@@ -202,7 +202,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         classifiers_ = ["adaboost", "decision_tree", "extra_trees",
                         "gradient_boosting", "k_nearest_neighbors",
                         "libsvm_svc", "random_forest", "gaussian_nb",
-                        "decision_tree"]
+                        "decision_tree", "xgradient_boosting"]
         feature_learning = ["kitchen_sinks", "nystroem_sampler"]
 
         for c, f in product(classifiers_, feature_learning):
