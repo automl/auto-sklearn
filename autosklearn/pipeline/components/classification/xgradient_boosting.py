@@ -79,83 +79,56 @@ class XGradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.init = init
         self.estimator = None
 
-    def fit(self, X, y, refit=False):
-        if self.estimator is None or refit:
-            self.iterative_fit(X, y, n_iter=1, refit=refit)
-
-        while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=1)
-        return self
-
-    def iterative_fit(self, X, y, n_iter=1, refit=False):
+    def fit(self, X, y):
         import xgboost as xgb
 
-        if refit:
-            self.estimator = None
+        self.learning_rate = float(self.learning_rate)
+        self.n_estimators = int(self.n_estimators)
+        self.subsample = float(self.subsample)
+        self.max_depth = int(self.max_depth)
 
-        if self.estimator is None:
-            self.learning_rate = float(self.learning_rate)
-            self.n_estimators = int(self.n_estimators)
-            self.subsample = float(self.subsample)
-            self.max_depth = int(self.max_depth)
+        # (TODO) Gb used at most half of the features, here we use all
+        self.colsample_bylevel = float(self.colsample_bylevel)
 
-            # (TODO) Gb used at most half of the features, here we use all
-            self.colsample_bylevel = float(self.colsample_bylevel)
+        self.colsample_bytree = float(self.colsample_bytree)
+        self.gamma = float(self.gamma)
+        self.min_child_weight = int(self.min_child_weight)
+        self.max_delta_step = int(self.max_delta_step)
+        self.reg_alpha = float(self.reg_alpha)
+        self.reg_lambda = float(self.reg_lambda)
+        self.nthread = int(self.nthread)
+        self.base_score = float(self.base_score)
+        self.scale_pos_weight = float(self.scale_pos_weight)
 
-            self.colsample_bytree = float(self.colsample_bytree)
-            self.gamma = float(self.gamma)
-            self.min_child_weight = int(self.min_child_weight)
-            self.max_delta_step = int(self.max_delta_step)
-            self.reg_alpha = float(self.reg_alpha)
-            self.reg_lambda = float(self.reg_lambda)
-            self.nthread = int(self.nthread)
-            self.base_score = float(self.base_score)
-            self.scale_pos_weight = float(self.scale_pos_weight)
+        # We don't support multilabel, so we only need 1 objective function
+        if len(numpy.unique(y) == 2):
+            # We probably have binary classification
+            self.objective = 'binary:logistic'
+        else:
+            self.objective = 'multi:softprob'
 
-            # We don't support multilabel, so we only need 1 objective function
-            if len(numpy.unique(y) == 2):
-                # We probably have binary classification
-                self.objective = 'binary:logistic'
-            else:
-                self.objective = 'multi:softprob'
-
-            self.estimator = xgb.XGBClassifier(
-                    max_depth=self.max_depth,
-                    learning_rate=self.learning_rate,
-                    n_estimators=self.n_estimators,
-                    silent=self.silent,
-                    objective=self.objective,
-                    nthread=self.nthread,
-                    gamma=self.gamma,
-                    scale_pos_weight=self.scale_pos_weight,
-                    min_child_weight=self.min_child_weight,
-                    max_delta_step=self.max_delta_step,
-                    subsample=self.subsample,
-                    colsample_bytree=self.colsample_bytree,
-                    colsample_bylevel=self.colsample_bylevel,
-                    reg_alpha=self.reg_alpha,
-                    reg_lambda=self.reg_lambda,
-                    base_score=self.base_score,
-                    seed=self.seed
-                    )
-
-        tmp = self.estimator  # TODO copy ?
-        tmp.n_estimators += n_iter
-        tmp.fit(X, y)
-        self.estimator = tmp
-
-        if self.estimator.n_estimators >= self.n_estimators:
-            self.fully_fit_ = True
+        self.estimator = xgb.XGBClassifier(
+                max_depth=self.max_depth,
+                learning_rate=self.learning_rate,
+                n_estimators=self.n_estimators,
+                silent=self.silent,
+                objective=self.objective,
+                nthread=self.nthread,
+                gamma=self.gamma,
+                scale_pos_weight=self.scale_pos_weight,
+                min_child_weight=self.min_child_weight,
+                max_delta_step=self.max_delta_step,
+                subsample=self.subsample,
+                colsample_bytree=self.colsample_bytree,
+                colsample_bylevel=self.colsample_bylevel,
+                reg_alpha=self.reg_alpha,
+                reg_lambda=self.reg_lambda,
+                base_score=self.base_score,
+                seed=self.seed
+                )
+        self.estimator.fit(X, y)
 
         return self
-
-    def configuration_fully_fitted(self):
-        if self.estimator is None:
-            return False
-        elif not hasattr(self, 'fully_fit_'):
-            return False
-        else:
-            return self.fully_fit_
 
     def predict(self, X):
         if self.estimator is None:
