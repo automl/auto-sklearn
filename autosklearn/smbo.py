@@ -246,10 +246,6 @@ class AutoMLSMBO(multiprocessing.Process):
         self.start_num_run = start_num_run
         self.acquisition_function = acquisition_function
 
-        # Meta-features
-        self._metafeatures = None
-        self._metafeatures_encoded = None
-
         self.config_space.seed(self.seed)
         logger_name = self.__class__.__name__ + \
                       (":" + dataset_name if dataset_name is not None else "")
@@ -487,7 +483,7 @@ class AutoMLSMBO(multiprocessing.Process):
         return meta_features
 
     def _calculate_metafeatures_with_limits(self, time_limit):
-        res = None
+        res = {}
         try:
             safe_mf = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                               wall_time_in_s=int(time_limit),
@@ -510,7 +506,7 @@ class AutoMLSMBO(multiprocessing.Process):
         return meta_features_encoded
 
     def _calculate_metafeatures_encoded_with_limits(self, time_limit):
-        res = None
+        res = {}
         try:
             safe_mf = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                               wall_time_in_s=int(time_limit),
@@ -659,16 +655,28 @@ class AutoMLSMBO(multiprocessing.Process):
 
         metafeature_calculation_time_limit = int(
             self.total_walltime_limit / 4)
-        start_time = time.time()
+        metafeature_calculation_start_time = time.time()
         meta_features = self._calculate_metafeatures_with_limits(
             metafeature_calculation_time_limit)
-        end_time = time.time()
-        metafeature_calculation_time_limit = end_time - start_time
+        metafeature_calculation_end_time = time.time()
+        metafeature_calculation_time_limit = \
+            metafeature_calculation_time_limit - (
+            metafeature_calculation_end_time -
+            metafeature_calculation_start_time)
 
-        self.datamanager.perform1HotEncoding()
-        meta_features_encoded = \
-            self._calculate_metafeatures_encoded_with_limits(
-                metafeature_calculation_time_limit)
+        if metafeature_calculation_time_limit <= 0.1:
+            self.logger.warning('Time limit for metafeature calculation less '
+                                'than 0.1 seconds (%f). Skipping calculation '
+                                'of encoded metafeatures.')
+            meta_features_encoded = {}
+        else:
+            self.datamanager.perform1HotEncoding()
+            meta_features_encoded = \
+                self._calculate_metafeatures_encoded_with_limits(
+                    metafeature_calculation_time_limit)
+
+        self.logger.info('%s %s', meta_features, meta_features_encoded)
+
         meta_features.metafeature_values.update(
             meta_features_encoded.metafeature_values)
 
@@ -695,6 +703,45 @@ class AutoMLSMBO(multiprocessing.Process):
             meta_features_list.append(meta_features[meta_feature_name].value)
         meta_features_list = np.array(meta_features_list).reshape((1, -1))
         self.logger.info(list(meta_features_dict.keys()))
+
+        meta_runs = meta_base.get_all_runs(METRIC_TO_STRING[self.metric])
+        meta_runs_dataset_indices = {}
+        meta_runs_index = 0
+        try:
+            meta_durations = meta_base.get_all_runs('runtime')
+            read_runtime_data = True
+        except KeyError:
+            read_runtime_data = False
+            self.logger.critical('Cannot read runtime data.')
+            if self.acquisition_function == 'EIPS':
+                self.logger.critical('Reverting to acquisition function EI!')
+                self.acquisition_function = 'EI'
+
+        for meta_dataset in meta_runs.index:
+            meta_dataset_start_index = meta_runs_index
+            for meta_configuration in meta_runs.columns:
+                if np.isfinite(meta_runs.loc[meta_dataset, meta_configuration]):
+                    try:
+                        config = meta_base.get_configuration_from_algorithm_index(
+                            meta_configuration)
+                        cost = meta_runs.loc[meta_dataset, meta_configuration]
+                        if read_runtime_data:
+                            runtime = meta_durations.loc[meta_dataset,
+                                                         meta_configuration]
+                        else:
+                            runtime = 1
+                        # TODO read out other status types!
+                        meta_runhistory.add(config, cost, runtime,
+                                            StatusType.SUCCESS,
+                                            instance_id=meta_dataset)
+                        meta_runs_index += 1
+                    except:
+                        # TODO maybe add warning
+                        pass
+
+            meta_runs_dataset_indices[meta_dataset] = (
+                meta_dataset_start_index, meta_runs_index)
+
         self.scenario = AutoMLScenario(self.config_space,
                                        self.total_walltime_limit,
                                        self.func_eval_time_limit,
@@ -729,32 +776,7 @@ class AutoMLSMBO(multiprocessing.Process):
             raise ValueError('Unknown acquisition function value %s!' %
                              self.acquisition_function)
 
-        meta_runs = meta_base.get_all_runs(METRIC_TO_STRING[self.metric])
-        meta_runs_dataset_indices = {}
-        meta_runs_index = 0
-        meta_durations = meta_base.get_all_runs('runtime')
-        for meta_dataset in meta_runs.index:
-            meta_dataset_start_index = meta_runs_index
-            for meta_configuration in meta_runs.columns:
-                if np.isfinite(meta_runs.loc[meta_dataset, meta_configuration]):
-                    try:
-                        config = meta_base.get_configuration_from_algorithm_index(
-                            meta_configuration)
-                        cost = meta_runs.loc[meta_dataset, meta_configuration]
-                        runtime = meta_durations.loc[meta_dataset,
-                                                     meta_configuration]
-                        # TODO read out other status types!
-                        meta_runhistory.add(config, cost, runtime,
-                                            StatusType.SUCCESS,
-                                            instance_id=meta_dataset)
-                        meta_runs_index += 1
-                    except:
-                        # TODO maybe add warning
-                        pass
-
-            meta_runs_dataset_indices[meta_dataset] = (
-                meta_dataset_start_index, meta_runs_index)
-
+        # Build a runtime model
         runtime_rf = RandomForestWithInstances(types,
                                                instance_features=meta_features_list,
                                                seed=1, num_trees=10)
