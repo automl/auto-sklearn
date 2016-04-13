@@ -5,13 +5,13 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant, \
     CategoricalHyperparameter
 
-from autosklearn.pipeline.components.base import \
-    AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
+
 
 from autosklearn.pipeline.constants import *
 
 
-class XGradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
+class XGradientBoostingRegressor(AutoSklearnRegressionAlgorithm):
     def __init__(self, learning_rate, n_estimators, subsample,
                  max_depth, colsample_bylevel, colsample_bytree, gamma,
                  min_child_weight, max_delta_step, reg_alpha, reg_lambda,
@@ -79,7 +79,7 @@ class XGradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.init = init
         self.estimator = None
 
-    def fit(self, X, y):
+    def fit(self, X, y, refit=False):
         import xgboost as xgb
 
         self.learning_rate = float(self.learning_rate)
@@ -100,14 +100,9 @@ class XGradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.base_score = float(self.base_score)
         self.scale_pos_weight = float(self.scale_pos_weight)
 
-        # We don't support multilabel, so we only need 1 objective function
-        if len(numpy.unique(y) == 2):
-            # We probably have binary classification
-            self.objective = 'binary:logistic'
-        else:
-            self.objective = 'multi:softprob'
+        self.objective = 'reg:linear'
 
-        self.estimator = xgb.XGBClassifier(
+        self.estimator = xgb.XGBRegressor(
                 max_depth=self.max_depth,
                 learning_rate=self.learning_rate,
                 n_estimators=self.n_estimators,
@@ -126,6 +121,7 @@ class XGradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 base_score=self.base_score,
                 seed=self.seed
                 )
+
         self.estimator.fit(X, y)
 
         return self
@@ -135,18 +131,13 @@ class XGradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             raise NotImplementedError
         return self.estimator.predict(X)
 
-    def predict_proba(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        return self.estimator.predict_proba(X)
-
     @staticmethod
     def get_properties(dataset_properties=None):
         return {'shortname': 'XGB',
-                'name': 'XGradient Boosting Classifier',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
+                'name': 'XGradient Boosting Regressor',
+                'handles_regression': True,
+                'handles_classification': False,
+                'handles_multiclass': False,
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),

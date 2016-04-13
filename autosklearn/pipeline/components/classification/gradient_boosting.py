@@ -30,6 +30,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
+        self.fully_fit_ = False
 
     def fit(self, X, y, sample_weight=None, refit=False):
         if self.estimator is None or refit:
@@ -100,10 +101,9 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             tmp.n_estimators += n_iter
             tmp.fit(X, y, sample_weight=sample_weight)
             self.estimator = tmp
-
+            # Apparently this if is necessary
             if self.estimator.n_estimators >= self.n_estimators:
                 self.fully_fit_ = True
-
         return self
 
     def configuration_fully_fitted(self):

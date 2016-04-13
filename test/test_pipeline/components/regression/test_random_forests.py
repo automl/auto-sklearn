@@ -14,7 +14,6 @@ class RandomForestComponentTest(unittest.TestCase):
             self.assertAlmostEqual(0.41795829411621988,
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
 
-
     def test_default_configuration_sparse(self):
         for i in range(10):
             predictions, targets = _test_regressor(RandomForest, sparse=True)
@@ -26,4 +25,11 @@ class RandomForestComponentTest(unittest.TestCase):
             predictions, targets = \
                 _test_regressor_iterative_fit(RandomForest)
             self.assertAlmostEqual(0.41795829411621988,
+                sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
+
+    def test_default_configuration_iterative_fit_sparse(self):
+        for i in range(10):
+            predictions, targets = \
+                _test_regressor_iterative_fit(RandomForest, sparse=True)
+            self.assertAlmostEqual(0.24225685933770469,
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
