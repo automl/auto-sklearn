@@ -469,7 +469,8 @@ class AutoMLSMBO(multiprocessing.Process):
         return meta_features
 
     def _calculate_metafeatures_with_limits(self, time_limit):
-        res = {}
+        res = None
+        time_limit = max(time_limit, 1)
         try:
             safe_mf = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                               wall_time_in_s=int(time_limit),
@@ -492,7 +493,8 @@ class AutoMLSMBO(multiprocessing.Process):
         return meta_features_encoded
 
     def _calculate_metafeatures_encoded_with_limits(self, time_limit):
-        res = {}
+        res = None
+        time_limit = max(time_limit, 1)
         try:
             safe_mf = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                               wall_time_in_s=int(time_limit),
@@ -654,10 +656,11 @@ class AutoMLSMBO(multiprocessing.Process):
             metafeature_calculation_end_time -
             metafeature_calculation_start_time)
 
-        if metafeature_calculation_time_limit <= 0.1:
+        if metafeature_calculation_time_limit < 1:
             self.logger.warning('Time limit for metafeature calculation less '
-                                'than 0.1 seconds (%f). Skipping calculation '
-                                'of encoded metafeatures.')
+                                'than 1 seconds (%f). Skipping calculation '
+                                'of metafeatures for encoded dataset.',
+                                metafeature_calculation_time_limit)
             meta_features_encoded = None
         else:
             self.datamanager.perform1HotEncoding()
