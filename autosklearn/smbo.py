@@ -205,7 +205,6 @@ class AutoMLSMBO(multiprocessing.Process):
                  memory_limit,
                  watcher, start_num_run=1,
                  data_memory_limit=None,
-                 default_cfgs=None,
                  num_metalearning_cfgs=25,
                  config_file=None,
                  smac_iters=1000,
@@ -238,7 +237,6 @@ class AutoMLSMBO(multiprocessing.Process):
         self.memory_limit = memory_limit
         self.data_memory_limit = data_memory_limit
         self.watcher = watcher
-        self.default_cfgs = default_cfgs
         self.num_metalearning_cfgs = num_metalearning_cfgs
         self.config_file = config_file
         self.seed = seed
@@ -266,11 +264,6 @@ class AutoMLSMBO(multiprocessing.Process):
                                          max_mem = max_mem)
         self.metric = self.datamanager.info['metric']
         self.task = self.datamanager.info['task']
-
-    def collect_defaults(self):
-        # TODO each pipeline should know about its preferred default
-        # configurations!
-        return []
         
     def collect_additional_subset_defaults(self):
         default_configs = []
@@ -536,17 +529,8 @@ class AutoMLSMBO(multiprocessing.Process):
         num_run = self.start_num_run
         instance_id = self.dataset_name + SENTINEL
 
-        # Create array for default configurations!
-        if self.default_cfgs is None:
-            default_cfgs = []
-        else:
-            default_cfgs = self.default_cfgs
-        default_cfgs.insert(0, self.config_space.get_default_configuration())
-        # add the standard defaults we want to evaluate
-        default_cfgs += self.collect_defaults()
-
         # == Train on subset
-        #    before doing anything, let us run the default_cfgs
+        #    before doing anything, let us run the default_cfg
         #    on a subset of the available data to ensure that
         #    we at least have some models
         #    we will try three different ratios of decreasing magnitude
@@ -556,11 +540,9 @@ class AutoMLSMBO(multiprocessing.Process):
         subset_ratio = 10000. / n_data
         if subset_ratio >= 0.5:
             subset_ratio = 0.33
-            subset_ratios = [subset_ratio, subset_ratio * 0.5,
-                             subset_ratio * 0.10]
+            subset_ratios = [subset_ratio, subset_ratio * 0.10]
         else:
-            subset_ratios = [subset_ratio, 3500. / n_data,
-                             500. / n_data]
+            subset_ratios = [subset_ratio, 500. / n_data]
         self.logger.info("Training default configurations on a subset of "
                          "%d/%d data points." %
                          (int(n_data * subset_ratio), n_data))
@@ -571,9 +553,10 @@ class AutoMLSMBO(multiprocessing.Process):
         # the configs we want to run on the data subset are:
         # 1) the default configs
         # 2) a set of configs we selected for training on a subset
-        subset_configs = default_cfgs \
-                         + self.collect_additional_subset_defaults()
-        for next_config in subset_configs:
+        subset_configs = [self.config_space.get_default_configuration()] \
+                          + self.collect_additional_subset_defaults()
+        subset_config_succesful = [False] * len(subset_configs)
+        for subset_config_id, next_config in enumerate(subset_configs):
             for i, ratio in enumerate(subset_ratios):
                 self.reset_data_manager()
                 n_data_subsample = int(n_data * ratio)
@@ -599,6 +582,7 @@ class AutoMLSMBO(multiprocessing.Process):
                                  "info: %s ", num_run, duration, result,
                                  str(status), additional_run_info)
 
+                num_run += 1
                 if i < len(subset_ratios) - 1:
                     if status != StatusType.SUCCESS:
                         # Do not increase num_run here, because we will try
@@ -608,22 +592,32 @@ class AutoMLSMBO(multiprocessing.Process):
                                          ratio)
                         continue
                     else:
-                        num_run += 1
                         self.logger.info("Finished SUBSET training sucessfully "
                                          "with ratio %f", ratio)
+                        subset_config_succesful[subset_config_id] = True
                         break
                 else:
                     if status != StatusType.SUCCESS:
                         self.logger.info("A CONFIG did not finish "
                                          " for subset ratio %f.",
                                          ratio)
-                        num_run += 1
                         continue
                     else:
-                        num_run += 1
                         self.logger.info("Finished SUBSET training sucessfully "
                                          "with ratio %f", ratio)
+                        subset_config_succesful[subset_config_id] = True
                         break
+
+        # Use the first non-failing configuration from the subsets as the new
+        #  default configuration -> this guards us against the random forest
+        # failing on large, sparse datasets
+        default_cfg = None
+        for subset_config_id, next_config in enumerate(subset_configs):
+            if subset_config_succesful[subset_config_id]:
+                default_cfg = next_config
+                break
+        if default_cfg is None:
+            default_cfg = self.config_space.get_default_configuration()
 
         # == METALEARNING suggestions
         # we start by evaluating the defaults on the full dataset again
@@ -768,16 +762,16 @@ class AutoMLSMBO(multiprocessing.Process):
                              self.acquisition_function)
 
         # Build a runtime model
-        runtime_rf = RandomForestWithInstances(types,
-                                               instance_features=meta_features_list,
-                                               seed=1, num_trees=10)
-        runtime_rh2EPM = RunHistory2EPM4EIPS(num_params=num_params,
-                                             scenario=self.scenario,
-                                             success_states=None,
-                                             impute_censored_data=False,
-                                             impute_state=None)
-        X_runtime, y_runtime = runtime_rh2EPM.transform(meta_runhistory)
-        runtime_rf.train(X_runtime, y_runtime[:, 1].flatten())
+        # runtime_rf = RandomForestWithInstances(types,
+        #                                        instance_features=meta_features_list,
+        #                                        seed=1, num_trees=10)
+        # runtime_rh2EPM = RunHistory2EPM4EIPS(num_params=num_params,
+        #                                      scenario=self.scenario,
+        #                                      success_states=None,
+        #                                      impute_censored_data=False,
+        #                                      impute_state=None)
+        # X_runtime, y_runtime = runtime_rh2EPM.transform(meta_runhistory)
+        # runtime_rf.train(X_runtime, y_runtime[:, 1].flatten())
         X_meta, Y_meta = rh2EPM.transform(meta_runhistory)
         # Transform Y_meta on a per-dataset base
         for meta_dataset in meta_runs_dataset_indices:
@@ -793,13 +787,13 @@ class AutoMLSMBO(multiprocessing.Process):
                   [Y_meta[start_index:end_index, 0] > 2] = 2
 
         # == first, evaluate all metelearning and default configurations
-        for i, next_config in enumerate((default_cfgs +
-                                        metalearning_configurations)):
+        for i, next_config in enumerate(([default_cfg] +
+                                          metalearning_configurations)):
             # Do not evaluate default configurations more than once
-            if i >= len(default_cfgs) and next_config in default_cfgs:
+            if i >= len([default_cfg]) and next_config in [default_cfg]:
                 continue
 
-            config_name = 'meta-learning' if i >= len(default_cfgs) \
+            config_name = 'meta-learning' if i >= len([default_cfg]) \
                 else 'default'
 
             self.logger.info("Starting to evaluate %d. configuration "
@@ -871,9 +865,9 @@ class AutoMLSMBO(multiprocessing.Process):
             for next_config in next_configs:
                 x_runtime = impute_inactive_values(next_config)
                 x_runtime = impute_inactive_values(x_runtime).get_array()
-                predicted_runtime = runtime_rf.predict_marginalized_over_instances(
-                    x_runtime.reshape((1, -1)))
-                predicted_runtime = np.exp(predicted_runtime[0][0][0]) - 1
+                # predicted_runtime = runtime_rf.predict_marginalized_over_instances(
+                #     x_runtime.reshape((1, -1)))
+                # predicted_runtime = np.exp(predicted_runtime[0][0][0]) - 1
 
                 self.logger.info("Starting to evaluate %d. configuration (from "
                                  "SMAC) with time limit %ds.", num_run,
@@ -892,8 +886,8 @@ class AutoMLSMBO(multiprocessing.Process):
                                 instance_id=instance_id, seed=seed)
                 run_history.update_cost(next_config, result)
 
-                self.logger.info('Predicted runtime %g, true runtime %g',
-                                 predicted_runtime, duration)
+                #self.logger.info('Predicted runtime %g, true runtime %g',
+                #                 predicted_runtime, duration)
 
                 # TODO add unittest to make sure everything works fine and
                 # this does not get outdated!
