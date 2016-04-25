@@ -21,6 +21,7 @@ from smac.epm.uncorrelated_mo_rf_with_instances import \
     UncorrelatedMultiObjectiveRandomForestWithInstances
 from smac.epm.rf_with_instances import RandomForestWithInstances
 from smac.smbo.acquisition import EIPS
+from smac.smbo import pSMAC
 
 import autosklearn.metalearning
 from autosklearn.constants import *
@@ -180,7 +181,8 @@ class AutoMLScenario(Scenario):
     to create it in code, without actually reading a smac scenario file
     """
 
-    def __init__(self, config_space, limit, cutoff_time, metafeatures):
+    def __init__(self, config_space, limit, cutoff_time, metafeatures,
+                 output_dir, shared_model):
         self.logger = get_logger(self.__class__.__name__)
 
         # Give SMAC at least 5 seconds
@@ -192,7 +194,9 @@ class AutoMLScenario(Scenario):
                          'algo_runs_timelimit': soft_limit,
                          'wallclock-limit': limit,
                          'features': metafeatures,
-                         'instances': [[name] for name in metafeatures]}
+                         'instances': [[name] for name in metafeatures],
+                         'output_dir': output_dir,
+                         'shared_model': shared_model}
 
         super(AutoMLScenario, self).__init__(scenario_dict)
 
@@ -212,7 +216,8 @@ class AutoMLSMBO(multiprocessing.Process):
                  metadata_directory=None,
                  resampling_strategy='holdout',
                  resampling_strategy_args=None,
-                 acquisition_function='EI'):
+                 acquisition_function='EI',
+                 shared_mode=False):
         super(AutoMLSMBO, self).__init__()
         # data related
         self.dataset_name = dataset_name
@@ -244,11 +249,16 @@ class AutoMLSMBO(multiprocessing.Process):
         self.smac_iters = smac_iters
         self.start_num_run = start_num_run
         self.acquisition_function = acquisition_function
+        self.shared_mode = shared_mode
 
         self.config_space.seed(self.seed)
-        logger_name = self.__class__.__name__ + \
-                      (":" + dataset_name if dataset_name is not None else "")
+        logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed,
+                                     ":" + dataset_name if dataset_name is
+                                                           not None else "")
         self.logger = get_logger(logger_name)
+        import logging
+        root = logging.getLogger()
+        root.setLevel(logging.DEBUG)
 
     def reset_data_manager(self, max_mem=None):
         if max_mem is None:
@@ -751,7 +761,9 @@ class AutoMLSMBO(multiprocessing.Process):
         self.scenario = AutoMLScenario(self.config_space,
                                        self.total_walltime_limit,
                                        self.func_eval_time_limit,
-                                       meta_features_dict)
+                                       meta_features_dict,
+                                       self.tmp_dir,
+                                       self.shared_mode)
 
         types = get_types(self.config_space, self.scenario.feature_array)
         if self.acquisition_function == 'EI':
@@ -843,11 +855,22 @@ class AutoMLSMBO(multiprocessing.Process):
             elif result < run_history.get_cost(smac.incumbent):
                 smac.incumbent = next_config
 
+            if self.scenario.shared_model:
+                pSMAC.write(run_history=run_history,
+                            output_directory=self.scenario.output_dir,
+                            num_run=self.seed)
+
         # == after metalearning run SMAC loop
         smac.runhistory = run_history
         smac_iter = 0
         finished = False
         while not finished:
+            if self.scenario.shared_model:
+                pSMAC.read(run_history=run_history,
+                           output_directory=self.scenario.output_dir,
+                           configuration_space=self.config_space,
+                           logger=self.logger)
+
             next_configs = []
             time_for_choose_next = -1
             try:
@@ -948,5 +971,10 @@ class AutoMLSMBO(multiprocessing.Process):
 
                 if max_iters is not None:
                     finished = (smac_iter < max_iters)
+
+            if self.scenario.shared_model:
+                pSMAC.write(run_history=run_history,
+                            output_directory=self.scenario.output_dir,
+                            num_run=self.seed)
         
         

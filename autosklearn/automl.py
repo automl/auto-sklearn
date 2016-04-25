@@ -379,7 +379,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                          metadata_directory=self._metadata_directory,
                                          resampling_strategy=self._resampling_strategy,
                                          resampling_strategy_args=self._resampling_strategy_arguments,
-                                         acquisition_function=self.acquisition_function)
+                                         acquisition_function=self.acquisition_function,
+                                         shared_mode=self._shared_mode)
             self._proc_smac.start()
 
         psutil_procs = []
@@ -511,6 +512,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self.ensemble_ = self._backend.load_ensemble(seed)
         if self.ensemble_:
             identifiers = self.ensemble_.identifiers_
+            self._logger.debug('Loading models %s', identifiers)
             self.models_ = self._backend.load_models_by_identifiers(identifiers)
         else:
             self.models_ = self._backend.load_all_models(seed)
