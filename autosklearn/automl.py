@@ -23,62 +23,9 @@ from autosklearn.evaluation import resampling, eval_with_limits
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline, Backend
-from autosklearn.ensemble_builder import main as ensemble_main
+from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 
-
-class EnsembleProcess(multiprocessing.Process):
-
-    """
-    Wrap the ensemble script into its own process.
-    """
-    
-    def __init__(self, tmp_dir, dataset_name, task_type, metric, limit,
-                 output_dir, ensemble_size, ensemble_nbest, seed,
-                 shared_mode, precision, max_iterations=None, silent=True):
-        super(EnsembleProcess, self).__init__()
-
-        self.tmp_dir = tmp_dir
-        self.dataset_name = dataset_name
-        self.task_type = task_type
-        self.metric = metric
-        self.limit = limit
-        self.output_dir = output_dir
-        self.ensemble_size = ensemble_size
-        self.ensemble_nbest = ensemble_nbest
-        self.seed = seed
-        self.shared_mode = shared_mode
-        self.max_iterations = max_iterations
-        self.precision = precision
-        self.silent = silent
-        if self.max_iterations is None:
-            self.max_iterations = -1
-        if self.limit <= 0:
-            self.limit = None
-        else:
-            self.limit = max(1, self.limit)
-
-    def run(self):
-        if self.silent:
-            f = open(os.devnull, 'w')
-            sys.stdout = f
-            sys.stderr = f
-        # TODO What LIMITS do we want on memory consumption here ?
-        buffer_time = 5
-        time_left = self.limit - buffer_time
-        safe_ensemble_script = pynisher.enforce_limits(wall_time_in_s=int(time_left))(ensemble_main)
-        safe_ensemble_script(autosklearn_tmp_dir = self.tmp_dir,
-                             dataset_name = self.dataset_name,
-                             task_type = self.task_type,
-                             metric = self.metric,
-                             limit = self.limit,
-                             output_dir = self.output_dir,
-                             ensemble_size = self.ensemble_size,
-                             ensemble_nbest = self.ensemble_nbest,
-                             seed = self.seed,
-                             shared_mode = self.shared_mode,
-                             max_iterations = self.max_iterations,
-                             precision = self.precision)
 
 class AutoML(BaseEstimator, multiprocessing.Process):
 
@@ -178,9 +125,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         datamanager = get_data_manager(namespace=self._parser)
         self._stopwatch.start_task(datamanager.name)
 
-        logger_name = 'AutoML(%d):%s' % (self._seed, datamanager.name)
-        setup_logger(os.path.join(self._tmp_dir, '%s.log' % str(logger_name)))
-        self._logger = get_logger(logger_name)
+        self._logger = self._get_logger(datamanager.name)
 
         self._datamanager = datamanager
         self._dataset_name = datamanager.name
@@ -201,9 +146,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._dataset_name = dataset_name
         self._stopwatch.start_task(self._dataset_name)
 
-        logger_name = 'AutoML(%d):%s' % (self._seed, dataset_name)
-        setup_logger(os.path.join(self._tmp_dir, '%s.log' % str(logger_name)))
-        self._logger = get_logger(logger_name)
+        self._logger = self._get_logger(dataset_name)
 
         if isinstance(metric, str):
             metric = STRING_TO_METRIC[metric]
@@ -240,10 +183,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._start_task(self._stopwatch, name)
         self._dataset_name = name
 
-        logger_name = 'AutoML(%d):%s' % (self._seed, name)
-        setup_logger(os.path.join(self._tmp_dir, '%s.log' % str(logger_name)))
-        self._logger = get_logger(logger_name)
-
+        self._logger = self._get_logger(name)
         self._logger.debug('======== Reading and converting data ==========')
         # Encoding the labels will be done after the metafeature calculation!
         self._data_memory_limit = float(self._ml_memory_limit) / 3
@@ -255,6 +195,11 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             self._logger.debug(part)
 
         return self._fit(loaded_data_manager)
+
+    def _get_logger(self, name):
+        logger_name = 'AutoML(%d):%s' % (self._seed, name)
+        setup_logger(os.path.join(self._tmp_dir, '%s.log' % str(logger_name)))
+        return get_logger(logger_name)
 
     @staticmethod
     def _start_task(watcher, task_name):
@@ -391,21 +336,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                  "is no time left!")
             self._proc_ensemble = None
         else:
-            self._proc_ensemble = EnsembleProcess(
-                tmp_dir=self._tmp_dir,
-                dataset_name=self._dataset_name,
-                task_type=self._task,
-                metric=self._metric,
-                limit=time_left_for_ensembles,
-                output_dir=self._output_dir,
-                ensemble_size=self._ensemble_size,
-                ensemble_nbest=self._ensemble_nbest,
-                seed=self._seed,
-                shared_mode=self._shared_mode,
-                precision=self.precision,
-                # JTS TODO: enable silent again and check that it works
-                silent=False 
-            )
+            self._proc_ensemble = self._get_ensemble_process(time_left_for_ensembles)
             self._proc_ensemble.start()
         self._stopwatch.stop_task(ensemble_task_name)
 
@@ -535,6 +466,41 @@ class AutoML(BaseEstimator, multiprocessing.Process):
 
         predictions = self.ensemble_.predict(all_predictions)
         return predictions
+
+    def fit_ensemble(self, task, metric, precision, dataset_name):
+        if self._logger is None:
+            self._logger = self._get_logger(dataset_name)
+        self._proc_ensemble = self._get_ensemble_process(1, task, metric,
+                                                         precision,
+                                                         dataset_name,
+                                                         max_iterations=1)
+        self._proc_ensemble.main()
+
+    def _get_ensemble_process(self, time_left_for_ensembles,
+                              task=None, metric=None, precision=None,
+                              dataset_name=None, max_iterations=-1):
+
+        if task is None:
+            task = self._task
+        if metric is None:
+            metric = self._metric
+        if precision is None:
+            precision = self.precision
+        if dataset_name is None:
+            dataset_name = self._dataset_name
+
+        return EnsembleBuilder(autosklearn_tmp_dir=self._tmp_dir,
+                               dataset_name=dataset_name,
+                               task_type=task,
+                               metric=metric,
+                               limit=time_left_for_ensembles,
+                               output_dir=self._output_dir,
+                               ensemble_size=self._ensemble_size,
+                               ensemble_nbest=self._ensemble_nbest,
+                               seed=self._seed,
+                               shared_mode=self._shared_mode,
+                               precision=precision,
+                               max_iterations=max_iterations)
 
     def _load_models(self):
         if self._shared_mode:
