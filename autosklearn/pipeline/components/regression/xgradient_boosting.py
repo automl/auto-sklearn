@@ -149,32 +149,31 @@ class XGradientBoostingRegressor(AutoSklearnRegressionAlgorithm):
 
         # Parameterized Hyperparameters
         max_depth = cs.add_hyperparameter(UniformIntegerHyperparameter(
-                name="max_depth", lower=1, upper=10, default=3))
+            name="max_depth", lower=1, upper=10, default=3))
         learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
-                name="learning_rate", lower=0.01, upper=1, default=0.1, log=True))
-        n_estimators = cs.add_hyperparameter(Constant("n_estimators", 100))
+            name="learning_rate", lower=0.01, upper=1, default=0.1, log=True))
+        n_estimators = cs.add_hyperparameter(UniformIntegerHyperparameter
+            ("n_estimators", 50, 500, default=100))
         subsample = cs.add_hyperparameter(UniformFloatHyperparameter(
-                name="subsample", lower=0.01, upper=1.0, default=1.0,
-                log=False))
+            name="subsample", lower=0.01, upper=1.0, default=1.0, log=False))
         min_child_weight = cs.add_hyperparameter(UniformIntegerHyperparameter(
-                name="min_child_weight", lower=1, upper=20, default=1,
-                log=False))
+            name="min_child_weight", lower=1, upper=20, default=1, log=False))
 
         # Unparameterized Hyperparameters
         max_delta_step = cs.add_hyperparameter(UnParametrizedHyperparameter(
-                name="max_delta_step", value=0))
+            name="max_delta_step", value=0))
         colsample_bytree = cs.add_hyperparameter(UnParametrizedHyperparameter(
-                name="colsample_bytree", value=1))
+            name="colsample_bytree", value=1))
         gamma = cs.add_hyperparameter(UnParametrizedHyperparameter(
-                name="gamma", value=0))
+            name="gamma", value=0))
         colsample_bylevel = cs.add_hyperparameter(UnParametrizedHyperparameter(
-                name="colsample_bylevel", value=1))
+            name="colsample_bylevel", value=1))
         reg_alpha = cs.add_hyperparameter(UnParametrizedHyperparameter(
-                name="reg_alpha", value=0))
+            name="reg_alpha", value=0))
         reg_lambda = cs.add_hyperparameter(UnParametrizedHyperparameter(
-                name="reg_lambda", value=1))
+            name="reg_lambda", value=1))
         base_score = cs.add_hyperparameter(UnParametrizedHyperparameter(
-                name="base_score", value=0.5))
+            name="base_score", value=0.5))
         scale_pos_weight = cs.add_hyperparameter(UnParametrizedHyperparameter(
-                name="scale_pos_weight", value=1))
+            name="scale_pos_weight", value=1))
         return cs
