@@ -468,18 +468,21 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         predictions = self.ensemble_.predict(all_predictions)
         return predictions
 
-    def fit_ensemble(self, task, metric, precision, dataset_name):
+    def fit_ensemble(self, task=None, metric=None, precision='32',
+                     dataset_name=None, ensemble_nbest=None,
+                     ensemble_size=None):
         if self._logger is None:
             self._logger = self._get_logger(dataset_name)
-        self._proc_ensemble = self._get_ensemble_process(1, task, metric,
-                                                         precision,
-                                                         dataset_name,
-                                                         max_iterations=1)
+
+        self._proc_ensemble = self._get_ensemble_process(
+            1, task, metric, precision, dataset_name, max_iterations=1,
+            ensemble_nbest=ensemble_nbest, ensemble_size=ensemble_size)
         self._proc_ensemble.main()
 
     def _get_ensemble_process(self, time_left_for_ensembles,
                               task=None, metric=None, precision=None,
-                              dataset_name=None, max_iterations=-1):
+                              dataset_name=None, max_iterations=-1,
+                              ensemble_nbest=None, ensemble_size=None):
 
         if task is None:
             task = self._task
@@ -489,6 +492,10 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             precision = self.precision
         if dataset_name is None:
             dataset_name = self._dataset_name
+        if ensemble_nbest is None:
+            ensemble_nbest = self._ensemble_nbest
+        if ensemble_size is None:
+            ensemble_size = self._ensemble_size
 
         return EnsembleBuilder(autosklearn_tmp_dir=self._tmp_dir,
                                dataset_name=dataset_name,
@@ -496,8 +503,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                metric=metric,
                                limit=time_left_for_ensembles,
                                output_dir=self._output_dir,
-                               ensemble_size=self._ensemble_size,
-                               ensemble_nbest=self._ensemble_nbest,
+                               ensemble_size=ensemble_size,
+                               ensemble_nbest=ensemble_nbest,
                                seed=self._seed,
                                shared_mode=self._shared_mode,
                                precision=precision,

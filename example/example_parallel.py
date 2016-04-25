@@ -26,7 +26,7 @@ def spawn_classifier(seed, dataset_name):
     X_test = X[1000:]
     y_test = y[1000:]
 
-    automl = AutoSklearnClassifier(time_left_for_this_task=180,
+    automl = AutoSklearnClassifier(time_left_for_this_task=60,
                                    per_run_time_limit=60,
                                    ml_memory_limit=1024,
                                    shared_mode=True,
@@ -64,16 +64,20 @@ if __name__ == '__main__':
                                    per_run_time_limit=15,
                                    ml_memory_limit=1024,
                                    shared_mode=True,
+                                   ensemble_size=50,
+                                   ensemble_nbest=200,
                                    tmp_folder=tmp_folder,
                                    output_folder=output_folder,
-                                   ensemble_size=50,
                                    initial_configurations_via_metalearning=0,
                                    seed=1)
 
+    # Both the ensemble_size and ensemble_nbest parameters can be changed later
     automl.fit_ensemble(task=MULTICLASS_CLASSIFICATION,
                         metric=ACC_METRIC,
                         precision='32',
-                        dataset_name='digits')
+                        dataset_name='digits',
+                        ensemble_size=10,
+                        ensemble_nbest=10)
 
     predictions = automl.predict(X_test)
     print(automl.show_models())
