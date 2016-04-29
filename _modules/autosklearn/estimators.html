@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>autosklearn.estimators &mdash; AutoSklearn 0.0.1dev documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootswatch-3.3.6/cosmo/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="AutoSklearn 0.0.1dev documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+  
+  <a href="https://github.com/openml/openml-python"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.0.1dev</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../index.html">Start</a></li>
+                <li><a href="../../api.html">API</a></li>
+                <li><a href="../../extending.html">Extending</a></li>
+                <li><a href="../../resampling.html">Resampling</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <h1>Source code for autosklearn.estimators</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- encoding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">six</span>
+
+<span class="kn">import</span> <span class="nn">autosklearn.automl</span>
+<span class="kn">from</span> <span class="nn">autosklearn.constants</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<div class="viewcode-block" id="AutoSklearnClassifier"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnClassifier">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearnClassifier</span><span class="p">(</span><span class="n">autosklearn</span><span class="o">.</span><span class="n">automl</span><span class="o">.</span><span class="n">AutoML</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class implements the classification task. It must not be pickled!</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    time_left_for_this_task : int, optional (default=3600)</span>
+<span class="sd">        Time limit in seconds for the search for appropriate classification</span>
+<span class="sd">        models. By increasing this value, *auto-sklearn* will find better</span>
+<span class="sd">        configurations.</span>
+
+<span class="sd">    per_run_time_limit : int, optional (default=360)</span>
+<span class="sd">        Time limit for a single call to machine learning model.</span>
+
+<span class="sd">    initial_configurations_via_metalearning : int, optional (default=25)</span>
+
+<span class="sd">    ensemble_size : int, optional (default=50)</span>
+
+<span class="sd">    ensemble_nbest : int, optional (default=50)</span>
+
+<span class="sd">    seed : int, optional (default=1)</span>
+
+<span class="sd">    ml_memory_limit : int, optional (3000)</span>
+<span class="sd">        Memory limit for the machine learning algorithm. If the machine</span>
+<span class="sd">        learning algorithm allocates tries to allocate more memory,</span>
+<span class="sd">        its evaluation will be stopped.</span>
+
+<span class="sd">    include_estimators : dict, optional (None)</span>
+<span class="sd">        If None all possible estimators are used. Otherwise specifies set of</span>
+<span class="sd">        estimators to use</span>
+
+<span class="sd">    include_preprocessors : dict, optional (None)</span>
+<span class="sd">        If None all possible preprocessors are used. Otherwise specifies set of</span>
+<span class="sd">        preprocessors to use</span>
+
+<span class="sd">    resampling_strategy : string, optional (&#39;holdout&#39;)</span>
+<span class="sd">        how to to handle overfitting, might need &#39;resampling_strategy_arguments&#39;</span>
+
+<span class="sd">        * &#39;holdout&#39;: 66:33 (train:test) split</span>
+<span class="sd">        * &#39;holdout-iterative-fit&#39;:  66:33 (train:test) split, calls iterative</span>
+<span class="sd">          fit where possible</span>
+<span class="sd">        * &#39;cv&#39;: crossvalidation, requires &#39;folds&#39;</span>
+<span class="sd">        * &#39;nested-cv&#39;: crossvalidation, requires &#39;outer-folds, &#39;inner-folds&#39;</span>
+<span class="sd">        * &#39;partial-cv&#39;: crossvalidation, requires &#39;folds&#39; , calls</span>
+<span class="sd">          iterative fit where possible</span>
+
+<span class="sd">    resampling_strategy_arguments : dict, optional if &#39;holdout&#39; (None)</span>
+<span class="sd">        Additional arguments for resampling_strategy</span>
+<span class="sd">        * &#39;holdout&#39;: None</span>
+<span class="sd">        * &#39;holdout-iterative-fit&#39;:  None</span>
+<span class="sd">        * &#39;cv&#39;: {&#39;folds&#39;: int}</span>
+<span class="sd">        * &#39;nested-cv&#39;: {&#39;outer_folds&#39;: int, &#39;inner_folds&#39;</span>
+<span class="sd">        * &#39;partial-cv&#39;: {&#39;folds&#39;: int}</span>
+
+<span class="sd">    tmp_folder : string, optional (None)</span>
+<span class="sd">        folder to store configuration output, if None automatically use</span>
+<span class="sd">        /tmp/autosklearn_tmp_$pid_$random_number</span>
+
+<span class="sd">    output_folder : string, optional (None)</span>
+<span class="sd">        folder to store trained models, if None automatically use</span>
+<span class="sd">        /tmp/autosklearn_output_$pid_$random_number</span>
+
+<span class="sd">    delete_tmp_folder_after_terminate: string, optional (True)</span>
+<span class="sd">        remove tmp_folder, when finished. If tmp_folder is None</span>
+<span class="sd">        tmp_dir will always be deleted</span>
+
+<span class="sd">    delete_output_folder_after_terminate: bool, optional (True)</span>
+<span class="sd">        remove output_folder, when finished. If output_folder is None</span>
+<span class="sd">        output_dir will always be deleted</span>
+
+<span class="sd">    shared_mode: bool, optional (False)</span>
+<span class="sd">        run smac in shared-model-node. This only works if arguments</span>
+<span class="sd">        tmp_folder and output_folder are given and sets both</span>
+<span class="sd">        delete_tmp_folder_after_terminate and</span>
+<span class="sd">        delete_output_folder_after_terminate to False.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>
+                 <span class="n">per_run_time_limit</span><span class="o">=</span><span class="mi">360</span><span class="p">,</span>
+                 <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+                 <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                 <span class="n">ensemble_nbest</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                 <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">ml_memory_limit</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span>
+                 <span class="n">include_estimators</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">include_preprocessors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">resampling_strategy</span><span class="o">=</span><span class="s1">&#39;holdout&#39;</span><span class="p">,</span>
+                 <span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">tmp_folder</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">output_folder</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">delete_output_folder_after_terminate</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">shared_mode</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="c1"># Check this before _prepare_create_folders assigns random output</span>
+        <span class="c1"># directories</span>
+        <span class="k">if</span> <span class="n">shared_mode</span><span class="p">:</span>
+            <span class="n">delete_output_folder_after_terminate</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">delete_tmp_folder_after_terminate</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="n">tmp_folder</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If shared_mode == True tmp_folder must not &quot;</span>
+                                 <span class="s2">&quot;be None.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">output_folder</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;If shared_mode == True output_folder must &quot;</span>
+                                 <span class="s2">&quot;not be None.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Call this before calling superconstructor as we feed tmp/output dir</span>
+        <span class="c1"># to superinit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tmp_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_create_folders</span><span class="p">(</span>
+            <span class="n">tmp_dir</span><span class="o">=</span><span class="n">tmp_folder</span><span class="p">,</span>
+            <span class="n">output_dir</span><span class="o">=</span><span class="n">output_folder</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_classes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_classes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_outputs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">AutoSklearnClassifier</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="n">time_left_for_this_task</span><span class="o">=</span><span class="n">time_left_for_this_task</span><span class="p">,</span>
+            <span class="n">per_run_time_limit</span><span class="o">=</span><span class="n">per_run_time_limit</span><span class="p">,</span>
+            <span class="n">log_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tmp_dir</span><span class="p">,</span>
+            <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span>
+            <span class="n">initial_configurations_via_metalearning</span><span class="p">,</span>
+            <span class="n">ensemble_size</span><span class="o">=</span><span class="n">ensemble_size</span><span class="p">,</span>
+            <span class="n">ensemble_nbest</span><span class="o">=</span><span class="n">ensemble_nbest</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="n">ml_memory_limit</span><span class="o">=</span><span class="n">ml_memory_limit</span><span class="p">,</span>
+            <span class="n">include_estimators</span><span class="o">=</span><span class="n">include_estimators</span><span class="p">,</span>
+            <span class="n">include_preprocessors</span><span class="o">=</span><span class="n">include_preprocessors</span><span class="p">,</span>
+            <span class="n">resampling_strategy</span><span class="o">=</span><span class="n">resampling_strategy</span><span class="p">,</span>
+            <span class="n">tmp_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tmp_dir</span><span class="p">,</span>
+            <span class="n">output_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_dir</span><span class="p">,</span>
+            <span class="n">resampling_strategy_arguments</span><span class="o">=</span><span class="n">resampling_strategy_arguments</span><span class="p">,</span>
+            <span class="n">delete_tmp_folder_after_terminate</span><span class="o">=</span><span class="n">delete_tmp_folder_after_terminate</span><span class="p">,</span>
+            <span class="n">delete_output_folder_after_terminate</span><span class="o">=</span>
+            <span class="n">delete_output_folder_after_terminate</span><span class="p">,</span>
+            <span class="n">shared_mode</span><span class="o">=</span><span class="n">shared_mode</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_prepare_create_folders</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">):</span>
+        <span class="n">random_number</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
+
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">tmp_dir</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">tmp_dir</span> <span class="o">=</span> <span class="s1">&#39;/tmp/autosklearn_tmp_</span><span class="si">%d</span><span class="s1">_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">random_number</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">output_dir</span> <span class="o">=</span> <span class="s1">&#39;/tmp/autosklearn_output_</span><span class="si">%d</span><span class="s1">_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">random_number</span><span class="p">)</span>
+
+        <span class="c1"># Totally weird, this has to be created here, will be deleted in the</span>
+        <span class="c1"># first lines of fit(). If not there, creating the Backend object in the</span>
+        <span class="c1"># superclass will fail</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">tmp_dir</span><span class="p">,</span> <span class="n">output_dir</span>
+
+    <span class="k">def</span> <span class="nf">_create_output_directories</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tmp_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_output_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+<div class="viewcode-block" id="AutoSklearnClassifier.fit"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnClassifier.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
+            <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;acc_metric&#39;</span><span class="p">,</span>
+            <span class="n">feat_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">dataset_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fit *autosklearn* to given training set (X, y).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        X : array-like or sparse matrix of shape = [n_samples, n_features]</span>
+<span class="sd">            The training input samples.</span>
+
+<span class="sd">        y : array-like, shape = [n_samples] or [n_samples, n_outputs]</span>
+<span class="sd">            The target classes.</span>
+
+<span class="sd">        metric : str, optional (default=&#39;acc_metric&#39;)</span>
+<span class="sd">            The metric to optimize for. Can be one of: [&#39;acc_metric&#39;,</span>
+<span class="sd">            &#39;auc_metric&#39;, &#39;bac_metric&#39;, &#39;f1_metric&#39;, &#39;pac_metric&#39;]. A</span>
+<span class="sd">            description of the metrics can be found in `the paper describing</span>
+<span class="sd">            the AutoML Challenge</span>
+<span class="sd">            &lt;http://www.causality.inf.ethz.ch/AutoML/automl_ijcnn15.pdf&gt;`_.</span>
+
+<span class="sd">        feat_type : list, optional (default=None)</span>
+<span class="sd">            List of str of `len(X.shape[1])` describing the attribute type.</span>
+<span class="sd">            Possible types are `Categorical` and `Numerical`. `Categorical`</span>
+<span class="sd">            attributes will be automatically One-Hot encoded.</span>
+
+<span class="sd">        dataset_name : str, optional (default=None)</span>
+<span class="sd">            Create nicer output. If None, a string will be determined by the</span>
+<span class="sd">            md5 hash of the dataset.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Fit is supposed to be idempotent!</span>
+
+        <span class="c1"># But not if we use share_mode:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shared_mode</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_delete_output_directories</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If this fails, it&#39;s likely that this is the first call to get</span>
+            <span class="c1"># the data manager</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">D</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">load_datamanager</span><span class="p">()</span>
+                <span class="n">dataset_name</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_output_directories</span><span class="p">()</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># reshape is necessary to preserve the data contiguity against vs</span>
+            <span class="c1"># [:, np.newaxis] that does not.</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_outputs</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_classes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_classes</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">six</span><span class="o">.</span><span class="n">moves</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_outputs</span><span class="p">):</span>
+            <span class="n">classes_k</span><span class="p">,</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">[:,</span> <span class="n">k</span><span class="p">],</span> <span class="n">return_inverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_classes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classes_k</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_n_classes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classes_k</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_classes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_outputs</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="n">MULTILABEL_CLASSIFICATION</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">task</span> <span class="o">=</span> <span class="n">BINARY_CLASSIFICATION</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">task</span> <span class="o">=</span> <span class="n">MULTICLASS_CLASSIFICATION</span>
+
+        <span class="c1"># TODO: fix metafeatures calculation to allow this!</span>
+        <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">AutoSklearnClassifier</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span>
+                                                      <span class="n">feat_type</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AutoSklearnClassifier.predict"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnClassifier.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Predict classes for X.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like or sparse matrix of shape = [n_samples, n_features]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        y : array of shape = [n_samples] or [n_samples, n_labels]</span>
+<span class="sd">            The predicted classes.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">AutoSklearnClassifier</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AutoSklearnClassifier.predict_proba"><a class="viewcode-back" href="../../api.html#autosklearn.classification.AutoSklearnClassifier.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Predict probabilities of classes for all samples X.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like or sparse matrix of shape = [n_samples, n_features]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        y : array of shape = [n_samples, n_classes] or [n_samples, n_labels]</span>
+<span class="sd">            The predicted class probabilities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">AutoSklearnClassifier</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">AutoSklearnRegressor</span><span class="p">(</span><span class="n">autosklearn</span><span class="o">.</span><span class="n">automl</span><span class="o">.</span><span class="n">AutoML</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2016, Matthias Feurer, Aaron Klein, Katharina Eggensperger, Jost Tobias Springenberg, Manuel Blum, Frank Hutter.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
