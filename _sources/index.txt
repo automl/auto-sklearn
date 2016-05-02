@@ -101,20 +101,6 @@ When developing new features, please create a new branch from the development
 branch. Prior to submitting a pull request, make sure that all tests are
 still passing.
 
-..
-
-    A short guide to the code
-    -------------------------
-    * `automl.py`: main class which controls the workflow.
-    * `estimators.py`: wraps a scikit-learn interface around automl.py.
-    * `cli`: command line interface to the machine learning algorithm which is
-      used internally by SMAC.
-    * `data`: code to read and store machine learning datasets.
-    * `evaluation`: classes to control the execution of machine learning,
-      algorithms and resampling of the data.
-    * `metrics`: contains metrics which can be optimized.
-    * `util`: several utilityy functions.
-
 Contributors
 ************
 
