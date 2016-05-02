@@ -32,7 +32,7 @@ pip install numpy==1.9.3
 pip install scipy==0.15.1
 
 # Install requirements in correct order
-cat requ.txt | xargs -n 1 -L 1 pip install
+cat requirements.txt | xargs -n 1 -L 1 pip install
 
 if [[ "$COVERAGE" == "true" ]]; then
     pip install coverage coveralls
