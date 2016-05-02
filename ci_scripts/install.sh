@@ -29,7 +29,7 @@ source activate testenv
 
 # First install exact numpy and scipy version from pip
 pip install numpy==1.9.3
-pip install scipy==0.15.1
+pip install scipy==0.16.1
 
 # Install requirements in correct order
 cat requirements.txt | xargs -n 1 -L 1 pip install
