@@ -19,7 +19,7 @@ replacement for a scikit-learn estimator:
 *auto-sklearn* frees a machine learning user from algorithm selection and
 hyperparameter tuning. It leverages recent advantages in *Bayesian
 optimization*, *meta-learning* and *ensemble construction*. Learn more about
-the technology behind *auto-sklearn* by reading a paper we just published at
+the technology behind *auto-sklearn* by reading this paper published at
 the `NIPS 2015 <http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf>`_
 .
 
@@ -50,21 +50,15 @@ This will run for one hour should result in an accuracy above 0.98.
 
 Installation
 ************
-**Prerequisities**: *auto-sklearn* is written in python (2.7) and was developed
+**Prerequisities**: *auto-sklearn* is written in python and was developed
 with Ubuntu. It should run on other Linux distributions, but won't work on a MAC
-or on a windows PC. It requires scikit-learn 0.16.1, which in turn requires
-numpy and scipy.
-
-*auto-sklearn* has at least one dependency, which is not yet automatically
-resolved:
-
-* `HPOlibConfigSpace <https://github.com/automl/HPOlibConfigSpace>`_
+or on a windows PC. It is built around scikit-learn 0.17.1
 
 Please install all dependencies manually with:
 
 .. code:: bash
 
-    pip install -r https://raw.githubusercontent.com/automl/auto-sklearn/master/requ.txt
+    pip install -r https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt
 
 Then install *auto-sklearn*
 
@@ -74,9 +68,7 @@ Then install *auto-sklearn*
 
 We recommend installing *auto-sklearn* into a `virtual environment
 <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or into an
-`anaconda environment <https://www.continuum.io/downloads>`_ because we have
-seen strange things happening when installing it using
-:bash:`python setup.py --user`.
+`anaconda environment <https://www.continuum.io/downloads>`_..
 
 Manual
 ******
@@ -90,7 +82,7 @@ License
 *******
 *auto-sklearn* is licensed the same way as *scikit-learn*,
 namely the 3-clause BSD license. The subprojects it uses, most notably SMAC,
-may have different licenses.
+can have different licenses.
 
 Contributing
 ************
@@ -109,24 +101,19 @@ When developing new features, please create a new branch from the development
 branch. Prior to submitting a pull request, make sure that all tests are
 still passing.
 
-Features under development
---------------------------
-* support for arff files
-* support for scikit-learn 0.17
-* python 3 compability
-* command line interface
+..
 
-A short guide to the code
--------------------------
-* `automl.py`: main class which controls the workflow.
-* `estimators.py`: wraps a scikit-learn interface around automl.py.
-* `cli`: command line interface to the machine learning algorithm which is
-  used internally by SMAC.
-* `data`: code to read and store machine learning datasets.
-* `evaluation`: classes to control the execution of machine learning,
-  algorithms and resampling of the data.
-* `metrics`: contains metrics which can be optimized.
-* `util`: several utilityy functions.
+    A short guide to the code
+    -------------------------
+    * `automl.py`: main class which controls the workflow.
+    * `estimators.py`: wraps a scikit-learn interface around automl.py.
+    * `cli`: command line interface to the machine learning algorithm which is
+      used internally by SMAC.
+    * `data`: code to read and store machine learning datasets.
+    * `evaluation`: classes to control the execution of machine learning,
+      algorithms and resampling of the data.
+    * `metrics`: contains metrics which can be optimized.
+    * `util`: several utilityy functions.
 
 Contributors
 ************
@@ -140,19 +127,4 @@ Contributors
 * Farooq Ahmed Zuberi
 * Frank Hutter
 * Alexander Sapronov
-
-..
-    Welcome to AutoSklearn's documentation!
-    =======================================
-
-    Contents:
-
-    .. toctree::
-        :maxdepth: 2
-
-        Indices and tables
-        ==================
-
-        * :ref:`genindex`
-    * :ref:`modindex`
-    * :ref:`search`
+* Anatolii Domashnev

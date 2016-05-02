@@ -32,6 +32,7 @@ env:
   matrix:
   - DISTRIB="conda" PYTHON_VERSION="2.7"
   - DISTRIB="conda" PYTHON_VERSION="3.4" COVERAGE="true"
+  - DISTRIB="conda" PYTHON_VERSION="3.5"
 
 install:
   # Necessary for random forest
