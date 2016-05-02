@@ -635,14 +635,15 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         # Multilabel
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
-        Y_train = np.array([(y, 26 - y) for y in Y_train])
+        Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
+                                 for y in Y_train]))
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
         cls_predict = mock.Mock(wraps=cls.pipeline_)
         cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
-        self.assertEqual((1647, 2), prediction.shape)
+        self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(83, cls_predict.predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
@@ -684,14 +685,15 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         # Multilabel
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                        make_sparse=True)
-        Y_train = np.array([(y, 26 - y) for y in Y_train])
+        Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
+                                 for y in Y_train]))
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
         cls_predict = mock.Mock(wraps=cls.pipeline_)
         cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
-        self.assertEqual((1647, 2), prediction.shape)
+        self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(83, cls_predict.predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
@@ -716,10 +718,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         # Multilabel
         cls = SimpleClassificationPipeline(default)
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
-        Y_train_ = np.zeros((Y_train.shape[0], 10))
-        for i, y in enumerate(Y_train):
-            Y_train_[i][y] = 1
-        Y_train = Y_train_
+        Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
+                                 for y in Y_train]))
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
@@ -772,10 +772,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cls = SimpleClassificationPipeline(config)
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                        make_sparse=True)
-        Y_train_ = np.zeros((Y_train.shape[0], 10))
-        for i, y in enumerate(Y_train):
-            Y_train_[i][y] = 1
-        Y_train = Y_train_
+        Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
+                                 for y in Y_train]))
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
