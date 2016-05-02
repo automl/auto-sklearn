@@ -117,11 +117,7 @@
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#manual">Manual</a></li>
 <li><a class="reference internal" href="#license">License</a></li>
-<li><a class="reference internal" href="#contributing">Contributing</a><ul>
-<li><a class="reference internal" href="#features-under-development">Features under development</a></li>
-<li><a class="reference internal" href="#a-short-guide-to-the-code">A short guide to the code</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#contributing">Contributing</a></li>
 <li><a class="reference internal" href="#contributors">Contributors</a></li>
 </ul>
 </li>
@@ -144,7 +140,7 @@ replacement for a scikit-learn estimator:</p>
 <p><em>auto-sklearn</em> frees a machine learning user from algorithm selection and
 hyperparameter tuning. It leverages recent advantages in <em>Bayesian
 optimization</em>, <em>meta-learning</em> and <em>ensemble construction</em>. Learn more about
-the technology behind <em>auto-sklearn</em> by reading a paper we just published at
+the technology behind <em>auto-sklearn</em> by reading this paper published at
 the <a class="reference external" href="http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf">NIPS 2015</a>
 .</p>
 <div class="section" id="example">
@@ -172,17 +168,11 @@ the <a class="reference external" href="http://papers.nips.cc/paper/5872-efficie
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p><strong>Prerequisities</strong>: <em>auto-sklearn</em> is written in python (2.7) and was developed
+<p><strong>Prerequisities</strong>: <em>auto-sklearn</em> is written in python and was developed
 with Ubuntu. It should run on other Linux distributions, but won&#8217;t work on a MAC
-or on a windows PC. It requires scikit-learn 0.16.1, which in turn requires
-numpy and scipy.</p>
-<p><em>auto-sklearn</em> has at least one dependency, which is not yet automatically
-resolved:</p>
-<ul class="simple">
-<li><a class="reference external" href="https://github.com/automl/HPOlibConfigSpace">HPOlibConfigSpace</a></li>
-</ul>
+or on a windows PC. It is built around scikit-learn 0.17.1</p>
 <p>Please install all dependencies manually with:</p>
-<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">auto</span><span class="o">-</span><span class="n">sklearn</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">requ</span><span class="o">.</span><span class="n">txt</span>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">auto</span><span class="o">-</span><span class="n">sklearn</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
 <p>Then install <em>auto-sklearn</em></p>
@@ -190,9 +180,7 @@ resolved:</p>
 </pre></div>
 </div>
 <p>We recommend installing <em>auto-sklearn</em> into a <a class="reference external" href="http://docs.python-guide.org/en/latest/dev/virtualenvs/">virtual environment</a> or into an
-<a class="reference external" href="https://www.continuum.io/downloads">anaconda environment</a> because we have
-seen strange things happening when installing it using
-<code class="code bash docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">--user</span></code>.</p>
+<a class="reference external" href="https://www.continuum.io/downloads">anaconda environment</a>..</p>
 </div>
 <div class="section" id="manual">
 <h2>Manual<a class="headerlink" href="#manual" title="Permalink to this headline">¶</a></h2>
@@ -206,7 +194,7 @@ seen strange things happening when installing it using
 <h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
 <p><em>auto-sklearn</em> is licensed the same way as <em>scikit-learn</em>,
 namely the 3-clause BSD license. The subprojects it uses, most notably SMAC,
-may have different licenses.</p>
+can have different licenses.</p>
 </div>
 <div class="section" id="contributing">
 <h2>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h2>
@@ -222,18 +210,8 @@ by opening a <a class="reference external" href="https://github.com/automl/auto-
 <p>When developing new features, please create a new branch from the development
 branch. Prior to submitting a pull request, make sure that all tests are
 still passing.</p>
-<div class="section" id="features-under-development">
-<h3>Features under development<a class="headerlink" href="#features-under-development" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>support for arff files</li>
-<li>support for scikit-learn 0.17</li>
-<li>python 3 compability</li>
-<li>command line interface</li>
-</ul>
-</div>
-<div class="section" id="a-short-guide-to-the-code">
-<h3>A short guide to the code<a class="headerlink" href="#a-short-guide-to-the-code" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
+<blockquote>
+<div><ul class="simple">
 <li><cite>automl.py</cite>: main class which controls the workflow.</li>
 <li><cite>estimators.py</cite>: wraps a scikit-learn interface around automl.py.</li>
 <li><cite>cli</cite>: command line interface to the machine learning algorithm which is
@@ -244,7 +222,7 @@ algorithms and resampling of the data.</li>
 <li><cite>metrics</cite>: contains metrics which can be optimized.</li>
 <li><cite>util</cite>: several utilityy functions.</li>
 </ul>
-</div>
+</div></blockquote>
 </div>
 <div class="section" id="contributors">
 <h2>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h2>
@@ -258,6 +236,7 @@ algorithms and resampling of the data.</li>
 <li>Farooq Ahmed Zuberi</li>
 <li>Frank Hutter</li>
 <li>Alexander Sapronov</li>
+<li>Anatolii Domashnev</li>
 </ul>
 </div>
 </div>
