@@ -30,9 +30,10 @@ class DecisionTree(AutoSklearnRegressionAlgorithm):
 
         self.max_features = float(self.max_features)
         if self.max_depth == "None":
-            self.max_depth = None
+            max_depth = self.max_depth = None
         else:
             num_features = X.shape[1]
+            self.max_depth = int(self.max_depth)
             max_depth = max(1, int(np.round(self.max_depth * num_features, 0)))
         self.min_samples_split = int(self.min_samples_split)
         self.min_samples_leaf = int(self.min_samples_leaf)
