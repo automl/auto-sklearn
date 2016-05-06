@@ -68,7 +68,7 @@ class BalancingComponentTest(unittest.TestCase):
 
         for name, clf, acc_no_weighting, acc_weighting in \
                 [('adaboost', AdaboostClassifier, 0.709, 0.658),
-                 ('decision_tree', DecisionTree, 0.724, 0.701),
+                 ('decision_tree', DecisionTree, 0.724, 0.692),
                  ('extra_trees', ExtraTreesClassifier, 0.812, 0.8),
                  ('gradient_boosting', GradientBoostingClassifier,
                     0.800, 0.760),
