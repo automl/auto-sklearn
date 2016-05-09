@@ -6,3 +6,4 @@ recursive-include autosklearn/metalearning/files *.arff
 recursive-include autosklearn/metalearning/files *.csv
 recursive-include autosklearn/metalearning/files *.txt
 include autosklearn/util/logging.yaml
+recursive-include autosklearn *.pyx
