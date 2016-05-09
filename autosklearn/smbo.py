@@ -884,8 +884,9 @@ class AutoMLSMBO(multiprocessing.Process):
                     Y_cfg[:, 0][Y_cfg[:, 0] > 2] = 2
 
                 if len(X_meta) > 0 and len(X_cfg) > 0:
-                    X_cfg = np.concatenate((X_meta, X_cfg))
-                    Y_cfg = np.concatenate((Y_meta, Y_cfg))
+                    pass
+                    #X_cfg = np.concatenate((X_meta, X_cfg))
+                    #Y_cfg = np.concatenate((Y_meta, Y_cfg))
                 elif len(X_meta) > 0:
                     X_cfg = X_meta.copy()
                     Y_cfg = Y_meta.copy()
