@@ -44,10 +44,14 @@ test:
   override:
     - cat ~/log.txt && if grep -q "Traceback (most recent call last):" ~/log.txt; then false; else true; fi
 deployment:
-  push:
+  master:
+    branch: master
+    commands:
+      - bash ci_scripts/push_doc.sh 'stable'
+  development:
     branch: development
     commands:
-      - bash ci_scripts/push_doc.sh
+      - bash ci_scripts/push_doc.sh 'dev'
 general:
   # Open the doc to the API
   artifacts:
@@ -57,3 +61,4 @@ general:
   branches:
     only:
        - development
+       - master
