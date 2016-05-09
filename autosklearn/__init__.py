@@ -3,9 +3,5 @@ import os
 
 import pkg_resources
 
-smac = pkg_resources.resource_filename(
-    'autosklearn',
-    'binaries/smac-v2.08.01-development-1/smac-v2.08.01-development-1/')
-runsolver = pkg_resources.resource_filename('autosklearn', 'binaries/')
-os.environ['PATH'] = smac + os.pathsep + runsolver + os.pathsep + \
-    os.environ['PATH']
+__version__ = '0.0.1'
+

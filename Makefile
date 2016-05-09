@@ -17,11 +17,11 @@ inplace:
 
 doc:
     cd ./doc
-    make
+    make html
     cd ..
 
 test-code: in
-	$(NOSETESTS) -s -v tests
+    $(NOSETESTS) -s -v tests
 test-doc:
 	$(NOSETESTS) -s -v doc/*.rst
 

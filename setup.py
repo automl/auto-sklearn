@@ -14,6 +14,7 @@ import setuptools
 from setuptools.extension import Extension
 import numpy as np
 from Cython.Build import cythonize
+import autosklearn
 
 extensions = cythonize(
     [Extension('autosklearn.data.competition_c_functions',
@@ -26,7 +27,7 @@ extensions = cythonize(
 setuptools.setup(
     name='auto-sklearn',
     description='Automated machine learning.',
-    version='0.0.1',
+    version=autosklearn.__version__,
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=['numpy>=1.9.0',

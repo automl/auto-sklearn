@@ -106,11 +106,14 @@ Contributors
 
 * Matthias Feurer
 * Katharina Eggensperger
-* Aaron Klein
 * Jost Tobias Springenberg
-* Manuel Blum
+* Aaron Klein
+* Anatolii Domashnev
+* Alexander Sapronov
 * Stefan Falkner
+* Manuel Blum
+* Hector Mendoza
 * Farooq Ahmed Zuberi
 * Frank Hutter
-* Alexander Sapronov
-* Anatolii Domashnev
+
+
