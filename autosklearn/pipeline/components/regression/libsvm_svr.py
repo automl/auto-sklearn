@@ -2,9 +2,9 @@ import resource
 
 import numpy as np
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.conditions import InCondition
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.conditions import InCondition
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter
 
@@ -71,8 +71,8 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
         )
         self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
 
-        self.scaler.fit(Y)
-        Y_scaled = self.scaler.transform(Y)
+        self.scaler.fit(Y.reshape((-1, 1)))
+        Y_scaled = self.scaler.transform(Y.reshape((-1, 1))).ravel()
         self.estimator.fit(X, Y_scaled)
         return self
 

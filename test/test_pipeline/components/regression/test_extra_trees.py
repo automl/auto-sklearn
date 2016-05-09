@@ -12,7 +12,7 @@ class ExtraTreesComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_regressor(ExtraTreesRegressor)
-            self.assertAlmostEqual(0.4269923975466271,
+            self.assertAlmostEqual(0.43258995365114405,
                                    sklearn.metrics.r2_score(targets,
                                                              predictions))
 
@@ -20,7 +20,7 @@ class ExtraTreesComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_regressor(ExtraTreesRegressor, sparse=True)
-            self.assertAlmostEqual(0.26287621251507987,
+            self.assertAlmostEqual(0.28016012771570553,
                                    sklearn.metrics.r2_score(targets,
                                                             predictions))
 
@@ -28,6 +28,6 @@ class ExtraTreesComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_regressor_iterative_fit(ExtraTreesRegressor)
-            self.assertAlmostEqual(0.4269923975466271,
+            self.assertAlmostEqual(0.43258995365114405,
                                    sklearn.metrics.r2_score(targets,
                                                             predictions))

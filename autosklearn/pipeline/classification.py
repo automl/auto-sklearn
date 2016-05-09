@@ -5,8 +5,8 @@ import numpy as np
 
 from sklearn.base import ClassifierMixin
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 from autosklearn.pipeline.components import classification as \
     classification_components
@@ -30,11 +30,11 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
     possible parameters in the __init__ function because we only know the
     available classifiers at runtime. For this reason the user must
     specifiy the parameters by passing an instance of
-    HPOlibConfigSpace.configuration_space.Configuration.
+    ConfigSpace.configuration_space.Configuration.
 
     Parameters
     ----------
-    configuration : HPOlibConfigSpace.configuration_space.Configuration
+    configuration : ConfigSpace.configuration_space.Configuration
         The configuration to evaluate.
 
     random_state : int, RandomState instance or None, optional (default=None)
@@ -117,38 +117,19 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
             else:
                 # Probe for the target array dimensions
-                target = self.predict_proba(X[0].copy())
+                target = self.predict_proba(X[0:2].copy())
 
-                # Binary or Multiclass
-                if len(target) == 1:
-                    y = np.zeros((X.shape[0], target.shape[1]),
-                                 dtype=np.float32)
+                y = np.zeros((X.shape[0], target.shape[1]),
+                             dtype=np.float32)
 
-                    for k in range(max(1, int(np.ceil(float(X.shape[0]) /
-                            batch_size)))):
-                        batch_from = k * batch_size
-                        batch_to = min([(k + 1) * batch_size, X.shape[0]])
-                        y[batch_from:batch_to] = \
-                            self.predict_proba(X[batch_from:batch_to],
-                                               batch_size=None).\
-                                astype(np.float32)
-
-                elif len(target) > 1:
-                    y = [np.zeros((X.shape[0], target[i].shape[1]),
-                                  dtype=np.float32)
-                         for i in range(len(target))]
-
-                    for k in range(max(1, int(np.ceil(float(X.shape[0]) /
-                            batch_size)))):
-                        batch_from = k * batch_size
-                        batch_to = min([(k + 1) * batch_size, X.shape[0]])
-                        predictions = \
-                            self.predict_proba(X[batch_from:batch_to],
-                                               batch_size=None).\
-                                astype(np.float32)
-
-                        for i in range(len(target)):
-                            y[i][batch_from:batch_to] = predictions[i]
+                for k in range(max(1, int(np.ceil(float(X.shape[0]) /
+                        batch_size)))):
+                    batch_from = k * batch_size
+                    batch_to = min([(k + 1) * batch_size, X.shape[0]])
+                    y[batch_from:batch_to] = \
+                        self.predict_proba(X[batch_from:batch_to],
+                                           batch_size=None).\
+                            astype(np.float32)
 
                 return y
 
@@ -221,7 +202,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         classifiers_ = ["adaboost", "decision_tree", "extra_trees",
                         "gradient_boosting", "k_nearest_neighbors",
                         "libsvm_svc", "random_forest", "gaussian_nb",
-                        "decision_tree"]
+                        "decision_tree", "xgradient_boosting"]
         feature_learning = ["kitchen_sinks", "nystroem_sampler"]
 
         for c, f in product(classifiers_, feature_learning):

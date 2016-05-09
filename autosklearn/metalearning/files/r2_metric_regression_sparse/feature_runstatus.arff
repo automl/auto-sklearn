@@ -1,0 +1,115 @@
+@RELATION ChaLearn_AutoML_Challenge_2015_FEATURE_RUNSTATUS
+
+@ATTRIBUTE instance_id STRING
+@ATTRIBUTE repetition NUMERIC
+@ATTRIBUTE NumberOfFeaturesWithMissingValues {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE KurtosisSTD {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE DatasetRatio {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE LandmarkDecisionNodeLearner {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE NumberOfClasses {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE NumberOfMissingValues {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE KurtosisMin {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE SkewnessMean {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE SymbolsMean {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE Skewnesses {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE SkewnessSTD {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE SkewnessMax {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE NumberOfFeatures {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE ClassEntropy {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE PCA {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE LandmarkNaiveBayes {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE LogNumberOfFeatures {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE RatioNominalToNumerical {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE LogNumberOfInstances {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE SymbolsSTD {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE MissingValues {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE SymbolsSum {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE PCAKurtosisFirstPC {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE NumSymbols {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE ClassProbabilityMax {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE LandmarkRandomNodeLearner {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE ClassProbabilitySTD {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE SymbolsMin {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE LogInverseDatasetRatio {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE LandmarkDecisionTree {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE KurtosisMean {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE NumberOfInstancesWithMissingValues {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE KurtosisMax {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE PCASkewnessFirstPC {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE PCAFractionOfComponentsFor95PercentVariance {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE LandmarkLDA {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE ClassOccurences {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE NumberOfCategoricalFeatures {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE Kurtosisses {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE ClassProbabilityMin {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE PercentageOfMissingValues {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE InverseDatasetRatio {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE PercentageOfInstancesWithMissingValues {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE ClassProbabilityMean {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE RatioNumericalToNominal {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE PercentageOfFeaturesWithMissingValues {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE NumberOfInstances {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE LogDatasetRatio {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE SkewnessMin {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE NumberOfNumericFeatures {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE Landmark1NN {ok, timeout, memout, presolved, crash, other}
+@ATTRIBUTE SymbolsMax {ok, timeout, memout, presolved, crash, other}
+
+@DATA
+1028_a_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+1028_r2_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+1030_a_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+1030_r2_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+1414_a_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+1414_r2_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+189_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+189_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+197_a_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+197_r2_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+198_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+198_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+201_a_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+201_r2_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+209_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+209_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+215_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+215_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+216_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+216_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+218_a_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+218_r2_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+225_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+225_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+227_a_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+227_r2_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+287_a_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+287_r2_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+296_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+296_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+308_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+308_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+344_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+344_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+405_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+405_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+416_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+416_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+422_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+422_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+507_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+507_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+512_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+512_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+558_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+558_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+562_a_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+562_r2_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+564_a_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+564_r2_metric,1.0,ok,other,ok,other,ok,ok,other,other,ok,other,other,other,ok,ok,other,other,ok,ok,ok,ok,ok,ok,other,ok,ok,other,ok,ok,ok,other,other,ok,other,other,other,other,ok,ok,other,ok,ok,ok,ok,ok,ok,ok,ok,ok,other,ok,other,ok
+573_a_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+573_r2_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+574_a_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+574_r2_metric,1.0,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok,ok
+% 
+% 
+% 

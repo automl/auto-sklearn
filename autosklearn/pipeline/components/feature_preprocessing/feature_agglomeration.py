@@ -1,9 +1,9 @@
 import numpy as np
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter, \
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
     UniformIntegerHyperparameter
-from HPOlibConfigSpace.forbidden import ForbiddenInClause, \
+from ConfigSpace.forbidden import ForbiddenInClause, \
     ForbiddenAndConjunction, ForbiddenEqualsClause
 
 from autosklearn.pipeline.components.base import \

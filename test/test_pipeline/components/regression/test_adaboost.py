@@ -12,7 +12,7 @@ class AdaBoostComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_regressor(AdaboostRegressor, dataset='boston')
-            self.assertAlmostEqual(0.11053868761882502,
+            self.assertAlmostEqual(0.59461560848921158,
                                    sklearn.metrics.r2_score(targets,
                                                             predictions))
 
@@ -20,6 +20,6 @@ class AdaBoostComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_regressor(AdaboostRegressor, sparse=True, dataset='boston')
-            self.assertAlmostEqual(-0.077540100211211049,
+            self.assertAlmostEqual(0.2039634989252479,
                                    sklearn.metrics.r2_score(targets,
                                                             predictions))

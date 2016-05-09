@@ -2,6 +2,7 @@
 from __future__ import print_function
 import copy
 import os
+import shutil
 import sys
 
 import numpy as np
@@ -23,6 +24,18 @@ class Dummy(object):
 class NestedCVEvaluator_Test(BaseEvaluatorTest):
     _multiprocess_can_split_ = True
 
+    def teardown(self):
+        try:
+            shutil.rmtree(self.output_dir)
+        except Exception:
+            pass
+
+        for output_dir in self.output_directories:
+            try:
+                shutil.rmtree(output_dir)
+            except Exception:
+                pass
+
     def test_datasets(self):
         for getter in get_dataset_getters():
             testname = '%s_%s' % (os.path.basename(__file__).
@@ -30,7 +43,9 @@ class NestedCVEvaluator_Test(BaseEvaluatorTest):
                                   getter.__name__)
             with self.subTest(testname):
                 D = getter()
-                output_directory = os.path.join(os.getcwd(), '.%s' % testname)
+                output_directory = os.path.join(os.path.dirname(__file__),
+                                                '.%s' % testname)
+                self.output_directories.append(output_directory)
                 err = np.zeros([N_TEST_RUNS])
                 for i in range(N_TEST_RUNS):
                     D_ = copy.deepcopy(D)

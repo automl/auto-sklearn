@@ -100,7 +100,7 @@ class AutoSklearnClassificationAlgorithm(object):
 
         Returns
         -------
-        HPOlibConfigspace.configuration_space.ConfigurationSpace
+        Configspace.configuration_space.ConfigurationSpace
             The configuration space of this classification algorithm.
         """
         raise NotImplementedError()
@@ -212,7 +212,7 @@ class AutoSklearnPreprocessingAlgorithm(object):
 
         Returns
         -------
-        HPOlibConfigspace.configuration_space.ConfigurationSpace
+        Configspace.configuration_space.ConfigurationSpace
             The configuration space of this preprocessing algorithm.
         """
         raise NotImplementedError()
@@ -311,7 +311,7 @@ class AutoSklearnRegressionAlgorithm(object):
 
         Returns
         -------
-        HPOlibConfigspace.configuration_space.ConfigurationSpace
+        Configspace.configuration_space.ConfigurationSpace
             The configuration space of this regression algorithm.
         """
         raise NotImplementedError()

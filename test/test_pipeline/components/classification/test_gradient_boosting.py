@@ -15,14 +15,14 @@ class GradientBoostingComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_classifier(GradientBoostingClassifier)
-            self.assertAlmostEqual(0.95999999999999996,
+            self.assertAlmostEqual(0.93999999999999995,
                 sklearn.metrics.accuracy_score(predictions, targets))
 
     def test_default_configuration_iterative_fit(self):
         for i in range(10):
             predictions, targets = \
                 _test_classifier_iterative_fit(GradientBoostingClassifier)
-            self.assertAlmostEqual(0.93999999999999995,
+            self.assertAlmostEqual(0.95999999999999996,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
 
@@ -40,7 +40,7 @@ class GradientBoostingComponentTest(unittest.TestCase):
                 _test_classifier(classifier=GradientBoostingClassifier,
                                  dataset='digits',
                                  make_multilabel=True)
-            self.assertAlmostEqual(0.83835860291198527,
+            self.assertAlmostEqual(0.84004577632243804,
                                    sklearn.metrics.average_precision_score(
                                        targets, predictions))
 

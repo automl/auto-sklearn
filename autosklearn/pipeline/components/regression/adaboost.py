@@ -1,7 +1,7 @@
 import numpy as np
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
@@ -25,7 +25,7 @@ class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
         self.n_estimators = int(self.n_estimators)
         self.learning_rate = float(self.learning_rate)
         self.max_depth = int(self.max_depth)
-        base_estimator = sklearn.tree.DecisionTreeClassifier(
+        base_estimator = sklearn.tree.DecisionTreeRegressor(
             max_depth=self.max_depth)
 
         self.estimator = sklearn.ensemble.AdaBoostRegressor(
@@ -63,7 +63,7 @@ class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
         n_estimators = cs.add_hyperparameter(UniformIntegerHyperparameter(
             name="n_estimators", lower=50, upper=500, default=50, log=False))
         learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
-            name="learning_rate", lower=0.0001, upper=2, default=0.1, log=True))
+            name="learning_rate", lower=0.01, upper=2, default=0.1, log=True))
         loss = cs.add_hyperparameter(CategoricalHyperparameter(
             name="loss", choices=["linear", "square", "exponential"],
             default="linear"))

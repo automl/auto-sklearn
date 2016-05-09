@@ -5,7 +5,6 @@ import scipy as sp
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
     BINARY_CLASSIFICATION
 
-
 def sanitize_array(array):
     """
     Replace NaN and Inf (there should not be any!)
@@ -20,6 +19,7 @@ def sanitize_array(array):
     mid = (maxi + mini) / 2
     array[np.isnan(array)] = mid
     return array
+
 
 
 def normalize_array(solution, prediction):
@@ -163,10 +163,9 @@ def binarize_predictions(array, task=BINARY_CLASSIFICATION):
 
 def create_multiclass_solution(solution, prediction):
     solution_binary = np.zeros((prediction.shape), dtype=np.int32)
-
     for i in range(solution_binary.shape[0]):
         try:
-            solution_binary[i, solution[i]] = 1
+            solution_binary[i, int(solution[i])] = 1
         except IndexError as e:
             raise IndexError('too many indices to array. array has shape %s, '
                              'indices are "%s %s"' %

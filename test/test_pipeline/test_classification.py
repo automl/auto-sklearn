@@ -13,9 +13,9 @@ import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.testing import assert_array_almost_equal
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace, \
+from ConfigSpace.configuration_space import ConfigurationSpace, \
     Configuration
-from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
+from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.components.base import \
@@ -119,6 +119,21 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 sklearn.metrics.accuracy_score(predictions, Y_test))
             scores = auto.predict_proba(X_test)
 
+    def test_default_configuration_multilabel(self):
+        for i in range(2):
+            cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+                dataset_properties={'multilabel': True})
+            default = cs.get_default_configuration()
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris',
+                                                           make_multilabel=True)
+            auto = SimpleClassificationPipeline(default)
+            auto = auto.fit(X_train, Y_train)
+            predictions = auto.predict(X_test)
+            self.assertAlmostEqual(0.9599999999999995,
+                                   sklearn.metrics.accuracy_score(predictions,
+                                                                  Y_test))
+            scores = auto.predict_proba(X_test)
+
     def test_repr(self):
         cs = SimpleClassificationPipeline.get_hyperparameter_search_space()
         default = cs.get_default_configuration()
@@ -162,6 +177,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             if 'classifier:sgd:n_iter' in config and \
                     config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
+            if 'classifier:adaboost:n_estimators' in config and \
+                    config['classifier:adaboost:n_estimators'] is not None:
+                config._values['classifier:adaboost:n_estimators'] = 50
+            if 'classifier:adaboost:max_depth' in config and \
+                    config['classifier:adaboost:max_depth'] is not None:
+                config._values['classifier:adaboost:max_depth'] = 1
 
             cls = SimpleClassificationPipeline(config, random_state=1)
             print(config)
@@ -176,9 +197,15 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 continue
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
-                        e.args[0] or \
-                        "removed all features" in e.args[0] or \
-                        "all features are discarded" in e.args[0]:
+                        e.args[0]:
+                    continue
+                elif "removed all features" in e.args[0]:
+                    continue
+                elif "all features are discarded" in e.args[0]:
+                    continue
+                elif "Numerical problems in QDA" in e.args[0]:
+                    continue
+                elif 'Bug in scikit-learn' in e.args[0]:
                     continue
                 else:
                     print(config)
@@ -248,6 +275,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     continue
                 elif "Numerical problems in QDA" in e.args[0]:
                     continue
+                elif 'Bug in scikit-learn' in e.args[0]:
+                    continue
                 else:
                     print(config)
                     print(traceback.format_exc())
@@ -294,6 +323,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             if 'classifier:sgd:n_iter' in config and \
                     config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
+            if 'classifier:adaboost:n_estimators' in config and \
+                    config['classifier:adaboost:n_estimators'] is not None:
+                config._values['classifier:adaboost:n_estimators'] = 50
+            if 'classifier:adaboost:max_depth' in config and \
+                    config['classifier:adaboost:max_depth'] is not None:
+                config._values['classifier:adaboost:max_depth'] = 1
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
             cls = SimpleClassificationPipeline(config, random_state=1)
@@ -307,9 +342,15 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 self.assertIsInstance(predicted_probabiliets, np.ndarray)
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
-                       e.args[0] or \
-                       "removed all features" in e.args[0] or \
-                                "all features are discarded" in e.args[0]:
+                        e.args[0]:
+                    continue
+                elif "removed all features" in e.args[0]:
+                    continue
+                elif "all features are discarded" in e.args[0]:
+                    continue
+                elif "Numerical problems in QDA" in e.args[0]:
+                    continue
+                elif 'Bug in scikit-learn' in e.args[0]:
                     continue
                 else:
                     print(config)
@@ -355,6 +396,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             if 'classifier:sgd:n_iter' in config and \
                     config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
+            if 'classifier:adaboost:n_estimators' in config and \
+                    config['classifier:adaboost:n_estimators'] is not None:
+                config._values['classifier:adaboost:n_estimators'] = 50
+            if 'classifier:adaboost:max_depth' in config and \
+                    config['classifier:adaboost:max_depth'] is not None:
+                config._values['classifier:adaboost:max_depth'] = 1
 
             print(config)
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
@@ -365,13 +412,19 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 predictions = cls.predict(X_test)
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
-                       e.args[0] or \
-                        "removed all features" in e.args[0] or \
-                                "all features are discarded" in e.args[0]:
+                        e.args[0]:
+                    continue
+                elif "removed all features" in e.args[0]:
+                    continue
+                elif "all features are discarded" in e.args[0]:
+                    continue
+                elif "Numerical problems in QDA" in e.args[0]:
+                    continue
+                elif 'Bug in scikit-learn' in e.args[0]:
                     continue
                 else:
                     print(config)
-                    traceback.print_tb(sys.exc_info()[2])
+                    print(traceback.format_exc())
                     raise e
             except RuntimeWarning as e:
                 if "invalid value encountered in sqrt" in e.args[0]:
@@ -409,6 +462,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             if 'classifier:sgd:n_iter' in config and \
                     config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
+            if 'classifier:adaboost:n_estimators' in config and \
+                    config['classifier:adaboost:n_estimators'] is not None:
+                config._values['classifier:adaboost:n_estimators'] = 50
+            if 'classifier:adaboost:max_depth' in config and \
+                            config['classifier:adaboost:max_depth'] is not None:
+                config._values['classifier:adaboost:max_depth'] = 1
 
             print(config)
             categorical = [True, True, True, False, False, True, True, True,
@@ -431,13 +490,19 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 predictions = cls.predict(X_test)
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
-                    e.args[0] or \
-                    "removed all features" in e.args[0] or \
-                                "all features are discarded" in e.args[0]:
+                        e.args[0]:
+                    continue
+                elif "removed all features" in e.args[0]:
+                    continue
+                elif "all features are discarded" in e.args[0]:
+                    continue
+                elif "Numerical problems in QDA" in e.args[0]:
+                    continue
+                elif 'Bug in scikit-learn' in e.args[0]:
                     continue
                 else:
                     print(config)
-                    traceback.print_tb(sys.exc_info()[2])
+                    print(traceback.format_exc())
                     raise e
             except RuntimeWarning as e:
                 if "invalid value encountered in sqrt" in e.args[0]:
@@ -466,12 +531,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(len(cs.get_hyperparameter(
             'rescaling:__choice__').choices), 4)
         self.assertEqual(len(cs.get_hyperparameter(
-            'classifier:__choice__').choices), 16)
+            'classifier:__choice__').choices), 17)
         self.assertEqual(len(cs.get_hyperparameter(
             'preprocessor:__choice__').choices), 14)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(144, len(hyperparameters))
+        self.assertEqual(157, len(hyperparameters))
 
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
@@ -528,7 +593,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                          'preprocessor': ['densifier']},
                                 dataset_properties={'sparse': True})
 
-    @unittest.skip("Wait until HPOlibConfigSpace is fixed.")
+    @unittest.skip("Wait until ConfigSpace is fixed.")
     def test_get_hyperparameter_search_space_dataset_properties(self):
         cs_mc = SimpleClassificationPipeline.get_hyperparameter_search_space(
             dataset_properties={'multiclass': True})
@@ -570,14 +635,15 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         # Multilabel
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
-        Y_train = np.array([(y, 26 - y) for y in Y_train])
+        Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
+                                 for y in Y_train]))
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
         cls_predict = mock.Mock(wraps=cls.pipeline_)
         cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
-        self.assertEqual((1647, 2), prediction.shape)
+        self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(83, cls_predict.predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
@@ -619,14 +685,15 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         # Multilabel
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                        make_sparse=True)
-        Y_train = np.array([(y, 26 - y) for y in Y_train])
+        Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
+                                 for y in Y_train]))
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
         cls_predict = mock.Mock(wraps=cls.pipeline_)
         cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
-        self.assertEqual((1647, 2), prediction.shape)
+        self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(83, cls_predict.predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
@@ -651,10 +718,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         # Multilabel
         cls = SimpleClassificationPipeline(default)
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
-        Y_train_ = np.zeros((Y_train.shape[0], 10))
-        for i, y in enumerate(Y_train):
-            Y_train_[i][y] = 1
-        Y_train = Y_train_
+        Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
+                                 for y in Y_train]))
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
@@ -707,10 +772,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cls = SimpleClassificationPipeline(config)
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                        make_sparse=True)
-        Y_train_ = np.zeros((Y_train.shape[0], 10))
-        for i, y in enumerate(Y_train):
-            Y_train_[i][y] = 1
-        Y_train = Y_train_
+        Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
+                                 for y in Y_train]))
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)

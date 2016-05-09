@@ -1,50 +1,43 @@
 language: python
-python:
-  - "2.7"
-  - "3.4"
-
-
-cache:
-  directories:
-    - $HOME/.cache/pip
-  pip: true
 
 sudo: false
 
-before_cache:
-  - rm -f $HOME/.cache/pip/log/debug.log
+cache:
+  apt: true
+  # We use three different cache directory
+  # to work around a Travis bug with multi-platform cache
+  directories:
+  - $HOME/.cache/pip
+  - $HOME/download
+  pip: true
 
 # command to install dependencies
 addons:
   apt:
+    sources:
+    - ubuntu-toolchain-r-test
     packages:
+    - gcc-4.8
+    - g++-4.8
     - libatlas-dev
     - liblapack-dev
     - libatlas-base-dev
     - gfortran
 
-before_install:
-  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - conda update --yes conda
+env:
+  global:
+  # Directory where tests are run from
+  - TEST_DIR=/tmp/test_dir/
+  - MODULE=autosklearn
+  matrix:
+  - DISTRIB="conda" PYTHON_VERSION="2.7"
+  - DISTRIB="conda" PYTHON_VERSION="3.4" COVERAGE="true"
+  - DISTRIB="conda" PYTHON_VERSION="3.5"
 
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy=1.9 scipy=0.16 nose scikit-learn=0.16.1 Cython pandas
-  - pip install mock --no-deps
-  - pip install lockfile==0.10.2 --no-deps
-  - pip install pep8 python-coveralls
-  - pip install coverage
-  - pip install psutil
+  # Necessary for random forest
+  - export CXX="g++-4.8" CC="gcc-4.8"
+  - source ci_scripts/install.sh
+script: bash ci_scripts/test.sh
+after_success: source ci_scripts/success.sh
 
-  # Install requirements from other repos
-  - pip install git+https://github.com/automl/HPOlibConfigSpace.git
-
-  - python setup.py install
-
-# command to run tests, e.g. python setup.py test
-script:
-  # - coverage run --source autosklearn setup.py test
-  - cd test && nosetests -v --with-coverage --cover-package=autosklearn
-
-after_success: coveralls

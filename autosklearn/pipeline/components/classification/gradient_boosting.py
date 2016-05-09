@@ -1,7 +1,7 @@
 import numpy as np
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant, \
     CategoricalHyperparameter
 
@@ -30,6 +30,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
+        self.fully_fit_ = False
 
     def fit(self, X, y, sample_weight=None, refit=False):
         if self.estimator is None or refit:
@@ -100,10 +101,9 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             tmp.n_estimators += n_iter
             tmp.fit(X, y, sample_weight=sample_weight)
             self.estimator = tmp
-
+            # Apparently this if is necessary
             if self.estimator.n_estimators >= self.n_estimators:
                 self.fully_fit_ = True
-
         return self
 
     def configuration_fully_fitted(self):
@@ -141,8 +141,9 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         cs = ConfigurationSpace()
         loss = cs.add_hyperparameter(Constant("loss", "deviance"))
         learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
-            name="learning_rate", lower=0.0001, upper=1, default=0.1, log=True))
-        n_estimators = cs.add_hyperparameter(Constant("n_estimators", 100))
+            name="learning_rate", lower=0.01, upper=1, default=0.1, log=True))
+        n_estimators = cs.add_hyperparameter(UniformIntegerHyperparameter
+            ("n_estimators", 50, 500, default=100))
         max_depth = cs.add_hyperparameter(UniformIntegerHyperparameter(
             name="max_depth", lower=1, upper=10, default=3))
         min_samples_split = cs.add_hyperparameter(UniformIntegerHyperparameter(

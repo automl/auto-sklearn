@@ -1,8 +1,8 @@
 from autosklearn.pipeline.implementations.MultilabelClassifier import \
     MultilabelClassifier
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
@@ -76,7 +76,7 @@ class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
         n_estimators = cs.add_hyperparameter(UniformIntegerHyperparameter(
             name="n_estimators", lower=50, upper=500, default=50, log=False))
         learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
-            name="learning_rate", lower=0.0001, upper=2, default=0.1, log=True))
+            name="learning_rate", lower=0.01, upper=2, default=0.1, log=True))
         algorithm = cs.add_hyperparameter(CategoricalHyperparameter(
             name="algorithm", choices=["SAMME.R", "SAMME"], default="SAMME.R"))
         max_depth = cs.add_hyperparameter(UniformIntegerHyperparameter(

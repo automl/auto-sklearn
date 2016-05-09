@@ -1,9 +1,12 @@
 # -*- encoding: utf-8 -*-
+from smac.tae.execute_ta_run import StatusType
+
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.evaluation.util import calculate_score
 
 
 __all__ = [
+    'eval_t',
     'TestEvaluator'
 ]
 
@@ -21,7 +24,8 @@ class TestEvaluator(AbstractEvaluator):
             all_scoring_functions=all_scoring_functions,
             seed=seed,
             output_y_test=False,
-            num_run='dummy')
+            num_run='dummy',
+            subsample=None)
         self.configuration = configuration
 
         self.X_train = Datamanager.data['X_train']
@@ -30,11 +34,11 @@ class TestEvaluator(AbstractEvaluator):
         self.X_test = Datamanager.data.get('X_test')
         self.Y_test = Datamanager.data.get('Y_test')
 
-    def fit(self):
+    def fit_predict_and_loss(self):
         self.model.fit(self.X_train, self.Y_train)
+        return self.predict_and_loss()
 
-    # override
-    def predict(self, train=False):
+    def predict_and_loss(self, train=False):
 
         if train:
             Y_pred = self.predict_function(self.X_train, self.model,
@@ -62,6 +66,21 @@ class TestEvaluator(AbstractEvaluator):
         else:
             err = 1 - score
 
-        if self.with_predictions:
-            return err, Y_pred, Y_pred, Y_pred
-        return err
+        return err, Y_pred, Y_pred, Y_pred
+
+
+# create closure for evaluating an algorithm
+# Has a stupid name so nosetests doesn't regard it as a test
+def eval_t(queue, config, data, tmp_dir, seed, num_run, subsample,
+           with_predictions, all_scoring_functions,
+           output_y_test):
+    evaluator = TestEvaluator(data, tmp_dir, config,
+                              seed=seed, with_predictions=with_predictions,
+                              all_scoring_functions=all_scoring_functions)
+
+    loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
+    duration, result, seed, run_info = evaluator.finish_up(
+        loss, opt_pred, valid_pred, test_pred, file_output=False)
+
+    status = StatusType.SUCCESS
+    queue.put((duration, result, seed, run_info, status))

@@ -1,0 +1,23 @@
+{% extends "!layout.html" %}
+
+{# Custom CSS overrides #}
+{# set bootswatch_css_custom = ['_static/my-styles.css'] #}
+
+{# Add github banner (from: https://github.com/blog/273-github-ribbons). #}
+{% block header %}
+  {{ super() }}
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+{% endblock %}
+

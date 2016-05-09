@@ -1,29 +1,33 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
-import abc
 import os
 import time
-import traceback
 
 import numpy as np
-import autosklearn.pipeline.classification
-import autosklearn.pipeline.regression
 from sklearn.dummy import DummyClassifier, DummyRegressor
 
+import autosklearn.pipeline.classification
+import autosklearn.pipeline.regression
 from autosklearn.constants import *
-from autosklearn.evaluation.util import get_new_run_num
 from autosklearn.util import Backend
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 from autosklearn.evaluation.util import calculate_score
+
+from ConfigSpace import Configuration
 
 
 __all__ = [
     'AbstractEvaluator'
 ]
 
+
 class MyDummyClassifier(DummyClassifier):
     def __init__(self, configuration, random_states):
-        super(MyDummyClassifier, self).__init__(strategy="most_frequent")
+        self.configuration = configuration
+        if configuration == 1:
+            super(MyDummyClassifier, self).__init__(strategy="uniform")
+        else:
+            super(MyDummyClassifier, self).__init__(strategy="most_frequent")
 
     def pre_transform(self, X, y, fit_params=None, init_params=None):
         if fit_params is None:
@@ -50,7 +54,11 @@ class MyDummyClassifier(DummyClassifier):
 
 class MyDummyRegressor(DummyRegressor):
     def __init__(self, configuration, random_states):
-        super(MyDummyRegressor, self).__init__(strategy='mean')
+        self.configuration = configuration
+        if configuration == 1:
+            super(MyDummyRegressor, self).__init__(strategy='mean')
+        else:
+            super(MyDummyRegressor, self).__init__(strategy='median')
 
     def pre_transform(self, X, y, fit_params=None, init_params=None):
         if fit_params is None:
@@ -73,15 +81,13 @@ class MyDummyRegressor(DummyRegressor):
 
 
 class AbstractEvaluator(object):
-    __metaclass__ = abc.ABCMeta
-
-    @abc.abstractmethod
     def __init__(self, Datamanager, output_dir, configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
                  output_y_test=False,
-                 num_run=None):
+                 num_run=None,
+                 subsample=None,):
 
         self.starttime = time.time()
 
@@ -101,14 +107,14 @@ class AbstractEvaluator(object):
         self.all_scoring_functions = all_scoring_functions
 
         if self.task_type in REGRESSION_TASKS:
-            if self.configuration is None:
+            if not isinstance(self.configuration, Configuration):
                 self.model_class = MyDummyRegressor
             else:
                 self.model_class = \
                     autosklearn.pipeline.regression.SimpleRegressionPipeline
             self.predict_function = self._predict_regression
         else:
-            if self.configuration is None:
+            if not isinstance(self.configuration, Configuration):
                 self.model_class = MyDummyClassifier
             else:
                 self.model_class = \
@@ -116,8 +122,10 @@ class AbstractEvaluator(object):
             self.predict_function = self._predict_proba
 
         if num_run is None:
-            num_run = get_new_run_num()
+            num_run = 0
         self.num_run = num_run
+
+        self.subsample = subsample
 
         self.backend = Backend(None, self.output_dir)
         self.model = self.model_class(self.configuration, self.seed)
@@ -155,7 +163,7 @@ class AbstractEvaluator(object):
         raise NotImplementedError()
 
     def _loss(self, y_true, y_hat):
-        if self.configuration is None:
+        if not isinstance(self.configuration, Configuration):
             if self.all_scoring_functions:
                 return {self.metric: 1.0}
             else:
@@ -174,7 +182,7 @@ class AbstractEvaluator(object):
         return err
 
     def finish_up(self, loss=None, opt_pred=None, valid_pred=None,
-                  test_pred=None):
+                  test_pred=None, file_output=True):
         """This function does everything necessary after the fitting is done:
 
         * predicting
@@ -183,48 +191,52 @@ class AbstractEvaluator(object):
         We use it as the signal handler so we can recycle the code for the
         normal usecase and when the runsolver kills us here :)"""
 
-        try:
-            self.duration = time.time() - self.starttime
-            if loss is None:
-                loss, opt_pred, valid_pred, test_pred = self.predict_and_loss()
-            self.file_output(loss, opt_pred, valid_pred, test_pred)
-            self.duration = time.time() - self.starttime
+        # try:
+        self.duration = time.time() - self.starttime
+        if loss is None:
+            loss, opt_pred, valid_pred, test_pred = self.predict_and_loss()
 
-            num_run = str(self.num_run).zfill(5)
-            if isinstance(loss, dict):
-                loss_ = loss
-                loss = loss_[self.D.info['metric']]
-            else:
-                loss_ = {}
-            additional_run_info = ';'.join(['%s: %s' %
-                                    (METRIC_TO_STRING[
-                                         metric] if metric in METRIC_TO_STRING else metric,
-                                     value)
-                                    for metric, value in loss_.items()])
-            additional_run_info += ';' + 'duration: ' + str(self.duration)
-            additional_run_info += ';' + 'num_run:' + num_run
+        if file_output:
+            loss_, additional_run_info_ = self.file_output(
+                loss, opt_pred, valid_pred, test_pred)
+        else:
+            loss_, additional_run_info_ = None, None
 
-            if self.configuration is not None:
-                self._output_SMAC_string(self.duration, loss, self.seed,
-                                         additional_run_info)
-        except Exception as e:
-            self.duration = time.time() - self.starttime
-            print(traceback.format_exc())
-            self._output_SMAC_string(self.duration, 2.0, self.seed,
-                'No results were produced! Error is %s' % str(e))
+        if loss_ is not None:
+            return self.duration, loss_, self.seed, additional_run_info_
 
-    def _output_SMAC_string(self, duration, loss, seed, additional_run_info):
-        print('Result for ParamILS: %s, %f, 1, %f, %d, %s' %
-              ('SAT', abs(self.duration), loss, self.seed,
-               additional_run_info))
+        num_run = str(self.num_run).zfill(5)
+        if isinstance(loss, dict):
+            loss_ = loss
+            loss = loss_[self.D.info['metric']]
+        else:
+            loss_ = {}
+        additional_run_info = ';'.join(['%s: %s' %
+                                (METRIC_TO_STRING[
+                                     metric] if metric in METRIC_TO_STRING else metric,
+                                 value)
+                                for metric, value in loss_.items()])
+        additional_run_info += ';' + 'duration: ' + str(self.duration)
+        additional_run_info += ';' + 'num_run:' + num_run
+
+        return self.duration, loss, self.seed, additional_run_info
 
     def file_output(self, loss, Y_optimization_pred, Y_valid_pred, Y_test_pred):
-        seed = os.environ.get('AUTOSKLEARN_SEED')
+        seed = self.seed
 
         if self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
-            return 2, "Targets %s and prediction %s don't have the same " \
+            return 2.0, "Targets %s and prediction %s don't have the same " \
             "length. Probably training didn't finish" % (
                 self.Y_optimization.shape, Y_optimization_pred.shape)
+
+        if not np.all(np.isfinite(Y_optimization_pred)):
+            return 2.0, 'Model predictions for optimization set contains NaNs.'
+        if Y_valid_pred is not None and \
+                not np.all(np.isfinite(Y_valid_pred)):
+            return 2.0, 'Model predictions for validation set contains NaNs.'
+        if Y_test_pred is not None and \
+                not np.all(np.isfinite(Y_test_pred)):
+            return 2.0, 'Model predictions for test set contains NaNs.'
 
         num_run = str(self.num_run).zfill(5)
         if os.path.exists(self.backend.get_model_dir()):
@@ -247,6 +259,8 @@ class AbstractEvaluator(object):
         if Y_test_pred is not None:
             self.backend.save_predictions_as_npy(Y_test_pred, 'test',
                                                  seed, num_run)
+
+        return None, None
 
     def _predict_proba(self, X, model, task_type, Y_train):
         Y_pred = model.predict_proba(X, batch_size=1000)

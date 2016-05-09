@@ -1,7 +1,8 @@
 import numpy as np
+import warnings
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
@@ -33,10 +34,15 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
             nugget=self.nugget,
             optimizer='Welch',
             random_state=self.random_state)
-        self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
-        self.scaler.fit(Y)
-        Y_scaled = self.scaler.transform(Y)
-        self.estimator.fit(X, Y_scaled)
+
+        # Remove this in sklearn==0.18 as the GP class will be refactored and
+        #  hopefully not be affected by this problem any more.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
+            self.scaler.fit(Y.reshape((-1, 1)))
+            Y_scaled = self.scaler.transform(Y.reshape((-1, 1))).ravel()
+            self.estimator.fit(X, Y_scaled)
         return self
 
     def predict(self, X):

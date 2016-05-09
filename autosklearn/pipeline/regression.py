@@ -5,8 +5,8 @@ from itertools import product
 import numpy as np
 from sklearn.base import RegressorMixin
 
-from HPOlibConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
+from ConfigSpace.configuration_space import ConfigurationSpace
 
 from autosklearn.pipeline.components import regression as regression_components
 from autosklearn.pipeline.components import data_preprocessing as \
@@ -28,11 +28,11 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     possible parameters in the __init__ function because we only know the
     available regressors at runtime. For this reason the user must
     specifiy the parameters by passing an instance of
-    HPOlibConfigSpace.configuration_space.Configuration.
+    ConfigSpace.configuration_space.Configuration.
 
     Parameters
     ----------
-    configuration : HPOlibConfigSpace.configuration_space.Configuration
+    configuration : ConfigSpace.configuration_space.Configuration
         The configuration to evaluate.
 
     random_state : int, RandomState instance or None, optional (default=None)
@@ -78,14 +78,18 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     def fit_estimator(self, X, y, fit_params=None):
         self.y_max_ = np.nanmax(y)
         self.y_min_ = np.nanmin(y)
+        if fit_params is None:
+            fit_params = {}
         return super(SimpleRegressionPipeline, self).fit_estimator(
-            X, y, fit_params=fit_params)
+            X, y, **fit_params)
 
     def iterative_fit(self, X, y, fit_params=None, n_iter=1):
         self.y_max_ = np.nanmax(y)
         self.y_min_ = np.nanmin(y)
+        if fit_params is None:
+            fit_params = {}
         return super(SimpleRegressionPipeline, self).iterative_fit(
-            X, y, fit_params=fit_params, n_iter=n_iter)
+            X, y, n_iter=n_iter, **fit_params)
 
     def predict(self, X, batch_size=None):
         y = super(SimpleRegressionPipeline, self).\
@@ -147,7 +151,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
         Returns
         -------
-        cs : HPOlibConfigSpace.configuration_space.Configuration
+        cs : ConfigSpace.configuration_space.Configuration
             The configuration space describing the SimpleRegressionClassifier.
         """
         cs = ConfigurationSpace()
@@ -210,7 +214,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         # Combinations of tree-based models with feature learning:
         regressors_ = ["adaboost", "decision_tree", "extra_trees",
                        "gaussian_process", "gradient_boosting",
-                       "k_nearest_neighbors", "random_forest"]
+                       "k_nearest_neighbors", "random_forest", "xgradient_boosting"]
         feature_learning_ = ["kitchen_sinks", "kernel_pca", "nystroem_sampler"]
 
         for r, f in product(regressors_, feature_learning_):

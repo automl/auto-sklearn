@@ -1,5 +1,5 @@
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnClassificationAlgorithm
@@ -16,9 +16,9 @@ class QDA(AutoSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, Y):
-        import sklearn.qda
+        import sklearn.discriminant_analysis
 
-        estimator = sklearn.qda.QDA(self.reg_param)
+        estimator = sklearn.discriminant_analysis.QuadraticDiscriminantAnalysis(self.reg_param)
 
         if len(Y.shape) == 2 and Y.shape[1] > 1:
             self.estimator = sklearn.multiclass.OneVsRestClassifier(estimator, n_jobs=1)

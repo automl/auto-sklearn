@@ -109,7 +109,7 @@ def _test_classifier(classifier, dataset='iris', sparse=False,
     configuration_space = classifier.get_hyperparameter_search_space(
         dataset_properties={'sparse': sparse})
     default = configuration_space.get_default_configuration()
-    classifier = classifier(random_state=1,
+    classifier = classifier(random_state=np.random.RandomState(1),
                             **{hp_name: default[hp_name] for hp_name in
                                default if default[hp_name] is not None})
     predictor = classifier.fit(X_train, Y_train)
@@ -125,7 +125,7 @@ def _test_classifier_iterative_fit(classifier, dataset='iris', sparse=False):
     configuration_space = classifier.get_hyperparameter_search_space(
         dataset_properties={'sparse': sparse})
     default = configuration_space.get_default_configuration()
-    classifier = classifier(random_state=1,
+    classifier = classifier(random_state=np.random.RandomState(1),
                             **{hp_name: default[hp_name] for hp_name in
                                default if default[hp_name] is not None})
     for i in range(10):
@@ -145,7 +145,7 @@ def _test_classifier_predict_proba(classifier, dataset='iris', sparse=False,
                                                    make_binary=make_binary)
     configuration_space = classifier.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
-    classifier = classifier(random_state=1,
+    classifier = classifier(random_state=np.random.RandomState(1),
                             **{hp_name: default[hp_name] for hp_name in
                                default})
     predictor = classifier.fit(X_train, Y_train)
@@ -160,7 +160,7 @@ def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False):
     configuration_space = Preprocessor.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
 
-    preprocessor = Preprocessor(random_state=1,
+    preprocessor = Preprocessor(random_state=np.random.RandomState(1),
                                 **{hp_name: default[hp_name] for hp_name in
                                    default if default[hp_name] is not None})
 
@@ -178,7 +178,7 @@ class PreprocessingTestCase(unittest.TestCase):
 
         configuration_space = Preprocessor.get_hyperparameter_search_space()
         default = configuration_space.get_default_configuration()
-        preprocessor = Preprocessor(random_state=1,
+        preprocessor = Preprocessor(random_state=np.random.RandomState(1),
                                     **{hp_name: default[hp_name] for hp_name in
                                        default})
         preprocessor.fit(X_train, Y_train)
@@ -190,7 +190,7 @@ class PreprocessingTestCase(unittest.TestCase):
         X_train = X_train.astype(np.float64)
         configuration_space = Preprocessor.get_hyperparameter_search_space()
         default = configuration_space.get_default_configuration()
-        preprocessor = Preprocessor(random_state=1,
+        preprocessor = Preprocessor(random_state=np.random.RandomState(1),
                                     **{hp_name: default[hp_name] for hp_name in
                                        default})
         preprocessor.fit(X_train, Y_train)
@@ -205,7 +205,7 @@ class PreprocessingTestCase(unittest.TestCase):
             self.assertEqual(X_train.dtype, np.float32)
             configuration_space = Preprocessor.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
-            preprocessor = Preprocessor(random_state=1,
+            preprocessor = Preprocessor(random_state=np.random.RandomState(1),
                                         **{hp_name: default[hp_name] for hp_name
                                            in default})
             preprocessor.fit(X_train, Y_train)
@@ -219,7 +219,7 @@ class PreprocessingTestCase(unittest.TestCase):
             X_train = X_train.astype(np.float64)
             configuration_space = Preprocessor.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
-            preprocessor = Preprocessor(random_state=1,
+            preprocessor = Preprocessor(random_state=np.random.RandomState(1),
                                         **{hp_name: default[hp_name] for hp_name
                                            in default})
             preprocessor.fit(X_train, Y_train)
@@ -232,7 +232,7 @@ def _test_regressor(Regressor, dataset='diabetes', sparse=False):
                                                    make_sparse=sparse)
     configuration_space = Regressor.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()
-    regressor = Regressor(random_state=1,
+    regressor = Regressor(random_state=np.random.RandomState(1),
                           **{hp_name: default[hp_name] for hp_name in
                              default})
     # Dumb incomplete hacky test to check that we do not alter the data
@@ -254,7 +254,7 @@ def _test_regressor_iterative_fit(Regressor, dataset='diabetes', sparse=False):
     configuration_space = Regressor.get_hyperparameter_search_space(
         dataset_properties={'sparse': sparse})
     default = configuration_space.get_default_configuration()
-    regressor = Regressor(random_state=1,
+    regressor = Regressor(random_state=np.random.RandomState(1),
                           **{hp_name: default[hp_name] for hp_name in
                              default})
     while not regressor.configuration_fully_fitted():

@@ -1,10 +1,10 @@
 import numpy as np
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, Constant, \
     UnParametrizedHyperparameter
-from HPOlibConfigSpace.conditions import InCondition
+from ConfigSpace.conditions import InCondition
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
@@ -128,8 +128,9 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
         loss = cs.add_hyperparameter(CategoricalHyperparameter(
             "loss", ["ls", "lad", "huber", "quantile"], default="ls"))
         learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
-            name="learning_rate", lower=0.0001, upper=1, default=0.1, log=True))
-        n_estimators = cs.add_hyperparameter(Constant("n_estimators", 100))
+            name="learning_rate", lower=0.01, upper=1, default=0.1, log=True))
+        n_estimators = cs.add_hyperparameter(UniformIntegerHyperparameter
+            ("n_estimators", 50, 500, default=100))
         max_depth = cs.add_hyperparameter(UniformIntegerHyperparameter(
             name="max_depth", lower=1, upper=10, default=3))
         min_samples_split = cs.add_hyperparameter(UniformIntegerHyperparameter(

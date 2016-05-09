@@ -25,6 +25,10 @@ class Dummy(object):
 
 
 class BaseEvaluatorTest(unittest.TestCase):
+    def __init__(self, methodName):
+        super(BaseEvaluatorTest, self).__init__(methodName)
+        self.output_directories = []
+
     def _fit(self, evaluator):
         return self.__fit(evaluator.fit)
 
@@ -98,7 +102,9 @@ def get_multiclass_classification_datamanager():
         'X_train': X_train,
         'Y_train': Y_train,
         'X_valid': X_valid,
-        'X_test': X_test
+        'Y_valid': Y_valid,
+        'X_test': X_test,
+        'Y_test': Y_test
     }
     D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
     return D
@@ -145,7 +151,9 @@ def get_multilabel_classification_datamanager():
         'X_train': X_train,
         'Y_train': Y_train,
         'X_valid': X_valid,
-        'X_test': X_test
+        'Y_valid': Y_valid,
+        'X_test': X_test,
+        'Y_test': Y_test
     }
     D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
     return D
@@ -181,9 +189,11 @@ def get_binary_classification_datamanager():
     }
     D.data = {
         'X_train': X_train,
-        'Y_train': Y_train,
+        'Y_train': Y_train.reshape((-1, 1)),
         'X_valid': X_valid,
-        'X_test': X_test
+        'Y_valid': Y_valid.reshape((-1, 1)),
+        'X_test': X_test,
+        'Y_test': Y_test.reshape((-1, 1))
     }
     D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical']
     return D
@@ -211,9 +221,11 @@ def get_regression_datamanager():
     }
     D.data = {
         'X_train': X_train,
-        'Y_train': Y_train,
+        'Y_train': Y_train.reshape((-1, 1)),
         'X_valid': X_valid,
-        'X_test': X_test
+        'Y_valid': Y_valid.reshape((-1, 1)),
+        'X_test': X_test,
+        'Y_test': Y_test.reshape((-1, 1))
     }
     D.feat_type = ['numerical', 'Numerical', 'numerical', 'numerical',
                    'numerical', 'numerical', 'numerical', 'numerical',
@@ -247,7 +259,10 @@ def get_500_classes_datamanager():
         'is_sparse': False,
         'label_num': 500
     }
-    D.data = {'X_train': X, 'Y_train': Y, 'X_valid': X, 'X_test': X}
+    D.data = {'X_train': X[:700], 'Y_train': Y[:700],
+              'X_valid': X[700:710], 'Y_valid': Y[700:710],
+              'X_test': X[710:], 'Y_test': Y[710:]
+              }
     D.feat_type = ['numerical'] * 20
     return D
 

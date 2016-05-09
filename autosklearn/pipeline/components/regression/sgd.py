@@ -1,8 +1,8 @@
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, UnParametrizedHyperparameter, \
     UniformIntegerHyperparameter
-from HPOlibConfigSpace.conditions import InCondition, EqualsCondition
+from ConfigSpace.conditions import InCondition, EqualsCondition
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
@@ -71,13 +71,12 @@ class SGD(AutoSklearnRegressionAlgorithm):
                                           random_state=self.random_state)
 
             self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
-            self.scaler.fit(y)
+            self.scaler.fit(y.reshape((-1, 1)))
 
-        Y_scaled = self.scaler.transform(y)
+        Y_scaled = self.scaler.transform(y.reshape((-1, 1))).ravel()
 
         self.estimator.n_iter = n_iter
         self._iterations += n_iter
-        print(n_iter)
         self.estimator.partial_fit(X, Y_scaled)
         return self
 

@@ -12,8 +12,8 @@ import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.testing import assert_array_almost_equal
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import CategoricalHyperparameter
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from autosklearn.pipeline.regression import SimpleRegressionPipeline
 from autosklearn.pipeline.components.base import \
@@ -263,7 +263,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             predictions = auto.predict(copy.deepcopy(X_test))
             # The lower the worse
             r2_score = sklearn.metrics.r2_score(Y_test, predictions)
-            self.assertAlmostEqual(0.41626416529791199, r2_score)
+            self.assertAlmostEqual(0.41732302035060087, r2_score)
             model_score = auto.score(copy.deepcopy(X_test), Y_test)
             self.assertEqual(model_score, r2_score)
 
@@ -279,7 +279,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(130, len(hyperparameters))
+        self.assertEqual(143, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 5, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
