@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>APIs &mdash; AutoSklearn 0.0.1dev documentation</title>
+    
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootswatch-3.3.6/cosmo/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="AutoSklearn 0.0.1dev documentation" href="index.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.0.1dev</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="index.html">Start</a></li>
+                <li><a href="#">API</a></li>
+                <li><a href="extending.html">Extending</a></li>
+                <li><a href="resampling.html">Resampling</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">APIs</a><ul>
+<li><a class="reference internal" href="#main-modules">Main modules</a></li>
+<li><a class="reference internal" href="#extension-interfaces">Extension Interfaces</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="apis">
+<span id="api"></span><h1>APIs<a class="headerlink" href="#apis" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="main-modules">
+<h2>Main modules<a class="headerlink" href="#main-modules" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="autosklearn.classification.AutoSklearnClassifier">
+<em class="property">class </em><code class="descclassname">autosklearn.classification.</code><code class="descname">AutoSklearnClassifier</code><span class="sig-paren">(</span><em>time_left_for_this_task=3600</em>, <em>per_run_time_limit=360</em>, <em>initial_configurations_via_metalearning=25</em>, <em>ensemble_size=50</em>, <em>ensemble_nbest=50</em>, <em>seed=1</em>, <em>ml_memory_limit=3000</em>, <em>include_estimators=None</em>, <em>include_preprocessors=None</em>, <em>resampling_strategy='holdout'</em>, <em>resampling_strategy_arguments=None</em>, <em>tmp_folder=None</em>, <em>output_folder=None</em>, <em>delete_tmp_folder_after_terminate=True</em>, <em>delete_output_folder_after_terminate=True</em>, <em>shared_mode=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class implements the classification task. It must not be pickled!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>time_left_for_this_task</strong> : int, optional (default=3600)</p>
+<blockquote>
+<div><p>Time limit in seconds for the search for appropriate classification
+models. By increasing this value, <em>auto-sklearn</em> will find better
+configurations.</p>
+</div></blockquote>
+<p><strong>per_run_time_limit</strong> : int, optional (default=360)</p>
+<blockquote>
+<div><p>Time limit for a single call to machine learning model.</p>
+</div></blockquote>
+<p><strong>initial_configurations_via_metalearning</strong> : int, optional (default=25)</p>
+<p><strong>ensemble_size</strong> : int, optional (default=50)</p>
+<p><strong>ensemble_nbest</strong> : int, optional (default=50)</p>
+<p><strong>seed</strong> : int, optional (default=1)</p>
+<p><strong>ml_memory_limit</strong> : int, optional (3000)</p>
+<blockquote>
+<div><p>Memory limit for the machine learning algorithm. If the machine
+learning algorithm allocates tries to allocate more memory,
+its evaluation will be stopped.</p>
+</div></blockquote>
+<p><strong>include_estimators</strong> : dict, optional (None)</p>
+<blockquote>
+<div><p>If None all possible estimators are used. Otherwise specifies set of
+estimators to use</p>
+</div></blockquote>
+<p><strong>include_preprocessors</strong> : dict, optional (None)</p>
+<blockquote>
+<div><p>If None all possible preprocessors are used. Otherwise specifies set of
+preprocessors to use</p>
+</div></blockquote>
+<p><strong>resampling_strategy</strong> : string, optional (&#8216;holdout&#8217;)</p>
+<blockquote>
+<div><p>how to to handle overfitting, might need &#8216;resampling_strategy_arguments&#8217;</p>
+<ul class="simple">
+<li>&#8216;holdout&#8217;: 66:33 (train:test) split</li>
+<li>&#8216;holdout-iterative-fit&#8217;:  66:33 (train:test) split, calls iterative
+fit where possible</li>
+<li>&#8216;cv&#8217;: crossvalidation, requires &#8216;folds&#8217;</li>
+<li>&#8216;nested-cv&#8217;: crossvalidation, requires &#8216;outer-folds, &#8216;inner-folds&#8217;</li>
+<li>&#8216;partial-cv&#8217;: crossvalidation, requires &#8216;folds&#8217; , calls
+iterative fit where possible</li>
+</ul>
+</div></blockquote>
+<p><strong>resampling_strategy_arguments</strong> : dict, optional if &#8216;holdout&#8217; (None)</p>
+<blockquote>
+<div><p>Additional arguments for resampling_strategy
+* &#8216;holdout&#8217;: None
+* &#8216;holdout-iterative-fit&#8217;:  None
+* &#8216;cv&#8217;: {&#8216;folds&#8217;: int}
+* &#8216;nested-cv&#8217;: {&#8216;outer_folds&#8217;: int, &#8216;inner_folds&#8217;
+* &#8216;partial-cv&#8217;: {&#8216;folds&#8217;: int}</p>
+</div></blockquote>
+<p><strong>tmp_folder</strong> : string, optional (None)</p>
+<blockquote>
+<div><p>folder to store configuration output, if None automatically use
+/tmp/autosklearn_tmp_$pid_$random_number</p>
+</div></blockquote>
+<p><strong>output_folder</strong> : string, optional (None)</p>
+<blockquote>
+<div><p>folder to store trained models, if None automatically use
+/tmp/autosklearn_output_$pid_$random_number</p>
+</div></blockquote>
+<p><strong>delete_tmp_folder_after_terminate: string, optional (True)</strong></p>
+<blockquote>
+<div><p>remove tmp_folder, when finished. If tmp_folder is None
+tmp_dir will always be deleted</p>
+</div></blockquote>
+<p><strong>delete_output_folder_after_terminate: bool, optional (True)</strong></p>
+<blockquote>
+<div><p>remove output_folder, when finished. If output_folder is None
+output_dir will always be deleted</p>
+</div></blockquote>
+<p><strong>shared_mode: bool, optional (False)</strong></p>
+<blockquote class="last">
+<div><p>run smac in shared-model-node. This only works if arguments
+tmp_folder and output_folder are given and sets both
+delete_tmp_folder_after_terminate and
+delete_output_folder_after_terminate to False.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="autosklearn.classification.AutoSklearnClassifier.daemon">
+<code class="descname">daemon</code><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.daemon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether process is a daemon</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.classification.AutoSklearnClassifier.exitcode">
+<code class="descname">exitcode</code><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.exitcode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return exit code of process or <cite>None</cite> if it has yet to stop</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>metric='acc_metric'</em>, <em>feat_type=None</em>, <em>dataset_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit <em>autosklearn</em> to given training set (X, y).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : array-like or sparse matrix of shape = [n_samples, n_features]</p>
+<blockquote>
+<div><p>The training input samples.</p>
+</div></blockquote>
+<p><strong>y</strong> : array-like, shape = [n_samples] or [n_samples, n_outputs]</p>
+<blockquote>
+<div><p>The target classes.</p>
+</div></blockquote>
+<p><strong>metric</strong> : str, optional (default=&#8217;acc_metric&#8217;)</p>
+<blockquote>
+<div><p>The metric to optimize for. Can be one of: [&#8216;acc_metric&#8217;,
+&#8216;auc_metric&#8217;, &#8216;bac_metric&#8217;, &#8216;f1_metric&#8217;, &#8216;pac_metric&#8217;]. A
+description of the metrics can be found in <a class="reference external" href="http://www.causality.inf.ethz.ch/AutoML/automl_ijcnn15.pdf">the paper describing
+the AutoML Challenge</a>.</p>
+</div></blockquote>
+<p><strong>feat_type</strong> : list, optional (default=None)</p>
+<blockquote>
+<div><p>List of str of <cite>len(X.shape[1])</cite> describing the attribute type.
+Possible types are <cite>Categorical</cite> and <cite>Numerical</cite>. <cite>Categorical</cite>
+attributes will be automatically One-Hot encoded.</p>
+</div></blockquote>
+<p><strong>dataset_name</strong> : str, optional (default=None)</p>
+<blockquote>
+<div><p>Create nicer output. If None, a string will be determined by the
+md5 hash of the dataset.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">self</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.classification.AutoSklearnClassifier.ident">
+<code class="descname">ident</code><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.ident" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return identifier (PID) of process or <cite>None</cite> if it has yet to start</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.is_alive">
+<code class="descname">is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.is_alive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether process is alive</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.join">
+<code class="descname">join</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.join" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait until child process terminates</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.classification.AutoSklearnClassifier.pid">
+<code class="descname">pid</code><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.pid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return identifier (PID) of process or <cite>None</cite> if it has yet to start</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict classes for X.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : array-like or sparse matrix of shape = [n_samples, n_features]</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>y</strong> : array of shape = [n_samples] or [n_samples, n_labels]</p>
+<blockquote class="last">
+<div><p>The predicted classes.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.predict_proba">
+<code class="descname">predict_proba</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict probabilities of classes for all samples X.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : array-like or sparse matrix of shape = [n_samples, n_features]</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>y</strong> : array of shape = [n_samples, n_classes] or [n_samples, n_labels]</p>
+<blockquote class="last">
+<div><p>The predicted class probabilities.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.terminate">
+<code class="descname">terminate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.terminate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Terminate process; sends SIGTERM signal or uses TerminateProcess()</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="extension-interfaces">
+<h2>Extension Interfaces<a class="headerlink" href="#extension-interfaces" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm">
+<em class="property">class </em><code class="descclassname">autosklearn.pipeline.components.base.</code><code class="descname">AutoSklearnClassificationAlgorithm</code><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide an abstract interface for classification algorithms in
+auto-sklearn.</p>
+<p>See <a class="reference internal" href="extending.html#extending"><span class="std std-ref">Extending auto-sklearn</span></a> for more information.</p>
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>The fit function calls the fit function of the underlying
+scikit-learn model and returns <cite>self</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : array-like, shape = (n_samples, n_features)</p>
+<blockquote>
+<div><p>Training data</p>
+</div></blockquote>
+<p><strong>y</strong> : array-like, shape = (n_samples,) or shape = (n_sample, n_labels)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>self</strong> : returns an instance of self.</p>
+<blockquote class="last">
+<div><p>Targets</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Please see the <a class="reference external" href="http://scikit-learn.org/dev/developers/index.html#apis-of-scikit-learn-objects">scikit-learn API documentation</a> for further information.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.get_estimator">
+<code class="descname">get_estimator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.get_estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.get_estimator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the underlying estimator object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>estimator</strong> : the underlying estimator object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.get_hyperparameter_search_space">
+<em class="property">static </em><code class="descname">get_hyperparameter_search_space</code><span class="sig-paren">(</span><em>dataset_properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.get_hyperparameter_search_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.get_hyperparameter_search_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the configuration space of this classification algorithm.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dataset_properties</strong> : dict, optional (default=None)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Configspace.configuration_space.ConfigurationSpace</p>
+<blockquote class="last">
+<div><p>The configuration space of this classification algorithm.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.get_properties">
+<em class="property">static </em><code class="descname">get_properties</code><span class="sig-paren">(</span><em>dataset_properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.get_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.get_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the properties of the underlying algorithm.</p>
+<p>Find more information at <a class="reference internal" href="extending.html#get-properties"><span class="std std-ref">get_properties()</span></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dataset_properties</strong> : dict, optional (default=None)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>The predict function calls the predict function of the
+underlying scikit-learn model and returns an array with the predictions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : array-like, shape = (n_samples, n_features)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">array, shape = (n_samples,) or shape = (n_samples, n_labels)</p>
+<blockquote class="last">
+<div><p>Returns the predicted values</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Please see the <a class="reference external" href="http://scikit-learn.org/dev/developers/index.html#apis-of-scikit-learn-objects">scikit-learn API documentation</a> for further information.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict_proba">
+<code class="descname">predict_proba</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict_proba" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict probabilities.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> : array-like, shape = (n_samples, n_features)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm">
+<em class="property">class </em><code class="descclassname">autosklearn.pipeline.components.base.</code><code class="descname">AutoSklearnRegressionAlgorithm</code><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnRegressionAlgorithm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide an abstract interface for regression algorithms in
+auto-sklearn.</p>
+<p>Make a subclass of this and put it into the directory
+<cite>autosklearn/pipeline/components/regression</cite> to make it available.</p>
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnRegressionAlgorithm.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>The fit function calls the fit function of the underlying
+scikit-learn model and returns <cite>self</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : array-like, shape = (n_samples, n_features)</p>
+<blockquote>
+<div><p>Training data</p>
+</div></blockquote>
+<p><strong>y</strong> : array-like, shape = [n_samples]</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>self</strong> : returns an instance of self.</p>
+<blockquote class="last">
+<div><p>Targets</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Please see the <a class="reference external" href="http://scikit-learn.org/dev/developers/index.html#apis-of-scikit-learn-objects">scikit-learn API documentation</a> for further information.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.get_estimator">
+<code class="descname">get_estimator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnRegressionAlgorithm.get_estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.get_estimator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the underlying estimator object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>estimator</strong> : the underlying estimator object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.get_hyperparameter_search_space">
+<em class="property">static </em><code class="descname">get_hyperparameter_search_space</code><span class="sig-paren">(</span><em>dataset_properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnRegressionAlgorithm.get_hyperparameter_search_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.get_hyperparameter_search_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the configuration space of this regression algorithm.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dataset_properties</strong> : dict, optional (default=None)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Configspace.configuration_space.ConfigurationSpace</p>
+<blockquote class="last">
+<div><p>The configuration space of this regression algorithm.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.get_properties">
+<code class="descname">get_properties</code><span class="sig-paren">(</span><em>dataset_properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnRegressionAlgorithm.get_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.get_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the properties of the underlying algorithm.</p>
+<p>Find more information at <a class="reference internal" href="extending.html#get-properties"><span class="std std-ref">get_properties()</span></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dataset_properties</strong> : dict, optional (default=None)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnRegressionAlgorithm.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>The predict function calls the predict function of the
+underlying scikit-learn model and returns an array with the predictions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : array-like, shape = (n_samples, n_features)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">array, shape = (n_samples,)</p>
+<blockquote class="last">
+<div><p>Returns the predicted values</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Please see the <a class="reference external" href="http://scikit-learn.org/dev/developers/index.html#apis-of-scikit-learn-objects">scikit-learn API documentation</a> for further information.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm">
+<em class="property">class </em><code class="descclassname">autosklearn.pipeline.components.base.</code><code class="descname">AutoSklearnPreprocessingAlgorithm</code><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnPreprocessingAlgorithm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide an abstract interface for preprocessing algorithms in
+auto-sklearn.</p>
+<p>See <a class="reference internal" href="extending.html#extending"><span class="std std-ref">Extending auto-sklearn</span></a> for more information.</p>
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>Y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnPreprocessingAlgorithm.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>The fit function calls the fit function of the underlying
+scikit-learn preprocessing algorithm and returns <cite>self</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : array-like, shape = (n_samples, n_features)</p>
+<blockquote>
+<div><p>Training data</p>
+</div></blockquote>
+<p><strong>y</strong> : array-like, shape = (n_samples,) or shape = (n_sample, n_labels)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>self</strong> : returns an instance of self.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Please see the <a class="reference external" href="http://scikit-learn.org/dev/developers/index.html#apis-of-scikit-learn-objects">scikit-learn API documentation</a> for further information.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.get_hyperparameter_search_space">
+<em class="property">static </em><code class="descname">get_hyperparameter_search_space</code><span class="sig-paren">(</span><em>dataset_properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnPreprocessingAlgorithm.get_hyperparameter_search_space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.get_hyperparameter_search_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the configuration space of this preprocessing algorithm.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dataset_properties</strong> : dict, optional (default=None)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Configspace.configuration_space.ConfigurationSpace</p>
+<blockquote class="last">
+<div><p>The configuration space of this preprocessing algorithm.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.get_preprocessor">
+<code class="descname">get_preprocessor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnPreprocessingAlgorithm.get_preprocessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.get_preprocessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the underlying preprocessor object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>preprocessor</strong> : the underlying preprocessor object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.get_properties">
+<em class="property">static </em><code class="descname">get_properties</code><span class="sig-paren">(</span><em>dataset_properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnPreprocessingAlgorithm.get_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.get_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the properties of the underlying algorithm.</p>
+<p>Find more information at <a class="reference internal" href="extending.html#get-properties"><span class="std std-ref">get_properties()</span></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dataset_properties</strong> : dict, optional (default=None)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnPreprocessingAlgorithm.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>The transform function calls the transform function of the
+underlying scikit-learn model and returns the transformed array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : array-like, shape = (n_samples, n_features)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>X</strong> : array</p>
+<blockquote class="last">
+<div><p>Return the transformed training data</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Please see the <a class="reference external" href="http://scikit-learn.org/dev/developers/index.html#apis-of-scikit-learn-objects">scikit-learn API documentation</a> for further information.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="_sources/api.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2016, Matthias Feurer, Aaron Klein, Katharina Eggensperger, Jost Tobias Springenberg, Manuel Blum, Frank Hutter.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
