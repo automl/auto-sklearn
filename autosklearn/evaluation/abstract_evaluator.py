@@ -307,28 +307,16 @@ class AbstractEvaluator(object):
         return prediction
 
     def _fit_and_suppress_warnings(self, model, X, y):
-        with warnings.catch_warnings(record=True) as warning_list:
+        def send_warnings_to_log(message, category, filename, lineno,
+                                 file=None):
+            self.logger.debug('%s:%s: %s:%s' %
+                (filename, lineno, category.__name__, message))
+            return
+
+        with warnings.catch_warnings():
+            warnings.showwarning = send_warnings_to_log
+            # warnings.simplefilter('ignore')
             model = model.fit(X, y)
-            for warning in warning_list:
-                message = str(warning.message)
-                filename = str(warning.filename)
-
-                # kernel approximattion (nystroem sampler)
-                # QDA
-                # FastICA
-                if message.startswith('n_components > n_samples. This is ' \
-                                      'not possible.') or \
-                        message == 'Variables are collinear' or \
-                        message.startswith('FastICA did not converge'):
-                    self.logger.debug('Suppressed warning from file %s: %s',
-                                      filename, message)
-
-                else:
-                    warnings.showwarning(message=warning.message,
-                                         category=warning.category,
-                                         filename=warning.filename,
-                                         lineno=warning.lineno)
-                    # print(type(warning), warning, message)
 
         return model
 
