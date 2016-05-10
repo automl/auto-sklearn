@@ -156,9 +156,9 @@ class EnsembleSelection(AbstractEnsemble):
     def _sorted_initialization(self, predictions, labels, n_best):
         perf = np.zeros([predictions.shape[0]])
 
-        for i, p in enumerate(predictions):
-            perf[i] = calculate_score(labels, predictions, self.task_type,
-                                      self.metric, predictions.shape[1])
+        for idx, prediction in enumerate(predictions):
+            perf[idx] = calculate_score(labels, prediction, self.task_type,
+                                        self.metric, predictions.shape[1])
 
         indices = np.argsort(perf)[perf.shape[0] - n_best:]
         return indices
