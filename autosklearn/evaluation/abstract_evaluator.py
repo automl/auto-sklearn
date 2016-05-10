@@ -2,6 +2,7 @@
 from __future__ import print_function
 import os
 import time
+import warnings
 
 import numpy as np
 from sklearn.dummy import DummyClassifier, DummyRegressor
@@ -12,6 +13,7 @@ from autosklearn.constants import *
 from autosklearn.util import Backend
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 from autosklearn.evaluation.util import calculate_score
+from autosklearn.util.logging_ import get_logger
 
 from ConfigSpace import Configuration
 
@@ -129,6 +131,10 @@ class AbstractEvaluator(object):
 
         self.backend = Backend(None, self.output_dir)
         self.model = self.model_class(self.configuration, self.seed)
+
+        logger_name = '%s(%d):%s' % (self.__class__.__name__.split('.')[-1],
+                                     self.seed, self.D.name)
+        self.logger = get_logger(logger_name)
 
     def fit_predict_and_loss(self):
         """Fit model(s) according to resampling strategy, predict for the
@@ -299,3 +305,30 @@ class AbstractEvaluator(object):
             return new_predictions
 
         return prediction
+
+    def _fit_and_suppress_warnings(self, model, X, y):
+        with warnings.catch_warnings(record=True) as warning_list:
+            model = model.fit(X, y)
+            for warning in warning_list:
+                message = str(warning.message)
+                filename = str(warning.filename)
+
+                # kernel approximattion (nystroem sampler)
+                # QDA
+                # FastICA
+                if message.startswith('n_components > n_samples. This is ' \
+                                      'not possible.') or \
+                        message == 'Variables are collinear' or \
+                        message.startswith('FastICA did not converge'):
+                    self.logger.debug('Suppressed warning from file %s: %s',
+                                      filename, message)
+
+                else:
+                    warnings.showwarning(message=warning.message,
+                                         category=warning.category,
+                                         filename=warning.filename,
+                                         lineno=warning.lineno)
+                    # print(type(warning), warning, message)
+
+        return model
+

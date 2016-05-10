@@ -484,7 +484,8 @@ class AutoMLSMBO(multiprocessing.Process):
         try:
             safe_mf = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                               wall_time_in_s=int(time_limit),
-                                              grace_period_in_s=30)(
+                                              grace_period_in_s=30,
+                                              logger=self.logger)(
                 self._calculate_metafeatures)
             res = safe_mf()
         except Exception as e:
@@ -508,7 +509,8 @@ class AutoMLSMBO(multiprocessing.Process):
         try:
             safe_mf = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                               wall_time_in_s=int(time_limit),
-                                              grace_period_in_s=30)(
+                                              grace_period_in_s=30,
+                                              logger=self.logger)(
                 self._calculate_metafeatures_encoded)
             res = safe_mf()
         except Exception as e:
@@ -521,7 +523,8 @@ class AutoMLSMBO(multiprocessing.Process):
         # we use pynisher here to enforce limits
         safe_smbo = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
                                             wall_time_in_s=int(self.total_walltime_limit),
-                                            grace_period_in_s=5)(self.run_smbo)
+                                            grace_period_in_s=5,
+                                            logger=self.logger)(self.run_smbo)
         safe_smbo(max_iters = self.smac_iters)
         
 
@@ -588,7 +591,8 @@ class AutoMLSMBO(multiprocessing.Process):
                     self.resampling_strategy,
                     self.resampling_strategy_args,
                     self.memory_limit,
-                    subset_time_limit, n_data_subsample)
+                    subset_time_limit, n_data_subsample,
+                    logger=self.logger)
                 (duration, result, _, additional_run_info, status) = _info
                 self.logger.info("Finished evaluating %d. configuration on SUBSET. "
                                  "Duration %f; loss %f; status %s; additional run "
@@ -839,7 +843,8 @@ class AutoMLSMBO(multiprocessing.Process):
                                     self.resampling_strategy,
                                     self.resampling_strategy_args,
                                     self.memory_limit,
-                                    self.func_eval_time_limit)
+                                    self.func_eval_time_limit,
+                                    logger=self.logger)
             (duration, result, _, additional_run_info, status) = info
             run_history.add(config=next_config, cost=result,
                             time=duration , status=status,
@@ -934,7 +939,8 @@ class AutoMLSMBO(multiprocessing.Process):
                                         self.resampling_strategy,
                                         self.resampling_strategy_args,
                                         self.memory_limit,
-                                        self.func_eval_time_limit)
+                                        self.func_eval_time_limit,
+                                        logger=self.logger)
                 (duration, result, _, additional_run_info, status) = info
                 run_history.add(config=next_config, cost=result,
                                 time=duration , status=status,

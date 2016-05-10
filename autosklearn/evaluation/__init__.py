@@ -21,7 +21,8 @@ def eval_with_limits(datamanager, tmp_dir, config, seed, num_run,
                      func_eval_time_limit, subsample=None,
                      with_predictions=True,
                      all_scoring_functions=False,
-                     output_y_test=True):
+                     output_y_test=True,
+                     logger=None):
     if resampling_strategy_args is None:
         resampling_strategy_args = {}
 
@@ -46,7 +47,8 @@ def eval_with_limits(datamanager, tmp_dir, config, seed, num_run,
     safe_eval = pynisher.enforce_limits(mem_in_mb=memory_limit,
                                         wall_time_in_s=func_eval_time_limit,
                                         cpu_time_in_s=func_eval_time_limit,
-                                        grace_period_in_s=30)(
+                                        grace_period_in_s=30,
+                                        logger=logger)(
         eval_function)
 
     try:

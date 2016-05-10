@@ -229,7 +229,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                  self._seed, num_run,
                                  self._resampling_strategy,
                                  self._resampling_strategy_arguments,
-                                 memory_limit, time_limit)
+                                 memory_limit, time_limit,
+                                 logger=self._logger)
         if _info[4] == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy prediction 1/2.")
         else:
@@ -242,7 +243,8 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                  self._seed, num_run,
                                  self._resampling_strategy,
                                  self._resampling_strategy_arguments,
-                                 memory_limit, time_limit)
+                                 memory_limit, time_limit,
+                                 logger=self._logger)
         if _info[4] == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy prediction 2/2.")
         else:
@@ -337,7 +339,11 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             self._proc_ensemble = None
         else:
             self._proc_ensemble = self._get_ensemble_process(time_left_for_ensembles)
-            self._proc_ensemble.start()
+            if self._ensemble_size > 0:
+                self._proc_ensemble.start()
+            else:
+                self._logger.info('Not starting ensemble builder because '
+                                  'ensemble size is <= 0.')
         self._stopwatch.stop_task(ensemble_task_name)
 
         # == RUN SMBO
@@ -398,7 +404,12 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             self._queue.put([time_for_load_data, data_manager_path, psutil_procs])
         else:
             for proc in procs:
-                proc.join()
+                try:
+                    proc.join()
+                # It can happen that we don't start the ensemble process due
+                # to the parameter ensemble_size < 0, then we also can't join.
+                except AssertionError as e:
+                    self._logger.debug(e)
 
         if self._queue is None:
             self._load_models()

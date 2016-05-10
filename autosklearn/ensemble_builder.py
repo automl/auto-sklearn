@@ -42,15 +42,13 @@ class EnsembleBuilder(multiprocessing.Process):
         self.low_precision = low_precision
 
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
-        setup_logger(os.path.join(self.autosklearn_tmp_dir,
-                                  '%s.log' % str(logger_name)))
         self.logger = get_logger(logger_name)
 
     def run(self):
         buffer_time = 5
         time_left = self.limit - buffer_time
         safe_ensemble_script = pynisher.enforce_limits(
-            wall_time_in_s=int(time_left))(self.main)
+            wall_time_in_s=int(time_left), logger=self.logger)(self.main)
         safe_ensemble_script()
 
     def main(self):
