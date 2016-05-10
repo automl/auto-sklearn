@@ -269,12 +269,29 @@ class AbstractEvaluator(object):
         return None, None
 
     def _predict_proba(self, X, model, task_type, Y_train):
-        Y_pred = model.predict_proba(X, batch_size=1000)
+        def send_warnings_to_log(message, category, filename, lineno,
+                                 file=None):
+            self.logger.debug('%s:%s: %s:%s' %
+                              (filename, lineno, category.__name__, message))
+            return
+
+        with warnings.catch_warnings():
+            warnings.showwarning = send_warnings_to_log
+            Y_pred = model.predict_proba(X, batch_size=1000)
+
         Y_pred = self._ensure_prediction_array_sizes(Y_pred, Y_train)
         return Y_pred
 
     def _predict_regression(self, X, model, task_type, Y_train=None):
-        Y_pred = model.predict(X)
+        def send_warnings_to_log(message, category, filename, lineno,
+                                 file=None):
+            self.logger.debug('%s:%s: %s:%s' %
+                              (filename, lineno, category.__name__, message))
+            return
+
+        with warnings.catch_warnings():
+            warnings.showwarning = send_warnings_to_log
+            Y_pred = model.predict(X)
 
         if len(Y_pred.shape) == 1:
             Y_pred = Y_pred.reshape((-1, 1))
@@ -315,7 +332,6 @@ class AbstractEvaluator(object):
 
         with warnings.catch_warnings():
             warnings.showwarning = send_warnings_to_log
-            # warnings.simplefilter('ignore')
             model = model.fit(X, y)
 
         return model
