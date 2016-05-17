@@ -609,8 +609,8 @@ class AutoMLSMBO(multiprocessing.Process):
                                          ratio)
                         continue
                     else:
-                        self.logger.info("Finished SUBSET training sucessfully "
-                                         "with ratio %f", ratio)
+                        self.logger.info("Finished SUBSET training successfully"
+                                         " with ratio %f", ratio)
                         subset_config_succesful[subset_config_id] = True
                         break
                 else:
@@ -620,8 +620,8 @@ class AutoMLSMBO(multiprocessing.Process):
                                          ratio)
                         continue
                     else:
-                        self.logger.info("Finished SUBSET training sucessfully "
-                                         "with ratio %f", ratio)
+                        self.logger.info("Finished SUBSET training successfully"
+                                         " with ratio %f", ratio)
                         subset_config_succesful[subset_config_id] = True
                         break
 
