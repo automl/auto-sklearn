@@ -34,9 +34,26 @@ class PickableLoggerAdapter(object):
         self.logger = _create_logger(name)
 
     def __getstate__(self):
+        """
+        Method is called when pickle dumps an object.
+
+        Returns
+        -------
+        Dictionary, representing the object state to be pickled. Ignores
+        the self.logger field and only returns the logger name.
+        """
         return { 'name': self.name }
 
     def __setstate__(self, state):
+        """
+        Method is called when pickle loads an object. Retrieves the name and
+        creates a logger.
+
+        Parameters
+        ----------
+        state - dictionary, containing the logger name.
+
+        """
         self.name = state['name']
         self.logger = _create_logger(self.name)
 
