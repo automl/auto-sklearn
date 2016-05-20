@@ -27,7 +27,7 @@ from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 
 
-class AutoML(BaseEstimator, multiprocessing.Process):
+class AutoML(BaseEstimator):
 
     def __init__(self,
                  tmp_dir,
@@ -366,7 +366,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         if time_left_for_smac <= 0:
             self._logger.warning("Not starting SMAC because there is no time "
                                  "left.")
-            self._procsmac = None
+            self._proc_smac = None
         else:
             self._proc_smac = AutoMLSMBO(config_space=self.configuration_space,
                                          dataset_name=self._dataset_name,
@@ -413,6 +413,9 @@ class AutoML(BaseEstimator, multiprocessing.Process):
 
         if self._queue is None:
             self._load_models()
+
+        self._proc_smac = None
+        self._proc_ensemble = None
 
         return self
 
