@@ -6,6 +6,7 @@ import six.moves.cPickle as pickle
 import os
 import sklearn.datasets
 import sklearn.metrics
+import sklearn.externals.joblib
 from base import Base
 
 
@@ -30,7 +31,8 @@ class PicklingTests(Base, unittest.TestCase):
         initial_accuracy = sklearn.metrics.accuracy_score(Y_test, initial_predictions)
         self.assertTrue(initial_accuracy > 0.75)
 
-        dump_file = os.path.join(output, 'automl.dump')
+        # Test pickle
+        dump_file = os.path.join(output, 'automl.dump.pkl')
 
         with open(dump_file, 'wb') as f:
             pickle.dump(automl, f)
@@ -43,3 +45,17 @@ class PicklingTests(Base, unittest.TestCase):
         self.assertTrue(restored_accuracy > 0.75)
 
         self.assertEqual(initial_accuracy, restored_accuracy)
+
+        # Test joblib
+        dump_file = os.path.join(output, 'automl.dump.joblib')
+
+        sklearn.externals.joblib.dump(automl, dump_file)
+
+        restored_automl = sklearn.externals.joblib.load(dump_file)
+
+        restored_predictions = restored_automl.predict(X_test)
+        restored_accuracy = sklearn.metrics.accuracy_score(Y_test, restored_predictions)
+        self.assertTrue(restored_accuracy > 0.75)
+
+        self.assertEqual(initial_accuracy, restored_accuracy)
+

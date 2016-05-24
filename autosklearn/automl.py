@@ -420,6 +420,30 @@ class AutoML(BaseEstimator):
         return self
 
     def refit(self, X, y):
+        """Refit all models found with fit to new data.
+
+        Necessary when using cross-validation. During training, auto-sklearn
+        fits each model k times on the dataset, but does not keep any trained
+        model and can therefore not be used to predict for new data points.
+        This methods fits all models found during a call to fit on the data
+        given. This method may also be used together with holdout to avoid
+        only using 66% of the training data to fit the final model.
+
+        Parameters
+        ----------
+
+        X : array-like or sparse matrix of shape = [n_samples, n_features]
+            The training input samples.
+
+        y : array-like, shape = [n_samples] or [n_samples, n_outputs]
+            The target classes.
+
+        Returns
+        -------
+
+        self
+
+        """
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
@@ -435,6 +459,7 @@ class AutoML(BaseEstimator):
                 model.fit(X.copy(), y.copy())
 
         self._can_predict = True
+        return self
 
     def predict(self, X):
         return np.argmax(self.predict_proba(X), axis=1)
@@ -485,6 +510,14 @@ class AutoML(BaseEstimator):
     def fit_ensemble(self, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
+        """Build the ensemble.
+
+        This method only needs to be called in the parallel mode.
+
+        Returns
+        -------
+        self
+        """
         if self._logger is None:
             self._logger = self._get_logger(dataset_name)
 
@@ -492,6 +525,7 @@ class AutoML(BaseEstimator):
             1, task, metric, precision, dataset_name, max_iterations=1,
             ensemble_nbest=ensemble_nbest, ensemble_size=ensemble_size)
         self._proc_ensemble.main()
+        return self
 
     def _get_ensemble_process(self, time_left_for_ensembles,
                               task=None, metric=None, precision=None,
@@ -550,6 +584,12 @@ class AutoML(BaseEstimator):
                                logger=self._logger)
 
     def show_models(self):
+        """Return a representation of the final ensemble found by auto-sklearn
+
+        Returns
+        -------
+        str
+        """
 
         if self.models_ is None or len(self.models_) == 0 or \
                 self.ensemble_ is None:

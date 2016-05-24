@@ -52,7 +52,8 @@ Installation
 ************
 **Prerequisities**: *auto-sklearn* is written in python and was developed
 with Ubuntu. It should run on other Linux distributions, but won't work on a MAC
-or on a windows PC. It is built around scikit-learn 0.17.1
+or on a windows PC. It is built around scikit-learn 0.17.1 and needs a
+compiler for C++ 11.
 
 Please install all dependencies manually with:
 
@@ -74,7 +75,7 @@ Manual
 ******
 
 * :ref:`API`
-* :ref:`resampling`
+* :ref:`manual`
 * :ref:`extending`
 
 

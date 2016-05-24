@@ -10,7 +10,7 @@ from autosklearn.constants import *
 
 
 class AutoSklearnClassifier(autosklearn.automl.AutoML):
-    """This class implements the classification task. It must not be pickled!
+    """This class implements the classification task.
 
     Parameters
     ----------
