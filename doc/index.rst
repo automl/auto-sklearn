@@ -85,6 +85,31 @@ License
 namely the 3-clause BSD license. The subprojects it uses, most notably SMAC,
 can have different licenses.
 
+Citing auto-sklearn
+*******************
+
+If you use auto-sklearn in a scientific publication, we would appreciate
+citations to the following paper:
+
+
+ `Efficient and Robust Automated Machine Learning
+ <https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning>`_,
+ Feurer *et al.*, Advances in Neural Information Processing Systems 28 (NIPS 2015).
+
+ Bibtex entry::
+
+     @incollection{NIPS2015_5872,
+        title = {Efficient and Robust Automated Machine Learning},
+        author = {Feurer, Matthias and Klein, Aaron and Eggensperger, Katharina and
+                  Springenberg, Jost and Blum, Manuel and Hutter, Frank},
+        booktitle = {Advances in Neural Information Processing Systems 28},
+        editor = {C. Cortes and N. D. Lawrence and D. D. Lee and M. Sugiyama and R. Garnett},
+        pages = {2962--2970},
+        year = {2015},
+        publisher = {Curran Associates, Inc.},
+        url = {http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf}
+     }
+
 Contributing
 ************
 *auto-sklearn* is developed mainly by the `Machine Learning for Automated
