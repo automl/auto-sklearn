@@ -45,7 +45,6 @@ class EvaluationTest(unittest.TestCase):
             lst = []
             for i in range(1000000):
                 lst.append(i)
-            print(lst)
             return lst
 
         safe_eval = pynisher.enforce_limits(mem_in_mb=1)(fill_memory)
