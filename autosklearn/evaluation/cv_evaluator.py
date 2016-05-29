@@ -116,8 +116,9 @@ class CVEvaluator(AbstractEvaluator):
             train_indices = train_indices[indices]
 
         self.indices[fold] = ((train_indices, test_indices))
-        model.fit(self.X_train[train_indices],
-                  self.Y_train[train_indices])
+        self._fit_and_suppress_warnings(model,
+                                        self.X_train[train_indices],
+                                        self.Y_train[train_indices])
 
         if self.keep_models:
             self.models[fold] = model

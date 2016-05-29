@@ -2,7 +2,9 @@
 from __future__ import absolute_import
 
 import multiprocessing
+import sys
 import time
+import traceback
 
 import pynisher
 from smac.tae.execute_ta_run import StatusType
@@ -14,17 +16,12 @@ from .nested_cv_evaluator import *
 from .test_evaluator import *
 from .util import *
 
+WORST_POSSIBLE_RESULT = 2.0
 
-def eval_with_limits(datamanager, tmp_dir, config, seed, num_run,
-                     resampling_strategy,
-                     resampling_strategy_args, memory_limit,
-                     func_eval_time_limit, subsample=None,
-                     with_predictions=True,
-                     all_scoring_functions=False,
-                     output_y_test=True):
-    if resampling_strategy_args is None:
-        resampling_strategy_args = {}
 
+def _eval_wrapper(queue, config, data, backend, seed, num_run, subsample,
+                  with_predictions, all_scoring_functions, output_y_test,
+                  resampling_strategy, **resampling_strategy_args):
     if resampling_strategy == 'holdout':
         eval_function = eval_holdout
     elif resampling_strategy == 'holdout-iterative-fit':
@@ -42,42 +39,67 @@ def eval_with_limits(datamanager, tmp_dir, config, seed, num_run,
                          resampling_strategy)
 
     start_time = time.time()
+    try:
+        eval_function(queue=queue, config=config, data=data,
+                      backend=backend, seed=seed, num_run=num_run,
+                      subsample=subsample, with_predictions=with_predictions,
+                      all_scoring_functions=all_scoring_functions,
+                      output_y_test=output_y_test,
+                      **resampling_strategy_args)
+    # We need to catch the 'limit'-exceptions of the pynisher here as well!
+    except pynisher.TimeoutException as e:
+        duration = time.time() - start_time
+        error_message = 'Timeout'
+        queue.put((duration, WORST_POSSIBLE_RESULT, seed, error_message,
+                   StatusType.TIMEOUT))
+    except MemoryError as e:
+        duration = time.time() - start_time
+        error_message = 'Memout'
+        queue.put((duration, WORST_POSSIBLE_RESULT, seed, error_message,
+                   StatusType.MEMOUT))
+    except Exception as e:
+        duration = time.time() - start_time
+        exc_info = sys.exc_info()
+        error_message = ''.join(traceback.format_exception(*exc_info))
+        queue.put((duration, WORST_POSSIBLE_RESULT, seed, error_message,
+                   StatusType.CRASHED))
+
+
+def eval_with_limits(datamanager, backend, config, seed, num_run,
+                     resampling_strategy,
+                     resampling_strategy_args, memory_limit,
+                     func_eval_time_limit, subsample=None,
+                     with_predictions=True,
+                     all_scoring_functions=False,
+                     output_y_test=True,
+                     logger=None):
+    if resampling_strategy_args is None:
+        resampling_strategy_args = {}
+
+    start_time = time.time()
     queue = multiprocessing.Queue()
     safe_eval = pynisher.enforce_limits(mem_in_mb=memory_limit,
                                         wall_time_in_s=func_eval_time_limit,
                                         cpu_time_in_s=func_eval_time_limit,
-                                        grace_period_in_s=30)(
-        eval_function)
+                                        grace_period_in_s=30,
+                                        logger=logger)(_eval_wrapper)
 
     try:
         safe_eval(queue=queue, config=config, data=datamanager,
-                  tmp_dir=tmp_dir, seed=seed, num_run=num_run,
+                  backend=backend, seed=seed, num_run=num_run,
                   subsample=subsample,
                   with_predictions=with_predictions,
                   all_scoring_functions=all_scoring_functions,
                   output_y_test=output_y_test,
+                  resampling_strategy=resampling_strategy,
                   **resampling_strategy_args)
-        info = queue.get(block=True, timeout=1)
+        info = queue.get(block=True, timeout=2)
     except Exception as e0:
-        if isinstance(e0, MemoryError):
-            is_memory_error = True
-        else:
-            is_memory_error = False
+        error_message = 'Unknown error (%s) %s' % (type(e0), e0)
+        status = StatusType.CRASHED
 
-        try:
-            # This happens if a timeout is reached and a half-way trained
-            #  model can be used to predict something
-            info = queue.get_nowait()
-        except Exception as e1:
-            # This happens if a timeout is reached and the model does not
-            #  support iterative_fit()
-            duration = time.time() - start_time
-            if is_memory_error:
-                status = StatusType.MEMOUT
-            elif duration >= func_eval_time_limit:
-                status = StatusType.TIMEOUT
-            else:
-                status = StatusType.CRASHED
-            info = (duration, 2.0, seed, str(e0), status)
+        duration = time.time() - start_time
+        info = (duration, WORST_POSSIBLE_RESULT, seed, error_message, status)
+
     return info
 

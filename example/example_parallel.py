@@ -14,6 +14,12 @@ output_folder = '/tmp/autosklearn_example_out'
 
 
 def spawn_classifier(seed, dataset_name):
+    """Spawn a subprocess.
+
+    auto-sklearn does not take care of spawning worker processes. This
+    function, which is called several times in the main block is a new
+    process which runs one instance of auto-sklearn.
+    """
     digits = sklearn.datasets.load_digits()
     X = digits.data
     y = digits.target
@@ -23,9 +29,12 @@ def spawn_classifier(seed, dataset_name):
     y = y[indices]
     X_train = X[:1000]
     y_train = y[:1000]
-    X_test = X[1000:]
-    y_test = y[1000:]
 
+    # Arguments which are different to other runs of auto-sklearn:
+    # 1. all classifiers write to the same output directory
+    # 2. shared_mode is set to True, this enables sharing of data between
+    # models.
+    # 3. all instances of the AutoSklearnClassifier must have a different seed!
     automl = AutoSklearnClassifier(time_left_for_this_task=60,
                                    per_run_time_limit=60,
                                    ml_memory_limit=1024,

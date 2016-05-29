@@ -68,7 +68,7 @@ class BalancingComponentTest(unittest.TestCase):
 
         for name, clf, acc_no_weighting, acc_weighting in \
                 [('adaboost', AdaboostClassifier, 0.709, 0.658),
-                 ('decision_tree', DecisionTree, 0.683, 0.701),
+                 ('decision_tree', DecisionTree, 0.724, 0.692),
                  ('extra_trees', ExtraTreesClassifier, 0.812, 0.8),
                  ('gradient_boosting', GradientBoostingClassifier,
                     0.800, 0.760),
@@ -122,7 +122,7 @@ class BalancingComponentTest(unittest.TestCase):
                     ExtraTreesPreprocessorClassification, 0.7142857142857143,
                     0.72180451127819545),
                  ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
-                    0.5934065934065933, 0.71111111111111114)]:
+                    0.71844660194174748, 0.71014492753623182)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
                 data_ = copy.copy(data)

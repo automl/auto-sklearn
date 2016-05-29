@@ -56,7 +56,7 @@ class HoldoutEvaluator(AbstractEvaluator):
         else:
             X_train, Y_train = self.X_train, self.Y_train
 
-        self.model.fit(X_train, Y_train)
+        self._fit_and_suppress_warnings(self.model, X_train, Y_train)
         return self.predict_and_loss()
 
     def iterative_fit(self):
@@ -118,10 +118,10 @@ class HoldoutEvaluator(AbstractEvaluator):
 
 
 # create closure for evaluating an algorithm
-def eval_holdout(queue, config, data, tmp_dir, seed, num_run,
+def eval_holdout(queue, config, data, backend, seed, num_run,
                  subsample, with_predictions, all_scoring_functions,
                  output_y_test, iterative=False):
-    evaluator = HoldoutEvaluator(data, tmp_dir, config,
+    evaluator = HoldoutEvaluator(data, backend, config,
                                  seed=seed,
                                  num_run=num_run,
                                  subsample=subsample,

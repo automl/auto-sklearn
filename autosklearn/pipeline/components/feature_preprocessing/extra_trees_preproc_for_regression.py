@@ -61,20 +61,25 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
 
     def fit(self, X, Y):
         from sklearn.ensemble import ExtraTreesRegressor
+        from sklearn.feature_selection import SelectFromModel
 
         num_features = X.shape[1]
         max_features = int(
             float(self.max_features) * (np.log(num_features) + 1))
         # Use at most half of the features
         max_features = max(1, min(int(X.shape[1] / 2), max_features))
-        self.preprocessor = ExtraTreesRegressor(
+        estimator = ExtraTreesRegressor(
             n_estimators=self.n_estimators, criterion=self.criterion,
             max_depth=self.max_depth, min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,
             max_features=max_features, max_leaf_nodes=self.max_leaf_nodes,
             oob_score=self.oob_score, n_jobs=self.n_jobs, verbose=self.verbose,
             random_state=self.random_state)
-        self.preprocessor.fit(X, Y)
+
+        estimator.fit(X, Y)
+        self.preprocessor = SelectFromModel(estimator=estimator,
+                                            threshold='mean',
+                                            prefit=True)
 
         return self
 

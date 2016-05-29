@@ -46,7 +46,6 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary',
 # Configure the extensions
 numpydoc_show_class_members = False
 autosummary_generate = True
-autodoc_default_flags = ['members', 'inherited-members']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -134,7 +133,7 @@ html_theme_options = {
         ('Start', 'index'),
         ('API', 'api'),
         ('Extending', 'extending'),
-        ('Resampling', 'resampling'),
+        ('Manual', 'manual'),
     ],
 
     # Render the next and previous page links in navbar. (Default: true)

@@ -27,11 +27,10 @@ from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 
 
-class AutoML(BaseEstimator, multiprocessing.Process):
+class AutoML(BaseEstimator):
 
     def __init__(self,
-                 tmp_dir,
-                 output_dir,
+                 backend,
                  time_left_for_this_task,
                  per_run_time_limit,
                  log_dir=None,
@@ -55,12 +54,12 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                  max_iter_smac=None,
                  acquisition_function='EI'):
         super(AutoML, self).__init__()
-
-        self._tmp_dir = tmp_dir
-        self._output_dir = output_dir
+        self._backend = backend
+        #self._tmp_dir = tmp_dir
+        #self._output_dir = output_dir
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
-        self._log_dir = log_dir if log_dir is not None else self._tmp_dir
+        #self._log_dir = log_dir if log_dir is not None else self._tmp_dir
         self._initial_configurations_via_metalearning = \
             initial_configurations_via_metalearning
         self._ensemble_size = ensemble_size
@@ -76,10 +75,10 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self._resampling_strategy = resampling_strategy
         self._resampling_strategy_arguments = resampling_strategy_arguments
         self._max_iter_smac = max_iter_smac
-        self.delete_tmp_folder_after_terminate = \
-            delete_tmp_folder_after_terminate
-        self.delete_output_folder_after_terminate = \
-            delete_output_folder_after_terminate
+        #self.delete_tmp_folder_after_terminate = \
+        #    delete_tmp_folder_after_terminate
+        #self.delete_output_folder_after_terminate = \
+        #    delete_output_folder_after_terminate
         self._shared_mode = shared_mode
         self.precision = precision
         self.acquisition_function = acquisition_function
@@ -106,7 +105,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                              str(type(self._per_run_time_limit)))
 
         # After assignging and checking variables...
-        self._backend = Backend(self._output_dir, self._tmp_dir)
+        #self._backend = Backend(self._output_dir, self._tmp_dir)
 
     def start_automl(self, parser):
         self._parser = parser
@@ -198,7 +197,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
-        setup_logger(os.path.join(self._tmp_dir, '%s.log' % str(logger_name)))
+        setup_logger(os.path.join(self._backend.temporary_directory, '%s.log' % str(logger_name)))
         return get_logger(logger_name)
 
     @staticmethod
@@ -225,11 +224,12 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         time_limit = int(self._time_for_task / 6.)
         memory_limit = int(self._ml_memory_limit)
 
-        _info = eval_with_limits(datamanager, self._tmp_dir, 1,
+        _info = eval_with_limits(datamanager, self._backend, 1,
                                  self._seed, num_run,
                                  self._resampling_strategy,
                                  self._resampling_strategy_arguments,
-                                 memory_limit, time_limit)
+                                 memory_limit, time_limit,
+                                 logger=self._logger)
         if _info[4] == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy prediction 1/2.")
         else:
@@ -238,11 +238,12 @@ class AutoML(BaseEstimator, multiprocessing.Process):
 
         num_run += 1
 
-        _info = eval_with_limits(datamanager, self._tmp_dir, 2,
+        _info = eval_with_limits(datamanager, self._backend, 2,
                                  self._seed, num_run,
                                  self._resampling_strategy,
                                  self._resampling_strategy_arguments,
-                                 memory_limit, time_limit)
+                                 memory_limit, time_limit,
+                                 logger=self._logger)
         if _info[4] == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy prediction 2/2.")
         else:
@@ -314,7 +315,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         # like this we can't use some of the preprocessing methods in case
         # the data became sparse)
         self.configuration_space, configspace_path = self._create_search_space(
-            self._tmp_dir,
+            self._backend.temporary_directory,
             self._backend,
             datamanager,
             self._include_estimators,
@@ -337,7 +338,11 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             self._proc_ensemble = None
         else:
             self._proc_ensemble = self._get_ensemble_process(time_left_for_ensembles)
-            self._proc_ensemble.start()
+            if self._ensemble_size > 0:
+                self._proc_ensemble.start()
+            else:
+                self._logger.info('Not starting ensemble builder because '
+                                  'ensemble size is <= 0.')
         self._stopwatch.stop_task(ensemble_task_name)
 
         # == RUN SMBO
@@ -360,12 +365,11 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         if time_left_for_smac <= 0:
             self._logger.warning("Not starting SMAC because there is no time "
                                  "left.")
-            self._procsmac = None
+            self._proc_smac = None
         else:
             self._proc_smac = AutoMLSMBO(config_space=self.configuration_space,
                                          dataset_name=self._dataset_name,
-                                         tmp_dir=self._tmp_dir,
-                                         output_dir=self._output_dir,
+                                         backend=self._backend,
                                          total_walltime_limit=time_left_for_smac,
                                          func_eval_time_limit=self._per_run_time_limit,
                                          memory_limit=self._ml_memory_limit,
@@ -398,14 +402,46 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             self._queue.put([time_for_load_data, data_manager_path, psutil_procs])
         else:
             for proc in procs:
-                proc.join()
+                try:
+                    proc.join()
+                # It can happen that we don't start the ensemble process due
+                # to the parameter ensemble_size < 0, then we also can't join.
+                except AssertionError as e:
+                    self._logger.debug(e)
 
         if self._queue is None:
             self._load_models()
 
+        self._proc_smac = None
+        self._proc_ensemble = None
+
         return self
 
     def refit(self, X, y):
+        """Refit all models found with fit to new data.
+
+        Necessary when using cross-validation. During training, auto-sklearn
+        fits each model k times on the dataset, but does not keep any trained
+        model and can therefore not be used to predict for new data points.
+        This methods fits all models found during a call to fit on the data
+        given. This method may also be used together with holdout to avoid
+        only using 66% of the training data to fit the final model.
+
+        Parameters
+        ----------
+
+        X : array-like or sparse matrix of shape = [n_samples, n_features]
+            The training input samples.
+
+        y : array-like, shape = [n_samples] or [n_samples, n_outputs]
+            The target classes.
+
+        Returns
+        -------
+
+        self
+
+        """
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
@@ -421,11 +457,9 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                 model.fit(X.copy(), y.copy())
 
         self._can_predict = True
+        return self
 
     def predict(self, X):
-        return np.argmax(self.predict_proba(X), axis=1)
-
-    def predict_proba(self, X):
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
@@ -471,6 +505,14 @@ class AutoML(BaseEstimator, multiprocessing.Process):
     def fit_ensemble(self, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
+        """Build the ensemble.
+
+        This method only needs to be called in the parallel mode.
+
+        Returns
+        -------
+        self
+        """
         if self._logger is None:
             self._logger = self._get_logger(dataset_name)
 
@@ -478,6 +520,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
             1, task, metric, precision, dataset_name, max_iterations=1,
             ensemble_nbest=ensemble_nbest, ensemble_size=ensemble_size)
         self._proc_ensemble.main()
+        return self
 
     def _get_ensemble_process(self, time_left_for_ensembles,
                               task=None, metric=None, precision=None,
@@ -497,12 +540,11 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         if ensemble_size is None:
             ensemble_size = self._ensemble_size
 
-        return EnsembleBuilder(autosklearn_tmp_dir=self._tmp_dir,
+        return EnsembleBuilder(backend=self._backend,
                                dataset_name=dataset_name,
                                task_type=task,
                                metric=metric,
                                limit=time_left_for_ensembles,
-                               output_dir=self._output_dir,
                                ensemble_size=ensemble_size,
                                ensemble_nbest=ensemble_nbest,
                                seed=self._seed,
@@ -536,6 +578,12 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                                logger=self._logger)
 
     def show_models(self):
+        """Return a representation of the final ensemble found by auto-sklearn
+
+        Returns
+        -------
+        str
+        """
 
         if self.models_ is None or len(self.models_) == 0 or \
                 self.ensemble_ is None:
@@ -579,40 +627,3 @@ class AutoML(BaseEstimator, multiprocessing.Process):
 
     def configuration_space_created_hook(self, datamanager, configuration_space):
         return configuration_space
-
-    def get_params(self, deep=True):
-        raise NotImplementedError('auto-sklearn does not implement '
-                                  'get_params() because it is not intended to '
-                                  'be optimized.')
-
-    def set_params(self, deep=True):
-        raise NotImplementedError('auto-sklearn does not implement '
-                                  'set_params() because it is not intended to '
-                                  'be optimized.')
-
-    def __del__(self):
-        self._delete_output_directories()
-
-    def _delete_output_directories(self):
-        if self.delete_output_folder_after_terminate:
-            try:
-                shutil.rmtree(self._output_dir)
-            except Exception:
-                if self._logger is not None:
-                    self._logger.warning("Could not delete output dir: %s" %
-                                         self._output_dir)
-                else:
-                    print("Could not delete output dir: %s" %
-                          self._output_dir)
-
-        if self.delete_tmp_folder_after_terminate:
-            try:
-                shutil.rmtree(self._tmp_dir)
-            except Exception:
-                if self._logger is not None:
-                    self._logger.warning("Could not delete tmp dir: %s" %
-                                  self._tmp_dir)
-                    pass
-                else:
-                    print("Could not delete tmp dir: %s" %
-                          self._tmp_dir)

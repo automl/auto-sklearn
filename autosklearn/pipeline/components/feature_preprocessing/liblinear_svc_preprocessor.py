@@ -28,6 +28,7 @@ class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
 
     def fit(self, X, Y):
         import sklearn.svm
+        from sklearn.feature_selection import SelectFromModel
 
         self.C = float(self.C)
         self.tol = float(self.tol)
@@ -39,17 +40,22 @@ class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
         if self.class_weight == "None":
             self.class_weight = None
 
-        self.preprocessor = sklearn.svm.LinearSVC(penalty=self.penalty,
-                                                  loss=self.loss,
-                                                  dual=self.dual,
-                                                  tol=self.tol,
-                                                  C=self.C,
-                                                  class_weight=self.class_weight,
-                                                  fit_intercept=self.fit_intercept,
-                                                  intercept_scaling=self.intercept_scaling,
-                                                  multi_class=self.multi_class,
-                                                  random_state=self.random_state)
-        self.preprocessor.fit(X, Y)
+        estimator = sklearn.svm.LinearSVC(penalty=self.penalty,
+                                          loss=self.loss,
+                                          dual=self.dual,
+                                          tol=self.tol,
+                                          C=self.C,
+                                          class_weight=self.class_weight,
+                                          fit_intercept=self.fit_intercept,
+                                          intercept_scaling=self.intercept_scaling,
+                                          multi_class=self.multi_class,
+                                          random_state=self.random_state)
+
+        estimator.fit(X, Y)
+        self.preprocessor = SelectFromModel(estimator=estimator,
+                                            threshold='mean',
+                                            prefit=True)
+
         return self
 
     def transform(self, X):

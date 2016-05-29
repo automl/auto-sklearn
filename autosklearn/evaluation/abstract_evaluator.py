@@ -2,6 +2,7 @@
 from __future__ import print_function
 import os
 import time
+import warnings
 
 import numpy as np
 from sklearn.dummy import DummyClassifier, DummyRegressor
@@ -12,6 +13,7 @@ from autosklearn.constants import *
 from autosklearn.util import Backend
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 from autosklearn.evaluation.util import calculate_score
+from autosklearn.util.logging_ import get_logger
 
 from ConfigSpace import Configuration
 
@@ -81,7 +83,7 @@ class MyDummyRegressor(DummyRegressor):
 
 
 class AbstractEvaluator(object):
-    def __init__(self, Datamanager, output_dir, configuration=None,
+    def __init__(self, Datamanager, backend, configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
@@ -91,8 +93,9 @@ class AbstractEvaluator(object):
 
         self.starttime = time.time()
 
-        self.output_dir = output_dir
         self.configuration = configuration
+        self.backend = backend
+
         self.D = Datamanager
 
         self.X_valid = Datamanager.data.get('X_valid')
@@ -127,8 +130,11 @@ class AbstractEvaluator(object):
 
         self.subsample = subsample
 
-        self.backend = Backend(None, self.output_dir)
         self.model = self.model_class(self.configuration, self.seed)
+
+        logger_name = '%s(%d):%s' % (self.__class__.__name__.split('.')[-1],
+                                     self.seed, self.D.name)
+        self.logger = get_logger(logger_name)
 
     def fit_predict_and_loss(self):
         """Fit model(s) according to resampling strategy, predict for the
@@ -244,7 +250,7 @@ class AbstractEvaluator(object):
 
         if self.output_y_test:
             try:
-                os.makedirs(self.output_dir)
+                os.makedirs(self.backend.output_directory)
             except OSError:
                 pass
             self.backend.save_targets_ensemble(self.Y_optimization)
@@ -263,12 +269,29 @@ class AbstractEvaluator(object):
         return None, None
 
     def _predict_proba(self, X, model, task_type, Y_train):
-        Y_pred = model.predict_proba(X, batch_size=1000)
+        def send_warnings_to_log(message, category, filename, lineno,
+                                 file=None):
+            self.logger.debug('%s:%s: %s:%s' %
+                              (filename, lineno, category.__name__, message))
+            return
+
+        with warnings.catch_warnings():
+            warnings.showwarning = send_warnings_to_log
+            Y_pred = model.predict_proba(X, batch_size=1000)
+
         Y_pred = self._ensure_prediction_array_sizes(Y_pred, Y_train)
         return Y_pred
 
     def _predict_regression(self, X, model, task_type, Y_train=None):
-        Y_pred = model.predict(X)
+        def send_warnings_to_log(message, category, filename, lineno,
+                                 file=None):
+            self.logger.debug('%s:%s: %s:%s' %
+                              (filename, lineno, category.__name__, message))
+            return
+
+        with warnings.catch_warnings():
+            warnings.showwarning = send_warnings_to_log
+            Y_pred = model.predict(X)
 
         if len(Y_pred.shape) == 1:
             Y_pred = Y_pred.reshape((-1, 1))
@@ -299,3 +322,17 @@ class AbstractEvaluator(object):
             return new_predictions
 
         return prediction
+
+    def _fit_and_suppress_warnings(self, model, X, y):
+        def send_warnings_to_log(message, category, filename, lineno,
+                                 file=None):
+            self.logger.debug('%s:%s: %s:%s' %
+                (filename, lineno, category.__name__, message))
+            return
+
+        with warnings.catch_warnings():
+            warnings.showwarning = send_warnings_to_log
+            model = model.fit(X, y)
+
+        return model
+

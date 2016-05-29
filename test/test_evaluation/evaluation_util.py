@@ -21,7 +21,8 @@ N_TEST_RUNS = 5
 
 
 class Dummy(object):
-    pass
+    def __init__(self):
+        self.name = 'Dummy'
 
 
 class BaseEvaluatorTest(unittest.TestCase):
