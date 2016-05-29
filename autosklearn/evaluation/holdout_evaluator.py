@@ -118,10 +118,10 @@ class HoldoutEvaluator(AbstractEvaluator):
 
 
 # create closure for evaluating an algorithm
-def eval_holdout(queue, config, data, tmp_dir, seed, num_run,
+def eval_holdout(queue, config, data, backend, seed, num_run,
                  subsample, with_predictions, all_scoring_functions,
                  output_y_test, iterative=False):
-    evaluator = HoldoutEvaluator(data, tmp_dir, config,
+    evaluator = HoldoutEvaluator(data, backend, config,
                                  seed=seed,
                                  num_run=num_run,
                                  subsample=subsample,
