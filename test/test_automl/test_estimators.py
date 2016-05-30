@@ -43,7 +43,7 @@ class EstimatorTest(Base, unittest.TestCase):
         print(automl.show_models())
 
         self.assertGreaterEqual(score, 0.8)
-        self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
+        self.assertEqual(automl._automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
         self._tearDown(output)

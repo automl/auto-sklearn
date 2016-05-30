@@ -135,6 +135,19 @@ class AutoML(BaseEstimator):
             metric='acc_metric',
             feat_type=None,
             dataset_name=None):
+        if not self._shared_mode:
+            self._backend.context.delete_directories()
+        else:
+            # If this fails, it's likely that this is the first call to get
+            # the data manager
+            try:
+                D = self._backend.load_datamanager()
+                dataset_name = D.name
+            except IOError:
+                pass
+
+        self._backend.context.create_directories()
+
         if dataset_name is None:
             m = hashlib.md5()
             m.update(X.data)
@@ -572,7 +585,7 @@ class AutoML(BaseEstimator):
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
         # Don't know if the reshaping should be done there or in calculate_score
-        prediction = self.predict_proba(X)
+        prediction = self.predict(X)
         return calculate_score(y, prediction, self._task,
                                self._metric, self._label_num,
                                logger=self._logger)

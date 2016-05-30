@@ -365,7 +365,7 @@ class EnsembleBuilder(multiprocessing.Process):
                             # File size maximally 2.1MB
                             precision = 6
 
-                backend.save_predictions_as_txt(ensemble_predictions_valid,
+                self.backend.save_predictions_as_txt(ensemble_predictions_valid,
                                                 'valid', index_run, prefix=self.dataset_name,
                                                 precision=precision)
             else:

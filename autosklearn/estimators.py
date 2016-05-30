@@ -23,11 +23,15 @@ class AutoSklearnEstimator(BaseEstimator):
             ):
         pass
 
-    def refit(self):
-        pass
+    def refit(self, X, y):
+        return self._automl.refit(X, y)
 
-    def fit_ensemble(self):
-        pass
+    def fit_ensemble(self, task=None, metric=None, precision='32',
+                     dataset_name=None, ensemble_nbest=None,
+                     ensemble_size=None):
+        return self._automl.fit_ensemble(task, metric, precision,
+                                         dataset_name, ensemble_nbest,
+                                         ensemble_size)
 
     def predict(self, X):
         """Predict classes for X.
@@ -44,8 +48,8 @@ class AutoSklearnEstimator(BaseEstimator):
         """
         return self._automl.predict(X)
 
-    def score(self):
-        pass
+    def score(self, X, y):
+        return self._automl.score(X, y)
 
     def show_models(self):
         return self._automl.show_models()
@@ -110,21 +114,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         # Fit is supposed to be idempotent!
 
         # But not if we use share_mode:
-        '''
-        if not self._shared_mode:
-            self._delete_output_directories()
-        else:
-            # If this fails, it's likely that this is the first call to get
-            # the data manager
-            try:
-                D = self._backend.load_datamanager()
-                dataset_name = D.name
-            except IOError:
-                pass
 
-        self._create_output_directories()
-
-        '''
         y = np.atleast_1d(y)
 
         if y.ndim == 1:
@@ -289,8 +279,6 @@ class EstimatorBuilder():
                delete_output_folder_after_terminate=True,
                shared_mode=False):
 
-        estimator_cls = next(x for x in cls.__bases__ if issubclass(x, AutoSklearnEstimator))
-
         if shared_mode:
             delete_output_folder_after_terminate = False
             delete_tmp_folder_after_terminate = False
@@ -301,7 +289,10 @@ class EstimatorBuilder():
                 raise ValueError("If shared_mode == True output_folder must "
                                  "not be None.")
 
-        backend = create(tmp_folder, output_folder, delete_tmp_folder_after_terminate, delete_output_folder_after_terminate)
+        backend = create(temporary_directory=tmp_folder,
+                         output_directory=output_folder,
+                         delete_tmp_folder_after_terminate=delete_tmp_folder_after_terminate,
+                         delete_output_folder_after_terminate=delete_output_folder_after_terminate)
         automl = autosklearn.automl.AutoML(
             backend=backend,
             time_left_for_this_task=time_left_for_this_task,
@@ -321,6 +312,8 @@ class EstimatorBuilder():
             delete_output_folder_after_terminate=
             delete_output_folder_after_terminate,
             shared_mode=shared_mode)
+
+        estimator_cls = next(x for x in cls.__bases__ if issubclass(x, AutoSklearnEstimator))
         estimator = estimator_cls(automl)
 
         return estimator

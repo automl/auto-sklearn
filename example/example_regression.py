@@ -23,7 +23,7 @@ def main():
 
     print(automl.show_models())
     predictions = automl.predict(X_test)
-    print("MSE score", sklearn.metrics.mean_squared_error(y_test, predictions))
+    print("R2 score:", sklearn.metrics.r2_score(y_test, predictions))
 
 
 if __name__ == '__main__':

@@ -18,8 +18,8 @@ __all__ = [
 
 def create(temporary_directory,
            output_directory,
-           delete_tmp_folder_after_terminate,
-           delete_output_folder_after_terminate):
+           delete_tmp_folder_after_terminate=True,
+           delete_output_folder_after_terminate=True):
     context = BackendContext(temporary_directory, output_directory,
                              delete_tmp_folder_after_terminate,
                              delete_output_folder_after_terminate)
@@ -39,6 +39,7 @@ class BackendContext(object):
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
         self._logger = logging.get_logger(__name__)
+        self.create_directories()
 
     @property
     def output_directory(self):
@@ -60,9 +61,7 @@ class BackendContext(object):
             if output_directory \
             else '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
 
-        self._create_directories()
-
-    def _create_directories(self):
+    def create_directories(self):
         try:
             os.makedirs(self.temporary_directory)
         except OSError:
@@ -73,10 +72,10 @@ class BackendContext(object):
             pass
 
     def __del__(self):
-        self._delete_output_directories()
+        self.delete_directories(force=False)
 
-    def _delete_output_directories(self):
-        if self.delete_output_folder_after_terminate:
+    def delete_directories(self, force=True):
+        if self.delete_output_folder_after_terminate or force:
             try:
                 shutil.rmtree(self.output_directory)
             except Exception:
@@ -87,7 +86,7 @@ class BackendContext(object):
                     print("Could not delete output dir: %s" %
                           self.output_directory)
 
-        if self.delete_tmp_folder_after_terminate:
+        if self.delete_tmp_folder_after_terminate or force:
             try:
                 shutil.rmtree(self.temporary_directory)
             except Exception:
