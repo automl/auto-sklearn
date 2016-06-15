@@ -1,3 +1,4 @@
+import copy
 import os
 import resource
 import sys
@@ -225,7 +226,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'classifier:adaboost:n_estimators': 50,
                             'classifier:adaboost:max_depth': 1,
                             'preprocessor:kernel_pca:n_components': 10,
-                            'preprocessor:kitchen_sinks:n_components': 50}
+                            'preprocessor:kitchen_sinks:n_components': 50,
+                            'preprocessor:gem:N': 5,
+                            'classifier:proj_logit:max_epochs': 1,
+                            'classifier:libsvm_svc:degree': 2}
 
             for restrict_parameter in restrictions:
                 restrict_to = restrictions[restrict_parameter]
@@ -244,10 +248,13 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 X_test = data['X_test'].copy()
                 Y_test = data['Y_test'].copy()
 
-            cls = SimpleClassificationPipeline(config, random_state=1,)
+            cls = SimpleClassificationPipeline(config, random_state=1)
             try:
-                cls.fit(X_train, Y_train, init_params=init_params)
+                init_params_ = copy.deepcopy(init_params)
+                cls.fit(X_train, Y_train, init_params=init_params_)
                 predictions = cls.predict(X_test)
+            except MemoryError as e:
+                continue
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
                         e.args[0]:
