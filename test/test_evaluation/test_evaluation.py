@@ -4,6 +4,8 @@ import sys
 import time
 import unittest
 
+import numpy as np
+
 if sys.version_info[0] == 2:
     import mock
 else:
@@ -42,13 +44,10 @@ class EvaluationTest(unittest.TestCase):
 
     def test_pynisher_memory_error(self):
         def fill_memory():
-            lst = []
-            for i in range(1000000):
-                lst.append(i)
-            return lst
+            a = np.random.random_sample((10000, 10000)).astype(np.float64)
+            return np.sum(a)
 
         safe_eval = pynisher.enforce_limits(mem_in_mb=1)(fill_memory)
-        safe_eval()
         self.assertEqual(safe_eval.exit_status, pynisher.MemorylimitException)
 
     def test_pynisher_timeout(self):
