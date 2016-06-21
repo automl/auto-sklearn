@@ -97,6 +97,11 @@ def get_options():
                         type=int,
                         default=1,
                         help='Seed for random number generators.')
+
+    parser.add_argument('--exec-mode',
+                        default=None,
+                        type=str,
+                        help='Execution mode for SMAC')
     parser.add_argument('--exec-dir', type=str, help='Execution directory.')
     parser.add_argument(
         '--metadata-directory',
@@ -183,6 +188,7 @@ if __name__ == '__main__':
         ensemble_nbest=args.ensemble_nbest,
         initial_configurations_via_metalearning=args.metalearning_configurations,
         seed=args.seed,
+        exec_mode=args.exec_mode,
         ml_memory_limit=args.ml_memory_limit,
         metadata_directory=args.metadata_directory,
         queue=queue,

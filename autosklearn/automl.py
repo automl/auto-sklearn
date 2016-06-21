@@ -151,6 +151,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                  delete_tmp_folder_after_terminate=False,
                  delete_output_folder_after_terminate=False,
                  shared_mode=False,
+                 exec_mode=None,
                  precision=32):
         super(AutoML, self).__init__()
 
@@ -177,6 +178,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
         self.delete_output_folder_after_terminate = \
             delete_output_folder_after_terminate
         self._shared_mode = shared_mode
+        self._exec_mode = exec_mode
         self.precision = precision
 
         self._datamanager = None
@@ -498,7 +500,7 @@ class AutoML(BaseEstimator, multiprocessing.Process):
                              seed=self._seed,
                              resampling_strategy=self._resampling_strategy,
                              resampling_strategy_arguments=self._resampling_strategy_arguments,
-                             shared_mode=self._shared_mode)
+                             shared_mode=self._shared_mode, exec_mode=self._exec_mode)
 
         procs = []
 
