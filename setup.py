@@ -12,11 +12,8 @@ except:
 
 import setuptools
 from setuptools.extension import Extension
-from setuptools.command.install import install
 import numpy as np
 from Cython.Build import cythonize
-
-METADATA_DIRECTORY = 'autosklearn/metalearning/files'
 
 extensions = cythonize(
     [Extension('autosklearn.data.competition_c_functions',
@@ -27,9 +24,9 @@ extensions = cythonize(
 
 
 setuptools.setup(
-    name='AutoSklearn',
-    description='Code to participate in the AutoML 2015 challenge.',
-    version='0.0.1dev',
+    name='auto-sklearn',
+    description='Automated machine learning.',
+    version='0.0.1',
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=['numpy>=1.9.0',
@@ -55,4 +52,4 @@ setuptools.setup(
     license='BSD',
     platforms=['Linux'],
     classifiers=[],
-    url='www.automl.org')
+    url='automl.github.io/auto-sklearn')

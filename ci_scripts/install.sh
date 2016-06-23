@@ -28,11 +28,11 @@ conda create -n testenv --yes python=$PYTHON_VERSION pip nose cython
 source activate testenv
 
 # First install exact numpy and scipy version from pip
-pip install numpy==1.9.3
-pip install scipy==0.15.1
+pip install numpy==1.11.0
+pip install scipy==0.16.1
 
 # Install requirements in correct order
-cat requ.txt | xargs -n 1 -L 1 pip install
+cat requirements.txt | xargs -n 1 -L 1 pip install
 
 if [[ "$COVERAGE" == "true" ]]; then
     pip install coverage coveralls

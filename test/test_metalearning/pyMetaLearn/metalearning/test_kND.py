@@ -91,7 +91,8 @@ class kNDTest(unittest.TestCase):
         assert_series_equal(metafeatures.iloc[0],
                             pd.Series({"number_of_instances": 0.267919719656,
                                       "number_of_classes": 1,
-                                      "number_of_features": 1}))
+                                      "number_of_features": 1},
+                                      name=232))
 
     def test_random_metric(self):
         kND = KNearestDatasets(metric=get_random_metric(random_state=1))

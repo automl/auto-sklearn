@@ -63,7 +63,7 @@ class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
         n_estimators = cs.add_hyperparameter(UniformIntegerHyperparameter(
             name="n_estimators", lower=50, upper=500, default=50, log=False))
         learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
-            name="learning_rate", lower=0.0001, upper=2, default=0.1, log=True))
+            name="learning_rate", lower=0.01, upper=2, default=0.1, log=True))
         loss = cs.add_hyperparameter(CategoricalHyperparameter(
             name="loss", choices=["linear", "square", "exponential"],
             default="linear"))

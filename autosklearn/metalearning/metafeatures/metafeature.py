@@ -151,3 +151,9 @@ class DatasetMetafeatures(object):
                 repr.write("    %s\n" % self.metafeature_values[name].comment)
 
         return repr.getvalue()
+
+    def keys(self):
+        return self.metafeature_values.keys()
+
+    def __getitem__(self, item):
+        return self.metafeature_values[item]

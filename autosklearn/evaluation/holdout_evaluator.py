@@ -56,7 +56,7 @@ class HoldoutEvaluator(AbstractEvaluator):
         else:
             X_train, Y_train = self.X_train, self.Y_train
 
-        self.model.fit(X_train, Y_train)
+        self._fit_and_suppress_warnings(self.model, X_train, Y_train)
         return self.predict_and_loss()
 
     def iterative_fit(self):

@@ -27,7 +27,7 @@ class RandomForestComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = \
                 _test_classifier_iterative_fit(RandomForest)
-            self.assertAlmostEqual(0.94,
+            self.assertAlmostEqual(0.95999999999999996,
                                    sklearn.metrics.accuracy_score(
                                        predictions, targets))
 
@@ -53,7 +53,7 @@ class RandomForestComponentTest(unittest.TestCase):
                 _test_classifier_predict_proba(RandomForest,
                                                make_multilabel=True)
             self.assertEqual(predictions.shape, ((50, 3)))
-            self.assertAlmostEqual(0.9943139211500065,
+            self.assertAlmostEqual(0.99252721833266977,
                                    sklearn.metrics.average_precision_score(
                                        targets, predictions))
 
