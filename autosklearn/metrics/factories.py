@@ -1,10 +1,12 @@
+# This module implements metric class and corresponding factories
+
 import six
 import importlib
 from autosklearn.constants import BINARY_CLASSIFICATION, \
     MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION, REGRESSION
-from classification_metrics import acc_metric, bac_metric, pac_metric, \
+from .classification_metrics import acc_metric, bac_metric, pac_metric, \
     f1_metric, auc_metric
-from regression_metrics import a_metric, r2_metric
+from .regression_metrics import a_metric, r2_metric
 
 
 ### Metric base class and implementations ###
@@ -69,9 +71,13 @@ STRING_TO_METRIC = {
 class MetricBuilder():
 
     metric_name = None
+    # the name of the metric they build
     scoring_function = None
+    # scoring function of the metric
     possible_metric_names = None
+    # possible names, by which the metric is accessible (aliases)
     possible_task_types = None
+    # possible task types, for which this metric can be returned
 
     def can_build_metric_with_name(self, metric_name):
         return metric_name in self.possible_metric_names
@@ -94,13 +100,6 @@ class MetricBuilder():
     def get_scoring_function(self):
         pass
 
-'''
-    Metric builders specify:
-        - the name of the metric they build
-        - scoring function of the metric
-        - possible names, by which the metric is accessible (aliases)
-        - possible task types, for which this metric can be returned
-'''
 
 class AMetricBuilder(MetricBuilder):
     metric_name = 'a_metric'
@@ -172,6 +171,15 @@ class KnownMetricFactory():
                                        if b.can_build(task_type)]
 
     def create(self, metric_name):
+        """
+        Returns a Metric object with a known scoring function
+        defined in auto-sklearn.
+        Parameters
+        ----------
+        metric_name
+        Known metric name from a list of available metrics or
+        their aliases: ['f1', 'pac', 'acc', 'auc', 'a', 'bac', 'r2']
+        """
         builders = [b for b in self.builders_for_task_type
                     if b.can_build_metric_with_name(metric_name)]
         n_builders = len(builders)
@@ -196,6 +204,15 @@ class KnownMetricFactory():
 class PackageMetricFactory():
 
     def create(self, package):
+        """
+        Returns a metric object from a string representing a
+        callable method path.
+        Parameters
+        ----------
+        package : str
+        Callable object path. Path corresponds to some python
+        package / module.
+        """
         last_dot_index = package.rfind('.')
         module_name = package[:last_dot_index]
         function_name = package[last_dot_index + 1:]
@@ -212,6 +229,22 @@ class PackageMetricFactory():
 class MetricFactory():
 
     def create(self, metric, task_type=None):
+        """
+        Creates a Metric object based on provided metric parameter.
+        Parameters
+        ----------
+        metric : str, callable
+        If metric is a callable function, then returns a metric object
+        with a provided scoring function.
+        If metric is a string then: if it contains '.', then
+        metric is considered to be a package path. Then, this
+        endpoint is extracted as a callable scoring function;
+        if not, then returns a metric by a commonly known name,
+        if it's present in a system.
+
+        task_type : TASK_TYPE constant
+        used only for an auto-sklearn known metric
+        """
         if isinstance(metric, Metric):
             return metric
         elif callable(metric):

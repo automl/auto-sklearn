@@ -1,4 +1,4 @@
-from factories import Metric, MetricFactory
+from .factories import Metric, MetricFactory
 
 
 class LossMetricDecorator(Metric):
@@ -27,6 +27,18 @@ class MetricFromLossFactory():
         self.factory = MetricFactory()
 
     def create(self, loss):
+        """
+        Function returns a metric object decorated by a loss
+        decorator. Scoring function of this metric is a
+        function 1 - loss. So, the maximization of this metric
+        corresponds to minimization of loss function.
+        Parameters
+        ----------
+        loss : str or callable
+        An initial metric to be decorated is created based
+        on this parameter. Can be a callable object or
+        a package path string.
+        """
         loss_metric = self.factory.create(loss, None)
         metric = LossMetricDecorator(loss_metric)
 

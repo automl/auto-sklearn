@@ -650,7 +650,7 @@ class AutoMLSMBO(multiprocessing.Process):
                 meta_task = self.task
             metadata_directory = os.path.join(
                 metalearning_directory, 'files',
-                '%s_%s_%s' % (METRIC_TO_STRING[self.metric],
+                '%s_%s_%s' % (self.metric.name,
                               TASK_TYPES_TO_STRING[meta_task],
                               'sparse' if self.datamanager.info['is_sparse']
                               else 'dense'))
@@ -718,7 +718,7 @@ class AutoMLSMBO(multiprocessing.Process):
             meta_features_list = np.array(meta_features_list).reshape((1, -1))
             self.logger.info(list(meta_features_dict.keys()))
 
-            meta_runs = meta_base.get_all_runs(METRIC_TO_STRING[self.metric])
+            meta_runs = meta_base.get_all_runs(self.metric.name)
             meta_runs_index = 0
             try:
                 meta_durations = meta_base.get_all_runs('runtime')

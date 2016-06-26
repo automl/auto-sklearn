@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     # Both the ensemble_size and ensemble_nbest parameters can be changed later
     automl.fit_ensemble(task=MULTICLASS_CLASSIFICATION,
-                        metric=ACC_METRIC,
+                        metric='acc_metric',
                         precision='32',
                         dataset_name='digits',
                         ensemble_size=10,
