@@ -3,13 +3,16 @@ from __future__ import print_function
 import os
 import sys
 import unittest
+import mock
 
 import numpy as np
 import autosklearn.pipeline.util as putil
 
 from autosklearn.classification import AutoSklearnClassifier
+from autosklearn.estimators import AutoMLClassifier
 from autosklearn.util.backend import Backend
 from autosklearn.constants import *
+from autosklearn.automl import AutoML
 
 sys.path.append(os.path.dirname(__file__))
 from base import Base
@@ -43,7 +46,7 @@ class EstimatorTest(Base, unittest.TestCase):
         print(automl.show_models())
 
         self.assertGreaterEqual(score, 0.8)
-        self.assertEqual(automl._automl._task, MULTICLASS_CLASSIFICATION)
+        self.assertEqual(automl._automl._automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
         self._tearDown(output)
@@ -52,13 +55,14 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertRaisesRegexp(ValueError,
                                 "If shared_mode == True tmp_folder must not "
                                 "be None.",
-                                AutoSklearnClassifier,
+                                lambda shared_mode: AutoSklearnClassifier(shared_mode=shared_mode).fit(None, None),
                                 shared_mode=True)
 
         self.assertRaisesRegexp(ValueError,
                                 "If shared_mode == True output_folder must not "
                                 "be None.",
-                                AutoSklearnClassifier,
+                                lambda shared_mode, tmp_folder:
+                                AutoSklearnClassifier(shared_mode=shared_mode, tmp_folder=tmp_folder).fit(None, None),
                                 shared_mode=True,
                                 tmp_folder='/tmp/duitaredxtvbedb')
 
@@ -140,8 +144,51 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertEqual(len(os.listdir(os.path.join(output, '.auto-sklearn',
                                                      'ensembles'))), 1)
         self.assertGreaterEqual(score, 0.90)
-        self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
+        self.assertEqual(automl._automl._automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
         self._tearDown(output)
 
+
+class AutoMLClassifierTest(unittest.TestCase):
+
+    def test_multiclass_prediction(self):
+        classes = [['a', 'b', 'c']]
+        predicted_probabilities = [[0, 0, 0.99], [0, 0.99, 0], [0.99, 0, 0],
+                                   [0, 0.99, 0], [0, 0, 0.99]]
+        predicted_indexes = [2, 1, 0, 1, 2]
+        expected_result = ['c', 'b', 'a', 'b', 'c']
+
+        automl_mock = mock.Mock()
+        automl_mock.predict.return_value = np.array(predicted_probabilities)
+
+        classifier = AutoMLClassifier(automl_mock)
+        classifier._classes = [np.array(classes)]
+        classifier._n_outputs = 1
+        classifier._n_classes = np.array([3])
+
+        actual_result = classifier.predict([None] * len(predicted_indexes))
+
+        np.testing.assert_array_equal(expected_result, actual_result)
+
+    def test_multilabel_prediction(self):
+        classes = [['a', 'b', 'c'], [13, 17]]
+        predicted_probabilities = [[[0, 0, 0.99], [0.99, 0]],
+                                   [[0, 0.99, 0], [0.99, 0]],
+                                   [[0.99, 0, 0], [0, 0.99]],
+                                   [[0, 0.99, 0], [0, 0.99]],
+                                   [[0, 0, 0.99], [0, 0.99]]]
+        predicted_indexes = [[2, 0], [1, 0], [0, 1], [1, 1], [2, 1]]
+        expected_result = np.array([['c', 13], ['b', 13], ['a', 17], ['b', 17], ['c', 17]], dtype=object)
+
+        automl_mock = mock.Mock()
+        automl_mock.predict.return_value = np.matrix(predicted_probabilities)
+
+        classifier = AutoMLClassifier(automl_mock)
+        classifier._classes = list(map(np.array, classes))
+        classifier._n_outputs = 2
+        classifier._n_classes = np.array([3, 2])
+
+        actual_result = classifier.predict([None] * len(predicted_indexes))
+
+        np.testing.assert_array_equal(expected_result, actual_result)

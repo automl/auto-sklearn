@@ -244,7 +244,7 @@ class AutoMLClassifier(AutoMLDecorator):
     def __init__(self, automl):
         self._classes = []
         self._n_classes = []
-        self._n_outputs = []
+        self._n_outputs = 0
 
         super(AutoMLClassifier, self).__init__(automl)
 
@@ -337,10 +337,24 @@ class AutoMLClassifier(AutoMLDecorator):
             The predicted classes.
 
         """
-        probabilities = self.predict_proba(X)
-        max_probability_index = np.argmax(probabilities, axis=1)
+        predicted_probabilities = self._automl.predict(X)
+        if self._n_outputs == 1:
+            predicted_indexes = np.argmax(predicted_probabilities, axis=1)
+            predicted_classes = self._classes[0].take(predicted_indexes)
 
-        return max_probability_index
+            return predicted_classes
+        else:
+            argmax_v = np.vectorize(np.argmax, otypes=[int])
+            predicted_indexes = argmax_v(predicted_probabilities)
+            #predicted_indexes = np.argmax(predicted_probabilities, axis=1)
+            n_samples = predicted_probabilities.shape[0]
+            predicted_classes = np.zeros((n_samples, self._n_outputs), dtype=object)
+
+            for k in six.moves.range(self._n_outputs):
+                output_predicted_indexes = predicted_indexes[:, k].reshape(-1)
+                predicted_classes[:, k] = self._classes[k].take(output_predicted_indexes)
+
+            return predicted_classes
 
     def predict_proba(self, X):
         """Predict probabilities of classes for all samples X.
