@@ -229,7 +229,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'preprocessor:kitchen_sinks:n_components': 50,
                             'preprocessor:gem:N': 5,
                             'classifier:proj_logit:max_epochs': 1,
-                            'classifier:libsvm_svc:degree': 2}
+                            'classifier:libsvm_svc:degree': 2,
+                            'regressor:libsvm_svr:degree': 2}
 
             for restrict_parameter in restrictions:
                 restrict_to = restrictions[restrict_parameter]
