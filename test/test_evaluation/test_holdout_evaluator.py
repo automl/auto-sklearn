@@ -12,6 +12,7 @@ import numpy as np
 from autosklearn.constants import *
 from autosklearn.evaluation.holdout_evaluator import HoldoutEvaluator, \
     eval_holdout, eval_iterative_holdout
+from autosklearn.util import backend
 from autosklearn.util.pipeline import get_configuration_space
 
 this_directory = os.path.dirname(__file__)
@@ -52,7 +53,8 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
         configuration_space = get_configuration_space(D.info)
 
         configuration = configuration_space.sample_configuration()
-        evaluator = HoldoutEvaluator(D, self.output_dir, configuration,
+        backend_api = backend.create(self.output_dir, self.output_dir)
+        evaluator = HoldoutEvaluator(D, backend_api, configuration,
                                      with_predictions=True,
                                      all_scoring_functions=True,
                                      output_y_test=True)
@@ -134,7 +136,8 @@ class FunctionsTest(unittest.TestCase):
             pass
 
     def test_eval_holdout(self):
-        eval_holdout(self.queue, self.configuration, self.data, self.tmp_dir,
+        backend_api = backend.create(self.tmp_dir, self.tmp_dir)
+        eval_holdout(self.queue, self.configuration, self.data, backend_api,
                      1, 1, None, True, False, True)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.05)
@@ -142,7 +145,8 @@ class FunctionsTest(unittest.TestCase):
         self.assertNotIn('bac_metric', info[3])
 
     def test_eval_holdout_all_loss_functions(self):
-        eval_holdout(self.queue, self.configuration, self.data, self.tmp_dir,
+        backend_api = backend.create(self.tmp_dir, self.tmp_dir)
+        eval_holdout(self.queue, self.configuration, self.data, backend_api,
                      1, 1, None, True, True, True)
         info = self.queue.get()
         self.assertIn('f1_metric: 0.0480549199085;pac_metric: 0.135572680594;'
@@ -152,22 +156,25 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(info[2], 1)
 
     def test_eval_holdout_on_subset(self):
+        backend_api = backend.create(self.tmp_dir, self.tmp_dir)
         eval_holdout(self.queue, self.configuration, self.data,
-                     self.tmp_dir, 1, 1, 43, True, False, True)
+                     backend_api, 1, 1, 43, True, False, True)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.1)
         self.assertEqual(info[2], 1)
 
     def test_eval_holdout_iterative_fit_no_timeout(self):
+        backend_api = backend.create(self.tmp_dir, self.tmp_dir)
         eval_iterative_holdout(self.queue, self.configuration, self.data,
-                               self.tmp_dir, 1, 1, None, True, False, True)
+                               backend_api, 1, 1, None, True, False, True)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.05)
         self.assertEqual(info[2], 1)
 
     def test_eval_holdout_iterative_fit_on_subset_no_timeout(self):
+        backend_api = backend.create(self.tmp_dir, self.tmp_dir)
         eval_iterative_holdout(self.queue, self.configuration,
-                               self.data, self.tmp_dir, 1, 1, 43, True, False,
+                               self.data, backend_api, 1, 1, 43, True, False,
                                True)
 
         info = self.queue.get()

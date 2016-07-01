@@ -7,6 +7,8 @@ import unittest
 
 import numpy as np
 
+from autosklearn.util import backend
+
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 from evaluation_util import get_multiclass_classification_datamanager
@@ -28,7 +30,8 @@ class AbstractEvaluatorTest(unittest.TestCase):
         except:
             pass
 
-        ae = AbstractEvaluator(Datamanager=D, output_dir=output_dir,
+        backend_api = backend.create(output_dir, output_dir)
+        ae = AbstractEvaluator(Datamanager=D, backend=backend_api,
                                output_y_test=False)
         ae.Y_optimization = rs.rand(33, 3)
         predictions_ensemble = rs.rand(33, 3)

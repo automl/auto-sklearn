@@ -71,10 +71,7 @@ EXCLUDE_META_FEATURES_REGRESSION = {
 
 
 # dataset helpers
-def load_data(dataset_info, outputdir, tmp_dir=None, max_mem=None):
-    if tmp_dir is None:
-        tmp_dir = outputdir
-    backend = Backend(outputdir, tmp_dir)
+def load_data(dataset_info, backend, max_mem=None):
     try:
         D = backend.load_datamanager()
     except IOError:
@@ -203,7 +200,7 @@ class AutoMLScenario(Scenario):
 class AutoMLSMBO(multiprocessing.Process):
 
     def __init__(self, config_space, dataset_name,
-                 output_dir, tmp_dir,
+                 backend,
                  total_walltime_limit,
                  func_eval_time_limit,
                  memory_limit,
@@ -221,11 +218,12 @@ class AutoMLSMBO(multiprocessing.Process):
         super(AutoMLSMBO, self).__init__()
         # data related
         self.dataset_name = dataset_name
-        self.output_dir = output_dir
-        self.tmp_dir = tmp_dir
+        #self.output_dir = output_dir
+        #self.tmp_dir = tmp_dir
         self.datamanager = None
         self.metric = None
         self.task = None
+        self.backend = backend
 
         # the configuration space
         self.config_space = config_space
@@ -269,8 +267,7 @@ class AutoMLSMBO(multiprocessing.Process):
             self.datamanager = self.dataset_name
         else:
             self.datamanager = load_data(self.dataset_name,
-                                         self.output_dir,
-                                         self.tmp_dir,
+                                         self.backend,
                                          max_mem = max_mem)
         self.metric = self.datamanager.info['metric']
         self.task = self.datamanager.info['task']
@@ -586,7 +583,7 @@ class AutoMLSMBO(multiprocessing.Process):
                                  subset_time_limit)
                 self.logger.info(next_config)
                 _info = eval_with_limits(
-                    self.datamanager, self.tmp_dir, next_config,
+                    self.datamanager, self.backend, next_config,
                     seed, num_run,
                     self.resampling_strategy,
                     self.resampling_strategy_args,
@@ -766,7 +763,7 @@ class AutoMLSMBO(multiprocessing.Process):
                                        self.total_walltime_limit,
                                        self.func_eval_time_limit,
                                        meta_features_dict,
-                                       self.tmp_dir,
+                                       self.backend.temporary_directory,
                                        self.shared_mode)
 
         types = get_types(self.config_space, self.scenario.feature_array)
@@ -838,7 +835,7 @@ class AutoMLSMBO(multiprocessing.Process):
                              num_run, config_name, self.func_eval_time_limit)
             self.logger.info(next_config)
             self.reset_data_manager()
-            info = eval_with_limits(self.datamanager, self.tmp_dir, next_config,
+            info = eval_with_limits(self.datamanager, self.backend, next_config,
                                     seed, num_run,
                                     self.resampling_strategy,
                                     self.resampling_strategy_args,
@@ -934,7 +931,7 @@ class AutoMLSMBO(multiprocessing.Process):
                                  self.func_eval_time_limit)
                 self.logger.info(next_config)
                 self.reset_data_manager()
-                info = eval_with_limits(self.datamanager, self.tmp_dir, next_config,
+                info = eval_with_limits(self.datamanager, self.backend, next_config,
                                         seed, num_run,
                                         self.resampling_strategy,
                                         self.resampling_strategy_args,

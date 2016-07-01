@@ -3,18 +3,100 @@ import glob
 import os
 import tempfile
 import time
-
+import random
 import lockfile
 import numpy as np
-
+import shutil
 import six.moves.cPickle as pickle
-
 from autosklearn.util import logging_ as logging
 
 
 __all__ = [
     'Backend'
 ]
+
+
+def create(temporary_directory,
+           output_directory,
+           delete_tmp_folder_after_terminate=True,
+           delete_output_folder_after_terminate=True):
+    context = BackendContext(temporary_directory, output_directory,
+                             delete_tmp_folder_after_terminate,
+                             delete_output_folder_after_terminate)
+    backend = Backend(context)
+
+    return backend
+
+
+class BackendContext(object):
+
+    def __init__(self,
+                 temporary_directory,
+                 output_directory,
+                 delete_tmp_folder_after_terminate,
+                 delete_output_folder_after_terminate):
+        self._prepare_directories(temporary_directory, output_directory)
+        self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
+        self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
+        self._logger = logging.get_logger(__name__)
+        self.create_directories()
+
+    @property
+    def output_directory(self):
+        return self.__output_directory
+
+    @property
+    def temporary_directory(self):
+        return self.__temporary_directory
+
+    def _prepare_directories(self, temporary_directory, output_directory):
+        random_number = random.randint(0, 10000)
+        pid = os.getpid()
+
+        self.__temporary_directory = temporary_directory \
+            if temporary_directory \
+            else '/tmp/autosklearn_tmp_%d_%d' % (pid, random_number)
+
+        self.__output_directory = output_directory \
+            if output_directory \
+            else '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
+
+    def create_directories(self):
+        try:
+            os.makedirs(self.temporary_directory)
+        except OSError:
+            pass
+        try:
+            os.makedirs(self.output_directory)
+        except OSError:
+            pass
+
+    def __del__(self):
+        self.delete_directories(force=False)
+
+    def delete_directories(self, force=True):
+        if self.delete_output_folder_after_terminate or force:
+            try:
+                shutil.rmtree(self.output_directory)
+            except Exception:
+                if self._logger is not None:
+                    self._logger.warning("Could not delete output dir: %s" %
+                                         self.output_directory)
+                else:
+                    print("Could not delete output dir: %s" %
+                          self.output_directory)
+
+        if self.delete_tmp_folder_after_terminate or force:
+            try:
+                shutil.rmtree(self.temporary_directory)
+            except Exception:
+                if self._logger is not None:
+                    self._logger.warning("Could not delete tmp dir: %s" %
+                                  self.temporary_directory)
+                    pass
+                else:
+                    print("Could not delete tmp dir: %s" %
+                          self.temporary_directory)
 
 
 class Backend(object):
@@ -25,11 +107,9 @@ class Backend(object):
     * true targets of the ensemble
     """
 
-    def __init__(self, output_directory, temporary_directory):
+    def __init__(self, context):
         self.logger = logging.get_logger(__name__)
-
-        self.output_directory = output_directory
-        self.temporary_directory = temporary_directory
+        self.context = context
 
         # Create the temporary directory if it does not yet exist
         try:
@@ -45,6 +125,14 @@ class Backend(object):
         self.internals_directory = os.path.join(self.temporary_directory,
                                                 ".auto-sklearn")
         self._make_internals_directory()
+
+    @property
+    def output_directory(self):
+        return self.context.output_directory
+
+    @property
+    def temporary_directory(self):
+        return self.context.temporary_directory
 
     def _make_internals_directory(self):
         try:

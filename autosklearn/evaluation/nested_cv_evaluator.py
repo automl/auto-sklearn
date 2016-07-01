@@ -20,7 +20,7 @@ class NestedCVEvaluator(AbstractEvaluator):
     #  of alternating cross-validation to only have one model in memory at
     # the time!
 
-    def __init__(self, Datamanager, output_dir,
+    def __init__(self, Datamanager, backend,
                  configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
@@ -31,7 +31,7 @@ class NestedCVEvaluator(AbstractEvaluator):
                  num_run=None,
                  subsample=None):
         super(NestedCVEvaluator, self).__init__(
-            Datamanager, output_dir, configuration,
+            Datamanager, backend, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,

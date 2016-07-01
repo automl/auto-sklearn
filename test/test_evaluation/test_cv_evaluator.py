@@ -11,6 +11,7 @@ import numpy as np
 
 from autosklearn.constants import *
 from autosklearn.evaluation import CVEvaluator, eval_partial_cv, eval_cv
+from autosklearn.util import backend
 from autosklearn.util.pipeline import get_configuration_space
 
 this_directory = os.path.dirname(__file__)
@@ -87,7 +88,8 @@ class FunctionsTest(unittest.TestCase):
             pass
 
     def test_eval_cv(self):
-        eval_cv(self.queue, self.configuration, self.data, self.tmp_dir,
+        backend_api = backend.create(self.tmp_dir, self.tmp_dir)
+        eval_cv(self.queue, self.configuration, self.data, backend_api,
                 1, 1, 5, None, True, False, True)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.079637096774193727)
@@ -95,7 +97,8 @@ class FunctionsTest(unittest.TestCase):
         self.assertNotIn('bac_metric', info[3])
 
     def test_eval_cv_all_loss_functions(self):
-        eval_cv(self.queue, self.configuration, self.data, self.tmp_dir,
+        backend_api = backend.create(self.tmp_dir, self.tmp_dir)
+        eval_cv(self.queue, self.configuration, self.data, backend_api,
                 1, 1, 5, None, True, True, True)
         info = self.queue.get()
         self.assertIn('f1_metric: 0.0794451450189;pac_metric: 0.344745492187;'
@@ -105,8 +108,9 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(info[2], 1)
 
     def test_eval_cv_on_subset(self):
+        backend_api = backend.create(self.tmp_dir, self.tmp_dir)
         eval_cv(self.queue, self.configuration, self.data,
-                          self.tmp_dir, 1, 1, 5, 45, True, False, True)
+                          backend_api, 1, 1, 5, 45, True, False, True)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.063004032258064502)
         self.assertEqual(info[2], 1)
@@ -118,8 +122,9 @@ class FunctionsTest(unittest.TestCase):
                    0.16666666666666674,
                    0.0]
         for fold in range(5):
+            backend_api = backend.create(self.tmp_dir, self.tmp_dir)
             eval_partial_cv(self.queue, self.configuration, self.data,
-                            self.tmp_dir, 1, 1, fold, 5, None, True, False, True)
+                            backend_api, 1, 1, fold, 5, None, True, False, True)
             info = self.queue.get()
             results.append(info[1])
             self.assertAlmostEqual(info[1], results[fold])

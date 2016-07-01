@@ -7,84 +7,39 @@ import six
 
 import autosklearn.automl
 from autosklearn.constants import *
+from autosklearn.util.backend import create
+from sklearn.base import BaseEstimator
 
 
-class AutoSklearnClassifier(autosklearn.automl.AutoML):
-    """This class implements the classification task.
+class AutoMLDecorator(object):
 
-    Parameters
-    ----------
-    time_left_for_this_task : int, optional (default=3600)
-        Time limit in seconds for the search for appropriate classification
-        models. By increasing this value, *auto-sklearn* will find better
-        configurations.
+    def __init__(self, automl):
+        self._automl = automl
 
-    per_run_time_limit : int, optional (default=360)
-        Time limit for a single call to machine learning model.
+    def fit(self, *args, **kwargs):
+        self._automl.fit(*args, **kwargs)
 
-    initial_configurations_via_metalearning : int, optional (default=25)
+    def refit(self, X, y):
+        return self._automl.refit(X, y)
 
-    ensemble_size : int, optional (default=50)
+    def fit_ensemble(self, task=None, metric=None, precision='32',
+                     dataset_name=None, ensemble_nbest=None,
+                     ensemble_size=None):
+        return self._automl.fit_ensemble(task, metric, precision,
+                                         dataset_name, ensemble_nbest,
+                                         ensemble_size)
 
-    ensemble_nbest : int, optional (default=50)
+    def predict(self, X):
+        return self._automl.predict(X)
 
-    seed : int, optional (default=1)
+    def score(self, X, y):
+        return self._automl.score(X, y)
 
-    ml_memory_limit : int, optional (3000)
-        Memory limit for the machine learning algorithm. If the machine
-        learning algorithm allocates tries to allocate more memory,
-        its evaluation will be stopped.
+    def show_models(self):
+        return self._automl.show_models()
 
-    include_estimators : dict, optional (None)
-        If None all possible estimators are used. Otherwise specifies set of
-        estimators to use
 
-    include_preprocessors : dict, optional (None)
-        If None all possible preprocessors are used. Otherwise specifies set of
-        preprocessors to use
-
-    resampling_strategy : string, optional ('holdout')
-        how to to handle overfitting, might need 'resampling_strategy_arguments'
-
-        * 'holdout': 66:33 (train:test) split
-        * 'holdout-iterative-fit':  66:33 (train:test) split, calls iterative
-          fit where possible
-        * 'cv': crossvalidation, requires 'folds'
-        * 'nested-cv': crossvalidation, requires 'outer-folds, 'inner-folds'
-        * 'partial-cv': crossvalidation, requires 'folds' , calls
-          iterative fit where possible
-
-    resampling_strategy_arguments : dict, optional if 'holdout' (None)
-        Additional arguments for resampling_strategy
-        * 'holdout': None
-        * 'holdout-iterative-fit':  None
-        * 'cv': {'folds': int}
-        * 'nested-cv': {'outer_folds': int, 'inner_folds'
-        * 'partial-cv': {'folds': int}
-
-    tmp_folder : string, optional (None)
-        folder to store configuration output, if None automatically use
-        /tmp/autosklearn_tmp_$pid_$random_number
-
-    output_folder : string, optional (None)
-        folder to store trained models, if None automatically use
-        /tmp/autosklearn_output_$pid_$random_number
-
-    delete_tmp_folder_after_terminate: string, optional (True)
-        remove tmp_folder, when finished. If tmp_folder is None
-        tmp_dir will always be deleted
-
-    delete_output_folder_after_terminate: bool, optional (True)
-        remove output_folder, when finished. If output_folder is None
-        output_dir will always be deleted
-
-    shared_mode: bool, optional (False)
-        run smac in shared-model-node. This only works if arguments
-        tmp_folder and output_folder are given and sets both
-        delete_tmp_folder_after_terminate and
-        delete_output_folder_after_terminate to False.
-
-    """
+class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
 
     def __init__(self,
                  time_left_for_this_task=3600,
@@ -103,83 +58,195 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
                  delete_tmp_folder_after_terminate=True,
                  delete_output_folder_after_terminate=True,
                  shared_mode=False):
+        """This class implements the classification task.
 
-        # Check this before _prepare_create_folders assigns random output
-        # directories
-        if shared_mode:
-            delete_output_folder_after_terminate = False
-            delete_tmp_folder_after_terminate = False
-            if tmp_folder is None:
+        Parameters
+        ----------
+        time_left_for_this_task : int, optional (default=3600)
+            Time limit in seconds for the search for appropriate classification
+            models. By increasing this value, *auto-sklearn* will find better
+            configurations.
+
+        per_run_time_limit : int, optional (default=360)
+            Time limit for a single call to machine learning model.
+
+        initial_configurations_via_metalearning : int, optional (default=25)
+
+        ensemble_size : int, optional (default=50)
+
+        ensemble_nbest : int, optional (default=50)
+
+        seed : int, optional (default=1)
+
+        ml_memory_limit : int, optional (3000)
+            Memory limit for the machine learning algorithm. If the machine
+            learning algorithm allocates tries to allocate more memory,
+            its evaluation will be stopped.
+
+        include_estimators : dict, optional (None)
+            If None all possible estimators are used. Otherwise specifies set of
+            estimators to use
+
+        include_preprocessors : dict, optional (None)
+            If None all possible preprocessors are used. Otherwise specifies set of
+            preprocessors to use
+
+        resampling_strategy : string, optional ('holdout')
+            how to to handle overfitting, might need 'resampling_strategy_arguments'
+
+            * 'holdout': 66:33 (train:test) split
+            * 'holdout-iterative-fit':  66:33 (train:test) split, calls iterative
+              fit where possible
+            * 'cv': crossvalidation, requires 'folds'
+            * 'nested-cv': crossvalidation, requires 'outer-folds, 'inner-folds'
+            * 'partial-cv': crossvalidation, requires 'folds' , calls
+              iterative fit where possible
+
+        resampling_strategy_arguments : dict, optional if 'holdout' (None)
+            Additional arguments for resampling_strategy
+            * 'holdout': None
+            * 'holdout-iterative-fit':  None
+            * 'cv': {'folds': int}
+            * 'nested-cv': {'outer_folds': int, 'inner_folds'
+            * 'partial-cv': {'folds': int}
+
+        tmp_folder : string, optional (None)
+            folder to store configuration output, if None automatically use
+            /tmp/autosklearn_tmp_$pid_$random_number
+
+        output_folder : string, optional (None)
+            folder to store trained models, if None automatically use
+            /tmp/autosklearn_output_$pid_$random_number
+
+        delete_tmp_folder_after_terminate: string, optional (True)
+            remove tmp_folder, when finished. If tmp_folder is None
+            tmp_dir will always be deleted
+
+        delete_output_folder_after_terminate: bool, optional (True)
+            remove output_folder, when finished. If output_folder is None
+            output_dir will always be deleted
+
+        shared_mode: bool, optional (False)
+            run smac in shared-model-node. This only works if arguments
+            tmp_folder and output_folder are given and sets both
+            delete_tmp_folder_after_terminate and
+            delete_output_folder_after_terminate to False.
+
+        """
+        self.time_left_for_this_task = time_left_for_this_task
+        self.per_run_time_limit = per_run_time_limit
+        self.initial_configurations_via_metalearning = initial_configurations_via_metalearning
+        self.ensemble_size = ensemble_size
+        self.ensemble_nbest = ensemble_nbest
+        self.seed = seed
+        self.ml_memory_limit = ml_memory_limit
+        self.include_estimators = include_estimators
+        self.include_preprocessors = include_preprocessors
+        self.resampling_strategy = resampling_strategy
+        self.resampling_strategy_arguments = resampling_strategy_arguments
+        self.tmp_folder = tmp_folder
+        self.output_folder = output_folder
+        self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
+        self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
+        self.shared_mode = shared_mode
+        super(AutoSklearnEstimator, self).__init__(None)
+
+
+    @property
+    def _automl(self):
+        if not self.__automl:
+            self.__automl = self._build_automl()
+
+        return self.__automl
+
+    @_automl.setter
+    def _automl(self, automl):
+        self.__automl = automl
+
+    def _build_automl(self):
+        if self.shared_mode:
+            self.delete_output_folder_after_terminate = False
+            self.delete_tmp_folder_after_terminate = False
+            if self.tmp_folder is None:
                 raise ValueError("If shared_mode == True tmp_folder must not "
                                  "be None.")
-            if output_folder is None:
+            if self.output_folder is None:
                 raise ValueError("If shared_mode == True output_folder must "
                                  "not be None.")
 
-        # Call this before calling superconstructor as we feed tmp/output dir
-        # to superinit
-        self._tmp_dir, self._output_dir = self._prepare_create_folders(
-            tmp_dir=tmp_folder,
-            output_dir=output_folder)
+        backend = create(temporary_directory=self.tmp_folder,
+                         output_directory=self.output_folder,
+                         delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
+                         delete_output_folder_after_terminate=self.delete_output_folder_after_terminate)
+        automl = autosklearn.automl.AutoML(
+            backend=backend,
+            time_left_for_this_task=self.time_left_for_this_task,
+            per_run_time_limit=self.per_run_time_limit,
+            log_dir=backend.temporary_directory,
+            initial_configurations_via_metalearning=
+            self.initial_configurations_via_metalearning,
+            ensemble_size=self.ensemble_size,
+            ensemble_nbest=self.ensemble_nbest,
+            seed=self.seed,
+            ml_memory_limit=self.ml_memory_limit,
+            include_estimators=self.include_estimators,
+            include_preprocessors=self.include_preprocessors,
+            resampling_strategy=self.resampling_strategy,
+            resampling_strategy_arguments=self.resampling_strategy_arguments,
+            delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
+            delete_output_folder_after_terminate=
+            self.delete_output_folder_after_terminate,
+            shared_mode=self.shared_mode)
 
+        return automl
+
+    def fit(self, *args, **kwargs):
+        self._automl = self._build_automl()
+        super(AutoSklearnEstimator, self).fit(*args, **kwargs)
+
+    def fit_ensemble(self, task=None, metric=None, precision='32',
+                     dataset_name=None, ensemble_nbest=None,
+                     ensemble_size=None):
+        self._automl = self._build_automl()
+        return self._automl.fit_ensemble(task, metric, precision,
+                                         dataset_name, ensemble_nbest,
+                                         ensemble_size)
+
+
+class AutoSklearnClassifier(AutoSklearnEstimator):
+
+    def _build_automl(self):
+        automl = super(AutoSklearnClassifier, self)._build_automl()
+        return AutoMLClassifier(automl)
+
+    def fit(self, X, y,
+            metric='acc_metric',
+            feat_type=None,
+            dataset_name=None):
+        return super(AutoSklearnClassifier, self).fit(X, y, metric, feat_type, dataset_name)
+
+
+class AutoSklearnRegressor(AutoSklearnEstimator):
+
+    def _build_automl(self):
+        automl = super(AutoSklearnRegressor, self)._build_automl()
+        return AutoMLRegressor(automl)
+
+    def fit(self, X, y,
+            metric='r2_metric',
+            feat_type=None,
+            dataset_name=None):
+        return super(AutoSklearnRegressor, self).fit(X, y, metric, feat_type, dataset_name)
+
+
+class AutoMLClassifier(AutoMLDecorator):
+
+    def __init__(self, automl):
         self._classes = []
         self._n_classes = []
         self._n_outputs = 0
 
-        super(AutoSklearnClassifier, self).__init__(
-            time_left_for_this_task=time_left_for_this_task,
-            per_run_time_limit=per_run_time_limit,
-            log_dir=self._tmp_dir,
-            initial_configurations_via_metalearning=
-            initial_configurations_via_metalearning,
-            ensemble_size=ensemble_size,
-            ensemble_nbest=ensemble_nbest,
-            seed=seed,
-            ml_memory_limit=ml_memory_limit,
-            include_estimators=include_estimators,
-            include_preprocessors=include_preprocessors,
-            resampling_strategy=resampling_strategy,
-            tmp_dir=self._tmp_dir,
-            output_dir=self._output_dir,
-            resampling_strategy_arguments=resampling_strategy_arguments,
-            delete_tmp_folder_after_terminate=delete_tmp_folder_after_terminate,
-            delete_output_folder_after_terminate=
-            delete_output_folder_after_terminate,
-            shared_mode=shared_mode)
-
-    @staticmethod
-    def _prepare_create_folders(tmp_dir, output_dir):
-        random_number = random.randint(0, 10000)
-
-        pid = os.getpid()
-        if tmp_dir is None:
-            tmp_dir = '/tmp/autosklearn_tmp_%d_%d' % (pid, random_number)
-        if output_dir is None:
-            output_dir = '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
-
-        # Totally weird, this has to be created here, will be deleted in the
-        # first lines of fit(). If not there, creating the Backend object in the
-        # superclass will fail
-        try:
-            os.makedirs(tmp_dir)
-        except OSError:
-            pass
-        try:
-            os.makedirs(output_dir)
-        except OSError:
-            pass
-
-        return tmp_dir, output_dir
-
-    def _create_output_directories(self):
-        try:
-            os.makedirs(self._tmp_dir)
-        except OSError:
-            pass
-        try:
-            os.makedirs(self._output_dir)
-        except OSError:
-            pass
+        super(AutoMLClassifier, self).__init__(automl)
 
     def fit(self, X, y,
             metric='acc_metric',
@@ -221,18 +288,6 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         # Fit is supposed to be idempotent!
 
         # But not if we use share_mode:
-        if not self._shared_mode:
-            self._delete_output_directories()
-        else:
-            # If this fails, it's likely that this is the first call to get
-            # the data manager
-            try:
-                D = self._backend.load_datamanager()
-                dataset_name = D.name
-            except IOError:
-                pass
-
-        self._create_output_directories()
 
         y = np.atleast_1d(y)
 
@@ -267,8 +322,7 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         if y.shape[1] == 1:
             y = y.flatten()
 
-        return super(AutoSklearnClassifier, self).fit(X, y, task, metric,
-                                                      feat_type, dataset_name)
+        return self._automl.fit(X, y, task, metric, feat_type, dataset_name)
 
     def predict(self, X):
         """Predict classes for X.
@@ -283,17 +337,21 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
             The predicted classes.
 
         """
-        predicted_indexes = super(AutoSklearnClassifier, self).predict(X)
+        predicted_probabilities = self._automl.predict(X)
         if self._n_outputs == 1:
+            predicted_indexes = np.argmax(predicted_probabilities, axis=1)
             predicted_classes = self._classes[0].take(predicted_indexes)
 
             return predicted_classes
         else:
-            n_samples = predicted_indexes.shape[0]
+            argmax_v = np.vectorize(np.argmax, otypes=[int])
+            predicted_indexes = argmax_v(predicted_probabilities)
+            #predicted_indexes = np.argmax(predicted_probabilities, axis=1)
+            n_samples = predicted_probabilities.shape[0]
             predicted_classes = np.zeros((n_samples, self._n_outputs), dtype=object)
 
             for k in six.moves.range(self._n_outputs):
-                output_predicted_indexes = predicted_indexes[:, k]
+                output_predicted_indexes = predicted_indexes[:, k].reshape(-1)
                 predicted_classes[:, k] = self._classes[k].take(output_predicted_indexes)
 
             return predicted_classes
@@ -310,10 +368,14 @@ class AutoSklearnClassifier(autosklearn.automl.AutoML):
         y : array of shape = [n_samples, n_classes] or [n_samples, n_labels]
             The predicted class probabilities.
         """
-        return super(AutoSklearnClassifier, self).predict_proba(X)
+        return self._automl.predict(X)
 
 
-class AutoSklearnRegressor(autosklearn.automl.AutoML):
+class AutoMLRegressor(AutoMLDecorator):
 
-    def __init__(self, **kwargs):
-        raise NotImplementedError()
+    def fit(self, X, y,
+            metric='r2_metric',
+            feat_type=None,
+            dataset_name=None,
+            ):
+        return self._automl.fit(X, y, REGRESSION, metric, feat_type, dataset_name)

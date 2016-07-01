@@ -30,8 +30,7 @@ from autosklearn.smbo import AutoMLSMBO
 class AutoML(BaseEstimator):
 
     def __init__(self,
-                 tmp_dir,
-                 output_dir,
+                 backend,
                  time_left_for_this_task,
                  per_run_time_limit,
                  log_dir=None,
@@ -55,12 +54,12 @@ class AutoML(BaseEstimator):
                  max_iter_smac=None,
                  acquisition_function='EI'):
         super(AutoML, self).__init__()
-
-        self._tmp_dir = tmp_dir
-        self._output_dir = output_dir
+        self._backend = backend
+        #self._tmp_dir = tmp_dir
+        #self._output_dir = output_dir
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
-        self._log_dir = log_dir if log_dir is not None else self._tmp_dir
+        #self._log_dir = log_dir if log_dir is not None else self._tmp_dir
         self._initial_configurations_via_metalearning = \
             initial_configurations_via_metalearning
         self._ensemble_size = ensemble_size
@@ -76,10 +75,10 @@ class AutoML(BaseEstimator):
         self._resampling_strategy = resampling_strategy
         self._resampling_strategy_arguments = resampling_strategy_arguments
         self._max_iter_smac = max_iter_smac
-        self.delete_tmp_folder_after_terminate = \
-            delete_tmp_folder_after_terminate
-        self.delete_output_folder_after_terminate = \
-            delete_output_folder_after_terminate
+        #self.delete_tmp_folder_after_terminate = \
+        #    delete_tmp_folder_after_terminate
+        #self.delete_output_folder_after_terminate = \
+        #    delete_output_folder_after_terminate
         self._shared_mode = shared_mode
         self.precision = precision
         self.acquisition_function = acquisition_function
@@ -106,7 +105,7 @@ class AutoML(BaseEstimator):
                              str(type(self._per_run_time_limit)))
 
         # After assignging and checking variables...
-        self._backend = Backend(self._output_dir, self._tmp_dir)
+        #self._backend = Backend(self._output_dir, self._tmp_dir)
 
     def start_automl(self, parser):
         self._parser = parser
@@ -136,6 +135,19 @@ class AutoML(BaseEstimator):
             metric='acc_metric',
             feat_type=None,
             dataset_name=None):
+        if not self._shared_mode:
+            self._backend.context.delete_directories()
+        else:
+            # If this fails, it's likely that this is the first call to get
+            # the data manager
+            try:
+                D = self._backend.load_datamanager()
+                dataset_name = D.name
+            except IOError:
+                pass
+
+        self._backend.context.create_directories()
+
         if dataset_name is None:
             m = hashlib.md5()
             m.update(X.data)
@@ -198,7 +210,7 @@ class AutoML(BaseEstimator):
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
-        setup_logger(os.path.join(self._tmp_dir, '%s.log' % str(logger_name)))
+        setup_logger(os.path.join(self._backend.temporary_directory, '%s.log' % str(logger_name)))
         return get_logger(logger_name)
 
     @staticmethod
@@ -225,7 +237,7 @@ class AutoML(BaseEstimator):
         time_limit = int(self._time_for_task / 6.)
         memory_limit = int(self._ml_memory_limit)
 
-        _info = eval_with_limits(datamanager, self._tmp_dir, 1,
+        _info = eval_with_limits(datamanager, self._backend, 1,
                                  self._seed, num_run,
                                  self._resampling_strategy,
                                  self._resampling_strategy_arguments,
@@ -239,7 +251,7 @@ class AutoML(BaseEstimator):
 
         num_run += 1
 
-        _info = eval_with_limits(datamanager, self._tmp_dir, 2,
+        _info = eval_with_limits(datamanager, self._backend, 2,
                                  self._seed, num_run,
                                  self._resampling_strategy,
                                  self._resampling_strategy_arguments,
@@ -316,7 +328,7 @@ class AutoML(BaseEstimator):
         # like this we can't use some of the preprocessing methods in case
         # the data became sparse)
         self.configuration_space, configspace_path = self._create_search_space(
-            self._tmp_dir,
+            self._backend.temporary_directory,
             self._backend,
             datamanager,
             self._include_estimators,
@@ -370,8 +382,7 @@ class AutoML(BaseEstimator):
         else:
             self._proc_smac = AutoMLSMBO(config_space=self.configuration_space,
                                          dataset_name=self._dataset_name,
-                                         tmp_dir=self._tmp_dir,
-                                         output_dir=self._output_dir,
+                                         backend=self._backend,
                                          total_walltime_limit=time_left_for_smac,
                                          func_eval_time_limit=self._per_run_time_limit,
                                          memory_limit=self._ml_memory_limit,
@@ -462,9 +473,6 @@ class AutoML(BaseEstimator):
         return self
 
     def predict(self, X):
-        return np.argmax(self.predict_proba(X), axis=1)
-
-    def predict_proba(self, X):
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
@@ -545,12 +553,11 @@ class AutoML(BaseEstimator):
         if ensemble_size is None:
             ensemble_size = self._ensemble_size
 
-        return EnsembleBuilder(autosklearn_tmp_dir=self._tmp_dir,
+        return EnsembleBuilder(backend=self._backend,
                                dataset_name=dataset_name,
                                task_type=task,
                                metric=metric,
                                limit=time_left_for_ensembles,
-                               output_dir=self._output_dir,
                                ensemble_size=ensemble_size,
                                ensemble_nbest=ensemble_nbest,
                                seed=self._seed,
@@ -578,7 +585,7 @@ class AutoML(BaseEstimator):
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
         # Don't know if the reshaping should be done there or in calculate_score
-        prediction = self.predict_proba(X)
+        prediction = self.predict(X)
         return calculate_score(y, prediction, self._task,
                                self._metric, self._label_num,
                                logger=self._logger)
@@ -633,40 +640,3 @@ class AutoML(BaseEstimator):
 
     def configuration_space_created_hook(self, datamanager, configuration_space):
         return configuration_space
-
-    def get_params(self, deep=True):
-        raise NotImplementedError('auto-sklearn does not implement '
-                                  'get_params() because it is not intended to '
-                                  'be optimized.')
-
-    def set_params(self, deep=True):
-        raise NotImplementedError('auto-sklearn does not implement '
-                                  'set_params() because it is not intended to '
-                                  'be optimized.')
-
-    def __del__(self):
-        self._delete_output_directories()
-
-    def _delete_output_directories(self):
-        if self.delete_output_folder_after_terminate:
-            try:
-                shutil.rmtree(self._output_dir)
-            except Exception:
-                if self._logger is not None:
-                    self._logger.warning("Could not delete output dir: %s" %
-                                         self._output_dir)
-                else:
-                    print("Could not delete output dir: %s" %
-                          self._output_dir)
-
-        if self.delete_tmp_folder_after_terminate:
-            try:
-                shutil.rmtree(self._tmp_dir)
-            except Exception:
-                if self._logger is not None:
-                    self._logger.warning("Could not delete tmp dir: %s" %
-                                  self._tmp_dir)
-                    pass
-                else:
-                    print("Could not delete tmp dir: %s" %
-                          self._tmp_dir)

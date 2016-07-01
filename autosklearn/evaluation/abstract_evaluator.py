@@ -83,7 +83,7 @@ class MyDummyRegressor(DummyRegressor):
 
 
 class AbstractEvaluator(object):
-    def __init__(self, Datamanager, output_dir, configuration=None,
+    def __init__(self, Datamanager, backend, configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
@@ -93,8 +93,9 @@ class AbstractEvaluator(object):
 
         self.starttime = time.time()
 
-        self.output_dir = output_dir
         self.configuration = configuration
+        self.backend = backend
+
         self.D = Datamanager
 
         self.X_valid = Datamanager.data.get('X_valid')
@@ -129,7 +130,6 @@ class AbstractEvaluator(object):
 
         self.subsample = subsample
 
-        self.backend = Backend(None, self.output_dir)
         self.model = self.model_class(self.configuration, self.seed)
 
         logger_name = '%s(%d):%s' % (self.__class__.__name__.split('.')[-1],
@@ -250,7 +250,7 @@ class AbstractEvaluator(object):
 
         if self.output_y_test:
             try:
-                os.makedirs(self.output_dir)
+                os.makedirs(self.backend.output_directory)
             except OSError:
                 pass
             self.backend.save_targets_ensemble(self.Y_optimization)

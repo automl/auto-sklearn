@@ -21,18 +21,17 @@ from autosklearn.util.logging_ import get_logger, setup_logger
 
 
 class EnsembleBuilder(multiprocessing.Process):
-    def __init__(self, autosklearn_tmp_dir, dataset_name, task_type, metric,
-                 limit, output_dir, ensemble_size=None, ensemble_nbest=None,
+    def __init__(self, backend, dataset_name, task_type, metric,
+                 limit, ensemble_size=None, ensemble_nbest=None,
                  seed=1, shared_mode=False, max_iterations=-1, precision="32",
                  low_precision=True):
         super(EnsembleBuilder, self).__init__()
 
-        self.autosklearn_tmp_dir = autosklearn_tmp_dir
+        self.backend = backend
         self.dataset_name = dataset_name
         self.task_type = task_type
         self.metric = metric
         self.limit = limit
-        self.output_dir = output_dir
         self.ensemble_size = ensemble_size
         self.ensemble_nbest = ensemble_nbest
         self.seed = seed
@@ -64,14 +63,13 @@ class EnsembleBuilder(multiprocessing.Process):
         last_hash = None
         current_hash = None
 
-        backend = Backend(self.output_dir, self.autosklearn_tmp_dir)
-        dir_ensemble = os.path.join(self.autosklearn_tmp_dir,
+        dir_ensemble = os.path.join(self.backend.temporary_directory,
                                     '.auto-sklearn',
                                     'predictions_ensemble')
-        dir_valid = os.path.join(self.autosklearn_tmp_dir,
+        dir_valid = os.path.join(self.backend.temporary_directory,
                                  '.auto-sklearn',
                                  'predictions_valid')
-        dir_test = os.path.join(self.autosklearn_tmp_dir,
+        dir_test = os.path.join(self.backend.temporary_directory,
                                 '.auto-sklearn',
                                 'predictions_test')
         paths_ = [dir_ensemble, dir_valid, dir_test]
@@ -89,7 +87,7 @@ class EnsembleBuilder(multiprocessing.Process):
             # Reload the ensemble targets every iteration, important, because cv may
             # update the ensemble targets in the cause of running auto-sklearn
             # TODO update cv in order to not need this any more!
-            targets_ensemble = backend.load_targets_ensemble()
+            targets_ensemble = self.backend.load_targets_ensemble()
 
             # Load the predictions from the models
             exists = [os.path.isdir(dir_) for dir_ in paths_]
@@ -333,7 +331,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 last_hash = current_hash
 
             # Save the ensemble for later use in the main auto-sklearn module!
-            backend.save_ensemble(ensemble, index_run, self.seed)
+            self.backend.save_ensemble(ensemble, index_run, self.seed)
 
             # Save predictions for valid and test data set
             if len(dir_valid_list) == len(dir_ensemble_list):
@@ -367,7 +365,7 @@ class EnsembleBuilder(multiprocessing.Process):
                             # File size maximally 2.1MB
                             precision = 6
 
-                backend.save_predictions_as_txt(ensemble_predictions_valid,
+                self.backend.save_predictions_as_txt(ensemble_predictions_valid,
                                                 'valid', index_run, prefix=self.dataset_name,
                                                 precision=precision)
             else:

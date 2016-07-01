@@ -19,7 +19,7 @@ from .util import *
 WORST_POSSIBLE_RESULT = 2.0
 
 
-def _eval_wrapper(queue, config, data, tmp_dir, seed, num_run, subsample,
+def _eval_wrapper(queue, config, data, backend, seed, num_run, subsample,
                   with_predictions, all_scoring_functions, output_y_test,
                   resampling_strategy, **resampling_strategy_args):
     if resampling_strategy == 'holdout':
@@ -41,7 +41,7 @@ def _eval_wrapper(queue, config, data, tmp_dir, seed, num_run, subsample,
     start_time = time.time()
     try:
         eval_function(queue=queue, config=config, data=data,
-                      tmp_dir=tmp_dir, seed=seed, num_run=num_run,
+                      backend=backend, seed=seed, num_run=num_run,
                       subsample=subsample, with_predictions=with_predictions,
                       all_scoring_functions=all_scoring_functions,
                       output_y_test=output_y_test,
@@ -65,7 +65,7 @@ def _eval_wrapper(queue, config, data, tmp_dir, seed, num_run, subsample,
                    StatusType.CRASHED))
 
 
-def eval_with_limits(datamanager, tmp_dir, config, seed, num_run,
+def eval_with_limits(datamanager, backend, config, seed, num_run,
                      resampling_strategy,
                      resampling_strategy_args, memory_limit,
                      func_eval_time_limit, subsample=None,
@@ -86,7 +86,7 @@ def eval_with_limits(datamanager, tmp_dir, config, seed, num_run,
 
     try:
         safe_eval(queue=queue, config=config, data=datamanager,
-                  tmp_dir=tmp_dir, seed=seed, num_run=num_run,
+                  backend=backend, seed=seed, num_run=num_run,
                   subsample=subsample,
                   with_predictions=with_predictions,
                   all_scoring_functions=all_scoring_functions,
