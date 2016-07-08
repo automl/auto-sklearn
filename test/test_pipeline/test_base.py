@@ -27,9 +27,9 @@ class BaseTest(unittest.TestCase):
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
                          15)
 
-        #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
-        #    print(clause)
-        self.assertEqual(142, len(cs.forbidden_clauses))
+        # for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
+        #     print(clause)
+        self.assertEqual(134, len(cs.forbidden_clauses))
 
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification', 'signed': True}
@@ -59,10 +59,10 @@ class BaseTest(unittest.TestCase):
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
                          15)
         self.assertEqual(len(cs.get_hyperparameter("c:__choice__").choices),
-                         17)
+                         16)
         #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #    print(clause)
-        self.assertEqual(115, len(cs.forbidden_clauses))
+        self.assertEqual(107, len(cs.forbidden_clauses))
 
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification', 'sparse': True}
@@ -74,7 +74,7 @@ class BaseTest(unittest.TestCase):
                          15)
         #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #    print(clause)
-        self.assertEqual(400, len(cs.forbidden_clauses))
+        self.assertEqual(343, len(cs.forbidden_clauses))
 
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification',
@@ -90,6 +90,6 @@ class BaseTest(unittest.TestCase):
         # extra_trees_preproc, multinomial_nb -> less constraints
         #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #    print(clause)
-        self.assertEqual(355, len(cs.forbidden_clauses))
+        self.assertEqual(298, len(cs.forbidden_clauses))
 
 
