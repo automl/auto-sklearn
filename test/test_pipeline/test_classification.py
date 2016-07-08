@@ -291,7 +291,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     print(config)
                     raise e
 
-
     def test_get_hyperparameter_search_space(self):
         cs = SimpleClassificationPipeline.get_hyperparameter_search_space()
         self.assertIsInstance(cs, ConfigurationSpace)
@@ -302,10 +301,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(len(cs.get_hyperparameter(
             'classifier:__choice__').choices), 17)
         self.assertEqual(len(cs.get_hyperparameter(
-            'preprocessor:__choice__').choices), 14)
+            'preprocessor:__choice__').choices), 13)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(157, len(hyperparameters))
+        self.assertEqual(155, len(hyperparameters))
 
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
