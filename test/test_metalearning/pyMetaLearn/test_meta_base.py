@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 import autosklearn.pipeline.classification
-from autosklearn.metalearning.metalearning.meta_base import MetaBase, Run
+from autosklearn.metalearning.metalearning.meta_base import MetaBase
 
 
 class MetaBaseTest(unittest.TestCase):
