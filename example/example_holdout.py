@@ -27,6 +27,7 @@ def main():
     automl.fit(X_train, y_train, dataset_name='digits')
 
     print(automl.show_models())
+    print(automl.get_statistics())
     predictions = automl.predict(X_test)
     print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 

@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 
+import collections
 import hashlib
 import multiprocessing
 import os
@@ -10,6 +11,7 @@ import pynisher
 
 import numpy as np
 import psutil
+import six
 
 from ConfigSpace.io import pcs
 from sklearn.base import BaseEstimator
@@ -291,7 +293,6 @@ class AutoML(BaseEstimator):
             try:
                 os.mkdir(self._backend.get_model_dir())
             except OSError:
-                self._logger.warning("model directory already exists")
                 if not self._shared_mode:
                     raise
 
@@ -603,6 +604,20 @@ class AutoML(BaseEstimator):
             self._load_models()
 
         return self.ensemble_.pprint_ensemble_string(self.models_)
+
+    def get_statistics(self):
+        statistics = self._proc_smac.statistics
+
+        sio = six.StringIO()
+        sio.write('# successful runs: %d\n' % statistics[StatusType.SUCCESS])
+        sio.write('# timeouts: %d\n' % statistics[StatusType.TIMEOUT])
+        sio.write('# memouts: %d\n' % statistics[StatusType.MEMOUT])
+        sio.write('# crashs: %d\n' % statistics[StatusType.CRASHED])
+
+        counter = collections.Counter(statistics['crash_reasons'])
+        print(counter)
+
+        return sio.getvalue()
 
     def _save_ensemble_data(self, X, y):
         """Split dataset and store Data for the ensemble script.

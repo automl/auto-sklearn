@@ -191,8 +191,8 @@ class EnsembleBuilder(multiprocessing.Process):
 
                 if self.ensemble_nbest is not None:
                     if score <= 0.001:
-                        self.logger.error('Model only predicts at random: ' +
-                                      model_name + ' has score: ' + str(score))
+                        self.logger.info('Model only predicts at random: %s '
+                                         'has score: %f' % (model_name, score))
                         backup_num_runs.append((automl_seed, num_run))
                     # If we have less models in our ensemble than ensemble_nbest add
                     # the current model if it is better than random
@@ -208,10 +208,11 @@ class EnsembleBuilder(multiprocessing.Process):
                         # If the current model is better than the worst model in
                         # our ensemble replace it by the current model
                         if scores_nbest[idx] < score:
-                            self.logger.debug('Worst model in our ensemble: %s with '
-                                          'score %f will be replaced by model %s '
-                                          'with score %f', model_names[idx],
-                                          scores_nbest[idx], model_name, score)
+                            self.logger.info(
+                                'Worst model in our ensemble: %s with score '
+                                '%f will be replaced by model %s with score %f',
+                                model_names[idx], scores_nbest[idx], model_name,
+                                score)
                             # Exclude the old model
                             del scores_nbest[idx]
                             scores_nbest.append(score)
@@ -231,8 +232,8 @@ class EnsembleBuilder(multiprocessing.Process):
                     # Load all predictions that are better than random
                     if score <= 0.001:
                         # include_num_runs.append(True)
-                        self.logger.error('Model only predicts at random: ' +
-                                      model_name + ' has score: ' + str(score))
+                        self.logger.info('Model only predicts at random: %s '
+                                         'has score: %f' % (model_name, score))
                         backup_num_runs.append((automl_seed, num_run))
                     else:
                         include_num_runs.append((automl_seed, num_run))

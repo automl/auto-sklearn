@@ -1,9 +1,12 @@
 # -*- encoding: utf-8 -*-
 import os
 import random
+import warnings
 
 import numpy as np
+import scipy.sparse
 import six
+import sklearn.utils
 
 import autosklearn.automl
 from autosklearn.constants import *
@@ -289,7 +292,19 @@ class AutoMLClassifier(AutoMLDecorator):
 
         # But not if we use share_mode:
 
+        # Validate or convert input data
+        X = sklearn.utils.check_array(X, accept_sparse="csr")
+        if scipy.sparse.issparse(X):
+            # Pre-sort indices to avoid that each individual tree of the
+            # ensemble sorts the indices.
+            X.sort_indices()
+
         y = np.atleast_1d(y)
+        if y.ndim == 2 and y.shape[1] == 1:
+            warnings.warn("A column-vector y was passed when a 1d array was"
+                 " expected. Please change the shape of y to "
+                 "(n_samples,), for example using ravel().",
+                 sklearn.utils.DataConversionWarning, stacklevel=2)
 
         if y.ndim == 1:
             # reshape is necessary to preserve the data contiguity against vs

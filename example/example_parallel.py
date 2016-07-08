@@ -35,8 +35,8 @@ def spawn_classifier(seed, dataset_name):
     # 2. shared_mode is set to True, this enables sharing of data between
     # models.
     # 3. all instances of the AutoSklearnClassifier must have a different seed!
-    automl = AutoSklearnClassifier(time_left_for_this_task=60,
-                                   per_run_time_limit=60,
+    automl = AutoSklearnClassifier(time_left_for_this_task=120,
+                                   per_run_time_limit=15,
                                    ml_memory_limit=1024,
                                    shared_mode=True,
                                    tmp_folder=tmp_folder,
@@ -46,6 +46,7 @@ def spawn_classifier(seed, dataset_name):
                                    initial_configurations_via_metalearning=0,
                                    seed=seed)
     automl.fit(X_train, y_train, dataset_name=dataset_name)
+    print(automl.get_statistics())
 
 if __name__ == '__main__':
     processes = []

@@ -124,10 +124,10 @@ class DatasetMetafeatures(object):
             input = arff.load(path_or_filehandle)
 
         dataset_name = input['relation'].replace('metafeatures_', '')
-        metafeature_values = []
+        metafeature_values = {}
         for item in input['data']:
             mf = MetaFeatureValue(*item)
-            metafeature_values.append(mf)
+            metafeature_values[mf.name] = mf
 
         return cls(dataset_name, metafeature_values)
 

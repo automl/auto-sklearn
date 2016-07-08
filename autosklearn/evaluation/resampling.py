@@ -77,8 +77,8 @@ def split_data(X, Y, classification=None):
         X_train, X_valid = X[train_index], X[valid_index]
         Y_train, Y_valid = Y[train_index], Y[valid_index]
 
-    assert X_train.shape[0] + X_valid.shape[0] == num_data_points
-    assert Y_train.shape[0] + Y_valid.shape[0] == num_data_points
+    #assert X_train.shape[0] + X_valid.shape[0] == num_data_points
+    #assert Y_train.shape[0] + Y_valid.shape[0] == num_data_points
 
     return X_train, X_valid, Y_train, Y_valid
 

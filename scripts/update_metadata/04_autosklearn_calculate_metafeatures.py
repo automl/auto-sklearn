@@ -96,14 +96,15 @@ if __name__ == "__main__":
     helperfunction_values = defaultdict(dict)
     for i, key in enumerate(all_metafeatures):
         calculation_times[key] = dict()
-        for metafeature_value in sorted(all_metafeatures[key].metafeature_values):
-            calculation_times[key][metafeature_value.name] = \
+        for metafeature_name in sorted(list(all_metafeatures[key].keys())):
+            metafeature_value = all_metafeatures[key][metafeature_name]
+            calculation_times[key][metafeature_name] = \
                 metafeature_value.time
             if metafeature_value.type_ == "HELPERFUNCTION":
-                helperfunction_values[key][metafeature_value.name] = \
+                helperfunction_values[key][metafeature_name] = \
                     metafeature_value.value
             else:
-                metafeature_values[key][metafeature_value.name] = \
+                metafeature_values[key][metafeature_name] = \
                     metafeature_value.value
 
 
@@ -159,11 +160,14 @@ if __name__ == "__main__":
         line = [idx, 1]
         for feature_step in feature_steps:
             if feature_step in helperfunction_values[idx]:
-                line.append('ok' if helperfunction_values[feature_step] is not \
-                            None else 'other')
+                line.append('ok' if helperfunction_values[feature_step]
+                            is not None else 'other')
             else:
-                line.append('ok' if np.isfinite(metafeature_values.loc[idx][
-                            feature_step]) else 'other')
+                try:
+                    line.append('ok' if np.isfinite(metafeature_values.loc[idx][
+                                feature_step]) else 'other')
+                except KeyError:
+                    line.append('other')
 
         data.append(line)
     arff_object['data'] = data
@@ -186,7 +190,10 @@ if __name__ == "__main__":
         for feature_step in feature_steps:
             time_ = 0.0
             for feature in feature_steps[feature_step]:
-                time_ += calculation_times[feature][instance_id]
+                time__ = calculation_times[feature][instance_id]
+                if not np.isfinite(time__):
+                    continue
+                time_ += time__
             if not np.isfinite(time_):
                 raise ValueError("Feature cost for instance %s and feature "
                                  "step %s not finite" % (instance_id, feature))

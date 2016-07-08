@@ -2,9 +2,9 @@ import multiprocessing
 import os
 import time
 import traceback
+import warnings
 
 import numpy as np
-import pandas as pd
 import pynisher
 
 # JTS TODO: notify aaron to clean up these nasty nested modules
@@ -258,6 +258,18 @@ class AutoMLSMBO(multiprocessing.Process):
         root = logging.getLogger()
         root.setLevel(logging.DEBUG)
 
+        # Some statistics
+        self.statistics = {StatusType.SUCCESS: 0,
+                           StatusType.TIMEOUT: 0,
+                           StatusType.MEMOUT: 0,
+                           StatusType.CRASHED: 0,
+                           'crash_reasons': []}
+
+    def _send_warnings_to_log(self, message, category, filename, lineno,
+                              file=None):
+        self.logger.debug('%s:%s: %s:%s' %
+                          (filename, lineno, category.__name__, message))
+
     def reset_data_manager(self, max_mem=None):
         if max_mem is None:
             max_mem = self.data_memory_limit
@@ -465,15 +477,19 @@ class AutoMLSMBO(multiprocessing.Process):
         return metalearning_configurations
 
     def _calculate_metafeatures(self):
-        meta_features = _calculate_metafeatures(
-            data_feat_type=self.datamanager.feat_type,
-            data_info_task=self.datamanager.info['task'],
-            x_train=self.datamanager.data['X_train'],
-            y_train=self.datamanager.data['Y_train'],
-            basename=self.dataset_name,
-            watcher=self.watcher,
-            logger=self.logger)
-        return meta_features
+
+        with warnings.catch_warnings():
+            warnings.showwarning = self._send_warnings_to_log
+
+            meta_features = _calculate_metafeatures(
+                data_feat_type=self.datamanager.feat_type,
+                data_info_task=self.datamanager.info['task'],
+                x_train=self.datamanager.data['X_train'],
+                y_train=self.datamanager.data['Y_train'],
+                basename=self.dataset_name,
+                watcher=self.watcher,
+                logger=self.logger)
+            return meta_features
 
     def _calculate_metafeatures_with_limits(self, time_limit):
         res = None
@@ -491,14 +507,18 @@ class AutoMLSMBO(multiprocessing.Process):
         return res
 
     def _calculate_metafeatures_encoded(self):
-        meta_features_encoded = _calculate_metafeatures_encoded(
-            self.dataset_name,
-            self.datamanager.data['X_train'],
-            self.datamanager.data['Y_train'],
-            self.watcher,
-            self.datamanager.info['task'],
-            self.logger)
-        return meta_features_encoded
+
+        with warnings.catch_warnings():
+            warnings.showwarning = self._send_warnings_to_log
+
+            meta_features_encoded = _calculate_metafeatures_encoded(
+                self.dataset_name,
+                self.datamanager.data['X_train'],
+                self.datamanager.data['Y_train'],
+                self.watcher,
+                self.datamanager.info['task'],
+                self.logger)
+            return meta_features_encoded
 
     def _calculate_metafeatures_encoded_with_limits(self, time_limit):
         res = None
@@ -674,7 +694,12 @@ class AutoMLSMBO(multiprocessing.Process):
                                 metafeature_calculation_time_limit)
             meta_features_encoded = None
         else:
-            self.datamanager.perform1HotEncoding()
+
+            with warnings.catch_warnings():
+                warnings.showwarning = self._send_warnings_to_log
+
+                self.datamanager.perform1HotEncoding()
+
             meta_features_encoded = \
                 self._calculate_metafeatures_encoded_with_limits(
                     metafeature_calculation_time_limit)
@@ -911,9 +936,10 @@ class AutoMLSMBO(multiprocessing.Process):
                 next_configs.extend(next_configs_tmp)
             # TODO put Exception here!
             except Exception as e:
-                self.logger.error(e)
-                self.logger.error("Error in getting next configurations "
-                                  "with SMAC. Using random configuration!")
+                if not isinstance(e, pynisher.TimeoutException):
+                    self.logger.error('%s: %s', type(e), e)
+                    self.logger.error("Error in getting next configurations "
+                                      "with SMAC. Using random configuration!")
                 next_config = self.config_space.sample_configuration()
                 next_configs.append(next_config)
 
@@ -940,12 +966,15 @@ class AutoMLSMBO(multiprocessing.Process):
                                         logger=self.logger)
                 (duration, result, _, additional_run_info, status) = info
                 run_history.add(config=next_config, cost=result,
-                                time=duration , status=status,
+                                time=duration, status=status,
                                 instance_id=instance_id, seed=seed)
                 run_history.update_cost(next_config, result)
 
-                #self.logger.info('Predicted runtime %g, true runtime %g',
-                #                 predicted_runtime, duration)
+                self.statistics[status] += 1
+                print(self.statistics)
+                if status == StatusType.CRASHED:
+                    crash_reason = additional_run_info.strip().split('\n')[-1]
+                    self.statistics['crash_reasons'].append(crash_reason)
 
                 # TODO add unittest to make sure everything works fine and
                 # this does not get outdated!

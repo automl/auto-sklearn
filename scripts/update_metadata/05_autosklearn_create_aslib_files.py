@@ -35,10 +35,10 @@ if __name__ == "__main__":
     except (OSError, IOError):
         pass
 
-    for sparse, task in [(1, BINARY_CLASSIFICATION),
-                         (1, MULTICLASS_CLASSIFICATION),
-                         (0, BINARY_CLASSIFICATION),
-                         (0, MULTICLASS_CLASSIFICATION),
+    for sparse, task in [#(1, BINARY_CLASSIFICATION),
+                         #(1, MULTICLASS_CLASSIFICATION),
+                         #(0, BINARY_CLASSIFICATION),
+                         #(0, MULTICLASS_CLASSIFICATION),]:
                          (1, REGRESSION),
                          (0, REGRESSION)]:
 
@@ -58,7 +58,7 @@ if __name__ == "__main__":
             results_dir_ = os.path.join(results_dir, dir_name)
 
             if not os.path.exists(results_dir_):
-                print("Results directory %s does not exist!") % results_dir_
+                print("Results directory %s does not exist!" % results_dir_)
                 continue
 
             try:
