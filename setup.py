@@ -26,7 +26,7 @@ extensions = cythonize(
 setuptools.setup(
     name='auto-sklearn',
     description='Automated machine learning.',
-    version='0.0.1',
+    version='0.0.2dev',
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=['numpy>=1.9.0',
