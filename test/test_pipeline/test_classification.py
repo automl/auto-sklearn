@@ -229,7 +229,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'preprocessor:kitchen_sinks:n_components': 50,
                             'classifier:proj_logit:max_epochs': 1,
                             'classifier:libsvm_svc:degree': 2,
-                            'regressor:libsvm_svr:degree': 2}
+                            'regressor:libsvm_svr:degree': 2,
+                            'preprocessor:truncatedSVD:target_dim': 10,
+                            'preprocessor:polynomial:degree': 2,
+                            'classifier:lda:n_components': 10}
 
             for restrict_parameter in restrictions:
                 restrict_to = restrictions[restrict_parameter]
@@ -241,7 +244,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
             if data is None:
                 X_train, Y_train, X_test, Y_test = get_dataset(
-                    dataset='digits', make_sparse=make_sparse)
+                    dataset='digits', make_sparse=make_sparse, add_NaNs=True)
             else:
                 X_train = data['X_train'].copy()
                 Y_train = data['Y_train'].copy()
@@ -433,7 +436,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     'classifier:random_forest:max_leaf_nodes': 'None',
                     'classifier:random_forest:n_estimators': 100,
                     'classifier:random_forest:min_weight_fraction_leaf': 0.0,
-                    "rescaling:__choice__": "min/max"})
+                    "rescaling:__choice__": "standardize"})
         cls = SimpleClassificationPipeline(config)
 
         # Multiclass
@@ -518,7 +521,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                        'classifier:random_forest:max_features': 0.5,
                                        'classifier:random_forest:max_leaf_nodes': 'None',
                                        'classifier:random_forest:n_estimators': 100,
-                                       "rescaling:__choice__": "min/max"})
+                                       "rescaling:__choice__": "standardize"})
 
         # Multiclass
         cls = SimpleClassificationPipeline(config)

@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import copy
+import scipy.sparse as sparse
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
@@ -58,8 +59,7 @@ class NoRescalingComponent(Rescaling):
 
 class MinMaxScalerComponent(Rescaling):
     def __init__(self, random_state):
-        from autosklearn.pipeline.implementations.MinMaxScaler import \
-            MinMaxScaler
+        from sklearn.preprocessing import MinMaxScaler
         self.preprocessor = MinMaxScaler()
 
     @staticmethod
@@ -79,15 +79,14 @@ class MinMaxScalerComponent(Rescaling):
                 # TODO find out of this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
-                'input': (SPARSE, DENSE, UNSIGNED_DATA),
+                'input': (DENSE, UNSIGNED_DATA),
                 'output': (INPUT, SIGNED_DATA),
                 'preferred_dtype': None}
 
 
 class StandardScalerComponent(Rescaling):
     def __init__(self, random_state):
-        from autosklearn.pipeline.implementations.StandardScaler import \
-            StandardScaler
+        from sklearn.preprocessing import StandardScaler
         self.preprocessor = StandardScaler()
 
     @staticmethod
@@ -111,9 +110,17 @@ class StandardScalerComponent(Rescaling):
                 'output': (INPUT,),
                 'preferred_dtype': None}
 
+    def fit(self, X, y=None):
+        if sparse.isspmatrix(X):
+            self.preprocessor.set_params(with_mean=False)
+
+        return super(StandardScalerComponent, self).fit(X, y)
+
 
 class NormalizerComponent(Rescaling):
     def __init__(self, random_state):
+        # Use custom implementation because sklearn implementation cannot
+        # handle float32 input matrix
         from autosklearn.pipeline.implementations.Normalizer import Normalizer
         self.preprocessor = Normalizer()
 
@@ -191,7 +198,7 @@ class RescalingChoice(object):
                 "No rescaling algorithm found.")
 
         if default is None:
-            defaults = ['min/max', 'standardize', 'none', 'normalize']
+            defaults = ['standardize', 'min/max', 'none', 'normalize']
             for default_ in defaults:
                 if default_ in available_preprocessors:
                     default = default_

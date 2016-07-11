@@ -32,7 +32,8 @@ class ScalingComponentTest(unittest.TestCase):
             transformation, original = self._test_helper(RescalingChoice,
                                                          dataset='boston')
             # The maximum is around 1.95 for the transformed array...
-            self.assertLessEqual(np.max(transformation), 2)
+            self.assertAlmostEqual(np.mean(transformation), 0, places=5)
+            self.assertAlmostEqual(np.std(transformation), 1, places=5)
             self.assertFalse((original == transformation).all())
             transformations.append(transformation)
             if len(transformations) > 1:
@@ -44,7 +45,6 @@ class ScalingComponentTest(unittest.TestCase):
                                           make_sparse=True)
         transformation, original = preprocessing
         self.assertEqual(original.getnnz(), transformation.getnnz())
-        self.assertAlmostEqual(1, transformation.max(), places=6)
         self.assertTrue(~np.allclose(original.data, transformation.data))
 
     @unittest.skip("Does not work at the moment.")

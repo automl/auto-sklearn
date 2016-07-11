@@ -13,9 +13,9 @@ import sklearn.cross_validation
 from sklearn.utils import check_array
 from sklearn.multiclass import OneVsRestClassifier
 
-from autosklearn.pipeline.implementations.Imputation import Imputer
+from sklearn.preprocessing import Imputer
 from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
-from autosklearn.pipeline.implementations.StandardScaler import StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 from autosklearn.util.logging_ import get_logger
 from .metafeature import MetaFeature, HelperFunction, DatasetMetafeatures, \
@@ -953,9 +953,10 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name,
                 sparse = scipy.sparse.issparse(X)
                 ohe = OneHotEncoder(categorical_features=categorical, sparse=True)
                 X_transformed = ohe.fit_transform(X)
-                imputer = Imputer(strategy='mean', copy=False, dtype=X.dtype)
+                imputer = Imputer(strategy='mean', copy=False)
                 X_transformed = imputer.fit_transform(X_transformed)
-                standard_scaler = StandardScaler(copy=False)
+                center = not scipy.sparse.isspmatrix(X_transformed)
+                standard_scaler = StandardScaler(copy=False, with_mean=center)
                 X_transformed = standard_scaler.fit_transform(X_transformed)
 
                 # Transform the array which indicates the categorical metafeatures

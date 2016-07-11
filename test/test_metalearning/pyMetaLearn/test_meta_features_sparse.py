@@ -2,6 +2,7 @@ from __future__ import print_function
 from six import StringIO
 import os
 import sys
+import unittest
 
 # Make the super class importable
 sys.path.append(os.path.dirname(__file__))
@@ -12,13 +13,14 @@ from scipy import sparse
 from sklearn.preprocessing.imputation import Imputer
 
 from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
-from autosklearn.pipeline.implementations.StandardScaler import StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features
 import test_meta_features
 
 
-class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest):
+class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest,
+                             unittest.TestCase):
     _multiprocess_can_split_ = True
 
     def setUp(self):
@@ -53,7 +55,7 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest):
         X_transformed = ohe.fit_transform(X_transformed)
         imp = Imputer(copy=False)
         X_transformed = imp.fit_transform(X_transformed)
-        standard_scaler = StandardScaler()
+        standard_scaler = StandardScaler(with_mean=False)
         X_transformed = standard_scaler.fit_transform(X_transformed)
 
         # Transform the array which indicates the categorical metafeatures
@@ -156,22 +158,24 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest):
         self.assertEqual(mf.value, 25)
 
     def test_skewnesses(self):
-        fixture = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                   0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        fixture = [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                   1.0, 0.0, -1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                   0.0, 0.0, -1.0, 0.0, 0.0, 0.0,
                    -0.6969708499033568, 0.626346013011263,
                    0.3809987596624038, 1.4762248835141034,
                    0.07687661087633726, 0.36889797830360116]
         mf = self.helpers["Skewnesses"](self.X_transformed, self.y)
+        print(mf.value)
+        print(fixture)
         np.testing.assert_allclose(mf.value, fixture)
 
     def test_kurtosisses(self):
-        fixture = [-3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0,
-                   -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0,
-                   -3.0, -3.0, -3.0, -3.0, -3.0, -3.0, -3.0,
-                   -3.0, -3.0, -1.100583611425576,
-                   -1.1786325509475737, -1.2387998382327914,
-                   1.3934382644137013, -0.9768209837948341,
+        fixture = [-3.0, -3.0, -2.0, -2.0, -3.0, -3.0, -3.0, -3.0,
+                   -3.0, -2.0, -3.0, -2.0, -3.0, -3.0, -2.0, -3.0,
+                   -3.0, -3.0, -3.0, -3.0, -3.0, -2.0, -3.0,
+                   -3.0, -3.0, -1.1005836114255765,
+                   -1.1786325509475712, -1.2387998382327912,
+                   1.393438264413704, -0.9768209837948336,
                    -1.7937072296512782]
         mf = self.helpers["Kurtosisses"](self.X_transformed, self.y)
         np.testing.assert_allclose(mf.value, fixture)
@@ -179,15 +183,15 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest):
     def test_pca_95percent(self):
         mf = self.mf["PCAFractionOfComponentsFor95PercentVariance"](
             self.X_transformed, self.y)
-        self.assertAlmostEqual(0.4838709677419355, mf.value)
+        self.assertAlmostEqual(0.7741935483870968, mf.value)
 
     def test_pca_kurtosis_first_pc(self):
         mf = self.mf["PCAKurtosisFirstPC"](self.X_transformed, self.y)
-        self.assertAlmostEqual(-0.29762845690133855, mf.value)
+        self.assertAlmostEqual(-0.15444516166802469, mf.value)
 
     def test_pca_skewness_first_pc(self):
         mf = self.mf["PCASkewnessFirstPC"](self.X_transformed, self.y)
-        self.assertAlmostEqual(-0.42524696889893054, mf.value)
+        self.assertAlmostEqual(0.026514792083623905, mf.value)
 
     def test_calculate_all_metafeatures(self):
         mf = meta_features.calculate_all_metafeatures(

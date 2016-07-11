@@ -149,7 +149,7 @@ class FunctionsTest(unittest.TestCase):
         eval_holdout(self.queue, self.configuration, self.data, backend_api,
                      1, 1, None, True, True, True)
         info = self.queue.get()
-        self.assertIn('f1_metric: 0.0480549199085;pac_metric: 0.135572680594;'
+        self.assertIn('f1_metric: 0.0480549199085;pac_metric: 0.122252018407;'
                       'acc_metric: 0.0454545454545;auc_metric: 0.0;'
                       'bac_metric: 0.05;duration: ', info[3])
         self.assertAlmostEqual(info[1], 0.05)

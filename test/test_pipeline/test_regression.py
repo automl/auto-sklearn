@@ -204,7 +204,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
-            dataset_properties={'sparse': True})
+            dataset_properties={'sparse': True},
+            # TODO remove in sklearn 0.18
+            exclude={'regressor': 'gaussian_process'})
         print(cs)
         for i in range(10):
             config = cs.sample_configuration()
@@ -263,9 +265,10 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             predictions = auto.predict(copy.deepcopy(X_test))
             # The lower the worse
             r2_score = sklearn.metrics.r2_score(Y_test, predictions)
-            self.assertAlmostEqual(0.41732302035060087, r2_score)
+            self.assertAlmostEqual(0.417, r2_score,
+                                   places=3)
             model_score = auto.score(copy.deepcopy(X_test), Y_test)
-            self.assertEqual(model_score, r2_score)
+            self.assertAlmostEqual(model_score, r2_score, places=5)
 
     def test_repr(self):
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
