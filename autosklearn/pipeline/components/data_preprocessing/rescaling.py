@@ -6,6 +6,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 from ConfigSpace.conditions import EqualsCondition, AbstractConjunction
 
+from autosklearn.pipeline.base import AutoSklearnChoice
 from autosklearn.pipeline.constants import *
 
 
@@ -146,11 +147,7 @@ class NormalizerComponent(Rescaling):
                 'preferred_dtype': None}
 
 
-class RescalingChoice(object):
-    def __init__(self, **params):
-        choice = params['__choice__']
-        del params['__choice__']
-        self.choice = self.get_components()[choice](**params)
+class RescalingChoice(AutoSklearnChoice):
 
     @classmethod
     def get_components(cls):

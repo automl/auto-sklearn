@@ -5,7 +5,7 @@ import copy
 import os
 
 from ..base import AutoSklearnClassificationAlgorithm, find_components, \
-    ThirdPartyComponents
+    ThirdPartyComponents, AutoSklearnChoice
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 from ConfigSpace.conditions import EqualsCondition
@@ -21,11 +21,7 @@ def add_classifier(classifier):
     _addons.add_component(classifier)
 
 
-class ClassifierChoice(object):
-    def __init__(self, **params):
-        choice = params['__choice__']
-        del params['__choice__']
-        self.choice = self.get_components()[choice](**params)
+class ClassifierChoice(AutoSklearnChoice):
 
     @classmethod
     def get_components(cls):

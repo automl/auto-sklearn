@@ -40,14 +40,10 @@ class ThirdPartyComponents(object):
                             str(self.base_class))
 
         properties = set(classifier.get_properties())
-        should_be_there = set(['shortname',
-                               'name',
-                               'handles_regression',
-                               'handles_classification',
-                               'handles_multiclass',
-                               'handles_multilabel',
-                               'is_deterministic',
-                               'input', 'output'])
+        should_be_there = {'shortname', 'name', 'handles_regression',
+                           'handles_classification', 'handles_multiclass',
+                           'handles_multilabel', 'is_deterministic',
+                           'input', 'output'}
         for property in properties:
             if property not in should_be_there:
                 raise ValueError('Property %s must not be specified for '
@@ -62,16 +58,7 @@ class ThirdPartyComponents(object):
         print(name, classifier)
 
 
-class AutoSklearnClassificationAlgorithm(object):
-    """Provide an abstract interface for classification algorithms in
-    auto-sklearn.
-
-    See :ref:`extending` for more information."""
-
-    def __init__(self):
-        self.estimator = None
-        self.properties = None
-
+class AutoSklearnComponent(object):
     @staticmethod
     def get_properties(dataset_properties=None):
         """Get the properties of the underlying algorithm.
@@ -128,6 +115,22 @@ class AutoSklearnClassificationAlgorithm(object):
         -learn-objects>`_ for further information."""
         raise NotImplementedError()
 
+    def __str__(self):
+        name = self.get_properties()['name']
+        return "autosklearn.pipeline %s" % name
+
+
+
+class AutoSklearnClassificationAlgorithm(AutoSklearnComponent):
+    """Provide an abstract interface for classification algorithms in
+    auto-sklearn.
+
+    See :ref:`extending` for more information."""
+
+    def __init__(self):
+        self.estimator = None
+        self.properties = None
+
     def predict(self, X):
         """The predict function calls the predict function of the
         underlying scikit-learn model and returns an array with the predictions.
@@ -170,12 +173,8 @@ class AutoSklearnClassificationAlgorithm(object):
         """
         return self.estimator
 
-    def __str__(self):
-        name = self.get_properties()['name']
-        return "autosklearn.pipeline %s" % name
 
-
-class AutoSklearnPreprocessingAlgorithm(object):
+class AutoSklearnPreprocessingAlgorithm(AutoSklearnComponent):
     """Provide an abstract interface for preprocessing algorithms in
     auto-sklearn.
 
@@ -183,61 +182,6 @@ class AutoSklearnPreprocessingAlgorithm(object):
 
     def __init__(self):
         self.preprocessor = None
-
-    @staticmethod
-    def get_properties(dataset_properties=None):
-        """Get the properties of the underlying algorithm.
-
-        Find more information at :ref:`get_properties`
-
-        Parameters
-        ----------
-
-        dataset_properties : dict, optional (default=None)
-
-        Returns
-        -------
-        dict
-        """
-        raise NotImplementedError()
-
-    @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
-        """Return the configuration space of this preprocessing algorithm.
-
-        Parameters
-        ----------
-
-        dataset_properties : dict, optional (default=None)
-
-        Returns
-        -------
-        Configspace.configuration_space.ConfigurationSpace
-            The configuration space of this preprocessing algorithm.
-        """
-        raise NotImplementedError()
-
-    def fit(self, X, Y):
-        """The fit function calls the fit function of the underlying
-        scikit-learn preprocessing algorithm and returns `self`.
-
-        Parameters
-        ----------
-        X : array-like, shape = (n_samples, n_features)
-            Training data
-
-        y : array-like, shape = (n_samples,) or shape = (n_sample, n_labels)
-
-        Returns
-        -------
-        self : returns an instance of self.
-
-        Notes
-        -----
-        Please see the `scikit-learn API documentation
-        <http://scikit-learn.org/dev/developers/index.html#apis-of-scikit
-        -learn-objects>`_ for further information."""
-        raise NotImplementedError()
 
     def transform(self, X):
         """The transform function calls the transform function of the
@@ -268,12 +212,8 @@ class AutoSklearnPreprocessingAlgorithm(object):
         """
         return self.preprocessor
 
-    def __str__(self):
-        name = self.get_properties()['name']
-        return "autosklearn.pipeline %s" % name
 
-
-class AutoSklearnRegressionAlgorithm(object):
+class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
     """Provide an abstract interface for regression algorithms in
     auto-sklearn.
 
@@ -283,61 +223,6 @@ class AutoSklearnRegressionAlgorithm(object):
     def __init__(self):
         self.estimator = None
         self.properties = None
-
-    def get_properties(dataset_properties=None):
-        """Get the properties of the underlying algorithm.
-
-        Find more information at :ref:`get_properties`
-
-        Parameters
-        ----------
-
-        dataset_properties : dict, optional (default=None)
-
-        Returns
-        -------
-        dict
-        """
-        raise NotImplementedError()
-
-    @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
-        """Return the configuration space of this regression algorithm.
-
-        Parameters
-        ----------
-
-        dataset_properties : dict, optional (default=None)
-
-        Returns
-        -------
-        Configspace.configuration_space.ConfigurationSpace
-            The configuration space of this regression algorithm.
-        """
-        raise NotImplementedError()
-
-    def fit(self, X, y):
-        """The fit function calls the fit function of the underlying
-        scikit-learn model and returns `self`.
-
-        Parameters
-        ----------
-        X : array-like, shape = (n_samples, n_features)
-            Training data
-
-        y : array-like, shape = [n_samples]
-
-        Returns
-        -------
-        self : returns an instance of self.
-            Targets
-
-        Notes
-        -----
-        Please see the `scikit-learn API documentation
-        <http://scikit-learn.org/dev/developers/index.html#apis-of-scikit
-        -learn-objects>`_ for further information."""
-        raise NotImplementedError()
 
     def predict(self, X):
         """The predict function calls the predict function of the
@@ -368,7 +253,26 @@ class AutoSklearnRegressionAlgorithm(object):
         """
         return self.estimator
 
-    def __str__(self):
-        name = self.get_properties()['name']
-        return "autosklearn.pipeline %s" % name
 
+class AutoSklearnChoice(object):
+    def __init__(self, **params):
+        choice = params['__choice__']
+        del params['__choice__']
+        self.choice = self.get_components()[choice](**params)
+
+    @classmethod
+    def get_components(cls):
+        raise NotImplementedError()
+
+    @classmethod
+    def get_available_components(cls, data_prop,
+                                 include=None,
+                                 exclude=None):
+        raise NotImplementedError()
+
+    @classmethod
+    def get_hyperparameter_search_space(cls, dataset_properties,
+                                        default=None,
+                                        include=None,
+                                        exclude=None):
+        raise NotImplementedError()

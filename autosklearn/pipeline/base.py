@@ -7,7 +7,7 @@ from sklearn.base import BaseEstimator
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_random_state, check_is_fitted
 
-from autosklearn.pipeline import components as components
+from .components.base import AutoSklearnChoice
 import autosklearn.pipeline.create_searchspace_util
 
 
@@ -92,8 +92,7 @@ class BasePipeline(BaseEstimator):
             preprocessor_object = preproc_class(
                 random_state=self.random_state, **preproc_params)
 
-            # Ducktyping...
-            if hasattr(preproc_class, 'get_components'):
+            if issubclass(preproc_class, AutoSklearnChoice):
                 preprocessor_object = preprocessor_object.choice
 
             steps.append((preproc_name, preprocessor_object))
@@ -116,8 +115,7 @@ class BasePipeline(BaseEstimator):
         estimator_object = estimator_object(random_state=self.random_state,
                             **estimator_parameters)
 
-        # Ducktyping...
-        if hasattr(estimator_object, 'get_components'):
+        if isinstance(estimator_object, AutoSklearnChoice):
             estimator_object = estimator_object.choice
 
         steps.append((estimator_name, estimator_object))
@@ -279,7 +277,9 @@ class BasePipeline(BaseEstimator):
         # pipeline) to see if we can add a hyperparameter for that step
         for node_idx, n_ in enumerate(pipeline):
             node_name, node = n_
-            is_choice = hasattr(node, "get_available_components")
+
+            # node is a class object, not an instance
+            is_choice = issubclass(node, AutoSklearnChoice)
 
             # if the node isn't a choice we can add it immediately because it
             #  must be active (if it wouldn't, np.sum(matches) would be zero

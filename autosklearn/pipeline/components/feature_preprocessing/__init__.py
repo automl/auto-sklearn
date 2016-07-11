@@ -1,13 +1,9 @@
 from collections import OrderedDict
 import copy
-import importlib
-import inspect
 import os
-import pkgutil
-import sys
 
 from ..base import AutoSklearnPreprocessingAlgorithm, find_components, \
-    ThirdPartyComponents
+    ThirdPartyComponents, AutoSklearnChoice
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 from ConfigSpace.conditions import EqualsCondition, AbstractConjunction
@@ -23,11 +19,7 @@ def add_preprocessor(preprocessor):
     _addons.add_component(preprocessor)
 
 
-class FeaturePreprocessorChoice(object):
-    def __init__(self, **params):
-        choice = params['__choice__']
-        del params['__choice__']
-        self.choice = self.get_components()[choice](**params)
+class FeaturePreprocessorChoice(AutoSklearnChoice):
 
     @classmethod
     def get_components(cls):
