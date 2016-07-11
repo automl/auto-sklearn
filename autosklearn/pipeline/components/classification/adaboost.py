@@ -1,6 +1,3 @@
-from autosklearn.pipeline.implementations.MultilabelClassifier import \
-    MultilabelClassifier
-
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
@@ -37,11 +34,7 @@ class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
             random_state=self.random_state
         )
 
-        if len(Y.shape) == 2 and Y.shape[1] > 1:
-            estimator = MultilabelClassifier(estimator, n_jobs=1)
-            estimator.fit(X, Y, sample_weight=sample_weight)
-        else:
-            estimator.fit(X, Y, sample_weight=sample_weight)
+        estimator.fit(X, Y, sample_weight=sample_weight)
 
         self.estimator = estimator
         return self
@@ -63,7 +56,7 @@ class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': True,
+                'handles_multilabel': False,
                 'is_deterministic': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,)}

@@ -9,8 +9,6 @@ from ConfigSpace.conditions import EqualsCondition
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
-from autosklearn.pipeline.implementations.MultilabelClassifier import \
-    MultilabelClassifier
 
 
 class SGD(AutoSklearnClassificationAlgorithm):
@@ -69,20 +67,13 @@ class SGD(AutoSklearnClassificationAlgorithm):
                                            average=self.average,
                                            random_state=self.random_state,)
 
-        # Fallback for multilabel classification
-        if len(y.shape) > 1 and y.shape[1] > 1:
-            self.estimator.n_iter = self.n_iter
-            self.estimator = MultilabelClassifier(self.estimator, n_jobs=1)
-            self.estimator.fit(X, y, sample_weight=sample_weight)
-            self.fully_fit_ = True
-        else:
-            self.estimator.n_iter = n_iter
-            self.estimator.partial_fit(X, y, classes=np.unique(y),
-                                       sample_weight=sample_weight)
+        self.estimator.n_iter = n_iter
+        self.estimator.partial_fit(X, y, classes=np.unique(y),
+                                   sample_weight=sample_weight)
 
-            if self._iterations >= self.n_iter:
-                self.fully_fit_ = True
-            self._iterations += n_iter
+        if self._iterations >= self.n_iter:
+            self.fully_fit_ = True
+        self._iterations += n_iter
         return self
 
     def configuration_fully_fitted(self):
