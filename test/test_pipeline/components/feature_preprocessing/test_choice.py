@@ -12,7 +12,7 @@ class FeatureProcessingTest(unittest.TestCase):
                                         ('regression', 13)]:
             data_properties = {'target_type': target_type}
 
-            available_components = fp.FeaturePreprocessorChoice\
+            available_components = fp.FeaturePreprocessorChoice(data_properties)\
                 .get_available_components(data_properties)
 
             self.assertEqual(len(available_components), num_values)
@@ -20,7 +20,7 @@ class FeatureProcessingTest(unittest.TestCase):
         # Multiclass
         data_properties = {'target_type': 'classification',
                            'multiclass': True}
-        available_components = fp.FeaturePreprocessorChoice \
+        available_components = fp.FeaturePreprocessorChoice(data_properties) \
             .get_available_components(data_properties)
 
         self.assertEqual(len(available_components), 15)
@@ -28,7 +28,7 @@ class FeatureProcessingTest(unittest.TestCase):
         # Multilabel
         data_properties = {'target_type': 'classification',
                            'multilabel': True}
-        available_components = fp.FeaturePreprocessorChoice \
+        available_components = fp.FeaturePreprocessorChoice(data_properties) \
             .get_available_components(data_properties)
 
         self.assertEqual(len(available_components), 12)

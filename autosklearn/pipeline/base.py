@@ -17,22 +17,31 @@ class BasePipeline(Pipeline):
     This class should not be instantiated, only subclassed."""
     __metaclass__ = ABCMeta
 
-    def __init__(self, config=None, pipeline=None, random_state=None):
+    def __init__(self, config=None, pipeline=None, dataset_properties=None,
+                 random_state=None):
         if pipeline is None:
             self.steps = self._get_pipeline()
         else:
             self.steps = pipeline
 
-        if config is None:
-            self.configuration = self.get_hyperparameter_search_space(
-                ).get_default_configuration()
+        if dataset_properties is None:
+            self.dataset_properties_ = {}
         else:
-            cs = self.get_hyperparameter_search_space()
+            self.dataset_properties_ = dataset_properties
+
+        if config is None:
+            self.configuration_ = self.get_hyperparameter_search_space(
+                dataset_properties).get_default_configuration()
+        else:
+            cs = self.get_hyperparameter_search_space(dataset_properties=
+                                                      dataset_properties)
+            if isinstance(config, dict):
+                config = Configuration(cs, config)
             if cs != config.configuration_space:
                 raise ValueError('Configuration passed does not come from the '
                                  'same configuration space.')
-            self.configuration = config
-        self.set_hyperparameters(self.configuration)
+            self.configuration_ = config
+        self.set_hyperparameters(self.configuration_)
 
         if random_state is None:
             self.random_state = check_random_state(1)
@@ -290,18 +299,41 @@ class BasePipeline(Pipeline):
         class_name = self.__class__.__name__
 
         configuration = {}
-        self.configuration._populate_values()
-        for hp_name in self.configuration:
-            if self.configuration[hp_name] is not None:
-                configuration[hp_name] = self.configuration[hp_name]
+        self.configuration_._populate_values()
+        for hp_name in self.configuration_:
+            if self.configuration_[hp_name] is not None:
+                configuration[hp_name] = self.configuration_[hp_name]
 
         configuration_string = ''.join(
-            ['configuration={\n  ',
+            ['config={\n  ',
              ',\n  '.join(["'%s': %s" % (hp_name, repr(configuration[hp_name]))
                                          for hp_name in sorted(configuration)]),
              '}'])
 
-        return '%s(%s)' % (class_name, configuration_string)
+        if len(self.dataset_properties_) > 0:
+            dataset_properties_string = []
+            dataset_properties_string.append('dataset_properties={')
+            for i, item in enumerate(self.dataset_properties_.items()):
+                if i != 0:
+                    dataset_properties_string.append(',\n  ')
+                else:
+                    dataset_properties_string.append('\n  ')
+
+                if isinstance(item[1], str):
+                    dataset_properties_string.append("'%s': '%s'" % (item[0],
+                                                                     item[1]))
+                else:
+                    dataset_properties_string.append("'%s': %s" % (item[0],
+                                                                   item[1]))
+            dataset_properties_string.append('}')
+            dataset_properties_string = ''.join(dataset_properties_string)
+
+            rval = '%s(%s,\n%s)' % (class_name, configuration,
+                                    dataset_properties_string)
+        else:
+            rval = '%s(%s)' % (class_name, configuration_string)
+
+        return rval
 
     def _get_pipeline(self):
         raise NotImplementedError()

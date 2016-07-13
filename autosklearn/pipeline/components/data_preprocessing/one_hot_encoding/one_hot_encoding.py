@@ -13,7 +13,7 @@ from autosklearn.pipeline.constants import *
 
 class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, use_minimum_fraction=True, minimum_fraction=0.01,
-                 categorical_features='all', random_state=None):
+                 categorical_features=None, random_state=None):
         # TODO pay attention to the cases when a copy is made (CSR matrices)
         self.use_minimum_fraction = use_minimum_fraction
         self.minimum_fraction = minimum_fraction

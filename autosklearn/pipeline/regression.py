@@ -68,10 +68,11 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     --------
 
     """
-    def __init__(self, config=None, pipeline=None, random_state=None):
+    def __init__(self, config=None, pipeline=None,
+                 dataset_properties=None, random_state=None):
         self._output_dtype = np.float32
         super(SimpleRegressionPipeline, self).__init__(
-            config, pipeline, random_state)
+            config, pipeline, dataset_properties, random_state)
 
     def pre_transform(self, X, Y, fit_params=None, init_params=None):
         X, fit_params = super(SimpleRegressionPipeline, self).pre_transform(

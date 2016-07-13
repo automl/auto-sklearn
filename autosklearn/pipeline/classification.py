@@ -72,10 +72,11 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
     """
 
-    def __init__(self, config=None, pipeline=None, random_state=None):
+    def __init__(self, config=None, pipeline=None,
+                 dataset_properties=None, random_state=None):
         self._output_dtype = np.int32
         super(SimpleClassificationPipeline, self).__init__(
-            config, pipeline, random_state)
+            config, pipeline, dataset_properties, random_state)
 
     def pre_transform(self, X, y, fit_params=None, init_params=None):
         self.num_targets = 1 if len(y.shape) == 1 else y.shape[1]
@@ -111,10 +112,10 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         """
         if batch_size is None:
             Xt = X
-            for name, transform in self.pipeline_.steps[:-1]:
+            for name, transform in self.steps[:-1]:
                 Xt = transform.transform(Xt)
 
-            return self.pipeline_.steps[-1][-1].predict_proba(Xt)
+            return self.steps[-1][-1].predict_proba(Xt)
 
         else:
             if type(batch_size) is not int or batch_size <= 0:
@@ -218,9 +219,9 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                 try:
                     cs.add_forbidden_clause(ForbiddenAndConjunction(
                         ForbiddenEqualsClause(cs.get_hyperparameter(
-                            "classifier"), c),
+                            "classifier:__choice__"), c),
                         ForbiddenEqualsClause(cs.get_hyperparameter(
-                            "preprocessor"), f)))
+                            "preprocessor:__choice__"), f)))
                     break
                 except KeyError:
                     break
@@ -249,9 +250,9 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                 try:
                     cs.add_forbidden_clause(ForbiddenAndConjunction(
                         ForbiddenEqualsClause(cs.get_hyperparameter(
-                            "preprocessor"), f),
+                            "preprocessor:__choice__"), f),
                         ForbiddenEqualsClause(cs.get_hyperparameter(
-                            "classifier"), c)))
+                            "classifier:__choice__"), c)))
                     break
                 except KeyError:
                     break

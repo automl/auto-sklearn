@@ -75,166 +75,99 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         limit = 4000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
+        cs = SimpleRegressionPipeline().get_hyperparameter_search_space()
 
-        print(cs)
-        cs.seed(1)
-
-        for i in range(10):
-            config = cs.sample_configuration()
-            config._populate_values()
-            if config['regressor:sgd:n_iter'] is not None:
-                config._values['regressor:sgd:n_iter'] = 5
-
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
-            cls = SimpleRegressionPipeline(config, random_state=1)
-            print(config)
-            try:
-                cls.fit(X_train, Y_train)
-                X_test_ = X_test.copy()
-                predictions = cls.predict(X_test)
-                self.assertIsInstance(predictions, np.ndarray)
-                predicted_probabiliets = cls.predict(X_test_)
-                self.assertIsInstance(predicted_probabiliets, np.ndarray)
-            except ValueError as e:
-                if "Floating-point under-/overflow occurred at epoch" in \
-                        e.args[0]:
-                    continue
-                elif "all features are discarded" in e.args[0]:
-                    continue
-                elif "removed all features" in e.args[0]:
-                    continue
-                elif "Bug in scikit-learn:" in e.args[0]:
-                    continue
-                else:
-                    print(config)
-                    print(traceback.format_exc())
-                    raise e
-            except RuntimeWarning as e:
-                if "invalid value encountered in sqrt" in e.args[0]:
-                    continue
-                elif "divide by zero encountered in" in e.args[0]:
-                    continue
-                elif "invalid value encountered in divide" in e.args[0]:
-                    continue
-                elif "invalid value encountered in true_divide" in e.args[0]:
-                    continue
-                else:
-                    print(config)
-                    print(traceback.format_exc())
-                    raise e
-            except UserWarning as e:
-                if "FastICA did not converge" in e.args[0]:
-                    continue
-                else:
-                    print(config)
-                    print(traceback.format_exc())
-                    raise e
-            except MemoryError as e:
-                continue
+        self._test_configurations(cs)
 
     def test_configurations_signed_data(self):
         # Use a limit of ~4GiB
         limit = 4000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
             dataset_properties={'signed': True})
 
-        print(cs)
-
-        for i in range(10):
-            config = cs.sample_configuration()
-            config._populate_values()
-            if 'classifier:passive_aggressive:n_iter' in config and \
-                            config[
-                                'classifier:passive_aggressive:n_iter'] is not None:
-                config._values['classifier:passive_aggressive:n_iter'] = 5
-            if 'classifier:sgd:n_iter' in config and \
-                            config['classifier:sgd:n_iter'] is not None:
-                config._values['classifier:sgd:n_iter'] = 5
-
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
-            cls = SimpleRegressionPipeline(config, random_state=1)
-            print(config)
-            try:
-                cls.fit(X_train, Y_train)
-                X_test_ = X_test.copy()
-                predictions = cls.predict(X_test)
-                self.assertIsInstance(predictions, np.ndarray)
-                predicted_probabiliets = cls.predict(X_test_)
-                self.assertIsInstance(predicted_probabiliets, np.ndarray)
-            except ValueError as e:
-                if "Floating-point under-/overflow occurred at epoch" in \
-                        e.args[0] or \
-                                "removed all features" in e.args[0] or \
-                                "all features are discarded" in e.args[0] or \
-                        "Bug in scikit-learn" in e.args[0]:
-                    continue
-                else:
-                    print(config)
-                    print(traceback.format_exc())
-                    raise e
-            except RuntimeWarning as e:
-                if "invalid value encountered in sqrt" in e.args[0]:
-                    continue
-                elif "divide by zero encountered in" in e.args[0]:
-                    continue
-                elif "invalid value encountered in divide" in e.args[0]:
-                    continue
-                elif "invalid value encountered in true_divide" in e.args[0]:
-                    continue
-                else:
-                    print(config)
-                    print(traceback.format_exc())
-                    raise e
-            except UserWarning as e:
-                if "FastICA did not converge" in e.args[0]:
-                    continue
-                else:
-                    print(config)
-                    print(traceback.format_exc())
-                    raise e
-            except MemoryError as e:
-                continue
+        self._test_configurations(configurations_space=cs)
 
     def test_configurations_sparse(self):
         # Use a limit of ~4GiB
         limit = 4000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
             dataset_properties={'sparse': True},
             # TODO remove in sklearn 0.18
             exclude={'regressor': 'gaussian_process'})
-        print(cs)
+
+        self._test_configurations(cs, make_sparse=True)
+
+    def _test_configurations(self, configurations_space, make_sparse=False,
+                             data=None, init_params=None):
+        # Use a limit of ~4GiB
+        limit = 4000 * 1024 * 1024
+        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
+        configurations_space.seed(1)
+
+        print(configurations_space)
         for i in range(10):
-            config = cs.sample_configuration()
+            config = configurations_space.sample_configuration()
             config._populate_values()
-            if 'classifier:passive_aggressive:n_iter' in config and \
-                            config[
-                                'classifier:passive_aggressive:n_iter'] is not None:
-                config._values['classifier:passive_aggressive:n_iter'] = 5
-            if 'classifier:sgd:n_iter' in config and \
-                            config['classifier:sgd:n_iter'] is not None:
-                config._values['classifier:sgd:n_iter'] = 5
+
+            # Restrict configurations which could take too long on travis-ci
+            restrictions = {'regressor:passive_aggressive:n_iter': 5,
+                            'regressor:sgd:n_iter': 5,
+                            'regressor:adaboost:n_estimators': 50,
+                            'regressor:adaboost:max_depth': 1,
+                            'preprocessor:kernel_pca:n_components': 10,
+                            'preprocessor:kitchen_sinks:n_components': 50,
+                            'regressor:proj_logit:max_epochs': 1,
+                            'regressor:libsvm_svc:degree': 2,
+                            'regressor:libsvm_svr:degree': 2,
+                            'preprocessor:truncatedSVD:target_dim': 10,
+                            'preprocessor:polynomial:degree': 2,
+                            'regressor:lda:n_components': 10}
+
+            for restrict_parameter in restrictions:
+                restrict_to = restrictions[restrict_parameter]
+                if restrict_parameter in config and \
+                                config[restrict_parameter] is not None:
+                    config._values[restrict_parameter] = restrict_to
 
             print(config)
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston',
-                                                           make_sparse=True)
-            cls = SimpleRegressionPipeline(config, random_state=1)
+
+            if data is None:
+                X_train, Y_train, X_test, Y_test = get_dataset(
+                    dataset='boston', make_sparse=make_sparse, add_NaNs=True)
+            else:
+                X_train = data['X_train'].copy()
+                Y_train = data['Y_train'].copy()
+                X_test = data['X_test'].copy()
+                Y_test = data['Y_test'].copy()
+
+            cls = SimpleRegressionPipeline(random_state=1)
+            cls.set_hyperparameters(config)
             try:
-                cls.fit(X_train, Y_train)
+                init_params_ = copy.deepcopy(init_params)
+                cls.fit(X_train, Y_train, init_params=init_params_)
                 predictions = cls.predict(X_test)
+            except MemoryError as e:
+                continue
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
-                        e.args[0] or \
-                                "removed all features" in e.args[0] or \
-                                "all features are discarded" in e.args[0]:
+                        e.args[0]:
+                    continue
+                elif "removed all features" in e.args[0]:
+                    continue
+                elif "all features are discarded" in e.args[0]:
+                    continue
+                elif "Numerical problems in QDA" in e.args[0]:
+                    continue
+                elif 'Bug in scikit-learn' in e.args[0]:
                     continue
                 else:
                     print(config)
-                    traceback.print_tb(sys.exc_info()[2])
+                    print(traceback.format_exc())
                     raise e
             except RuntimeWarning as e:
                 if "invalid value encountered in sqrt" in e.args[0]:
@@ -257,10 +190,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
 
     def test_default_configuration(self):
         for i in range(2):
-            cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
-            default = cs.get_default_configuration()
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes')
-            auto = SimpleRegressionPipeline(default)
+            auto = SimpleRegressionPipeline()
             auto = auto.fit(X_train, Y_train)
             predictions = auto.predict(copy.deepcopy(X_test))
             # The lower the worse
@@ -271,9 +202,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             self.assertAlmostEqual(model_score, r2_score, places=5)
 
     def test_repr(self):
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space()
-        default = cs.get_default_configuration()
-        representation = repr(SimpleRegressionPipeline(default))
+        representation = repr(SimpleRegressionPipeline())
         cls = eval(representation)
         self.assertIsInstance(cls, SimpleRegressionPipeline)
 
@@ -321,7 +250,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(ValueError, "Cannot find a legal default "
                                             "configuration.",
-                                SimpleRegressionPipeline.get_hyperparameter_search_space,
+                                SimpleRegressionPipeline().get_hyperparameter_search_space,
                                 include={'regressor': ['random_forest'],
                                          'preprocessor': ['kitchen_sinks']})
 
@@ -329,7 +258,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         # data are located behind the densifier
         self.assertRaisesRegexp(ValueError, "Cannot find a legal default "
                                             "configuration",
-                                SimpleRegressionPipeline.get_hyperparameter_search_space,
+                                SimpleRegressionPipeline().get_hyperparameter_search_space,
                                 include={'regressor': ['ridge_regression'],
                                          'preprocessor': ['densifier']},
                                 dataset_properties={'sparse': True})

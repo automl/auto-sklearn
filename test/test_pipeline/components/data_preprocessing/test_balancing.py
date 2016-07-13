@@ -87,7 +87,7 @@ class BalancingComponentTest(unittest.TestCase):
                 X_test = data_[0][700:]
                 Y_test = data_[1][700:]
 
-                cs = SimpleClassificationPipeline.\
+                cs = SimpleClassificationPipeline().\
                     get_hyperparameter_search_space(
                         include={'classifier': [name]})
                 default = cs.get_default_configuration()

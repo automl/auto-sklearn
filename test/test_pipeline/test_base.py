@@ -6,19 +6,28 @@ import autosklearn.pipeline.base
 import autosklearn.pipeline.components.feature_preprocessing
 import autosklearn.pipeline.components.classification
 
+
+class BasePipelineMock(autosklearn.pipeline.base.BasePipeline):
+    def __init__(self):
+        pass
+
+
 class BaseTest(unittest.TestCase):
     def test_get_hyperparameter_configuration_space_3choices(self):
-        base = autosklearn.pipeline.base.BasePipeline
-
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification'}
         exclude = {}
         include = {}
         pipeline = [('p0',
-                     autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice),
+                     autosklearn.pipeline.components.feature_preprocessing
+                     .FeaturePreprocessorChoice(dataset_properties)),
                     ('p1',
-                     autosklearn.pipeline.components.feature_preprocessing.FeaturePreprocessorChoice),
-                    ('c', autosklearn.pipeline.components.classification.ClassifierChoice)]
+                     autosklearn.pipeline.components.feature_preprocessing
+                     .FeaturePreprocessorChoice(dataset_properties)),
+                    ('c', autosklearn.pipeline.components.classification
+                     .ClassifierChoice(dataset_properties))]
+
+        base = BasePipelineMock()
         cs = base._get_hyperparameter_search_space(cs, dataset_properties,
                                                    exclude, include, pipeline)
 
