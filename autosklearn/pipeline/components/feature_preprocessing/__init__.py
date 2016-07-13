@@ -21,22 +21,23 @@ def add_preprocessor(preprocessor):
 
 class FeaturePreprocessorChoice(AutoSklearnChoice):
 
-    @classmethod
-    def get_components(cls):
+    def get_components(self):
         components = OrderedDict()
         components.update(_preprocessors)
         components.update(_addons.components)
         return components
 
-    @classmethod
-    def get_available_components(cls, data_prop,
+    def get_available_components(self, dataset_properties=None,
                                  include=None,
                                  exclude=None):
+        if dataset_properties is None:
+            dataset_properties = {}
+
         if include is not None and exclude is not None:
             raise ValueError(
                 "The argument include and exclude cannot be used together.")
 
-        available_comp = cls.get_components()
+        available_comp = self.get_components()
 
         if include is not None:
             for incl in include:
@@ -59,14 +60,14 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
             if entry == FeaturePreprocessorChoice or hasattr(entry, 'get_components'):
                 continue
 
-            target_type = data_prop['target_type']
+            target_type = dataset_properties['target_type']
             if target_type == 'classification':
                 if entry.get_properties()['handles_classification'] is False:
                     continue
-                if data_prop.get('multiclass') is True and \
+                if dataset_properties.get('multiclass') is True and \
                         entry.get_properties()['handles_multiclass'] is False:
                     continue
-                if data_prop.get('multilabel') is True and \
+                if dataset_properties.get('multilabel') is True and \
                         entry.get_properties()['handles_multilabel'] is False:
                     continue
 
@@ -81,16 +82,18 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
 
         return components_dict
 
-    @classmethod
-    def get_hyperparameter_search_space(cls, dataset_properties,
+    def get_hyperparameter_search_space(self, dataset_properties=None,
                                         default=None,
                                         include=None,
                                         exclude=None):
         cs = ConfigurationSpace()
 
+        if dataset_properties is None:
+            dataset_properties = {}
+
         # Compile a list of legal preprocessors for this problem
-        available_preprocessors = cls.get_available_components(
-            data_prop=dataset_properties,
+        available_preprocessors = self.get_available_components(
+            dataset_properties=dataset_properties,
             include=include, exclude=exclude)
 
         if len(available_preprocessors) == 0:
@@ -150,3 +153,6 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
                 cs.add_forbidden_clause(forbidden_clause)
 
         return cs
+
+    def transform(self, X):
+        return self.choice.transform(X)

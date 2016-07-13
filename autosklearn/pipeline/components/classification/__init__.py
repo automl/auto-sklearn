@@ -23,17 +23,18 @@ def add_classifier(classifier):
 
 class ClassifierChoice(AutoSklearnChoice):
 
-    @classmethod
     def get_components(cls):
         components = OrderedDict()
         components.update(_classifiers)
         components.update(_addons.components)
         return components
 
-    @classmethod
-    def get_available_components(cls, data_prop,
+    def get_available_components(cls, dataset_properties=None,
                                  include=None,
                                  exclude=None):
+        if dataset_properties is None:
+            dataset_properties = {}
+
         available_comp = cls.get_components()
         components_dict = OrderedDict()
 
@@ -60,21 +61,23 @@ class ClassifierChoice(AutoSklearnChoice):
 
             if entry.get_properties()['handles_classification'] is False:
                 continue
-            if data_prop.get('multiclass') is True and entry.get_properties()[
+            if dataset_properties.get('multiclass') is True and entry.get_properties()[
                 'handles_multiclass'] is False:
                 continue
-            if data_prop.get('multilabel') is True and available_comp[name]. \
+            if dataset_properties.get('multilabel') is True and available_comp[name]. \
                     get_properties()['handles_multilabel'] is False:
                 continue
             components_dict[name] = entry
 
         return components_dict
 
-    @classmethod
-    def get_hyperparameter_search_space(cls, dataset_properties,
+    def get_hyperparameter_search_space(cls, dataset_properties=None,
                                         default=None,
                                         include=None,
                                         exclude=None):
+        if dataset_properties is None:
+            dataset_properties = {}
+
         if include is not None and exclude is not None:
             raise ValueError("The arguments include_estimators and "
                              "exclude_estimators cannot be used together.")
@@ -83,7 +86,7 @@ class ClassifierChoice(AutoSklearnChoice):
 
         # Compile a list of all estimator objects for this problem
         available_estimators = cls.get_available_components(
-            data_prop=dataset_properties,
+            dataset_properties=dataset_properties,
             include=include,
             exclude=exclude)
 
@@ -153,3 +156,6 @@ class ClassifierChoice(AutoSklearnChoice):
                 cs.add_forbidden_clause(forbidden_clause)
     
         return cs
+
+    def predict_proba(self, X):
+        return self.choice.predict_proba(X)

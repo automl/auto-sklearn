@@ -4,6 +4,8 @@ import inspect
 import pkgutil
 import sys
 
+from sklearn.utils import check_random_state
+
 
 def find_components(package, directory, base_class):
     components = OrderedDict()
@@ -255,24 +257,91 @@ class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
 
 
 class AutoSklearnChoice(object):
-    def __init__(self, **params):
+    def __init__(self, dataset_properties, random_state=None, **params):
+        """
+        Parameters
+        ----------
+        dataset_properties : dict
+            Describes the dataset to work on, this can change the
+            configuration space constructed by auto-sklearn. Mandatory
+            properties are:
+            * target_type: classification or regression
+
+
+            Optional properties are:
+            * multiclass: whether the dataset is a multiclass classification
+              dataset.
+            * multilabel: whether the dataset is a multilabel classification
+              dataset
+        """
+        self.configuration = self.get_hyperparameter_search_space(
+            dataset_properties).get_default_configuration()
+
+        if len(params) == 0:
+            params = self.configuration.get_dictionary()
+
+        if random_state is None:
+            self.random_state = check_random_state(1)
+        else:
+            self.random_state = check_random_state(random_state)
+
         choice = params['__choice__']
         del params['__choice__']
-        self.choice = self.get_components()[choice](**params)
 
-    @classmethod
+        new_params = {}
+        for param, value in params.items():
+            param = param.replace(choice, '').replace(':', '')
+            new_params[param] = value
+
+        new_params['random_state'] = self.random_state
+
+        self.new_params = new_params
+        self.choice = self.get_components()[choice](**new_params)
+
     def get_components(cls):
         raise NotImplementedError()
 
-    @classmethod
-    def get_available_components(cls, data_prop,
+    def get_available_components(self, dataset_properties=None,
                                  include=None,
                                  exclude=None):
-        raise NotImplementedError()
+        if dataset_properties is None:
+            dataset_properties = {}
 
-    @classmethod
-    def get_hyperparameter_search_space(cls, dataset_properties,
+        if include is not None and exclude is not None:
+            raise ValueError(
+                "The argument include and exclude cannot be used together.")
+
+        available_comp = self.get_components()
+
+        if include is not None:
+            for incl in include:
+                if incl not in available_comp:
+                    raise ValueError("Trying to include unknown component: "
+                                     "%s" % incl)
+
+        components_dict = OrderedDict()
+        for name in available_comp:
+            if include is not None and name not in include:
+                continue
+            elif exclude is not None and name in exclude:
+                continue
+
+            # TODO maybe check for sparse?
+
+            components_dict[name] = available_comp[name]
+
+        return components_dict
+
+    def get_hyperparameter_search_space(self, dataset_properties=None,
                                         default=None,
                                         include=None,
                                         exclude=None):
         raise NotImplementedError()
+
+    def fit(self, X, y, **kwargs):
+        if kwargs is None:
+            kwargs = {}
+        return self.choice.fit(X, y, **kwargs)
+
+    def predict(self, X):
+        return self.choice.predict(X)

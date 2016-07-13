@@ -10,13 +10,18 @@ from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 from autosklearn.pipeline.components import classification as \
     classification_components
-from autosklearn.pipeline.components import data_preprocessing as \
-    data_preprocessing_components
+from autosklearn.pipeline.components.data_preprocessing import rescaling as \
+    rescaling_components
+from autosklearn.pipeline.components.data_preprocessing.balancing.balancing import \
+    Balancing
+from autosklearn.pipeline.components.data_preprocessing.imputation.imputation \
+    import Imputation
+from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding\
+    .one_hot_encoding import OneHotEncoder
 from autosklearn.pipeline.components import feature_preprocessing as \
     feature_preprocessing_components
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
-from autosklearn.pipeline.components.data_preprocessing.balancing import Balancing
 
 
 class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
@@ -67,10 +72,10 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
     """
 
-    def __init__(self, configuration, random_state=None):
+    def __init__(self, config=None, pipeline=None, random_state=None):
         self._output_dtype = np.int32
-        super(SimpleClassificationPipeline, self).__init__(configuration,
-                                                           random_state)
+        super(SimpleClassificationPipeline, self).__init__(
+            config, pipeline, random_state)
 
     def pre_transform(self, X, y, fit_params=None, init_params=None):
         self.num_targets = 1 if len(y.shape) == 1 else y.shape[1]
@@ -133,8 +138,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
                 return y
 
-    @classmethod
-    def get_hyperparameter_search_space(cls, include=None, exclude=None,
+    def get_hyperparameter_search_space(self, include=None, exclude=None,
                                         dataset_properties=None):
         """Create the hyperparameter configuration space.
 
@@ -154,9 +158,9 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         if dataset_properties['target_type'] != 'classification':
             dataset_properties['target_type'] = 'classification'
 
-        pipeline = cls._get_pipeline()
-        cs = cls._get_hyperparameter_search_space(cs, dataset_properties,
-                                                  exclude, include, pipeline)
+        pipeline = self._get_pipeline()
+        cs = self._get_hyperparameter_search_space(cs, dataset_properties,
+                                                   exclude, include, pipeline)
 
         classifiers = cs.get_hyperparameter('classifier:__choice__').choices
         preprocessors = cs.get_hyperparameter('preprocessor:__choice__').choices
@@ -214,9 +218,9 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                 try:
                     cs.add_forbidden_clause(ForbiddenAndConjunction(
                         ForbiddenEqualsClause(cs.get_hyperparameter(
-                            "classifier:__choice__"), c),
+                            "classifier"), c),
                         ForbiddenEqualsClause(cs.get_hyperparameter(
-                            "preprocessor:__choice__"), f)))
+                            "preprocessor"), f)))
                     break
                 except KeyError:
                     break
@@ -245,9 +249,9 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                 try:
                     cs.add_forbidden_clause(ForbiddenAndConjunction(
                         ForbiddenEqualsClause(cs.get_hyperparameter(
-                            "preprocessor:__choice__"), f),
+                            "preprocessor"), f),
                         ForbiddenEqualsClause(cs.get_hyperparameter(
-                            "classifier:__choice__"), c)))
+                            "classifier"), c)))
                     break
                 except KeyError:
                     break
@@ -263,28 +267,28 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
         return cs
 
-    @classmethod
-    def _get_pipeline(cls):
+    def _get_pipeline(self):
         steps = []
+
+        default_dataset_properties = {'target_type': 'classification'}
 
         # Add the always active preprocessing components
         steps.extend(
-            [["one_hot_encoding",
-              data_preprocessing_components._preprocessors['one_hot_encoding']],
-             ["imputation",
-              data_preprocessing_components._preprocessors['imputation']],
+            [["one_hot_encoding", OneHotEncoder()],
+             ["imputation", Imputation()],
              ["rescaling",
-              data_preprocessing_components._preprocessors['rescaling']],
-             ["balancing",
-              data_preprocessing_components._preprocessors['balancing']]])
+              rescaling_components.RescalingChoice(default_dataset_properties)],
+             ["balancing", Balancing()]])
 
         # Add the preprocessing component
         steps.append(['preprocessor',
-                      feature_preprocessing_components.FeaturePreprocessorChoice])
+                      feature_preprocessing_components.FeaturePreprocessorChoice(
+                          default_dataset_properties)])
 
         # Add the classification component
         steps.append(['classifier',
-                      classification_components.ClassifierChoice])
+                      classification_components.ClassifierChoice(
+                          default_dataset_properties)])
         return steps
 
     def _get_estimator_hyperparameter_name(self):

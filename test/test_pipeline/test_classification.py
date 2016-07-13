@@ -169,7 +169,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self._test_configurations(configurations_space=cs)
 
     def test_configurations(self):
-        cs = SimpleClassificationPipeline.get_hyperparameter_search_space()
+        cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
 
         self._test_configurations(configurations_space=cs)
 
@@ -251,7 +251,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 X_test = data['X_test'].copy()
                 Y_test = data['Y_test'].copy()
 
-            cls = SimpleClassificationPipeline(config, random_state=1)
+            cls = SimpleClassificationPipeline(random_state=1)
+            cls.set_hyperparameters(config)
             try:
                 init_params_ = copy.deepcopy(init_params)
                 cls.fit(X_train, Y_train, init_params=init_params_)
