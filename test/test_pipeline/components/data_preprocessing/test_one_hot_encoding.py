@@ -4,7 +4,8 @@ import unittest
 import numpy as np
 from scipy import sparse
 
-from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding import OneHotEncoder
+from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.one_hot_encoding \
+    import OneHotEncoder
 from autosklearn.pipeline.util import _test_preprocessing
 
 

@@ -116,42 +116,49 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
         for name in available_preprocessors:
             preprocessor_configuration_space = available_preprocessors[name]. \
                 get_hyperparameter_search_space(dataset_properties)
-            for parameter in preprocessor_configuration_space.get_hyperparameters():
-                new_parameter = copy.deepcopy(parameter)
-                new_parameter.name = "%s:%s" % (name, new_parameter.name)
-                cs.add_hyperparameter(new_parameter)
-                # We must only add a condition if the hyperparameter is not
-                # conditional on something else
-                if len(preprocessor_configuration_space.
-                        get_parents_of(parameter)) == 0:
-                    condition = EqualsCondition(new_parameter, preprocessor,
-                                                name)
-                    cs.add_condition(condition)
+            parent_hyperparameter = {'parent': preprocessor, 'value': name}
+            cs.add_configuration_space(name, preprocessor_configuration_space,
+                                       parent_hyperparameter=parent_hyperparameter)
+            # # preprocessor_configuration_space = available_preprocessors[name]. \
+            # #     get_hyperparameter_search_space(dataset_properties)
+            # for parameter in preprocessor_configuration_space.get_hyperparameters():
+            #     new_parameter = copy.deepcopy(parameter)
+            #     new_parameter.name = "%s:%s" % (name, new_parameter.name)
+            #     cs.add_hyperparameter(new_parameter)
+            #     # We must only add a condition if the hyperparameter is not
+            #     # conditional on something else
+            #     if len(preprocessor_configuration_space.
+            #             get_parents_of(parameter)) == 0:
+            #         condition = EqualsCondition(new_parameter, preprocessor,
+            #                                     name)
+            #         cs.add_condition(condition)
+            #
+            # for condition in available_preprocessors[name]. \
+            #         get_hyperparameter_search_space(
+            #         dataset_properties).get_conditions():
+            #     if not isinstance(condition, AbstractConjunction):
+            #         dlcs = [condition]
+            #     else:
+            #         dlcs = condition.get_descendent_literal_conditions()
+            #     for dlc in dlcs:
+            #         if not dlc.child.name.startswith(name):
+            #             dlc.child.name = "%s:%s" % (name, dlc.child.name)
+            #         if not dlc.parent.name.startswith(name):
+            #             dlc.parent.name = "%s:%s" % (name, dlc.parent.name)
+            #     cs.add_condition(condition)
+            #
+            # for forbidden_clause in available_preprocessors[name]. \
+            #         get_hyperparameter_search_space(
+            #         dataset_properties).forbidden_clauses:
+            #     dlcs = forbidden_clause.get_descendant_literal_clauses()
+            #     for dlc in dlcs:
+            #         if not dlc.hyperparameter.name.startswith(name):
+            #             dlc.hyperparameter.name = "%s:%s" % (name,
+            #                                                  dlc.hyperparameter.name)
+            #     cs.add_forbidden_clause(forbidden_clause)
 
-            for condition in available_preprocessors[name]. \
-                    get_hyperparameter_search_space(
-                    dataset_properties).get_conditions():
-                if not isinstance(condition, AbstractConjunction):
-                    dlcs = [condition]
-                else:
-                    dlcs = condition.get_descendent_literal_conditions()
-                for dlc in dlcs:
-                    if not dlc.child.name.startswith(name):
-                        dlc.child.name = "%s:%s" % (name, dlc.child.name)
-                    if not dlc.parent.name.startswith(name):
-                        dlc.parent.name = "%s:%s" % (name, dlc.parent.name)
-                cs.add_condition(condition)
-
-            for forbidden_clause in available_preprocessors[name]. \
-                    get_hyperparameter_search_space(
-                    dataset_properties).forbidden_clauses:
-                dlcs = forbidden_clause.get_descendant_literal_clauses()
-                for dlc in dlcs:
-                    if not dlc.hyperparameter.name.startswith(name):
-                        dlc.hyperparameter.name = "%s:%s" % (name,
-                                                             dlc.hyperparameter.name)
-                cs.add_forbidden_clause(forbidden_clause)
-
+        self.configuration_space_ = cs
+        self.dataset_properties_ = dataset_properties
         return cs
 
     def transform(self, X):

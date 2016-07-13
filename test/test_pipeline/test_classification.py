@@ -28,8 +28,7 @@ from autosklearn.pipeline.constants import *
 
 
 class DummyClassifier(AutoSklearnClassificationAlgorithm):
-    @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(self, dataset_properties=None):
         return {'shortname': 'AB',
                 'name': 'AdaBoost Classifier',
                 'handles_regression': False,
@@ -40,15 +39,13 @@ class DummyClassifier(AutoSklearnClassificationAlgorithm):
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
-    @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(self, dataset_properties=None):
         cs = ConfigurationSpace()
         return cs
 
 
 class DummyPreprocessor(AutoSklearnPreprocessingAlgorithm):
-    @staticmethod
-    def get_properties(dataset_properties=None):
+    def get_properties(self, dataset_properties=None):
         return {'shortname': 'AB',
                 'name': 'AdaBoost Classifier',
                 'handles_regression': False,
@@ -59,8 +56,7 @@ class DummyPreprocessor(AutoSklearnPreprocessingAlgorithm):
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (INPUT,)}
 
-    @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(self, dataset_properties=None):
         cs = ConfigurationSpace()
         return cs
 
@@ -164,7 +160,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 'X_test': X_test, 'Y_test': Y_test}
 
         dataset_properties = {'multilabel': True}
-        cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+        cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
             dataset_properties=dataset_properties)
         self._test_configurations(configurations_space=cs)
 
@@ -174,19 +170,19 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self._test_configurations(configurations_space=cs)
 
     def test_configurations_signed_data(self):
-        cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+        cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
             dataset_properties={'signed': True})
 
         self._test_configurations(configurations_space=cs)
 
     def test_configurations_sparse(self):
-        cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+        cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
 
         self._test_configurations(configurations_space=cs, make_sparse=True)
 
     def test_configurations_categorical_data(self):
-        cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+        cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
 
         categorical = [True, True, True, False, False, True, True, True,

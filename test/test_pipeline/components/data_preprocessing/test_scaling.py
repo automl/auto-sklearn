@@ -11,13 +11,16 @@ class ScalingComponentTest(unittest.TestCase):
     def _test_helper(self, Preprocessor, dataset=None, make_sparse=False):
         X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
                                           make_sparse=make_sparse)
+
+        dataset_properties = {'sparse': make_sparse}
+
         original_X_train = X_train.copy()
-        configuration_space = Preprocessor.get_hyperparameter_search_space()
+        configuration_space = Preprocessor(dataset_properties).\
+            get_hyperparameter_search_space(dataset_properties)
         default = configuration_space.get_default_configuration()
 
-        preprocessor = Preprocessor(random_state=1,
-                                    **{hp_name: default[hp_name] for hp_name in
-                                       default if default[hp_name] is not None})
+        preprocessor = Preprocessor(dataset_properties, random_state=1)
+        preprocessor.set_hyperparameters(default)
         preprocessor = preprocessor.choice
         transformer = preprocessor.fit(X_train, Y_train)
         return transformer.transform(X_train), original_X_train

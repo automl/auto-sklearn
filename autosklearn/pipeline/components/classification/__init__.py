@@ -71,7 +71,7 @@ class ClassifierChoice(AutoSklearnChoice):
 
         return components_dict
 
-    def get_hyperparameter_search_space(cls, dataset_properties=None,
+    def get_hyperparameter_search_space(self, dataset_properties=None,
                                         default=None,
                                         include=None,
                                         exclude=None):
@@ -85,7 +85,7 @@ class ClassifierChoice(AutoSklearnChoice):
         cs = ConfigurationSpace()
 
         # Compile a list of all estimator objects for this problem
-        available_estimators = cls.get_available_components(
+        available_estimators = self.get_available_components(
             dataset_properties=dataset_properties,
             include=include,
             exclude=exclude)
@@ -154,7 +154,9 @@ class ClassifierChoice(AutoSklearnChoice):
                         dlc.hyperparameter.name = "%s:%s" % (estimator_name,
                                                              dlc.hyperparameter.name)
                 cs.add_forbidden_clause(forbidden_clause)
-    
+
+        self.configuration_space_ = cs
+        self.dataset_properties_ = dataset_properties
         return cs
 
     def predict_proba(self, X):

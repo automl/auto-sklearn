@@ -117,6 +117,18 @@ class AutoSklearnComponent(object):
         -learn-objects>`_ for further information."""
         raise NotImplementedError()
 
+    def set_hyperparameters(self, configuration):
+        params = configuration.get_dictionary()
+
+        for param, value in params.items():
+            if not hasattr(self, param):
+                raise ValueError('Cannot set hyperparameter %s for %s because '
+                                 'the hyperparameter does not exist.' %
+                                 (param, str(self)))
+            setattr(self, param, value)
+
+        return self
+
     def __str__(self):
         name = self.get_properties()['name']
         return "autosklearn.pipeline %s" % name
@@ -257,7 +269,7 @@ class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
 
 
 class AutoSklearnChoice(object):
-    def __init__(self, dataset_properties, random_state=None, **params):
+    def __init__(self, dataset_properties, random_state=None):
         """
         Parameters
         ----------
@@ -277,26 +289,13 @@ class AutoSklearnChoice(object):
         self.configuration = self.get_hyperparameter_search_space(
             dataset_properties).get_default_configuration()
 
-        if len(params) == 0:
-            params = self.configuration.get_dictionary()
-
         if random_state is None:
             self.random_state = check_random_state(1)
         else:
             self.random_state = check_random_state(random_state)
 
-        choice = params['__choice__']
-        del params['__choice__']
-
-        new_params = {}
-        for param, value in params.items():
-            param = param.replace(choice, '').replace(':', '')
-            new_params[param] = value
-
-        new_params['random_state'] = self.random_state
-
-        self.new_params = new_params
-        self.choice = self.get_components()[choice](**new_params)
+        self.set_hyperparameters(self.configuration)
+        self.choice = None
 
     def get_components(cls):
         raise NotImplementedError()
@@ -331,6 +330,23 @@ class AutoSklearnChoice(object):
             components_dict[name] = available_comp[name]
 
         return components_dict
+
+    def set_hyperparameters(self, configuration):
+        params = configuration.get_dictionary()
+        choice = params['__choice__']
+        del params['__choice__']
+
+        new_params = {}
+        for param, value in params.items():
+            param = param.replace(choice, '').replace(':', '')
+            new_params[param] = value
+
+        new_params['random_state'] = self.random_state
+
+        self.new_params = new_params
+        self.choice = self.get_components()[choice](**new_params)
+
+        return self
 
     def get_hyperparameter_search_space(self, dataset_properties=None,
                                         default=None,

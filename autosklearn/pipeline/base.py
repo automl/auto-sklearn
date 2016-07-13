@@ -1,9 +1,7 @@
 from abc import ABCMeta
-from collections import OrderedDict
 
 import numpy as np
-
-from sklearn.base import BaseEstimator
+from ConfigSpace import Configuration
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_random_state, check_is_fitted
 
@@ -153,11 +151,22 @@ class BasePipeline(Pipeline):
         for node_idx, n_ in enumerate(self.steps):
             node_name, node = n_
 
+            sub_configuration_space = node.get_hyperparameter_search_space(
+                dataset_properties=self.dataset_properties_
+            )
+            sub_config_dict = {}
+            for param in configuration:
+                if param.startswith('%s:' % node_name):
+                    value = configuration[param]
+                    new_name = param.replace('%s:' % node_name, '', 1)
+                    sub_config_dict[new_name] = value
+
+            sub_configuration = Configuration(sub_configuration_space,
+                                              values=sub_config_dict)
+
             # TODO set hyperparameters of child objects!
-            if isinstance(node, AutoSklearnChoice):
-                pass
-            elif isinstance(node, AutoSklearnComponent):
-                pass
+            if isinstance(node, (AutoSklearnChoice, AutoSklearnComponent)):
+                node.set_hyperparameters(sub_configuration)
             else:
                 raise NotImplementedError('Not supported yet!')
 

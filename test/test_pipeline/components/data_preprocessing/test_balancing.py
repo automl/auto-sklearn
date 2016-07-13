@@ -7,7 +7,8 @@ import numpy as np
 import sklearn.datasets
 import sklearn.metrics
 
-from autosklearn.pipeline.components.data_preprocessing.balancing import Balancing
+from autosklearn.pipeline.components.data_preprocessing.balancing.balancing \
+    import Balancing
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.components.classification.adaboost import AdaboostClassifier
 from autosklearn.pipeline.components.classification.decision_tree import DecisionTree
@@ -67,14 +68,14 @@ class BalancingComponentTest(unittest.TestCase):
             random_state=1)
 
         for name, clf, acc_no_weighting, acc_weighting in \
-                [#('adaboost', AdaboostClassifier, 0.709, 0.658),
-                 #('decision_tree', DecisionTree, 0.724, 0.692),
-                 #('extra_trees', ExtraTreesClassifier, 0.812, 0.8),
-                 #('gradient_boosting', GradientBoostingClassifier,
-                 #   0.800, 0.760),
-                 #('random_forest', RandomForest, 0.846, 0.792),
-                 #('libsvm_svc', LibSVM_SVC, 0.800, 0.762),
-                 #('liblinear_svc', LibLinear_SVC, 0.679, 0.690),
+                [('adaboost', AdaboostClassifier, 0.709, 0.658),
+                 ('decision_tree', DecisionTree, 0.724, 0.692),
+                 ('extra_trees', ExtraTreesClassifier, 0.812, 0.8),
+                 ('gradient_boosting', GradientBoostingClassifier,
+                    0.800, 0.760),
+                 ('random_forest', RandomForest, 0.846, 0.792),
+                 ('libsvm_svc', LibSVM_SVC, 0.800, 0.762),
+                 ('liblinear_svc', LibLinear_SVC, 0.679, 0.690),
                  ('sgd', SGD, 0.635, 0.578)
                 ]:
             for strategy, acc in [('none', acc_no_weighting),

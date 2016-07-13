@@ -271,14 +271,14 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             self.assertAlmostEqual(model_score, r2_score, places=5)
 
     def test_repr(self):
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
+        cs = SimpleRegressionPipeline().get_hyperparameter_search_space()
         default = cs.get_default_configuration()
         representation = repr(SimpleRegressionPipeline(default))
         cls = eval(representation)
         self.assertIsInstance(cls, SimpleRegressionPipeline)
 
     def test_get_hyperparameter_search_space(self):
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
+        cs = SimpleRegressionPipeline().get_hyperparameter_search_space()
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
@@ -286,34 +286,34 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         self.assertEqual(len(hyperparameters) - 5, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
             include={'regressor': ['random_forest']})
         self.assertEqual(cs.get_hyperparameter('regressor:__choice__'),
             CategoricalHyperparameter('regressor:__choice__', ['random_forest']))
 
         # TODO add this test when more than one regressor is present
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
             exclude={'regressor': ['random_forest']})
         self.assertNotIn('random_forest', str(cs))
 
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
             include={'preprocessor': ['pca']})
         self.assertEqual(cs.get_hyperparameter('preprocessor:__choice__'),
             CategoricalHyperparameter('preprocessor:__choice__', ['pca']))
 
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
             exclude={'preprocessor': ['no_preprocessing']})
         self.assertNotIn('no_preprocessing', str(cs))
 
     def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(
             self):
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
             include={'preprocessor': ['densifier']},
             dataset_properties={'sparse': True})
         self.assertEqual(cs.get_hyperparameter('regressor:__choice__').default,
                          'gradient_boosting')
 
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
             include={'preprocessor': ['nystroem_sampler']})
         self.assertEqual(cs.get_hyperparameter('regressor:__choice__').default,
                          'sgd')
@@ -368,37 +368,36 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     """
 
     def test_predict_batched(self):
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
-        default = cs.get_default_configuration()
-        cls = SimpleRegressionPipeline(default)
+        regressor = SimpleRegressionPipeline()
 
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
-        cls.fit(X_train, Y_train)
+        regressor.fit(X_train, Y_train)
         X_test_ = X_test.copy()
-        prediction_ = cls.predict(X_test_)
-        cls_predict = mock.Mock(wraps=cls.pipeline_)
-        cls.pipeline_ = cls_predict
-        prediction = cls.predict(X_test, batch_size=20)
+        prediction_ = regressor.predict(X_test_)
+        mock_predict = mock.Mock(wraps=regressor.steps[-1][-1].predict)
+        regressor.steps[-1][-1].predict = mock_predict
+        prediction = regressor.predict(X_test, batch_size=20)
         self.assertEqual((356,), prediction.shape)
-        self.assertEqual(18, cls_predict.predict.call_count)
+        self.assertEqual(18, mock_predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_batched_sparse(self):
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+        regressor = SimpleRegressionPipeline()
+        cs = regressor.get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
         default = cs.get_default_configuration()
-        cls = SimpleRegressionPipeline(default)
+        regressor.set_hyperparameters(default)
 
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston',
                                                        make_sparse=True)
-        cls.fit(X_train, Y_train)
+        regressor.fit(X_train, Y_train)
         X_test_ = X_test.copy()
-        prediction_ = cls.predict(X_test_)
-        cls_predict = mock.Mock(wraps=cls.pipeline_)
-        cls.pipeline_ = cls_predict
-        prediction = cls.predict(X_test, batch_size=20)
+        prediction_ = regressor.predict(X_test_)
+        mock_predict = mock.Mock(wraps=regressor.steps[-1][-1].predict)
+        regressor.steps[-1][-1].predict = mock_predict
+        prediction = regressor.predict(X_test, batch_size=20)
         self.assertEqual((356,), prediction.shape)
-        self.assertEqual(18, cls_predict.predict.call_count)
+        self.assertEqual(18, mock_predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
     @unittest.skip("test_check_random_state Not yet Implemented")

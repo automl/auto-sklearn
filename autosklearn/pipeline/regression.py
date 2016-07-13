@@ -7,11 +7,15 @@ from sklearn.base import RegressorMixin
 
 from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 from ConfigSpace.configuration_space import ConfigurationSpace
-
-from autosklearn.pipeline.components import regression as regression_components
-from autosklearn.pipeline.components import data_preprocessing as \
-    data_preprocessing_components
-from autosklearn.pipeline.components import  feature_preprocessing as \
+from autosklearn.pipeline.components import regression as \
+    regression_components
+from autosklearn.pipeline.components.data_preprocessing import rescaling as \
+    rescaling_components
+from autosklearn.pipeline.components.data_preprocessing.imputation.imputation \
+    import Imputation
+from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding \
+    .one_hot_encoding import OneHotEncoder
+from autosklearn.pipeline.components import feature_preprocessing as \
     feature_preprocessing_components
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
@@ -32,7 +36,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
     Parameters
     ----------
-    configuration : ConfigSpace.configuration_space.Configuration
+    config : ConfigSpace.configuration_space.Configuration
         The configuration to evaluate.
 
     random_state : int, RandomState instance or None, optional (default=None)
@@ -64,10 +68,10 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     --------
 
     """
-    def __init__(self, configuration, random_state=None):
+    def __init__(self, config=None, pipeline=None, random_state=None):
         self._output_dtype = np.float32
-        super(SimpleRegressionPipeline, self).__init__(configuration,
-                                                       random_state)
+        super(SimpleRegressionPipeline, self).__init__(
+            config, pipeline, random_state)
 
     def pre_transform(self, X, Y, fit_params=None, init_params=None):
         X, fit_params = super(SimpleRegressionPipeline, self).pre_transform(
@@ -101,8 +105,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             y[y < (0.5 * self.y_min_)] = 0.5 * self.y_min_
         return y
 
-    @classmethod
-    def get_available_components(cls, available_comp, data_prop, inc, exc):
+    def get_available_components(self, available_comp, data_prop, inc, exc):
         components_dict = OrderedDict()
         for name in available_comp:
             if inc is not None and name not in inc:
@@ -116,8 +119,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             components_dict[name] = entry
         return components_dict
 
-    @classmethod
-    def get_hyperparameter_search_space(cls, include=None, exclude=None,
+    def get_hyperparameter_search_space(self, include=None, exclude=None,
                                         dataset_properties=None):
         """Return the configuration space for the CASH problem.
 
@@ -167,8 +169,8 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             # This dataset is probaby dense
             dataset_properties['sparse'] = False
 
-        pipeline = cls._get_pipeline()
-        cs = cls._get_hyperparameter_search_space(cs, dataset_properties,
+        pipeline = self._get_pipeline()
+        cs = self._get_hyperparameter_search_space(cs, dataset_properties,
                                                   exclude, include, pipeline)
 
         regressors = cs.get_hyperparameter('regressor:__choice__').choices
@@ -242,32 +244,34 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                     cs.get_hyperparameter(
                         'regressor:__choice__').default = default
 
+        self.configuration_space_ = cs
+        self.dataset_properties_ = dataset_properties
         return cs
 
-    @staticmethod
-    def _get_estimator_components():
+    def _get_estimator_components(self):
         return regression_components._regressors
 
-    @classmethod
-    def _get_pipeline(cls):
+    def _get_pipeline(self):
         steps = []
+
+        default_dataset_properties = {'target_type': 'regression'}
 
         # Add the always active preprocessing components
         steps.extend(
-            [["one_hot_encoding",
-              data_preprocessing_components._preprocessors['one_hot_encoding']],
-            ["imputation",
-             data_preprocessing_components._preprocessors['imputation']],
-             ["rescaling",
-              data_preprocessing_components._preprocessors['rescaling']]])
+            [["one_hot_encoding", OneHotEncoder()],
+            ["imputation", Imputation()],
+             ["rescaling", rescaling_components.RescalingChoice(
+                 default_dataset_properties)]])
 
         # Add the preprocessing component
         steps.append(['preprocessor',
-                      feature_preprocessing_components.FeaturePreprocessorChoice])
+                      feature_preprocessing_components.FeaturePreprocessorChoice(
+                          default_dataset_properties)])
 
         # Add the classification component
         steps.append(['regressor',
-                      regression_components.RegressorChoice])
+                      regression_components.RegressorChoice(
+                          default_dataset_properties)])
         return steps
 
     def _get_estimator_hyperparameter_name(self):

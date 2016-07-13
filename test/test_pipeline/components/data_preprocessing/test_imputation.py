@@ -2,7 +2,8 @@ import unittest
 
 from scipy import sparse
 
-from autosklearn.pipeline.components.data_preprocessing.imputation import Imputation
+from autosklearn.pipeline.components.data_preprocessing.imputation.imputation\
+    import Imputation
 from autosklearn.pipeline.util import _test_preprocessing, PreprocessingTestCase
 
 

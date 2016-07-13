@@ -63,8 +63,7 @@ class RegressorChoice(AutoSklearnChoice):
 
         return components_dict
 
-    @classmethod
-    def get_hyperparameter_search_space(cls, dataset_properties,
+    def get_hyperparameter_search_space(self, dataset_properties,
                                         default=None,
                                         include=None,
                                         exclude=None):
@@ -74,7 +73,7 @@ class RegressorChoice(AutoSklearnChoice):
         cs = ConfigurationSpace()
 
         # Compile a list of all estimator objects for this problem
-        available_estimators = cls.get_available_components(
+        available_estimators = self.get_available_components(
             data_prop=dataset_properties,
             include=include,
             exclude=exclude)
@@ -145,4 +144,6 @@ class RegressorChoice(AutoSklearnChoice):
                                                              dlc.hyperparameter.name)
                 cs.add_forbidden_clause(forbidden_clause)
 
+        self.configuration_space_ = cs
+        self.dataset_properties_ = dataset_properties
         return cs
