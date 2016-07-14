@@ -102,7 +102,8 @@ class CVEvaluator(AbstractEvaluator):
         return loss, opt_pred, valid_pred, test_pred
 
     def _partial_fit_and_predict(self, fold):
-        model = self.model_class(self.configuration, self.seed)
+        model = self.model_class(config=self.configuration,
+                                 random_state=self.seed)
 
         train_indices, test_indices = self.get_train_test_split(fold)
 

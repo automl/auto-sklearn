@@ -68,7 +68,8 @@ class NestedCVEvaluator(AbstractEvaluator):
             self.outer_indices[outer_fold] = ((outer_train_indices,
                                                outer_test_indices))
 
-            model = self.model_class(self.configuration, self.random_state)
+            model = self.model_class(config=self.configuration,
+                                     random_state=self.random_state)
             self.outer_models[outer_fold] = model
             self._fit_and_suppress_warnings(self.outer_models[outer_fold],
                                             self.X_train[outer_train_indices],
@@ -89,7 +90,8 @@ class NestedCVEvaluator(AbstractEvaluator):
 
                 self.inner_indices[outer_fold][inner_fold] = \
                     ((inner_train_indices, inner_test_indices))
-                model = self.model_class(self.configuration, self.random_state)
+                model = self.model_class(config=self.configuration,
+                                         random_state=self.random_state)
                 model = self._fit_and_suppress_warnings(model, X_train, Y_train)
                 self.inner_models[outer_fold][inner_fold] = model
 

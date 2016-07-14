@@ -24,9 +24,9 @@ __all__ = [
 
 
 class MyDummyClassifier(DummyClassifier):
-    def __init__(self, configuration, random_states):
-        self.configuration = configuration
-        if configuration == 1:
+    def __init__(self, config, random_state):
+        self.configuration = config
+        if self.configuration == 1:
             super(MyDummyClassifier, self).__init__(strategy="uniform")
         else:
             super(MyDummyClassifier, self).__init__(strategy="most_frequent")
@@ -55,9 +55,9 @@ class MyDummyClassifier(DummyClassifier):
 
 
 class MyDummyRegressor(DummyRegressor):
-    def __init__(self, configuration, random_states):
-        self.configuration = configuration
-        if configuration == 1:
+    def __init__(self, config, random_state):
+        self.configuration = config
+        if self.configuration == 1:
             super(MyDummyRegressor, self).__init__(strategy='mean')
         else:
             super(MyDummyRegressor, self).__init__(strategy='median')
@@ -130,7 +130,8 @@ class AbstractEvaluator(object):
 
         self.subsample = subsample
 
-        self.model = self.model_class(self.configuration, self.seed)
+        self.model = self.model_class(config=self.configuration,
+                                      random_state=self.seed)
 
         logger_name = '%s(%d):%s' % (self.__class__.__name__.split('.')[-1],
                                      self.seed, self.D.name)
