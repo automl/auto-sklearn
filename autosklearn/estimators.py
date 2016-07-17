@@ -151,19 +151,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
         self.shared_mode = shared_mode
         super(AutoSklearnEstimator, self).__init__(None)
 
-
-    @property
-    def _automl(self):
-        if not self.__automl:
-            self.__automl = self._build_automl()
-
-        return self.__automl
-
-    @_automl.setter
-    def _automl(self, automl):
-        self.__automl = automl
-
-    def _build_automl(self):
+    def build_automl(self):
         if self.shared_mode:
             self.delete_output_folder_after_terminate = False
             self.delete_tmp_folder_after_terminate = False
@@ -201,13 +189,13 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
         return automl
 
     def fit(self, *args, **kwargs):
-        self._automl = self._build_automl()
+        self._automl = self.build_automl()
         super(AutoSklearnEstimator, self).fit(*args, **kwargs)
 
     def fit_ensemble(self, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
-        self._automl = self._build_automl()
+        self._automl = self.build_automl()
         return self._automl.fit_ensemble(task, metric, precision,
                                          dataset_name, ensemble_nbest,
                                          ensemble_size)
@@ -215,8 +203,8 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
 
 class AutoSklearnClassifier(AutoSklearnEstimator):
 
-    def _build_automl(self):
-        automl = super(AutoSklearnClassifier, self)._build_automl()
+    def build_automl(self):
+        automl = super(AutoSklearnClassifier, self).build_automl()
         return AutoMLClassifier(automl)
 
     def fit(self, X, y,
@@ -228,8 +216,8 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
 
 class AutoSklearnRegressor(AutoSklearnEstimator):
 
-    def _build_automl(self):
-        automl = super(AutoSklearnRegressor, self)._build_automl()
+    def build_automl(self):
+        automl = super(AutoSklearnRegressor, self).build_automl()
         return AutoMLRegressor(automl)
 
     def fit(self, X, y,
