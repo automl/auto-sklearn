@@ -20,11 +20,43 @@ class AutoMLDecorator(object):
         self._automl.fit(*args, **kwargs)
 
     def refit(self, X, y):
+        """Refit all models found with fit to new data.
+
+        Necessary when using cross-validation. During training, auto-sklearn
+        fits each model k times on the dataset, but does not keep any trained
+        model and can therefore not be used to predict for new data points.
+        This methods fits all models found during a call to fit on the data
+        given. This method may also be used together with holdout to avoid
+        only using 66% of the training data to fit the final model.
+
+        Parameters
+        ----------
+
+        X : array-like or sparse matrix of shape = [n_samples, n_features]
+            The training input samples.
+
+        y : array-like, shape = [n_samples] or [n_samples, n_outputs]
+            The targets.
+
+        Returns
+        -------
+
+        self
+
+        """
         return self._automl.refit(X, y)
 
     def fit_ensemble(self, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
+        """Build the ensemble.
+
+        This method only needs to be called in the parallel mode.
+
+        Returns
+        -------
+        self
+        """
         return self._automl.fit_ensemble(task, metric, precision,
                                          dataset_name, ensemble_nbest,
                                          ensemble_size)
@@ -36,6 +68,12 @@ class AutoMLDecorator(object):
         return self._automl.score(X, y)
 
     def show_models(self):
+        """Return a representation of the final ensemble found by auto-sklearn
+
+        Returns
+        -------
+        str
+        """
         return self._automl.show_models()
 
 
@@ -58,12 +96,11 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
                  delete_tmp_folder_after_terminate=True,
                  delete_output_folder_after_terminate=True,
                  shared_mode=False):
-        """This class implements the classification task.
-
+        """
         Parameters
         ----------
         time_left_for_this_task : int, optional (default=3600)
-            Time limit in seconds for the search for appropriate classification
+            Time limit in seconds for the search of appropriate
             models. By increasing this value, *auto-sklearn* will find better
             configurations.
 
@@ -202,6 +239,9 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
 
 
 class AutoSklearnClassifier(AutoSklearnEstimator):
+    """
+    This class implements the classification task.
+    """
 
     def build_automl(self):
         automl = super(AutoSklearnClassifier, self).build_automl()
@@ -211,36 +251,6 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             metric='acc_metric',
             feat_type=None,
             dataset_name=None):
-        return super(AutoSklearnClassifier, self).fit(X, y, metric, feat_type, dataset_name)
-
-
-class AutoSklearnRegressor(AutoSklearnEstimator):
-
-    def build_automl(self):
-        automl = super(AutoSklearnRegressor, self).build_automl()
-        return AutoMLRegressor(automl)
-
-    def fit(self, X, y,
-            metric='r2_metric',
-            feat_type=None,
-            dataset_name=None):
-        return super(AutoSklearnRegressor, self).fit(X, y, metric, feat_type, dataset_name)
-
-
-class AutoMLClassifier(AutoMLDecorator):
-
-    def __init__(self, automl):
-        self._classes = []
-        self._n_classes = []
-        self._n_outputs = 0
-
-        super(AutoMLClassifier, self).__init__(automl)
-
-    def fit(self, X, y,
-            metric='acc_metric',
-            feat_type=None,
-            dataset_name=None,
-            ):
         """Fit *autosklearn* to given training set (X, y).
 
         Parameters
@@ -274,9 +284,118 @@ class AutoMLClassifier(AutoMLDecorator):
 
         """
         # Fit is supposed to be idempotent!
+        # But not if we use share_mode.
+        return super(AutoSklearnClassifier, self).fit(X, y, metric, feat_type, dataset_name)
 
-        # But not if we use share_mode:
+    def predict(self, X):
+        """Predict classes for X.
 
+        Parameters
+        ----------
+        X : array-like or sparse matrix of shape = [n_samples, n_features]
+
+        Returns
+        -------
+        y : array of shape = [n_samples] or [n_samples, n_labels]
+            The predicted classes.
+
+        """
+        return super(AutoSklearnClassifier, self).predict(X)
+
+    def predict_proba(self, X):
+
+        """Predict probabilities of classes for all samples X.
+
+        Parameters
+        ----------
+        X : array-like or sparse matrix of shape = [n_samples, n_features]
+
+        Returns
+        -------
+        y : array of shape = [n_samples, n_classes] or [n_samples, n_labels]
+            The predicted class probabilities.
+        """
+        return self._automl.predict_proba(X)
+
+
+class AutoSklearnRegressor(AutoSklearnEstimator):
+    """
+    This class implements the regression task.
+    """
+
+    def build_automl(self):
+        automl = super(AutoSklearnRegressor, self).build_automl()
+        return AutoMLRegressor(automl)
+
+    def fit(self, X, y,
+            metric='r2_metric',
+            feat_type=None,
+            dataset_name=None):
+        """Fit *autosklearn* to given training set (X, y).
+
+        Parameters
+        ----------
+
+        X : array-like or sparse matrix of shape = [n_samples, n_features]
+            The training input samples.
+
+        y : array-like, shape = [n_samples] or [n_samples, n_outputs]
+            The regression target.
+
+        metric : str, optional (default='r2_metric')
+            The metric to optimize for. Can be one of: ['r2_metric',
+            'a_metric']. A description of the metrics can be found in
+            `the paper describing the AutoML Challenge
+            <http://www.causality.inf.ethz.ch/AutoML/automl_ijcnn15.pdf>`_.
+
+        feat_type : list, optional (default=None)
+            List of str of `len(X.shape[1])` describing the attribute type.
+            Possible types are `Categorical` and `Numerical`. `Categorical`
+            attributes will be automatically One-Hot encoded.
+
+        dataset_name : str, optional (default=None)
+            Create nicer output. If None, a string will be determined by the
+            md5 hash of the dataset.
+
+        Returns
+        -------
+        self
+
+        """
+        # Fit is supposed to be idempotent!
+        # But not if we use share_mode.
+        return super(AutoSklearnRegressor, self).fit(X, y, metric, feat_type, dataset_name)
+
+    def predict(self, X):
+        """Predict regression target for X.
+
+        Parameters
+        ----------
+        X : array-like or sparse matrix of shape = [n_samples, n_features]
+
+        Returns
+        -------
+        y : array of shape = [n_samples] or [n_samples, n_outputs]
+            The predicted values.
+
+        """
+        return super(AutoSklearnRegressor, self).predict(X)
+
+
+class AutoMLClassifier(AutoMLDecorator):
+
+    def __init__(self, automl):
+        self._classes = []
+        self._n_classes = []
+        self._n_outputs = 0
+
+        super(AutoMLClassifier, self).__init__(automl)
+
+    def fit(self, X, y,
+            metric='acc_metric',
+            feat_type=None,
+            dataset_name=None,
+            ):
         y = np.atleast_1d(y)
 
         if y.ndim == 1:
@@ -313,18 +432,6 @@ class AutoMLClassifier(AutoMLDecorator):
         return self._automl.fit(X, y, task, metric, feat_type, dataset_name)
 
     def predict(self, X):
-        """Predict classes for X.
-
-        Parameters
-        ----------
-        X : array-like or sparse matrix of shape = [n_samples, n_features]
-
-        Returns
-        -------
-        y : array of shape = [n_samples] or [n_samples, n_labels]
-            The predicted classes.
-
-        """
         predicted_probabilities = self._automl.predict(X)
         if self._n_outputs == 1:
             predicted_indexes = np.argmax(predicted_probabilities, axis=1)
@@ -345,17 +452,6 @@ class AutoMLClassifier(AutoMLDecorator):
             return predicted_classes
 
     def predict_proba(self, X):
-        """Predict probabilities of classes for all samples X.
-
-        Parameters
-        ----------
-        X : array-like or sparse matrix of shape = [n_samples, n_features]
-
-        Returns
-        -------
-        y : array of shape = [n_samples, n_classes] or [n_samples, n_labels]
-            The predicted class probabilities.
-        """
         return self._automl.predict(X)
 
 

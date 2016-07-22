@@ -12,6 +12,10 @@ Main modules
     :members:
     :inherited-members: show_models, fit_ensemble, refit
 
+.. autoclass:: autosklearn.regression.AutoSklearnRegressor
+    :members:
+    :inherited-members: show_models, fit_ensemble, refit
+
 Extension Interfaces
 ====================
 
