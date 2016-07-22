@@ -17,7 +17,9 @@ class TestEvaluator(AbstractEvaluator):
                  configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
-                 seed=1):
+                 seed=1,
+                 include=None,
+                 exclude=None):
         super(TestEvaluator, self).__init__(
             Datamanager, output_dir, configuration,
             with_predictions=with_predictions,
@@ -25,7 +27,9 @@ class TestEvaluator(AbstractEvaluator):
             seed=seed,
             output_y_test=False,
             num_run='dummy',
-            subsample=None)
+            subsample=None,
+            include=include,
+            exclude=exclude)
         self.configuration = configuration
 
         self.X_train = Datamanager.data['X_train']

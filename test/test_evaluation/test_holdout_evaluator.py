@@ -88,7 +88,9 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
             include_preprocessors=['select_rates'])
         configuration = configuration_space.sample_configuration()
 
-        evaluator = HoldoutEvaluator(D, self.output_dir, configuration)
+        evaluator = HoldoutEvaluator(D, self.output_dir, configuration,
+                                     include={'classifier': ['extra_trees'],
+                                              'preprocessor': ['select_rates']})
         evaluator.model = model
         loss, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
             evaluator.fit_predict_and_loss()

@@ -67,15 +67,16 @@ class BalancingComponentTest(unittest.TestCase):
             n_repeated=2, n_clusters_per_class=2, weights=[0.8, 0.2],
             random_state=1)
 
+        # TODO check DT and LibSVM get their init parameters?
         for name, clf, acc_no_weighting, acc_weighting in \
                 [('adaboost', AdaboostClassifier, 0.709, 0.658),
-                 ('decision_tree', DecisionTree, 0.724, 0.692),
+                 ('decision_tree', DecisionTree, 0.724, 0.724),
                  ('extra_trees', ExtraTreesClassifier, 0.812, 0.8),
                  ('gradient_boosting', GradientBoostingClassifier,
                     0.800, 0.760),
                  ('random_forest', RandomForest, 0.846, 0.792),
-                 ('libsvm_svc', LibSVM_SVC, 0.800, 0.762),
-                 ('liblinear_svc', LibLinear_SVC, 0.679, 0.690),
+                 ('libsvm_svc', LibSVM_SVC, 0.800, 0.800),
+                 ('liblinear_svc', LibLinear_SVC, 0.679, 0.679),
                  ('sgd', SGD, 0.635, 0.578)
                 ]:
             for strategy, acc in [('none', acc_no_weighting),
@@ -92,7 +93,8 @@ class BalancingComponentTest(unittest.TestCase):
                         include={'classifier': [name]})
                 default = cs.get_default_configuration()
                 default._values['balancing:strategy'] = strategy
-                classifier = SimpleClassificationPipeline(default, random_state=1)
+                classifier = SimpleClassificationPipeline(
+                    default, random_state=1, include={'classifier': [name]})
                 predictor = classifier.fit(X_train, Y_train)
                 predictions = predictor.predict(X_test)
                 self.assertAlmostEqual(acc,
@@ -106,11 +108,12 @@ class BalancingComponentTest(unittest.TestCase):
                 X_test = data_[0][700:]
                 Y_test = data_[1][700:]
 
-                cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+                cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
                     include={'classifier': [name]})
                 default = cs.get_default_configuration()
                 default._values['balancing:strategy'] = strategy
-                classifier = SimpleClassificationPipeline(default, random_state=1)
+                classifier = SimpleClassificationPipeline(
+                    default, random_state=1, include={'classifier': [name]})
                 Xt, fit_params = classifier.pre_transform(X_train, Y_train)
                 classifier.fit_estimator(Xt, Y_train, **fit_params)
                 predictions = classifier.predict(X_test)
@@ -121,9 +124,9 @@ class BalancingComponentTest(unittest.TestCase):
 
         for name, pre, acc_no_weighting, acc_weighting in \
                 [('extra_trees_preproc_for_classification',
-                    ExtraTreesPreprocessorClassification, 0.690, 0.714),
+                    ExtraTreesPreprocessorClassification, 0.738, 0.679),
                  ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
-                    0.650, 0.679)]:
+                    0.723, 0.675)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
                 data_ = copy.copy(data)
@@ -132,11 +135,13 @@ class BalancingComponentTest(unittest.TestCase):
                 X_test = data_[0][700:]
                 Y_test = data_[1][700:]
 
-                cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+                cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
                     include={'classifier': ['sgd'], 'preprocessor': [name]})
                 default = cs.get_default_configuration()
                 default._values['balancing:strategy'] = strategy
-                classifier = SimpleClassificationPipeline(default, random_state=1)
+                classifier = SimpleClassificationPipeline(
+                    default, random_state=1,
+                    include={'classifier': ['sgd'], 'preprocessor': [name]})
                 predictor = classifier.fit(X_train, Y_train)
                 predictions = predictor.predict(X_test)
                 self.assertAlmostEqual(acc,
@@ -151,11 +156,13 @@ class BalancingComponentTest(unittest.TestCase):
                 X_test = data_[0][700:]
                 Y_test = data_[1][700:]
 
-                cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+                cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
                     include={'classifier': ['sgd'], 'preprocessor': [name]})
                 default = cs.get_default_configuration()
                 default._values['balancing:strategy'] = strategy
-                classifier = SimpleClassificationPipeline(default, random_state=1)
+                classifier = SimpleClassificationPipeline(
+                    default, random_state=1,
+                    include={'classifier': ['sgd'], 'preprocessor': [name]})
                 Xt, fit_params = classifier.pre_transform(X_train, Y_train)
                 classifier.fit_estimator(Xt, Y_train, **fit_params)
                 predictions = classifier.predict(X_test)

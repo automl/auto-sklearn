@@ -68,11 +68,13 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     --------
 
     """
-    def __init__(self, config=None, pipeline=None,
-                 dataset_properties=None, random_state=None):
+    def __init__(self, config=None, pipeline=None, dataset_properties=None,
+                 include=None, exclude=None, random_state=None):
         self._output_dtype = np.float32
         super(SimpleRegressionPipeline, self).__init__(
-            config, pipeline, dataset_properties, random_state)
+            config=config, pipeline=pipeline,
+            dataset_properties=dataset_properties,
+            include=include, exclude=exclude, random_state=random_state)
 
     def pre_transform(self, X, Y, fit_params=None, init_params=None):
         X, fit_params = super(SimpleRegressionPipeline, self).pre_transform(
@@ -171,8 +173,9 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             dataset_properties['sparse'] = False
 
         pipeline = self._get_pipeline()
-        cs = self._get_hyperparameter_search_space(cs, dataset_properties,
-                                                  exclude, include, pipeline)
+        cs = self._get_hyperparameter_search_space(
+            cs=cs, dataset_properties=dataset_properties,
+            exclude=exclude, include=include, pipeline=pipeline)
 
         regressors = cs.get_hyperparameter('regressor:__choice__').choices
         preprocessors = cs.get_hyperparameter('preprocessor:__choice__').choices

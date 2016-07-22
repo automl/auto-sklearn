@@ -26,7 +26,9 @@ class HoldoutEvaluator(AbstractEvaluator):
                  seed=1,
                  output_y_test=False,
                  num_run=None,
-                 subsample=None):
+                 subsample=None,
+                 include=None,
+                 exclude=None):
         super(HoldoutEvaluator, self).__init__(
             datamanager, backend, configuration,
             with_predictions=with_predictions,
@@ -34,7 +36,9 @@ class HoldoutEvaluator(AbstractEvaluator):
             seed=seed,
             output_y_test=output_y_test,
             num_run=num_run,
-            subsample=subsample)
+            subsample=subsample,
+            include=include,
+            exclude=exclude)
 
         classification = datamanager.info['task'] in CLASSIFICATION_TASKS
         self.X_train, self.X_optimization, self.Y_train, self.Y_optimization = \

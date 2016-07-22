@@ -18,7 +18,7 @@ class BasePipeline(Pipeline):
     __metaclass__ = ABCMeta
 
     def __init__(self, config=None, pipeline=None, dataset_properties=None,
-                 random_state=None):
+                 include=None, exclude=None, random_state=None):
         if pipeline is None:
             self.steps = self._get_pipeline()
         else:
@@ -31,10 +31,12 @@ class BasePipeline(Pipeline):
 
         if config is None:
             self.configuration_ = self.get_hyperparameter_search_space(
-                dataset_properties).get_default_configuration()
+                dataset_properties=dataset_properties,
+                include=include, exclude=exclude).get_default_configuration()
         else:
-            cs = self.get_hyperparameter_search_space(dataset_properties=
-                                                      dataset_properties)
+            cs = self.get_hyperparameter_search_space(
+                dataset_properties=dataset_properties,
+                include=include, exclude=exclude)
             if isinstance(config, dict):
                 config = Configuration(cs, config)
             if cs != config.configuration_space:

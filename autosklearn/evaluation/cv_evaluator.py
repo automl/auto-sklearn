@@ -25,7 +25,9 @@ class CVEvaluator(AbstractEvaluator):
                  cv_folds=10,
                  num_run=None,
                  subsample=None,
-                 keep_models=False):
+                 keep_models=False,
+                 include=None,
+                 exclude=None):
         super(CVEvaluator, self).__init__(
             Datamanager, backend, configuration,
             with_predictions=with_predictions,
@@ -33,7 +35,9 @@ class CVEvaluator(AbstractEvaluator):
             seed=seed,
             output_y_test=output_y_test,
             num_run=num_run,
-            subsample=subsample)
+            subsample=subsample,
+            include=include,
+            exclude=exclude)
 
         self.cv_folds = cv_folds
         self.X_train = self.D.data['X_train']
@@ -103,7 +107,9 @@ class CVEvaluator(AbstractEvaluator):
 
     def _partial_fit_and_predict(self, fold):
         model = self.model_class(config=self.configuration,
-                                 random_state=self.seed)
+                                 random_state=self.seed,
+                                 include=self.include,
+                                 exclude=self.exclude)
 
         train_indices, test_indices = self.get_train_test_split(fold)
 

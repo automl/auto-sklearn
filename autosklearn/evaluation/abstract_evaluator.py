@@ -24,7 +24,7 @@ __all__ = [
 
 
 class MyDummyClassifier(DummyClassifier):
-    def __init__(self, config, random_state):
+    def __init__(self, config, include, exclude, random_state):
         self.configuration = config
         if self.configuration == 1:
             super(MyDummyClassifier, self).__init__(strategy="uniform")
@@ -55,7 +55,7 @@ class MyDummyClassifier(DummyClassifier):
 
 
 class MyDummyRegressor(DummyRegressor):
-    def __init__(self, config, random_state):
+    def __init__(self, config, include, exclude, random_state):
         self.configuration = config
         if self.configuration == 1:
             super(MyDummyRegressor, self).__init__(strategy='mean')
@@ -89,7 +89,9 @@ class AbstractEvaluator(object):
                  seed=1,
                  output_y_test=False,
                  num_run=None,
-                 subsample=None,):
+                 subsample=None,
+                 include=None,
+                 exclude=None):
 
         self.starttime = time.time()
 
@@ -97,6 +99,8 @@ class AbstractEvaluator(object):
         self.backend = backend
 
         self.D = Datamanager
+        self.include = include
+        self.exclude = exclude
 
         self.X_valid = Datamanager.data.get('X_valid')
         self.X_test = Datamanager.data.get('X_test')
@@ -131,7 +135,9 @@ class AbstractEvaluator(object):
         self.subsample = subsample
 
         self.model = self.model_class(config=self.configuration,
-                                      random_state=self.seed)
+                                      random_state=self.seed,
+                                      include=self.include,
+                                      exclude=self.exclude)
 
         logger_name = '%s(%d):%s' % (self.__class__.__name__.split('.')[-1],
                                      self.seed, self.D.name)

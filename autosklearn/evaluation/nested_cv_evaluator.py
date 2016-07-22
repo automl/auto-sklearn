@@ -29,7 +29,9 @@ class NestedCVEvaluator(AbstractEvaluator):
                  inner_cv_folds=5,
                  outer_cv_folds=5,
                  num_run=None,
-                 subsample=None):
+                 subsample=None,
+                 include=None,
+                 exclude=None):
         super(NestedCVEvaluator, self).__init__(
             Datamanager, backend, configuration,
             with_predictions=with_predictions,
@@ -37,7 +39,9 @@ class NestedCVEvaluator(AbstractEvaluator):
             seed=seed,
             output_y_test=output_y_test,
             num_run=num_run,
-            subsample=subsample)
+            subsample=subsample,
+            include=include,
+            exclude=exclude)
 
         self.inner_cv_folds = inner_cv_folds
         self.outer_cv_folds = outer_cv_folds
@@ -69,7 +73,9 @@ class NestedCVEvaluator(AbstractEvaluator):
                                                outer_test_indices))
 
             model = self.model_class(config=self.configuration,
-                                     random_state=self.random_state)
+                                     random_state=self.random_state,
+                                     include=self.include,
+                                     exclude=self.exclude)
             self.outer_models[outer_fold] = model
             self._fit_and_suppress_warnings(self.outer_models[outer_fold],
                                             self.X_train[outer_train_indices],
@@ -91,7 +97,9 @@ class NestedCVEvaluator(AbstractEvaluator):
                 self.inner_indices[outer_fold][inner_fold] = \
                     ((inner_train_indices, inner_test_indices))
                 model = self.model_class(config=self.configuration,
-                                         random_state=self.random_state)
+                                         random_state=self.random_state,
+                                         include=self.include,
+                                         exclude=self.exclude)
                 model = self._fit_and_suppress_warnings(model, X_train, Y_train)
                 self.inner_models[outer_fold][inner_fold] = model
 
