@@ -425,8 +425,8 @@ class AutoML(BaseEstimator):
         if self._queue is None:
             self._load_models()
 
-        self._proc_smac = None
-        self._proc_ensemble = None
+        #self._proc_smac = None
+        #self._proc_ensemble = None
 
         return self
 

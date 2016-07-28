@@ -291,7 +291,7 @@ class AutoMLSMBO(multiprocessing.Process):
                            'one_hot_encoding:use_minimum_fraction': 'True',
                            'one_hot_encoding:minimum_fraction': 0.1,
                            'preprocessor:__choice__': 'no_preprocessing',
-                           'rescaling:__choice__': 'min/max'}
+                           'rescaling:__choice__': 'minmax'}
             try:
                 config = Configuration(self.config_space, config_dict)
                 default_configs.append(config)
@@ -316,7 +316,7 @@ class AutoMLSMBO(multiprocessing.Process):
                                'one_hot_encoding:minimum_fraction': 0.1,
                                'preprocessor:__choice__': 'truncatedSVD',
                                'preprocessor:truncatedSVD:target_dim': 20,
-                               'rescaling:__choice__': 'min/max'}
+                               'rescaling:__choice__': 'minmax'}
             else:
                 n_data_points = self.datamanager.data['X_train'].shape[0]
                 percentile = 20. / n_data_points
@@ -338,7 +338,7 @@ class AutoMLSMBO(multiprocessing.Process):
                                'preprocessor:__choice__': 'select_percentile_classification',
                                'preprocessor:select_percentile_classification:percentile': percentile,
                                'preprocessor:select_percentile_classification:score_func': 'chi2',
-                               'rescaling:__choice__': 'min/max'}
+                               'rescaling:__choice__': 'minmax'}
 
             try:
                 config = Configuration(self.config_space, config_dict)
@@ -388,7 +388,7 @@ class AutoMLSMBO(multiprocessing.Process):
                            'one_hot_encoding:use_minimum_fraction': 'True',
                            'one_hot_encoding:minimum_fraction': 0.1,
                            'preprocessor:__choice__': 'no_preprocessing',
-                           'rescaling:__choice__': 'min/max'}
+                           'rescaling:__choice__': 'minmax'}
             try:
                 config = Configuration(self.config_space, config_dict)
                 default_configs.append(config)
@@ -411,7 +411,7 @@ class AutoMLSMBO(multiprocessing.Process):
                                'one_hot_encoding:minimum_fraction': 0.1,
                                'preprocessor:__choice__': 'truncatedSVD',
                                'preprocessor:truncatedSVD:target_dim': 10,
-                               'rescaling:__choice__': 'min/max'}
+                               'rescaling:__choice__': 'minmax'}
             else:
                 config_dict = {'regressor:__choice__': 'extra_trees',
                                'regressor:extra_trees:bootstrap': 'False',
@@ -427,7 +427,7 @@ class AutoMLSMBO(multiprocessing.Process):
                                'preprocessor:__choice__': 'pca',
                                'preprocessor:pca:keep_variance': 0.9,
                                'preprocessor:pca:whiten': 'False',
-                               'rescaling:__choice__': 'min/max'}
+                               'rescaling:__choice__': 'minmax'}
 
             try:
                 config = Configuration(self.config_space, config_dict)

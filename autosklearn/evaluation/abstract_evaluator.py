@@ -134,10 +134,23 @@ class AbstractEvaluator(object):
 
         self.subsample = subsample
 
-        self.model = self.model_class(config=self.configuration,
-                                      random_state=self.seed,
-                                      include=self.include,
-                                      exclude=self.exclude)
+        if not isinstance(self.configuration, Configuration):
+            self.model = self.model_class(config=self.configuration,
+                                          random_state=self.seed,
+                                          include=self.include,
+                                          exclude=self.exclude)
+        else:
+            dataset_properties = {'task': self.task_type,
+                                  'sparse': self.D.info['is_sparse'] == 1,
+                                  'is_multilabel': self.task_type ==
+                                                   MULTILABEL_CLASSIFICATION,
+                                  'is_multiclass': self.task_type ==
+                                                   MULTICLASS_CLASSIFICATION}
+            self.model = self.model_class(config=self.configuration,
+                                          dataset_properties=dataset_properties,
+                                          random_state=self.seed,
+                                          include=self.include,
+                                          exclude=self.exclude)
 
         logger_name = '%s(%d):%s' % (self.__class__.__name__.split('.')[-1],
                                      self.seed, self.D.name)

@@ -161,8 +161,9 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             dataset_properties['target_type'] = 'classification'
 
         pipeline = self._get_pipeline()
-        cs = self._get_hyperparameter_search_space(cs, dataset_properties,
-                                                   exclude, include, pipeline)
+        cs = self._get_hyperparameter_search_space(
+            cs=cs, dataset_properties=dataset_properties,
+            exclude=exclude, include=include, pipeline=pipeline)
 
         classifiers = cs.get_hyperparameter('classifier:__choice__').choices
         preprocessors = cs.get_hyperparameter('preprocessor:__choice__').choices

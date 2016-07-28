@@ -40,8 +40,16 @@ class BasePipeline(Pipeline):
             if isinstance(config, dict):
                 config = Configuration(cs, config)
             if cs != config.configuration_space:
+                print(cs._children)
+                print(config.configuration_space._children)
+                import difflib
+                diff = difflib.unified_diff(
+                    str(cs).splitlines(),
+                    str(config.configuration_space).splitlines())
+                diff = '\n'.join(diff)
                 raise ValueError('Configuration passed does not come from the '
-                                 'same configuration space.')
+                                 'same configuration space. Differences are: '
+                                 '%s' % diff)
             self.configuration_ = config
         self.set_hyperparameters(self.configuration_)
 
