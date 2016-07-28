@@ -15,7 +15,7 @@ from autosklearn.constants import STRING_TO_TASK_TYPES, STRING_TO_METRIC, \
     MULTILABEL_CLASSIFICATION, CLASSIFICATION_TASKS, REGRESSION_TASKS, \
     BAC_METRIC, F1_METRIC
 from autosklearn.evaluation.util import calculate_score
-from autosklearn.util import StopWatch, Backend
+from autosklearn.util import StopWatch
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.util.logging_ import get_logger, setup_logger
 
@@ -406,9 +406,9 @@ class EnsembleBuilder(multiprocessing.Process):
                         else:
                             precision = 6
 
-                backend.save_predictions_as_txt(ensemble_predictions_test,
-                                                'test', index_run, prefix=self.dataset_name,
-                                                precision=precision)
+                self.backend.save_predictions_as_txt(
+                    ensemble_predictions_test, 'test', index_run,
+                    prefix=self.dataset_name, precision=precision)
             else:
                 self.logger.info('Could not find as many test set predictions (%d) as '
                              'ensemble predictions (%d)!',

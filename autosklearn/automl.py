@@ -425,8 +425,11 @@ class AutoML(BaseEstimator):
         if self._queue is None:
             self._load_models()
 
-        #self._proc_smac = None
-        #self._proc_ensemble = None
+        # proc_ensemble is a subclass of multiprocessing and must be set to None
+        # to allow pickling
+        # TODO: find a way to circumvent the EnsembleBuilder being a subclass
+        #  of multiprocessing.Process
+        self._proc_ensemble = None
 
         return self
 
