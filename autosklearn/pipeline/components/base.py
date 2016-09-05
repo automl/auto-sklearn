@@ -129,6 +129,9 @@ class AutoSklearnComponent(object):
 
         return self
 
+    def get_execution_flow_conflicts(self):
+        pass
+
     def __str__(self):
         name = self.get_properties()['name']
         return "autosklearn.pipeline %s" % name
@@ -361,3 +364,10 @@ class AutoSklearnChoice(object):
 
     def predict(self, X):
         return self.choice.predict(X)
+
+
+class DataArtifacts(object):
+    pass
+
+class Conflict(object):
+    pass
