@@ -8,7 +8,6 @@ import pandas as pd
 import numpy as np
 import sklearn.utils
 
-from autosklearn.metalearning.metalearning.meta_base import MetaBase, Run
 from autosklearn.metalearning.metalearning.kNearestDatasets.kND import KNearestDatasets
 
 def test_function(params):

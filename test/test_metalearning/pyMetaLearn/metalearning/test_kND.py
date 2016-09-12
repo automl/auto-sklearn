@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from autosklearn.metalearning.metalearning.kNearestDatasets.kND import KNearestDatasets
 from autosklearn.metalearning.metalearning.metrics.misc import get_random_metric
-from autosklearn.metalearning.metalearning.meta_base import Run
 from sklearn.utils.testing import assert_array_almost_equal
 
 class kNDTest(unittest.TestCase):

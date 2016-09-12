@@ -7,21 +7,6 @@ from ..metafeatures.metafeature import DatasetMetafeatures
 from ConfigSpace.configuration_space import Configuration
 
 
-class Run(object):
-    def __init__(self, configuration, result, runtime):
-        self.configuration = configuration
-        self.result = result
-        self.runtime = runtime
-
-    def __repr__(self):
-        return "Run:\nresult: %3.3f\nruntime: %3.3f\n%s" % \
-               (self.result, self.runtime, str(self.configuration))
-
-class Instance(object):
-    def __init__(self, name, features):
-        self.name = name
-        self.features = features
-
 class MetaBase(object):
     def __init__(self, configuration_space, aslib_directory):
         """Container for dataset metadata and experiment results.
