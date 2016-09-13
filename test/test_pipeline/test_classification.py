@@ -4,8 +4,11 @@ import resource
 import sys
 import traceback
 import unittest
+try:
+    import mock
+except ImportError:
+    from unittest import mock
 
-import mock
 import numpy as np
 import sklearn.datasets
 import sklearn.decomposition

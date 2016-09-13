@@ -82,12 +82,10 @@ class AutoMLTest(Base, unittest.TestCase):
         data_manager_file = os.path.join(output, '.auto-sklearn',
                                          'datamanager.pkl')
 
-        queue = multiprocessing.Queue()
         backend_api = backend.create(output, output)
         auto = autosklearn.automl.AutoML(
             backend_api, 15, 15,
             initial_configurations_via_metalearning=25,
-            queue=queue,
             seed=100)
         auto.fit_automl_dataset(dataset)
 
@@ -96,11 +94,6 @@ class AutoMLTest(Base, unittest.TestCase):
             D = six.moves.cPickle.load(fh)
             self.assertTrue(np.allclose(D.data['X_train'][0, :3],
                                         [1., 12., 2.]))
-
-        time_needed_to_load_data, data_manager_file, procs = \
-            queue.get()
-        for proc in procs:
-            proc.wait()
 
         # Check that all directories are there
         fixture = ['predictions_valid', 'true_targets_ensemble.npy',

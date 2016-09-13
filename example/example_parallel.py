@@ -9,8 +9,8 @@ import sklearn.metrics
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import *
 
-tmp_folder = '/tmp/autoslearn_example_tmp'
-output_folder = '/tmp/autosklearn_example_out'
+tmp_folder = '/tmp/autoslearn_parallel_example_tmp'
+output_folder = '/tmp/autosklearn_parallel_example_out'
 
 
 def spawn_classifier(seed, dataset_name):

@@ -22,8 +22,8 @@ def main():
     y_test = y[1000:]
     automl = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=60, per_run_time_limit=30,
-        tmp_folder='/tmp/autoslearn_example_tmp',
-        output_folder='/tmp/autosklearn_example_out')
+        tmp_folder='/tmp/autoslearn_holdout_example_tmp',
+        output_folder='/tmp/autosklearn_holdout_example_out')
     automl.fit(X_train, y_train, dataset_name='digits')
 
     print(automl.show_models())

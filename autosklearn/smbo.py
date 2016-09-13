@@ -1,10 +1,8 @@
-import multiprocessing
 import os
 import time
 import traceback
 
 import numpy as np
-import pandas as pd
 import pynisher
 
 # JTS TODO: notify aaron to clean up these nasty nested modules
@@ -30,7 +28,6 @@ from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.evaluation import eval_with_limits
 from autosklearn.util import get_logger
-from autosklearn.util import Backend
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.metafeatures.metafeatures import \
     calculate_all_metafeatures_with_labels, calculate_all_metafeatures_encoded_labels
@@ -186,9 +183,9 @@ class AutoMLScenario(Scenario):
         soft_limit = max(5, cutoff_time - 35)
 
         scenario_dict = {'cs': config_space,
-                         'run_obj': 'quality',
-                         'cutoff': soft_limit,
-                         'algo_runs_timelimit': soft_limit,
+                         'run-obj': 'quality',
+                         'cutoff-time': soft_limit,
+                         'tuner-timeout': soft_limit,
                          'wallclock-limit': limit,
                          'features': metafeatures,
                          'instances': [[name] for name in metafeatures],
@@ -196,8 +193,10 @@ class AutoMLScenario(Scenario):
                          'shared_model': shared_model}
 
         super(AutoMLScenario, self).__init__(scenario_dict)
+        # reset the logger, because otherwise we can't pickle the AutoMLScenario
+        self.logger = get_logger(self.__class__.__name__)
 
-class AutoMLSMBO(multiprocessing.Process):
+class AutoMLSMBO(object):
 
     def __init__(self, config_space, dataset_name,
                  backend,
@@ -254,9 +253,6 @@ class AutoMLSMBO(multiprocessing.Process):
                                      ":" + dataset_name if dataset_name is
                                                            not None else "")
         self.logger = get_logger(logger_name)
-        import logging
-        root = logging.getLogger()
-        root.setLevel(logging.DEBUG)
 
     def reset_data_manager(self, max_mem=None):
         if max_mem is None:
@@ -515,18 +511,11 @@ class AutoMLSMBO(multiprocessing.Process):
                               str(e))
 
         return res
-    
-    def run(self):
-        # we use pynisher here to enforce limits
-        safe_smbo = pynisher.enforce_limits(mem_in_mb=self.memory_limit,
-                                            wall_time_in_s=int(self.total_walltime_limit),
-                                            grace_period_in_s=5,
-                                            logger=self.logger)(self.run_smbo)
-        safe_smbo(max_iters = self.smac_iters)
-        
 
     def run_smbo(self, max_iters=1000):
         global evaluator
+
+        self.watcher.start_task('SMBO')
 
         # == first things first: load the datamanager
         self.reset_data_manager()
@@ -583,12 +572,13 @@ class AutoMLSMBO(multiprocessing.Process):
                                  subset_time_limit)
                 self.logger.info(next_config)
                 _info = eval_with_limits(
-                    self.datamanager, self.backend, next_config,
-                    seed, num_run,
-                    self.resampling_strategy,
-                    self.resampling_strategy_args,
-                    self.memory_limit,
-                    subset_time_limit, n_data_subsample,
+                    datamanager=self.datamanager, backend=self.backend,
+                    config=next_config, seed=seed, num_run=num_run,
+                    resampling_strategy=self.resampling_strategy,
+                    resampling_strategy_args=self.resampling_strategy_args,
+                    memory_limit=self.memory_limit,
+                    func_eval_time_limit=subset_time_limit,
+                    subsample=n_data_subsample,
                     logger=self.logger)
                 (duration, result, _, additional_run_info, status) = _info
                 self.logger.info("Finished evaluating %d. configuration on SUBSET. "
@@ -759,12 +749,12 @@ class AutoMLSMBO(multiprocessing.Process):
             meta_features_dict = {}
             metalearning_configurations = []
 
-        self.scenario = AutoMLScenario(self.config_space,
-                                       self.total_walltime_limit,
-                                       self.func_eval_time_limit,
-                                       meta_features_dict,
-                                       self.backend.temporary_directory,
-                                       self.shared_mode)
+        self.scenario = AutoMLScenario(config_space=self.config_space,
+                                       limit=self.total_walltime_limit,
+                                       cutoff_time=self.func_eval_time_limit,
+                                       metafeatures=meta_features_dict,
+                                       output_dir=self.backend.temporary_directory,
+                                       shared_model=self.shared_mode)
 
         types = get_types(self.config_space, self.scenario.feature_array)
         if self.acquisition_function == 'EI':
@@ -821,6 +811,7 @@ class AutoMLSMBO(multiprocessing.Process):
                   [Y_meta[start_index:end_index, 0] > 2] = 2
 
         # == first, evaluate all metelearning and default configurations
+        finished = False
         for i, next_config in enumerate(([default_cfg] +
                                           metalearning_configurations)):
             # Do not evaluate default configurations more than once
@@ -835,12 +826,14 @@ class AutoMLSMBO(multiprocessing.Process):
                              num_run, config_name, self.func_eval_time_limit)
             self.logger.info(next_config)
             self.reset_data_manager()
-            info = eval_with_limits(self.datamanager, self.backend, next_config,
-                                    seed, num_run,
-                                    self.resampling_strategy,
-                                    self.resampling_strategy_args,
-                                    self.memory_limit,
-                                    self.func_eval_time_limit,
+            info = eval_with_limits(datamanager=self.datamanager,
+                                    backend=self.backend,
+                                    config=next_config,
+                                    seed=seed, num_run=num_run,
+                                    resampling_strategy=self.resampling_strategy,
+                                    resampling_strategy_args=self.resampling_strategy_args,
+                                    memory_limit=self.memory_limit,
+                                    func_eval_time_limit=self.func_eval_time_limit,
                                     logger=self.logger)
             (duration, result, _, additional_run_info, status) = info
             run_history.add(config=next_config, cost=result,
@@ -862,10 +855,16 @@ class AutoMLSMBO(multiprocessing.Process):
                             output_directory=self.scenario.output_dir,
                             num_run=self.seed)
 
+            if self.watcher.wall_elapsed(
+                    'SMBO') > self.total_walltime_limit:
+                finished = True
+
+            if finished:
+                break
+
         # == after metalearning run SMAC loop
         smac.runhistory = run_history
         smac_iter = 0
-        finished = False
         while not finished:
             if self.scenario.shared_model:
                 pSMAC.read(run_history=run_history,
@@ -931,12 +930,14 @@ class AutoMLSMBO(multiprocessing.Process):
                                  self.func_eval_time_limit)
                 self.logger.info(next_config)
                 self.reset_data_manager()
-                info = eval_with_limits(self.datamanager, self.backend, next_config,
-                                        seed, num_run,
-                                        self.resampling_strategy,
-                                        self.resampling_strategy_args,
-                                        self.memory_limit,
-                                        self.func_eval_time_limit,
+                info = eval_with_limits(datamanager=self.datamanager,
+                                        backend=self.backend,
+                                        config=next_config,
+                                        seed=seed, num_run=num_run,
+                                        resampling_strategy=self.resampling_strategy,
+                                        resampling_strategy_args=self.resampling_strategy_args,
+                                        memory_limit=self.memory_limit,
+                                        func_eval_time_limit=self.func_eval_time_limit,
                                         logger=self.logger)
                 (duration, result, _, additional_run_info, status) = info
                 run_history.add(config=next_config, cost=result,
@@ -963,6 +964,13 @@ class AutoMLSMBO(multiprocessing.Process):
 
                 models_fitted_this_iteration += 1
                 time_used_this_iteration = time.time() - start_time_this_iteration
+
+                if max_iters is not None:
+                    finished = (smac_iter < max_iters)
+                if self.watcher.wall_elapsed(
+                        'SMBO') > self.total_walltime_limit:
+                    finished = True
+
                 if models_fitted_this_iteration >= 2 and \
                         time_for_choose_next > 0 and \
                         time_used_this_iteration > time_for_choose_next:
@@ -973,8 +981,8 @@ class AutoMLSMBO(multiprocessing.Process):
                 elif models_fitted_this_iteration >= 50:
                     break
 
-                if max_iters is not None:
-                    finished = (smac_iter < max_iters)
+                if finished:
+                    break
 
             if self.scenario.shared_model:
                 pSMAC.write(run_history=run_history,

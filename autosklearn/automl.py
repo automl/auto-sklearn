@@ -2,13 +2,8 @@
 from __future__ import print_function
 
 import hashlib
-import multiprocessing
 import os
-import sys
-import shutil
-import pynisher
 
-import numpy as np
 import psutil
 
 from ConfigSpace.io import pcs
@@ -22,7 +17,7 @@ from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import resampling, eval_with_limits
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
-    pipeline, Backend
+    pipeline
 from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 
@@ -40,7 +35,6 @@ class AutoML(BaseEstimator):
                  seed=1,
                  ml_memory_limit=3000,
                  metadata_directory=None,
-                 queue=None,
                  keep_models=True,
                  debug_mode=False,
                  include_estimators=None,
@@ -68,7 +62,6 @@ class AutoML(BaseEstimator):
         self._ml_memory_limit = ml_memory_limit
         self._data_memory_limit = None
         self._metadata_directory = metadata_directory
-        self._queue = queue
         self._keep_models = keep_models
         self._include_estimators = include_estimators
         self._include_preprocessors = include_preprocessors
@@ -358,7 +351,6 @@ class AutoML(BaseEstimator):
                                   'ensemble size is <= 0.')
         self._stopwatch.stop_task(ensemble_task_name)
 
-        # == RUN SMBO
         # kill the datamanager as it will be re-loaded anyways from sub processes
         try:
             del self._datamanager
@@ -398,35 +390,10 @@ class AutoML(BaseEstimator):
                                          resampling_strategy_args=self._resampling_strategy_arguments,
                                          acquisition_function=self.acquisition_function,
                                          shared_mode=self._shared_mode)
-            self._proc_smac.start()
+            self._proc_smac.run_smbo()
 
-        psutil_procs = []
-        procs = []
-        if self._proc_smac is not None:
-            proc_smac = psutil.Process(self._proc_smac.pid)
-            psutil_procs.append(proc_smac)
-            procs.append(self._proc_smac)
-        if self._proc_ensemble is not None:
-            proc_ensemble = psutil.Process(self._proc_ensemble.pid)
-            psutil_procs.append(proc_ensemble)
-            procs.append(self._proc_ensemble)
-
-        if self._queue is not None:
-            self._queue.put([time_for_load_data, data_manager_path, psutil_procs])
-        else:
-            for proc in procs:
-                try:
-                    proc.join()
-                # It can happen that we don't start the ensemble process due
-                # to the parameter ensemble_size < 0, then we also can't join.
-                except AssertionError as e:
-                    self._logger.debug(e)
-
-        if self._queue is None:
-            self._load_models()
-
-        self._proc_smac = None
         self._proc_ensemble = None
+        self._load_models()
 
         return self
 

@@ -3,7 +3,11 @@ from __future__ import print_function
 import os
 import sys
 import unittest
-import mock
+
+try:
+    import mock
+except ImportError:
+    from unittest import mock
 
 import numpy as np
 import autosklearn.pipeline.util as putil

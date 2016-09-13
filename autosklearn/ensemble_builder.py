@@ -406,9 +406,9 @@ class EnsembleBuilder(multiprocessing.Process):
                         else:
                             precision = 6
 
-                backend.save_predictions_as_txt(ensemble_predictions_test,
-                                                'test', index_run, prefix=self.dataset_name,
-                                                precision=precision)
+                self.backend.save_predictions_as_txt(ensemble_predictions_test,
+                                                     'test', index_run, prefix=self.dataset_name,
+                                                     precision=precision)
             else:
                 self.logger.info('Could not find as many test set predictions (%d) as '
                              'ensemble predictions (%d)!',

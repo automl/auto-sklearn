@@ -1,15 +1,13 @@
-import argparse
 import ast
-from collections import OrderedDict
-import logging
-import sys
 
 import pandas as pd
 import numpy as np
 import sklearn.utils
 
-from autosklearn.metalearning.metalearning.meta_base import MetaBase, Run
 from autosklearn.metalearning.metalearning.kNearestDatasets.kND import KNearestDatasets
+
+from ....util.logging_ import get_logger
+
 
 def test_function(params):
     return np.random.random()
@@ -28,7 +26,7 @@ class MetaLearningOptimizer(object):
         self.distance_kwargs = distance_kwargs
         self.kND = None     # For caching, makes things faster...
 
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
 
     def metalearning_suggest_all(self, exclude_double_configurations=True):
         """Return a list of the best hyperparameters of neighboring datasets"""
