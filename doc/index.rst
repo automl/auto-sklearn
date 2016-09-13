@@ -56,15 +56,11 @@ or on a windows PC. It is built around scikit-learn 0.17.1
 
 Please install all dependencies manually with:
 
-First install *cython*
+First install *cython numpy* and *six* 
 
 .. code:: bash
 
-    pip install cython
-
-.. code:: bash
-
-    pip install -r https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt
+    pip install cython numpy six 
 
 Then install *auto-sklearn*
 
