@@ -19,6 +19,7 @@ def add_rescaler(rescaler):
 
 
 class RescalingChoice(AutoSklearnChoice):
+
     def get_components(self):
         components = OrderedDict()
         components.update(_rescalers)

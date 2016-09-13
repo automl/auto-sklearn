@@ -65,3 +65,14 @@ class SimplePipelineConfigSpaceTest(unittest.TestCase):
 
         cs = pipeline.get_config_space()
         print(cs)
+
+    def test_pipeline_with_choice_nodes(self):
+        pipeline = SerialFlow(
+            [
+                RescalingChoice(),
+                ClassifierChoice()
+            ]
+        )
+
+        cs = pipeline.get_config_space()
+        print(cs)

@@ -2,6 +2,10 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 
 
 class Rescaling(object):
+
+    def __init__(self):
+        self.preprocessor = None
+
     def fit(self, X, y=None):
         self.preprocessor.fit(X)
         return self

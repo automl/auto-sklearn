@@ -38,8 +38,6 @@ class LeafNodeConfigSpaceBuilder(ConfigSpaceBuilder):
         self._element = element
         self._parent = None
         self._children = OrderedDict()
-        self._incompatible_nodes = []
-        self.path = None
 
     def _set_name(self, name):
         self._name = name
@@ -65,7 +63,8 @@ class LeafNodeConfigSpaceBuilder(ConfigSpaceBuilder):
             for artifact in ex.artifacts:
                 nodes = []
                 source_node = data_description.get_node_by_artifact(artifact)
-                nodes.append(IncompatibleNodes(artifact, source_node, self))
+                choices = data_description.get_choices()
+                nodes.append(IncompatibleNodes(artifact, source_node, self, choices))
                 return nodes
 
 
@@ -85,6 +84,7 @@ class ParallelConfigSpaceBuilder(CompositeConfigSpaceBuilder):
         data_descriptions = []
         for name, node in self._children.items():
             data_description_copy = data_description.copy()
+            data_description_copy.add_choice(self, name)
             current_step_data_descriptions = node.explore_data_flow(data_description_copy)
             data_descriptions.extend(current_step_data_descriptions)
         return data_descriptions
@@ -106,10 +106,22 @@ class SerialConfigSpaceBuilder(CompositeConfigSpaceBuilder):
         return data_descriptions
 
 
+class ChoiceConfigSpaceBuilder(CompositeConfigSpaceBuilder):
+
+    def explore_data_flow(self, data_description):
+        data_descriptions = []
+        for name, node in self._children.items():
+            data_description_copy = data_description.copy()
+            current_step_data_descriptions = node.explore_data_flow(data_description_copy)
+            data_descriptions.extend(current_step_data_descriptions)
+        return data_descriptions
+
+
 class DataDescription(object):
 
     def __init__(self):
         self._node_by_artifact = {}
+        self._choices = []
 
     def copy(self):
         data_description = DataDescription()
@@ -142,10 +154,17 @@ class DataDescription(object):
     def get_node_by_artifact(self, artifact):
         return self._node_by_artifact[artifact]
 
+    def add_choice(self, node, option):
+        self._choices.append((node, option))
+
+    def get_choices(self):
+        return self._choices
+
 
 class IncompatibleNodes(object):
 
-    def __init__(self, artifact, source_node, final_node):
+    def __init__(self, artifact, source_node, final_node, choices):
         self.artifact = artifact
         self.source_node = source_node
         self.final_node = final_node
+        self.choices = choices
