@@ -284,7 +284,6 @@ class AutoML(BaseEstimator):
             try:
                 os.mkdir(self._backend.get_model_dir())
             except OSError:
-                self._logger.warning("model directory already exists")
                 if not self._shared_mode:
                     raise
 

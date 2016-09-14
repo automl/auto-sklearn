@@ -2,11 +2,14 @@
 
 import numpy as np
 import six
+import warnings
 
 import autosklearn.automl
 from autosklearn.constants import *
 from autosklearn.util.backend import create
 from sklearn.base import BaseEstimator
+import sklearn.utils
+import scipy.sparse
 
 
 class AutoMLDecorator(object):
@@ -394,7 +397,17 @@ class AutoMLClassifier(AutoMLDecorator):
             feat_type=None,
             dataset_name=None,
             ):
+        # From sklearn.tree.DecisionTreeClassifier
+        X = sklearn.utils.check_array(X, accept_sparse="csr",
+                                      force_all_finite=False)
+        if scipy.sparse.issparse(X):
+            X.sort_indices()
         y = np.atleast_1d(y)
+        if y.ndim == 2 and y.shape[1] == 1:
+            warnings.warn("A column-vector y was passed when a 1d array was"
+                          " expected. Please change the shape of y to "
+                          "(n_samples,), for example using ravel().",
+                          sklearn.utils.DataConversionWarning, stacklevel=2)
 
         if y.ndim == 1:
             # reshape is necessary to preserve the data contiguity against vs

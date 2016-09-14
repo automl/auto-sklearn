@@ -1,6 +1,7 @@
 import os
 import time
 import traceback
+import warnings
 
 import numpy as np
 import pynisher
@@ -254,6 +255,11 @@ class AutoMLSMBO(object):
                                                            not None else "")
         self.logger = get_logger(logger_name)
 
+    def _send_warnings_to_log(self, message, category, filename, lineno,
+                              file=None):
+        self.logger.debug('%s:%s: %s:%s', filename, lineno, category.__name__,
+                          message)
+
     def reset_data_manager(self, max_mem=None):
         if max_mem is None:
             max_mem = self.data_memory_limit
@@ -461,15 +467,18 @@ class AutoMLSMBO(object):
         return metalearning_configurations
 
     def _calculate_metafeatures(self):
-        meta_features = _calculate_metafeatures(
-            data_feat_type=self.datamanager.feat_type,
-            data_info_task=self.datamanager.info['task'],
-            x_train=self.datamanager.data['X_train'],
-            y_train=self.datamanager.data['Y_train'],
-            basename=self.dataset_name,
-            watcher=self.watcher,
-            logger=self.logger)
-        return meta_features
+        with warnings.catch_warnings():
+            warnings.showwarning = self._send_warnings_to_log
+
+            meta_features = _calculate_metafeatures(
+                data_feat_type=self.datamanager.feat_type,
+                data_info_task=self.datamanager.info['task'],
+                x_train=self.datamanager.data['X_train'],
+                y_train=self.datamanager.data['Y_train'],
+                basename=self.dataset_name,
+                watcher=self.watcher,
+                logger=self.logger)
+            return meta_features
 
     def _calculate_metafeatures_with_limits(self, time_limit):
         res = None
@@ -487,14 +496,17 @@ class AutoMLSMBO(object):
         return res
 
     def _calculate_metafeatures_encoded(self):
-        meta_features_encoded = _calculate_metafeatures_encoded(
-            self.dataset_name,
-            self.datamanager.data['X_train'],
-            self.datamanager.data['Y_train'],
-            self.watcher,
-            self.datamanager.info['task'],
-            self.logger)
-        return meta_features_encoded
+        with warnings.catch_warnings():
+            warnings.showwarning = self._send_warnings_to_log
+
+            meta_features_encoded = _calculate_metafeatures_encoded(
+                self.dataset_name,
+                self.datamanager.data['X_train'],
+                self.datamanager.data['Y_train'],
+                self.watcher,
+                self.datamanager.info['task'],
+                self.logger)
+            return meta_features_encoded
 
     def _calculate_metafeatures_encoded_with_limits(self, time_limit):
         res = None
@@ -664,7 +676,9 @@ class AutoMLSMBO(object):
                                 metafeature_calculation_time_limit)
             meta_features_encoded = None
         else:
-            self.datamanager.perform1HotEncoding()
+            with warnings.catch_warnings():
+                warnings.showwarning = self._send_warnings_to_log
+                self.datamanager.perform1HotEncoding()
             meta_features_encoded = \
                 self._calculate_metafeatures_encoded_with_limits(
                     metafeature_calculation_time_limit)
@@ -686,8 +700,10 @@ class AutoMLSMBO(object):
                 features=list(meta_features.keys()))
             all_metafeatures.fillna(all_metafeatures.mean(), inplace=True)
 
-            metalearning_configurations = self.collect_metalearning_suggestions(
-                meta_base)
+            with warnings.catch_warnings():
+                warnings.showwarning = self._send_warnings_to_log
+                metalearning_configurations = self.collect_metalearning_suggestions(
+                    meta_base)
             if metalearning_configurations is None:
                 metalearning_configurations = []
             self.reset_data_manager()
@@ -941,7 +957,7 @@ class AutoMLSMBO(object):
                                         logger=self.logger)
                 (duration, result, _, additional_run_info, status) = info
                 run_history.add(config=next_config, cost=result,
-                                time=duration , status=status,
+                                time=duration, status=status,
                                 instance_id=instance_id, seed=seed)
                 run_history.update_cost(next_config, result)
 
