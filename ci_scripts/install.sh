@@ -28,7 +28,7 @@ conda create -n testenv --yes python=$PYTHON_VERSION pip nose
 source activate testenv
 
 # Install requirements in correct order
-cat requirements.txt | xargs -n 1 -L 1 pip install
+pip install -r requirements.txt
 
 if [[ "$COVERAGE" == "true" ]]; then
     pip install coverage coveralls
