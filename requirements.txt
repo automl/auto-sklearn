@@ -22,4 +22,4 @@ xgboost==0.4a30
 ConfigSpace
 pynisher>=0.4
 pyrfr
-smac
+smac==0.0.1
