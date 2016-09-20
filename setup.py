@@ -1,9 +1,5 @@
 # -*- encoding: utf-8 -*-
 import os
-import shutil
-import subprocess
-import sys
-import tarfile
 
 try:
     from urllib import urlretrieve
@@ -22,6 +18,15 @@ extensions = cythonize(
                include_dirs=[np.get_include()])
      ])
 
+requirements_file = os.path.join(os.path.dirname(__file__), 'requirements.txt')
+requirements = []
+dependency_links = []
+with open(requirements_file) as fh:
+    for line in fh:
+        line = line.strip()
+        if line:
+            requirements.append(line)
+
 
 setuptools.setup(
     name='auto-sklearn',
@@ -29,21 +34,7 @@ setuptools.setup(
     version='0.0.2dev',
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
-    install_requires=['numpy>=1.9.0',
-                      'scipy>=0.14.1',
-                      'scikit-learn==0.17.1',
-                      'lockfile',
-                      'psutil',
-                      'pyyaml',
-                      'six',
-                      'ConfigArgParse',
-                      'liac-arff',
-                      'pandas',
-                      'Cython',
-                      'ConfigSpace',
-                      'pynisher',
-                      'smac',
-                      'pyrfr'],
+    install_requires=requirements,
     test_suite='nose.collector',
     scripts=['scripts/autosklearn'],
     include_package_data=True,
