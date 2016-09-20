@@ -43,7 +43,7 @@ setuptools.setup(
                       'Cython',
                       'ConfigSpace',
                       'pynisher',
-                      'smac',
+                      'smac==0.0.1',
                       'pyrfr'],
     test_suite='nose.collector',
     scripts=['scripts/autosklearn'],
