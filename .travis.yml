@@ -30,9 +30,8 @@ env:
   - TEST_DIR=/tmp/test_dir/
   - MODULE=autosklearn
   matrix:
-  - DISTRIB="conda" PYTHON_VERSION="2.7"
-  - DISTRIB="conda" PYTHON_VERSION="3.4" COVERAGE="true"
-  - DISTRIB="conda" PYTHON_VERSION="3.5"
+  - DISTRIB="conda" PYTHON_VERSION="3.4"
+  - DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true"
 
 install:
   # Necessary for random forest
