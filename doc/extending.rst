@@ -20,7 +20,7 @@ following base classes:
 
 * classification: :class:`autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm`
 * regression: :class:`autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm`
-* proprocessing: :class:`autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm`
+* preprocessing: :class:`autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm`
 
 In general, these classes are wrappers around existing machine learning
 models and only add the functionality auto-sklearn needs. Of course you can
