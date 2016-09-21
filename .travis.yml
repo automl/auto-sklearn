@@ -2,6 +2,14 @@ language: python
 
 sudo: false
 
+os:
+  - linux
+  - osx
+
+matrix:
+  allow_failures:
+  - os: osx
+
 cache:
   apt: true
   # We use three different cache directory
