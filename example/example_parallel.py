@@ -15,9 +15,9 @@ output_folder = '/tmp/autosklearn_example_out'
 
 def spawn_classifier(seed, dataset_name):
 
-    automl = AutoSklearnClassifier(time_left_for_this_task=600, # how long should this seed fit process run
-                                   per_run_time_limit=60, # each model may only take this long before it's killed 
-                                   ml_memory_limit=1024,
+    automl = AutoSklearnClassifier(time_left_for_this_task=600, # sec., how long should this seed fit process run
+                                   per_run_time_limit=60, # sec., each model may only take this long before it's killed 
+                                   ml_memory_limit=1024, # MB
                                    shared_mode=True, # tmp folder will be shared between seeds
                                    tmp_folder=tmp_folder,
                                    output_folder=output_folder,
