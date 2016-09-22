@@ -9,7 +9,7 @@ import sklearn.metrics
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import *
 
-tmp_folder = '/tmp/autoslearn_example_tmp'
+tmp_folder = '/tmp/autosklearn_example_tmp'
 output_folder = '/tmp/autosklearn_example_out'
 
 
