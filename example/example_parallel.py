@@ -20,42 +20,22 @@ def spawn_classifier(seed, dataset_name):
     function, which is called several times in the main block is a new
     process which runs one instance of auto-sklearn.
     """
-    digits = sklearn.datasets.load_digits()
-    X = digits.data
-    y = digits.target
-    indices = np.arange(X.shape[0])
-    np.random.shuffle(indices)
-    X = X[indices]
-    y = y[indices]
-    X_train = X[:1000]
-    y_train = y[:1000]
 
-    # Arguments which are different to other runs of auto-sklearn:
-    # 1. all classifiers write to the same output directory
-    # 2. shared_mode is set to True, this enables sharing of data between
-    # models.
-    # 3. all instances of the AutoSklearnClassifier must have a different seed!
-    automl = AutoSklearnClassifier(time_left_for_this_task=60,
-                                   per_run_time_limit=60,
+
+    automl = AutoSklearnClassifier(time_left_for_this_task=600, # how long should this seed fit process run
+                                   per_run_time_limit=60, # each model may only take this long before it's killed 
                                    ml_memory_limit=1024,
-                                   shared_mode=True,
+                                   shared_mode=True, # tmp folder will be shared between seeds
                                    tmp_folder=tmp_folder,
                                    output_folder=output_folder,
                                    delete_tmp_folder_after_terminate=False,
-                                   ensemble_size=0,
-                                   initial_configurations_via_metalearning=0,
+                                   ensemble_size=0, # no need to build ensembles at this stage
+                                   initial_configurations_via_metalearning=0, # let seeds profit from each other's results
                                    seed=seed)
     automl.fit(X_train, y_train, dataset_name=dataset_name)
 
 if __name__ == '__main__':
-    processes = []
-    for i in range(2, 6):
-        p = multiprocessing.Process(target=spawn_classifier, args=(i, 'digits'))
-        p.start()
-        processes.append(p)
-    for p in processes:
-        p.join()
-
+    
     digits = sklearn.datasets.load_digits()
     X = digits.data
     y = digits.target
@@ -67,6 +47,14 @@ if __name__ == '__main__':
     y_train = y[:1000]
     X_test = X[1000:]
     y_test = y[1000:]
+
+    processes = []
+    for i in range(4): # set this at roughly half of your cores
+        p = multiprocessing.Process(target=spawn_classifier, args=(i, 'digits'))
+        p.start()
+        processes.append(p)
+    for p in processes:
+        p.join()
 
     print('Starting to build an ensemble!')
     automl = AutoSklearnClassifier(time_left_for_this_task=15,
