@@ -10,18 +10,12 @@ from autosklearn.pipeline.constants import *
 
 class MultinomialNB(AutoSklearnClassificationAlgorithm):
 
-    def __init__(self, alpha, fit_prior, random_state=None, verbose=0):
-        self.alpha = alpha
-        if fit_prior.lower() == "true":
-            self.fit_prior = True
-        elif fit_prior.lower() == "false":
-            self.fit_prior = False
-        else:
-            self.fit_prior = fit_prior
-
-        self.random_state = random_state
-        self.verbose = int(verbose)
-        self.estimator = None
+    def __init__(self):
+        super(MultinomialNB, self).__init__()
+        self.alpha = None
+        self.fit_prior = None
+        self.random_state = None
+        self.verbose = None
 
     def fit(self, X, y):
         while not self.configuration_fully_fitted():

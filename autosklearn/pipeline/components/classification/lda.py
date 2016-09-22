@@ -7,20 +7,20 @@ from autosklearn.pipeline.components.base import \
     AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
+import sklearn.discriminant_analysis
+import sklearn.multiclass
 
 
 class LDA(AutoSklearnClassificationAlgorithm):
-    def __init__(self, shrinkage, n_components, tol, shrinkage_factor=0.5,
-        random_state=None):
-        self.shrinkage = shrinkage
-        self.n_components = n_components
-        self.tol = tol
-        self.shrinkage_factor = shrinkage_factor
-        self.estimator = None
+
+    def __init__(self):
+        super(LDA, self).__init__()
+        self.shrinkage = None
+        self.n_components = None
+        self.tol = None
+        self.shrinkage_factor = None
 
     def fit(self, X, Y):
-        import sklearn.discriminant_analysis
-        import sklearn.multiclass
 
         if self.shrinkage == "None":
             self.shrinkage = None
@@ -85,4 +85,5 @@ class LDA(AutoSklearnClassificationAlgorithm):
             "tol", 1e-5, 1e-1, default=1e-4, log=True))
 
         cs.add_condition(EqualsCondition(shrinkage_factor, shrinkage, "manual"))
+
         return cs

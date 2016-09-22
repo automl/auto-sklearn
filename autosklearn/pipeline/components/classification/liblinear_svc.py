@@ -7,29 +7,25 @@ from ConfigSpace.forbidden import ForbiddenEqualsClause, \
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.pipeline.constants import *
+import sklearn.multiclass
 
 
 class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
-    def __init__(self, penalty, loss, dual, tol, C, multi_class,
-                 fit_intercept, intercept_scaling, class_weight=None,
-                 random_state=None):
-        self.penalty = penalty
-        self.loss = loss
-        self.dual = dual
-        self.tol = tol
-        self.C = C
-        self.multi_class = multi_class
-        self.fit_intercept = fit_intercept
-        self.intercept_scaling = intercept_scaling
-        self.class_weight = class_weight
-        self.random_state = random_state
-        self.estimator = None
+    def __init__(self):
+        super(LibLinear_SVC, self).__init__()
+        self.penalty = None
+        self.loss = None
+        self.dual = None
+        self.tol = None
+        self.C = None
+        self.multi_class = None
+        self.fit_intercept = None
+        self.intercept_scaling = None
+        self.class_weight = None
+        self.random_state = None
 
     def fit(self, X, Y):
-        import sklearn.svm
-        import sklearn.multiclass
-
         self.C = float(self.C)
         self.tol = float(self.tol)
 

@@ -11,7 +11,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
-
+import sklearn.svm
 
 # From the scikit-learn master branch. Will hopefully be there in sklearn 0.17
 def _ovr_decision_function(predictions, confidences, n_classes):
@@ -59,23 +59,21 @@ def _ovr_decision_function(predictions, confidences, n_classes):
 
 
 class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
-    def __init__(self, C, kernel, gamma, shrinking, tol, max_iter,
-                 class_weight=None, degree=3, coef0=0, random_state=None):
-        self.C = C
-        self.kernel = kernel
-        self.degree = degree
-        self.gamma = gamma
-        self.coef0 = coef0
-        self.shrinking = shrinking
-        self.tol = tol
-        self.class_weight = class_weight
-        self.max_iter = max_iter
-        self.random_state = random_state
-        self.estimator = None
+
+    def __init__(self):
+        super(LibSVM_SVC, self).__init__()
+        self.C = None
+        self.kernel = None
+        self.degree = None
+        self.gamma = None
+        self.coef0 = None
+        self.shrinking = None
+        self.tol = None
+        self.class_weight = None
+        self.max_iter = None
+        self.random_state = None
 
     def fit(self, X, Y):
-        import sklearn.svm
-
         try:
             soft, hard = resource.getrlimit(resource.RLIMIT_AS)
             if soft > 0:

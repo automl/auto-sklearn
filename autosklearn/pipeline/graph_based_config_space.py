@@ -10,6 +10,7 @@ class InvalidDataArtifactsException(Exception):
         message = "Unable to transform data with: %s" % artifacts
         super(InvalidDataArtifactsException, self).__init__(message)
 
+
 class ConfigSpaceBuilder(object):
 
     def get_config_space(self):
@@ -51,7 +52,7 @@ class LeafNodeConfigSpaceBuilder(ConfigSpaceBuilder):
         self._children[name] = node
 
     def get_config_space(self):
-        return self._element.get_config_space()
+        return self._element.get_hyperparameter_search_space()
 
     def explore_data_flow(self, data_description):
         try:
@@ -107,6 +108,15 @@ class SerialConfigSpaceBuilder(CompositeConfigSpaceBuilder):
 
 
 class ChoiceConfigSpaceBuilder(CompositeConfigSpaceBuilder):
+
+    def get_config_space(self):
+        cs = self._element.get_hyperparameter_search_space()
+        choice_parameter = cs.get_hyperparameter('__choice__')
+        for name, node in self._children.items():
+            sub_cs = node.get_config_space()
+            cs.add_configuration_space(name, sub_cs, {'parent': choice_parameter, 'value': name})
+        return cs
+
 
     def explore_data_flow(self, data_description):
         data_descriptions = []

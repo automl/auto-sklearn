@@ -8,11 +8,10 @@ from autosklearn.pipeline.constants import *
 
 class GaussianNB(AutoSklearnClassificationAlgorithm):
 
-    def __init__(self, random_state=None, verbose=0):
-
-        self.random_state = random_state
-        self.verbose = int(verbose)
-        self.estimator = None
+    def __init__(self):
+        super(GaussianNB, self).__init__()
+        self.random_state = None
+        self.verbose = None
 
     def fit(self, X, y):
         while not self.configuration_fully_fitted():

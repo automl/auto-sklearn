@@ -11,8 +11,9 @@ import numpy as np
 
 class QDA(AutoSklearnClassificationAlgorithm):
 
-    def __init__(self, reg_param, random_state=None):
-        self.reg_param = float(reg_param)
+    def __init__(self):
+        super(QDA, self).__init__()
+        self.reg_param = None
         self.estimator = None
 
     def fit(self, X, Y):

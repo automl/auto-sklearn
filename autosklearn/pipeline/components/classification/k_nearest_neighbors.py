@@ -8,11 +8,12 @@ from autosklearn.pipeline.constants import *
 
 class KNearestNeighborsClassifier(AutoSklearnClassificationAlgorithm):
 
-    def __init__(self, n_neighbors, weights, p, random_state=None):
-        self.n_neighbors = n_neighbors
-        self.weights = weights
-        self.p = p
-        self.random_state = random_state
+    def __init__(self):
+        super(KNearestNeighborsClassifier, self).__init__()
+        self.n_neighbors = None
+        self.weights = None
+        self.p = None
+        self.random_state = None
 
     def fit(self, X, Y):
         import sklearn.neighbors

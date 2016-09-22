@@ -12,12 +12,14 @@ from autosklearn.pipeline.implementations.util import softmax
 
 
 class PassiveAggressive(AutoSklearnClassificationAlgorithm):
-    def __init__(self, C, fit_intercept, n_iter, loss, random_state=None):
-        self.C = float(C)
-        self.fit_intercept = fit_intercept == 'True'
-        self.n_iter = int(n_iter)
-        self.loss = loss
-        self.random_state = random_state
+
+    def __init__(self):
+        super(PassiveAggressive, self).__init__()
+        self.C = None
+        self.fit_intercept = None
+        self.n_iter = None
+        self.loss = None
+        self.random_state = None
         self.estimator = None
 
     def fit(self, X, y):

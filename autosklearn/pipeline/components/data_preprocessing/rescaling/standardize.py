@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 
 class StandardScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
 
-    def __init__(self, random_state):
+    def __init__(self):
         super(StandardScalerComponent, self).__init__()
         self.preprocessor = StandardScaler()
 

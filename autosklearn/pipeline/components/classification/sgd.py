@@ -12,21 +12,21 @@ from autosklearn.pipeline.implementations.util import softmax
 
 
 class SGD(AutoSklearnClassificationAlgorithm):
-    def __init__(self, loss, penalty, alpha, fit_intercept, n_iter,
-                 learning_rate, l1_ratio=0.15, epsilon=0.1,
-                 eta0=0.01, power_t=0.5, average=False, random_state=None):
-        self.loss = loss
-        self.penalty = penalty
-        self.alpha = alpha
-        self.fit_intercept = fit_intercept
-        self.n_iter = n_iter
-        self.learning_rate = learning_rate
-        self.l1_ratio = l1_ratio
-        self.epsilon = epsilon
-        self.eta0 = eta0
-        self.power_t = power_t
-        self.random_state = random_state
-        self.average = average
+
+    def __init__(self):
+        super(SGD, self).__init__()
+        self.loss = None
+        self.penalty = None
+        self.alpha = None
+        self.fit_intercept = None
+        self.n_iter = None
+        self.learning_rate = None
+        self.l1_ratio = 0.15
+        self.epsilon = 0.1
+        self.eta0 = 0.01
+        self.power_t = 0.5
+        self.random_state = None
+        self.average = None
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None):

@@ -9,26 +9,24 @@ from autosklearn.pipeline.components.base import \
     AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
-
+from sklearn.tree import DecisionTreeClassifier
 
 class DecisionTree(AutoSklearnClassificationAlgorithm):
-    def __init__(self, criterion, splitter, max_features, max_depth,
-                 min_samples_split, min_samples_leaf, min_weight_fraction_leaf,
-                 max_leaf_nodes, class_weight=None, random_state=None):
-        self.criterion = criterion
-        self.splitter = splitter
-        self.max_features = max_features
-        self.max_depth = max_depth
-        self.min_samples_split = min_samples_split
-        self.min_samples_leaf = min_samples_leaf
-        self.max_leaf_nodes = max_leaf_nodes
-        self.min_weight_fraction_leaf = min_weight_fraction_leaf
-        self.random_state = random_state
-        self.class_weight = class_weight
-        self.estimator = None
+
+    def __init__(self):
+        super(DecisionTree, self).__init__()
+        self.criterion = None
+        self.splitter = None
+        self.max_features = None
+        self.max_depth = None
+        self.min_samples_split = None
+        self.min_samples_leaf = None
+        self.max_leaf_nodes = None
+        self.min_weight_fraction_leaf = None
+        self.random_state = None
+        self.class_weight = None
 
     def fit(self, X, y, sample_weight=None):
-        from sklearn.tree import DecisionTreeClassifier
 
         self.max_features = float(self.max_features)
         if self.max_depth == "None":
