@@ -124,6 +124,9 @@ class EnsembleBuilder(multiprocessing.Process):
             # over time!
             old_dir_ensemble_list_mtimes = dir_ensemble_list_mtimes
             dir_ensemble_list_mtimes = []
+            # The ensemble dir can contain non-model files. We filter them and
+            # use the following list instead
+            dir_ensemble_model_files = []
 
             for dir_ensemble_file in dir_ensemble_list:
                 if dir_ensemble_file.endswith("/"):
@@ -132,18 +135,19 @@ class EnsembleBuilder(multiprocessing.Process):
                     self.logger.warning('Error loading file (not .npy): %s', dir_ensemble_file)
                     continue
 
+                dir_ensemble_model_files.append(dir_ensemble_file)
                 basename = os.path.basename(dir_ensemble_file)
                 dir_ensemble_file = os.path.join(dir_ensemble, basename)
                 mtime = os.path.getmtime(dir_ensemble_file)
                 dir_ensemble_list_mtimes.append(mtime)
 
-            if len(dir_ensemble_list) == 0:
+            if len(dir_ensemble_model_files) == 0:
                 self.logger.debug('Directories are empty')
                 time.sleep(2)
                 used_time = watch.wall_elapsed('ensemble_builder')
                 continue
 
-            if len(dir_ensemble_list) <= current_num_models and \
+            if len(dir_ensemble_model_files) <= current_num_models and \
                     old_dir_ensemble_list_mtimes == dir_ensemble_list_mtimes:
                 self.logger.debug('Nothing has changed since the last time')
                 time.sleep(2)
@@ -169,7 +173,7 @@ class EnsembleBuilder(multiprocessing.Process):
             model_names_to_scores = dict()
 
             model_idx = 0
-            for model_name in dir_ensemble_list:
+            for model_name in dir_ensemble_model_files:
                 if model_name.endswith("/"):
                     model_name = model_name[:-1]
                 basename = os.path.basename(model_name)
@@ -254,7 +258,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
             indices_to_model_names = dict()
             indices_to_run_num = dict()
-            for i, model_name in enumerate(dir_ensemble_list):
+            for i, model_name in enumerate(dir_ensemble_model_files):
                 match = model_and_automl_re.search(model_name)
                 automl_seed = int(match.group(1))
                 num_run = int(match.group(2))
@@ -265,7 +269,8 @@ class EnsembleBuilder(multiprocessing.Process):
 
             try:
                 all_predictions_train, all_predictions_valid, all_predictions_test =\
-                    self.get_all_predictions(dir_ensemble, dir_ensemble_list,
+                    self.get_all_predictions(dir_ensemble,
+                                             dir_ensemble_model_files,
                                              dir_valid, dir_valid_list,
                                              dir_test, dir_test_list,
                                              include_num_runs,
@@ -314,7 +319,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
             # Set this variable here to avoid re-running the ensemble builder
             # every two seconds in case the ensemble did not change
-            current_num_models = len(dir_ensemble_list)
+            current_num_models = len(dir_ensemble_model_files)
 
             ensemble_predictions = ensemble.predict(all_predictions_train)
             if sys.version_info[0] == 2:
@@ -342,7 +347,7 @@ class EnsembleBuilder(multiprocessing.Process):
             backend.save_ensemble(ensemble, index_run, self.seed)
 
             # Save predictions for valid and test data set
-            if len(dir_valid_list) == len(dir_ensemble_list):
+            if len(dir_valid_list) == len(dir_ensemble_model_files):
                 all_predictions_valid = np.array(all_predictions_valid)
                 ensemble_predictions_valid = ensemble.predict(all_predictions_valid)
                 if self.task_type == BINARY_CLASSIFICATION:
@@ -379,11 +384,11 @@ class EnsembleBuilder(multiprocessing.Process):
             else:
                 self.logger.info('Could not find as many validation set predictions (%d)'
                              'as ensemble predictions (%d)!.',
-                            len(dir_valid_list), len(dir_ensemble_list))
+                            len(dir_valid_list), len(dir_ensemble_model_files))
 
             del all_predictions_valid
 
-            if len(dir_test_list) == len(dir_ensemble_list):
+            if len(dir_test_list) == len(dir_ensemble_model_files):
                 all_predictions_test = np.array(all_predictions_test)
                 ensemble_predictions_test = ensemble.predict(all_predictions_test)
                 if self.task_type == BINARY_CLASSIFICATION:
@@ -420,11 +425,11 @@ class EnsembleBuilder(multiprocessing.Process):
             else:
                 self.logger.info('Could not find as many test set predictions (%d) as '
                              'ensemble predictions (%d)!',
-                            len(dir_test_list), len(dir_ensemble_list))
+                            len(dir_test_list), len(dir_ensemble_model_files))
 
             del all_predictions_test
 
-            current_num_models = len(dir_ensemble_list)
+            current_num_models = len(dir_ensemble_model_files)
             watch.stop_task('index_run' + str(index_run))
             time_iter = watch.get_wall_dur('index_run' + str(index_run))
             used_time = watch.wall_elapsed('ensemble_builder')
