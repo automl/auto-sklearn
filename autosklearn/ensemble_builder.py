@@ -128,6 +128,10 @@ class EnsembleBuilder(multiprocessing.Process):
             for dir_ensemble_file in dir_ensemble_list:
                 if dir_ensemble_file.endswith("/"):
                     dir_ensemble_file = dir_ensemble_file[:-1]
+                if not dir_ensemble_file.endswith(".npy"):
+                    self.logger.warning('Error loading file (not .npy): %s', dir_ensemble_file)
+                    continue
+
                 basename = os.path.basename(dir_ensemble_file)
                 dir_ensemble_file = os.path.join(dir_ensemble, basename)
                 mtime = os.path.getmtime(dir_ensemble_file)

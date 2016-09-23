@@ -179,6 +179,9 @@ class Backend(object):
             # File names are like: {seed}.{index}.model
             if model_file.endswith('/'):
                 model_file = model_file[:-1]
+            if not model_file.endswith('.model'):
+                continue
+
             basename = os.path.basename(model_file)
 
             basename_parts = basename.split('.')
