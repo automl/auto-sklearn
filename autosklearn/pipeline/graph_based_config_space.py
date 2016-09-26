@@ -1,4 +1,5 @@
 from collections import defaultdict, OrderedDict
+from copy import copy
 
 from ConfigSpace import ConfigurationSpace
 
@@ -22,7 +23,7 @@ class ConfigSpaceBuilder(object):
     def get_incompatible_nodes(self, cs):
         data_description = DataDescription()
         data_descriptions = self.explore_data_flow(data_description)
-        incompatible_nodes = [x for x in data_descriptions if isinstance(x, IncompatibleNodes)]
+        incompatible_nodes = [x for x in data_descriptions if x.is_incompatible]
 
         return incompatible_nodes
 
@@ -61,12 +62,7 @@ class LeafNodeConfigSpaceBuilder(ConfigSpaceBuilder):
             data_description.update_artifacts(self, artifacts)
             return [data_description]
         except InvalidDataArtifactsException as ex:
-            for artifact in ex.artifacts:
-                nodes = []
-                source_node = data_description.get_node_by_artifact(artifact)
-                choices = data_description.get_choices()
-                nodes.append(IncompatibleNodes(artifact, source_node, self, choices))
-                return nodes
+            return [IncompatibleDataDescription(data_description, self, ex.artifacts)]
 
 
 class CompositeConfigSpaceBuilder(LeafNodeConfigSpaceBuilder):
@@ -98,7 +94,7 @@ class SerialConfigSpaceBuilder(CompositeConfigSpaceBuilder):
         for name, node in self._children.items():
             current_step_data_descriptions = []
             for data_description in data_descriptions:
-                if isinstance(data_description, DataDescription):
+                if data_description.is_valid:
                     data_descriptions = node.explore_data_flow(data_description)
                     current_step_data_descriptions.extend(data_descriptions)
                 else:
@@ -122,22 +118,35 @@ class ChoiceConfigSpaceBuilder(CompositeConfigSpaceBuilder):
         data_descriptions = []
         for name, node in self._children.items():
             data_description_copy = data_description.copy()
+            data_description_copy.add_choice(node, name)
             current_step_data_descriptions = node.explore_data_flow(data_description_copy)
             data_descriptions.extend(current_step_data_descriptions)
         return data_descriptions
 
 
-class DataDescription(object):
+class PathTracker(object):
+
+    def __init__(self):
+        self._node_path = []
+        self._choices = []
+
+    def add_path(self, node):
+        self._node_path.append(node)
+
+    def add_choice(self, node, option):
+        self._choices.append((node, option))
+
+    def copy(self):
+        data_description_path = PathTracker()
+        data_description_path._node_path = copy(self._node_path)
+        data_description_path._choices = copy(self._choices)
+        return data_description_path
+
+
+class ArtifactStorage(object):
 
     def __init__(self):
         self._node_by_artifact = {}
-        self._choices = []
-
-    def copy(self):
-        data_description = DataDescription()
-        nodes_by_artifacts = self._node_by_artifact.copy()
-        data_description._node_by_artifact = nodes_by_artifacts
-        return data_description
 
     def get_artifacts(self):
         return list(self._node_by_artifact.keys())
@@ -164,17 +173,86 @@ class DataDescription(object):
     def get_node_by_artifact(self, artifact):
         return self._node_by_artifact[artifact]
 
+    def copy(self):
+        artifact_storage = ArtifactStorage()
+        artifact_storage._node_by_artifact = copy(self._node_by_artifact)
+        return artifact_storage
+
+
+class DataDescriptionBase(object):
+
+    def __init__(self, path_tracker, artifact_storage):
+        self._path_tracker = path_tracker
+        self._artifact_storage = artifact_storage
+
+    @property
+    def is_valid(self):
+        return False
+
+    @property
+    def is_incompatible(self):
+        return False
+
+
+class DataDescription(DataDescriptionBase):
+
+    def __init__(self, path_tracker=None, artifact_storage=None):
+        if not path_tracker:
+            path_tracker = PathTracker()
+        if not artifact_storage:
+            artifact_storage = ArtifactStorage()
+        super(DataDescription, self).__init__(path_tracker, artifact_storage)
+
+    @property
+    def is_valid(self):
+        return True
+
+    @property
+    def is_incompatible(self):
+        return False
+
+    def copy(self):
+        path_tracker = self._path_tracker.copy()
+        artifact_storage = self._artifact_storage.copy()
+        data_description = DataDescription(path_tracker, artifact_storage)
+        return data_description
+
+    def get_artifacts(self):
+        return self._artifact_storage.get_artifacts()
+
+    def update_artifacts(self, node, artifacts):
+        return self._artifact_storage.update_artifacts(node, artifacts)
+
+    def add_artifact(self, node, artifact):
+        return self._artifact_storage.add_artifact(node, artifact)
+
+    def remove_artifact(self, artifact):
+        return self._artifact_storage.remove_artifact(artifact)
+
+    def get_node_by_artifact(self, artifact):
+        return self._artifact_storage.get_node_by_artifact(artifact)
+
+    def add_path(self, node):
+        return self._path_tracker.add_path(node)
+
     def add_choice(self, node, option):
-        self._choices.append((node, option))
-
-    def get_choices(self):
-        return self._choices
+        return self._path_tracker.add_choice(node, option)
 
 
-class IncompatibleNodes(object):
+class IncompatibleDataDescription(DataDescription):
 
-    def __init__(self, artifact, source_node, final_node, choices):
-        self.artifact = artifact
-        self.source_node = source_node
-        self.final_node = final_node
-        self.choices = choices
+    def __init__(self, data_description, node, artifacts):
+        self.data_description = data_description
+        self.node = node
+        self.artifacts = artifacts
+        path_tracker = data_description._path_tracker
+        artifact_storage = data_description._artifact_storage
+        super(IncompatibleDataDescription).__init__(path_tracker, artifact_storage)
+
+    @property
+    def is_valid(self):
+        return False
+
+    @property
+    def is_incompatible(self):
+        return True

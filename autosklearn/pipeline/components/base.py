@@ -83,6 +83,10 @@ class AutoSklearnComponent(object):
         """
         raise NotImplementedError()
 
+    def transform_data_description(self, artifacts):
+        # stub
+        return artifacts
+
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         """Return the configuration space of this classification algorithm.
