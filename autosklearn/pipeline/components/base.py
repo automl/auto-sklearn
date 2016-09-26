@@ -85,6 +85,7 @@ class AutoSklearnComponent(object):
 
     def transform_data_description(self, artifacts):
         # stub
+        artifacts.append('some artifact')
         return artifacts
 
     @staticmethod

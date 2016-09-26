@@ -5,6 +5,7 @@ from ConfigSpace.forbidden import ForbiddenEqualsClause, \
     ForbiddenAndConjunction
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.graph_based_config_space import InvalidDataArtifactsException
 from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.pipeline.constants import *
 import sklearn.multiclass
@@ -78,6 +79,11 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
                 'is_deterministic': False,
                 'input': (SPARSE, DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,)}
+
+    def transform_data_description(self, artifacts):
+        # stub
+        if 'some artifact' in artifacts:
+            raise InvalidDataArtifactsException(['some artifact'])
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

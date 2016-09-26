@@ -2,6 +2,8 @@ from collections import defaultdict, OrderedDict
 from copy import copy
 
 from ConfigSpace import ConfigurationSpace
+from ConfigSpace import ForbiddenAndConjunction
+from ConfigSpace import ForbiddenEqualsClause
 
 
 class InvalidDataArtifactsException(Exception):
@@ -24,6 +26,13 @@ class ConfigSpaceBuilder(object):
         data_description = DataDescription()
         data_descriptions = self.explore_data_flow(data_description)
         incompatible_nodes = [x for x in data_descriptions if x.is_incompatible]
+        incompatible_node_choices = [x.get_choices() for x in incompatible_nodes]
+
+        for incompatible_node_choice in incompatible_node_choices:
+            hp_and_options = [(cs.get_hyperparameter(path), option) for path, option in incompatible_node_choice]
+            clauses = [ForbiddenEqualsClause(hp, option) for hp, option in hp_and_options]
+            conjunction = ForbiddenAndConjunction(*clauses)
+            cs.add_forbidden_clause(conjunction)
 
         return incompatible_nodes
 
@@ -39,6 +48,7 @@ class LeafNodeConfigSpaceBuilder(ConfigSpaceBuilder):
     def __init__(self, element):
         self._element = element
         self._parent = None
+        self._name = None
         self._children = OrderedDict()
 
     def _set_name(self, name):
@@ -51,6 +61,19 @@ class LeafNodeConfigSpaceBuilder(ConfigSpaceBuilder):
         node._set_parent(self)
         node._set_name(name)
         self._children[name] = node
+
+    def get_path(self):
+        name = self._name
+        parent_path = self._parent.get_path() if self._parent else None
+
+        if parent_path and name:
+            return parent_path + ':' + name
+        elif parent_path:
+            return parent_path
+        elif name:
+            return name
+        else:
+            return ""
 
     def get_config_space(self):
         return self._element.get_hyperparameter_search_space()
@@ -113,12 +136,11 @@ class ChoiceConfigSpaceBuilder(CompositeConfigSpaceBuilder):
             cs.add_configuration_space(name, sub_cs, {'parent': choice_parameter, 'value': name})
         return cs
 
-
     def explore_data_flow(self, data_description):
         data_descriptions = []
         for name, node in self._children.items():
             data_description_copy = data_description.copy()
-            data_description_copy.add_choice(node, name)
+            data_description_copy.add_choice(self, name)
             current_step_data_descriptions = node.explore_data_flow(data_description_copy)
             data_descriptions.extend(current_step_data_descriptions)
         return data_descriptions
@@ -135,6 +157,9 @@ class PathTracker(object):
 
     def add_choice(self, node, option):
         self._choices.append((node, option))
+
+    def get_choices(self):
+        return self._choices
 
     def copy(self):
         data_description_path = PathTracker()
@@ -239,15 +264,14 @@ class DataDescription(DataDescriptionBase):
         return self._path_tracker.add_choice(node, option)
 
 
-class IncompatibleDataDescription(DataDescription):
+class IncompatibleDataDescription(DataDescriptionBase):
 
     def __init__(self, data_description, node, artifacts):
-        self.data_description = data_description
-        self.node = node
-        self.artifacts = artifacts
+        self._exception_node = node
+        self._incompatible_artifacts = artifacts
         path_tracker = data_description._path_tracker
         artifact_storage = data_description._artifact_storage
-        super(IncompatibleDataDescription).__init__(path_tracker, artifact_storage)
+        super(IncompatibleDataDescription, self).__init__(path_tracker, artifact_storage)
 
     @property
     def is_valid(self):
@@ -256,3 +280,8 @@ class IncompatibleDataDescription(DataDescription):
     @property
     def is_incompatible(self):
         return True
+
+    def get_choices(self):
+        choices = self._path_tracker.get_choices()
+        choice_paths = [(node.get_path() + ":__choice__", choice) for node, choice in choices]
+        return choice_paths

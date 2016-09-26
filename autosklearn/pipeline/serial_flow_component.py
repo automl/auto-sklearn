@@ -5,8 +5,6 @@ from autosklearn.pipeline.graph_based_config_space import ParallelConfigSpaceBui
     SerialConfigSpaceBuilder
 
 
-
-
 class SerialFlow(CompositeAutoSklearnComponent):
 
     def get_config_space_builder(self):
