@@ -8,9 +8,15 @@ APIs
 Main modules
 ============
 
+Classification
+~~~~~~~~~~~~~~
+
 .. autoclass:: autosklearn.classification.AutoSklearnClassifier
     :members:
     :inherited-members: show_models, fit_ensemble, refit
+
+Regression
+~~~~~~~~~~
 
 .. autoclass:: autosklearn.regression.AutoSklearnRegressor
     :members:

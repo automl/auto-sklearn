@@ -77,6 +77,10 @@ class AutoMLDecorator(object):
         """
         return self._automl.show_models()
 
+    @property
+    def grid_scores_(self):
+        return self._automl.grid_scores_
+
 
 class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
 
@@ -169,6 +173,18 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             tmp_folder and output_folder are given and sets both
             delete_tmp_folder_after_terminate and
             delete_output_folder_after_terminate to False.
+
+        Attributes
+        ----------
+        grid_scores\_ : list of named tuples
+            Contains scores for all parameter combinations in param_grid.
+            Each entry corresponds to one parameter setting.
+            Each named tuple has the attributes:
+
+            * ``parameters``, a dict of parameter settings
+            * ``mean_validation_score``, the mean score over the
+              cross-validation folds
+            * ``cv_validation_scores``, the list of scores for each fold
 
         """
         self.time_left_for_this_task = time_left_for_this_task

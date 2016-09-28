@@ -1,14 +1,16 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 
+from collections import defaultdict
 import hashlib
 import os
 
-import psutil
 
 from ConfigSpace.io import pcs
+import numpy as np
 from sklearn.base import BaseEstimator
 from smac.tae.execute_ta_run import StatusType
+from sklearn.grid_search import _CVScoreTuple
 
 from autosklearn.constants import *
 from autosklearn.data.data_manager_factory import get_data_manager
@@ -515,7 +517,6 @@ class AutoML(BaseEstimator):
         if len(self.models_) == 0:
             raise ValueError('No models fitted!')
 
-
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
         # Don't know if the reshaping should be done there or in calculate_score
@@ -523,6 +524,35 @@ class AutoML(BaseEstimator):
         return calculate_score(y, prediction, self._task,
                                self._metric, self._label_num,
                                logger=self._logger)
+
+    @property
+    def grid_scores_(self):
+        grid_scores = list()
+
+        scores_per_config = defaultdict(list)
+        config_list = list()
+
+        for run_key in self._proc_smac.runhistory.data:
+            run_value = self._proc_smac.runhistory.data[run_key]
+
+            config_id = run_key.config_id
+            cost = run_value.cost
+
+            if config_id not in config_list:
+                config_list.append(config_id)
+
+            scores_per_config[config_id].append(cost)
+
+        for config_id in config_list:
+            scores = [1 - score for score in scores_per_config[config_id]]
+            mean_score = np.mean(scores)
+            config = self._proc_smac.runhistory.ids_config[config_id]
+
+            grid_score = _CVScoreTuple(config.get_dictionary(), mean_score,
+                                       scores)
+            grid_scores.append(grid_score)
+
+        return grid_scores
 
     def show_models(self):
         if self.models_ is None or len(self.models_) == 0 or \

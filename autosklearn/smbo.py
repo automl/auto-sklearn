@@ -248,6 +248,7 @@ class AutoMLSMBO(object):
         self.start_num_run = start_num_run
         self.acquisition_function = acquisition_function
         self.shared_mode = shared_mode
+        self.runhistory = None
 
         self.config_space.seed(self.seed)
         logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed,
@@ -982,7 +983,8 @@ class AutoMLSMBO(object):
                 time_used_this_iteration = time.time() - start_time_this_iteration
 
                 if max_iters is not None:
-                    finished = (smac_iter < max_iters)
+                    finished = (smac_iter >= max_iters)
+
                 if self.watcher.wall_elapsed(
                         'SMBO') > self.total_walltime_limit:
                     finished = True
@@ -1004,5 +1006,7 @@ class AutoMLSMBO(object):
                 pSMAC.write(run_history=run_history,
                             output_directory=self.scenario.output_dir,
                             num_run=self.seed)
+
+        self.runhistory = run_history
         
         

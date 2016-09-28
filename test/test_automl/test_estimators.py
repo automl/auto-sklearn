@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
+import collections
 import os
 import sys
 import unittest
@@ -10,13 +11,13 @@ except ImportError:
     from unittest import mock
 
 import numpy as np
-import autosklearn.pipeline.util as putil
+from sklearn.grid_search import _CVScoreTuple
 
+import autosklearn.pipeline.util as putil
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.estimators import AutoMLClassifier
 from autosklearn.util.backend import Backend
 from autosklearn.constants import *
-from autosklearn.automl import AutoML
 
 sys.path.append(os.path.dirname(__file__))
 from base import Base
@@ -152,6 +153,44 @@ class EstimatorTest(Base, unittest.TestCase):
 
         del automl
         self._tearDown(output)
+
+    def test_grid_scores(self):
+        output = os.path.join(self.test_dir, '..', '.tmp_grid_scores')
+        self._setUp(output)
+
+        cls = AutoSklearnClassifier(time_left_for_this_task=15,
+                                    per_run_time_limit=15,
+                                    output_folder=output,
+                                    tmp_folder=output,
+                                    shared_mode=False,
+                                    seed=1,
+                                    initial_configurations_via_metalearning=0,
+                                    ensemble_size=0)
+        cls_ = cls.build_automl()
+        automl = cls_._automl
+        automl._proc_smac = mock.MagicMock()
+
+        RunKey = collections.namedtuple(
+            'RunKey', ['config_id', 'instance_id', 'seed'])
+
+        RunValue = collections.namedtuple(
+            'RunValue', ['cost', 'time', 'status', 'additional_info'])
+
+        runhistory = dict()
+        runhistory[RunKey(1, 1, 1)] = RunValue(1, 1, 1, '')
+        automl._proc_smac.runhistory.data = runhistory
+        grid_scores_ = automl.grid_scores_
+
+        print(grid_scores_[0].__dict__)
+        self.assertIsInstance(grid_scores_[0], _CVScoreTuple)
+        # In the runhistory we store losses, thus the score is zero
+        self.assertEqual(grid_scores_[0].mean_validation_score, 0)
+        self.assertEqual(grid_scores_[0].cv_validation_scores, [0])
+        self.assertIsInstance(grid_scores_[0].parameters, mock.MagicMock)
+
+        del automl
+        self._tearDown(output)
+
 
 
 class AutoMLClassifierTest(unittest.TestCase):
