@@ -11,19 +11,18 @@ from autosklearn.pipeline.constants import *
 
 class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
-    def __init__(self, penalty, loss, dual, tol, C, multi_class,
-                 fit_intercept, intercept_scaling, class_weight=None,
-                 random_state=None):
-        self.penalty = penalty
-        self.loss = loss
-        self.dual = dual
-        self.tol = tol
-        self.C = C
-        self.multi_class = multi_class
-        self.fit_intercept = fit_intercept
-        self.intercept_scaling = intercept_scaling
-        self.class_weight = class_weight
-        self.random_state = random_state
+    def __init__(self):
+        super(LibLinear_Preprocessor, self).__init__()
+        self.penalty = None
+        self.loss = None
+        self.dual = None
+        self.tol = None
+        self.C = None
+        self.multi_class = None
+        self.fit_intercept = None
+        self.intercept_scaling = None
+        self.class_weight = None
+        self.random_state = None
         self.preprocessor = None
 
     def fit(self, X, Y):

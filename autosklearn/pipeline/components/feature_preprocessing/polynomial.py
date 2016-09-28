@@ -8,12 +8,13 @@ from autosklearn.pipeline.constants import *
 
 
 class PolynomialFeatures(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, degree, interaction_only, include_bias, random_state=None):
-        self.degree = int(degree)
-        self.interaction_only = interaction_only.lower() == 'true'
-        self.include_bias = include_bias.lower() == 'true'
-        self.random_state = random_state
-        self.preprocessor = None
+
+    def __init__(self):
+        self.degree = None
+        self.interaction_only = None
+        self.include_bias = None
+        self.random_state = None
+        super(PolynomialFeatures, self).__init__()
 
     def fit(self, X, Y):
         import sklearn.preprocessing

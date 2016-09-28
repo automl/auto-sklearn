@@ -12,12 +12,13 @@ from autosklearn.pipeline.constants import *
 
 
 class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, use_minimum_fraction=True, minimum_fraction=0.01,
-                 categorical_features=None, random_state=None):
+
+    def __init__(self):
         # TODO pay attention to the cases when a copy is made (CSR matrices)
-        self.use_minimum_fraction = use_minimum_fraction
-        self.minimum_fraction = minimum_fraction
-        self.categorical_features = categorical_features
+        self.use_minimum_fraction = None
+        self.minimum_fraction = None
+        self.categorical_features = None
+        super(OneHotEncoder, self).__init__()
 
     def fit(self, X, y=None):
         if self.use_minimum_fraction is None or \

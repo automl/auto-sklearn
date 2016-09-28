@@ -9,7 +9,7 @@ from autosklearn.pipeline.constants import *
 class SelectPercentileClassification(SelectPercentileBase,
                                      AutoSklearnPreprocessingAlgorithm):
 
-    def __init__(self, percentile, score_func="chi2", random_state=None):
+    def __init__(self):
         """ Parameters:
         random state : ignored
 
@@ -17,16 +17,10 @@ class SelectPercentileClassification(SelectPercentileBase,
                      returning a pair of arrays (scores, pvalues).
         """
         import sklearn.feature_selection
-
-        self.random_state = random_state  # We don't use this
-        self.percentile = int(float(percentile))
-        if score_func == "chi2":
-            self.score_func = sklearn.feature_selection.chi2
-        elif score_func == "f_classif":
-            self.score_func = sklearn.feature_selection.f_classif
-        else:
-            raise ValueError("score_func must be in ('chi2, 'f_classif'), "
-                             "but is: %s" % score_func)
+        super(SelectPercentileClassification, self).__init__()
+        self.random_state = None  # We don't use this
+        self.percentile = None
+        self.score_func = None
 
     def fit(self, X, y):
         import scipy.sparse

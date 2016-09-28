@@ -9,7 +9,7 @@ from autosklearn.pipeline.constants import *
 class SelectPercentileRegression(SelectPercentileBase,
                                  AutoSklearnPreprocessingAlgorithm):
 
-    def __init__(self, percentile, score_func="f_classif", random_state=None):
+    def __init__(self):
         """ Parameters:
         random state : ignored
 
@@ -17,13 +17,10 @@ class SelectPercentileRegression(SelectPercentileBase,
                      returning a pair of arrays (scores, pvalues).
         """
         import sklearn.feature_selection
-
-        self.random_state = random_state  # We don't use this
-        self.percentile = int(float(percentile))
-        if score_func == "f_regression":
-            self.score_func = sklearn.feature_selection.f_regression
-        else:
-            raise ValueError("Don't know this scoring function: %s" % score_func)
+        super(SelectPercentileRegression, self).__init__()
+        self.random_state = None  # We don't use this
+        self.percentile = None
+        self.score_func = None
 
     @staticmethod
     def get_properties(dataset_properties=None):

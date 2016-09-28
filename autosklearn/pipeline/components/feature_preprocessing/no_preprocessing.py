@@ -6,9 +6,9 @@ from autosklearn.pipeline.constants import *
 
 class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):
 
-    def __init__(self, random_state):
+    def __init__(self):
         """ This preprocessors does not change the data """
-        self.preprocessor = None
+        super(NoPreprocessing, self).__init__()
 
     def fit(self, X, Y=None):
         self.preprocessor = 0

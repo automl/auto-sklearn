@@ -6,9 +6,11 @@ from autosklearn.pipeline.constants import *
 
 
 class Imputation(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, strategy='median', random_state=None):
+
+    def __init__(self):
         # TODO pay attention to the cases when a copy is made (CSR matrices)
-        self.strategy = strategy
+        self.strategy = None
+        super(Imputation, self).__init__()
 
     def fit(self, X, y=None):
         import sklearn.preprocessing

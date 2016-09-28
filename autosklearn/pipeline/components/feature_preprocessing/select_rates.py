@@ -8,22 +8,15 @@ from autosklearn.pipeline.constants import *
 
 
 class SelectRates(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, alpha, mode='fpr',
-                 score_func="chi2", random_state=None):
+
+    def __init__(self):
         import sklearn.feature_selection
 
-        self.random_state = random_state  # We don't use this
-        self.alpha = float(alpha)
-
-        if score_func == "chi2":
-            self.score_func = sklearn.feature_selection.chi2
-        elif score_func == "f_classif":
-            self.score_func = sklearn.feature_selection.f_classif
-        else:
-            raise ValueError("score_func must be in ('chi2, 'f_classif'), "
-                             "but is: %s" % score_func)
-
-        self.mode = mode
+        self.random_state = None  # We don't use this
+        self.alpha = None
+        self.score_func = None
+        self.mode = None
+        super(SelectRates, self).__init__()
 
     def fit(self, X, y):
         import scipy.sparse

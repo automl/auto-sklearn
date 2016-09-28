@@ -6,8 +6,9 @@ from autosklearn.pipeline.constants import *
 
 
 class Densifier(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state=None):
-        pass
+
+    def __init__(self):
+        super(Densifier, self).__init__()
 
     def fit(self, X, y=None):
         return self

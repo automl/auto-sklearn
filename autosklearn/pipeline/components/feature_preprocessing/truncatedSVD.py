@@ -8,10 +8,12 @@ from autosklearn.pipeline.constants import *
 
 
 class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, target_dim, random_state=None):
-        self.target_dim = int(target_dim)
-        self.random_state = random_state
+
+    def __init__(self):
+        self.target_dim = None
+        self.random_state = None
         self.preprocessor = None
+        super(TruncatedSVD, self).__init__()
 
     def fit(self, X, Y):
         import sklearn.decomposition

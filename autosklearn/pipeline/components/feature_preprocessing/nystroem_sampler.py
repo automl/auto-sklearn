@@ -11,14 +11,14 @@ from autosklearn.pipeline.constants import *
 
 
 class Nystroem(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, kernel, n_components, gamma=1.0, degree=3,
-                 coef0=1, random_state=None):
-        self.kernel = kernel
-        self.n_components = int(n_components)
-        self.gamma = float(gamma)
-        self.degree = int(degree)
-        self.coef0 = float(coef0)
-        self.random_state = random_state
+    def __init__(self):
+        super(Nystroem, self).__init__()
+        self.kernel = None
+        self.n_components = None
+        self.gamma = None
+        self.degree = None
+        self.coef0 = None
+        self.random_state = None
 
     def fit(self, X, Y=None):
         import scipy.sparse

@@ -60,6 +60,8 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
             if entry == FeaturePreprocessorChoice or hasattr(entry, 'get_components'):
                 continue
 
+            '''
+
             target_type = dataset_properties['target_type']
             if target_type == 'classification':
                 if entry.get_properties()['handles_classification'] is False:
@@ -78,6 +80,7 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
             else:
                 raise ValueError('Unknown target type %s' % target_type)
 
+            '''
             components_dict[name] = entry
 
         return components_dict

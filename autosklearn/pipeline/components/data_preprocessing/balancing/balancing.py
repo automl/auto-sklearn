@@ -9,8 +9,10 @@ from autosklearn.pipeline.constants import *
 
 
 class Balancing(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, strategy='none', random_state=None):
-        self.strategy = strategy
+
+    def __init__(self):
+        self.strategy = None
+        super(Balancing, self).__init__()
 
     def fit(self, X, y=None):
         return self

@@ -13,14 +13,15 @@ from autosklearn.pipeline.constants import *
 
 
 class KernelPCA(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, n_components, kernel, degree=3, gamma=0.25, coef0=0.0,
-                 random_state=None):
-        self.n_components = int(n_components)
-        self.kernel = kernel
-        self.degree = int(degree)
-        self.gamma = float(gamma)
-        self.coef0 = float(coef0)
-        self.random_state = random_state
+
+    def __init__(self):
+        super(KernelPCA, self).__init__()
+        self.n_components = None
+        self.kernel = None
+        self.degree = None
+        self.gamma = None
+        self.coef0 = None
+        self.random_state = None
 
     def fit(self, X, Y=None):
         import scipy.sparse

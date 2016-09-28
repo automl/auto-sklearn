@@ -12,13 +12,14 @@ from autosklearn.pipeline.constants import *
 
 
 class FeatureAgglomeration(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, n_clusters, affinity, linkage, pooling_func,
-        random_state=None):
-        self.n_clusters = int(n_clusters)
-        self.affinity = affinity
-        self.linkage = linkage
-        self.pooling_func = pooling_func
-        self.random_state = random_state
+
+    def __init__(self):
+        super(FeatureAgglomeration, self).__init__()
+        self.n_clusters = None
+        self.affinity = None
+        self.linkage = None
+        self.pooling_func = None
+        self.random_state = None
 
         self.pooling_func_mapping = dict(mean=np.mean,
                                          median=np.median,

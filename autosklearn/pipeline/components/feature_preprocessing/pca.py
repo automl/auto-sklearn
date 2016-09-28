@@ -9,10 +9,12 @@ from autosklearn.pipeline.constants import *
 
 
 class PCA(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, keep_variance, whiten, random_state=None):
-        self.keep_variance = keep_variance
-        self.whiten = whiten
-        self.random_state = random_state
+
+    def __init__(self):
+        super(PCA, self).__init__()
+        self.keep_variance = None
+        self.whiten = None
+        self.random_state = None
 
     def fit(self, X, Y=None):
         import sklearn.decomposition

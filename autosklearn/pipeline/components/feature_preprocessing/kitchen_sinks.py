@@ -7,7 +7,8 @@ from autosklearn.pipeline.constants import *
 
 class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
 
-    def __init__(self, gamma, n_components, random_state=None):
+    def __init__(self):
+        super(RandomKitchenSinks, self).__init__()
         """ Parameters:
         gamma: float
                Parameter of the rbf kernel to be approximated exp(-gamma * x^2)
@@ -15,9 +16,9 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
         n_components: int 
                Number of components (output dimensionality) used to approximate the kernel
         """
-        self.gamma = gamma
-        self.n_components = n_components
-        self.random_state = random_state
+        self.gamma = None
+        self.n_components = None
+        self.random_state = None
 
     def fit(self, X, Y=None):
         import sklearn.kernel_approximation

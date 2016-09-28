@@ -11,13 +11,14 @@ from autosklearn.pipeline.constants import *
 
 
 class FastICA(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, algorithm, whiten, fun, n_components=None,
-                 random_state=None):
-        self.n_components = None if n_components is None else int(n_components)
-        self.algorithm = algorithm
-        self.whiten = whiten == 'True'
-        self.fun = fun
-        self.random_state = random_state
+
+    def __init__(self):
+        super(FastICA, self).__init__()
+        self.n_components = None
+        self.algorithm = None
+        self.whiten = None
+        self.fun = None
+        self.random_state = None
 
     def fit(self, X, Y=None):
         import sklearn.decomposition
