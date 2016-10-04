@@ -80,11 +80,6 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
                 'input': (SPARSE, DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
-    def transform_data_description(self, artifacts):
-        # stub
-        if 'some artifact' in artifacts:
-            raise InvalidDataArtifactsException(['some artifact'])
-
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()

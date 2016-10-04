@@ -8,7 +8,9 @@ from ConfigSpace import CategoricalHyperparameter
 from ConfigSpace import ConfigurationSpace
 from sklearn.utils import check_random_state
 
-from autosklearn.pipeline.graph_based_config_space import ChoiceConfigSpaceBuilder, LeafNodeConfigSpaceBuilder
+from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.graph_based_config_space import ChoiceConfigSpaceBuilder, LeafNodeConfigSpaceBuilder, \
+    InvalidDataArtifactsException
 
 
 def find_components(package, directory, base_class):
@@ -84,9 +86,53 @@ class AutoSklearnComponent(object):
         raise NotImplementedError()
 
     def transform_data_description(self, artifacts):
-        # stub
-        artifacts.append('some artifact')
-        return artifacts
+        # default properties-based transformation
+
+        properties = self.get_properties()
+
+        if REGRESSION in artifacts and not properties['handles_regression']:
+            raise InvalidDataArtifactsException(REGRESSION)
+        if BINARY_CLASSIFICATION in artifacts and not properties['handles_classification']:
+            raise InvalidDataArtifactsException(BINARY_CLASSIFICATION)
+        if MULTICLASS_CLASSIFICATION in artifacts and not properties['handles_multiclass']:
+            raise InvalidDataArtifactsException(MULTICLASS_CLASSIFICATION)
+        if MULTILABEL_CLASSIFICATION in artifacts and not properties['handles_multilabel']:
+            raise InvalidDataArtifactsException(MULTILABEL_CLASSIFICATION)
+
+        input = properties['input']
+        if DENSE in artifacts and not DENSE in input:
+            raise InvalidDataArtifactsException(DENSE)
+        elif SPARSE in artifacts and not SPARSE in input:
+            raise InvalidDataArtifactsException(SPARSE)
+
+        if SIGNED_DATA in artifacts and (not SIGNED_DATA in input or not UNSIGNED_DATA in input):
+            raise InvalidDataArtifactsException(SIGNED_DATA)
+        elif UNSIGNED_DATA in artifacts and not UNSIGNED_DATA in input:
+            raise InvalidDataArtifactsException(UNSIGNED_DATA)
+
+        output = properties['output']
+        artifacts = set(artifacts)
+        if PREDICTIONS in output:
+            artifacts.add(PREDICTIONS)
+        if not INPUT in output:
+            artifacts.discard(UNSIGNED_DATA)
+            artifacts.discard(SIGNED_DATA)
+            artifacts.discard(DENSE)
+            artifacts.discard(SPARSE)
+        if SIGNED_DATA in output:
+            artifacts.add(SIGNED_DATA)
+            artifacts.discard(UNSIGNED_DATA)
+        if UNSIGNED_DATA in output:
+            artifacts.add(UNSIGNED_DATA)
+            artifacts.discard(SIGNED_DATA)
+        if DENSE in output:
+            artifacts.add(DENSE)
+            artifacts.discard(SPARSE)
+        if SPARSE in output:
+            artifacts.add(SPARSE)
+            artifacts.discard(DENSE)
+
+        return list(artifacts)
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

@@ -18,7 +18,7 @@ from autosklearn.pipeline.serial_flow_component import SerialFlow, ParallelFlow
 
 class BadStub(AutoSklearnComponent):
 
-    def get_config_space(self):
+    def get_hyperparameter_search_space(self):
         cs = ConfigurationSpace()
         cs.add_hyperparameter(CategoricalHyperparameter(name="loss", choices=["linear", "square", "exponential"], default="linear"))
         return cs
@@ -34,7 +34,7 @@ class BadStub(AutoSklearnComponent):
 
 class Stub(AutoSklearnComponent):
 
-    def get_config_space(self):
+    def get_hyperparameter_search_space(self):
         cs = ConfigurationSpace()
         cs.add_hyperparameter(CategoricalHyperparameter(name="loss", choices=["linear", "square", "exponential"], default="linear"))
         return cs
@@ -92,3 +92,9 @@ class SimplePipelineConfigSpaceTest(unittest.TestCase):
 
         cs = pipeline.get_config_space()
         print(cs)
+
+    def test_simple_regression_pipeline(self):
+        pass
+
+    def test_two_parallel_data_processing_pipelines(self):
+        pass
