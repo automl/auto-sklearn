@@ -8,6 +8,8 @@ import os
 
 from ConfigSpace.io import pcs
 import numpy as np
+import numpy.ma as ma
+import scipy.stats
 from sklearn.base import BaseEstimator
 from smac.tae.execute_ta_run import StatusType
 from sklearn.grid_search import _CVScoreTuple
@@ -553,6 +555,72 @@ class AutoML(BaseEstimator):
             grid_scores.append(grid_score)
 
         return grid_scores
+
+    @property
+    def cv_results_(self):
+        results = dict()
+
+        # Missing in contrast to scikit-learn
+        # splitX_test_score - auto-sklearn does not store the scores on a split
+        #                     basis
+        # std_test_score - auto-sklearn does not store the scores on a split
+        #                  basis
+        # splitX_train_score - auto-sklearn does not compute train scores, add
+        #                      flag to compute the train scores
+        # mean_train_score - auto-sklearn does not store the train scores
+        # std_train_score - auto-sklearn does not store the train scores
+        # std_fit_time - auto-sklearn does not store the fit times per split
+        # mean_score_time - auto-sklearn does not store the score time
+        # std_score_time - auto-sklearn does not store the score time
+        # TODO: add those arguments
+
+        parameter_dictionaries = dict()
+        masks = dict()
+        hp_names = []
+
+        # Set up dictionary for parameter values
+        for hp in self.configuration_space.get_hyperparameters():
+            name = hp.name
+            parameter_dictionaries[name] = []
+            masks[name] = []
+            hp_names.append(name)
+
+        mean_test_score = []
+        mean_fit_time = []
+        params = []
+        for run_key in self._proc_smac.runhistory.data:
+            run_value = self._proc_smac.runhistory.data[run_key]
+            config_id = run_key.config_id
+            config = self._proc_smac.runhistory.ids_config[config_id]
+
+            param_dict = config.get_dictionary()
+            params.append(param_dict)
+            mean_test_score.append(1 - run_value.cost)
+            mean_fit_time.append(run_value.time)
+
+            for hp_name in hp_names:
+                if hp_name in param_dict:
+                    hp_value = param_dict[hp_name]
+                    mask_value = False
+                else:
+                    hp_value = np.NaN
+                    mask_value = True
+
+                parameter_dictionaries[hp_name].append(hp_value)
+                masks[hp_name].append(mask_value)
+
+        results['mean_test_score'] = np.array(mean_test_score)
+        results['mean_fit_time'] = np.array(mean_fit_time)
+        results['params'] = params
+        results['rank_test_scores'] = scipy.stats.rankdata(1 - results['mean_test_score'],
+                                                           method='min')
+
+        for hp_name in hp_names:
+            masked_array = ma.MaskedArray(parameter_dictionaries[hp_name],
+                                          masks[hp_name])
+            results['param_%s' % hp_name] = masked_array
+
+        return results
 
     def show_models(self):
         if self.models_ is None or len(self.models_) == 0 or \

@@ -81,6 +81,10 @@ class AutoMLDecorator(object):
     def grid_scores_(self):
         return self._automl.grid_scores_
 
+    @property
+    def cv_results_(self):
+        return self._automl.cv_results_
+
 
 class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
 
