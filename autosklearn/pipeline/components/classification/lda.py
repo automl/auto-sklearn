@@ -69,7 +69,7 @@ class LDA(AutoSklearnClassificationAlgorithm):
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                'input': (DENSE, UNSIGNED_DATA),
+                'input': (DENSE, SIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
     @staticmethod

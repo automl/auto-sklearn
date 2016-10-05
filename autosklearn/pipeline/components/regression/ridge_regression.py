@@ -9,12 +9,13 @@ from autosklearn.pipeline.constants import *
 
 
 class RidgeRegression(AutoSklearnRegressionAlgorithm):
-    def __init__(self, alpha, fit_intercept, tol, random_state=None):
-        self.alpha = float(alpha)
-        self.fit_intercept = fit_intercept == 'True'
-        self.tol = float(tol)
-        self.random_state = random_state
-        self.estimator = None
+
+    def __init__(self):
+        super(RidgeRegression, self).__init__()
+        self.alpha = None
+        self.fit_intercept = None
+        self.tol = None
+        self.random_state = None
 
     def fit(self, X, Y):
         import sklearn.linear_model
@@ -41,7 +42,7 @@ class RidgeRegression(AutoSklearnRegressionAlgorithm):
                 'handles_multilabel': False,
                 'prefers_data_normalized': True,
                 'is_deterministic': True,
-                'input': (SPARSE, DENSE, UNSIGNED_DATA),
+                'input': (SPARSE, DENSE, SIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
     @staticmethod

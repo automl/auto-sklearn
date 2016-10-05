@@ -28,6 +28,6 @@ class MinMaxScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
                 # TODO find out of this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
-                'input': (DENSE, UNSIGNED_DATA),
-                'output': (INPUT, SIGNED_DATA),
+                'input': (DENSE, SIGNED_DATA),
+                'output': (INPUT, UNSIGNED_DATA),
                 'preferred_dtype': None}

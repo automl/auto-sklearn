@@ -41,7 +41,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             self.assertIsInstance(inp, tuple)
             self.assertIsInstance(output, tuple)
             for i in inp:
-                self.assertIn(i, (SPARSE, DENSE, SIGNED_DATA, UNSIGNED_DATA))
+                self.assertIn(i, (SPARSE, DENSE, UNSIGNED_DATA, SIGNED_DATA))
             self.assertEqual(output, (PREDICTIONS,))
             self.assertIn('handles_regression', props)
             self.assertTrue(props['handles_regression'])

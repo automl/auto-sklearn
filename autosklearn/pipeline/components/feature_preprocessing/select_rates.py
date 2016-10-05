@@ -67,12 +67,12 @@ class SelectRates(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        data_type = UNSIGNED_DATA
+        data_type = SIGNED_DATA
 
         if dataset_properties is not None:
             signed = dataset_properties.get('signed')
             if signed is not None:
-                data_type = SIGNED_DATA if signed is True else UNSIGNED_DATA
+                data_type = UNSIGNED_DATA if signed is True else SIGNED_DATA
 
         return {'shortname': 'SR',
                 'name': 'Univariate Feature Selection based on rates',

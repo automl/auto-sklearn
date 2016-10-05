@@ -5,6 +5,7 @@ import pkgutil
 import sys
 
 from ConfigSpace import CategoricalHyperparameter
+from ConfigSpace import Configuration
 from ConfigSpace import ConfigurationSpace
 from sklearn.utils import check_random_state
 
@@ -105,26 +106,26 @@ class AutoSklearnComponent(object):
         elif SPARSE in artifacts and not SPARSE in input:
             raise InvalidDataArtifactsException(SPARSE)
 
-        if SIGNED_DATA in artifacts and (not SIGNED_DATA in input or not UNSIGNED_DATA in input):
-            raise InvalidDataArtifactsException(SIGNED_DATA)
-        elif UNSIGNED_DATA in artifacts and not UNSIGNED_DATA in input:
+        if UNSIGNED_DATA in artifacts and (not UNSIGNED_DATA in input or not SIGNED_DATA in input):
             raise InvalidDataArtifactsException(UNSIGNED_DATA)
+        elif SIGNED_DATA in artifacts and not SIGNED_DATA in input:
+            raise InvalidDataArtifactsException(SIGNED_DATA)
 
         output = properties['output']
         artifacts = set(artifacts)
         if PREDICTIONS in output:
             artifacts.add(PREDICTIONS)
         if not INPUT in output:
-            artifacts.discard(UNSIGNED_DATA)
             artifacts.discard(SIGNED_DATA)
+            artifacts.discard(UNSIGNED_DATA)
             artifacts.discard(DENSE)
             artifacts.discard(SPARSE)
-        if SIGNED_DATA in output:
-            artifacts.add(SIGNED_DATA)
-            artifacts.discard(UNSIGNED_DATA)
         if UNSIGNED_DATA in output:
             artifacts.add(UNSIGNED_DATA)
             artifacts.discard(SIGNED_DATA)
+        if SIGNED_DATA in output:
+            artifacts.add(SIGNED_DATA)
+            artifacts.discard(UNSIGNED_DATA)
         if DENSE in output:
             artifacts.add(DENSE)
             artifacts.discard(SPARSE)
@@ -174,9 +175,10 @@ class AutoSklearnComponent(object):
         raise NotImplementedError()
 
     def set_hyperparameters(self, configuration):
-        params = configuration.get_dictionary()
+        if isinstance(configuration, Configuration):
+            configuration = configuration.get_dictionary()
 
-        for param, value in params.items():
+        for param, value in configuration.items():
             if not hasattr(self, param):
                 raise ValueError('Cannot set hyperparameter %s for %s because '
                                  'the hyperparameter does not exist.' %
@@ -367,6 +369,21 @@ class CompositeAutoSklearnComponent(AutoSklearnComponent):
     def get_config_space_builder(self):
         pass
 
+    def set_hyperparameters(self, configuration):
+        if isinstance(configuration, Configuration):
+            configuration = configuration.get_dictionary()
+
+        component_configs = {}
+        for component_name in self.components:
+            component_configs[component_name] = {}
+        for hp_name, hp_value in configuration.items():
+            separator_index = hp_name.index(':')
+            component_name = hp_name[:separator_index]
+            sub_hp_name = hp_name[separator_index+1:]
+            component_configs[component_name][sub_hp_name] = hp_value
+        for component_name, config in component_configs.items():
+            component = self.components[component_name]
+            component.set_hyperparameters(config)
 
 
 class AutoSklearnChoice(CompositeAutoSklearnComponent):
@@ -437,21 +454,21 @@ class AutoSklearnChoice(CompositeAutoSklearnComponent):
         return components_dict
 
     def set_hyperparameters(self, configuration):
-        params = configuration.get_dictionary()
-        choice = params['__choice__']
-        del params['__choice__']
+        if isinstance(configuration, Configuration):
+            configuration = configuration.get_dictionary()
 
-        new_params = {}
-        for param, value in params.items():
-            param = param.replace(choice, '').replace(':', '')
-            new_params[param] = value
+        choice = configuration['__choice__']
+        del configuration['__choice__']
+        self.choice = self.components[choice]
 
-        new_params['random_state'] = self.random_state
-
-        self.new_params = new_params
-        self.choice = self.get_components()[choice](**new_params)
-
-        return self
+        component_config = {}
+        for hp_name, hp_value in configuration.items():
+            separator_index = hp_name.index(':')
+            component_name = hp_name[:separator_index]
+            if component_name == choice:
+                sub_hp_name = hp_name[separator_index+1:]
+                component_config[sub_hp_name] = hp_value
+        self.choice.set_hyperparameters(component_config)
 
     def get_hyperparameter_search_space(self, dataset_properties=None,
                                         default=None,

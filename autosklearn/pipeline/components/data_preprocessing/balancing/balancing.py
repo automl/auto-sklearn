@@ -11,8 +11,8 @@ from autosklearn.pipeline.constants import *
 class Balancing(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self):
-        self.strategy = None
         super(Balancing, self).__init__()
+        self.strategy = None
 
     def fit(self, X, y=None):
         return self
@@ -20,6 +20,7 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
     def transform(self, X):
         return X
 
+    '''
     def get_weights(self, Y, classifier, preprocessor, init_params, fit_params):
         if init_params is None:
             init_params = {}
@@ -84,6 +85,7 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
                 init_params['classifier:class_weight'] = class_weights
 
         return init_params, fit_params
+    '''
 
     @staticmethod
     def get_properties(dataset_properties=None):
@@ -101,7 +103,7 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
                 'is_deterministic': True,
                 'handles_sparse': True,
                 'handles_dense': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA, SIGNED_DATA),
+                'input': (DENSE, SPARSE, SIGNED_DATA, UNSIGNED_DATA),
                 'output': (INPUT,),
                 'preferred_dtype': None}
 

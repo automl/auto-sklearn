@@ -114,7 +114,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'input': (DENSE, SPARSE, SIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
     @staticmethod

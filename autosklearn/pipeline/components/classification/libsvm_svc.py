@@ -73,6 +73,9 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         self.max_iter = None
         self.random_state = None
 
+    def set_weights(self):
+        pass
+
     def fit(self, X, Y):
         try:
             soft, hard = resource.getrlimit(resource.RLIMIT_AS)
@@ -145,7 +148,7 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
             'handles_multiclass': True,
             'handles_multilabel': False,
             'is_deterministic': True,
-            'input': (DENSE, SPARSE, UNSIGNED_DATA),
+            'input': (DENSE, SPARSE, SIGNED_DATA),
             'output': (PREDICTIONS,)}
 
     @staticmethod

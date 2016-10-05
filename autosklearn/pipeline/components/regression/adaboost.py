@@ -9,13 +9,14 @@ from autosklearn.pipeline.constants import *
 
 
 class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
-    def __init__(self, n_estimators, learning_rate, loss, max_depth,
-                 random_state=None):
-        self.n_estimators = int(n_estimators)
-        self.learning_rate = float(learning_rate)
-        self.loss = loss
-        self.random_state = random_state
-        self.max_depth = max_depth
+
+    def __init__(self):
+        super(AdaboostRegressor, self).__init__()
+        self.n_estimators = None
+        self.learning_rate = None
+        self.loss = None
+        self.random_state = None
+        self.max_depth = None
         self.estimator = None
 
     def fit(self, X, Y):
@@ -52,7 +53,7 @@ class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
                 'handles_multiclass': False,
                 'handles_multilabel': False,
                 'is_deterministic': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'input': (DENSE, SPARSE, SIGNED_DATA),
                 'output': (PREDICTIONS, )}
 
     @staticmethod

@@ -42,8 +42,8 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                'input': (SPARSE, DENSE, UNSIGNED_DATA),
-                'output': (INPUT, UNSIGNED_DATA)}
+                'input': (SPARSE, DENSE, SIGNED_DATA),
+                'output': (INPUT, SIGNED_DATA)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

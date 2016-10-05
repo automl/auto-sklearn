@@ -59,8 +59,8 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (SPARSE, SIGNED_DATA)}
+                'input': (DENSE, SPARSE, SIGNED_DATA),
+                'output': (SPARSE, UNSIGNED_DATA)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

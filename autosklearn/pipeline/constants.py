@@ -23,18 +23,18 @@ STRING_TO_TASK_TYPES = \
      "multilabel.classification": MULTILABEL_CLASSIFICATION,
      "regression": REGRESSION}
 
-DENSE = 5
-SPARSE = 6
-PREDICTIONS = 7
-INPUT = 8
+DENSE = 'dense'
+SPARSE = 'sparse'
+PREDICTIONS = 'predictions'
+INPUT = 'input'
 
-SIGNED_DATA = 9 # only +
-UNSIGNED_DATA = 10 # + or -
+UNSIGNED_DATA = 'unsigned data' # only +, subset of SIGNED_DATA
+SIGNED_DATA = 'signed data' # + or -
 
 DATASET_PROPERTIES_TO_STRING = \
     {DENSE:         'dense',
      SPARSE:        'sparse',
      PREDICTIONS:   'predictions',
      INPUT:         'input',
-     SIGNED_DATA:   'signed data',
-     UNSIGNED_DATA: 'unsigned data'}
+     UNSIGNED_DATA: 'signed data',
+     SIGNED_DATA: 'unsigned data'}

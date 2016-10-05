@@ -11,18 +11,18 @@ from autosklearn.pipeline.constants import *
 
 
 class DecisionTree(AutoSklearnRegressionAlgorithm):
-    def __init__(self, criterion, splitter, max_features, max_depth,
-                 min_samples_split, min_samples_leaf, min_weight_fraction_leaf,
-                 max_leaf_nodes, random_state=None):
-        self.criterion = criterion
-        self.splitter = splitter
-        self.max_features = max_features
-        self.max_depth = max_depth
-        self.min_samples_split = min_samples_split
-        self.min_samples_leaf = min_samples_leaf
-        self.max_leaf_nodes = max_leaf_nodes
-        self.min_weight_fraction_leaf = min_weight_fraction_leaf
-        self.random_state = random_state
+
+    def __init__(self):
+        super(DecisionTree, self).__init__()
+        self.criterion = None
+        self.splitter = None
+        self.max_features = None
+        self.max_depth = None
+        self.min_samples_split = None
+        self.min_samples_leaf = None
+        self.max_leaf_nodes = None
+        self.min_weight_fraction_leaf = None
+        self.random_state = None
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None):
@@ -67,7 +67,7 @@ class DecisionTree(AutoSklearnRegressionAlgorithm):
                 'handles_multiclass': False,
                 'handles_multilabel': False,
                 'is_deterministic': False,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'input': (DENSE, SPARSE, SIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
     @staticmethod

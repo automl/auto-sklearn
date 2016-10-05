@@ -64,7 +64,7 @@ def get_match_array(pipeline, dataset_properties,
                 break
             # No need to check if the node can handle SIGNED_DATA; this is
             # always assumed to be true
-            elif not dataset_is_signed and UNSIGNED_DATA not in node_input:
+            elif not dataset_is_signed and SIGNED_DATA not in node_input:
                 matches[pipeline_instantiation_idxs] = 0
                 break
 
@@ -89,12 +89,12 @@ def get_match_array(pipeline, dataset_properties,
 
             if PREDICTIONS in node_output:
                 pass
-            elif (INPUT in node_output and SIGNED_DATA not in node_output and
-                        UNSIGNED_DATA not in node_output):
+            elif (INPUT in node_output and UNSIGNED_DATA not in node_output and
+                        SIGNED_DATA not in node_output):
                 pass
-            elif SIGNED_DATA in node_output:
-                dataset_is_signed = True
             elif UNSIGNED_DATA in node_output:
+                dataset_is_signed = True
+            elif SIGNED_DATA in node_output:
                 dataset_is_signed = False
             else:
                 print(node)

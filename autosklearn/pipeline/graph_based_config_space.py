@@ -133,7 +133,7 @@ class ChoiceConfigSpaceBuilder(CompositeConfigSpaceBuilder):
         choice_parameter = cs.get_hyperparameter('__choice__')
         for name, node in self._children.items():
             sub_cs = node.get_config_space()
-            cs.add_configuration_space(name, sub_cs, {'parent': choice_parameter, 'value': name})
+            cs.add_configuration_space(name, sub_cs, parent_hyperparameter={'parent': choice_parameter, 'value': name})
         return cs
 
     def explore_data_flow(self, data_description):

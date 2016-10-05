@@ -12,6 +12,7 @@ from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.one_hot
 from autosklearn.pipeline.components.data_preprocessing.rescaling import \
     RescalingChoice
 from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
+from autosklearn.pipeline.components.regression import RegressorChoice
 from autosklearn.pipeline.graph_based_config_space import LeafNodeConfigSpaceBuilder, InvalidDataArtifactsException
 from autosklearn.pipeline.serial_flow_component import SerialFlow, ParallelFlow
 
@@ -93,8 +94,36 @@ class SimplePipelineConfigSpaceTest(unittest.TestCase):
         cs = pipeline.get_config_space()
         print(cs)
 
+    def test_set_simple_classification_pipeline(self):
+        pipeline = SerialFlow(
+            [
+                ("one_hot_encoding", OneHotEncoder()),
+                ("imputation", Imputation()),
+                ("rescaling", RescalingChoice()),
+                ("balancing", Balancing()),
+                ("preprocessor", FeaturePreprocessorChoice()),
+                ("classifier", ClassifierChoice())
+            ]
+        )
+
+        cs = pipeline.get_config_space()
+        default = cs.get_default_configuration()
+        pipeline.set_hyperparameters(default)
+
     def test_simple_regression_pipeline(self):
-        pass
+        pipeline = SerialFlow(
+            [
+                ("one_hot_encoding", OneHotEncoder()),
+                ("imputation", Imputation()),
+                ("rescaling", RescalingChoice()),
+                ("preprocessor", FeaturePreprocessorChoice()),
+                ("classifier", RegressorChoice())
+            ]
+        )
+
+        cs = pipeline.get_config_space()
+        default = cs.get_default_configuration()
+        pipeline.set_hyperparameters(default)
 
     def test_two_parallel_data_processing_pipelines(self):
         pass

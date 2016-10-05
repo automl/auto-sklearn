@@ -9,23 +9,21 @@ from autosklearn.pipeline.constants import *
 
 
 class SGD(AutoSklearnRegressionAlgorithm):
-    def __init__(self, loss, penalty, alpha, fit_intercept, n_iter,
-                 learning_rate, l1_ratio=0.15, epsilon=0.1,
-                 eta0=0.01, power_t=0.5, average=False, random_state=None):
-        self.loss = loss
-        self.penalty = penalty
-        self.alpha = alpha
-        self.fit_intercept = fit_intercept
-        self.n_iter = n_iter
-        self.learning_rate = learning_rate
-        self.l1_ratio = l1_ratio
-        self.epsilon = epsilon
-        self.eta0 = eta0
-        self.power_t = power_t
-        self.random_state = random_state
-        self.average = average
 
-        self.estimator = None
+    def __init__(self):
+        super(SGD, self).__init__()
+        self.loss = None
+        self.penalty = None
+        self.alpha = None
+        self.fit_intercept = None
+        self.n_iter = None
+        self.learning_rate = None
+        self.l1_ratio = 0.15
+        self.epsilon = 0.1
+        self.eta0 = 0.01
+        self.power_t = 0.5
+        self.random_state = None
+        self.average = False
         self.scaler = None
 
     def fit(self, X, y):
@@ -106,7 +104,7 @@ class SGD(AutoSklearnRegressionAlgorithm):
                 'handles_multilabel': False,
                 'is_deterministic': True,
                 'handles_sparse': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'input': (DENSE, SPARSE, SIGNED_DATA),
                 'output': (PREDICTIONS,),
                 # TODO find out what is best used here!
                 'preferred_dtype': None}

@@ -7,11 +7,13 @@ from autosklearn.pipeline.constants import *
 
 
 class KNearestNeighborsRegressor(AutoSklearnRegressionAlgorithm):
-    def __init__(self, n_neighbors, weights, p, random_state=None):
-        self.n_neighbors = n_neighbors
-        self.weights = weights
-        self.p = p
-        self.random_state = random_state
+
+    def __init__(self):
+        super(KNearestNeighborsRegressor, self).__init__()
+        self.n_neighbors = None
+        self.weights = None
+        self.p = None
+        self.random_state = None
 
     def fit(self, X, Y):
         import sklearn.neighbors
@@ -38,7 +40,7 @@ class KNearestNeighborsRegressor(AutoSklearnRegressionAlgorithm):
                 'handles_multiclass': False,
                 'handles_multilabel': False,
                 'is_deterministic': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'input': (DENSE, SPARSE, SIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
     @staticmethod

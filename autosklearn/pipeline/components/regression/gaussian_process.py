@@ -9,16 +9,15 @@ from autosklearn.pipeline.constants import *
 
 
 class GaussianProcess(AutoSklearnRegressionAlgorithm):
-    def __init__(self, nugget, thetaL, thetaU, normalize=False, copy_X=False, 
-                 random_state=None):
-        self.nugget = float(nugget)
-        self.thetaL = float(thetaL)
-        self.thetaU = float(thetaU)
-        self.normalize = normalize
-        self.copy_X = copy_X
-        # We ignore it
-        self.random_state = random_state
-        self.estimator = None
+
+    def __init__(self):
+        super(GaussianProcess, self).__init__()
+        self.nugget = None
+        self.thetaL = None
+        self.thetaU = None
+        self.normalize = None
+        self.copy_X = None
+        self.random_state = None
         self.scaler = None
 
     def fit(self, X, Y):
@@ -62,7 +61,7 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
                 'handles_multiclass': False,
                 'handles_multilabel': False,
                 'is_deterministic': True,
-                'input': (DENSE, UNSIGNED_DATA),
+                'input': (DENSE, SIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
     @staticmethod

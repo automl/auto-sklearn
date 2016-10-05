@@ -12,11 +12,9 @@ from autosklearn.pipeline.constants import *
 
 
 class XGradientBoostingRegressor(AutoSklearnRegressionAlgorithm):
-    def __init__(self, learning_rate, n_estimators, subsample,
-                 max_depth, colsample_bylevel, colsample_bytree, gamma,
-                 min_child_weight, max_delta_step, reg_alpha, reg_lambda,
-                 base_score, scale_pos_weight, nthread=1, init=None,
-                 random_state=None, verbose=0):
+
+    def __init__(self):
+        super(XGradientBoostingRegressor, self).__init__()
         ## Do not exist
         # self.loss = loss
         # self.min_samples_split = min_samples_split
@@ -24,60 +22,53 @@ class XGradientBoostingRegressor(AutoSklearnRegressionAlgorithm):
         # self.min_weight_fraction_leaf = min_weight_fraction_leaf
         # self.max_leaf_nodes = max_leaf_nodes
 
-        self.learning_rate = learning_rate
-        self.n_estimators = n_estimators
-        self.subsample = subsample
-        self.max_depth = max_depth
+        self.learning_rate = None
+        self.n_estimators = None
+        self.subsample = None
+        self.max_depth = None
 
         ## called differently
         # max_features: Subsample ratio of columns for each split, in each level.
-        self.colsample_bylevel = colsample_bylevel
+        self.colsample_bylevel = None
 
         # min_weight_fraction_leaf: Minimum sum of instance weight(hessian)
         # needed in a child.
-        self.min_child_weight = min_child_weight
+        self.min_child_weight = None
 
         # Whether to print messages while running boosting.
-        if verbose:
-            self.silent = False
-        else:
-            self.silent = True
+        self.silent = False
 
         # Random number seed.
-        if random_state is None:
-            self.seed = numpy.random.randint(1, 10000, size=1)[0]
-        else:
-            self.seed = random_state.randint(1, 10000, size=1)[0]
+        self.seed = None
 
         ## new paramaters
         # Subsample ratio of columns when constructing each tree.
-        self.colsample_bytree = colsample_bytree
+        self.colsample_bytree = None
 
         # Minimum loss reduction required to make a further partition on a leaf
         # node of the tree.
-        self.gamma = gamma
+        self.gamma = None
 
         # Maximum delta step we allow each tree's weight estimation to be.
-        self.max_delta_step = max_delta_step
+        self.max_delta_step = None
 
         # L2 regularization term on weights
-        self.reg_alpha = reg_alpha
+        self.reg_alpha = None
 
         # L1 regularization term on weights
-        self.reg_lambda = reg_lambda
+        self.reg_lambda = None
 
         # Balancing of positive and negative weights.
-        self.scale_pos_weight = scale_pos_weight
+        self.scale_pos_weight = None
 
         # The initial prediction score of all instances, global bias.
-        self.base_score = base_score
+        self.base_score = None
 
         # Number of parallel threads used to run xgboost.
-        self.nthread = nthread
+        self.n_thread = 1
 
         ## Were there before, didn't touch
-        self.init = init
-        self.estimator = None
+        self.init = None
 
     def fit(self, X, y, refit=False):
         import xgboost as xgb
@@ -96,7 +87,7 @@ class XGradientBoostingRegressor(AutoSklearnRegressionAlgorithm):
         self.max_delta_step = int(self.max_delta_step)
         self.reg_alpha = float(self.reg_alpha)
         self.reg_lambda = float(self.reg_lambda)
-        self.nthread = int(self.nthread)
+        self.n_thread = int(self.n_thread)
         self.base_score = float(self.base_score)
         self.scale_pos_weight = float(self.scale_pos_weight)
 
@@ -108,7 +99,7 @@ class XGradientBoostingRegressor(AutoSklearnRegressionAlgorithm):
                 n_estimators=self.n_estimators,
                 silent=self.silent,
                 objective=self.objective,
-                nthread=self.nthread,
+                nthread=self.n_thread,
                 gamma=self.gamma,
                 scale_pos_weight=self.scale_pos_weight,
                 min_child_weight=self.min_child_weight,
@@ -140,7 +131,7 @@ class XGradientBoostingRegressor(AutoSklearnRegressionAlgorithm):
                 'handles_multiclass': False,
                 'handles_multilabel': False,
                 'is_deterministic': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'input': (DENSE, SPARSE, SIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
     @staticmethod

@@ -28,7 +28,7 @@ class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                'input': (SPARSE, DENSE, UNSIGNED_DATA),
+                'input': (SPARSE, DENSE, SIGNED_DATA),
                 'output': (INPUT,)}
 
     @staticmethod

@@ -10,51 +10,22 @@ from autosklearn.pipeline.constants import *
 
 
 class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
-    def __init__(self, n_estimators, criterion, min_samples_leaf,
-                 min_samples_split, max_features,
-                 max_leaf_nodes_or_max_depth="max_depth",
-                 bootstrap=False, max_leaf_nodes=None, max_depth="None",
-                 oob_score=False, n_jobs=1, random_state=None, verbose=0):
 
-        self.n_estimators = int(n_estimators)
-        self.estimator_increment = 10
-        if criterion not in ("mse"):
-            raise ValueError("'criterion' is not in ('mse'): "
-                             "%s" % criterion)
-        self.criterion = criterion
-
-        if max_leaf_nodes_or_max_depth == "max_depth":
-            self.max_leaf_nodes = None
-            if max_depth == "None":
-                self.max_depth = None
-            else:
-                self.max_depth = int(max_depth)
-                #if use_max_depth == "True":
-                #    self.max_depth = int(max_depth)
-                #elif use_max_depth == "False":
-                #    self.max_depth = None
-        else:
-            if max_leaf_nodes == "None":
-                self.max_leaf_nodes = None
-            else:
-                self.max_leaf_nodes = int(max_leaf_nodes)
-            self.max_depth = None
-
-        self.min_samples_leaf = int(min_samples_leaf)
-        self.min_samples_split = int(min_samples_split)
-
-        self.max_features = float(max_features)
-
-        if bootstrap == "True":
-            self.bootstrap = True
-        elif bootstrap == "False":
-            self.bootstrap = False
-
-        self.oob_score = oob_score
-        self.n_jobs = int(n_jobs)
-        self.random_state = random_state
-        self.verbose = int(verbose)
-        self.estimator = None
+    def __init__(self):
+        super(ExtraTreesRegressor, self).__init__()
+        self.n_estimators = None
+        self.estimator_increment = None
+        self.criterion = None
+        self.max_leaf_nodes = None
+        self.max_depth = None
+        self.min_samples_leaf = None
+        self.min_samples_split = None
+        self.max_features = None
+        self.bootstrap = False
+        self.oob_score = False
+        self.n_jobs = 1
+        self.random_state = None
+        self.verbose = 0
 
     def fit(self, X, y, refit=False):
         if self.estimator is None or refit:
@@ -118,7 +89,7 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
                 'handles_multiclass': False,
                 'handles_multilabel': False,
                 'is_deterministic': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'input': (DENSE, SPARSE, SIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
     @staticmethod

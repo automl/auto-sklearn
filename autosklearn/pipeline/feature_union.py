@@ -3,7 +3,7 @@ from ConfigSpace import ConfigurationSpace
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm, AutoSklearnComponent
 from autosklearn.pipeline.constants import DENSE, SPARSE
-from autosklearn.pipeline.constants import INPUT, UNSIGNED_DATA
+from autosklearn.pipeline.constants import INPUT, SIGNED_DATA
 
 
 class FeatureUnion(AutoSklearnComponent):
@@ -30,7 +30,7 @@ class FeatureUnion(AutoSklearnComponent):
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                'input': (UNSIGNED_DATA),
+                'input': (SIGNED_DATA),
                 'output': (INPUT, )}
 
     def get_hyperparameter_search_space(self, dataset_properties=None):

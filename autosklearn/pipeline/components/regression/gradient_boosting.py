@@ -11,26 +11,22 @@ from autosklearn.pipeline.constants import *
 
 
 class GradientBoosting(AutoSklearnRegressionAlgorithm):
-    def __init__(self, loss, learning_rate, n_estimators, subsample,
-                 min_samples_split, min_samples_leaf,
-                 min_weight_fraction_leaf, max_depth, max_features,
-                 max_leaf_nodes, alpha=None, init=None, random_state=None,
-                 verbose=0):
-        self.loss = loss
-        self.learning_rate = learning_rate
-        self.n_estimators = n_estimators
-        self.subsample = subsample
-        self.min_samples_split = min_samples_split
-        self.min_samples_leaf = min_samples_leaf
-        self.min_weight_fraction_leaf = min_weight_fraction_leaf
-        self.max_depth = max_depth
-        self.max_features = max_features
-        self.max_leaf_nodes = max_leaf_nodes
-        self.alpha = alpha
-        self.init = init
-        self.random_state = random_state
-        self.verbose = verbose
-        self.estimator = None
+    def __init__(self):
+        super(GradientBoosting, self).__init__()
+        self.loss = None
+        self.learning_rate = None
+        self.n_estimators = None
+        self.subsample = None
+        self.min_samples_split = None
+        self.min_samples_leaf = None
+        self.min_weight_fraction_leaf = None
+        self.max_depth = None
+        self.max_features = None
+        self.max_leaf_nodes = None
+        self.alpha = None
+        self.init = None
+        self.random_state = None
+        self.verbose = 0
 
     def fit(self, X, y, sample_weight=None, refit=False):
         if self.estimator is None or refit:
@@ -119,7 +115,7 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
                 'handles_multilabel': False,
                 'prefers_data_normalized': False,
                 'is_deterministic': True,
-                'input': (DENSE, UNSIGNED_DATA),
+                'input': (DENSE, SIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
     @staticmethod

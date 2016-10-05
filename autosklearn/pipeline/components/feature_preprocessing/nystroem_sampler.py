@@ -57,12 +57,12 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        data_type = UNSIGNED_DATA
+        data_type = SIGNED_DATA
 
         if dataset_properties is not None:
             signed = dataset_properties.get('signed')
             if signed is not None:
-                data_type = SIGNED_DATA if signed is True else UNSIGNED_DATA
+                data_type = UNSIGNED_DATA if signed is True else SIGNED_DATA
         return {'shortname': 'Nystroem',
                 'name': 'Nystroem kernel approximation',
                 'handles_regression': True,
@@ -71,7 +71,7 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
                 'handles_multilabel': True,
                 'is_deterministic': True,
                 'input': (SPARSE, DENSE, data_type),
-                'output': (INPUT, UNSIGNED_DATA)}
+                'output': (INPUT, SIGNED_DATA)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

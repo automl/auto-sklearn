@@ -10,23 +10,21 @@ from autosklearn.pipeline.constants import *
 
 
 class RandomForest(AutoSklearnRegressionAlgorithm):
-    def __init__(self, n_estimators, criterion, max_features,
-                 max_depth, min_samples_split, min_samples_leaf,
-                 min_weight_fraction_leaf, bootstrap, max_leaf_nodes,
-                 random_state=None, n_jobs=1):
-        self.n_estimators = n_estimators
+
+    def __init__(self):
+        super(RandomForest, self).__init__()
+        self.n_estimators = None
         self.estimator_increment = 10
-        self.criterion = criterion
-        self.max_features = max_features
-        self.max_depth = max_depth
-        self.min_samples_split = min_samples_split
-        self.min_samples_leaf = min_samples_leaf
-        self.min_weight_fraction_leaf = min_weight_fraction_leaf
-        self.bootstrap = bootstrap
-        self.max_leaf_nodes = max_leaf_nodes
-        self.random_state = random_state
-        self.n_jobs = n_jobs
-        self.estimator = None
+        self.criterion = None
+        self.max_features = None
+        self.max_depth = None
+        self.min_samples_split = None
+        self.min_samples_leaf = None
+        self.min_weight_fraction_leaf = None
+        self.bootstrap = None
+        self.max_leaf_nodes = None
+        self.random_state = None
+        self.n_jobs = 1
 
     def fit(self, X, y, sample_weight=None, refit=False):
         if self.estimator is None or refit:
@@ -106,7 +104,7 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
                 'handles_multilabel': False,
                 'prefers_data_normalized': False,
                 'is_deterministic': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'input': (DENSE, SPARSE, SIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
     @staticmethod

@@ -72,7 +72,7 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
                 # TODO find out of this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'input': (DENSE, SPARSE, SIGNED_DATA),
                 'output': (INPUT,),
                 'preferred_dtype': None}
 

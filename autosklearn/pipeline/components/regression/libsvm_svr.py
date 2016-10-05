@@ -13,21 +13,20 @@ from autosklearn.pipeline.constants import *
 
 
 class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
-    def __init__(self, kernel, C, epsilon, tol, shrinking, gamma=0.0,
-                 degree=3, coef0=0.0, verbose=False,
-                 max_iter=-1, random_state=None):
-        self.kernel = kernel
-        self.C = C
-        self.epsilon = epsilon
-        self.tol = tol
-        self.shrinking = shrinking
-        self.degree = degree
-        self.gamma = gamma
-        self.coef0 = coef0
-        self.verbose = verbose
-        self.max_iter = max_iter
-        self.random_state = random_state
-        self.estimator = None
+
+    def __init__(self):
+        super(LibSVM_SVR, self).__init__()
+        self.kernel = None
+        self.C = None
+        self.epsilon = None
+        self.tol = None
+        self.shrinking = None
+        self.degree = 3
+        self.gamma = 0.0
+        self.coef0 = 0.0
+        self.verbose = False
+        self.max_iter = -1
+        self.random_state = None
 
     def fit(self, X, Y):
         import sklearn.svm
@@ -94,7 +93,7 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
                 'handles_multilabel': False,
                 'prefers_data_normalized': True,
                 'is_deterministic': True,
-                'input': (SPARSE, DENSE, UNSIGNED_DATA),
+                'input': (SPARSE, DENSE, SIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
     @staticmethod

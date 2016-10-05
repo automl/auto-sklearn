@@ -32,6 +32,6 @@ class NoRescalingComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
                 # TODO find out of this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
-                'input': (SPARSE, DENSE, UNSIGNED_DATA),
+                'input': (SPARSE, DENSE, SIGNED_DATA),
                 'output': (INPUT,),
                 'preferred_dtype': None}

@@ -10,16 +10,16 @@ from autosklearn.pipeline.constants import *
 
 class LibLinear_SVR(AutoSklearnRegressionAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
-    def __init__(self, loss, epsilon, dual, tol, C, fit_intercept,
-                 intercept_scaling, random_state=None):
-        self.epsilon = epsilon
-        self.loss = loss
-        self.dual = dual
-        self.tol = tol
-        self.C = C
-        self.fit_intercept = fit_intercept
-        self.intercept_scaling = intercept_scaling
-        self.random_state = random_state
+    def __init__(self):
+        super(LibLinear_SVR, self).__init__()
+        self.epsilon = None
+        self.loss = None
+        self.dual = None
+        self.tol = None
+        self.C = None
+        self.fit_intercept = None
+        self.intercept_scaling = None
+        self.random_state = None
         self.estimator = None
 
     def fit(self, X, Y):
@@ -58,7 +58,7 @@ class LibLinear_SVR(AutoSklearnRegressionAlgorithm):
                 'handles_multiclass': False,
                 'handles_multilabel': False,
                 'is_deterministic': False,
-                'input': (SPARSE, DENSE, UNSIGNED_DATA),
+                'input': (SPARSE, DENSE, SIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
     @staticmethod

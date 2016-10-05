@@ -64,8 +64,8 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': False,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (DENSE, UNSIGNED_DATA)}
+                'input': (DENSE, SPARSE, SIGNED_DATA),
+                'output': (DENSE, SIGNED_DATA)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

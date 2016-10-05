@@ -9,19 +9,18 @@ from autosklearn.pipeline.constants import *
 
 
 class ARDRegression(AutoSklearnRegressionAlgorithm):
-    def __init__(self, n_iter, tol, alpha_1, alpha_2, lambda_1, lambda_2,
-                 threshold_lambda, fit_intercept, random_state=None):
-        self.random_state = random_state
-        self.estimator = None
 
-        self.n_iter = int(n_iter)
-        self.tol = float(tol)
-        self.alpha_1 = float(alpha_1)
-        self.alpha_2 = float(alpha_2)
-        self.lambda_1 = float(lambda_1)
-        self.lambda_2 = float(lambda_2)
-        self.threshold_lambda = float(threshold_lambda)
-        self.fit_intercept = fit_intercept == True
+    def __init__(self):
+        super(ARDRegression, self).__init__()
+        self.n_iter = None
+        self.tol = None
+        self.alpha_1 = None
+        self.alpha_2 = None
+        self.lambda_1 = None
+        self.lambda_2 = None
+        self.threshold_lambda = None
+        self.fit_intercept = None
+        self.random_state = None
 
     def fit(self, X, Y):
         import sklearn.linear_model
@@ -56,7 +55,7 @@ class ARDRegression(AutoSklearnRegressionAlgorithm):
                 'handles_multilabel': False,
                 'prefers_data_normalized': True,
                 'is_deterministic': True,
-                'input': (DENSE, UNSIGNED_DATA),
+                'input': (DENSE, SIGNED_DATA),
                 'output': (PREDICTIONS,)}
 
     @staticmethod
