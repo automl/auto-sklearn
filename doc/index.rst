@@ -66,7 +66,7 @@ Then install *auto-sklearn*
 
 .. code:: bash
 
-    pip install git+https://github.com/automl/auto-sklearn.git#egg=autosklearn
+    pip install auto-sklearn
 
 We recommend installing *auto-sklearn* into a `virtual environment
 <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or into an
@@ -76,7 +76,7 @@ Manual
 ******
 
 * :ref:`API`
-* :ref:`manual`
+* :ref:`resampling`
 * :ref:`extending`
 
 
@@ -133,11 +133,15 @@ Contributors
 
 * Matthias Feurer
 * Katharina Eggensperger
-* Aaron Klein
 * Jost Tobias Springenberg
-* Manuel Blum
+* Aaron Klein
+* Anatolii Domashnev
+* Alexander Sapronov
 * Stefan Falkner
+* Manuel Blum
+* Hector Mendoza
 * Farooq Ahmed Zuberi
 * Frank Hutter
-* Alexander Sapronov
-* Anatolii Domashnev
+* Diego Kobylkin
+
+

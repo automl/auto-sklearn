@@ -9,7 +9,7 @@ import sklearn.metrics
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import *
 
-tmp_folder = '/tmp/autoslearn_parallel_example_tmp'
+tmp_folder = '/tmp/autosklearn_parallel_example_tmp'
 output_folder = '/tmp/autosklearn_parallel_example_out'
 
 
@@ -21,17 +21,30 @@ def spawn_classifier(seed, dataset_name):
     process which runs one instance of auto-sklearn.
     """
 
+    # Use the initial configurations from meta-learning only in one out of
+    # the four processes spawned. This prevents auto-sklearn from evaluating
+    # the same configurations in four processes.
+    if seed == 0:
+        initial_configurations_via_metalearning = 25
+    else:
+        initial_configurations_via_metalearning = 0
 
-    automl = AutoSklearnClassifier(time_left_for_this_task=600, # sec., how long should this seed fit process run
-                                   per_run_time_limit=60, # sec., each model may only take this long before it's killed 
-                                   ml_memory_limit=1024, # MB
-                                   shared_mode=True, # tmp folder will be shared between seeds
-                                   tmp_folder=tmp_folder,
-                                   output_folder=output_folder,
-                                   delete_tmp_folder_after_terminate=False,
-                                   ensemble_size=0, # no need to build ensembles at this stage
-                                   initial_configurations_via_metalearning=0, # let seeds profit from each other's results
-                                   seed=seed)
+    # Arguments which are different to other runs of auto-sklearn:
+    # 1. all classifiers write to the same output directory
+    # 2. shared_mode is set to True, this enables sharing of data between
+    # models.
+    # 3. all instances of the AutoSklearnClassifier must have a different seed!
+    automl = AutoSklearnClassifier(
+        time_left_for_this_task=180, # sec., how long should this seed fit process run
+        per_run_time_limit=60, # sec., each model may only take this long before it's killed
+        ml_memory_limit=1024, # MB, memory limit imposed on each call to a ML  algorithm
+        shared_mode=True, # tmp folder will be shared between seeds
+        tmp_folder=tmp_folder,
+        output_folder=output_folder,
+        delete_tmp_folder_after_terminate=False,
+        ensemble_size=0, # ensembles will be built when all optimization runs are finished
+        initial_configurations_via_metalearning=initial_configurations_via_metalearning,
+        seed=seed)
     automl.fit(X_train, y_train, dataset_name=dataset_name)
 
 if __name__ == '__main__':
@@ -68,7 +81,8 @@ if __name__ == '__main__':
                                    initial_configurations_via_metalearning=0,
                                    seed=1)
 
-    # Both the ensemble_size and ensemble_nbest parameters can be changed later
+    # Both the ensemble_size and ensemble_nbest parameters can be changed now if
+    # necessary
     automl.fit_ensemble(task=MULTICLASS_CLASSIFICATION,
                         metric=ACC_METRIC,
                         precision='32',
