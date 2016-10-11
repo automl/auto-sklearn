@@ -143,5 +143,6 @@ Contributors
 * Farooq Ahmed Zuberi
 * Frank Hutter
 * Diego Kobylkin
+* Marius Lindauer
 
 
