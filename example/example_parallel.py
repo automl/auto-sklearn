@@ -87,8 +87,8 @@ if __name__ == '__main__':
                         metric=ACC_METRIC,
                         precision='32',
                         dataset_name='digits',
-                        ensemble_size=10,
-                        ensemble_nbest=10)
+                        ensemble_size=20,
+                        ensemble_nbest=50)
 
     predictions = automl.predict(X_test)
     print(automl.show_models())
