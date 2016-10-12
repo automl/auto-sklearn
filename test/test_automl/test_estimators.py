@@ -11,6 +11,7 @@ except ImportError:
     from unittest import mock
 
 import numpy as np
+import numpy.ma as npma
 from sklearn.grid_search import _CVScoreTuple
 
 import autosklearn.pipeline.util as putil
@@ -188,6 +189,33 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertIsInstance(grid_scores_[0].parameters, mock.MagicMock)
 
         del automl
+        self._tearDown(output)
+
+    def test_cv_results(self):
+        # TODO restructure and actually use real SMAC output from a long run
+        # to do this unittest!
+        output = os.path.join(self.test_dir, '..', '.tmp_cv_results')
+        self._setUp(output)
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+
+        cls = AutoSklearnClassifier(time_left_for_this_task=15,
+                                    per_run_time_limit=15,
+                                    output_folder=output,
+                                    tmp_folder=output,
+                                    shared_mode=False,
+                                    seed=1,
+                                    initial_configurations_via_metalearning=0,
+                                    ensemble_size=0)
+        cls.fit(X_train, Y_train)
+        cv_results = cls.cv_results_
+        self.assertIsInstance(cv_results, dict)
+        self.assertIsInstance(cv_results['mean_test_score'], np.ndarray)
+        self.assertIsInstance(cv_results['mean_fit_time'], np.ndarray)
+        self.assertIsInstance(cv_results['params'], list)
+        self.assertIsInstance(cv_results['rank_test_scores'], np.ndarray)
+        self.assertTrue([isinstance(val, npma.MaskedArray) for key, val in
+                         cv_results.items() if key.startswith('param_')])
+        del cls
         self._tearDown(output)
 
 
