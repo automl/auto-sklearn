@@ -3,6 +3,7 @@ from __future__ import print_function
 from operator import itemgetter
 
 import numpy as np
+import pandas as pd
 import sklearn.datasets
 import sklearn.metrics
 
@@ -35,7 +36,7 @@ def main():
     X_test = X[1000:]
     y_test = y[1000:]
     automl = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=60, per_run_time_limit=30,
+        time_left_for_this_task=120, per_run_time_limit=30,
         tmp_folder='/tmp/autoslearn_holdout_example_tmp',
         output_folder='/tmp/autosklearn_holdout_example_out')
     automl.fit(X_train, y_train, dataset_name='digits')
@@ -46,6 +47,7 @@ def main():
     report(automl.grid_scores_)
     print(automl.show_models())
     predictions = automl.predict(X_test)
+    print(automl.sprint_statistics())
     print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
 

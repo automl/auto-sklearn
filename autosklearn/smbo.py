@@ -854,8 +854,9 @@ class AutoMLSMBO(object):
                                     logger=self.logger)
             (duration, result, _, additional_run_info, status) = info
             run_history.add(config=next_config, cost=result,
-                            time=duration , status=status,
-                            instance_id=instance_id, seed=seed)
+                            time=duration, status=status,
+                            instance_id=instance_id, seed=seed,
+                            additional_info=additional_run_info)
             run_history.update_cost(next_config, result)
             self.logger.info("Finished evaluating %d. configuration. "
                              "Duration %f; loss %f; status %s; additional run "
@@ -959,7 +960,8 @@ class AutoMLSMBO(object):
                 (duration, result, _, additional_run_info, status) = info
                 run_history.add(config=next_config, cost=result,
                                 time=duration, status=status,
-                                instance_id=instance_id, seed=seed)
+                                instance_id=instance_id, seed=seed,
+                                additional_info=additional_run_info)
                 run_history.update_cost(next_config, result)
 
                 #self.logger.info('Predicted runtime %g, true runtime %g',

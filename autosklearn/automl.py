@@ -3,6 +3,7 @@ from __future__ import print_function
 
 from collections import defaultdict
 import hashlib
+import io
 import os
 
 
@@ -588,6 +589,7 @@ class AutoML(BaseEstimator):
         mean_test_score = []
         mean_fit_time = []
         params = []
+        status = []
         for run_key in self._proc_smac.runhistory.data:
             run_value = self._proc_smac.runhistory.data[run_key]
             config_id = run_key.config_id
@@ -597,6 +599,19 @@ class AutoML(BaseEstimator):
             params.append(param_dict)
             mean_test_score.append(1 - run_value.cost)
             mean_fit_time.append(run_value.time)
+            s = run_value.status
+            if s == 1:
+                status.append('Success')
+            elif s == 2:
+                status.append('Timeout')
+            elif s == 3:
+                status.append('Crash')
+            elif s == 4:
+                status.append('Abort')
+            elif s == 5:
+                status.append('Memout')
+            else:
+                status.append('Unknown')
 
             for hp_name in hp_names:
                 if hp_name in param_dict:
@@ -614,6 +629,7 @@ class AutoML(BaseEstimator):
         results['params'] = params
         results['rank_test_scores'] = scipy.stats.rankdata(1 - results['mean_test_score'],
                                                            method='min')
+        results['status'] = status
 
         for hp_name in hp_names:
             masked_array = ma.MaskedArray(parameter_dictionaries[hp_name],
@@ -621,6 +637,30 @@ class AutoML(BaseEstimator):
             results['param_%s' % hp_name] = masked_array
 
         return results
+
+    def sprint_statistics(self):
+        cv_results = self.cv_results_
+        sio = io.StringIO()
+        sio.write('auto-sklearn results:\n')
+        sio.write('  Dataset name: %s\n' % self._dataset_name)
+        sio.write('  Metric: %s\n' % METRIC_TO_STRING[self._metric])
+        idx_best_run = np.argmax(cv_results['mean_test_score'])
+        best_score = cv_results['mean_test_score'][idx_best_run]
+        sio.write('  Best validation score: %f\n' % best_score)
+        num_runs = len(cv_results['status'])
+        sio.write('  Number of target algorithm runs: %d\n' % num_runs)
+        num_success = sum([s == 'Success' for s in cv_results['status']])
+        sio.write('  Number of successful target algorithm runs: %d\n' % num_success)
+        num_crash = sum([s == 'Crash' for s in cv_results['status']])
+        sio.write('  Number of crashed target algorithm runs: %d\n' % num_crash)
+        num_timeout = sum([s == 'Timeout' for s in cv_results['status']])
+        sio.write('  Number of target algorithms that exceeded the memory '
+                  'limit: %d\n' % num_timeout)
+        num_memout = sum([s == 'Memout' for s in cv_results['status']])
+        sio.write('  Number of target algorithms that exceeded the time '
+                  'limit: %d\n' % num_memout)
+        return sio.getvalue()
+
 
     def show_models(self):
         if self.models_ is None or len(self.models_) == 0 or \

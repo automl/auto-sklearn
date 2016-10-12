@@ -85,6 +85,9 @@ class AutoMLDecorator(object):
     def cv_results_(self):
         return self._automl.cv_results_
 
+    def sprint_statistics(self):
+        return self._automl.sprint_statistics()
+
 
 class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
 
