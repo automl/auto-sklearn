@@ -181,7 +181,6 @@ class EstimatorTest(Base, unittest.TestCase):
         automl._proc_smac.runhistory.data = runhistory
         grid_scores_ = automl.grid_scores_
 
-        print(grid_scores_[0].__dict__)
         self.assertIsInstance(grid_scores_[0], _CVScoreTuple)
         # In the runhistory we store losses, thus the score is zero
         self.assertEqual(grid_scores_[0].mean_validation_score, 0)
