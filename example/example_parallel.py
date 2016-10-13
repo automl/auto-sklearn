@@ -8,10 +8,13 @@ import sklearn.metrics
 
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import *
+from autosklearn.util.backend import BackendContext
 
 tmp_folder = '/tmp/autosklearn_parallel_example_tmp'
 output_folder = '/tmp/autosklearn_parallel_example_out'
 
+backend_context = BackendContext(tmp_folder, output_folder, True, True)
+backend_context.delete_directories(True)
 
 def spawn_classifier(seed, dataset_name):
     """Spawn a subprocess.
@@ -51,7 +54,7 @@ if __name__ == '__main__':
     
     digits = sklearn.datasets.load_digits()
     X = digits.data
-    y = digits.target
+    y = digits.target + 1
     indices = np.arange(X.shape[0])
     np.random.shuffle(indices)
     X = X[indices]
@@ -83,7 +86,8 @@ if __name__ == '__main__':
 
     # Both the ensemble_size and ensemble_nbest parameters can be changed now if
     # necessary
-    automl.fit_ensemble(task=MULTICLASS_CLASSIFICATION,
+    automl.fit_ensemble(y_train,
+                        task=MULTICLASS_CLASSIFICATION,
                         metric=ACC_METRIC,
                         precision='32',
                         dataset_name='digits',

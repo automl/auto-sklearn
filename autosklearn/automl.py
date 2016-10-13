@@ -481,16 +481,33 @@ class AutoML(BaseEstimator):
 
         if task is None:
             task = self._task
+        else:
+            self._task = task
+
         if metric is None:
             metric = self._metric
+        else:
+            self._metric = metric
+
         if precision is None:
             precision = self.precision
+        else:
+            self.precision = precision
+
         if dataset_name is None:
             dataset_name = self._dataset_name
+        else:
+            self._dataset_name = dataset_name
+
         if ensemble_nbest is None:
             ensemble_nbest = self._ensemble_nbest
+        else:
+            self._ensemble_nbest = ensemble_nbest
+
         if ensemble_size is None:
             ensemble_size = self._ensemble_size
+        else:
+            self._ensemble_size = ensemble_size
 
         return EnsembleBuilder(backend=self._backend,
                                dataset_name=dataset_name,

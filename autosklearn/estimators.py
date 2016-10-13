@@ -253,11 +253,11 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
         self._automl = self.build_automl()
         super(AutoSklearnEstimator, self).fit(*args, **kwargs)
 
-    def fit_ensemble(self, task=None, metric=None, precision='32',
+    def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         self._automl = self.build_automl()
-        return self._automl.fit_ensemble(task, metric, precision,
+        return self._automl.fit_ensemble(y, task, metric, precision,
                                          dataset_name, ensemble_nbest,
                                          ensemble_size)
 
@@ -425,6 +425,27 @@ class AutoMLClassifier(AutoMLDecorator):
                                       force_all_finite=False)
         if scipy.sparse.issparse(X):
             X.sort_indices()
+
+        y = self._process_target_classes(y)
+
+        if self._n_outputs > 1:
+            task = MULTILABEL_CLASSIFICATION
+        else:
+            if len(self._classes[0]) == 2:
+                task = BINARY_CLASSIFICATION
+            else:
+                task = MULTICLASS_CLASSIFICATION
+
+        return self._automl.fit(X, y, task, metric, feat_type, dataset_name)
+
+    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+                     dataset_name=None, ensemble_nbest=None,
+                     ensemble_size=None):
+        self._process_target_classes(y)
+        return self._automl.fit_ensemble(task, metric, precision, dataset_name,
+                                         ensemble_nbest, ensemble_size)
+
+    def _process_target_classes(self, y):
         y = np.atleast_1d(y)
         if y.ndim == 2 and y.shape[1] == 1:
             warnings.warn("A column-vector y was passed when a 1d array was"
@@ -451,19 +472,12 @@ class AutoMLClassifier(AutoMLDecorator):
 
         self._n_classes = np.array(self._n_classes, dtype=np.int)
 
-        if self._n_outputs > 1:
-            task = MULTILABEL_CLASSIFICATION
-        else:
-            if len(self._classes[0]) == 2:
-                task = BINARY_CLASSIFICATION
-            else:
-                task = MULTICLASS_CLASSIFICATION
-
         # TODO: fix metafeatures calculation to allow this!
         if y.shape[1] == 1:
             y = y.flatten()
 
-        return self._automl.fit(X, y, task, metric, feat_type, dataset_name)
+        return y
+
 
     def predict(self, X):
         predicted_probabilities = self._automl.predict(X)
