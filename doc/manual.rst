@@ -23,6 +23,20 @@ model by writing it to disk after every iteration. At the beginning of each
 iteration, SMAC loads all newly found data points. An example can be found in
 the example directory.
 
+In it's default mode, auto-sklearn already uses two cores. The first one is
+used for model building, the second for building an ensemble every time a new
+machine learning model has finished training. The file `example_sequential
+.py` in the example directory describes how to run these tasks sequentially
+to use only a single core at a time.
+
+Furthermore, depending on the installation of scikit-learn and numpy,
+the model building procedure may use up to all cores. Such behaviour is
+unintended by auto-sklearn and is most likely due to numpy being installed
+from `pypi` as a binary wheel (`see here http://scikit-learn-general.narkive
+.com/44ywvAHA/binary-wheel-packages-for-linux-are-coming`_). Executing
+`export OPENBLAS_NUM_THREADS=1` should disable such behaviours and make numpy
+ only use a single core at a time.
+
 Model persistence
 *****************
 

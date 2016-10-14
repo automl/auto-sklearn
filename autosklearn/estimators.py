@@ -256,7 +256,8 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
-        self._automl = self.build_automl()
+        if self._automl is None:
+            self._automl = self.build_automl()
         return self._automl.fit_ensemble(y, task, metric, precision,
                                          dataset_name, ensemble_nbest,
                                          ensemble_size)

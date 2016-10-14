@@ -1,4 +1,4 @@
-import logging
+# -*- encoding: utf-8 -*-
 import multiprocessing
 import numpy as np
 import shutil
@@ -41,7 +41,8 @@ def spawn_classifier(seed, dataset_name):
     # models.
     # 3. all instances of the AutoSklearnClassifier must have a different seed!
     automl = AutoSklearnClassifier(
-        time_left_for_this_task=180, # sec., how long should this seed fit process run
+        time_left_for_this_task=120, # sec., how long should this seed fit
+        # process run
         per_run_time_limit=60, # sec., each model may only take this long before it's killed
         ml_memory_limit=1024, # MB, memory limit imposed on each call to a ML  algorithm
         shared_mode=True, # tmp folder will be shared between seeds
