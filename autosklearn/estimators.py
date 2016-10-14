@@ -47,7 +47,7 @@ class AutoMLDecorator(object):
         """
         return self._automl.refit(X, y)
 
-    def fit_ensemble(self, task=None, metric=None, precision='32',
+    def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         """Build the ensemble.
@@ -58,7 +58,7 @@ class AutoMLDecorator(object):
         -------
         self
         """
-        return self._automl.fit_ensemble(task, metric, precision,
+        return self._automl.fit_ensemble(y, task, metric, precision,
                                          dataset_name, ensemble_nbest,
                                          ensemble_size)
 
@@ -442,7 +442,7 @@ class AutoMLClassifier(AutoMLDecorator):
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         self._process_target_classes(y)
-        return self._automl.fit_ensemble(task, metric, precision, dataset_name,
+        return self._automl.fit_ensemble(y, task, metric, precision, dataset_name,
                                          ensemble_nbest, ensemble_size)
 
     def _process_target_classes(self, y):

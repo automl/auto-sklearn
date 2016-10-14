@@ -100,6 +100,8 @@ class EstimatorTest(Base, unittest.TestCase):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+
+        # test parallel Classifier to predict classes, not only indexes
         Y_train = Y_train + 1
         Y_test = Y_test + 1
 
@@ -157,14 +159,14 @@ class EstimatorTest(Base, unittest.TestCase):
         predictions = automl.predict(X_test)
         score = sklearn.metrics.accuracy_score(Y_test, predictions)
 
-        # TODO: score calculation fails
-        # internal_score = automl.score(X_test, Y_test)
-        # self.assertEqual(score, internal_score)
-
         self.assertEqual(len(os.listdir(os.path.join(output, '.auto-sklearn',
                                                      'ensembles'))), 1)
         self.assertGreaterEqual(score, 0.90)
         self.assertEqual(automl._automl._automl._task, MULTICLASS_CLASSIFICATION)
+
+        models = automl._automl._automl.models_
+        classifier_types = [type(c) for c in models.values()]
+        self.assertIn(ArrayReturningDummyPredictor, classifier_types)
 
         del automl
         self._tearDown(output)

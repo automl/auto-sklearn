@@ -1,20 +1,23 @@
 import logging
 import multiprocessing
-
 import numpy as np
-
+import shutil
 import sklearn.datasets
 import sklearn.metrics
-
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import *
-from autosklearn.util.backend import BackendContext
 
 tmp_folder = '/tmp/autosklearn_parallel_example_tmp'
 output_folder = '/tmp/autosklearn_parallel_example_out'
 
-backend_context = BackendContext(tmp_folder, output_folder, True, True)
-backend_context.delete_directories(True)
+try:
+    shutil.rmtree(tmp_folder)
+except OSError as e:
+    pass
+try:
+    shutil.rmtree(output_folder)
+except OSError:
+    pass
 
 def spawn_classifier(seed, dataset_name):
     """Spawn a subprocess.
@@ -54,7 +57,7 @@ if __name__ == '__main__':
     
     digits = sklearn.datasets.load_digits()
     X = digits.data
-    y = digits.target + 1
+    y = digits.target
     indices = np.arange(X.shape[0])
     np.random.shuffle(indices)
     X = X[indices]
