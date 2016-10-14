@@ -14,7 +14,7 @@ def main():
     np.random.shuffle(indices)
     X_train, X_test, y_train, y_test = train_test_split(X, y)
     automl = autosklearn.regression.AutoSklearnRegressor(
-        time_left_for_this_task=600,
+        time_left_for_this_task=120, per_run_time_limit=30,
         tmp_folder='/tmp/autoslearn_regression_example_tmp',
         output_folder='/tmp/autosklearn_regression_example_out')
     automl.fit(X_train, y_train, dataset_name='boston')
