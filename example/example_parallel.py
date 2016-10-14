@@ -1,4 +1,4 @@
-import logging
+# -*- encoding: utf-8 -*-
 import multiprocessing
 
 import numpy as np

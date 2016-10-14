@@ -1,9 +1,6 @@
-# -*- encoding: utf-8 -*-
-from __future__ import print_function
 from operator import itemgetter
 
 import numpy as np
-import pandas as pd
 import sklearn.datasets
 import sklearn.metrics
 

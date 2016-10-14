@@ -194,7 +194,8 @@ class EnsembleBuilder(multiprocessing.Process):
                                             predictions.shape[1])
 
                 except Exception as e:
-                    self.logger.warning('Error loading %s: %s', basename, e)
+                    self.logger.warning('Error loading %s: %s - %s',
+                                        basename, type(e), e)
                     score = -1
 
                 model_names_to_scores[model_name] = score
