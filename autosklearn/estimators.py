@@ -113,32 +113,46 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
         ----------
         time_left_for_this_task : int, optional (default=3600)
             Time limit in seconds for the search of appropriate
-            models. By increasing this value, *auto-sklearn* will find better
-            configurations.
+            models. By increasing this value, *auto-sklearn* has a higher
+            chance of finding better models.
 
         per_run_time_limit : int, optional (default=360)
-            Time limit for a single call to machine learning model.
+            Time limit for a single call to the machine learning model.
+            Model fitting will be terminated if the machine learning
+            algorithm runs over the time limit. Set this value high enough so
+            that typical machine learning algorithms can be fit on the
+            training data.
 
         initial_configurations_via_metalearning : int, optional (default=25)
+            Initialize the hyperparameter optimization algorithm with this
+            many configurations which worked well on previously seen
+            datasets. Disable if the hyperparameter optimization algorithm
+            should start from scratch.
 
         ensemble_size : int, optional (default=50)
+            Number of models added to the ensemble built by `Ensemble
+            selection from libraries of models. Models are drawn with
+            replacement.
 
         ensemble_nbest : int, optional (default=50)
+            Only consider the ``ensemble_nbest`` models when building an
+            ensemble. Implements `Model Library Pruning` from `Getting the
+            most out of ensemble selection`.
 
         seed : int, optional (default=1)
 
         ml_memory_limit : int, optional (3000)
-            Memory limit for the machine learning algorithm. If the machine
-            learning algorithm allocates tries to allocate more memory,
-            its evaluation will be stopped.
+            Memory limit in MB for the machine learning algorithm.
+            `auto-sklearn` will stop fitting the machine learning algorithm if
+            it tries to allocate more than `ml_memory_limit` MB.
 
         include_estimators : dict, optional (None)
-            If None all possible estimators are used. Otherwise specifies set of
-            estimators to use
+            If None, all possible estimators are used. Otherwise specifies
+            set of estimators to use
 
         include_preprocessors : dict, optional (None)
-            If None all possible preprocessors are used. Otherwise specifies set of
-            preprocessors to use
+            If None all possible preprocessors are used. Otherwise specifies set
+            of preprocessors to use
 
         resampling_strategy : string, optional ('holdout')
             how to to handle overfitting, might need 'resampling_strategy_arguments'
@@ -148,8 +162,6 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
               fit where possible
             * 'cv': crossvalidation, requires 'folds'
             * 'nested-cv': crossvalidation, requires 'outer-folds, 'inner-folds'
-            * 'partial-cv': crossvalidation, requires 'folds' , calls
-              iterative fit where possible
 
         resampling_strategy_arguments : dict, optional if 'holdout' (None)
             Additional arguments for resampling_strategy
@@ -157,15 +169,14 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             * 'holdout-iterative-fit':  None
             * 'cv': {'folds': int}
             * 'nested-cv': {'outer_folds': int, 'inner_folds'
-            * 'partial-cv': {'folds': int}
 
         tmp_folder : string, optional (None)
-            folder to store configuration output, if None automatically use
-            /tmp/autosklearn_tmp_$pid_$random_number
+            folder to store configuration output and log files, if ``None``
+            automatically use ``/tmp/autosklearn_tmp_$pid_$random_number``
 
         output_folder : string, optional (None)
-            folder to store trained models, if None automatically use
-            /tmp/autosklearn_output_$pid_$random_number
+            folder to store predictions for optional test set, if ``None``
+            automatically use ``/tmp/autosklearn_output_$pid_$random_number``
 
         delete_tmp_folder_after_terminate: string, optional (True)
             remove tmp_folder, when finished. If tmp_folder is None
@@ -176,10 +187,10 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             output_dir will always be deleted
 
         shared_mode: bool, optional (False)
-            run smac in shared-model-node. This only works if arguments
-            tmp_folder and output_folder are given and sets both
-            delete_tmp_folder_after_terminate and
-            delete_output_folder_after_terminate to False.
+            Run smac in shared-model-node. This only works if arguments
+            ``tmp_folder`` and ``output_folder`` are given and both
+            ``delete_tmp_folder_after_terminate`` and
+            ``delete_output_folder_after_terminate`` are set to False.
 
         Attributes
         ----------
@@ -192,6 +203,14 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             * ``mean_validation_score``, the mean score over the
               cross-validation folds
             * ``cv_validation_scores``, the list of scores for each fold
+
+        cv_results_ : dict of numpy (masked) ndarrays
+            A dict with keys as column headers and values as columns, that can be
+            imported into a pandas ``DataFrame``.
+
+            This attribute is a backward port to already support the advanced
+            output of scikit-learn 0.18. Not all keys returned by scikit-learn
+            are supported yet.
 
         """
         self.time_left_for_this_task = time_left_for_this_task
@@ -276,7 +295,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             metric='acc_metric',
             feat_type=None,
             dataset_name=None):
-        """Fit *autosklearn* to given training set (X, y).
+        """Fit *auto-sklearn* to given training set (X, y).
 
         Parameters
         ----------
@@ -308,8 +327,6 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         self
 
         """
-        # Fit is supposed to be idempotent!
-        # But not if we use share_mode.
         return super(AutoSklearnClassifier, self).fit(X, y, metric, feat_type, dataset_name)
 
     def predict(self, X):

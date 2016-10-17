@@ -27,19 +27,13 @@ Example
 *******
 
     >>> import autosklearn.classification
+    >>> import sklearn.cross_validation
     >>> import sklearn.datasets
     >>> digits = sklearn.datasets.load_digits()
     >>> X = digits.data
     >>> y = digits.target
-    >>> import numpy as np
-    >>> indices = np.arange(X.shape[0])
-    >>> np.random.shuffle(indices)
-    >>> X = X[indices]
-    >>> y = y[indices]
-    >>> X_train = X[:1000]
-    >>> y_train = y[:1000]
-    >>> X_test = X[1000:]
-    >>> y_test = y[1000:]
+    >>> X_train, X_test, y_train, y_test = \
+            sklearn.cross_validation.train_test_split(X, y, random_state=1)
     >>> automl = autosklearn.classification.AutoSklearnClassifier()
     >>> automl.fit(X_train, y_train)
     >>> print(automl.score(X_test,y_test))
@@ -69,8 +63,7 @@ Then install *auto-sklearn*
     pip install auto-sklearn
 
 We recommend installing *auto-sklearn* into a `virtual environment
-<http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or into an
-`anaconda environment <https://www.continuum.io/downloads>`_..
+<http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_.
 
 Manual
 ******
@@ -83,14 +76,13 @@ Manual
 License
 *******
 *auto-sklearn* is licensed the same way as *scikit-learn*,
-namely the 3-clause BSD license. The subprojects it uses, most notably SMAC,
-can have different licenses.
+namely the 3-clause BSD license.
 
 Citing auto-sklearn
 *******************
 
 If you use auto-sklearn in a scientific publication, we would appreciate
-citations to the following paper:
+references to the following paper:
 
 
  `Efficient and Robust Automated Machine Learning
@@ -113,9 +105,11 @@ citations to the following paper:
 
 Contributing
 ************
-*auto-sklearn* is developed mainly by the `Machine Learning for Automated
-Algorithm Design <http://aad.informatik.uni-freiburg.de>`_ group at the
-University of Freiburg.
+
+We appreciate all contribution to auto-sklearn, from bug reports,
+documentation to new features. If you want to contribute to the code, you can
+pick an issue from the `issue tracker <https://github.com/automl/auto-sklearn/issues>`_
+which is marked with `Needs contributer`.
 
 .. note::
 
