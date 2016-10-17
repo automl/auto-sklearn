@@ -1,17 +1,23 @@
 # -*- encoding: utf-8 -*-
 import multiprocessing
-
 import numpy as np
-
+import shutil
 import sklearn.datasets
 import sklearn.metrics
-
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import *
 
 tmp_folder = '/tmp/autosklearn_parallel_example_tmp'
 output_folder = '/tmp/autosklearn_parallel_example_out'
 
+try:
+    shutil.rmtree(tmp_folder)
+except OSError as e:
+    pass
+try:
+    shutil.rmtree(output_folder)
+except OSError:
+    pass
 
 def spawn_classifier(seed, dataset_name):
     """Spawn a subprocess.
@@ -84,7 +90,8 @@ if __name__ == '__main__':
 
     # Both the ensemble_size and ensemble_nbest parameters can be changed now if
     # necessary
-    automl.fit_ensemble(task=MULTICLASS_CLASSIFICATION,
+    automl.fit_ensemble(y_train,
+                        task=MULTICLASS_CLASSIFICATION,
                         metric=ACC_METRIC,
                         precision='32',
                         dataset_name='digits',

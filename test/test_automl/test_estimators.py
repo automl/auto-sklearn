@@ -5,6 +5,8 @@ import os
 import sys
 import unittest
 
+import sklearn
+
 try:
     import mock
 except ImportError:
@@ -17,7 +19,7 @@ from sklearn.grid_search import _CVScoreTuple
 import autosklearn.pipeline.util as putil
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.estimators import AutoMLClassifier
-from autosklearn.util.backend import Backend
+from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import *
 
 sys.path.append(os.path.dirname(__file__))
@@ -93,12 +95,15 @@ class EstimatorTest(Base, unittest.TestCase):
                                 cls.fit,
                                 X=X, y=y, feat_type=['Car']*100)
 
-    @unittest.skip("pSMAC not yet working with new python SMAC")
     def test_fit_pSMAC(self):
         output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+
+        # test parallel Classifier to predict classes, not only indexes
+        Y_train = Y_train + 1
+        Y_test = Y_test + 1
 
         automl = AutoSklearnClassifier(time_left_for_this_task=15,
                                        per_run_time_limit=15,
@@ -128,10 +133,11 @@ class EstimatorTest(Base, unittest.TestCase):
 
         probas_test = np.zeros((len(Y_test), 3), dtype=float)
         for i, value in enumerate(Y_test):
-            probas_test[i, value] = 1.0
+            probas_test[i, value - 1] = 1.0
 
         dummy = ArrayReturningDummyPredictor(probas_test)
-        backend = Backend(output, output)
+        context = BackendContext(output, output, False, False)
+        backend = Backend(context)
         backend.save_model(dummy, 30, 1)
 
         automl = AutoSklearnClassifier(time_left_for_this_task=15,
@@ -142,15 +148,25 @@ class EstimatorTest(Base, unittest.TestCase):
                                        seed=2,
                                        initial_configurations_via_metalearning=0,
                                        ensemble_size=0)
-        automl.fit(X_train, Y_train)
-        automl.run_ensemble_builder(0, 1, 50).wait()
+        automl.fit_ensemble(Y_train,
+                            task=MULTICLASS_CLASSIFICATION,
+                            metric=ACC_METRIC,
+                            precision='32',
+                            dataset_name='iris',
+                            ensemble_size=20,
+                            ensemble_nbest=50)
 
-        score = automl.score(X_test, Y_test)
+        predictions = automl.predict(X_test)
+        score = sklearn.metrics.accuracy_score(Y_test, predictions)
 
         self.assertEqual(len(os.listdir(os.path.join(output, '.auto-sklearn',
                                                      'ensembles'))), 1)
         self.assertGreaterEqual(score, 0.90)
         self.assertEqual(automl._automl._automl._task, MULTICLASS_CLASSIFICATION)
+
+        models = automl._automl._automl.models_
+        classifier_types = [type(c) for c in models.values()]
+        self.assertIn(ArrayReturningDummyPredictor, classifier_types)
 
         del automl
         self._tearDown(output)
