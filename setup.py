@@ -6,6 +6,8 @@ try:
 except:
     from urllib.request import urlretrieve
 
+import autosklearn
+
 import setuptools
 from setuptools.extension import Extension
 import numpy as np
@@ -31,7 +33,7 @@ with open(requirements_file) as fh:
 setuptools.setup(
     name='auto-sklearn',
     description='Automated machine learning.',
-    version='0.0.2dev',
+    version=autosklearn.__version__,
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=requirements,
