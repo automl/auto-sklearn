@@ -204,7 +204,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
               cross-validation folds
             * ``cv_validation_scores``, the list of scores for each fold
 
-        cv_results_ : dict of numpy (masked) ndarrays
+        cv_results\_ : dict of numpy (masked) ndarrays
             A dict with keys as column headers and values as columns, that can be
             imported into a pandas ``DataFrame``.
 

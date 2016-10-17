@@ -69,7 +69,7 @@ Manual
 ******
 
 * :ref:`API`
-* :ref:`resampling`
+* :ref:`manual`
 * :ref:`extending`
 
 
