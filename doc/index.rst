@@ -29,6 +29,7 @@ Example
     >>> import autosklearn.classification
     >>> import sklearn.cross_validation
     >>> import sklearn.datasets
+    >>> import sklearn.metrics
     >>> digits = sklearn.datasets.load_digits()
     >>> X = digits.data
     >>> y = digits.target
@@ -36,7 +37,8 @@ Example
             sklearn.cross_validation.train_test_split(X, y, random_state=1)
     >>> automl = autosklearn.classification.AutoSklearnClassifier()
     >>> automl.fit(X_train, y_train)
-    >>> print(automl.score(X_test,y_test))
+    >>> y_hat = automl.predict(X_test)
+    >>> print("Accuracy score", sklearn.metrics.accuracy_score(y_test, y_hat))
 
 
 This will run for one hour should result in an accuracy above 0.98.

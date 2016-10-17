@@ -1,11 +1,4 @@
 # -*- encoding: utf-8 -*-
-import os
-
-try:
-    from urllib import urlretrieve
-except:
-    from urllib.request import urlretrieve
-
 import autosklearn
 
 import setuptools
@@ -20,14 +13,29 @@ extensions = cythonize(
                include_dirs=[np.get_include()])
      ])
 
-requirements_file = os.path.join(os.path.dirname(__file__), 'requirements.txt')
-requirements = []
-dependency_links = []
-with open(requirements_file) as fh:
-    for line in fh:
-        line = line.strip()
-        if line:
-            requirements.append(line)
+requirements = [
+    "unittest2",
+    "setuptools",
+    "mock",
+    "nose",
+    "six",
+    "Cython",
+    "numpy>=1.9.0",
+    "scipy>=0.14.1",
+    "scikit-learn==0.17.1",
+    "lockfile",
+    "joblib",
+    "psutil",
+    "pyyaml",
+    "ConfigArgParse",
+    "liac-arff",
+    "pandas",
+    "xgboost==0.4a30",
+    "ConfigSpace",
+    "pynisher>=0.4",
+    "pyrfr",
+    "smac==0.0.1"
+]
 
 
 setuptools.setup(
