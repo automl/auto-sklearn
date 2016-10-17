@@ -1,7 +1,3 @@
-recursive-include autosklearn/binaries/smac-v2.08.01-development-1/smac-v2.08.01-development-1/lib *.jar
-include autosklearn/binaries/smac-v2.08.01-development-1/smac-v2.08.01-development-1/smac
-include autosklearn/binaries/smac-v2.08.01-development-1/smac-v2.08.01-development-1/
-include autosklearn/binaries/runsolver
 recursive-include autosklearn/metalearning/files *.arff
 recursive-include autosklearn/metalearning/files *.csv
 recursive-include autosklearn/metalearning/files *.txt
