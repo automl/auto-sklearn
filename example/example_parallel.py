@@ -1,23 +1,24 @@
 # -*- encoding: utf-8 -*-
 import multiprocessing
-import numpy as np
 import shutil
+
+import sklearn.cross_validation
 import sklearn.datasets
 import sklearn.metrics
+
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import *
 
 tmp_folder = '/tmp/autosklearn_parallel_example_tmp'
 output_folder = '/tmp/autosklearn_parallel_example_out'
 
-try:
-    shutil.rmtree(tmp_folder)
-except OSError as e:
-    pass
-try:
-    shutil.rmtree(output_folder)
-except OSError:
-    pass
+
+for dir in [tmp_folder, output_folder]:
+    try:
+        shutil.rmtree(dir)
+    except OSError as e:
+        pass
+
 
 def spawn_classifier(seed, dataset_name):
     """Spawn a subprocess.
@@ -59,14 +60,8 @@ if __name__ == '__main__':
     digits = sklearn.datasets.load_digits()
     X = digits.data
     y = digits.target
-    indices = np.arange(X.shape[0])
-    np.random.shuffle(indices)
-    X = X[indices]
-    y = y[indices]
-    X_train = X[:1000]
-    y_train = y[:1000]
-    X_test = X[1000:]
-    y_test = y[1000:]
+    X_train, X_test, y_train, y_test = \
+        sklearn.cross_validation.train_test_split(X, y, random_state=1)
 
     processes = []
     for i in range(4): # set this at roughly half of your cores

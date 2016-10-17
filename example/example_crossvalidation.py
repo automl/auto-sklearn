@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
+import sklearn.cross_validation
 import sklearn.datasets
-import numpy as np
+import sklearn.metrics
 
 import autosklearn.classification
 
@@ -9,14 +10,9 @@ def main():
     digits = sklearn.datasets.load_digits()
     X = digits.data
     y = digits.target
-    indices = np.arange(X.shape[0])
-    np.random.shuffle(indices)
-    X = X[indices]
-    y = y[indices]
-    X_train = X[:1000]
-    y_train = y[:1000]
-    X_test = X[1000:]
-    y_test = y[1000:]
+    X_train, X_test, y_train, y_test = \
+        sklearn.cross_validation.train_test_split(X, y, random_state=1)
+
     automl = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120, per_run_time_limit=30,
         tmp_folder='/tmp/autoslearn_cv_example_tmp',
@@ -27,6 +23,9 @@ def main():
     # fit() changes the data in place, but refit needs the original data. We
     # therefore copy the data. In practice, one should reload the data
     automl.fit(X_train.copy(), y_train.copy(), dataset_name='digits')
+    # During fit(), models are fit on individual cross-validation folds. To use
+    # all available data, we call refit() which trains all models in the
+    # final ensemble on the whole dataset.
     automl.refit(X_train.copy(), y_train.copy())
 
     print(automl.show_models())

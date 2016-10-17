@@ -1,6 +1,7 @@
 from operator import itemgetter
 
 import numpy as np
+import sklearn.cross_validation
 import sklearn.datasets
 import sklearn.metrics
 
@@ -24,14 +25,9 @@ def main():
     digits = sklearn.datasets.load_digits()
     X = digits.data
     y = digits.target
-    indices = np.arange(X.shape[0])
-    np.random.shuffle(indices)
-    X = X[indices]
-    y = y[indices]
-    X_train = X[:1000]
-    y_train = y[:1000]
-    X_test = X[1000:]
-    y_test = y[1000:]
+    X_train, X_test, y_train, y_test = \
+        sklearn.cross_validation.train_test_split(X, y, random_state=1)
+
     automl = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120, per_run_time_limit=30,
         tmp_folder='/tmp/autoslearn_holdout_example_tmp',
@@ -42,8 +38,11 @@ def main():
     # unreasonably bad (around 0.0) you should have a look into the logging
     # file to figure out the error
     report(automl.grid_scores_)
+    # Print the final ensemble constructed by auto-sklearn.
     print(automl.show_models())
     predictions = automl.predict(X_test)
+    # Print statistics about the auto-sklearn run such as number of
+    # iterations, number of models failed with a time out.
     print(automl.sprint_statistics())
     print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 

@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
-import numpy as np
+import sklearn.cross_validation
 import sklearn.datasets
 import sklearn.metrics
-from sklearn.cross_validation import train_test_split
+
 import autosklearn.regression
 
 
@@ -10,9 +10,9 @@ def main():
     boston = sklearn.datasets.load_boston()
     X = boston.data
     y = boston.target
-    indices = np.arange(X.shape[0])
-    np.random.shuffle(indices)
-    X_train, X_test, y_train, y_test = train_test_split(X, y)
+    X_train, X_test, y_train, y_test = \
+        sklearn.cross_validation.train_test_split(X, y, random_state=1)
+
     automl = autosklearn.regression.AutoSklearnRegressor(
         time_left_for_this_task=120, per_run_time_limit=30,
         tmp_folder='/tmp/autoslearn_regression_example_tmp',
