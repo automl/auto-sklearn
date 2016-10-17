@@ -1,20 +1,10 @@
 # -*- encoding: utf-8 -*-
-import os
-import shutil
-import subprocess
-import sys
-import tarfile
-
-try:
-    from urllib import urlretrieve
-except:
-    from urllib.request import urlretrieve
+import autosklearn
 
 import setuptools
 from setuptools.extension import Extension
 import numpy as np
 from Cython.Build import cythonize
-import autosklearn
 
 extensions = cythonize(
     [Extension('autosklearn.data.competition_c_functions',
@@ -23,6 +13,30 @@ extensions = cythonize(
                include_dirs=[np.get_include()])
      ])
 
+requirements = [
+    "unittest2",
+    "setuptools",
+    "mock",
+    "nose",
+    "six",
+    "Cython",
+    "numpy>=1.9.0",
+    "scipy>=0.14.1",
+    "scikit-learn==0.17.1",
+    "lockfile",
+    "joblib",
+    "psutil",
+    "pyyaml",
+    "ConfigArgParse",
+    "liac-arff",
+    "pandas",
+    "xgboost==0.4a30",
+    "ConfigSpace",
+    "pynisher>=0.4",
+    "pyrfr",
+    "smac==0.0.1"
+]
+
 
 setuptools.setup(
     name='auto-sklearn',
@@ -30,21 +44,7 @@ setuptools.setup(
     version=autosklearn.__version__,
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
-    install_requires=['numpy>=1.9.0',
-                      'scipy>=0.14.1',
-                      'scikit-learn==0.17.1',
-                      'lockfile',
-                      'psutil',
-                      'pyyaml',
-                      'six',
-                      'ConfigArgParse',
-                      'liac-arff',
-                      'pandas',
-                      'Cython',
-                      'ConfigSpace',
-                      'pynisher',
-                      'smac==0.0.1',
-                      'pyrfr'],
+    install_requires=requirements,
     test_suite='nose.collector',
     scripts=['scripts/autosklearn'],
     include_package_data=True,

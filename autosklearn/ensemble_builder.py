@@ -6,6 +6,7 @@ import os
 import re
 import sys
 import time
+import warnings
 
 import numpy as np
 import pynisher
@@ -21,18 +22,17 @@ from autosklearn.util.logging_ import get_logger, setup_logger
 
 
 class EnsembleBuilder(multiprocessing.Process):
-    def __init__(self, autosklearn_tmp_dir, dataset_name, task_type, metric,
-                 limit, output_dir, ensemble_size=None, ensemble_nbest=None,
+    def __init__(self, backend, dataset_name, task_type, metric,
+                 limit, ensemble_size=None, ensemble_nbest=None,
                  seed=1, shared_mode=False, max_iterations=-1, precision="32",
                  low_precision=True):
         super(EnsembleBuilder, self).__init__()
 
-        self.autosklearn_tmp_dir = autosklearn_tmp_dir
+        self.backend = backend
         self.dataset_name = dataset_name
         self.task_type = task_type
         self.metric = metric
         self.limit = limit
-        self.output_dir = output_dir
         self.ensemble_size = ensemble_size
         self.ensemble_nbest = ensemble_nbest
         self.seed = seed
@@ -42,15 +42,13 @@ class EnsembleBuilder(multiprocessing.Process):
         self.low_precision = low_precision
 
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
-        setup_logger(os.path.join(self.autosklearn_tmp_dir,
-                                  '%s.log' % str(logger_name)))
         self.logger = get_logger(logger_name)
 
     def run(self):
         buffer_time = 5
         time_left = self.limit - buffer_time
         safe_ensemble_script = pynisher.enforce_limits(
-            wall_time_in_s=int(time_left))(self.main)
+            wall_time_in_s=int(time_left), logger=self.logger)(self.main)
         safe_ensemble_script()
 
     def main(self):
@@ -66,14 +64,13 @@ class EnsembleBuilder(multiprocessing.Process):
         last_hash = None
         current_hash = None
 
-        backend = Backend(self.output_dir, self.autosklearn_tmp_dir)
-        dir_ensemble = os.path.join(self.autosklearn_tmp_dir,
+        dir_ensemble = os.path.join(self.backend.temporary_directory,
                                     '.auto-sklearn',
                                     'predictions_ensemble')
-        dir_valid = os.path.join(self.autosklearn_tmp_dir,
+        dir_valid = os.path.join(self.backend.temporary_directory,
                                  '.auto-sklearn',
                                  'predictions_valid')
-        dir_test = os.path.join(self.autosklearn_tmp_dir,
+        dir_test = os.path.join(self.backend.temporary_directory,
                                 '.auto-sklearn',
                                 'predictions_test')
         paths_ = [dir_ensemble, dir_valid, dir_test]
@@ -91,7 +88,7 @@ class EnsembleBuilder(multiprocessing.Process):
             # Reload the ensemble targets every iteration, important, because cv may
             # update the ensemble targets in the cause of running auto-sklearn
             # TODO update cv in order to not need this any more!
-            targets_ensemble = backend.load_targets_ensemble()
+            targets_ensemble = self.backend.load_targets_ensemble()
 
             # Load the predictions from the models
             exists = [os.path.isdir(dir_) for dir_ in paths_]
@@ -154,7 +151,11 @@ class EnsembleBuilder(multiprocessing.Process):
                 used_time = watch.wall_elapsed('ensemble_builder')
                 continue
 
-            watch.start_task('index_run' + str(index_run))
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                # TODO restructure time management in the ensemble builder,
+                # what is the time of index_run actually needed for?
+                watch.start_task('index_run' + str(index_run))
             watch.start_task('ensemble_iter_' + str(num_iteration))
 
             # List of num_runs (which are in the filename) which will be included
@@ -193,7 +194,8 @@ class EnsembleBuilder(multiprocessing.Process):
                                             predictions.shape[1])
 
                 except Exception as e:
-                    self.logger.warning('Error loading %s: %s', basename, e)
+                    self.logger.warning('Error loading %s: %s - %s',
+                                        basename, type(e), e)
                     score = -1
 
                 model_names_to_scores[model_name] = score
@@ -203,8 +205,8 @@ class EnsembleBuilder(multiprocessing.Process):
 
                 if self.ensemble_nbest is not None:
                     if score <= 0.001:
-                        self.logger.error('Model only predicts at random: ' +
-                                      model_name + ' has score: ' + str(score))
+                        self.logger.info('Model only predicts at random: ' +
+                                         model_name + ' has score: ' + str(score))
                         backup_num_runs.append((automl_seed, num_run))
                     # If we have less models in our ensemble than ensemble_nbest add
                     # the current model if it is better than random
@@ -220,10 +222,11 @@ class EnsembleBuilder(multiprocessing.Process):
                         # If the current model is better than the worst model in
                         # our ensemble replace it by the current model
                         if scores_nbest[idx] < score:
-                            self.logger.debug('Worst model in our ensemble: %s with '
-                                          'score %f will be replaced by model %s '
-                                          'with score %f', model_names[idx],
-                                          scores_nbest[idx], model_name, score)
+                            self.logger.info(
+                                'Worst model in our ensemble: %s with score %f '
+                                'will be replaced by model %s with score %f',
+                                model_names[idx], scores_nbest[idx], model_name,
+                                score)
                             # Exclude the old model
                             del scores_nbest[idx]
                             scores_nbest.append(score)
@@ -243,8 +246,9 @@ class EnsembleBuilder(multiprocessing.Process):
                     # Load all predictions that are better than random
                     if score <= 0.001:
                         # include_num_runs.append(True)
-                        self.logger.error('Model only predicts at random: ' +
-                                      model_name + ' has score: ' + str(score))
+                        self.logger.info('Model only predicts at random: ' +
+                                         model_name + ' has score: ' +
+                                         str(score))
                         backup_num_runs.append((automl_seed, num_run))
                     else:
                         include_num_runs.append((automl_seed, num_run))
@@ -344,7 +348,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 last_hash = current_hash
 
             # Save the ensemble for later use in the main auto-sklearn module!
-            backend.save_ensemble(ensemble, index_run, self.seed)
+            self.backend.save_ensemble(ensemble, index_run, self.seed)
 
             # Save predictions for valid and test data set
             if len(dir_valid_list) == len(dir_ensemble_model_files):
@@ -378,7 +382,7 @@ class EnsembleBuilder(multiprocessing.Process):
                             # File size maximally 2.1MB
                             precision = 6
 
-                backend.save_predictions_as_txt(ensemble_predictions_valid,
+                self.backend.save_predictions_as_txt(ensemble_predictions_valid,
                                                 'valid', index_run, prefix=self.dataset_name,
                                                 precision=precision)
             else:
@@ -419,9 +423,9 @@ class EnsembleBuilder(multiprocessing.Process):
                         else:
                             precision = 6
 
-                backend.save_predictions_as_txt(ensemble_predictions_test,
-                                                'test', index_run, prefix=self.dataset_name,
-                                                precision=precision)
+                self.backend.save_predictions_as_txt(ensemble_predictions_test,
+                                                     'test', index_run, prefix=self.dataset_name,
+                                                     precision=precision)
             else:
                 self.logger.info('Could not find as many test set predictions (%d) as '
                              'ensemble predictions (%d)!',

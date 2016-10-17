@@ -12,14 +12,14 @@ class DecisionTreetComponentTest(unittest.TestCase):
     def test_default_configuration(self):
         for i in range(10):
             predictions, targets = _test_classifier(DecisionTree)
-            self.assertAlmostEqual(0.92,
+            self.assertAlmostEqual(0.62,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
 
     def test_default_configuration_sparse(self):
         for i in range(10):
             predictions, targets = _test_classifier(DecisionTree, sparse=True)
-            self.assertAlmostEqual(0.69999999999999996,
+            self.assertAlmostEqual(0.41999999999999998,
                                    sklearn.metrics.accuracy_score(predictions,
                                                               targets))
 
@@ -27,7 +27,7 @@ class DecisionTreetComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = _test_classifier_predict_proba(
                 DecisionTree)
-            self.assertAlmostEqual(0.28069887755912964,
+            self.assertAlmostEqual(0.51333963481747835,
                 sklearn.metrics.log_loss(targets, predictions))
 
     def test_default_configuration_binary(self):
@@ -43,7 +43,7 @@ class DecisionTreetComponentTest(unittest.TestCase):
             predictions, targets = _test_classifier(
                 DecisionTree, make_multilabel=True)
             print(predictions, targets)
-            self.assertAlmostEqual(0.94120857699805072,
+            self.assertAlmostEqual(0.81108108108108112,
                                    sklearn.metrics.average_precision_score(
                                        targets, predictions))
 
@@ -52,7 +52,7 @@ class DecisionTreetComponentTest(unittest.TestCase):
             predictions, targets = _test_classifier_predict_proba(
                 DecisionTree, make_multilabel=True)
             self.assertEqual(predictions.shape, ((50, 3)))
-            self.assertAlmostEqual(0.94589326168273546,
+            self.assertAlmostEqual(0.83333333333333337,
                                    sklearn.metrics.average_precision_score(
                                        targets, predictions))
 

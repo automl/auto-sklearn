@@ -20,7 +20,7 @@ class NestedCVEvaluator(AbstractEvaluator):
     #  of alternating cross-validation to only have one model in memory at
     # the time!
 
-    def __init__(self, Datamanager, output_dir,
+    def __init__(self, Datamanager, backend,
                  configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
@@ -31,7 +31,7 @@ class NestedCVEvaluator(AbstractEvaluator):
                  num_run=None,
                  subsample=None):
         super(NestedCVEvaluator, self).__init__(
-            Datamanager, output_dir, configuration,
+            Datamanager, backend, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
@@ -70,9 +70,9 @@ class NestedCVEvaluator(AbstractEvaluator):
 
             model = self.model_class(self.configuration, self.random_state)
             self.outer_models[outer_fold] = model
-            self.outer_models[outer_fold].fit(
-                self.X_train[outer_train_indices],
-                self.Y_train[outer_train_indices])
+            self._fit_and_suppress_warnings(self.outer_models[outer_fold],
+                                            self.X_train[outer_train_indices],
+                                            self.Y_train[outer_train_indices])
 
             # Then perform the fit for the inner cross validation
             for inner_fold in range(self.inner_cv_folds):
@@ -90,7 +90,7 @@ class NestedCVEvaluator(AbstractEvaluator):
                 self.inner_indices[outer_fold][inner_fold] = \
                     ((inner_train_indices, inner_test_indices))
                 model = self.model_class(self.configuration, self.random_state)
-                model = model.fit(X_train, Y_train)
+                model = self._fit_and_suppress_warnings(model, X_train, Y_train)
                 self.inner_models[outer_fold][inner_fold] = model
 
     def _predict(self):

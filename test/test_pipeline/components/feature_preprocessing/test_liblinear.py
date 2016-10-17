@@ -34,7 +34,7 @@ class LiblinearComponentTest(PreprocessingTestCase):
             predictor = classifier.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
             accuracy = sklearn.metrics.accuracy_score(predictions, Y_test)
-            self.assertAlmostEqual(accuracy, 0.87917425622343659, places=2)
+            self.assertAlmostEqual(accuracy, 0.84274438372799032, places=2)
 
     def test_preprocessing_dtype(self):
         super(LiblinearComponentTest,

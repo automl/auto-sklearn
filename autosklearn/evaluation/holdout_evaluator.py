@@ -19,7 +19,7 @@ __all__ = [
 
 class HoldoutEvaluator(AbstractEvaluator):
 
-    def __init__(self, datamanager, output_dir,
+    def __init__(self, datamanager, backend,
                  configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
@@ -28,7 +28,7 @@ class HoldoutEvaluator(AbstractEvaluator):
                  num_run=None,
                  subsample=None):
         super(HoldoutEvaluator, self).__init__(
-            datamanager, output_dir, configuration,
+            datamanager, backend, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
@@ -56,7 +56,7 @@ class HoldoutEvaluator(AbstractEvaluator):
         else:
             X_train, Y_train = self.X_train, self.Y_train
 
-        self.model.fit(X_train, Y_train)
+        self._fit_and_suppress_warnings(self.model, X_train, Y_train)
         return self.predict_and_loss()
 
     def iterative_fit(self):
@@ -118,10 +118,10 @@ class HoldoutEvaluator(AbstractEvaluator):
 
 
 # create closure for evaluating an algorithm
-def eval_holdout(queue, config, data, tmp_dir, seed, num_run,
+def eval_holdout(queue, config, data, backend, seed, num_run,
                  subsample, with_predictions, all_scoring_functions,
                  output_y_test, iterative=False):
-    evaluator = HoldoutEvaluator(data, tmp_dir, config,
+    evaluator = HoldoutEvaluator(data, backend, config,
                                  seed=seed,
                                  num_run=num_run,
                                  subsample=subsample,
@@ -153,9 +153,9 @@ def eval_holdout(queue, config, data, tmp_dir, seed, num_run,
     queue.put((duration, result, seed, run_info, status))
 
 
-def eval_iterative_holdout(queue, config, data, tmp_dir, seed,
+def eval_iterative_holdout(queue, config, data, backend, seed,
                            num_run, subsample, with_predictions,
                            all_scoring_functions, output_y_test):
-    eval_holdout(queue, config, data, tmp_dir, seed, num_run, subsample,
+    eval_holdout(queue, config, data, backend, seed, num_run, subsample,
                  with_predictions, all_scoring_functions, output_y_test,
                  iterative = True)

@@ -13,7 +13,7 @@ import sklearn.datasets
 
 import autosklearn.automl
 import autosklearn.pipeline.util as putil
-from autosklearn.util import setup_logger, get_logger
+from autosklearn.util import setup_logger, get_logger, backend
 from autosklearn.constants import *
 from autosklearn.smbo import load_data
 
@@ -32,7 +32,8 @@ class AutoMLTest(Base, unittest.TestCase):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = autosklearn.automl.AutoML(output, output, 15, 15)
+        backend_api = backend.create(output, output)
+        automl = autosklearn.automl.AutoML(backend_api, 15, 15)
         automl.fit(X_train, Y_train)
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
@@ -61,7 +62,8 @@ class AutoMLTest(Base, unittest.TestCase):
         X_test = data[0][700:]
         Y_test = data[1][700:]
 
-        automl = autosklearn.automl.AutoML(output, output, 15, 15)
+        backend_api = backend.create(output, output)
+        automl = autosklearn.automl.AutoML(backend_api, 15, 15)
         automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION)
         self.assertEqual(automl._task, BINARY_CLASSIFICATION)
 
@@ -80,11 +82,10 @@ class AutoMLTest(Base, unittest.TestCase):
         data_manager_file = os.path.join(output, '.auto-sklearn',
                                          'datamanager.pkl')
 
-        queue = multiprocessing.Queue()
+        backend_api = backend.create(output, output)
         auto = autosklearn.automl.AutoML(
-            output, output, 15, 15,
+            backend_api, 15, 15,
             initial_configurations_via_metalearning=25,
-            queue=queue,
             seed=100)
         auto.fit_automl_dataset(dataset)
 
@@ -93,11 +94,6 @@ class AutoMLTest(Base, unittest.TestCase):
             D = six.moves.cPickle.load(fh)
             self.assertTrue(np.allclose(D.data['X_train'][0, :3],
                                         [1., 12., 2.]))
-
-        time_needed_to_load_data, data_manager_file, procs = \
-            queue.get()
-        for proc in procs:
-            proc.wait()
 
         # Check that all directories are there
         fixture = ['predictions_valid', 'true_targets_ensemble.npy',
@@ -139,13 +135,14 @@ class AutoMLTest(Base, unittest.TestCase):
 
             dataset = os.path.join(self.test_dir, '..', '.data', name)
 
+            backend_api = backend.create(output, output)
             auto = autosklearn.automl.AutoML(
-                output, output, 15, 15,
+                backend_api, 15, 15,
                 initial_configurations_via_metalearning=25)
             setup_logger()
             auto._logger = get_logger('test_do_dummy_predictions')
             auto._backend._make_internals_directory()
-            D = load_data(dataset, output)
+            D = load_data(dataset, backend_api)
             auto._backend.save_datamanager(D)
             auto._do_dummy_prediction(D, 1)
 

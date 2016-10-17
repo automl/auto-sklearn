@@ -16,7 +16,7 @@ __all__ = [
 
 
 class CVEvaluator(AbstractEvaluator):
-    def __init__(self, Datamanager, output_dir,
+    def __init__(self, Datamanager, backend,
                  configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
@@ -27,7 +27,7 @@ class CVEvaluator(AbstractEvaluator):
                  subsample=None,
                  keep_models=False):
         super(CVEvaluator, self).__init__(
-            Datamanager, output_dir, configuration,
+            Datamanager, backend, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
@@ -116,8 +116,9 @@ class CVEvaluator(AbstractEvaluator):
             train_indices = train_indices[indices]
 
         self.indices[fold] = ((train_indices, test_indices))
-        model.fit(self.X_train[train_indices],
-                  self.Y_train[train_indices])
+        self._fit_and_suppress_warnings(model,
+                                        self.X_train[train_indices],
+                                        self.Y_train[train_indices])
 
         if self.keep_models:
             self.models[fold] = model
@@ -153,10 +154,10 @@ class CVEvaluator(AbstractEvaluator):
                             random_state=self.seed)
 
 
-def eval_partial_cv(queue, config, data, tmp_dir, seed, num_run, fold,
+def eval_partial_cv(queue, config, data, backend, seed, num_run, fold,
                     folds, subsample, with_predictions, all_scoring_functions,
                     output_y_test):
-    evaluator = CVEvaluator(data, tmp_dir, config,
+    evaluator = CVEvaluator(data, backend, config,
                             seed=seed,
                             num_run=num_run,
                             cv_folds=folds,
@@ -175,10 +176,10 @@ def eval_partial_cv(queue, config, data, tmp_dir, seed, num_run, fold,
 
 
 # create closure for evaluating an algorithm
-def eval_cv(queue, config, data, tmp_dir, seed, num_run, folds,
+def eval_cv(queue, config, data, backend, seed, num_run, folds,
             subsample, with_predictions, all_scoring_functions,
             output_y_test):
-    evaluator = CVEvaluator(data, tmp_dir, config,
+    evaluator = CVEvaluator(data, backend, config,
                             seed=seed,
                             num_run=num_run,
                             cv_folds=folds,

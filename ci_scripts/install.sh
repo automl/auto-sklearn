@@ -24,15 +24,11 @@ popd
 
 # Configure the conda environment and put it in the path using the
 # provided versions
-conda create -n testenv --yes python=$PYTHON_VERSION pip nose cython
+conda create -n testenv --yes python=$PYTHON_VERSION pip nose
 source activate testenv
 
-# First install exact numpy and scipy version from pip
-pip install numpy==1.11.0
-pip install scipy==0.16.1
-
 # Install requirements in correct order
-cat requirements.txt | xargs -n 1 -L 1 pip install
+pip install -r requirements.txt
 
 if [[ "$COVERAGE" == "true" ]]; then
     pip install coverage coveralls

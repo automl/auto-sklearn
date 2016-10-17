@@ -1,14 +1,25 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
+import collections
 import os
 import sys
 import unittest
 
-import numpy as np
-import autosklearn.pipeline.util as putil
+import sklearn
 
+try:
+    import mock
+except ImportError:
+    from unittest import mock
+
+import numpy as np
+import numpy.ma as npma
+from sklearn.grid_search import _CVScoreTuple
+
+import autosklearn.pipeline.util as putil
 from autosklearn.classification import AutoSklearnClassifier
-from autosklearn.util.backend import Backend
+from autosklearn.estimators import AutoMLClassifier
+from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import *
 
 sys.path.append(os.path.dirname(__file__))
@@ -43,7 +54,7 @@ class EstimatorTest(Base, unittest.TestCase):
         print(automl.show_models())
 
         self.assertGreaterEqual(score, 0.8)
-        self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
+        self.assertEqual(automl._automl._automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
         self._tearDown(output)
@@ -52,13 +63,14 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertRaisesRegexp(ValueError,
                                 "If shared_mode == True tmp_folder must not "
                                 "be None.",
-                                AutoSklearnClassifier,
+                                lambda shared_mode: AutoSklearnClassifier(shared_mode=shared_mode).fit(None, None),
                                 shared_mode=True)
 
         self.assertRaisesRegexp(ValueError,
                                 "If shared_mode == True output_folder must not "
                                 "be None.",
-                                AutoSklearnClassifier,
+                                lambda shared_mode, tmp_folder:
+                                AutoSklearnClassifier(shared_mode=shared_mode, tmp_folder=tmp_folder).fit(None, None),
                                 shared_mode=True,
                                 tmp_folder='/tmp/duitaredxtvbedb')
 
@@ -83,12 +95,15 @@ class EstimatorTest(Base, unittest.TestCase):
                                 cls.fit,
                                 X=X, y=y, feat_type=['Car']*100)
 
-    @unittest.skip("pSMAC not yet working with new python SMAC")
     def test_fit_pSMAC(self):
         output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+
+        # test parallel Classifier to predict classes, not only indexes
+        Y_train = Y_train + 1
+        Y_test = Y_test + 1
 
         automl = AutoSklearnClassifier(time_left_for_this_task=15,
                                        per_run_time_limit=15,
@@ -118,10 +133,11 @@ class EstimatorTest(Base, unittest.TestCase):
 
         probas_test = np.zeros((len(Y_test), 3), dtype=float)
         for i, value in enumerate(Y_test):
-            probas_test[i, value] = 1.0
+            probas_test[i, value - 1] = 1.0
 
         dummy = ArrayReturningDummyPredictor(probas_test)
-        backend = Backend(output, output)
+        context = BackendContext(output, output, False, False)
+        backend = Backend(context)
         backend.save_model(dummy, 30, 1)
 
         automl = AutoSklearnClassifier(time_left_for_this_task=15,
@@ -132,16 +148,133 @@ class EstimatorTest(Base, unittest.TestCase):
                                        seed=2,
                                        initial_configurations_via_metalearning=0,
                                        ensemble_size=0)
-        automl.fit(X_train, Y_train)
-        automl.run_ensemble_builder(0, 1, 50).wait()
+        automl.fit_ensemble(Y_train,
+                            task=MULTICLASS_CLASSIFICATION,
+                            metric=ACC_METRIC,
+                            precision='32',
+                            dataset_name='iris',
+                            ensemble_size=20,
+                            ensemble_nbest=50)
 
-        score = automl.score(X_test, Y_test)
+        predictions = automl.predict(X_test)
+        score = sklearn.metrics.accuracy_score(Y_test, predictions)
 
         self.assertEqual(len(os.listdir(os.path.join(output, '.auto-sklearn',
                                                      'ensembles'))), 1)
         self.assertGreaterEqual(score, 0.90)
-        self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
+        self.assertEqual(automl._automl._automl._task, MULTICLASS_CLASSIFICATION)
+
+        models = automl._automl._automl.models_
+        classifier_types = [type(c) for c in models.values()]
+        self.assertIn(ArrayReturningDummyPredictor, classifier_types)
 
         del automl
         self._tearDown(output)
 
+    def test_grid_scores(self):
+        output = os.path.join(self.test_dir, '..', '.tmp_grid_scores')
+        self._setUp(output)
+
+        cls = AutoSklearnClassifier(time_left_for_this_task=15,
+                                    per_run_time_limit=15,
+                                    output_folder=output,
+                                    tmp_folder=output,
+                                    shared_mode=False,
+                                    seed=1,
+                                    initial_configurations_via_metalearning=0,
+                                    ensemble_size=0)
+        cls_ = cls.build_automl()
+        automl = cls_._automl
+        automl._proc_smac = mock.MagicMock()
+
+        RunKey = collections.namedtuple(
+            'RunKey', ['config_id', 'instance_id', 'seed'])
+
+        RunValue = collections.namedtuple(
+            'RunValue', ['cost', 'time', 'status', 'additional_info'])
+
+        runhistory = dict()
+        runhistory[RunKey(1, 1, 1)] = RunValue(1, 1, 1, '')
+        automl._proc_smac.runhistory.data = runhistory
+        grid_scores_ = automl.grid_scores_
+
+        self.assertIsInstance(grid_scores_[0], _CVScoreTuple)
+        # In the runhistory we store losses, thus the score is zero
+        self.assertEqual(grid_scores_[0].mean_validation_score, 0)
+        self.assertEqual(grid_scores_[0].cv_validation_scores, [0])
+        self.assertIsInstance(grid_scores_[0].parameters, mock.MagicMock)
+
+        del automl
+        self._tearDown(output)
+
+    def test_cv_results(self):
+        # TODO restructure and actually use real SMAC output from a long run
+        # to do this unittest!
+        output = os.path.join(self.test_dir, '..', '.tmp_cv_results')
+        self._setUp(output)
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+
+        cls = AutoSklearnClassifier(time_left_for_this_task=15,
+                                    per_run_time_limit=15,
+                                    output_folder=output,
+                                    tmp_folder=output,
+                                    shared_mode=False,
+                                    seed=1,
+                                    initial_configurations_via_metalearning=0,
+                                    ensemble_size=0)
+        cls.fit(X_train, Y_train)
+        cv_results = cls.cv_results_
+        self.assertIsInstance(cv_results, dict)
+        self.assertIsInstance(cv_results['mean_test_score'], np.ndarray)
+        self.assertIsInstance(cv_results['mean_fit_time'], np.ndarray)
+        self.assertIsInstance(cv_results['params'], list)
+        self.assertIsInstance(cv_results['rank_test_scores'], np.ndarray)
+        self.assertTrue([isinstance(val, npma.MaskedArray) for key, val in
+                         cv_results.items() if key.startswith('param_')])
+        del cls
+        self._tearDown(output)
+
+
+
+class AutoMLClassifierTest(unittest.TestCase):
+
+    def test_multiclass_prediction(self):
+        classes = [['a', 'b', 'c']]
+        predicted_probabilities = [[0, 0, 0.99], [0, 0.99, 0], [0.99, 0, 0],
+                                   [0, 0.99, 0], [0, 0, 0.99]]
+        predicted_indexes = [2, 1, 0, 1, 2]
+        expected_result = ['c', 'b', 'a', 'b', 'c']
+
+        automl_mock = mock.Mock()
+        automl_mock.predict.return_value = np.array(predicted_probabilities)
+
+        classifier = AutoMLClassifier(automl_mock)
+        classifier._classes = [np.array(classes)]
+        classifier._n_outputs = 1
+        classifier._n_classes = np.array([3])
+
+        actual_result = classifier.predict([None] * len(predicted_indexes))
+
+        np.testing.assert_array_equal(expected_result, actual_result)
+
+    def test_multilabel_prediction(self):
+        classes = [['a', 'b', 'c'], [13, 17]]
+        predicted_probabilities = [[[0, 0, 0.99], [0.99, 0]],
+                                   [[0, 0.99, 0], [0.99, 0]],
+                                   [[0.99, 0, 0], [0, 0.99]],
+                                   [[0, 0.99, 0], [0, 0.99]],
+                                   [[0, 0, 0.99], [0, 0.99]]]
+        predicted_indexes = [[2, 0], [1, 0], [0, 1], [1, 1], [2, 1]]
+        expected_result = np.array([['c', 13], ['b', 13], ['a', 17], ['b', 17], ['c', 17]], dtype=object)
+
+        automl_mock = mock.Mock()
+        automl_mock.predict.return_value = np.matrix(predicted_probabilities)
+
+        classifier = AutoMLClassifier(automl_mock)
+        classifier._classes = list(map(np.array, classes))
+        classifier._n_outputs = 2
+        classifier._n_classes = np.array([3, 2])
+
+        actual_result = classifier.predict([None] * len(predicted_indexes))
+
+        np.testing.assert_array_equal(expected_result, actual_result)

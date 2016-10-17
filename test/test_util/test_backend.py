@@ -1,7 +1,11 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 import unittest
-import mock
+try:
+    import mock
+except ImportError:
+    from unittest import mock
+
 from autosklearn.util.backend import Backend
 
 from sys import version_info
