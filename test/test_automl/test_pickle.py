@@ -13,9 +13,6 @@ from base import Base
 class PicklingTests(Base, unittest.TestCase):
 
     def test_can_pickle_classifier(self):
-        if self.travis:
-            self.skipTest('This test does currently not run on travis-ci. '
-                          'Make sure it runs locally on your machine!')
 
         output = os.path.join(self.test_dir, '..', '.tmp_can_pickle')
         self._setUp(output)

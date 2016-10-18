@@ -24,9 +24,6 @@ class AutoMLTest(Base, unittest.TestCase):
     _multiprocess_can_split_ = True
 
     def test_fit(self):
-        if self.travis:
-            self.skipTest('This test does currently not run on travis-ci. '
-                          'Make sure it runs locally on your machine!')
 
         output = os.path.join(self.test_dir, '..', '.tmp_test_fit')
         self._setUp(output)
@@ -47,9 +44,6 @@ class AutoMLTest(Base, unittest.TestCase):
         Test fix for binary classification prediction
         taking the index 1 of second dimension in prediction matrix
         """
-        if self.travis:
-            self.skipTest('This test does currently not run on travis-ci. '
-                          'Make sure it runs locally on your machine!')
 
         output = os.path.join(self.test_dir, '..', '.tmp_test_binary_score')
         self._setUp(output)
