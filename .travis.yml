@@ -11,7 +11,7 @@ matrix:
   - os: osx
 
 cache:
-  apt: true
+  #apt: true
   # We use three different cache directory
   # to work around a Travis bug with multi-platform cache
   directories:
@@ -20,17 +20,17 @@ cache:
   pip: true
 
 # command to install dependencies
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    #- gcc-4.8
-    #- g++-4.8
-    - libatlas-dev
-    - liblapack-dev
-    - libatlas-base-dev
-    - gfortran
+#addons:
+#  apt:
+#    sources:
+#    - ubuntu-toolchain-r-test
+#    packages:
+#    - gcc-4.8
+#    - g++-4.8
+#    - libatlas-dev
+#    - liblapack-dev
+#    - libatlas-base-dev
+#    - gfortran
 
 env:
   global:
