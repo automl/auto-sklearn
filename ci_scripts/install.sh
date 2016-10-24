@@ -27,6 +27,10 @@ popd
 conda create -n testenv --yes python=$PYTHON_VERSION pip nose
 source activate testenv
 
+# Install anaconda gcc compiler to have compiler compatible with the
+# anaconda python executable
+conda install gcc
+
 # Install requirements in correct order
 cat requirements.txt | xargs -n 1 -L 1 pip install
 
