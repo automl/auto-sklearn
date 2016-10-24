@@ -2,10 +2,6 @@ language: python
 
 sudo: false
 
-os:
-  - linux
-  - osx
-
 matrix:
   allow_failures:
   - os: osx
@@ -37,6 +33,9 @@ cache:
   - $HOME/download
   pip: true
 
+git:
+  depth: 5
+
 env:
   global:
   # Directory where tests are run from
@@ -44,9 +43,8 @@ env:
   - MODULE=autosklearn
 
 install:
-  # Necessary for random forest
-  #- export CXX="g++-4.8" CC="gcc-4.8"
   - source ci_scripts/install.sh
+  
 script: bash ci_scripts/test.sh
 after_success: source ci_scripts/success.sh
 
