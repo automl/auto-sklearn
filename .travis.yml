@@ -2,16 +2,30 @@ language: python
 
 sudo: false
 
-os:
-  - linux
-  - osx
-
 matrix:
   allow_failures:
   - os: osx
+  
+  include:
+  - os: linux
+    env: DISTRIB="conda" PYTHON_VERSION="3.4"
+  - os: linux
+    env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true"
+
+  # Set language to generic to not break travis-ci
+  # https://github.com/travis-ci/travis-ci/issues/2312#issuecomment-195620855
+  # so far, this issue is still open and there is no good solution
+  # python will then be installed by anaconda
+  - os: osx
+    sudo: required
+    language: generic
+    env: DISTRIB="conda" PYTHON_VERSION="3.4"
+  - os: osx
+    sudo: required
+    language: generic
+    env: DISTRIB="conda" PYTHON_VERSION="3.5"
 
 cache:
-  apt: true
   # We use three different cache directory
   # to work around a Travis bug with multi-platform cache
   directories:
@@ -19,32 +33,18 @@ cache:
   - $HOME/download
   pip: true
 
-# command to install dependencies
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gcc-4.8
-    - g++-4.8
-    - libatlas-dev
-    - liblapack-dev
-    - libatlas-base-dev
-    - gfortran
+git:
+  depth: 5
 
 env:
   global:
   # Directory where tests are run from
   - TEST_DIR=/tmp/test_dir/
   - MODULE=autosklearn
-  matrix:
-  - DISTRIB="conda" PYTHON_VERSION="3.4"
-  - DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true"
 
 install:
-  # Necessary for random forest
-  - export CXX="g++-4.8" CC="gcc-4.8"
   - source ci_scripts/install.sh
+  
 script: bash ci_scripts/test.sh
 after_success: source ci_scripts/success.sh
 
