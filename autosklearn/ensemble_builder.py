@@ -129,7 +129,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 if dir_ensemble_file.endswith("/"):
                     dir_ensemble_file = dir_ensemble_file[:-1]
                 if not dir_ensemble_file.endswith(".npy"):
-                    self.logger.warning('Error loading file (not .npy): %s', dir_ensemble_file)
+                    self.logger.info('Error loading file (not .npy): %s', dir_ensemble_file)
                     continue
 
                 dir_ensemble_model_files.append(dir_ensemble_file)
