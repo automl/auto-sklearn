@@ -6,7 +6,7 @@ from ConfigSpace.forbidden import ForbiddenAndConjunction
 from ConfigSpace.forbidden import ForbiddenEqualsClause
 
 from autosklearn.pipeline.constants import *
-
+'''
 
 def get_match_array(pipeline, dataset_properties,
                     include=None, exclude=None):
@@ -258,3 +258,4 @@ def add_forbidden(conf_space, pipeline, matches, dataset_properties,
                         conf_space.add_forbidden_clause(forbidden)
 
     return conf_space
+'''

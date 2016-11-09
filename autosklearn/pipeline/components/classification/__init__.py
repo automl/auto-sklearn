@@ -1,14 +1,16 @@
+from autosklearn.pipeline.components.algorithms import AutoSklearnClassificationAlgorithm
+
 __author__ = 'feurerm'
 
 from collections import OrderedDict
 import copy
 import os
 
-from ..base import AutoSklearnClassificationAlgorithm, find_components, \
-    ThirdPartyComponents, AutoSklearnChoice
+from ..base import find_components, \
+    ThirdPartyComponents
+from autosklearn.pipeline.components.choice import AutoSklearnChoice
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
-from ConfigSpace.conditions import EqualsCondition
 
 classifier_directory = os.path.split(__file__)[0]
 _classifiers = find_components(__package__,

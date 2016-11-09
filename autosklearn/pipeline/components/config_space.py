@@ -1,20 +1,33 @@
-from collections import defaultdict, OrderedDict
 from copy import copy
-
-from ConfigSpace import ConfigurationSpace
 from ConfigSpace import ForbiddenAndConjunction
 from ConfigSpace import ForbiddenEqualsClause
 
 
-class InvalidDataArtifactsException(Exception):
-
-    def __init__(self, artifacts):
-        self.artifacts = artifacts
-        message = "Unable to transform data with: %s" % artifacts
-        super(InvalidDataArtifactsException, self).__init__(message)
-
-
 class ConfigSpaceBuilder(object):
+
+    def __init__(self, element):
+        self._element = element
+        self._parent = None
+        self._name = None
+
+    def _set_name(self, name):
+        self._name = name
+
+    def _set_parent(self, parent):
+        self._parent = parent
+
+    def get_path(self):
+        name = self._name
+        parent_path = self._parent.get_path() if self._parent else None
+
+        if parent_path and name:
+            return parent_path + ':' + name
+        elif parent_path:
+            return parent_path
+        elif name:
+            return name
+        else:
+            return ""
 
     def get_config_space(self):
         pass
@@ -43,107 +56,12 @@ class ConfigSpaceBuilder(object):
         return cs
 
 
-class LeafNodeConfigSpaceBuilder(ConfigSpaceBuilder):
+class InvalidDataArtifactsException(Exception):
 
-    def __init__(self, element):
-        self._element = element
-        self._parent = None
-        self._name = None
-        self._children = OrderedDict()
-
-    def _set_name(self, name):
-        self._name = name
-
-    def _set_parent(self, parent):
-        self._parent = parent
-
-    def add_child(self, name, node):
-        node._set_parent(self)
-        node._set_name(name)
-        self._children[name] = node
-
-    def get_path(self):
-        name = self._name
-        parent_path = self._parent.get_path() if self._parent else None
-
-        if parent_path and name:
-            return parent_path + ':' + name
-        elif parent_path:
-            return parent_path
-        elif name:
-            return name
-        else:
-            return ""
-
-    def get_config_space(self):
-        return self._element.get_hyperparameter_search_space()
-
-    def explore_data_flow(self, data_description):
-        try:
-            artifacts = data_description.get_artifacts()
-            artifacts = self._element.transform_data_description(artifacts)
-            data_description.update_artifacts(self, artifacts)
-            return [data_description]
-        except InvalidDataArtifactsException as ex:
-            return [IncompatibleDataDescription(data_description, self, ex.artifacts)]
-
-
-class CompositeConfigSpaceBuilder(LeafNodeConfigSpaceBuilder):
-
-    def get_config_space(self):
-        cs = ConfigurationSpace()
-        for name, node in self._children.items():
-            sub_cs = node.get_config_space()
-            cs.add_configuration_space(name, sub_cs)
-        return cs
-
-
-class ParallelConfigSpaceBuilder(CompositeConfigSpaceBuilder):
-
-    def explore_data_flow(self, data_description):
-        data_descriptions = []
-        for name, node in self._children.items():
-            data_description_copy = data_description.copy()
-            data_description_copy.add_choice(self, name)
-            current_step_data_descriptions = node.explore_data_flow(data_description_copy)
-            data_descriptions.extend(current_step_data_descriptions)
-        return data_descriptions
-
-
-class SerialConfigSpaceBuilder(CompositeConfigSpaceBuilder):
-
-    def explore_data_flow(self, data_description):
-        data_descriptions = [data_description]
-        for name, node in self._children.items():
-            current_step_data_descriptions = []
-            for data_description in data_descriptions:
-                if data_description.is_valid:
-                    data_descriptions = node.explore_data_flow(data_description)
-                    current_step_data_descriptions.extend(data_descriptions)
-                else:
-                    current_step_data_descriptions.append(data_description)
-            data_descriptions = current_step_data_descriptions
-        return data_descriptions
-
-
-class ChoiceConfigSpaceBuilder(CompositeConfigSpaceBuilder):
-
-    def get_config_space(self):
-        cs = self._element.get_hyperparameter_search_space()
-        choice_parameter = cs.get_hyperparameter('__choice__')
-        for name, node in self._children.items():
-            sub_cs = node.get_config_space()
-            cs.add_configuration_space(name, sub_cs, parent_hyperparameter={'parent': choice_parameter, 'value': name})
-        return cs
-
-    def explore_data_flow(self, data_description):
-        data_descriptions = []
-        for name, node in self._children.items():
-            data_description_copy = data_description.copy()
-            data_description_copy.add_choice(self, name)
-            current_step_data_descriptions = node.explore_data_flow(data_description_copy)
-            data_descriptions.extend(current_step_data_descriptions)
-        return data_descriptions
+    def __init__(self, artifacts):
+        self.artifacts = artifacts
+        message = "Unable to transform data with: %s" % artifacts
+        super(InvalidDataArtifactsException, self).__init__(message)
 
 
 class PathTracker(object):

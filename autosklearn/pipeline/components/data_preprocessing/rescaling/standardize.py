@@ -2,8 +2,7 @@ from scipy import sparse
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling \
     import Rescaling
-from autosklearn.pipeline.components.base import \
-    AutoSklearnPreprocessingAlgorithm
+from autosklearn.pipeline.components.algorithms import AutoSklearnPreprocessingAlgorithm
 from sklearn.preprocessing import StandardScaler
 
 

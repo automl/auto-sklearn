@@ -2,7 +2,7 @@ import numpy as np
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
-from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.algorithms import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 
 

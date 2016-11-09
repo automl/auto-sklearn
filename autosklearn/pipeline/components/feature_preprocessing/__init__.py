@@ -2,8 +2,10 @@ from collections import OrderedDict
 import copy
 import os
 
-from ..base import AutoSklearnPreprocessingAlgorithm, find_components, \
-    ThirdPartyComponents, AutoSklearnChoice
+from autosklearn.pipeline.components.algorithms import AutoSklearnPreprocessingAlgorithm
+from ..base import find_components, \
+    ThirdPartyComponents
+from autosklearn.pipeline.components.choice import AutoSklearnChoice
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 from ConfigSpace.conditions import EqualsCondition, AbstractConjunction

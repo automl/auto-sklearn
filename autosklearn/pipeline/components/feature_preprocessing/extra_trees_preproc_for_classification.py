@@ -5,8 +5,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
-from autosklearn.pipeline.components.base import \
-    AutoSklearnPreprocessingAlgorithm
+from autosklearn.pipeline.components.algorithms import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
 
 

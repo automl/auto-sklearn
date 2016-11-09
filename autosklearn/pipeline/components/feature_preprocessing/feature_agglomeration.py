@@ -6,8 +6,7 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
 from ConfigSpace.forbidden import ForbiddenInClause, \
     ForbiddenAndConjunction, ForbiddenEqualsClause
 
-from autosklearn.pipeline.components.base import \
-    AutoSklearnPreprocessingAlgorithm
+from autosklearn.pipeline.components.algorithms import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
 
 

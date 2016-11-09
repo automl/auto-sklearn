@@ -1,7 +1,7 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, CategoricalHyperparameter, Constant
 
-from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
+from autosklearn.pipeline.components.algorithms import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.components.feature_preprocessing.select_percentile import SelectPercentileBase
 from autosklearn.pipeline.constants import *
 

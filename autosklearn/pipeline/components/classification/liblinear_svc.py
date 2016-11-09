@@ -4,8 +4,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from ConfigSpace.forbidden import ForbiddenEqualsClause, \
     ForbiddenAndConjunction
 
-from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
-from autosklearn.pipeline.graph_based_config_space import InvalidDataArtifactsException
+from autosklearn.pipeline.components.algorithms import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.pipeline.constants import *
 import sklearn.multiclass

@@ -4,7 +4,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from ConfigSpace.forbidden import ForbiddenEqualsClause, \
     ForbiddenAndConjunction
 
-from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
+from autosklearn.pipeline.components.algorithms import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
 
 

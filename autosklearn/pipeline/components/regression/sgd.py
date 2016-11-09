@@ -4,7 +4,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter
 from ConfigSpace.conditions import InCondition, EqualsCondition
 
-from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
+from autosklearn.pipeline.components.algorithms import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
 
 

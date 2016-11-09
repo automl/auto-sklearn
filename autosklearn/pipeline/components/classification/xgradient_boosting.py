@@ -2,12 +2,9 @@ import numpy
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant, \
-    CategoricalHyperparameter
+    UniformIntegerHyperparameter, UnParametrizedHyperparameter
 
-from autosklearn.pipeline.components.base import \
-    AutoSklearnClassificationAlgorithm
-
+from autosklearn.pipeline.components.algorithms import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 
 

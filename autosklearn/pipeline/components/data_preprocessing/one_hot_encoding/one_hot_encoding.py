@@ -7,7 +7,7 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
     UniformFloatHyperparameter
 from ConfigSpace.conditions import EqualsCondition
 
-from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
+from autosklearn.pipeline.components.algorithms import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
 
 

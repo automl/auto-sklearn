@@ -3,18 +3,17 @@ import unittest
 from ConfigSpace import CategoricalHyperparameter
 from ConfigSpace import ConfigurationSpace
 
-from autosklearn.pipeline.components.base import AutoSklearnComponent
+from autosklearn.pipeline.components.base import AutoSklearnComponent, LeafNodeConfigSpaceBuilder
 from autosklearn.pipeline.components.classification import ClassifierChoice
-from autosklearn.pipeline.components.data_preprocessing.balancing.balancing import \
-    Balancing
+from autosklearn.pipeline.components.config_space import InvalidDataArtifactsException
 from autosklearn.pipeline.components.data_preprocessing.imputation.imputation import Imputation
 from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.one_hot_encoding import OneHotEncoder
 from autosklearn.pipeline.components.data_preprocessing.rescaling import \
     RescalingChoice
 from autosklearn.pipeline.components.feature_preprocessing import FeaturePreprocessorChoice
+from autosklearn.pipeline.components.parallel import ParallelAutoSklearnComponent
 from autosklearn.pipeline.components.regression import RegressorChoice
-from autosklearn.pipeline.graph_based_config_space import LeafNodeConfigSpaceBuilder, InvalidDataArtifactsException
-from autosklearn.pipeline.serial_flow_component import SerialFlow, ParallelFlow
+from autosklearn.pipeline.components.serial import SerialAutoSklearnComponent
 
 
 class BadStub(AutoSklearnComponent):
@@ -55,8 +54,8 @@ class Stub(AutoSklearnComponent):
 class SimplePipelineConfigSpaceTest(unittest.TestCase):
 
     def test_lol(self):
-        pipeline = SerialFlow(
-            [ParallelFlow(
+        pipeline = SerialAutoSklearnComponent(
+            [ParallelAutoSklearnComponent(
                 [BadStub(),
                  Stub(),
                  Stub(),
@@ -69,7 +68,7 @@ class SimplePipelineConfigSpaceTest(unittest.TestCase):
         print(cs)
 
     def test_pipeline_with_choice_nodes(self):
-        pipeline = SerialFlow(
+        pipeline = SerialAutoSklearnComponent(
             [
                 RescalingChoice(),
                 ClassifierChoice()
@@ -80,12 +79,11 @@ class SimplePipelineConfigSpaceTest(unittest.TestCase):
         print(cs)
 
     def test_simple_classification_pipeline(self):
-        pipeline = SerialFlow(
+        pipeline = SerialAutoSklearnComponent(
             [
                 ("one_hot_encoding", OneHotEncoder()),
                 ("imputation", Imputation()),
                 ("rescaling", RescalingChoice()),
-                ("balancing", Balancing()),
                 ("preprocessor", FeaturePreprocessorChoice()),
                 ("classifier", ClassifierChoice())
             ]
@@ -95,12 +93,11 @@ class SimplePipelineConfigSpaceTest(unittest.TestCase):
         print(cs)
 
     def test_set_simple_classification_pipeline(self):
-        pipeline = SerialFlow(
+        pipeline = SerialAutoSklearnComponent(
             [
                 ("one_hot_encoding", OneHotEncoder()),
                 ("imputation", Imputation()),
                 ("rescaling", RescalingChoice()),
-                ("balancing", Balancing()),
                 ("preprocessor", FeaturePreprocessorChoice()),
                 ("classifier", ClassifierChoice())
             ]
@@ -111,13 +108,13 @@ class SimplePipelineConfigSpaceTest(unittest.TestCase):
         pipeline.set_hyperparameters(default)
 
     def test_simple_regression_pipeline(self):
-        pipeline = SerialFlow(
+        pipeline = SerialAutoSklearnComponent(
             [
                 ("one_hot_encoding", OneHotEncoder()),
                 ("imputation", Imputation()),
                 ("rescaling", RescalingChoice()),
                 ("preprocessor", FeaturePreprocessorChoice()),
-                ("classifier", RegressorChoice())
+                ("regressor", RegressorChoice())
             ]
         )
 
@@ -126,4 +123,30 @@ class SimplePipelineConfigSpaceTest(unittest.TestCase):
         pipeline.set_hyperparameters(default)
 
     def test_two_parallel_data_processing_pipelines(self):
-        pass
+        pipeline = SerialAutoSklearnComponent(
+            [
+                ParallelAutoSklearnComponent([
+                    SerialAutoSklearnComponent(
+                        [
+                            ("one_hot_encoding", OneHotEncoder()),
+                            ("imputation", Imputation()),
+                            ("rescaling", RescalingChoice()),
+                            ("preprocessor", FeaturePreprocessorChoice())
+                        ]
+                    ),
+                    SerialAutoSklearnComponent(
+                        [
+                            ("one_hot_encoding", OneHotEncoder()),
+                            ("imputation", Imputation()),
+                            ("rescaling", RescalingChoice()),
+                            ("preprocessor", FeaturePreprocessorChoice())
+                        ]
+                    )
+                ]),
+                ("classifier", ClassifierChoice())
+            ]
+        )
+
+        cs = pipeline.get_config_space()
+        default = cs.get_default_configuration()
+        pipeline.set_hyperparameters(default)

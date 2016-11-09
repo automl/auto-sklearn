@@ -3,7 +3,7 @@ import numpy as np
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformIntegerHyperparameter
 
-from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
+from autosklearn.pipeline.components.algorithms import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
 
 

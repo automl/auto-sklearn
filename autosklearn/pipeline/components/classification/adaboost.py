@@ -2,7 +2,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
 
-from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.algorithms import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 
 from sklearn.ensemble import AdaBoostClassifier

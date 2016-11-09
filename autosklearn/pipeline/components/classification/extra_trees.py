@@ -5,7 +5,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
-from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.algorithms import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 

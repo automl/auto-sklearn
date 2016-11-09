@@ -1,6 +1,6 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 
-from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
+from autosklearn.pipeline.components.algorithms import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
 
 

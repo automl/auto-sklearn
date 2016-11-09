@@ -1,8 +1,7 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter
 
-from autosklearn.pipeline.components.base import \
-    AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.algorithms import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
 

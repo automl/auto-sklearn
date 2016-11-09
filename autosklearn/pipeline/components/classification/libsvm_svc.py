@@ -8,7 +8,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter
 
-from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.algorithms import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
 import sklearn.svm
