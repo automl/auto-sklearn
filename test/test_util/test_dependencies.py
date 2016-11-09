@@ -6,7 +6,8 @@ from unittest.mock import patch, Mock
 
 import pkg_resources
 
-from autosklearn.util.dependencies import verify_packages, _verify_package
+from autosklearn.util.dependencies import verify_packages, _verify_package, MissingPackageError, \
+    IncorrectPackageVersionError
 
 
 @patch('pkg_resources.get_distribution')
@@ -15,9 +16,7 @@ class VerifyPackagesTests(unittest.TestCase):
     def test_existing_package(self, getDistributionMock):
         requirement = 'package'
 
-        with warnings.catch_warnings(record=True) as w:
-            verify_packages(requirement)
-            self.assertEqual(0, len(w))
+        verify_packages(requirement)
 
         getDistributionMock.assert_called_once_with('package')
 
@@ -26,7 +25,8 @@ class VerifyPackagesTests(unittest.TestCase):
 
         getDistributionMock.side_effect = pkg_resources.DistributionNotFound()
 
-        self.assertWarnsRegex(UserWarning, "mandatory package 'package' not found", verify_packages, requirement)
+        self.assertRaisesRegex(MissingPackageError,
+                               "mandatory package 'package' not found", verify_packages, requirement)
 
     def test_correct_package_versions(self, getDistributionMock):
         requirement = 'package==0.1.2\n' \
@@ -37,9 +37,7 @@ class VerifyPackagesTests(unittest.TestCase):
         moduleMock.version = '0.1.2'
         getDistributionMock.return_value = moduleMock
 
-        with warnings.catch_warnings(record=True) as w:
-            verify_packages(requirement)
-            self.assertEqual(0, len(w))
+        verify_packages(requirement)
 
         getDistributionMock.assert_called_with('package')
         self.assertEqual(3, len(getDistributionMock.call_args_list))
@@ -51,7 +49,8 @@ class VerifyPackagesTests(unittest.TestCase):
         moduleMock.version = '0.1.2'
         getDistributionMock.return_value = moduleMock
 
-        self.assertWarnsRegex(UserWarning, re.escape("'package' version mismatch (>0.1.2)"), verify_packages, requirement)
+        self.assertRaisesRegex(IncorrectPackageVersionError,
+                               re.escape("'package 0.1.2' version mismatch (>0.1.2)"), verify_packages, requirement)
 
     def test_outdated_requirement(self, getDistributionMock):
         requirement = 'package>=0.1'
@@ -60,7 +59,8 @@ class VerifyPackagesTests(unittest.TestCase):
         moduleMock.version = '0.0.9'
         getDistributionMock.return_value = moduleMock
 
-        self.assertWarnsRegex(UserWarning, re.escape("'package' version mismatch (>=0.1)"), verify_packages, requirement)
+        self.assertRaisesRegex(IncorrectPackageVersionError,
+                               re.escape("'package 0.0.9' version mismatch (>=0.1)"), verify_packages, requirement)
 
     def test_too_fresh_requirement(self, getDistributionMock):
         requirement = 'package==0.1.2'
@@ -69,4 +69,5 @@ class VerifyPackagesTests(unittest.TestCase):
         moduleMock.version = '0.1.3'
         getDistributionMock.return_value = moduleMock
 
-        self.assertWarnsRegex(UserWarning, re.escape("'package' version mismatch (==0.1.2)"), verify_packages, requirement)
+        self.assertRaisesRegex(IncorrectPackageVersionError,
+                               re.escape("'package 0.1.3' version mismatch (==0.1.2)"), verify_packages, requirement)

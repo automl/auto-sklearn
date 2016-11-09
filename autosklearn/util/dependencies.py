@@ -33,8 +33,7 @@ def _verify_package(name, operation, version):
     try:
         module = pkg_resources.get_distribution(name)
     except pkg_resources.DistributionNotFound:
-        warn('mandatory package \'%s\' not found' % name)
-        return
+        raise MissingPackageError(name) from None
 
     if not operation:
         return
@@ -50,6 +49,31 @@ def _verify_package(name, operation, version):
         check = installed_version > required_version or \
                 installed_version == required_version
     else:
-        raise NotImplementedError('operation %s is not supported' % operation)
+        raise NotImplementedError('operation \'%s\' is not supported' % operation)
     if not check:
-        warn('\'%s\' version mismatch (%s%s)' % (name, operation, required_version))
+        raise IncorrectPackageVersionError(name, installed_version, operation, required_version)
+
+
+class MissingPackageError(Exception):
+
+    error_message = 'mandatory package \'{name}\' not found'
+
+    def __init__(self, package_name):
+        self.package_name = package_name
+        super(MissingPackageError, self).__init__(self.error_message.format(name=package_name))
+
+
+class IncorrectPackageVersionError(Exception):
+
+    error_message = '\'{name} {installed_version}\' version mismatch ({operation}{required_version})'
+
+    def __init__(self, package_name, installed_version, operation, required_version):
+        self.package_name = package_name
+        self.installed_version = installed_version
+        self.operation = operation
+        self.required_version = required_version
+        message = self.error_message.format(name=package_name,
+                                            installed_version=installed_version,
+                                            operation=operation,
+                                            required_version=required_version)
+        super(IncorrectPackageVersionError, self).__init__(message)
