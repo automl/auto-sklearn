@@ -1,12 +1,11 @@
 import unittest
-import warnings
 import re
 
 from unittest.mock import patch, Mock
 
 import pkg_resources
 
-from autosklearn.util.dependencies import verify_packages, _verify_package, MissingPackageError, \
+from autosklearn.util.dependencies import verify_packages, MissingPackageError, \
     IncorrectPackageVersionError
 
 

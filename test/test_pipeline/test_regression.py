@@ -3,10 +3,7 @@ import resource
 import sys
 import traceback
 import unittest
-try:
-    import mock
-except ImportError:
-    from unittest import mock
+import unittest.mock
 
 import numpy as np
 import sklearn.datasets
@@ -376,7 +373,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
-        cls_predict = mock.Mock(wraps=cls.pipeline_)
+        cls_predict = unittest.mock.Mock(wraps=cls.pipeline_)
         cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
         self.assertEqual((356,), prediction.shape)
@@ -394,7 +391,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
-        cls_predict = mock.Mock(wraps=cls.pipeline_)
+        cls_predict = unittest.mock.Mock(wraps=cls.pipeline_)
         cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
         self.assertEqual((356,), prediction.shape)

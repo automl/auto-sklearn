@@ -1,10 +1,7 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 import unittest
-try:
-    import mock
-except ImportError:
-    from unittest import mock
+import unittest.mock
 
 from autosklearn.automl import AutoML
 from autosklearn.util.backend import Backend
@@ -22,7 +19,7 @@ class AutoMlModelsTest(unittest.TestCase):
         self.automl = AutoMLStub()
         self.automl._shared_mode = False
         self.automl._seed = 42
-        self.automl._backend = mock.Mock(spec=Backend)
+        self.automl._backend = unittest.mock.Mock(spec=Backend)
         self.automl._delete_output_directories = lambda: 0
 
     def test_only_loads_ensemble_models(self):

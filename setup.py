@@ -16,7 +16,6 @@ extensions = cythonize(
 requirements = [
     "unittest2",
     "setuptools",
-    "mock",
     "nose",
     "six",
     "Cython",

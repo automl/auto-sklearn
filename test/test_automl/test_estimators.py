@@ -4,13 +4,9 @@ import collections
 import os
 import sys
 import unittest
+import unittest.mock
 
 import sklearn
-
-try:
-    import mock
-except ImportError:
-    from unittest import mock
 
 import numpy as np
 import numpy.ma as npma
@@ -182,7 +178,7 @@ class EstimatorTest(Base, unittest.TestCase):
                                     ensemble_size=0)
         cls_ = cls.build_automl()
         automl = cls_._automl
-        automl._proc_smac = mock.MagicMock()
+        automl._proc_smac = unittest.mock.MagicMock()
 
         RunKey = collections.namedtuple(
             'RunKey', ['config_id', 'instance_id', 'seed'])
@@ -199,7 +195,7 @@ class EstimatorTest(Base, unittest.TestCase):
         # In the runhistory we store losses, thus the score is zero
         self.assertEqual(grid_scores_[0].mean_validation_score, 0)
         self.assertEqual(grid_scores_[0].cv_validation_scores, [0])
-        self.assertIsInstance(grid_scores_[0].parameters, mock.MagicMock)
+        self.assertIsInstance(grid_scores_[0].parameters, unittest.mock.MagicMock)
 
         del automl
         self._tearDown(output)
@@ -242,7 +238,7 @@ class AutoMLClassifierTest(unittest.TestCase):
         predicted_indexes = [2, 1, 0, 1, 2]
         expected_result = ['c', 'b', 'a', 'b', 'c']
 
-        automl_mock = mock.Mock()
+        automl_mock = unittest.mock.Mock()
         automl_mock.predict.return_value = np.array(predicted_probabilities)
 
         classifier = AutoMLClassifier(automl_mock)
@@ -264,7 +260,7 @@ class AutoMLClassifierTest(unittest.TestCase):
         predicted_indexes = [[2, 0], [1, 0], [0, 1], [1, 1], [2, 1]]
         expected_result = np.array([['c', 13], ['b', 13], ['a', 17], ['b', 17], ['c', 17]], dtype=object)
 
-        automl_mock = mock.Mock()
+        automl_mock = unittest.mock.Mock()
         automl_mock.predict.return_value = np.matrix(predicted_probabilities)
 
         classifier = AutoMLClassifier(automl_mock)

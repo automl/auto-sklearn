@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-nosetests --processes=3 --process-timeout=120 -v $1
+nosetests --processes=16 --process-timeout=240 -v $1

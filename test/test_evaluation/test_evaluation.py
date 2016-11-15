@@ -4,13 +4,9 @@ import shutil
 import sys
 import time
 import unittest
+import unittest.mock
 
 import numpy as np
-
-if sys.version_info[0] == 2:
-    import mock
-else:
-    from unittest import mock
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
@@ -67,7 +63,7 @@ class EvaluationTest(unittest.TestCase):
         safe_eval()
         self.assertEqual(safe_eval.exit_status, pynisher.TimeoutException)
 
-    @mock.patch('autosklearn.evaluation.eval_holdout')
+    @unittest.mock.patch('autosklearn.evaluation.eval_holdout')
     def test_eval_with_limits_holdout(self, pynisher_mock):
         pynisher_mock.side_effect = safe_eval_success_mock
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
@@ -78,7 +74,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1], 0.5)
         self.assertIsInstance(info[2], float)
 
-    @mock.patch('autosklearn.evaluation.eval_holdout')
+    @unittest.mock.patch('autosklearn.evaluation.eval_holdout')
     def test_eval_with_limits_holdout_fail_silent(self, pynisher_mock):
         pynisher_mock.return_value = None
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
@@ -89,7 +85,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1], 2.0)
         self.assertIsInstance(info[2], float)
 
-    @mock.patch('autosklearn.evaluation.eval_holdout')
+    @unittest.mock.patch('autosklearn.evaluation.eval_holdout')
     def test_eval_with_limits_holdout_fail_memory_error(self, pynisher_mock):
         pynisher_mock.side_effect = MemoryError
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
@@ -100,7 +96,7 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[1], 2.0)
         self.assertIsInstance(info[2], float)
 
-    @mock.patch('autosklearn.evaluation.eval_holdout')
+    @unittest.mock.patch('autosklearn.evaluation.eval_holdout')
     def test_eval_with_limits_holdout_fail_timeout(self, pynisher_mock):
         pynisher_mock.side_effect = pynisher.TimeoutException
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,

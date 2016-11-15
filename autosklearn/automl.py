@@ -5,7 +5,6 @@ from collections import defaultdict
 import hashlib
 import io
 import os
-import unittest.mock
 
 
 from ConfigSpace.io import pcs
@@ -14,8 +13,6 @@ import numpy.ma as ma
 import scipy.stats
 from sklearn.base import BaseEstimator
 from smac.tae.execute_ta_run import StatusType
-import smac.stats.stats
-from smac.runhistory.runhistory import RunHistory
 from sklearn.grid_search import _CVScoreTuple
 
 from autosklearn.constants import *

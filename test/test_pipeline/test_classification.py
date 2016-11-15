@@ -4,10 +4,7 @@ import resource
 import sys
 import traceback
 import unittest
-try:
-    import mock
-except ImportError:
-    from unittest import mock
+import unittest.mock
 
 import numpy as np
 import sklearn.datasets
@@ -398,7 +395,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
-        cls_predict = mock.Mock(wraps=cls.pipeline_)
+        cls_predict = unittest.mock.Mock(wraps=cls.pipeline_)
         cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
         self.assertEqual((1647,), prediction.shape)
@@ -412,7 +409,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
-        cls_predict = mock.Mock(wraps=cls.pipeline_)
+        cls_predict = unittest.mock.Mock(wraps=cls.pipeline_)
         cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
@@ -447,7 +444,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
-        cls_predict = mock.Mock(wraps=cls.pipeline_)
+        cls_predict = unittest.mock.Mock(wraps=cls.pipeline_)
         cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
         self.assertEqual((1647,), prediction.shape)
@@ -462,7 +459,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
-        cls_predict = mock.Mock(wraps=cls.pipeline_)
+        cls_predict = unittest.mock.Mock(wraps=cls.pipeline_)
         cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
@@ -480,7 +477,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         # The object behind the last step in the pipeline
-        cls_predict = mock.Mock(wraps=cls.pipeline_.steps[-1][1])
+        cls_predict = unittest.mock.Mock(wraps=cls.pipeline_.steps[-1][1])
         cls.pipeline_.steps[-1] = ("estimator", cls_predict)
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
@@ -495,7 +492,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
-        cls_predict = mock.Mock(wraps=cls.pipeline_.steps[-1][1])
+        cls_predict = unittest.mock.Mock(wraps=cls.pipeline_.steps[-1][1])
         cls.pipeline_.steps[-1] = ("estimator", cls_predict)
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertIsInstance(prediction, np.ndarray)
@@ -533,7 +530,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         # The object behind the last step in the pipeline
-        cls_predict = mock.Mock(wraps=cls.pipeline_.steps[-1][1])
+        cls_predict = unittest.mock.Mock(wraps=cls.pipeline_.steps[-1][1])
         cls.pipeline_.steps[-1] = ("estimator", cls_predict)
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
@@ -549,7 +546,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
-        cls_predict = mock.Mock(wraps=cls.pipeline_.steps[-1][1])
+        cls_predict = unittest.mock.Mock(wraps=cls.pipeline_.steps[-1][1])
         cls.pipeline_.steps[-1] = ("estimator", cls_predict)
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual(prediction.shape, ((1647, 10)))
