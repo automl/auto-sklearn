@@ -5,7 +5,7 @@ __version__ = '0.1.0'
 
 __MANDATORY_PACKAGES__ = '''
 scikit-learn==0.17.1
-smac==0.0.1
+smac==0.2
 lockfile>=0.10
 ConfigSpace>=0.2.1
 pyrfr==0.2.0
