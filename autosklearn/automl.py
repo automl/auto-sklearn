@@ -418,12 +418,25 @@ class AutoML(BaseEstimator):
                 self.ensemble_ is None:
             self._load_models()
 
+        random_state = np.random.RandomState(self._seed)
         for identifier in self.models_:
             if identifier in self.ensemble_.get_model_identifiers():
                 model = self.models_[identifier]
                 # this updates the model inplace, it can then later be used in
                 # predict method
-                model.fit(X.copy(), y.copy())
+
+                # try to fit the model. If it fails, shuffle the data. This
+                # could alleviate the problem in algorithms that depend on
+                # the ordering of the data.
+                for i in range(10):
+                    try:
+                        model.fit(X.copy(), y.copy())
+                        break
+                    except ValueError:
+                        indices = list(range(X.shape[0]))
+                        random_state.shuffle(indices)
+                        X = X[indices]
+                        y = y[indices]
 
         self._can_predict = True
         return self
