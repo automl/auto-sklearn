@@ -25,6 +25,8 @@ dependencies:
     - sudo apt-get update
     - sudo apt-get install libatlas-dev libatlas3gf-base
     - sudo apt-get install build-essential python-dev python-setuptools
+    # upgrade pip and wheel to allow for fast installation
+    - pip install wheel pip --upgrade
     # install numpy first as it is a compile time dependency for other packages
     - pip install --upgrade numpy
     # install documentation building dependencies
