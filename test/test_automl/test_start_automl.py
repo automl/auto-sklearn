@@ -146,9 +146,5 @@ class AutoMLTest(Base, unittest.TestCase):
                 output, '.auto-sklearn', 'predictions_ensemble',
                 'predictions_ensemble_1_00001.npy')))
 
-            self.assertTrue(os.path.exists(os.path.join(
-                output, '.auto-sklearn', 'predictions_ensemble',
-                'predictions_ensemble_1_00002.npy')))
-
             del auto
             self._tearDown(output)
