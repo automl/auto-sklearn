@@ -5,6 +5,7 @@ from collections import defaultdict
 import hashlib
 import io
 import os
+import unittest.mock
 
 
 from ConfigSpace.io import pcs
@@ -13,13 +14,15 @@ import numpy.ma as ma
 import scipy.stats
 from sklearn.base import BaseEstimator
 from smac.tae.execute_ta_run import StatusType
+import smac.stats.stats
+from smac.runhistory.runhistory import RunHistory
 from sklearn.grid_search import _CVScoreTuple
 
 from autosklearn.constants import *
 from autosklearn.data.data_manager_factory import get_data_manager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.evaluation import resampling, eval_with_limits
+from autosklearn.evaluation import resampling, ExecuteTaFuncWithQueue
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline
@@ -234,35 +237,29 @@ class AutoML(BaseEstimator):
         self._logger.info("Starting to create dummy predictions.")
         time_limit = int(self._time_for_task / 6.)
         memory_limit = int(self._ml_memory_limit)
+        ta = ExecuteTaFuncWithQueue(backend=self._backend,
+                                    autosklearn_seed=self._seed,
+                                    resampling_strategy=self._resampling_strategy,
+                                    initial_num_run=num_run,
+                                    logger=self._logger)
 
-        _info = eval_with_limits(datamanager, self._backend, 1,
-                                 self._seed, num_run,
-                                 self._resampling_strategy,
-                                 self._resampling_strategy_arguments,
-                                 memory_limit, time_limit,
-                                 logger=self._logger)
-        if _info[4] == StatusType.SUCCESS:
+        status, cost, runtime, additional_info = \
+            ta.run(1, cutoff=time_limit, memory_limit=memory_limit)
+        if status == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy prediction 1/2.")
         else:
             self._logger.error('Error creating dummy prediction 1/2:%s ',
-                               _info[3])
+                               additional_info)
 
-        num_run += 1
-
-        _info = eval_with_limits(datamanager, self._backend, 2,
-                                 self._seed, num_run,
-                                 self._resampling_strategy,
-                                 self._resampling_strategy_arguments,
-                                 memory_limit, time_limit,
-                                 logger=self._logger)
-        if _info[4] == StatusType.SUCCESS:
+        status, cost, runtime, additional_info = \
+            ta.run(2, cutoff=time_limit, memory_limit=memory_limit)
+        if status == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy prediction 2/2.")
         else:
             self._logger.error('Error creating dummy prediction 2/2 %s',
-                               _info[3])
+                               additional_info)
 
-        num_run += 1
-        return num_run
+        return ta.num_run
 
     def _fit(self, datamanager):
         # Reset learnt stuff

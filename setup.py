@@ -34,7 +34,7 @@ requirements = [
     "ConfigSpace",
     "pynisher>=0.4",
     "pyrfr",
-    "smac==0.0.1"
+    "smac==0.2.0"
 ]
 
 

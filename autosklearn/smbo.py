@@ -1,3 +1,4 @@
+import functools
 import os
 import time
 import traceback
@@ -8,11 +9,12 @@ import pynisher
 
 # JTS TODO: notify aaron to clean up these nasty nested modules
 from ConfigSpace.configuration_space import Configuration
-from ConfigSpace.util import impute_inactive_values
 
-from smac.smbo.smbo import SMBO, get_types
+from smac.facade.smac_facade import SMAC
+from smac.utils.util_funcs import get_types
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_ta_run import StatusType
+from smac.smbo.objective import average_cost
 from smac.runhistory.runhistory import RunHistory
 from smac.runhistory.runhistory2epm import RunHistory2EPM4Cost, \
     RunHistory2EPM4EIPS
@@ -27,7 +29,7 @@ from autosklearn.constants import *
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
-from autosklearn.evaluation import eval_with_limits
+from autosklearn.evaluation import ExecuteTaFuncWithQueue
 from autosklearn.util import get_logger
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.metafeatures.metafeatures import \
@@ -169,33 +171,6 @@ def _print_debug_info_of_init_configuration(initial_configurations, basename,
         'Time left for %s after finding initial configurations: %5.2fsec',
         basename, time_for_task - watcher.wall_elapsed(basename))
 
-
-class AutoMLScenario(Scenario):
-    """
-    We specialize the smac3 scenario here as we would like
-    to create it in code, without actually reading a smac scenario file
-    """
-
-    def __init__(self, config_space, limit, cutoff_time, metafeatures,
-                 output_dir, shared_model):
-        self.logger = get_logger(self.__class__.__name__)
-
-        # Give SMAC at least 5 seconds
-        soft_limit = max(5, cutoff_time - 35)
-
-        scenario_dict = {'cs': config_space,
-                         'run-obj': 'quality',
-                         'cutoff-time': soft_limit,
-                         'tuner-timeout': soft_limit,
-                         'wallclock-limit': limit,
-                         'features': metafeatures,
-                         'instances': [[name] for name in metafeatures],
-                         'output_dir': output_dir,
-                         'shared_model': shared_model}
-
-        super(AutoMLScenario, self).__init__(scenario_dict)
-        # reset the logger, because otherwise we can't pickle the AutoMLScenario
-        self.logger = get_logger(self.__class__.__name__)
 
 class AutoMLSMBO(object):
 
@@ -533,108 +508,110 @@ class AutoMLSMBO(object):
         # == first things first: load the datamanager
         self.reset_data_manager()
         
-        # == Initialize SMBO stuff
+        # == Initialize non-SMBO stuff
         # first create a scenario
         seed = self.seed # TODO
         num_params = len(self.config_space.get_hyperparameters())
         # allocate a run history
-        run_history = RunHistory()
-        meta_runhistory = RunHistory()
-        meta_runs_dataset_indices = {}
         num_run = self.start_num_run
         instance_id = self.dataset_name + SENTINEL
 
-        # == Train on subset
-        #    before doing anything, let us run the default_cfg
-        #    on a subset of the available data to ensure that
-        #    we at least have some models
-        #    we will try three different ratios of decreasing magnitude
-        #    in the hope that at least on the last one we will be able
-        #    to get a model
-        n_data = self.datamanager.data['X_train'].shape[0]
-        subset_ratio = 10000. / n_data
-        if subset_ratio >= 0.5:
-            subset_ratio = 0.33
-            subset_ratios = [subset_ratio, subset_ratio * 0.10]
-        else:
-            subset_ratios = [subset_ratio, 500. / n_data]
-        self.logger.info("Training default configurations on a subset of "
-                         "%d/%d data points." %
-                         (int(n_data * subset_ratio), n_data))
+        # # == Train on subset
+        # #    before doing anything, let us run the default_cfg
+        # #    on a subset of the available data to ensure that
+        # #    we at least have some models
+        # #    we will try three different ratios of decreasing magnitude
+        # #    in the hope that at least on the last one we will be able
+        # #    to get a model
+        # n_data = self.datamanager.data['X_train'].shape[0]
+        # subset_ratio = 10000. / n_data
+        # if subset_ratio >= 0.5:
+        #     subset_ratio = 0.33
+        #     subset_ratios = [subset_ratio, subset_ratio * 0.10]
+        # else:
+        #     subset_ratios = [subset_ratio, 500. / n_data]
+        # self.logger.info("Training default configurations on a subset of "
+        #                  "%d/%d data points." %
+        #                  (int(n_data * subset_ratio), n_data))
+        #
+        # # the time limit for these function evaluations is rigorously
+        # # set to only 1/2 of a full function evaluation
+        # subset_time_limit = max(5, int(self.func_eval_time_limit / 2))
+        # # the configs we want to run on the data subset are:
+        # # 1) the default configs
+        # # 2) a set of configs we selected for training on a subset
+        # subset_configs = [self.config_space.get_default_configuration()] \
+        #                   + self.collect_additional_subset_defaults()
+        # subset_config_succesful = [False] * len(subset_configs)
+        # for subset_config_id, next_config in enumerate(subset_configs):
+        #     for i, ratio in enumerate(subset_ratios):
+        #         self.reset_data_manager()
+        #         n_data_subsample = int(n_data * ratio)
+        #
+        #         # run the config, but throw away the result afterwards
+        #         # since this cfg was evaluated only on a subset
+        #         # and we don't want  to confuse SMAC
+        #         self.logger.info("Starting to evaluate %d on SUBSET "
+        #                          "with size %d and time limit %ds.",
+        #                          num_run, n_data_subsample,
+        #                          subset_time_limit)
+        #         self.logger.info(next_config)
+        #         _info = eval_with_limits(
+        #             datamanager=self.datamanager, backend=self.backend,
+        #             config=next_config, seed=seed, num_run=num_run,
+        #             resampling_strategy=self.resampling_strategy,
+        #             resampling_strategy_args=self.resampling_strategy_args,
+        #             memory_limit=self.memory_limit,
+        #             func_eval_time_limit=subset_time_limit,
+        #             subsample=n_data_subsample,
+        #             logger=self.logger)
+        #         (duration, result, _, additional_run_info, status) = _info
+        #         self.logger.info("Finished evaluating %d. configuration on SUBSET. "
+        #                          "Duration %f; loss %f; status %s; additional run "
+        #                          "info: %s ", num_run, duration, result,
+        #                          str(status), additional_run_info)
+        #
+        #         num_run += 1
+        #         if i < len(subset_ratios) - 1:
+        #             if status != StatusType.SUCCESS:
+        #                 # Do not increase num_run here, because we will try
+        #                 # the same configuration with less data
+        #                 self.logger.info("A CONFIG did not finish "
+        #                                  " for subset ratio %f -> going smaller",
+        #                                  ratio)
+        #                 continue
+        #             else:
+        #                 self.logger.info("Finished SUBSET training successfully"
+        #                                  " with ratio %f", ratio)
+        #                 subset_config_succesful[subset_config_id] = True
+        #                 break
+        #         else:
+        #             if status != StatusType.SUCCESS:
+        #                 self.logger.info("A CONFIG did not finish "
+        #                                  " for subset ratio %f.",
+        #                                  ratio)
+        #                 continue
+        #             else:
+        #                 self.logger.info("Finished SUBSET training successfully"
+        #                                  " with ratio %f", ratio)
+        #                 subset_config_succesful[subset_config_id] = True
+        #                 break
+        #
+        # # Use the first non-failing configuration from the subsets as the new
+        # #  default configuration -> this guards us against the random forest
+        # # failing on large, sparse datasets
+        # default_cfg = None
+        # for subset_config_id, next_config in enumerate(subset_configs):
+        #     if subset_config_succesful[subset_config_id]:
+        #         default_cfg = next_config
+        #         break
+        # if default_cfg is None:
+        #     default_cfg = self.config_space.get_default_configuration()
 
-        # the time limit for these function evaluations is rigorously
-        # set to only 1/2 of a full function evaluation
-        subset_time_limit = max(5, int(self.func_eval_time_limit / 2))
-        # the configs we want to run on the data subset are:
-        # 1) the default configs
-        # 2) a set of configs we selected for training on a subset
-        subset_configs = [self.config_space.get_default_configuration()] \
-                          + self.collect_additional_subset_defaults()
-        subset_config_succesful = [False] * len(subset_configs)
-        for subset_config_id, next_config in enumerate(subset_configs):
-            for i, ratio in enumerate(subset_ratios):
-                self.reset_data_manager()
-                n_data_subsample = int(n_data * ratio)
-
-                # run the config, but throw away the result afterwards
-                # since this cfg was evaluated only on a subset
-                # and we don't want  to confuse SMAC
-                self.logger.info("Starting to evaluate %d on SUBSET "
-                                 "with size %d and time limit %ds.",
-                                 num_run, n_data_subsample,
-                                 subset_time_limit)
-                self.logger.info(next_config)
-                _info = eval_with_limits(
-                    datamanager=self.datamanager, backend=self.backend,
-                    config=next_config, seed=seed, num_run=num_run,
-                    resampling_strategy=self.resampling_strategy,
-                    resampling_strategy_args=self.resampling_strategy_args,
-                    memory_limit=self.memory_limit,
-                    func_eval_time_limit=subset_time_limit,
-                    subsample=n_data_subsample,
-                    logger=self.logger)
-                (duration, result, _, additional_run_info, status) = _info
-                self.logger.info("Finished evaluating %d. configuration on SUBSET. "
-                                 "Duration %f; loss %f; status %s; additional run "
-                                 "info: %s ", num_run, duration, result,
-                                 str(status), additional_run_info)
-
-                num_run += 1
-                if i < len(subset_ratios) - 1:
-                    if status != StatusType.SUCCESS:
-                        # Do not increase num_run here, because we will try
-                        # the same configuration with less data
-                        self.logger.info("A CONFIG did not finish "
-                                         " for subset ratio %f -> going smaller",
-                                         ratio)
-                        continue
-                    else:
-                        self.logger.info("Finished SUBSET training successfully"
-                                         " with ratio %f", ratio)
-                        subset_config_succesful[subset_config_id] = True
-                        break
-                else:
-                    if status != StatusType.SUCCESS:
-                        self.logger.info("A CONFIG did not finish "
-                                         " for subset ratio %f.",
-                                         ratio)
-                        continue
-                    else:
-                        self.logger.info("Finished SUBSET training successfully"
-                                         " with ratio %f", ratio)
-                        subset_config_succesful[subset_config_id] = True
-                        break
-
-        # Use the first non-failing configuration from the subsets as the new
-        #  default configuration -> this guards us against the random forest
-        # failing on large, sparse datasets
-        default_cfg = None
-        for subset_config_id, next_config in enumerate(subset_configs):
-            if subset_config_succesful[subset_config_id]:
-                default_cfg = next_config
-                break
-        if default_cfg is None:
-            default_cfg = self.config_space.get_default_configuration()
+        # Initialize some SMAC dependencies
+        run_history = RunHistory(aggregate_func=average_cost)
+        meta_runhistory = RunHistory(aggregate_func=average_cost)
+        meta_runs_dataset_indices = {}
 
         # == METALEARNING suggestions
         # we start by evaluating the defaults on the full dataset again
@@ -734,30 +711,30 @@ class AutoMLSMBO(object):
                     self.logger.critical('Reverting to acquisition function EI!')
                     self.acquisition_function = 'EI'
 
-            for meta_dataset in meta_runs.index:
-                meta_dataset_start_index = meta_runs_index
-                for meta_configuration in meta_runs.columns:
-                    if np.isfinite(meta_runs.loc[meta_dataset, meta_configuration]):
-                        try:
-                            config = meta_base.get_configuration_from_algorithm_index(
-                                meta_configuration)
-                            cost = meta_runs.loc[meta_dataset, meta_configuration]
-                            if read_runtime_data:
-                                runtime = meta_durations.loc[meta_dataset,
-                                                             meta_configuration]
-                            else:
-                                runtime = 1
-                            # TODO read out other status types!
-                            meta_runhistory.add(config, cost, runtime,
-                                                StatusType.SUCCESS,
-                                                instance_id=meta_dataset)
-                            meta_runs_index += 1
-                        except:
-                            # TODO maybe add warning
-                            pass
-
-                meta_runs_dataset_indices[meta_dataset] = (
-                    meta_dataset_start_index, meta_runs_index)
+            # for meta_dataset in meta_runs.index:
+            #     meta_dataset_start_index = meta_runs_index
+            #     for meta_configuration in meta_runs.columns:
+            #         if np.isfinite(meta_runs.loc[meta_dataset, meta_configuration]):
+            #             try:
+            #                 config = meta_base.get_configuration_from_algorithm_index(
+            #                     meta_configuration)
+            #                 cost = meta_runs.loc[meta_dataset, meta_configuration]
+            #                 if read_runtime_data:
+            #                     runtime = meta_durations.loc[meta_dataset,
+            #                                                  meta_configuration]
+            #                 else:
+            #                     runtime = 1
+            #                 # TODO read out other status types!
+            #                 meta_runhistory.add(config, cost, runtime,
+            #                                     StatusType.SUCCESS,
+            #                                     instance_id=meta_dataset)
+            #                 meta_runs_index += 1
+            #             except:
+            #                 # TODO maybe add warning
+            #                 pass
+            #
+            #     meta_runs_dataset_indices[meta_dataset] = (
+            #         meta_dataset_start_index, meta_runs_index)
         else:
             if self.acquisition_function == 'EIPS':
                 self.logger.critical('Reverting to acquisition function EI!')
@@ -766,12 +743,23 @@ class AutoMLSMBO(object):
             meta_features_dict = {}
             metalearning_configurations = []
 
-        self.scenario = AutoMLScenario(config_space=self.config_space,
-                                       limit=self.total_walltime_limit,
-                                       cutoff_time=self.func_eval_time_limit,
-                                       metafeatures=meta_features_dict,
-                                       output_dir=self.backend.temporary_directory,
-                                       shared_model=self.shared_mode)
+        self.scenario = Scenario({'cs': self.config_space,
+                                  'wallclock-limit': self.total_walltime_limit,
+                                  'instances': [[name] for name in meta_features_dict],
+                                  'output-dir': self.backend.temporary_directory,
+                                  'shared-model': self.shared_mode,
+                                  'run-obj': 'quality'})
+
+        # TODO rebuild target algorithm to be it's own target algorithm
+        # evaluator, which takes into account that a run can be killed prior
+        # to the model being fully fitted; thus putting intermediate results
+        # into a queue and querying them once the time is over
+        ta = ExecuteTaFuncWithQueue(backend=self.backend,
+                                    autosklearn_seed=seed,
+                                    resampling_strategy=self.resampling_strategy,
+                                    initial_num_run=num_run,
+                                    logger=self.logger,
+                                    **self.resampling_strategy_args)
 
         types = get_types(self.config_space, self.scenario.feature_array)
         if self.acquisition_function == 'EI':
@@ -783,8 +771,11 @@ class AutoMLSMBO(object):
             model = RandomForestWithInstances(types,
                                               instance_features=meta_features_list,
                                               seed=1, num_trees=10)
-            smac = SMBO(self.scenario, model=model,
-                        rng=seed)
+            smac = SMAC(scenario=self.scenario,
+                        model=model,
+                        rng=seed,
+                        tae_runner=ta,
+                        runhistory=run_history)
         elif self.acquisition_function == 'EIPS':
             rh2EPM = RunHistory2EPM4EIPS(num_params=num_params,
                                          scenario=self.scenario,
@@ -795,12 +786,16 @@ class AutoMLSMBO(object):
                 ['cost', 'runtime'], types, num_trees = 10,
                 instance_features=meta_features_list, seed=1)
             acquisition_function = EIPS(model)
-            smac = SMBO(self.scenario,
+            smac = SMAC(scenario=self.scenario, tae_runner=ta,
                         acquisition_function=acquisition_function,
-                        model=model, runhistory2epm=rh2EPM, rng=seed)
+                        model=model, runhistory2epm=rh2EPM, rng=seed,
+                        runhistory=run_history)
         else:
             raise ValueError('Unknown acquisition function value %s!' %
                              self.acquisition_function)
+
+        smac.solver.stats.start_timing()
+        smac.solver.incumbent = smac.solver.initial_design.run()
 
         # Build a runtime model
         # runtime_rf = RandomForestWithInstances(types,
@@ -813,85 +808,118 @@ class AutoMLSMBO(object):
         #                                      impute_state=None)
         # X_runtime, y_runtime = runtime_rh2EPM.transform(meta_runhistory)
         # runtime_rf.train(X_runtime, y_runtime[:, 1].flatten())
-        X_meta, Y_meta = rh2EPM.transform(meta_runhistory)
-        # Transform Y_meta on a per-dataset base
-        for meta_dataset in meta_runs_dataset_indices:
-            start_index, end_index = meta_runs_dataset_indices[meta_dataset]
-            end_index += 1  # Python indexing
-            Y_meta[start_index:end_index, 0]\
-                [Y_meta[start_index:end_index, 0] >2.0] =  2.0
-            dataset_minimum = np.min(Y_meta[start_index:end_index, 0])
-            Y_meta[start_index:end_index, 0] = 1 - (
-                (1. - Y_meta[start_index:end_index, 0]) /
-                (1. - dataset_minimum))
-            Y_meta[start_index:end_index, 0]\
-                  [Y_meta[start_index:end_index, 0] > 2] = 2
+        # X_meta, Y_meta = rh2EPM.transform(meta_runhistory)
+        # # Transform Y_meta on a per-dataset base
+        # for meta_dataset in meta_runs_dataset_indices:
+        #     start_index, end_index = meta_runs_dataset_indices[meta_dataset]
+        #     end_index += 1  # Python indexing
+        #     Y_meta[start_index:end_index, 0]\
+        #         [Y_meta[start_index:end_index, 0] >2.0] =  2.0
+        #     dataset_minimum = np.min(Y_meta[start_index:end_index, 0])
+        #     Y_meta[start_index:end_index, 0] = 1 - (
+        #         (1. - Y_meta[start_index:end_index, 0]) /
+        #         (1. - dataset_minimum))
+        #     Y_meta[start_index:end_index, 0]\
+        #           [Y_meta[start_index:end_index, 0] > 2] = 2
 
+        smac.solver.stats.start_timing()
         # == first, evaluate all metelearning and default configurations
-        finished = False
-        for i, next_config in enumerate(([default_cfg] +
-                                          metalearning_configurations)):
-            # Do not evaluate default configurations more than once
-            if i >= len([default_cfg]) and next_config in [default_cfg]:
-                continue
+        smac.solver.incumbent = smac.solver.initial_design.run()
+        runkey = list(run_history.data.keys())[-1]
+        runvalue = run_history.data[runkey]
+        # self.logger.info("Finished evaluating %d. configuration. "
+        #                  "Duration %f; loss %f; status %s; additional run "
+        #                  "info: %s ", num_run, runvalue.time, runvalue.cost,
+        #                  str(runvalue.status), runvalue.additional_info)
 
-            config_name = 'meta-learning' if i >= len([default_cfg]) \
-                else 'default'
+        for challenger in metalearning_configurations:
 
-            self.logger.info("Starting to evaluate %d. configuration "
-                             "(%s configuration) with time limit %ds.",
-                             num_run, config_name, self.func_eval_time_limit)
-            self.logger.info(next_config)
-            self.reset_data_manager()
-            info = eval_with_limits(datamanager=self.datamanager,
-                                    backend=self.backend,
-                                    config=next_config,
-                                    seed=seed, num_run=num_run,
-                                    resampling_strategy=self.resampling_strategy,
-                                    resampling_strategy_args=self.resampling_strategy_args,
-                                    memory_limit=self.memory_limit,
-                                    func_eval_time_limit=self.func_eval_time_limit,
-                                    logger=self.logger)
-            (duration, result, _, additional_run_info, status) = info
-            run_history.add(config=next_config, cost=result,
-                            time=duration, status=status,
-                            instance_id=instance_id, seed=seed,
-                            additional_info=additional_run_info)
-            run_history.update_cost(next_config, result)
-            self.logger.info("Finished evaluating %d. configuration. "
-                             "Duration %f; loss %f; status %s; additional run "
-                             "info: %s ", num_run, duration, result,
-                             str(status), additional_run_info)
-            num_run += 1
-            if smac.incumbent is None:
-                smac.incumbent = next_config
-            elif result < run_history.get_cost(smac.incumbent):
-                smac.incumbent = next_config
+            smac.solver.incumbent, inc_perf = smac.solver.intensifier.intensify(
+                challengers=[challenger],
+                incumbent=smac.solver.incumbent,
+                run_history=smac.solver.runhistory,
+                aggregate_func=smac.solver.aggregate_func,
+                time_bound=self.total_walltime_limit)
 
-            if self.scenario.shared_model:
+            if smac.solver.scenario.shared_model:
                 pSMAC.write(run_history=run_history,
-                            output_directory=self.scenario.output_dir,
+                            output_directory=smac.solver.scenario.output_dir,
                             num_run=self.seed)
 
-            if self.watcher.wall_elapsed(
-                    'SMBO') > self.total_walltime_limit:
-                finished = True
+            runkey = list(run_history.data.keys())[-1]
+            runvalue = run_history.data[runkey]
+            # self.logger.info("Finished evaluating %d. configuration. "
+            #                  "Duration %f; loss %f; status %s; additional run "
+            #                  "info: %s ", num_run, runvalue.time, runvalue.cost,
+            #                  str(runvalue.status), runvalue.additional_info)
 
-            if finished:
+            if smac.solver.stats.is_budget_exhausted():
                 break
 
+            # TODO print SMAC stats
+
+        # finished = False
+        # for i, next_config in enumerate(([default_cfg] +
+        #                                   metalearning_configurations)):
+        #     # Do not evaluate default configurations more than once
+        #     if i >= len([default_cfg]) and next_config in [default_cfg]:
+        #         continue
+        #
+        #     config_name = 'meta-learning' if i >= len([default_cfg]) \
+        #         else 'default'
+        #
+        #     self.logger.info("Starting to evaluate %d. configuration "
+        #                      "(%s configuration) with time limit %ds.",
+        #                      num_run, config_name, self.func_eval_time_limit)
+        #     self.logger.info(next_config)
+        #     self.reset_data_manager()
+        #     info = eval_with_limits(datamanager=self.datamanager,
+        #                             backend=self.backend,
+        #                             config=next_config,
+        #                             seed=seed, num_run=num_run,
+        #                             resampling_strategy=self.resampling_strategy,
+        #                             resampling_strategy_args=self.resampling_strategy_args,
+        #                             memory_limit=self.memory_limit,
+        #                             func_eval_time_limit=self.func_eval_time_limit,
+        #                             logger=self.logger)
+        #     (duration, result, _, additional_run_info, status) = info
+        #     run_history.add(config=next_config, cost=result,
+        #                     time=duration, status=status,
+        #                     instance_id=instance_id, seed=seed,
+        #                     additional_info=additional_run_info)
+        #     run_history.update_cost(next_config, result)
+        #     self.logger.info("Finished evaluating %d. configuration. "
+        #                      "Duration %f; loss %f; status %s; additional run "
+        #                      "info: %s ", num_run, duration, result,
+        #                      str(status), additional_run_info)
+        #     num_run += 1
+        #     if smac.incumbent is None:
+        #         smac.incumbent = next_config
+        #     elif result < run_history.get_cost(smac.incumbent):
+        #         smac.incumbent = next_config
+        #
+        #     if self.scenario.shared_model:
+        #         pSMAC.write(run_history=run_history,
+        #                     output_directory=self.scenario.output_dir,
+        #                     num_run=self.seed)
+        #
+        #     if self.watcher.wall_elapsed(
+        #             'SMBO') > self.total_walltime_limit:
+        #         finished = True
+        #
+        #     if finished:
+        #         break
+
         # == after metalearning run SMAC loop
-        smac.runhistory = run_history
-        smac_iter = 0
-        while not finished:
-            if self.scenario.shared_model:
+        while True:
+            if smac.solver.scenario.shared_model:
                 pSMAC.read(run_history=run_history,
                            output_directory=self.scenario.output_dir,
                            configuration_space=self.config_space,
                            logger=self.logger)
 
-            next_configs = []
-            time_for_choose_next = -1
+            challengers = []
+            choose_next_start_time = time.time()
             try:
                 X_cfg, Y_cfg = rh2EPM.transform(run_history)
 
@@ -902,113 +930,194 @@ class AutoMLSMBO(object):
                                        (1. - dataset_minimum))
                     Y_cfg[:, 0][Y_cfg[:, 0] > 2] = 2
 
-                if len(X_meta) > 0 and len(X_cfg) > 0:
-                    pass
-                    #X_cfg = np.concatenate((X_meta, X_cfg))
-                    #Y_cfg = np.concatenate((Y_meta, Y_cfg))
-                elif len(X_meta) > 0:
-                    X_cfg = X_meta.copy()
-                    Y_cfg = Y_meta.copy()
-                elif len(X_cfg) > 0:
-                    X_cfg = X_cfg.copy()
-                    Y_cfg = Y_cfg.copy()
-                else:
-                    raise ValueError('No training data for SMAC random forest!')
+                #if len(X_meta) > 0 and len(X_cfg) > 0:
+                #    pass
+                #    X_cfg = np.concatenate((X_meta, X_cfg))
+                #    Y_cfg = np.concatenate((Y_meta, Y_cfg))
+                #elif len(X_meta) > 0:
+                #    X_cfg = X_meta.copy()
+                #    Y_cfg = Y_meta.copy()
+                #elif len(X_cfg) > 0:
+                X_cfg = X_cfg.copy()
+                Y_cfg = Y_cfg.copy()
+                #else:
+                #    raise ValueError('No training data for SMAC random forest!')
 
                 self.logger.info('Using %d training points for SMAC.' %
                                  X_cfg.shape[0])
                 choose_next_start_time = time.time()
-                next_configs_tmp = smac.choose_next(X_cfg, Y_cfg,
-                                                    num_interleaved_random=110,
-                                                    num_configurations_by_local_search=10,
-                                                    num_configurations_by_random_search_sorted=100)
+                next_configs_tmp = smac.solver.choose_next(
+                    X_cfg, Y_cfg, num_interleaved_random=110,
+                    num_configurations_by_local_search=10,
+                    num_configurations_by_random_search_sorted=100)
                 time_for_choose_next = time.time() - choose_next_start_time
                 self.logger.info('Used %g seconds to find next '
                                  'configurations' % (time_for_choose_next))
-                next_configs.extend(next_configs_tmp)
-            # TODO put Exception here!
+                challengers.extend(next_configs_tmp)
             except Exception as e:
                 self.logger.error(e)
                 self.logger.error("Error in getting next configurations "
                                   "with SMAC. Using random configuration!")
                 next_config = self.config_space.sample_configuration()
-                next_configs.append(next_config)
+                challengers.append(next_config)
+            time_for_choose_next = time.time() - choose_next_start_time
 
-            models_fitted_this_iteration = 0
-            start_time_this_iteration = time.time()
-            for next_config in next_configs:
-                x_runtime = impute_inactive_values(next_config)
-                x_runtime = impute_inactive_values(x_runtime).get_array()
-                # predicted_runtime = runtime_rf.predict_marginalized_over_instances(
-                #     x_runtime.reshape((1, -1)))
-                # predicted_runtime = np.exp(predicted_runtime[0][0][0]) - 1
+            # self.logger.info("Finished evaluating %d. configuration. "
+            #                  "Duration: %f; loss: %f; status %s; additional "
+            #                  "run info: %s ", num_run, duration, result,
+            #                  str(status), additional_run_info)
 
-                self.logger.info("Starting to evaluate %d. configuration (from "
-                                 "SMAC) with time limit %ds.", num_run,
-                                 self.func_eval_time_limit)
-                self.logger.info(next_config)
-                self.reset_data_manager()
-                info = eval_with_limits(datamanager=self.datamanager,
-                                        backend=self.backend,
-                                        config=next_config,
-                                        seed=seed, num_run=num_run,
-                                        resampling_strategy=self.resampling_strategy,
-                                        resampling_strategy_args=self.resampling_strategy_args,
-                                        memory_limit=self.memory_limit,
-                                        func_eval_time_limit=self.func_eval_time_limit,
-                                        logger=self.logger)
-                (duration, result, _, additional_run_info, status) = info
-                run_history.add(config=next_config, cost=result,
-                                time=duration, status=status,
-                                instance_id=instance_id, seed=seed,
-                                additional_info=additional_run_info)
-                run_history.update_cost(next_config, result)
+            smac.solver.incumbent, inc_perf = smac.solver.intensifier.intensify(
+                challengers=challengers,
+                incumbent=smac.solver.incumbent,
+                run_history=smac.solver.runhistory,
+                aggregate_func=smac.solver.aggregate_func,
+                time_bound=time_for_choose_next)
 
-                #self.logger.info('Predicted runtime %g, true runtime %g',
-                #                 predicted_runtime, duration)
-
-                # TODO add unittest to make sure everything works fine and
-                # this does not get outdated!
-                if smac.incumbent is None:
-                    smac.incumbent = next_config
-                elif result < run_history.get_cost(smac.incumbent):
-                    smac.incumbent = next_config
-
-                self.logger.info("Finished evaluating %d. configuration. "
-                                 "Duration: %f; loss: %f; status %s; additional "
-                                 "run info: %s ", num_run, duration, result,
-                                 str(status), additional_run_info)
-                smac_iter += 1
-                num_run += 1
-
-                models_fitted_this_iteration += 1
-                time_used_this_iteration = time.time() - start_time_this_iteration
-
-                if max_iters is not None:
-                    finished = (smac_iter >= max_iters)
-
-                if self.watcher.wall_elapsed(
-                        'SMBO') > self.total_walltime_limit:
-                    finished = True
-
-                if models_fitted_this_iteration >= 2 and \
-                        time_for_choose_next > 0 and \
-                        time_used_this_iteration > time_for_choose_next:
-                    break
-                elif time_for_choose_next <= 0 and \
-                        models_fitted_this_iteration >= 1:
-                    break
-                elif models_fitted_this_iteration >= 50:
-                    break
-
-                if finished:
-                    break
-
-            if self.scenario.shared_model:
+            if smac.solver.scenario.shared_model:
                 pSMAC.write(run_history=run_history,
-                            output_directory=self.scenario.output_dir,
+                            output_directory=smac.solver.scenario.output_dir,
                             num_run=self.seed)
 
+            # runkey = list(run_history.data.keys())[-1]
+            # runvalue = run_history.data[runkey]
+            # self.logger.info("Finished evaluating %d. configuration. "
+            #                  "Duration %f; loss %f; status %s; additional run "
+            #                  "info: %s ", num_run, runvalue.time, runvalue.cost,
+            #                  str(runvalue.status), runvalue.additional_info)
+
+            if smac.solver.stats.is_budget_exhausted():
+                break
+
         self.runhistory = run_history
-        
+
+        # smac.runhistory = run_history
+        # smac_iter = 0
+        # while not finished:
+        #     if self.scenario.shared_model:
+        #         pSMAC.read(run_history=run_history,
+        #                    output_directory=self.scenario.output_dir,
+        #                    configuration_space=self.config_space,
+        #                    logger=self.logger)
+        #
+        #     next_configs = []
+        #     time_for_choose_next = -1
+        #     try:
+        #         X_cfg, Y_cfg = rh2EPM.transform(run_history)
+        #
+        #         if not run_history.empty():
+        #             # Update costs by normalization
+        #             dataset_minimum = np.min(Y_cfg[:, 0])
+        #             Y_cfg[:, 0] = 1 - ((1. - Y_cfg[:, 0]) /
+        #                                (1. - dataset_minimum))
+        #             Y_cfg[:, 0][Y_cfg[:, 0] > 2] = 2
+        #
+        #         if len(X_meta) > 0 and len(X_cfg) > 0:
+        #             pass
+        #             #X_cfg = np.concatenate((X_meta, X_cfg))
+        #             #Y_cfg = np.concatenate((Y_meta, Y_cfg))
+        #         elif len(X_meta) > 0:
+        #             X_cfg = X_meta.copy()
+        #             Y_cfg = Y_meta.copy()
+        #         elif len(X_cfg) > 0:
+        #             X_cfg = X_cfg.copy()
+        #             Y_cfg = Y_cfg.copy()
+        #         else:
+        #             raise ValueError('No training data for SMAC random forest!')
+        #
+        #         self.logger.info('Using %d training points for SMAC.' %
+        #                          X_cfg.shape[0])
+        #         choose_next_start_time = time.time()
+        #         next_configs_tmp = smac.solver.choose_next(
+        #             X_cfg, Y_cfg, num_interleaved_random=110,
+        #             num_configurations_by_local_search=10,
+        #             num_configurations_by_random_search_sorted=100)
+        #         time_for_choose_next = time.time() - choose_next_start_time
+        #         self.logger.info('Used %g seconds to find next '
+        #                          'configurations' % (time_for_choose_next))
+        #         next_configs.extend(next_configs_tmp)
+        #     except Exception as e:
+        #         self.logger.error(e)
+        #         self.logger.error("Error in getting next configurations "
+        #                           "with SMAC. Using random configuration!")
+        #         next_config = self.config_space.sample_configuration()
+        #         next_configs.append(next_config)
+        #
+        #     models_fitted_this_iteration = 0
+        #     start_time_this_iteration = time.time()
+        #     for next_config in next_configs:
+        #         #x_runtime = impute_inactive_values(next_config)
+        #         #x_runtime = impute_inactive_values(x_runtime).get_array()
+        #         # predicted_runtime = runtime_rf.predict_marginalized_over_instances(
+        #         #     x_runtime.reshape((1, -1)))
+        #         # predicted_runtime = np.exp(predicted_runtime[0][0][0]) - 1
+        #
+        #         self.logger.info("Starting to evaluate %d. configuration (from "
+        #                          "SMAC) with time limit %ds.", num_run,
+        #                          self.func_eval_time_limit)
+        #         self.logger.info(next_config)
+        #         self.reset_data_manager()
+        #         info = eval_with_limits(datamanager=self.datamanager,
+        #                                 backend=self.backend,
+        #                                 config=next_config,
+        #                                 seed=seed, num_run=num_run,
+        #                                 resampling_strategy=self.resampling_strategy,
+        #                                 resampling_strategy_args=self.resampling_strategy_args,
+        #                                 memory_limit=self.memory_limit,
+        #                                 func_eval_time_limit=self.func_eval_time_limit,
+        #                                 logger=self.logger)
+        #         (duration, result, _, additional_run_info, status) = info
+        #         run_history.add(config=next_config, cost=result,
+        #                         time=duration, status=status,
+        #                         instance_id=instance_id, seed=seed,
+        #                         additional_info=additional_run_info)
+        #         run_history.update_cost(next_config, result)
+        #
+        #         #self.logger.info('Predicted runtime %g, true runtime %g',
+        #         #                 predicted_runtime, duration)
+        #
+        #         # TODO add unittest to make sure everything works fine and
+        #         # this does not get outdated!
+        #         if smac.incumbent is None:
+        #             smac.incumbent = next_config
+        #         elif result < run_history.get_cost(smac.incumbent):
+        #             smac.incumbent = next_config
+        #
+        #         self.logger.info("Finished evaluating %d. configuration. "
+        #                          "Duration: %f; loss: %f; status %s; additional "
+        #                          "run info: %s ", num_run, duration, result,
+        #                          str(status), additional_run_info)
+        #         smac_iter += 1
+        #         num_run += 1
+        #
+        #         models_fitted_this_iteration += 1
+        #         time_used_this_iteration = time.time() - start_time_this_iteration
+        #
+        #         if max_iters is not None:
+        #             finished = (smac_iter >= max_iters)
+        #
+        #         if self.watcher.wall_elapsed(
+        #                 'SMBO') > self.total_walltime_limit:
+        #             finished = True
+        #
+        #         if models_fitted_this_iteration >= 2 and \
+        #                 time_for_choose_next > 0 and \
+        #                 time_used_this_iteration > time_for_choose_next:
+        #             break
+        #         elif time_for_choose_next <= 0 and \
+        #                 models_fitted_this_iteration >= 1:
+        #             break
+        #         elif models_fitted_this_iteration >= 50:
+        #             break
+        #
+        #         if finished:
+        #             break
+        #
+        #     if self.scenario.shared_model:
+        #         pSMAC.write(run_history=run_history,
+        #                     output_directory=self.scenario.output_dir,
+        #                     num_run=self.seed)
+        #
+        # self.runhistory = run_history
+        #
         

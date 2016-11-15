@@ -1,4 +1,5 @@
 import os
+import logging
 import shutil
 import sys
 import time
@@ -18,18 +19,24 @@ import pynisher
 from smac.tae.execute_ta_run import StatusType
 
 from evaluation_util import get_multiclass_classification_datamanager
-from autosklearn.evaluation import eval_with_limits
+from autosklearn.evaluation import ExecuteTaFuncWithQueue
 
 
 def safe_eval_success_mock(*args, **kwargs):
     queue = kwargs['queue']
-    queue.put((0.1, 1.0, 1, '', StatusType.SUCCESS))
+    queue.put((StatusType.SUCCESS, 0.5, 0.12345, ''))
+
+
+class BackendMock(object):
+    def load_datamanager(self):
+        return get_multiclass_classification_datamanager()
 
 
 class EvaluationTest(unittest.TestCase):
     def setUp(self):
         self.datamanager = get_multiclass_classification_datamanager()
         self.tmp = os.path.join(os.getcwd(), '.test_evaluation')
+        self.logger = logging.getLogger()
 
         try:
             shutil.rmtree(self.tmp)
@@ -63,32 +70,43 @@ class EvaluationTest(unittest.TestCase):
     @mock.patch('autosklearn.evaluation.eval_holdout')
     def test_eval_with_limits_holdout(self, pynisher_mock):
         pynisher_mock.side_effect = safe_eval_success_mock
-        info = eval_with_limits(self.datamanager, self.tmp, None, 1, 1,
-                                'holdout', {}, 3000, 30)
-        self.assertEqual(info[1], 1.0)
-        self.assertEqual(info[2], 1)
-        self.assertEqual(info[4], StatusType.SUCCESS)
+        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+                                    resampling_strategy='holdout',
+                                    logger=self.logger)
+        info = ta.run(None, cutoff=30, memory_limit=3000)
+        self.assertEqual(info[0], StatusType.SUCCESS)
+        self.assertEqual(info[1], 0.5)
+        self.assertIsInstance(info[2], float)
 
     @mock.patch('autosklearn.evaluation.eval_holdout')
     def test_eval_with_limits_holdout_fail_silent(self, pynisher_mock):
         pynisher_mock.return_value = None
-        info = eval_with_limits(self.datamanager, self.tmp, None, 1, 1,
-                                'holdout', {}, 3000, 30)
+        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+                                    resampling_strategy='holdout',
+                                    logger=self.logger)
+        info = ta.run(None, cutoff=30, memory_limit=3000)
+        self.assertEqual(info[0], StatusType.CRASHED)
         self.assertEqual(info[1], 2.0)
-        self.assertEqual(info[4], StatusType.CRASHED)
+        self.assertIsInstance(info[2], float)
 
     @mock.patch('autosklearn.evaluation.eval_holdout')
     def test_eval_with_limits_holdout_fail_memory_error(self, pynisher_mock):
         pynisher_mock.side_effect = MemoryError
-        info = eval_with_limits(self.datamanager, self.tmp, None, 1, 1,
-                                'holdout', {}, 3000, 30)
+        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+                                    resampling_strategy='holdout',
+                                    logger=self.logger)
+        info = ta.run(None, cutoff=30, memory_limit=3000)
+        self.assertEqual(info[0], StatusType.MEMOUT)
         self.assertEqual(info[1], 2.0)
-        self.assertEqual(info[4], StatusType.MEMOUT)
+        self.assertIsInstance(info[2], float)
 
     @mock.patch('autosklearn.evaluation.eval_holdout')
     def test_eval_with_limits_holdout_fail_timeout(self, pynisher_mock):
         pynisher_mock.side_effect = pynisher.TimeoutException
-        info = eval_with_limits(self.datamanager, self.tmp, None, 1, 1,
-                                'holdout', {}, 3000, 30)
+        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+                                    resampling_strategy='holdout',
+                                    logger=self.logger)
+        info = ta.run(None, cutoff=30, memory_limit=3000)
+        self.assertEqual(info[0], StatusType.TIMEOUT)
         self.assertEqual(info[1], 2.0)
-        self.assertEqual(info[4], StatusType.TIMEOUT)
+        self.assertIsInstance(info[2], float)
