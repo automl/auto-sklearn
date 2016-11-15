@@ -1,4 +1,7 @@
 machine:
+  python:
+    version: 3.4.3
+
   environment:
     # The github organization or username of the repository which hosts the
     # project and documentation.
