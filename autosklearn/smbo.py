@@ -744,6 +744,8 @@ class AutoMLSMBO(object):
             metalearning_configurations = []
 
         self.scenario = Scenario({'cs': self.config_space,
+                                  'cutoff-time': self.func_eval_time_limit,
+                                  'memory-limit': self.memory_limit,
                                   'wallclock-limit': self.total_walltime_limit,
                                   'instances': [[name] for name in meta_features_dict],
                                   'output-dir': self.backend.temporary_directory,

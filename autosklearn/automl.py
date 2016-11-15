@@ -74,7 +74,8 @@ class AutoML(BaseEstimator):
         self._include_estimators = include_estimators
         self._include_preprocessors = include_preprocessors
         self._resampling_strategy = resampling_strategy
-        self._resampling_strategy_arguments = resampling_strategy_arguments
+        self._resampling_strategy_arguments = resampling_strategy_arguments \
+            if resampling_strategy_arguments is not None else {}
         self._max_iter_smac = max_iter_smac
         #self.delete_tmp_folder_after_terminate = \
         #    delete_tmp_folder_after_terminate
@@ -235,29 +236,30 @@ class AutoML(BaseEstimator):
     def _do_dummy_prediction(self, datamanager, num_run):
 
         self._logger.info("Starting to create dummy predictions.")
-        time_limit = int(self._time_for_task / 6.)
+        # time_limit = int(self._time_for_task / 6.)
         memory_limit = int(self._ml_memory_limit)
         ta = ExecuteTaFuncWithQueue(backend=self._backend,
                                     autosklearn_seed=self._seed,
                                     resampling_strategy=self._resampling_strategy,
                                     initial_num_run=num_run,
-                                    logger=self._logger)
+                                    logger=self._logger,
+                                    **self._resampling_strategy_arguments)
 
         status, cost, runtime, additional_info = \
-            ta.run(1, cutoff=time_limit, memory_limit=memory_limit)
+            ta.run(1, cutoff=self._time_for_task, memory_limit=memory_limit)
         if status == StatusType.SUCCESS:
-            self._logger.info("Finished creating dummy prediction 1/2.")
+            self._logger.info("Finished creating dummy predictions.")
         else:
-            self._logger.error('Error creating dummy prediction 1/2:%s ',
+            self._logger.error('Error creating dummy predictions:%s ',
                                additional_info)
 
-        status, cost, runtime, additional_info = \
-            ta.run(2, cutoff=time_limit, memory_limit=memory_limit)
-        if status == StatusType.SUCCESS:
-            self._logger.info("Finished creating dummy prediction 2/2.")
-        else:
-            self._logger.error('Error creating dummy prediction 2/2 %s',
-                               additional_info)
+        #status, cost, runtime, additional_info = \
+        #    ta.run(2, cutoff=time_limit, memory_limit=memory_limit)
+        #if status == StatusType.SUCCESS:
+        #    self._logger.info("Finished creating dummy prediction 2/2.")
+        #else:
+        #    self._logger.error('Error creating dummy prediction 2/2 %s',
+        #                       additional_info)
 
         return ta.num_run
 
