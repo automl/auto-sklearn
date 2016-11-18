@@ -31,6 +31,8 @@ class AutoMLTest(Base, unittest.TestCase):
     _multiprocess_can_split_ = True
 
     def setUp(self):
+        super().setUp()
+
         self.automl = AutoMLStub()
 
         self.automl._shared_mode = False

@@ -229,7 +229,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self._tearDown(output)
 
         
-class AutoMLClassifierTest(unittest.TestCase):
+class AutoMLClassifierTest(Base, unittest.TestCase):
 
     def test_multiclass_prediction(self):
         classes = [['a', 'b', 'c']]
