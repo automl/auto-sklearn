@@ -31,7 +31,7 @@ def main():
     automl = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120, per_run_time_limit=30,
         tmp_folder='/tmp/autoslearn_holdout_example_tmp',
-        output_folder='/tmp/autosklearn_holdout_example_out')
+        output_folder='/tmp/autosklearn_holdout_example_out',
     automl.fit(X_train, y_train, dataset_name='digits')
 
     # Print the best models together with their scores - if all scores are
