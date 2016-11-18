@@ -149,7 +149,10 @@ class AutoML(BaseEstimator):
 
         if dataset_name is None:
             m = hashlib.md5()
-            m.update(X.data)
+            if X.flags['C_CONTIGUOUS']:
+                m.update(X.data)
+            else:
+                m.update(X.T.data)
             dataset_name = m.hexdigest()
 
         self._backend.save_start_time(self._seed)

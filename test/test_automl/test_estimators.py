@@ -227,6 +227,26 @@ class EstimatorTest(Base, unittest.TestCase):
         del cls
         self._tearDown(output)
 
+    def test_f_contiguous_array(self):
+
+        output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit')
+        self._setUp(output)
+
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        X_train = np.asfortranarray(X_train)
+        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+                                       per_run_time_limit=5,
+                                       tmp_folder=output,
+                                       output_folder=output)
+        automl.fit(X_train, Y_train)
+        score = automl.score(X_test, Y_test)
+        print(automl.show_models())
+
+        self.assertGreaterEqual(score, 0.8)
+        self.assertEqual(automl._automl._automl._task, MULTICLASS_CLASSIFICATION)
+
+        del automl
+        self._tearDown(output)
 
 
 class AutoMLClassifierTest(unittest.TestCase):
