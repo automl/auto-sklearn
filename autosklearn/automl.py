@@ -25,6 +25,7 @@ from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline
 from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
+from autosklearn.util.hash import hash_numpy_array
 
 
 class AutoML(BaseEstimator):
@@ -148,9 +149,7 @@ class AutoML(BaseEstimator):
         self._backend.context.create_directories()
 
         if dataset_name is None:
-            m = hashlib.md5()
-            m.update(X.data)
-            dataset_name = m.hexdigest()
+            dataset_name = hash_numpy_array(X)
 
         self._backend.save_start_time(self._seed)
         self._stopwatch = StopWatch()

@@ -227,8 +227,7 @@ class EstimatorTest(Base, unittest.TestCase):
         del cls
         self._tearDown(output)
 
-
-
+        
 class AutoMLClassifierTest(unittest.TestCase):
 
     def test_multiclass_prediction(self):
