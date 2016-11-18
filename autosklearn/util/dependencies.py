@@ -33,7 +33,7 @@ def _verify_package(name, operation, version):
     try:
         module = pkg_resources.get_distribution(name)
     except pkg_resources.DistributionNotFound:
-        raise MissingPackageError(name) from None
+        raise MissingPackageError(name)
 
     if not operation:
         return
