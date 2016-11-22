@@ -16,12 +16,12 @@ inplace:
 	$(PYTHON) setup.py build_ext -i
 
 doc:
-    cd ./doc
-    make html
-    cd ..
+	cd ./doc
+	make html
+	cd ..
 
 test-code: in
-    $(NOSETESTS) -s -v tests
+	$(NOSETESTS) -s -v tests
 test-doc:
 	$(NOSETESTS) -s -v doc/*.rst
 
