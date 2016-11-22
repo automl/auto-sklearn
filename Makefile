@@ -21,12 +21,12 @@ doc:
 	cd ..
 
 test-code: in
-	$(NOSETESTS) -s -v tests
+	$(NOSETESTS) -s -v test
 test-doc:
 	$(NOSETESTS) -s -v doc/*.rst
 
 test-coverage:
 	rm -rf coverage .coverage
-	$(NOSETESTS) -s -v --with-coverage tests
+	$(NOSETESTS) -s -v --with-coverage test
 
 test: test-code test-sphinxext test-doc
