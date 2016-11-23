@@ -42,8 +42,22 @@ env:
   - TEST_DIR=/tmp/test_dir/
   - MODULE=autosklearn
 
+before_install:
+  - wget $MINICONDA_URL -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - if [[ `which conda` ]]; then echo 'Conda installation successful'; else exit 1; fi
+  - conda update --yes conda
+  - conda create -n testenv --yes python=$PYTHON_VERSION pip wheel nose
+  - source activate testenv
+  - conda install --yes gcc
+  - echo "Using GCC at "`which gcc`
+  - export CC=`which gcc`
+
 install:
-  - source ci_scripts/install.sh
+  - pip install coverage pep8 python-coveralls
+  - cat requirements.txt | xargs -n 1 -L 1 pip install
+  - python setup.py install
   
 script: bash ci_scripts/test.sh
 after_success: source ci_scripts/success.sh
