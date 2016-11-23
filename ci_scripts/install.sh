@@ -13,12 +13,12 @@ ls -l
 echo
 if [[ ! -f miniconda.sh ]]
    then
-   wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh \
-       -O miniconda.sh
+   wget $MINICONDA_URL -O miniconda.sh
    fi
 chmod +x miniconda.sh && ./miniconda.sh -b -p $HOME/miniconda
 cd ..
 export PATH=/home/travis/miniconda/bin:$PATH
+if [[ `which conda` ]]; then echo 'Conda installation successful'; else exit 1; fi
 conda update --yes conda
 popd
 
@@ -30,6 +30,8 @@ source activate testenv
 # Install anaconda gcc compiler to have compiler compatible with the
 # anaconda python executable
 conda install gcc --yes
+echo "Using GCC at "`which gcc`
+export CC=`which gcc`
 
 # Install requirements in correct order
 cat requirements.txt | xargs -n 1 -L 1 pip install
