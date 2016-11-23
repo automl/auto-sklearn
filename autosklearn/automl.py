@@ -369,7 +369,7 @@ class AutoML(BaseEstimator):
         if time_left_for_smac <= 0:
             self._logger.warning("Not starting SMAC because there is no time "
                                  "left.")
-            self._proc_smac = None
+            _proc_smac = None
         else:
             if self._per_run_time_limit is None or \
                     self._per_run_time_limit > time_left_for_smac:
@@ -380,25 +380,25 @@ class AutoML(BaseEstimator):
             else:
                 per_run_time_limit = self._per_run_time_limit
 
-            self._proc_smac = AutoMLSMBO(config_space=self.configuration_space,
-                                         dataset_name=self._dataset_name,
-                                         backend=self._backend,
-                                         total_walltime_limit=time_left_for_smac,
-                                         func_eval_time_limit=per_run_time_limit,
-                                         memory_limit=self._ml_memory_limit,
-                                         data_memory_limit=self._data_memory_limit,
-                                         watcher=self._stopwatch,
-                                         start_num_run=num_run,
-                                         num_metalearning_cfgs=self._initial_configurations_via_metalearning,
-                                         config_file=configspace_path,
-                                         smac_iters=self._max_iter_smac,
-                                         seed=self._seed,
-                                         metadata_directory=self._metadata_directory,
-                                         resampling_strategy=self._resampling_strategy,
-                                         resampling_strategy_args=self._resampling_strategy_arguments,
-                                         acquisition_function=self.acquisition_function,
-                                         shared_mode=self._shared_mode)
-            self._proc_smac.run_smbo()
+            _proc_smac = AutoMLSMBO(config_space=self.configuration_space,
+                                    dataset_name=self._dataset_name,
+                                    backend=self._backend,
+                                    total_walltime_limit=time_left_for_smac,
+                                    func_eval_time_limit=per_run_time_limit,
+                                    memory_limit=self._ml_memory_limit,
+                                    data_memory_limit=self._data_memory_limit,
+                                    watcher=self._stopwatch,
+                                    start_num_run=num_run,
+                                    num_metalearning_cfgs=self._initial_configurations_via_metalearning,
+                                    config_file=configspace_path,
+                                    smac_iters=self._max_iter_smac,
+                                    seed=self._seed,
+                                    metadata_directory=self._metadata_directory,
+                                    resampling_strategy=self._resampling_strategy,
+                                    resampling_strategy_args=self._resampling_strategy_arguments,
+                                    acquisition_function=self.acquisition_function,
+                                    shared_mode=self._shared_mode)
+            self.runhistory_ = _proc_smac.run_smbo()
 
         self._proc_ensemble = None
         self._load_models()
@@ -569,8 +569,8 @@ class AutoML(BaseEstimator):
         scores_per_config = defaultdict(list)
         config_list = list()
 
-        for run_key in self._proc_smac.runhistory.data:
-            run_value = self._proc_smac.runhistory.data[run_key]
+        for run_key in self.runhistory_.data:
+            run_value = self.runhistory_.data[run_key]
 
             config_id = run_key.config_id
             cost = run_value.cost
@@ -583,7 +583,7 @@ class AutoML(BaseEstimator):
         for config_id in config_list:
             scores = [1 - score for score in scores_per_config[config_id]]
             mean_score = np.mean(scores)
-            config = self._proc_smac.runhistory.ids_config[config_id]
+            config = self.runhistory_.ids_config[config_id]
 
             grid_score = _CVScoreTuple(config.get_dictionary(), mean_score,
                                        scores)
@@ -624,10 +624,10 @@ class AutoML(BaseEstimator):
         mean_fit_time = []
         params = []
         status = []
-        for run_key in self._proc_smac.runhistory.data:
-            run_value = self._proc_smac.runhistory.data[run_key]
+        for run_key in self.runhistory_.data:
+            run_value = self.runhistory_.data[run_key]
             config_id = run_key.config_id
-            config = self._proc_smac.runhistory.ids_config[config_id]
+            config = self.runhistory_.ids_config[config_id]
 
             param_dict = config.get_dictionary()
             params.append(param_dict)

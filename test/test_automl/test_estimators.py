@@ -179,7 +179,7 @@ class EstimatorTest(Base, unittest.TestCase):
                                     ensemble_size=0)
         cls_ = cls.build_automl()
         automl = cls_._automl
-        automl._proc_smac = unittest.mock.MagicMock()
+        automl.runhistory_ = unittest.mock.MagicMock()
 
         RunKey = collections.namedtuple(
             'RunKey', ['config_id', 'instance_id', 'seed'])
@@ -189,7 +189,7 @@ class EstimatorTest(Base, unittest.TestCase):
 
         runhistory = dict()
         runhistory[RunKey(1, 1, 1)] = RunValue(1, 1, 1, '')
-        automl._proc_smac.runhistory.data = runhistory
+        automl.runhistory_.data = runhistory
         grid_scores_ = automl.grid_scores_
 
         self.assertIsInstance(grid_scores_[0], _CVScoreTuple)

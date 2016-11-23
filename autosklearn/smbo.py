@@ -616,6 +616,7 @@ class AutoMLSMBO(object):
                 break
 
         self.runhistory = smac.solver.runhistory
+        return runhistory
 
     def choose_next(self, smac):
         challengers = []
