@@ -486,7 +486,8 @@ class AutoMLSMBO(object):
                                   #'instances': [[name] for name in meta_features_dict],
                                   'output-dir': self.backend.temporary_directory,
                                   'shared-model': self.shared_mode,
-                                  'run-obj': 'quality'})
+                                  'run-obj': 'quality',
+                                  'deterministic': 'true'})
 
         # TODO rebuild target algorithm to be it's own target algorithm
         # evaluator, which takes into account that a run can be killed prior
