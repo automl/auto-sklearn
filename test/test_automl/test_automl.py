@@ -1,16 +1,17 @@
 # -*- encoding: utf-8 -*-
-from __future__ import print_function
-
 import multiprocessing
 import os
 import sys
 import time
 import unittest
+import unittest.mock
 
 import numpy as np
-import six
 import sklearn.datasets
+import six
 
+from autosklearn.util.backend import Backend, BackendContext
+from autosklearn.automl import AutoML
 import autosklearn.automl
 import autosklearn.pipeline.util as putil
 from autosklearn.util import setup_logger, get_logger, backend
@@ -20,20 +21,81 @@ from autosklearn.smbo import load_data
 sys.path.append(os.path.dirname(__file__))
 from base import Base
 
+
+class AutoMLStub(AutoML):
+    def __init__(self):
+        self.__class__ = AutoML
+
+
 class AutoMLTest(Base, unittest.TestCase):
     _multiprocess_can_split_ = True
 
-    def test_fit(self):
-        if self.travis:
-            self.skipTest('This test does currently not run on travis-ci. '
-                          'Make sure it runs locally on your machine!')
+    def setUp(self):
+        super().setUp()
 
+        self.automl = AutoMLStub()
+
+        self.automl._shared_mode = False
+        self.automl._seed = 42
+        self.automl._backend = unittest.mock.Mock(spec=Backend)
+        self.automl._delete_output_directories = lambda: 0
+
+    def test_refit_shuffle_on_fail(self):
+        output = os.path.join(self.test_dir, '..', '.tmp_refit_shuffle_on_fail')
+        context = BackendContext(output, output, False, False)
+        backend = Backend(context)
+
+        failing_model = unittest.mock.Mock()
+        failing_model.fit.side_effect = [ValueError(), ValueError(), None]
+
+        auto = AutoML(backend, 30, 30)
+        ensemble_mock = unittest.mock.Mock()
+        auto.ensemble_ = ensemble_mock
+        ensemble_mock.get_model_identifiers.return_value = [1]
+
+        auto.models_ = {1: failing_model}
+
+        X = np.array([1, 2, 3])
+        y = np.array([1, 2, 3])
+        auto.refit(X, y)
+
+        self.assertEqual(failing_model.fit.call_count, 3)
+
+    def test_only_loads_ensemble_models(self):
+        identifiers = [(1, 2), (3, 4)]
+
+        models = [42]
+        self.automl._backend.load_ensemble.return_value.identifiers_ \
+            = identifiers
+        self.automl._backend.load_models_by_identifiers.side_effect \
+            = lambda ids: models if ids is identifiers else None
+
+        self.automl._load_models()
+
+        self.assertEqual(models, self.automl.models_)
+
+    def test_loads_all_models_if_no_ensemble(self):
+        models = [42]
+        self.automl._backend.load_ensemble.return_value = None
+        self.automl._backend.load_all_models.return_value = models
+
+        self.automl._load_models()
+
+        self.assertEqual(models, self.automl.models_)
+
+    def test_raises_if_no_models(self):
+        self.automl._backend.load_ensemble.return_value = None
+        self.automl._backend.load_all_models.return_value = []
+
+        self.assertRaises(ValueError, self.automl._load_models)
+
+    def test_fit(self):
         output = os.path.join(self.test_dir, '..', '.tmp_test_fit')
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         backend_api = backend.create(output, output)
-        automl = autosklearn.automl.AutoML(backend_api, 15, 15)
+        automl = autosklearn.automl.AutoML(backend_api, 15, 5)
         automl.fit(X_train, Y_train)
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
@@ -47,9 +109,6 @@ class AutoMLTest(Base, unittest.TestCase):
         Test fix for binary classification prediction
         taking the index 1 of second dimension in prediction matrix
         """
-        if self.travis:
-            self.skipTest('This test does currently not run on travis-ci. '
-                          'Make sure it runs locally on your machine!')
 
         output = os.path.join(self.test_dir, '..', '.tmp_test_binary_score')
         self._setUp(output)
@@ -63,7 +122,7 @@ class AutoMLTest(Base, unittest.TestCase):
         Y_test = data[1][700:]
 
         backend_api = backend.create(output, output)
-        automl = autosklearn.automl.AutoML(backend_api, 15, 15)
+        automl = autosklearn.automl.AutoML(backend_api, 15, 5)
         automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION)
         self.assertEqual(automl._task, BINARY_CLASSIFICATION)
 
@@ -84,7 +143,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
         backend_api = backend.create(output, output)
         auto = autosklearn.automl.AutoML(
-            backend_api, 15, 15,
+            backend_api, 15, 5,
             initial_configurations_via_metalearning=25,
             seed=100)
         auto.fit_automl_dataset(dataset)
@@ -100,7 +159,7 @@ class AutoMLTest(Base, unittest.TestCase):
                    'start_time_100', 'datamanager.pkl', 'predictions_ensemble',
                    'ensembles', 'predictions_test', 'models']
         self.assertEqual(sorted(os.listdir(os.path.join(output,
-                                                       '.auto-sklearn'))),
+                                                        '.auto-sklearn'))),
                          sorted(fixture))
 
         # At least one ensemble, one validation, one test prediction and one
@@ -137,7 +196,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
             backend_api = backend.create(output, output)
             auto = autosklearn.automl.AutoML(
-                backend_api, 15, 15,
+                backend_api, 15, 5,
                 initial_configurations_via_metalearning=25)
             setup_logger()
             auto._logger = get_logger('test_do_dummy_predictions')
@@ -154,9 +213,7 @@ class AutoMLTest(Base, unittest.TestCase):
                 output, '.auto-sklearn', 'predictions_ensemble',
                 'predictions_ensemble_1_00001.npy')))
 
-            self.assertTrue(os.path.exists(os.path.join(
-                output, '.auto-sklearn', 'predictions_ensemble',
-                'predictions_ensemble_1_00002.npy')))
-
             del auto
             self._tearDown(output)
+
+

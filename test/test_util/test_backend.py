@@ -1,10 +1,7 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 import unittest
-try:
-    import mock
-except ImportError:
-    from unittest import mock
+import unittest.mock
 
 from autosklearn.util.backend import Backend
 
@@ -27,8 +24,8 @@ class BackendModelsTest(unittest.TestCase):
         self.backend = self.BackendStub()
         self.backend.get_model_dir = lambda: self.model_directory
 
-    @mock.patch('six.moves.cPickle.load')
-    @mock.patch.object(builtins, 'open')
+    @unittest.mock.patch('six.moves.cPickle.load')
+    @unittest.mock.patch.object(builtins, 'open')
     def test_loads_model_by_seed_and_id(self, openMock, pickleLoadMock):
         seed = 13
         idx = 17
@@ -38,8 +35,8 @@ class BackendModelsTest(unittest.TestCase):
 
         self.assertEqual(expected_model, actual_model)
 
-    @mock.patch('six.moves.cPickle.load')
-    @mock.patch.object(builtins, 'open')
+    @unittest.mock.patch('six.moves.cPickle.load')
+    @unittest.mock.patch.object(builtins, 'open')
     def test_loads_models_by_identifiers(self, openMock, pickleLoadMock):
         seed = 13
         idx = 17
@@ -56,7 +53,7 @@ class BackendModelsTest(unittest.TestCase):
         file_handler = 'file_handler'
         expected_model = 'model'
 
-        fileMock = mock.MagicMock()
+        fileMock = unittest.mock.MagicMock()
         fileMock.__enter__.return_value = file_handler
 
         openMock.side_effect = lambda path, flag: fileMock if path == model_path and flag == 'rb' else None

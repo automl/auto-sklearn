@@ -19,12 +19,13 @@ from autosklearn.constants import *
 from autosklearn.data.data_manager_factory import get_data_manager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.evaluation import resampling, eval_with_limits
+from autosklearn.evaluation import resampling, ExecuteTaFuncWithQueue
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline
 from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
+from autosklearn.util.hash import hash_numpy_array
 
 
 class AutoML(BaseEstimator):
@@ -71,7 +72,8 @@ class AutoML(BaseEstimator):
         self._include_estimators = include_estimators
         self._include_preprocessors = include_preprocessors
         self._resampling_strategy = resampling_strategy
-        self._resampling_strategy_arguments = resampling_strategy_arguments
+        self._resampling_strategy_arguments = resampling_strategy_arguments \
+            if resampling_strategy_arguments is not None else {}
         self._max_iter_smac = max_iter_smac
         #self.delete_tmp_folder_after_terminate = \
         #    delete_tmp_folder_after_terminate
@@ -147,9 +149,7 @@ class AutoML(BaseEstimator):
         self._backend.context.create_directories()
 
         if dataset_name is None:
-            m = hashlib.md5()
-            m.update(X.data)
-            dataset_name = m.hexdigest()
+            dataset_name = hash_numpy_array(X)
 
         self._backend.save_start_time(self._seed)
         self._stopwatch = StopWatch()
@@ -232,37 +232,32 @@ class AutoML(BaseEstimator):
     def _do_dummy_prediction(self, datamanager, num_run):
 
         self._logger.info("Starting to create dummy predictions.")
-        time_limit = int(self._time_for_task / 6.)
+        # time_limit = int(self._time_for_task / 6.)
         memory_limit = int(self._ml_memory_limit)
+        ta = ExecuteTaFuncWithQueue(backend=self._backend,
+                                    autosklearn_seed=self._seed,
+                                    resampling_strategy=self._resampling_strategy,
+                                    initial_num_run=num_run,
+                                    logger=self._logger,
+                                    **self._resampling_strategy_arguments)
 
-        _info = eval_with_limits(datamanager, self._backend, 1,
-                                 self._seed, num_run,
-                                 self._resampling_strategy,
-                                 self._resampling_strategy_arguments,
-                                 memory_limit, time_limit,
-                                 logger=self._logger)
-        if _info[4] == StatusType.SUCCESS:
-            self._logger.info("Finished creating dummy prediction 1/2.")
+        status, cost, runtime, additional_info = \
+            ta.run(1, cutoff=self._time_for_task, memory_limit=memory_limit)
+        if status == StatusType.SUCCESS:
+            self._logger.info("Finished creating dummy predictions.")
         else:
-            self._logger.error('Error creating dummy prediction 1/2:%s ',
-                               _info[3])
+            self._logger.error('Error creating dummy predictions:%s ',
+                               additional_info)
 
-        num_run += 1
+        #status, cost, runtime, additional_info = \
+        #    ta.run(2, cutoff=time_limit, memory_limit=memory_limit)
+        #if status == StatusType.SUCCESS:
+        #    self._logger.info("Finished creating dummy prediction 2/2.")
+        #else:
+        #    self._logger.error('Error creating dummy prediction 2/2 %s',
+        #                       additional_info)
 
-        _info = eval_with_limits(datamanager, self._backend, 2,
-                                 self._seed, num_run,
-                                 self._resampling_strategy,
-                                 self._resampling_strategy_arguments,
-                                 memory_limit, time_limit,
-                                 logger=self._logger)
-        if _info[4] == StatusType.SUCCESS:
-            self._logger.info("Finished creating dummy prediction 2/2.")
-        else:
-            self._logger.error('Error creating dummy prediction 2/2 %s',
-                               _info[3])
-
-        num_run += 1
-        return num_run
+        return ta.num_run
 
     def _fit(self, datamanager):
         # Reset learnt stuff
@@ -374,7 +369,7 @@ class AutoML(BaseEstimator):
         if time_left_for_smac <= 0:
             self._logger.warning("Not starting SMAC because there is no time "
                                  "left.")
-            self._proc_smac = None
+            _proc_smac = None
         else:
             if self._per_run_time_limit is None or \
                     self._per_run_time_limit > time_left_for_smac:
@@ -385,25 +380,25 @@ class AutoML(BaseEstimator):
             else:
                 per_run_time_limit = self._per_run_time_limit
 
-            self._proc_smac = AutoMLSMBO(config_space=self.configuration_space,
-                                         dataset_name=self._dataset_name,
-                                         backend=self._backend,
-                                         total_walltime_limit=time_left_for_smac,
-                                         func_eval_time_limit=per_run_time_limit,
-                                         memory_limit=self._ml_memory_limit,
-                                         data_memory_limit=self._data_memory_limit,
-                                         watcher=self._stopwatch,
-                                         start_num_run=num_run,
-                                         num_metalearning_cfgs=self._initial_configurations_via_metalearning,
-                                         config_file=configspace_path,
-                                         smac_iters=self._max_iter_smac,
-                                         seed=self._seed,
-                                         metadata_directory=self._metadata_directory,
-                                         resampling_strategy=self._resampling_strategy,
-                                         resampling_strategy_args=self._resampling_strategy_arguments,
-                                         acquisition_function=self.acquisition_function,
-                                         shared_mode=self._shared_mode)
-            self._proc_smac.run_smbo()
+            _proc_smac = AutoMLSMBO(config_space=self.configuration_space,
+                                    dataset_name=self._dataset_name,
+                                    backend=self._backend,
+                                    total_walltime_limit=time_left_for_smac,
+                                    func_eval_time_limit=per_run_time_limit,
+                                    memory_limit=self._ml_memory_limit,
+                                    data_memory_limit=self._data_memory_limit,
+                                    watcher=self._stopwatch,
+                                    start_num_run=num_run,
+                                    num_metalearning_cfgs=self._initial_configurations_via_metalearning,
+                                    config_file=configspace_path,
+                                    smac_iters=self._max_iter_smac,
+                                    seed=self._seed,
+                                    metadata_directory=self._metadata_directory,
+                                    resampling_strategy=self._resampling_strategy,
+                                    resampling_strategy_args=self._resampling_strategy_arguments,
+                                    acquisition_function=self.acquisition_function,
+                                    shared_mode=self._shared_mode)
+            self.runhistory_ = _proc_smac.run_smbo()
 
         self._proc_ensemble = None
         self._load_models()
@@ -418,12 +413,25 @@ class AutoML(BaseEstimator):
                 self.ensemble_ is None:
             self._load_models()
 
+        random_state = np.random.RandomState(self._seed)
         for identifier in self.models_:
             if identifier in self.ensemble_.get_model_identifiers():
                 model = self.models_[identifier]
                 # this updates the model inplace, it can then later be used in
                 # predict method
-                model.fit(X.copy(), y.copy())
+
+                # try to fit the model. If it fails, shuffle the data. This
+                # could alleviate the problem in algorithms that depend on
+                # the ordering of the data.
+                for i in range(10):
+                    try:
+                        model.fit(X.copy(), y.copy())
+                        break
+                    except ValueError:
+                        indices = list(range(X.shape[0]))
+                        random_state.shuffle(indices)
+                        X = X[indices]
+                        y = y[indices]
 
         self._can_predict = True
         return self
@@ -561,8 +569,8 @@ class AutoML(BaseEstimator):
         scores_per_config = defaultdict(list)
         config_list = list()
 
-        for run_key in self._proc_smac.runhistory.data:
-            run_value = self._proc_smac.runhistory.data[run_key]
+        for run_key in self.runhistory_.data:
+            run_value = self.runhistory_.data[run_key]
 
             config_id = run_key.config_id
             cost = run_value.cost
@@ -575,7 +583,7 @@ class AutoML(BaseEstimator):
         for config_id in config_list:
             scores = [1 - score for score in scores_per_config[config_id]]
             mean_score = np.mean(scores)
-            config = self._proc_smac.runhistory.ids_config[config_id]
+            config = self.runhistory_.ids_config[config_id]
 
             grid_score = _CVScoreTuple(config.get_dictionary(), mean_score,
                                        scores)
@@ -616,10 +624,10 @@ class AutoML(BaseEstimator):
         mean_fit_time = []
         params = []
         status = []
-        for run_key in self._proc_smac.runhistory.data:
-            run_value = self._proc_smac.runhistory.data[run_key]
+        for run_key in self.runhistory_.data:
+            run_value = self.runhistory_.data[run_key]
             config_id = run_key.config_id
-            config = self._proc_smac.runhistory.ids_config[config_id]
+            config = self.runhistory_.ids_config[config_id]
 
             param_dict = config.get_dictionary()
             params.append(param_dict)

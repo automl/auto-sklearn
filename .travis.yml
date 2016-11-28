@@ -2,16 +2,30 @@ language: python
 
 sudo: false
 
-os:
-  - linux
-  - osx
-
 matrix:
   allow_failures:
   - os: osx
+  
+  include:
+  - os: linux
+    env: DISTRIB="conda" PYTHON_VERSION="3.4" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+  - os: linux
+    env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+
+  # Set language to generic to not break travis-ci
+  # https://github.com/travis-ci/travis-ci/issues/2312#issuecomment-195620855
+  # so far, this issue is still open and there is no good solution
+  # python will then be installed by anaconda
+  - os: osx
+    sudo: required
+    language: generic
+    env: DISTRIB="conda" PYTHON_VERSION="3.4" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh"
+  - os: osx
+    sudo: required
+    language: generic
+    env: DISTRIB="conda" PYTHON_VERSION="3.5" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh"
 
 cache:
-  apt: true
   # We use three different cache directory
   # to work around a Travis bug with multi-platform cache
   directories:
@@ -19,32 +33,32 @@ cache:
   - $HOME/download
   pip: true
 
-# command to install dependencies
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gcc-4.8
-    - g++-4.8
-    - libatlas-dev
-    - liblapack-dev
-    - libatlas-base-dev
-    - gfortran
+git:
+  depth: 5
 
 env:
   global:
   # Directory where tests are run from
   - TEST_DIR=/tmp/test_dir/
   - MODULE=autosklearn
-  matrix:
-  - DISTRIB="conda" PYTHON_VERSION="3.4"
-  - DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true"
+
+before_install:
+  - wget $MINICONDA_URL -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - if [[ `which conda` ]]; then echo 'Conda installation successful'; else exit 1; fi
+  - conda update --yes conda
+  - conda create -n testenv --yes python=$PYTHON_VERSION pip wheel nose
+  - source activate testenv
+  - conda install --yes gcc
+  - echo "Using GCC at "`which gcc`
+  - export CC=`which gcc`
 
 install:
-  # Necessary for random forest
-  - export CXX="g++-4.8" CC="gcc-4.8"
-  - source ci_scripts/install.sh
+  - pip install coverage pep8 python-coveralls
+  - cat requirements.txt | xargs -n 1 -L 1 pip install
+  - python setup.py install
+  
 script: bash ci_scripts/test.sh
 after_success: source ci_scripts/success.sh
 

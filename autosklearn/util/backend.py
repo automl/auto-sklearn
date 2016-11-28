@@ -180,6 +180,19 @@ class Backend(object):
 
         filepath = self._get_targets_ensemble_filename()
 
+        # Try to open the file without locking it, this will reduce the
+        # number of times where we erronously keep a lock on the ensemble
+        # targets file although the process already was killed
+        try:
+            existing_targets = np.load(filepath)
+            if existing_targets.shape[0] > targets.shape[0] or \
+                    (existing_targets.shape == targets.shape and
+                         np.allclose(existing_targets, targets)):
+
+                return filepath
+        except Exception:
+            pass
+
         lock_path = filepath + '.lock'
         with lockfile.LockFile(lock_path):
             if os.path.exists(filepath):

@@ -16,7 +16,6 @@ extensions = cythonize(
 requirements = [
     "unittest2",
     "setuptools",
-    "mock",
     "nose",
     "six",
     "Cython",
@@ -34,7 +33,7 @@ requirements = [
     "ConfigSpace",
     "pynisher>=0.4",
     "pyrfr",
-    "smac==0.0.1"
+    "smac==0.2.1"
 ]
 
 
