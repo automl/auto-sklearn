@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 from autosklearn.util import dependencies
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 __MANDATORY_PACKAGES__ = '''
 scikit-learn==0.17.1
