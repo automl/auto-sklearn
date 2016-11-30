@@ -36,7 +36,7 @@ requirements = [
     "smac==0.2.1"
 ]
 
-with open("main_package/_version.py") as fh:
+with open("autosklearn/__version__.py") as fh:
     version = fh.readlines()[-1].split()[-1].strip("\"'")
 
 setuptools.setup(
