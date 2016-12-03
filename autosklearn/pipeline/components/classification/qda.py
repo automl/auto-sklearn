@@ -12,8 +12,27 @@ class QDA(AutoSklearnClassificationAlgorithm):
 
     def __init__(self):
         super(QDA, self).__init__()
-        self.reg_param = None
-        self.estimator = None
+        self.reg_param = 0.5
+
+    @staticmethod
+    def get_properties(dataset_properties=None):
+        return {'shortname': 'QDA',
+                'name': 'Quadratic Discriminant Analysis',
+                'handles_regression': False,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': True,
+                'is_deterministic': True,
+                'input': (DENSE, SIGNED_DATA),
+                'output': (PREDICTIONS,)}
+
+    @staticmethod
+    def get_hyperparameter_search_space(dataset_properties=None):
+        reg_param = UniformFloatHyperparameter('reg_param', 0.0, 10.0,
+                                               default=0.5)
+        cs = ConfigurationSpace()
+        cs.add_hyperparameter(reg_param)
+        return cs
 
     def fit(self, X, Y):
         import sklearn.discriminant_analysis
@@ -42,34 +61,9 @@ class QDA(AutoSklearnClassificationAlgorithm):
                              'contains values <= 0.0')
         return self
 
-    def predict(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        return self.estimator.predict(X)
-
     def predict_proba(self, X):
         if self.estimator is None:
             raise NotImplementedError()
 
         df = self.estimator.predict_proba(X)
         return softmax(df)
-
-    @staticmethod
-    def get_properties(dataset_properties=None):
-        return {'shortname': 'QDA',
-                'name': 'Quadratic Discriminant Analysis',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'is_deterministic': True,
-                'input': (DENSE, SIGNED_DATA),
-                'output': (PREDICTIONS,)}
-
-    @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
-        reg_param = UniformFloatHyperparameter('reg_param', 0.0, 10.0,
-                                               default=0.5)
-        cs = ConfigurationSpace()
-        cs.add_hyperparameter(reg_param)
-        return cs

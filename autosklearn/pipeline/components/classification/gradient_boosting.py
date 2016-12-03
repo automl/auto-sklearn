@@ -13,20 +13,56 @@ from autosklearn.pipeline.constants import *
 class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
     def __init__(self):
         super(GradientBoostingClassifier, self).__init__()
-        self.loss = None
-        self.learning_rate = None
-        self.n_estimators = None
-        self.subsample = None
-        self.min_samples_split = None
-        self.min_samples_leaf = None
-        self.min_weight_fraction_leaf = None
-        self.max_depth = None
-        self.max_features = None
+        self.loss = "deviance"
+        self.learning_rate = 0.1
+        self.n_estimators = 100
+        self.subsample = 1.0
+        self.min_samples_split = 2
+        self.min_samples_leaf = 1
+        self.min_weight_fraction_leaf = 0.
+        self.max_depth = 3
+        self.max_features = 1
         self.max_leaf_nodes = None
         self.init = None
-        self.random_state = None
-        self.verbose = None
+        self.verbose = 0
         self.fully_fit_ = False
+
+    @staticmethod
+    def get_properties(dataset_properties=None):
+        return {'shortname': 'GB',
+                'name': 'Gradient Boosting Classifier',
+                'handles_regression': False,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': False,
+                'is_deterministic': True,
+                'input': (DENSE, SIGNED_DATA),
+                'output': (PREDICTIONS,)}
+
+    @staticmethod
+    def get_hyperparameter_search_space(dataset_properties=None):
+        cs = ConfigurationSpace()
+        loss = cs.add_hyperparameter(Constant("loss", "deviance"))
+        learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
+            name="learning_rate", lower=0.01, upper=1, default=0.1, log=True))
+        n_estimators = cs.add_hyperparameter(UniformIntegerHyperparameter
+            ("n_estimators", 50, 500, default=100))
+        max_depth = cs.add_hyperparameter(UniformIntegerHyperparameter(
+            name="max_depth", lower=1, upper=10, default=3))
+        min_samples_split = cs.add_hyperparameter(UniformIntegerHyperparameter(
+            name="min_samples_split", lower=2, upper=20, default=2, log=False))
+        min_samples_leaf = cs.add_hyperparameter(UniformIntegerHyperparameter(
+            name="min_samples_leaf", lower=1, upper=20, default=1, log=False))
+        min_weight_fraction_leaf = cs.add_hyperparameter(
+            UnParametrizedHyperparameter("min_weight_fraction_leaf", 0.))
+        subsample = cs.add_hyperparameter(UniformFloatHyperparameter(
+                name="subsample", lower=0.01, upper=1.0, default=1.0, log=False))
+        max_features = cs.add_hyperparameter(UniformFloatHyperparameter(
+            "max_features", 0.5, 5, default=1))
+        max_leaf_nodes = cs.add_hyperparameter(UnParametrizedHyperparameter(
+            name="max_leaf_nodes", value="None"))
+
+        return cs
 
     def fit(self, X, y, sample_weight=None, refit=False):
         if self.estimator is None or refit:
@@ -101,51 +137,3 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             return False
         else:
             return self.fully_fit_
-
-    def predict(self, X):
-        if self.estimator is None:
-            raise NotImplementedError
-        return self.estimator.predict(X)
-
-    def predict_proba(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        return self.estimator.predict_proba(X)
-
-    @staticmethod
-    def get_properties(dataset_properties=None):
-        return {'shortname': 'GB',
-                'name': 'Gradient Boosting Classifier',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': False,
-                'is_deterministic': True,
-                'input': (DENSE, SIGNED_DATA),
-                'output': (PREDICTIONS,)}
-
-    @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
-        cs = ConfigurationSpace()
-        loss = cs.add_hyperparameter(Constant("loss", "deviance"))
-        learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
-            name="learning_rate", lower=0.01, upper=1, default=0.1, log=True))
-        n_estimators = cs.add_hyperparameter(UniformIntegerHyperparameter
-            ("n_estimators", 50, 500, default=100))
-        max_depth = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="max_depth", lower=1, upper=10, default=3))
-        min_samples_split = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="min_samples_split", lower=2, upper=20, default=2, log=False))
-        min_samples_leaf = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="min_samples_leaf", lower=1, upper=20, default=1, log=False))
-        min_weight_fraction_leaf = cs.add_hyperparameter(
-            UnParametrizedHyperparameter("min_weight_fraction_leaf", 0.))
-        subsample = cs.add_hyperparameter(UniformFloatHyperparameter(
-                name="subsample", lower=0.01, upper=1.0, default=1.0, log=False))
-        max_features = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default=1))
-        max_leaf_nodes = cs.add_hyperparameter(UnParametrizedHyperparameter(
-            name="max_leaf_nodes", value="None"))
-
-        return cs
-

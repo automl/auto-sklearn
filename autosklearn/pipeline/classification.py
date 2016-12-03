@@ -23,7 +23,7 @@ from autosklearn.pipeline.components import feature_preprocessing as \
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
 
-
+'''
 class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
     """This class implements the classification task.
 
@@ -299,3 +299,4 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
     def _get_estimator_hyperparameter_name(self):
         return "classifier"
 
+'''

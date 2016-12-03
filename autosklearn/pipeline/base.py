@@ -5,11 +5,15 @@ from ConfigSpace import Configuration
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_random_state, check_is_fitted
 
-from .components.base import AutoSklearnComponent
-from autosklearn.pipeline.components.choice import AutoSklearnChoice
-import autosklearn.pipeline.create_searchspace_util
+from autosklearn.pipeline.components.serial import SerialAutoSklearnComponent
 
+class EstimationPipeline(SerialAutoSklearnComponent, Pipeline):
 
+    def __init__(self, components):
+        SerialAutoSklearnComponent.__init__(self, components)
+        Pipeline.__init__(self, self.components.items())
+
+'''
 class BasePipeline(Pipeline):
     """Base class for all pipeline objects.
 
@@ -352,3 +356,4 @@ class BasePipeline(Pipeline):
     def _get_estimator_hyperparameter_name(self):
         raise NotImplementedError()
 
+'''

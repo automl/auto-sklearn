@@ -14,58 +14,14 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
     def __init__(self):
         super(LibLinear_SVC, self).__init__()
-        self.penalty = None
-        self.loss = None
-        self.dual = None
-        self.tol = None
-        self.C = None
-        self.multi_class = None
-        self.fit_intercept = None
-        self.intercept_scaling = None
-        self.class_weight = None
-        self.random_state = None
-
-    def fit(self, X, Y):
-        self.C = float(self.C)
-        self.tol = float(self.tol)
-
-        self.dual = self.dual == 'True'
-        self.fit_intercept = self.fit_intercept == 'True'
-        self.intercept_scaling = float(self.intercept_scaling)
-
-        if self.class_weight == "None":
-            self.class_weight = None
-
-        estimator = sklearn.svm.LinearSVC(penalty=self.penalty,
-                                          loss=self.loss,
-                                          dual=self.dual,
-                                          tol=self.tol,
-                                          C=self.C,
-                                          class_weight=self.class_weight,
-                                          fit_intercept=self.fit_intercept,
-                                          intercept_scaling=self.intercept_scaling,
-                                          multi_class=self.multi_class,
-                                          random_state=self.random_state)
-
-        if len(Y.shape) == 2 and Y.shape[1] > 1:
-            self.estimator = sklearn.multiclass.OneVsRestClassifier(estimator, n_jobs=1)
-        else:
-            self.estimator = estimator
-
-        self.estimator.fit(X, Y)
-        return self
-
-    def predict(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        return self.estimator.predict(X)
-
-    def predict_proba(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-
-        df = self.estimator.decision_function(X)
-        return softmax(df)
+        self.penalty = "l2"
+        self.loss = "squared_hinge"
+        self.dual = False
+        self.tol = 1e-4
+        self.C = 1.0
+        self.multi_class = "ovr"
+        self.fit_intercept = True
+        self.intercept_scaling = 1
 
     @staticmethod
     def get_properties(dataset_properties=None):
@@ -116,3 +72,40 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
         cs.add_forbidden_clause(constant_penalty_and_loss)
         cs.add_forbidden_clause(penalty_and_dual)
         return cs
+
+    def fit(self, X, Y):
+        self.C = float(self.C)
+        self.tol = float(self.tol)
+
+        self.dual = self.dual == 'True'
+        self.fit_intercept = self.fit_intercept == 'True'
+        self.intercept_scaling = float(self.intercept_scaling)
+
+        if self.class_weight == "None":
+            self.class_weight = None
+
+        estimator = sklearn.svm.LinearSVC(penalty=self.penalty,
+                                          loss=self.loss,
+                                          dual=self.dual,
+                                          tol=self.tol,
+                                          C=self.C,
+                                          class_weight=self.class_weight,
+                                          fit_intercept=self.fit_intercept,
+                                          intercept_scaling=self.intercept_scaling,
+                                          multi_class=self.multi_class,
+                                          random_state=self.random_state)
+
+        if len(Y.shape) == 2 and Y.shape[1] > 1:
+            self.estimator = sklearn.multiclass.OneVsRestClassifier(estimator, n_jobs=1)
+        else:
+            self.estimator = estimator
+
+        self.estimator.fit(X, Y)
+        return self
+
+    def predict_proba(self, X):
+        if self.estimator is None:
+            raise NotImplementedError()
+
+        df = self.estimator.decision_function(X)
+        return softmax(df)

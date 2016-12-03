@@ -12,10 +12,40 @@ class MultinomialNB(AutoSklearnClassificationAlgorithm):
 
     def __init__(self):
         super(MultinomialNB, self).__init__()
-        self.alpha = None
-        self.fit_prior = None
-        self.random_state = None
-        self.verbose = None
+        self.alpha = 1
+        self.fit_prior = True
+        self.verbose = 0
+
+    @staticmethod
+    def get_properties(dataset_properties=None):
+        return {'shortname': 'MultinomialNB',
+                'name': 'Multinomial Naive Bayes classifier',
+                'handles_regression': False,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': True,
+                'is_deterministic': True,
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
+                'output': (PREDICTIONS,)}
+
+    @staticmethod
+    def get_hyperparameter_search_space(dataset_properties=None):
+        cs = ConfigurationSpace()
+
+        # the smoothing parameter is a non-negative float
+        # I will limit it to 100 and put it on a logarithmic scale. (SF)
+        # Please adjust that, if you know a proper range, this is just a guess.
+        alpha = UniformFloatHyperparameter(name="alpha", lower=1e-2, upper=100,
+                                           default=1, log=True)
+
+        fit_prior = CategoricalHyperparameter(name="fit_prior",
+                                              choices=["True", "False"],
+                                              default="True")
+
+        cs.add_hyperparameter(alpha)
+        cs.add_hyperparameter(fit_prior)
+
+        return cs
 
     def fit(self, X, y):
         while not self.configuration_fully_fitted():
@@ -76,45 +106,3 @@ class MultinomialNB(AutoSklearnClassificationAlgorithm):
             return False
         else:
             return self.fully_fit_
-
-    def predict(self, X):
-        if self.estimator is None:
-            raise NotImplementedError
-        return self.estimator.predict(X)
-
-    def predict_proba(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        return self.estimator.predict_proba(X)
-
-    @staticmethod
-    def get_properties(dataset_properties=None):
-        return {'shortname': 'MultinomialNB',
-                'name': 'Multinomial Naive Bayes classifier',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'is_deterministic': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,)}
-
-    @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
-        cs = ConfigurationSpace()
-        
-        # the smoothing parameter is a non-negative float
-        # I will limit it to 100 and put it on a logarithmic scale. (SF)
-        # Please adjust that, if you know a proper range, this is just a guess.
-        alpha = UniformFloatHyperparameter(name="alpha", lower=1e-2, upper=100,
-                                           default=1, log=True)
-
-        fit_prior = CategoricalHyperparameter(name="fit_prior",
-                                              choices=["True", "False"],
-                                              default="True")
-        
-        cs.add_hyperparameter(alpha)
-        cs.add_hyperparameter(fit_prior)
-        
-        return cs
-

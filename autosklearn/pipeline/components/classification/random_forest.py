@@ -11,21 +11,51 @@ from autosklearn.pipeline.implementations.util import convert_multioutput_multic
 
 
 class RandomForest(AutoSklearnClassificationAlgorithm):
+
     def __init__(self):
-        self.n_estimators = None
+        super(RandomForest, self).__init__()
+        self.n_estimators = 100
         self.estimator_increment = 10
-        self.criterion = None
-        self.max_features = None
+        self.criterion = "gini"
+        self.max_features = 1
         self.max_depth = None
-        self.min_samples_split = None
-        self.min_samples_leaf = None
-        self.min_weight_fraction_leaf = None
-        self.bootstrap = None
+        self.min_samples_split = 2
+        self.min_samples_leaf = 1
+        self.min_weight_fraction_leaf = 0.
+        self.bootstrap = True
         self.max_leaf_nodes = None
-        self.random_state = None
         self.n_jobs = 1
-        self.class_weight = None
-        self.estimator = None
+
+    @staticmethod
+    def get_properties(dataset_properties=None):
+        return {'shortname': 'RF',
+                'name': 'Random Forest Classifier',
+                'handles_regression': False,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': True,
+                'is_deterministic': True,
+                'input': (DENSE, SPARSE, SIGNED_DATA),
+                'output': (PREDICTIONS,)}
+
+    @staticmethod
+    def get_hyperparameter_search_space(dataset_properties=None):
+        cs = ConfigurationSpace()
+        cs.add_hyperparameter(Constant("n_estimators", 100))
+        cs.add_hyperparameter(CategoricalHyperparameter(
+            "criterion", ["gini", "entropy"], default="gini"))
+        cs.add_hyperparameter(UniformFloatHyperparameter(
+            "max_features", 0.5, 5, default=1))
+        cs.add_hyperparameter(UnParametrizedHyperparameter("max_depth", "None"))
+        cs.add_hyperparameter(UniformIntegerHyperparameter(
+            "min_samples_split", 2, 20, default=2))
+        cs.add_hyperparameter(UniformIntegerHyperparameter(
+            "min_samples_leaf", 1, 20, default=1))
+        cs.add_hyperparameter(UnParametrizedHyperparameter("min_weight_fraction_leaf", 0.))
+        cs.add_hyperparameter(UnParametrizedHyperparameter("max_leaf_nodes", "None"))
+        cs.add_hyperparameter(CategoricalHyperparameter(
+            "bootstrap", ["True", "False"], default="True"))
+        return cs
 
     def fit(self, X, y, sample_weight=None, refit=False):
         if self.estimator is None or refit:
@@ -93,45 +123,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
 
         return not len(self.estimator.estimators_) < self.n_estimators
 
-    def predict(self, X):
-        if self.estimator is None:
-            raise NotImplementedError
-        return self.estimator.predict(X)
-
     def predict_proba(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        probas = self.estimator.predict_proba(X)
+        probas = super(RandomForest, self).predict_proba(X)
         probas = convert_multioutput_multiclass_to_multilabel(probas)
         return probas
-
-    @staticmethod
-    def get_properties(dataset_properties=None):
-        return {'shortname': 'RF',
-                'name': 'Random Forest Classifier',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'is_deterministic': True,
-                'input': (DENSE, SPARSE, SIGNED_DATA),
-                'output': (PREDICTIONS,)}
-
-    @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
-        cs = ConfigurationSpace()
-        cs.add_hyperparameter(Constant("n_estimators", 100))
-        cs.add_hyperparameter(CategoricalHyperparameter(
-            "criterion", ["gini", "entropy"], default="gini"))
-        cs.add_hyperparameter(UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default=1))
-        cs.add_hyperparameter(UnParametrizedHyperparameter("max_depth", "None"))
-        cs.add_hyperparameter(UniformIntegerHyperparameter(
-            "min_samples_split", 2, 20, default=2))
-        cs.add_hyperparameter(UniformIntegerHyperparameter(
-            "min_samples_leaf", 1, 20, default=1))
-        cs.add_hyperparameter(UnParametrizedHyperparameter("min_weight_fraction_leaf", 0.))
-        cs.add_hyperparameter(UnParametrizedHyperparameter("max_leaf_nodes", "None"))
-        cs.add_hyperparameter(CategoricalHyperparameter(
-            "bootstrap", ["True", "False"], default="True"))
-        return cs

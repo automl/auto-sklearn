@@ -10,37 +10,9 @@ class KNearestNeighborsClassifier(AutoSklearnClassificationAlgorithm):
 
     def __init__(self):
         super(KNearestNeighborsClassifier, self).__init__()
-        self.n_neighbors = None
-        self.weights = None
-        self.p = None
-        self.random_state = None
-
-    def fit(self, X, Y):
-        import sklearn.neighbors
-        import sklearn.multiclass
-
-        estimator = \
-            sklearn.neighbors.KNeighborsClassifier(n_neighbors=self.n_neighbors,
-                                                   weights=self.weights,
-                                                   p=self.p)
-
-        if len(Y.shape) == 2 and Y.shape[1] > 1:
-            self.estimator = sklearn.multiclass.OneVsRestClassifier(estimator, n_jobs=1)
-        else:
-            self.estimator = estimator
-
-        self.estimator.fit(X, Y)
-        return self
-
-    def predict(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        return self.estimator.predict(X)
-
-    def predict_proba(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        return self.estimator.predict_proba(X)
+        self.n_neighbors = 1
+        self.weights = "uniform"
+        self.p = 2
 
     @staticmethod
     def get_properties(dataset_properties=None):
@@ -66,3 +38,20 @@ class KNearestNeighborsClassifier(AutoSklearnClassificationAlgorithm):
             name="p", choices=[1, 2], default=2))
 
         return cs
+
+    def fit(self, X, Y):
+        import sklearn.neighbors
+        import sklearn.multiclass
+
+        estimator = \
+            sklearn.neighbors.KNeighborsClassifier(n_neighbors=self.n_neighbors,
+                                                   weights=self.weights,
+                                                   p=self.p)
+
+        if len(Y.shape) == 2 and Y.shape[1] > 1:
+            self.estimator = sklearn.multiclass.OneVsRestClassifier(estimator, n_jobs=1)
+        else:
+            self.estimator = estimator
+
+        self.estimator.fit(X, Y)
+        return self

@@ -13,42 +13,10 @@ class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
 
     def __init__(self):
         super(AdaboostClassifier, self).__init__()
-        self.n_estimators = None
-        self.learning_rate = None
-        self.algorithm = None
-        self.random_state = None
-        self.max_depth = None
-        self.estimator = None
-
-    def fit(self, X, Y, sample_weight=None):
-
-        self.n_estimators = int(self.n_estimators)
-        self.learning_rate = float(self.learning_rate)
-        self.max_depth = int(self.max_depth)
-        base_estimator = DecisionTreeClassifier(max_depth=self.max_depth)
-
-        estimator = AdaBoostClassifier(
-            base_estimator=base_estimator,
-            n_estimators=self.n_estimators,
-            learning_rate=self.learning_rate,
-            algorithm=self.algorithm,
-            random_state=self.random_state
-        )
-
-        estimator.fit(X, Y, sample_weight=sample_weight)
-
-        self.estimator = estimator
-        return self
-
-    def predict(self, X):
-        if self.estimator is None:
-            raise NotImplementedError
-        return self.estimator.predict(X)
-
-    def predict_proba(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        return self.estimator.predict_proba(X)
+        self.n_estimators = 50
+        self.learning_rate = 0.1
+        self.algorithm = "SAMME.R"
+        self.max_depth = 1
 
     @staticmethod
     def get_properties(dataset_properties=None):
@@ -83,3 +51,22 @@ class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
 
         return cs
 
+    def fit(self, X, Y, sample_weight=None):
+
+        self.n_estimators = int(self.n_estimators)
+        self.learning_rate = float(self.learning_rate)
+        self.max_depth = int(self.max_depth)
+        base_estimator = DecisionTreeClassifier(max_depth=self.max_depth)
+
+        estimator = AdaBoostClassifier(
+            base_estimator=base_estimator,
+            n_estimators=self.n_estimators,
+            learning_rate=self.learning_rate,
+            algorithm=self.algorithm,
+            random_state=self.random_state
+        )
+
+        estimator.fit(X, Y, sample_weight=sample_weight)
+
+        self.estimator = estimator
+        return self

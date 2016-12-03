@@ -15,89 +15,17 @@ class SGD(AutoSklearnClassificationAlgorithm):
 
     def __init__(self):
         super(SGD, self).__init__()
-        self.loss = None
-        self.penalty = None
-        self.alpha = None
-        self.fit_intercept = None
-        self.n_iter = None
-        self.learning_rate = None
+        self.loss = "log"
+        self.penalty = "l2"
+        self.alpha = 1e-4
+        self.fit_intercept = True
+        self.n_iter = 20
+        self.learning_rate = "optimal"
         self.l1_ratio = 0.15
-        self.epsilon = 0.1
-        self.eta0 = 0.01
-        self.power_t = 0.5
-        self.random_state = None
-        self.average = None
-        self.estimator = None
-
-    def fit(self, X, y, sample_weight=None):
-        while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight)
-
-        return self
-
-    def iterative_fit(self, X, y, n_iter=1, refit=False, sample_weight=None):
-        from sklearn.linear_model.stochastic_gradient import SGDClassifier
-
-        if refit:
-            self.estimator = None
-
-        if self.estimator is None:
-            self._iterations = 0
-
-            self.alpha = float(self.alpha)
-            self.fit_intercept = self.fit_intercept == 'True'
-            self.n_iter = int(self.n_iter)
-            self.l1_ratio = float(self.l1_ratio) if self.l1_ratio is not None else 0.15
-            self.epsilon = float(self.epsilon) if self.epsilon is not None else 0.1
-            self.eta0 = float(self.eta0)
-            self.power_t = float(self.power_t) if self.power_t is not None else 0.25
-            self.average = self.average == 'True'
-
-            self.estimator = SGDClassifier(loss=self.loss,
-                                           penalty=self.penalty,
-                                           alpha=self.alpha,
-                                           fit_intercept=self.fit_intercept,
-                                           n_iter=1,
-                                           learning_rate=self.learning_rate,
-                                           l1_ratio=self.l1_ratio,
-                                           epsilon=self.epsilon,
-                                           eta0=self.eta0,
-                                           power_t=self.power_t,
-                                           shuffle=True,
-                                           average=self.average,
-                                           random_state=self.random_state,)
-
-        self.estimator.n_iter = n_iter
-        self.estimator.partial_fit(X, y, classes=np.unique(y),
-                                   sample_weight=sample_weight)
-
-        if self._iterations >= self.n_iter:
-            self.fully_fit_ = True
-        self._iterations += n_iter
-        return self
-
-    def configuration_fully_fitted(self):
-        if self.estimator is None:
-            return False
-        elif not hasattr(self, 'fully_fit_'):
-            return False
-        else:
-            return self.fully_fit_
-
-    def predict(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        return self.estimator.predict(X)
-
-    def predict_proba(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-
-        if self.loss in ["log", "modified_huber"]:
-            return self.estimator.predict_proba(X)
-        else:
-            df = self.estimator.decision_function(X)
-            return softmax(df)
+        self.epsilon = 1e-4
+        self.eta0 = 1e-2
+        self.power_t = 0.51
+        self.average = False
 
     @staticmethod
     def get_properties(dataset_properties=None):
@@ -157,3 +85,67 @@ class SGD(AutoSklearnClassificationAlgorithm):
 
         return cs
 
+    def fit(self, X, y, sample_weight=None):
+        while not self.configuration_fully_fitted():
+            self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight)
+
+        return self
+
+    def iterative_fit(self, X, y, n_iter=1, refit=False, sample_weight=None):
+        from sklearn.linear_model.stochastic_gradient import SGDClassifier
+
+        if refit:
+            self.estimator = None
+
+        if self.estimator is None:
+            self._iterations = 0
+
+            self.alpha = float(self.alpha)
+            self.fit_intercept = self.fit_intercept == 'True'
+            self.n_iter = int(self.n_iter)
+            self.l1_ratio = float(self.l1_ratio) if self.l1_ratio is not None else 0.15
+            self.epsilon = float(self.epsilon) if self.epsilon is not None else 0.1
+            self.eta0 = float(self.eta0)
+            self.power_t = float(self.power_t) if self.power_t is not None else 0.25
+            self.average = self.average == 'True'
+
+            self.estimator = SGDClassifier(loss=self.loss,
+                                           penalty=self.penalty,
+                                           alpha=self.alpha,
+                                           fit_intercept=self.fit_intercept,
+                                           n_iter=1,
+                                           learning_rate=self.learning_rate,
+                                           l1_ratio=self.l1_ratio,
+                                           epsilon=self.epsilon,
+                                           eta0=self.eta0,
+                                           power_t=self.power_t,
+                                           shuffle=True,
+                                           average=self.average,
+                                           random_state=self.random_state,)
+
+        self.estimator.n_iter = n_iter
+        self.estimator.partial_fit(X, y, classes=np.unique(y),
+                                   sample_weight=sample_weight)
+
+        if self._iterations >= self.n_iter:
+            self.fully_fit_ = True
+        self._iterations += n_iter
+        return self
+
+    def configuration_fully_fitted(self):
+        if self.estimator is None:
+            return False
+        elif not hasattr(self, 'fully_fit_'):
+            return False
+        else:
+            return self.fully_fit_
+
+    def predict_proba(self, X):
+        if self.estimator is None:
+            raise NotImplementedError()
+
+        if self.loss in ["log", "modified_huber"]:
+            return self.estimator.predict_proba(X)
+        else:
+            df = self.estimator.decision_function(X)
+            return softmax(df)

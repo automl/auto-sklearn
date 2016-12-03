@@ -10,6 +10,22 @@ class AutoSklearnClassificationAlgorithm(AutoSklearnComponent):
     def __init__(self):
         self.estimator = None
         self.properties = None
+        self.random_state = None
+
+    def predict_proba(self, X):
+        """Predict probabilities.
+
+        Parameters
+        ----------
+        X : array-like, shape = (n_samples, n_features)
+
+        Returns
+        -------
+        array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)
+        """
+        if self.estimator is None:
+            raise NotImplementedError()
+        return self.estimator.predict_proba(X)
 
     def predict(self, X):
         """The predict function calls the predict function of the
@@ -29,20 +45,9 @@ class AutoSklearnClassificationAlgorithm(AutoSklearnComponent):
         Please see the `scikit-learn API documentation
         <http://scikit-learn.org/dev/developers/index.html#apis-of-scikit
         -learn-objects>`_ for further information."""
-        raise NotImplementedError()
-
-    def predict_proba(self, X):
-        """Predict probabilities.
-
-        Parameters
-        ----------
-        X : array-like, shape = (n_samples, n_features)
-
-        Returns
-        -------
-        array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)
-        """
-        raise NotImplementedError()
+        if self.estimator is None:
+            raise NotImplementedError
+        return self.estimator.predict(X)
 
     def get_estimator(self):
         """Return the underlying estimator object.

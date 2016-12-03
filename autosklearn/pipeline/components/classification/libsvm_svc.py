@@ -62,82 +62,14 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
 
     def __init__(self):
         super(LibSVM_SVC, self).__init__()
-        self.C = None
-        self.kernel = None
-        self.degree = None
-        self.gamma = None
-        self.coef0 = None
-        self.shrinking = None
-        self.tol = None
-        self.class_weight = None
-        self.max_iter = None
-        self.random_state = None
-
-    def set_weights(self):
-        pass
-
-    def fit(self, X, Y):
-        try:
-            soft, hard = resource.getrlimit(resource.RLIMIT_AS)
-            if soft > 0:
-                soft /= 1024 * 1024
-                maxrss = resource.getrusage(resource.RUSAGE_SELF)[2] / 1024
-                cache_size = (soft - maxrss) / 1.5
-            else:
-                cache_size = 200
-        except Exception:
-            cache_size = 200
-
-        self.C = float(self.C)
-        if self.degree is None:
-            self.degree = 3
-        else:
-            self.degree = int(self.degree)
-        if self.gamma is None:
-            self.gamma = 0.0
-        else:
-            self.gamma = float(self.gamma)
-        if self.coef0 is None:
-            self.coef0 = 0.0
-        else:
-            self.coef0 = float(self.coef0)
-        self.tol = float(self.tol)
-        self.max_iter = float(self.max_iter)
-        self.shrinking = self.shrinking == 'True'
-
-        if self.class_weight == "None":
-            self.class_weight = None
-
-        self.estimator = sklearn.svm.SVC(C=self.C,
-                                         kernel=self.kernel,
-                                         degree=self.degree,
-                                         gamma=self.gamma,
-                                         coef0=self.coef0,
-                                         shrinking=self.shrinking,
-                                         tol=self.tol,
-                                         class_weight=self.class_weight,
-                                         max_iter=self.max_iter,
-                                         random_state=self.random_state,
-                                         cache_size=cache_size)
-                                         # probability=True)
-        self.estimator.fit(X, Y)
-        return self
-
-    def predict(self, X):
-        if self.estimator is None:
-            raise NotImplementedError
-        return self.estimator.predict(X)
-
-    def predict_proba(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        # return self.estimator.predict_proba(X)
-        decision = self.estimator.decision_function(X)
-        if len(self.estimator.classes_) > 2:
-            decision = _ovr_decision_function(decision < 0, decision,
-                                              len(self.estimator.classes_))
-        return softmax(decision)
-
+        self.C = 1.0
+        self.kernel = "rbf"
+        self.degree = 3
+        self.gamma = 0.1
+        self.coef0 = 0
+        self.shrinking = True
+        self.tol = 1e-4
+        self.max_iter = -1
 
     @staticmethod
     def get_properties(dataset_properties=None):
@@ -188,3 +120,60 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         cs.add_condition(coef0_condition)
 
         return cs
+
+    def fit(self, X, Y):
+        try:
+            soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+            if soft > 0:
+                soft /= 1024 * 1024
+                maxrss = resource.getrusage(resource.RUSAGE_SELF)[2] / 1024
+                cache_size = (soft - maxrss) / 1.5
+            else:
+                cache_size = 200
+        except Exception:
+            cache_size = 200
+
+        self.C = float(self.C)
+        if self.degree is None:
+            self.degree = 3
+        else:
+            self.degree = int(self.degree)
+        if self.gamma is None:
+            self.gamma = 0.0
+        else:
+            self.gamma = float(self.gamma)
+        if self.coef0 is None:
+            self.coef0 = 0.0
+        else:
+            self.coef0 = float(self.coef0)
+        self.tol = float(self.tol)
+        self.max_iter = float(self.max_iter)
+        self.shrinking = self.shrinking == 'True'
+
+        if self.class_weight == "None":
+            self.class_weight = None
+
+        self.estimator = sklearn.svm.SVC(C=self.C,
+                                         kernel=self.kernel,
+                                         degree=self.degree,
+                                         gamma=self.gamma,
+                                         coef0=self.coef0,
+                                         shrinking=self.shrinking,
+                                         tol=self.tol,
+                                         class_weight=self.class_weight,
+                                         max_iter=self.max_iter,
+                                         random_state=self.random_state,
+                                         cache_size=cache_size)
+                                         # probability=True)
+        self.estimator.fit(X, Y)
+        return self
+
+    def predict_proba(self, X):
+        if self.estimator is None:
+            raise NotImplementedError()
+        # return self.estimator.predict_proba(X)
+        decision = self.estimator.decision_function(X)
+        if len(self.estimator.classes_) > 2:
+            decision = _ovr_decision_function(decision < 0, decision,
+                                              len(self.estimator.classes_))
+        return softmax(decision)

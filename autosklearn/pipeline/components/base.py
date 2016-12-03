@@ -132,8 +132,7 @@ class AutoSklearnComponent(object):
 
         return list(artifacts)
 
-    @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
+    def get_hyperparameter_search_space(self, dataset_properties=None):
         """Return the configuration space of this classification algorithm.
 
         Parameters

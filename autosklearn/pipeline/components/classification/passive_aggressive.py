@@ -14,12 +14,38 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
 
     def __init__(self):
         super(PassiveAggressive, self).__init__()
-        self.C = None
-        self.fit_intercept = None
-        self.n_iter = None
-        self.loss = None
-        self.random_state = None
-        self.estimator = None
+        self.C = 1
+        self.fit_intercept = True
+        self.n_iter = 20
+        self.loss = "hinge"
+
+    @staticmethod
+    def get_properties(dataset_properties=None):
+        return {'shortname': 'PassiveAggressive Classifier',
+                'name': 'Passive Aggressive Classifier',
+                'handles_regression': False,
+                'handles_classification': True,
+                'handles_multiclass': True,
+                'handles_multilabel': True,
+                'is_deterministic': True,
+                'input': (DENSE, SPARSE, SIGNED_DATA),
+                'output': (PREDICTIONS,)}
+
+    @staticmethod
+    def get_hyperparameter_search_space(dataset_properties=None):
+        loss = CategoricalHyperparameter("loss",
+                                         ["hinge", "squared_hinge"],
+                                         default="hinge")
+        fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
+        n_iter = UniformIntegerHyperparameter("n_iter", 5, 1000, default=20,
+                                              log=True)
+        C = UniformFloatHyperparameter("C", 1e-5, 10, default=1, log=True)
+        cs = ConfigurationSpace()
+        cs.add_hyperparameter(loss)
+        cs.add_hyperparameter(fit_intercept)
+        cs.add_hyperparameter(n_iter)
+        cs.add_hyperparameter(C)
+        return cs
 
     def fit(self, X, y):
         while not self.configuration_fully_fitted():
@@ -70,42 +96,9 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
         else:
             return self.fully_fit_
 
-    def predict(self, X):
-        if self.estimator is None:
-            raise NotImplementedError()
-        return self.estimator.predict(X)
-
     def predict_proba(self, X):
         if self.estimator is None:
             raise NotImplementedError()
 
         df = self.estimator.decision_function(X)
         return softmax(df)
-
-    @staticmethod
-    def get_properties(dataset_properties=None):
-        return {'shortname': 'PassiveAggressive Classifier',
-                'name': 'Passive Aggressive Classifier',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
-                'handles_multilabel': True,
-                'is_deterministic': True,
-                'input': (DENSE, SPARSE, SIGNED_DATA),
-                'output': (PREDICTIONS,)}
-
-    @staticmethod
-    def get_hyperparameter_search_space(dataset_properties=None):
-        loss = CategoricalHyperparameter("loss",
-                                         ["hinge", "squared_hinge"],
-                                         default="hinge")
-        fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
-        n_iter = UniformIntegerHyperparameter("n_iter", 5, 1000, default=20,
-                                              log=True)
-        C = UniformFloatHyperparameter("C", 1e-5, 10, 1, log=True)
-        cs = ConfigurationSpace()
-        cs.add_hyperparameter(loss)
-        cs.add_hyperparameter(fit_intercept)
-        cs.add_hyperparameter(n_iter)
-        cs.add_hyperparameter(C)
-        return cs
