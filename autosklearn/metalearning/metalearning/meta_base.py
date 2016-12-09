@@ -1,7 +1,6 @@
-import logging
-
 import pandas as pd
 
+from ...util.logging_ import get_logger
 from ..input import aslib_simple
 from ..metafeatures.metafeature import DatasetMetafeatures
 from ConfigSpace.configuration_space import Configuration
@@ -31,7 +30,7 @@ class MetaBase(object):
         - aslib_directory: directory with a problem instance in the aslib format
         """
 
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
 
         self.configuration_space = configuration_space
         self.aslib_directory = aslib_directory

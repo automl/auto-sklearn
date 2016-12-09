@@ -27,22 +27,18 @@ Example
 *******
 
     >>> import autosklearn.classification
+    >>> import sklearn.cross_validation
     >>> import sklearn.datasets
+    >>> import sklearn.metrics
     >>> digits = sklearn.datasets.load_digits()
     >>> X = digits.data
     >>> y = digits.target
-    >>> import numpy as np
-    >>> indices = np.arange(X.shape[0])
-    >>> np.random.shuffle(indices)
-    >>> X = X[indices]
-    >>> y = y[indices]
-    >>> X_train = X[:1000]
-    >>> y_train = y[:1000]
-    >>> X_test = X[1000:]
-    >>> y_test = y[1000:]
+    >>> X_train, X_test, y_train, y_test = \
+            sklearn.cross_validation.train_test_split(X, y, random_state=1)
     >>> automl = autosklearn.classification.AutoSklearnClassifier()
     >>> automl.fit(X_train, y_train)
-    >>> print(automl.score(X_test,y_test))
+    >>> y_hat = automl.predict(X_test)
+    >>> print("Accuracy score", sklearn.metrics.accuracy_score(y_test, y_hat))
 
 
 This will run for one hour should result in an accuracy above 0.98.
@@ -52,24 +48,24 @@ Installation
 ************
 **Prerequisities**: *auto-sklearn* is written in python and was developed
 with Ubuntu. It should run on other Linux distributions, but won't work on a MAC
-or on a windows PC. It is built around scikit-learn 0.17.1 and needs a
-compiler for C++ 11.
+or on a windows PC. We aim to always support the two latests python versions,
+which are 3.4 and 3.5 at the moment. It is built around scikit-learn 0.17.1 and
+needs a compiler for C++ 11.
 
 Please install all dependencies manually with:
 
 .. code:: bash
 
-    pip install -r https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt
+    curl https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt | xargs -n 1 -L 1 pip install
 
 Then install *auto-sklearn*
 
 .. code:: bash
 
-    pip install git+https://github.com/automl/auto-sklearn.git#egg=autosklearn
+    pip install auto-sklearn
 
 We recommend installing *auto-sklearn* into a `virtual environment
-<http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or into an
-`anaconda environment <https://www.continuum.io/downloads>`_..
+<http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_.
 
 Manual
 ******
@@ -82,14 +78,13 @@ Manual
 License
 *******
 *auto-sklearn* is licensed the same way as *scikit-learn*,
-namely the 3-clause BSD license. The subprojects it uses, most notably SMAC,
-can have different licenses.
+namely the 3-clause BSD license.
 
 Citing auto-sklearn
 *******************
 
 If you use auto-sklearn in a scientific publication, we would appreciate
-citations to the following paper:
+references to the following paper:
 
 
  `Efficient and Robust Automated Machine Learning
@@ -112,9 +107,11 @@ citations to the following paper:
 
 Contributing
 ************
-*auto-sklearn* is developed mainly by the `Machine Learning for Automated
-Algorithm Design <http://aad.informatik.uni-freiburg.de>`_ group at the
-University of Freiburg.
+
+We appreciate all contribution to auto-sklearn, from bug reports,
+documentation to new features. If you want to contribute to the code, you can
+pick an issue from the `issue tracker <https://github.com/automl/auto-sklearn/issues>`_
+which is marked with `Needs contributer`.
 
 .. note::
 
@@ -132,11 +129,16 @@ Contributors
 
 * Matthias Feurer
 * Katharina Eggensperger
-* Aaron Klein
 * Jost Tobias Springenberg
-* Manuel Blum
+* Aaron Klein
+* Anatolii Domashnev
+* Alexander Sapronov
 * Stefan Falkner
+* Manuel Blum
+* Hector Mendoza
 * Farooq Ahmed Zuberi
 * Frank Hutter
-* Alexander Sapronov
-* Anatolii Domashnev
+* Diego Kobylkin
+* Marius Lindauer
+
+

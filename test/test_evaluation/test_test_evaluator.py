@@ -6,6 +6,7 @@ import os
 import shutil
 import sys
 import unittest
+import unittest.mock
 
 import numpy as np
 
@@ -18,6 +19,7 @@ from autosklearn.evaluation import TestEvaluator
 # Otherwise nosetests thinks this is a test to run...
 from autosklearn.evaluation import eval_t
 from autosklearn.util.pipeline import get_configuration_space
+from autosklearn.util import Backend
 
 N_TEST_RUNS = 10
 
@@ -70,6 +72,7 @@ class FunctionsTest(unittest.TestCase):
         self.data = get_multiclass_classification_datamanager()
         self.tmp_dir = os.path.join(os.path.dirname(__file__),
                                     '.test_cv_functions')
+        self.backend = unittest.mock.Mock(spec=Backend)
 
     def tearDown(self):
         try:
@@ -78,16 +81,24 @@ class FunctionsTest(unittest.TestCase):
             pass
 
     def test_eval_test(self):
-        eval_t(self.queue, self.configuration, self.data, self.tmp_dir,
-               1, 1, None, True, False, True)
+        eval_t(queue=self.queue,
+               backend=self.backend,
+               config=self.configuration,
+               data=self.data,
+               seed=1, num_run=1, subsample=None, with_predictions=True,
+               all_scoring_functions=False, output_y_test=True)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.041666666666666852)
         self.assertEqual(info[2], 1)
         self.assertNotIn('bac_metric', info[3])
 
     def test_eval_test_all_loss_functions(self):
-        eval_t(self.queue, self.configuration, self.data, self.tmp_dir,
-               1, 1, None, True, True, True)
+        eval_t(queue=self.queue,
+               backend=self.backend,
+               config=self.configuration,
+               data=self.data,
+               seed=1, num_run=1, subsample=None, with_predictions=True,
+               all_scoring_functions=True, output_y_test=True)
         info = self.queue.get()
         self.assertIn(
             'f1_metric: 0.0511508951407;pac_metric: 0.185257565321;'

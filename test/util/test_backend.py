@@ -2,7 +2,6 @@
 from __future__ import print_function
 import unittest
 import unittest.mock
-
 from autosklearn.util.backend import Backend
 
 from sys import version_info

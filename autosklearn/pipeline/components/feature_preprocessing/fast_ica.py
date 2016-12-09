@@ -28,16 +28,12 @@ class FastICA(AutoSklearnPreprocessingAlgorithm):
         )
         # Make the RuntimeWarning an Exception!
         with warnings.catch_warnings():
-            warnings.filterwarnings("error")
+            warnings.filterwarnings("error", message='array must not contain infs or NaNs')
             try:
                 self.preprocessor.fit(X)
             except ValueError as e:
                 if 'array must not contain infs or NaNs' in e.args[0]:
                     raise ValueError("Bug in scikit-learn: https://github.com/scikit-learn/scikit-learn/pull/2738")
-                else:
-                    import traceback
-                    traceback.format_exc()
-                    raise ValueError()
 
         return self
 
