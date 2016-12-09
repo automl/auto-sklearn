@@ -230,7 +230,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'preprocessor:gem:N': 5,
                             'classifier:proj_logit:max_epochs': 1,
                             'classifier:libsvm_svc:degree': 2,
-                            'regressor:libsvm_svr:degree': 2}
+                            'regressor:libsvm_svr:degree': 2,
+                            'preprocessor:feature_agglomeration:n_clusters': 2}
 
             for restrict_parameter in restrictions:
                 restrict_to = restrictions[restrict_parameter]
