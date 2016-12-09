@@ -13,13 +13,13 @@ __all__ = [
 
 class TestEvaluator(AbstractEvaluator):
 
-    def __init__(self, Datamanager, output_dir,
+    def __init__(self, Datamanager, backend,
                  configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1):
         super(TestEvaluator, self).__init__(
-            Datamanager, output_dir, configuration,
+            Datamanager, backend, configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
@@ -71,11 +71,12 @@ class TestEvaluator(AbstractEvaluator):
 
 # create closure for evaluating an algorithm
 # Has a stupid name so nosetests doesn't regard it as a test
-def eval_t(queue, config, data, tmp_dir, seed, num_run, subsample,
+def eval_t(queue, config, data, backend, seed, num_run, subsample,
            with_predictions, all_scoring_functions,
            output_y_test):
-    evaluator = TestEvaluator(data, tmp_dir, config,
-                              seed=seed, with_predictions=with_predictions,
+    evaluator = TestEvaluator(Datamanager=data, configuration=config,
+                              backend=backend, seed=seed,
+                              with_predictions=with_predictions,
                               all_scoring_functions=all_scoring_functions)
 
     loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
@@ -84,3 +85,5 @@ def eval_t(queue, config, data, tmp_dir, seed, num_run, subsample,
 
     status = StatusType.SUCCESS
     queue.put((duration, result, seed, run_info, status))
+
+
