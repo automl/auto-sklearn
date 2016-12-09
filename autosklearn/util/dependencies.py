@@ -1,12 +1,10 @@
-from warnings import warn
-
 import pkg_resources
 import re
-
 from distutils.version import LooseVersion
 
+RE_PATTERN = re.compile(
+    r'^(?P<name>[\w\-]+)((?P<operation>==|>=|>)(?P<version>(\d+)?(\.[a-zA-Z0-9]+)?(\.\d+)?))?$')
 
-RE_PATTERN = re.compile('^(?P<name>[\w\-]+)((?P<operation>==|>=|>)(?P<version>(\d+\.)?(\d+\.)?(\d+)))?$')
 
 
 def verify_packages(packages):
@@ -49,25 +47,27 @@ def _verify_package(name, operation, version):
         check = installed_version > required_version or \
                 installed_version == required_version
     else:
-        raise NotImplementedError('operation \'%s\' is not supported' % operation)
+        raise NotImplementedError(
+            'operation \'%s\' is not supported' % operation)
     if not check:
-        raise IncorrectPackageVersionError(name, installed_version, operation, required_version)
+        raise IncorrectPackageVersionError(name, installed_version, operation,
+                                           required_version)
 
 
 class MissingPackageError(Exception):
-
     error_message = 'mandatory package \'{name}\' not found'
 
     def __init__(self, package_name):
         self.package_name = package_name
-        super(MissingPackageError, self).__init__(self.error_message.format(name=package_name))
+        super(MissingPackageError, self).__init__(
+            self.error_message.format(name=package_name))
 
 
 class IncorrectPackageVersionError(Exception):
-
     error_message = '\'{name} {installed_version}\' version mismatch ({operation}{required_version})'
 
-    def __init__(self, package_name, installed_version, operation, required_version):
+    def __init__(self, package_name, installed_version, operation,
+                 required_version):
         self.package_name = package_name
         self.installed_version = installed_version
         self.operation = operation
