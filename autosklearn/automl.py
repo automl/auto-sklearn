@@ -400,21 +400,6 @@ class AutoML(BaseEstimator):
                                     shared_mode=self._shared_mode)
             self.runhistory_ = _proc_smac.run_smbo()
 
-        if self._queue is not None:
-            self._queue.put([time_for_load_data, data_manager_path, psutil_procs])
-        else:
-            for proc in procs:
-                try:
-                    proc.join()
-                # It can happen that we don't start the ensemble process due
-                # to the parameter ensemble_size < 0, then we also can't join.
-                except AssertionError as e:
-                    self._logger.debug(e)
-
-        if self._queue is None:
-            self._load_models()
-
-        self._proc_smac = None
         self._proc_ensemble = None
         self._load_models()
 
