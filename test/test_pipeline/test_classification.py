@@ -227,6 +227,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'classifier:adaboost:max_depth': 1,
                             'preprocessor:kernel_pca:n_components': 10,
                             'preprocessor:kitchen_sinks:n_components': 50,
+                            'preprocessor:nystroem_sampler:n_components': 50,
                             'preprocessor:gem:N': 5,
                             'classifier:proj_logit:max_epochs': 1,
                             'classifier:libsvm_svc:degree': 2,
