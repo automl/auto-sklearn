@@ -23,6 +23,10 @@ def add_preprocessor(preprocessor):
 
 class FeaturePreprocessorChoice(AutoSklearnChoice):
 
+    def __init__(self, target_type='all', random_state=None):
+        super(FeaturePreprocessorChoice, self).__init__(random_state)
+        self.target_type = target_type
+
     def get_components(self):
         components = OrderedDict()
         components.update(_preprocessors)
@@ -62,9 +66,7 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
             if entry == FeaturePreprocessorChoice or hasattr(entry, 'get_components'):
                 continue
 
-            '''
-
-            target_type = dataset_properties['target_type']
+            target_type = self.target_type
             if target_type == 'classification':
                 if entry.get_properties()['handles_classification'] is False:
                     continue
@@ -82,7 +84,6 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
             else:
                 raise ValueError('Unknown target type %s' % target_type)
 
-            '''
             components_dict[name] = entry
 
         return components_dict

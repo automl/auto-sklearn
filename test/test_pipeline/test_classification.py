@@ -19,10 +19,10 @@ from ConfigSpace.configuration_space import ConfigurationSpace, \
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
-from autosklearn.pipeline.components.base import \
-    AutoSklearnClassificationAlgorithm, AutoSklearnPreprocessingAlgorithm
 import autosklearn.pipeline.components.classification as classification_components
 import autosklearn.pipeline.components.feature_preprocessing as preprocessing_components
+from autosklearn.pipeline.components.algorithms import AutoSklearnClassificationAlgorithm, \
+    AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.util import get_dataset
 from autosklearn.pipeline.constants import *
 
