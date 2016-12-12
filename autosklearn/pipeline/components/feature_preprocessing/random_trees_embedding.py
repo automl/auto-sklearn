@@ -9,13 +9,13 @@ from autosklearn.pipeline.constants import *
 class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self):
-        self.n_estimators = None
-        self.max_depth = None
-        self.min_samples_split = None
-        self.min_samples_leaf = None
+        self.n_estimators = 10
+        self.max_depth = 5
+        self.min_samples_split = 2
+        self.min_samples_leaf = 1
         self.max_leaf_nodes = None
-        self.min_weight_fraction_leaf = None
-        self.sparse_output = None
+        self.min_weight_fraction_leaf = 1.0
+        self.sparse_output = True
         self.n_jobs = 1
         self.random_state = None
         super(RandomTreesEmbedding, self).__init__()

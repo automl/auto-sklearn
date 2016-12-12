@@ -12,8 +12,8 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self):
         super(PCA, self).__init__()
-        self.keep_variance = None
-        self.whiten = None
+        self.keep_variance = 0.9999
+        self.whiten = False
         self.random_state = None
 
     def fit(self, X, Y=None):

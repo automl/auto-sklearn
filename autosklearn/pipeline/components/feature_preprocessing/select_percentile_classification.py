@@ -19,8 +19,8 @@ class SelectPercentileClassification(SelectPercentileBase,
         import sklearn.feature_selection
         super(SelectPercentileClassification, self).__init__()
         self.random_state = None  # We don't use this
-        self.percentile = None
-        self.score_func = None
+        self.percentile = 50
+        self.score_func = "chi2"
 
     def fit(self, X, y):
         import scipy.sparse

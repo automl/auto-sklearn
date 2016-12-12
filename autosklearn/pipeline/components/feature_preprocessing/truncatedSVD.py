@@ -10,7 +10,7 @@ from autosklearn.pipeline.constants import *
 class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self):
-        self.target_dim = None
+        self.target_dim = 128
         self.random_state = None
         self.preprocessor = None
         super(TruncatedSVD, self).__init__()

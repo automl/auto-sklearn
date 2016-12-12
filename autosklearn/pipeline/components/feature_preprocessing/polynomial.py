@@ -9,9 +9,9 @@ from autosklearn.pipeline.constants import *
 class PolynomialFeatures(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self):
-        self.degree = None
-        self.interaction_only = None
-        self.include_bias = None
+        self.degree = 2
+        self.interaction_only = False
+        self.include_bias = True
         self.random_state = None
         super(PolynomialFeatures, self).__init__()
 

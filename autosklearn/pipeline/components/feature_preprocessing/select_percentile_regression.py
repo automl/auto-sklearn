@@ -19,8 +19,8 @@ class SelectPercentileRegression(SelectPercentileBase,
         import sklearn.feature_selection
         super(SelectPercentileRegression, self).__init__()
         self.random_state = None  # We don't use this
-        self.percentile = None
-        self.score_func = None
+        self.percentile = 50
+        self.score_func = "f_regression"
 
     @staticmethod
     def get_properties(dataset_properties=None):

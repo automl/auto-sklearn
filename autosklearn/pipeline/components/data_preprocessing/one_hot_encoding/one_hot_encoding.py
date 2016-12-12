@@ -15,8 +15,8 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self):
         # TODO pay attention to the cases when a copy is made (CSR matrices)
-        self.use_minimum_fraction = None
-        self.minimum_fraction = None
+        self.use_minimum_fraction = True
+        self.minimum_fraction = 0.01
         self.categorical_features = None
         super(OneHotEncoder, self).__init__()
 

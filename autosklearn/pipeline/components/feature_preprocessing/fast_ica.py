@@ -13,10 +13,10 @@ class FastICA(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self):
         super(FastICA, self).__init__()
-        self.n_components = None
-        self.algorithm = None
-        self.whiten = None
-        self.fun = None
+        self.n_components = 100
+        self.algorithm = 'parallel'
+        self.whiten = False
+        self.fun = 'logcosh'
         self.random_state = None
 
     def fit(self, X, Y=None):

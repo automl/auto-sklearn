@@ -14,10 +14,10 @@ class FeatureAgglomeration(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self):
         super(FeatureAgglomeration, self).__init__()
-        self.n_clusters = None
-        self.affinity = None
-        self.linkage = None
-        self.pooling_func = None
+        self.n_clusters = 25
+        self.affinity = "euclidean"
+        self.linkage = "ward"
+        self.pooling_func = "max"
         self.random_state = None
 
         self.pooling_func_mapping = dict(mean=np.mean,

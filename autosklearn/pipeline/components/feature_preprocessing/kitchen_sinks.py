@@ -16,8 +16,8 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
         n_components: int 
                Number of components (output dimensionality) used to approximate the kernel
         """
-        self.gamma = None
-        self.n_components = None
+        self.gamma = 1.0
+        self.n_components = 100
         self.random_state = None
 
     def fit(self, X, Y=None):

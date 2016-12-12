@@ -12,14 +12,14 @@ class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
     def __init__(self):
         super(LibLinear_Preprocessor, self).__init__()
-        self.penalty = None
-        self.loss = None
-        self.dual = None
-        self.tol = None
-        self.C = None
-        self.multi_class = None
-        self.fit_intercept = None
-        self.intercept_scaling = None
+        self.penalty = "l1"
+        self.loss = "squared_hinge"
+        self.dual = "False"
+        self.tol = 1e-4
+        self.C = 1.0
+        self.multi_class = "ovr"
+        self.fit_intercept = True
+        self.intercept_scaling = 1
         self.class_weight = None
         self.random_state = None
         self.preprocessor = None

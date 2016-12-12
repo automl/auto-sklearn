@@ -15,11 +15,11 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self):
         super(KernelPCA, self).__init__()
-        self.n_components = None
-        self.kernel = None
-        self.degree = None
-        self.gamma = None
-        self.coef0 = None
+        self.n_components = 100
+        self.kernel = 'rbf'
+        self.degree = 3
+        self.gamma = 1.0
+        self.coef0 = 0
         self.random_state = None
 
     def fit(self, X, Y=None):

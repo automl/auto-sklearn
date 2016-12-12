@@ -13,17 +13,17 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self):
         super(ExtraTreesPreprocessorClassification, self).__init__()
-        self.n_estimators = None
+        self.n_estimators = 100
         self.estimator_increment = 10
-        self.criterion = None
+        self.criterion = "gini"
         self.max_leaf_nodes = None
         self.max_depth = None
         self.max_leaf_nodes = None
-        self.min_samples_leaf = None
-        self.min_samples_split = None
-        self.max_features = None
+        self.min_samples_leaf = 1
+        self.min_samples_split = 2
+        self.max_features = 1
         self.bootstrap = False
-        self.oob_score = None
+        self.oob_score = False
         self.n_jobs = 1
         self.random_state = None
         self.verbose = 0
@@ -86,8 +86,6 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
             "min_samples_split", 2, 20, default=2))
         min_samples_leaf = cs.add_hyperparameter(UniformIntegerHyperparameter(
             "min_samples_leaf", 1, 20, default=1))
-        min_weight_fraction_leaf = cs.add_hyperparameter(Constant(
-            'min_weight_fraction_leaf', 0.))
 
         bootstrap = cs.add_hyperparameter(CategoricalHyperparameter(
             "bootstrap", ["True", "False"], default="False"))

@@ -12,9 +12,9 @@ class SelectRates(AutoSklearnPreprocessingAlgorithm):
         import sklearn.feature_selection
 
         self.random_state = None  # We don't use this
-        self.alpha = None
-        self.score_func = None
-        self.mode = None
+        self.alpha = 0.1
+        self.score_func = 'chi2'
+        self.mode = 'fpr'
         super(SelectRates, self).__init__()
 
     def fit(self, X, y):
