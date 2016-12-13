@@ -26,7 +26,7 @@ from autosklearn.pipeline.constants import SPARSE
 
 class SimpleClassificationPipeline(EstimationPipeline, ClassifierMixin):
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         components = [
                 ("one_hot_encoding", OneHotEncoder()),
                 ("imputation", Imputation()),

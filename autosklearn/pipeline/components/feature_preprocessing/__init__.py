@@ -23,9 +23,19 @@ def add_preprocessor(preprocessor):
 
 class FeaturePreprocessorChoice(AutoSklearnChoice):
 
-    def __init__(self, target_type='all', random_state=None):
-        super(FeaturePreprocessorChoice, self).__init__(random_state)
+    def __init__(self,
+                 target_type='all',
+                 is_multiclass=False,
+                 is_multilabel=False,
+                 random_state=None,
+                 include=None,
+                 exclude=None,
+                 default=None):
         self.target_type = target_type
+        self.is_multiclass = is_multiclass
+        self.is_multilabel = is_multilabel
+        self.default = default
+        super(FeaturePreprocessorChoice, self).__init__(include, exclude, random_state)
 
     def get_components(self):
         components = OrderedDict()
@@ -33,9 +43,8 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
         components.update(_addons.components)
         return components
 
-    def get_available_components(self, dataset_properties=None,
-                                 include=None,
-                                 exclude=None):
+    def get_available_components(self):
+        '''
         if dataset_properties is None:
             dataset_properties = {}
 
@@ -50,14 +59,16 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
                 if incl not in available_comp:
                     raise ValueError("Trying to include unknown component: "
                                      "%s" % incl)
+        '''
 
         # TODO check for task type classification and/or regression!
 
+        available_comp = self.get_components()
         components_dict = OrderedDict()
         for name in available_comp:
-            if include is not None and name not in include:
+            if self.include is not None and name not in self.include:
                 continue
-            elif exclude is not None and name in exclude:
+            elif self.exclude is not None and name in self.exclude:
                 continue
 
             entry = available_comp[name]
@@ -70,10 +81,10 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
             if target_type == 'classification':
                 if entry.get_properties()['handles_classification'] is False:
                     continue
-                if dataset_properties.get('multiclass') is True and \
+                if self.is_multiclass and \
                         entry.get_properties()['handles_multiclass'] is False:
                     continue
-                if dataset_properties.get('multilabel') is True and \
+                if self.is_multilabel is True and \
                         entry.get_properties()['handles_multilabel'] is False:
                     continue
 
@@ -88,24 +99,16 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
 
         return components_dict
 
-    def get_hyperparameter_search_space(self, dataset_properties=None,
-                                        default=None,
-                                        include=None,
-                                        exclude=None):
+    def get_hyperparameter_search_space(self):
         cs = ConfigurationSpace()
-
-        if dataset_properties is None:
-            dataset_properties = {}
-
         # Compile a list of legal preprocessors for this problem
-        available_preprocessors = self.get_available_components(
-            dataset_properties=dataset_properties,
-            include=include, exclude=exclude)
+        available_preprocessors = self.get_available_components()
 
         if len(available_preprocessors) == 0:
             raise ValueError(
                 "No preprocessors found, please add NoPreprocessing")
 
+        default = self.default
         if default is None:
             defaults = ['no_preprocessing', 'select_percentile', 'pca',
                         'truncatedSVD']
@@ -119,17 +122,6 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
                                                      available_preprocessors.keys()),
                                                  default=default)
         cs.add_hyperparameter(preprocessor)
-        '''
-        for name in available_preprocessors:
-            preprocessor_configuration_space = available_preprocessors[name].
-                get_hyperparameter_search_space(dataset_properties)
-            parent_hyperparameter = {'parent': preprocessor, 'value': name}
-            cs.add_configuration_space(name, preprocessor_configuration_space,
-                                       parent_hyperparameter=parent_hyperparameter)
-        '''
-
-        self.configuration_space_ = cs
-        self.dataset_properties_ = dataset_properties
         return cs
 
     def transform(self, X):
