@@ -9,38 +9,29 @@ from autosklearn.pipeline.components.composite import CompositeAutoSklearnCompon
 class AutoSklearnChoice(CompositeAutoSklearnComponent):
 
     def __init__(self, include=None, exclude=None, default=None, random_state=None):
-        """
-        Parameters
-        ----------
-        dataset_properties : dict
-            Describes the dataset to work on, this can change the
-            configuration space constructed by auto-sklearn. Mandatory
-            properties are:
-            * target_type: classification or regression
-
-
-            Optional properties are:
-            * multiclass: whether the dataset is a multiclass classification
-              dataset.
-            * multilabel: whether the dataset is a multilabel classification
-              dataset
-        """
-        #self.configuration = self.get_hyperparameter_search_space(
-        #    dataset_properties).get_default_configuration()
         self.include = include
         self.exclude = exclude
-        self.default = default
 
         if random_state is None:
             self.random_state = check_random_state(1)
         else:
             self.random_state = check_random_state(random_state)
 
-        #self.set_hyperparameters(self.configuration)
-        self.choice = None
         components = self.get_available_components()
         components = [(name, cls()) for (name, cls) in components.items()]
         super(AutoSklearnChoice, self).__init__(components)
+
+        if default:
+            self.default = default
+            self.choice = self.components[default]
+        else:
+            default = self._get_default_name()
+            self.default = default
+            self.choice = self.components[default]
+
+    def _get_default_name(self):
+        for default_name, default_obj in self.components.items():
+            return default_name
 
     def get_components(cls):
         raise NotImplementedError()
@@ -76,6 +67,16 @@ class AutoSklearnChoice(CompositeAutoSklearnComponent):
 
         return components_dict
 
+    def get_hyperparameter_search_space(self):
+        cs = ConfigurationSpace()
+
+        options = list(self.components.keys())
+        choice = CategoricalHyperparameter('__choice__', options,
+                                            default=self.default)
+        cs.add_hyperparameter(choice)
+
+        return cs
+
     def set_hyperparameters(self, configuration):
         if isinstance(configuration, Configuration):
             configuration = configuration.get_dictionary()
@@ -93,9 +94,6 @@ class AutoSklearnChoice(CompositeAutoSklearnComponent):
                 component_config[sub_hp_name] = hp_value
         self.choice.set_hyperparameters(component_config)
 
-    def get_hyperparameter_search_space(self):
-        raise NotImplementedError()
-
     def fit(self, X, y, **kwargs):
         if kwargs is None:
             kwargs = {}
@@ -103,13 +101,7 @@ class AutoSklearnChoice(CompositeAutoSklearnComponent):
 
     def predict(self, X):
         return self.choice.predict(X)
-    '''
-    def get_hyperparameter_search_space(self):
-        cs = ConfigurationSpace()
 
-        cs.add_hyperparameter(CategoricalHyperparameter(name="__choice__", choices=["linear", "square", "exponential"], default="linear"))
-        return cs
-    '''
     def get_config_space_builder(self):
         builder = ChoiceConfigSpaceBuilder(self)
         for name, component in self.components.items():

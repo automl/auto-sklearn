@@ -500,7 +500,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_proba_batched_sparse(self):
-        config = {"balancing:strategy": "none",
+        config = {#"balancing:strategy": "none",
                   "classifier:__choice__": "random_forest",
                   "imputation:strategy": "mean",
                   "one_hot_encoding:minimum_fraction": 0.01,
@@ -517,9 +517,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                   'classifier:random_forest:n_estimators': 100,
                   "rescaling:__choice__": "standardize"}
 
-        cls = SimpleClassificationPipeline(
-            config=config, dataset_properties={'sparse': True,
-                                               'multiclass': True})
+        cls = SimpleClassificationPipeline()#dataset_properties={'sparse': True, 'multiclass': True})
+        cls.set_hyperparameters(config)
 
         # Multiclass
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',

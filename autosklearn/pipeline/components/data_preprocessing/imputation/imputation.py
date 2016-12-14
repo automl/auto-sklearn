@@ -9,7 +9,7 @@ class Imputation(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self):
         # TODO pay attention to the cases when a copy is made (CSR matrices)
-        self.strategy = None
+        self.strategy = 'mean'
         super(Imputation, self).__init__()
 
     def fit(self, X, y=None):
@@ -29,22 +29,15 @@ class Imputation(AutoSklearnPreprocessingAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': 'Imputation',
                 'name': 'Imputation',
-                'handles_missing_values': True,
-                'handles_nominal_values': True,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': False,
-                'prefers_data_normalized': False,
                 'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
-                'is_deterministic': True,
-                # TODO find out of this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (DENSE, SPARSE, SIGNED_DATA),
-                'output': (INPUT,),
-                'preferred_dtype': None}
+                'output': (INPUT,)
+                }
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

@@ -108,7 +108,6 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
                 max_leaf_nodes=self.max_leaf_nodes,
                 random_state=self.random_state,
                 n_jobs=self.n_jobs,
-                class_weight=self.class_weight,
                 warm_start=True)
 
         tmp = self.estimator

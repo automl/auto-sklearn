@@ -72,6 +72,5 @@ class EstimationPipeline(SerialAutoSklearnComponent, Pipeline):
 
                 return y
 
-    def get_hyperparameter_search_space(self, include=None, exclude=None,
-                                        dataset_properties=None):
-        return self.get_config_space()
+    def get_hyperparameter_search_space(self, dataset_properties=None):
+        return self.get_config_space(dataset_properties)

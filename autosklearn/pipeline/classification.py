@@ -26,13 +26,16 @@ from autosklearn.pipeline.constants import SPARSE
 
 class SimpleClassificationPipeline(EstimationPipeline, ClassifierMixin):
 
-    def __init__(self, **kwargs):
+    def __init__(self, is_multiclass=False, is_multilabel=False):
         components = [
                 ("one_hot_encoding", OneHotEncoder()),
                 ("imputation", Imputation()),
                 ("rescaling", RescalingChoice()),
-                ("preprocessor", FeaturePreprocessorChoice(target_type='classification')),
-                ("classifier", ClassifierChoice())
+                ("preprocessor", FeaturePreprocessorChoice(target_type='classification',
+                                                           is_multiclass=is_multiclass,
+                                                           is_multilabel=is_multilabel)),
+                ("classifier", ClassifierChoice(is_multiclass=is_multiclass,
+                                                is_multilabel=is_multilabel))
             ]
         super(SimpleClassificationPipeline, self).__init__(components)
 

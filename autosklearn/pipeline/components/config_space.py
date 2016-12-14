@@ -2,6 +2,8 @@ from copy import copy
 from ConfigSpace import ForbiddenAndConjunction
 from ConfigSpace import ForbiddenEqualsClause
 
+from autosklearn.pipeline.constants import SPARSE, DENSE
+
 
 class ConfigSpaceBuilder(object):
 
@@ -35,8 +37,15 @@ class ConfigSpaceBuilder(object):
     def explore_data_flow(self, data_description):
         pass
 
-    def get_incompatible_nodes(self, cs):
+    def get_incompatible_nodes(self, cs, dataset_properties):
         data_description = DataDescription()
+
+        if 'is_sparse' in dataset_properties:
+            if dataset_properties['is_sparse']:
+                data_description.add_artifact(None, SPARSE)
+            else:
+                data_description.add_artifact(None, DENSE)
+
         data_descriptions = self.explore_data_flow(data_description)
         incompatible_nodes = [x for x in data_descriptions if x.is_incompatible]
         incompatible_node_choices = [x.get_choices() for x in incompatible_nodes]
@@ -49,9 +58,9 @@ class ConfigSpaceBuilder(object):
 
         return incompatible_nodes
 
-    def build(self):
+    def build(self, dataset_properties):
         cs = self.get_config_space()
-        self.get_incompatible_nodes(cs)
+        self.get_incompatible_nodes(cs, dataset_properties)
 
         return cs
 

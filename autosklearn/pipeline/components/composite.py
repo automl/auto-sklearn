@@ -33,9 +33,9 @@ class CompositeAutoSklearnComponent(AutoSklearnComponent):
 
         self.components[temp_name] = component
 
-    def get_config_space(self):
+    def get_config_space(self, dataset_properties):
         builder = self.get_config_space_builder()
-        cs = builder.build()
+        cs = builder.build(dataset_properties)
         return cs
 
     def get_config_space_builder(self):

@@ -34,8 +34,7 @@ class FeaturePreprocessorChoice(AutoSklearnChoice):
         self.target_type = target_type
         self.is_multiclass = is_multiclass
         self.is_multilabel = is_multilabel
-        self.default = default
-        super(FeaturePreprocessorChoice, self).__init__(include, exclude, random_state)
+        super(FeaturePreprocessorChoice, self).__init__(include, exclude, default, random_state)
 
     def get_components(self):
         components = OrderedDict()

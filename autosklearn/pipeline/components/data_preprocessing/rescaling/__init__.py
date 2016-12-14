@@ -28,30 +28,11 @@ class RescalingChoice(AutoSklearnChoice):
         components.update(_addons.components)
         return components
 
-    def get_hyperparameter_search_space(self):
-        cs = ConfigurationSpace()
-
-        # Compile a list of legal preprocessors for this problem
-        available_preprocessors = self.get_available_components()
-
-        if len(available_preprocessors) == 0:
-            raise ValueError(
-                "No rescalers found, please add any rescaling component.")
-
-        default = self.default
-        if default is None:
-            defaults = ['standardize', 'none', 'minmax', 'normalize']
-            for default_ in defaults:
-                if default_ in available_preprocessors:
-                    default = default_
-                    break
-
-        preprocessor = CategoricalHyperparameter('__choice__',
-                                                 list(
-                                                     available_preprocessors.keys()),
-                                                 default=default)
-        cs.add_hyperparameter(preprocessor)
-        return cs
+    def _get_default_name(self):
+        defaults = ['standardize', 'none', 'minmax', 'normalize']
+        for default in defaults:
+            if default in self.components:
+                return default
 
     def transform(self, X):
         return self.choice.transform(X)

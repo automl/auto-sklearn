@@ -25,19 +25,30 @@ def add_classifier(classifier):
 
 class ClassifierChoice(AutoSklearnChoice):
 
+    def __init__(self,
+                 is_multiclass=False,
+                 is_multilabel=False,
+                 random_state=None,
+                 include=None,
+                 exclude=None,
+                 default=None):
+        self.is_multiclass = is_multiclass
+        self.is_multilabel = is_multilabel
+        super(ClassifierChoice, self).__init__(include, exclude, default, random_state)
+
     def get_components(cls):
         components = OrderedDict()
         components.update(_classifiers)
         components.update(_addons.components)
         return components
 
-    def get_available_components(cls, dataset_properties=None,
+    def get_available_components(self, dataset_properties=None,
                                  include=None,
                                  exclude=None):
         if dataset_properties is None:
             dataset_properties = {}
 
-        available_comp = cls.get_components()
+        available_comp = self.get_components()
         components_dict = OrderedDict()
 
         if include is not None and exclude is not None:
@@ -63,10 +74,10 @@ class ClassifierChoice(AutoSklearnChoice):
 
             if entry.get_properties()['handles_classification'] is False:
                 continue
-            if dataset_properties.get('multiclass') is True and entry.get_properties()[
+            if self.is_multiclass is True and entry.get_properties()[
                 'handles_multiclass'] is False:
                 continue
-            if dataset_properties.get('multilabel') is True and available_comp[name]. \
+            if self.is_multilabel is True and available_comp[name]. \
                     get_properties()['handles_multilabel'] is False:
                 continue
             components_dict[name] = entry
