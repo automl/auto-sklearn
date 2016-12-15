@@ -71,8 +71,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                             preprocessors[key].__bases__)
 
     def test_configurations(self):
-        # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 1024
+        # Use a limit of ~1GiB
+        limit = 1000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
@@ -133,8 +133,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 continue
 
     def test_configurations_signed_data(self):
-        # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 1024
+        # Use a limit of ~1GiB
+        limit = 1000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
@@ -196,8 +196,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 continue
 
     def test_configurations_sparse(self):
-        # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 1024
+        # Use a limit of ~1GiB
+        limit = 1000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
