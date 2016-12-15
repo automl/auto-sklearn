@@ -77,7 +77,6 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
 
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
 
-        print(cs)
         cs.seed(1)
 
         for i in range(10):
@@ -88,7 +87,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
             cls = SimpleRegressionPipeline(config, random_state=1)
-            print(config)
+
             try:
                 cls.fit(X_train, Y_train)
                 X_test_ = X_test.copy()
@@ -141,8 +140,6 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
             dataset_properties={'signed': True})
 
-        print(cs)
-
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
@@ -156,7 +153,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
 
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
             cls = SimpleRegressionPipeline(config, random_state=1)
-            print(config)
+
             try:
                 cls.fit(X_train, Y_train)
                 X_test_ = X_test.copy()
@@ -205,7 +202,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
 
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
-        print(cs)
+
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
@@ -217,7 +214,6 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                             config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
-            print(config)
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston',
                                                            make_sparse=True)
             cls = SimpleRegressionPipeline(config, random_state=1)
@@ -245,12 +241,14 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     continue
                 else:
                     print(config)
+                    traceback.print_tb(sys.exc_info()[2])
                     raise e
             except UserWarning as e:
                 if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
                     print(config)
+                    traceback.print_tb(sys.exc_info()[2])
                     raise e
 
     def test_default_configuration(self):

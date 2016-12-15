@@ -99,9 +99,7 @@ class ResamplingTest(unittest.TestCase):
                           4, 5))
             np.random.shuffle(y)
             X_train, X_valid, Y_train, Y_valid = split_data(
-                X, y,
-                classification=True)
-            print(X_train, Y_train)
+                X, y, classification=True)
             self.assertLessEqual(max(Y_valid), 1)
 
 

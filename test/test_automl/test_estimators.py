@@ -45,7 +45,6 @@ class EstimatorTest(Base, unittest.TestCase):
                                        output_folder=output)
         automl.fit(X_train, Y_train)
         score = automl.score(X_test, Y_test)
-        print(automl.show_models())
 
         self.assertGreaterEqual(score, 0.8)
         self.assertEqual(automl._automl._automl._task, MULTICLASS_CLASSIFICATION)

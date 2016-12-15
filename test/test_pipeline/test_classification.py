@@ -215,7 +215,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         limit = 4000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
-        print(configurations_space)
         for i in range(10):
             config = configurations_space.sample_configuration()
             config._populate_values()
@@ -240,7 +239,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                         config[restrict_parameter] is not None:
                     config._values[restrict_parameter] = restrict_to
 
-            print(config)
 
             if data is None:
                 X_train, Y_train, X_test, Y_test = get_dataset(
@@ -284,12 +282,14 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 elif "invalid value encountered in true_divide" in e.args[0]:
                     continue
                 else:
+                    print(traceback.format_exc())
                     print(config)
                     raise e
             except UserWarning as e:
                 if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
+                    print(traceback.format_exc())
                     print(config)
                     raise e
 

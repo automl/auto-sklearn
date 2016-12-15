@@ -42,7 +42,6 @@ class DecisionTreetComponentTest(unittest.TestCase):
         for i in range(10):
             predictions, targets = _test_classifier(
                 DecisionTree, make_multilabel=True)
-            print(predictions, targets)
             self.assertAlmostEqual(0.81108108108108112,
                                    sklearn.metrics.average_precision_score(
                                        targets, predictions))
