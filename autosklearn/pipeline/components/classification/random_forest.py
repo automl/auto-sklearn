@@ -18,7 +18,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         self.estimator_increment = 10
         self.criterion = "gini"
         self.max_features = 1
-        self.max_depth = None
+        self.max_depth = "None"
         self.min_samples_split = 2
         self.min_samples_leaf = 1
         self.min_weight_fraction_leaf = 0.

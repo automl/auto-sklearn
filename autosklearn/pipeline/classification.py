@@ -10,6 +10,7 @@ from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 from autosklearn.pipeline.components import classification as \
     classification_components
+from autosklearn.pipeline.components.choice import ClassificationComponentFilter
 from autosklearn.pipeline.components.classification import ClassifierChoice
 from autosklearn.pipeline.components.data_preprocessing import rescaling as \
     rescaling_components
@@ -27,15 +28,16 @@ from autosklearn.pipeline.constants import SPARSE
 class SimpleClassificationPipeline(EstimationPipeline, ClassifierMixin):
 
     def __init__(self, is_multiclass=False, is_multilabel=False):
+        filter = ClassificationComponentFilter(is_multiclass=is_multiclass,
+                                               is_multilabel=is_multilabel)
+
+        self._output_dtype = np.int32
         components = [
                 ("one_hot_encoding", OneHotEncoder()),
                 ("imputation", Imputation()),
-                ("rescaling", RescalingChoice()),
-                ("preprocessor", FeaturePreprocessorChoice(target_type='classification',
-                                                           is_multiclass=is_multiclass,
-                                                           is_multilabel=is_multilabel)),
-                ("classifier", ClassifierChoice(is_multiclass=is_multiclass,
-                                                is_multilabel=is_multilabel))
+                ("rescaling", RescalingChoice(filter=filter)),
+                ("preprocessor", FeaturePreprocessorChoice(filter=filter)),
+                ("classifier", ClassifierChoice(filter=filter))
             ]
         super(SimpleClassificationPipeline, self).__init__(components)
 
@@ -83,3 +85,4 @@ class SimpleClassificationPipeline(EstimationPipeline, ClassifierMixin):
                             astype(np.float32)
 
                 return y
+

@@ -179,9 +179,9 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
         regressors = cs.get_hyperparameter('regressor:__choice__').choices
         preprocessors = cs.get_hyperparameter('preprocessor:__choice__').choices
-        available_regressors = pipeline[-1][1].get_available_components(
+        available_regressors = pipeline[-1][1]._get_available_components(
             dataset_properties)
-        available_preprocessors = pipeline[-2][1].get_available_components(
+        available_preprocessors = pipeline[-2][1]._get_available_components(
             dataset_properties)
 
         possible_default_regressor = copy.copy(list(

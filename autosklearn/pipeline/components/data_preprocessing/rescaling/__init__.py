@@ -4,7 +4,7 @@ import os
 from autosklearn.pipeline.components.algorithms import AutoSklearnPreprocessingAlgorithm
 from ...base import find_components, \
     ThirdPartyComponents
-from autosklearn.pipeline.components.choice import AutoSklearnChoice
+from autosklearn.pipeline.components.choice import ComponentAutoSklearnChoice
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
@@ -20,19 +20,16 @@ def add_rescaler(rescaler):
     _addons.add_component(rescaler)
 
 
-class RescalingChoice(AutoSklearnChoice):
+class RescalingChoice(ComponentAutoSklearnChoice):
 
-    def get_components(self):
+    def _get_possible_components(self):
         components = OrderedDict()
         components.update(_rescalers)
         components.update(_addons.components)
         return components
 
-    def _get_default_name(self):
-        defaults = ['standardize', 'none', 'minmax', 'normalize']
-        for default in defaults:
-            if default in self.components:
-                return default
+    def _get_default_names(self):
+        return ['standardize', 'none', 'minmax', 'normalize']
 
     def transform(self, X):
         return self.choice.transform(X)

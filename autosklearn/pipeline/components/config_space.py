@@ -40,11 +40,12 @@ class ConfigSpaceBuilder(object):
     def get_incompatible_nodes(self, cs, dataset_properties):
         data_description = DataDescription()
 
-        if 'is_sparse' in dataset_properties:
-            if dataset_properties['is_sparse']:
-                data_description.add_artifact(None, SPARSE)
-            else:
-                data_description.add_artifact(None, DENSE)
+        if dataset_properties:
+            if 'is_sparse' in dataset_properties:
+                if dataset_properties['is_sparse']:
+                    data_description.add_artifact(None, SPARSE)
+                else:
+                    data_description.add_artifact(None, DENSE)
 
         data_descriptions = self.explore_data_flow(data_description)
         incompatible_nodes = [x for x in data_descriptions if x.is_incompatible]

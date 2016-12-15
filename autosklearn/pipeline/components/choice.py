@@ -8,71 +8,18 @@ from autosklearn.pipeline.components.composite import CompositeAutoSklearnCompon
 
 class AutoSklearnChoice(CompositeAutoSklearnComponent):
 
-    def __init__(self, include=None, exclude=None, default=None, random_state=None):
-        self.include = include
-        self.exclude = exclude
-
-        if random_state is None:
-            self.random_state = check_random_state(1)
-        else:
-            self.random_state = check_random_state(random_state)
-
-        components = self.get_available_components()
-        components = [(name, cls()) for (name, cls) in components.items()]
+    def __init__(self, components, default):
         super(AutoSklearnChoice, self).__init__(components)
-
-        if default:
-            self.default = default
-            self.choice = self.components[default]
-        else:
-            default = self._get_default_name()
-            self.default = default
-            self.choice = self.components[default]
-
-    def _get_default_name(self):
-        for default_name, default_obj in self.components.items():
-            return default_name
-
-    def get_components(cls):
-        raise NotImplementedError()
-
-    def get_available_components(self):
-        '''
-        if dataset_properties is None:
-            dataset_properties = {}
-
-        if include is not None and exclude is not None:
-            raise ValueError(
-                "The argument include and exclude cannot be used together.")
-
-        available_comp = self.get_components()
-
-        if include is not None:
-            for incl in include:
-                if incl not in available_comp:
-                    raise ValueError("Trying to include unknown component: "
-                                     "%s" % incl)
-        '''
-        available_comp = self.get_components()
-        components_dict = OrderedDict()
-        for name in available_comp:
-            if self.include is not None and name not in self.include:
-                continue
-            elif self.exclude is not None and name in self.exclude:
-                continue
-
-            # TODO maybe check for sparse?
-
-            components_dict[name] = available_comp[name]
-
-        return components_dict
+        self.default = default
+        self.choice = self.components[default]
 
     def get_hyperparameter_search_space(self):
         cs = ConfigurationSpace()
 
         options = list(self.components.keys())
-        choice = CategoricalHyperparameter('__choice__', options,
-                                            default=self.default)
+        choice = CategoricalHyperparameter('__choice__',
+                                           choices=options,
+                                           default=self.default)
         cs.add_hyperparameter(choice)
 
         return cs
@@ -128,3 +75,84 @@ class ChoiceConfigSpaceBuilder(CompositeConfigSpaceBuilder):
             current_step_data_descriptions = node.explore_data_flow(data_description_copy)
             data_descriptions.extend(current_step_data_descriptions)
         return data_descriptions
+
+
+class ComponentAutoSklearnChoice(AutoSklearnChoice):
+
+    def __init__(self, filter=None, default=None):
+        self.filter = filter if filter else ComponentFilter()
+
+        self.available_components = self._get_available_components()
+        if not default:
+            default = self._get_default_name()
+
+        components = [(name, cls()) for (name, cls) in self.available_components.items()]
+        super(ComponentAutoSklearnChoice, self).__init__(components, default)
+
+    def _get_default_name(self):
+        for default in self._get_default_names():
+            if default in self.available_components:
+                return default
+
+    def _get_default_names(self):
+        return self.components.keys()
+
+    def _get_possible_components(cls):
+        raise NotImplementedError()
+
+    def _get_available_components(self):
+        possible_components = self._get_possible_components()
+        available_components = OrderedDict()
+        for name, component in possible_components.items():
+            if self.filter.can_be_used(name, component):
+                available_components[name] = possible_components[name]
+        return available_components
+
+
+class ComponentFilter():
+
+    def __init__(self, include=None, exclude=None):
+        self.include = include
+        self.exclude = exclude
+
+    def can_be_used(self, name, component):
+        return self._can_be_included(name) and self._can_be_used(component)
+
+    def _can_be_included(self, name):
+        if self.include is not None and name not in self.include:
+            return False
+        elif self.exclude is not None and name in self.exclude:
+            return False
+        return True
+
+    def _can_be_used(self, component):
+        return True
+
+
+class ClassificationComponentFilter(ComponentFilter):
+
+    def __init__(self,
+                 include=None,
+                 exclude=None,
+                 is_multiclass=False,
+                 is_multilabel=False):
+        super(ClassificationComponentFilter, self).__init__(include, exclude)
+        self.is_multiclass = is_multiclass
+        self.is_multilabel = is_multilabel
+
+    def _can_be_used(self, component):
+        if component.get_properties()['handles_classification'] is False:
+            return False
+        if self.is_multiclass and \
+                        component.get_properties()['handles_multiclass'] is False:
+            return False
+        if self.is_multilabel is True and \
+                        component.get_properties()['handles_multilabel'] is False:
+            return False
+        return True
+
+
+class RegressionComponentFilter(ComponentFilter):
+
+    def _can_be_used(self, component):
+        return component.get_properties()['handles_regression']
