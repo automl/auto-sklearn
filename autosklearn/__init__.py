@@ -1,11 +1,15 @@
 # -*- encoding: utf-8 -*-
-import os
+from autosklearn.util import dependencies
+from autosklearn.__version__ import __version__
 
-import pkg_resources
 
-smac = pkg_resources.resource_filename(
-    'autosklearn',
-    'binaries/smac-v2.08.01-development-1/smac-v2.08.01-development-1/')
-runsolver = pkg_resources.resource_filename('autosklearn', 'binaries/')
-os.environ['PATH'] = smac + os.pathsep + runsolver + os.pathsep + \
-    os.environ['PATH']
+__MANDATORY_PACKAGES__ = '''
+scikit-learn==0.17.1
+smac==0.2.1
+lockfile>=0.10
+ConfigSpace>=0.2.1
+pyrfr==0.2.0
+xgboost==0.4a30
+'''
+
+dependencies.verify_packages(__MANDATORY_PACKAGES__)

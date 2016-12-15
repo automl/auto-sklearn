@@ -4,8 +4,8 @@ import resource
 import sys
 import traceback
 import unittest
+import unittest.mock
 
-import mock
 import numpy as np
 import sklearn.datasets
 import sklearn.decomposition
@@ -41,7 +41,7 @@ class DummyClassifier(AutoSklearnClassificationAlgorithm):
                 'output': (PREDICTIONS,)}
 
     @staticmethod
-    def get_hyperparameter_search_space( dataset_properties=None):
+    def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
         return cs
 
@@ -230,7 +230,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'regressor:libsvm_svr:degree': 2,
                             'preprocessor:truncatedSVD:target_dim': 10,
                             'preprocessor:polynomial:degree': 2,
-                            'classifier:lda:n_components': 10}
+                            'classifier:lda:n_components': 10,
+                            'preprocessor:feature_agglomeration:n_clusters': 2}
 
             for restrict_parameter in restrictions:
                 restrict_to = restrictions[restrict_parameter]
@@ -394,7 +395,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         # The object behind the last step in the pipeline
-        cls_predict = mock.Mock(wraps=cls.steps[-1][1].predict_proba)
+        cls_predict = unittest.mock.Mock(wraps=cls.steps[-1][1].predict_proba)
         cls.steps[-1][-1].predict_proba = cls_predict
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
@@ -406,11 +407,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
                                  for y in Y_train]))
         cls.fit(X_train, Y_train)
-        cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         # The object behind the last step in the pipeline
-        cls_predict = mock.Mock(wraps=cls.steps[-1][1].predict_proba)
+        cls_predict = unittest.mock.Mock(wraps=cls.steps[-1][1].predict_proba)
         cls.steps[-1][-1].predict_proba = cls_predict
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
@@ -444,7 +444,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         # The object behind the last step in the pipeline
-        cls_predict = mock.Mock(wraps=cls.steps[-1][1].predict_proba)
+        cls_predict = unittest.mock.Mock(wraps=cls.steps[-1][1].predict_proba)
         cls.steps[-1][-1].predict_proba = cls_predict
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
@@ -460,7 +460,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         # The object behind the last step in the pipeline
-        cls_predict = mock.Mock(wraps=cls.steps[-1][1].predict_proba)
+        cls_predict = unittest.mock.Mock(wraps=cls.steps[-1][1].predict_proba)
         cls.steps[-1][-1].predict_proba = cls_predict
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
@@ -476,7 +476,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         # The object behind the last step in the pipeline
-        cls_predict = mock.Mock(wraps=cls.steps[-1][1].predict_proba)
+        cls_predict = unittest.mock.Mock(wraps=cls.steps[-1][1].predict_proba)
         cls.steps[-1][-1].predict_proba = cls_predict
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
@@ -492,7 +492,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         # The object behind the last step in the pipeline
-        cls_predict = mock.Mock(wraps=cls.steps[-1][1].predict_proba)
+        cls_predict = unittest.mock.Mock(wraps=cls.steps[-1][1].predict_proba)
         cls.steps[-1][-1].predict_proba = cls_predict
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
@@ -527,7 +527,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         # The object behind the last step in the pipeline
-        cls_predict = mock.Mock(wraps=cls.steps[-1][1].predict_proba)
+        cls_predict = unittest.mock.Mock(wraps=cls.steps[-1][1].predict_proba)
         cls.steps[-1][-1].predict_proba = cls_predict
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
@@ -546,7 +546,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
         # The object behind the last step in the pipeline
-        cls_predict = mock.Mock(wraps=cls.steps[-1][1].predict_proba)
+        cls_predict = unittest.mock.Mock(wraps=cls.steps[-1][1].predict_proba)
         cls.steps[-1][-1].predict_proba = cls_predict
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)

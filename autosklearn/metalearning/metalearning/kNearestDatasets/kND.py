@@ -1,18 +1,18 @@
 from __future__ import print_function
 
-import logging
-
 import numpy as np
 import pandas as pd
 
 from sklearn.neighbors import NearestNeighbors
 import sklearn.utils
 
+from ....util.logging_ import get_logger
+
 
 
 class KNearestDatasets(object):
     def __init__(self, metric='l1', random_state=None, metric_params=None):
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
 
         self.metric = metric
         self.model = None

@@ -3,8 +3,8 @@ import resource
 import sys
 import traceback
 import unittest
+import unittest.mock
 
-import mock
 import numpy as np
 import sklearn.datasets
 import sklearn.decomposition
@@ -303,7 +303,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         regressor.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = regressor.predict(X_test_)
-        mock_predict = mock.Mock(wraps=regressor.steps[-1][-1].predict)
+        mock_predict = unittest.mock.Mock(wraps=regressor.steps[-1][-1].predict)
         regressor.steps[-1][-1].predict = mock_predict
         prediction = regressor.predict(X_test, batch_size=20)
         self.assertEqual((356,), prediction.shape)
@@ -322,7 +322,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         regressor.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = regressor.predict(X_test_)
-        mock_predict = mock.Mock(wraps=regressor.steps[-1][-1].predict)
+        mock_predict = unittest.mock.Mock(wraps=regressor.steps[-1][-1].predict)
         regressor.steps[-1][-1].predict = mock_predict
         prediction = regressor.predict(X_test, batch_size=20)
         self.assertEqual((356,), prediction.shape)

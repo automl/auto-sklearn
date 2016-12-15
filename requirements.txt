@@ -1,10 +1,9 @@
 unittest2
 setuptools
-mock
 nose
 
-Cython
 six
+Cython
 
 numpy>=1.9.0
 scipy>=0.14.1
@@ -18,9 +17,9 @@ pyyaml
 ConfigArgParse
 liac-arff
 pandas
-xgboost
+xgboost==0.4a30
 
 ConfigSpace
 pynisher>=0.4
 pyrfr
-smac
+smac==0.2.1
