@@ -59,7 +59,6 @@ class ThirdPartyComponents(object):
                 raise ValueError('Property %s not specified for algorithm %s')
 
         self.components[name] = classifier
-        print(name, classifier)
 
 
 class AutoSklearnClassificationAlgorithm(object):
