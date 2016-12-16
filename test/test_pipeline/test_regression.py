@@ -85,7 +85,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             if config['regressor:sgd:n_iter'] is not None:
                 config._values['regressor:sgd:n_iter'] = 5
 
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes')
             cls = SimpleRegressionPipeline(config, random_state=1)
 
             try:
@@ -151,7 +151,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                             config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes')
             cls = SimpleRegressionPipeline(config, random_state=1)
 
             try:
@@ -214,7 +214,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                             config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston',
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes',
                                                            make_sparse=True)
             cls = SimpleRegressionPipeline(config, random_state=1)
             try:
@@ -367,7 +367,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         default = cs.get_default_configuration()
         cls = SimpleRegressionPipeline(default)
 
-        X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes')
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
@@ -384,7 +384,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         default = cs.get_default_configuration()
         cls = SimpleRegressionPipeline(default)
 
-        X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston',
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes',
                                                        make_sparse=True)
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
