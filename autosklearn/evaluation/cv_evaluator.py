@@ -154,7 +154,7 @@ class CVEvaluator(AbstractEvaluator):
                             random_state=self.seed)
 
 
-def eval_partial_cv(queue, config, data, backend, seed, num_run, fold,
+def eval_partial_cv(queue, config, data, backend, seed, num_run, instance,
                     folds, subsample, with_predictions, all_scoring_functions,
                     output_y_test):
     evaluator = CVEvaluator(data, backend, config,
@@ -164,12 +164,12 @@ def eval_partial_cv(queue, config, data, backend, seed, num_run, fold,
                             subsample=subsample,
                             with_predictions=with_predictions,
                             all_scoring_functions=all_scoring_functions,
-                            output_y_test=output_y_test)
+                            output_y_test=False)
 
     loss, opt_pred, valid_pred, test_pred = \
-        evaluator.partial_fit_predict_and_loss(fold)
+        evaluator.partial_fit_predict_and_loss(instance)
     duration, result, seed, run_info = evaluator.finish_up(
-        loss, opt_pred, valid_pred, test_pred, False)
+        loss, opt_pred, valid_pred, test_pred)
 
     status = StatusType.SUCCESS
     queue.put((duration, result, seed, run_info, status))

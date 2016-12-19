@@ -52,6 +52,25 @@ class EstimatorTest(Base, unittest.TestCase):
         del automl
         self._tearDown(output)
 
+    def test_fit_partial_cv(self):
+
+        output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_partial_cv')
+        self._setUp(output)
+
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+                                       per_run_time_limit=5,
+                                       tmp_folder=output,
+                                       output_folder=output,
+                                       resampling_strategy='partial-cv',
+                                       ensemble_size=0,
+                                       delete_tmp_folder_after_terminate=False)
+        automl.fit(X_train, Y_train)
+        print(automl._automl._automl.runhistory_.data)
+
+        del automl
+        self._tearDown(output)
+
     def test_pSMAC_wrong_arguments(self):
         self.assertRaisesRegexp(ValueError,
                                 "If shared_mode == True tmp_folder must not "

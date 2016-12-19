@@ -53,6 +53,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.resampling_strategy_args = resampling_strategy_args
         self.with_predictions = with_predictions
         self.all_scoring_functions = all_scoring_functions
+        # TODO deactivate output_y_test and let the respective evaluator decide
         self.output_y_test = output_y_test
         self.logger = logger
 
@@ -79,6 +80,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                           output_y_test=self.output_y_test,
                           subsample=None,
                           **self.resampling_strategy_args)
+        if instance is not None:
+            obj_kwargs['instance'] = instance
 
         obj = pynisher.enforce_limits(**arguments)(self.ta)
         obj(**obj_kwargs)

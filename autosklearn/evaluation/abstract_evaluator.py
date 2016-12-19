@@ -230,7 +230,10 @@ class AbstractEvaluator(object):
     def file_output(self, loss, Y_optimization_pred, Y_valid_pred, Y_test_pred):
         seed = self.seed
 
-        if self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
+        # self.Y_optimization can be None if we use partial-cv, then,
+        # obviously no output should be saved.
+        if self.Y_optimization is not None and \
+                self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
             return 2.0, "Targets %s and prediction %s don't have the same " \
             "length. Probably training didn't finish" % (
                 self.Y_optimization.shape, Y_optimization_pred.shape)
