@@ -14,14 +14,13 @@ def find_components(package, directory, base_class):
         if full_module_name not in sys.modules and not ispkg:
             module = importlib.import_module(full_module_name)
 
-            for member_name, obj in inspect.getmembers(module):
-                if inspect.isclass(
-                        obj) and base_class in obj.__bases__:
+            for member_name, obj in inspect.getmembers(module, inspect.isclass):
+                if base_class in inspect.getmro(obj) and base_class is not obj:
                     # TODO test if the obj implements the interface
                     # Keep in mind that this only instantiates the ensemble_wrapper,
                     # but not the real target classifier
                     classifier = obj
-                    components[module_name] = classifier
+                    components[member_name] = classifier
 
     return components
 
@@ -32,7 +31,7 @@ class ThirdPartyComponents(object):
         self.components = OrderedDict()
 
     def add_component(self, obj):
-        if inspect.isclass(obj) and self.base_class in obj.__bases__:
+        if inspect.isclass(obj) and self.base_class in inspect.getmro(obj):
             name = obj.__name__
             classifier = obj
         else:
@@ -40,14 +39,13 @@ class ThirdPartyComponents(object):
                             str(self.base_class))
 
         properties = set(classifier.get_properties())
-        should_be_there = set(['shortname',
-                               'name',
-                               'handles_regression',
-                               'handles_classification',
-                               'handles_multiclass',
-                               'handles_multilabel',
-                               'is_deterministic',
-                               'input', 'output'])
+        should_be_there = {'shortname', 'name',
+                           'handles_regression',
+                           'handles_classification',
+                           'handles_multiclass',
+                           'handles_multilabel',
+                           'is_deterministic',
+                           'input', 'output'}
         for property in properties:
             if property not in should_be_there:
                 raise ValueError('Property %s must not be specified for '

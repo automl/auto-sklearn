@@ -1,28 +1,23 @@
 import numpy as np
 
 from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformIntegerHyperparameter
+from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
 
 
-class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, target_dim, random_state=None):
-        self.target_dim = int(target_dim)
+class GaussRandomProjection(AutoSklearnPreprocessingAlgorithm):
+    def __init__(self, eps, random_state=None):
+        self.eps = eps
         self.random_state = random_state
         self.preprocessor = None
 
     def fit(self, X, Y):
-        import sklearn.decomposition
+        import sklearn.random_projection
 
-        target_dim = min(self.target_dim, X.shape[1] - 1)
-        self.preprocessor = sklearn.decomposition.TruncatedSVD(
-            target_dim, algorithm='randomized')
-        # TODO: remove when migrating to sklearn 0.16
-        # Circumvents a bug in sklearn
-        # https://github.com/scikit-learn/scikit-learn/commit/f08b8c8e52663167819f242f605db39f3b5a6d0c
-        # X = X.astype(np.float64)
+        self.preprocessor = sklearn.random_projection.GaussianRandomProjection(
+            eps=self.eps)
         self.preprocessor.fit(X, Y)
 
         return self
@@ -34,20 +29,20 @@ class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'TSVD',
-                'name': 'Truncated Singular Value Decomposition',
+        return {'shortname': 'random_projection',
+                'name': 'Random Gaussian Projection',
                 'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                'input': (SPARSE, UNSIGNED_DATA),
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (DENSE, INPUT)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        target_dim = UniformIntegerHyperparameter(
-            "target_dim", 10, 512, default=128)
+        admissible_distortion = UniformFloatHyperparameter(
+            "eps", 0.2, 1.0, default=0.5)
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(target_dim)
+        cs.add_hyperparameter(admissible_distortion)
         return cs

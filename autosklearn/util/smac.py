@@ -8,9 +8,10 @@ from autosklearn.util import logging_ as logging
 
 
 def run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
-              data_manager_path, configspace_path, initial_configurations,
-              per_run_time_limit, watcher, backend, seed,
-              resampling_strategy, resampling_strategy_arguments, shared_mode):
+             data_manager_path, configspace_path, initial_configurations,
+             per_run_time_limit, watcher, backend, seed,
+             resampling_strategy, resampling_strategy_arguments,
+             shared_mode, exec_mode):
     logger = logging.get_logger(__name__)
 
     task_name = 'runSmac'
@@ -39,13 +40,17 @@ def run_smac(tmp_dir, basename, time_for_task, ml_memory_limit,
     if initial_challengers is None:
         initial_challengers = []
 
+    if exec_mode is None:
+        exec_mode = 'SMAC'
+
     smac_options = {
         'retryTargetAlgorithmRunCount': '0',
         'intensification-percentage': '0.5',
         'num-ei-random': '1000',
         'num-challengers': 100,
         'initial-incumbent': 'DEFAULT',
-        'validation': 'false'
+        'validation': 'false',
+        'exec-mode': exec_mode
     }
 
     if shared_mode:
@@ -160,7 +165,7 @@ def _write_scenario_file(limit, cutoff_time, memory_limit, tmp_dir,
                          searchspace, instance_file_path,
                          test_instance_file_path, dataset_name):
     if limit <= 0:
-    # It makes no sense to start building ensembles_statistics
+        # It makes no sense to start building ensembles_statistics
         return
 
     limit = int(limit)

@@ -106,8 +106,8 @@ class FeaturePreprocessorChoice(object):
                 "No preprocessors found, please add NoPreprocessing")
 
         if default is None:
-            defaults = ['no_preprocessing', 'select_percentile', 'pca',
-                        'truncatedSVD']
+            defaults = ['NoPreprocessing', 'SelectPercentileClassification', 'PCA',
+                        'TruncatedSVD']
             for default_ in defaults:
                 if default_ in available_preprocessors:
                     default = default_
