@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
         # CPU overhead
         start = time.clock()
         watch = StopWatch()
-        for i in range(1, 100000):
+        for i in range(1, 1000):
             watch.start_task('task_%d' % i)
             watch.stop_task('task_%d' % i)
         stop = time.clock()
@@ -31,7 +31,7 @@ class Test(unittest.TestCase):
         # Wall Overhead
         start = time.time()
         watch = StopWatch()
-        for i in range(1, 100000):
+        for i in range(1, 1000):
             watch.start_task('task_%d' % i)
             watch.stop_task('task_%d' % i)
         stop = time.time()

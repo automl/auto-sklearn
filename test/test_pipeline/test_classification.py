@@ -209,8 +209,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def _test_configurations(self, configurations_space, make_sparse=False,
                              data=None, init_params=None):
-        # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 1024
+        # Use a limit of ~3GiB
+        limit = 3000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         print(configurations_space)
@@ -225,6 +225,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'classifier:adaboost:max_depth': 1,
                             'preprocessor:kernel_pca:n_components': 10,
                             'preprocessor:kitchen_sinks:n_components': 50,
+                            'preprocessor:nystroem_sampler:n_components': 50,
                             'classifier:proj_logit:max_epochs': 1,
                             'classifier:libsvm_svc:degree': 2,
                             'regressor:libsvm_svr:degree': 2,
@@ -284,12 +285,14 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 elif "invalid value encountered in true_divide" in e.args[0]:
                     continue
                 else:
+                    print(traceback.format_exc())
                     print(config)
                     raise e
             except UserWarning as e:
                 if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
+                    print(traceback.format_exc())
                     print(config)
                     raise e
 

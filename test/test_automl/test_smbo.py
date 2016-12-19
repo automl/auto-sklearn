@@ -33,9 +33,11 @@ class TestSMBO(unittest.TestCase):
                                            'empty runhistory',
                                auto.choose_next, smac)
 
+        config = Configuration(configspace, values={'a': 0.1, 'b': 0.2})
+        # TODO make sure the incumbent is always set?
+        smac.solver.incumbent = config
         runhistory = smac.solver.runhistory
-        runhistory.add(config=Configuration(configspace,
-                                            values={'a': 0.1, 'b': 0.2}),
-                       cost=0.5, time=0.5, status=StatusType.SUCCESS)
+        runhistory.add(config=config, cost=0.5, time=0.5,
+                       status=StatusType.SUCCESS)
 
         auto.choose_next(smac)
