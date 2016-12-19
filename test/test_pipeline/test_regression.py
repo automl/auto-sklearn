@@ -250,6 +250,13 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     print(config)
                     traceback.print_tb(sys.exc_info()[2])
                     raise e
+            except Exception as e:
+                if "Multiple input features cannot have the same target value" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    traceback.print_tb(sys.exc_info()[2])
+                    raise e
 
     def test_default_configuration(self):
         for i in range(2):
