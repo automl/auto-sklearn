@@ -71,8 +71,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                             preprocessors[key].__bases__)
 
     def test_configurations(self):
-        # Use a limit of ~1GiB
-        limit = 1000 * 1024 * 1024
+        # Use a limit of ~3GiB
+        limit = 3000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
@@ -133,8 +133,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 continue
 
     def test_configurations_signed_data(self):
-        # Use a limit of ~1GiB
-        limit = 1000 * 1024 * 1024
+        # Use a limit of ~3GiB
+        limit = 3000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
@@ -197,7 +197,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
 
     def test_configurations_sparse(self):
         # Use a limit of ~1GiB
-        limit = 1000 * 1024 * 1024
+        limit = 3000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
@@ -374,8 +374,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         cls_predict = unittest.mock.Mock(wraps=cls.pipeline_)
         cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
-        self.assertEqual((356,), prediction.shape)
-        self.assertEqual(18, cls_predict.predict.call_count)
+        self.assertEqual((292,), prediction.shape)
+        self.assertEqual(15, cls_predict.predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_batched_sparse(self):
@@ -392,8 +392,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         cls_predict = unittest.mock.Mock(wraps=cls.pipeline_)
         cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
-        self.assertEqual((356,), prediction.shape)
-        self.assertEqual(18, cls_predict.predict.call_count)
+        self.assertEqual((292,), prediction.shape)
+        self.assertEqual(15, cls_predict.predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
     @unittest.skip("test_check_random_state Not yet Implemented")

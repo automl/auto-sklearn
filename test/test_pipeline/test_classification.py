@@ -211,8 +211,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def _test_configurations(self, configurations_space, make_sparse=False,
                              data=None, init_params=None):
-        # Use a limit of ~1GiB
-        limit = 1000 * 1024 * 1024
+        # Use a limit of ~3GiB
+        limit = 3000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         for i in range(10):
