@@ -13,6 +13,7 @@ import sklearn.cross_validation
 import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.testing import assert_array_almost_equal
+from xgboost.core import XGBoostError
 
 from ConfigSpace.configuration_space import ConfigurationSpace, \
     Configuration
@@ -287,6 +288,13 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     raise e
             except UserWarning as e:
                 if "FastICA did not converge" in e.args[0]:
+                    continue
+                else:
+                    print(traceback.format_exc())
+                    print(config)
+                    raise e
+            except XGBoostError as e:
+                if "std::bad_alloc" in e.args[0]:
                     continue
                 else:
                     print(traceback.format_exc())
