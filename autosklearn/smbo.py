@@ -478,6 +478,12 @@ class AutoMLSMBO(object):
             meta_features_dict = {}
             metalearning_configurations = []
 
+        if self.resampling_strategy in ['partial-cv']:
+            num_folds = self.resampling_strategy_args['folds']
+            instances = [[fold_number] for fold_number in range(num_folds)]
+        else:
+            instances = None
+
         self.scenario = Scenario({'cs': self.config_space,
                                   'cutoff-time': self.func_eval_time_limit,
                                   'memory-limit': self.memory_limit,
@@ -486,7 +492,8 @@ class AutoMLSMBO(object):
                                   'output-dir': self.backend.temporary_directory,
                                   'shared-model': self.shared_mode,
                                   'run-obj': 'quality',
-                                  'deterministic': 'true'})
+                                  'deterministic': 'true',
+                                  'instances': instances})
 
         # TODO rebuild target algorithm to be it's own target algorithm
         # evaluator, which takes into account that a run can be killed prior

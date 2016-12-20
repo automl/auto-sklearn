@@ -231,6 +231,10 @@ class AutoML(BaseEstimator):
 
     def _do_dummy_prediction(self, datamanager, num_run):
 
+        # When using partial-cv it makes no sense to do dummy predictions
+        if self._resampling_strategy in ['partial-cv']:
+            return num_run
+
         self._logger.info("Starting to create dummy predictions.")
         # time_limit = int(self._time_for_task / 6.)
         memory_limit = int(self._ml_memory_limit)
@@ -273,6 +277,9 @@ class AutoML(BaseEstimator):
                 self._ensemble_size != 0:
             raise ValueError("Resampling strategy partial-cv cannot be used "
                              "together with ensembles.")
+        if self._resampling_strategy in ['partial-cv', 'cv'] and \
+                not 'folds' in self._resampling_strategy_arguments:
+            self._resampling_strategy_arguments['folds'] = 5
 
         acquisition_functions = ['EI', 'EIPS']
         if self.acquisition_function not in acquisition_functions:
@@ -445,7 +452,7 @@ class AutoML(BaseEstimator):
                         ['holdout', 'holdout-iterative-fit']:
             raise NotImplementedError(
                 'Predict is currently only implemented for resampling '
-                'strategy holdout.')
+                'strategy %s.' % self._resampling_strategy)
 
         if self.models_ is None or len(self.models_) == 0 or \
                 self.ensemble_ is None:
@@ -482,6 +489,10 @@ class AutoML(BaseEstimator):
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
+        if self._resampling_strategy in ['partial-cv']:
+            raise ValueError('Cannot call fit_ensemble with resampling '
+                             'strategy partial-cv.')
+
         if self._logger is None:
             self._logger = self._get_logger(dataset_name)
 
@@ -551,7 +562,7 @@ class AutoML(BaseEstimator):
         else:
             self.models_ = self._backend.load_all_models(seed)
 
-        if len(self.models_) == 0:
+        if len(self.models_) == 0 and self._resampling_strategy not in ['partial-cv']:
             raise ValueError('No models fitted!')
 
     def score(self, X, y):
@@ -608,6 +619,10 @@ class AutoML(BaseEstimator):
         # mean_score_time - auto-sklearn does not store the score time
         # std_score_time - auto-sklearn does not store the score time
         # TODO: add those arguments
+
+        # TODO remove this restriction!
+        if self._resampling_strategy in ['partial-cv']:
+            raise ValueError('Cannot call cv_results when using partial-cv!')
 
         parameter_dictionaries = dict()
         masks = dict()

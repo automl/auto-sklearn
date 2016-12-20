@@ -89,8 +89,10 @@ class FunctionsTest(unittest.TestCase):
 
     def test_eval_cv(self):
         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
-        eval_cv(self.queue, self.configuration, self.data, backend_api,
-                1, 1, 5, None, True, False, True)
+        eval_cv(queue=self.queue, config=self.configuration, data=self.data,
+                backend=backend_api, seed=1, num_run=1, folds=5, subsample=None,
+                with_predictions=True, all_scoring_functions=False,
+                output_y_test=True)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.079637096774193727)
         self.assertEqual(info[2], 1)
@@ -98,8 +100,10 @@ class FunctionsTest(unittest.TestCase):
 
     def test_eval_cv_all_loss_functions(self):
         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
-        eval_cv(self.queue, self.configuration, self.data, backend_api,
-                1, 1, 5, None, True, True, True)
+        eval_cv(queue=self.queue, config=self.configuration, data=self.data,
+                backend=backend_api, seed=1, num_run=1, folds=5, subsample=None,
+                with_predictions=True, all_scoring_functions=True,
+                output_y_test=True)
         info = self.queue.get()
         self.assertIn('f1_metric: 0.0794451450189;pac_metric: 0.344745492187;'
                       'acc_metric: 0.075;auc_metric: 0.0285222960152;'
@@ -109,8 +113,10 @@ class FunctionsTest(unittest.TestCase):
 
     def test_eval_cv_on_subset(self):
         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
-        eval_cv(self.queue, self.configuration, self.data,
-                          backend_api, 1, 1, 5, 45, True, False, True)
+        eval_cv(queue=self.queue, config=self.configuration, data=self.data,
+                backend=backend_api, seed=1, num_run=1, folds=5, subsample=45,
+                with_predictions=True, all_scoring_functions=False,
+                output_y_test=True)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.063004032258064502)
         self.assertEqual(info[2], 1)
@@ -123,23 +129,30 @@ class FunctionsTest(unittest.TestCase):
                    0.0]
         for fold in range(5):
             backend_api = backend.create(self.tmp_dir, self.tmp_dir)
-            eval_partial_cv(self.queue, self.configuration, self.data,
-                            backend_api, 1, 1, fold, 5, None, True, False, True)
+            eval_partial_cv(queue=self.queue, config=self.configuration,
+                            data=self.data, backend=backend_api, seed=1,
+                            num_run=1, instance=fold, folds=5,
+                            subsample=None, with_predictions=True,
+                            all_scoring_functions=False, output_y_test=True)
             info = self.queue.get()
             results.append(info[1])
             self.assertAlmostEqual(info[1], results[fold])
             self.assertEqual(info[2], 1)
 
     def test_eval_partial_cv_on_subset_no_timeout(self):
+        backend_api = backend.create(self.tmp_dir, self.tmp_dir)
+
         results = [0.071428571428571508,
                    0.071428571428571508,
                    0.08333333333333337,
                    0.16666666666666674,
                    0.0]
         for fold in range(5):
-            eval_partial_cv(self.queue, self.configuration,
-                                      self.data, self.tmp_dir, 1, 1,
-                                      fold, 5, 80, True, False, True)
+            eval_partial_cv(queue=self.queue, config=self.configuration,
+                            data=self.data, backend=backend_api,
+                            seed=1, num_run=1, instance=fold, folds=5,
+                            subsample=80, with_predictions=True,
+                            all_scoring_functions=False, output_y_test=True)
 
             info = self.queue.get()
             self.assertAlmostEqual(info[1], results[fold])
@@ -151,9 +164,11 @@ class FunctionsTest(unittest.TestCase):
                    0.0,
                    0.0]
         for fold in range(5):
-            eval_partial_cv(self.queue, self.configuration,
-                                      self.data, self.tmp_dir, 1, 1,
-                                      fold, 5, 43, True, False, True)
+            eval_partial_cv(queue=self.queue, config=self.configuration,
+                            data=self.data, backend=backend_api,
+                            seed=1, num_run=1, instance=fold, folds=5,
+                            subsample=43, with_predictions=True,
+                            all_scoring_functions=False, output_y_test=True)
 
             info = self.queue.get()
             self.assertAlmostEqual(info[1], results[fold])
