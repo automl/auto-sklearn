@@ -293,7 +293,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     print(config)
                     raise e
 
-
     def test_get_hyperparameter_search_space(self):
         cs = SimpleClassificationPipeline.get_hyperparameter_search_space()
         self.assertIsInstance(cs, ConfigurationSpace)
@@ -388,7 +387,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(cs_ml, cs_mc_ml)
 
     def test_predict_batched(self):
-        cs = SimpleClassificationPipeline.get_hyperparameter_search_space()
+        cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+            include={'classifier': ['decision_tree']})
         default = cs.get_default_configuration()
         cls = SimpleClassificationPipeline(default)
 
@@ -420,24 +420,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_predict_batched_sparse(self):
         cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+            include={'classifier': ['decision_tree']},
             dataset_properties={'sparse': True})
-        config = Configuration(cs,
-            values={"balancing:strategy": "none",
-                    "classifier:__choice__": "random_forest",
-                    "imputation:strategy": "mean",
-                    "one_hot_encoding:minimum_fraction": 0.01,
-                    "one_hot_encoding:use_minimum_fraction": "True",
-                    "preprocessor:__choice__": "no_preprocessing",
-                    'classifier:random_forest:bootstrap': 'True',
-                    'classifier:random_forest:criterion': 'gini',
-                    'classifier:random_forest:max_depth': 'None',
-                    'classifier:random_forest:min_samples_split': 2,
-                    'classifier:random_forest:min_samples_leaf': 2,
-                    'classifier:random_forest:max_features': 0.5,
-                    'classifier:random_forest:max_leaf_nodes': 'None',
-                    'classifier:random_forest:n_estimators': 100,
-                    'classifier:random_forest:min_weight_fraction_leaf': 0.0,
-                    "rescaling:__choice__": "min/max"})
+        config = cs.get_default_configuration()
         cls = SimpleClassificationPipeline(config)
 
         # Multiclass
@@ -469,7 +454,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_proba_batched(self):
-        cs = SimpleClassificationPipeline.get_hyperparameter_search_space()
+        cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+            include={'classifier': ['decision_tree']})
         default = cs.get_default_configuration()
 
         # Multiclass
@@ -504,25 +490,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_predict_proba_batched_sparse(self):
         cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+            include={'classifier': ['decision_tree']},
             dataset_properties={'sparse': True})
 
-        config = Configuration(cs,
-                               values={"balancing:strategy": "none",
-                                       "classifier:__choice__": "random_forest",
-                                       "imputation:strategy": "mean",
-                                       "one_hot_encoding:minimum_fraction": 0.01,
-                                       "one_hot_encoding:use_minimum_fraction": 'True',
-                                       "preprocessor:__choice__": "no_preprocessing",
-                                       'classifier:random_forest:bootstrap': 'True',
-                                       'classifier:random_forest:criterion': 'gini',
-                                       'classifier:random_forest:max_depth': 'None',
-                                       'classifier:random_forest:min_samples_split': 2,
-                                       'classifier:random_forest:min_samples_leaf': 2,
-                                       'classifier:random_forest:min_weight_fraction_leaf': 0.0,
-                                       'classifier:random_forest:max_features': 0.5,
-                                       'classifier:random_forest:max_leaf_nodes': 'None',
-                                       'classifier:random_forest:n_estimators': 100,
-                                       "rescaling:__choice__": "min/max"})
+        config = cs.get_default_configuration()
 
         # Multiclass
         cls = SimpleClassificationPipeline(config)
