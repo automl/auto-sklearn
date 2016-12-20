@@ -82,7 +82,7 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger)
         info = ta.run(None, cutoff=30, memory_limit=3000)
         self.assertEqual(info[0], StatusType.CRASHED)
-        self.assertEqual(info[1], 2.0)
+        self.assertEqual(info[1], 1.0)
         self.assertIsInstance(info[2], float)
 
     @unittest.mock.patch('autosklearn.evaluation.eval_holdout')
@@ -93,7 +93,7 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger)
         info = ta.run(None, cutoff=30, memory_limit=3000)
         self.assertEqual(info[0], StatusType.MEMOUT)
-        self.assertEqual(info[1], 2.0)
+        self.assertEqual(info[1], 1.0)
         self.assertIsInstance(info[2], float)
 
     @unittest.mock.patch('autosklearn.evaluation.eval_holdout')
@@ -104,5 +104,5 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger)
         info = ta.run(None, cutoff=30, memory_limit=3000)
         self.assertEqual(info[0], StatusType.TIMEOUT)
-        self.assertEqual(info[1], 2.0)
+        self.assertEqual(info[1], 1.0)
         self.assertIsInstance(info[2], float)
