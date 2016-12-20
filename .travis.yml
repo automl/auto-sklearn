@@ -53,6 +53,8 @@ before_install:
   - conda install --yes gcc
   - echo "Using GCC at "`which gcc`
   - export CC=`which gcc`
+  # Fixes version `GLIBCXX_3.4.21' not found (on Ubuntu 16.04)
+  - conda install --yes libgcc
 
 install:
   - pip install coverage pep8 python-coveralls

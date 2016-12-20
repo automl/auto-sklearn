@@ -1,4 +1,3 @@
-import functools
 import os
 import time
 import traceback
@@ -508,15 +507,25 @@ class AutoMLSMBO(object):
             model = RandomForestWithInstances(types,
                                               #instance_features=meta_features_list,
                                               seed=1, num_trees=10)
+            rh2EPM = RunHistory2EPM4Cost(num_params=num_params,
+                                         scenario=self.scenario,
+                                         success_states=[StatusType.SUCCESS,
+                                                         StatusType.MEMOUT,
+                                                         StatusType.TIMEOUT],
+                                         impute_censored_data=False,
+                                         impute_state=None)
             smac = SMAC(scenario=self.scenario,
                         model=model,
                         rng=seed,
+                        runhistory2epm=rh2EPM,
                         tae_runner=ta,
                         runhistory=runhistory)
         elif self.acquisition_function == 'EIPS':
             rh2EPM = RunHistory2EPM4EIPS(num_params=num_params,
                                          scenario=self.scenario,
-                                         success_states=None,
+                                         success_states=[StatusType.SUCCESS,
+                                                         StatusType.MEMOUT,
+                                                         StatusType.TIMEOUT],
                                          impute_censored_data=False,
                                          impute_state=None)
             model = UncorrelatedMultiObjectiveRandomForestWithInstances(
@@ -650,7 +659,7 @@ class AutoMLSMBO(object):
         self.logger.info('Using %d training points for SMAC.' %
                          X_cfg.shape[0])
         next_configs_tmp = smac.solver.choose_next(
-            X_cfg, Y_cfg, num_interleaved_random=110,
+            X_cfg, Y_cfg,
             num_configurations_by_local_search=10,
             num_configurations_by_random_search_sorted=100)
 

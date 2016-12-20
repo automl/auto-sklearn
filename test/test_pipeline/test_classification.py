@@ -13,6 +13,7 @@ import sklearn.cross_validation
 import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.testing import assert_array_almost_equal
+from xgboost.core import XGBoostError
 
 from ConfigSpace.configuration_space import ConfigurationSpace, \
     Configuration
@@ -211,11 +212,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def _test_configurations(self, configurations_space, make_sparse=False,
                              data=None, init_params=None):
-        # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 1024
+        # Use a limit of ~3GiB
+        limit = 3000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
-        print(configurations_space)
         for i in range(10):
             config = configurations_space.sample_configuration()
             config._populate_values()
@@ -227,10 +227,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'classifier:adaboost:max_depth': 1,
                             'preprocessor:kernel_pca:n_components': 10,
                             'preprocessor:kitchen_sinks:n_components': 50,
+                            'preprocessor:nystroem_sampler:n_components': 50,
                             'preprocessor:gem:N': 5,
                             'classifier:proj_logit:max_epochs': 1,
                             'classifier:libsvm_svc:degree': 2,
-                            'regressor:libsvm_svr:degree': 2}
+                            'regressor:libsvm_svr:degree': 2,
+                            'preprocessor:feature_agglomeration:n_clusters': 2}
 
             for restrict_parameter in restrictions:
                 restrict_to = restrictions[restrict_parameter]
@@ -238,7 +240,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                         config[restrict_parameter] is not None:
                     config._values[restrict_parameter] = restrict_to
 
-            print(config)
 
             if data is None:
                 X_train, Y_train, X_test, Y_test = get_dataset(
@@ -282,15 +283,23 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 elif "invalid value encountered in true_divide" in e.args[0]:
                     continue
                 else:
+                    print(traceback.format_exc())
                     print(config)
                     raise e
             except UserWarning as e:
                 if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
+                    print(traceback.format_exc())
                     print(config)
                     raise e
-
+            except XGBoostError as e:
+                if "std::bad_alloc" in e.args[0]:
+                    continue
+                else:
+                    print(traceback.format_exc())
+                    print(config)
+                    raise e
 
     def test_get_hyperparameter_search_space(self):
         cs = SimpleClassificationPipeline.get_hyperparameter_search_space()
@@ -386,7 +395,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(cs_ml, cs_mc_ml)
 
     def test_predict_batched(self):
-        cs = SimpleClassificationPipeline.get_hyperparameter_search_space()
+        cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+            include={'classifier': ['decision_tree']})
         default = cs.get_default_configuration()
         cls = SimpleClassificationPipeline(default)
 
@@ -418,24 +428,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_predict_batched_sparse(self):
         cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+            include={'classifier': ['decision_tree']},
             dataset_properties={'sparse': True})
-        config = Configuration(cs,
-            values={"balancing:strategy": "none",
-                    "classifier:__choice__": "random_forest",
-                    "imputation:strategy": "mean",
-                    "one_hot_encoding:minimum_fraction": 0.01,
-                    "one_hot_encoding:use_minimum_fraction": "True",
-                    "preprocessor:__choice__": "no_preprocessing",
-                    'classifier:random_forest:bootstrap': 'True',
-                    'classifier:random_forest:criterion': 'gini',
-                    'classifier:random_forest:max_depth': 'None',
-                    'classifier:random_forest:min_samples_split': 2,
-                    'classifier:random_forest:min_samples_leaf': 2,
-                    'classifier:random_forest:max_features': 0.5,
-                    'classifier:random_forest:max_leaf_nodes': 'None',
-                    'classifier:random_forest:n_estimators': 100,
-                    'classifier:random_forest:min_weight_fraction_leaf': 0.0,
-                    "rescaling:__choice__": "min/max"})
+        config = cs.get_default_configuration()
         cls = SimpleClassificationPipeline(config)
 
         # Multiclass
@@ -467,7 +462,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_proba_batched(self):
-        cs = SimpleClassificationPipeline.get_hyperparameter_search_space()
+        cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+            include={'classifier': ['decision_tree']})
         default = cs.get_default_configuration()
 
         # Multiclass
@@ -502,25 +498,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_predict_proba_batched_sparse(self):
         cs = SimpleClassificationPipeline.get_hyperparameter_search_space(
+            include={'classifier': ['decision_tree']},
             dataset_properties={'sparse': True})
 
-        config = Configuration(cs,
-                               values={"balancing:strategy": "none",
-                                       "classifier:__choice__": "random_forest",
-                                       "imputation:strategy": "mean",
-                                       "one_hot_encoding:minimum_fraction": 0.01,
-                                       "one_hot_encoding:use_minimum_fraction": 'True',
-                                       "preprocessor:__choice__": "no_preprocessing",
-                                       'classifier:random_forest:bootstrap': 'True',
-                                       'classifier:random_forest:criterion': 'gini',
-                                       'classifier:random_forest:max_depth': 'None',
-                                       'classifier:random_forest:min_samples_split': 2,
-                                       'classifier:random_forest:min_samples_leaf': 2,
-                                       'classifier:random_forest:min_weight_fraction_leaf': 0.0,
-                                       'classifier:random_forest:max_features': 0.5,
-                                       'classifier:random_forest:max_leaf_nodes': 'None',
-                                       'classifier:random_forest:n_estimators': 100,
-                                       "rescaling:__choice__": "min/max"})
+        config = cs.get_default_configuration()
 
         # Multiclass
         cls = SimpleClassificationPipeline(config)

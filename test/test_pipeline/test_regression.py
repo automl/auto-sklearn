@@ -71,13 +71,12 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                             preprocessors[key].__bases__)
 
     def test_configurations(self):
-        # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 1024
+        # Use a limit of ~3GiB
+        limit = 3000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
 
-        print(cs)
         cs.seed(1)
 
         for i in range(10):
@@ -86,9 +85,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             if config['regressor:sgd:n_iter'] is not None:
                 config._values['regressor:sgd:n_iter'] = 5
 
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes')
             cls = SimpleRegressionPipeline(config, random_state=1)
-            print(config)
+
             try:
                 cls.fit(X_train, Y_train)
                 X_test_ = X_test.copy()
@@ -134,14 +133,12 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 continue
 
     def test_configurations_signed_data(self):
-        # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 1024
+        # Use a limit of ~3GiB
+        limit = 3000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
             dataset_properties={'signed': True})
-
-        print(cs)
 
         for i in range(10):
             config = cs.sample_configuration()
@@ -154,9 +151,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                             config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes')
             cls = SimpleRegressionPipeline(config, random_state=1)
-            print(config)
+
             try:
                 cls.fit(X_train, Y_train)
                 X_test_ = X_test.copy()
@@ -199,13 +196,13 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 continue
 
     def test_configurations_sparse(self):
-        # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 1024
+        # Use a limit of ~1GiB
+        limit = 3000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
             dataset_properties={'sparse': True})
-        print(cs)
+
         for i in range(10):
             config = cs.sample_configuration()
             config._populate_values()
@@ -217,8 +214,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                             config['classifier:sgd:n_iter'] is not None:
                 config._values['classifier:sgd:n_iter'] = 5
 
-            print(config)
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston',
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes',
                                                            make_sparse=True)
             cls = SimpleRegressionPipeline(config, random_state=1)
             try:
@@ -245,12 +241,21 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     continue
                 else:
                     print(config)
+                    traceback.print_tb(sys.exc_info()[2])
                     raise e
             except UserWarning as e:
                 if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
                     print(config)
+                    traceback.print_tb(sys.exc_info()[2])
+                    raise e
+            except Exception as e:
+                if "Multiple input features cannot have the same target value" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    traceback.print_tb(sys.exc_info()[2])
                     raise e
 
     def test_default_configuration(self):
@@ -365,28 +370,30 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     """
 
     def test_predict_batched(self):
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+            include={'regressor': ['decision_tree']})
         default = cs.get_default_configuration()
         cls = SimpleRegressionPipeline(default)
 
-        X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes')
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict(X_test_)
         cls_predict = unittest.mock.Mock(wraps=cls.pipeline_)
         cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
-        self.assertEqual((356,), prediction.shape)
-        self.assertEqual(18, cls_predict.predict.call_count)
+        self.assertEqual((292,), prediction.shape)
+        self.assertEqual(15, cls_predict.predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_batched_sparse(self):
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
-            dataset_properties={'sparse': True})
+            dataset_properties={'sparse': True},
+            include={'regressor': ['decision_tree']})
         default = cs.get_default_configuration()
         cls = SimpleRegressionPipeline(default)
 
-        X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston',
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes',
                                                        make_sparse=True)
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
@@ -394,8 +401,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         cls_predict = unittest.mock.Mock(wraps=cls.pipeline_)
         cls.pipeline_ = cls_predict
         prediction = cls.predict(X_test, batch_size=20)
-        self.assertEqual((356,), prediction.shape)
-        self.assertEqual(18, cls_predict.predict.call_count)
+        self.assertEqual((292,), prediction.shape)
+        self.assertEqual(15, cls_predict.predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
     @unittest.skip("test_check_random_state Not yet Implemented")
