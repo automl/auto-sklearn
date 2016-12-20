@@ -374,7 +374,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     """
 
     def test_predict_batched(self):
-        cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+            include={'regressor': ['decision_tree']})
         default = cs.get_default_configuration()
         cls = SimpleRegressionPipeline(default)
 
@@ -391,7 +392,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
 
     def test_predict_batched_sparse(self):
         cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
-            dataset_properties={'sparse': True})
+            dataset_properties={'sparse': True},
+            include={'regressor': ['decision_tree']})
         default = cs.get_default_configuration()
         cls = SimpleRegressionPipeline(default)
 

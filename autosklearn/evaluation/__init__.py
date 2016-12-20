@@ -16,7 +16,7 @@ from .nested_cv_evaluator import *
 from .test_evaluator import *
 from .util import *
 
-WORST_POSSIBLE_RESULT = 2.0
+WORST_POSSIBLE_RESULT = 1.0
 
 
 class ExecuteTaFuncWithQueue(AbstractTAFunc):
