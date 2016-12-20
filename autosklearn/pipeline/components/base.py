@@ -15,8 +15,8 @@ def find_components(package, directory, base_class):
             module = importlib.import_module(full_module_name)
 
             for member_name, obj in inspect.getmembers(module):
-                if inspect.isclass(
-                        obj) and base_class in obj.__bases__:
+                if inspect.isclass(obj) and issubclass(obj, base_class) and \
+                        obj != base_class:
                     # TODO test if the obj implements the interface
                     # Keep in mind that this only instantiates the ensemble_wrapper,
                     # but not the real target classifier
