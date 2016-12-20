@@ -405,6 +405,9 @@ class AutoML(BaseEstimator):
                                     acquisition_function=self.acquisition_function,
                                     shared_mode=self._shared_mode)
             self.runhistory_ = _proc_smac.run_smbo()
+            runhistory_filename = os.path.join(self._backend.temporary_directory,
+                                               'runhistory.json',)
+            self.runhistory_.save_json(runhistory_filename)
 
         self._proc_ensemble = None
         self._load_models()

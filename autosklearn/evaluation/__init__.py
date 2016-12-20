@@ -107,7 +107,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             try:
                 info = queue.get(block=True, timeout=2)
                 result = info[1]
-                error_message = info[3]
+                additional_run_info = info[3]
 
                 if obj.exit_status == 0 and result is not None:
                     status = StatusType.SUCCESS
@@ -116,7 +116,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 else:
                     status = StatusType.CRASHED
                     cost = WORST_POSSIBLE_RESULT
-                    additional_run_info = error_message
             except Exception as e0:
                 additional_run_info = 'Unknown error (%s) %s' % (type(e0), e0)
                 status = StatusType.CRASHED
