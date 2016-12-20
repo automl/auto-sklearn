@@ -549,9 +549,6 @@ class AutoMLSMBO(object):
             raise ValueError('Unknown acquisition function value %s!' %
                              self.acquisition_function)
 
-        smac.solver.stats.start_timing()
-        smac.solver.incumbent = smac.solver.initial_design.run()
-
         # Build a runtime model
         # runtime_rf = RandomForestWithInstances(types,
         #                                        instance_features=meta_features_list,
@@ -635,6 +632,7 @@ class AutoMLSMBO(object):
                 break
 
         self.runhistory = smac.solver.runhistory
+
         return runhistory
 
     def choose_next(self, smac):
