@@ -13,6 +13,7 @@ sys.path.append(this_directory)
 
 import pynisher
 from smac.tae.execute_ta_run import StatusType
+from smac.stats.stats import Stats
 
 from evaluation_util import get_multiclass_classification_datamanager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
@@ -33,6 +34,12 @@ class EvaluationTest(unittest.TestCase):
         self.datamanager = get_multiclass_classification_datamanager()
         self.tmp = os.path.join(os.getcwd(), '.test_evaluation')
         self.logger = logging.getLogger()
+        scenario_mock = unittest.mock.Mock()
+        scenario_mock.wallclock_limit = 10
+        self.scenario = scenario_mock
+        stats = Stats(scenario_mock)
+        stats.start_timing()
+        self.stats = stats
 
         try:
             shutil.rmtree(self.tmp)
@@ -68,18 +75,51 @@ class EvaluationTest(unittest.TestCase):
         pynisher_mock.side_effect = safe_eval_success_mock
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger)
+                                    logger=self.logger,
+                                    stats=self.stats)
         info = ta.run(None, cutoff=30, memory_limit=3000)
         self.assertEqual(info[0], StatusType.SUCCESS)
         self.assertEqual(info[1], 0.5)
         self.assertIsInstance(info[2], float)
+
+    @unittest.mock.patch('pynisher.enforce_limits')
+    def test_cutoff_lower_than_remaining_time(self, pynisher_mock):
+        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+                                    resampling_strategy='holdout',
+                                    logger=self.logger,
+                                    stats=self.stats)
+        ta.run(None, cutoff=30, memory_limit=3000)
+        self.assertEqual(pynisher_mock.call_args[1]['wall_time_in_s'], 4)
+        self.assertIsInstance(pynisher_mock.call_args[1]['wall_time_in_s'], int)
+
+    @unittest.mock.patch('pynisher.enforce_limits')
+    def test_zero_or_negative_cutoff(self, pynisher_mock):
+        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+                                    resampling_strategy='holdout',
+                                    logger=self.logger,
+                                    stats=self.stats)
+        self.scenario.wallclock_limit = 5
+        info = ta.run(None, cutoff=10, memory_limit=3000)
+        fixture = (StatusType.ABORT, np.nan, 0, {"misc": "exhausted bugdet -- ABORT"})
+        self.assertEqual(info, fixture)
+
+    @unittest.mock.patch('pynisher.enforce_limits')
+    def test_cutoff_lower_than_remaining_time(self, pynisher_mock):
+        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+                                    resampling_strategy='holdout',
+                                    logger=self.logger,
+                                    stats=self.stats)
+        ta.run(None, cutoff=30, memory_limit=3000)
+        self.assertEqual(pynisher_mock.call_args[1]['wall_time_in_s'], 4)
+        self.assertIsInstance(pynisher_mock.call_args[1]['wall_time_in_s'], int)
 
     @unittest.mock.patch('autosklearn.evaluation.eval_holdout')
     def test_eval_with_limits_holdout_fail_silent(self, pynisher_mock):
         pynisher_mock.return_value = None
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger)
+                                    logger=self.logger,
+                                    stats=self.stats)
         info = ta.run(None, cutoff=30, memory_limit=3000)
         self.assertEqual(info[0], StatusType.CRASHED)
         self.assertEqual(info[1], 1.0)
@@ -90,7 +130,8 @@ class EvaluationTest(unittest.TestCase):
         pynisher_mock.side_effect = MemoryError
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger)
+                                    logger=self.logger,
+                                    stats=self.stats)
         info = ta.run(None, cutoff=30, memory_limit=3000)
         self.assertEqual(info[0], StatusType.MEMOUT)
         self.assertEqual(info[1], 1.0)
@@ -101,7 +142,8 @@ class EvaluationTest(unittest.TestCase):
         pynisher_mock.side_effect = pynisher.TimeoutException
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
-                                    logger=self.logger)
+                                    logger=self.logger,
+                                    stats=self.stats)
         info = ta.run(None, cutoff=30, memory_limit=3000)
         self.assertEqual(info[0], StatusType.TIMEOUT)
         self.assertEqual(info[1], 1.0)

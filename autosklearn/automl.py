@@ -2,9 +2,9 @@
 from __future__ import print_function
 
 from collections import defaultdict
-import hashlib
 import io
 import os
+import unittest.mock
 
 
 from ConfigSpace.io import pcs
@@ -13,6 +13,7 @@ import numpy.ma as ma
 import scipy.stats
 from sklearn.base import BaseEstimator
 from smac.tae.execute_ta_run import StatusType
+from smac.stats.stats import Stats
 from sklearn.grid_search import _CVScoreTuple
 
 from autosklearn.constants import *
@@ -236,13 +237,19 @@ class AutoML(BaseEstimator):
             return num_run
 
         self._logger.info("Starting to create dummy predictions.")
-        # time_limit = int(self._time_for_task / 6.)
         memory_limit = int(self._ml_memory_limit)
+        scenario_mock = unittest.mock.Mock()
+        scenario_mock.wallclock_limit = self._time_for_task
+        # This stats object is a hack - maybe the SMAC stats object should
+        # already be generated here!
+        stats = Stats(scenario_mock)
+        stats.start_timing()
         ta = ExecuteTaFuncWithQueue(backend=self._backend,
                                     autosklearn_seed=self._seed,
                                     resampling_strategy=self._resampling_strategy,
                                     initial_num_run=num_run,
                                     logger=self._logger,
+                                    stats=stats,
                                     **self._resampling_strategy_arguments)
 
         status, cost, runtime, additional_info = \
@@ -252,14 +259,6 @@ class AutoML(BaseEstimator):
         else:
             self._logger.error('Error creating dummy predictions:%s ',
                                additional_info)
-
-        #status, cost, runtime, additional_info = \
-        #    ta.run(2, cutoff=time_limit, memory_limit=memory_limit)
-        #if status == StatusType.SUCCESS:
-        #    self._logger.info("Finished creating dummy prediction 2/2.")
-        #else:
-        #    self._logger.error('Error creating dummy prediction 2/2 %s',
-        #                       additional_info)
 
         return ta.num_run
 

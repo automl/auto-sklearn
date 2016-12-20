@@ -39,7 +39,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+        automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
                                        tmp_folder=output,
                                        output_folder=output)
@@ -58,7 +58,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+        automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
                                        tmp_folder=output,
                                        output_folder=output,
@@ -117,7 +117,7 @@ class EstimatorTest(Base, unittest.TestCase):
         Y_train = Y_train + 1
         Y_test = Y_test + 1
 
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+        automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
                                        output_folder=output,
                                        tmp_folder=output,
@@ -152,7 +152,7 @@ class EstimatorTest(Base, unittest.TestCase):
         backend = Backend(context)
         backend.save_model(dummy, 30, 1)
 
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+        automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
                                        output_folder=output,
                                        tmp_folder=output,
@@ -226,7 +226,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self._setUp(output)
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
 
-        cls = AutoSklearnClassifier(time_left_for_this_task=15,
+        cls = AutoSklearnClassifier(time_left_for_this_task=20,
                                     per_run_time_limit=5,
                                     output_folder=output,
                                     tmp_folder=output,

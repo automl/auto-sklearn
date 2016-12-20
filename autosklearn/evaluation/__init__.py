@@ -1,10 +1,8 @@
 # -*- encoding: utf-8 -*-
 import logging
 import multiprocessing
-import sys
-import time
-import traceback
 
+import numpy as np
 import pynisher
 from smac.tae.execute_ta_run import StatusType
 from smac.tae.execute_func import AbstractTAFunc
@@ -65,6 +63,17 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         D = self.backend.load_datamanager()
         queue = multiprocessing.Queue()
+
+        # Restrict the cutoff to not go over the final time limit, but stop ten
+        # seconds earlier
+        remaining_time = self.stats.get_remaing_time_budget()
+        if remaining_time - 5 < cutoff:
+            cutoff = int(remaining_time - 5)
+
+        if cutoff <= 0:
+            self.logger.debug(
+                "Skip target algorithm run due to exhausted configuration budget")
+            return StatusType.ABORT, np.nan, 0, {"misc": "exhausted bugdet -- ABORT"}
 
         arguments = dict(logger=logging.getLogger("pynisher"),
                          wall_time_in_s=cutoff,
