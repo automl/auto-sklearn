@@ -233,7 +233,8 @@ class AutoML(BaseEstimator):
     def _do_dummy_prediction(self, datamanager, num_run):
 
         # When using partial-cv it makes no sense to do dummy predictions
-        if self._resampling_strategy in ['partial-cv']:
+        if self._resampling_strategy in ['partial-cv',
+                                         'partial-cv-iterative-fit']:
             return num_run
 
         self._logger.info("Starting to create dummy predictions.")
@@ -269,14 +270,16 @@ class AutoML(BaseEstimator):
 
         # Check arguments prior to doing anything!
         if self._resampling_strategy not in ['holdout', 'holdout-iterative-fit',
-                                             'cv', 'nested-cv', 'partial-cv']:
+                                             'cv', 'nested-cv', 'partial-cv',
+                                             'partial-cv-iterative-fit']:
             raise ValueError('Illegal resampling strategy: %s' %
                              self._resampling_strategy)
-        if self._resampling_strategy == 'partial-cv' and \
-                self._ensemble_size != 0:
-            raise ValueError("Resampling strategy partial-cv cannot be used "
-                             "together with ensembles.")
-        if self._resampling_strategy in ['partial-cv', 'cv'] and \
+        if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit'] \
+                and self._ensemble_size != 0:
+            raise ValueError("Resampling strategy %s cannot be used "
+                             "together with ensembles." % self._resampling_strategy)
+        if self._resampling_strategy in ['partial-cv', 'cv',
+                                         'partial-cv-iterative-fit'] and \
                 not 'folds' in self._resampling_strategy_arguments:
             self._resampling_strategy_arguments['folds'] = 5
 
@@ -491,9 +494,9 @@ class AutoML(BaseEstimator):
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
-        if self._resampling_strategy in ['partial-cv']:
+        if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
             raise ValueError('Cannot call fit_ensemble with resampling '
-                             'strategy partial-cv.')
+                             'strategy %s.' % self._resampling_strategy)
 
         if self._logger is None:
             self._logger = self._get_logger(dataset_name)
@@ -564,7 +567,8 @@ class AutoML(BaseEstimator):
         else:
             self.models_ = self._backend.load_all_models(seed)
 
-        if len(self.models_) == 0 and self._resampling_strategy not in ['partial-cv']:
+        if len(self.models_) == 0 and self._resampling_strategy not in \
+                ['partial-cv', 'partial-cv-iterative-fit']:
             raise ValueError('No models fitted!')
 
     def score(self, X, y):
@@ -623,7 +627,7 @@ class AutoML(BaseEstimator):
         # TODO: add those arguments
 
         # TODO remove this restriction!
-        if self._resampling_strategy in ['partial-cv']:
+        if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
             raise ValueError('Cannot call cv_results when using partial-cv!')
 
         parameter_dictionaries = dict()

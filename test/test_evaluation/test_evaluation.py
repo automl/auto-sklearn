@@ -151,3 +151,18 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[0], StatusType.TIMEOUT)
         self.assertEqual(info[1], 1.0)
         self.assertIsInstance(info[2], float)
+
+    @unittest.mock.patch('autosklearn.evaluation.eval_holdout')
+    def test_eval_with_limits_holdout_timeout_with_results_in_queue(self, pynisher_mock):
+        def side_effect(**kwargs):
+            queue = kwargs['queue']
+            queue.put((StatusType.SUCCESS, 0.5, 0.12345, ''))
+        pynisher_mock.side_effect = side_effect
+        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+                                    resampling_strategy='holdout',
+                                    logger=self.logger,
+                                    stats=self.stats)
+        info = ta.run(None, cutoff=30, memory_limit=3000)
+        self.assertEqual(info[0], StatusType.SUCCESS)
+        self.assertEqual(info[1], 0.5)
+        self.assertIsInstance(info[2], float)

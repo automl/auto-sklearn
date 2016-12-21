@@ -33,6 +33,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             eval_function = eval_cv
         elif resampling_strategy == 'partial-cv':
             eval_function = eval_partial_cv
+        elif resampling_strategy == 'partial-cv-iterative-fit':
+            eval_function = eval_partial_cv_iterative
         elif resampling_strategy == 'test':
             eval_function = eval_t
             output_y_test = False
@@ -88,7 +90,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         arguments = dict(logger=logging.getLogger("pynisher"),
                          wall_time_in_s=cutoff,
-                         mem_in_mb=memory_limit)
+                         mem_in_mb=memory_limit,
+                         grace_period_in_s=15)
         obj_kwargs = dict(queue=queue,
                           config=config,
                           data=D,
@@ -107,9 +110,25 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         obj(**obj_kwargs)
 
         if obj.exit_status is pynisher.TimeoutException:
-            status = StatusType.TIMEOUT
-            cost = WORST_POSSIBLE_RESULT
-            additional_run_info = 'Timeout'
+            # Even if the pynisher thinks that a timeout occured, it can be that
+            # the target algorithm wrote something into the queue - then we
+            # treat it as a succesful run
+            try:
+                info = queue.get(block=True, timeout=2)
+                result = info[1]
+                additional_run_info = info[3]
+
+                if obj.exit_status == pynisher.TimeoutException and result is not None:
+                    status = StatusType.SUCCESS
+                    cost = result
+                else:
+                    status = StatusType.CRASHED
+                    cost = WORST_POSSIBLE_RESULT
+            except Exception:
+                status = StatusType.TIMEOUT
+                cost = WORST_POSSIBLE_RESULT
+                additional_run_info = 'Timeout'
+
         elif obj.exit_status is pynisher.MemorylimitException:
             status = StatusType.MEMOUT
             cost = WORST_POSSIBLE_RESULT
@@ -123,7 +142,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 if obj.exit_status == 0 and result is not None:
                     status = StatusType.SUCCESS
                     cost = result
-                    additional_run_info = ''
                 else:
                     status = StatusType.CRASHED
                     cost = WORST_POSSIBLE_RESULT

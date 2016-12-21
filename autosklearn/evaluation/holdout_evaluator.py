@@ -134,7 +134,6 @@ def eval_holdout(queue, config, data, backend, seed, num_run,
         print('Received signal %s. Aborting Training!' % str(signum))
         global evaluator
         duration, result, seed, run_info = evaluator.finish_up()
-        # TODO use status type for stopped, but yielded a result
         queue.put((duration, result, seed, run_info, StatusType.SUCCESS))
 
     def empty_signal_handler(signum, frame):

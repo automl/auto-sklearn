@@ -477,7 +477,8 @@ class AutoMLSMBO(object):
             meta_features_dict = {}
             metalearning_configurations = []
 
-        if self.resampling_strategy in ['partial-cv']:
+        if self.resampling_strategy in ['partial-cv',
+                                        'partial-cv-iterative-fit']:
             num_folds = self.resampling_strategy_args['folds']
             instances = [[fold_number] for fold_number in range(num_folds)]
         else:

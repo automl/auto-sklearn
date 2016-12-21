@@ -12,6 +12,7 @@ __all__ = [
     'CVEvaluator',
     'eval_cv',
     'eval_partial_cv',
+    'eval_partial_cv_iterative'
 ]
 
 
@@ -148,6 +149,72 @@ class CVEvaluator(AbstractEvaluator):
 
         return opt_pred, valid_pred, test_pred
 
+    def partial_iterative_fit(self, fold):
+        model = self.model_class(self.configuration, self.seed)
+        train_indices, test_indices = self.get_train_test_split(fold)
+
+        if self.subsample is not None:
+            n_data_subsample = min(self.subsample, len(train_indices))
+            indices = np.array(([True] * n_data_subsample) + \
+                               ([False] * (len(train_indices) - n_data_subsample)),
+                               dtype=np.bool)
+            rs = np.random.RandomState(self.seed)
+            rs.shuffle(indices)
+            train_indices = train_indices[indices]
+
+        self.indices[fold] = ((train_indices, test_indices))
+        X_train = self.X_train[train_indices]
+        Y_train = self.Y_train[train_indices]
+        self.Y_targets[fold] = self.Y_train[test_indices]
+
+        Xt, fit_params = model.pre_transform(X_train, Y_train)
+        if not model.estimator_supports_iterative_fit():
+            print("Model does not support iterative_fit(), reverting to " \
+                "regular fit().")
+
+            self.models[fold] = model
+            model.fit_estimator(Xt, Y_train, **fit_params)
+            return
+
+        n_iter = 1
+        self.models[fold] = model
+        while not model.configuration_fully_fitted():
+            model.iterative_fit(Xt, Y_train, n_iter=n_iter,
+                                **fit_params)
+            n_iter *= 2
+
+    def predict_and_loss(self):
+        # Only called by finish_up for iterative fit
+        for fold, model in enumerate(self.models):
+            if model is None:
+                continue
+
+            train_indices, test_indices = self.indices[fold]
+
+            opt_pred = self.predict_function(self.X_train[test_indices],
+                                             model, self.task_type,
+                                             self.Y_train[train_indices])
+
+            if self.X_valid is not None:
+                X_valid = self.X_valid.copy()
+                valid_pred = self.predict_function(X_valid, model,
+                                                   self.task_type,
+                                                   self.Y_train[train_indices])
+            else:
+                valid_pred = None
+
+            if self.X_test is not None:
+                X_test = self.X_test.copy()
+                test_pred = self.predict_function(X_test, model,
+                                                  self.task_type,
+                                                  self.Y_train[train_indices])
+            else:
+                test_pred = None
+
+            loss = self._loss(self.Y_targets[fold], opt_pred)
+
+            return loss, opt_pred, valid_pred, test_pred
+
     def get_train_test_split(self, fold):
         return get_CV_fold(self.X_train, self.Y_train, fold=fold,
                             folds=self.cv_folds, shuffle=True,
@@ -156,7 +223,8 @@ class CVEvaluator(AbstractEvaluator):
 
 def eval_partial_cv(queue, config, data, backend, seed, num_run, instance,
                     folds, subsample, with_predictions, all_scoring_functions,
-                    output_y_test):
+                    output_y_test, iterative=False):
+    global evaluator
     evaluator = CVEvaluator(data, backend, config,
                             seed=seed,
                             num_run=num_run,
@@ -166,13 +234,41 @@ def eval_partial_cv(queue, config, data, backend, seed, num_run, instance,
                             all_scoring_functions=all_scoring_functions,
                             output_y_test=False)
 
-    loss, opt_pred, valid_pred, test_pred = \
-        evaluator.partial_fit_predict_and_loss(instance)
-    duration, result, seed, run_info = evaluator.finish_up(
-        loss, opt_pred, valid_pred, test_pred)
+
+    def signal_handler(signum, frame):
+        print('Received signal %s. Aborting Training!' % str(signum))
+        global evaluator
+        duration, result, seed, run_info = evaluator.finish_up()
+        # TODO use status type for stopped, but yielded a result
+        queue.put((duration, result, seed, run_info, StatusType.SUCCESS))
+
+    def empty_signal_handler(signum, frame):
+        pass
+
+    if iterative:
+        signal.signal(signal.SIGALRM, signal_handler)
+        evaluator.partial_iterative_fit(instance)
+        signal.signal(signal.SIGALRM, empty_signal_handler)
+        loss = evaluator.model
+        duration, result, seed, run_info = evaluator.finish_up()
+    else:
+        loss, opt_pred, valid_pred, test_pred = \
+            evaluator.partial_fit_predict_and_loss(instance)
+        duration, result, seed, run_info = evaluator.finish_up(
+            loss, opt_pred, valid_pred, test_pred)
 
     status = StatusType.SUCCESS
     queue.put((duration, result, seed, run_info, status))
+
+
+def eval_partial_cv_iterative(queue, config, data, backend, seed, num_run,
+                              instance, folds, subsample, with_predictions,
+                              all_scoring_functions, output_y_test):
+    eval_partial_cv(queue=queue, config=config, data=data, backend=backend,
+                    seed=seed, num_run=num_run, instance=instance, folds=folds,
+                    subsample=subsample, with_predictions=with_predictions,
+                    all_scoring_functions=all_scoring_functions,
+                    output_y_test=output_y_test, iterative=True)
 
 
 # create closure for evaluating an algorithm
