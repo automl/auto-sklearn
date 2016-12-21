@@ -270,7 +270,7 @@ class AutoML(BaseEstimator):
 
         # Check arguments prior to doing anything!
         if self._resampling_strategy not in ['holdout', 'holdout-iterative-fit',
-                                             'cv', 'nested-cv', 'partial-cv',
+                                             'cv', 'partial-cv',
                                              'partial-cv-iterative-fit']:
             raise ValueError('Illegal resampling strategy: %s' %
                              self._resampling_strategy)

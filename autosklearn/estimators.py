@@ -161,14 +161,12 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             * 'holdout-iterative-fit':  66:33 (train:test) split, calls iterative
               fit where possible
             * 'cv': crossvalidation, requires 'folds'
-            * 'nested-cv': crossvalidation, requires 'outer-folds, 'inner-folds'
 
         resampling_strategy_arguments : dict, optional if 'holdout' (None)
             Additional arguments for resampling_strategy
             * 'holdout': None
             * 'holdout-iterative-fit':  None
             * 'cv': {'folds': int}
-            * 'nested-cv': {'outer_folds': int, 'inner_folds'
 
         tmp_folder : string, optional (None)
             folder to store configuration output and log files, if ``None``
