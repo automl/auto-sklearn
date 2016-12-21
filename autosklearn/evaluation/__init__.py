@@ -55,14 +55,13 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.output_y_test = output_y_test
         self.logger = logger
 
-    def run(self, config, instance=None,
-            cutoff=None,
-            memory_limit=None,
-            seed=12345,
-            instance_specific="0"):
-
-        D = self.backend.load_datamanager()
-        queue = multiprocessing.Queue()
+    def start(self, config, instance,
+              cutoff=None,
+              seed=12345,
+              instance_specific="0"):
+        # Overwrite the start function here. This allows us to abort target
+        # algorithm runs if the time us over without having the start method
+        # of the parent class adding the run to the runhistory
 
         # Restrict the cutoff to not go over the final time limit, but stop ten
         # seconds earlier
@@ -74,6 +73,18 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             self.logger.debug(
                 "Skip target algorithm run due to exhausted configuration budget")
             return StatusType.ABORT, np.nan, 0, {"misc": "exhausted bugdet -- ABORT"}
+
+        return super().start(config=config, instance=instance, cutoff=cutoff,
+                             seed=seed, instance_specific=instance_specific)
+
+    def run(self, config, instance=None,
+            cutoff=None,
+            memory_limit=None,
+            seed=12345,
+            instance_specific="0"):
+
+        D = self.backend.load_datamanager()
+        queue = multiprocessing.Queue()
 
         arguments = dict(logger=logging.getLogger("pynisher"),
                          wall_time_in_s=cutoff,
@@ -124,47 +135,3 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         runtime = float(obj.wall_clock_time)
         self.num_run += 1
         return status, cost, runtime, additional_run_info
-
-# def eval_with_limits(config, datamanager, backend, seed, num_run,
-#                      resampling_strategy,
-#                      resampling_strategy_args, memory_limit,
-#                      func_eval_time_limit, subsample=None,
-#                      with_predictions=True,
-#                      all_scoring_functions=False,
-#                      output_y_test=True,
-#                      logger=None,
-#                      # arguments to please SMAC
-#                      instance=None):
-#     if resampling_strategy_args is None:
-#         resampling_strategy_args = {}
-#
-#     start_time = time.time()
-#     queue = multiprocessing.Queue()
-#     safe_eval = pynisher.enforce_limits(mem_in_mb=memory_limit,
-#                                         wall_time_in_s=func_eval_time_limit,
-#                                         grace_period_in_s=30,
-#                                         logger=logger)(_eval_wrapper)
-#
-#     try:
-#         safe_eval(queue=queue, config=config, data=datamanager,
-#                   backend=backend, seed=seed, num_run=num_run,
-#                   subsample=subsample,
-#                   with_predictions=with_predictions,
-#                   all_scoring_functions=all_scoring_functions,
-#                   output_y_test=output_y_test,
-#                   resampling_strategy=resampling_strategy,
-#                   **resampling_strategy_args)
-#         info = queue.get(block=True, timeout=2)
-#
-#     except Exception as e0:
-#         error_message = 'Unknown error (%s) %s' % (type(e0), e0)
-#         status = StatusType.CRASHED
-#
-#         duration = time.time() - start_time
-#         info = (duration, WORST_POSSIBLE_RESULT, seed, error_message, status)
-#
-#     # TODO only return relevant information and make SMAC measure the rest!
-#     # Currently, everything has the status SUCESS
-#     #return info
-#     return info[1], info[3]
-
