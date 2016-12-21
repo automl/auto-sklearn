@@ -125,9 +125,9 @@ class FeedForwardNet(object):
                 print("... using multilabel prediction")
             if self.is_regression:
                 print("... using regression loss")
-            print("... building network")
-            print(input_shape)
-            print("... with number of epochs")
+            print("... building network!")
+            print("Input shape:", input_shape)
+            print("... with number of epochs:")
             print(num_epochs)
 
         # Added for reproducibility

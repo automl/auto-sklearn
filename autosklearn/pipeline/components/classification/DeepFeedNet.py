@@ -1,10 +1,9 @@
 import numpy as np
 import scipy.sparse as sp
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.conditions import EqualsCondition, InCondition, AndConjunction
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, CategoricalHyperparameter, Constant
+from ConfigSpace import ConfigurationSpace, EqualsCondition, InCondition, \
+    UniformFloatHyperparameter, UniformIntegerHyperparameter, \
+    CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *

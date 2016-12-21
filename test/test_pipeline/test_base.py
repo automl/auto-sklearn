@@ -31,14 +31,12 @@ class BaseTest(unittest.TestCase):
         cs = base._get_base_search_space(cs, dataset_properties,
                                          exclude, include, pipeline)
 
-        self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
-                         13)
-        self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
-                         15)
+        self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices), 14)
+        self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices), 16)
 
-        # for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
-        #     print(clause)
-        self.assertEqual(134, len(cs.forbidden_clauses))
+        #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
+        #    print clause
+        self.assertEqual(154, len(cs.forbidden_clauses))
 
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification', 'signed': True}
@@ -46,16 +44,14 @@ class BaseTest(unittest.TestCase):
         cs = base._get_base_search_space(cs, dataset_properties,
                                          exclude, include, pipeline)
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
-                         13)
+                         14)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
-                         10)
+                         11)
         self.assertEqual(len(cs.get_hyperparameter("c:__choice__").choices),
                          1)
         # Mostly combinations of p0 making the data unsigned and p1 not
         # changing the values of the data points
-        #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
-        #    print(clause)
-        self.assertEqual(65, len(cs.forbidden_clauses))
+        self.assertEqual(72, len(cs.forbidden_clauses))
 
 
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
@@ -64,26 +60,23 @@ class BaseTest(unittest.TestCase):
         cs = base._get_base_search_space(cs, dataset_properties,
                                          exclude, include, pipeline)
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
-                         13)
+                         14)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
-                         15)
-        self.assertEqual(len(cs.get_hyperparameter("c:__choice__").choices),
                          16)
-        #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
-        #    print(clause)
-        self.assertEqual(107, len(cs.forbidden_clauses))
+        self.assertEqual(len(cs.get_hyperparameter("c:__choice__").choices),
+                         18)
+        self.assertEqual(114, len(cs.forbidden_clauses))
+
 
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification', 'sparse': True}
         cs = base._get_base_search_space(cs, dataset_properties,
                                          exclude, include, pipeline)
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
-                         11)
+                         12)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
-                         15)
-        #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
-        #    print(clause)
-        self.assertEqual(343, len(cs.forbidden_clauses))
+                         16)
+        self.assertEqual(361, len(cs.forbidden_clauses))
 
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification',
@@ -92,13 +85,11 @@ class BaseTest(unittest.TestCase):
                                          exclude, include, pipeline)
 
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
-                         11)
+                         12)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
-                         15)
+                         16)
         # Data is guaranteed to be positive in cases like densifier,
         # extra_trees_preproc, multinomial_nb -> less constraints
-        #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
-        #    print(clause)
-        self.assertEqual(298, len(cs.forbidden_clauses))
+        self.assertEqual(303, len(cs.forbidden_clauses))
 
 

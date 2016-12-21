@@ -1,7 +1,6 @@
 import numpy as np
 
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter
+from ConfigSpace import ConfigurationSpace, UniformFloatHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
@@ -42,7 +41,7 @@ class GaussRandomProjection(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         admissible_distortion = UniformFloatHyperparameter(
-            "eps", 0.2, 1.0, default=0.5)
+            "eps", 0.01, 1.0, default=0.5)
         cs = ConfigurationSpace()
         cs.add_hyperparameter(admissible_distortion)
         return cs
