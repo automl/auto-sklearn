@@ -121,6 +121,7 @@ class HoldoutEvaluator(AbstractEvaluator):
 def eval_holdout(queue, config, data, backend, seed, num_run,
                  subsample, with_predictions, all_scoring_functions,
                  output_y_test, iterative=False):
+    global evaluator
     evaluator = HoldoutEvaluator(data, backend, config,
                                  seed=seed,
                                  num_run=num_run,
@@ -130,7 +131,7 @@ def eval_holdout(queue, config, data, backend, seed, num_run,
                                  output_y_test=output_y_test)
 
     def signal_handler(signum, frame):
-        print('Received signal %s. Aborting Training!', str(signum))
+        print('Received signal %s. Aborting Training!' % str(signum))
         global evaluator
         duration, result, seed, run_info = evaluator.finish_up()
         # TODO use status type for stopped, but yielded a result
@@ -140,9 +141,9 @@ def eval_holdout(queue, config, data, backend, seed, num_run,
         pass
 
     if iterative:
-        signal.signal(15, signal_handler)
+        signal.signal(signal.SIGALRM, signal_handler)
         evaluator.iterative_fit()
-        signal.signal(15, empty_signal_handler)
+        signal.signal(signal.SIGALRM, empty_signal_handler)
         duration, result, seed, run_info = evaluator.finish_up()
     else:
         loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()

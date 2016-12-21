@@ -326,8 +326,7 @@ class AutoMLSMBO(object):
 
         return res
 
-    def run_smbo(self, max_iters=1000):
-        global evaluator
+    def run_smbo(self):
 
         self.watcher.start_task('SMBO')
 
