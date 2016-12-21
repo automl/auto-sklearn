@@ -2,6 +2,11 @@ language: python
 
 sudo: false
 
+env:
+  global:
+  - OPENBLAS_NUM_THREADS=1
+  - OMP_NUM_THREADS=1
+
 matrix:
   allow_failures:
   - os: osx
