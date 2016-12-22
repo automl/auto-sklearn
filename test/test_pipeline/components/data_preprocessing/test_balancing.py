@@ -122,7 +122,7 @@ class BalancingComponentTest(unittest.TestCase):
                     ExtraTreesPreprocessorClassification, 0.7142857142857143,
                     0.72180451127819545),
                  ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
-                    0.71844660194174748, 0.71014492753623182)]:
+                    0.71844660194174748, 0.70503597122302153)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
                 data_ = copy.copy(data)
