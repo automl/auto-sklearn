@@ -24,7 +24,7 @@ __all__ = [
 
 
 class MyDummyClassifier(DummyClassifier):
-    def __init__(self, configuration, random_states):
+    def __init__(self, configuration, random_state):
         self.configuration = configuration
         if configuration == 1:
             super(MyDummyClassifier, self).__init__(strategy="uniform")
@@ -36,7 +36,7 @@ class MyDummyClassifier(DummyClassifier):
             fit_params = {}
         return X, fit_params
 
-    def fit(self, X, y, sample_weight=None):
+    def fit(self, X, y, sample_weight=None, init_params=None):
         return super(MyDummyClassifier, self).fit(np.ones((X.shape[0], 1)), y,
                                                   sample_weight=sample_weight)
 
@@ -55,7 +55,7 @@ class MyDummyClassifier(DummyClassifier):
 
 
 class MyDummyRegressor(DummyRegressor):
-    def __init__(self, configuration, random_states):
+    def __init__(self, configuration, random_state):
         self.configuration = configuration
         if configuration == 1:
             super(MyDummyRegressor, self).__init__(strategy='mean')
@@ -67,7 +67,7 @@ class MyDummyRegressor(DummyRegressor):
             fit_params = {}
         return X, fit_params
 
-    def fit(self, X, y, sample_weight=None):
+    def fit(self, X, y, sample_weight=None, init_params=None):
         return super(MyDummyRegressor, self).fit(np.ones((X.shape[0], 1)), y,
                                                  sample_weight=sample_weight)
 
@@ -123,6 +123,20 @@ class AbstractEvaluator(object):
                 self.model_class = \
                     autosklearn.pipeline.classification.SimpleClassificationPipeline
             self.predict_function = self._predict_proba
+
+        categorical_mask = []
+        for feat in Datamanager.feat_type:
+            if feat.lower() == 'numerical':
+                categorical_mask.append(False)
+            elif feat.lower() == 'categorical':
+                categorical_mask.append(True)
+            else:
+                raise ValueError(feat)
+        if np.sum(categorical_mask) > 0:
+            self._init_params = {'one_hot_encoding:categorical_features':
+                                     categorical_mask}
+        else:
+            self._init_params = {}
 
         if num_run is None:
             num_run = 0
@@ -335,7 +349,7 @@ class AbstractEvaluator(object):
 
         with warnings.catch_warnings():
             warnings.showwarning = send_warnings_to_log
-            model = model.fit(X, y)
+            model = model.fit(X, y, init_params=self._init_params)
 
         return model
 

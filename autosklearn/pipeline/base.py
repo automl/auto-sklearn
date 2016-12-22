@@ -89,6 +89,7 @@ class BasePipeline(BaseEstimator):
                 preproc_params[name_] = self.configuration[
                     instantiated_hyperparameter]
 
+            preproc_params.update(init_params_per_method[preproc_name])
             preprocessor_object = preproc_class(
                 random_state=self.random_state, **preproc_params)
 

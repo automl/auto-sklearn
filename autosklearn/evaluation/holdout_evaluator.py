@@ -74,7 +74,8 @@ class HoldoutEvaluator(AbstractEvaluator):
         else:
             X_train, Y_train = self.X_train, self.Y_train
 
-        Xt, fit_params = self.model.pre_transform(X_train, Y_train)
+        Xt, fit_params = self.model.pre_transform(X_train, Y_train,
+                                                  init_params=self._init_params)
         if not self.model.estimator_supports_iterative_fit():
             print("Model does not support iterative_fit(), reverting to " \
                 "regular fit().")
