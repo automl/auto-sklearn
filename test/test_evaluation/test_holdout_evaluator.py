@@ -77,7 +77,7 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
             def predict_proba(self, y, batch_size=200):
                 return np.array([[0.1, 0.9]] * 23)
 
-            def fit(self, X, y):
+            def fit(self, X, y, init_params):
                 return self
 
         model = Dummy2()

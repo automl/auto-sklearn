@@ -326,8 +326,7 @@ class AutoMLSMBO(object):
 
         return res
 
-    def run_smbo(self, max_iters=1000):
-        global evaluator
+    def run_smbo(self):
 
         self.watcher.start_task('SMBO')
 
@@ -478,15 +477,25 @@ class AutoMLSMBO(object):
             meta_features_dict = {}
             metalearning_configurations = []
 
+        if self.resampling_strategy in ['partial-cv',
+                                        'partial-cv-iterative-fit']:
+            num_folds = self.resampling_strategy_args['folds']
+            instances = [[fold_number] for fold_number in range(num_folds)]
+        else:
+            instances = None
+
+        startup_time = self.watcher.wall_elapsed(self.dataset_name)
+        total_walltime_limit = self.total_walltime_limit - startup_time - 5
         self.scenario = Scenario({'cs': self.config_space,
                                   'cutoff-time': self.func_eval_time_limit,
                                   'memory-limit': self.memory_limit,
-                                  'wallclock-limit': self.total_walltime_limit,
+                                  'wallclock-limit': total_walltime_limit,
                                   #'instances': [[name] for name in meta_features_dict],
                                   'output-dir': self.backend.temporary_directory,
                                   'shared-model': self.shared_mode,
                                   'run-obj': 'quality',
-                                  'deterministic': 'true'})
+                                  'deterministic': 'true',
+                                  'instances': instances})
 
         # TODO rebuild target algorithm to be it's own target algorithm
         # evaluator, which takes into account that a run can be killed prior
@@ -539,9 +548,6 @@ class AutoMLSMBO(object):
         else:
             raise ValueError('Unknown acquisition function value %s!' %
                              self.acquisition_function)
-
-        smac.solver.stats.start_timing()
-        smac.solver.incumbent = smac.solver.initial_design.run()
 
         # Build a runtime model
         # runtime_rf = RandomForestWithInstances(types,
@@ -626,6 +632,7 @@ class AutoMLSMBO(object):
                 break
 
         self.runhistory = smac.solver.runhistory
+
         return runhistory
 
     def choose_next(self, smac):

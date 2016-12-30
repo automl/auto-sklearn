@@ -24,9 +24,9 @@ __all__ = [
 
 
 class MyDummyClassifier(DummyClassifier):
-    def __init__(self, config, include, exclude, random_state):
-        self.configuration = config
-        if self.configuration == 1:
+    def __init__(self, configuration, random_state):
+        self.configuration = configuration
+        if configuration == 1:
             super(MyDummyClassifier, self).__init__(strategy="uniform")
         else:
             super(MyDummyClassifier, self).__init__(strategy="most_frequent")
@@ -36,7 +36,7 @@ class MyDummyClassifier(DummyClassifier):
             fit_params = {}
         return X, fit_params
 
-    def fit(self, X, y, sample_weight=None):
+    def fit(self, X, y, sample_weight=None, init_params=None):
         return super(MyDummyClassifier, self).fit(np.ones((X.shape[0], 1)), y,
                                                   sample_weight=sample_weight)
 
@@ -55,9 +55,9 @@ class MyDummyClassifier(DummyClassifier):
 
 
 class MyDummyRegressor(DummyRegressor):
-    def __init__(self, config, include, exclude, random_state):
-        self.configuration = config
-        if self.configuration == 1:
+    def __init__(self, configuration, random_state):
+        self.configuration = configuration
+        if configuration == 1:
             super(MyDummyRegressor, self).__init__(strategy='mean')
         else:
             super(MyDummyRegressor, self).__init__(strategy='median')
@@ -67,7 +67,7 @@ class MyDummyRegressor(DummyRegressor):
             fit_params = {}
         return X, fit_params
 
-    def fit(self, X, y, sample_weight=None):
+    def fit(self, X, y, sample_weight=None, init_params=None):
         return super(MyDummyRegressor, self).fit(np.ones((X.shape[0], 1)), y,
                                                  sample_weight=sample_weight)
 
@@ -127,6 +127,20 @@ class AbstractEvaluator(object):
                 self.model_class = \
                     autosklearn.pipeline.classification.SimpleClassificationPipeline
             self.predict_function = self._predict_proba
+
+        categorical_mask = []
+        for feat in Datamanager.feat_type:
+            if feat.lower() == 'numerical':
+                categorical_mask.append(False)
+            elif feat.lower() == 'categorical':
+                categorical_mask.append(True)
+            else:
+                raise ValueError(feat)
+        if np.sum(categorical_mask) > 0:
+            self._init_params = {'one_hot_encoding:categorical_features':
+                                     categorical_mask}
+        else:
+            self._init_params = {}
 
         if num_run is None:
             num_run = 0
@@ -250,7 +264,10 @@ class AbstractEvaluator(object):
     def file_output(self, loss, Y_optimization_pred, Y_valid_pred, Y_test_pred):
         seed = self.seed
 
-        if self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
+        # self.Y_optimization can be None if we use partial-cv, then,
+        # obviously no output should be saved.
+        if self.Y_optimization is not None and \
+                self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
             return 2.0, "Targets %s and prediction %s don't have the same " \
             "length. Probably training didn't finish" % (
                 self.Y_optimization.shape, Y_optimization_pred.shape)
@@ -352,7 +369,7 @@ class AbstractEvaluator(object):
 
         with warnings.catch_warnings():
             warnings.showwarning = send_warnings_to_log
-            model = model.fit(X, y)
+            model = model.fit(X, y, init_params=self._init_params)
 
         return model
 

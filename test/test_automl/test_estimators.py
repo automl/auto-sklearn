@@ -39,7 +39,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+        automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
                                        tmp_folder=output,
                                        output_folder=output)
@@ -48,6 +48,25 @@ class EstimatorTest(Base, unittest.TestCase):
 
         self.assertGreaterEqual(score, 0.8)
         self.assertEqual(automl._automl._automl._task, MULTICLASS_CLASSIFICATION)
+
+        del automl
+        self._tearDown(output)
+
+    def test_fit_partial_cv(self):
+
+        output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_partial_cv')
+        self._setUp(output)
+
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        automl = AutoSklearnClassifier(time_left_for_this_task=20,
+                                       per_run_time_limit=5,
+                                       tmp_folder=output,
+                                       output_folder=output,
+                                       resampling_strategy='partial-cv',
+                                       ensemble_size=0,
+                                       delete_tmp_folder_after_terminate=False)
+        automl.fit(X_train, Y_train)
+        print(automl._automl._automl.runhistory_.data)
 
         del automl
         self._tearDown(output)
@@ -98,7 +117,7 @@ class EstimatorTest(Base, unittest.TestCase):
         Y_train = Y_train + 1
         Y_test = Y_test + 1
 
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+        automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
                                        output_folder=output,
                                        tmp_folder=output,
@@ -133,7 +152,7 @@ class EstimatorTest(Base, unittest.TestCase):
         backend = Backend(context)
         backend.save_model(dummy, 30, 1)
 
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+        automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
                                        output_folder=output,
                                        tmp_folder=output,
@@ -168,7 +187,7 @@ class EstimatorTest(Base, unittest.TestCase):
         output = os.path.join(self.test_dir, '..', '.tmp_grid_scores')
         self._setUp(output)
 
-        cls = AutoSklearnClassifier(time_left_for_this_task=15,
+        cls = AutoSklearnClassifier(time_left_for_this_task=20,
                                     per_run_time_limit=5,
                                     output_folder=output,
                                     tmp_folder=output,
@@ -207,7 +226,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self._setUp(output)
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
 
-        cls = AutoSklearnClassifier(time_left_for_this_task=15,
+        cls = AutoSklearnClassifier(time_left_for_this_task=20,
                                     per_run_time_limit=5,
                                     output_folder=output,
                                     tmp_folder=output,
@@ -276,7 +295,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+        automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
                                        tmp_folder=output,
                                        output_folder=output)

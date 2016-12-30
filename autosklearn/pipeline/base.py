@@ -315,7 +315,7 @@ class BasePipeline(Pipeline):
                 configuration[hp_name] = self.configuration_[hp_name]
 
         configuration_string = ''.join(
-            ['config={\n  ',
+            ['configuration={\n  ',
              ',\n  '.join(["'%s': %s" % (hp_name, repr(configuration[hp_name]))
                                          for hp_name in sorted(configuration)]),
              '}'])

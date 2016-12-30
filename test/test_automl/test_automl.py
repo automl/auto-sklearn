@@ -86,6 +86,7 @@ class AutoMLTest(Base, unittest.TestCase):
     def test_raises_if_no_models(self):
         self.automl._backend.load_ensemble.return_value = None
         self.automl._backend.load_all_models.return_value = []
+        self.automl._resampling_strategy = 'holdout'
 
         self.assertRaises(ValueError, self.automl._load_models)
 
@@ -95,7 +96,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         backend_api = backend.create(output, output)
-        automl = autosklearn.automl.AutoML(backend_api, 15, 5)
+        automl = autosklearn.automl.AutoML(backend_api, 20, 5)
         automl.fit(X_train, Y_train)
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
@@ -122,7 +123,7 @@ class AutoMLTest(Base, unittest.TestCase):
         Y_test = data[1][700:]
 
         backend_api = backend.create(output, output)
-        automl = autosklearn.automl.AutoML(backend_api, 15, 5)
+        automl = autosklearn.automl.AutoML(backend_api, 20, 5)
         automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION)
         self.assertEqual(automl._task, BINARY_CLASSIFICATION)
 
@@ -143,7 +144,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
         backend_api = backend.create(output, output)
         auto = autosklearn.automl.AutoML(
-            backend_api, 15, 5,
+            backend_api, 20, 5,
             initial_configurations_via_metalearning=25,
             seed=100)
         auto.fit_automl_dataset(dataset)
@@ -196,7 +197,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
             backend_api = backend.create(output, output)
             auto = autosklearn.automl.AutoML(
-                backend_api, 15, 5,
+                backend_api, 20, 5,
                 initial_configurations_via_metalearning=25)
             setup_logger()
             auto._logger = get_logger('test_do_dummy_predictions')

@@ -2,9 +2,9 @@
 from __future__ import print_function
 
 from collections import defaultdict
-import hashlib
 import io
 import os
+import unittest.mock
 
 
 from ConfigSpace.io import pcs
@@ -13,6 +13,7 @@ import numpy.ma as ma
 import scipy.stats
 from sklearn.base import BaseEstimator
 from smac.tae.execute_ta_run import StatusType
+from smac.stats.stats import Stats
 from sklearn.grid_search import _CVScoreTuple
 
 from autosklearn.constants import *
@@ -231,14 +232,25 @@ class AutoML(BaseEstimator):
 
     def _do_dummy_prediction(self, datamanager, num_run):
 
+        # When using partial-cv it makes no sense to do dummy predictions
+        if self._resampling_strategy in ['partial-cv',
+                                         'partial-cv-iterative-fit']:
+            return num_run
+
         self._logger.info("Starting to create dummy predictions.")
-        # time_limit = int(self._time_for_task / 6.)
         memory_limit = int(self._ml_memory_limit)
+        scenario_mock = unittest.mock.Mock()
+        scenario_mock.wallclock_limit = self._time_for_task
+        # This stats object is a hack - maybe the SMAC stats object should
+        # already be generated here!
+        stats = Stats(scenario_mock)
+        stats.start_timing()
         ta = ExecuteTaFuncWithQueue(backend=self._backend,
                                     autosklearn_seed=self._seed,
                                     resampling_strategy=self._resampling_strategy,
                                     initial_num_run=num_run,
                                     logger=self._logger,
+                                    stats=stats,
                                     **self._resampling_strategy_arguments)
 
         status, cost, runtime, additional_info = \
@@ -249,14 +261,6 @@ class AutoML(BaseEstimator):
             self._logger.error('Error creating dummy predictions:%s ',
                                additional_info)
 
-        #status, cost, runtime, additional_info = \
-        #    ta.run(2, cutoff=time_limit, memory_limit=memory_limit)
-        #if status == StatusType.SUCCESS:
-        #    self._logger.info("Finished creating dummy prediction 2/2.")
-        #else:
-        #    self._logger.error('Error creating dummy prediction 2/2 %s',
-        #                       additional_info)
-
         return ta.num_run
 
     def _fit(self, datamanager):
@@ -266,13 +270,18 @@ class AutoML(BaseEstimator):
 
         # Check arguments prior to doing anything!
         if self._resampling_strategy not in ['holdout', 'holdout-iterative-fit',
-                                             'cv', 'nested-cv', 'partial-cv']:
+                                             'cv', 'partial-cv',
+                                             'partial-cv-iterative-fit']:
             raise ValueError('Illegal resampling strategy: %s' %
                              self._resampling_strategy)
-        if self._resampling_strategy == 'partial-cv' and \
-                self._ensemble_size != 0:
-            raise ValueError("Resampling strategy partial-cv cannot be used "
-                             "together with ensembles.")
+        if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit'] \
+                and self._ensemble_size != 0:
+            raise ValueError("Resampling strategy %s cannot be used "
+                             "together with ensembles." % self._resampling_strategy)
+        if self._resampling_strategy in ['partial-cv', 'cv',
+                                         'partial-cv-iterative-fit'] and \
+                not 'folds' in self._resampling_strategy_arguments:
+            self._resampling_strategy_arguments['folds'] = 5
 
         acquisition_functions = ['EI', 'EIPS']
         if self.acquisition_function not in acquisition_functions:
@@ -399,6 +408,9 @@ class AutoML(BaseEstimator):
                                     acquisition_function=self.acquisition_function,
                                     shared_mode=self._shared_mode)
             self.runhistory_ = _proc_smac.run_smbo()
+            runhistory_filename = os.path.join(self._backend.temporary_directory,
+                                               'runhistory.json',)
+            self.runhistory_.save_json(runhistory_filename)
 
         self._proc_ensemble = None
         self._load_models()
@@ -445,7 +457,7 @@ class AutoML(BaseEstimator):
                         ['holdout', 'holdout-iterative-fit']:
             raise NotImplementedError(
                 'Predict is currently only implemented for resampling '
-                'strategy holdout.')
+                'strategy %s.' % self._resampling_strategy)
 
         if self.models_ is None or len(self.models_) == 0 or \
                 self.ensemble_ is None:
@@ -482,6 +494,10 @@ class AutoML(BaseEstimator):
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
+        if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
+            raise ValueError('Cannot call fit_ensemble with resampling '
+                             'strategy %s.' % self._resampling_strategy)
+
         if self._logger is None:
             self._logger = self._get_logger(dataset_name)
 
@@ -551,7 +567,8 @@ class AutoML(BaseEstimator):
         else:
             self.models_ = self._backend.load_all_models(seed)
 
-        if len(self.models_) == 0:
+        if len(self.models_) == 0 and self._resampling_strategy not in \
+                ['partial-cv', 'partial-cv-iterative-fit']:
             raise ValueError('No models fitted!')
 
     def score(self, X, y):
@@ -608,6 +625,10 @@ class AutoML(BaseEstimator):
         # mean_score_time - auto-sklearn does not store the score time
         # std_score_time - auto-sklearn does not store the score time
         # TODO: add those arguments
+
+        # TODO remove this restriction!
+        if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
+            raise ValueError('Cannot call cv_results when using partial-cv!')
 
         parameter_dictionaries = dict()
         masks = dict()
