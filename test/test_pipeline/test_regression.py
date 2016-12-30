@@ -75,95 +75,36 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         limit = 4000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space()
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
 
-        self._test_configurations(cs)
+        print(cs)
+        cs.seed(1)
 
-    def test_configurations_signed_data(self):
-        # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 1024
-        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
-
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
-            dataset_properties={'signed': True})
-
-        self._test_configurations(configurations_space=cs)
-
-    def test_configurations_sparse(self):
-        # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 1024
-        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
-
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
-            dataset_properties={'sparse': True},
-            # TODO remove in sklearn 0.18
-            exclude={'regressor': 'gaussian_process'})
-
-        self._test_configurations(cs, make_sparse=True)
-
-    def _test_configurations(self, configurations_space, make_sparse=False,
-                             data=None, init_params=None):
-        # Use a limit of ~4GiB
-        limit = 4000 * 1024 * 1024
-        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
-
-        configurations_space.seed(1)
-
-        print(configurations_space)
         for i in range(10):
-            config = configurations_space.sample_configuration()
+            config = cs.sample_configuration()
             config._populate_values()
+            if config['regressor:sgd:n_iter'] is not None:
+                config._values['regressor:sgd:n_iter'] = 5
 
-            # Restrict configurations which could take too long on travis-ci
-            restrictions = {'regressor:passive_aggressive:n_iter': 5,
-                            'regressor:sgd:n_iter': 5,
-                            'regressor:adaboost:n_estimators': 50,
-                            'regressor:adaboost:max_depth': 1,
-                            'preprocessor:kernel_pca:n_components': 10,
-                            'preprocessor:kitchen_sinks:n_components': 50,
-                            'regressor:proj_logit:max_epochs': 1,
-                            'regressor:libsvm_svc:degree': 2,
-                            'regressor:libsvm_svr:degree': 2,
-                            'preprocessor:truncatedSVD:target_dim': 10,
-                            'preprocessor:polynomial:degree': 2,
-                            'regressor:lda:n_components': 10}
-
-            for restrict_parameter in restrictions:
-                restrict_to = restrictions[restrict_parameter]
-                if restrict_parameter in config and \
-                                config[restrict_parameter] is not None:
-                    config._values[restrict_parameter] = restrict_to
-
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
+            cls = SimpleRegressionPipeline(config, random_state=1)
             print(config)
-
-            if data is None:
-                X_train, Y_train, X_test, Y_test = get_dataset(
-                    dataset='boston', make_sparse=make_sparse, add_NaNs=True)
-            else:
-                X_train = data['X_train'].copy()
-                Y_train = data['Y_train'].copy()
-                X_test = data['X_test'].copy()
-                Y_test = data['Y_test'].copy()
-
-            cls = SimpleRegressionPipeline(random_state=1)
-            cls.set_hyperparameters(config)
             try:
-                init_params_ = copy.deepcopy(init_params)
-                cls.fit(X_train, Y_train, init_params=init_params_)
+                cls.fit(X_train, Y_train)
+                X_test_ = X_test.copy()
                 predictions = cls.predict(X_test)
-            except MemoryError as e:
-                continue
+                self.assertIsInstance(predictions, np.ndarray)
+                predicted_probabiliets = cls.predict(X_test_)
+                self.assertIsInstance(predicted_probabiliets, np.ndarray)
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
                         e.args[0]:
                     continue
-                elif "removed all features" in e.args[0]:
-                    continue
                 elif "all features are discarded" in e.args[0]:
                     continue
-                elif "Numerical problems in QDA" in e.args[0]:
+                elif "removed all features" in e.args[0]:
                     continue
-                elif 'Bug in scikit-learn' in e.args[0]:
+                elif "Bug in scikit-learn:" in e.args[0]:
                     continue
                 else:
                     print(config)
@@ -180,34 +121,170 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     continue
                 else:
                     print(config)
+                    print(traceback.format_exc())
                     raise e
             except UserWarning as e:
                 if "FastICA did not converge" in e.args[0]:
                     continue
                 else:
                     print(config)
+                    print(traceback.format_exc())
+                    raise e
+            except MemoryError as e:
+                continue
+
+    def test_configurations_signed_data(self):
+        # Use a limit of ~4GiB
+        limit = 4000 * 1024 * 1024
+        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+            dataset_properties={'signed': True})
+
+        print(cs)
+
+        for i in range(10):
+            config = cs.sample_configuration()
+            config._populate_values()
+            if 'classifier:passive_aggressive:n_iter' in config and \
+                            config[
+                                'classifier:passive_aggressive:n_iter'] is not None:
+                config._values['classifier:passive_aggressive:n_iter'] = 5
+            if 'classifier:sgd:n_iter' in config and \
+                            config['classifier:sgd:n_iter'] is not None:
+                config._values['classifier:sgd:n_iter'] = 5
+
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
+            cls = SimpleRegressionPipeline(config, random_state=1)
+            print(config)
+            try:
+                cls.fit(X_train, Y_train)
+                X_test_ = X_test.copy()
+                predictions = cls.predict(X_test)
+                self.assertIsInstance(predictions, np.ndarray)
+                predicted_probabiliets = cls.predict(X_test_)
+                self.assertIsInstance(predicted_probabiliets, np.ndarray)
+            except ValueError as e:
+                if "Floating-point under-/overflow occurred at epoch" in \
+                        e.args[0] or \
+                                "removed all features" in e.args[0] or \
+                                "all features are discarded" in e.args[0] or \
+                        "Bug in scikit-learn" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    print(traceback.format_exc())
+                    raise e
+            except RuntimeWarning as e:
+                if "invalid value encountered in sqrt" in e.args[0]:
+                    continue
+                elif "divide by zero encountered in" in e.args[0]:
+                    continue
+                elif "invalid value encountered in divide" in e.args[0]:
+                    continue
+                elif "invalid value encountered in true_divide" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    print(traceback.format_exc())
+                    raise e
+            except UserWarning as e:
+                if "FastICA did not converge" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    print(traceback.format_exc())
+                    raise e
+            except MemoryError as e:
+                continue
+
+    def test_configurations_sparse(self):
+        # Use a limit of ~3GiB
+        limit = 3000 * 1024 * 1024
+        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+            dataset_properties={'sparse': True})
+
+        for i in range(10):
+            config = cs.sample_configuration()
+            config._populate_values()
+            if 'classifier:passive_aggressive:n_iter' in config and \
+                            config[
+                                'classifier:passive_aggressive:n_iter'] is not None:
+                config._values['classifier:passive_aggressive:n_iter'] = 5
+            if 'classifier:sgd:n_iter' in config and \
+                            config['classifier:sgd:n_iter'] is not None:
+                config._values['classifier:sgd:n_iter'] = 5
+
+            print(config)
+            X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes',
+                                                           make_sparse=True)
+            cls = SimpleRegressionPipeline(config, random_state=1)
+            try:
+                cls.fit(X_train, Y_train)
+                predictions = cls.predict(X_test)
+            except ValueError as e:
+                if "Floating-point under-/overflow occurred at epoch" in \
+                        e.args[0] or \
+                                "removed all features" in e.args[0] or \
+                                "all features are discarded" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    traceback.print_tb(sys.exc_info()[2])
+                    raise e
+            except RuntimeWarning as e:
+                if "invalid value encountered in sqrt" in e.args[0]:
+                    continue
+                elif "divide by zero encountered in" in e.args[0]:
+                    continue
+                elif "invalid value encountered in divide" in e.args[0]:
+                    continue
+                elif "invalid value encountered in true_divide" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    traceback.print_tb(sys.exc_info()[2])
+                    raise e
+            except UserWarning as e:
+                if "FastICA did not converge" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    traceback.print_tb(sys.exc_info()[2])
+                    raise e
+            except Exception as e:
+                if "Multiple input features cannot have the same target value" in e.args[0]:
+                    continue
+                else:
+                    print(config)
+                    traceback.print_tb(sys.exc_info()[2])
                     raise e
 
     def test_default_configuration(self):
         for i in range(2):
+            cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
+            default = cs.get_default_configuration()
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes')
-            auto = SimpleRegressionPipeline()
+            auto = SimpleRegressionPipeline(default)
             auto = auto.fit(X_train, Y_train)
             predictions = auto.predict(copy.deepcopy(X_test))
             # The lower the worse
             r2_score = sklearn.metrics.r2_score(Y_test, predictions)
-            self.assertAlmostEqual(0.417, r2_score,
-                                   places=3)
+            self.assertAlmostEqual(0.41732302035060087, r2_score)
             model_score = auto.score(copy.deepcopy(X_test), Y_test)
-            self.assertAlmostEqual(model_score, r2_score, places=5)
+            self.assertEqual(model_score, r2_score)
 
     def test_repr(self):
-        representation = repr(SimpleRegressionPipeline())
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
+        default = cs.get_default_configuration()
+        representation = repr(SimpleRegressionPipeline(default))
         cls = eval(representation)
         self.assertIsInstance(cls, SimpleRegressionPipeline)
 
     def test_get_hyperparameter_search_space(self):
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space()
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space()
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
@@ -215,34 +292,34 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         self.assertEqual(len(hyperparameters) - 5, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
             include={'regressor': ['random_forest']})
         self.assertEqual(cs.get_hyperparameter('regressor:__choice__'),
             CategoricalHyperparameter('regressor:__choice__', ['random_forest']))
 
         # TODO add this test when more than one regressor is present
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
             exclude={'regressor': ['random_forest']})
         self.assertNotIn('random_forest', str(cs))
 
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
             include={'preprocessor': ['pca']})
         self.assertEqual(cs.get_hyperparameter('preprocessor:__choice__'),
             CategoricalHyperparameter('preprocessor:__choice__', ['pca']))
 
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
             exclude={'preprocessor': ['no_preprocessing']})
         self.assertNotIn('no_preprocessing', str(cs))
 
     def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(
             self):
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
             include={'preprocessor': ['densifier']},
             dataset_properties={'sparse': True})
         self.assertEqual(cs.get_hyperparameter('regressor:__choice__').default,
                          'gradient_boosting')
 
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
             include={'preprocessor': ['nystroem_sampler']})
         self.assertEqual(cs.get_hyperparameter('regressor:__choice__').default,
                          'sgd')
@@ -250,7 +327,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(ValueError, "Cannot find a legal default "
                                             "configuration.",
-                                SimpleRegressionPipeline().get_hyperparameter_search_space,
+                                SimpleRegressionPipeline.get_hyperparameter_search_space,
                                 include={'regressor': ['random_forest'],
                                          'preprocessor': ['kitchen_sinks']})
 
@@ -258,7 +335,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         # data are located behind the densifier
         self.assertRaisesRegexp(ValueError, "Cannot find a legal default "
                                             "configuration",
-                                SimpleRegressionPipeline().get_hyperparameter_search_space,
+                                SimpleRegressionPipeline.get_hyperparameter_search_space,
                                 include={'regressor': ['ridge_regression'],
                                          'preprocessor': ['densifier']},
                                 dataset_properties={'sparse': True})
@@ -297,36 +374,39 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     """
 
     def test_predict_batched(self):
-        regressor = SimpleRegressionPipeline()
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+            include={'regressor': ['decision_tree']})
+        default = cs.get_default_configuration()
+        cls = SimpleRegressionPipeline(default)
 
-        X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
-        regressor.fit(X_train, Y_train)
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes')
+        cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
-        prediction_ = regressor.predict(X_test_)
-        mock_predict = unittest.mock.Mock(wraps=regressor.steps[-1][-1].predict)
-        regressor.steps[-1][-1].predict = mock_predict
-        prediction = regressor.predict(X_test, batch_size=20)
-        self.assertEqual((356,), prediction.shape)
-        self.assertEqual(18, mock_predict.call_count)
+        prediction_ = cls.predict(X_test_)
+        cls_predict = unittest.mock.Mock(wraps=cls.pipeline_)
+        cls.pipeline_ = cls_predict
+        prediction = cls.predict(X_test, batch_size=20)
+        self.assertEqual((292,), prediction.shape)
+        self.assertEqual(15, cls_predict.predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_batched_sparse(self):
-        regressor = SimpleRegressionPipeline()
-        cs = regressor.get_hyperparameter_search_space(
-            dataset_properties={'sparse': True})
+        cs = SimpleRegressionPipeline.get_hyperparameter_search_space(
+            dataset_properties={'sparse': True},
+            include={'regressor': ['decision_tree']})
         default = cs.get_default_configuration()
-        regressor.set_hyperparameters(default)
+        cls = SimpleRegressionPipeline(default)
 
-        X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston',
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes',
                                                        make_sparse=True)
-        regressor.fit(X_train, Y_train)
+        cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
-        prediction_ = regressor.predict(X_test_)
-        mock_predict = unittest.mock.Mock(wraps=regressor.steps[-1][-1].predict)
-        regressor.steps[-1][-1].predict = mock_predict
-        prediction = regressor.predict(X_test, batch_size=20)
-        self.assertEqual((356,), prediction.shape)
-        self.assertEqual(18, mock_predict.call_count)
+        prediction_ = cls.predict(X_test_)
+        cls_predict = unittest.mock.Mock(wraps=cls.pipeline_)
+        cls.pipeline_ = cls_predict
+        prediction = cls.predict(X_test, batch_size=20)
+        self.assertEqual((292,), prediction.shape)
+        self.assertEqual(15, cls_predict.predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
     @unittest.skip("test_check_random_state Not yet Implemented")

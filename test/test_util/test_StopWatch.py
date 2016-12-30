@@ -9,6 +9,7 @@
 from __future__ import print_function
 import time
 import unittest
+import unittest.mock
 
 from autosklearn.util import StopWatch
 
@@ -17,29 +18,24 @@ class Test(unittest.TestCase):
     _multiprocess_can_split_ = True
 
     def test_stopwatch_overhead(self):
-        # CPU overhead
-        start = time.clock()
-        watch = StopWatch()
-        for i in range(1, 100000):
-            watch.start_task('task_%d' % i)
-            watch.stop_task('task_%d' % i)
-        stop = time.clock()
-        dur = stop - start
-        cpu_overhead = dur - watch.cpu_sum()
-        self.assertLess(cpu_overhead, 1.5)
 
         # Wall Overhead
         start = time.time()
+        cpu_start = time.clock()
         watch = StopWatch()
-        for i in range(1, 100000):
+        for i in range(1, 1000):
             watch.start_task('task_%d' % i)
             watch.stop_task('task_%d' % i)
+        cpu_stop = time.clock()
         stop = time.time()
         dur = stop - start
+        cpu_dur = cpu_stop - cpu_start
+        cpu_overhead = cpu_dur - watch.cpu_sum()
         wall_overhead = dur - watch.wall_sum()
 
-        self.assertLess(wall_overhead, 2)
-        self.assertLess(cpu_overhead, 2*wall_overhead)
+        self.assertLess(cpu_overhead, 1)
+        self.assertLess(wall_overhead, 1)
+        self.assertLess(watch.cpu_sum(), 2 * watch.wall_sum())
 
 
 if __name__ == '__main__':
