@@ -4,6 +4,7 @@ import signal
 import numpy as np
 from smac.tae.execute_ta_run import StatusType
 
+from ConfigSpace import Configuration
 from autosklearn.evaluation.resampling import get_CV_fold
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 
@@ -107,10 +108,14 @@ class CVEvaluator(AbstractEvaluator):
         return loss, opt_pred, valid_pred, test_pred
 
     def _partial_fit_and_predict(self, fold):
-        model = self.model_class(config=self.configuration,
-                                 random_state=self.seed,
-                                 include=self.include,
-                                 exclude=self.exclude)
+        if not isinstance(self.configuration, Configuration):
+            model = self.model_class(configuration=self.configuration,
+                                          random_state=self.seed)
+        else:
+            model = self.model_class(config=self.configuration,
+                                     random_state=self.seed,
+                                     include=self.include,
+                                     exclude=self.exclude)
 
         train_indices, test_indices = self.get_train_test_split(fold)
 

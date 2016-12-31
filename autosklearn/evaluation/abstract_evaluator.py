@@ -149,10 +149,8 @@ class AbstractEvaluator(object):
         self.subsample = subsample
 
         if not isinstance(self.configuration, Configuration):
-            self.model = self.model_class(config=self.configuration,
-                                          random_state=self.seed,
-                                          include=self.include,
-                                          exclude=self.exclude)
+            self.model = self.model_class(configuration=self.configuration,
+                                          random_state=self.seed)
         else:
             dataset_properties = {'task': self.task_type,
                                   'sparse': self.D.info['is_sparse'] == 1,

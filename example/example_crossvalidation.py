@@ -18,11 +18,14 @@ def main():
         tmp_folder='/tmp/autoslearn_cv_example_tmp',
         output_folder='/tmp/autosklearn_cv_example_out',
         delete_tmp_folder_after_terminate=False,
-        resampling_strategy='cv', resampling_strategy_arguments={'folds': 5})
+        resampling_strategy='partial-cv-iterative-fit', ensemble_size=0,
+        resampling_strategy_arguments={'folds': 5})
 
     # fit() changes the data in place, but refit needs the original data. We
     # therefore copy the data. In practice, one should reload the data
     automl.fit(X_train.copy(), y_train.copy(), dataset_name='digits')
+    import time
+    time.sleep(600)
     # During fit(), models are fit on individual cross-validation folds. To use
     # all available data, we call refit() which trains all models in the
     # final ensemble on the whole dataset.
