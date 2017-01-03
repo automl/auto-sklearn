@@ -101,7 +101,6 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
 
         configurations_space.seed(1)
 
-        print(configurations_space)
         for i in range(10):
             config = configurations_space.sample_configuration()
             config._populate_values()
@@ -124,8 +123,6 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 if restrict_parameter in config and \
                                 config[restrict_parameter] is not None:
                     config._values[restrict_parameter] = restrict_to
-
-            print(config)
 
             if data is None:
                 X_train, Y_train, X_test, Y_test = get_dataset(
