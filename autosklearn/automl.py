@@ -414,7 +414,7 @@ class AutoML(BaseEstimator):
 
         # Wait until the ensemble process is finished to avoid shutting down
         # while the ensemble builder tries to access the data
-        if self._proc_ensemble is not None:
+        if self._proc_ensemble is not None and self._ensemble_size > 0:
             self._proc_ensemble.join()
 
         self._proc_ensemble = None
