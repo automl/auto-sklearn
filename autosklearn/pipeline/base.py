@@ -1,4 +1,5 @@
 from abc import ABCMeta
+from collections import defaultdict
 
 import numpy as np
 from ConfigSpace import Configuration
@@ -18,9 +19,15 @@ class BasePipeline(Pipeline):
     __metaclass__ = ABCMeta
 
     def __init__(self, config=None, pipeline=None, dataset_properties=None,
-                 include=None, exclude=None, random_state=None):
+                 include=None, exclude=None, random_state=None,
+                 init_params=None):
         if pipeline is None:
-            self.steps = self._get_pipeline()
+            init_params_per_method = defaultdict(dict)
+            if init_params is not None and len(init_params) != 0:
+                for init_param, value in init_params.items():
+                    method, param = init_param.split(":")
+                    init_params_per_method[method][param] = value
+            self.steps = self._get_pipeline(init_params_per_method)
         else:
             self.steps = pipeline
 
@@ -345,7 +352,7 @@ class BasePipeline(Pipeline):
 
         return rval
 
-    def _get_pipeline(self):
+    def _get_pipeline(self, init_params=None):
         raise NotImplementedError()
 
     def _get_estimator_hyperparameter_name(self):

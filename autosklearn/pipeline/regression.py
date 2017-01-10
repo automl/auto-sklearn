@@ -69,12 +69,14 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
     """
     def __init__(self, config=None, pipeline=None, dataset_properties=None,
-                 include=None, exclude=None, random_state=None):
+                 include=None, exclude=None, random_state=None,
+                 init_params=None):
         self._output_dtype = np.float32
         super(SimpleRegressionPipeline, self).__init__(
             config=config, pipeline=pipeline,
             dataset_properties=dataset_properties,
-            include=include, exclude=exclude, random_state=random_state)
+            include=include, exclude=exclude, random_state=random_state,
+            init_params=init_params)
 
     def pre_transform(self, X, Y, fit_params=None, init_params=None):
         X, fit_params = super(SimpleRegressionPipeline, self).pre_transform(
@@ -255,14 +257,23 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     def _get_estimator_components(self):
         return regression_components._regressors
 
-    def _get_pipeline(self):
+    def _get_pipeline(self, init_params=None):
         steps = []
 
         default_dataset_properties = {'target_type': 'regression'}
 
         # Add the always active preprocessing components
+        # Add the always active preprocessing components
+        print(init_params)
+        if init_params is not None and 'one_hot_encoding' in init_params:
+            ohe_init_params = init_params['one_hot_encoding']
+            if 'categorical_features' in ohe_init_params:
+                categorical_features = ohe_init_params['categorical_features']
+        else:
+            categorical_features = None
+
         steps.extend(
-            [["one_hot_encoding", OneHotEncoder()],
+            [["one_hot_encoding", OneHotEncoder(categorical_features=categorical_features)],
             ["imputation", Imputation()],
              ["rescaling", rescaling_components.RescalingChoice(
                  default_dataset_properties)]])

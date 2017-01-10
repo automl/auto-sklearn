@@ -73,11 +73,12 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
     """
 
     def __init__(self, config=None, pipeline=None, dataset_properties=None,
-                 include=None, exclude=None, random_state=None):
+                 include=None, exclude=None, random_state=None,
+                 init_params=None):
         self._output_dtype = np.int32
         super(SimpleClassificationPipeline, self).__init__(
             config, pipeline, dataset_properties, include, exclude,
-            random_state)
+            random_state, init_params)
 
     def pre_transform(self, X, y, fit_params=None, init_params=None):
         self.num_targets = 1 if len(y.shape) == 1 else y.shape[1]
@@ -272,14 +273,21 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         self.dataset_properties_ = dataset_properties
         return cs
 
-    def _get_pipeline(self):
+    def _get_pipeline(self, init_params=None):
         steps = []
 
         default_dataset_properties = {'target_type': 'classification'}
 
         # Add the always active preprocessing components
+        if init_params is not None and 'one_hot_encoding' in init_params:
+            ohe_init_params = init_params['one_hot_encoding']
+            if 'categorical_features' in ohe_init_params:
+                categorical_features = ohe_init_params['categorical_features']
+        else:
+            categorical_features = None
+
         steps.extend(
-            [["one_hot_encoding", OneHotEncoder()],
+            [["one_hot_encoding", OneHotEncoder(categorical_features=categorical_features)],
              ["imputation", Imputation()],
              ["rescaling",
               rescaling_components.RescalingChoice(default_dataset_properties)],
