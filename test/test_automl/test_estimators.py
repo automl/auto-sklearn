@@ -40,10 +40,12 @@ class EstimatorTest(Base, unittest.TestCase):
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         automl = AutoSklearnClassifier(time_left_for_this_task=60,
-                                       per_run_time_limit=5,
+                                       per_run_time_limit=10,
                                        tmp_folder=output,
                                        output_folder=output)
         automl.fit(X_train, Y_train)
+        print(automl.show_models(), flush=True)
+        print(automl.cv_results_, flush=True)
         score = automl.score(X_test, Y_test)
 
         self.assertGreaterEqual(score, 0.8)
@@ -59,14 +61,13 @@ class EstimatorTest(Base, unittest.TestCase):
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         automl = AutoSklearnClassifier(time_left_for_this_task=60,
-                                       per_run_time_limit=5,
+                                       per_run_time_limit=10,
                                        tmp_folder=output,
                                        output_folder=output,
                                        resampling_strategy='partial-cv',
                                        ensemble_size=0,
                                        delete_tmp_folder_after_terminate=False)
         automl.fit(X_train, Y_train)
-        print(automl._automl._automl.runhistory_.data)
 
         del automl
         self._tearDown(output)
@@ -118,7 +119,7 @@ class EstimatorTest(Base, unittest.TestCase):
         Y_test = Y_test + 1
 
         automl = AutoSklearnClassifier(time_left_for_this_task=60,
-                                       per_run_time_limit=5,
+                                       per_run_time_limit=10,
                                        output_folder=output,
                                        tmp_folder=output,
                                        shared_mode=True,
@@ -153,7 +154,7 @@ class EstimatorTest(Base, unittest.TestCase):
         backend.save_model(dummy, 30, 1)
 
         automl = AutoSklearnClassifier(time_left_for_this_task=60,
-                                       per_run_time_limit=5,
+                                       per_run_time_limit=10,
                                        output_folder=output,
                                        tmp_folder=output,
                                        shared_mode=True,
@@ -167,6 +168,7 @@ class EstimatorTest(Base, unittest.TestCase):
                             dataset_name='iris',
                             ensemble_size=20,
                             ensemble_nbest=50)
+        print(automl.show_models(), flush=True)
 
         predictions = automl.predict(X_test)
         score = sklearn.metrics.accuracy_score(Y_test, predictions)
@@ -188,7 +190,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self._setUp(output)
 
         cls = AutoSklearnClassifier(time_left_for_this_task=60,
-                                    per_run_time_limit=5,
+                                    per_run_time_limit=10,
                                     output_folder=output,
                                     tmp_folder=output,
                                     shared_mode=False,
@@ -227,7 +229,7 @@ class EstimatorTest(Base, unittest.TestCase):
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
 
         cls = AutoSklearnClassifier(time_left_for_this_task=60,
-                                    per_run_time_limit=5,
+                                    per_run_time_limit=10,
                                     output_folder=output,
                                     tmp_folder=output,
                                     shared_mode=False,
@@ -296,10 +298,12 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         automl = AutoSklearnClassifier(time_left_for_this_task=60,
-                                       per_run_time_limit=5,
+                                       per_run_time_limit=10,
                                        tmp_folder=output,
                                        output_folder=output)
         automl.fit(X_train, Y_train)
+        print(automl.show_models(), flush=True)
+        print(automl.cv_results_, flush=True)
 
         initial_predictions = automl.predict(X_test)
         initial_accuracy = sklearn.metrics.accuracy_score(Y_test,

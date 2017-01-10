@@ -5,7 +5,7 @@ set -e
 mkdir -p $TEST_DIR
 
 cwd=`pwd`
-test_dir=$cwd/test
+test_dir=$cwd/test/test_automl
 
 cd $TEST_DIR
 
