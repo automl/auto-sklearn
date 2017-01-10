@@ -18,7 +18,6 @@ from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.estimators import AutoMLClassifier
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import *
-30
 sys.path.append(os.path.dirname(__file__))
 from base import Base
 
@@ -44,8 +43,8 @@ class EstimatorTest(Base, unittest.TestCase):
                                        tmp_folder=output,
                                        output_folder=output)
         automl.fit(X_train, Y_train)
-        print(automl.show_models(), flush=True)
-        print(automl.cv_results_, flush=True)
+        #print(automl.show_models(), flush=True)
+        #print(automl.cv_results_, flush=True)
         score = automl.score(X_test, Y_test)
 
         self.assertGreaterEqual(score, 0.8)
@@ -168,7 +167,7 @@ class EstimatorTest(Base, unittest.TestCase):
                             dataset_name='iris',
                             ensemble_size=20,
                             ensemble_nbest=50)
-        print(automl.show_models(), flush=True)
+        #print(automl.show_models(), flush=True)
 
         predictions = automl.predict(X_test)
         score = sklearn.metrics.accuracy_score(Y_test, predictions)
@@ -302,8 +301,8 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
                                        tmp_folder=output,
                                        output_folder=output)
         automl.fit(X_train, Y_train)
-        print(automl.show_models(), flush=True)
-        print(automl.cv_results_, flush=True)
+        #print(automl.show_models(), flush=True)
+        #print(automl.cv_results_, flush=True)
 
         initial_predictions = automl.predict(X_test)
         initial_accuracy = sklearn.metrics.accuracy_score(Y_test,
