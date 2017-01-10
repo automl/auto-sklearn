@@ -85,6 +85,10 @@ class AutoMLDecorator(object):
     def cv_results_(self):
         return self._automl.cv_results_
 
+    @property
+    def trajectory_(self):
+        return self._automl.trajectory_
+
     def sprint_statistics(self):
         return self._automl.sprint_statistics()
 
