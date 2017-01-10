@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-import autosklearn
-
 import setuptools
 from setuptools.extension import Extension
 import numpy as np
@@ -42,7 +40,7 @@ with open("autosklearn/__version__.py") as fh:
 setuptools.setup(
     name='auto-sklearn',
     description='Automated machine learning.',
-    version=autosklearn.__version__,
+    version=version,
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=requirements,
