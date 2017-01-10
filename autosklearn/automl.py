@@ -510,6 +510,7 @@ class AutoML(BaseEstimator):
             1, task, metric, precision, dataset_name, max_iterations=1,
             ensemble_nbest=ensemble_nbest, ensemble_size=ensemble_size)
         self._proc_ensemble.main()
+        self._proc_ensemble = None
         return self
 
     def _get_ensemble_process(self, time_left_for_ensembles,
