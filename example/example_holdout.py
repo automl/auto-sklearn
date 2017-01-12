@@ -29,13 +29,10 @@ def main():
         sklearn.cross_validation.train_test_split(X, y, random_state=1)
 
     automl = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=30, per_run_time_limit=30,
-        resampling_strategy='holdout',
-        include_estimators=['random_forest'],
+        time_left_for_this_task=120, per_run_time_limit=30,
         tmp_folder='/tmp/autoslearn_holdout_example_tmp',
         output_folder='/tmp/autosklearn_holdout_example_out')
-    automl.fit(X_train, y_train, dataset_name='digits',
-               feat_type=['categorical' for x in X_train[0]])
+    automl.fit(X_train, y_train, dataset_name='digits')
 
     # Print the best models together with their scores - if all scores are
     # unreasonably bad (around 0.0) you should have a look into the logging
@@ -48,6 +45,7 @@ def main():
     # iterations, number of models failed with a time out.
     print(automl.sprint_statistics())
     print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+
 
 if __name__ == '__main__':
     main()
