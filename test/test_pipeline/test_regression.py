@@ -94,7 +94,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                                   dataset_properties=dataset_properties)
 
     def _test_configurations(self, configurations_space, make_sparse=False,
-                             data=None, init_params=None, dataset_properties=None):
+                             data=None, dataset_properties=None):
         # Use a limit of ~4GiB
         limit = 3000 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
@@ -137,8 +137,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                                            dataset_properties=dataset_properties)
             cls.set_hyperparameters(config)
             try:
-                init_params_ = copy.deepcopy(init_params)
-                cls.fit(X_train, Y_train, init_params=init_params_)
+                cls.fit(X_train, Y_train)
                 predictions = cls.predict(X_test)
             except MemoryError as e:
                 continue

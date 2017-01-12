@@ -80,19 +80,26 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             config, pipeline, dataset_properties, include, exclude,
             random_state, init_params)
 
-    def pre_transform(self, X, y, fit_params=None, init_params=None):
+    def pre_transform(self, X, y, fit_params=None):
         self.num_targets = 1 if len(y.shape) == 1 else y.shape[1]
 
-        # Weighting samples has to be done here, not in the components
+        if fit_params is None:
+            fit_params = {}
+
         if self.configuration['balancing:strategy'] == 'weighting':
             balancing = Balancing(strategy='weighting')
-            init_params, fit_params = balancing.get_weights(
+            _init_params, _fit_params = balancing.get_weights(
                 y, self.configuration['classifier:__choice__'],
                 self.configuration['preprocessor:__choice__'],
-                init_params, fit_params)
+                {}, {})
+            self.set_hyperparameters(configuration=self.configuration,
+                                     init_params=_init_params)
+
+            if _fit_params is not None:
+                fit_params.update(_fit_params)
 
         X, fit_params = super(SimpleClassificationPipeline, self).pre_transform(
-            X, y, fit_params=fit_params, init_params=init_params)
+            X, y, fit_params=fit_params)
 
         return X, fit_params
 
@@ -273,21 +280,15 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         self.dataset_properties_ = dataset_properties
         return cs
 
-    def _get_pipeline(self, init_params=None):
+    def _get_pipeline(self):
         steps = []
 
         default_dataset_properties = {'target_type': 'classification'}
 
         # Add the always active preprocessing components
-        if init_params is not None and 'one_hot_encoding' in init_params:
-            ohe_init_params = init_params['one_hot_encoding']
-            if 'categorical_features' in ohe_init_params:
-                categorical_features = ohe_init_params['categorical_features']
-        else:
-            categorical_features = None
 
         steps.extend(
-            [["one_hot_encoding", OneHotEncoder(categorical_features=categorical_features)],
+            [["one_hot_encoding", OneHotEncoder()],
              ["imputation", Imputation()],
              ["rescaling",
               rescaling_components.RescalingChoice(default_dataset_properties)],

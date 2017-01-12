@@ -116,7 +116,7 @@ class AutoSklearnComponent(object):
         -learn-objects>`_ for further information."""
         raise NotImplementedError()
 
-    def set_hyperparameters(self, configuration):
+    def set_hyperparameters(self, configuration, init_params=None):
         params = configuration.get_dictionary()
 
         for param, value in params.items():
@@ -125,6 +125,14 @@ class AutoSklearnComponent(object):
                                  'the hyperparameter does not exist.' %
                                  (param, str(self)))
             setattr(self, param, value)
+
+        if init_params is not None:
+            for param, value in init_params.items():
+                if not hasattr(self, param):
+                    raise ValueError('Cannot set init param %s for %s because '
+                                     'the init param does not exist.' %
+                                     (param, str(self)))
+                setattr(self, param, value)
 
         return self
 
@@ -330,15 +338,21 @@ class AutoSklearnChoice(object):
 
         return components_dict
 
-    def set_hyperparameters(self, configuration):
+    def set_hyperparameters(self, configuration, init_params=None):
+        new_params = {}
+
         params = configuration.get_dictionary()
         choice = params['__choice__']
         del params['__choice__']
 
-        new_params = {}
         for param, value in params.items():
             param = param.replace(choice, '').replace(':', '')
             new_params[param] = value
+
+        if init_params is not None:
+            for param, value in init_params.items():
+                param = param.replace(choice, '').replace(':', '')
+                new_params[param] = value
 
         new_params['random_state'] = self.random_state
 

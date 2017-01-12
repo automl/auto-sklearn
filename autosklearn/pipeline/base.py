@@ -22,12 +22,7 @@ class BasePipeline(Pipeline):
                  include=None, exclude=None, random_state=None,
                  init_params=None):
         if pipeline is None:
-            init_params_per_method = defaultdict(dict)
-            if init_params is not None and len(init_params) != 0:
-                for init_param, value in init_params.items():
-                    method, param = init_param.split(":")
-                    init_params_per_method[method][param] = value
-            self.steps = self._get_pipeline(init_params_per_method)
+            self.steps = self._get_pipeline()
         else:
             self.steps = pipeline
 
@@ -58,14 +53,15 @@ class BasePipeline(Pipeline):
                                  'same configuration space. Differences are: '
                                  '%s' % diff)
             self.configuration_ = config
-        self.set_hyperparameters(self.configuration_)
+
+        self.set_hyperparameters(self.configuration_, init_params=init_params)
 
         if random_state is None:
             self.random_state = check_random_state(1)
         else:
             self.random_state = check_random_state(random_state)
 
-    def fit(self, X, y, fit_params=None, init_params=None):
+    def fit(self, X, y, fit_params=None):
         """Fit the selected algorithm to the training data.
 
         Parameters
@@ -81,11 +77,6 @@ class BasePipeline(Pipeline):
             See the documentation of sklearn.pipeline.Pipeline for formatting
             instructions.
 
-        init_params : dict
-            Pass arguments to the constructors of single methods. To pass
-            arguments to only one of the methods (lets says the
-            OneHotEncoder), seperate the class name from the argument by a ':'.
-
         Returns
         -------
         self : returns an instance of self.
@@ -100,9 +91,7 @@ class BasePipeline(Pipeline):
         self.fit_estimator(X, y, **fit_params)
         return self
 
-    def pre_transform(self, X, y, fit_params=None, init_params=None):
-        # TODO do something with the init params!
-        # TODO actually, initialize the submodels only here?
+    def pre_transform(self, X, y, fit_params=None):
         if fit_params is None or not isinstance(fit_params, dict):
             fit_params = dict()
         else:
@@ -171,7 +160,7 @@ class BasePipeline(Pipeline):
 
                 return y
 
-    def set_hyperparameters(self, configuration=None, init_params=None):
+    def set_hyperparameters(self, configuration, init_params=None):
         self.configuration = configuration
 
         for node_idx, n_ in enumerate(self.steps):
@@ -190,9 +179,19 @@ class BasePipeline(Pipeline):
             sub_configuration = Configuration(sub_configuration_space,
                                               values=sub_config_dict)
 
-            # TODO set hyperparameters of child objects!
+            if init_params is not None:
+                sub_init_params_dict = {}
+                for param in init_params:
+                    if param.startswith('%s:' % node_name):
+                        value = init_params[param]
+                        new_name = param.replace('%s:' % node_name, '', 1)
+                        sub_init_params_dict[new_name] = value
+            else:
+                sub_init_params_dict = None
+
             if isinstance(node, (AutoSklearnChoice, AutoSklearnComponent)):
-                node.set_hyperparameters(sub_configuration)
+                node.set_hyperparameters(configuration=sub_configuration,
+                                         init_params=sub_init_params_dict)
             else:
                 raise NotImplementedError('Not supported yet!')
 
@@ -352,7 +351,7 @@ class BasePipeline(Pipeline):
 
         return rval
 
-    def _get_pipeline(self, init_params=None):
+    def _get_pipeline(self):
         raise NotImplementedError()
 
     def _get_estimator_hyperparameter_name(self):

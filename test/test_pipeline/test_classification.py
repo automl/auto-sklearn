@@ -210,6 +210,20 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self._test_configurations(configurations_space=cs, make_sparse=True,
                                   data=data, init_params=init_params)
 
+    @unittest.mock.patch('autosklearn.pipeline.components.data_preprocessing'
+                         '.one_hot_encoding.one_hot_encoding.OneHotEncoder'
+                         '.set_hyperparameters')
+    def test_categorical_passed_to_one_hot_encoder(self, ohe_mock):
+        cls = SimpleClassificationPipeline(init_params={
+            'one_hot_encoding:categorical_features': [True, False]})
+        self.assertEqual(ohe_mock.call_args[1]['init_params'],
+                         {'categorical_features': [True, False]})
+        default = cls.get_hyperparameter_search_space().get_default_configuration()
+        cls.set_hyperparameters(configuration=default,
+            init_params={'one_hot_encoding:categorical_features': [True, True, False]})
+        self.assertEqual(ohe_mock.call_args[1]['init_params'],
+                         {'categorical_features': [True, True, False]})
+
     def _test_configurations(self, configurations_space, make_sparse=False,
                              data=None, init_params=None,
                              dataset_properties=None):
@@ -253,12 +267,13 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 X_test = data['X_test'].copy()
                 Y_test = data['Y_test'].copy()
 
+            init_params_ = copy.deepcopy(init_params)
             cls = SimpleClassificationPipeline(random_state=1,
-                                               dataset_properties=dataset_properties)
+                                               dataset_properties=dataset_properties,
+                                               init_params=init_params_)
             cls.set_hyperparameters(config)
             try:
-                init_params_ = copy.deepcopy(init_params)
-                cls.fit(X_train, Y_train, init_params=init_params_)
+                cls.fit(X_train, Y_train, )
                 predictions = cls.predict(X_test)
             except MemoryError as e:
                 continue
