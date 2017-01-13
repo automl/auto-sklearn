@@ -116,9 +116,9 @@ class CVEvaluator(AbstractEvaluator):
                               'is_multiclass': self.task_type ==
                                                MULTICLASS_CLASSIFICATION}
         if not isinstance(self.configuration, Configuration):
+            # Dummy classifiers
             model = self.model_class(configuration=self.configuration,
-                                     random_state=self.seed,
-                                     dataset_properties=dataset_properties)
+                                     random_state=self.seed)
         else:
             model = self.model_class(config=self.configuration,
                                      random_state=self.seed,
