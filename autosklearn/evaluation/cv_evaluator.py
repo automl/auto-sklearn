@@ -7,6 +7,7 @@ from smac.tae.execute_ta_run import StatusType
 from ConfigSpace import Configuration
 from autosklearn.evaluation.resampling import get_CV_fold
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
+from autosklearn.constants import MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION
 
 
 __all__ = [
@@ -108,14 +109,22 @@ class CVEvaluator(AbstractEvaluator):
         return loss, opt_pred, valid_pred, test_pred
 
     def _partial_fit_and_predict(self, fold):
+        dataset_properties = {'task': self.task_type,
+                              'sparse': self.D.info['is_sparse'] == 1,
+                              'is_multilabel': self.task_type ==
+                                               MULTILABEL_CLASSIFICATION,
+                              'is_multiclass': self.task_type ==
+                                               MULTICLASS_CLASSIFICATION}
         if not isinstance(self.configuration, Configuration):
             model = self.model_class(configuration=self.configuration,
-                                          random_state=self.seed)
+                                     random_state=self.seed,
+                                     dataset_properties=dataset_properties)
         else:
             model = self.model_class(config=self.configuration,
                                      random_state=self.seed,
                                      include=self.include,
-                                     exclude=self.exclude)
+                                     exclude=self.exclude,
+                                     dataset_properties=dataset_properties)
 
         train_indices, test_indices = self.get_train_test_split(fold)
 
@@ -162,7 +171,18 @@ class CVEvaluator(AbstractEvaluator):
         return opt_pred, valid_pred, test_pred
 
     def partial_iterative_fit(self, fold):
-        model = self.model_class(self.configuration, self.seed)
+        dataset_properties = {'task': self.task_type,
+                              'sparse': self.D.info['is_sparse'] == 1,
+                              'is_multilabel': self.task_type ==
+                                               MULTILABEL_CLASSIFICATION,
+                              'is_multiclass': self.task_type ==
+                                               MULTICLASS_CLASSIFICATION}
+        model = self.model_class(config=self.configuration,
+                                 dataset_properties=dataset_properties,
+                                 random_state=self.seed,
+                                 include=self.include,
+                                 exclude=self.exclude,
+                                 init_params=self._init_params)
         train_indices, test_indices = self.get_train_test_split(fold)
 
         if self.subsample is not None:
