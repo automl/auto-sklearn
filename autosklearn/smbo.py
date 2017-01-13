@@ -351,125 +351,132 @@ class AutoMLSMBO(object):
         # we start by evaluating the defaults on the full dataset again
         # and add the suggestions from metalearning behind it
 
-        if self.metadata_directory is None:
-            metalearning_directory = os.path.dirname(
-                autosklearn.metalearning.__file__)
-            # There is no multilabel data in OpenML
-            if self.task == MULTILABEL_CLASSIFICATION:
-                meta_task = BINARY_CLASSIFICATION
+        if self.num_metalearning_cfgs > 0:
+            if self.metadata_directory is None:
+                metalearning_directory = os.path.dirname(
+                    autosklearn.metalearning.__file__)
+                # There is no multilabel data in OpenML
+                if self.task == MULTILABEL_CLASSIFICATION:
+                    meta_task = BINARY_CLASSIFICATION
+                else:
+                    meta_task = self.task
+                metadata_directory = os.path.join(
+                    metalearning_directory, 'files',
+                    '%s_%s_%s' % (METRIC_TO_STRING[self.metric],
+                                  TASK_TYPES_TO_STRING[meta_task],
+                                  'sparse' if self.datamanager.info['is_sparse']
+                                  else 'dense'))
+                self.metadata_directory = metadata_directory
+
+            self.logger.info('Metadata directory: %s', self.metadata_directory)
+            meta_base = MetaBase(self.config_space, self.metadata_directory)
+
+            metafeature_calculation_time_limit = int(
+                self.total_walltime_limit / 4)
+            metafeature_calculation_start_time = time.time()
+            meta_features = self._calculate_metafeatures_with_limits(
+                metafeature_calculation_time_limit)
+            metafeature_calculation_end_time = time.time()
+            metafeature_calculation_time_limit = \
+                metafeature_calculation_time_limit - (
+                metafeature_calculation_end_time -
+                metafeature_calculation_start_time)
+
+            if metafeature_calculation_time_limit < 1:
+                self.logger.warning('Time limit for metafeature calculation less '
+                                    'than 1 seconds (%f). Skipping calculation '
+                                    'of metafeatures for encoded dataset.',
+                                    metafeature_calculation_time_limit)
+                meta_features_encoded = None
             else:
-                meta_task = self.task
-            metadata_directory = os.path.join(
-                metalearning_directory, 'files',
-                '%s_%s_%s' % (METRIC_TO_STRING[self.metric],
-                              TASK_TYPES_TO_STRING[meta_task],
-                              'sparse' if self.datamanager.info['is_sparse']
-                              else 'dense'))
-            self.metadata_directory = metadata_directory
+                with warnings.catch_warnings():
+                    warnings.showwarning = self._send_warnings_to_log
+                    self.datamanager.perform1HotEncoding()
+                meta_features_encoded = \
+                    self._calculate_metafeatures_encoded_with_limits(
+                        metafeature_calculation_time_limit)
 
-        self.logger.info('Metadata directory: %s', self.metadata_directory)
-        meta_base = MetaBase(self.config_space, self.metadata_directory)
+            # In case there is a problem calculating the encoded meta-features
+            if meta_features is None:
+                if meta_features_encoded is not None:
+                    meta_features = meta_features_encoded
+            else:
+                if meta_features_encoded is not None:
+                    meta_features.metafeature_values.update(
+                        meta_features_encoded.metafeature_values)
 
-        metafeature_calculation_time_limit = int(
-            self.total_walltime_limit / 4)
-        metafeature_calculation_start_time = time.time()
-        meta_features = self._calculate_metafeatures_with_limits(
-            metafeature_calculation_time_limit)
-        metafeature_calculation_end_time = time.time()
-        metafeature_calculation_time_limit = \
-            metafeature_calculation_time_limit - (
-            metafeature_calculation_end_time -
-            metafeature_calculation_start_time)
+            if meta_features is not None:
+                meta_base.add_dataset(instance_id, meta_features)
+                # Do mean imputation of the meta-features - should be done specific
+                # for each prediction model!
+                all_metafeatures = meta_base.get_metafeatures(
+                    features=list(meta_features.keys()))
+                all_metafeatures.fillna(all_metafeatures.mean(), inplace=True)
 
-        if metafeature_calculation_time_limit < 1:
-            self.logger.warning('Time limit for metafeature calculation less '
-                                'than 1 seconds (%f). Skipping calculation '
-                                'of metafeatures for encoded dataset.',
-                                metafeature_calculation_time_limit)
-            meta_features_encoded = None
+                with warnings.catch_warnings():
+                    warnings.showwarning = self._send_warnings_to_log
+                    metalearning_configurations = self.collect_metalearning_suggestions(
+                        meta_base)
+                if metalearning_configurations is None:
+                    metalearning_configurations = []
+                self.reset_data_manager()
+
+                self.logger.info('%s', meta_features)
+
+                # Convert meta-features into a dictionary because the scenario
+                # expects a dictionary
+                meta_features_dict = {}
+                for dataset, series in all_metafeatures.iterrows():
+                    meta_features_dict[dataset] = series.values
+                meta_features_list = []
+                for meta_feature_name in all_metafeatures.columns:
+                    meta_features_list.append(
+                        meta_features[meta_feature_name].value)
+                meta_features_list = np.array(meta_features_list).reshape(
+                    (1, -1))
+                self.logger.info(list(meta_features_dict.keys()))
+
+                # meta_runs = meta_base.get_all_runs(METRIC_TO_STRING[self.metric])
+                # meta_runs_index = 0
+                # try:
+                #    meta_durations = meta_base.get_all_runs('runtime')
+                #    read_runtime_data = True
+                # except KeyError:
+                #    read_runtime_data = False
+                #    self.logger.critical('Cannot read runtime data.')
+                #    if self.acquisition_function == 'EIPS':
+                #        self.logger.critical('Reverting to acquisition function EI!')
+                #        self.acquisition_function = 'EI'
+
+                # for meta_dataset in meta_runs.index:
+                #     meta_dataset_start_index = meta_runs_index
+                #     for meta_configuration in meta_runs.columns:
+                #         if np.isfinite(meta_runs.loc[meta_dataset, meta_configuration]):
+                #             try:
+                #                 config = meta_base.get_configuration_from_algorithm_index(
+                #                     meta_configuration)
+                #                 cost = meta_runs.loc[meta_dataset, meta_configuration]
+                #                 if read_runtime_data:
+                #                     runtime = meta_durations.loc[meta_dataset,
+                #                                                  meta_configuration]
+                #                 else:
+                #                     runtime = 1
+                #                 # TODO read out other status types!
+                #                 meta_runhistory.add(config, cost, runtime,
+                #                                     StatusType.SUCCESS,
+                #                                     instance_id=meta_dataset)
+                #                 meta_runs_index += 1
+                #             except:
+                #                 # TODO maybe add warning
+                #                 pass
+                #
+                #     meta_runs_dataset_indices[meta_dataset] = (
+                #         meta_dataset_start_index, meta_runs_index)
+
         else:
-            with warnings.catch_warnings():
-                warnings.showwarning = self._send_warnings_to_log
-                self.datamanager.perform1HotEncoding()
-            meta_features_encoded = \
-                self._calculate_metafeatures_encoded_with_limits(
-                    metafeature_calculation_time_limit)
+            meta_features = None
 
-        # In case there is a problem calculating the encoded meta-features
         if meta_features is None:
-            if meta_features_encoded is not None:
-                meta_features = meta_features_encoded
-        else:
-            if meta_features_encoded is not None:
-                meta_features.metafeature_values.update(
-                    meta_features_encoded.metafeature_values)
-
-        if meta_features is not None:
-            meta_base.add_dataset(instance_id, meta_features)
-            # Do mean imputation of the meta-features - should be done specific
-            # for each prediction model!
-            all_metafeatures = meta_base.get_metafeatures(
-                features=list(meta_features.keys()))
-            all_metafeatures.fillna(all_metafeatures.mean(), inplace=True)
-
-            with warnings.catch_warnings():
-                warnings.showwarning = self._send_warnings_to_log
-                metalearning_configurations = self.collect_metalearning_suggestions(
-                    meta_base)
-            if metalearning_configurations is None:
-                metalearning_configurations = []
-            self.reset_data_manager()
-
-            self.logger.info('%s', meta_features)
-
-            # Convert meta-features into a dictionary because the scenario
-            # expects a dictionary
-            meta_features_dict = {}
-            for dataset, series in all_metafeatures.iterrows():
-                meta_features_dict[dataset] = series.values
-            meta_features_list = []
-            for meta_feature_name in all_metafeatures.columns:
-                meta_features_list.append(meta_features[meta_feature_name].value)
-            meta_features_list = np.array(meta_features_list).reshape((1, -1))
-            self.logger.info(list(meta_features_dict.keys()))
-
-            #meta_runs = meta_base.get_all_runs(METRIC_TO_STRING[self.metric])
-            #meta_runs_index = 0
-            #try:
-            #    meta_durations = meta_base.get_all_runs('runtime')
-            #    read_runtime_data = True
-            #except KeyError:
-            #    read_runtime_data = False
-            #    self.logger.critical('Cannot read runtime data.')
-            #    if self.acquisition_function == 'EIPS':
-            #        self.logger.critical('Reverting to acquisition function EI!')
-            #        self.acquisition_function = 'EI'
-
-            # for meta_dataset in meta_runs.index:
-            #     meta_dataset_start_index = meta_runs_index
-            #     for meta_configuration in meta_runs.columns:
-            #         if np.isfinite(meta_runs.loc[meta_dataset, meta_configuration]):
-            #             try:
-            #                 config = meta_base.get_configuration_from_algorithm_index(
-            #                     meta_configuration)
-            #                 cost = meta_runs.loc[meta_dataset, meta_configuration]
-            #                 if read_runtime_data:
-            #                     runtime = meta_durations.loc[meta_dataset,
-            #                                                  meta_configuration]
-            #                 else:
-            #                     runtime = 1
-            #                 # TODO read out other status types!
-            #                 meta_runhistory.add(config, cost, runtime,
-            #                                     StatusType.SUCCESS,
-            #                                     instance_id=meta_dataset)
-            #                 meta_runs_index += 1
-            #             except:
-            #                 # TODO maybe add warning
-            #                 pass
-            #
-            #     meta_runs_dataset_indices[meta_dataset] = (
-            #         meta_dataset_start_index, meta_runs_index)
-        else:
             if self.acquisition_function == 'EIPS':
                 self.logger.critical('Reverting to acquisition function EI!')
                 self.acquisition_function = 'EI'
