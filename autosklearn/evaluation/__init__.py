@@ -22,7 +22,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                  logger, initial_num_run=1, stats=None, runhistory=None,
                  run_obj='quality', par_factor=1, with_predictions=True,
                  all_scoring_functions=False, output_y_test=True,
-                 **resampling_strategy_args):
+                 include=None, exclude=None, **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
             eval_function = eval_holdout
@@ -54,6 +54,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.all_scoring_functions = all_scoring_functions
         # TODO deactivate output_y_test and let the respective evaluator decide
         self.output_y_test = output_y_test
+        self.include = include
+        self.exclude = exclude
         self.logger = logger
 
     def start(self, config, instance,
@@ -101,6 +103,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                           all_scoring_functions=self.all_scoring_functions,
                           output_y_test=self.output_y_test,
                           subsample=None,
+                          include=self.include,
+                          exclude=self.exclude,
                           **self.resampling_strategy_args)
         if instance is not None:
             obj_kwargs['instance'] = instance

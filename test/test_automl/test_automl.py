@@ -107,7 +107,7 @@ class AutoMLTest(Base, unittest.TestCase):
         del automl
         self._tearDown(output)
 
-    def test_binary_score(self):
+    def test_binary_score_and_include(self):
         """
         Test fix for binary classification prediction
         taking the index 1 of second dimension in prediction matrix
@@ -125,7 +125,9 @@ class AutoMLTest(Base, unittest.TestCase):
         Y_test = data[1][200:]
 
         backend_api = backend.create(output, output)
-        automl = autosklearn.automl.AutoML(backend_api, 60, 10)
+        automl = autosklearn.automl.AutoML(backend_api, 60, 10,
+                                           include_estimators=['sgd'],
+                                           include_preprocessors=['no_preprocessing'])
         automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION)
         #print(automl.show_models(), flush=True)
         #print(automl.cv_results_, flush=True)

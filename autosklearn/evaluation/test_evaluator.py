@@ -77,11 +77,12 @@ class TestEvaluator(AbstractEvaluator):
 # Has a stupid name so nosetests doesn't regard it as a test
 def eval_t(queue, config, data, backend, seed, num_run, subsample,
            with_predictions, all_scoring_functions,
-           output_y_test):
+           output_y_test, include, exclude):
     evaluator = TestEvaluator(Datamanager=data, configuration=config,
                               backend=backend, seed=seed,
                               with_predictions=with_predictions,
-                              all_scoring_functions=all_scoring_functions)
+                              all_scoring_functions=all_scoring_functions,
+                              include=include, exclude=exclude)
 
     loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
     duration, result, seed, run_info = evaluator.finish_up(

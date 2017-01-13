@@ -92,7 +92,7 @@ class FunctionsTest(unittest.TestCase):
         eval_cv(queue=self.queue, config=self.configuration, data=self.data,
                 backend=backend_api, seed=1, num_run=1, folds=5, subsample=None,
                 with_predictions=True, all_scoring_functions=False,
-                output_y_test=True)
+                output_y_test=True, include=None, exclude=None)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.095262096774193505)
         self.assertEqual(info[2], 1)
@@ -103,7 +103,7 @@ class FunctionsTest(unittest.TestCase):
         eval_cv(queue=self.queue, config=self.configuration, data=self.data,
                 backend=backend_api, seed=1, num_run=1, folds=5, subsample=None,
                 with_predictions=True, all_scoring_functions=True,
-                output_y_test=True)
+                output_y_test=True, include=None, exclude=None)
         info = self.queue.get()
         self.assertIn(
             'f1_metric: 0.0952620967742;pac_metric: 0.355606202593;'
@@ -117,7 +117,7 @@ class FunctionsTest(unittest.TestCase):
         eval_cv(queue=self.queue, config=self.configuration, data=self.data,
                 backend=backend_api, seed=1, num_run=1, folds=5, subsample=45,
                 with_predictions=True, all_scoring_functions=False,
-                output_y_test=True)
+                output_y_test=True, include=None, exclude=None)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.063004032258064502)
         self.assertEqual(info[2], 1)
@@ -134,7 +134,8 @@ class FunctionsTest(unittest.TestCase):
                             data=self.data, backend=backend_api, seed=1,
                             num_run=1, instance=fold, folds=5,
                             subsample=None, with_predictions=True,
-                            all_scoring_functions=False, output_y_test=True)
+                            all_scoring_functions=False, output_y_test=True,
+                            include=None, exclude=None)
             info = self.queue.get()
             results.append(info[1])
             self.assertAlmostEqual(info[1], results[fold])
@@ -153,7 +154,8 @@ class FunctionsTest(unittest.TestCase):
                             data=self.data, backend=backend_api,
                             seed=1, num_run=1, instance=fold, folds=5,
                             subsample=80, with_predictions=True,
-                            all_scoring_functions=False, output_y_test=True)
+                            all_scoring_functions=False, output_y_test=True,
+                            include=None, exclude=None)
 
             info = self.queue.get()
             self.assertAlmostEqual(info[1], results[fold])
@@ -169,7 +171,8 @@ class FunctionsTest(unittest.TestCase):
                             data=self.data, backend=backend_api,
                             seed=1, num_run=1, instance=fold, folds=5,
                             subsample=43, with_predictions=True,
-                            all_scoring_functions=False, output_y_test=True)
+                            all_scoring_functions=False, output_y_test=True,
+                            include=None, exclude=None)
 
             info = self.queue.get()
             self.assertAlmostEqual(info[1], results[fold])

@@ -235,7 +235,7 @@ class CVEvaluator(AbstractEvaluator):
 
 def eval_partial_cv(queue, config, data, backend, seed, num_run, instance,
                     folds, subsample, with_predictions, all_scoring_functions,
-                    output_y_test, iterative=False):
+                    output_y_test, include, exclude, iterative=False):
     global evaluator
     evaluator = CVEvaluator(data, backend, config,
                             seed=seed,
@@ -244,7 +244,9 @@ def eval_partial_cv(queue, config, data, backend, seed, num_run, instance,
                             subsample=subsample,
                             with_predictions=with_predictions,
                             all_scoring_functions=all_scoring_functions,
-                            output_y_test=False)
+                            output_y_test=False,
+                            include=include,
+                            exclude=exclude)
 
 
     def signal_handler(signum, frame):
@@ -275,18 +277,20 @@ def eval_partial_cv(queue, config, data, backend, seed, num_run, instance,
 
 def eval_partial_cv_iterative(queue, config, data, backend, seed, num_run,
                               instance, folds, subsample, with_predictions,
-                              all_scoring_functions, output_y_test):
+                              all_scoring_functions, output_y_test,
+                              include, exclude):
     eval_partial_cv(queue=queue, config=config, data=data, backend=backend,
                     seed=seed, num_run=num_run, instance=instance, folds=folds,
                     subsample=subsample, with_predictions=with_predictions,
                     all_scoring_functions=all_scoring_functions,
-                    output_y_test=output_y_test, iterative=True)
+                    output_y_test=output_y_test, include=include,
+                    exclude=exclude, iterative=True)
 
 
 # create closure for evaluating an algorithm
 def eval_cv(queue, config, data, backend, seed, num_run, folds,
             subsample, with_predictions, all_scoring_functions,
-            output_y_test):
+            output_y_test, include, exclude):
     evaluator = CVEvaluator(data, backend, config,
                             seed=seed,
                             num_run=num_run,
@@ -294,7 +298,9 @@ def eval_cv(queue, config, data, backend, seed, num_run, folds,
                             subsample=subsample,
                             with_predictions=with_predictions,
                             all_scoring_functions=all_scoring_functions,
-                            output_y_test=output_y_test)
+                            output_y_test=output_y_test,
+                            include=include,
+                            exclude=exclude)
 
     loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
     duration, result, seed, run_info = evaluator.finish_up(

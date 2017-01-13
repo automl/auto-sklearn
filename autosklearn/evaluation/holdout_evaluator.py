@@ -124,7 +124,7 @@ class HoldoutEvaluator(AbstractEvaluator):
 # create closure for evaluating an algorithm
 def eval_holdout(queue, config, data, backend, seed, num_run,
                  subsample, with_predictions, all_scoring_functions,
-                 output_y_test, iterative=False):
+                 output_y_test, include, exclude, iterative=False):
     global evaluator
     evaluator = HoldoutEvaluator(data, backend, config,
                                  seed=seed,
@@ -132,7 +132,9 @@ def eval_holdout(queue, config, data, backend, seed, num_run,
                                  subsample=subsample,
                                  with_predictions=with_predictions,
                                  all_scoring_functions=all_scoring_functions,
-                                 output_y_test=output_y_test)
+                                 output_y_test=output_y_test,
+                                 include=include,
+                                 exclude=exclude)
 
     def signal_handler(signum, frame):
         print('Received signal %s. Aborting Training!' % str(signum))
@@ -159,7 +161,8 @@ def eval_holdout(queue, config, data, backend, seed, num_run,
 
 def eval_iterative_holdout(queue, config, data, backend, seed,
                            num_run, subsample, with_predictions,
-                           all_scoring_functions, output_y_test):
+                           all_scoring_functions, output_y_test,
+                           include, exclude):
     eval_holdout(queue, config, data, backend, seed, num_run, subsample,
                  with_predictions, all_scoring_functions, output_y_test,
-                 iterative = True)
+                 include, exclude, iterative=True)

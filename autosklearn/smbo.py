@@ -188,7 +188,9 @@ class AutoMLSMBO(object):
                  resampling_strategy='holdout',
                  resampling_strategy_args=None,
                  acquisition_function='EI',
-                 shared_mode=False):
+                 shared_mode=False,
+                 include_estimators=None,
+                 include_preprocessors=None):
         super(AutoMLSMBO, self).__init__()
         # data related
         self.dataset_name = dataset_name
@@ -223,6 +225,8 @@ class AutoMLSMBO(object):
         self.acquisition_function = acquisition_function
         self.shared_mode = shared_mode
         self.runhistory = None
+        self.include_estimators = include_estimators
+        self.include_preprocessors = include_preprocessors
 
         logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed,
                                      ":" + dataset_name if dataset_name is
@@ -508,11 +512,23 @@ class AutoMLSMBO(object):
         # evaluator, which takes into account that a run can be killed prior
         # to the model being fully fitted; thus putting intermediate results
         # into a queue and querying them once the time is over
+        include = dict()
+        if self.include_preprocessors is not None:
+            include['preprocessor'] = self.include_preprocessors
+        if self.include_estimators is not None:
+            if self.task in CLASSIFICATION_TASKS:
+                include['classifier'] = self.include_estimators
+            elif self.task in REGRESSION_TASKS:
+                include['regressor'] = self.include_estimators
+            else:
+                raise ValueError(self.task)
+
         ta = ExecuteTaFuncWithQueue(backend=self.backend,
                                     autosklearn_seed=seed,
                                     resampling_strategy=self.resampling_strategy,
                                     initial_num_run=num_run,
                                     logger=self.logger,
+                                    include=include,
                                     **self.resampling_strategy_args)
 
         types = get_types(self.config_space, self.scenario.feature_array)
