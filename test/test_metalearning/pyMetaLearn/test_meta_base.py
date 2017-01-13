@@ -18,7 +18,7 @@ class MetaBaseTest(unittest.TestCase):
         data_dir = os.path.join(data_dir, 'test_meta_base_data')
         os.chdir(data_dir)
 
-        cs = autosklearn.pipeline.classification.SimpleClassificationPipeline\
+        cs = autosklearn.pipeline.classification.SimpleClassificationPipeline()\
             .get_hyperparameter_search_space()
 
         self.base = MetaBase(cs, data_dir)

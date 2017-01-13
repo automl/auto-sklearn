@@ -100,9 +100,10 @@ class FunctionsTest(unittest.TestCase):
                seed=1, num_run=1, subsample=None, with_predictions=True,
                all_scoring_functions=True, output_y_test=True)
         info = self.queue.get()
-        self.assertIn('f1_metric: 0.0511508951407;pac_metric: 0.273385527265;'
-                      'acc_metric: 0.06;auc_metric: 0.00917546505782;'
-                      'bac_metric: 0.0416666666667;duration: ', info[3])
+        self.assertIn(
+            'f1_metric: 0.0511508951407;pac_metric: 0.185257565321;'
+            'acc_metric: 0.06;auc_metric: 0.00917546505782;'
+            'bac_metric: 0.0416666666667;duration: ', info[3])
         self.assertAlmostEqual(info[1], 0.041666666666666852)
         self.assertEqual(info[2], 1)
 

@@ -6,7 +6,7 @@ from autosklearn.pipeline.constants import *
 
 
 class Imputation(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, strategy, random_state=None):
+    def __init__(self, strategy='median', random_state=None):
         # TODO pay attention to the cases when a copy is made (CSR matrices)
         self.strategy = strategy
 

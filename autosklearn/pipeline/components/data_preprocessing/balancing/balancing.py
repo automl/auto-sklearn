@@ -9,7 +9,7 @@ from autosklearn.pipeline.constants import *
 
 
 class Balancing(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, strategy, random_state=None):
+    def __init__(self, strategy='none', random_state=None):
         self.strategy = strategy
 
     def fit(self, X, y=None):

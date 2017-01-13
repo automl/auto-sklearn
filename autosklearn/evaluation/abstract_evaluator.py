@@ -24,19 +24,19 @@ __all__ = [
 
 
 class MyDummyClassifier(DummyClassifier):
-    def __init__(self, configuration, random_state):
+    def __init__(self, configuration, random_state, init_params=None):
         self.configuration = configuration
         if configuration == 1:
             super(MyDummyClassifier, self).__init__(strategy="uniform")
         else:
             super(MyDummyClassifier, self).__init__(strategy="most_frequent")
 
-    def pre_transform(self, X, y, fit_params=None, init_params=None):
+    def pre_transform(self, X, y, fit_params=None):
         if fit_params is None:
             fit_params = {}
         return X, fit_params
 
-    def fit(self, X, y, sample_weight=None, init_params=None):
+    def fit(self, X, y, sample_weight=None):
         return super(MyDummyClassifier, self).fit(np.ones((X.shape[0], 1)), y,
                                                   sample_weight=sample_weight)
 
@@ -55,19 +55,19 @@ class MyDummyClassifier(DummyClassifier):
 
 
 class MyDummyRegressor(DummyRegressor):
-    def __init__(self, configuration, random_state):
+    def __init__(self, configuration, random_state, init_params=None):
         self.configuration = configuration
         if configuration == 1:
             super(MyDummyRegressor, self).__init__(strategy='mean')
         else:
             super(MyDummyRegressor, self).__init__(strategy='median')
 
-    def pre_transform(self, X, y, fit_params=None, init_params=None):
+    def pre_transform(self, X, y, fit_params=None):
         if fit_params is None:
             fit_params = {}
         return X, fit_params
 
-    def fit(self, X, y, sample_weight=None, init_params=None):
+    def fit(self, X, y, sample_weight=None):
         return super(MyDummyRegressor, self).fit(np.ones((X.shape[0], 1)), y,
                                                  sample_weight=sample_weight)
 
@@ -89,7 +89,9 @@ class AbstractEvaluator(object):
                  seed=1,
                  output_y_test=False,
                  num_run=None,
-                 subsample=None,):
+                 subsample=None,
+                 include=None,
+                 exclude=None):
 
         self.starttime = time.time()
 
@@ -97,6 +99,8 @@ class AbstractEvaluator(object):
         self.backend = backend
 
         self.D = Datamanager
+        self.include = include
+        self.exclude = exclude
 
         self.X_valid = Datamanager.data.get('X_valid')
         self.X_test = Datamanager.data.get('X_test')
@@ -144,7 +148,23 @@ class AbstractEvaluator(object):
 
         self.subsample = subsample
 
-        self.model = self.model_class(self.configuration, self.seed)
+        if not isinstance(self.configuration, Configuration):
+            self.model = self.model_class(configuration=self.configuration,
+                                          random_state=self.seed,
+                                          init_params=self._init_params)
+        else:
+            dataset_properties = {'task': self.task_type,
+                                  'sparse': self.D.info['is_sparse'] == 1,
+                                  'is_multilabel': self.task_type ==
+                                                   MULTILABEL_CLASSIFICATION,
+                                  'is_multiclass': self.task_type ==
+                                                   MULTICLASS_CLASSIFICATION}
+            self.model = self.model_class(config=self.configuration,
+                                          dataset_properties=dataset_properties,
+                                          random_state=self.seed,
+                                          include=self.include,
+                                          exclude=self.exclude,
+                                          init_params=self._init_params)
 
         logger_name = '%s(%d):%s' % (self.__class__.__name__.split('.')[-1],
                                      self.seed, self.D.name)
@@ -349,7 +369,7 @@ class AbstractEvaluator(object):
 
         with warnings.catch_warnings():
             warnings.showwarning = send_warnings_to_log
-            model = model.fit(X, y, init_params=self._init_params)
+            model = model.fit(X, y)
 
         return model
 

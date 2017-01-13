@@ -1,4 +1,5 @@
 import numpy as np
+import sklearn.ensemble
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -6,8 +7,6 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
-from autosklearn.pipeline.implementations.MultilabelClassifier import \
-    MultilabelClassifier
 from autosklearn.pipeline.constants import *
 
 
@@ -42,7 +41,6 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         return self
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
-        import sklearn.ensemble
 
         # Special fix for gradient boosting!
         if isinstance(X, np.ndarray):
@@ -89,21 +87,14 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 warm_start=True,
             )
 
-        # Fallback for multilabel classification
-        if len(y.shape) > 1 and y.shape[1] > 1:
-            import sklearn.multiclass
-            self.estimator.n_estimators = self.n_estimators
-            self.estimator = MultilabelClassifier(self.estimator, n_jobs=1)
-            self.estimator.fit(X, y)
+        tmp = self.estimator  # TODO copy ?
+        tmp.n_estimators += n_iter
+        tmp.fit(X, y, sample_weight=sample_weight)
+        self.estimator = tmp
+        # Apparently this if is necessary
+        if self.estimator.n_estimators >= self.n_estimators:
             self.fully_fit_ = True
-        else:
-            tmp = self.estimator  # TODO copy ?
-            tmp.n_estimators += n_iter
-            tmp.fit(X, y, sample_weight=sample_weight)
-            self.estimator = tmp
-            # Apparently this if is necessary
-            if self.estimator.n_estimators >= self.n_estimators:
-                self.fully_fit_ = True
+
         return self
 
     def configuration_fully_fitted(self):
@@ -131,7 +122,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': True,
+                'handles_multilabel': False,
                 'is_deterministic': True,
                 'input': (DENSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,)}

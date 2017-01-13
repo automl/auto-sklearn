@@ -12,7 +12,7 @@ from autosklearn.pipeline.constants import *
 
 
 class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, use_minimum_fraction, minimum_fraction=None,
+    def __init__(self, use_minimum_fraction=True, minimum_fraction=0.01,
                  categorical_features=None, random_state=None):
         # TODO pay attention to the cases when a copy is made (CSR matrices)
         self.use_minimum_fraction = use_minimum_fraction
@@ -21,7 +21,9 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
 
     def fit(self, X, y=None):
         if self.use_minimum_fraction is None or \
-                self.use_minimum_fraction.lower() == 'false':
+                self.use_minimum_fraction is False or \
+                (isinstance(self.use_minimum_fraction, str) and
+                 self.use_minimum_fraction.lower() == 'false'):
             self.minimum_fraction = None
         else:
             self.minimum_fraction = float(self.minimum_fraction)

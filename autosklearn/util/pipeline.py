@@ -7,7 +7,6 @@ from autosklearn.pipeline.regression import SimpleRegressionPipeline
 __all__ = [
     'get_configuration_space',
     'get_class',
-    'get_model'
 ]
 
 
@@ -31,7 +30,8 @@ def _get_regression_configuration_space(info, include):
     sparse = False
     if info['is_sparse'] == 1:
         sparse = True
-    configuration_space = SimpleRegressionPipeline. \
+    configuration_space = SimpleRegressionPipeline(
+        dataset_properties=info, include=include).\
         get_hyperparameter_search_space(include=include,
                                         dataset_properties={'sparse': sparse})
     return configuration_space
@@ -62,16 +62,11 @@ def _get_classification_configuration_space(info, include):
         'sparse': sparse
     }
 
-    return SimpleClassificationPipeline.get_hyperparameter_search_space(
+    return SimpleClassificationPipeline(
+        dataset_properties=dataset_properties, include=include).\
+        get_hyperparameter_search_space(
         dataset_properties=dataset_properties,
         include=include)
-
-
-def get_model(configuration, seed):
-    if 'classifier' in configuration:
-        return SimpleClassificationPipeline(configuration, seed)
-    elif 'regressor' in configuration:
-        return SimpleRegressionPipeline(configuration, seed)
 
 
 def get_class(info):

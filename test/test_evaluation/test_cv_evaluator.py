@@ -94,7 +94,7 @@ class FunctionsTest(unittest.TestCase):
                 with_predictions=True, all_scoring_functions=False,
                 output_y_test=True)
         info = self.queue.get()
-        self.assertAlmostEqual(info[1], 0.079637096774193727)
+        self.assertAlmostEqual(info[1], 0.095262096774193505)
         self.assertEqual(info[2], 1)
         self.assertNotIn('bac_metric', info[3])
 
@@ -105,10 +105,11 @@ class FunctionsTest(unittest.TestCase):
                 with_predictions=True, all_scoring_functions=True,
                 output_y_test=True)
         info = self.queue.get()
-        self.assertIn('f1_metric: 0.0794451450189;pac_metric: 0.344745492187;'
-                      'acc_metric: 0.075;auc_metric: 0.0285222960152;'
-                      'bac_metric: 0.0796370967742;duration: ', info[3])
-        self.assertAlmostEqual(info[1], 0.079637096774193727)
+        self.assertIn(
+            'f1_metric: 0.0952620967742;pac_metric: 0.355606202593;'
+            'acc_metric: 0.09;auc_metric: 0.030994474695;'
+            'bac_metric: 0.0952620967742;duration: ', info[3])
+        self.assertAlmostEqual(info[1], 0.095262096774193505)
         self.assertEqual(info[2], 1)
 
     def test_eval_cv_on_subset(self):
@@ -123,7 +124,7 @@ class FunctionsTest(unittest.TestCase):
 
     def test_eval_partial_cv(self):
         results = [0.071428571428571508,
-                   0.071428571428571508,
+                   0.15476190476190488,
                    0.08333333333333337,
                    0.16666666666666674,
                    0.0]
@@ -143,7 +144,7 @@ class FunctionsTest(unittest.TestCase):
         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
 
         results = [0.071428571428571508,
-                   0.071428571428571508,
+                   0.15476190476190488,
                    0.08333333333333337,
                    0.16666666666666674,
                    0.0]

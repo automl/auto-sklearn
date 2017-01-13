@@ -4,6 +4,7 @@ import signal
 import numpy as np
 from smac.tae.execute_ta_run import StatusType
 
+from ConfigSpace import Configuration
 from autosklearn.evaluation.resampling import get_CV_fold
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 
@@ -26,7 +27,9 @@ class CVEvaluator(AbstractEvaluator):
                  cv_folds=10,
                  num_run=None,
                  subsample=None,
-                 keep_models=False):
+                 keep_models=False,
+                 include=None,
+                 exclude=None):
         super(CVEvaluator, self).__init__(
             Datamanager, backend, configuration,
             with_predictions=with_predictions,
@@ -34,7 +37,9 @@ class CVEvaluator(AbstractEvaluator):
             seed=seed,
             output_y_test=output_y_test,
             num_run=num_run,
-            subsample=subsample)
+            subsample=subsample,
+            include=include,
+            exclude=exclude)
 
         self.cv_folds = cv_folds
         self.X_train = self.D.data['X_train']
@@ -103,7 +108,14 @@ class CVEvaluator(AbstractEvaluator):
         return loss, opt_pred, valid_pred, test_pred
 
     def _partial_fit_and_predict(self, fold):
-        model = self.model_class(self.configuration, self.seed)
+        if not isinstance(self.configuration, Configuration):
+            model = self.model_class(configuration=self.configuration,
+                                          random_state=self.seed)
+        else:
+            model = self.model_class(config=self.configuration,
+                                     random_state=self.seed,
+                                     include=self.include,
+                                     exclude=self.exclude)
 
         train_indices, test_indices = self.get_train_test_split(fold)
 
@@ -167,8 +179,7 @@ class CVEvaluator(AbstractEvaluator):
         Y_train = self.Y_train[train_indices]
         self.Y_targets[fold] = self.Y_train[test_indices]
 
-        Xt, fit_params = model.pre_transform(X_train, Y_train,
-                                             init_params=self._init_params)
+        Xt, fit_params = model.pre_transform(X_train, Y_train)
         if not model.estimator_supports_iterative_fit():
             print("Model does not support iterative_fit(), reverting to " \
                 "regular fit().")

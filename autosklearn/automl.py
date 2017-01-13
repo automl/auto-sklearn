@@ -412,6 +412,11 @@ class AutoML(BaseEstimator):
                                                'runhistory.json',)
             self.runhistory_.save_json(runhistory_filename)
 
+        # Wait until the ensemble process is finished to avoid shutting down
+        # while the ensemble builder tries to access the data
+        if self._proc_ensemble is not None and self._ensemble_size > 0:
+            self._proc_ensemble.join()
+
         self._proc_ensemble = None
         self._load_models()
 

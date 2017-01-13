@@ -10,13 +10,18 @@ from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 from autosklearn.pipeline.components import classification as \
     classification_components
-from autosklearn.pipeline.components import data_preprocessing as \
-    data_preprocessing_components
+from autosklearn.pipeline.components.data_preprocessing import rescaling as \
+    rescaling_components
+from autosklearn.pipeline.components.data_preprocessing.balancing.balancing import \
+    Balancing
+from autosklearn.pipeline.components.data_preprocessing.imputation.imputation \
+    import Imputation
+from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding\
+    .one_hot_encoding import OneHotEncoder
 from autosklearn.pipeline.components import feature_preprocessing as \
     feature_preprocessing_components
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
-from autosklearn.pipeline.components.data_preprocessing.balancing import Balancing
 
 
 class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
@@ -67,24 +72,34 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
     """
 
-    def __init__(self, configuration, random_state=None):
+    def __init__(self, config=None, pipeline=None, dataset_properties=None,
+                 include=None, exclude=None, random_state=None,
+                 init_params=None):
         self._output_dtype = np.int32
-        super(SimpleClassificationPipeline, self).__init__(configuration,
-                                                           random_state)
+        super(SimpleClassificationPipeline, self).__init__(
+            config, pipeline, dataset_properties, include, exclude,
+            random_state, init_params)
 
-    def pre_transform(self, X, y, fit_params=None, init_params=None):
+    def pre_transform(self, X, y, fit_params=None):
         self.num_targets = 1 if len(y.shape) == 1 else y.shape[1]
 
-        # Weighting samples has to be done here, not in the components
+        if fit_params is None:
+            fit_params = {}
+
         if self.configuration['balancing:strategy'] == 'weighting':
             balancing = Balancing(strategy='weighting')
-            init_params, fit_params = balancing.get_weights(
+            _init_params, _fit_params = balancing.get_weights(
                 y, self.configuration['classifier:__choice__'],
                 self.configuration['preprocessor:__choice__'],
-                init_params, fit_params)
+                {}, {})
+            self.set_hyperparameters(configuration=self.configuration,
+                                     init_params=_init_params)
+
+            if _fit_params is not None:
+                fit_params.update(_fit_params)
 
         X, fit_params = super(SimpleClassificationPipeline, self).pre_transform(
-            X, y, fit_params=fit_params, init_params=init_params)
+            X, y, fit_params=fit_params)
 
         return X, fit_params
 
@@ -106,10 +121,10 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         """
         if batch_size is None:
             Xt = X
-            for name, transform in self.pipeline_.steps[:-1]:
+            for name, transform in self.steps[:-1]:
                 Xt = transform.transform(Xt)
 
-            return self.pipeline_.steps[-1][-1].predict_proba(Xt)
+            return self.steps[-1][-1].predict_proba(Xt)
 
         else:
             if type(batch_size) is not int or batch_size <= 0:
@@ -133,8 +148,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
                 return y
 
-    @classmethod
-    def get_hyperparameter_search_space(cls, include=None, exclude=None,
+    def get_hyperparameter_search_space(self, include=None, exclude=None,
                                         dataset_properties=None):
         """Create the hyperparameter configuration space.
 
@@ -154,9 +168,10 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         if dataset_properties['target_type'] != 'classification':
             dataset_properties['target_type'] = 'classification'
 
-        pipeline = cls._get_pipeline()
-        cs = cls._get_hyperparameter_search_space(cs, dataset_properties,
-                                                  exclude, include, pipeline)
+        pipeline = self._get_pipeline()
+        cs = self._get_hyperparameter_search_space(
+            cs=cs, dataset_properties=dataset_properties,
+            exclude=exclude, include=include, pipeline=pipeline)
 
         classifiers = cs.get_hyperparameter('classifier:__choice__').choices
         preprocessors = cs.get_hyperparameter('preprocessor:__choice__').choices
@@ -261,30 +276,33 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                     cs.get_hyperparameter(
                         'classifier:__choice__').default = default
 
+        self.configuration_space_ = cs
+        self.dataset_properties_ = dataset_properties
         return cs
 
-    @classmethod
-    def _get_pipeline(cls):
+    def _get_pipeline(self):
         steps = []
 
+        default_dataset_properties = {'target_type': 'classification'}
+
         # Add the always active preprocessing components
+
         steps.extend(
-            [["one_hot_encoding",
-              data_preprocessing_components._preprocessors['one_hot_encoding']],
-             ["imputation",
-              data_preprocessing_components._preprocessors['imputation']],
+            [["one_hot_encoding", OneHotEncoder()],
+             ["imputation", Imputation()],
              ["rescaling",
-              data_preprocessing_components._preprocessors['rescaling']],
-             ["balancing",
-              data_preprocessing_components._preprocessors['balancing']]])
+              rescaling_components.RescalingChoice(default_dataset_properties)],
+             ["balancing", Balancing()]])
 
         # Add the preprocessing component
         steps.append(['preprocessor',
-                      feature_preprocessing_components.FeaturePreprocessorChoice])
+                      feature_preprocessing_components.FeaturePreprocessorChoice(
+                          default_dataset_properties)])
 
         # Add the classification component
         steps.append(['classifier',
-                      classification_components.ClassifierChoice])
+                      classification_components.ClassifierChoice(
+                          default_dataset_properties)])
         return steps
 
     def _get_estimator_hyperparameter_name(self):

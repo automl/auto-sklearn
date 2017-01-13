@@ -6,11 +6,12 @@ import os
 
 import arff
 import numpy as np
+import scipy.sparse
 from sklearn.preprocessing.imputation import Imputer
 from sklearn.datasets import make_multilabel_classification
 
 from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
-from autosklearn.pipeline.implementations.StandardScaler import StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 from autosklearn.metalearning.metafeatures.metafeature import MetaFeatureValue
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features
@@ -43,7 +44,8 @@ class MetaFeaturesTest(TestCase):
         X_transformed = ohe.fit_transform(X)
         imp = Imputer(copy=False)
         X_transformed = imp.fit_transform(X_transformed)
-        standard_scaler = StandardScaler()
+        center = not scipy.sparse.isspmatrix((X_transformed))
+        standard_scaler = StandardScaler(with_mean=center)
         X_transformed = standard_scaler.fit_transform(X_transformed)
         X_transformed = X_transformed.todense()
 
@@ -436,7 +438,7 @@ class MetaFeaturesTest(TestCase):
 
     def test_pca_95percent(self):
         mf = self.mf["PCAFractionOfComponentsFor95PercentVariance"](self.X_transformed, self.y)
-        self.assertAlmostEqual(0.2976190476190476, mf.value)
+        self.assertAlmostEqual(0.44047619047619047, mf.value)
 
     def test_pca_kurtosis_first_pc(self):
         mf = self.mf["PCAKurtosisFirstPC"](self.X_transformed, self.y)

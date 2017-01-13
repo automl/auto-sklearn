@@ -24,8 +24,8 @@ class MetaLearnerTest(unittest.TestCase):
         data_dir = os.path.join(data_dir, 'test_meta_base_data')
         os.chdir(data_dir)
 
-        self.cs = autosklearn.pipeline.classification.SimpleClassificationPipeline\
-            .get_hyperparameter_search_space()
+        self.cs = autosklearn.pipeline.classification\
+            .SimpleClassificationPipeline().get_hyperparameter_search_space()
 
         meta_base = MetaBase(self.cs, data_dir)
         self.meta_optimizer = metalearner.MetaLearningOptimizer(
@@ -36,7 +36,7 @@ class MetaLearnerTest(unittest.TestCase):
 
     def test_metalearning_suggest_all(self):
         ret = self.meta_optimizer.metalearning_suggest_all()
-        self.assertEqual(19, len(ret))
+        self.assertEqual(18, len(ret))
         self.assertEqual('gradient_boosting', ret[0]['classifier:__choice__'])
         self.assertEqual('random_forest', ret[1]['classifier:__choice__'])
         # There is no test for exclude_double_configuration as it's not present
@@ -46,7 +46,7 @@ class MetaLearnerTest(unittest.TestCase):
         self.meta_optimizer.meta_base.metafeatures.loc["38_acc"].iloc[:10] = \
             np.NaN
         ret = self.meta_optimizer.metalearning_suggest_all()
-        self.assertEqual(19, len(ret))
+        self.assertEqual(18, len(ret))
         self.assertEqual('gradient_boosting', ret[0]['classifier:__choice__'])
         self.assertEqual('random_forest', ret[1]['classifier:__choice__'])
 

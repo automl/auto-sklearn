@@ -33,26 +33,6 @@ class AdaBoostComponentTest(unittest.TestCase):
                                    sklearn.metrics.accuracy_score(targets,
                                                                   predictions))
 
-    def test_default_configuration_multilabel(self):
-        for i in range(10):
-            predictions, targets = \
-                _test_classifier(classifier=AdaboostClassifier,
-                                 dataset='digits',
-                                 make_multilabel=True)
-            self.assertAlmostEqual(0.79529966660329099,
-                                   sklearn.metrics.average_precision_score(
-                                       targets, predictions))
-
-    def test_default_configuration_multilabel_predict_proba(self):
-        for i in range(10):
-            predictions, targets = \
-                _test_classifier_predict_proba(classifier=AdaboostClassifier,
-                                 make_multilabel=True)
-            self.assertEqual(predictions.shape, ((50, 3)))
-            self.assertAlmostEqual(0.9722131915406923,
-                                   sklearn.metrics.average_precision_score(
-                                       targets, predictions))
-
     def test_default_configuration_binary(self):
         for i in range(10):
             predictions, targets = \
