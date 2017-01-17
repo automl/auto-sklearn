@@ -12,14 +12,14 @@ import sklearn.ensemble
 
 class ExtraTreesComponentTest(unittest.TestCase):
     def test_default_configuration(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(ExtraTreesClassifier)
             self.assertAlmostEqual(0.95999999999999996,
                 sklearn.metrics.accuracy_score(targets, predictions))
 
     def test_default_configuration_predict_proba(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier_predict_proba(ExtraTreesClassifier)
             self.assertAlmostEqual(0.1086791056721286,
@@ -27,7 +27,7 @@ class ExtraTreesComponentTest(unittest.TestCase):
                                        targets, predictions))
 
     def test_default_configuration_sparse(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(ExtraTreesClassifier, sparse=True)
             self.assertAlmostEqual(0.71999999999999997,
@@ -35,7 +35,7 @@ class ExtraTreesComponentTest(unittest.TestCase):
                                                                   predictions))
 
     def test_default_configuration_iterative_fit(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier_iterative_fit(ExtraTreesClassifier)
             self.assertAlmostEqual(0.93999999999999995,
@@ -43,7 +43,7 @@ class ExtraTreesComponentTest(unittest.TestCase):
                                                                   predictions))
 
     def test_default_configuration_binary(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(ExtraTreesClassifier, make_binary=True)
             self.assertAlmostEqual(1,
@@ -51,7 +51,7 @@ class ExtraTreesComponentTest(unittest.TestCase):
                                                                   predictions))
 
     def test_default_configuration_multilabel(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(ExtraTreesClassifier, make_multilabel=True)
             self.assertAlmostEqual(0.97060428849902536,
@@ -59,7 +59,7 @@ class ExtraTreesComponentTest(unittest.TestCase):
                                        targets, predictions))
 
     def test_default_configuration_predict_proba_multilabel(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier_predict_proba(ExtraTreesClassifier,
                                                make_multilabel=True)

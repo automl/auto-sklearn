@@ -11,14 +11,14 @@ import sklearn.linear_model
 
 class SGDComponentTest(unittest.TestCase):
     def test_default_configuration(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier(SGD)
             self.assertAlmostEqual(0.64000000000000001,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
 
     def test_default_configuration_iterative_fit(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier_iterative_fit(
                 SGD)
             self.assertAlmostEqual(0.76000000000000001,
@@ -26,7 +26,7 @@ class SGDComponentTest(unittest.TestCase):
                                        predictions, targets))
 
     def test_default_configuration_digits(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(SGD, dataset='digits')
             self.assertAlmostEqual(0.89981785063752273,
@@ -34,7 +34,7 @@ class SGDComponentTest(unittest.TestCase):
                                                                   targets))
 
     def test_default_configuration_digits_iterative_fit(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier_iterative_fit(
                 SGD,
                 dataset='digits')
@@ -43,7 +43,7 @@ class SGDComponentTest(unittest.TestCase):
                                        predictions, targets))
 
     def test_default_configuration_binary(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier(SGD, make_binary=True)
             self.assertAlmostEqual(1.0,
                                    sklearn.metrics.accuracy_score(predictions,

@@ -9,7 +9,7 @@ from autosklearn.pipeline.util import _test_preprocessing, PreprocessingTestCase
 class PCAComponentTest(PreprocessingTestCase):
     def test_default_configuration(self):
         transformations = []
-        for i in range(10):
+        for i in range(2):
             transformation, original = _test_preprocessing(PCA)
             self.assertEqual(transformation.shape, original.shape)
             self.assertFalse((transformation == original).all())

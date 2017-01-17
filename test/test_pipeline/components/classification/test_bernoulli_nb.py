@@ -12,7 +12,7 @@ import sklearn.naive_bayes
 
 class BernoulliNBComponentTest(unittest.TestCase):
     def test_default_configuration(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(BernoulliNB)
             self.assertAlmostEqual(0.26000000000000001,
@@ -20,7 +20,7 @@ class BernoulliNBComponentTest(unittest.TestCase):
                                                                   targets))
 
     def test_default_configuration_iterative_fit(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier_iterative_fit(BernoulliNB)
             self.assertAlmostEqual(0.26000000000000001,
@@ -28,7 +28,7 @@ class BernoulliNBComponentTest(unittest.TestCase):
                                                                   targets))
 
     def test_default_configuration_binary(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(BernoulliNB, make_binary=True)
             self.assertAlmostEqual(0.73999999999999999,
@@ -36,7 +36,7 @@ class BernoulliNBComponentTest(unittest.TestCase):
                                        predictions, targets))
 
     def test_default_configuration_multilabel(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(classifier=BernoulliNB,
                                  dataset='digits',
@@ -46,7 +46,7 @@ class BernoulliNBComponentTest(unittest.TestCase):
                                        targets, predictions))
 
     def test_default_configuration_multilabel_predict_proba(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier_predict_proba(classifier=BernoulliNB,
                                                make_multilabel=True)

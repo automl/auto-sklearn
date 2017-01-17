@@ -12,14 +12,14 @@ import numpy as np
 
 class GradientBoostingComponentTest(unittest.TestCase):
     def test_default_configuration(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(GradientBoostingClassifier)
             self.assertAlmostEqual(0.93999999999999995,
                 sklearn.metrics.accuracy_score(predictions, targets))
 
     def test_default_configuration_iterative_fit(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier_iterative_fit(GradientBoostingClassifier)
             self.assertAlmostEqual(0.95999999999999996,
@@ -27,7 +27,7 @@ class GradientBoostingComponentTest(unittest.TestCase):
                                                                   targets))
 
     def test_default_configuration_binary(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier(
                 GradientBoostingClassifier, make_binary=True)
             self.assertAlmostEqual(1.0,

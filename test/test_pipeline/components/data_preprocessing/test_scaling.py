@@ -31,7 +31,7 @@ class ScalingComponentTest(unittest.TestCase):
 
     def test_default_configuration(self):
         transformations = []
-        for i in range(10):
+        for i in range(2):
             transformation, original = self._test_helper(RescalingChoice,
                                                          dataset='boston')
             # The maximum is around 1.95 for the transformed array...

@@ -11,13 +11,13 @@ import sklearn.svm
 
 class LibSVM_SVCComponentTest(unittest.TestCase):
     def test_default_configuration(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier(LibSVM_SVC, dataset='iris')
             self.assertAlmostEqual(0.96,
                 sklearn.metrics.accuracy_score(predictions, targets))
 
     def test_default_configuration_predict_proba(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier_predict_proba(
                 LibSVM_SVC, sparse=True, dataset='digits',
                 train_size_maximum=500)
@@ -25,7 +25,7 @@ class LibSVM_SVCComponentTest(unittest.TestCase):
                                    sklearn.metrics.log_loss(targets,
                                                             predictions))
 
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier_predict_proba(
                 LibSVM_SVC, sparse=True, dataset='iris')
             self.assertAlmostEqual(0.8649665185853217,
@@ -33,7 +33,7 @@ class LibSVM_SVCComponentTest(unittest.TestCase):
                                                         predictions))
 
         # 2 class
-        for i in range(10):
+        for i in range(2):
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
             remove_training_data = Y_train == 2
             remove_test_data = Y_test == 2
@@ -56,7 +56,7 @@ class LibSVM_SVCComponentTest(unittest.TestCase):
                                    0.69323680119641773)
 
     def test_default_configuration_binary(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier(LibSVM_SVC,
                                                     make_binary=True)
             self.assertAlmostEqual(1.0,
