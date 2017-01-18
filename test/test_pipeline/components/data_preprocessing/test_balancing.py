@@ -76,7 +76,7 @@ class BalancingComponentTest(unittest.TestCase):
                  ('random_forest', RandomForest, 0.75, 0.821),
                  ('libsvm_svc', LibSVM_SVC, 0.769, 0.706),
                  ('liblinear_svc', LibLinear_SVC, 0.762, 0.72),
-                 ('sgd', SGD, 0.739, 0.632)
+                 ('sgd', SGD, 0.739, 0.735)
                 ]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
