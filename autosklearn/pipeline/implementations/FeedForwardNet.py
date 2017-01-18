@@ -15,8 +15,11 @@ import lasagne
 DEBUG = True
 
 
-def sharedX(X, dtype=theano.config.floatX, name=None):
-    return theano.shared(np.asarray(X, dtype=dtype), name=name)
+def sharedX(X, dtype=theano.config.floatX, name=None, broadcastable=None):
+    if broadcastable:
+        return theano.shared(np.asarray(X, dtype=dtype), name=name, broadcastable=broadcastable)
+    else:
+        return theano.shared(np.asarray(X, dtype=dtype), name=name)
 
 
 def smorm3s(cost, params, learning_rate=1e-3, eps=1e-16, gather=False):
@@ -25,9 +28,9 @@ def smorm3s(cost, params, learning_rate=1e-3, eps=1e-16, gather=False):
     grads = T.grad(cost, params)
 
     for p, grad in zip(params, grads):
-        mem = sharedX(p.get_value() * 0. + 1.)
-        g = sharedX(p.get_value() * 0.)
-        g2 = sharedX(p.get_value() * 0.)
+        mem = sharedX(p.get_value() * 0. + 1., broadcastable=p.broadcastable)
+        g = sharedX(p.get_value() * 0., broadcastable=p.broadcastable)
+        g2 = sharedX(p.get_value() * 0., broadcastable=p.broadcastable)
         if gather:
             optim_params.append(mem)
             optim_params.append(g)
@@ -179,7 +182,8 @@ class FeedForwardNet(object):
         # Aggregate loss mean function with l2
         # Regularization on all layers' params
         if self.is_binary or self.is_multilabel:
-            loss = T.sum(loss, dtype=theano.config.floatX)
+            #loss = T.sum(loss, dtype=theano.config.floatX)
+            loss = T.mean(loss, dtype=theano.config.floatX)
         else:
             loss = T.mean(loss, dtype=theano.config.floatX)
         l2_penalty = self.lambda2 * lasagne.regularization.regularize_network_params(
