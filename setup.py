@@ -17,7 +17,7 @@ requirements = [
     "nose",
     "six",
     "Cython",
-    "numpy>=1.9.0,<1.2",
+    "numpy<1.2",
     "scipy>=0.14.1",
     "scikit-learn==0.17.1",
     "lockfile",
