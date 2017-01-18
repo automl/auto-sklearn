@@ -122,19 +122,19 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
     def test_default_configuration_multilabel(self):
         for i in range(2):
             dataset_properties = {'multilabel': True}
-            cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
+            classifier = SimpleClassificationPipeline(
                 dataset_properties=dataset_properties)
+            cs = classifier.get_hyperparameter_search_space()
             default = cs.get_default_configuration()
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris',
                                                            make_multilabel=True)
-            auto = SimpleClassificationPipeline(config=default,
-                                                dataset_properties=dataset_properties)
-            auto = auto.fit(X_train, Y_train)
-            predictions = auto.predict(X_test)
+            classifier.set_hyperparameters(default)
+            classifier = classifier.fit(X_train, Y_train)
+            predictions = classifier.predict(X_test)
             self.assertAlmostEqual(0.9599999999999995,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   Y_test))
-            scores = auto.predict_proba(X_test)
+            scores = classifier.predict_proba(X_test)
 
     def test_repr(self):
         representation = repr(SimpleClassificationPipeline())

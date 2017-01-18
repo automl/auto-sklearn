@@ -31,6 +31,9 @@ class BasePipeline(Pipeline):
         else:
             self.dataset_properties_ = dataset_properties
 
+        self.include_ = include
+        self.exclude_ = exclude
+
         if config is None:
             self.configuration_ = self.get_hyperparameter_search_space(
                 dataset_properties=dataset_properties,
@@ -242,7 +245,10 @@ class BasePipeline(Pipeline):
     def _get_hyperparameter_search_space(self, cs, dataset_properties, exclude,
                                          include, pipeline):
         if include is None:
-            include = {}
+            if self.include_ is None:
+                include = {}
+            else:
+                include = self.include_
 
         keys = [pair[0] for pair in pipeline]
         for key in include:
@@ -251,7 +257,10 @@ class BasePipeline(Pipeline):
                                  'of %s' % (key, keys))
 
         if exclude is None:
-            exclude = {}
+            if self.exclude_ is None:
+                exclude = {}
+            else:
+                exclude = self.exclude_
 
         keys = [pair[0] for pair in pipeline]
         for key in exclude:
