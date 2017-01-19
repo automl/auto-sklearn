@@ -112,7 +112,8 @@ class FeedForwardNet(object):
         self.solver = solver
 
         if is_sparse:
-            input_var = S.csr_matrix('inputs', dtype=theano.config.floatX)
+            #input_var = S.csr_matrix('inputs', dtype=theano.config.floatX)
+            input_var = T.matrix('inputs')
         else:
             input_var = T.matrix('inputs')
 
@@ -276,6 +277,8 @@ class FeedForwardNet(object):
             train_batches = 0
             for inputs, targets in iterate_minibatches(X, y, self.batch_size, shuffle=True,
                                                        random_state=self.random_state):
+                if self.is_sparse:
+                    inputs = inputs.toarray()
                 train_err += self.train_fn(inputs, targets, self.learning_rate)
                 train_batches += 1
             decay = self.update_function(self.gamma, epoch+1.0,
@@ -295,8 +298,9 @@ class FeedForwardNet(object):
 
     def predict_proba(self, X, is_sparse=False):
         if is_sparse:
-            X = X.astype(np.float32)
-            X = S.as_sparse_or_tensor_variable(X)
+            #X = X.astype(np.float32)
+            #X = S.as_sparse_or_tensor_variable(X)
+            X = X.toarray()
         else:
             try:
                 X = np.asarray(X, dtype=theano.config.floatX)
