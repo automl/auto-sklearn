@@ -6,7 +6,7 @@ from autosklearn.__version__ import __version__
 __MANDATORY_PACKAGES__ = '''
 numpy>=1.9,<1.12
 scikit-learn==0.17.1
-smac==0.2.2
+smac==0.2.3
 lockfile>=0.10
 ConfigSpace>=0.2.1
 pyrfr==0.2.0

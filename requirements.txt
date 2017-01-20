@@ -22,4 +22,4 @@ xgboost==0.4a30
 ConfigSpace
 pynisher>=0.4
 pyrfr
-git+https://github.com/automl/SMAC3@development
+smac==0.2.3

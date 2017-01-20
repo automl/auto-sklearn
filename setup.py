@@ -31,7 +31,7 @@ requirements = [
     "ConfigSpace",
     "pynisher>=0.4",
     "pyrfr",
-    "smac==0.2.2"
+    "smac==0.2.3"
 ]
 
 with open("autosklearn/__version__.py") as fh:
@@ -45,7 +45,6 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=requirements,
     test_suite='nose.collector',
-    scripts=['scripts/autosklearn'],
     include_package_data=True,
     author='Matthias Feurer',
     author_email='feurerm@informatik.uni-freiburg.de',
