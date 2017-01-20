@@ -10,6 +10,7 @@ def main():
     boston = sklearn.datasets.load_boston()
     X = boston.data
     y = boston.target
+    feature_types = (['numerical'] * 3) + ['categorical'] + (['numerical'] * 9)
     X_train, X_test, y_train, y_test = \
         sklearn.cross_validation.train_test_split(X, y, random_state=1)
 
@@ -17,7 +18,8 @@ def main():
         time_left_for_this_task=120, per_run_time_limit=30,
         tmp_folder='/tmp/autoslearn_regression_example_tmp',
         output_folder='/tmp/autosklearn_regression_example_out')
-    automl.fit(X_train, y_train, dataset_name='boston')
+    automl.fit(X_train, y_train, dataset_name='boston',
+               feat_type=feature_types)
 
     print(automl.show_models())
     predictions = automl.predict(X_test)
