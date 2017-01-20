@@ -77,7 +77,7 @@ class MetaFeatureValue(object):
                "comment: %s)"
         repr = repr % tuple(self.to_arff_row()[:4] +
                             [str(self.to_arff_row()[4])] +
-                            [self.to_arff_row()[5:]] )
+                            self.to_arff_row()[5:])
         return repr
 
 class DatasetMetafeatures(object):

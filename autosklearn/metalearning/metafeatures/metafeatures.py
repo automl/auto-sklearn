@@ -951,15 +951,18 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name,
                 # TODO make sure this is done as efficient as possible (no copy for
                 # sparse matrices because of wrong sparse format)
                 sparse = scipy.sparse.issparse(X)
-                ohe = OneHotEncoder(categorical_features=categorical, sparse=True)
-                X_transformed = ohe.fit_transform(X)
+                if any(categorical):
+                    ohe = OneHotEncoder(categorical_features=categorical, sparse=True)
+                    X_transformed = ohe.fit_transform(X)
+                else:
+                    X_transformed = X
                 imputer = Imputer(strategy='mean', copy=False)
                 X_transformed = imputer.fit_transform(X_transformed)
                 center = not scipy.sparse.isspmatrix(X_transformed)
                 standard_scaler = StandardScaler(copy=False, with_mean=center)
                 X_transformed = standard_scaler.fit_transform(X_transformed)
 
-                # Transform the array which indicates the categorical metafeatures
+                # Some stats on how the array got transformed
                 number_numerical = np.sum(~np.array(categorical))
                 categorical_transformed = [True] * (X_transformed.shape[1] -
                                                     number_numerical) + \

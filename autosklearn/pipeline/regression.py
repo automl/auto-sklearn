@@ -263,8 +263,6 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         default_dataset_properties = {'target_type': 'regression'}
 
         # Add the always active preprocessing components
-        # Add the always active preprocessing components
-        print(init_params)
         if init_params is not None and 'one_hot_encoding' in init_params:
             ohe_init_params = init_params['one_hot_encoding']
             if 'categorical_features' in ohe_init_params:

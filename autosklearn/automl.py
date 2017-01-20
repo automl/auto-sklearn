@@ -3,6 +3,7 @@ from __future__ import print_function
 
 from collections import defaultdict
 import io
+import json
 import os
 import unittest.mock
 
@@ -17,7 +18,6 @@ from smac.stats.stats import Stats
 from sklearn.grid_search import _CVScoreTuple
 
 from autosklearn.constants import *
-from autosklearn.data.data_manager_factory import get_data_manager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import resampling, ExecuteTaFuncWithQueue
@@ -107,29 +107,6 @@ class AutoML(BaseEstimator):
 
         # After assignging and checking variables...
         #self._backend = Backend(self._output_dir, self._tmp_dir)
-
-    def start_automl(self, parser):
-        self._parser = parser
-        self.start()
-
-    def start(self):
-        if self._parser is None:
-            raise ValueError('You must invoke start() only via start_automl()')
-        super(AutoML, self).start()
-
-    def run(self):
-        if self._parser is None:
-            raise ValueError('You must invoke run() only via start_automl()')
-        self._backend.save_start_time(self._seed)
-        self._stopwatch = StopWatch()
-        datamanager = get_data_manager(namespace=self._parser)
-        self._stopwatch.start_task(datamanager.name)
-
-        self._logger = self._get_logger(datamanager.name)
-
-        self._datamanager = datamanager
-        self._dataset_name = datamanager.name
-        self._fit(self._datamanager)
 
     def fit(self, X, y,
             task=MULTICLASS_CLASSIFICATION,
@@ -413,6 +390,12 @@ class AutoML(BaseEstimator):
             runhistory_filename = os.path.join(self._backend.temporary_directory,
                                                'runhistory.json',)
             self.runhistory_.save_json(runhistory_filename)
+            trajectory_filename = os.path.join(
+                self._backend.temporary_directory, 'trajectory.json')
+            saveable_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
+                                   for entry in self.trajectory_]
+            with open(trajectory_filename, 'w') as fh:
+                json.dump(saveable_trajectory, fh)
 
         # Wait until the ensemble process is finished to avoid shutting down
         # while the ensemble builder tries to access the data

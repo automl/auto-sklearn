@@ -1,13 +1,9 @@
 # -*- encoding: utf-8 -*-
 import abc
-import copy
 
-import numpy as np
 import scipy.sparse
 
-from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
-
-from autosklearn.util import predict_RAM_usage
+from autosklearn.data.generic_one_hot_encoding import perform_one_hot_encoding
 
 
 class AbstractDataManager():
@@ -48,51 +44,29 @@ class AbstractDataManager():
         self._encoder = value
 
     def perform1HotEncoding(self):
-        if not hasattr(self, 'data'):
-            raise ValueError('perform1HotEncoding can only be called when '
-                             'data is loaded')
-        if hasattr(self, 'encoder_'):
-            raise ValueError('perform1HotEncoding can only be called on '
-                             'non-encoded data.')
-        self._encoder = None
-
         sparse = True if self.info['is_sparse'] == 1 else False
         has_missing = True if self.info['has_missing'] else False
-
         to_encode = ['categorical']
         if has_missing:
             to_encode += ['binary']
         encoding_mask = [feat_type.lower() in to_encode
                          for feat_type in self.feat_type]
 
-        categorical = [True if feat_type.lower() == 'categorical' else False
-                       for feat_type in self.feat_type]
+        data = [self.data['X_train']]
+        if 'X_valid' in self.data:
+            data.append(self.data['X_valid'])
+        if 'X_test' in self.data:
+            data.append(self.data['X_test'])
+        data, sparse = perform_one_hot_encoding(
+            sparse=sparse, categorical=encoding_mask,
+            data=data)
 
-        predicted_RAM_usage = float(predict_RAM_usage(
-            self.data['X_train'], categorical)) / 1024 / 1024
-
-        if predicted_RAM_usage > 1000:
-            sparse = True
-
-        if any(encoding_mask):
-            encoder = OneHotEncoder(categorical_features=encoding_mask,
-                                    dtype=np.float32,
-                                    sparse=sparse)
-            self.data['X_train'] = encoder.fit_transform(self.data['X_train'])
-            if 'X_valid' in self.data:
-                self.data['X_valid'] = encoder.transform(self.data['X_valid'])
-            if 'X_test' in self.data:
-                self.data['X_test'] = encoder.transform(self.data['X_test'])
-
-            if not sparse and scipy.sparse.issparse(self.data['X_train']):
-                self.data['X_train'] = self.data['X_train'].todense()
-                if 'X_valid' in self.data:
-                    self.data['X_valid'] = self.data['X_valid'].todense()
-                if 'X_test' in self.data:
-                    self.data['X_test'] = self.data['X_test'].todense()
-
-            self.encoder = encoder
-            self.info['is_sparse'] = 1 if sparse else 0
+        self.info['is_sparse'] = 1 if sparse else 0
+        self.data['X_train'] = data[0]
+        if 'X_valid' in self.data:
+            self.data['X_valid'] = data[1]
+        if 'X_test' in self.data:
+            self.data['X_test'] = data[2]
 
     def __repr__(self):
         return 'DataManager : ' + self.name
