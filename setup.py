@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
-import autosklearn
-
+import os
 import setuptools
 from setuptools.extension import Extension
 import numpy as np
@@ -36,13 +35,16 @@ requirements = [
     "smac==0.2.2"
 ]
 
-with open("autosklearn/__version__.py") as fh:
+here = os.path.abspath(os.path.dirname(__file__))
+
+version = ''
+with open(os.path.join(here, 'autosklearn', '__version__.py')) as fh:
     version = fh.readlines()[-1].split()[-1].strip("\"'")
 
 setuptools.setup(
     name='auto-sklearn',
     description='Automated machine learning.',
-    version=autosklearn.__version__,
+    version=version,
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=requirements,
