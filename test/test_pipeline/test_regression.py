@@ -96,7 +96,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     def _test_configurations(self, configurations_space, make_sparse=False,
                              data=None, dataset_properties=None):
         # Use a limit of ~4GiB
-        limit = 3000 * 1024 * 1024
+        limit = 3072 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         configurations_space.seed(1)

@@ -79,7 +79,7 @@ for entry in trajectory:
     if incumbent_id not in incumbent_id_to_model:
         config = entry[2]
         print(incumbent_id, config)
-        is_sparse = 1 if scipy.sparse.issparse(X) else 0
+        is_sparse = 1 if scipy.sparse.issparse(X_train) else 0
         dataset_properties = {'task': automl._automl._automl._task,
                               'sparse': is_sparse,
                               'is_multilabel': automl._automl._automl._task == MULTILABEL_CLASSIFICATION,
@@ -94,7 +94,7 @@ for entry in trajectory:
 
         if automl._automl._automl._task in CLASSIFICATION_TASKS:
             model = SimpleClassificationPipeline(**model_arguments)
-        elif task in REGRESSION_TASKS:
+        elif automl._automl._automl._task in REGRESSION_TASKS:
             model = SimpleRegressionPipeline(**model_arguments)
         else:
             raise ValueError(automl._automl._automl._task)

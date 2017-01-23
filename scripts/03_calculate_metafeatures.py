@@ -61,12 +61,14 @@ if __name__ == "__main__":
     parser.add_argument("--n-jobs",
                         help="Compute metafeatures in parallel if possible.",
                         type=int, default=1)
+    parser.add_argument("--test-mode", type=bool, default=False)
 
     args = parser.parse_args()
     working_directory = args.working_directory
     task_type = args.task_type
     memory_limit = args.memory_limit
     n_jobs = args.n_jobs
+    test_mode = args.test_mode
 
     output_directory = os.path.join(working_directory, 'metafeatures')
     try:
@@ -80,6 +82,9 @@ if __name__ == "__main__":
         tasks = classification_tasks
     else:
         tasks = regression_tasks
+
+    if test_mode:
+        tasks = [tasks[0]]
 
     def producer():
         for task_id in tasks:

@@ -228,10 +228,11 @@ class AutoML(BaseEstimator):
                                     initial_num_run=num_run,
                                     logger=self._logger,
                                     stats=stats,
+                                    memory_limit=memory_limit,
                                     **self._resampling_strategy_arguments)
 
         status, cost, runtime, additional_info = \
-            ta.run(1, cutoff=self._time_for_task, memory_limit=memory_limit)
+            ta.run(1, cutoff=self._time_for_task)
         if status == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy predictions.")
         else:

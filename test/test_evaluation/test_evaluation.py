@@ -78,8 +78,9 @@ class EvaluationTest(unittest.TestCase):
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     logger=self.logger,
-                                    stats=self.stats)
-        info = ta.run(None, cutoff=30, memory_limit=3000)
+                                    stats=self.stats,
+                                    memory_limit=3000)
+        info = ta.run(None, cutoff=30)
         self.assertEqual(info[0], StatusType.SUCCESS)
         self.assertEqual(info[1], 0.5)
         self.assertIsInstance(info[2], float)
@@ -89,8 +90,9 @@ class EvaluationTest(unittest.TestCase):
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     logger=self.logger,
-                                    stats=self.stats)
-        ta.run(None, cutoff=30, memory_limit=3000)
+                                    stats=self.stats,
+                                    memory_limit=3000)
+        ta.run(None, cutoff=30)
         self.assertEqual(pynisher_mock.call_args[1]['wall_time_in_s'], 4)
         self.assertIsInstance(pynisher_mock.call_args[1]['wall_time_in_s'], int)
 
@@ -122,8 +124,9 @@ class EvaluationTest(unittest.TestCase):
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     logger=self.logger,
-                                    stats=self.stats)
-        info = ta.run(None, cutoff=30, memory_limit=3000)
+                                    stats=self.stats,
+                                    memory_limit=3000)
+        info = ta.run(None, cutoff=30)
         self.assertEqual(info[0], StatusType.CRASHED)
         self.assertEqual(info[1], 1.0)
         self.assertIsInstance(info[2], float)
@@ -134,8 +137,9 @@ class EvaluationTest(unittest.TestCase):
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     logger=self.logger,
-                                    stats=self.stats)
-        info = ta.run(None, cutoff=30, memory_limit=3000)
+                                    stats=self.stats,
+                                    memory_limit=3000)
+        info = ta.run(None, cutoff=30)
         self.assertEqual(info[0], StatusType.MEMOUT)
         self.assertEqual(info[1], 1.0)
         self.assertIsInstance(info[2], float)
@@ -146,8 +150,9 @@ class EvaluationTest(unittest.TestCase):
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     logger=self.logger,
-                                    stats=self.stats)
-        info = ta.run(None, cutoff=30, memory_limit=3000)
+                                    stats=self.stats,
+                                    memory_limit=3000)
+        info = ta.run(None, cutoff=30)
         self.assertEqual(info[0], StatusType.TIMEOUT)
         self.assertEqual(info[1], 1.0)
         self.assertIsInstance(info[2], float)
@@ -161,8 +166,9 @@ class EvaluationTest(unittest.TestCase):
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     logger=self.logger,
-                                    stats=self.stats)
-        info = ta.run(None, cutoff=30, memory_limit=3000)
+                                    stats=self.stats,
+                                    memory_limit=3000)
+        info = ta.run(None, cutoff=30)
         self.assertEqual(info[0], StatusType.SUCCESS)
         self.assertEqual(info[1], 0.5)
         self.assertIsInstance(info[2], float)

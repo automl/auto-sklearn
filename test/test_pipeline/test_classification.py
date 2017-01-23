@@ -228,7 +228,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                              data=None, init_params=None,
                              dataset_properties=None):
         # Use a limit of ~3GiB
-        limit = 3000 * 1024 * 1024
+        limit = 3072 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         for i in range(10):

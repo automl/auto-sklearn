@@ -529,6 +529,7 @@ class AutoMLSMBO(object):
                                     initial_num_run=num_run,
                                     logger=self.logger,
                                     include=include,
+                                    memory_limit=self.memory_limit,
                                     **self.resampling_strategy_args)
 
         types = get_types(self.config_space, self.scenario.feature_array)

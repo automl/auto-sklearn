@@ -24,7 +24,7 @@ Read the [OpenML python package manual](https://openml.github.io/openml-python) 
 
 ## 3. Create configuration commands
 
-    python 01_create_commands.py --working-directory $working_directory --task-type $task_type
+    python3 01_create_commands.py --working-directory $working_directory --task-type $task_type
 
 This will create a file with all commands necessary to run auto-sklearn on a
 large number of datasets from OpenML. You can change the task IDs or the way
@@ -39,12 +39,12 @@ order to get the results in a reasonable amount of time.
 
 ## 5. Get the test performance of these configurations
 
-    bash 02_retrieve_metadata.py --working-directory $working_directory --task-type $task_type
+    python3 02_retrieve_metadata.py --working-directory $working_directory --task-type $task_type
 
 ## 6. Calculate metafeatures
 
-    python 03_calculate_metafeatures.py --working-directory $working_directory --task-type $task_type
+    python3 03_calculate_metafeatures.py --working-directory $working_directory --task-type $task_type
 
 ## 7. Create aslib files
 
-    python 04_create_aslib_files.py --working-directory $working_directory --task-type $task_type
+    python3 04_create_aslib_files.py --working-directory $working_directory --task-type $task_type

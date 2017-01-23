@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 import logging
+import math
 import multiprocessing
 
 import numpy as np
@@ -22,7 +23,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                  logger, initial_num_run=1, stats=None, runhistory=None,
                  run_obj='quality', par_factor=1, with_predictions=True,
                  all_scoring_functions=False, output_y_test=True,
-                 include=None, exclude=None, **resampling_strategy_args):
+                 include=None, exclude=None, memory_limit=None,
+                 **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
             eval_function = eval_holdout
@@ -58,6 +60,10 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.exclude = exclude
         self.logger = logger
 
+        if memory_limit is not None:
+            memory_limit = int(math.ceil(memory_limit))
+        self.memory_limit = memory_limit
+
     def start(self, config, instance,
               cutoff=None,
               seed=12345,
@@ -82,7 +88,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def run(self, config, instance=None,
             cutoff=None,
-            memory_limit=None,
             seed=12345,
             instance_specific="0"):
 
@@ -91,7 +96,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         arguments = dict(logger=logging.getLogger("pynisher"),
                          wall_time_in_s=cutoff,
-                         mem_in_mb=memory_limit,
+                         mem_in_mb=self.memory_limit,
                          grace_period_in_s=15)
         obj_kwargs = dict(queue=queue,
                           config=config,
