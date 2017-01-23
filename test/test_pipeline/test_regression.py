@@ -197,6 +197,17 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             model_score = auto.score(copy.deepcopy(X_test), Y_test)
             self.assertAlmostEqual(model_score, r2_score, places=5)
 
+    def test_default_configuration_iterative_fit(self):
+        regressor = SimpleRegressionPipeline(
+            include={'regressor': ['random_forest'],
+                     'preprocessor': ['no_preprocessing']})
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
+        XT = regressor.pre_transform(X_train, Y_train)
+        for i in range(1, 11):
+            regressor.iterative_fit(X_train, Y_train)
+            self.assertEqual(regressor.steps[-1][-1].choice.estimator.n_estimators,
+                             i)
+
     def test_repr(self):
         representation = repr(SimpleRegressionPipeline())
         cls = eval(representation)

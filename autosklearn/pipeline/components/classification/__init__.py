@@ -124,3 +124,14 @@ class ClassifierChoice(AutoSklearnChoice):
 
     def predict_proba(self, X):
         return self.choice.predict_proba(X)
+
+    def estimator_supports_iterative_fit(self):
+        return hasattr(self.choice, 'iterative_fit')
+
+    def iterative_fit(self, X, y, n_iter=1, **fit_params):
+        if fit_params is None:
+            fit_params = {}
+        return self.choice.iterative_fit(X, y, n_iter=n_iter, **fit_params)
+
+    def configuration_fully_fitted(self):
+        return self.choice.configuration_fully_fitted()

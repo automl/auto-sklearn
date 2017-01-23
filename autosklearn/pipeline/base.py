@@ -112,14 +112,12 @@ class BasePipeline(Pipeline):
     def iterative_fit(self, X, y, n_iter=1, **fit_params):
         if fit_params is None:
             fit_params = {}
-        self.steps[-1][-1].iterative_fit(X, y, n_iter=n_iter,
-                                                   **fit_params)
+        self.steps[-1][-1].iterative_fit(X, y, n_iter=n_iter, **fit_params)
 
     def estimator_supports_iterative_fit(self):
-        return hasattr(self.steps[-1][-1], 'iterative_fit')
+        return self.steps[-1][-1].estimator_supports_iterative_fit()
 
     def configuration_fully_fitted(self):
-        check_is_fitted(self, 'pipeline_')
         return self.steps[-1][-1].configuration_fully_fitted()
 
     def predict(self, X, batch_size=None):

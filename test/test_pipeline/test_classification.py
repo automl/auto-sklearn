@@ -136,6 +136,17 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                                                   Y_test))
             scores = classifier.predict_proba(X_test)
 
+    def test_default_configuration_iterative_fit(self):
+        classifier = SimpleClassificationPipeline(
+            include={'classifier': ['random_forest'],
+                     'preprocessor': ['no_preprocessing']})
+        X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
+        XT = classifier.pre_transform(X_train, Y_train)
+        for i in range(1, 11):
+            classifier.iterative_fit(X_train, Y_train)
+            self.assertEqual(classifier.steps[-1][-1].choice.estimator.n_estimators,
+                             i)
+
     def test_repr(self):
         representation = repr(SimpleClassificationPipeline())
         cls = eval(representation)

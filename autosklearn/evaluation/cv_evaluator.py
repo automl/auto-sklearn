@@ -204,8 +204,8 @@ class CVEvaluator(AbstractEvaluator):
             print("Model does not support iterative_fit(), reverting to " \
                 "regular fit().")
 
-            self.models[fold] = model
             model.fit_estimator(Xt, Y_train, **fit_params)
+            self.models[fold] = model
             return
 
         n_iter = 1
