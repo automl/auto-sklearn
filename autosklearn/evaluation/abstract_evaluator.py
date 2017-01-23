@@ -268,18 +268,18 @@ class AbstractEvaluator(object):
         # obviously no output should be saved.
         if self.Y_optimization is not None and \
                 self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
-            return 2.0, "Targets %s and prediction %s don't have the same " \
+            return 1.0, "Targets %s and prediction %s don't have the same " \
             "length. Probably training didn't finish" % (
                 self.Y_optimization.shape, Y_optimization_pred.shape)
 
         if not np.all(np.isfinite(Y_optimization_pred)):
-            return 2.0, 'Model predictions for optimization set contains NaNs.'
+            return 1.0, 'Model predictions for optimization set contains NaNs.'
         if Y_valid_pred is not None and \
                 not np.all(np.isfinite(Y_valid_pred)):
-            return 2.0, 'Model predictions for validation set contains NaNs.'
+            return 1.0, 'Model predictions for validation set contains NaNs.'
         if Y_test_pred is not None and \
                 not np.all(np.isfinite(Y_test_pred)):
-            return 2.0, 'Model predictions for test set contains NaNs.'
+            return 1.0, 'Model predictions for test set contains NaNs.'
 
         num_run = str(self.num_run).zfill(5)
         if os.path.exists(self.backend.get_model_dir()):
