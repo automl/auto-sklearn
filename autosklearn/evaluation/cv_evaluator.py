@@ -272,7 +272,7 @@ def eval_partial_cv(queue, config, data, backend, seed, num_run, instance,
     def signal_handler(signum, frame):
         print('Received signal %s. Aborting Training!' % str(signum))
         global evaluator
-        duration, result, seed, run_info = evaluator.finish_up()
+        duration, result, seed, run_info = evaluator.finish_up(file_output=False)
         # TODO use status type for stopped, but yielded a result
         queue.put((duration, result, seed, run_info, StatusType.SUCCESS))
 
@@ -283,13 +283,12 @@ def eval_partial_cv(queue, config, data, backend, seed, num_run, instance,
         signal.signal(signal.SIGALRM, signal_handler)
         evaluator.partial_iterative_fit(instance)
         signal.signal(signal.SIGALRM, empty_signal_handler)
-        loss = evaluator.model
-        duration, result, seed, run_info = evaluator.finish_up()
+        duration, result, seed, run_info = evaluator.finish_up(file_output=False)
     else:
         loss, opt_pred, valid_pred, test_pred = \
             evaluator.partial_fit_predict_and_loss(instance)
         duration, result, seed, run_info = evaluator.finish_up(
-            loss, opt_pred, valid_pred, test_pred)
+            loss, opt_pred, valid_pred, test_pred, file_output=False)
 
     status = StatusType.SUCCESS
     queue.put((duration, result, seed, run_info, status))
