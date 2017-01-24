@@ -42,7 +42,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
         predictions_ensemble[5, 2] = np.NaN
         _, loss, _, additional_run_info = ae.finish_up(
             0.1, predictions_ensemble, predictions_valid, predictions_test)
-        self.assertEqual(loss, 2.0)
+        self.assertEqual(loss, 1.0)
         self.assertEqual(additional_run_info, 'Model predictions for '
                                               'optimization set contains NaNs.')
 
@@ -51,7 +51,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
         predictions_valid[5, 2] = np.NaN
         _, loss, _, additional_run_info = ae.finish_up(
             0.1, predictions_ensemble, predictions_valid, predictions_test)
-        self.assertEqual(loss, 2.0)
+        self.assertEqual(loss, 1.0)
         self.assertEqual(additional_run_info, 'Model predictions for '
                                               'validation set contains NaNs.')
 
@@ -60,7 +60,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
         predictions_test[5, 2] = np.NaN
         _, loss, _, additional_run_info = ae.finish_up(
             0.1, predictions_ensemble, predictions_valid, predictions_test)
-        self.assertEqual(loss, 2.0)
+        self.assertEqual(loss, 1.0)
         self.assertEqual(additional_run_info, 'Model predictions for '
                                               'test set contains NaNs.')
 

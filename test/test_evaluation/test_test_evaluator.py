@@ -21,7 +21,7 @@ from autosklearn.evaluation import eval_t
 from autosklearn.util.pipeline import get_configuration_space
 from autosklearn.util import Backend
 
-N_TEST_RUNS = 10
+N_TEST_RUNS = 3
 
 
 class Dummy(object):
@@ -31,17 +31,6 @@ class Dummy(object):
 class TestEvaluator_Test(BaseEvaluatorTest):
     _multiprocess_can_split_ = True
 
-    def teardown(self):
-        try:
-            shutil.rmtree(self.output_dir)
-        except Exception:
-            pass
-
-        for output_dir in self.output_directories:
-            try:
-                shutil.rmtree(output_dir)
-            except Exception:
-                pass
 
     def test_datasets(self):
         for getter in get_dataset_getters():
@@ -61,6 +50,12 @@ class TestEvaluator_Test(BaseEvaluatorTest):
                     err[i] = evaluator.fit_predict_and_loss()[0]
 
                     self.assertTrue(np.isfinite(err[i]))
+
+                for i in range(5):
+                    try:
+                        shutil.rmtree(output_directory)
+                    except Exception:
+                        pass
 
 
 class FunctionsTest(unittest.TestCase):

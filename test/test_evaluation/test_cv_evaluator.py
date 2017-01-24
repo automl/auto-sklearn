@@ -19,23 +19,11 @@ sys.path.append(this_directory)
 from evaluation_util import get_dataset_getters, BaseEvaluatorTest, \
     get_multiclass_classification_datamanager
 
-N_TEST_RUNS = 5
+N_TEST_RUNS = 3
 
 
 class CVEvaluator_Test(BaseEvaluatorTest):
     _multiprocess_can_split_ = True
-
-    def teardown(self):
-        try:
-            shutil.rmtree(self.output_dir)
-        except Exception:
-            pass
-
-        for output_dir in self.output_directories:
-            try:
-                shutil.rmtree(output_dir)
-            except Exception:
-                pass
 
     def test_datasets(self):
         for getter in get_dataset_getters():
@@ -69,6 +57,12 @@ class CVEvaluator_Test(BaseEvaluatorTest):
                     for j in range(5, 10):
                         indices = evaluator.indices[j]
                         self.assertIsNone(indices)
+
+            for i in range(5):
+                try:
+                    shutil.rmtree(output_directory)
+                except Exception:
+                    pass
 
 
 class FunctionsTest(unittest.TestCase):
