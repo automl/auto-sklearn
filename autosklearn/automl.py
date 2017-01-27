@@ -56,7 +56,8 @@ class AutoML(BaseEstimator):
                  precision=32,
                  max_iter_smac=None,
                  acquisition_function='EI',
-                 disable_evaluator_output=False):
+                 disable_evaluator_output=False,
+                 configuration_mode='SMAC'):
         super(AutoML, self).__init__()
         self._backend = backend
         #self._tmp_dir = tmp_dir
@@ -89,6 +90,7 @@ class AutoML(BaseEstimator):
         self.precision = precision
         self.acquisition_function = acquisition_function
         self._disable_evaluator_output = disable_evaluator_output
+        self._configuration_mode = configuration_mode
 
         self._datamanager = None
         self._dataset_name = None
@@ -398,7 +400,8 @@ class AutoML(BaseEstimator):
                                     exclude_estimators=self._exclude_estimators,
                                     include_preprocessors=self._include_preprocessors,
                                     exclude_preprocessors=self._exclude_preprocessors,
-                                    disable_file_output=self._disable_evaluator_output)
+                                    disable_file_output=self._disable_evaluator_output,
+                                    configuration_mode=self._configuration_mode)
             self.runhistory_, self.trajectory_ = _proc_smac.run_smbo()
             runhistory_filename = os.path.join(self._backend.temporary_directory,
                                                'runhistory.json',)
@@ -756,7 +759,7 @@ class AutoML(BaseEstimator):
             include_estimators=include_estimators,
             exclude_estimators=exclude_estimators,
             include_preprocessors=include_preprocessors,
-            exclude_preprocessors=exclude_estimators)
+            exclude_preprocessors=exclude_preprocessors)
         configuration_space = self.configuration_space_created_hook(
             datamanager, configuration_space)
         sp_string = pcs.write(configuration_space)

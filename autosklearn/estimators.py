@@ -114,7 +114,8 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
                  delete_tmp_folder_after_terminate=True,
                  delete_output_folder_after_terminate=True,
                  shared_mode=False,
-                 disable_evaluator_output=False):
+                 disable_evaluator_output=False,
+                 configuration_mode='SMAC'):
         """
         Parameters
         ----------
@@ -251,6 +252,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
         self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
         self.shared_mode = shared_mode
         self.disable_evaluator_output = disable_evaluator_output
+        self.configuration_mode = configuration_mode
         super(AutoSklearnEstimator, self).__init__(None)
 
     def build_automl(self):
@@ -289,6 +291,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             delete_output_folder_after_terminate=
             self.delete_output_folder_after_terminate,
             shared_mode=self.shared_mode,
+            configuration_mode=self.configuration_mode,
             disable_evaluator_output=self.disable_evaluator_output)
 
         return automl
