@@ -45,7 +45,9 @@ class AutoML(BaseEstimator):
                  keep_models=True,
                  debug_mode=False,
                  include_estimators=None,
+                 exclude_estimators=None,
                  include_preprocessors=None,
+                 exclude_preprocessors=None,
                  resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
                  delete_tmp_folder_after_terminate=False,
@@ -72,7 +74,9 @@ class AutoML(BaseEstimator):
         self._metadata_directory = metadata_directory
         self._keep_models = keep_models
         self._include_estimators = include_estimators
+        self._exclude_estimators = exclude_estimators
         self._include_preprocessors = include_preprocessors
+        self._exclude_preprocessors = exclude_preprocessors
         self._resampling_strategy = resampling_strategy
         self._resampling_strategy_arguments = resampling_strategy_arguments \
             if resampling_strategy_arguments is not None else {}
@@ -313,8 +317,10 @@ class AutoML(BaseEstimator):
             self._backend.temporary_directory,
             self._backend,
             datamanager,
-            self._include_estimators,
-            self._include_preprocessors)
+            include_estimators=self._include_estimators,
+            exclude_estimators=self._exclude_estimators,
+            include_preprocessors=self._include_preprocessors,
+            exclude_preprocessors=self._exclude_preprocessors)
 
         # == RUN ensemble builder
         # Do this before calculating the meta-features to make sure that the
@@ -389,7 +395,9 @@ class AutoML(BaseEstimator):
                                     acquisition_function=self.acquisition_function,
                                     shared_mode=self._shared_mode,
                                     include_estimators=self._include_estimators,
+                                    exclude_estimators=self._exclude_estimators,
                                     include_preprocessors=self._include_preprocessors,
+                                    exclude_preprocessors=self._exclude_preprocessors,
                                     disable_file_output=self._disable_evaluator_output)
             self.runhistory_, self.trajectory_ = _proc_smac.run_smbo()
             runhistory_filename = os.path.join(self._backend.temporary_directory,
@@ -736,7 +744,9 @@ class AutoML(BaseEstimator):
 
     def _create_search_space(self, tmp_dir, backend, datamanager,
                              include_estimators=None,
-                             include_preprocessors=None):
+                             exclude_estimators=None,
+                             include_preprocessors=None,
+                             exclude_preprocessors=None):
         task_name = 'CreateConfigSpace'
 
         self._stopwatch.start_task(task_name)
@@ -744,7 +754,9 @@ class AutoML(BaseEstimator):
         configuration_space = pipeline.get_configuration_space(
             datamanager.info,
             include_estimators=include_estimators,
-            include_preprocessors=include_preprocessors)
+            exclude_estimators=exclude_estimators,
+            include_preprocessors=include_preprocessors,
+            exclude_preprocessors=exclude_estimators)
         configuration_space = self.configuration_space_created_hook(
             datamanager, configuration_space)
         sp_string = pcs.write(configuration_space)

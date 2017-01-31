@@ -190,7 +190,9 @@ class AutoMLSMBO(object):
                  acquisition_function='EI',
                  shared_mode=False,
                  include_estimators=None,
+                 exclude_estimators=None,
                  include_preprocessors=None,
+                 exclude_preprocessors=None,
                  disable_file_output=False):
         super(AutoMLSMBO, self).__init__()
         # data related
@@ -227,7 +229,9 @@ class AutoMLSMBO(object):
         self.shared_mode = shared_mode
         self.runhistory = None
         self.include_estimators = include_estimators
+        self.exclude_estimators = exclude_estimators
         self.include_preprocessors = include_preprocessors
+        self.exclude_preprocessors = exclude_preprocessors
         self.disable_file_output = disable_file_output
 
         logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed,
@@ -514,14 +518,32 @@ class AutoMLSMBO(object):
         # evaluator, which takes into account that a run can be killed prior
         # to the model being fully fitted; thus putting intermediate results
         # into a queue and querying them once the time is over
+        exclude = dict()
         include = dict()
-        if self.include_preprocessors is not None:
+        if self.include_preprocessors is not None and \
+                self.exclude_preprocessors is not None:
+            raise ValueError('Cannot specify include_preprocessors and '
+                             'exclude_preprocessors.')
+        elif self.include_preprocessors is not None:
             include['preprocessor'] = self.include_preprocessors
-        if self.include_estimators is not None:
+        elif self.exclude_preprocessors is not None:
+            exclude['preprocessor'] = self.exclude_preprocessors
+        if self.include_estimators is not None and \
+                self.exclude_preprocessors is not None:
+            raise ValueError('Cannot specify include_estimators and '
+                             'exclude_estimators.')
+        elif self.include_estimators is not None:
             if self.task in CLASSIFICATION_TASKS:
                 include['classifier'] = self.include_estimators
             elif self.task in REGRESSION_TASKS:
                 include['regressor'] = self.include_estimators
+            else:
+                raise ValueError(self.task)
+        elif self.exclude_estimators is not None:
+            if self.task in CLASSIFICATION_TASKS:
+                exclude['classifier'] = self.exclude_estimators
+            elif self.task in REGRESSION_TASKS:
+                exclude['regressor'] = self.exclude_estimators
             else:
                 raise ValueError(self.task)
 
@@ -531,6 +553,7 @@ class AutoMLSMBO(object):
                                     initial_num_run=num_run,
                                     logger=self.logger,
                                     include=include,
+                                    exclude=exclude,
                                     memory_limit=self.memory_limit,
                                     disable_file_output=self.disable_file_output,
                                     **self.resampling_strategy_args)
