@@ -82,7 +82,7 @@ class FunctionsTest(unittest.TestCase):
                data=self.data,
                seed=1, num_run=1, subsample=None, with_predictions=True,
                all_scoring_functions=False, output_y_test=True,
-               include=None, exclude=None)
+               include=None, exclude=None, disable_file_output=False)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.041666666666666852)
         self.assertEqual(info[2], 1)
@@ -95,7 +95,7 @@ class FunctionsTest(unittest.TestCase):
                data=self.data,
                seed=1, num_run=1, subsample=None, with_predictions=True,
                all_scoring_functions=True, output_y_test=True,
-               include=None, exclude=None)
+               include=None, exclude=None, disable_file_output=False)
         info = self.queue.get()
         self.assertIn(
             'f1_metric: 0.0511508951407;pac_metric: 0.185257565321;'
@@ -103,4 +103,3 @@ class FunctionsTest(unittest.TestCase):
             'bac_metric: 0.0416666666667;duration: ', info[3])
         self.assertAlmostEqual(info[1], 0.041666666666666852)
         self.assertEqual(info[2], 1)
-

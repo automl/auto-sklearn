@@ -91,7 +91,8 @@ class AbstractEvaluator(object):
                  num_run=None,
                  subsample=None,
                  include=None,
-                 exclude=None):
+                 exclude=None,
+                 disable_file_output=False):
 
         self.starttime = time.time()
 
@@ -112,6 +113,7 @@ class AbstractEvaluator(object):
         self.output_y_test = output_y_test
         self.with_predictions = with_predictions
         self.all_scoring_functions = all_scoring_functions
+        self.disable_file_output = disable_file_output
 
         if self.task_type in REGRESSION_TASKS:
             if not isinstance(self.configuration, Configuration):
@@ -262,6 +264,9 @@ class AbstractEvaluator(object):
         return self.duration, loss, self.seed, additional_run_info
 
     def file_output(self, loss, Y_optimization_pred, Y_valid_pred, Y_test_pred):
+        if self.disable_file_output:
+            return None, None
+
         seed = self.seed
 
         # self.Y_optimization can be None if we use partial-cv, then,

@@ -111,7 +111,8 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
                  output_folder=None,
                  delete_tmp_folder_after_terminate=True,
                  delete_output_folder_after_terminate=True,
-                 shared_mode=False):
+                 shared_mode=False,
+                 disable_evaluator_output=False):
         """
         Parameters
         ----------
@@ -194,6 +195,11 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             ``delete_tmp_folder_after_terminate`` and
             ``delete_output_folder_after_terminate`` are set to False.
 
+        disable_evaluator_output: bool, optional (False)
+            Disable model and prediction output. Cannot be used together with
+            ensemble building. predict() cannot be used when setting this
+            flag to True.
+
         Attributes
         ----------
         grid_scores\_ : list of named tuples
@@ -231,6 +237,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
         self.shared_mode = shared_mode
+        self.disable_evaluator_output = disable_evaluator_output
         super(AutoSklearnEstimator, self).__init__(None)
 
     def build_automl(self):
@@ -266,7 +273,8 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
             delete_output_folder_after_terminate=
             self.delete_output_folder_after_terminate,
-            shared_mode=self.shared_mode)
+            shared_mode=self.shared_mode,
+            disable_evaluator_output=self.disable_evaluator_output)
 
         return automl
 

@@ -146,7 +146,7 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout(self):
         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
         eval_holdout(self.queue, self.configuration, self.data, backend_api,
-                     1, 1, None, True, False, True, None, None)
+                     1, 1, None, True, False, True, None, None, False)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.05)
         self.assertEqual(info[2], 1)
@@ -155,7 +155,7 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout_all_loss_functions(self):
         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
         eval_holdout(self.queue, self.configuration, self.data, backend_api,
-                     1, 1, None, True, True, True, None, None)
+                     1, 1, None, True, True, True, None, None, False)
         info = self.queue.get()
         self.assertIn('f1_metric: 0.0480549199085;pac_metric: 0.122252018407;'
                       'acc_metric: 0.0454545454545;auc_metric: 0.0;'
@@ -166,7 +166,8 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout_on_subset(self):
         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
         eval_holdout(self.queue, self.configuration, self.data,
-                     backend_api, 1, 1, 43, True, False, True, None, None)
+                     backend_api, 1, 1, 43, True, False, True, None, None,
+                     False)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.1)
         self.assertEqual(info[2], 1)
@@ -175,7 +176,7 @@ class FunctionsTest(unittest.TestCase):
         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
         eval_iterative_holdout(self.queue, self.configuration, self.data,
                                backend_api, 1, 1, None, True, False, True,
-                               None, None)
+                               None, None, False)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.05)
         self.assertEqual(info[2], 1)
@@ -184,7 +185,7 @@ class FunctionsTest(unittest.TestCase):
         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
         eval_iterative_holdout(self.queue, self.configuration,
                                self.data, backend_api, 1, 1, 43, True, False,
-                               True, None, None)
+                               True, None, None, False)
 
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.1)

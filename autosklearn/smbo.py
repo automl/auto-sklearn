@@ -190,7 +190,8 @@ class AutoMLSMBO(object):
                  acquisition_function='EI',
                  shared_mode=False,
                  include_estimators=None,
-                 include_preprocessors=None):
+                 include_preprocessors=None,
+                 disable_file_output=False):
         super(AutoMLSMBO, self).__init__()
         # data related
         self.dataset_name = dataset_name
@@ -227,6 +228,7 @@ class AutoMLSMBO(object):
         self.runhistory = None
         self.include_estimators = include_estimators
         self.include_preprocessors = include_preprocessors
+        self.disable_file_output = disable_file_output
 
         logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed,
                                      ":" + dataset_name if dataset_name is
@@ -530,6 +532,7 @@ class AutoMLSMBO(object):
                                     logger=self.logger,
                                     include=include,
                                     memory_limit=self.memory_limit,
+                                    disable_file_output=self.disable_file_output,
                                     **self.resampling_strategy_args)
 
         types = get_types(self.config_space, self.scenario.feature_array)
