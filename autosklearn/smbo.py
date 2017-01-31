@@ -10,7 +10,6 @@ import pynisher
 from ConfigSpace.configuration_space import Configuration
 
 from smac.facade.smac_facade import SMAC
-from smac.facade.roar_facade import ROAR
 from smac.utils.util_funcs import get_types
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_ta_run import StatusType
@@ -191,8 +190,7 @@ class AutoMLSMBO(object):
                  acquisition_function='EI',
                  shared_mode=False,
                  include_estimators=None,
-                 include_preprocessors=None,
-                 configuration_mode='SMAC'):
+                 include_preprocessors=None):
         super(AutoMLSMBO, self).__init__()
         # data related
         self.dataset_name = dataset_name
@@ -229,7 +227,6 @@ class AutoMLSMBO(object):
         self.runhistory = None
         self.include_estimators = include_estimators
         self.include_preprocessors = include_preprocessors
-        self.configuration_mode = configuration_mode
 
         logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed,
                                      ":" + dataset_name if dataset_name is
@@ -500,23 +497,16 @@ class AutoMLSMBO(object):
 
         startup_time = self.watcher.wall_elapsed(self.dataset_name)
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
-        scenario_dict = {'cs': self.config_space,
-                         'cutoff-time': self.func_eval_time_limit,
-                         'memory-limit': self.memory_limit,
-                         'wallclock-limit': total_walltime_limit,
-                         # 'instances': [[name] for name in meta_features_dict],
-                         'output-dir': self.backend.temporary_directory,
-                         'shared-model': self.shared_mode,
-                         'run-obj': 'quality',
-                         'deterministic': 'true',
-                         'instances': instances}
-
-        if self.configuration_mode == 'RANDOM':
-            scenario_dict['minR'] = len(instances) if instances is not None else 1
-            scenario_dict['initial_incumbent'] = 'RANDOM'
-
-        self.scenario = Scenario(scenario_dict)
-
+        self.scenario = Scenario({'cs': self.config_space,
+                                  'cutoff-time': self.func_eval_time_limit,
+                                  'memory-limit': self.memory_limit,
+                                  'wallclock-limit': total_walltime_limit,
+                                  #'instances': [[name] for name in meta_features_dict],
+                                  'output-dir': self.backend.temporary_directory,
+                                  'shared-model': self.shared_mode,
+                                  'run-obj': 'quality',
+                                  'deterministic': 'true',
+                                  'instances': instances})
 
         # TODO rebuild target algorithm to be it's own target algorithm
         # evaluator, which takes into account that a run can be killed prior
@@ -557,12 +547,12 @@ class AutoMLSMBO(object):
                                                          StatusType.TIMEOUT],
                                          impute_censored_data=False,
                                          impute_state=None)
-            _smac_arguments = dict(scenario=self.scenario,
-                                   model=model,
-                                   rng=seed,
-                                   runhistory2epm=rh2EPM,
-                                   tae_runner=ta,
-                                   runhistory=runhistory)
+            smac = SMAC(scenario=self.scenario,
+                        model=model,
+                        rng=seed,
+                        runhistory2epm=rh2EPM,
+                        tae_runner=ta,
+                        runhistory=runhistory)
         elif self.acquisition_function == 'EIPS':
             rh2EPM = RunHistory2EPM4EIPS(num_params=num_params,
                                          scenario=self.scenario,
@@ -572,29 +562,16 @@ class AutoMLSMBO(object):
                                          impute_censored_data=False,
                                          impute_state=None)
             model = UncorrelatedMultiObjectiveRandomForestWithInstances(
-                ['cost', 'runtime'], types, num_trees=10,
+                ['cost', 'runtime'], types, num_trees = 10,
                 instance_features=meta_features_list, seed=1)
             acquisition_function = EIPS(model)
-            _smac_arguments = dict(scenario=self.scenario,
-                                   model=model,
-                                   rng=seed,
-                                   tae_runner=ta,
-                                   runhistory2epm=rh2EPM,
-                                   runhistory=runhistory,
-                                   acquisition_function=acquisition_function)
+            smac = SMAC(scenario=self.scenario, tae_runner=ta,
+                        acquisition_function=acquisition_function,
+                        model=model, runhistory2epm=rh2EPM, rng=seed,
+                        runhistory=runhistory)
         else:
             raise ValueError('Unknown acquisition function value %s!' %
                              self.acquisition_function)
-
-        if self.configuration_mode == 'SMAC':
-            smac = SMAC(**_smac_arguments)
-        elif self.configuration_mode in ['ROAR', 'RANDOM']:
-            for not_in_roar in ['runhistory2epm', 'model']:
-                if not_in_roar in _smac_arguments:
-                    del _smac_arguments[not_in_roar]
-            smac = ROAR(**_smac_arguments)
-        else:
-            raise ValueError(self.configuration_mode)
 
         # Build a runtime model
         # runtime_rf = RandomForestWithInstances(types,

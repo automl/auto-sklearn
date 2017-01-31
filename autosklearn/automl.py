@@ -53,8 +53,7 @@ class AutoML(BaseEstimator):
                  shared_mode=False,
                  precision=32,
                  max_iter_smac=None,
-                 acquisition_function='EI',
-                 configuration_mode='SMAC'):
+                 acquisition_function='EI'):
         super(AutoML, self).__init__()
         self._backend = backend
         #self._tmp_dir = tmp_dir
@@ -84,7 +83,6 @@ class AutoML(BaseEstimator):
         self._shared_mode = shared_mode
         self.precision = precision
         self.acquisition_function = acquisition_function
-        self._configuration_mode = configuration_mode
 
         self._datamanager = None
         self._dataset_name = None
@@ -388,8 +386,7 @@ class AutoML(BaseEstimator):
                                     acquisition_function=self.acquisition_function,
                                     shared_mode=self._shared_mode,
                                     include_estimators=self._include_estimators,
-                                    include_preprocessors=self._include_preprocessors,
-                                    configuration_mode=self._configuration_mode)
+                                    include_preprocessors=self._include_preprocessors)
             self.runhistory_, self.trajectory_ = _proc_smac.run_smbo()
             runhistory_filename = os.path.join(self._backend.temporary_directory,
                                                'runhistory.json',)
