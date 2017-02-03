@@ -647,6 +647,7 @@ class AutoMLSMBO(object):
 
         # == after metalearning run SMAC loop
         while True:
+
             if smac.solver.scenario.shared_model:
                 pSMAC.read(run_history=smac.solver.runhistory,
                            output_directory=self.scenario.output_dir,
@@ -666,6 +667,7 @@ class AutoMLSMBO(object):
             self.logger.info('Used %g seconds to find next '
                              'configurations' % (time_for_choose_next))
 
+            time_for_choose_next = max(time_for_choose_next, 1.0)
             smac.solver.incumbent, inc_perf = smac.solver.intensifier.intensify(
                 challengers=challengers,
                 incumbent=smac.solver.incumbent,

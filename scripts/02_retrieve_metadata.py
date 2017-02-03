@@ -41,7 +41,7 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
         with open(validation_trajectory_file) as fh:
             validation_trajectory = json.load(fh)
 
-        best_value = 1.0
+        best_value = np.inf
         best_configuration = None
         for entry in validation_trajectory:
             config = entry[2]
