@@ -28,7 +28,8 @@ class HoldoutEvaluator(AbstractEvaluator):
                  num_run=None,
                  subsample=None,
                  include=None,
-                 exclude=None):
+                 exclude=None,
+                 disable_file_output=False):
         super(HoldoutEvaluator, self).__init__(
             datamanager, backend, configuration,
             with_predictions=with_predictions,
@@ -38,7 +39,8 @@ class HoldoutEvaluator(AbstractEvaluator):
             num_run=num_run,
             subsample=subsample,
             include=include,
-            exclude=exclude)
+            exclude=exclude,
+            disable_file_output=disable_file_output)
 
         classification = datamanager.info['task'] in CLASSIFICATION_TASKS
         self.X_train, self.X_optimization, self.Y_train, self.Y_optimization = \
@@ -124,7 +126,8 @@ class HoldoutEvaluator(AbstractEvaluator):
 # create closure for evaluating an algorithm
 def eval_holdout(queue, config, data, backend, seed, num_run,
                  subsample, with_predictions, all_scoring_functions,
-                 output_y_test, include, exclude, iterative=False):
+                 output_y_test, include, exclude, disable_file_output,
+                 iterative=False):
     global evaluator
     evaluator = HoldoutEvaluator(data, backend, config,
                                  seed=seed,
@@ -134,7 +137,8 @@ def eval_holdout(queue, config, data, backend, seed, num_run,
                                  all_scoring_functions=all_scoring_functions,
                                  output_y_test=output_y_test,
                                  include=include,
-                                 exclude=exclude)
+                                 exclude=exclude,
+                                 disable_file_output=disable_file_output)
 
     def signal_handler(signum, frame):
         print('Received signal %s. Aborting Training!' % str(signum))
@@ -162,7 +166,7 @@ def eval_holdout(queue, config, data, backend, seed, num_run,
 def eval_iterative_holdout(queue, config, data, backend, seed,
                            num_run, subsample, with_predictions,
                            all_scoring_functions, output_y_test,
-                           include, exclude):
+                           include, exclude, disable_file_output):
     eval_holdout(queue, config, data, backend, seed, num_run, subsample,
                  with_predictions, all_scoring_functions, output_y_test,
-                 include, exclude, iterative=True)
+                 include, exclude, disable_file_output, iterative=True)

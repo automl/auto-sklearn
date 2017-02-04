@@ -104,14 +104,17 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
                  seed=1,
                  ml_memory_limit=3000,
                  include_estimators=None,
+                 exclude_estimators=None,
                  include_preprocessors=None,
+                 exclude_preprocessors=None,
                  resampling_strategy='holdout',
                  resampling_strategy_arguments=None,
                  tmp_folder=None,
                  output_folder=None,
                  delete_tmp_folder_after_terminate=True,
                  delete_output_folder_after_terminate=True,
-                 shared_mode=False):
+                 shared_mode=False,
+                 disable_evaluator_output=False):
         """
         Parameters
         ----------
@@ -150,13 +153,22 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             `auto-sklearn` will stop fitting the machine learning algorithm if
             it tries to allocate more than `ml_memory_limit` MB.
 
-        include_estimators : dict, optional (None)
+        include_estimators : list, optional (None)
             If None, all possible estimators are used. Otherwise specifies
-            set of estimators to use
+            set of estimators to use.
 
-        include_preprocessors : dict, optional (None)
+        exclude_estimators : list, optional (None)
+            If None, all possible estimators are used. Otherwise specifies
+            set of estimators not to use. Incompatible with include_estimators.
+
+        include_preprocessors : list, optional (None)
             If None all possible preprocessors are used. Otherwise specifies set
-            of preprocessors to use
+            of preprocessors to use.
+
+        exclude_preprocessors : list, optional (None)
+            If None all possible preprocessors are used. Otherwise specifies set
+            of preprocessors not to use. Incompatible with
+            include_preprocessors.
 
         resampling_strategy : string, optional ('holdout')
             how to to handle overfitting, might need 'resampling_strategy_arguments'
@@ -194,6 +206,11 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             ``delete_tmp_folder_after_terminate`` and
             ``delete_output_folder_after_terminate`` are set to False.
 
+        disable_evaluator_output: bool, optional (False)
+            Disable model and prediction output. Cannot be used together with
+            ensemble building. predict() cannot be used when setting this
+            flag to True.
+
         Attributes
         ----------
         grid_scores\_ : list of named tuples
@@ -223,7 +240,9 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
         self.seed = seed
         self.ml_memory_limit = ml_memory_limit
         self.include_estimators = include_estimators
+        self.exclude_estimators = exclude_estimators
         self.include_preprocessors = include_preprocessors
+        self.exclude_preprocessors = exclude_preprocessors
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_arguments = resampling_strategy_arguments
         self.tmp_folder = tmp_folder
@@ -231,6 +250,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
         self.shared_mode = shared_mode
+        self.disable_evaluator_output = disable_evaluator_output
         super(AutoSklearnEstimator, self).__init__(None)
 
     def build_automl(self):
@@ -260,13 +280,16 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             seed=self.seed,
             ml_memory_limit=self.ml_memory_limit,
             include_estimators=self.include_estimators,
+            exclude_estimators=self.exclude_estimators,
             include_preprocessors=self.include_preprocessors,
+            exclude_preprocessors=self.exclude_preprocessors,
             resampling_strategy=self.resampling_strategy,
             resampling_strategy_arguments=self.resampling_strategy_arguments,
             delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
             delete_output_folder_after_terminate=
             self.delete_output_folder_after_terminate,
-            shared_mode=self.shared_mode)
+            shared_mode=self.shared_mode,
+            disable_evaluator_output=self.disable_evaluator_output)
 
         return automl
 

@@ -1,18 +1,17 @@
 import argparse
 import json
+import logging
 import os
 import sys
 
-import scipy.sparse
-
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
-from autosklearn.constants import BAC_METRIC, MULTILABEL_CLASSIFICATION, \
-    MULTICLASS_CLASSIFICATION, CLASSIFICATION_TASKS, REGRESSION_TASKS, \
-    R2_METRIC
-from autosklearn.pipeline.classification import SimpleClassificationPipeline
-from autosklearn.pipeline.regression import SimpleRegressionPipeline
-from autosklearn.evaluation.util import calculate_score
+from autosklearn.constants import BAC_METRIC, R2_METRIC, STRING_TO_METRIC
+from autosklearn.evaluation import ExecuteTaFuncWithQueue
+
+from smac.stats.stats import Stats
+from smac.scenario.scenario import Scenario
+from smac.tae.execute_ta_run import StatusType
 
 sys.path.append('.')
 from update_metadata_util import load_task
@@ -68,6 +67,13 @@ else:
 
 automl.fit(X_train, y_train, dataset_name=str(task_id), metric=BAC_METRIC,
            feat_type=cat)
+data = automl._automl._automl._backend.load_datamanager()
+# Data manager can't be replaced with save_datamanager, it has to be deleted
+# first
+os.remove(automl._automl._automl._backend._get_datamanager_pickle_filename())
+data.data['X_test'] = X_test
+data.data['Y_test'] = y_test
+automl._automl._automl._backend.save_datamanager(data)
 trajectory = automl.trajectory_
 
 incumbent_id_to_model = {}
@@ -76,39 +82,35 @@ validated_trajectory = []
 
 for entry in trajectory:
     incumbent_id = entry[1]
+    train_performance = entry[0]
     if incumbent_id not in incumbent_id_to_model:
         config = entry[2]
-        print(incumbent_id, config)
-        is_sparse = 1 if scipy.sparse.issparse(X_train) else 0
-        dataset_properties = {'task': automl._automl._automl._task,
-                              'sparse': is_sparse,
-                              'is_multilabel': automl._automl._automl._task == MULTILABEL_CLASSIFICATION,
-                              'is_multiclass': automl._automl._automl._task == MULTICLASS_CLASSIFICATION}
-        init_params = {'one_hot_encoding:categorical_features':
-                        [True if c == 'categorical' else False for c in cat]}
 
-        model_arguments = {'dataset_properties': dataset_properties,
-                           'init_params': init_params,
-                           'random_state': 1,
-                           'config': config}
+        logger = logging.getLogger('Testing:)')
+        stats = Stats(Scenario({'cutoff_time': per_run_time_limit * 2}))
+        stats.start_timing()
+        ta = ExecuteTaFuncWithQueue(backend=automl._automl._automl._backend,
+                                    autosklearn_seed=seed,
+                                    resampling_strategy='test',
+                                    with_predictions=False,
+                                    memory_limit=2 * automl_arguments['ml_memory_limit'],
+                                    disable_file_output=True,
+                                    logger=logger,
+                                    stats=stats,
+                                    all_scoring_functions=True)
+        status, cost, runtime, additional_run_info = ta.start(config=config,
+                                                              instance=None,
+                                                              cutoff=per_run_time_limit)
+        if status == StatusType.SUCCESS:
+            scores = additional_run_info.split(';')
+            scores = [score.split(':') for score in scores]
+            scores = [(score[0].strip(), score[1].strip()) for score in scores]
+            scores = [(STRING_TO_METRIC[score[0]], score[1]) for score in scores
+                      if score[0] in STRING_TO_METRIC]
+            scores = {score[0]: float(score[1]) for score in scores}
+            assert len(scores) > 1, scores
 
-        if automl._automl._automl._task in CLASSIFICATION_TASKS:
-            model = SimpleClassificationPipeline(**model_arguments)
-        elif automl._automl._automl._task in REGRESSION_TASKS:
-            model = SimpleRegressionPipeline(**model_arguments)
-        else:
-            raise ValueError(automl._automl._automl._task)
-
-        model.fit(X_train, y_train)
-        incumbent_id_to_model[incumbent_id] = model
-        y_pred = model.predict_proba(X_test)
-        scores = calculate_score(metric=metric,
-                                 solution=y_test,
-                                 prediction=y_pred,
-                                 task_type=automl._automl._automl._task,
-                                 all_scoring_functions=True,
-                                 num_classes=None)
-        print(scores)
+        # print(additional_run_info)
 
         validated_trajectory.append(list(entry) + [scores])
 

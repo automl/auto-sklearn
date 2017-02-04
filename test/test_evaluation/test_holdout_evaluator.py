@@ -21,7 +21,7 @@ from evaluation_util import get_regression_datamanager, BaseEvaluatorTest, \
     get_binary_classification_datamanager, get_dataset_getters, \
     get_multiclass_classification_datamanager
 
-N_TEST_RUNS = 10
+N_TEST_RUNS = 3
 
 
 class Dummy(object):
@@ -32,20 +32,8 @@ class Dummy(object):
 class HoldoutEvaluatorTest(BaseEvaluatorTest):
     _multiprocess_can_split_ = True
 
-    def teardown(self):
-        try:
-            shutil.rmtree(self.output_dir)
-        except Exception:
-            pass
-
-        for output_dir in self.output_directories:
-            try:
-                shutil.rmtree(output_dir)
-            except Exception:
-                pass
-
     def test_file_output(self):
-        self.output_dir = os.path.join(os.getcwd(), '.test_file_output')
+        output_dir = os.path.join(os.getcwd(), '.test_file_output')
 
         D = get_regression_datamanager()
         D.name = 'test'
@@ -53,7 +41,7 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
         configuration_space = get_configuration_space(D.info)
 
         configuration = configuration_space.sample_configuration()
-        backend_api = backend.create(self.output_dir, self.output_dir)
+        backend_api = backend.create(output_dir, output_dir)
         evaluator = HoldoutEvaluator(D, backend_api, configuration,
                                      with_predictions=True,
                                      all_scoring_functions=True,
@@ -65,11 +53,17 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
                               Y_test_pred)
 
         self.assertTrue(os.path.exists(os.path.join(
-            self.output_dir, '.auto-sklearn', 'true_targets_ensemble.npy')))
+            output_dir, '.auto-sklearn', 'true_targets_ensemble.npy')))
+
+        for i in range(5):
+            try:
+                shutil.rmtree(output_dir)
+            except Exception:
+                pass
 
     def test_predict_proba_binary_classification(self):
-        self.output_dir = os.path.join(os.getcwd(),
-                                       '.test_predict_proba_binary_classification')
+        output_dir = os.path.join(os.getcwd(),
+                                  '.test_predict_proba_binary_classification')
         D = get_binary_classification_datamanager()
 
         class Dummy2(object):
@@ -88,7 +82,7 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
             include_preprocessors=['select_rates'])
         configuration = configuration_space.sample_configuration()
 
-        evaluator = HoldoutEvaluator(D, self.output_dir, configuration,
+        evaluator = HoldoutEvaluator(D, output_dir, configuration,
                                      include={'classifier': ['extra_trees'],
                                               'preprocessor': ['select_rates']})
         evaluator.model = model
@@ -97,6 +91,12 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
 
         for i in range(23):
             self.assertEqual(0.9, Y_optimization_pred[i][1])
+
+        for i in range(5):
+            try:
+                shutil.rmtree(output_dir)
+            except Exception:
+                pass
 
     def test_datasets(self):
         for getter in get_dataset_getters():
@@ -119,6 +119,12 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
 
                     self.assertTrue(np.isfinite(err[i]))
 
+                for i in range(5):
+                    try:
+                        shutil.rmtree(output_directory)
+                    except Exception:
+                        pass
+
 
 
 class FunctionsTest(unittest.TestCase):
@@ -140,7 +146,7 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout(self):
         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
         eval_holdout(self.queue, self.configuration, self.data, backend_api,
-                     1, 1, None, True, False, True, None, None)
+                     1, 1, None, True, False, True, None, None, False)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.05)
         self.assertEqual(info[2], 1)
@@ -149,7 +155,7 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout_all_loss_functions(self):
         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
         eval_holdout(self.queue, self.configuration, self.data, backend_api,
-                     1, 1, None, True, True, True, None, None)
+                     1, 1, None, True, True, True, None, None, False)
         info = self.queue.get()
         self.assertIn('f1_metric: 0.0480549199085;pac_metric: 0.122252018407;'
                       'acc_metric: 0.0454545454545;auc_metric: 0.0;'
@@ -160,7 +166,8 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout_on_subset(self):
         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
         eval_holdout(self.queue, self.configuration, self.data,
-                     backend_api, 1, 1, 43, True, False, True, None, None)
+                     backend_api, 1, 1, 43, True, False, True, None, None,
+                     False)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.1)
         self.assertEqual(info[2], 1)
@@ -169,7 +176,7 @@ class FunctionsTest(unittest.TestCase):
         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
         eval_iterative_holdout(self.queue, self.configuration, self.data,
                                backend_api, 1, 1, None, True, False, True,
-                               None, None)
+                               None, None, False)
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.05)
         self.assertEqual(info[2], 1)
@@ -178,7 +185,7 @@ class FunctionsTest(unittest.TestCase):
         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
         eval_iterative_holdout(self.queue, self.configuration,
                                self.data, backend_api, 1, 1, 43, True, False,
-                               True, None, None)
+                               True, None, None, False)
 
         info = self.queue.get()
         self.assertAlmostEqual(info[1], 0.1)

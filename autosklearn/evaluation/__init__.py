@@ -24,7 +24,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                  run_obj='quality', par_factor=1, with_predictions=True,
                  all_scoring_functions=False, output_y_test=True,
                  include=None, exclude=None, memory_limit=None,
-                 **resampling_strategy_args):
+                 disable_file_output=False, **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
             eval_function = eval_holdout
@@ -58,6 +58,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.output_y_test = output_y_test
         self.include = include
         self.exclude = exclude
+        self.disable_file_output = disable_file_output
         self.logger = logger
 
         if memory_limit is not None:
@@ -110,6 +111,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                           subsample=None,
                           include=self.include,
                           exclude=self.exclude,
+                          disable_file_output=self.disable_file_output,
                           **self.resampling_strategy_args)
         if instance is not None:
             obj_kwargs['instance'] = instance
