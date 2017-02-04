@@ -74,18 +74,20 @@ class DecisionTree(AutoSklearnRegressionAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        criterion = cs.add_hyperparameter(Constant('criterion', 'mse'))
-        splitter = cs.add_hyperparameter(Constant("splitter", "best"))
-        max_features = cs.add_hyperparameter(Constant('max_features', 1.0))
-        max_depth = cs.add_hyperparameter(UniformFloatHyperparameter(
-            'max_depth', 0., 2., default=0.5))
-        min_samples_split = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            "min_samples_split", 2, 20, default=2))
-        min_samples_leaf = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            "min_samples_leaf", 1, 20, default=1))
-        min_weight_fraction_leaf = cs.add_hyperparameter(
-            Constant("min_weight_fraction_leaf", 0.0))
-        max_leaf_nodes = cs.add_hyperparameter(
-            UnParametrizedHyperparameter("max_leaf_nodes", "None"))
+        criterion = Constant('criterion', 'mse')
+        splitter = Constant("splitter", "best")
+        max_features = Constant('max_features', 1.0)
+        max_depth = UniformFloatHyperparameter(
+            'max_depth', 0., 2., default=0.5)
+        min_samples_split = UniformIntegerHyperparameter(
+            "min_samples_split", 2, 20, default=2)
+        min_samples_leaf = UniformIntegerHyperparameter(
+            "min_samples_leaf", 1, 20, default=1)
+        min_weight_fraction_leaf = Constant("min_weight_fraction_leaf", 0.0)
+        max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")
+
+        cs.add_hyperparameters([criterion, splitter, max_features, max_depth,
+                                min_samples_split, min_samples_leaf,
+                                min_weight_fraction_leaf, max_leaf_nodes])
 
         return cs

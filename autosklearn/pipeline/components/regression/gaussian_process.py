@@ -75,7 +75,5 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
             name="thetaU", lower=0.2, upper=10, default=1.0, log=True)
 
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(nugget)
-        cs.add_hyperparameter(thetaL)
-        cs.add_hyperparameter(thetaU)
+        cs.add_hyperparameters([nugget, thetaL, thetaU])
         return cs

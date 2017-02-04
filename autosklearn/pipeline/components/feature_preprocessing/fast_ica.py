@@ -58,14 +58,15 @@ class FastICA(AutoSklearnPreprocessingAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        n_components = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            "n_components", 10, 2000, default=100))
-        algorithm = cs.add_hyperparameter(CategoricalHyperparameter('algorithm',
-            ['parallel', 'deflation'], 'parallel'))
-        whiten = cs.add_hyperparameter(CategoricalHyperparameter('whiten',
-            ['False', 'True'], 'False'))
-        fun = cs.add_hyperparameter(CategoricalHyperparameter(
-            'fun', ['logcosh', 'exp', 'cube'], 'logcosh'))
+        n_components = UniformIntegerHyperparameter(
+            "n_components", 10, 2000, default=100)
+        algorithm = CategoricalHyperparameter('algorithm',
+            ['parallel', 'deflation'], 'parallel')
+        whiten = CategoricalHyperparameter('whiten',
+            ['False', 'True'], 'False')
+        fun = CategoricalHyperparameter(
+            'fun', ['logcosh', 'exp', 'cube'], 'logcosh')
+        cs.add_hyperparameters([n_components, algorithm, whiten, fun])
 
         cs.add_condition(EqualsCondition(n_components, whiten, "True"))
 

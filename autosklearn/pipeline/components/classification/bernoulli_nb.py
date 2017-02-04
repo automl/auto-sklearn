@@ -110,8 +110,7 @@ class BernoulliNB(AutoSklearnClassificationAlgorithm):
         fit_prior = CategoricalHyperparameter(name="fit_prior",
                                               choices=["True", "False"],
                                               default="True")
-        
-        cs.add_hyperparameter(alpha)
-        cs.add_hyperparameter(fit_prior)
+
+        cs.add_hyperparameters([alpha, fit_prior])
         
         return cs

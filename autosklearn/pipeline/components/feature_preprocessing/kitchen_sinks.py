@@ -51,6 +51,5 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
         n_components = UniformIntegerHyperparameter(
             "n_components", 50, 10000, default=100, log=True)
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(gamma)
-        cs.add_hyperparameter(n_components)
+        cs.add_hyperparameters([gamma, n_components])
         return cs

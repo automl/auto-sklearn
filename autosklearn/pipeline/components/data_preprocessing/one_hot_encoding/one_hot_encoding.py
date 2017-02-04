@@ -78,10 +78,11 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
-        use_minimum_fraction = cs.add_hyperparameter(CategoricalHyperparameter(
-            "use_minimum_fraction", ["True", "False"], default="True"))
-        minimum_fraction = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "minimum_fraction", lower=.0001, upper=0.5, default=0.01, log=True))
+        use_minimum_fraction = CategoricalHyperparameter(
+            "use_minimum_fraction", ["True", "False"], default="True")
+        minimum_fraction = UniformFloatHyperparameter(
+            "minimum_fraction", lower=.0001, upper=0.5, default=0.01, log=True)
+        cs.add_hyperparameters([use_minimum_fraction, minimum_fraction])
         cs.add_condition(EqualsCondition(minimum_fraction,
                                          use_minimum_fraction, 'True'))
         return cs

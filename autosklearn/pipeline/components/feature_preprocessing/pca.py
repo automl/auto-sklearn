@@ -52,6 +52,5 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
         whiten = CategoricalHyperparameter(
             "whiten", ["False", "True"], default="False")
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(keep_variance)
-        cs.add_hyperparameter(whiten)
+        cs.add_hyperparameters([keep_variance, whiten])
         return cs
