@@ -77,18 +77,18 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
 
     def test_configurations_signed_data(self):
         dataset_properties = {'signed': True}
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
-            dataset_properties=dataset_properties)
+        cs = SimpleRegressionPipeline(dataset_properties=dataset_properties).\
+            get_hyperparameter_search_space()
 
         self._test_configurations(configurations_space=cs,
                                   dataset_properties=dataset_properties)
 
     def test_configurations_sparse(self):
         dataset_properties = {'sparse': True}
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
-            dataset_properties=dataset_properties,
+        cs = SimpleRegressionPipeline(
             # TODO remove in sklearn 0.18
-            exclude={'regressor': 'gaussian_process'})
+            dataset_properties=dataset_properties,
+            exclude={'regressor': 'gaussian_process'}).get_hyperparameter_search_space()
 
         self._test_configurations(cs, make_sparse=True,
                                   dataset_properties=dataset_properties)
@@ -222,42 +222,42 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         self.assertEqual(len(hyperparameters) - 5, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
-            include={'regressor': ['random_forest']})
+        cs = SimpleRegressionPipeline(
+            include={'regressor': ['random_forest']}).get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter('regressor:__choice__'),
             CategoricalHyperparameter('regressor:__choice__', ['random_forest']))
 
         # TODO add this test when more than one regressor is present
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
-            exclude={'regressor': ['random_forest']})
+        cs = SimpleRegressionPipeline(exclude={'regressor': ['random_forest']}).\
+            get_hyperparameter_search_space()
         self.assertNotIn('random_forest', str(cs))
 
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
-            include={'preprocessor': ['pca']})
+        cs = SimpleRegressionPipeline(include={'preprocessor': ['pca']}).\
+            get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter('preprocessor:__choice__'),
             CategoricalHyperparameter('preprocessor:__choice__', ['pca']))
 
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
-            exclude={'preprocessor': ['no_preprocessing']})
+        cs = SimpleRegressionPipeline(exclude={'preprocessor': ['no_preprocessing']}).\
+            get_hyperparameter_search_space()
         self.assertNotIn('no_preprocessing', str(cs))
 
     def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(
             self):
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
-            include={'preprocessor': ['densifier']},
-            dataset_properties={'sparse': True})
+        cs = SimpleRegressionPipeline(include={'preprocessor': ['densifier']},
+                                      dataset_properties={'sparse': True}).\
+            get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter('regressor:__choice__').default,
                          'gradient_boosting')
 
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
-            include={'preprocessor': ['nystroem_sampler']})
+        cs = SimpleRegressionPipeline(include={'preprocessor': ['nystroem_sampler']}).\
+            get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter('regressor:__choice__').default,
                          'sgd')
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(ValueError, "Cannot find a legal default "
                                             "configuration.",
-                                SimpleRegressionPipeline().get_hyperparameter_search_space,
+                                SimpleRegressionPipeline,
                                 include={'regressor': ['random_forest'],
                                          'preprocessor': ['kitchen_sinks']})
 
@@ -265,7 +265,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         # data are located behind the densifier
         self.assertRaisesRegexp(ValueError, "Cannot find a legal default "
                                             "configuration",
-                                SimpleRegressionPipeline().get_hyperparameter_search_space,
+                                SimpleRegressionPipeline,
                                 include={'regressor': ['ridge_regression'],
                                          'preprocessor': ['densifier']},
                                 dataset_properties={'sparse': True})
@@ -305,8 +305,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
 
     def test_predict_batched(self):
         include = {'regressor': ['decision_tree']}
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
-            include=include)
+        cs = SimpleRegressionPipeline(include=include).get_hyperparameter_search_space()
         default = cs.get_default_configuration()
         regressor = SimpleRegressionPipeline(default, include=include)
 
@@ -324,8 +323,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     def test_predict_batched_sparse(self):
         dataset_properties = {'sparse': True}
         include = {'regressor': ['decision_tree']}
-        cs = SimpleRegressionPipeline().get_hyperparameter_search_space(
-            dataset_properties=dataset_properties, include=include)
+        cs = SimpleRegressionPipeline(dataset_properties=dataset_properties,
+                                      include=include).get_hyperparameter_search_space()
         default = cs.get_default_configuration()
         regressor = SimpleRegressionPipeline(default,
                                              dataset_properties=dataset_properties,
