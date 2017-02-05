@@ -28,8 +28,8 @@ class BaseTest(unittest.TestCase):
                      .ClassifierChoice(dataset_properties))]
 
         base = BasePipelineMock()
-        cs = base._get_hyperparameter_search_space(cs, dataset_properties,
-                                                   exclude, include, pipeline)
+        cs = base._get_base_search_space(cs, dataset_properties,
+                                         exclude, include, pipeline)
 
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
                          13)
@@ -43,8 +43,8 @@ class BaseTest(unittest.TestCase):
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification', 'signed': True}
         include = {'c': ['multinomial_nb']}
-        cs = base._get_hyperparameter_search_space(cs, dataset_properties,
-                                                   exclude, include, pipeline)
+        cs = base._get_base_search_space(cs, dataset_properties,
+                                         exclude, include, pipeline)
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
                          13)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
@@ -61,8 +61,8 @@ class BaseTest(unittest.TestCase):
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification', 'signed': True}
         include = {}
-        cs = base._get_hyperparameter_search_space(cs, dataset_properties,
-                                                   exclude, include, pipeline)
+        cs = base._get_base_search_space(cs, dataset_properties,
+                                         exclude, include, pipeline)
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
                          13)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
@@ -75,8 +75,8 @@ class BaseTest(unittest.TestCase):
 
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification', 'sparse': True}
-        cs = base._get_hyperparameter_search_space(cs, dataset_properties,
-                                                   exclude, include, pipeline)
+        cs = base._get_base_search_space(cs, dataset_properties,
+                                         exclude, include, pipeline)
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
                          11)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
@@ -88,8 +88,8 @@ class BaseTest(unittest.TestCase):
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification',
                               'sparse': True, 'signed': True}
-        cs = base._get_hyperparameter_search_space(cs, dataset_properties,
-                                                   exclude, include, pipeline)
+        cs = base._get_base_search_space(cs, dataset_properties,
+                                         exclude, include, pipeline)
 
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
                          11)

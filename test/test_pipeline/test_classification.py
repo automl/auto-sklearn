@@ -174,8 +174,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 'X_test': X_test, 'Y_test': Y_test}
 
         dataset_properties = {'multilabel': True}
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
-            dataset_properties=dataset_properties)
+        cs = SimpleClassificationPipeline(dataset_properties=dataset_properties).\
+            get_hyperparameter_search_space()
         self._test_configurations(configurations_space=cs, data=data)
 
     def test_configurations(self):
@@ -185,21 +185,21 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_configurations_signed_data(self):
         dataset_properties = {'signed': True}
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
-            dataset_properties=dataset_properties)
+        cs = SimpleClassificationPipeline(dataset_properties=dataset_properties)\
+            .get_hyperparameter_search_space()
 
         self._test_configurations(configurations_space=cs,
                                   dataset_properties=dataset_properties)
 
     def test_configurations_sparse(self):
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
-            dataset_properties={'sparse': True})
+        cs = SimpleClassificationPipeline(dataset_properties={'sparse': True}).\
+            get_hyperparameter_search_space()
 
         self._test_configurations(configurations_space=cs, make_sparse=True)
 
     def test_configurations_categorical_data(self):
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
-            dataset_properties={'sparse': True})
+        cs = SimpleClassificationPipeline(dataset_properties={'sparse': True}).\
+            get_hyperparameter_search_space()
 
         categorical = [True, True, True, False, False, True, True, True,
                        False, True, True, True, True, True, True, True,
@@ -355,49 +355,51 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(len(hyperparameters) - 6, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
-            include={'classifier': ['libsvm_svc']})
+        cs = SimpleClassificationPipeline(include={'classifier': ['libsvm_svc']})\
+            .get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter('classifier:__choice__'),
             CategoricalHyperparameter('classifier:__choice__', ['libsvm_svc']))
 
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
-            exclude={'classifier': ['libsvm_svc']})
+        cs = SimpleClassificationPipeline(exclude={'classifier': ['libsvm_svc']}).\
+            get_hyperparameter_search_space()
         self.assertNotIn('libsvm_svc', str(cs))
 
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
-            include={'preprocessor': ['select_percentile_classification']})
+        cs = SimpleClassificationPipeline(
+            include={'preprocessor': ['select_percentile_classification']}).\
+            get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter('preprocessor:__choice__'),
             CategoricalHyperparameter('preprocessor:__choice__',
                                       ['select_percentile_classification']))
 
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
-            exclude={'preprocessor': ['select_percentile_classification']})
+        cs = SimpleClassificationPipeline(
+            exclude={'preprocessor': ['select_percentile_classification']}
+        ).get_hyperparameter_search_space()
         self.assertNotIn('select_percentile_classification', str(cs))
 
     def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(self):
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
-            include={'preprocessor': ['densifier']},
-            dataset_properties={'sparse': True})
+        cs = SimpleClassificationPipeline(
+            include={'preprocessor': ['densifier']}, dataset_properties={'sparse': True}).\
+            get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter('classifier:__choice__').default,
                          'qda')
 
-        cs = SimpleClassificationPipeline().get_hyperparameter_search_space(
-            include={'preprocessor': ['nystroem_sampler']})
+        cs = SimpleClassificationPipeline(include={'preprocessor': ['nystroem_sampler']}).\
+            get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter('classifier:__choice__').default,
                          'sgd')
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(AssertionError, "No valid pipeline found.",
-                                SimpleClassificationPipeline().get_hyperparameter_search_space,
+                                SimpleClassificationPipeline,
                                 include={'classifier': ['multinomial_nb'],
                                          'preprocessor': ['pca']},
-                                dataset_properties={'sparse':True})
+                                dataset_properties={'sparse': True})
 
         # It must also be catched that no classifiers which can handle sparse
         #  data are located behind the densifier
         self.assertRaisesRegexp(ValueError, "Cannot find a legal default "
                                             "configuration.",
-                                SimpleClassificationPipeline().get_hyperparameter_search_space,
+                                SimpleClassificationPipeline,
                                 include={'classifier': ['liblinear_svc'],
                                          'preprocessor': ['densifier']},
                                 dataset_properties={'sparse': True})

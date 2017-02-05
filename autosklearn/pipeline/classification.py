@@ -148,8 +148,8 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
                 return y
 
-    def get_hyperparameter_search_space(self, include=None, exclude=None,
-                                        dataset_properties=None):
+    def _get_hyperparameter_search_space(self, include=None, exclude=None,
+                                         dataset_properties=None):
         """Create the hyperparameter configuration space.
 
         Parameters
@@ -168,8 +168,8 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         if dataset_properties['target_type'] != 'classification':
             dataset_properties['target_type'] = 'classification'
 
-        pipeline = self._get_pipeline()
-        cs = self._get_hyperparameter_search_space(
+        pipeline = self.steps
+        cs = self._get_base_search_space(
             cs=cs, dataset_properties=dataset_properties,
             exclude=exclude, include=include, pipeline=pipeline)
 

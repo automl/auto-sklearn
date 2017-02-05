@@ -124,8 +124,8 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             components_dict[name] = entry
         return components_dict
 
-    def get_hyperparameter_search_space(self, include=None, exclude=None,
-                                        dataset_properties=None):
+    def _get_hyperparameter_search_space(self, include=None, exclude=None,
+                                         dataset_properties=None):
         """Return the configuration space for the CASH problem.
 
         Parameters
@@ -174,8 +174,8 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             # This dataset is probaby dense
             dataset_properties['sparse'] = False
 
-        pipeline = self._get_pipeline()
-        cs = self._get_hyperparameter_search_space(
+        pipeline = self.steps
+        cs = self._get_base_search_space(
             cs=cs, dataset_properties=dataset_properties,
             exclude=exclude, include=include, pipeline=pipeline)
 

@@ -65,14 +65,15 @@ class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        # base_estimator = Constant(name="base_estimator", value="None")
-        n_estimators = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="n_estimators", lower=50, upper=500, default=50, log=False))
-        learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
-            name="learning_rate", lower=0.01, upper=2, default=0.1, log=True))
-        algorithm = cs.add_hyperparameter(CategoricalHyperparameter(
-            name="algorithm", choices=["SAMME.R", "SAMME"], default="SAMME.R"))
-        max_depth = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="max_depth", lower=1, upper=10, default=1, log=False))
+        n_estimators = UniformIntegerHyperparameter(
+            name="n_estimators", lower=50, upper=500, default=50, log=False)
+        learning_rate = UniformFloatHyperparameter(
+            name="learning_rate", lower=0.01, upper=2, default=0.1, log=True)
+        algorithm = CategoricalHyperparameter(
+            name="algorithm", choices=["SAMME.R", "SAMME"], default="SAMME.R")
+        max_depth = UniformIntegerHyperparameter(
+            name="max_depth", lower=1, upper=10, default=1, log=False)
+
+        cs.add_hyperparameters([n_estimators, learning_rate, algorithm, max_depth])
         return cs
 

@@ -56,8 +56,7 @@ def _get_regression_configuration_space(info, include, exclude):
         sparse = True
     configuration_space = SimpleRegressionPipeline(
         dataset_properties=info, include=include, exclude=exclude).\
-        get_hyperparameter_search_space(include=include, exclude=exclude,
-                                        dataset_properties={'sparse': sparse})
+        get_hyperparameter_search_space()
     return configuration_space
 
 
@@ -87,10 +86,9 @@ def _get_classification_configuration_space(info, include, exclude):
     }
 
     return SimpleClassificationPipeline(
-        dataset_properties=dataset_properties, include=include, exclude=exclude).\
-        get_hyperparameter_search_space(
         dataset_properties=dataset_properties,
-        include=include, exclude=exclude)
+        include=include, exclude=exclude).\
+        get_hyperparameter_search_space()
 
 
 def get_class(info):

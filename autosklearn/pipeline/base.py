@@ -21,35 +21,30 @@ class BasePipeline(Pipeline):
     def __init__(self, config=None, pipeline=None, dataset_properties=None,
                  include=None, exclude=None, random_state=None,
                  init_params=None):
+
+        self.include_ = include if include is not None else {}
+        self.exclude_ = exclude if exclude is not None else {}
+        self.dataset_properties_ = dataset_properties if \
+            dataset_properties is not None else {}
+
         if pipeline is None:
             self.steps = self._get_pipeline()
         else:
             self.steps = pipeline
 
-        if dataset_properties is None:
-            self.dataset_properties_ = {}
-        else:
-            self.dataset_properties_ = dataset_properties
-
-        self.include_ = include
-        self.exclude_ = exclude
+        self.config_space = self.get_hyperparameter_search_space()
 
         if config is None:
-            self.configuration_ = self.get_hyperparameter_search_space(
-                dataset_properties=dataset_properties,
-                include=include, exclude=exclude).get_default_configuration()
+            self.configuration_ = self.config_space.get_default_configuration()
         else:
-            cs = self.get_hyperparameter_search_space(
-                dataset_properties=dataset_properties,
-                include=include, exclude=exclude)
             if isinstance(config, dict):
-                config = Configuration(cs, config)
-            if cs != config.configuration_space:
-                print(cs._children)
+                config = Configuration(self.config_space, config)
+            if self.config_space != config.configuration_space:
+                print(self.config_space._children)
                 print(config.configuration_space._children)
                 import difflib
                 diff = difflib.unified_diff(
-                    str(cs).splitlines(),
+                    str(self.config_space).splitlines(),
                     str(config.configuration_space).splitlines())
                 diff = '\n'.join(diff)
                 raise ValueError('Configuration passed does not come from the '
@@ -198,7 +193,22 @@ class BasePipeline(Pipeline):
 
         return self
 
-    def get_hyperparameter_search_space(self, include=None, exclude=None,
+    def get_hyperparameter_search_space(self):
+        """Return the configuration space for the CASH problem.
+
+        Returns
+        -------
+        cs : ConfigSpace.configuration_space.Configuration
+            The configuration space describing the AutoSklearnClassifier.
+
+        """
+        if not hasattr(self, 'config_space') or self.config_space is None:
+            self.config_space = self._get_hyperparameter_search_space(
+                include=self.include_, exclude=self.exclude_,
+                dataset_properties=self.dataset_properties_)
+        return self.config_space
+
+    def _get_hyperparameter_search_space(self, include=None, exclude=None,
                                         dataset_properties=None):
         """Return the configuration space for the CASH problem.
 
@@ -236,12 +246,11 @@ class BasePipeline(Pipeline):
         -------
         cs : ConfigSpace.configuration_space.Configuration
             The configuration space describing the AutoSklearnClassifier.
-
         """
         raise NotImplementedError()
 
-    def _get_hyperparameter_search_space(self, cs, dataset_properties, exclude,
-                                         include, pipeline):
+    def _get_base_search_space(self, cs, dataset_properties, exclude,
+                               include, pipeline):
         if include is None:
             if self.include_ is None:
                 include = {}

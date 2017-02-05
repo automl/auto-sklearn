@@ -51,8 +51,6 @@ class PolynomialFeatures(AutoSklearnPreprocessingAlgorithm):
                                                  ["True", "False"], "True")
 
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(degree)
-        cs.add_hyperparameter(interaction_only)
-        cs.add_hyperparameter(include_bias)
+        cs.add_hyperparameters([degree, interaction_only, include_bias])
 
         return cs

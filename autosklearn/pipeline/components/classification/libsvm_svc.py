@@ -172,14 +172,8 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         max_iter = UnParametrizedHyperparameter("max_iter", -1)
 
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(C)
-        cs.add_hyperparameter(kernel)
-        cs.add_hyperparameter(degree)
-        cs.add_hyperparameter(gamma)
-        cs.add_hyperparameter(coef0)
-        cs.add_hyperparameter(shrinking)
-        cs.add_hyperparameter(tol)
-        cs.add_hyperparameter(max_iter)
+        cs.add_hyperparameters([C, kernel, degree, gamma, coef0, shrinking,
+                                tol, max_iter])
 
         degree_depends_on_poly = EqualsCondition(degree, kernel, "poly")
         coef0_condition = InCondition(coef0, kernel, ["poly", "sigmoid"])

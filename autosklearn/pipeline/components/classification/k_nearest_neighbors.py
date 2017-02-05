@@ -57,11 +57,11 @@ class KNearestNeighborsClassifier(AutoSklearnClassificationAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        n_neighbors = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="n_neighbors", lower=1, upper=100, log=True, default=1))
-        weights = cs.add_hyperparameter(CategoricalHyperparameter(
-            name="weights", choices=["uniform", "distance"], default="uniform"))
-        p = cs.add_hyperparameter(CategoricalHyperparameter(
-            name="p", choices=[1, 2], default=2))
+        n_neighbors = UniformIntegerHyperparameter(
+            name="n_neighbors", lower=1, upper=100, log=True, default=1)
+        weights = CategoricalHyperparameter(
+            name="weights", choices=["uniform", "distance"], default="uniform")
+        p = CategoricalHyperparameter(name="p", choices=[1, 2], default=2)
+        cs.add_hyperparameters([n_neighbors, weights, p])
 
         return cs

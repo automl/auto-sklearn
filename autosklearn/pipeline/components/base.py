@@ -293,15 +293,21 @@ class AutoSklearnChoice(object):
             * multilabel: whether the dataset is a multilabel classification
               dataset
         """
-        self.configuration = self.get_hyperparameter_search_space(
-            dataset_properties).get_default_configuration()
+
+        # Since all calls to get_hyperparameter_search_space will be done by the
+        # pipeline on construction, it is not necessary to construct a
+        # configuration space at this location!
+        # self.configuration = self.get_hyperparameter_search_space(
+        #     dataset_properties).get_default_configuration()
 
         if random_state is None:
             self.random_state = check_random_state(1)
         else:
             self.random_state = check_random_state(random_state)
 
-        self.set_hyperparameters(self.configuration)
+        # Since the pipeline will initialize the hyperparameters, it is not
+        # necessary to do this upon the construction of this object
+        # self.set_hyperparameters(self.configuration)
         self.choice = None
 
     def get_components(cls):

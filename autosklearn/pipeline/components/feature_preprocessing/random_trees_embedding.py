@@ -81,10 +81,7 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
         max_leaf_nodes = UnParametrizedHyperparameter(name="max_leaf_nodes",
                                                       value="None")
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(n_estimators)
-        cs.add_hyperparameter(max_depth)
-        cs.add_hyperparameter(min_samples_split)
-        cs.add_hyperparameter(min_samples_leaf)
-        cs.add_hyperparameter(min_weight_fraction_leaf)
-        cs.add_hyperparameter(max_leaf_nodes)
+        cs.add_hyperparameters([n_estimators, max_depth, min_samples_split,
+                                min_samples_leaf, min_weight_fraction_leaf,
+                                max_leaf_nodes])
         return cs

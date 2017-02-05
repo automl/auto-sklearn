@@ -94,11 +94,7 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
             "n_components", 50, 10000, default=100, log=True)
 
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(kernel)
-        cs.add_hyperparameter(degree)
-        cs.add_hyperparameter(gamma)
-        cs.add_hyperparameter(coef0)
-        cs.add_hyperparameter(n_components)
+        cs.add_hyperparameters([kernel, degree, gamma, coef0, n_components])
 
         degree_depends_on_poly = EqualsCondition(degree, kernel, "poly")
         coef0_condition = InCondition(coef0, kernel, ["poly", "sigmoid"])
@@ -107,7 +103,5 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
         if allow_chi2:
             gamma_kernels.append("chi2")
         gamma_condition = InCondition(gamma, kernel, gamma_kernels)
-        cs.add_condition(degree_depends_on_poly)
-        cs.add_condition(coef0_condition)
-        cs.add_condition(gamma_condition)
+        cs.add_conditions([degree_depends_on_poly, coef0_condition, gamma_condition])
         return cs

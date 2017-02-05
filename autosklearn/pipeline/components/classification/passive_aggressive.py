@@ -103,8 +103,5 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
                                               log=True)
         C = UniformFloatHyperparameter("C", 1e-5, 10, 1, log=True)
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(loss)
-        cs.add_hyperparameter(fit_intercept)
-        cs.add_hyperparameter(n_iter)
-        cs.add_hyperparameter(C)
+        cs.add_hyperparameters([loss, fit_intercept, n_iter, C])
         return cs
