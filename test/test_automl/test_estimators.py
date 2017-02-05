@@ -32,44 +32,23 @@ class ArrayReturningDummyPredictor(object):
 class EstimatorTest(Base, unittest.TestCase):
     _multiprocess_can_split_ = True
 
-    def test_fit(self):
-
-        output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit')
-        self._setUp(output)
-
-        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=30,
-                                       per_run_time_limit=5,
-                                       tmp_folder=output,
-                                       output_folder=output)
-        automl.fit(X_train, Y_train)
-        #print(automl.show_models(), flush=True)
-        #print(automl.cv_results_, flush=True)
-        score = automl.score(X_test, Y_test)
-
-        self.assertGreaterEqual(score, 0.8)
-        self.assertEqual(automl._automl._automl._task, MULTICLASS_CLASSIFICATION)
-
-        del automl
-        self._tearDown(output)
-
-    def test_fit_partial_cv(self):
-
-        output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_partial_cv')
-        self._setUp(output)
-
-        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=30,
-                                       per_run_time_limit=5,
-                                       tmp_folder=output,
-                                       output_folder=output,
-                                       resampling_strategy='partial-cv',
-                                       ensemble_size=0,
-                                       delete_tmp_folder_after_terminate=False)
-        automl.fit(X_train, Y_train)
-
-        del automl
-        self._tearDown(output)
+    # def test_fit_partial_cv(self):
+    #
+    #     output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_partial_cv')
+    #     self._setUp(output)
+    #
+    #     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+    #     automl = AutoSklearnClassifier(time_left_for_this_task=30,
+    #                                    per_run_time_limit=5,
+    #                                    tmp_folder=output,
+    #                                    output_folder=output,
+    #                                    resampling_strategy='partial-cv',
+    #                                    ensemble_size=0,
+    #                                    delete_tmp_folder_after_terminate=False)
+    #     automl.fit(X_train, Y_train)
+    #
+    #     del automl
+    #     self._tearDown(output)
 
     def test_pSMAC_wrong_arguments(self):
         self.assertRaisesRegexp(ValueError,
@@ -296,13 +275,11 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=60,
-                                       per_run_time_limit=10,
+        automl = AutoSklearnClassifier(time_left_for_this_task=30,
+                                       per_run_time_limit=5,
                                        tmp_folder=output,
                                        output_folder=output)
         automl.fit(X_train, Y_train)
-        #print(automl.show_models(), flush=True)
-        #print(automl.cv_results_, flush=True)
 
         initial_predictions = automl.predict(X_test)
         initial_accuracy = sklearn.metrics.accuracy_score(Y_test,
