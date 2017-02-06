@@ -83,7 +83,7 @@ class MyDummyRegressor(DummyRegressor):
 
 
 class AbstractEvaluator(object):
-    def __init__(self, Datamanager, backend, configuration=None,
+    def __init__(self, Datamanager, backend, queue, configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
@@ -150,27 +150,29 @@ class AbstractEvaluator(object):
 
         self.subsample = subsample
 
-        if not isinstance(self.configuration, Configuration):
-            self.model = self.model_class(configuration=self.configuration,
-                                          random_state=self.seed,
-                                          init_params=self._init_params)
-        else:
-            dataset_properties = {'task': self.task_type,
-                                  'sparse': self.D.info['is_sparse'] == 1,
-                                  'multilabel': self.task_type ==
-                                                MULTILABEL_CLASSIFICATION,
-                                  'multiclass': self.task_type ==
-                                                MULTICLASS_CLASSIFICATION}
-            self.model = self.model_class(config=self.configuration,
-                                          dataset_properties=dataset_properties,
-                                          random_state=self.seed,
-                                          include=self.include,
-                                          exclude=self.exclude,
-                                          init_params=self._init_params)
-
         logger_name = '%s(%d):%s' % (self.__class__.__name__.split('.')[-1],
                                      self.seed, self.D.name)
         self.logger = get_logger(logger_name)
+
+    def _get_model(self):
+        if not isinstance(self.configuration, Configuration):
+            model = self.model_class(configuration=self.configuration,
+                                     random_state=self.seed,
+                                     init_params=self._init_params)
+        else:
+            dataset_properties = {'task': self.task_type,
+                                  'sparse': self.D.info['is_sparse'] == 1,
+                                  'is_multilabel': self.task_type ==
+                                                   MULTILABEL_CLASSIFICATION,
+                                  'is_multiclass': self.task_type ==
+                                                   MULTICLASS_CLASSIFICATION}
+            model = self.model_class(config=self.configuration,
+                                     dataset_properties=dataset_properties,
+                                     random_state=self.seed,
+                                     include=self.include,
+                                     exclude=self.exclude,
+                                     init_params=self._init_params)
+        return model
 
     def fit_predict_and_loss(self):
         """Fit model(s) according to resampling strategy, predict for the
@@ -223,8 +225,7 @@ class AbstractEvaluator(object):
 
         return err
 
-    def finish_up(self, loss=None, opt_pred=None, valid_pred=None,
-                  test_pred=None, file_output=True):
+    def finish_up(self, loss, opt_pred, valid_pred, test_pred, file_output=True):
         """This function does everything necessary after the fitting is done:
 
         * predicting
@@ -235,8 +236,6 @@ class AbstractEvaluator(object):
 
         # try:
         self.duration = time.time() - self.starttime
-        if loss is None:
-            loss, opt_pred, valid_pred, test_pred = self.predict_and_loss()
 
         if file_output:
             loss_, additional_run_info_ = self.file_output(
@@ -374,7 +373,7 @@ class AbstractEvaluator(object):
 
         with warnings.catch_warnings():
             warnings.showwarning = send_warnings_to_log
-            model = model.fit(X, y)
+            model.fit(X, y)
 
         return model
 
