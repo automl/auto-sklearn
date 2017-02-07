@@ -102,7 +102,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
                  ensemble_size=50,
                  ensemble_nbest=50,
                  seed=1,
-                 ml_memory_limit=3000,
+                 ml_memory_limit=3072,
                  include_estimators=None,
                  exclude_estimators=None,
                  include_preprocessors=None,
@@ -148,7 +148,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
 
         seed : int, optional (default=1)
 
-        ml_memory_limit : int, optional (3000)
+        ml_memory_limit : int, optional (3072)
             Memory limit in MB for the machine learning algorithm.
             `auto-sklearn` will stop fitting the machine learning algorithm if
             it tries to allocate more than `ml_memory_limit` MB.
