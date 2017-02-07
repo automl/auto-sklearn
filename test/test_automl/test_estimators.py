@@ -1,6 +1,5 @@
-# -*- encoding: utf-8 -*-
-from __future__ import print_function
 import collections
+import gzip
 import os
 import pickle
 import sys
@@ -110,16 +109,17 @@ class EstimatorTest(Base, unittest.TestCase):
         # more than 99%; it should be in the final ensemble if the ensemble
         # building of the second AutoSklearn classifier works correct
         true_targets_ensemble_path = os.path.join(output, '.auto-sklearn',
-                                                  'true_targets_ensemble.npy')
-        true_targets_ensemble = np.load(true_targets_ensemble_path)
+                                                  'true_targets_ensemble.npy.gz')
+        with gzip.open(true_targets_ensemble_path) as fh:
+            true_targets_ensemble = np.load(fh)
         true_targets_ensemble[-1] = 1 if true_targets_ensemble[-1] != 1 else 0
         probas = np.zeros((len(true_targets_ensemble), 3), dtype=float)
         for i, value in enumerate(true_targets_ensemble):
             probas[i, value] = 1.0
         dummy_predictions_path = os.path.join(output, '.auto-sklearn',
                                               'predictions_ensemble',
-                                              'predictions_ensemble_1_00030.npy')
-        with open(dummy_predictions_path, 'wb') as fh:
+                                              'predictions_ensemble_1_00030.npy.gz')
+        with gzip.open(dummy_predictions_path, 'wb') as fh:
             np.save(fh, probas)
 
         probas_test = np.zeros((len(Y_test), 3), dtype=float)

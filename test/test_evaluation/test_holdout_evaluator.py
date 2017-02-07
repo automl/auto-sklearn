@@ -53,7 +53,7 @@ class HoldoutEvaluatorTest(BaseEvaluatorTest):
                               Y_test_pred)
 
         self.assertTrue(os.path.exists(os.path.join(
-            output_dir, '.auto-sklearn', 'true_targets_ensemble.npy')))
+            output_dir, '.auto-sklearn', 'true_targets_ensemble.npy.gz')))
 
         for i in range(5):
             try:
