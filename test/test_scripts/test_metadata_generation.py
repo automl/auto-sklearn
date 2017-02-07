@@ -13,7 +13,7 @@ class TestMetadataGeneration(unittest.TestCase):
         self.working_directory = '/tmp/autosklearn-unittest-tmp-dir-%s-%d-%d' % (
             socket.gethostname(), os.getpid(), random.randint(0, 1000000))
 
-    @unittest.skipIf(sys.version_info < (3, 4), 'subprocess.run() not '
+    @unittest.skipIf(sys.version_info < (3, 5), 'subprocess.run() not '
                                                 'available in python3.4.')
     def test_metadata_generation(self):
         current_directory = __file__
