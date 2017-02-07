@@ -1,9 +1,8 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
-import copy
+import queue
 import multiprocessing
 import os
-import shutil
 import sys
 import unittest
 import unittest.mock
@@ -12,11 +11,8 @@ from ConfigSpace import Configuration
 import numpy as np
 from sklearn.cross_validation import StratifiedKFold, ShuffleSplit
 
-from autosklearn.constants import *
-from autosklearn.evaluation.train_evaluator import TrainEvaluator, \
-    eval_holdout
+from autosklearn.evaluation.train_evaluator import TrainEvaluator
 from autosklearn.util import backend
-from autosklearn.util.pipeline import get_configuration_space
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
@@ -38,18 +34,39 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_holdout(self, pipeline_mock):
         D = get_binary_classification_datamanager()
+        D.name = 'test'
         kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
 
-        evaluator, (loss, Y_optimization_pred, Y_valid_pred, Y_test_pred) = \
-            self._test_holdout_and_cv(kfold, pipeline_mock)
+        pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
+        output_dir = os.path.join(os.getcwd(), '.test_%s' % kfold)
 
-        self.assertEqual(loss, 1.0)
+        configuration = unittest.mock.Mock(spec=Configuration)
+        backend_api = backend.create(output_dir, output_dir)
+        queue_ = multiprocessing.Queue()
+
+        evaluator = TrainEvaluator(D, backend_api, queue_,
+                                   configuration=configuration,
+                                   cv=kfold,
+                                   with_predictions=True,
+                                   all_scoring_functions=False,
+                                   output_y_test=True)
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, None)
+
+        evaluator.fit_predict_and_loss()
+
+        duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
+        self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
+
+        self.assertEqual(evaluator.file_output.call_count, 1)
+        self.assertEqual(result, 1.0)
         self.assertEqual(pipeline_mock.fit.call_count, 1)
         # three calls because of the holdout, the validation and the test set
         self.assertEqual(pipeline_mock.predict_proba.call_count, 3)
-        self.assertEqual(Y_optimization_pred.shape[0], 7)
-        self.assertEqual(Y_valid_pred.shape[0], D.data['Y_valid'].shape[0])
-        self.assertEqual(Y_test_pred.shape[0], D.data['Y_test'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 7)
+        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], D.data['Y_valid'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_test'].shape[0])
         self.assertEqual(evaluator.model.fit.call_count, 1)
 
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
@@ -58,38 +75,40 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         kfold = StratifiedKFold(y=D.data['Y_train'].flatten(), random_state=1,
                                 n_folds=5, shuffle=True)
 
-        evaluator, (loss, Y_optimization_pred, Y_valid_pred, Y_test_pred) = \
-            self._test_holdout_and_cv(kfold, pipeline_mock)
+        pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
+        output_dir = os.path.join(os.getcwd(), '.test_%s' % kfold)
 
-        self.assertEqual(loss, 1.0)
+        configuration = unittest.mock.Mock(spec=Configuration)
+        backend_api = backend.create(output_dir, output_dir)
+        queue_ = multiprocessing.Queue()
+
+        evaluator = TrainEvaluator(D, backend_api, queue_,
+                                   configuration=configuration,
+                                   cv=kfold,
+                                   with_predictions=True,
+                                   all_scoring_functions=False,
+                                   output_y_test=True)
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, None)
+
+        evaluator.fit_predict_and_loss()
+
+        duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
+        self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
+
+        self.assertEqual(evaluator.file_output.call_count, 1)
+        self.assertEqual(result, 1.0)
         self.assertEqual(pipeline_mock.fit.call_count, 5)
         # Fifteen calls because of the holdout, the validation and the test set
         self.assertEqual(pipeline_mock.predict_proba.call_count, 15)
-        self.assertEqual(Y_optimization_pred.shape[0], D.data['Y_train'].shape[0])
-        self.assertEqual(Y_valid_pred.shape[0], D.data['Y_valid'].shape[0])
-        self.assertEqual(Y_test_pred.shape[0], D.data['Y_test'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], D.data['Y_train'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], D.data['Y_valid'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_test'].shape[0])
         # The model prior to fitting is saved, this cannot be directly tested
         # because of the way the mock module is used. Instead, we test whether
         # the if block in which model assignment is done is accessed
         self.assertTrue(evaluator._added_empty_model)
-
-    def _test_holdout_and_cv(self, split_generator, pipeline_mock):
-        pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
-        pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
-        output_dir = os.path.join(os.getcwd(), '.test_%s' % split_generator)
-        D = get_binary_classification_datamanager()
-        D.name = 'test'
-
-        configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(output_dir, output_dir)
-
-        evaluator = TrainEvaluator(D, backend_api, configuration,
-                                   cv=split_generator,
-                                   with_predictions=True,
-                                   all_scoring_functions=False,
-                                   output_y_test=True)
-
-        return evaluator, evaluator.fit_predict_and_loss()
 
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_partial_cv(self, pipeline_mock):
@@ -105,22 +124,27 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         configuration = unittest.mock.Mock(spec=Configuration)
         backend_api = backend.create(output_dir, output_dir)
+        queue_ = multiprocessing.Queue()
 
-        evaluator = TrainEvaluator(D, backend_api, configuration,
+        evaluator = TrainEvaluator(D, backend_api, queue_,
+                                   configuration=configuration,
                                    cv=kfold,
                                    with_predictions=True,
                                    all_scoring_functions=False,
                                    output_y_test=True)
 
-        loss, Y_optimization_pred, Y_valid_pred, Y_test_pred = evaluator.partial_fit_predict_and_loss(1)
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, None)
 
-        self.assertEqual(loss, 1.0)
+        evaluator.partial_fit_predict_and_loss(1)
+
+        duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
+        self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
+
+        self.assertEqual(evaluator.file_output.call_count, 0)
+        self.assertEqual(result, 1.0)
         self.assertEqual(pipeline_mock.fit.call_count, 1)
-        # Fifteen calls because of the holdout, the validation and the test set
         self.assertEqual(pipeline_mock.predict_proba.call_count, 3)
-        self.assertEqual(Y_optimization_pred.shape[0], 15)
-        self.assertEqual(Y_valid_pred.shape[0], D.data['Y_valid'].shape[0])
-        self.assertEqual(Y_test_pred.shape[0], D.data['Y_test'].shape[0])
         # The model prior to fitting is saved, this cannot be directly tested
         # because of the way the mock module is used. Instead, we test whether
         # the if block in which model assignment is done is accessed

@@ -105,7 +105,11 @@ class TrainEvaluator(AbstractEvaluator):
             # actually a new model
             self._added_empty_model = True
 
-        return loss, Y_optimization_pred, Y_valid_pred, Y_test_pred
+        # If iterative fitting is turned on, the outputs have been added to the
+        # queue before
+        if not iterative:
+            self.finish_up(loss, Y_optimization_pred, Y_valid_pred, Y_test_pred,
+                           file_output=True)
 
     def partial_fit_predict_and_loss(self, fold, iterative=False):
         if fold > self.cv_folds:
@@ -128,7 +132,8 @@ class TrainEvaluator(AbstractEvaluator):
             # actually a new model
             self._added_empty_model = True
 
-        return loss, opt_pred, valid_pred, test_pred
+        return self.finish_up(loss, opt_pred, valid_pred, test_pred,
+                              file_output=False)
 
     def _partial_fit_and_predict(self, fold, train_indices, test_indices,
                                  iterative=False):
@@ -143,7 +148,6 @@ class TrainEvaluator(AbstractEvaluator):
         #     rs.shuffle(indices)
         #     train_indices = train_indices[indices]
 
-
         self.indices[fold] = ((train_indices, test_indices))
 
         if iterative and self.model.estimator_supports_iterative_fit():
@@ -157,9 +161,13 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_optimization_pred, Y_valid_pred, Y_test_pred = self._predict(
                     model, train_indices=train_indices, test_indices=test_indices)
                 loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
-                #self.file_output(loss, Y_optimization_pred,
-                #                 Y_valid_pred, Y_test_pred)
-                self.finish_up(loss, )
+
+                # Do only output the files in the case of iterative holdou,
+                # In case of iterative partial cv, no file output is needed
+                # because ensembles cannot be built
+                file_output = True if self.cv_folds == 1 else False
+                self.finish_up(loss, Y_optimization_pred, Y_valid_pred,
+                               Y_test_pred, file_output=file_output)
                 n_iter *= 2
         else:
             self._fit_and_suppress_warnings(model,

@@ -6,11 +6,11 @@ import warnings
 
 import numpy as np
 from sklearn.dummy import DummyClassifier, DummyRegressor
+from smac.tae.execute_ta_run import StatusType
 
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
 from autosklearn.constants import *
-from autosklearn.util import Backend
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 from autosklearn.evaluation.util import calculate_score
 from autosklearn.util.logging_ import get_logger
@@ -98,6 +98,7 @@ class AbstractEvaluator(object):
 
         self.configuration = configuration
         self.backend = backend
+        self.queue = queue
 
         self.D = Datamanager
         self.include = include
@@ -234,12 +235,11 @@ class AbstractEvaluator(object):
         We use it as the signal handler so we can recycle the code for the
         normal usecase and when the runsolver kills us here :)"""
 
-        # try:
         self.duration = time.time() - self.starttime
 
         if file_output:
             loss_, additional_run_info_ = self.file_output(
-                loss, opt_pred, valid_pred, test_pred)
+                opt_pred, valid_pred, test_pred)
         else:
             loss_, additional_run_info_ = None, None
 
@@ -260,9 +260,10 @@ class AbstractEvaluator(object):
         additional_run_info += ';' + 'duration: ' + str(self.duration)
         additional_run_info += ';' + 'num_run:' + num_run
 
-        return self.duration, loss, self.seed, additional_run_info
+        self.queue.put((self.duration, loss, self.seed, additional_run_info,
+                        StatusType.SUCCESS))
 
-    def file_output(self, loss, Y_optimization_pred, Y_valid_pred, Y_test_pred):
+    def file_output(self, Y_optimization_pred, Y_valid_pred, Y_test_pred):
         if self.disable_file_output:
             return None, None
 
