@@ -40,7 +40,7 @@ class AutoML(BaseEstimator):
                  ensemble_size=1,
                  ensemble_nbest=1,
                  seed=1,
-                 ml_memory_limit=3000,
+                 ml_memory_limit=3072,
                  metadata_directory=None,
                  keep_models=True,
                  debug_mode=False,

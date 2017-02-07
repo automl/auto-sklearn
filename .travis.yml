@@ -63,7 +63,7 @@ install:
   # Install openml dependency for metadata generation unittest
   - pip install xmltodict requests
   - pip install git+https://github.com/renatopp/liac-arff
-  - pip install git+https://github.com/openml/openml-python --no-deps
+  - pip install git+https://github.com/openml/openml-python@master --no-deps
   - mkdir ~/.openml
   - echo "apikey = 610344db6388d9ba34f6db45a3cf71de" > ~/.openml/config
   # Debug output to know all exact package versions!
