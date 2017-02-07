@@ -24,8 +24,6 @@ def main():
     # fit() changes the data in place, but refit needs the original data. We
     # therefore copy the data. In practice, one should reload the data
     automl.fit(X_train.copy(), y_train.copy(), dataset_name='digits')
-    import time
-    time.sleep(600)
     # During fit(), models are fit on individual cross-validation folds. To use
     # all available data, we call refit() which trains all models in the
     # final ensemble on the whole dataset.
