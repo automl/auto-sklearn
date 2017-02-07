@@ -1,15 +1,9 @@
 # -*- encoding: utf-8 -*-
-from __future__ import print_function
+import gzip
 import unittest
 import unittest.mock
 
 from autosklearn.util.backend import Backend
-
-from sys import version_info
-if version_info.major == 2:
-    import __builtin__ as builtins
-else:
-    import builtins
 
 
 class BackendModelsTest(unittest.TestCase):
@@ -24,8 +18,8 @@ class BackendModelsTest(unittest.TestCase):
         self.backend = self.BackendStub()
         self.backend.get_model_dir = lambda: self.model_directory
 
-    @unittest.mock.patch('six.moves.cPickle.load')
-    @unittest.mock.patch.object(builtins, 'open')
+    @unittest.mock.patch('pickle.load')
+    @unittest.mock.patch('gzip.open')
     def test_loads_model_by_seed_and_id(self, openMock, pickleLoadMock):
         seed = 13
         idx = 17
@@ -35,8 +29,8 @@ class BackendModelsTest(unittest.TestCase):
 
         self.assertEqual(expected_model, actual_model)
 
-    @unittest.mock.patch('six.moves.cPickle.load')
-    @unittest.mock.patch.object(builtins, 'open')
+    @unittest.mock.patch('pickle.load')
+    @unittest.mock.patch('gzip.open')
     def test_loads_models_by_identifiers(self, openMock, pickleLoadMock):
         seed = 13
         idx = 17
@@ -49,7 +43,7 @@ class BackendModelsTest(unittest.TestCase):
         self.assertDictEqual(expected_dict, actual_dict)
 
     def _setup_load_model_mocks(self, openMock, pickleLoadMock, seed, idx):
-        model_path = '/model_directory/%s.%s.model' % (seed, idx)
+        model_path = '/model_directory/%s.%s.model.gz' % (seed, idx)
         file_handler = 'file_handler'
         expected_model = 'model'
 
