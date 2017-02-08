@@ -252,7 +252,6 @@ def get_500_classes_datamanager():
                                                 shuffle=True,
                                                 random_state=1)
 
-    assert (25 == np.sum(np.bincount(Y) == 1), np.sum(np.bincount(Y) == 1))
     D = Dummy()
     D.info = {
         'metric': ACC_METRIC,

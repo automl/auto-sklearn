@@ -4,6 +4,10 @@ from smac.tae.execute_ta_run import StatusType
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 
 
+__all__ = ['TrainEvaluator', 'eval_holdout', 'eval_iterative_holdout',
+           'eval_cv', 'eval_partial_cv', 'eval_partial_cv_iterative']
+
+
 class TrainEvaluator(AbstractEvaluator):
     def __init__(self, Datamanager, backend, queue,
                  configuration=None,
@@ -54,6 +58,7 @@ class TrainEvaluator(AbstractEvaluator):
                                  'cross-validation!')
 
             for train_split, test_split in self.cv:
+                self.Y_optimization = self.Y_train[test_split]
                 self._partial_fit_and_predict(0, train_indices=train_split,
                                               test_indices=test_split,
                                               iterative=True)
@@ -124,6 +129,9 @@ class TrainEvaluator(AbstractEvaluator):
             else:
                 break
 
+        if self.cv_folds > 1:
+            self.Y_optimization = self.Y_train[test_split]
+
         if iterative:
             self._partial_fit_and_predict(
                 fold, train_indices=train_split, test_indices=test_split,
@@ -140,8 +148,8 @@ class TrainEvaluator(AbstractEvaluator):
                 # actually a new model
                 self._added_empty_model = True
 
-            return self.finish_up(loss, opt_pred, valid_pred, test_pred,
-                                  file_output=False)
+            self.finish_up(loss, opt_pred, valid_pred, test_pred,
+                           file_output=False)
 
     def _partial_fit_and_predict(self, fold, train_indices, test_indices,
                                  iterative=False):
@@ -160,7 +168,7 @@ class TrainEvaluator(AbstractEvaluator):
 
         if iterative:
 
-            # Do only output the files in the case of iterative holdou,
+            # Do only output the files in the case of iterative holdout,
             # In case of iterative partial cv, no file output is needed
             # because ensembles cannot be built
             file_output = True if self.cv_folds == 1 else False
@@ -240,14 +248,14 @@ class TrainEvaluator(AbstractEvaluator):
         return opt_pred, valid_pred, test_pred
 
 
-
 # create closure for evaluating an algorithm
-def eval_holdout(queue, config, data, backend, seed, num_run,
+def eval_holdout(queue, config, data, backend, cv, seed, num_run,
                  subsample, with_predictions, all_scoring_functions,
                  output_y_test, include, exclude, disable_file_output,
                  iterative=False):
-    global evaluator
-    evaluator = TrainEvaluator(data, backend, config,
+    evaluator = TrainEvaluator(data, backend, queue,
+                               cv=cv,
+                               configuration=config,
                                seed=seed,
                                num_run=num_run,
                                subsample=subsample,
@@ -257,25 +265,70 @@ def eval_holdout(queue, config, data, backend, seed, num_run,
                                include=include,
                                exclude=exclude,
                                disable_file_output=disable_file_output)
+    evaluator.fit_predict_and_loss(iterative=iterative)
 
-    def signal_handler(signum, frame):
-        print('Received signal %s. Aborting Training!' % str(signum))
-        global evaluator
-        duration, result, seed, run_info = evaluator.finish_up()
-        queue.put((duration, result, seed, run_info, StatusType.SUCCESS))
 
-    def empty_signal_handler(signum, frame):
-        pass
+def eval_iterative_holdout(queue, config, data, backend, cv, seed,
+                           num_run, subsample, with_predictions,
+                           all_scoring_functions, output_y_test,
+                           include, exclude, disable_file_output):
+    return eval_holdout(queue=queue, config=config, data=data, backend=backend,
+                        cv=cv, seed=seed, num_run=num_run, subsample=subsample,
+                        with_predictions=with_predictions,
+                        all_scoring_functions=all_scoring_functions,
+                        output_y_test=output_y_test,
+                        include=include, exclude=exclude,
+                        disable_file_output=disable_file_output, iterative=True)
 
-    if iterative:
-        signal.signal(signal.SIGALRM, signal_handler)
-        evaluator.iterative_fit()
-        signal.signal(signal.SIGALRM, empty_signal_handler)
-        duration, result, seed, run_info = evaluator.finish_up()
-    else:
-        loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
-        duration, result, seed, run_info = evaluator.finish_up(
-            loss, opt_pred, valid_pred, test_pred)
 
-    status = StatusType.SUCCESS
-    queue.put((duration, result, seed, run_info, status))
+def eval_partial_cv(queue, config, data, backend, cv, seed, num_run, instance,
+                    subsample, with_predictions, all_scoring_functions,
+                    output_y_test, include, exclude, disable_file_output,
+                    iterative=False):
+    evaluator = TrainEvaluator(data, backend, queue,
+                               configuration=config,
+                               cv=cv,
+                               seed=seed,
+                               num_run=num_run,
+                               subsample=subsample,
+                               with_predictions=with_predictions,
+                               all_scoring_functions=all_scoring_functions,
+                               output_y_test=False,
+                               include=include,
+                               exclude=exclude,
+                               disable_file_output=disable_file_output)
+
+    evaluator.partial_fit_predict_and_loss(fold=instance, iterative=iterative)
+
+
+def eval_partial_cv_iterative(queue, config, data, backend, cv, seed, num_run,
+                              instance, subsample, with_predictions,
+                              all_scoring_functions, output_y_test,
+                              include, exclude, disable_file_output):
+    return eval_partial_cv(queue=queue, config=config, data=data, backend=backend,
+                           cv=cv, seed=seed, num_run=num_run, instance=instance,
+                           subsample=subsample, with_predictions=with_predictions,
+                           all_scoring_functions=all_scoring_functions,
+                           output_y_test=output_y_test, include=include,
+                           exclude=exclude, disable_file_output=disable_file_output,
+                           iterative=True)
+
+
+# create closure for evaluating an algorithm
+def eval_cv(queue, config, data, backend, cv, seed, num_run,
+            subsample, with_predictions, all_scoring_functions,
+            output_y_test, include, exclude, disable_file_output):
+    evaluator = TrainEvaluator(data, backend, queue,
+                               configuration=config,
+                               seed=seed,
+                               num_run=num_run,
+                               cv=cv,
+                               subsample=subsample,
+                               with_predictions=with_predictions,
+                               all_scoring_functions=all_scoring_functions,
+                               output_y_test=output_y_test,
+                               include=include,
+                               exclude=exclude,
+                               disable_file_output=disable_file_output)
+
+    evaluator.fit_predict_and_loss()

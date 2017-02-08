@@ -5,18 +5,23 @@ import multiprocessing
 
 import numpy as np
 import pynisher
+from sklearn.cross_validation import ShuffleSplit, StratifiedShuffleSplit, KFold, \
+    StratifiedKFold
 from smac.tae.execute_ta_run import StatusType
 from smac.tae.execute_func import AbstractTAFunc
 
 from .abstract_evaluator import *
-from .cv_evaluator import *
-from .holdout_evaluator import *
+from .train_evaluator import *
 from .test_evaluator import *
 from .util import *
+from autosklearn.constants import REGRESSION_TASKS, CLASSIFICATION_TASKS, \
+    MULTILABEL_CLASSIFICATION
 
 WORST_POSSIBLE_RESULT = 1.0
 
 
+# TODO potentially log all inputs to this class to pickle them in order to do
+# easier debugging of potential crashes
 class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def __init__(self, backend, autosklearn_seed, resampling_strategy,
@@ -51,6 +56,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.autosklearn_seed = autosklearn_seed
         self.resampling_strategy = resampling_strategy
         self.num_run = initial_num_run
+        self.resampling_strategy = resampling_strategy
         self.resampling_strategy_args = resampling_strategy_args
         self.with_predictions = with_predictions
         self.all_scoring_functions = all_scoring_functions
@@ -95,6 +101,30 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         D = self.backend.load_datamanager()
         queue = multiprocessing.Queue()
 
+        if D.info['task'] in CLASSIFICATION_TASKS and \
+                D.info['task'] != MULTILABEL_CLASSIFICATION:
+            y = D.data['Y_train'].ravel()
+            if self.resampling_strategy in ['holdout', 'holdout-iterative-fit']:
+                cv = StratifiedShuffleSplit(y=y, n_iter=1, train_size=0.67,
+                                            test_size=0.33, random_state=1)
+            elif self.resampling_strategy in ['cv', 'partial-cv',
+                                              'partial-cv-iterative-fit']:
+                cv = StratifiedKFold(y=y, n_folds=self.resampling_strategy_args['folds'],
+                                     shuffle=True, random_state=1)
+            else:
+                raise ValueError(self.resampling_strategy)
+        else:
+            n = D.data['Y_train'].shape[0]
+            if self.resampling_strategy in ['holdout', 'holdout-iterative-fit']:
+                cv = ShuffleSplit(n=n, n_iter=1, train_size=0.67,
+                                  test_size=0.33, random_state=1)
+            elif self.resampling_strategy in ['cv', 'partial-cv',
+                                              'partial-cv-iterative-fit']:
+                cv = KFold(n=n, n_folds=self.resampling_strategy_args['folds'],
+                           shuffle=True, random_state=1)
+            else:
+                raise ValueError(self.resampling_strategy)
+
         arguments = dict(logger=logging.getLogger("pynisher"),
                          wall_time_in_s=cutoff,
                          mem_in_mb=self.memory_limit,
@@ -111,8 +141,9 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                           subsample=None,
                           include=self.include,
                           exclude=self.exclude,
-                          disable_file_output=self.disable_file_output,
-                          **self.resampling_strategy_args)
+                          disable_file_output=self.disable_file_output)
+        if self.resampling_strategy != 'test':
+            obj_kwargs['cv'] = cv
         if instance is not None:
             obj_kwargs['instance'] = instance
 
@@ -124,7 +155,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             # the target algorithm wrote something into the queue - then we
             # treat it as a succesful run
             try:
-                info = queue.get(block=True, timeout=2)
+                info = get_last_result(queue)
                 result = info[1]
                 additional_run_info = info[3]
 
@@ -145,7 +176,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             additional_run_info = 'Memout'
         else:
             try:
-                info = queue.get(block=True, timeout=2)
+                info = get_last_result(queue)
                 result = info[1]
                 additional_run_info = info[3]
 
@@ -163,3 +194,4 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         runtime = float(obj.wall_clock_time)
         self.num_run += 1
         return status, cost, runtime, additional_run_info
+

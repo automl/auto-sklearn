@@ -13,7 +13,7 @@ __all__ = [
 
 class TestEvaluator(AbstractEvaluator):
 
-    def __init__(self, Datamanager, backend,
+    def __init__(self, Datamanager, backend, queue,
                  configuration=None,
                  with_predictions=False,
                  all_scoring_functions=False,
@@ -22,7 +22,8 @@ class TestEvaluator(AbstractEvaluator):
                  exclude=None,
                  disable_file_output=False):
         super(TestEvaluator, self).__init__(
-            Datamanager, backend, configuration,
+            Datamanager, backend, queue=queue,
+            configuration=configuration,
             with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
@@ -44,7 +45,8 @@ class TestEvaluator(AbstractEvaluator):
 
     def fit_predict_and_loss(self):
         self._fit_and_suppress_warnings(self.model, self.X_train, self.Y_train)
-        return self.predict_and_loss()
+        loss, Y_pred, _, _ =  self.predict_and_loss()
+        self.finish_up(loss, Y_pred, Y_pred, Y_pred, file_output=False)
 
     def predict_and_loss(self, train=False):
 
@@ -83,17 +85,12 @@ def eval_t(queue, config, data, backend, seed, num_run, subsample,
            with_predictions, all_scoring_functions,
            output_y_test, include, exclude, disable_file_output):
     evaluator = TestEvaluator(Datamanager=data, configuration=config,
-                              backend=backend, seed=seed,
+                              backend=backend, seed=seed, queue=queue,
                               with_predictions=with_predictions,
                               all_scoring_functions=all_scoring_functions,
                               include=include, exclude=exclude,
                               disable_file_output=disable_file_output)
 
-    loss, opt_pred, valid_pred, test_pred = evaluator.fit_predict_and_loss()
-    duration, result, seed, run_info = evaluator.finish_up(
-        loss, opt_pred, valid_pred, test_pred, file_output=False)
-
-    status = StatusType.SUCCESS
-    queue.put((duration, result, seed, run_info, status))
+    evaluator.fit_predict_and_loss()
 
 

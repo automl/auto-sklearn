@@ -1,6 +1,5 @@
-# -*- encoding: utf-8 -*-
-from __future__ import print_function
 import os
+import queue
 import time
 import warnings
 
@@ -279,12 +278,10 @@ class AbstractEvaluator(object):
 
         if not np.all(np.isfinite(Y_optimization_pred)):
             return 1.0, 'Model predictions for optimization set contains NaNs.'
-        if Y_valid_pred is not None and \
-                not np.all(np.isfinite(Y_valid_pred)):
-            return 1.0, 'Model predictions for validation set contains NaNs.'
-        if Y_test_pred is not None and \
-                not np.all(np.isfinite(Y_test_pred)):
-            return 1.0, 'Model predictions for test set contains NaNs.'
+        for y, s in [[Y_valid_pred, 'validation'],
+                  [Y_test_pred, 'test']]:
+            if y is not None and not np.all(np.isfinite(y)):
+                return 1.0, 'Model predictions for %s set contains NaNs.' % s
 
         num_run = str(self.num_run).zfill(5)
         if os.path.exists(self.backend.get_model_dir()):

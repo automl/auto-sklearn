@@ -1,5 +1,4 @@
-# -*- encoding: utf-8 -*-
-from __future__ import print_function
+import copy
 import queue
 import multiprocessing
 import os
@@ -10,17 +9,19 @@ import unittest.mock
 from ConfigSpace import Configuration
 import numpy as np
 from sklearn.cross_validation import StratifiedKFold, ShuffleSplit
+from smac.tae.execute_ta_run import StatusType
 
-from autosklearn.evaluation.train_evaluator import TrainEvaluator
+from autosklearn.evaluation import get_last_result, TrainEvaluator, eval_holdout, \
+    eval_iterative_holdout, eval_cv, eval_partial_cv
 from autosklearn.util import backend
+from autosklearn.util.pipeline import get_configuration_space
+from autosklearn.constants import *
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 from evaluation_util import get_regression_datamanager, BaseEvaluatorTest, \
     get_binary_classification_datamanager, get_dataset_getters, \
     get_multiclass_classification_datamanager
-
-N_TEST_RUNS = 3
 
 
 class Dummy(object):
@@ -394,165 +395,261 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # and a total of five calls because of five iterations of fitting
         self.assertEqual(pipeline_mock.predict_proba.call_count, 15)
 
-#     def test_file_output(self):
-#         output_dir = os.path.join(os.getcwd(), '.test_file_output')
-#
-#         D = get_regression_datamanager()
-#         D.name = 'test'
-#
-#         configuration_space = get_configuration_space(D.info)
-#
-#         configuration = configuration_space.sample_configuration()
-#         backend_api = backend.create(output_dir, output_dir)
-#
-#         kfold = StratifiedKFold(y=D.data['Y_train'].flatten(),
-#                                 n_folds=5, shuffle=True, random_state=1)
-#         evaluator = TrainEvaluator(D, backend_api, configuration,
-#                                    cv=kfold,
-#                                    with_predictions=True,
-#                                    all_scoring_functions=True,
-#                                    output_y_test=True)
-#
-#         loss, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
-#             evaluator.fit_predict_and_loss()
-#         evaluator.file_output(loss, Y_optimization_pred, Y_valid_pred,
-#                               Y_test_pred)
-#
-#         self.assertTrue(os.path.exists(os.path.join(
-#             output_dir, '.auto-sklearn', 'true_targets_ensemble.npy')))
-#
-#         for i in range(5):
-#             try:
-#                 shutil.rmtree(output_dir)
-#             except Exception:
-#                 pass
-#
-#     def test_predict_proba_binary_classification(self):
-#         output_dir = os.path.join(os.getcwd(),
-#                                   '.test_predict_proba_binary_classification')
-#         D = get_binary_classification_datamanager()
-#
-#         class Dummy2(object):
-#
-#             def predict_proba(self, y, batch_size=200):
-#                 return np.array([[0.1, 0.9]] * 23)
-#
-#             def fit(self, X, y):
-#                 return self
-#
-#         model = Dummy2()
-#
-#         configuration_space = get_configuration_space(
-#             D.info,
-#             include_estimators=['extra_trees'],
-#             include_preprocessors=['select_rates'])
-#         configuration = configuration_space.sample_configuration()
-#
-#         evaluator = HoldoutEvaluator(D, output_dir, configuration,
-#                                      include={'classifier': ['extra_trees'],
-#                                               'preprocessor': ['select_rates']})
-#         evaluator.model = model
-#         loss, Y_optimization_pred, Y_valid_pred, Y_test_pred = \
-#             evaluator.fit_predict_and_loss()
-#
-#         for i in range(23):
-#             self.assertEqual(0.9, Y_optimization_pred[i][1])
-#
-#         for i in range(5):
-#             try:
-#                 shutil.rmtree(output_dir)
-#             except Exception:
-#                 pass
-#
-#     def test_datasets(self):
-#         for getter in get_dataset_getters():
-#             testname = '%s_%s' % (os.path.basename(__file__).
-#                                   replace('.pyc', '').replace('.py', ''),
-#                                   getter.__name__)
-#             with self.subTest(testname):
-#                 D = getter()
-#                 output_directory = os.path.join(os.path.dirname(__file__),
-#                                                 '.%s' % testname)
-#                 self.output_directory = output_directory
-#                 self.output_directories.append(output_directory)
-#
-#                 err = np.zeros([N_TEST_RUNS])
-#                 for i in range(N_TEST_RUNS):
-#                     D_ = copy.deepcopy(D)
-#                     evaluator = HoldoutEvaluator(D_, self.output_directory, None)
-#
-#                     err[i] = evaluator.fit_predict_and_loss()[0]
-#
-#                     self.assertTrue(np.isfinite(err[i]))
-#
-#                 for i in range(5):
-#                     try:
-#                         shutil.rmtree(output_directory)
-#                     except Exception:
-#                         pass
-#
-#
-#
-# class FunctionsTest(unittest.TestCase):
-#     def setUp(self):
-#         self.queue = multiprocessing.Queue()
-#         self.configuration = get_configuration_space(
-#             {'task': MULTICLASS_CLASSIFICATION,
-#              'is_sparse': False}).get_default_configuration()
-#         self.data = get_multiclass_classification_datamanager()
-#         self.tmp_dir = os.path.join(os.path.dirname(__file__),
-#                                     '.test_holdout_functions')
-#
-#     def tearDown(self):
-#         try:
-#             shutil.rmtree(self.tmp_dir)
-#         except Exception:
-#             pass
-#
-#     def test_eval_holdout(self):
-#         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
-#         eval_holdout(self.queue, self.configuration, self.data, backend_api,
-#                      1, 1, None, True, False, True, None, None, False)
-#         info = self.queue.get()
-#         self.assertAlmostEqual(info[1], 0.05)
-#         self.assertEqual(info[2], 1)
-#         self.assertNotIn('bac_metric', info[3])
-#
-#     def test_eval_holdout_all_loss_functions(self):
-#         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
-#         eval_holdout(self.queue, self.configuration, self.data, backend_api,
-#                      1, 1, None, True, True, True, None, None, False)
-#         info = self.queue.get()
-#         self.assertIn('f1_metric: 0.0480549199085;pac_metric: 0.122252018407;'
-#                       'acc_metric: 0.0454545454545;auc_metric: 0.0;'
-#                       'bac_metric: 0.05;duration: ', info[3])
-#         self.assertAlmostEqual(info[1], 0.05)
-#         self.assertEqual(info[2], 1)
-#
-#     def test_eval_holdout_on_subset(self):
-#         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
-#         eval_holdout(self.queue, self.configuration, self.data,
-#                      backend_api, 1, 1, 43, True, False, True, None, None,
-#                      False)
-#         info = self.queue.get()
-#         self.assertAlmostEqual(info[1], 0.1)
-#         self.assertEqual(info[2], 1)
-#
-#     def test_eval_holdout_iterative_fit_no_timeout(self):
-#         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
-#         eval_iterative_holdout(self.queue, self.configuration, self.data,
-#                                backend_api, 1, 1, None, True, False, True,
-#                                None, None, False)
-#         info = self.queue.get()
-#         self.assertAlmostEqual(info[1], 0.05)
-#         self.assertEqual(info[2], 1)
-#
-#     def test_eval_holdout_iterative_fit_on_subset_no_timeout(self):
-#         backend_api = backend.create(self.tmp_dir, self.tmp_dir)
-#         eval_iterative_holdout(self.queue, self.configuration,
-#                                self.data, backend_api, 1, 1, 43, True, False,
-#                                True, None, None, False)
-#
-#         info = self.queue.get()
-#         self.assertAlmostEqual(info[1], 0.1)
-#         self.assertEqual(info[2], 1)
+    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('os.makedirs')
+    def test_file_output(self, makedirs_mock, backend_mock):
+
+        D = get_regression_datamanager()
+        D.name = 'test'
+        configuration = unittest.mock.Mock(spec=Configuration)
+        queue_ = multiprocessing.Queue()
+
+        kfold = StratifiedKFold(y=D.data['Y_train'].flatten(),
+                                n_folds=5, shuffle=True, random_state=1)
+        evaluator = TrainEvaluator(D, backend_mock, queue=queue_,
+                                   configuration=configuration,
+                                   cv=kfold,
+                                   with_predictions=True,
+                                   all_scoring_functions=True,
+                                   output_y_test=True)
+
+        backend_mock.get_model_dir.return_value = True
+        evaluator.model = 'model'
+        evaluator.Y_optimization = D.data['Y_train']
+        rval = evaluator.file_output(D.data['Y_train'], D.data['Y_valid'],
+                                     D.data['Y_test'])
+
+        self.assertEqual(rval, (None, None))
+        self.assertEqual(backend_mock.save_targets_ensemble.call_count, 1)
+        self.assertEqual(backend_mock.save_predictions_as_npy.call_count, 3)
+        self.assertEqual(makedirs_mock.call_count, 1)
+        self.assertEqual(backend_mock.save_model.call_count, 1)
+
+        # Check for not containing NaNs - that the models don't predict nonsense
+        # for unseen data
+        D.data['Y_valid'][0] = np.NaN
+        rval = evaluator.file_output(D.data['Y_train'], D.data['Y_valid'],
+                                     D.data['Y_test'])
+        self.assertEqual(rval, (1.0, 'Model predictions for validation set contains NaNs.'))
+        D.data['Y_train'][0] = np.NaN
+        rval = evaluator.file_output(D.data['Y_train'], D.data['Y_valid'],
+                                     D.data['Y_test'])
+        self.assertEqual(rval, (1.0, 'Model predictions for optimization set contains NaNs.'))
+
+    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_predict_proba_binary_classification(self, mock, backend_mock):
+        D = get_binary_classification_datamanager()
+        mock.predict_proba.side_effect = lambda y, batch_size: np.array([[0.1, 0.9]] * 7)
+        mock.side_effect = lambda **kwargs: mock
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        queue_ = multiprocessing.Queue()
+        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
+
+        evaluator = TrainEvaluator(D, backend_mock, queue_,
+                                   configuration=configuration,
+                                   cv=kfold)
+        evaluator.fit_predict_and_loss()
+        Y_optimization_pred = backend_mock.save_predictions_as_npy.call_args_list[0][0][0]
+        print(Y_optimization_pred)
+
+        for i in range(7):
+            self.assertEqual(0.9, Y_optimization_pred[i][1])
+
+    def test_get_results(self):
+        backend_mock = unittest.mock.Mock(spec=backend.Backend)
+        backend_mock.get_model_dir.return_value = 'dutirapbdxvltcrpbdlcatepdeau'
+        D = get_binary_classification_datamanager()
+        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
+        queue_ = multiprocessing.Queue()
+        for i in range(5):
+            queue_.put((i * 1, 1 - (i * 0.2), 0, "", StatusType.SUCCESS))
+        result = get_last_result(queue_)
+        self.assertEqual(result[0], 4)
+        self.assertAlmostEqual(result[1], 0.2)
+
+    def test_datasets(self):
+        for getter in get_dataset_getters():
+            testname = '%s_%s' % (os.path.basename(__file__).
+                                  replace('.pyc', '').replace('.py', ''),
+                                  getter.__name__)
+
+            with self.subTest(testname):
+                backend_mock = unittest.mock.Mock(spec=backend.Backend)
+                backend_mock.get_model_dir.return_value = 'dutirapbdxvltcrpbdlcatepdeau'
+                D = getter()
+                D_ = copy.deepcopy(D)
+                y = D.data['Y_train']
+                if len(y.shape) == 2 and y.shape[1] == 1:
+                    y = y.flatten()
+                kfold = ShuffleSplit(n=len(y), n_iter=5, random_state=1)
+                queue_ = multiprocessing.Queue()
+                evaluator = TrainEvaluator(D_, backend_mock, queue_,
+                                           cv=kfold)
+
+                evaluator.fit_predict_and_loss()
+                duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
+                self.assertTrue(np.isfinite(result))
+
+
+class FunctionsTest(unittest.TestCase):
+    def setUp(self):
+        self.queue = multiprocessing.Queue()
+        self.configuration = get_configuration_space(
+            {'task': MULTICLASS_CLASSIFICATION,
+             'is_sparse': False}).get_default_configuration()
+        self.data = get_multiclass_classification_datamanager()
+        self.tmp_dir = os.path.join(os.path.dirname(__file__),
+                                    '.test_holdout_functions')
+        self.n = len(self.data.data['Y_train'])
+        self.y = self.data.data['Y_train'].flatten()
+        self.backend = unittest.mock.Mock()
+        self.backend.get_model_dir.return_value = 'udiaetzrpduaeirdaetr'
+        self.backend.output_directory = 'duapdbaetpdbe'
+
+    def test_eval_holdout(self):
+        kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
+        eval_holdout(self.queue, self.configuration, self.data, self.backend,
+                     kfold, 1, 1, None, True, False, True, None, None, False)
+        info = get_last_result(self.queue)
+        self.assertAlmostEqual(info[1], 0.095, places=3)
+        self.assertEqual(info[2], 1)
+        self.assertNotIn('bac_metric', info[3])
+
+    def test_eval_holdout_all_loss_functions(self):
+        kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
+        eval_holdout(self.queue, self.configuration, self.data, self.backend,
+                     kfold, 1, 1, None, True, True, True, None, None, False)
+        info = get_last_result(self.queue)
+        self.assertIn('f1_metric: 0.0954545454545;pac_metric: 0.203125867166;'
+                      'acc_metric: 0.0909090909091;auc_metric: 0.0197868008145;'
+                      'bac_metric: 0.0954545454545;duration: ', info[3])
+        self.assertAlmostEqual(info[1], 0.095, places=3)
+        self.assertEqual(info[2], 1)
+
+    # def test_eval_holdout_on_subset(self):
+    #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)
+    #     eval_holdout(self.queue, self.configuration, self.data,
+    #                  backend_api, 1, 1, 43, True, False, True, None, None,
+    #                  False)
+    #     info = self.queue.get()
+    #     self.assertAlmostEqual(info[1], 0.1)
+    #     self.assertEqual(info[2], 1)
+
+    def test_eval_holdout_iterative_fit_no_timeout(self):
+        kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
+        eval_iterative_holdout(self.queue, self.configuration, self.data,
+                               self.backend, kfold, 1, 1, None, True,
+                               False, True, None, None, False)
+        info = get_last_result(self.queue)
+        self.assertAlmostEqual(info[1], 0.09545454545454557)
+        self.assertEqual(info[2], 1)
+
+    # def test_eval_holdout_iterative_fit_on_subset_no_timeout(self):
+    #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)
+    #     eval_iterative_holdout(self.queue, self.configuration,
+    #                            self.data, backend_api, 1, 1, 43, True, False,
+    #                            True, None, None, False)
+    #
+    #     info = self.queue.get()
+    #     self.assertAlmostEqual(info[1], 0.1)
+    #     self.assertEqual(info[2], 1)
+
+    def test_eval_cv(self):
+        cv = StratifiedKFold(y=self.y, shuffle=True, random_state=1)
+        eval_cv(queue=self.queue, config=self.configuration, data=self.data,
+                backend=self.backend, seed=1, num_run=1, cv=cv, subsample=None,
+                with_predictions=True, all_scoring_functions=False,
+                output_y_test=True, include=None, exclude=None,
+                disable_file_output=False)
+        info = get_last_result(self.queue)
+        self.assertAlmostEqual(info[1], 0.063004032258064502)
+        self.assertEqual(info[2], 1)
+        self.assertNotIn('bac_metric', info[3])
+
+    def test_eval_cv_all_loss_functions(self):
+        cv = StratifiedKFold(y=self.y, shuffle=True, random_state=1)
+        eval_cv(queue=self.queue, config=self.configuration, data=self.data,
+                backend=self.backend, seed=1, num_run=1, cv=cv, subsample=None,
+                with_predictions=True, all_scoring_functions=True,
+                output_y_test=True, include=None, exclude=None,
+                disable_file_output=False)
+        info = get_last_result(self.queue)
+        self.assertIn(
+            'f1_metric: 0.0635080645161;pac_metric: 0.165226664054;'
+            'acc_metric: 0.06;auc_metric: 0.0154405176049;'
+            'bac_metric: 0.0630040322581;duration: ', info[3])
+        self.assertAlmostEqual(info[1], 0.063004032258064502)
+        self.assertEqual(info[2], 1)
+
+    # def test_eval_cv_on_subset(self):
+    #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)
+    #     eval_cv(queue=self.queue, config=self.configuration, data=self.data,
+    #             backend=backend_api, seed=1, num_run=1, folds=5, subsample=45,
+    #             with_predictions=True, all_scoring_functions=False,
+    #             output_y_test=True, include=None, exclude=None,
+    #             disable_file_output=False)
+    #     info = self.queue.get()
+    #     self.assertAlmostEqual(info[1], 0.063004032258064502)
+    #     self.assertEqual(info[2], 1)
+
+    def test_eval_partial_cv(self):
+        cv = StratifiedKFold(y=self.y, shuffle=True, random_state=1,
+                             n_folds=5)
+        results = [0.071428571428571508,
+                   0.15476190476190488,
+                   0.08333333333333337,
+                   0.16666666666666674,
+                   0.0]
+        for fold in range(5):
+            eval_partial_cv(queue=self.queue, config=self.configuration,
+                            data=self.data, backend=self.backend, seed=1,
+                            num_run=1, instance=fold, cv=cv,
+                            subsample=None, with_predictions=True,
+                            all_scoring_functions=False, output_y_test=True,
+                            include=None, exclude=None,
+                            disable_file_output=False)
+            info = get_last_result(self.queue)
+            results.append(info[1])
+            self.assertAlmostEqual(info[1], results[fold])
+            self.assertEqual(info[2], 1)
+
+    # def test_eval_partial_cv_on_subset_no_timeout(self):
+    #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)
+    #
+    #     results = [0.071428571428571508,
+    #                0.15476190476190488,
+    #                0.08333333333333337,
+    #                0.16666666666666674,
+    #                0.0]
+    #     for fold in range(5):
+    #         eval_partial_cv(queue=self.queue, config=self.configuration,
+    #                         data=self.data, backend=backend_api,
+    #                         seed=1, num_run=1, instance=fold, folds=5,
+    #                         subsample=80, with_predictions=True,
+    #                         all_scoring_functions=False, output_y_test=True,
+    #                         include=None, exclude=None,
+    #                         disable_file_output=False)
+    #
+    #         info = self.queue.get()
+    #         self.assertAlmostEqual(info[1], results[fold])
+    #         self.assertEqual(info[2], 1)
+    #
+    #     results = [0.071428571428571508,
+    #                0.15476190476190488,
+    #                0.16666666666666674,
+    #                0.0,
+    #                0.0]
+    #     for fold in range(5):
+    #         eval_partial_cv(queue=self.queue, config=self.configuration,
+    #                         data=self.data, backend=backend_api,
+    #                         seed=1, num_run=1, instance=fold, folds=5,
+    #                         subsample=43, with_predictions=True,
+    #                         all_scoring_functions=False, output_y_test=True,
+    #                         include=None, exclude=None,
+    #                         disable_file_output=False)
+    #
+    #         info = self.queue.get()
+    #         self.assertAlmostEqual(info[1], results[fold])
+    #         self.assertEqual(info[2], 1)

@@ -1,3 +1,5 @@
+import queue
+
 from autosklearn.constants import *
 from autosklearn.metrics import sanitize_array, \
     regression_metrics, classification_metrics
@@ -5,9 +7,8 @@ from autosklearn.metrics import sanitize_array, \
 
 __all__ = [
     'calculate_score',
+    'get_last_result'
 ]
-
-
 
 
 def calculate_score(solution, prediction, task_type, metric, num_classes,
@@ -38,3 +39,14 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
             score = classification_metrics.calculate_score(
                 metric, solution, prediction, task=task_type)
     return score
+
+
+def get_last_result(queue_):
+    stack = []
+    while True:
+        try:
+            rval = queue_.get(timeout=1)
+        except queue.Empty:
+            break
+        stack.append(rval)
+    return stack.pop()
