@@ -39,7 +39,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
-        output_dir = os.path.join(os.getcwd(), '.test_%s' % kfold)
+        output_dir = os.path.join(os.getcwd(), '.test_holdout')
 
         configuration = unittest.mock.Mock(spec=Configuration)
         backend_api = backend.create(output_dir, output_dir)
@@ -64,9 +64,187 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(pipeline_mock.fit.call_count, 1)
         # three calls because of the holdout, the validation and the test set
         self.assertEqual(pipeline_mock.predict_proba.call_count, 3)
+        self.assertEqual(evaluator.file_output.call_count, 1)
         self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 7)
         self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], D.data['Y_valid'].shape[0])
         self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_test'].shape[0])
+        self.assertEqual(evaluator.model.fit.call_count, 1)
+
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_iterative_holdout(self, pipeline_mock):
+        # Regular fitting
+        D = get_binary_classification_datamanager()
+        D.name = 'test'
+        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
+
+        class SideEffect(object):
+            def __init__(self):
+                self.fully_fitted_call_count = 0
+
+            def configuration_fully_fitted(self):
+                self.fully_fitted_call_count += 1
+                return self.fully_fitted_call_count > 5
+
+        Xt_fixture = 'Xt_fixture'
+        pipeline_mock.estimator_supports_iterative_fit.return_value = True
+        pipeline_mock.configuration_fully_fitted.side_effect = SideEffect().configuration_fully_fitted
+        pipeline_mock.pre_transform.return_value = Xt_fixture, {}
+        pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
+        output_dir = os.path.join(os.getcwd(), '.test_iterative_holdout')
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        backend_api = backend.create(output_dir, output_dir)
+        queue_ = multiprocessing.Queue()
+
+        evaluator = TrainEvaluator(D, backend_api, queue_,
+                                   configuration=configuration,
+                                   cv=kfold,
+                                   with_predictions=True,
+                                   all_scoring_functions=False,
+                                   output_y_test=True)
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, None)
+
+        class LossSideEffect(object):
+            def __init__(self):
+                self.losses = [1.0, 0.8, 0.6, 0.4, 0.2, 0.0]
+                self.iteration = 0
+
+            def side_effect(self, *args):
+                self.iteration += 1
+                return self.losses[self.iteration]
+        evaluator._loss = unittest.mock.Mock()
+        evaluator._loss.side_effect = LossSideEffect().side_effect
+
+        evaluator.fit_predict_and_loss(iterative=True)
+        self.assertEqual(evaluator.file_output.call_count, 5)
+
+        for i in range(1, 6):
+            duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
+            self.assertAlmostEqual(result, 1.0 - (0.2 * i))
+        self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
+
+        self.assertEqual(pipeline_mock.iterative_fit.call_count, 5)
+        self.assertEqual([cal[1]['n_iter'] for cal in pipeline_mock.iterative_fit.call_args_list], [2, 4, 8, 16, 32])
+        # fifteen calls because of the holdout, the validation and the test set
+        # and a total of five calls because of five iterations of fitting
+        self.assertEqual(evaluator.model.predict_proba.call_count, 15)
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 7)
+        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], D.data['Y_valid'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_test'].shape[0])
+        self.assertEqual(evaluator.file_output.call_count, 5)
+        self.assertEqual(evaluator.model.fit.call_count, 0)
+
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_iterative_holdout_interuption(self, pipeline_mock):
+        # Regular fitting
+        D = get_binary_classification_datamanager()
+        D.name = 'test'
+        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
+
+        class SideEffect(object):
+            def __init__(self):
+                self.fully_fitted_call_count = 0
+
+            def configuration_fully_fitted(self):
+                self.fully_fitted_call_count += 1
+                if self.fully_fitted_call_count == 3:
+                    raise ValueError()
+                return self.fully_fitted_call_count > 5
+
+        Xt_fixture = 'Xt_fixture'
+        pipeline_mock.estimator_supports_iterative_fit.return_value = True
+        pipeline_mock.configuration_fully_fitted.side_effect = SideEffect().configuration_fully_fitted
+        pipeline_mock.pre_transform.return_value = Xt_fixture, {}
+        pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
+        output_dir = os.path.join(os.getcwd(), '.test_iterative_holdout_interuption')
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        backend_api = backend.create(output_dir, output_dir)
+        queue_ = multiprocessing.Queue()
+
+        evaluator = TrainEvaluator(D, backend_api, queue_,
+                                   configuration=configuration,
+                                   cv=kfold,
+                                   with_predictions=True,
+                                   all_scoring_functions=False,
+                                   output_y_test=True)
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, None)
+
+        class LossSideEffect(object):
+            def __init__(self):
+                self.losses = [1.0, 0.8, 0.6, 0.4, 0.2, 0.0]
+                self.iteration = 0
+
+            def side_effect(self, *args):
+                self.iteration += 1
+                return self.losses[self.iteration]
+        evaluator._loss = unittest.mock.Mock()
+        evaluator._loss.side_effect = LossSideEffect().side_effect
+
+        self.assertRaises(ValueError, evaluator.fit_predict_and_loss, iterative=True)
+        self.assertEqual(evaluator.file_output.call_count, 2)
+
+        for i in range(1, 3):
+            duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
+            self.assertAlmostEqual(result, 1.0 - (0.2 * i))
+        self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
+
+        self.assertEqual(pipeline_mock.iterative_fit.call_count, 2)
+        # fifteen calls because of the holdout, the validation and the test set
+        # and a total of five calls because of five iterations of fitting
+        self.assertEqual(evaluator.model.predict_proba.call_count, 6)
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 7)
+        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], D.data['Y_valid'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_test'].shape[0])
+        self.assertEqual(evaluator.file_output.call_count, 2)
+        self.assertEqual(evaluator.model.fit.call_count, 0)
+
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_iterative_holdout_not_iterative(self, pipeline_mock):
+        # Regular fitting
+        D = get_binary_classification_datamanager()
+        D.name = 'test'
+        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
+
+        Xt_fixture = 'Xt_fixture'
+        pipeline_mock.estimator_supports_iterative_fit.return_value = False
+        pipeline_mock.pre_transform.return_value = Xt_fixture, {}
+        pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
+        output_dir = os.path.join(os.getcwd(), '.test_iterative_holdout_not_iterative')
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        backend_api = backend.create(output_dir, output_dir)
+        queue_ = multiprocessing.Queue()
+
+        evaluator = TrainEvaluator(D, backend_api, queue_,
+                                   configuration=configuration,
+                                   cv=kfold,
+                                   with_predictions=True,
+                                   all_scoring_functions=False,
+                                   output_y_test=True)
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, None)
+
+        evaluator.fit_predict_and_loss(iterative=True)
+        self.assertEqual(evaluator.file_output.call_count, 1)
+
+        duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
+        self.assertAlmostEqual(result, 1.0)
+        self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
+
+        self.assertEqual(pipeline_mock.iterative_fit.call_count, 0)
+        # fifteen calls because of the holdout, the validation and the test set
+        # and a total of five calls because of five iterations of fitting
+        self.assertEqual(evaluator.model.predict_proba.call_count, 3)
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 7)
+        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], D.data['Y_valid'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_test'].shape[0])
+        self.assertEqual(evaluator.file_output.call_count, 1)
         self.assertEqual(evaluator.model.fit.call_count, 1)
 
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
@@ -77,7 +255,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
-        output_dir = os.path.join(os.getcwd(), '.test_%s' % kfold)
+        output_dir = os.path.join(os.getcwd(), '.test_cv')
 
         configuration = unittest.mock.Mock(spec=Configuration)
         backend_api = backend.create(output_dir, output_dir)
@@ -118,7 +296,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
-        output_dir = os.path.join(os.getcwd(), '.test_%s' % kfold)
+        output_dir = os.path.join(os.getcwd(), '.test_partial_cv')
         D = get_binary_classification_datamanager()
         D.name = 'test'
 
@@ -149,6 +327,72 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # because of the way the mock module is used. Instead, we test whether
         # the if block in which model assignment is done is accessed
         self.assertTrue(evaluator._added_empty_model)
+
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_iterative_partial_cv(self, pipeline_mock):
+        # Regular fitting
+        D = get_binary_classification_datamanager()
+        D.name = 'test'
+        kfold = StratifiedKFold(y=D.data['Y_train'].flatten(), random_state=1, n_folds=3)
+
+        class SideEffect(object):
+            def __init__(self):
+                self.fully_fitted_call_count = 0
+
+            def configuration_fully_fitted(self):
+                self.fully_fitted_call_count += 1
+                return self.fully_fitted_call_count > 5
+
+        Xt_fixture = 'Xt_fixture'
+        pipeline_mock.estimator_supports_iterative_fit.return_value = True
+        pipeline_mock.configuration_fully_fitted.side_effect = SideEffect().configuration_fully_fitted
+        pipeline_mock.pre_transform.return_value = Xt_fixture, {}
+        pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
+        output_dir = os.path.join(os.getcwd(), '.test_iterative_partial_cv')
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        backend_api = backend.create(output_dir, output_dir)
+        queue_ = multiprocessing.Queue()
+
+        evaluator = TrainEvaluator(D, backend_api, queue_,
+                                   configuration=configuration,
+                                   cv=kfold,
+                                   with_predictions=True,
+                                   all_scoring_functions=False,
+                                   output_y_test=True)
+        evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
+        evaluator.file_output.return_value = (None, None)
+
+        class LossSideEffect(object):
+            def __init__(self):
+                self.losses = [1.0, 0.8, 0.6, 0.4, 0.2, 0.0]
+                self.iteration = 0
+
+            def side_effect(self, *args):
+                self.iteration += 1
+                return self.losses[self.iteration]
+        evaluator._loss = unittest.mock.Mock()
+        evaluator._loss.side_effect = LossSideEffect().side_effect
+
+        evaluator.partial_fit_predict_and_loss(fold=1, iterative=True)
+        # No file output here!
+        self.assertEqual(evaluator.file_output.call_count, 0)
+
+        for i in range(1, 6):
+            duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
+            self.assertAlmostEqual(result, 1.0 - (0.2 * i))
+        self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
+
+        self.assertEqual(pipeline_mock.iterative_fit.call_count, 5)
+        self.assertEqual([cal[1]['n_iter'] for cal in pipeline_mock.iterative_fit.call_args_list], [2, 4, 8, 16, 32])
+        # fifteen calls because of the holdout, the validation and the test set
+        # and a total of five calls because of five iterations of fitting
+        self.assertFalse(hasattr(evaluator, 'model'))
+        self.assertEqual(pipeline_mock.iterative_fit.call_count, 5)
+        # fifteen calls because of the holdout, the validation and the test set
+        # and a total of five calls because of five iterations of fitting
+        self.assertEqual(pipeline_mock.predict_proba.call_count, 15)
 
 #     def test_file_output(self):
 #         output_dir = os.path.join(os.getcwd(), '.test_file_output')

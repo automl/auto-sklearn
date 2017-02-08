@@ -48,66 +48,69 @@ class TrainEvaluator(AbstractEvaluator):
         self.keep_models = keep_models
 
     def fit_predict_and_loss(self, iterative=False):
-        """Fit function for non-iterative fitting of models"""
-        self.partial = False
+        if iterative:
+            if self.cv_folds > 1:
+                raise ValueError('Cannot use partial fitting together with full'
+                                 'cross-validation!')
 
-        if iterative and self.cv_folds > 1:
-            raise ValueError('Cannot use partial fitting together with full'
-                             'cross-validation!')
+            for train_split, test_split in self.cv:
+                self._partial_fit_and_predict(0, train_indices=train_split,
+                                              test_indices=test_split,
+                                              iterative=True)
 
-        Y_optimization_pred = [None] * self.cv_folds
-        Y_valid_pred = [None] * self.cv_folds
-        Y_test_pred = [None] * self.cv_folds
-
-        for i, (train_split, test_split) in enumerate(self.cv):
-            opt_pred, valid_pred, test_pred = self._partial_fit_and_predict(
-                i, train_indices=train_split, test_indices=test_split,
-                iterative=iterative)
-
-            Y_optimization_pred[i] = opt_pred
-            Y_valid_pred[i] = valid_pred
-            Y_test_pred[i] = test_pred
-
-        Y_targets = self.Y_targets
-
-        Y_optimization_pred = np.concatenate(
-            [Y_optimization_pred[i] for i in range(self.cv_folds)
-             if Y_optimization_pred[i] is not None])
-        Y_targets = np.concatenate([Y_targets[i] for i in range(self.cv_folds)
-                                    if Y_targets[i] is not None])
-
-        if self.X_valid is not None:
-            Y_valid_pred = np.array([Y_valid_pred[i]
-                                     for i in range(self.cv_folds)
-                                     if Y_valid_pred[i] is not None])
-            # Average the predictions of several models
-            if len(Y_valid_pred.shape) == 3:
-                Y_valid_pred = np.nanmean(Y_valid_pred, axis=0)
         else:
-            Y_valid_pred = None
 
-        if self.X_test is not None:
-            Y_test_pred = np.array([Y_test_pred[i]
-                                    for i in range(self.cv_folds)
-                                    if Y_test_pred[i] is not None])
-            # Average the predictions of several models
-            if len(Y_test_pred.shape) == 3:
-                Y_test_pred = np.nanmean(Y_test_pred, axis=0)
-        else:
-            Y_test_pred = None
+            self.partial = False
 
-        self.Y_optimization = Y_targets
-        loss = self._loss(Y_targets, Y_optimization_pred)
+            Y_optimization_pred = [None] * self.cv_folds
+            Y_valid_pred = [None] * self.cv_folds
+            Y_test_pred = [None] * self.cv_folds
 
-        if self.cv_folds > 1:
-            self.model = self._get_model()
-            # Bad style, but necessary for unit testing that self.model is
-            # actually a new model
-            self._added_empty_model = True
+            for i, (train_split, test_split) in enumerate(self.cv):
+                opt_pred, valid_pred, test_pred = self._partial_fit_and_predict(
+                    i, train_indices=train_split, test_indices=test_split)
 
-        # If iterative fitting is turned on, the outputs have been added to the
-        # queue before
-        if not iterative:
+                Y_optimization_pred[i] = opt_pred
+                Y_valid_pred[i] = valid_pred
+                Y_test_pred[i] = test_pred
+
+            Y_targets = self.Y_targets
+
+            Y_optimization_pred = np.concatenate(
+                [Y_optimization_pred[i] for i in range(self.cv_folds)
+                 if Y_optimization_pred[i] is not None])
+            Y_targets = np.concatenate([Y_targets[i] for i in range(self.cv_folds)
+                                        if Y_targets[i] is not None])
+
+            if self.X_valid is not None:
+                Y_valid_pred = np.array([Y_valid_pred[i]
+                                         for i in range(self.cv_folds)
+                                         if Y_valid_pred[i] is not None])
+                # Average the predictions of several models
+                if len(Y_valid_pred.shape) == 3:
+                    Y_valid_pred = np.nanmean(Y_valid_pred, axis=0)
+            else:
+                Y_valid_pred = None
+
+            if self.X_test is not None:
+                Y_test_pred = np.array([Y_test_pred[i]
+                                        for i in range(self.cv_folds)
+                                        if Y_test_pred[i] is not None])
+                # Average the predictions of several models
+                if len(Y_test_pred.shape) == 3:
+                    Y_test_pred = np.nanmean(Y_test_pred, axis=0)
+            else:
+                Y_test_pred = None
+
+            self.Y_optimization = Y_targets
+            loss = self._loss(Y_targets, Y_optimization_pred)
+
+            if self.cv_folds > 1:
+                self.model = self._get_model()
+                # Bad style, but necessary for unit testing that self.model is
+                # actually a new model
+                self._added_empty_model = True
+
             self.finish_up(loss, Y_optimization_pred, Y_valid_pred, Y_test_pred,
                            file_output=True)
 
@@ -121,19 +124,24 @@ class TrainEvaluator(AbstractEvaluator):
             else:
                 break
 
-        opt_pred, valid_pred, test_pred = self._partial_fit_and_predict(
-            fold, train_indices=train_split, test_indices=test_split,
-            iterative=iterative)
-        loss = self._loss(self.Y_targets[fold], opt_pred)
+        if iterative:
+            self._partial_fit_and_predict(
+                fold, train_indices=train_split, test_indices=test_split,
+                iterative=iterative)
+        else:
+            opt_pred, valid_pred, test_pred = self._partial_fit_and_predict(
+                fold, train_indices=train_split, test_indices=test_split,
+                iterative=iterative)
+            loss = self._loss(self.Y_targets[fold], opt_pred)
 
-        if self.cv_folds > 1:
-            self.model = self._get_model()
-            # Bad style, but necessary for unit testing that self.model is
-            # actually a new model
-            self._added_empty_model = True
+            if self.cv_folds > 1:
+                self.model = self._get_model()
+                # Bad style, but necessary for unit testing that self.model is
+                # actually a new model
+                self._added_empty_model = True
 
-        return self.finish_up(loss, opt_pred, valid_pred, test_pred,
-                              file_output=False)
+            return self.finish_up(loss, opt_pred, valid_pred, test_pred,
+                                  file_output=False)
 
     def _partial_fit_and_predict(self, fold, train_indices, test_indices,
                                  iterative=False):
@@ -150,25 +158,51 @@ class TrainEvaluator(AbstractEvaluator):
 
         self.indices[fold] = ((train_indices, test_indices))
 
-        if iterative and self.model.estimator_supports_iterative_fit():
-            Xt, fit_params = self.model.pre_transform(self.X_train[train_indices],
-                                                      self.Y_train[train_indices])
+        if iterative:
 
-            n_iter = 1
-            while not self.model.configuration_fully_fitted():
-                self.model.iterative_fit(Xt, self.Y_train[train_indices],
-                                         n_iter=n_iter, **fit_params)
+            # Do only output the files in the case of iterative holdou,
+            # In case of iterative partial cv, no file output is needed
+            # because ensembles cannot be built
+            file_output = True if self.cv_folds == 1 else False
+
+            if model.estimator_supports_iterative_fit():
+                Xt, fit_params = model.pre_transform(self.X_train[train_indices],
+                                                     self.Y_train[train_indices])
+
+                n_iter = 2
+                while not model.configuration_fully_fitted():
+                    model.iterative_fit(Xt, self.Y_train[train_indices],
+                                        n_iter=n_iter, **fit_params)
+                    Y_optimization_pred, Y_valid_pred, Y_test_pred = self._predict(
+                        model, train_indices=train_indices, test_indices=test_indices)
+
+                    if self.cv_folds == 1:
+                        self.model = model
+
+                    loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
+
+                    self.finish_up(loss, Y_optimization_pred, Y_valid_pred,
+                                   Y_test_pred, file_output=file_output)
+                    n_iter *= 2
+
+                return
+            else:
+                self._fit_and_suppress_warnings(model,
+                                                self.X_train[train_indices],
+                                                self.Y_train[train_indices])
+
+                if self.cv_folds == 1:
+                    self.model = model
+
+                train_indices, test_indices = self.indices[fold]
+                self.Y_targets[fold] = self.Y_train[test_indices]
                 Y_optimization_pred, Y_valid_pred, Y_test_pred = self._predict(
-                    model, train_indices=train_indices, test_indices=test_indices)
+                    model=model, train_indices=train_indices, test_indices=test_indices)
                 loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
-
-                # Do only output the files in the case of iterative holdou,
-                # In case of iterative partial cv, no file output is needed
-                # because ensembles cannot be built
-                file_output = True if self.cv_folds == 1 else False
                 self.finish_up(loss, Y_optimization_pred, Y_valid_pred,
                                Y_test_pred, file_output=file_output)
-                n_iter *= 2
+                return
+
         else:
             self._fit_and_suppress_warnings(model,
                                             self.X_train[train_indices],
