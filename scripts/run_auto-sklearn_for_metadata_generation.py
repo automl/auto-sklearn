@@ -25,6 +25,7 @@ parser.add_argument('--task-id', type=int, required=True)
 parser.add_argument('--task-type', choices=['classification', 'regression'],
                     required=True)
 parser.add_argument('-s', '--seed', type=int, required=True)
+parser.add_argument('--unittest', action='store_true')
 args = parser.parse_args()
 
 working_directory = args.working_directory
@@ -33,6 +34,7 @@ per_run_time_limit = args.per_run_time_limit
 task_id = args.task_id
 task_type = args.task_type
 seed = args.seed
+is_test = args.unittest
 
 configuration_output_dir = os.path.join(working_directory, 'configuration',
                                         task_type)
@@ -80,6 +82,11 @@ incumbent_id_to_model = {}
 incumbent_id_to_performance = {}
 validated_trajectory = []
 
+if is_test:
+    memory_limit_factor = 1
+else:
+    memory_limit_factor = 2
+
 for entry in trajectory:
     incumbent_id = entry[1]
     train_performance = entry[0]
@@ -93,7 +100,7 @@ for entry in trajectory:
                                     autosklearn_seed=seed,
                                     resampling_strategy='test',
                                     with_predictions=False,
-                                    memory_limit=2 * automl_arguments['ml_memory_limit'],
+                                    memory_limit=memory_limit_factor * automl_arguments['ml_memory_limit'],
                                     disable_file_output=True,
                                     logger=logger,
                                     stats=stats,

@@ -51,11 +51,19 @@ class TestMetadataGeneration(unittest.TestCase):
         self.assertIn('per-run-time-limit 1800', cmd)
         cmd = cmd.replace('time-limit 86400', 'time-limit 30').replace(
             'per-run-time-limit 1800', 'per-run-time-limit 7')
+        # This tells the script to use the same memory limit for testing as
+        # for training. In production, it would use twice as much!
+        cmd = cmd.replace('-s 1', '-s 1 --unittest')
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
         # print(rval.stdout, flush=True)
         # print(rval.stderr, flush=True)
-        self.assertEqual(rval.returncode, 0, msg=str(rval))
+        smac_log = os.path.join(self.working_directory,
+                                'configuration/classification/233-1',
+                                'AutoML(1):233.log')
+        with open(smac_log) as fh:
+            smac_output = fh.read()
+        self.assertEqual(rval.returncode, 0, msg=str(rval) + '\n' + smac_output)
 
         expected_output_directory = os.path.join(self.working_directory,
                                                  'configuration',
