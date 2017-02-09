@@ -11,7 +11,7 @@ from autosklearn.pipeline.constants import *
 
 class DeepFeedNet(AutoSklearnClassificationAlgorithm):
 
-    def __init__(self, number_updates, batch_size, num_layers, num_units_layer_1,
+    def __init__(self, batch_size, num_layers, num_units_layer_1,
                  dropout_layer_1, dropout_output, std_layer_1,
                  learning_rate, solver, lambda2,
                  num_units_layer_2=10, num_units_layer_3=10, num_units_layer_4=10,
@@ -33,7 +33,6 @@ class DeepFeedNet(AutoSklearnClassificationAlgorithm):
                  momentum=0.99, beta1=0.9, beta2=0.9, rho=0.95,
                  lr_policy='fixed', gamma=0.01, power=1.0, epoch_step=1,
                  random_state=None):
-        self.number_updates = number_updates
         self.batch_size = batch_size
         # Hacky implementation of condition on number of layers
         self.num_layers = ord(num_layers) - ord('a')
@@ -110,8 +109,9 @@ class DeepFeedNet(AutoSklearnClassificationAlgorithm):
 
         Xf, yf = self._prefit(X, y)
 
-        epoch = (self.number_updates * self.batch_size)//X.shape[0]
-        number_epochs = min(max(2, epoch), 80)  # Capping of epochs
+        #epoch = (self.number_updates * self.batch_size)//X.shape[0]
+        #number_epochs = min(max(2, epoch), 80)  # Capping of epochs
+        number_epochs = 100
 
         from ...implementations import FeedForwardNet
         self.estimator = FeedForwardNet.FeedForwardNet(batch_size=self.batch_size,
@@ -178,14 +178,15 @@ class DeepFeedNet(AutoSklearnClassificationAlgorithm):
         layer_choices = [chr(i) for i in range(ord('c'), ord('b')+max_num_layers)]
 
         batch_size = UniformIntegerHyperparameter("batch_size",
-                                                  32, 4096,
+                                                  #32, 4096,
+                                                  32, 256,
                                                   log=True,
                                                   default=32)
 
-        number_updates = UniformIntegerHyperparameter("number_updates",
-                                                      50, 3500,
-                                                      log=True,
-                                                      default=200)
+        #number_updates = UniformIntegerHyperparameter("number_updates",
+        #                                              50, 3500,
+        #                                              log=True,
+        #                                              default=200)
 
         num_layers = CategoricalHyperparameter("num_layers",
                                                choices=layer_choices,
@@ -208,7 +209,7 @@ class DeepFeedNet(AutoSklearnClassificationAlgorithm):
 
         cs = ConfigurationSpace()
         # cs.add_hyperparameter(number_epochs)
-        cs.add_hyperparameter(number_updates)
+        #cs.add_hyperparameter(number_updates)
         cs.add_hyperparameter(batch_size)
         cs.add_hyperparameter(num_layers)
         cs.add_hyperparameter(lr)
@@ -287,7 +288,7 @@ class DeepFeedNet(AutoSklearnClassificationAlgorithm):
         # Iterate over parameters that are used in each layer
         for i in range(1, max_num_layers):
             layer_units = UniformIntegerHyperparameter("num_units_layer_" + str(i),
-                                                       64, 4096,
+                                                       64, 1024,
                                                        log=True,
                                                        default=128)
             cs.add_hyperparameter(layer_units)
@@ -308,20 +309,20 @@ class DeepFeedNet(AutoSklearnClassificationAlgorithm):
                                                          choices=activations_choices,
                                                          default="relu")
             cs.add_hyperparameter(layer_activation)
-            layer_leakiness = UniformFloatHyperparameter('leakiness_layer_' + str(i),
-                                                         0.01, 0.99,
-                                                         default=0.3)
-
-            cs.add_hyperparameter(layer_leakiness)
-            layer_tanh_alpha = UniformFloatHyperparameter('tanh_alpha_layer_' + str(i),
-                                                          0.5, 1.0,
-                                                          default=2./3.)
-            cs.add_hyperparameter(layer_tanh_alpha)
-            layer_tanh_beta = UniformFloatHyperparameter('tanh_beta_layer_' + str(i),
-                                                         1.1, 3.0,
-                                                         log=True,
-                                                         default=1.7159)
-            cs.add_hyperparameter(layer_tanh_beta)
+            # layer_leakiness = UniformFloatHyperparameter('leakiness_layer_' + str(i),
+            #                                              0.01, 0.99,
+            #                                              default=0.3)
+            #
+            # cs.add_hyperparameter(layer_leakiness)
+            # layer_tanh_alpha = UniformFloatHyperparameter('tanh_alpha_layer_' + str(i),
+            #                                               0.5, 1.0,
+            #                                               default=2./3.)
+            # cs.add_hyperparameter(layer_tanh_alpha)
+            # layer_tanh_beta = UniformFloatHyperparameter('tanh_beta_layer_' + str(i),
+            #                                              1.1, 3.0,
+            #                                              log=True,
+            #                                              default=1.7159)
+            # cs.add_hyperparameter(layer_tanh_beta)
 
         # TODO: Could be in a function in a new module
         for i in range(2, max_num_layers):
@@ -352,22 +353,22 @@ class DeepFeedNet(AutoSklearnClassificationAlgorithm):
                                      values=[l for l in layer_choices[i-1:]])
             cs.add_condition(layer_cond)
             # Condition leakiness on activation choice
-            layer_leakiness_param = cs.get_hyperparameter("leakiness_layer_" + str(i))
-            activation_cond = EqualsCondition(child=layer_leakiness_param,
-                                              parent=layer_activation_param,
-                                              value='leaky')
-            cs.add_condition(activation_cond)
-            # Condition tanh on activation choice
-            layer_tanh_alpha_param = cs.get_hyperparameter("tanh_alpha_layer_" + str(i))
-            activation_cond = EqualsCondition(child=layer_tanh_alpha_param,
-                                              parent=layer_activation_param,
-                                              value='scaledTanh')
-            cs.add_condition(activation_cond)
-            layer_tanh_beta_param = cs.get_hyperparameter("tanh_beta_layer_" + str(i))
-            activation_cond = EqualsCondition(child=layer_tanh_beta_param,
-                                              parent=layer_activation_param,
-                                              value='scaledTanh')
-            cs.add_condition(activation_cond)
+            # layer_leakiness_param = cs.get_hyperparameter("leakiness_layer_" + str(i))
+            # activation_cond = EqualsCondition(child=layer_leakiness_param,
+            #                                   parent=layer_activation_param,
+            #                                   value='leaky')
+            # cs.add_condition(activation_cond)
+            # # Condition tanh on activation choice
+            # layer_tanh_alpha_param = cs.get_hyperparameter("tanh_alpha_layer_" + str(i))
+            # activation_cond = EqualsCondition(child=layer_tanh_alpha_param,
+            #                                   parent=layer_activation_param,
+            #                                   value='scaledTanh')
+            # cs.add_condition(activation_cond)
+            # layer_tanh_beta_param = cs.get_hyperparameter("tanh_beta_layer_" + str(i))
+            # activation_cond = EqualsCondition(child=layer_tanh_beta_param,
+            #                                   parent=layer_activation_param,
+            #                                   value='scaledTanh')
+            # cs.add_condition(activation_cond)
 
         # Conditioning on solver
         momentum_depends_on_solver = InCondition(momentum, solver,
