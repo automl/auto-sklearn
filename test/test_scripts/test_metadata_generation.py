@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import shutil
@@ -70,6 +71,16 @@ class TestMetadataGeneration(unittest.TestCase):
                                                  'classification',
                                                  '233-1')
         self.assertTrue(os.path.exists(expected_output_directory))
+        expected_validation_output = os.path.join(expected_output_directory,
+                                                  'validation_trajectory.json')
+        self.assertTrue(os.path.exists(expected_validation_output))
+        trajectory = os.path.join(expected_output_directory, 'trajectory.json')
+        with open(expected_validation_output) as fh_validation:
+            with open(trajectory) as fh_trajectory:
+                traj = json.load(fh_trajectory)
+                valid_traj = json.load(fh_validation)
+                self.assertGreater(len(traj), 0)
+                self.assertEqual(len(traj), len(valid_traj))
 
         # 5. Get the test performance of these configurations
         script_filename = os.path.join(scripts_directory, '02_retrieve_metadata.py')

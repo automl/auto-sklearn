@@ -101,30 +101,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         D = self.backend.load_datamanager()
         queue = multiprocessing.Queue()
 
-        if D.info['task'] in CLASSIFICATION_TASKS and \
-                D.info['task'] != MULTILABEL_CLASSIFICATION:
-            y = D.data['Y_train'].ravel()
-            if self.resampling_strategy in ['holdout', 'holdout-iterative-fit']:
-                cv = StratifiedShuffleSplit(y=y, n_iter=1, train_size=0.67,
-                                            test_size=0.33, random_state=1)
-            elif self.resampling_strategy in ['cv', 'partial-cv',
-                                              'partial-cv-iterative-fit']:
-                cv = StratifiedKFold(y=y, n_folds=self.resampling_strategy_args['folds'],
-                                     shuffle=True, random_state=1)
-            else:
-                raise ValueError(self.resampling_strategy)
-        else:
-            n = D.data['Y_train'].shape[0]
-            if self.resampling_strategy in ['holdout', 'holdout-iterative-fit']:
-                cv = ShuffleSplit(n=n, n_iter=1, train_size=0.67,
-                                  test_size=0.33, random_state=1)
-            elif self.resampling_strategy in ['cv', 'partial-cv',
-                                              'partial-cv-iterative-fit']:
-                cv = KFold(n=n, n_folds=self.resampling_strategy_args['folds'],
-                           shuffle=True, random_state=1)
-            else:
-                raise ValueError(self.resampling_strategy)
-
         arguments = dict(logger=logging.getLogger("pynisher"),
                          wall_time_in_s=cutoff,
                          mem_in_mb=self.memory_limit,
@@ -143,6 +119,35 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                           exclude=self.exclude,
                           disable_file_output=self.disable_file_output)
         if self.resampling_strategy != 'test':
+            if D.info['task'] in CLASSIFICATION_TASKS and \
+                            D.info['task'] != MULTILABEL_CLASSIFICATION:
+                y = D.data['Y_train'].ravel()
+                if self.resampling_strategy in ['holdout',
+                                                'holdout-iterative-fit']:
+                    cv = StratifiedShuffleSplit(y=y, n_iter=1, train_size=0.67,
+                                                test_size=0.33, random_state=1)
+                elif self.resampling_strategy in ['cv', 'partial-cv',
+                                                  'partial-cv-iterative-fit']:
+                    cv = StratifiedKFold(y=y,
+                                         n_folds=self.resampling_strategy_args[
+                                             'folds'],
+                                         shuffle=True, random_state=1)
+                else:
+                    raise ValueError(self.resampling_strategy)
+            else:
+                n = D.data['Y_train'].shape[0]
+                if self.resampling_strategy in ['holdout',
+                                                'holdout-iterative-fit']:
+                    cv = ShuffleSplit(n=n, n_iter=1, train_size=0.67,
+                                      test_size=0.33, random_state=1)
+                elif self.resampling_strategy in ['cv', 'partial-cv',
+                                                  'partial-cv-iterative-fit']:
+                    cv = KFold(n=n,
+                               n_folds=self.resampling_strategy_args['folds'],
+                               shuffle=True, random_state=1)
+                else:
+                    raise ValueError(self.resampling_strategy)
+
             obj_kwargs['cv'] = cv
         if instance is not None:
             obj_kwargs['instance'] = instance
