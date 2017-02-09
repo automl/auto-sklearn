@@ -162,10 +162,10 @@ class AbstractEvaluator(object):
         else:
             dataset_properties = {'task': self.task_type,
                                   'sparse': self.D.info['is_sparse'] == 1,
-                                  'is_multilabel': self.task_type ==
-                                                   MULTILABEL_CLASSIFICATION,
-                                  'is_multiclass': self.task_type ==
-                                                   MULTICLASS_CLASSIFICATION}
+                                  'multilabel': self.task_type ==
+                                                MULTILABEL_CLASSIFICATION,
+                                  'multiclass': self.task_type ==
+                                                MULTICLASS_CLASSIFICATION}
             model = self.model_class(config=self.configuration,
                                      dataset_properties=dataset_properties,
                                      random_state=self.seed,
