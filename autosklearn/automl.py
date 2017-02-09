@@ -20,7 +20,7 @@ from sklearn.grid_search import _CVScoreTuple
 from autosklearn.constants import *
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.evaluation import resampling, ExecuteTaFuncWithQueue
+from autosklearn.evaluation import ExecuteTaFuncWithQueue
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline
