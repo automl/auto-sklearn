@@ -79,7 +79,7 @@ class EvaluationTest(unittest.TestCase):
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats,
-                                    memory_limit=3000)
+                                    memory_limit=3072)
         info = ta.run(None, cutoff=30)
         self.assertEqual(info[0], StatusType.SUCCESS)
         self.assertEqual(info[1], 0.5)
@@ -91,7 +91,7 @@ class EvaluationTest(unittest.TestCase):
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats,
-                                    memory_limit=3000)
+                                    memory_limit=3072)
         ta.run(None, cutoff=30)
         self.assertEqual(pynisher_mock.call_args[1]['wall_time_in_s'], 4)
         self.assertIsInstance(pynisher_mock.call_args[1]['wall_time_in_s'], int)
@@ -125,7 +125,7 @@ class EvaluationTest(unittest.TestCase):
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats,
-                                    memory_limit=3000)
+                                    memory_limit=3072)
         info = ta.run(None, cutoff=30)
         self.assertEqual(info[0], StatusType.CRASHED)
         self.assertEqual(info[1], 1.0)
@@ -138,7 +138,7 @@ class EvaluationTest(unittest.TestCase):
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats,
-                                    memory_limit=3000)
+                                    memory_limit=3072)
         info = ta.run(None, cutoff=30)
         self.assertEqual(info[0], StatusType.MEMOUT)
         self.assertEqual(info[1], 1.0)
@@ -151,7 +151,7 @@ class EvaluationTest(unittest.TestCase):
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats,
-                                    memory_limit=3000)
+                                    memory_limit=3072)
         info = ta.run(None, cutoff=30)
         self.assertEqual(info[0], StatusType.TIMEOUT)
         self.assertEqual(info[1], 1.0)
@@ -167,7 +167,7 @@ class EvaluationTest(unittest.TestCase):
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats,
-                                    memory_limit=3000)
+                                    memory_limit=3072)
         info = ta.run(None, cutoff=30)
         self.assertEqual(info[0], StatusType.SUCCESS)
         self.assertEqual(info[1], 0.5)
