@@ -174,38 +174,6 @@ class AbstractEvaluator(object):
                                      init_params=self._init_params)
         return model
 
-    def fit_predict_and_loss(self):
-        """Fit model(s) according to resampling strategy, predict for the
-        validation set and return the loss and predictions on the validation
-        set.
-
-        Provides a closed interface in which all steps of the target
-        algorithm are performed without any communication with other
-        processes. Useful for cross-validation because it allows to train a
-        model, predict for the validation set and then forget the model in
-        order to save main memory.
-        """
-        raise NotImplementedError()
-
-    def iterative_fit(self):
-        """Fit a model iteratively.
-
-        Fitting can be interrupted in order to use a partially trained model."""
-        raise NotImplementedError()
-
-    def predict_and_loss(self):
-        """Use current model to predict on the validation set and calculate
-        loss.
-
-         Should be used when using iterative fitting."""
-        raise NotImplementedError()
-
-    def predict(self):
-        """Use the current model to predict on the validation set.
-
-        Should only be used to create dummy predictions."""
-        raise NotImplementedError()
-
     def _loss(self, y_true, y_hat):
         if not isinstance(self.configuration, Configuration):
             if self.all_scoring_functions:
