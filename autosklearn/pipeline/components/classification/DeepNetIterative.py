@@ -155,6 +155,9 @@ class DeepNetIterative(AutoSklearnClassificationAlgorithm):
         self._iterations += n_iter
         return self
 
+    def estimator_supports_iterative_fit(self):
+        return True
+
     def configuration_fully_fitted(self):
         if self.estimator is None:
             return False
