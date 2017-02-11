@@ -19,7 +19,7 @@ liac-arff
 pandas
 xgboost==0.4a30
 
-ConfigSpace>=0.2.3
+ConfigSpace>=0.2.3,<0.3
 pynisher>=0.4
 pyrfr
-git+https://github.com/automl/smac3@development
+smac==0.2.4
