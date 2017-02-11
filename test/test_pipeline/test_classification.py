@@ -509,7 +509,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         assert_array_almost_equal(prediction_, prediction)
 
         # Multilabel
-        cls = SimpleClassificationPipeline()
+        cls = SimpleClassificationPipeline(include={'classifier': ['lda']})
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
         Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
                                  for y in Y_train]))
