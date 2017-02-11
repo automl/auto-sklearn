@@ -107,6 +107,25 @@ class AutoMLTest(Base, unittest.TestCase):
         del automl
         self._tearDown(output)
 
+    def test_fit_roar(self):
+        output = os.path.join(self.test_dir, '..', '.tmp_test_fit')
+        self._setUp(output)
+
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        backend_api = backend.create(output, output)
+        automl = autosklearn.automl.AutoML(backend_api, 30, 5,
+                                           initial_configurations_via_metalearning=0,
+                                           configuration_mode='ROAR')
+        automl.fit(X_train, Y_train)
+        # print(automl.show_models(), flush=True)
+        # print(automl.cv_results_, flush=True)
+        score = automl.score(X_test, Y_test)
+        self.assertGreaterEqual(score, 0.8)
+        self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
+
+        del automl
+        self._tearDown(output)
+
     def test_binary_score_and_include(self):
         """
         Test fix for binary classification prediction
