@@ -428,7 +428,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(cs_ml, cs_mc_ml)
 
     def test_predict_batched(self):
-        cls = SimpleClassificationPipeline()
+        cls = SimpleClassificationPipeline(include={'classifier': ['sgd']})
 
         # Multiclass
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
@@ -459,24 +459,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_batched_sparse(self):
-        config = {"balancing:strategy": "none",
-                  "classifier:__choice__": "random_forest",
-                  "imputation:strategy": "mean",
-                  "one_hot_encoding:minimum_fraction": 0.01,
-                  "one_hot_encoding:use_minimum_fraction": "True",
-                  "preprocessor:__choice__": "no_preprocessing",
-                  'classifier:random_forest:bootstrap': 'True',
-                  'classifier:random_forest:criterion': 'gini',
-                  'classifier:random_forest:max_depth': 'None',
-                  'classifier:random_forest:min_samples_split': 2,
-                  'classifier:random_forest:min_samples_leaf': 2,
-                  'classifier:random_forest:max_features': 0.5,
-                  'classifier:random_forest:max_leaf_nodes': 'None',
-                  'classifier:random_forest:n_estimators': 100,
-                  'classifier:random_forest:min_weight_fraction_leaf': 0.0,
-                  "rescaling:__choice__": "standardize"}
-        cls = SimpleClassificationPipeline(config=config,
-                                           dataset_properties={'sparse': True})
+        cls = SimpleClassificationPipeline(dataset_properties={'sparse': True},
+                                           include={'classifier': ['sgd']})
 
         # Multiclass
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
@@ -510,7 +494,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_predict_proba_batched(self):
         # Multiclass
-        cls = SimpleClassificationPipeline()
+        cls = SimpleClassificationPipeline(include={'classifier': ['sgd']})
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
 
         cls.fit(X_train, Y_train)
@@ -541,26 +525,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_proba_batched_sparse(self):
-        config = {"balancing:strategy": "none",
-                  "classifier:__choice__": "random_forest",
-                  "imputation:strategy": "mean",
-                  "one_hot_encoding:minimum_fraction": 0.01,
-                  "one_hot_encoding:use_minimum_fraction": 'True',
-                  "preprocessor:__choice__": "no_preprocessing",
-                  'classifier:random_forest:bootstrap': 'True',
-                  'classifier:random_forest:criterion': 'gini',
-                  'classifier:random_forest:max_depth': 'None',
-                  'classifier:random_forest:min_samples_split': 2,
-                  'classifier:random_forest:min_samples_leaf': 2,
-                  'classifier:random_forest:min_weight_fraction_leaf': 0.0,
-                  'classifier:random_forest:max_features': 0.5,
-                  'classifier:random_forest:max_leaf_nodes': 'None',
-                  'classifier:random_forest:n_estimators': 100,
-                  "rescaling:__choice__": "standardize"}
 
         cls = SimpleClassificationPipeline(
-            config=config, dataset_properties={'sparse': True,
-                                               'multiclass': True})
+            dataset_properties={'sparse': True, 'multiclass': True},
+            include={'classifier': ['sgd']})
 
         # Multiclass
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
@@ -578,8 +546,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         # Multilabel
         cls = SimpleClassificationPipeline(
-            config=config, dataset_properties={'sparse': True,
-                                               'multilabel': True})
+            dataset_properties={'sparse': True, 'multilabel': True},
+            include={'classifier': ['lda']})
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                        make_sparse=True)
         Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
