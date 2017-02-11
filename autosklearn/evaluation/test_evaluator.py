@@ -28,7 +28,7 @@ class TestEvaluator(AbstractEvaluator):
             all_scoring_functions=all_scoring_functions,
             seed=seed,
             output_y_test=False,
-            num_run='dummy',
+            num_run='-1',
             subsample=None,
             include=include,
             exclude=exclude,

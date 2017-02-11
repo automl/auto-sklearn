@@ -141,7 +141,7 @@ class EstimatorTest(Base, unittest.TestCase):
                                        ensemble_size=0)
         automl.fit_ensemble(Y_train,
                             task=MULTICLASS_CLASSIFICATION,
-                            metric=ACC_METRIC,
+                            metric='acc_metric',
                             precision='32',
                             dataset_name='iris',
                             ensemble_size=20,

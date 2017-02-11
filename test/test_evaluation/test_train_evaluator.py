@@ -593,9 +593,18 @@ class FunctionsTest(unittest.TestCase):
         eval_holdout(self.queue, self.configuration, self.data, self.backend,
                      kfold, 1, 1, None, True, True, True, None, None, False)
         info = get_last_result(self.queue)
-        self.assertIn('f1_metric: 0.0954545454545;pac_metric: 0.203125867166;'
-                      'acc_metric: 0.0909090909091;auc_metric: 0.0197868008145;'
-                      'bac_metric: 0.0954545454545;duration: ', info[3])
+
+        fixture = {'f1_metric': 0.0954545454545,
+                   'pac_metric': 0.203125867166,
+                   'acc_metric': 0.0909090909091,
+                   'auc_metric': 0.0197868008145,
+                   'bac_metric': 0.0954545454545,
+                   'num_run': 1}
+        rval = {i.split(':')[0]: float(i.split(':')[1]) for i in info[3].split(';')}
+        for key, value in fixture.items():
+            self.assertAlmostEqual(rval[key], fixture[key])
+        self.assertIn('duration', rval)
+
         self.assertAlmostEqual(info[1], 0.095, places=3)
         self.assertEqual(info[2], 1)
 
@@ -647,10 +656,18 @@ class FunctionsTest(unittest.TestCase):
                 output_y_test=True, include=None, exclude=None,
                 disable_file_output=False)
         info = get_last_result(self.queue)
-        self.assertIn(
-            'f1_metric: 0.0635080645161;pac_metric: 0.165226664054;'
-            'acc_metric: 0.06;auc_metric: 0.0154405176049;'
-            'bac_metric: 0.0630040322581;duration: ', info[3])
+
+        fixture = {'f1_metric': 0.0635080645161,
+                   'pac_metric': 0.165226664054,
+                   'acc_metric': 0.06,
+                   'auc_metric': 0.0154405176049,
+                   'bac_metric': 0.0630040322581,
+                   'num_run': 1}
+        rval = {i.split(':')[0]: float(i.split(':')[1]) for i in info[3].split(';')}
+        for key, value in fixture.items():
+            self.assertAlmostEqual(rval[key], fixture[key])
+        self.assertIn('duration', rval)
+
         self.assertAlmostEqual(info[1], 0.063004032258064502)
         self.assertEqual(info[2], 1)
 

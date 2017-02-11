@@ -372,7 +372,7 @@ class AutoMLSMBO(object):
                     meta_task = self.task
                 metadata_directory = os.path.join(
                     metalearning_directory, 'files',
-                    '%s_%s_%s' % (METRIC_TO_STRING[self.metric],
+                    '%s_%s_%s' % (self.metric.name,
                                   TASK_TYPES_TO_STRING[meta_task],
                                   'sparse' if self.datamanager.info['is_sparse']
                                   else 'dense'))

@@ -92,9 +92,15 @@ class FunctionsTest(unittest.TestCase):
                all_scoring_functions=True, output_y_test=True,
                include=None, exclude=None, disable_file_output=False)
         info = get_last_result(self.queue)
-        self.assertIn(
-            'f1_metric: 0.0511508951407;pac_metric: 0.185257565321;'
-            'acc_metric: 0.06;auc_metric: 0.00917546505782;'
-            'bac_metric: 0.0416666666667;duration: ', info[3])
+        fixture = {'f1_metric': 0.0511508951407,
+                   'pac_metric': 0.185257565321,
+                   'acc_metric': 0.06,
+                   'auc_metric': 0.00917546505782,
+                   'bac_metric': 0.0416666666667,
+                   'num_run': -1}
+        rval = {i.split(':')[0]: float(i.split(':')[1]) for i in info[3].split(';')}
+        for key, value in fixture.items():
+            self.assertAlmostEqual(rval[key], fixture[key])
+        self.assertIn('duration', rval)
         self.assertAlmostEqual(info[1], 0.041666666666666852)
         self.assertEqual(info[2], 1)

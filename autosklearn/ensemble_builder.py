@@ -12,9 +12,10 @@ import warnings
 import numpy as np
 import pynisher
 
-from autosklearn.constants import BINARY_CLASSIFICATION, \
-    MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION, CLASSIFICATION_TASKS, \
-    BAC_METRIC, F1_METRIC
+from autosklearn.constants import STRING_TO_TASK_TYPES, \
+    BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
+    MULTILABEL_CLASSIFICATION, CLASSIFICATION_TASKS, REGRESSION_TASKS
+from autosklearn.metrics.factories import STRING_TO_METRIC
 from autosklearn.evaluation.util import calculate_score
 from autosklearn.util import StopWatch
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
@@ -361,7 +362,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 if self.low_precision:
                     if self.task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
                         ensemble_predictions_valid[ensemble_predictions_valid < 1e-4] = 0.
-                    if self.metric in [BAC_METRIC, F1_METRIC]:
+                    if self.metric.name in ['bac_metric', 'f1_metric']:
                         bin_array = np.zeros(ensemble_predictions_valid.shape, dtype=np.int32)
                         if (self.task_type != MULTICLASS_CLASSIFICATION) or (
                             ensemble_predictions_valid.shape[1] == 1):
@@ -402,7 +403,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 if self.low_precision:
                     if self.task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
                         ensemble_predictions_test[ensemble_predictions_test < 1e-4] = 0.
-                    if self.metric in [BAC_METRIC, F1_METRIC]:
+                    if self.metric.name in ['bac_metric', 'f1_metric']:
                         bin_array = np.zeros(ensemble_predictions_test.shape,
                                              dtype=np.int32)
                         if (self.task_type != MULTICLASS_CLASSIFICATION) or (
