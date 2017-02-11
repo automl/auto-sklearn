@@ -33,32 +33,32 @@ class Test(unittest.TestCase):
     def test_metalearning(self):
         dataset_name_classification = 'digits'
         initial_challengers_classification = {
-            ACC_METRIC: "--initial-challengers \" "
+            'acc_metric': "--initial-challengers \" "
                         "-balancing:strategy 'weighting' "
                         "-classifier:__choice__ 'proj_logit'",
-            AUC_METRIC: "--initial-challengers \" "
+            'auc_metric': "--initial-challengers \" "
                         "-balancing:strategy 'weighting' "
                         "-classifier:__choice__ 'liblinear_svc'",
-            BAC_METRIC: "--initial-challengers \" "
+            'bac_metric': "--initial-challengers \" "
                         "-balancing:strategy 'weighting' "
                         "-classifier:__choice__ 'proj_logit'",
-            F1_METRIC: "--initial-challengers \" "
+            'f1_metric': "--initial-challengers \" "
                        "-balancing:strategy 'weighting' "
                        "-classifier:__choice__ 'proj_logit'",
-            PAC_METRIC: "--initial-challengers \" "
+            'pac_metric': "--initial-challengers \" "
                         "-balancing:strategy 'none' "
                         "-classifier:__choice__ 'random_forest'"
         }
 
         dataset_name_regression = 'diabetes'
         initial_challengers_regression = {
-            A_METRIC: "--initial-challengers \" "
+            'a_metric': "--initial-challengers \" "
                       "-imputation:strategy 'mean' "
                       "-one_hot_encoding:minimum_fraction '0.01' "
                       "-one_hot_encoding:use_minimum_fraction 'True' "
                       "-preprocessor:__choice__ 'no_preprocessing' "
                       "-regressor:__choice__ 'random_forest'",
-            R2_METRIC: "--initial-challengers \" "
+            'r2_metric': "--initial-challengers \" "
                        "-imputation:strategy 'mean' "
                        "-one_hot_encoding:minimum_fraction '0.01' "
                        "-one_hot_encoding:use_minimum_fraction 'True' "
@@ -96,5 +96,7 @@ class Test(unittest.TestCase):
                         configuration_space, dataset_name, metric,
                         task, False, 1, None)
 
+                print(metric)
+                print(initial_configuration_strings_for_smac[0])
                 self.assertTrue(initial_configuration_strings_for_smac[
                                     0].startswith(initial_challengers[metric]))

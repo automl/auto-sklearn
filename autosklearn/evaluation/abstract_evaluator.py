@@ -219,11 +219,8 @@ class AbstractEvaluator(object):
             loss = loss_[self.D.info['metric']]
         else:
             loss_ = {}
-        additional_run_info = ';'.join(['%s: %s' %
-                                (METRIC_TO_STRING[
-                                     metric] if metric in METRIC_TO_STRING else metric,
-                                 value)
-                                for metric, value in loss_.items()])
+        additional_run_info = ';'.join(['%s: %s' % (metric, value) for
+                                        metric, value in loss_.items()])
         additional_run_info += ';' + 'duration: ' + str(self.duration)
         additional_run_info += ';' + 'num_run:' + num_run
 

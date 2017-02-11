@@ -27,6 +27,7 @@ from autosklearn.util import StopWatch, get_logger, setup_logger, \
 from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_numpy_array
+from autosklearn.metrics import get_metric
 
 
 class AutoML(BaseEstimator):
@@ -141,9 +142,6 @@ class AutoML(BaseEstimator):
         self._stopwatch.start_task(self._dataset_name)
 
         self._logger = self._get_logger(dataset_name)
-
-        if isinstance(metric, str):
-            metric = STRING_TO_METRIC[metric]
 
         if feat_type is not None and len(feat_type) != X.shape[1]:
             raise ValueError('Array feat_type does not have same number of '
