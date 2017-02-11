@@ -1,7 +1,8 @@
 import numpy as np
-from smac.tae.execute_ta_run import StatusType
+import sklearn.cross_validation
 
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
+from autosklearn.constants import *
 
 
 __all__ = ['TrainEvaluator', 'eval_holdout', 'eval_iterative_holdout',
@@ -155,14 +156,7 @@ class TrainEvaluator(AbstractEvaluator):
                                  iterative=False):
         model = self._get_model()
 
-        # if self.subsample is not None:
-        #     n_data_subsample = min(self.subsample, len(train_indices))
-        #     indices = np.array(([True] * n_data_subsample) + \
-        #                        ([False] * (len(train_indices) - n_data_subsample)),
-        #                        dtype=np.bool)
-        #     rs = np.random.RandomState(self.seed)
-        #     rs.shuffle(indices)
-        #     train_indices = train_indices[indices]
+        train_indices = self.subsample_indices(train_indices)
 
         self.indices[fold] = ((train_indices, test_indices))
 
@@ -223,6 +217,27 @@ class TrainEvaluator(AbstractEvaluator):
             self.Y_targets[fold] = self.Y_train[test_indices]
             return self._predict(model=model, train_indices=train_indices,
                                  test_indices=test_indices)
+
+    def subsample_indices(self, train_indices):
+        if self.subsample is not None:
+            # Only subsample if there are more indices given to this method than
+            # required to subsample because otherwise scikit-learn will complain
+
+            if self.task_type in CLASSIFICATION_TASKS and \
+                    self.task_type != MULTILABEL_CLASSIFICATION:
+                stratify = self.Y_train[train_indices]
+            else:
+                stratify = None
+
+            if len(train_indices) > self.subsample:
+                cv_indices_train, _ = sklearn.cross_validation.train_test_split(
+                    train_indices, stratify=stratify,
+                    train_size=self.subsample, random_state=1)
+                train_indices = train_indices[cv_indices_train]
+                return train_indices
+
+        return train_indices
+
 
     def _predict(self, model, test_indices, train_indices):
         opt_pred = self.predict_function(self.X_train[test_indices],

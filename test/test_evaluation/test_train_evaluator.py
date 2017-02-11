@@ -438,6 +438,77 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
     @unittest.mock.patch('autosklearn.util.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_subsample_indices_classification(self, mock, backend_mock):
+        D = get_binary_classification_datamanager()
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        queue_ = multiprocessing.Queue()
+        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
+        evaluator = TrainEvaluator(D, backend_mock, queue_,
+                                   configuration=configuration,
+                                   cv=kfold, subsample=10)
+        train_indices = np.arange(69, dtype=int)
+        train_indices1 = evaluator.subsample_indices(train_indices)
+        evaluator.subsample = 20
+        train_indices2 = evaluator.subsample_indices(train_indices)
+        evaluator.subsample = 30
+        train_indices3 = evaluator.subsample_indices(train_indices)
+        evaluator.subsample = 67
+        train_indices4 = evaluator.subsample_indices(train_indices)
+        # Common cases
+        for ti in train_indices1:
+            self.assertIn(ti, train_indices2)
+        for ti in train_indices2:
+            self.assertIn(ti, train_indices3)
+        for ti in train_indices3:
+            self.assertIn(ti, train_indices4)
+
+        # Corner cases
+        evaluator.subsample = 0
+        self.assertRaisesRegex(ValueError, 'The train_size = 0 should be '
+                                           'greater or equal to the number '
+                                           'of classes = 2',
+                               evaluator.subsample_indices, train_indices)
+        # With equal or greater it should return a non-shuffled array of indices
+        evaluator.subsample = 69
+        train_indices5 = evaluator.subsample_indices(train_indices)
+        self.assertTrue(np.all(train_indices5 == train_indices))
+        evaluator.subsample = 68
+        self.assertRaisesRegex(ValueError, 'The test_size = 1 should be greater'
+                                           ' or equal to the number of '
+                                           'classes = 2',
+                               evaluator.subsample_indices, train_indices)
+
+    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_subsample_indices_regression(self, mock, backend_mock):
+        D = get_regression_datamanager()
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        queue_ = multiprocessing.Queue()
+        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
+        evaluator = TrainEvaluator(D, backend_mock, queue_,
+                                   configuration=configuration,
+                                   cv=kfold, subsample=30)
+        train_indices = np.arange(69, dtype=int)
+        train_indices3 = evaluator.subsample_indices(train_indices)
+        evaluator.subsample = 67
+        train_indices4 = evaluator.subsample_indices(train_indices)
+        # Common cases
+        for ti in train_indices3:
+            self.assertIn(ti, train_indices4)
+
+        # Corner cases
+        evaluator.subsample = 0
+        train_indices5 = evaluator.subsample_indices(train_indices)
+        np.testing.assert_allclose(train_indices5, np.array([]))
+        # With equal or greater it should return a non-shuffled array of indices
+        evaluator.subsample = 69
+        train_indices6 = evaluator.subsample_indices(train_indices)
+        np.testing.assert_allclose(train_indices6, train_indices)
+
+    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_predict_proba_binary_classification(self, mock, backend_mock):
         D = get_binary_classification_datamanager()
         mock.predict_proba.side_effect = lambda y, batch_size: np.array([[0.1, 0.9]] * 7)

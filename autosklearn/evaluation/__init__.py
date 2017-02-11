@@ -74,7 +74,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
     def start(self, config, instance,
               cutoff=None,
               seed=12345,
-              instance_specific="0"):
+              instance_specific=None):
         # Overwrite the start function here. This allows us to abort target
         # algorithm runs if the time us over without having the start method
         # of the parent class adding the run to the runhistory
@@ -96,10 +96,19 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
     def run(self, config, instance=None,
             cutoff=None,
             seed=12345,
-            instance_specific="0"):
+            instance_specific=None):
 
         D = self.backend.load_datamanager()
         queue = multiprocessing.Queue()
+
+        if instance_specific is None or instance_specific == '0':
+            instance_specific = {}
+        else:
+            print(instance_specific)
+            instance_specific = [specific.split('=') for specific in instance_specific.split(',')]
+            instance_specific = {specific[0]: specific[1] for specific in instance_specific}
+        subsample = instance_specific.get('subsample')
+        subsample = int(subsample) if subsample is not None else None
 
         arguments = dict(logger=logging.getLogger("pynisher"),
                          wall_time_in_s=cutoff,
@@ -114,7 +123,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                           with_predictions=self.with_predictions,
                           all_scoring_functions=self.all_scoring_functions,
                           output_y_test=self.output_y_test,
-                          subsample=None,
+                          subsample=subsample,
                           include=self.include,
                           exclude=self.exclude,
                           disable_file_output=self.disable_file_output)
