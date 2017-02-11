@@ -114,6 +114,7 @@ class AutoMLTest(Base, unittest.TestCase):
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         backend_api = backend.create(output, output)
         automl = autosklearn.automl.AutoML(backend_api, 30, 5,
+                                           initial_configurations_via_metalearning=0,
                                            configuration_mode='ROAR')
         automl.fit(X_train, Y_train)
         # print(automl.show_models(), flush=True)
@@ -121,9 +122,6 @@ class AutoMLTest(Base, unittest.TestCase):
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
-        for entry in automl.trajectory_:
-            print(entry[2].origin)
-        exit(1)
 
         del automl
         self._tearDown(output)
