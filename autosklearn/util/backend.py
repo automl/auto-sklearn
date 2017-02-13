@@ -256,15 +256,25 @@ class Backend(object):
 
     def save_model(self, model, idx, seed):
         # This should fail if no models directory exists
-        filepath = os.path.join(self.get_model_dir(),
-                                '%s.%s.model.gz' % (seed, idx))
+        try:
+            filepath = os.path.join(self.get_model_dir(),
+                                    '%s.%s.model.gz' % (seed, idx))
 
-        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
-                filepath), delete=False) as fh:
-            zipfile = gzip.GzipFile(fileobj=fh)
-            pickle.dump(model, zipfile, -1)
-            zipfile.close()
+            with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                    filepath), delete=False) as fh:
+                zipfile = gzip.GzipFile(fileobj=fh)
+                pickle.dump(model, zipfile, -1)
+                zipfile.close()
             tempname = fh.name
+        except RecursionError:
+            filepath = os.path.join(self.get_model_dir(),
+                                    '%s.%s.model' % (seed, idx))
+
+            with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                    filepath), delete=False) as fh:
+                pickle.dump(model, fh, -1)
+                tempname = fh.name
+
         os.rename(tempname, filepath)
 
     def load_all_models(self, seed):
@@ -273,6 +283,8 @@ class Backend(object):
         if seed >= 0:
             model_files = glob.glob(os.path.join(model_directory,
                                                  '%s.*.model.gz' % seed))
+            model_files.extend(glob.glob(os.path.join(model_directory,
+                                                      '%s.*.model' % seed)))
         else:
             model_files = os.listdir(model_directory)
             model_files = [os.path.join(model_directory, mf) for mf in model_files]
@@ -288,7 +300,8 @@ class Backend(object):
             # File names are like: {seed}.{index}.model
             if model_file.endswith('/'):
                 model_file = model_file[:-1]
-            if not model_file.endswith('.model.gz'):
+            if not model_file.endswith('.model.gz') and \
+                    not model_file.endswith('.model'):
                 continue
 
             basename = os.path.basename(model_file)
@@ -312,11 +325,15 @@ class Backend(object):
 
     def load_model_by_seed_and_id(self, seed, idx):
         model_directory = self.get_model_dir()
+
         model_file_name = '%s.%s.model.gz' % (seed, idx)
         model_file_path = os.path.join(model_directory, model_file_name)
-
-        with gzip.open(model_file_path, 'rb') as fh:
-            return (pickle.load(fh))
+        if os.path.exists(model_file_path):
+            with gzip.open(model_file_path, 'rb') as fh:
+                return pickle.load(fh)
+        else:
+            with open(model_file_path[:-3], 'rb') as fh:
+                return pickle.load(fh)
 
     def get_ensemble_dir(self):
         return os.path.join(self.internals_directory, 'ensembles')
