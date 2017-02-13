@@ -61,7 +61,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'AutoSklearn'
-copyright = u'2014-2016, Matthias Feurer, Aaron Klein, Katharina ' \
+copyright = u'2014-2017, Matthias Feurer, Aaron Klein, Katharina ' \
             u'Eggensperger, Jost Tobias Springenberg, Manuel Blum, Frank Hutter'
 
 # The version info for the project you're documenting, acts as replacement for
