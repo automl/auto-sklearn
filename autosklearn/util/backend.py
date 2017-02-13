@@ -247,7 +247,7 @@ class Backend(object):
     def load_datamanager(self):
         filepath = self._get_datamanager_pickle_filename()
         lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path, timeout=60):
+        with lockfile.LockFile(lock_path):
             with gzip.open(filepath, 'rb') as fh:
                 return pickle.load(fh)
 
