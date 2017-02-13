@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import sys
 import unittest
 import unittest.mock
 
@@ -49,7 +50,7 @@ class BackendModelsTest(unittest.TestCase):
     def test_load_model_by_seed_and_id(self, exists_mock, pickleLoadMock):
         exists_mock.return_value = False
         open_mock = unittest.mock.mock_open(read_data='Data')
-        with unittest.mock.patch('autosklearn.util.backend.open', open_mock) as m:
+        with unittest.mock.patch('autosklearn.util.backend.open', open_mock, create=True):
             seed = 13
             idx = 17
             expected_model = self._setup_load_model_mocks(open_mock,
@@ -100,7 +101,10 @@ class BackendModelsTest(unittest.TestCase):
             def side_effect(self, *args):
                 self.num_calls += 1
                 if self.num_calls == 1:
-                    raise RecursionError
+                    if sys.version_info >= (3, 5):
+                        raise RecursionError
+                    else:
+                        raise RuntimeError
 
         dump_mock.side_effect = SideEffect().side_effect
         model = sklearn.tree.DecisionTreeClassifier()

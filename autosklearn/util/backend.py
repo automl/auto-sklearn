@@ -266,7 +266,10 @@ class Backend(object):
                 pickle.dump(model, zipfile, -1)
                 zipfile.close()
             tempname = fh.name
-        except RecursionError:
+        # Actually I would like to catch a RecursionError here, but it turns out
+        # that it was added in python3.5 and cannot be used in python3.4. But
+        # since it is a subclass of RuntimeError this works fine as well
+        except RuntimeError:
             filepath = os.path.join(self.get_model_dir(),
                                     '%s.%s.model' % (seed, idx))
 
