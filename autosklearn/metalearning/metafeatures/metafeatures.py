@@ -616,7 +616,7 @@ class LandmarkLDA(MetaFeature):
         accuracy = 0.
         try:
             for train, test in kf:
-                lda = sklearn.lda.LDA()
+                lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
 
                 if len(y.shape) == 1 or y.shape[1] == 1:
                     lda.fit(X[train], y[train])
@@ -961,12 +961,7 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name,
                 center = not scipy.sparse.isspmatrix(X_transformed)
                 standard_scaler = StandardScaler(copy=False, with_mean=center)
                 X_transformed = standard_scaler.fit_transform(X_transformed)
-
-                # Some stats on how the array got transformed
-                number_numerical = np.sum(~np.array(categorical))
-                categorical_transformed = [True] * (X_transformed.shape[1] -
-                                                    number_numerical) + \
-                                          [False] * number_numerical
+                categorical_transformed = [False] * X_transformed.shape[1]
 
                 # Densify the transformed matrix
                 if not sparse and scipy.sparse.issparse(X_transformed):

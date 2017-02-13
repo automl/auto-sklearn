@@ -1,12 +1,15 @@
 from argparse import ArgumentParser
 from collections import defaultdict, OrderedDict
+import copy
 import os
 import sys
+import time
 
 import arff
 import joblib
 import numpy as np
 import pandas as pd
+import pynisher
 import scipy.sparse
 
 from autosklearn.data.generic_one_hot_encoding import perform_one_hot_encoding
@@ -18,6 +21,7 @@ from update_metadata_util import load_task, classification_tasks, \
 
 
 def calculate_metafeatures(task_id):
+    print(task_id)
     X_train, y_train, X_test, y_test, cat = load_task(task_id)
     categorical = [True if 'categorical' == c else False for c in cat]
 
@@ -27,22 +31,31 @@ def calculate_metafeatures(task_id):
     X_train, sparse = perform_one_hot_encoding(scipy.sparse.issparse(X_train),
                                                categorical, [X_train])
     X_train = X_train[0]
+    categorical = [False] * X_train.shape[1]
 
-    try:
-        _metafeatures_encoded_labels = metafeatures.calculate_all_metafeatures_encoded_labels(
-            X_train, y_train, categorical, task_id)
-    except MemoryError as e:
+    start_time = time.time()
+    obj = pynisher.enforce_limits(mem_in_mb=3072)(
+        metafeatures.calculate_all_metafeatures_encoded_labels)
+    _metafeatures_encoded_labels = obj(X_train, y_train,
+                                       categorical, task_id)
+    end_time = time.time()
+
+    if obj.exit_status == pynisher.MemorylimitException:
         # During the conversion of the dataset (rescaling, etc...), it can
         # happen that we run out of memory.
         _metafeatures_encoded_labels = \
-            metafeatures.metafeature.DatasetMetafeatures(task_id, dict())
-        for metafeature_name in metafeatures.metafeatures.npy_metafeatures:
+            metafeature.DatasetMetafeatures(task_id, dict())
+
+        metafeature_calculation_time = (end_time - start_time) / \
+                                       len(metafeatures.npy_metafeatures)
+
+        for metafeature_name in metafeatures.npy_metafeatures:
             type_ = "HELPERFUNCTION" if metafeature_name not in \
-                                        metafeatures.metafeatures.metafeatures.functions \
+                                        metafeatures.metafeatures.functions \
                 else "METAFEATURE"
             _metafeatures_encoded_labels.metafeature_values[metafeature_name] = \
                 metafeature.MetaFeatureValue(metafeature_name, type_, 0, 0,
-                                             np.NaN, np.NaN,
+                                             np.NaN, metafeature_calculation_time,
                                              "Memory error during dataset scaling.")
 
     mf = _metafeatures_labels
@@ -86,12 +99,18 @@ if __name__ == "__main__":
     if test_mode:
         tasks = [tasks[0]]
 
+    tasks = copy.deepcopy(tasks)
+    np.random.shuffle(tasks)
+
     def producer():
         for task_id in tasks:
             yield task_id
 
+    memory = joblib.Memory(cachedir='/tmp/joblib', verbose=10)
+    cached_calculate_metafeatures = memory.cache(calculate_metafeatures)
     mfs = joblib.Parallel(n_jobs=args.n_jobs) \
-        (joblib.delayed(calculate_metafeatures)(task_id) for task_id in producer())
+        (joblib.delayed(cached_calculate_metafeatures)(task_id)
+         for task_id in producer())
 
     for mf in mfs:
         if mf is not None:
@@ -103,15 +122,10 @@ if __name__ == "__main__":
     metafeature_values = defaultdict(dict)
     helperfunction_values = defaultdict(dict)
 
-    print(all_metafeatures)
-
     for i, task_id in enumerate(all_metafeatures):
-        print(task_id)
         calculation_times[task_id] = dict()
-        print(all_metafeatures[task_id].metafeature_values)
         for metafeature_name in sorted(
                 all_metafeatures[task_id].metafeature_values):
-            print(metafeature_name)
             metafeature_value = all_metafeatures[task_id].metafeature_values[
                 metafeature_name]
             calculation_times[task_id][metafeature_name] = \
@@ -180,9 +194,11 @@ if __name__ == "__main__":
             if feature_step in helperfunction_values[idx]:
                 line.append('ok' if helperfunction_values[feature_step] is not \
                                     None else 'other')
-            else:
+            elif feature_step in metafeature_values.loc[idx]:
                 line.append('ok' if np.isfinite(metafeature_values.loc[idx][
                                                     feature_step]) else 'other')
+            else:
+                line.append('other')
 
         data.append(line)
     arff_object['data'] = data
@@ -208,8 +224,8 @@ if __name__ == "__main__":
             for feature in feature_steps[feature_step]:
                 time_ += calculation_times[feature][instance_id]
             if not np.isfinite(time_):
-                raise ValueError("Feature cost for instance %s and feature "
-                                 "step %s not finite" % (instance_id, feature))
+                raise ValueError("Feature cost %s for instance %s and feature "
+                                 "step %s not finite" % (time_, instance_id, feature))
             line.append(time_)
         data.append(line)
     arff_object['data'] = data
