@@ -1,5 +1,8 @@
+import shutil
 import sys
 import os
+import time
+import unittest
 
 from autosklearn.util.backend import create
 from autosklearn.metrics import get_metric, get_metric_from_loss
@@ -11,7 +14,6 @@ from autosklearn.constants import MULTICLASS_CLASSIFICATION
 
 parent_directory = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(parent_directory)
-from test_automl.base import Base
 
 
 def metric_function(true, prediction):
@@ -28,7 +30,35 @@ class DataManagerStub(object):
         self.info = { 'metric': metric }
 
 
-class MetricDefinitionsTest(Base):
+class MetricDefinitionsTest(unittest.TestCase):
+    _multiprocess_can_split_ = True
+    """All tests which are a subclass of this must define their own output
+    directory and call self._setUp."""
+
+    def setUp(self):
+        self.test_dir = os.path.dirname(__file__)
+
+    def _setUp(self, output):
+        if os.path.exists(output):
+            for i in range(10):
+                try:
+                    shutil.rmtree(output)
+                    break
+                except OSError:
+                    time.sleep(1)
+        try:
+            os.makedirs(output)
+        except OSError:
+            pass
+
+    def _tearDown(self, output):
+        if os.path.exists(output):
+            for i in range(10):
+                try:
+                    shutil.rmtree(output)
+                    break
+                except OSError:
+                    time.sleep(1)
 
     def test_known_metric(self):
         metric = get_metric('acc', task_type=MULTICLASS_CLASSIFICATION)
