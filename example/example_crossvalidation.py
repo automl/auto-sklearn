@@ -18,7 +18,7 @@ def main():
         tmp_folder='/tmp/autoslearn_cv_example_tmp',
         output_folder='/tmp/autosklearn_cv_example_out',
         delete_tmp_folder_after_terminate=False,
-        resampling_strategy='partial-cv-iterative-fit', ensemble_size=0,
+        resampling_strategy='cv',
         resampling_strategy_arguments={'folds': 5})
 
     # fit() changes the data in place, but refit needs the original data. We

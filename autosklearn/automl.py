@@ -20,13 +20,14 @@ from sklearn.grid_search import _CVScoreTuple
 from autosklearn.constants import *
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.evaluation import resampling, ExecuteTaFuncWithQueue
+from autosklearn.evaluation import ExecuteTaFuncWithQueue
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline
 from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_numpy_array
+from autosklearn.metrics import get_metric
 
 
 class AutoML(BaseEstimator):
@@ -143,9 +144,6 @@ class AutoML(BaseEstimator):
         self._stopwatch.start_task(self._dataset_name)
 
         self._logger = self._get_logger(dataset_name)
-
-        if isinstance(metric, str):
-            metric = STRING_TO_METRIC[metric]
 
         if feat_type is not None and len(feat_type) != X.shape[1]:
             raise ValueError('Array feat_type does not have same number of '
@@ -289,10 +287,6 @@ class AutoML(BaseEstimator):
 
         # == Pickle the data manager to speed up loading
         data_manager_path = self._backend.save_datamanager(datamanager)
-
-        self._save_ensemble_data(
-            datamanager.data['X_train'],
-            datamanager.data['Y_train'])
 
         time_for_load_data = self._stopwatch.wall_elapsed(self._dataset_name)
 
@@ -730,20 +724,6 @@ class AutoML(BaseEstimator):
             self._load_models()
 
         return self.ensemble_.pprint_ensemble_string(self.models_)
-
-    def _save_ensemble_data(self, X, y):
-        """Split dataset and store Data for the ensemble script.
-
-        :param X:
-        :param y:
-        :return:
-
-        """
-        task_name = 'LoadData'
-        self._start_task(self._stopwatch, task_name)
-        _, _, _, y_ensemble = resampling.split_data(X, y)
-        self._backend.save_targets_ensemble(y_ensemble)
-        self._stop_task(self._stopwatch, task_name)
 
     def _create_search_space(self, tmp_dir, backend, datamanager,
                              include_estimators=None,

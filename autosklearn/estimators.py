@@ -6,6 +6,7 @@ import warnings
 
 import autosklearn.automl
 from autosklearn.constants import *
+from autosklearn.metrics import get_metric_from_loss
 from autosklearn.util.backend import create
 from sklearn.base import BaseEstimator
 import sklearn.utils
@@ -321,6 +322,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
 
     def fit(self, X, y,
             metric='acc_metric',
+            loss=None,
             feat_type=None,
             dataset_name=None):
         """Fit *auto-sklearn* to given training set (X, y).
@@ -334,13 +336,17 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         y : array-like, shape = [n_samples] or [n_samples, n_outputs]
             The target classes.
 
-        metric : str, optional (default='acc_metric')
+        metric : str or callable, optional (default='acc_metric')
             The metric to optimize for. Can be one of: ['acc_metric',
-            'auc_metric', 'bac_metric', 'f1_metric', 'pac_metric']. A
-            description of the metrics can be found in `the paper describing
-            the AutoML Challenge
+            'auc_metric', 'bac_metric', 'f1_metric', 'pac_metric'], a package
+            name i.e. 'sklearn.metrics.accuracy_score' or a callable object
+            with a signature 'foo(true, prediction)'. A description of the
+            metrics can be found in `the paper describing the AutoML Challenge
             <http://www.causality.inf.ethz.ch/AutoML/automl_ijcnn15.pdf>`_.
-
+        loss : a package name or a callable, optional (default=None)
+            If specified, defines the objective ignoring the metric argument.
+            While the metric argument specifies a maximization objective,
+            the loss argument specifies a minimization one.
         feat_type : list, optional (default=None)
             List of str of `len(X.shape[1])` describing the attribute type.
             Possible types are `Categorical` and `Numerical`. `Categorical`
@@ -355,7 +361,9 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         self
 
         """
-        return super(AutoSklearnClassifier, self).fit(X, y, metric, feat_type, dataset_name)
+        return super(AutoSklearnClassifier, self).fit(X=X, y=y, metric=metric,
+                                                      loss=loss, feat_type=feat_type,
+                                                      dataset_name=dataset_name)
 
     def predict(self, X):
         """Predict classes for X.
@@ -463,6 +471,7 @@ class AutoMLClassifier(AutoMLDecorator):
 
     def fit(self, X, y,
             metric='acc_metric',
+            loss=None,
             feat_type=None,
             dataset_name=None,
             ):
@@ -481,6 +490,11 @@ class AutoMLClassifier(AutoMLDecorator):
                 task = BINARY_CLASSIFICATION
             else:
                 task = MULTICLASS_CLASSIFICATION
+
+        if loss:
+            metric = get_metric_from_loss(loss)
+        elif not metric:
+            raise Exception('No metric or loss function provided.')
 
         return self._automl.fit(X, y, task, metric, feat_type, dataset_name)
 
@@ -553,7 +567,10 @@ class AutoMLRegressor(AutoMLDecorator):
 
     def fit(self, X, y,
             metric='r2_metric',
+            loss=None,
             feat_type=None,
             dataset_name=None,
             ):
-        return self._automl.fit(X, y, REGRESSION, metric, feat_type, dataset_name)
+        return self._automl.fit(X=X, y=y, task=REGRESSION, metric=metric,
+                                loss=loss, feat_type=feat_type,
+                                dataset_name=dataset_name)

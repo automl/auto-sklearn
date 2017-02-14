@@ -96,6 +96,8 @@ for entry in trajectory:
         logger = logging.getLogger('Testing:)')
         stats = Stats(Scenario({'cutoff_time': per_run_time_limit * 2}))
         stats.start_timing()
+        # To avoid the output "first run crashed"...
+        stats.ta_runs += 1
         ta = ExecuteTaFuncWithQueue(backend=automl._automl._automl._backend,
                                     autosklearn_seed=seed,
                                     resampling_strategy='test',

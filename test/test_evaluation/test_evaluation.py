@@ -172,3 +172,20 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[0], StatusType.SUCCESS)
         self.assertEqual(info[1], 0.5)
         self.assertIsInstance(info[2], float)
+
+    @unittest.mock.patch('autosklearn.evaluation.eval_holdout')
+    def test_eval_with_limits_holdout(self, eval_houldout_mock):
+        def side_effect(*args, **kwargs):
+            queue = kwargs['queue']
+            queue.put((StatusType.SUCCESS, 0.5, 0.12345, kwargs['subsample']))
+        eval_houldout_mock.side_effect = side_effect
+        ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
+                                    resampling_strategy='holdout',
+                                    logger=self.logger,
+                                    stats=self.stats,
+                                    memory_limit=3072)
+        self.scenario.wallclock_limit = 180
+        info = ta.start(None, cutoff=30, instance=None,
+                        instance_specific='subsample=30')
+        self.assertEqual(info[0], StatusType.SUCCESS)
+        self.assertEqual(info[-1], 30)

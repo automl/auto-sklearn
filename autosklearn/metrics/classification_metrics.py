@@ -9,20 +9,9 @@ import numpy as np
 import scipy as sp
 import scipy.stats
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
-    BINARY_CLASSIFICATION, METRIC_TO_STRING, MULTILABEL_CLASSIFICATION
+    BINARY_CLASSIFICATION, MULTILABEL_CLASSIFICATION
 from autosklearn.metrics.util import log_loss, prior_log_loss, \
     binarize_predictions, normalize_array, create_multiclass_solution
-
-
-def calculate_score(metric, solution, prediction, task):
-    if solution.shape[0] != prediction.shape[0]:
-        raise ValueError('Solution and prediction have different number of '
-                         'samples: %d and %d' % (solution.shape[0],
-                                                 prediction.shape[0]))
-
-    metric = METRIC_TO_STRING[metric]
-    return globals()[metric](solution, prediction, task)
-
 
 
 def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
