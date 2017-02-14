@@ -1,8 +1,8 @@
-from HPOlibConfigSpace.configuration_space import ConfigurationSpace
-from HPOlibConfigSpace.hyperparameters import UniformFloatHyperparameter, \
+from ConfigSpace.configuration_space import ConfigurationSpace
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, UnParametrizedHyperparameter, \
     UniformIntegerHyperparameter
-from HPOlibConfigSpace.conditions import InCondition, EqualsCondition
+from ConfigSpace.conditions import InCondition, EqualsCondition
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
@@ -77,7 +77,6 @@ class SGD(AutoSklearnRegressionAlgorithm):
 
         self.estimator.n_iter = n_iter
         self._iterations += n_iter
-        print(n_iter)
         self.estimator.partial_fit(X, Y_scaled)
         return self
 

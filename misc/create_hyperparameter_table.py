@@ -4,7 +4,7 @@ import os
 import shlex
 import subprocess
 
-import HPOlibConfigSpace.hyperparameters
+import ConfigSpace.hyperparameters
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
 
@@ -108,15 +108,15 @@ def get_dict(task_type="classifier", **kwargs):
             est = h.name.split(":")[1]
             if est not in d:
                 continue
-            if isinstance(h, HPOlibConfigSpace.hyperparameters.UniformIntegerHyperparameter):
+            if isinstance(h, ConfigSpace.hyperparameters.UniformIntegerHyperparameter):
                 d[est][CONT] += 1
-            elif isinstance(h, HPOlibConfigSpace.hyperparameters.UniformFloatHyperparameter):
+            elif isinstance(h, ConfigSpace.hyperparameters.UniformFloatHyperparameter):
                 d[est][CONT] += 1
-            elif isinstance(h, HPOlibConfigSpace.hyperparameters.CategoricalHyperparameter):
+            elif isinstance(h, ConfigSpace.hyperparameters.CategoricalHyperparameter):
                 d[est][CAT] += 1
-            elif isinstance(h, HPOlibConfigSpace.hyperparameters.Constant):
+            elif isinstance(h, ConfigSpace.hyperparameters.Constant):
                 d[est][CONST] += 1
-            elif isinstance(h, HPOlibConfigSpace.hyperparameters.UnParametrizedHyperparameter):
+            elif isinstance(h, ConfigSpace.hyperparameters.UnParametrizedHyperparameter):
                 d[est][UN] += 1
             else:
                 raise ValueError("Don't know that type: %s" % type(h))
@@ -139,15 +139,15 @@ def get_dict(task_type="classifier", **kwargs):
             #print vars(h)
             #print h.parent
             #print type(h)
-            if isinstance(h.child, HPOlibConfigSpace.hyperparameters.UniformIntegerHyperparameter):
+            if isinstance(h.child, ConfigSpace.hyperparameters.UniformIntegerHyperparameter):
                 d[est][COND][CONT] += 1
-            elif isinstance(h.child, HPOlibConfigSpace.hyperparameters.UniformFloatHyperparameter):
+            elif isinstance(h.child, ConfigSpace.hyperparameters.UniformFloatHyperparameter):
                 d[est][COND][CONT] += 1
-            elif isinstance(h.child, HPOlibConfigSpace.hyperparameters.CategoricalHyperparameter):
+            elif isinstance(h.child, ConfigSpace.hyperparameters.CategoricalHyperparameter):
                 d[est][COND][CAT] += 1
-            elif isinstance(h.child, HPOlibConfigSpace.hyperparameters.Constant):
+            elif isinstance(h.child, ConfigSpace.hyperparameters.Constant):
                 d[est][COND][CONST] += 1
-            elif isinstance(h.child, HPOlibConfigSpace.hyperparameters.UnParametrizedHyperparameter):
+            elif isinstance(h.child, ConfigSpace.hyperparameters.UnParametrizedHyperparameter):
                 d[est][COND][UN] += 1
             else:
                 raise ValueError("Don't know that type: %s" % type(h))

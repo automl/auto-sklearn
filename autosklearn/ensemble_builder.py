@@ -7,19 +7,22 @@ import os
 import re
 import sys
 import time
-from collections import Counter
 
 import numpy as np
 
-from autosklearn.constants import STRING_TO_TASK_TYPES, STRING_TO_METRIC
+from autosklearn.constants import STRING_TO_TASK_TYPES, STRING_TO_METRIC, \
+    BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
+    MULTILABEL_CLASSIFICATION, CLASSIFICATION_TASKS, REGRESSION_TASKS, \
+    BAC_METRIC, F1_METRIC
 from autosklearn.evaluation.util import calculate_score
 from autosklearn.util import StopWatch, Backend
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 
 
+# TODO make this a class and make the logger know the dataset name!
 logging.basicConfig(format='[%(levelname)s] [%(asctime)s:%(name)s] %('
                            'message)s', datefmt='%H:%M:%S')
-logger = logging.getLogger("ensemble_selection_script.py")
+logger = logging.getLogger("ensemble_builder")
 logger.setLevel(logging.DEBUG)
 
 
@@ -77,7 +80,8 @@ def main(autosklearn_tmp_dir,
          seed=1,
          shared_mode=False,
          max_iterations=-1,
-         precision="32"):
+         precision="32",
+         low_precision=True):
 
     watch = StopWatch()
     watch.start_task('ensemble_builder')
@@ -87,6 +91,8 @@ def main(autosklearn_tmp_dir,
     index_run = 0
     num_iteration = 0
     current_num_models = 0
+    last_hash = None
+    current_hash = None
 
     backend = Backend(output_dir, autosklearn_tmp_dir)
     dir_ensemble = os.path.join(autosklearn_tmp_dir, '.auto-sklearn',
@@ -102,7 +108,7 @@ def main(autosklearn_tmp_dir,
     while used_time < limit or (max_iterations > 0 and max_iterations >= num_iteration):
         num_iteration += 1
         logger.debug('Time left: %f', limit - used_time)
-        logger.debug('Time last iteration: %f', time_iter)
+        logger.debug('Time last ensemble building: %f', time_iter)
 
         # Reload the ensemble targets every iteration, important, because cv may
         # update the ensemble targets in the cause of running auto-sklearn
@@ -162,7 +168,8 @@ def main(autosklearn_tmp_dir,
             used_time = watch.wall_elapsed('ensemble_builder')
             continue
 
-        watch.start_task('ensemble_iter_' + str(index_run))
+        watch.start_task('index_run' + str(index_run))
+        watch.start_task('ensemble_iter_' + str(num_iteration))
 
         # List of num_runs (which are in the filename) which will be included
         #  later
@@ -310,13 +317,42 @@ def main(autosklearn_tmp_dir,
                 time.sleep(2)
                 continue
             except Exception as e:
-                logger.error('Caught error! %s', e.message)
+                logger.error('Caught error! %s', str(e))
                 used_time = watch.wall_elapsed('ensemble_builder')
                 time.sleep(2)
                 continue
 
             # Output the score
             logger.info('Training performance: %f' % ensemble.train_score_)
+
+            logger.info('Building the ensemble took %f seconds' %
+                        watch.wall_elapsed('ensemble_iter_' + str(num_iteration)))
+
+        # Set this variable here to avoid re-running the ensemble builder
+        # every two seconds in case the ensemble did not change
+        current_num_models = len(dir_ensemble_list)
+
+        ensemble_predictions = ensemble.predict(all_predictions_train)
+        if sys.version_info[0] == 2:
+            ensemble_predictions.flags.writeable = False
+            current_hash = hash(ensemble_predictions.data)
+        else:
+            current_hash = hash(ensemble_predictions.data.tobytes())
+
+        # Only output a new ensemble and new predictions if the output of the
+        # ensemble would actually change!
+        # TODO this is neither safe (collisions, tests only with the ensemble
+        #  prediction, but not the ensemble), implement a hash function for
+        # each possible ensemble builder.
+        if last_hash is not None:
+            if current_hash == last_hash:
+                logger.info('Ensemble output did not change.')
+                time.sleep(2)
+                continue
+            else:
+                last_hash = current_hash
+        else:
+            last_hash = current_hash
 
         # Save the ensemble for later use in the main auto-sklearn module!
         backend.save_ensemble(ensemble, index_run, seed)
@@ -325,8 +361,37 @@ def main(autosklearn_tmp_dir,
         if len(dir_valid_list) == len(dir_ensemble_list):
             all_predictions_valid = np.array(all_predictions_valid)
             ensemble_predictions_valid = ensemble.predict(all_predictions_valid)
+            if task_type == BINARY_CLASSIFICATION:
+                ensemble_predictions_valid = ensemble_predictions_valid[:, 1]
+            if low_precision:
+                if task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
+                    ensemble_predictions_valid[ensemble_predictions_valid < 1e-4] = 0.
+                if metric in [BAC_METRIC, F1_METRIC]:
+                    bin_array = np.zeros(ensemble_predictions_valid.shape, dtype=np.int32)
+                    if (task_type != MULTICLASS_CLASSIFICATION) or (
+                        ensemble_predictions_valid.shape[1] == 1):
+                        bin_array[ensemble_predictions_valid >= 0.5] = 1
+                    else:
+                        sample_num = ensemble_predictions_valid.shape[0]
+                        for i in range(sample_num):
+                            j = np.argmax(ensemble_predictions_valid[i, :])
+                            bin_array[i, j] = 1
+                    ensemble_predictions_valid = bin_array
+                if task_type in CLASSIFICATION_TASKS:
+                    if ensemble_predictions_valid.size < (20000 * 20):
+                        precision = 3
+                    else:
+                        precision = 2
+                else:
+                    if ensemble_predictions_valid.size > 1000000:
+                        precision = 4
+                    else:
+                        # File size maximally 2.1MB
+                        precision = 6
+
             backend.save_predictions_as_txt(ensemble_predictions_valid,
-                                            'valid', index_run, prefix=dataset_name)
+                                            'valid', index_run, prefix=dataset_name,
+                                            precision=precision)
         else:
             logger.info('Could not find as many validation set predictions (%d)'
                          'as ensemble predictions (%d)!.',
@@ -337,8 +402,37 @@ def main(autosklearn_tmp_dir,
         if len(dir_test_list) == len(dir_ensemble_list):
             all_predictions_test = np.array(all_predictions_test)
             ensemble_predictions_test = ensemble.predict(all_predictions_test)
+            if task_type == BINARY_CLASSIFICATION:
+                ensemble_predictions_test = ensemble_predictions_test[:, 1]
+            if low_precision:
+                if task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
+                    ensemble_predictions_test[ensemble_predictions_test < 1e-4] = 0.
+                if metric in [BAC_METRIC, F1_METRIC]:
+                    bin_array = np.zeros(ensemble_predictions_test.shape,
+                                         dtype=np.int32)
+                    if (task_type != MULTICLASS_CLASSIFICATION) or (
+                                ensemble_predictions_test.shape[1] == 1):
+                        bin_array[ensemble_predictions_test >= 0.5] = 1
+                    else:
+                        sample_num = ensemble_predictions_test.shape[0]
+                        for i in range(sample_num):
+                            j = np.argmax(ensemble_predictions_test[i, :])
+                            bin_array[i, j] = 1
+                    ensemble_predictions_test = bin_array
+                if task_type in CLASSIFICATION_TASKS:
+                    if ensemble_predictions_test.size < (20000 * 20):
+                        precision = 3
+                    else:
+                        precision = 2
+                else:
+                    if ensemble_predictions_test.size > 1000000:
+                        precision = 4
+                    else:
+                        precision = 6
+
             backend.save_predictions_as_txt(ensemble_predictions_test,
-                                            'test', index_run, prefix=dataset_name)
+                                            'test', index_run, prefix=dataset_name,
+                                            precision=precision)
         else:
             logger.info('Could not find as many test set predictions (%d) as '
                          'ensemble predictions (%d)!',
@@ -347,8 +441,8 @@ def main(autosklearn_tmp_dir,
         del all_predictions_test
 
         current_num_models = len(dir_ensemble_list)
-        watch.stop_task('ensemble_iter_' + str(index_run))
-        time_iter = watch.get_wall_dur('ensemble_iter_' + str(index_run))
+        watch.stop_task('index_run' + str(index_run))
+        time_iter = watch.get_wall_dur('index_run' + str(index_run))
         used_time = watch.wall_elapsed('ensemble_builder')
         index_run += 1
     return

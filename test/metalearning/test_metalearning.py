@@ -31,15 +31,14 @@ class Test(unittest.TestCase):
         self.Y_train = self.Y_train[eliminate_class_two]
 
     def test_metalearning(self):
-        dataset_name = 'digits'
-
-        initial_challengers = {
+        dataset_name_classification = 'digits'
+        initial_challengers_classification = {
             ACC_METRIC: "--initial-challengers \" "
                         "-balancing:strategy 'weighting' "
                         "-classifier:__choice__ 'proj_logit'",
             AUC_METRIC: "--initial-challengers \" "
-                        "-balancing:strategy 'none' "
-                        "-classifier:__choice__ 'random_forest'",
+                        "-balancing:strategy 'weighting' "
+                        "-classifier:__choice__ 'liblinear_svc'",
             BAC_METRIC: "--initial-challengers \" "
                         "-balancing:strategy 'weighting' "
                         "-classifier:__choice__ 'proj_logit'",
@@ -51,32 +50,53 @@ class Test(unittest.TestCase):
                         "-classifier:__choice__ 'random_forest'"
         }
 
-        for metric in initial_challengers:
-            configuration_space = get_configuration_space(
-                {
-                    'metric': metric,
-                    'task': MULTICLASS_CLASSIFICATION,
-                    'is_sparse': False
-                },
-                include_preprocessors=['no_preprocessing'])
+        dataset_name_regression = 'diabetes'
+        initial_challengers_regression = {
+            A_METRIC: "--initial-challengers \" "
+                      "-imputation:strategy 'mean' "
+                      "-one_hot_encoding:minimum_fraction '0.01' "
+                      "-one_hot_encoding:use_minimum_fraction 'True' "
+                      "-preprocessor:__choice__ 'no_preprocessing' "
+                      "-regressor:__choice__ 'random_forest'",
+            R2_METRIC: "--initial-challengers \" "
+                       "-imputation:strategy 'mean' "
+                       "-one_hot_encoding:minimum_fraction '0.01' "
+                       "-one_hot_encoding:use_minimum_fraction 'True' "
+                       "-preprocessor:__choice__ 'no_preprocessing' "
+                       "-regressor:__choice__ 'random_forest'",
+        }
 
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset_name)
-            categorical = [False] * X_train.shape[1]
+        for dataset_name, task, initial_challengers in [
+            (dataset_name_regression, REGRESSION,
+             initial_challengers_regression),
+            (dataset_name_classification, MULTICLASS_CLASSIFICATION,
+             initial_challengers_classification)
+            ]:
+            for metric in initial_challengers:
+                configuration_space = get_configuration_space(
+                    {
+                        'metric': metric,
+                        'task': task,
+                        'is_sparse': False
+                    },
+                    include_preprocessors=['no_preprocessing'])
 
-            meta_features_label = calc_meta_features(X_train, Y_train,
-                                                     categorical, dataset_name)
-            meta_features_encoded_label = calc_meta_features_encoded(X_train,
-                                                                     Y_train,
-                                                                     categorical,
-                                                                     dataset_name)
-            initial_configuration_strings_for_smac = \
-                create_metalearning_string_for_smac_call(
-                    meta_features_label,
-                    meta_features_encoded_label,
-                    configuration_space, dataset_name, metric,
-                    MULTICLASS_CLASSIFICATION, False, 1, None)
+                X_train, Y_train, X_test, Y_test = get_dataset(dataset_name)
+                categorical = [False] * X_train.shape[1]
 
-            print(metric)
-            print(initial_configuration_strings_for_smac[0])
-            self.assertTrue(initial_configuration_strings_for_smac[
-                                0].startswith(initial_challengers[metric]))
+                meta_features_label = calc_meta_features(
+                    X_train, Y_train, categorical, dataset_name, task)
+                meta_features_encoded_label = calc_meta_features_encoded(
+                    X_train, Y_train, categorical, dataset_name, task)
+
+                initial_configuration_strings_for_smac = \
+                    create_metalearning_string_for_smac_call(
+                        meta_features_label,
+                        meta_features_encoded_label,
+                        configuration_space, dataset_name, metric,
+                        task, False, 1, None)
+
+                print(METRIC_TO_STRING[metric])
+                print(initial_configuration_strings_for_smac[0])
+                self.assertTrue(initial_configuration_strings_for_smac[
+                                    0].startswith(initial_challengers[metric]))

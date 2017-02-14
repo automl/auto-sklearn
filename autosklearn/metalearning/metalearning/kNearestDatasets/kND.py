@@ -164,7 +164,9 @@ class KNearestDatasets(object):
         # I also need to scale the target dataset meta features...
         mins = pd.DataFrame(data=[mins, other]).min()
         maxs = pd.DataFrame(data=[maxs, other]).max()
-        scaled_metafeatures = (scaled_metafeatures - mins) / (maxs - mins)
-        other = (other -mins) / (maxs - mins)
+        divisor = (maxs-mins)
+        divisor[divisor == 0] = 1
+        scaled_metafeatures = (scaled_metafeatures - mins) / divisor
+        other = (other - mins) / divisor
         return scaled_metafeatures, other
 

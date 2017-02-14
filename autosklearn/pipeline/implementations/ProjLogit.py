@@ -73,7 +73,7 @@ class ProjLogit(object):
         return np.argmax(res, axis = 1)
     
     def predict_proba(self, X):
-        if self.w0 == None:
+        if self.w0 is None:
             raise NotImplementedError
         testx = np.hstack([np.ones((X.shape[0], 1)), X])
         pred = np.dot(testx, self.w0)
@@ -84,7 +84,7 @@ class ProjLogit(object):
         return proj_simplex(pred)
     
     def predict_log_proba(self, X):
-        if self.w == None:
+        if self.w is None:
             return np.zeros(X.shape[0])
         res = np.log(self.predict_proba(X))
         return res

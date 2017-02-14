@@ -13,7 +13,6 @@ class GEM(object):
 
 
     def fit(self, X, Y):
-        print(X.shape, Y.shape)
         self.N = min(self.N, X.shape[1]-2)
         y_max = int(np.max(Y) + 1)
         self.W = np.zeros((X.shape[1], self.N*y_max*(y_max-1)), dtype=X.dtype)
@@ -34,9 +33,10 @@ class GEM(object):
                 C2 = 0.5 * (C + C.T)
                 S,U = eigs(C2, self.N)
                 gev = np.dot(E, U[:, :self.N])
-                self.W[:, off:off+self.N] = gev
+                self.W[:, off:off+self.N] = np.real(gev)
                 off += self.N
-        print("DONE")
+        if self.verbose:
+            print("DONE")
         return self
 
     

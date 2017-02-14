@@ -777,7 +777,7 @@ class CosealReader(object):
                 "Number of unsolvable instances regarding status and runtime is not consistent.")
 
         if not n_valid:
-            logger.error("Have not found valid instances", -10)
+            logger.error("Have not found valid instances")
 
     def check_feature_status(self):
         '''

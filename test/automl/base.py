@@ -7,6 +7,7 @@ import unittest
 
 
 class Base(unittest.TestCase):
+    _multiprocess_can_split_ = True
     """All tests which are a subclass of this must define their own output
     directory and call self._setUp."""
 

@@ -4,7 +4,7 @@ import pandas as pd
 
 from ..input import aslib_simple
 from ..metafeatures.metafeature import DatasetMetafeatures
-from HPOlibConfigSpace.configuration_space import Configuration
+from ConfigSpace.configuration_space import Configuration
 
 
 

@@ -6,8 +6,8 @@ import os
 import arff
 import numpy as np
 
-from HPOlibConfigSpace.configuration_space import Configuration
-from HPOlibConfigSpace.hyperparameters import IntegerHyperparameter, \
+from ConfigSpace.configuration_space import Configuration
+from ConfigSpace.hyperparameters import IntegerHyperparameter, \
     FloatHyperparameter, CategoricalHyperparameter, Constant
 
 from autosklearn.constants import *
@@ -31,6 +31,8 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
 
         if not os.path.exists(ped) or not os.path.isdir(ped):
             continue
+
+        print("Going through directory %s" % ped)
 
         smac_output_dir = ped
         validation_files = []
@@ -75,6 +77,9 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
         for validation_file, validation_configuration_file, validation_run_results_file in \
                 zip(validation_files, validation_configuration_files,
                     validation_run_results_files):
+
+            print("\t%s" % validation_file)
+
             configuration_to_time = dict()
             with open(validation_file) as fh:
                 reader = csv.reader(fh)
@@ -102,9 +107,12 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                             metric_ = metric_.replace(":", "").strip()
                             value = value.strip()
 
-                            if metric_ == metric:
-                                value = float(value)
-                                best.append((value, i + 1))
+                            try:
+                                if int(metric_) == STRING_TO_METRIC[metric]:
+                                    value = float(value)
+                                    best.append((value, i + 1))
+                            except ValueError:
+                                pass
 
             best.sort()
             for test_performance, validation_configuration_id in best:
@@ -132,8 +140,10 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                                     hyperparameter = \
                                         configuration_space.get_hyperparameter(
                                             hp_name)
+                                    del configuration[key]
                                 except KeyError:
                                     break
+
                                 value = value.strip("'")
 
                                 if isinstance(hyperparameter,
@@ -157,7 +167,10 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                                 elif hyperparameter is None:
                                     value = ''
                                 else:
-                                    raise ValueError((hp_name, ))
+                                    raise ValueError((hp_name, value,
+                                                      hyperparameter,
+                                                      type(hyperparameter),
+                                                      configuration, configuration_space))
 
                                 configuration[hp_name] = value
 
@@ -167,7 +180,7 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                             except Exception as e:
                                 print("Configuration %s not applicable " \
                                       "because of %s!" \
-                                      % (row[1], e))
+                                      % (configuration, e))
                                 break
 
                             if str(configuration) in \
@@ -287,10 +300,19 @@ def main():
     for sparse, task in [(1, BINARY_CLASSIFICATION),
                          (1, MULTICLASS_CLASSIFICATION),
                          (0, BINARY_CLASSIFICATION),
-                         (0, MULTICLASS_CLASSIFICATION)]:
+                         (0, MULTICLASS_CLASSIFICATION),
+                         (1, REGRESSION),
+                         (0, REGRESSION)]:
 
         for metric in ['acc_metric', 'auc_metric', 'bac_metric', 'f1_metric',
-                       'pac_metric']:
+                       'pac_metric', 'a_metric', 'r2_metric']:
+
+            if STRING_TO_METRIC[metric] not in REGRESSION_METRICS and task in\
+                    REGRESSION_TASKS:
+                continue
+            if STRING_TO_METRIC[metric] not in CLASSIFICATION_METRICS and \
+                            task in CLASSIFICATION_TASKS:
+                continue
 
             output_dir_ = os.path.join(output_dir, '%s_%s_%s' % (
                 metric, TASK_TYPES_TO_STRING[task], 'sparse' if sparse else 'dense'))
@@ -313,7 +335,10 @@ def main():
                 only_best=args.only_best)
 
             if len(outputs) == 0:
-                raise ValueError("Nothing found!")
+                print("No output found for %s, %s, %s" %
+                      (metric, TASK_TYPES_TO_STRING[task],
+                       'sparse' if sparse else 'dense'))
+                continue
 
             write_output(outputs, configurations, output_dir_,
                          configuration_space, metric)
