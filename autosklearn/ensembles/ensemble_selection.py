@@ -25,8 +25,8 @@ class EnsembleSelection(AbstractEnsemble):
             raise ValueError('Ensemble size cannot be less than one!')
         if not self.task_type in TASK_TYPES:
             raise ValueError('Unknown task type %s.' % self.task_type)
-        if not self.metric:
-            raise ValueError('Metric is not specified.')
+        if not self.metric in METRIC:
+            raise ValueError('Unknown metric %s.' % self.metric)
         if self.mode not in ('fast', 'slow'):
             raise ValueError('Unknown mode %s' % self.mode)
 

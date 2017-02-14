@@ -6,8 +6,8 @@ import sys
 
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
-from autosklearn.constants import BAC_METRIC, R2_METRIC, STRING_TO_METRIC
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
+from autosklearn.constants import *
 
 from smac.stats.stats import Stats
 from smac.scenario.scenario import Scenario
@@ -67,7 +67,7 @@ elif task_type == 'regression':
 else:
     raise ValueError(task_type)
 
-automl.fit(X_train, y_train, dataset_name=str(task_id), metric=BAC_METRIC,
+automl.fit(X_train, y_train, dataset_name=str(task_id), metric=metric,
            feat_type=cat)
 data = automl._automl._automl._backend.load_datamanager()
 # Data manager can't be replaced with save_datamanager, it has to be deleted

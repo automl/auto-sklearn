@@ -57,24 +57,24 @@ class TestMetadataGeneration(unittest.TestCase):
         cmd = cmd.replace('-s 1', '-s 1 --unittest')
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
-        # print(rval.stdout, flush=True)
-        # print(rval.stderr, flush=True)
+        print(rval.stdout, flush=True)
+        print(rval.stderr, flush=True)
+        expected_output_directory = os.path.join(self.working_directory,
+                                                 'configuration',
+                                                 'classification',
+                                                 '233-1')
+        self.assertTrue(os.path.exists(expected_output_directory))
         smac_log = os.path.join(self.working_directory,
                                 'configuration/classification/233-1',
                                 'AutoML(1):233.log')
         with open(smac_log) as fh:
             smac_output = fh.read()
         self.assertEqual(rval.returncode, 0, msg=str(rval) + '\n' + smac_output)
-
-        expected_output_directory = os.path.join(self.working_directory,
-                                                 'configuration',
-                                                 'classification',
-                                                 '233-1')
-        self.assertTrue(os.path.exists(expected_output_directory))
         expected_validation_output = os.path.join(expected_output_directory,
                                                   'validation_trajectory.json')
         self.assertTrue(os.path.exists(expected_validation_output))
         trajectory = os.path.join(expected_output_directory, 'trajectory.json')
+
         with open(expected_validation_output) as fh_validation:
             with open(trajectory) as fh_trajectory:
                 traj = json.load(fh_trajectory)

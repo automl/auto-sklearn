@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-import types
 
 import numpy as np
 from scipy import sparse
@@ -7,7 +6,6 @@ import six
 
 from autosklearn.constants import *
 from autosklearn.data.abstract_data_manager import AbstractDataManager
-from autosklearn.metrics import get_metric
 
 
 class XYDataManager(AbstractDataManager):
@@ -19,7 +17,8 @@ class XYDataManager(AbstractDataManager):
         if isinstance(task, six.string_types):
             task = STRING_TO_TASK_TYPES[task]
 
-        metric = get_metric(metric, task)
+        if isinstance(metric, six.string_types):
+            metric = STRING_TO_METRIC[metric]
 
         self.info['task'] = task
         self.info['metric'] = metric

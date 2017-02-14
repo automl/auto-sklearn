@@ -33,32 +33,32 @@ class Test(unittest.TestCase):
     def test_metalearning(self):
         dataset_name_classification = 'digits'
         initial_challengers_classification = {
-            'acc_metric': "--initial-challengers \" "
+            ACC_METRIC: "--initial-challengers \" "
                         "-balancing:strategy 'weighting' "
                         "-classifier:__choice__ 'proj_logit'",
-            'auc_metric': "--initial-challengers \" "
+            AUC_METRIC: "--initial-challengers \" "
                         "-balancing:strategy 'weighting' "
                         "-classifier:__choice__ 'liblinear_svc'",
-            'bac_metric': "--initial-challengers \" "
+            BAC_METRIC: "--initial-challengers \" "
                         "-balancing:strategy 'weighting' "
                         "-classifier:__choice__ 'proj_logit'",
-            'f1_metric': "--initial-challengers \" "
+            F1_METRIC: "--initial-challengers \" "
                        "-balancing:strategy 'weighting' "
                        "-classifier:__choice__ 'proj_logit'",
-            'pac_metric': "--initial-challengers \" "
+            PAC_METRIC: "--initial-challengers \" "
                         "-balancing:strategy 'none' "
                         "-classifier:__choice__ 'random_forest'"
         }
 
         dataset_name_regression = 'diabetes'
         initial_challengers_regression = {
-            'a_metric': "--initial-challengers \" "
+            A_METRIC: "--initial-challengers \" "
                       "-imputation:strategy 'mean' "
                       "-one_hot_encoding:minimum_fraction '0.01' "
                       "-one_hot_encoding:use_minimum_fraction 'True' "
                       "-preprocessor:__choice__ 'no_preprocessing' "
                       "-regressor:__choice__ 'random_forest'",
-            'r2_metric': "--initial-challengers \" "
+            R2_METRIC: "--initial-challengers \" "
                        "-imputation:strategy 'mean' "
                        "-one_hot_encoding:minimum_fraction '0.01' "
                        "-one_hot_encoding:use_minimum_fraction 'True' "
