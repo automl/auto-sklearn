@@ -104,7 +104,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         if instance_specific is None or instance_specific == '0':
             instance_specific = {}
         else:
-            print(instance_specific)
             instance_specific = [specific.split('=') for specific in instance_specific.split(',')]
             instance_specific = {specific[0]: specific[1] for specific in instance_specific}
         subsample = instance_specific.get('subsample')

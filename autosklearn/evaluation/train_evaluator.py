@@ -230,8 +230,9 @@ class TrainEvaluator(AbstractEvaluator):
                 stratify = None
 
             if len(train_indices) > self.subsample:
+                indices = np.arange(len(train_indices))
                 cv_indices_train, _ = sklearn.cross_validation.train_test_split(
-                    train_indices, stratify=stratify,
+                    indices, stratify=stratify,
                     train_size=self.subsample, random_state=1)
                 train_indices = train_indices[cv_indices_train]
                 return train_indices
