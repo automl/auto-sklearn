@@ -44,7 +44,7 @@ class TestEvaluator_Test(BaseEvaluatorTest, unittest.TestCase):
                 D_ = copy.deepcopy(D)
                 y = D.data['Y_train']
                 if len(y.shape) == 2 and y.shape[1] == 1:
-                    y = y.flatten()
+                    D_.data['Y_train'] = y.flatten()
                 queue_ = multiprocessing.Queue()
                 evaluator = TestEvaluator(D_, backend_mock, queue_)
 

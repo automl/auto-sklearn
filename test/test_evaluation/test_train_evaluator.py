@@ -553,7 +553,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                 D_ = copy.deepcopy(D)
                 y = D.data['Y_train']
                 if len(y.shape) == 2 and y.shape[1] == 1:
-                    y = y.flatten()
+                    D_.data['Y_train'] = y.flatten()
                 kfold = ShuffleSplit(n=len(y), n_iter=5, random_state=1)
                 queue_ = multiprocessing.Queue()
                 evaluator = TrainEvaluator(D_, backend_mock, queue_,
