@@ -5,28 +5,29 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
+
 
 class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
 
-    def __init__(self, n_estimators, learning_rate, algorithm, max_depth,
-                 random_state=None):
-        self.n_estimators = int(n_estimators)
-        self.learning_rate = float(learning_rate)
-        self.algorithm = algorithm
-        self.random_state = random_state
-        self.max_depth = max_depth
+    def __init__(self):
+        super(AdaboostClassifier, self).__init__()
+        self.n_estimators = None
+        self.learning_rate = None
+        self.algorithm = None
+        self.random_state = None
+        self.max_depth = None
         self.estimator = None
 
     def fit(self, X, Y, sample_weight=None):
-        import sklearn.ensemble
-        import sklearn.tree
 
         self.n_estimators = int(self.n_estimators)
         self.learning_rate = float(self.learning_rate)
         self.max_depth = int(self.max_depth)
-        base_estimator = sklearn.tree.DecisionTreeClassifier(max_depth=self.max_depth)
+        base_estimator = DecisionTreeClassifier(max_depth=self.max_depth)
 
-        estimator = sklearn.ensemble.AdaBoostClassifier(
+        estimator = AdaBoostClassifier(
             base_estimator=base_estimator,
             n_estimators=self.n_estimators,
             learning_rate=self.learning_rate,

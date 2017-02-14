@@ -2,11 +2,13 @@ from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling \
     import Rescaling
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
+from sklearn.preprocessing import MinMaxScaler
 
 
 class MinMaxScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state):
-        from sklearn.preprocessing import MinMaxScaler
+
+    def __init__(self):
+        super(MinMaxScalerComponent, self).__init__()
         self.preprocessor = MinMaxScaler()
 
     @staticmethod

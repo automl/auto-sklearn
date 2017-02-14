@@ -4,7 +4,11 @@ import inspect
 import pkgutil
 import sys
 
+from ConfigSpace import CategoricalHyperparameter
+from ConfigSpace import ConfigurationSpace
 from sklearn.utils import check_random_state
+
+from autosklearn.pipeline.graph_based_config_space import ChoiceConfigSpaceBuilder, LeafNodeConfigSpaceBuilder
 
 
 def find_components(package, directory, base_class):
@@ -60,6 +64,7 @@ class ThirdPartyComponents(object):
 
 
 class AutoSklearnComponent(object):
+
     @staticmethod
     def get_properties(dataset_properties=None):
         """Get the properties of the underlying algorithm.
@@ -139,6 +144,15 @@ class AutoSklearnComponent(object):
     def __str__(self):
         name = self.get_properties()['name']
         return "autosklearn.pipeline %s" % name
+
+    def get_config_space(self):
+        builder = self.get_config_space_builder()
+        cs = builder.build()
+        return cs
+
+    def get_config_space_builder(self):
+        cs = LeafNodeConfigSpaceBuilder(self)
+        return cs
 
 
 
@@ -275,8 +289,45 @@ class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
         return self.estimator
 
 
-class AutoSklearnChoice(object):
-    def __init__(self, dataset_properties, random_state=None):
+class CompositeAutoSklearnComponent(AutoSklearnComponent):
+
+    def __init__(self, components):
+        self.components = OrderedDict()
+        for component in components:
+            if isinstance(component, AutoSklearnComponent):
+                self._add_component(component)
+                continue
+            elif isinstance(component, tuple):
+                name, component = component
+                if isinstance(name, str) and isinstance(component, AutoSklearnComponent):
+                    self.components[name] = component
+                    continue
+            raise ValueError(component)
+
+    def _add_component(self, component, name=None):
+        if not name:
+            name = type(component).__name__.lower()
+        temp_name = name
+        counter = 1
+        while temp_name in self.components:
+            counter += 1
+            temp_name = name + str(counter)
+
+        self.components[temp_name] = component
+
+    def get_config_space(self):
+        builder = self.get_config_space_builder()
+        cs = builder.build()
+        return cs
+
+    def get_config_space_builder(self):
+        pass
+
+
+
+class AutoSklearnChoice(CompositeAutoSklearnComponent):
+
+    def __init__(self, random_state=None):
         """
         Parameters
         ----------
@@ -293,16 +344,19 @@ class AutoSklearnChoice(object):
             * multilabel: whether the dataset is a multilabel classification
               dataset
         """
-        self.configuration = self.get_hyperparameter_search_space(
-            dataset_properties).get_default_configuration()
+        #self.configuration = self.get_hyperparameter_search_space(
+        #    dataset_properties).get_default_configuration()
 
         if random_state is None:
             self.random_state = check_random_state(1)
         else:
             self.random_state = check_random_state(random_state)
 
-        self.set_hyperparameters(self.configuration)
+        #self.set_hyperparameters(self.configuration)
         self.choice = None
+        components = self.get_components()
+        components = [(name, cls()) for (name, cls) in components.items()]
+        super(AutoSklearnChoice, self).__init__(components)
 
     def get_components(cls):
         raise NotImplementedError()
@@ -374,3 +428,16 @@ class AutoSklearnChoice(object):
 
     def predict(self, X):
         return self.choice.predict(X)
+
+    def get_hyperparameter_search_space(self):
+        cs = ConfigurationSpace()
+
+        cs.add_hyperparameter(CategoricalHyperparameter(name="__choice__", choices=["linear", "square", "exponential"], default="linear"))
+        return cs
+
+    def get_config_space_builder(self):
+        builder = ChoiceConfigSpaceBuilder(self)
+        for name, component in self.components.items():
+            child = component.get_config_space_builder()
+            builder.add_child(name, child)
+        return builder

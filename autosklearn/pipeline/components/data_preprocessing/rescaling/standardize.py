@@ -4,11 +4,13 @@ from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_resca
     import Rescaling
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
+from sklearn.preprocessing import StandardScaler
 
 
 class StandardScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
+
     def __init__(self, random_state):
-        from sklearn.preprocessing import StandardScaler
+        super(StandardScalerComponent, self).__init__()
         self.preprocessor = StandardScaler()
 
     @staticmethod

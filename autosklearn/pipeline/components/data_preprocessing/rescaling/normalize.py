@@ -2,13 +2,15 @@ from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling \
     import Rescaling
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
+# Use custom implementation because sklearn implementation cannot
+# handle float32 input matrix
+from autosklearn.pipeline.implementations.Normalizer import Normalizer
 
 
 class NormalizerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state):
-        # Use custom implementation because sklearn implementation cannot
-        # handle float32 input matrix
-        from autosklearn.pipeline.implementations.Normalizer import Normalizer
+
+    def __init__(self):
+        super(NormalizerComponent, self).__init__()
         self.preprocessor = Normalizer()
 
     @staticmethod
