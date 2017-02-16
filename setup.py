@@ -28,10 +28,10 @@ requirements = [
     "liac-arff",
     "pandas",
     "xgboost==0.4a30",
-    "ConfigSpace>=0.2.3",
+    "ConfigSpace>=0.3.1,<0.4",
     "pynisher>=0.4",
     "pyrfr",
-    "smac==0.2.4"
+    "smac==0.3.0"
 ]
 
 with open("autosklearn/__version__.py") as fh:
