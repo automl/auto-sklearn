@@ -192,6 +192,18 @@ class AutoML(BaseEstimator):
 
         return self._fit(loaded_data_manager)
 
+    def fit_on_datamanager(self, datamanager):
+        self._stopwatch = StopWatch()
+        self._backend.save_start_time(self._seed)
+
+        name = os.path.basename(datamanager.name)
+        self._stopwatch.start_task(name)
+        self._start_task(self._stopwatch, name)
+        self._dataset_name = name
+
+        self._logger = self._get_logger(name)
+        self._fit(datamanager)
+
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
         setup_logger(os.path.join(self._backend.temporary_directory, '%s.log' % str(logger_name)))
@@ -278,8 +290,8 @@ class AutoML(BaseEstimator):
         self._backend._make_internals_directory()
         if self._keep_models:
             try:
-                os.mkdir(self._backend.get_model_dir())
-            except OSError:
+                os.makedirs(self._backend.get_model_dir())
+            except (OSError, FileExistsError) as e:
                 if not self._shared_mode:
                     raise
 
