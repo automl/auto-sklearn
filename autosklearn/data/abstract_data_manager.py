@@ -63,10 +63,13 @@ class AbstractDataManager():
 
         self.info['is_sparse'] = 1 if sparse else 0
         self.data['X_train'] = data[0]
-        if 'X_valid' in self.data:
+        if 'X_valid' in self.data and 'X_test' in self.data:
             self.data['X_valid'] = data[1]
-        if 'X_test' in self.data:
             self.data['X_test'] = data[2]
+        elif 'X_valid' in self.data:
+            self.data['X_valid'] = data[1]
+        elif 'X_test' in self.data:
+            self.data['X_test'] = data[1]
 
     def __repr__(self):
         return 'DataManager : ' + self.name
