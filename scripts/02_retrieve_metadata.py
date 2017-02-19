@@ -62,7 +62,7 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
             configurations_to_ids[config_id] = best_configuration
             configurations[config_id] = best_configuration
 
-        outputs[task_name].append((best_value, config_id))
+        outputs[task_name].append((config_id, best_value))
 
     return outputs, configurations
 
