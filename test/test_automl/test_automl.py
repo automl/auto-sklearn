@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-import gzip
 import os
 import pickle
 import sys
@@ -167,7 +166,7 @@ class AutoMLTest(Base, unittest.TestCase):
         name = '31_bac'
         dataset = os.path.join(self.test_dir, '..', '.data', name)
         data_manager_file = os.path.join(output, '.auto-sklearn',
-                                         'datamanager.pkl.gz')
+                                         'datamanager.pkl')
 
         backend_api = backend.create(output, output)
         auto = autosklearn.automl.AutoML(
@@ -177,14 +176,14 @@ class AutoMLTest(Base, unittest.TestCase):
         auto.fit_automl_dataset(dataset)
 
         # pickled data manager (without one hot encoding!)
-        with gzip.open(data_manager_file, 'rb') as fh:
+        with open(data_manager_file, 'rb') as fh:
             D = pickle.load(fh)
             self.assertTrue(np.allclose(D.data['X_train'][0, :3],
                                         [1., 12., 2.]))
 
         # Check that all directories are there
-        fixture = ['predictions_valid', 'true_targets_ensemble.npy.gz',
-                   'start_time_100', 'datamanager.pkl.gz',
+        fixture = ['predictions_valid', 'true_targets_ensemble.npy',
+                   'start_time_100', 'datamanager.pkl',
                    'predictions_ensemble',
                    'ensembles', 'predictions_test', 'models']
         self.assertEqual(sorted(os.listdir(os.path.join(output,
@@ -195,11 +194,11 @@ class AutoMLTest(Base, unittest.TestCase):
         # model and one ensemble
         fixture = os.listdir(os.path.join(output, '.auto-sklearn',
                                           'predictions_ensemble'))
-        self.assertIn('predictions_ensemble_100_00001.npy.gz', fixture)
+        self.assertIn('predictions_ensemble_100_00001.npy', fixture)
 
         fixture = os.listdir(os.path.join(output, '.auto-sklearn',
                                           'models'))
-        self.assertIn('100.1.model.gz', fixture)
+        self.assertIn('100.1.model', fixture)
 
         fixture = os.listdir(os.path.join(output, '.auto-sklearn',
                                           'ensembles'))
@@ -240,7 +239,7 @@ class AutoMLTest(Base, unittest.TestCase):
                                                          '.auto-sklearn')))
             self.assertTrue(os.path.exists(os.path.join(
                 output, '.auto-sklearn', 'predictions_ensemble',
-                'predictions_ensemble_1_00001.npy.gz')))
+                'predictions_ensemble_1_00001.npy')))
 
             del auto
             self._tearDown(output)

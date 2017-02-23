@@ -1,5 +1,4 @@
 import glob
-import gzip
 import os
 import tempfile
 import time
@@ -170,7 +169,7 @@ class Backend(object):
 
     def _get_targets_ensemble_filename(self):
         return os.path.join(self.internals_directory,
-                            "true_targets_ensemble.npy.gz")
+                            "true_targets_ensemble.npy")
 
     def save_targets_ensemble(self, targets):
         self._make_internals_directory()
@@ -196,7 +195,7 @@ class Backend(object):
         lock_path = filepath + '.lock'
         with lockfile.LockFile(lock_path):
             if os.path.exists(filepath):
-                with gzip.open(filepath) as fh:
+                with open(filepath) as fh:
                     existing_targets = np.load(fh)
                     if existing_targets.shape[0] > targets.shape[0] or \
                             (existing_targets.shape == targets.shape and
@@ -205,9 +204,7 @@ class Backend(object):
 
             with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                     filepath), delete=False) as fh:
-                zipfile = gzip.GzipFile(fileobj=fh)
-                np.save(zipfile, targets.astype(np.float32))
-                zipfile.close()
+                np.save(fh, targets.astype(np.float32))
                 tempname = fh.name
 
             os.rename(tempname, filepath)
@@ -219,13 +216,13 @@ class Backend(object):
 
         lock_path = filepath + '.lock'
         with lockfile.LockFile(lock_path):
-            with gzip.open(filepath) as fh:
+            with open(filepath, 'rb') as fh:
                 targets = np.load(fh)
 
         return targets
 
     def _get_datamanager_pickle_filename(self):
-        return os.path.join(self.internals_directory, 'datamanager.pkl.gz')
+        return os.path.join(self.internals_directory, 'datamanager.pkl')
 
     def save_datamanager(self, datamanager):
         self._make_internals_directory()
@@ -236,9 +233,7 @@ class Backend(object):
             if not os.path.exists(filepath):
                 with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                         filepath), delete=False) as fh:
-                    zipfile = gzip.GzipFile(fileobj=fh)
-                    pickle.dump(datamanager, zipfile, -1)
-                    zipfile.close()
+                    pickle.dump(datamanager, fh, -1)
                     tempname = fh.name
                 os.rename(tempname, filepath)
 
@@ -248,7 +243,7 @@ class Backend(object):
         filepath = self._get_datamanager_pickle_filename()
         lock_path = filepath + '.lock'
         with lockfile.LockFile(lock_path):
-            with gzip.open(filepath, 'rb') as fh:
+            with open(filepath, 'rb') as fh:
                 return pickle.load(fh)
 
     def get_model_dir(self):
@@ -256,27 +251,13 @@ class Backend(object):
 
     def save_model(self, model, idx, seed):
         # This should fail if no models directory exists
-        try:
-            filepath = os.path.join(self.get_model_dir(),
-                                    '%s.%s.model.gz' % (seed, idx))
+        filepath = os.path.join(self.get_model_dir(),
+                                '%s.%s.model' % (seed, idx))
 
-            with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
-                    filepath), delete=False) as fh:
-                zipfile = gzip.GzipFile(fileobj=fh)
-                pickle.dump(model, zipfile, -1)
-                zipfile.close()
+        with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
+                filepath), delete=False) as fh:
+            pickle.dump(model, fh, -1)
             tempname = fh.name
-        # Actually I would like to catch a RecursionError here, but it turns out
-        # that it was added in python3.5 and cannot be used in python3.4. But
-        # since it is a subclass of RuntimeError this works fine as well
-        except RuntimeError:
-            filepath = os.path.join(self.get_model_dir(),
-                                    '%s.%s.model' % (seed, idx))
-
-            with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
-                    filepath), delete=False) as fh:
-                pickle.dump(model, fh, -1)
-                tempname = fh.name
 
         os.rename(tempname, filepath)
 
@@ -285,9 +266,7 @@ class Backend(object):
 
         if seed >= 0:
             model_files = glob.glob(os.path.join(model_directory,
-                                                 '%s.*.model.gz' % seed))
-            model_files.extend(glob.glob(os.path.join(model_directory,
-                                                      '%s.*.model' % seed)))
+                                                 '%s.*.model' % seed))
         else:
             model_files = os.listdir(model_directory)
             model_files = [os.path.join(model_directory, mf) for mf in model_files]
@@ -303,7 +282,7 @@ class Backend(object):
             # File names are like: {seed}.{index}.model
             if model_file.endswith('/'):
                 model_file = model_file[:-1]
-            if not model_file.endswith('.model.gz') and \
+            if not model_file.endswith('.model') and \
                     not model_file.endswith('.model'):
                 continue
 
@@ -329,14 +308,10 @@ class Backend(object):
     def load_model_by_seed_and_id(self, seed, idx):
         model_directory = self.get_model_dir()
 
-        model_file_name = '%s.%s.model.gz' % (seed, idx)
+        model_file_name = '%s.%s.model' % (seed, idx)
         model_file_path = os.path.join(model_directory, model_file_name)
-        if os.path.exists(model_file_path):
-            with gzip.open(model_file_path, 'rb') as fh:
-                return pickle.load(fh)
-        else:
-            with open(model_file_path[:-3], 'rb') as fh:
-                return pickle.load(fh)
+        with open(model_file_path, 'rb') as fh:
+            return pickle.load(fh)
 
     def get_ensemble_dir(self):
         return os.path.join(self.internals_directory, 'ensembles')
@@ -387,14 +362,12 @@ class Backend(object):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        filepath = os.path.join(output_dir, 'predictions_%s_%s_%s.npy.gz' %
+        filepath = os.path.join(output_dir, 'predictions_%s_%s_%s.npy' %
                                             (subset, automl_seed, str(idx)))
 
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
-            zipfile = gzip.GzipFile(fileobj=fh)
-            pickle.dump(predictions.astype(np.float32), zipfile, -1)
-            zipfile.close()
+            pickle.dump(predictions.astype(np.float32), fh, -1)
             tempname = fh.name
         os.rename(tempname, filepath)
 

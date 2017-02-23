@@ -2,7 +2,6 @@
 
 import multiprocessing
 import glob
-import gzip
 import os
 import re
 import sys
@@ -100,15 +99,15 @@ class EnsembleBuilder(multiprocessing.Process):
 
             if self.shared_mode is False:
                 dir_ensemble_list = sorted(glob.glob(os.path.join(
-                    dir_ensemble, 'predictions_ensemble_%s_*.npy.gz' % self.seed)))
+                    dir_ensemble, 'predictions_ensemble_%s_*.npy' % self.seed)))
                 if exists[1]:
                     dir_valid_list = sorted(glob.glob(os.path.join(
-                        dir_valid, 'predictions_valid_%s_*.npy.gz' % self.seed)))
+                        dir_valid, 'predictions_valid_%s_*.npy' % self.seed)))
                 else:
                     dir_valid_list = []
                 if exists[2]:
                     dir_test_list = sorted(glob.glob(os.path.join(
-                        dir_test, 'predictions_test_%s_*.npy.gz' % self.seed)))
+                        dir_test, 'predictions_test_%s_*.npy' % self.seed)))
                 else:
                     dir_test_list = []
             else:
@@ -127,8 +126,8 @@ class EnsembleBuilder(multiprocessing.Process):
             for dir_ensemble_file in dir_ensemble_list:
                 if dir_ensemble_file.endswith("/"):
                     dir_ensemble_file = dir_ensemble_file[:-1]
-                if not dir_ensemble_file.endswith(".npy.gz"):
-                    self.logger.info('Error loading file (not .npy.gz): %s', dir_ensemble_file)
+                if not dir_ensemble_file.endswith(".npy"):
+                    self.logger.info('Error loading file (not .npy): %s', dir_ensemble_file)
                     continue
 
                 dir_ensemble_model_files.append(dir_ensemble_file)
@@ -161,7 +160,7 @@ class EnsembleBuilder(multiprocessing.Process):
             #  later
             include_num_runs = []
             backup_num_runs = []
-            model_and_automl_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy\.gz$')
+            model_and_automl_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy')
             if self.ensemble_nbest is not None:
                 # Keeps track of the single scores of each model in our ensemble
                 scores_nbest = []
@@ -179,7 +178,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 basename = os.path.basename(model_name)
 
                 try:
-                    with gzip.open(os.path.join(dir_ensemble, basename)) as fh:
+                    with open(os.path.join(dir_ensemble, basename), 'rb') as fh:
                         if self.precision is "16":
                             predictions = np.load(fh).astype(dtype=np.float16)
                         elif self.precision is "32":
@@ -455,7 +454,7 @@ class EnsembleBuilder(multiprocessing.Process):
             basename = os.path.basename(model_name)
 
             if (automl_seed, num_run) in include_num_runs:
-                with gzip.open(os.path.join(dir_path, basename)) as fh:
+                with open(os.path.join(dir_path, basename), 'rb') as fh:
                     if precision == "16":
                         predictions = np.load(fh).astype(
                             dtype=np.float16)
