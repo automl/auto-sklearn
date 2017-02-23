@@ -3,8 +3,14 @@ from __future__ import print_function
 import os
 import unittest
 
-
-import autosklearn.data.competition_c_functions as competition_c_functions
+try:
+    import autosklearn.data.competition_c_functions as competition_c_functions
+except ImportError:
+    try:
+        travis = os.environ['TRAVIS']
+        raise
+    except Exception:
+        pass
 
 class CHelperFunctionTest(unittest.TestCase):
     _multiprocess_can_split_ = True
