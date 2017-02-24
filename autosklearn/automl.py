@@ -6,6 +6,7 @@ import io
 import json
 import os
 import unittest.mock
+import warnings
 
 
 from ConfigSpace.io import pcs
@@ -432,6 +433,12 @@ class AutoML(BaseEstimator):
         return self
 
     def refit(self, X, y):
+        def send_warnings_to_log(message, category, filename, lineno,
+                                 file=None):
+            self._logger.debug('%s:%s: %s:%s' %
+                               (filename, lineno, category.__name__, message))
+            return
+
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
@@ -451,7 +458,9 @@ class AutoML(BaseEstimator):
                 # the ordering of the data.
                 for i in range(10):
                     try:
-                        model.fit(X.copy(), y.copy())
+                        with warnings.catch_warnings():
+                            warnings.showwarning = send_warnings_to_log
+                            model.fit(X.copy(), y.copy())
                         break
                     except ValueError:
                         indices = list(range(X.shape[0]))
@@ -477,15 +486,23 @@ class AutoML(BaseEstimator):
                 self.ensemble_ is None:
             self._load_models()
 
+        def send_warnings_to_log(message, category, filename, lineno,
+                                 file=None):
+            self._logger.debug('%s:%s: %s:%s' %
+                               (filename, lineno, category.__name__, message))
+            return
+
         all_predictions = []
         for identifier in self.ensemble_.get_model_identifiers():
             model = self.models_[identifier]
 
             X_ = X.copy()
-            if self._task in REGRESSION_TASKS:
-                prediction = model.predict(X_)
-            else:
-                prediction = model.predict_proba(X_)
+            with warnings.catch_warnings():
+                warnings.showwarning = send_warnings_to_log
+                if self._task in REGRESSION_TASKS:
+                    prediction = model.predict(X_)
+                else:
+                    prediction = model.predict_proba(X_)
 
             if len(prediction.shape) < 1 or len(X_.shape) < 1 or \
                     X_.shape[0] < 1 or prediction.shape[0] != X_.shape[0]:
