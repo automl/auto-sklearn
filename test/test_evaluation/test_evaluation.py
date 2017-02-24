@@ -14,9 +14,12 @@ sys.path.append(this_directory)
 import pynisher
 from smac.tae.execute_ta_run import StatusType
 from smac.stats.stats import Stats
+import sklearn.cross_validation
 
 from evaluation_util import get_multiclass_classification_datamanager
+from autosklearn.constants import *
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
+from autosklearn.data.abstract_data_manager import AbstractDataManager
 
 
 def safe_eval_success_mock(*args, **kwargs):
@@ -189,3 +192,51 @@ class EvaluationTest(unittest.TestCase):
                         instance_specific='subsample=30')
         self.assertEqual(info[0], StatusType.SUCCESS)
         self.assertEqual(info[-1], 30)
+
+    def test_get_splitter(self):
+        ta_args = dict(backend=BackendMock(), autosklearn_seed=1,
+                       logger=self.logger, stats=self.stats, memory_limit=3072)
+        D = unittest.mock.Mock(spec=AbstractDataManager)
+        D.data = dict(Y_train=np.array([0, 0, 0, 1, 1, 1]))
+        D.info = dict(task=BINARY_CLASSIFICATION)
+
+        # holdout, binary classification
+        ta = ExecuteTaFuncWithQueue(resampling_strategy='holdout', **ta_args)
+        cv = ta.get_splitter(D)
+        self.assertIsInstance(cv,
+                              sklearn.cross_validation.StratifiedShuffleSplit)
+
+        # holdout, binary classification, fallback to shuffle split
+        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1, 2])
+        ta = ExecuteTaFuncWithQueue(resampling_strategy='holdout', **ta_args)
+        cv = ta.get_splitter(D)
+        self.assertIsInstance(cv, sklearn.cross_validation.ShuffleSplit)
+
+        # cv, binary classification
+        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
+        ta = ExecuteTaFuncWithQueue(resampling_strategy='cv', folds=5,
+                                    **ta_args)
+        cv = ta.get_splitter(D)
+        self.assertIsInstance(cv, sklearn.cross_validation.StratifiedKFold)
+
+        # cv, binary classification, no fallback anticipated
+        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1, 2])
+        ta = ExecuteTaFuncWithQueue(resampling_strategy='cv', folds=5,
+                                    **ta_args)
+        cv = ta.get_splitter(D)
+        self.assertIsInstance(cv, sklearn.cross_validation.StratifiedKFold)
+
+        # regression, shuffle split
+        D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        D.info['task'] = REGRESSION
+        ta = ExecuteTaFuncWithQueue(resampling_strategy='holdout', **ta_args)
+        cv = ta.get_splitter(D)
+        self.assertIsInstance(cv, sklearn.cross_validation.ShuffleSplit)
+
+        # regression cv, KFold
+        D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        D.info['task'] = REGRESSION
+        ta = ExecuteTaFuncWithQueue(resampling_strategy='cv', folds=5,
+                                    **ta_args)
+        cv = ta.get_splitter(D)
+        self.assertIsInstance(cv, sklearn.cross_validation.KFold)

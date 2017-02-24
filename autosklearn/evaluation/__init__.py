@@ -126,36 +126,9 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                           include=self.include,
                           exclude=self.exclude,
                           disable_file_output=self.disable_file_output)
-        if self.resampling_strategy != 'test':
-            if D.info['task'] in CLASSIFICATION_TASKS and \
-                            D.info['task'] != MULTILABEL_CLASSIFICATION:
-                y = D.data['Y_train'].ravel()
-                if self.resampling_strategy in ['holdout',
-                                                'holdout-iterative-fit']:
-                    cv = StratifiedShuffleSplit(y=y, n_iter=1, train_size=0.67,
-                                                test_size=0.33, random_state=1)
-                elif self.resampling_strategy in ['cv', 'partial-cv',
-                                                  'partial-cv-iterative-fit']:
-                    cv = StratifiedKFold(y=y,
-                                         n_folds=self.resampling_strategy_args[
-                                             'folds'],
-                                         shuffle=True, random_state=1)
-                else:
-                    raise ValueError(self.resampling_strategy)
-            else:
-                n = D.data['Y_train'].shape[0]
-                if self.resampling_strategy in ['holdout',
-                                                'holdout-iterative-fit']:
-                    cv = ShuffleSplit(n=n, n_iter=1, train_size=0.67,
-                                      test_size=0.33, random_state=1)
-                elif self.resampling_strategy in ['cv', 'partial-cv',
-                                                  'partial-cv-iterative-fit']:
-                    cv = KFold(n=n,
-                               n_folds=self.resampling_strategy_args['folds'],
-                               shuffle=True, random_state=1)
-                else:
-                    raise ValueError(self.resampling_strategy)
 
+        if self.resampling_strategy != 'test':
+            cv = self.get_splitter(D)
             obj_kwargs['cv'] = cv
         if instance is not None:
             obj_kwargs['instance'] = instance
@@ -207,4 +180,44 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         runtime = float(obj.wall_clock_time)
         self.num_run += 1
         return status, cost, runtime, additional_run_info
+
+    def get_splitter(self, D):
+        y = D.data['Y_train'].ravel()
+        n = D.data['Y_train'].shape[0]
+        if D.info['task'] in CLASSIFICATION_TASKS and \
+                        D.info['task'] != MULTILABEL_CLASSIFICATION:
+
+            if self.resampling_strategy in ['holdout',
+                                            'holdout-iterative-fit']:
+                try:
+                    cv = StratifiedShuffleSplit(y=y, n_iter=1, train_size=0.67,
+                                                test_size=0.33, random_state=1)
+                except ValueError as e:
+                    if 'The least populated class in y has only' in e.args[0]:
+                        cv = ShuffleSplit(n=n, n_iter=1, train_size=0.67,
+                                          test_size=0.33, random_state=1)
+                    else:
+                        raise
+
+            elif self.resampling_strategy in ['cv', 'partial-cv',
+                                              'partial-cv-iterative-fit']:
+                cv = StratifiedKFold(y=y,
+                                     n_folds=self.resampling_strategy_args[
+                                         'folds'],
+                                     shuffle=True, random_state=1)
+            else:
+                raise ValueError(self.resampling_strategy)
+        else:
+            if self.resampling_strategy in ['holdout',
+                                            'holdout-iterative-fit']:
+                cv = ShuffleSplit(n=n, n_iter=1, train_size=0.67,
+                                  test_size=0.33, random_state=1)
+            elif self.resampling_strategy in ['cv', 'partial-cv',
+                                              'partial-cv-iterative-fit']:
+                cv = KFold(n=n,
+                           n_folds=self.resampling_strategy_args['folds'],
+                           shuffle=True, random_state=1)
+            else:
+                raise ValueError(self.resampling_strategy)
+        return cv
 
