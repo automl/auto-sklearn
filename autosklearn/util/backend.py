@@ -1,4 +1,3 @@
-from __future__ import print_function
 import glob
 import os
 import tempfile
@@ -6,8 +5,8 @@ import time
 import random
 import lockfile
 import numpy as np
+import pickle
 import shutil
-import six.moves.cPickle as pickle
 from autosklearn.util import logging_ as logging
 
 
@@ -196,11 +195,12 @@ class Backend(object):
         lock_path = filepath + '.lock'
         with lockfile.LockFile(lock_path):
             if os.path.exists(filepath):
-                existing_targets = np.load(filepath)
-                if existing_targets.shape[0] > targets.shape[0] or \
-                        (existing_targets.shape == targets.shape and
-                         np.allclose(existing_targets, targets)):
-                    return filepath
+                with open(filepath) as fh:
+                    existing_targets = np.load(fh)
+                    if existing_targets.shape[0] > targets.shape[0] or \
+                            (existing_targets.shape == targets.shape and
+                             np.allclose(existing_targets, targets)):
+                        return filepath
 
             with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                     filepath), delete=False) as fh:
@@ -216,7 +216,8 @@ class Backend(object):
 
         lock_path = filepath + '.lock'
         with lockfile.LockFile(lock_path):
-            targets = np.load(filepath)
+            with open(filepath, 'rb') as fh:
+                targets = np.load(fh)
 
         return targets
 
@@ -241,7 +242,7 @@ class Backend(object):
     def load_datamanager(self):
         filepath = self._get_datamanager_pickle_filename()
         lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path, timeout=60):
+        with lockfile.LockFile(lock_path):
             with open(filepath, 'rb') as fh:
                 return pickle.load(fh)
 
@@ -257,6 +258,7 @@ class Backend(object):
                 filepath), delete=False) as fh:
             pickle.dump(model, fh, -1)
             tempname = fh.name
+
         os.rename(tempname, filepath)
 
     def load_all_models(self, seed):
@@ -280,7 +282,8 @@ class Backend(object):
             # File names are like: {seed}.{index}.model
             if model_file.endswith('/'):
                 model_file = model_file[:-1]
-            if not model_file.endswith('.model'):
+            if not model_file.endswith('.model') and \
+                    not model_file.endswith('.model'):
                 continue
 
             basename = os.path.basename(model_file)
@@ -304,11 +307,11 @@ class Backend(object):
 
     def load_model_by_seed_and_id(self, seed, idx):
         model_directory = self.get_model_dir()
+
         model_file_name = '%s.%s.model' % (seed, idx)
         model_file_path = os.path.join(model_directory, model_file_name)
-
         with open(model_file_path, 'rb') as fh:
-            return (pickle.load(fh))
+            return pickle.load(fh)
 
     def get_ensemble_dir(self):
         return os.path.join(self.internals_directory, 'ensembles')

@@ -1,3 +1,5 @@
+import queue
+
 from autosklearn.constants import *
 from autosklearn.metrics import sanitize_array, \
     regression_metrics, classification_metrics
@@ -5,13 +7,13 @@ from autosklearn.metrics import sanitize_array, \
 
 __all__ = [
     'calculate_score',
+    'get_last_result'
 ]
-
-
 
 
 def calculate_score(solution, prediction, task_type, metric, num_classes,
                     all_scoring_functions=False, logger=None):
+
     if task_type not in TASK_TYPES:
         raise NotImplementedError(task_type)
 
@@ -23,6 +25,7 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
             for metric_ in REGRESSION_METRICS:
                 score[metric_] = regression_metrics.calculate_score(
                     metric_, solution, cprediction)
+
         else:
             for metric_ in CLASSIFICATION_METRICS:
                 score[metric_] = classification_metrics.calculate_score(
@@ -37,4 +40,16 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
         else:
             score = classification_metrics.calculate_score(
                 metric, solution, prediction, task=task_type)
+
     return score
+
+
+def get_last_result(queue_):
+    stack = []
+    while True:
+        try:
+            rval = queue_.get(timeout=1)
+        except queue.Empty:
+            break
+        stack.append(rval)
+    return stack.pop()

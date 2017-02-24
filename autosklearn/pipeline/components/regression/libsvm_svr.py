@@ -127,15 +127,8 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
         epsilon = UniformFloatHyperparameter(name="epsilon", lower=0.001,
                                              upper=1, default=0.1, log=True)
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(C)
-        cs.add_hyperparameter(kernel)
-        cs.add_hyperparameter(degree)
-        cs.add_hyperparameter(gamma)
-        cs.add_hyperparameter(coef0)
-        cs.add_hyperparameter(shrinking)
-        cs.add_hyperparameter(tol)
-        cs.add_hyperparameter(max_iter)
-        cs.add_hyperparameter(epsilon)
+        cs.add_hyperparameters([C, kernel, degree, gamma, coef0, shrinking,
+                               tol, max_iter, epsilon])
 
         degree_depends_on_kernel = InCondition(child=degree, parent=kernel,
                                                values=('poly', 'rbf', 'sigmoid'))
@@ -143,7 +136,7 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
                                               values=('poly', 'rbf'))
         coef0_depends_on_kernel = InCondition(child=coef0, parent=kernel,
                                               values=('poly', 'sigmoid'))
-        cs.add_condition(degree_depends_on_kernel)
-        cs.add_condition(gamma_depends_on_kernel)
-        cs.add_condition(coef0_depends_on_kernel)
+        cs.add_conditions([degree_depends_on_kernel, gamma_depends_on_kernel,
+                           coef0_depends_on_kernel])
+
         return cs

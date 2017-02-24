@@ -4,7 +4,8 @@ import unittest
 import numpy as np
 from scipy import sparse
 
-from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding import OneHotEncoder
+from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.one_hot_encoding \
+    import OneHotEncoder
 from autosklearn.pipeline.util import _test_preprocessing
 
 
@@ -54,7 +55,7 @@ class OneHotEncoderTest(unittest.TestCase):
 
     def test_default_configuration(self):
         transformations = []
-        for i in range(10):
+        for i in range(2):
             configuration_space = OneHotEncoder.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
 
@@ -72,7 +73,7 @@ class OneHotEncoderTest(unittest.TestCase):
 
     def test_default_configuration_no_encoding(self):
         transformations = []
-        for i in range(10):
+        for i in range(2):
             transformation, original = _test_preprocessing(OneHotEncoder)
             self.assertEqual(transformation.shape, original.shape)
             self.assertTrue((transformation == original).all())
@@ -87,7 +88,7 @@ class OneHotEncoderTest(unittest.TestCase):
         self.X_train[~np.isfinite(self.X_train)] = 0
         self.X_train = sparse.csc_matrix(self.X_train)
 
-        for i in range(10):
+        for i in range(2):
             configuration_space = OneHotEncoder.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
 
@@ -109,7 +110,7 @@ class OneHotEncoderTest(unittest.TestCase):
     def test_default_configuration_sparse_no_encoding(self):
         transformations = []
 
-        for i in range(10):
+        for i in range(2):
             transformation, original = _test_preprocessing(OneHotEncoder,
                                                            make_sparse=True)
             self.assertEqual(transformation.shape, original.shape)

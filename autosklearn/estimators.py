@@ -85,6 +85,10 @@ class AutoMLDecorator(object):
     def cv_results_(self):
         return self._automl.cv_results_
 
+    @property
+    def trajectory_(self):
+        return self._automl.trajectory_
+
     def sprint_statistics(self):
         return self._automl.sprint_statistics()
 
@@ -98,16 +102,20 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
                  ensemble_size=50,
                  ensemble_nbest=50,
                  seed=1,
-                 ml_memory_limit=3000,
+                 ml_memory_limit=3072,
                  include_estimators=None,
+                 exclude_estimators=None,
                  include_preprocessors=None,
+                 exclude_preprocessors=None,
                  resampling_strategy='holdout',
                  resampling_strategy_arguments=None,
                  tmp_folder=None,
                  output_folder=None,
                  delete_tmp_folder_after_terminate=True,
                  delete_output_folder_after_terminate=True,
-                 shared_mode=False):
+                 shared_mode=False,
+                 disable_evaluator_output=False,
+                 configuration_mode='SMAC'):
         """
         Parameters
         ----------
@@ -141,18 +149,27 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
 
         seed : int, optional (default=1)
 
-        ml_memory_limit : int, optional (3000)
+        ml_memory_limit : int, optional (3072)
             Memory limit in MB for the machine learning algorithm.
             `auto-sklearn` will stop fitting the machine learning algorithm if
             it tries to allocate more than `ml_memory_limit` MB.
 
-        include_estimators : dict, optional (None)
+        include_estimators : list, optional (None)
             If None, all possible estimators are used. Otherwise specifies
-            set of estimators to use
+            set of estimators to use.
 
-        include_preprocessors : dict, optional (None)
+        exclude_estimators : list, optional (None)
+            If None, all possible estimators are used. Otherwise specifies
+            set of estimators not to use. Incompatible with include_estimators.
+
+        include_preprocessors : list, optional (None)
             If None all possible preprocessors are used. Otherwise specifies set
-            of preprocessors to use
+            of preprocessors to use.
+
+        exclude_preprocessors : list, optional (None)
+            If None all possible preprocessors are used. Otherwise specifies set
+            of preprocessors not to use. Incompatible with
+            include_preprocessors.
 
         resampling_strategy : string, optional ('holdout')
             how to to handle overfitting, might need 'resampling_strategy_arguments'
@@ -161,14 +178,12 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             * 'holdout-iterative-fit':  66:33 (train:test) split, calls iterative
               fit where possible
             * 'cv': crossvalidation, requires 'folds'
-            * 'nested-cv': crossvalidation, requires 'outer-folds, 'inner-folds'
 
         resampling_strategy_arguments : dict, optional if 'holdout' (None)
             Additional arguments for resampling_strategy
             * 'holdout': None
             * 'holdout-iterative-fit':  None
             * 'cv': {'folds': int}
-            * 'nested-cv': {'outer_folds': int, 'inner_folds'
 
         tmp_folder : string, optional (None)
             folder to store configuration output and log files, if ``None``
@@ -191,6 +206,11 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             ``tmp_folder`` and ``output_folder`` are given and both
             ``delete_tmp_folder_after_terminate`` and
             ``delete_output_folder_after_terminate`` are set to False.
+
+        disable_evaluator_output: bool, optional (False)
+            Disable model and prediction output. Cannot be used together with
+            ensemble building. predict() cannot be used when setting this
+            flag to True.
 
         Attributes
         ----------
@@ -221,7 +241,9 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
         self.seed = seed
         self.ml_memory_limit = ml_memory_limit
         self.include_estimators = include_estimators
+        self.exclude_estimators = exclude_estimators
         self.include_preprocessors = include_preprocessors
+        self.exclude_preprocessors = exclude_preprocessors
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_arguments = resampling_strategy_arguments
         self.tmp_folder = tmp_folder
@@ -229,6 +251,8 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
         self.shared_mode = shared_mode
+        self.disable_evaluator_output = disable_evaluator_output
+        self.configuration_mode = configuration_mode
         super(AutoSklearnEstimator, self).__init__(None)
 
     def build_automl(self):
@@ -258,13 +282,17 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             seed=self.seed,
             ml_memory_limit=self.ml_memory_limit,
             include_estimators=self.include_estimators,
+            exclude_estimators=self.exclude_estimators,
             include_preprocessors=self.include_preprocessors,
+            exclude_preprocessors=self.exclude_preprocessors,
             resampling_strategy=self.resampling_strategy,
             resampling_strategy_arguments=self.resampling_strategy_arguments,
             delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
             delete_output_folder_after_terminate=
             self.delete_output_folder_after_terminate,
-            shared_mode=self.shared_mode)
+            shared_mode=self.shared_mode,
+            configuration_mode=self.configuration_mode,
+            disable_evaluator_output=self.disable_evaluator_output)
 
         return automl
 
@@ -310,9 +338,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             The metric to optimize for. Can be one of: ['acc_metric',
             'auc_metric', 'bac_metric', 'f1_metric', 'pac_metric']. A
             description of the metrics can be found in `the paper describing
-            the AutoML Challenge
-            <http://www.causality.inf.ethz.ch/AutoML/automl_ijcnn15.pdf>`_.
-
+            the AutoML Challenge.
         feat_type : list, optional (default=None)
             List of str of `len(X.shape[1])` describing the attribute type.
             Possible types are `Categorical` and `Numerical`. `Categorical`
@@ -327,7 +353,9 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         self
 
         """
-        return super(AutoSklearnClassifier, self).fit(X, y, metric, feat_type, dataset_name)
+        return super(AutoSklearnClassifier, self).fit(X=X, y=y, metric=metric,
+                                                      feat_type=feat_type,
+                                                      dataset_name=dataset_name)
 
     def predict(self, X):
         """Predict classes for X.
@@ -435,6 +463,7 @@ class AutoMLClassifier(AutoMLDecorator):
 
     def fit(self, X, y,
             metric='acc_metric',
+            loss=None,
             feat_type=None,
             dataset_name=None,
             ):
@@ -525,7 +554,10 @@ class AutoMLRegressor(AutoMLDecorator):
 
     def fit(self, X, y,
             metric='r2_metric',
+            loss=None,
             feat_type=None,
             dataset_name=None,
             ):
-        return self._automl.fit(X, y, REGRESSION, metric, feat_type, dataset_name)
+        return self._automl.fit(X=X, y=y, task=REGRESSION, metric=metric,
+                                loss=loss, feat_type=feat_type,
+                                dataset_name=dataset_name)

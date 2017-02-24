@@ -1,13 +1,9 @@
 from collections import OrderedDict
 import copy
-import importlib
-import inspect
 import os
-import pkgutil
-import sys
 
 from ..base import AutoSklearnPreprocessingAlgorithm, find_components, \
-    ThirdPartyComponents
+    ThirdPartyComponents, AutoSklearnChoice
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 from ConfigSpace.conditions import EqualsCondition, AbstractConjunction
@@ -23,28 +19,25 @@ def add_preprocessor(preprocessor):
     _addons.add_component(preprocessor)
 
 
-class FeaturePreprocessorChoice(object):
-    def __init__(self, **params):
-        choice = params['__choice__']
-        del params['__choice__']
-        self.choice = self.get_components()[choice](**params)
+class FeaturePreprocessorChoice(AutoSklearnChoice):
 
-    @classmethod
-    def get_components(cls):
+    def get_components(self):
         components = OrderedDict()
         components.update(_preprocessors)
         components.update(_addons.components)
         return components
 
-    @classmethod
-    def get_available_components(cls, data_prop,
+    def get_available_components(self, dataset_properties=None,
                                  include=None,
                                  exclude=None):
+        if dataset_properties is None:
+            dataset_properties = {}
+
         if include is not None and exclude is not None:
             raise ValueError(
                 "The argument include and exclude cannot be used together.")
 
-        available_comp = cls.get_components()
+        available_comp = self.get_components()
 
         if include is not None:
             for incl in include:
@@ -67,14 +60,14 @@ class FeaturePreprocessorChoice(object):
             if entry == FeaturePreprocessorChoice or hasattr(entry, 'get_components'):
                 continue
 
-            target_type = data_prop['target_type']
+            target_type = dataset_properties['target_type']
             if target_type == 'classification':
                 if entry.get_properties()['handles_classification'] is False:
                     continue
-                if data_prop.get('multiclass') is True and \
+                if dataset_properties.get('multiclass') is True and \
                         entry.get_properties()['handles_multiclass'] is False:
                     continue
-                if data_prop.get('multilabel') is True and \
+                if dataset_properties.get('multilabel') is True and \
                         entry.get_properties()['handles_multilabel'] is False:
                     continue
 
@@ -89,16 +82,18 @@ class FeaturePreprocessorChoice(object):
 
         return components_dict
 
-    @classmethod
-    def get_hyperparameter_search_space(cls, dataset_properties,
+    def get_hyperparameter_search_space(self, dataset_properties=None,
                                         default=None,
                                         include=None,
                                         exclude=None):
         cs = ConfigurationSpace()
 
+        if dataset_properties is None:
+            dataset_properties = {}
+
         # Compile a list of legal preprocessors for this problem
-        available_preprocessors = cls.get_available_components(
-            data_prop=dataset_properties,
+        available_preprocessors = self.get_available_components(
+            dataset_properties=dataset_properties,
             include=include, exclude=exclude)
 
         if len(available_preprocessors) == 0:
@@ -121,40 +116,13 @@ class FeaturePreprocessorChoice(object):
         for name in available_preprocessors:
             preprocessor_configuration_space = available_preprocessors[name]. \
                 get_hyperparameter_search_space(dataset_properties)
-            for parameter in preprocessor_configuration_space.get_hyperparameters():
-                new_parameter = copy.deepcopy(parameter)
-                new_parameter.name = "%s:%s" % (name, new_parameter.name)
-                cs.add_hyperparameter(new_parameter)
-                # We must only add a condition if the hyperparameter is not
-                # conditional on something else
-                if len(preprocessor_configuration_space.
-                        get_parents_of(parameter)) == 0:
-                    condition = EqualsCondition(new_parameter, preprocessor,
-                                                name)
-                    cs.add_condition(condition)
+            parent_hyperparameter = {'parent': preprocessor, 'value': name}
+            cs.add_configuration_space(name, preprocessor_configuration_space,
+                                       parent_hyperparameter=parent_hyperparameter)
 
-            for condition in available_preprocessors[name]. \
-                    get_hyperparameter_search_space(
-                    dataset_properties).get_conditions():
-                if not isinstance(condition, AbstractConjunction):
-                    dlcs = [condition]
-                else:
-                    dlcs = condition.get_descendent_literal_conditions()
-                for dlc in dlcs:
-                    if not dlc.child.name.startswith(name):
-                        dlc.child.name = "%s:%s" % (name, dlc.child.name)
-                    if not dlc.parent.name.startswith(name):
-                        dlc.parent.name = "%s:%s" % (name, dlc.parent.name)
-                cs.add_condition(condition)
-
-            for forbidden_clause in available_preprocessors[name]. \
-                    get_hyperparameter_search_space(
-                    dataset_properties).forbidden_clauses:
-                dlcs = forbidden_clause.get_descendant_literal_clauses()
-                for dlc in dlcs:
-                    if not dlc.hyperparameter.name.startswith(name):
-                        dlc.hyperparameter.name = "%s:%s" % (name,
-                                                             dlc.hyperparameter.name)
-                cs.add_forbidden_clause(forbidden_clause)
-
+        self.configuration_space_ = cs
+        self.dataset_properties_ = dataset_properties
         return cs
+
+    def transform(self, X):
+        return self.choice.transform(X)

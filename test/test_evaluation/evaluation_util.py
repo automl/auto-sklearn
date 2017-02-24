@@ -183,7 +183,7 @@ def get_binary_classification_datamanager():
 
     D = Dummy()
     D.info = {
-        'metric': AUC_METRIC,
+        'metric': ACC_METRIC,
         'task': BINARY_CLASSIFICATION,
         'is_sparse': False,
         'label_num': 2
@@ -252,7 +252,6 @@ def get_500_classes_datamanager():
                                                 shuffle=True,
                                                 random_state=1)
 
-    assert (25 == np.sum(np.bincount(Y) == 1), np.sum(np.bincount(Y) == 1))
     D = Dummy()
     D.info = {
         'metric': ACC_METRIC,

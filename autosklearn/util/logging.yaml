@@ -32,3 +32,15 @@ loggers:
     level: DEBUG
     handlers: [file_handler]
     propagate: no
+
+  intensifier:
+    level: INFO
+    handlers: [file_handler, console]
+
+  localsearch:
+    level: INFO
+    handlers: [file_handler, console]
+
+  SMBO:
+    level: INFO
+    handlers: [file_handler, console]

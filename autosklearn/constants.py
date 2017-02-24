@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+
 BINARY_CLASSIFICATION = 1
 MULTICLASS_CLASSIFICATION = 2
 MULTILABEL_CLASSIFICATION = 3
@@ -21,6 +22,7 @@ STRING_TO_TASK_TYPES = \
      'multiclass.classification': MULTICLASS_CLASSIFICATION,
      'multilabel.classification': MULTILABEL_CLASSIFICATION,
      'regression': REGRESSION}
+
 
 ACC_METRIC = 5
 AUC_METRIC = 6
@@ -48,8 +50,7 @@ STRING_TO_METRIC = {
     'r2': R2_METRIC,
     'r2_metric': R2_METRIC,
     'a': A_METRIC,
-    'a_metric': A_METRIC
-}
+    'a_metric': A_METRIC}
 
 METRIC_TO_STRING = {
     ACC_METRIC: 'acc_metric',
@@ -58,8 +59,7 @@ METRIC_TO_STRING = {
     F1_METRIC: 'f1_metric',
     PAC_METRIC: 'pac_metric',
     R2_METRIC: 'r2_metric',
-    A_METRIC: 'a_metric'
-}
+    A_METRIC: 'a_metric'}
 
 METRICS_SHORT_TO_LONG_FORM = {
     'acc': 'acc_metric',
@@ -68,6 +68,4 @@ METRICS_SHORT_TO_LONG_FORM = {
     'f1': 'f1_metric',
     'pac': 'pac_metric',
     'r2': 'r2_metric',
-    'a': 'a_metric'
-}
-
+    'a': 'a_metric'}

@@ -1,6 +1,3 @@
-from autosklearn.pipeline.implementations.MultilabelClassifier import \
-    MultilabelClassifier
-
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
@@ -37,11 +34,7 @@ class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
             random_state=self.random_state
         )
 
-        if len(Y.shape) == 2 and Y.shape[1] > 1:
-            estimator = MultilabelClassifier(estimator, n_jobs=1)
-            estimator.fit(X, Y, sample_weight=sample_weight)
-        else:
-            estimator.fit(X, Y, sample_weight=sample_weight)
+        estimator.fit(X, Y, sample_weight=sample_weight)
 
         self.estimator = estimator
         return self
@@ -63,7 +56,7 @@ class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': True,
+                'handles_multilabel': False,
                 'is_deterministic': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,)}
@@ -72,14 +65,15 @@ class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        # base_estimator = Constant(name="base_estimator", value="None")
-        n_estimators = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="n_estimators", lower=50, upper=500, default=50, log=False))
-        learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
-            name="learning_rate", lower=0.01, upper=2, default=0.1, log=True))
-        algorithm = cs.add_hyperparameter(CategoricalHyperparameter(
-            name="algorithm", choices=["SAMME.R", "SAMME"], default="SAMME.R"))
-        max_depth = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="max_depth", lower=1, upper=10, default=1, log=False))
+        n_estimators = UniformIntegerHyperparameter(
+            name="n_estimators", lower=50, upper=500, default=50, log=False)
+        learning_rate = UniformFloatHyperparameter(
+            name="learning_rate", lower=0.01, upper=2, default=0.1, log=True)
+        algorithm = CategoricalHyperparameter(
+            name="algorithm", choices=["SAMME.R", "SAMME"], default="SAMME.R")
+        max_depth = UniformIntegerHyperparameter(
+            name="max_depth", lower=1, upper=10, default=1, log=False)
+
+        cs.add_hyperparameters([n_estimators, learning_rate, algorithm, max_depth])
         return cs
 

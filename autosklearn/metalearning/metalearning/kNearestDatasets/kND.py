@@ -53,8 +53,9 @@ class KNearestDatasets(object):
             if not np.isfinite(runs[dataset_name]).any():
                 best_configuration_per_dataset[dataset_name] = None
             else:
-                best_configuration_per_dataset[dataset_name] = \
-                    runs[dataset_name].argmin(skipna=True)
+                configuration_idx = runs[dataset_name].index[
+                    np.nanargmin(runs[dataset_name].values)]
+                best_configuration_per_dataset[dataset_name] = configuration_idx
 
         self.best_configuration_per_dataset = best_configuration_per_dataset
 

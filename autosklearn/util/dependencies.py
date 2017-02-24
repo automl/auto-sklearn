@@ -2,8 +2,9 @@ import pkg_resources
 import re
 from distutils.version import LooseVersion
 
+SUBPATTERN = r'((?P<operation%d>==|>=|>|<)(?P<version%d>(\d+)?(\.[a-zA-Z0-9]+)?(\.\d+)?))'
 RE_PATTERN = re.compile(
-    r'^(?P<name>[\w\-]+)((?P<operation>==|>=|>)(?P<version>(\d+)?(\.[a-zA-Z0-9]+)?(\.\d+)?))?$')
+    r'^(?P<name>[\w\-]+)%s?(,%s)?$' % (SUBPATTERN % (1, 1), SUBPATTERN % (2, 2)))
 
 
 
@@ -20,9 +21,11 @@ def verify_packages(packages):
         match = RE_PATTERN.match(package)
         if match:
             name = match.group('name')
-            operation = match.group('operation')
-            version = match.group('version')
+            operation = match.group('operation1')
+            version = match.group('version1')
             _verify_package(name, operation, version)
+            operation2 = match.group('operation2')
+            version2 = match.group('version2')
         else:
             raise ValueError('Unable to read requirement: %s' % package)
 

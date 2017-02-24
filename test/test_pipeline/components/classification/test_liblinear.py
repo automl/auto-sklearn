@@ -10,25 +10,25 @@ from autosklearn.pipeline.util import _test_classifier, _test_classifier_predict
 
 class LibLinearComponentTest(unittest.TestCase):
     def test_default_configuration(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier(LibLinear_SVC)
             self.assertTrue(all(targets == predictions))
 
     def test_default_configuration_sparse(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier(LibLinear_SVC,
                                                     sparse=True)
             self.assertEquals(0.56, sklearn.metrics.accuracy_score(
                 targets, predictions))
 
     def test_default_configuration_binary(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier(LibLinear_SVC,
                                                     make_binary=True)
             self.assertTrue(all(targets == predictions))
 
     def test_default_configuration_multilabel(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier(LibLinear_SVC,
                                                     make_multilabel=True)
             self.assertAlmostEquals(0.84479797979797977, sklearn.metrics.average_precision_score(

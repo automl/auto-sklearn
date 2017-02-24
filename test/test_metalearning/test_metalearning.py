@@ -96,5 +96,7 @@ class Test(unittest.TestCase):
                         configuration_space, dataset_name, metric,
                         task, False, 1, None)
 
+                print(metric)
+                print(initial_configuration_strings_for_smac[0])
                 self.assertTrue(initial_configuration_strings_for_smac[
                                     0].startswith(initial_challengers[metric]))

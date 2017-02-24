@@ -1,15 +1,12 @@
 # -*- encoding: utf-8 -*-
-from __future__ import print_function
+import builtins
+import sys
 import unittest
 import unittest.mock
 
-from autosklearn.util.backend import Backend
+import sklearn.tree
 
-from sys import version_info
-if version_info.major == 2:
-    import __builtin__ as builtins
-else:
-    import builtins
+from autosklearn.util.backend import Backend
 
 
 class BackendModelsTest(unittest.TestCase):
@@ -24,20 +21,36 @@ class BackendModelsTest(unittest.TestCase):
         self.backend = self.BackendStub()
         self.backend.get_model_dir = lambda: self.model_directory
 
-    @unittest.mock.patch('six.moves.cPickle.load')
+    def test_load_models_by_file_names(self):
+        self.backend.load_model_by_seed_and_id = unittest.mock.Mock()
+        self.backend.load_model_by_seed_and_id.side_effect = lambda *args: args
+        rval = self.backend.load_models_by_file_names(['1.2.model',
+                                                       '1.3.model',
+                                                       '1.4.models'])
+        self.assertEqual(rval, {(1, 2): (1, 2),
+                                (1, 3): (1, 3)})
+
+    @unittest.mock.patch('pickle.load')
+    @unittest.mock.patch('os.path.exists')
+    def test_load_model_by_seed_and_id(self, exists_mock, pickleLoadMock):
+        exists_mock.return_value = False
+        open_mock = unittest.mock.mock_open(read_data='Data')
+        with unittest.mock.patch('autosklearn.util.backend.open', open_mock, create=True):
+            seed = 13
+            idx = 17
+            expected_model = self._setup_load_model_mocks(open_mock,
+                                                          pickleLoadMock,
+                                                          seed, idx)
+
+            actual_model = self.backend.load_model_by_seed_and_id(seed, idx)
+
+            self.assertEqual(expected_model, actual_model)
+
+    @unittest.mock.patch('pickle.load')
     @unittest.mock.patch.object(builtins, 'open')
-    def test_loads_model_by_seed_and_id(self, openMock, pickleLoadMock):
-        seed = 13
-        idx = 17
-        expected_model = self._setup_load_model_mocks(openMock, pickleLoadMock, seed, idx)
-
-        actual_model = self.backend.load_model_by_seed_and_id(seed, idx)
-
-        self.assertEqual(expected_model, actual_model)
-
-    @unittest.mock.patch('six.moves.cPickle.load')
-    @unittest.mock.patch.object(builtins, 'open')
-    def test_loads_models_by_identifiers(self, openMock, pickleLoadMock):
+    @unittest.mock.patch('os.path.exists')
+    def test_loads_models_by_identifiers(self, exists_mock, openMock, pickleLoadMock):
+        exists_mock.return_value = True
         seed = 13
         idx = 17
         expected_model = self._setup_load_model_mocks(openMock, pickleLoadMock, seed, idx)

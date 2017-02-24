@@ -11,20 +11,20 @@ import sklearn.metrics
 
 class RandomForestComponentTest(unittest.TestCase):
     def test_default_configuration(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier(RandomForest)
             self.assertAlmostEqual(0.95999999999999996,
                 sklearn.metrics.accuracy_score(predictions, targets))
 
     def test_default_configuration_sparse(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier(RandomForest, sparse=True)
             self.assertAlmostEqual(0.85999999999999999,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   targets))
 
     def test_default_configuration_iterative_fit(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier_iterative_fit(RandomForest)
             self.assertAlmostEqual(0.95999999999999996,
@@ -32,7 +32,7 @@ class RandomForestComponentTest(unittest.TestCase):
                                        predictions, targets))
 
     def test_default_configuration_binary(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier(RandomForest,
                                                     make_binary=True)
             self.assertAlmostEqual(1.0,
@@ -40,7 +40,7 @@ class RandomForestComponentTest(unittest.TestCase):
                                        predictions, targets))
 
     def test_default_configuration_multilabel(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_classifier(RandomForest,
                                                     make_multilabel=True)
             self.assertAlmostEqual(0.95999999999999996,
@@ -48,7 +48,7 @@ class RandomForestComponentTest(unittest.TestCase):
                                        predictions, targets))
 
     def test_default_configuration_predict_proba_multilabel(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier_predict_proba(RandomForest,
                                                make_multilabel=True)

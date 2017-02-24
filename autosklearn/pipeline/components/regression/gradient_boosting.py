@@ -125,28 +125,33 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
-        loss = cs.add_hyperparameter(CategoricalHyperparameter(
-            "loss", ["ls", "lad", "huber", "quantile"], default="ls"))
-        learning_rate = cs.add_hyperparameter(UniformFloatHyperparameter(
-            name="learning_rate", lower=0.01, upper=1, default=0.1, log=True))
-        n_estimators = cs.add_hyperparameter(UniformIntegerHyperparameter
-            ("n_estimators", 50, 500, default=100))
-        max_depth = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="max_depth", lower=1, upper=10, default=3))
-        min_samples_split = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="min_samples_split", lower=2, upper=20, default=2, log=False))
-        min_samples_leaf = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            name="min_samples_leaf", lower=1, upper=20, default=1, log=False))
-        min_weight_fraction_leaf = cs.add_hyperparameter(
-            UnParametrizedHyperparameter("min_weight_fraction_leaf", 0.))
-        subsample = cs.add_hyperparameter(UniformFloatHyperparameter(
-            name="subsample", lower=0.01, upper=1.0, default=1.0, log=False))
-        max_features = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default=1))
-        max_leaf_nodes = cs.add_hyperparameter(UnParametrizedHyperparameter(
-            name="max_leaf_nodes", value="None"))
-        alpha = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "alpha", lower=0.75, upper=0.99, default=0.9))
+        loss = CategoricalHyperparameter(
+            "loss", ["ls", "lad", "huber", "quantile"], default="ls")
+        learning_rate = UniformFloatHyperparameter(
+            name="learning_rate", lower=0.01, upper=1, default=0.1, log=True)
+        n_estimators = UniformIntegerHyperparameter(
+            "n_estimators", 50, 500, default=100)
+        max_depth = UniformIntegerHyperparameter(
+            name="max_depth", lower=1, upper=10, default=3)
+        min_samples_split = UniformIntegerHyperparameter(
+            name="min_samples_split", lower=2, upper=20, default=2, log=False)
+        min_samples_leaf = UniformIntegerHyperparameter(
+            name="min_samples_leaf", lower=1, upper=20, default=1, log=False)
+        min_weight_fraction_leaf = UnParametrizedHyperparameter(
+            "min_weight_fraction_leaf", 0.)
+        subsample = UniformFloatHyperparameter(
+            name="subsample", lower=0.01, upper=1.0, default=1.0, log=False)
+        max_features = UniformFloatHyperparameter(
+            "max_features", 0.5, 5, default=1)
+        max_leaf_nodes = UnParametrizedHyperparameter(
+            name="max_leaf_nodes", value="None")
+        alpha = UniformFloatHyperparameter(
+            "alpha", lower=0.75, upper=0.99, default=0.9)
+
+        cs.add_hyperparameters([loss, learning_rate, n_estimators, max_depth,
+                                min_samples_split, min_samples_leaf,
+                                min_weight_fraction_leaf, subsample, max_features,
+                                max_leaf_nodes, alpha])
 
         cs.add_condition(InCondition(alpha, loss, ['huber', 'quantile']))
         return cs

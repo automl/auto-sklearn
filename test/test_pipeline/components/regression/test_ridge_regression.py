@@ -14,7 +14,7 @@ class RidgeComponentTest(unittest.TestCase):
         configuration_space_preproc = RandomKitchenSinks.get_hyperparameter_search_space()
         default_preproc = configuration_space_preproc.get_default_configuration()
 
-        for i in range(10):
+        for i in range(2):
             # This should be a bad results
             predictions, targets = _test_regressor(RidgeRegression,)
             self.assertAlmostEqual(0.32614416980439365,

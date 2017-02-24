@@ -12,7 +12,7 @@ import sklearn.naive_bayes
 
 class MultinomialNBComponentTest(unittest.TestCase):
     def test_default_configuration(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(MultinomialNB)
             self.assertAlmostEqual(0.97999999999999998,
@@ -20,7 +20,7 @@ class MultinomialNBComponentTest(unittest.TestCase):
                                                                   targets))
 
     def test_default_configuration_iterative_fit(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier_iterative_fit(MultinomialNB)
             self.assertAlmostEqual(0.97999999999999998,
@@ -46,7 +46,7 @@ class MultinomialNBComponentTest(unittest.TestCase):
                                0.88888888888888884)
 
     def test_default_configuration_binary(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(MultinomialNB, make_binary=True)
             self.assertAlmostEqual(1.0,
@@ -54,7 +54,7 @@ class MultinomialNBComponentTest(unittest.TestCase):
                                        predictions, targets))
 
     def test_default_configuration_multilabel(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(classifier=MultinomialNB,
                                  dataset='digits',
@@ -64,7 +64,7 @@ class MultinomialNBComponentTest(unittest.TestCase):
                                        targets, predictions))
 
     def test_default_configuration_multilabel_predict_proba(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier_predict_proba(classifier=MultinomialNB,
                                                make_multilabel=True)

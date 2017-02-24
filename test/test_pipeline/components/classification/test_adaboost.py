@@ -11,7 +11,7 @@ import numpy as np
 
 class AdaBoostComponentTest(unittest.TestCase):
     def test_default_configuration_iris(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(AdaboostClassifier)
             self.assertAlmostEqual(0.93999999999999995,
@@ -19,42 +19,22 @@ class AdaBoostComponentTest(unittest.TestCase):
                                                                   predictions))
 
     def test_default_configuration_iris_predict_proba(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier_predict_proba(AdaboostClassifier)
             self.assertAlmostEqual(0.22452300738472031,
                                    sklearn.metrics.log_loss(targets, predictions))
 
     def test_default_configuration_iris_sparse(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(AdaboostClassifier, sparse=True)
             self.assertAlmostEqual(0.85999999999999999,
                                    sklearn.metrics.accuracy_score(targets,
                                                                   predictions))
 
-    def test_default_configuration_multilabel(self):
-        for i in range(10):
-            predictions, targets = \
-                _test_classifier(classifier=AdaboostClassifier,
-                                 dataset='digits',
-                                 make_multilabel=True)
-            self.assertAlmostEqual(0.79529966660329099,
-                                   sklearn.metrics.average_precision_score(
-                                       targets, predictions))
-
-    def test_default_configuration_multilabel_predict_proba(self):
-        for i in range(10):
-            predictions, targets = \
-                _test_classifier_predict_proba(classifier=AdaboostClassifier,
-                                 make_multilabel=True)
-            self.assertEqual(predictions.shape, ((50, 3)))
-            self.assertAlmostEqual(0.9722131915406923,
-                                   sklearn.metrics.average_precision_score(
-                                       targets, predictions))
-
     def test_default_configuration_binary(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = \
                 _test_classifier(classifier=AdaboostClassifier,
                                  dataset='digits', sparse=True,

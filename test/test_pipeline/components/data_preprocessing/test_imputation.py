@@ -2,14 +2,15 @@ import unittest
 
 from scipy import sparse
 
-from autosklearn.pipeline.components.data_preprocessing.imputation import Imputation
+from autosklearn.pipeline.components.data_preprocessing.imputation.imputation\
+    import Imputation
 from autosklearn.pipeline.util import _test_preprocessing, PreprocessingTestCase
 
 
 class ImputationTest(PreprocessingTestCase):
     def test_default_configuration(self):
         transformations = []
-        for i in range(10):
+        for i in range(2):
             transformation, original = _test_preprocessing(Imputation)
             self.assertEqual(transformation.shape, original.shape)
             self.assertTrue((transformation == original).all())

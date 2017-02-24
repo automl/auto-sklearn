@@ -17,7 +17,7 @@ class TestSMBO(unittest.TestCase):
         dataset_name = 'foo'
         func_eval_time_limit = 15
         total_walltime_limit = 15
-        memory_limit = 3000
+        memory_limit = 3072
 
         auto = AutoMLSMBO(None, dataset_name, None, func_eval_time_limit,
                           total_walltime_limit, memory_limit, None)

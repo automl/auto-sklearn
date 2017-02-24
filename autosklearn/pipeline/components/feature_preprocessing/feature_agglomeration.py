@@ -57,14 +57,15 @@ class FeatureAgglomeration(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
-        n_clusters = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            "n_clusters", 2, 400, 25))
-        affinity = cs.add_hyperparameter(CategoricalHyperparameter(
-            "affinity", ["euclidean", "manhattan", "cosine"], "euclidean"))
-        linkage = cs.add_hyperparameter(CategoricalHyperparameter(
-            "linkage", ["ward", "complete", "average"], "ward"))
-        pooling_func = cs.add_hyperparameter(CategoricalHyperparameter(
-            "pooling_func", ["mean", "median", "max"]))
+        n_clusters = UniformIntegerHyperparameter("n_clusters", 2, 400, 25)
+        affinity = CategoricalHyperparameter(
+            "affinity", ["euclidean", "manhattan", "cosine"], "euclidean")
+        linkage = CategoricalHyperparameter(
+            "linkage", ["ward", "complete", "average"], "ward")
+        pooling_func = CategoricalHyperparameter(
+            "pooling_func", ["mean", "median", "max"])
+
+        cs.add_hyperparameters([n_clusters, affinity, linkage, pooling_func])
 
         affinity_and_linkage = ForbiddenAndConjunction(
             ForbiddenInClause(affinity, ["manhattan", "cosine"]),

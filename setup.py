@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-import autosklearn
-
 import setuptools
 from setuptools.extension import Extension
 import numpy as np
@@ -19,7 +17,7 @@ requirements = [
     "nose",
     "six",
     "Cython",
-    "numpy>=1.9.0",
+    "numpy>=1.9.0,<1.12",
     "scipy>=0.14.1",
     "scikit-learn==0.17.1",
     "lockfile",
@@ -30,10 +28,10 @@ requirements = [
     "liac-arff",
     "pandas",
     "xgboost==0.4a30",
-    "ConfigSpace",
+    "ConfigSpace>=0.3.1,<0.4",
     "pynisher>=0.4",
     "pyrfr",
-    "smac==0.2.2"
+    "smac==0.3.0"
 ]
 
 with open("autosklearn/__version__.py") as fh:
@@ -42,12 +40,11 @@ with open("autosklearn/__version__.py") as fh:
 setuptools.setup(
     name='auto-sklearn',
     description='Automated machine learning.',
-    version=autosklearn.__version__,
+    version=version,
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
     install_requires=requirements,
     test_suite='nose.collector',
-    scripts=['scripts/autosklearn'],
     include_package_data=True,
     author='Matthias Feurer',
     author_email='feurerm@informatik.uni-freiburg.de',

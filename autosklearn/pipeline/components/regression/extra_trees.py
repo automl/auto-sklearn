@@ -125,18 +125,17 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        n_estimators = cs.add_hyperparameter(Constant("n_estimators", 100))
-        criterion = cs.add_hyperparameter(Constant("criterion", "mse"))
-        max_features = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default=1))
+        n_estimators = Constant("n_estimators", 100)
+        criterion = Constant("criterion", "mse")
+        max_features = UniformFloatHyperparameter(
+            "max_features", 0.5, 5, default=1)
 
-        max_depth = cs.add_hyperparameter(
-            UnParametrizedHyperparameter(name="max_depth", value="None"))
+        max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
 
-        min_samples_split = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            "min_samples_split", 2, 20, default=2))
-        min_samples_leaf = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            "min_samples_leaf", 1, 20, default=1))
+        min_samples_split = UniformIntegerHyperparameter(
+            "min_samples_split", 2, 20, default=2)
+        min_samples_leaf = UniformIntegerHyperparameter(
+            "min_samples_leaf", 1, 20, default=1)
 
         # Unparametrized, we use min_samples as regularization
         # max_leaf_nodes_or_max_depth = UnParametrizedHyperparameter(
@@ -148,8 +147,12 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
         # max_leaf_nodes = UnParametrizedHyperparameter(name="max_leaf_nodes",
         #                                              value="None")
 
-        bootstrap = cs.add_hyperparameter(CategoricalHyperparameter(
-            "bootstrap", ["True", "False"], default="False"))
+        bootstrap = CategoricalHyperparameter(
+            "bootstrap", ["True", "False"], default="False")
+
+        cs.add_hyperparameters([n_estimators, criterion, max_features,
+                                max_depth, min_samples_split, min_samples_leaf,
+                                bootstrap])
 
         # Conditions
         # Not applicable because max_leaf_nodes is no legal value of the parent

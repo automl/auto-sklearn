@@ -9,7 +9,7 @@ from sklearn.utils.testing import assert_raises
 from sklearn.utils.testing import assert_false
 from sklearn.utils.testing import assert_true
 
-from autosklearn.pipeline.implementations.Imputation import Imputer
+from sklearn.preprocessing import Imputer
 from sklearn.pipeline import Pipeline
 from sklearn import grid_search
 from sklearn import tree

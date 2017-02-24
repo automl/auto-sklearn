@@ -24,7 +24,6 @@ def calculate_score(metric, solution, prediction, task):
     return globals()[metric](solution, prediction, task)
 
 
-
 def acc_metric(solution, prediction, task=BINARY_CLASSIFICATION):
     """
     Compute the accuracy.

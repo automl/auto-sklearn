@@ -9,8 +9,6 @@ from ConfigSpace.conditions import EqualsCondition
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
-from autosklearn.pipeline.implementations.MultilabelClassifier import \
-    MultilabelClassifier
 
 
 class SGD(AutoSklearnClassificationAlgorithm):
@@ -69,20 +67,13 @@ class SGD(AutoSklearnClassificationAlgorithm):
                                            average=self.average,
                                            random_state=self.random_state,)
 
-        # Fallback for multilabel classification
-        if len(y.shape) > 1 and y.shape[1] > 1:
-            self.estimator.n_iter = self.n_iter
-            self.estimator = MultilabelClassifier(self.estimator, n_jobs=1)
-            self.estimator.fit(X, y, sample_weight=sample_weight)
-            self.fully_fit_ = True
-        else:
-            self.estimator.n_iter = n_iter
-            self.estimator.partial_fit(X, y, classes=np.unique(y),
-                                       sample_weight=sample_weight)
+        self.estimator.n_iter = n_iter
+        self.estimator.partial_fit(X, y, classes=np.unique(y),
+                                   sample_weight=sample_weight)
 
-            if self._iterations >= self.n_iter:
-                self.fully_fit_ = True
-            self._iterations += n_iter
+        if self._iterations >= self.n_iter:
+            self.fully_fit_ = True
+        self._iterations += n_iter
         return self
 
     def configuration_fully_fitted(self):
@@ -115,7 +106,7 @@ class SGD(AutoSklearnClassificationAlgorithm):
                 'handles_regression': False,
                 'handles_classification': True,
                 'handles_multiclass': True,
-                'handles_multilabel': True,
+                'handles_multilabel': False,
                 'is_deterministic': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,)}
@@ -124,30 +115,30 @@ class SGD(AutoSklearnClassificationAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        loss = cs.add_hyperparameter(CategoricalHyperparameter("loss",
+        loss = CategoricalHyperparameter("loss",
             ["hinge", "log", "modified_huber", "squared_hinge", "perceptron"],
-            default="log"))
-        penalty = cs.add_hyperparameter(CategoricalHyperparameter(
-            "penalty", ["l1", "l2", "elasticnet"], default="l2"))
-        alpha = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "alpha", 10e-7, 1e-1, log=True, default=0.0001))
-        l1_ratio = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "l1_ratio", 1e-9, 1,  log=True, default=0.15))
-        fit_intercept = cs.add_hyperparameter(UnParametrizedHyperparameter(
-            "fit_intercept", "True"))
-        n_iter = cs.add_hyperparameter(UniformIntegerHyperparameter(
-            "n_iter", 5, 1000, log=True, default=20))
-        epsilon = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "epsilon", 1e-5, 1e-1, default=1e-4, log=True))
-        learning_rate = cs.add_hyperparameter(CategoricalHyperparameter(
+            default="log")
+        penalty = CategoricalHyperparameter(
+            "penalty", ["l1", "l2", "elasticnet"], default="l2")
+        alpha = UniformFloatHyperparameter(
+            "alpha", 10e-7, 1e-1, log=True, default=0.0001)
+        l1_ratio = UniformFloatHyperparameter(
+            "l1_ratio", 1e-9, 1,  log=True, default=0.15)
+        fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
+        n_iter = UniformIntegerHyperparameter("n_iter", 5, 1000, log=True, default=20)
+        epsilon = UniformFloatHyperparameter(
+            "epsilon", 1e-5, 1e-1, default=1e-4, log=True)
+        learning_rate = CategoricalHyperparameter(
             "learning_rate", ["optimal", "invscaling", "constant"],
-            default="optimal"))
-        eta0 = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "eta0", 10**-7, 0.1, default=0.01))
-        power_t = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "power_t", 1e-5, 1, default=0.25))
-        average = cs.add_hyperparameter(CategoricalHyperparameter(
-            "average", ["False", "True"], default="False"))
+            default="optimal")
+        eta0 = UniformFloatHyperparameter(
+            "eta0", 10**-7, 0.1, default=0.01)
+        power_t = UniformFloatHyperparameter("power_t", 1e-5, 1, default=0.25)
+        average = CategoricalHyperparameter(
+            "average", ["False", "True"], default="False")
+        cs.add_hyperparameters([loss, penalty, alpha, l1_ratio, fit_intercept,
+                                n_iter, epsilon, learning_rate, eta0, power_t,
+                                average])
 
         # TODO add passive/aggressive here, although not properly documented?
         elasticnet = EqualsCondition(l1_ratio, penalty, "elasticnet")
@@ -160,9 +151,7 @@ class SGD(AutoSklearnClassificationAlgorithm):
         #eta0_condition = OrConjunction(eta0_and_inv, eta0_and_constant)
         power_t_condition = EqualsCondition(power_t, learning_rate, "invscaling")
 
-        cs.add_condition(elasticnet)
-        cs.add_condition(epsilon_condition)
-        cs.add_condition(power_t_condition)
+        cs.add_conditions([elasticnet, epsilon_condition, power_t_condition])
 
         return cs
 

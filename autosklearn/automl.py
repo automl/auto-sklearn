@@ -2,9 +2,11 @@
 from __future__ import print_function
 
 from collections import defaultdict
-import hashlib
 import io
+import json
 import os
+import unittest.mock
+import warnings
 
 
 from ConfigSpace.io import pcs
@@ -13,13 +15,13 @@ import numpy.ma as ma
 import scipy.stats
 from sklearn.base import BaseEstimator
 from smac.tae.execute_ta_run import StatusType
+from smac.stats.stats import Stats
 from sklearn.grid_search import _CVScoreTuple
 
 from autosklearn.constants import *
-from autosklearn.data.data_manager_factory import get_data_manager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
-from autosklearn.evaluation import resampling, ExecuteTaFuncWithQueue
+from autosklearn.evaluation import ExecuteTaFuncWithQueue
 from autosklearn.evaluation import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline
@@ -39,12 +41,14 @@ class AutoML(BaseEstimator):
                  ensemble_size=1,
                  ensemble_nbest=1,
                  seed=1,
-                 ml_memory_limit=3000,
+                 ml_memory_limit=3072,
                  metadata_directory=None,
                  keep_models=True,
                  debug_mode=False,
                  include_estimators=None,
+                 exclude_estimators=None,
                  include_preprocessors=None,
+                 exclude_preprocessors=None,
                  resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
                  delete_tmp_folder_after_terminate=False,
@@ -52,7 +56,9 @@ class AutoML(BaseEstimator):
                  shared_mode=False,
                  precision=32,
                  max_iter_smac=None,
-                 acquisition_function='EI'):
+                 acquisition_function='EI',
+                 disable_evaluator_output=False,
+                 configuration_mode='SMAC'):
         super(AutoML, self).__init__()
         self._backend = backend
         #self._tmp_dir = tmp_dir
@@ -70,7 +76,9 @@ class AutoML(BaseEstimator):
         self._metadata_directory = metadata_directory
         self._keep_models = keep_models
         self._include_estimators = include_estimators
+        self._exclude_estimators = exclude_estimators
         self._include_preprocessors = include_preprocessors
+        self._exclude_preprocessors = exclude_preprocessors
         self._resampling_strategy = resampling_strategy
         self._resampling_strategy_arguments = resampling_strategy_arguments \
             if resampling_strategy_arguments is not None else {}
@@ -82,6 +90,8 @@ class AutoML(BaseEstimator):
         self._shared_mode = shared_mode
         self.precision = precision
         self.acquisition_function = acquisition_function
+        self._disable_evaluator_output = disable_evaluator_output
+        self._configuration_mode = configuration_mode
 
         self._datamanager = None
         self._dataset_name = None
@@ -106,29 +116,6 @@ class AutoML(BaseEstimator):
 
         # After assignging and checking variables...
         #self._backend = Backend(self._output_dir, self._tmp_dir)
-
-    def start_automl(self, parser):
-        self._parser = parser
-        self.start()
-
-    def start(self):
-        if self._parser is None:
-            raise ValueError('You must invoke start() only via start_automl()')
-        super(AutoML, self).start()
-
-    def run(self):
-        if self._parser is None:
-            raise ValueError('You must invoke run() only via start_automl()')
-        self._backend.save_start_time(self._seed)
-        self._stopwatch = StopWatch()
-        datamanager = get_data_manager(namespace=self._parser)
-        self._stopwatch.start_task(datamanager.name)
-
-        self._logger = self._get_logger(datamanager.name)
-
-        self._datamanager = datamanager
-        self._dataset_name = datamanager.name
-        self._fit(self._datamanager)
 
     def fit(self, X, y,
             task=MULTICLASS_CLASSIFICATION,
@@ -206,6 +193,18 @@ class AutoML(BaseEstimator):
 
         return self._fit(loaded_data_manager)
 
+    def fit_on_datamanager(self, datamanager):
+        self._stopwatch = StopWatch()
+        self._backend.save_start_time(self._seed)
+
+        name = os.path.basename(datamanager.name)
+        self._stopwatch.start_task(name)
+        self._start_task(self._stopwatch, name)
+        self._dataset_name = name
+
+        self._logger = self._get_logger(name)
+        self._fit(datamanager)
+
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
         setup_logger(os.path.join(self._backend.temporary_directory, '%s.log' % str(logger_name)))
@@ -231,31 +230,36 @@ class AutoML(BaseEstimator):
 
     def _do_dummy_prediction(self, datamanager, num_run):
 
+        # When using partial-cv it makes no sense to do dummy predictions
+        if self._resampling_strategy in ['partial-cv',
+                                         'partial-cv-iterative-fit']:
+            return num_run
+
         self._logger.info("Starting to create dummy predictions.")
-        # time_limit = int(self._time_for_task / 6.)
         memory_limit = int(self._ml_memory_limit)
+        scenario_mock = unittest.mock.Mock()
+        scenario_mock.wallclock_limit = self._time_for_task
+        # This stats object is a hack - maybe the SMAC stats object should
+        # already be generated here!
+        stats = Stats(scenario_mock)
+        stats.start_timing()
         ta = ExecuteTaFuncWithQueue(backend=self._backend,
                                     autosklearn_seed=self._seed,
                                     resampling_strategy=self._resampling_strategy,
                                     initial_num_run=num_run,
                                     logger=self._logger,
+                                    stats=stats,
+                                    memory_limit=memory_limit,
+                                    disable_file_output=self._disable_evaluator_output,
                                     **self._resampling_strategy_arguments)
 
         status, cost, runtime, additional_info = \
-            ta.run(1, cutoff=self._time_for_task, memory_limit=memory_limit)
+            ta.run(1, cutoff=self._time_for_task)
         if status == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy predictions.")
         else:
             self._logger.error('Error creating dummy predictions:%s ',
                                additional_info)
-
-        #status, cost, runtime, additional_info = \
-        #    ta.run(2, cutoff=time_limit, memory_limit=memory_limit)
-        #if status == StatusType.SUCCESS:
-        #    self._logger.info("Finished creating dummy prediction 2/2.")
-        #else:
-        #    self._logger.error('Error creating dummy prediction 2/2 %s',
-        #                       additional_info)
 
         return ta.num_run
 
@@ -266,13 +270,18 @@ class AutoML(BaseEstimator):
 
         # Check arguments prior to doing anything!
         if self._resampling_strategy not in ['holdout', 'holdout-iterative-fit',
-                                             'cv', 'nested-cv', 'partial-cv']:
+                                             'cv', 'partial-cv',
+                                             'partial-cv-iterative-fit']:
             raise ValueError('Illegal resampling strategy: %s' %
                              self._resampling_strategy)
-        if self._resampling_strategy == 'partial-cv' and \
-                self._ensemble_size != 0:
-            raise ValueError("Resampling strategy partial-cv cannot be used "
-                             "together with ensembles.")
+        if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit'] \
+                and self._ensemble_size != 0:
+            raise ValueError("Resampling strategy %s cannot be used "
+                             "together with ensembles." % self._resampling_strategy)
+        if self._resampling_strategy in ['partial-cv', 'cv',
+                                         'partial-cv-iterative-fit'] and \
+                not 'folds' in self._resampling_strategy_arguments:
+            self._resampling_strategy_arguments['folds'] = 5
 
         acquisition_functions = ['EI', 'EIPS']
         if self.acquisition_function not in acquisition_functions:
@@ -282,8 +291,8 @@ class AutoML(BaseEstimator):
         self._backend._make_internals_directory()
         if self._keep_models:
             try:
-                os.mkdir(self._backend.get_model_dir())
-            except OSError:
+                os.makedirs(self._backend.get_model_dir())
+            except (OSError, FileExistsError) as e:
                 if not self._shared_mode:
                     raise
 
@@ -293,10 +302,6 @@ class AutoML(BaseEstimator):
 
         # == Pickle the data manager to speed up loading
         data_manager_path = self._backend.save_datamanager(datamanager)
-
-        self._save_ensemble_data(
-            datamanager.data['X_train'],
-            datamanager.data['Y_train'])
 
         time_for_load_data = self._stopwatch.wall_elapsed(self._dataset_name)
 
@@ -323,8 +328,10 @@ class AutoML(BaseEstimator):
             self._backend.temporary_directory,
             self._backend,
             datamanager,
-            self._include_estimators,
-            self._include_preprocessors)
+            include_estimators=self._include_estimators,
+            exclude_estimators=self._exclude_estimators,
+            include_preprocessors=self._include_preprocessors,
+            exclude_preprocessors=self._exclude_preprocessors)
 
         # == RUN ensemble builder
         # Do this before calculating the meta-features to make sure that the
@@ -397,8 +404,28 @@ class AutoML(BaseEstimator):
                                     resampling_strategy=self._resampling_strategy,
                                     resampling_strategy_args=self._resampling_strategy_arguments,
                                     acquisition_function=self.acquisition_function,
-                                    shared_mode=self._shared_mode)
-            self.runhistory_ = _proc_smac.run_smbo()
+                                    shared_mode=self._shared_mode,
+                                    include_estimators=self._include_estimators,
+                                    exclude_estimators=self._exclude_estimators,
+                                    include_preprocessors=self._include_preprocessors,
+                                    exclude_preprocessors=self._exclude_preprocessors,
+                                    disable_file_output=self._disable_evaluator_output,
+                                    configuration_mode=self._configuration_mode)
+            self.runhistory_, self.trajectory_ = _proc_smac.run_smbo()
+            runhistory_filename = os.path.join(self._backend.temporary_directory,
+                                               'runhistory.json',)
+            self.runhistory_.save_json(runhistory_filename)
+            trajectory_filename = os.path.join(
+                self._backend.temporary_directory, 'trajectory.json')
+            saveable_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
+                                   for entry in self.trajectory_]
+            with open(trajectory_filename, 'w') as fh:
+                json.dump(saveable_trajectory, fh)
+
+        # Wait until the ensemble process is finished to avoid shutting down
+        # while the ensemble builder tries to access the data
+        if self._proc_ensemble is not None and self._ensemble_size > 0:
+            self._proc_ensemble.join()
 
         self._proc_ensemble = None
         self._load_models()
@@ -406,6 +433,12 @@ class AutoML(BaseEstimator):
         return self
 
     def refit(self, X, y):
+        def send_warnings_to_log(message, category, filename, lineno,
+                                 file=None):
+            self._logger.debug('%s:%s: %s:%s' %
+                               (filename, lineno, category.__name__, message))
+            return
+
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
@@ -425,7 +458,9 @@ class AutoML(BaseEstimator):
                 # the ordering of the data.
                 for i in range(10):
                     try:
-                        model.fit(X.copy(), y.copy())
+                        with warnings.catch_warnings():
+                            warnings.showwarning = send_warnings_to_log
+                            model.fit(X.copy(), y.copy())
                         break
                     except ValueError:
                         indices = list(range(X.shape[0]))
@@ -445,21 +480,29 @@ class AutoML(BaseEstimator):
                         ['holdout', 'holdout-iterative-fit']:
             raise NotImplementedError(
                 'Predict is currently only implemented for resampling '
-                'strategy holdout.')
+                'strategy %s.' % self._resampling_strategy)
 
         if self.models_ is None or len(self.models_) == 0 or \
                 self.ensemble_ is None:
             self._load_models()
+
+        def send_warnings_to_log(message, category, filename, lineno,
+                                 file=None):
+            self._logger.debug('%s:%s: %s:%s' %
+                               (filename, lineno, category.__name__, message))
+            return
 
         all_predictions = []
         for identifier in self.ensemble_.get_model_identifiers():
             model = self.models_[identifier]
 
             X_ = X.copy()
-            if self._task in REGRESSION_TASKS:
-                prediction = model.predict(X_)
-            else:
-                prediction = model.predict_proba(X_)
+            with warnings.catch_warnings():
+                warnings.showwarning = send_warnings_to_log
+                if self._task in REGRESSION_TASKS:
+                    prediction = model.predict(X_)
+                else:
+                    prediction = model.predict_proba(X_)
 
             if len(prediction.shape) < 1 or len(X_.shape) < 1 or \
                     X_.shape[0] < 1 or prediction.shape[0] != X_.shape[0]:
@@ -482,6 +525,10 @@ class AutoML(BaseEstimator):
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
+        if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
+            raise ValueError('Cannot call fit_ensemble with resampling '
+                             'strategy %s.' % self._resampling_strategy)
+
         if self._logger is None:
             self._logger = self._get_logger(dataset_name)
 
@@ -489,6 +536,7 @@ class AutoML(BaseEstimator):
             1, task, metric, precision, dataset_name, max_iterations=1,
             ensemble_nbest=ensemble_nbest, ensemble_size=ensemble_size)
         self._proc_ensemble.main()
+        self._proc_ensemble = None
         return self
 
     def _get_ensemble_process(self, time_left_for_ensembles,
@@ -551,7 +599,8 @@ class AutoML(BaseEstimator):
         else:
             self.models_ = self._backend.load_all_models(seed)
 
-        if len(self.models_) == 0:
+        if len(self.models_) == 0 and self._resampling_strategy not in \
+                ['partial-cv', 'partial-cv-iterative-fit']:
             raise ValueError('No models fitted!')
 
     def score(self, X, y):
@@ -608,6 +657,10 @@ class AutoML(BaseEstimator):
         # mean_score_time - auto-sklearn does not store the score time
         # std_score_time - auto-sklearn does not store the score time
         # TODO: add those arguments
+
+        # TODO remove this restriction!
+        if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
+            raise ValueError('Cannot call cv_results when using partial-cv!')
 
         parameter_dictionaries = dict()
         masks = dict()
@@ -703,23 +756,11 @@ class AutoML(BaseEstimator):
 
         return self.ensemble_.pprint_ensemble_string(self.models_)
 
-    def _save_ensemble_data(self, X, y):
-        """Split dataset and store Data for the ensemble script.
-
-        :param X:
-        :param y:
-        :return:
-
-        """
-        task_name = 'LoadData'
-        self._start_task(self._stopwatch, task_name)
-        _, _, _, y_ensemble = resampling.split_data(X, y)
-        self._backend.save_targets_ensemble(y_ensemble)
-        self._stop_task(self._stopwatch, task_name)
-
     def _create_search_space(self, tmp_dir, backend, datamanager,
                              include_estimators=None,
-                             include_preprocessors=None):
+                             exclude_estimators=None,
+                             include_preprocessors=None,
+                             exclude_preprocessors=None):
         task_name = 'CreateConfigSpace'
 
         self._stopwatch.start_task(task_name)
@@ -727,7 +768,9 @@ class AutoML(BaseEstimator):
         configuration_space = pipeline.get_configuration_space(
             datamanager.info,
             include_estimators=include_estimators,
-            include_preprocessors=include_preprocessors)
+            exclude_estimators=exclude_estimators,
+            include_preprocessors=include_preprocessors,
+            exclude_preprocessors=exclude_preprocessors)
         configuration_space = self.configuration_space_created_hook(
             datamanager, configuration_space)
         sp_string = pcs.write(configuration_space)

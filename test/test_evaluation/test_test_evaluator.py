@@ -17,50 +17,40 @@ from evaluation_util import get_dataset_getters, BaseEvaluatorTest, \
 from autosklearn.constants import *
 from autosklearn.evaluation import TestEvaluator
 # Otherwise nosetests thinks this is a test to run...
-from autosklearn.evaluation import eval_t
+from autosklearn.evaluation import eval_t, get_last_result
 from autosklearn.util.pipeline import get_configuration_space
 from autosklearn.util import Backend
 
-N_TEST_RUNS = 10
+N_TEST_RUNS = 3
 
 
 class Dummy(object):
     pass
 
 
-class TestEvaluator_Test(BaseEvaluatorTest):
+class TestEvaluator_Test(BaseEvaluatorTest, unittest.TestCase):
     _multiprocess_can_split_ = True
-
-    def teardown(self):
-        try:
-            shutil.rmtree(self.output_dir)
-        except Exception:
-            pass
-
-        for output_dir in self.output_directories:
-            try:
-                shutil.rmtree(output_dir)
-            except Exception:
-                pass
 
     def test_datasets(self):
         for getter in get_dataset_getters():
             testname = '%s_%s' % (os.path.basename(__file__).
                                   replace('.pyc', '').replace('.py', ''),
                                   getter.__name__)
+
             with self.subTest(testname):
+                backend_mock = unittest.mock.Mock(spec=Backend)
+                backend_mock.get_model_dir.return_value = 'dutirapbdxvltcrpbdlcatepdeau'
                 D = getter()
-                output_directory = os.path.join(os.path.dirname(__file__),
-                                                '.%s' % testname)
-                self.output_directories.append(output_directory)
-                err = np.zeros([N_TEST_RUNS])
-                for i in range(N_TEST_RUNS):
-                    D_ = copy.deepcopy(D)
-                    evaluator = TestEvaluator(D_, output_directory, None)
+                D_ = copy.deepcopy(D)
+                y = D.data['Y_train']
+                if len(y.shape) == 2 and y.shape[1] == 1:
+                    D_.data['Y_train'] = y.flatten()
+                queue_ = multiprocessing.Queue()
+                evaluator = TestEvaluator(D_, backend_mock, queue_)
 
-                    err[i] = evaluator.fit_predict_and_loss()[0]
-
-                    self.assertTrue(np.isfinite(err[i]))
+                evaluator.fit_predict_and_loss()
+                duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
+                self.assertTrue(np.isfinite(result))
 
 
 class FunctionsTest(unittest.TestCase):
@@ -86,8 +76,9 @@ class FunctionsTest(unittest.TestCase):
                config=self.configuration,
                data=self.data,
                seed=1, num_run=1, subsample=None, with_predictions=True,
-               all_scoring_functions=False, output_y_test=True)
-        info = self.queue.get()
+               all_scoring_functions=False, output_y_test=True,
+               include=None, exclude=None, disable_file_output=False)
+        info = get_last_result(self.queue)
         self.assertAlmostEqual(info[1], 0.041666666666666852)
         self.assertEqual(info[2], 1)
         self.assertNotIn('bac_metric', info[3])
@@ -98,11 +89,18 @@ class FunctionsTest(unittest.TestCase):
                config=self.configuration,
                data=self.data,
                seed=1, num_run=1, subsample=None, with_predictions=True,
-               all_scoring_functions=True, output_y_test=True)
-        info = self.queue.get()
-        self.assertIn('f1_metric: 0.0511508951407;pac_metric: 0.273385527265;'
-                      'acc_metric: 0.06;auc_metric: 0.00917546505782;'
-                      'bac_metric: 0.0416666666667;duration: ', info[3])
+               all_scoring_functions=True, output_y_test=True,
+               include=None, exclude=None, disable_file_output=False)
+        info = get_last_result(self.queue)
+        fixture = {'f1_metric': 0.0511508951407,
+                   'pac_metric': 0.185257565321,
+                   'acc_metric': 0.06,
+                   'auc_metric': 0.00917546505782,
+                   'bac_metric': 0.0416666666667,
+                   'num_run': -1}
+        rval = {i.split(':')[0]: float(i.split(':')[1]) for i in info[3].split(';')}
+        for key, value in fixture.items():
+            self.assertAlmostEqual(rval[key], fixture[key])
+        self.assertIn('duration', rval)
         self.assertAlmostEqual(info[1], 0.041666666666666852)
         self.assertEqual(info[2], 1)
-

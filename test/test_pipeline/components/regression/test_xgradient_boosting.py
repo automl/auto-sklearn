@@ -12,13 +12,13 @@ import sklearn.ensemble
 
 class XGradientBoostingComponentTest(unittest.TestCase):
     def test_default_configuration(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_regressor(XGradientBoostingRegressor)
             self.assertAlmostEqual(0.34009199992306871,
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
 
     def test_default_configuration_sparse(self):
-        for i in range(10):
+        for i in range(2):
             predictions, targets = _test_regressor(XGradientBoostingRegressor,
                                                    sparse=True)
             self.assertAlmostEqual(0.20743694821393754,

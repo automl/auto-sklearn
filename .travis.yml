@@ -2,6 +2,11 @@ language: python
 
 sudo: false
 
+env:
+  global:
+  - OPENBLAS_NUM_THREADS=1
+  - OMP_NUM_THREADS=1
+
 matrix:
   allow_failures:
   - os: osx
@@ -12,18 +17,19 @@ matrix:
   - os: linux
     env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
 
+  # Temporarily disabling OSX builds because thy take too long
   # Set language to generic to not break travis-ci
   # https://github.com/travis-ci/travis-ci/issues/2312#issuecomment-195620855
   # so far, this issue is still open and there is no good solution
   # python will then be installed by anaconda
-  - os: osx
-    sudo: required
-    language: generic
-    env: DISTRIB="conda" PYTHON_VERSION="3.4" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh"
-  - os: osx
-    sudo: required
-    language: generic
-    env: DISTRIB="conda" PYTHON_VERSION="3.5" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh"
+  #- os: osx
+  #  sudo: required
+  #  language: generic
+  #  env: DISTRIB="conda" PYTHON_VERSION="3.4" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh"
+  #- os: osx
+  #  sudo: required
+  #  language: generic
+  #  env: DISTRIB="conda" PYTHON_VERSION="3.5" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh"
 
 cache:
   # We use three different cache directory
@@ -57,8 +63,17 @@ before_install:
   - conda install --yes libgcc
 
 install:
+  # Install general requirements the way setup.py suggests
   - pip install coverage pep8 python-coveralls
   - cat requirements.txt | xargs -n 1 -L 1 pip install
+  # Install openml dependency for metadata generation unittest
+  - pip install xmltodict requests
+  - pip install git+https://github.com/renatopp/liac-arff
+  - pip install git+https://github.com/openml/openml-python@master --no-deps
+  - mkdir ~/.openml
+  - echo "apikey = 610344db6388d9ba34f6db45a3cf71de" > ~/.openml/config
+  # Debug output to know all exact package versions!
+  - pip freeze
   - python setup.py install
   
 script: bash ci_scripts/test.sh

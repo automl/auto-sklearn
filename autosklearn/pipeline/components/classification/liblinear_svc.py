@@ -87,21 +87,22 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        penalty = cs.add_hyperparameter(CategoricalHyperparameter(
-            "penalty", ["l1", "l2"], default="l2"))
-        loss = cs.add_hyperparameter(CategoricalHyperparameter(
-            "loss", ["hinge", "squared_hinge"], default="squared_hinge"))
-        dual = cs.add_hyperparameter(Constant("dual", "False"))
+        penalty = CategoricalHyperparameter(
+            "penalty", ["l1", "l2"], default="l2")
+        loss = CategoricalHyperparameter(
+            "loss", ["hinge", "squared_hinge"], default="squared_hinge")
+        dual = Constant("dual", "False")
         # This is set ad-hoc
-        tol = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "tol", 1e-5, 1e-1, default=1e-4, log=True))
-        C = cs.add_hyperparameter(UniformFloatHyperparameter(
-            "C", 0.03125, 32768, log=True, default=1.0))
-        multi_class = cs.add_hyperparameter(Constant("multi_class", "ovr"))
+        tol = UniformFloatHyperparameter(
+            "tol", 1e-5, 1e-1, default=1e-4, log=True)
+        C = UniformFloatHyperparameter(
+            "C", 0.03125, 32768, log=True, default=1.0)
+        multi_class = Constant("multi_class", "ovr")
         # These are set ad-hoc
-        fit_intercept = cs.add_hyperparameter(Constant("fit_intercept", "True"))
-        intercept_scaling = cs.add_hyperparameter(Constant(
-            "intercept_scaling", 1))
+        fit_intercept = Constant("fit_intercept", "True")
+        intercept_scaling = Constant("intercept_scaling", 1)
+        cs.add_hyperparameters([penalty, loss, dual, tol, C, multi_class,
+                                fit_intercept, intercept_scaling])
 
         penalty_and_loss = ForbiddenAndConjunction(
             ForbiddenEqualsClause(penalty, "l1"),

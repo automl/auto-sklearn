@@ -5,7 +5,7 @@ import copy
 import os
 
 from ..base import AutoSklearnClassificationAlgorithm, find_components, \
-    ThirdPartyComponents
+    ThirdPartyComponents, AutoSklearnChoice
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 from ConfigSpace.conditions import EqualsCondition
@@ -21,23 +21,20 @@ def add_classifier(classifier):
     _addons.add_component(classifier)
 
 
-class ClassifierChoice(object):
-    def __init__(self, **params):
-        choice = params['__choice__']
-        del params['__choice__']
-        self.choice = self.get_components()[choice](**params)
+class ClassifierChoice(AutoSklearnChoice):
 
-    @classmethod
     def get_components(cls):
         components = OrderedDict()
         components.update(_classifiers)
         components.update(_addons.components)
         return components
 
-    @classmethod
-    def get_available_components(cls, data_prop,
+    def get_available_components(cls, dataset_properties=None,
                                  include=None,
                                  exclude=None):
+        if dataset_properties is None:
+            dataset_properties = {}
+
         available_comp = cls.get_components()
         components_dict = OrderedDict()
 
@@ -64,21 +61,23 @@ class ClassifierChoice(object):
 
             if entry.get_properties()['handles_classification'] is False:
                 continue
-            if data_prop.get('multiclass') is True and entry.get_properties()[
+            if dataset_properties.get('multiclass') is True and entry.get_properties()[
                 'handles_multiclass'] is False:
                 continue
-            if data_prop.get('multilabel') is True and available_comp[name]. \
+            if dataset_properties.get('multilabel') is True and available_comp[name]. \
                     get_properties()['handles_multilabel'] is False:
                 continue
             components_dict[name] = entry
 
         return components_dict
 
-    @classmethod
-    def get_hyperparameter_search_space(cls, dataset_properties,
+    def get_hyperparameter_search_space(self, dataset_properties=None,
                                         default=None,
                                         include=None,
                                         exclude=None):
+        if dataset_properties is None:
+            dataset_properties = {}
+
         if include is not None and exclude is not None:
             raise ValueError("The arguments include_estimators and "
                              "exclude_estimators cannot be used together.")
@@ -86,8 +85,8 @@ class ClassifierChoice(object):
         cs = ConfigurationSpace()
 
         # Compile a list of all estimator objects for this problem
-        available_estimators = cls.get_available_components(
-            data_prop=dataset_properties,
+        available_estimators = self.get_available_components(
+            dataset_properties=dataset_properties,
             include=include,
             exclude=exclude)
 
@@ -111,49 +110,28 @@ class ClassifierChoice(object):
                                               default=default)
         cs.add_hyperparameter(estimator)
         for estimator_name in available_estimators.keys():
-            # We have to retrieve the configuration space every time because
-            # we change the objects it returns. If we reused it, we could not
-            # retrieve the conditions further down
-            # TODO implement copy for hyperparameters and forbidden and
-            # conditions!
-
-            estimator_configuration_space = available_estimators[
-                estimator_name]. \
+            estimator_configuration_space = available_estimators[estimator_name].\
                 get_hyperparameter_search_space(dataset_properties)
-            for parameter in estimator_configuration_space.get_hyperparameters():
-                new_parameter = copy.deepcopy(parameter)
-                new_parameter.name = "%s:%s" % (
-                    estimator_name, new_parameter.name)
-                cs.add_hyperparameter(new_parameter)
-                # We must only add a condition if the hyperparameter is not
-                # conditional on something else
-                if len(estimator_configuration_space.
-                        get_parents_of(parameter)) == 0:
-                    condition = EqualsCondition(new_parameter, estimator,
-                                                estimator_name)
-                    cs.add_condition(condition)
+            parent_hyperparameter = {'parent': estimator,
+                                     'value': estimator_name}
+            cs.add_configuration_space(estimator_name,
+                                       estimator_configuration_space,
+                                       parent_hyperparameter=parent_hyperparameter)
 
-            for condition in available_estimators[estimator_name]. \
-                    get_hyperparameter_search_space(
-                    dataset_properties).get_conditions():
-                dlcs = condition.get_descendant_literal_conditions()
-                for dlc in dlcs:
-                    if not dlc.child.name.startswith(estimator_name):
-                        dlc.child.name = "%s:%s" % (
-                            estimator_name, dlc.child.name)
-                    if not dlc.parent.name.startswith(estimator_name):
-                        dlc.parent.name = "%s:%s" % (
-                            estimator_name, dlc.parent.name)
-                cs.add_condition(condition)
-
-            for forbidden_clause in available_estimators[estimator_name]. \
-                    get_hyperparameter_search_space(
-                    dataset_properties).forbidden_clauses:
-                dlcs = forbidden_clause.get_descendant_literal_clauses()
-                for dlc in dlcs:
-                    if not dlc.hyperparameter.name.startswith(estimator_name):
-                        dlc.hyperparameter.name = "%s:%s" % (estimator_name,
-                                                             dlc.hyperparameter.name)
-                cs.add_forbidden_clause(forbidden_clause)
-    
+        self.configuration_space_ = cs
+        self.dataset_properties_ = dataset_properties
         return cs
+
+    def predict_proba(self, X):
+        return self.choice.predict_proba(X)
+
+    def estimator_supports_iterative_fit(self):
+        return hasattr(self.choice, 'iterative_fit')
+
+    def iterative_fit(self, X, y, n_iter=1, **fit_params):
+        if fit_params is None:
+            fit_params = {}
+        return self.choice.iterative_fit(X, y, n_iter=n_iter, **fit_params)
+
+    def configuration_fully_fitted(self):
+        return self.choice.configuration_fully_fitted()

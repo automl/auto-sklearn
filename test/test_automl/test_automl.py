@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
-import multiprocessing
 import os
+import pickle
 import sys
 import time
 import unittest
@@ -8,7 +8,6 @@ import unittest.mock
 
 import numpy as np
 import sklearn.datasets
-import six
 
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.automl import AutoML
@@ -48,7 +47,7 @@ class AutoMLTest(Base, unittest.TestCase):
         failing_model = unittest.mock.Mock()
         failing_model.fit.side_effect = [ValueError(), ValueError(), None]
 
-        auto = AutoML(backend, 30, 30)
+        auto = AutoML(backend, 30, 5)
         ensemble_mock = unittest.mock.Mock()
         auto.ensemble_ = ensemble_mock
         ensemble_mock.get_model_identifiers.return_value = [1]
@@ -86,6 +85,7 @@ class AutoMLTest(Base, unittest.TestCase):
     def test_raises_if_no_models(self):
         self.automl._backend.load_ensemble.return_value = None
         self.automl._backend.load_all_models.return_value = []
+        self.automl._resampling_strategy = 'holdout'
 
         self.assertRaises(ValueError, self.automl._load_models)
 
@@ -95,8 +95,10 @@ class AutoMLTest(Base, unittest.TestCase):
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         backend_api = backend.create(output, output)
-        automl = autosklearn.automl.AutoML(backend_api, 15, 5)
+        automl = autosklearn.automl.AutoML(backend_api, 30, 5)
         automl.fit(X_train, Y_train)
+        #print(automl.show_models(), flush=True)
+        #print(automl.cv_results_, flush=True)
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
@@ -104,7 +106,26 @@ class AutoMLTest(Base, unittest.TestCase):
         del automl
         self._tearDown(output)
 
-    def test_binary_score(self):
+    def test_fit_roar(self):
+        output = os.path.join(self.test_dir, '..', '.tmp_test_fit')
+        self._setUp(output)
+
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        backend_api = backend.create(output, output)
+        automl = autosklearn.automl.AutoML(backend_api, 30, 5,
+                                           initial_configurations_via_metalearning=0,
+                                           configuration_mode='ROAR')
+        automl.fit(X_train, Y_train)
+        # print(automl.show_models(), flush=True)
+        # print(automl.cv_results_, flush=True)
+        score = automl.score(X_test, Y_test)
+        self.assertGreaterEqual(score, 0.8)
+        self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
+
+        del automl
+        self._tearDown(output)
+
+    def test_binary_score_and_include(self):
         """
         Test fix for binary classification prediction
         taking the index 1 of second dimension in prediction matrix
@@ -114,20 +135,26 @@ class AutoMLTest(Base, unittest.TestCase):
         self._setUp(output)
 
         data = sklearn.datasets.make_classification(
-            n_samples=1000, n_features=20, n_redundant=5, n_informative=5,
-            n_repeated=2, n_clusters_per_class=2, random_state=1)
-        X_train = data[0][:700]
-        Y_train = data[1][:700]
-        X_test = data[0][700:]
-        Y_test = data[1][700:]
+            n_samples=400, n_features=10, n_redundant=1, n_informative=3,
+            n_repeated=1, n_clusters_per_class=2, random_state=1)
+        X_train = data[0][:200]
+        Y_train = data[1][:200]
+        X_test = data[0][200:]
+        Y_test = data[1][200:]
 
         backend_api = backend.create(output, output)
-        automl = autosklearn.automl.AutoML(backend_api, 15, 5)
+        automl = autosklearn.automl.AutoML(backend_api, 30, 5,
+                                           include_estimators=['sgd'],
+                                           include_preprocessors=['no_preprocessing'])
         automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION)
+        #print(automl.show_models(), flush=True)
+        #print(automl.cv_results_, flush=True)
         self.assertEqual(automl._task, BINARY_CLASSIFICATION)
 
+        # TODO, the assumption from above is not really tested here
+        # Also, the score method should be removed, it only makes little sense
         score = automl.score(X_test, Y_test)
-        self.assertGreaterEqual(score, 0.5)
+        self.assertGreaterEqual(score, 0.4)
 
         del automl
         self._tearDown(output)
@@ -143,20 +170,21 @@ class AutoMLTest(Base, unittest.TestCase):
 
         backend_api = backend.create(output, output)
         auto = autosklearn.automl.AutoML(
-            backend_api, 15, 5,
+            backend_api, 30, 5,
             initial_configurations_via_metalearning=25,
             seed=100)
         auto.fit_automl_dataset(dataset)
 
         # pickled data manager (without one hot encoding!)
         with open(data_manager_file, 'rb') as fh:
-            D = six.moves.cPickle.load(fh)
+            D = pickle.load(fh)
             self.assertTrue(np.allclose(D.data['X_train'][0, :3],
                                         [1., 12., 2.]))
 
         # Check that all directories are there
         fixture = ['predictions_valid', 'true_targets_ensemble.npy',
-                   'start_time_100', 'datamanager.pkl', 'predictions_ensemble',
+                   'start_time_100', 'datamanager.pkl',
+                   'predictions_ensemble',
                    'ensembles', 'predictions_test', 'models']
         self.assertEqual(sorted(os.listdir(os.path.join(output,
                                                         '.auto-sklearn'))),
@@ -196,7 +224,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
             backend_api = backend.create(output, output)
             auto = autosklearn.automl.AutoML(
-                backend_api, 15, 5,
+                backend_api, 30, 5,
                 initial_configurations_via_metalearning=25)
             setup_logger()
             auto._logger = get_logger('test_do_dummy_predictions')

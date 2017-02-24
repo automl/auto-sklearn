@@ -77,18 +77,12 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
                                            log=True, default=1.0)
         coef0 = UniformFloatHyperparameter("coef0", -1, 1, default=0)
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(n_components)
-        cs.add_hyperparameter(kernel)
-        cs.add_hyperparameter(degree)
-        cs.add_hyperparameter(gamma)
-        cs.add_hyperparameter(coef0)
+        cs.add_hyperparameters([n_components, kernel, degree, gamma, coef0])
 
         degree_depends_on_poly = EqualsCondition(degree, kernel, "poly")
         coef0_condition = InCondition(coef0, kernel, ["poly", "sigmoid"])
         gamma_condition = InCondition(gamma, kernel, ["poly", "rbf"])
-        cs.add_condition(degree_depends_on_poly)
-        cs.add_condition(coef0_condition)
-        cs.add_condition(gamma_condition)
+        cs.add_conditions([degree_depends_on_poly, coef0_condition, gamma_condition])
         return cs
 
 

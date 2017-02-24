@@ -2,16 +2,15 @@ from abc import ABCMeta
 from collections import defaultdict
 
 import numpy as np
-
-from sklearn.base import BaseEstimator
+from ConfigSpace import Configuration
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_random_state, check_is_fitted
 
-from autosklearn.pipeline import components as components
+from .components.base import AutoSklearnChoice, AutoSklearnComponent
 import autosklearn.pipeline.create_searchspace_util
 
 
-class BasePipeline(BaseEstimator):
+class BasePipeline(Pipeline):
     """Base class for all pipeline objects.
 
     Notes
@@ -19,15 +18,48 @@ class BasePipeline(BaseEstimator):
     This class should not be instantiated, only subclassed."""
     __metaclass__ = ABCMeta
 
-    def __init__(self, configuration, random_state=None):
-        self.configuration = configuration
+    def __init__(self, config=None, pipeline=None, dataset_properties=None,
+                 include=None, exclude=None, random_state=None,
+                 init_params=None):
+
+        self.include_ = include if include is not None else {}
+        self.exclude_ = exclude if exclude is not None else {}
+        self.dataset_properties_ = dataset_properties if \
+            dataset_properties is not None else {}
+
+        if pipeline is None:
+            self.steps = self._get_pipeline()
+        else:
+            self.steps = pipeline
+
+        self.config_space = self.get_hyperparameter_search_space()
+
+        if config is None:
+            self.configuration_ = self.config_space.get_default_configuration()
+        else:
+            if isinstance(config, dict):
+                config = Configuration(self.config_space, config)
+            if self.config_space != config.configuration_space:
+                print(self.config_space._children)
+                print(config.configuration_space._children)
+                import difflib
+                diff = difflib.unified_diff(
+                    str(self.config_space).splitlines(),
+                    str(config.configuration_space).splitlines())
+                diff = '\n'.join(diff)
+                raise ValueError('Configuration passed does not come from the '
+                                 'same configuration space. Differences are: '
+                                 '%s' % diff)
+            self.configuration_ = config
+
+        self.set_hyperparameters(self.configuration_, init_params=init_params)
 
         if random_state is None:
             self.random_state = check_random_state(1)
         else:
             self.random_state = check_random_state(random_state)
 
-    def fit(self, X, y, fit_params=None, init_params=None):
+    def fit(self, X, y, fit_params=None):
         """Fit the selected algorithm to the training data.
 
         Parameters
@@ -43,11 +75,6 @@ class BasePipeline(BaseEstimator):
             See the documentation of sklearn.pipeline.Pipeline for formatting
             instructions.
 
-        init_params : dict
-            Pass arguments to the constructors of single methods. To pass
-            arguments to only one of the methods (lets says the
-            OneHotEncoder), seperate the class name from the argument by a ':'.
-
         Returns
         -------
         self : returns an instance of self.
@@ -58,99 +85,35 @@ class BasePipeline(BaseEstimator):
             NoModelException is raised if fit() is called without specifying
             a classification algorithm first.
         """
-        X, fit_params = self.pre_transform(X, y, fit_params=fit_params,
-                                          init_params=init_params)
+        X, fit_params = self.pre_transform(X, y, fit_params=fit_params)
         self.fit_estimator(X, y, **fit_params)
         return self
 
-    def pre_transform(self, X, y, fit_params=None, init_params=None):
-
-        # Save all transformation object in a list to create a pipeline object
-        steps = []
-
-        # seperate the init parameters for the single methods
-        init_params_per_method = defaultdict(dict)
-        if init_params is not None and len(init_params) != 0:
-            for init_param, value in init_params.items():
-                method, param = init_param.split(":")
-                init_params_per_method[method][param] = value
-
-        # Instantiate preprocessor objects
-        for preproc_name, preproc_class in self._get_pipeline()[:-1]:
-            preproc_params = {}
-            for instantiated_hyperparameter in self.configuration:
-                if not instantiated_hyperparameter.startswith(
-                        preproc_name + ":"):
-                    continue
-                if self.configuration[instantiated_hyperparameter] is None:
-                    continue
-
-                name_ = instantiated_hyperparameter.split(":")[-1]
-                preproc_params[name_] = self.configuration[
-                    instantiated_hyperparameter]
-
-            preprocessor_object = preproc_class(
-                random_state=self.random_state, **preproc_params)
-
-            # Ducktyping...
-            if hasattr(preproc_class, 'get_components'):
-                preprocessor_object = preprocessor_object.choice
-
-            steps.append((preproc_name, preprocessor_object))
-
-        # Extract Estimator Hyperparameters from the configuration object
-        estimator_name = self._get_pipeline()[-1][0]
-        estimator_object = self._get_pipeline()[-1][1]
-        estimator_parameters = {}
-        for instantiated_hyperparameter in self.configuration:
-            if not instantiated_hyperparameter.startswith(estimator_name):
-                continue
-            if self.configuration[instantiated_hyperparameter] is None:
-                continue
-
-            name_ = instantiated_hyperparameter.split(":")[-1]
-            estimator_parameters[name_] = self.configuration[
-                instantiated_hyperparameter]
-
-        estimator_parameters.update(init_params_per_method[estimator_name])
-        estimator_object = estimator_object(random_state=self.random_state,
-                            **estimator_parameters)
-
-        # Ducktyping...
-        if hasattr(estimator_object, 'get_components'):
-            estimator_object = estimator_object.choice
-
-        steps.append((estimator_name, estimator_object))
-
-        self.pipeline_ = Pipeline(steps)
+    def pre_transform(self, X, y, fit_params=None):
         if fit_params is None or not isinstance(fit_params, dict):
             fit_params = dict()
         else:
             fit_params = {key.replace(":", "__"): value for key, value in
                           fit_params.items()}
-        X, fit_params = self.pipeline_._pre_transform(X, y, **fit_params)
+        X, fit_params = self._pre_transform(X, y, **fit_params)
         return X, fit_params
 
     def fit_estimator(self, X, y, **fit_params):
-        check_is_fitted(self, 'pipeline_')
         if fit_params is None:
             fit_params = {}
-        self.pipeline_.steps[-1][-1].fit(X, y, **fit_params)
+        self.steps[-1][-1].fit(X, y, **fit_params)
         return self
 
     def iterative_fit(self, X, y, n_iter=1, **fit_params):
-        check_is_fitted(self, 'pipeline_')
         if fit_params is None:
             fit_params = {}
-        self.pipeline_.steps[-1][-1].iterative_fit(X, y, n_iter=n_iter,
-                                                   **fit_params)
+        self.steps[-1][-1].iterative_fit(X, y, n_iter=n_iter, **fit_params)
 
     def estimator_supports_iterative_fit(self):
-        return hasattr(self.pipeline_.steps[-1][-1], 'iterative_fit')
+        return self.steps[-1][-1].estimator_supports_iterative_fit()
 
     def configuration_fully_fitted(self):
-        check_is_fitted(self, 'pipeline_')
-        return self.pipeline_.steps[-1][-1].configuration_fully_fitted()
+        return self.steps[-1][-1].configuration_fully_fitted()
 
     def predict(self, X, batch_size=None):
         """Predict the classes using the selected model.
@@ -171,7 +134,7 @@ class BasePipeline(BaseEstimator):
         # TODO check if fit() was called before...
 
         if batch_size is None:
-            return self.pipeline_.predict(X).astype(self._output_dtype)
+            return super(BasePipeline, self).predict(X).astype(self._output_dtype)
         else:
             if type(batch_size) is not int or batch_size <= 0:
                 raise Exception("batch_size must be a positive integer")
@@ -193,8 +156,59 @@ class BasePipeline(BaseEstimator):
 
                 return y
 
-    @classmethod
-    def get_hyperparameter_search_space(cls, include=None, exclude=None,
+    def set_hyperparameters(self, configuration, init_params=None):
+        self.configuration = configuration
+
+        for node_idx, n_ in enumerate(self.steps):
+            node_name, node = n_
+
+            sub_configuration_space = node.get_hyperparameter_search_space(
+                dataset_properties=self.dataset_properties_
+            )
+            sub_config_dict = {}
+            for param in configuration:
+                if param.startswith('%s:' % node_name):
+                    value = configuration[param]
+                    new_name = param.replace('%s:' % node_name, '', 1)
+                    sub_config_dict[new_name] = value
+
+            sub_configuration = Configuration(sub_configuration_space,
+                                              values=sub_config_dict)
+
+            if init_params is not None:
+                sub_init_params_dict = {}
+                for param in init_params:
+                    if param.startswith('%s:' % node_name):
+                        value = init_params[param]
+                        new_name = param.replace('%s:' % node_name, '', 1)
+                        sub_init_params_dict[new_name] = value
+            else:
+                sub_init_params_dict = None
+
+            if isinstance(node, (AutoSklearnChoice, AutoSklearnComponent)):
+                node.set_hyperparameters(configuration=sub_configuration,
+                                         init_params=sub_init_params_dict)
+            else:
+                raise NotImplementedError('Not supported yet!')
+
+        return self
+
+    def get_hyperparameter_search_space(self):
+        """Return the configuration space for the CASH problem.
+
+        Returns
+        -------
+        cs : ConfigSpace.configuration_space.Configuration
+            The configuration space describing the AutoSklearnClassifier.
+
+        """
+        if not hasattr(self, 'config_space') or self.config_space is None:
+            self.config_space = self._get_hyperparameter_search_space(
+                include=self.include_, exclude=self.exclude_,
+                dataset_properties=self.dataset_properties_)
+        return self.config_space
+
+    def _get_hyperparameter_search_space(self, include=None, exclude=None,
                                         dataset_properties=None):
         """Return the configuration space for the CASH problem.
 
@@ -232,15 +246,16 @@ class BasePipeline(BaseEstimator):
         -------
         cs : ConfigSpace.configuration_space.Configuration
             The configuration space describing the AutoSklearnClassifier.
-
         """
         raise NotImplementedError()
 
-    @classmethod
-    def _get_hyperparameter_search_space(cls, cs, dataset_properties, exclude,
-                                         include, pipeline):
+    def _get_base_search_space(self, cs, dataset_properties, exclude,
+                               include, pipeline):
         if include is None:
-            include = {}
+            if self.include_ is None:
+                include = {}
+            else:
+                include = self.include_
 
         keys = [pair[0] for pair in pipeline]
         for key in include:
@@ -249,7 +264,10 @@ class BasePipeline(BaseEstimator):
                                  'of %s' % (key, keys))
 
         if exclude is None:
-            exclude = {}
+            if self.exclude_ is None:
+                exclude = {}
+            else:
+                exclude = self.exclude_
 
         keys = [pair[0] for pair in pipeline]
         for key in exclude:
@@ -279,7 +297,8 @@ class BasePipeline(BaseEstimator):
         # pipeline) to see if we can add a hyperparameter for that step
         for node_idx, n_ in enumerate(pipeline):
             node_name, node = n_
-            is_choice = hasattr(node, "get_available_components")
+
+            is_choice = isinstance(node, AutoSklearnChoice)
 
             # if the node isn't a choice we can add it immediately because it
             #  must be active (if it wouldn't, np.sum(matches) would be zero
@@ -294,9 +313,10 @@ class BasePipeline(BaseEstimator):
                                         dataset_properties,
                                         include.get(node_name),
                                         exclude.get(node_name))
-                cs.add_configuration_space(node_name,
-                    node.get_hyperparameter_search_space(
-                        dataset_properties, include=choices_list))
+                sub_config_space = node.get_hyperparameter_search_space(
+                    dataset_properties, include=choices_list)
+                cs.add_configuration_space(node_name, sub_config_space)
+
         # And now add forbidden parameter configurations
         # According to matches
         if np.sum(matches) < np.size(matches):
@@ -311,10 +331,10 @@ class BasePipeline(BaseEstimator):
         class_name = self.__class__.__name__
 
         configuration = {}
-        self.configuration._populate_values()
-        for hp_name in self.configuration:
-            if self.configuration[hp_name] is not None:
-                configuration[hp_name] = self.configuration[hp_name]
+        self.configuration_._populate_values()
+        for hp_name in self.configuration_:
+            if self.configuration_[hp_name] is not None:
+                configuration[hp_name] = self.configuration_[hp_name]
 
         configuration_string = ''.join(
             ['configuration={\n  ',
@@ -322,12 +342,32 @@ class BasePipeline(BaseEstimator):
                                          for hp_name in sorted(configuration)]),
              '}'])
 
-        return '%s(%s)' % (class_name, configuration_string)
+        if len(self.dataset_properties_) > 0:
+            dataset_properties_string = []
+            dataset_properties_string.append('dataset_properties={')
+            for i, item in enumerate(self.dataset_properties_.items()):
+                if i != 0:
+                    dataset_properties_string.append(',\n  ')
+                else:
+                    dataset_properties_string.append('\n  ')
 
-    @classmethod
-    def _get_pipeline(cls):
-        if cls == autosklearn.pipelineBaseEstimator:
-            return []
+                if isinstance(item[1], str):
+                    dataset_properties_string.append("'%s': '%s'" % (item[0],
+                                                                     item[1]))
+                else:
+                    dataset_properties_string.append("'%s': %s" % (item[0],
+                                                                   item[1]))
+            dataset_properties_string.append('}')
+            dataset_properties_string = ''.join(dataset_properties_string)
+
+            rval = '%s(%s,\n%s)' % (class_name, configuration,
+                                    dataset_properties_string)
+        else:
+            rval = '%s(%s)' % (class_name, configuration_string)
+
+        return rval
+
+    def _get_pipeline(self):
         raise NotImplementedError()
 
     def _get_estimator_hyperparameter_name(self):

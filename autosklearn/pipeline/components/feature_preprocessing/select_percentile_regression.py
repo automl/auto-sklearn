@@ -46,6 +46,5 @@ class SelectPercentileRegression(SelectPercentileBase,
             name="score_func", value="f_regression")
 
         cs = ConfigurationSpace()
-        cs.add_hyperparameter(percentile)
-        cs.add_hyperparameter(score_func)
+        cs.add_hyperparameters([percentile, score_func])
         return cs

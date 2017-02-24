@@ -11,14 +11,12 @@ import warnings
 import numpy as np
 import pynisher
 
-from autosklearn.constants import STRING_TO_TASK_TYPES, STRING_TO_METRIC, \
-    BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
-    MULTILABEL_CLASSIFICATION, CLASSIFICATION_TASKS, REGRESSION_TASKS, \
-    BAC_METRIC, F1_METRIC
+from autosklearn.constants import BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
+    MULTILABEL_CLASSIFICATION, CLASSIFICATION_TASKS, BAC_METRIC, F1_METRIC
 from autosklearn.evaluation.util import calculate_score
-from autosklearn.util import StopWatch, Backend
+from autosklearn.util import StopWatch
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
-from autosklearn.util.logging_ import get_logger, setup_logger
+from autosklearn.util.logging_ import get_logger
 
 
 class EnsembleBuilder(multiprocessing.Process):
@@ -162,7 +160,7 @@ class EnsembleBuilder(multiprocessing.Process):
             #  later
             include_num_runs = []
             backup_num_runs = []
-            model_and_automl_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy$')
+            model_and_automl_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy')
             if self.ensemble_nbest is not None:
                 # Keeps track of the single scores of each model in our ensemble
                 scores_nbest = []
@@ -180,14 +178,15 @@ class EnsembleBuilder(multiprocessing.Process):
                 basename = os.path.basename(model_name)
 
                 try:
-                    if self.precision is "16":
-                        predictions = np.load(os.path.join(dir_ensemble, basename)).astype(dtype=np.float16)
-                    elif self.precision is "32":
-                        predictions = np.load(os.path.join(dir_ensemble, basename)).astype(dtype=np.float32)
-                    elif self.precision is "64":
-                        predictions = np.load(os.path.join(dir_ensemble, basename)).astype(dtype=np.float64)
-                    else:
-                        predictions = np.load(os.path.join(dir_ensemble, basename))
+                    with open(os.path.join(dir_ensemble, basename), 'rb') as fh:
+                        if self.precision is "16":
+                            predictions = np.load(fh).astype(dtype=np.float16)
+                        elif self.precision is "32":
+                            predictions = np.load(fh).astype(dtype=np.float32)
+                        elif self.precision is "64":
+                            predictions = np.load(fh).astype(dtype=np.float64)
+                        else:
+                            predictions = np.load(fh)
 
                     score = calculate_score(targets_ensemble, predictions,
                                             self.task_type, self.metric,
@@ -280,7 +279,8 @@ class EnsembleBuilder(multiprocessing.Process):
                                              include_num_runs,
                                              model_and_automl_re,
                                              self.precision)
-            except IOError:
+            except IOError as e:
+                print(e)
                 self.logger.error('Could not load the predictions.')
                 continue
 
@@ -454,17 +454,18 @@ class EnsembleBuilder(multiprocessing.Process):
             basename = os.path.basename(model_name)
 
             if (automl_seed, num_run) in include_num_runs:
-                if precision == "16":
-                    predictions = np.load(os.path.join(dir_path, basename)).astype(
-                        dtype=np.float16)
-                elif precision == "32":
-                    predictions = np.load(os.path.join(dir_path, basename)).astype(
-                        dtype=np.float32)
-                elif precision == "64":
-                    predictions = np.load(os.path.join(dir_path, basename)).astype(
-                        dtype=np.float64)
-                else:
-                    predictions = np.load(os.path.join(dir_path, basename))
+                with open(os.path.join(dir_path, basename), 'rb') as fh:
+                    if precision == "16":
+                        predictions = np.load(fh).astype(
+                            dtype=np.float16)
+                    elif precision == "32":
+                        predictions = np.load(fh).astype(
+                            dtype=np.float32)
+                    elif precision == "64":
+                        predictions = np.load(fh).astype(
+                            dtype=np.float64)
+                    else:
+                        predictions = np.load(fh)
                 result.append(predictions)
         return result
 

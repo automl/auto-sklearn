@@ -44,7 +44,7 @@ class MetaBase(object):
         for algorithm_id in self.configurations:
             configuration = self.configurations[algorithm_id]
             try:
-                configurations[algorithm_id] = \
+                configurations[str(algorithm_id)] = \
                     (Configuration(configuration_space, values=configuration))
             except (ValueError, KeyError) as e:
                 self.logger.debug("Error reading configurations: %s", e)
@@ -97,7 +97,7 @@ class MetaBase(object):
         return all_metafeatures
 
     def get_configuration_from_algorithm_index(self, idx):
-        return self.configurations[idx]
+        return self.configurations[str(idx)]
         #configuration = self.configurations[idx]
         #configuration = Configuration(self.configuration_space,
         # **configuration)

@@ -13,7 +13,7 @@ def main():
         sklearn.cross_validation.train_test_split(X, y, random_state=1)
 
     automl = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=1200, per_run_time_limit=30,
+        time_left_for_this_task=120, per_run_time_limit=30,
         tmp_folder='/tmp/autoslearn_sequential_example_tmp',
         output_folder='/tmp/autosklearn_sequential_example_out',
         # Do not construct ensembles in parallel to avoid using more than one

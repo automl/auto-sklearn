@@ -1,6 +1,5 @@
-# -*- encoding: utf-8 -*-
-from __future__ import print_function
 import collections
+import gzip
 import os
 import pickle
 import sys
@@ -18,7 +17,6 @@ from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.estimators import AutoMLClassifier
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import *
-
 sys.path.append(os.path.dirname(__file__))
 from base import Base
 
@@ -33,24 +31,23 @@ class ArrayReturningDummyPredictor(object):
 class EstimatorTest(Base, unittest.TestCase):
     _multiprocess_can_split_ = True
 
-    def test_fit(self):
-
-        output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit')
-        self._setUp(output)
-
-        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
-                                       per_run_time_limit=5,
-                                       tmp_folder=output,
-                                       output_folder=output)
-        automl.fit(X_train, Y_train)
-        score = automl.score(X_test, Y_test)
-
-        self.assertGreaterEqual(score, 0.8)
-        self.assertEqual(automl._automl._automl._task, MULTICLASS_CLASSIFICATION)
-
-        del automl
-        self._tearDown(output)
+    # def test_fit_partial_cv(self):
+    #
+    #     output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_partial_cv')
+    #     self._setUp(output)
+    #
+    #     X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+    #     automl = AutoSklearnClassifier(time_left_for_this_task=30,
+    #                                    per_run_time_limit=5,
+    #                                    tmp_folder=output,
+    #                                    output_folder=output,
+    #                                    resampling_strategy='partial-cv',
+    #                                    ensemble_size=0,
+    #                                    delete_tmp_folder_after_terminate=False)
+    #     automl.fit(X_train, Y_train)
+    #
+    #     del automl
+    #     self._tearDown(output)
 
     def test_pSMAC_wrong_arguments(self):
         self.assertRaisesRegexp(ValueError,
@@ -98,7 +95,7 @@ class EstimatorTest(Base, unittest.TestCase):
         Y_train = Y_train + 1
         Y_test = Y_test + 1
 
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+        automl = AutoSklearnClassifier(time_left_for_this_task=30,
                                        per_run_time_limit=5,
                                        output_folder=output,
                                        tmp_folder=output,
@@ -113,7 +110,8 @@ class EstimatorTest(Base, unittest.TestCase):
         # building of the second AutoSklearn classifier works correct
         true_targets_ensemble_path = os.path.join(output, '.auto-sklearn',
                                                   'true_targets_ensemble.npy')
-        true_targets_ensemble = np.load(true_targets_ensemble_path)
+        with open(true_targets_ensemble_path, 'rb') as fh:
+            true_targets_ensemble = np.load(fh)
         true_targets_ensemble[-1] = 1 if true_targets_ensemble[-1] != 1 else 0
         probas = np.zeros((len(true_targets_ensemble), 3), dtype=float)
         for i, value in enumerate(true_targets_ensemble):
@@ -133,7 +131,7 @@ class EstimatorTest(Base, unittest.TestCase):
         backend = Backend(context)
         backend.save_model(dummy, 30, 1)
 
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+        automl = AutoSklearnClassifier(time_left_for_this_task=30,
                                        per_run_time_limit=5,
                                        output_folder=output,
                                        tmp_folder=output,
@@ -148,6 +146,7 @@ class EstimatorTest(Base, unittest.TestCase):
                             dataset_name='iris',
                             ensemble_size=20,
                             ensemble_nbest=50)
+        #print(automl.show_models(), flush=True)
 
         predictions = automl.predict(X_test)
         score = sklearn.metrics.accuracy_score(Y_test, predictions)
@@ -168,7 +167,7 @@ class EstimatorTest(Base, unittest.TestCase):
         output = os.path.join(self.test_dir, '..', '.tmp_grid_scores')
         self._setUp(output)
 
-        cls = AutoSklearnClassifier(time_left_for_this_task=15,
+        cls = AutoSklearnClassifier(time_left_for_this_task=30,
                                     per_run_time_limit=5,
                                     output_folder=output,
                                     tmp_folder=output,
@@ -207,7 +206,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self._setUp(output)
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
 
-        cls = AutoSklearnClassifier(time_left_for_this_task=15,
+        cls = AutoSklearnClassifier(time_left_for_this_task=30,
                                     per_run_time_limit=5,
                                     output_folder=output,
                                     tmp_folder=output,
@@ -276,7 +275,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+        automl = AutoSklearnClassifier(time_left_for_this_task=30,
                                        per_run_time_limit=5,
                                        tmp_folder=output,
                                        output_folder=output)
