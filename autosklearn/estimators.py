@@ -65,8 +65,8 @@ class AutoMLDecorator(object):
                                          dataset_name, ensemble_nbest,
                                          ensemble_size)
 
-    def predict(self, X):
-        return self._automl.predict(X)
+    def predict(self, X, batch_size=None, n_jobs=1):
+        return self._automl.predict(X, batch_size=batch_size, n_jobs=n_jobs)
 
     def score(self, X, y):
         return self._automl.score(X, y)
@@ -353,7 +353,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
                                                       feat_type=feat_type,
                                                       dataset_name=dataset_name)
 
-    def predict(self, X):
+    def predict(self, X, batch_size=None, n_jobs=1):
         """Predict classes for X.
 
         Parameters
@@ -366,9 +366,10 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             The predicted classes.
 
         """
-        return super(AutoSklearnClassifier, self).predict(X)
+        return super(AutoSklearnClassifier, self).predict(
+            X, batch_size=batch_size, n_jobs=n_jobs)
 
-    def predict_proba(self, X):
+    def predict_proba(self, X, batch_size=None, n_jobs=1):
 
         """Predict probabilities of classes for all samples X.
 
@@ -381,7 +382,8 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         y : array of shape = [n_samples, n_classes] or [n_samples, n_labels]
             The predicted class probabilities.
         """
-        return self._automl.predict_proba(X)
+        return self._automl.predict_proba(
+            X, batch_size=batch_size, n_jobs=n_jobs)
 
 
 class AutoSklearnRegressor(AutoSklearnEstimator):
@@ -434,7 +436,7 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
                                                      feat_type=feat_type,
                                                      dataset_name=dataset_name)
 
-    def predict(self, X):
+    def predict(self, X, batch_size=None, n_jobs=1):
         """Predict regression target for X.
 
         Parameters
@@ -447,7 +449,8 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
             The predicted values.
 
         """
-        return super(AutoSklearnRegressor, self).predict(X)
+        return super(AutoSklearnRegressor, self).predict(
+            X, batch_size=batch_size, n_jobs=n_jobs)
 
 
 class AutoMLClassifier(AutoMLDecorator):
@@ -529,8 +532,11 @@ class AutoMLClassifier(AutoMLDecorator):
 
         return y
 
-    def predict(self, X):
-        predicted_probabilities = self._automl.predict(X)
+
+    def predict(self, X, batch_size=None, n_jobs=1):
+        predicted_probabilities = self._automl.predict(
+            X, batch_size=batch_size, n_jobs=n_jobs)
+
         if self._n_outputs == 1:
             predicted_indexes = np.argmax(predicted_probabilities, axis=1)
             predicted_classes = self._classes[0].take(predicted_indexes)
@@ -547,8 +553,8 @@ class AutoMLClassifier(AutoMLDecorator):
 
             return predicted_classes
 
-    def predict_proba(self, X):
-        return self._automl.predict(X)
+    def predict_proba(self, X, batch_size=None, n_jobs=1):
+        return self._automl.predict(X, batch_size=batch_size, n_jobs=n_jobs)
 
 
 class AutoMLRegressor(AutoMLDecorator):
