@@ -36,7 +36,8 @@ parser.add_argument('filename', nargs=1, help='pandas HDFS dataframe .h5 with cu
 
 args = parser.parse_args()
 
-work_dir = './nfs_share'
+work_dir = './redly_tmp'
+result_filename = 'redly-os-result.csv'
 atsklrn_tempdir=os.path.join(work_dir, 'atsklrn_tmp')
 shutil.rmtree(atsklrn_tempdir,ignore_errors=True) # cleanup - remove temp directory
 
@@ -244,3 +245,38 @@ print(c.show_models())
 p("Predicting")
 y_hat = c.predict(X_test.values)
 print("Accuracy score", sklearn.metrics.accuracy_score(y_test, y_hat))
+
+if df_unknown.shape[0]==0:
+    p("nothing to predict. Prediction dataset is empty.")
+    exit()
+
+p("Re-fitting on full known dataset. This can take long for a large set.")
+try:
+    c.refit(X.values, y)
+except Exception as e:
+    p("Refit failed, restarting")
+    print(e)
+    try:
+        X=X.values
+        indices = np.arange(X.shape[0])
+        np.random.shuffle(indices)
+        X = X[indices]
+        y = y[indices]
+        c.refit(X, y)
+    except Exception as e:
+        p("Second refit failed, exiting")
+        print(e)
+        exit()
+
+X_unknown,y_unknown,row_id_unknown = x_y_dataframe_split(df_unknown, id=True) 
+p("Predicting. This can take a long time for a large prediction set.")
+y_pred = c.predict(X_unknown.values)
+p("Prediction done")
+
+# http://pandas.pydata.org/pandas-docs/stable/api.html#api-dataframe-stats
+# https://github.com/automl/ChaLearn_Automatic_Machine_Learning_Challenge_2015/blob/master/004_yolanda.py
+result_df = pd.DataFrame({'cust_id':row_id_unknown,'prediction':pd.Series(y_pred,index=row_id_unknown.index)})
+p("Exporting the data")
+result_df.to_csv(result_filename, index=False, header=True) 
+p("Redly Script Completed!")
+
