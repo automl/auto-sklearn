@@ -597,12 +597,15 @@ class AutoML(BaseEstimator):
         if self.ensemble_:
             identifiers = self.ensemble_.identifiers_
             self.models_ = self._backend.load_models_by_identifiers(identifiers)
-        else:
-            self.models_ = self._backend.load_all_models(seed)
+            if len(self.models_) == 0 and self._resampling_strategy not in \
+                    ['partial-cv', 'partial-cv-iterative-fit']:
+                raise ValueError('No models fitted!')
 
-        if len(self.models_) == 0 and self._resampling_strategy not in \
-                ['partial-cv', 'partial-cv-iterative-fit']:
-            raise ValueError('No models fitted!')
+        else:
+            model_names = self._backend.list_all_models(seed)
+
+            if len(model_names) == 0:
+                raise ValueError('No models fitted!')
 
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension

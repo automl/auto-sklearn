@@ -84,7 +84,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
     def test_raises_if_no_models(self):
         self.automl._backend.load_ensemble.return_value = None
-        self.automl._backend.load_all_models.return_value = []
+        self.automl._backend.list_all_models.return_value = []
         self.automl._resampling_strategy = 'holdout'
 
         self.assertRaises(ValueError, self.automl._load_models)

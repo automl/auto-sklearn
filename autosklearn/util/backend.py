@@ -261,18 +261,21 @@ class Backend(object):
 
         os.rename(tempname, filepath)
 
-    def load_all_models(self, seed):
+    def list_all_models(self, seed):
         model_directory = self.get_model_dir()
-
         if seed >= 0:
             model_files = glob.glob(os.path.join(model_directory,
                                                  '%s.*.model' % seed))
         else:
             model_files = os.listdir(model_directory)
-            model_files = [os.path.join(model_directory, mf) for mf in model_files]
+            model_files = [os.path.join(model_directory, mf)
+                           for mf in model_files]
 
+        return model_files
+
+    def load_all_models(self, seed):
+        model_files = self.list_all_models(seed)
         models = self.load_models_by_file_names(model_files)
-
         return models
 
     def load_models_by_file_names(self, model_file_names):
