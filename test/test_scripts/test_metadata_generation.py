@@ -48,7 +48,7 @@ class TestMetadataGeneration(unittest.TestCase):
         with open(commands_output_file) as fh:
             while True:
                 cmd = fh.readline()
-                if 'task-id 233' in cmd:
+                if 'task-id 253' in cmd:
                     break
 
         self.assertIn('time-limit 86400', cmd)
@@ -65,11 +65,11 @@ class TestMetadataGeneration(unittest.TestCase):
         expected_output_directory = os.path.join(self.working_directory,
                                                  'configuration',
                                                  'classification',
-                                                 '233-1')
+                                                 '253-1')
         self.assertTrue(os.path.exists(expected_output_directory))
         smac_log = os.path.join(self.working_directory,
-                                'configuration/classification/233-1',
-                                'AutoML(1):233.log')
+                                'configuration/classification/253-1',
+                                'AutoML(1):253.log')
         with open(smac_log) as fh:
             smac_output = fh.read()
         self.assertEqual(rval.returncode, 0, msg=str(rval) + '\n' + smac_output)

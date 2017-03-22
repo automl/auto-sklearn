@@ -300,6 +300,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     continue
                 elif 'Bug in scikit-learn' in e.args[0]:
                     continue
+                elif 'The condensed distance matrix must contain only finite ' \
+                     'values.' in e.args[0]:
+                    continue
                 else:
                     print(config)
                     print(traceback.format_exc())
