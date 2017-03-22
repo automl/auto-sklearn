@@ -73,14 +73,12 @@ class AutoMLTest(Base, unittest.TestCase):
 
         self.assertEqual(models, self.automl.models_)
 
-    def test_loads_all_models_if_no_ensemble(self):
+    def test_check_for_models_if_no_ensemble(self):
         models = [42]
         self.automl._backend.load_ensemble.return_value = None
-        self.automl._backend.load_all_models.return_value = models
+        self.automl._backend.list_all_models.return_value = models
 
         self.automl._load_models()
-
-        self.assertEqual(models, self.automl.models_)
 
     def test_raises_if_no_models(self):
         self.automl._backend.load_ensemble.return_value = None

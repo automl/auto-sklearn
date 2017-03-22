@@ -46,7 +46,10 @@ class TestMetadataGeneration(unittest.TestCase):
         self.assertTrue(os.path.exists(commands_output_file))
 
         with open(commands_output_file) as fh:
-            cmd = fh.readline()
+            while True:
+                cmd = fh.readline()
+                if 'task-id 233' in cmd:
+                    break
 
         self.assertIn('time-limit 86400', cmd)
         self.assertIn('per-run-time-limit 1800', cmd)
