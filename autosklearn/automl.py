@@ -417,8 +417,9 @@ class AutoML(BaseEstimator):
             self.runhistory_.save_json(runhistory_filename)
             trajectory_filename = os.path.join(
                 self._backend.temporary_directory, 'trajectory.json')
-            saveable_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
-                                   for entry in self.trajectory_]
+            saveable_trajectory = \
+                [list(entry[:2]) + [entry[2].get_dictionary()] + list(entry[3:])
+                 for entry in self.trajectory_]
             with open(trajectory_filename, 'w') as fh:
                 json.dump(saveable_trajectory, fh)
 
