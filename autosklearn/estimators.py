@@ -434,7 +434,9 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         """
         # Fit is supposed to be idempotent!
         # But not if we use share_mode.
-        return super(AutoSklearnRegressor, self).fit(X, y, metric, feat_type, dataset_name)
+        return super(AutoSklearnRegressor, self).fit(X=X, y=y, metric=metric,
+                                                     feat_type=feat_type,
+                                                     dataset_name=dataset_name)
 
     def predict(self, X):
         """Predict regression target for X.
@@ -559,5 +561,4 @@ class AutoMLRegressor(AutoMLDecorator):
             dataset_name=None,
             ):
         return self._automl.fit(X=X, y=y, task=REGRESSION, metric=metric,
-                                loss=loss, feat_type=feat_type,
-                                dataset_name=dataset_name)
+                                feat_type=feat_type, dataset_name=dataset_name)
