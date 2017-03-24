@@ -604,7 +604,8 @@ class AutoML(BaseEstimator):
         else:
             model_names = self._backend.list_all_models(seed)
 
-            if len(model_names) == 0:
+            if len(model_names) == 0 and self._resampling_strategy not in \
+                    ['partial-cv', 'partial-cv-iterative-fit']:
                 raise ValueError('No models fitted!')
 
     def score(self, X, y):
