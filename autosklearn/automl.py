@@ -435,7 +435,7 @@ class AutoML(BaseEstimator):
 
     def refit(self, X, y):
         def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None):
+                                 file=None, line=None):
             self._logger.debug('%s:%s: %s:%s' %
                                (filename, lineno, category.__name__, message))
             return
@@ -488,7 +488,7 @@ class AutoML(BaseEstimator):
             self._load_models()
 
         def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None):
+                                 file=None, line=None):
             self._logger.debug('%s:%s: %s:%s' %
                                (filename, lineno, category.__name__, message))
             return

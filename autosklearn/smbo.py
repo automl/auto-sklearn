@@ -243,7 +243,7 @@ class AutoMLSMBO(object):
         self.logger = get_logger(logger_name)
 
     def _send_warnings_to_log(self, message, category, filename, lineno,
-                              file=None):
+                              file=None, line=None):
         self.logger.debug('%s:%s: %s:%s', filename, lineno, category.__name__,
                           message)
 

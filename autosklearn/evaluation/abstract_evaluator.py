@@ -275,7 +275,7 @@ class AbstractEvaluator(object):
 
     def _predict_proba(self, X, model, task_type, Y_train):
         def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None):
+                                 file=None, line=None):
             self.logger.debug('%s:%s: %s:%s' %
                               (filename, lineno, category.__name__, message))
             return
@@ -289,7 +289,7 @@ class AbstractEvaluator(object):
 
     def _predict_regression(self, X, model, task_type, Y_train=None):
         def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None):
+                                 file=None, line=None):
             self.logger.debug('%s:%s: %s:%s' %
                               (filename, lineno, category.__name__, message))
             return
@@ -330,7 +330,7 @@ class AbstractEvaluator(object):
 
     def _fit_and_suppress_warnings(self, model, X, y):
         def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None):
+                                 file=None, line=None):
             self.logger.debug('%s:%s: %s:%s' %
                 (filename, lineno, category.__name__, message))
             return
