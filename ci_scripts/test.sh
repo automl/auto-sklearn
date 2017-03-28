@@ -10,7 +10,7 @@ test_dir=$cwd/test/
 cd $TEST_DIR
 
 if [[ "$COVERAGE" == "true" ]]; then
-    nosetests -sv --with-coverage --cover-package=$MODULE $test_dir
+    nosetests --no-path-adjustment -sv --with-coverage --cover-package=$MODULE $test_dir
 else
-    nosetests -sv $test_dir
+    nosetests --no-path-adjustment -sv $test_dir
 fi
