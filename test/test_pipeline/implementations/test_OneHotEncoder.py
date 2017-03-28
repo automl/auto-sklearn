@@ -6,6 +6,8 @@ from sklearn.utils.testing import assert_array_almost_equal
 import sklearn.tree
 import sklearn.datasets
 import sklearn.cross_validation
+import sklearn.pipeline
+import openml
 
 from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
 
@@ -217,39 +219,19 @@ class TestOneHotEncoder(unittest.TestCase):
         self.assertEqual(3, np.sum(output))
 
     def test_classification_workflow(self):
-        ohe = OneHotEncoder(categorical_features=[True]*22)
-        tree = sklearn.tree.DecisionTreeClassifier()
+        task = openml.tasks.get_task(254)
+        X, y = task.get_X_and_y()
 
-        X = [[2., 3., 4., 1., 5., 2., 0., 0., 10., 1., 0., 2., 2., 6., 3.,
-              0., 2., 1., 5., 2., 4., 0.],
-             [3., 2., 4., 0., 8., 2., 0., 1., 0., 1., np.NaN, 2., 1., 7., 7.,
-              0., 2., 1., 1., 7., 4., 0.],
-             [2., 0., 4., 1., 5., 2., 0., 0., 9., 1., 0., 2., 2., 6., 6., 0.,
-              2., 1., 5., 2., 5., 0.],
-             [5., 3., 4., 0., 8., 2., 0., 1., 0., 1., np.NaN , 1., 1., 6., 7. ,
-              0., 2., 1., 1., 7., 4., 2.],
-             [5., 3., 4., 1., 6., 2., 0., 1., 7., 0., 2., 2., 2., 7., 7., 0.,
-              2., 1. , 5., 3., 3., 1.],
-             [5., 2., 8., 0., 5., 2., 2., 0., 7., 1., 2., 0., 0., 7., 7., 0.,
-              2., 1. , 1., 2., 0., 1.],
-             [5., 0., 8., 0., 1., 2., 0., 1., 9., 0., 0., 2., 2., 7., 7., 0.,
-              2., 1. , 5., 2., 4., 0.],
-             [2., 3., 8., 1., 6., 2., 0., 1., 10., 0., 2., 2., 2., 7., 7., 0.,
-              2., 1., 5., 2., 4., 5.],
-             [0., 3., 8., 1., 3., 2., 0., 0., 2., 0., 1., 2., 2., 7., 7., 0.,
-              2., 1. , 5., 3., 3., 3.],
-             [5., 2., 4., 0., 5., 2., 2., 0., 4., 1., 2., 0., 2., 7., 7., 0.,
-              2., 1., 1., 2., 3., 1.]]
-        y = [0, 1, 0, 1, 1, 0, 1, 1, 0, 0]
+        ohe = OneHotEncoder(categorical_features=[True]*22)
+        tree = sklearn.tree.DecisionTreeClassifier(random_state=1)
+        pipeline = sklearn.pipeline.Pipeline((('ohe', ohe), ('tree', tree)))
 
         X_train, X_test, y_train, y_test = \
-            sklearn.cross_validation.train_test_split(X, y, random_state=7)
-        X_train = ohe.fit_transform(X_train)
-        tree.fit(X_train, y_train)
-        X_test_ = ohe.transform(X_test)
-        self.assertEqual(np.mean(y_train == tree.predict(X_train)), 1)
+            sklearn.cross_validation.train_test_split(X, y, random_state=3,
+                                                      train_size=0.5,
+                                                      test_size=0.5)
+        pipeline.fit(X_train, y_train)
+        self.assertEqual(np.mean(y_train == pipeline.predict(X_train)), 1)
         # With an incorrect copy operation the OneHotEncoder would rearrange
         # the data in such a way that the accuracy would drop to 66%
-        self.assertEqual(np.mean(y_test == tree.predict(X_test_)), 1)
-
-
+        self.assertEqual(np.mean(y_test == pipeline.predict(X_test)), 1)
