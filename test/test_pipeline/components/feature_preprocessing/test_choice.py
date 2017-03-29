@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import unittest
 
 import autosklearn.pipeline.components.feature_preprocessing as fp

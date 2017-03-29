@@ -4,7 +4,6 @@
 # These can be computed for regression scores only after running
 # normalize_array
 
-from __future__ import print_function
 import numpy as np
 import scipy as sp
 import scipy.stats

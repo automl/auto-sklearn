@@ -3,10 +3,8 @@
 # Functions performing various input/output operations for the ChaLearn
 # AutoML challenge
 
-from __future__ import print_function
 import os
 import re
-import time
 
 import numpy as np
 import scipy.sparse

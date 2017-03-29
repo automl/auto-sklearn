@@ -2,8 +2,6 @@
 # REGRESSION METRICS (work on raw solution and prediction)
 # These can be computed on all solutions and predictions
 # (classification included)
-from __future__ import print_function
-
 import numpy as np
 
 from autosklearn.constants import REGRESSION, METRIC_TO_STRING

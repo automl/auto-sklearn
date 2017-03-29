@@ -1,4 +1,3 @@
-from __future__ import print_function
 from six import StringIO
 from unittest import TestCase
 import unittest

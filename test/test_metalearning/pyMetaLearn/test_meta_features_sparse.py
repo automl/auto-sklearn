@@ -1,4 +1,3 @@
-from __future__ import print_function
 from six import StringIO
 import os
 import sys

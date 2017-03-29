@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import print_function
-
 from collections import defaultdict
 import io
 import json

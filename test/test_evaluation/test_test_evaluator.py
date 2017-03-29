@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import print_function
 import copy
 import multiprocessing
 import os

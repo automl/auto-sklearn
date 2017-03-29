@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import print_function
 import numpy as np
 import scipy as sp
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, \

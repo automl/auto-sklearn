@@ -5,8 +5,6 @@
 @projekt: AutoML2015
 
 """
-
-from __future__ import print_function
 import time
 import unittest
 import unittest.mock
