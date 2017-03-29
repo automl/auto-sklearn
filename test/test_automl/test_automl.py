@@ -77,6 +77,7 @@ class AutoMLTest(Base, unittest.TestCase):
         models = [42]
         self.automl._backend.load_ensemble.return_value = None
         self.automl._backend.list_all_models.return_value = models
+        self.automl._disable_evaluator_output = False
 
         self.automl._load_models()
 
@@ -85,7 +86,12 @@ class AutoMLTest(Base, unittest.TestCase):
         self.automl._backend.list_all_models.return_value = []
         self.automl._resampling_strategy = 'holdout'
 
+        self.automl._disable_evaluator_output = False
         self.assertRaises(ValueError, self.automl._load_models)
+
+        self.automl._disable_evaluator_output = True
+        self.automl._load_models()
+
 
     def test_fit(self):
         output = os.path.join(self.test_dir, '..', '.tmp_test_fit')

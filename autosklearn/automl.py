@@ -601,12 +601,17 @@ class AutoML(BaseEstimator):
                     ['partial-cv', 'partial-cv-iterative-fit']:
                 raise ValueError('No models fitted!')
 
-        else:
+        elif not self._disable_evaluator_output:
             model_names = self._backend.list_all_models(seed)
 
             if len(model_names) == 0 and self._resampling_strategy not in \
                     ['partial-cv', 'partial-cv-iterative-fit']:
                 raise ValueError('No models fitted!')
+
+            self.models = []
+
+        else:
+            self.models = []
 
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
