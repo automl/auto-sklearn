@@ -2,11 +2,7 @@ import functools
 import os
 import sys
 import traceback
-
-if sys.version_info[0] == 2:
-    import unittest2 as unittest
-else:
-    import unittest
+import unittest
 
 import numpy as np
 from numpy.linalg import LinAlgError

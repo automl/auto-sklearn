@@ -12,7 +12,6 @@ extensions = cythonize(
      ])
 
 requirements = [
-    "unittest2",
     "setuptools",
     "nose",
     "six",
@@ -24,7 +23,6 @@ requirements = [
     "joblib",
     "psutil",
     "pyyaml",
-    "ConfigArgParse",
     "liac-arff",
     "pandas",
     "xgboost==0.4a30",

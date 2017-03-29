@@ -1,10 +1,7 @@
 # -*- encoding: utf-8 -*-
-from __future__ import print_function
 import sys
-if sys.version_info[0] == 2:
-    import unittest2 as unittest
-else:
-    import unittest
+import unittest
+
 import numpy as np
 from autosklearn.constants import *
 from autosklearn.metrics.util import normalize_array

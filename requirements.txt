@@ -1,4 +1,3 @@
-unittest2
 setuptools
 nose
 
@@ -14,7 +13,6 @@ lockfile
 joblib
 psutil
 pyyaml
-ConfigArgParse
 liac-arff
 pandas
 xgboost==0.4a30
