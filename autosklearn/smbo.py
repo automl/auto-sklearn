@@ -511,7 +511,8 @@ class AutoMLSMBO(object):
                          'memory-limit': self.memory_limit,
                          'wallclock-limit': total_walltime_limit,
                          # 'instances': [[name] for name in meta_features_dict],
-                         'output-dir': self.backend.temporary_directory,
+                         'output-dir':
+                             self.backend.get_smac_output_directory(self.seed),
                          'shared-model': self.shared_mode,
                          'run-obj': 'quality',
                          'deterministic': 'true',
