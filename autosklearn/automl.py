@@ -267,6 +267,16 @@ class AutoML(BaseEstimator):
         self.ensemble_ = None
 
         # Check arguments prior to doing anything!
+        if not isinstance(self._disable_evaluator_output, (bool, list)):
+            raise ValueError('disable_evaluator_output must be of type bool '
+                             'or list.')
+        if isinstance(self._disable_evaluator_output, list):
+            allowed_elements = ['model', 'y_optimization']
+            for element in self._disable_evaluator_output:
+                if element not in allowed_elements:
+                    raise ValueError("List member '%s' for argument "
+                                     "'disable_evaluator_output' must be one "
+                                     "of " + str(allowed_elements))
         if self._resampling_strategy not in ['holdout', 'holdout-iterative-fit',
                                              'cv', 'partial-cv',
                                              'partial-cv-iterative-fit']:
@@ -597,7 +607,9 @@ class AutoML(BaseEstimator):
                     ['partial-cv', 'partial-cv-iterative-fit']:
                 raise ValueError('No models fitted!')
 
-        elif not self._disable_evaluator_output:
+        elif self._disable_evaluator_output is False or \
+                (isinstance(self._disable_evaluator_output, list) and
+                 'model' not in self._disable_evaluator_output):
             model_names = self._backend.list_all_models(seed)
 
             if len(model_names) == 0 and self._resampling_strategy not in \

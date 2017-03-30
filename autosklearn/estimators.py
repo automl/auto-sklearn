@@ -207,10 +207,16 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             ``delete_tmp_folder_after_terminate`` and
             ``delete_output_folder_after_terminate`` are set to False.
 
-        disable_evaluator_output: bool, optional (False)
-            Disable model and prediction output. Cannot be used together with
-            ensemble building. predict() cannot be used when setting this
-            flag to True.
+        disable_evaluator_output: bool or list, optional (False)
+            If True, disable model and prediction output. Cannot be used
+            together with ensemble building. predict() cannot be used when
+            setting this True. Can also be used as a list to pass more
+            fine-grained information on what to save. Allowed elements in the
+            list are:
+            * 'y_optimization' : do not save the predictions for the
+              optimization/validation set, which would later on be used to build
+              an ensemble.
+            * 'model' : do not save any model files
 
         Attributes
         ----------

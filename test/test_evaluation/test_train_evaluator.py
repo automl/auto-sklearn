@@ -50,9 +50,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator(D, backend_api, queue_,
                                    configuration=configuration,
                                    cv=kfold,
-                                   with_predictions=True,
                                    all_scoring_functions=False,
-                                   output_y_test=True)
+                                   output_y_hat_optimization=True)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
 
@@ -102,9 +101,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator(D, backend_api, queue_,
                                    configuration=configuration,
                                    cv=kfold,
-                                   with_predictions=True,
                                    all_scoring_functions=False,
-                                   output_y_test=True)
+                                   output_y_hat_optimization=True)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
 
@@ -170,9 +168,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator(D, backend_api, queue_,
                                    configuration=configuration,
                                    cv=kfold,
-                                   with_predictions=True,
                                    all_scoring_functions=False,
-                                   output_y_test=True)
+                                   output_y_hat_optimization=True)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
 
@@ -226,9 +223,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator(D, backend_api, queue_,
                                    configuration=configuration,
                                    cv=kfold,
-                                   with_predictions=True,
                                    all_scoring_functions=False,
-                                   output_y_test=True)
+                                   output_y_hat_optimization=True)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
 
@@ -266,9 +262,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator(D, backend_api, queue_,
                                    configuration=configuration,
                                    cv=kfold,
-                                   with_predictions=True,
                                    all_scoring_functions=False,
-                                   output_y_test=True)
+                                   output_y_hat_optimization=True)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
 
@@ -309,9 +304,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator(D, backend_api, queue_,
                                    configuration=configuration,
                                    cv=kfold,
-                                   with_predictions=True,
                                    all_scoring_functions=False,
-                                   output_y_test=True)
+                                   output_y_hat_optimization=True)
 
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
@@ -360,9 +354,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator(D, backend_api, queue_,
                                    configuration=configuration,
                                    cv=kfold,
-                                   with_predictions=True,
                                    all_scoring_functions=False,
-                                   output_y_test=True)
+                                   output_y_hat_optimization=True)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
 
@@ -410,9 +403,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator = TrainEvaluator(D, backend_mock, queue=queue_,
                                    configuration=configuration,
                                    cv=kfold,
-                                   with_predictions=True,
                                    all_scoring_functions=True,
-                                   output_y_test=True)
+                                   output_y_hat_optimization=True)
 
         backend_mock.get_model_dir.return_value = True
         evaluator.model = 'model'
@@ -521,7 +513,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator = TrainEvaluator(D, backend_mock, queue_,
                                    configuration=configuration,
-                                   cv=kfold)
+                                   cv=kfold, output_y_hat_optimization=False)
         evaluator.fit_predict_and_loss()
         Y_optimization_pred = backend_mock.save_predictions_as_npy.call_args_list[0][0][0]
         print(Y_optimization_pred)
@@ -558,7 +550,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                 kfold = ShuffleSplit(n=len(y), n_iter=5, random_state=1)
                 queue_ = multiprocessing.Queue()
                 evaluator = TrainEvaluator(D_, backend_mock, queue_,
-                                           cv=kfold)
+                                           cv=kfold,
+                                           output_y_hat_optimization=False)
 
                 evaluator.fit_predict_and_loss()
                 duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
@@ -585,8 +578,8 @@ class FunctionsTest(unittest.TestCase):
         kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
         eval_holdout(queue=self.queue, config=self.configuration,
                      data=self.data, backend=self.backend, cv=kfold,
-                     seed=1, num_run=1, subsample=None, with_predictions=True,
-                     all_scoring_functions=False, output_y_test=True,
+                     seed=1, num_run=1, subsample=None,
+                     all_scoring_functions=False, output_y_hat_optimization=True,
                      include=None, exclude=None, disable_file_output=False,
                      instance = self.dataset_name)
         info = get_last_result(self.queue)
@@ -598,10 +591,9 @@ class FunctionsTest(unittest.TestCase):
         kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
         eval_holdout(queue=self.queue, config=self.configuration, data=self.data,
                      backend=self.backend, cv=kfold, seed=1, num_run=1,
-                     subsample=None, with_predictions=True,
-                     all_scoring_functions=True, output_y_test=True,
-                     include=None, exclude=None, disable_file_output=False,
-                     instance=self.dataset_name)
+                     subsample=None, all_scoring_functions=True,
+                     output_y_hat_optimization=True, include=None, exclude=None,
+                     disable_file_output=False, instance=self.dataset_name)
         info = get_last_result(self.queue)
 
         fixture = {'f1_metric': 0.0954545454545,
@@ -632,8 +624,8 @@ class FunctionsTest(unittest.TestCase):
         eval_iterative_holdout(queue=self.queue, config=self.configuration,
                                data=self.data, backend=self.backend,
                                cv=kfold, seed=1, num_run=1, subsample=None,
-                               with_predictions=True, all_scoring_functions=False,
-                               output_y_test=True, include=None, exclude=None,
+                               all_scoring_functions=False, output_y_hat_optimization=True,
+                               include=None, exclude=None,
                                disable_file_output=False, instance=self.dataset_name)
         info = get_last_result(self.queue)
         self.assertAlmostEqual(info[1], 0.09545454545454557)
@@ -653,9 +645,9 @@ class FunctionsTest(unittest.TestCase):
         cv = StratifiedKFold(y=self.y, shuffle=True, random_state=1)
         eval_cv(queue=self.queue, config=self.configuration, data=self.data,
                 backend=self.backend, seed=1, num_run=1, cv=cv, subsample=None,
-                with_predictions=True, all_scoring_functions=False,
-                output_y_test=True, include=None, exclude=None,
-                disable_file_output=False, instance=self.dataset_name)
+                all_scoring_functions=False, output_y_hat_optimization=True,
+                include=None, exclude=None, disable_file_output=False,
+                instance=self.dataset_name)
         info = get_last_result(self.queue)
         self.assertAlmostEqual(info[1], 0.063004032258064502)
         self.assertEqual(info[2], 1)
@@ -665,9 +657,9 @@ class FunctionsTest(unittest.TestCase):
         cv = StratifiedKFold(y=self.y, shuffle=True, random_state=1)
         eval_cv(queue=self.queue, config=self.configuration, data=self.data,
                 backend=self.backend, seed=1, num_run=1, cv=cv, subsample=None,
-                with_predictions=True, all_scoring_functions=True,
-                output_y_test=True, include=None, exclude=None,
-                disable_file_output=False, instance=self.dataset_name)
+                all_scoring_functions=True, output_y_hat_optimization=True,
+                include=None, exclude=None, disable_file_output=False,
+                instance=self.dataset_name)
         info = get_last_result(self.queue)
 
         fixture = {'f1_metric': 0.0635080645161,
@@ -689,7 +681,7 @@ class FunctionsTest(unittest.TestCase):
     #     eval_cv(queue=self.queue, config=self.configuration, data=self.data,
     #             backend=backend_api, seed=1, num_run=1, folds=5, subsample=45,
     #             with_predictions=True, all_scoring_functions=False,
-    #             output_y_test=True, include=None, exclude=None,
+    #             output_y_hat_optimization=True, include=None, exclude=None,
     #             disable_file_output=False)
     #     info = self.queue.get()
     #     self.assertAlmostEqual(info[1], 0.063004032258064502)
@@ -708,10 +700,9 @@ class FunctionsTest(unittest.TestCase):
             eval_partial_cv(queue=self.queue, config=self.configuration,
                             data=self.data, backend=self.backend, seed=1,
                             num_run=1, instance=instance, cv=cv,
-                            subsample=None, with_predictions=True,
-                            all_scoring_functions=False, output_y_test=True,
-                            include=None, exclude=None,
-                            disable_file_output=False)
+                            subsample=None, all_scoring_functions=False,
+                            output_y_hat_optimization=True, include=None,
+                            exclude=None, disable_file_output=False)
             info = get_last_result(self.queue)
             results.append(info[1])
             self.assertAlmostEqual(info[1], results[fold])
@@ -730,7 +721,7 @@ class FunctionsTest(unittest.TestCase):
     #                         data=self.data, backend=backend_api,
     #                         seed=1, num_run=1, instance=fold, folds=5,
     #                         subsample=80, with_predictions=True,
-    #                         all_scoring_functions=False, output_y_test=True,
+    #                         all_scoring_functions=False, output_y_hat_optimization=True,
     #                         include=None, exclude=None,
     #                         disable_file_output=False)
     #
@@ -748,7 +739,7 @@ class FunctionsTest(unittest.TestCase):
     #                         data=self.data, backend=backend_api,
     #                         seed=1, num_run=1, instance=fold, folds=5,
     #                         subsample=43, with_predictions=True,
-    #                         all_scoring_functions=False, output_y_test=True,
+    #                         all_scoring_functions=False, output_y_hat_optimization=True,
     #                         include=None, exclude=None,
     #                         disable_file_output=False)
     #

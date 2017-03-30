@@ -25,10 +25,10 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def __init__(self, backend, autosklearn_seed, resampling_strategy,
                  logger, initial_num_run=1, stats=None, runhistory=None,
-                 run_obj='quality', par_factor=1, with_predictions=True,
-                 all_scoring_functions=False, output_y_test=True,
-                 include=None, exclude=None, memory_limit=None,
-                 disable_file_output=False, **resampling_strategy_args):
+                 run_obj='quality', par_factor=1, all_scoring_functions=False,
+                 output_y_hat_optimization=True, include=None, exclude=None,
+                 memory_limit=None, disable_file_output=False,
+                 **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
             eval_function = eval_holdout
@@ -42,8 +42,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             eval_function = eval_partial_cv_iterative
         elif resampling_strategy == 'test':
             eval_function = eval_t
-            output_y_test = False
-            with_predictions = False
+            output_y_hat_optimization = False
         else:
             raise ValueError('Unknown resampling strategy %s' %
                              resampling_strategy)
@@ -57,10 +56,9 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.num_run = initial_num_run
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_args = resampling_strategy_args
-        self.with_predictions = with_predictions
         self.all_scoring_functions = all_scoring_functions
-        # TODO deactivate output_y_test and let the respective evaluator decide
-        self.output_y_test = output_y_test
+        # TODO deactivate output_y_hat_optimization and let the respective evaluator decide
+        self.output_y_hat_optimization = output_y_hat_optimization
         self.include = include
         self.exclude = exclude
         self.disable_file_output = disable_file_output
@@ -141,9 +139,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                           backend=self.backend,
                           seed=self.autosklearn_seed,
                           num_run=self.num_run,
-                          with_predictions=self.with_predictions,
                           all_scoring_functions=self.all_scoring_functions,
-                          output_y_test=self.output_y_test,
+                          output_y_hat_optimization=self.output_y_hat_optimization,
                           subsample=subsample,
                           include=self.include,
                           exclude=self.exclude,

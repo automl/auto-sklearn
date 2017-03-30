@@ -15,7 +15,6 @@ class TestEvaluator(AbstractEvaluator):
 
     def __init__(self, Datamanager, backend, queue,
                  configuration=None,
-                 with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
                  include=None,
@@ -24,10 +23,9 @@ class TestEvaluator(AbstractEvaluator):
         super(TestEvaluator, self).__init__(
             Datamanager, backend, queue=queue,
             configuration=configuration,
-            with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
-            output_y_test=False,
+            output_y_hat_optimization=False,
             num_run='-1',
             subsample=None,
             include=include,
@@ -82,11 +80,10 @@ class TestEvaluator(AbstractEvaluator):
 # create closure for evaluating an algorithm
 # Has a stupid name so nosetests doesn't regard it as a test
 def eval_t(queue, config, data, backend, seed, num_run, instance, subsample,
-           with_predictions, all_scoring_functions,
-           output_y_test, include, exclude, disable_file_output):
+           all_scoring_functions, output_y_hat_optimization, include, exclude,
+           disable_file_output):
     evaluator = TestEvaluator(Datamanager=data, configuration=config,
                               backend=backend, seed=seed, queue=queue,
-                              with_predictions=with_predictions,
                               all_scoring_functions=all_scoring_functions,
                               include=include, exclude=exclude,
                               disable_file_output=disable_file_output)

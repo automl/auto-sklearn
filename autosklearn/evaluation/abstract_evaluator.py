@@ -83,10 +83,9 @@ class MyDummyRegressor(DummyRegressor):
 
 class AbstractEvaluator(object):
     def __init__(self, Datamanager, backend, queue, configuration=None,
-                 with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
-                 output_y_test=False,
+                 output_y_hat_optimization=True,
                  num_run=None,
                  subsample=None,
                  include=None,
@@ -110,8 +109,7 @@ class AbstractEvaluator(object):
         self.task_type = Datamanager.info['task']
         self.seed = seed
 
-        self.output_y_test = output_y_test
-        self.with_predictions = with_predictions
+        self.output_y_hat_optimization = output_y_hat_optimization
         self.all_scoring_functions = all_scoring_functions
         self.disable_file_output = disable_file_output
 
@@ -229,7 +227,7 @@ class AbstractEvaluator(object):
                         StatusType.SUCCESS))
 
     def file_output(self, Y_optimization_pred, Y_valid_pred, Y_test_pred):
-        if self.disable_file_output:
+        if self.disable_file_output is True:
             return None, None
 
         seed = self.seed
@@ -244,24 +242,28 @@ class AbstractEvaluator(object):
 
         if not np.all(np.isfinite(Y_optimization_pred)):
             return 1.0, 'Model predictions for optimization set contains NaNs.'
-        for y, s in [[Y_valid_pred, 'validation'],
-                  [Y_test_pred, 'test']]:
+        for y, s in [[Y_valid_pred, 'validation'], [Y_test_pred, 'test']]:
             if y is not None and not np.all(np.isfinite(y)):
                 return 1.0, 'Model predictions for %s set contains NaNs.' % s
 
         num_run = str(self.num_run).zfill(5)
-        if os.path.exists(self.backend.get_model_dir()):
-            self.backend.save_model(self.model, self.num_run, seed)
 
-        if self.output_y_test:
-            try:
-                os.makedirs(self.backend.output_directory)
-            except OSError:
-                pass
-            self.backend.save_targets_ensemble(self.Y_optimization)
+        if not isinstance(self.disable_file_output, list) or \
+                'model' not in self.disable_file_output:
+            if os.path.exists(self.backend.get_model_dir()):
+                self.backend.save_model(self.model, self.num_run, seed)
 
-        self.backend.save_predictions_as_npy(Y_optimization_pred, 'ensemble',
-                                             seed, num_run)
+        if not isinstance(self.disable_file_output, list) or \
+                'y_optimization' not in self.disable_file_output:
+            if self.output_y_hat_optimization:
+                try:
+                    os.makedirs(self.backend.output_directory)
+                except OSError:
+                    pass
+                self.backend.save_targets_ensemble(self.Y_optimization)
+
+            self.backend.save_predictions_as_npy(Y_optimization_pred, 'ensemble',
+                                                 seed, num_run)
 
         if Y_valid_pred is not None:
             self.backend.save_predictions_as_npy(Y_valid_pred, 'valid',

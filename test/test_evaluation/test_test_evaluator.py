@@ -76,8 +76,8 @@ class FunctionsTest(unittest.TestCase):
                backend=self.backend,
                config=self.configuration,
                data=self.data,
-               seed=1, num_run=1, subsample=None, with_predictions=True,
-               all_scoring_functions=False, output_y_test=True,
+               seed=1, num_run=1, subsample=None,
+               all_scoring_functions=False, output_y_hat_optimization=False,
                include=None, exclude=None, disable_file_output=False,
                instance=self.dataset_name)
         info = get_last_result(self.queue)
@@ -90,8 +90,8 @@ class FunctionsTest(unittest.TestCase):
                backend=self.backend,
                config=self.configuration,
                data=self.data,
-               seed=1, num_run=1, subsample=None, with_predictions=True,
-               all_scoring_functions=True, output_y_test=True,
+               seed=1, num_run=1, subsample=None,
+               all_scoring_functions=True, output_y_hat_optimization=False,
                include=None, exclude=None, disable_file_output=False,
                instance=self.dataset_name)
         info = get_last_result(self.queue)

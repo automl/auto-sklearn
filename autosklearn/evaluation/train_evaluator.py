@@ -14,10 +14,9 @@ __all__ = ['TrainEvaluator', 'eval_holdout', 'eval_iterative_holdout',
 class TrainEvaluator(AbstractEvaluator):
     def __init__(self, Datamanager, backend, queue,
                  configuration=None,
-                 with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
-                 output_y_test=False,
+                 output_y_hat_optimization=True,
                  cv=None,
                  num_run=None,
                  subsample=None,
@@ -28,10 +27,9 @@ class TrainEvaluator(AbstractEvaluator):
         super().__init__(
             Datamanager, backend, queue,
             configuration=configuration,
-            with_predictions=with_predictions,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
-            output_y_test=output_y_test,
+            output_y_hat_optimization=output_y_hat_optimization,
             num_run=num_run,
             subsample=subsample,
             include=include,
@@ -268,18 +266,16 @@ class TrainEvaluator(AbstractEvaluator):
 
 # create closure for evaluating an algorithm
 def eval_holdout(queue, config, data, backend, cv, seed, num_run, instance,
-                 subsample, with_predictions, all_scoring_functions,
-                 output_y_test, include, exclude, disable_file_output,
-                 iterative=False):
+                 subsample, all_scoring_functions, output_y_hat_optimization,
+                 include, exclude, disable_file_output, iterative=False):
     evaluator = TrainEvaluator(data, backend, queue,
                                cv=cv,
                                configuration=config,
                                seed=seed,
                                num_run=num_run,
                                subsample=subsample,
-                               with_predictions=with_predictions,
                                all_scoring_functions=all_scoring_functions,
-                               output_y_test=output_y_test,
+                               output_y_hat_optimization=output_y_hat_optimization,
                                include=include,
                                exclude=exclude,
                                disable_file_output=disable_file_output)
@@ -287,31 +283,28 @@ def eval_holdout(queue, config, data, backend, cv, seed, num_run, instance,
 
 
 def eval_iterative_holdout(queue, config, data, backend, cv, seed,
-                           num_run, instance, subsample, with_predictions,
-                           all_scoring_functions, output_y_test,
-                           include, exclude, disable_file_output):
+                           num_run, instance, subsample, all_scoring_functions,
+                           output_y_hat_optimization, include, exclude,
+                           disable_file_output):
     return eval_holdout(queue=queue, config=config, data=data, backend=backend,
                         cv=cv, seed=seed, num_run=num_run, subsample=subsample,
-                        with_predictions=with_predictions,
                         all_scoring_functions=all_scoring_functions,
-                        output_y_test=output_y_test,
+                        output_y_hat_optimization=output_y_hat_optimization,
                         include=include, exclude=exclude, instance=instance,
                         disable_file_output=disable_file_output, iterative=True)
 
 
 def eval_partial_cv(queue, config, data, backend, cv, seed, num_run, instance,
-                    subsample, with_predictions, all_scoring_functions,
-                    output_y_test, include, exclude, disable_file_output,
-                    iterative=False):
+                    subsample, all_scoring_functions, output_y_hat_optimization,
+                    include, exclude, disable_file_output, iterative=False):
     evaluator = TrainEvaluator(data, backend, queue,
                                configuration=config,
                                cv=cv,
                                seed=seed,
                                num_run=num_run,
                                subsample=subsample,
-                               with_predictions=with_predictions,
                                all_scoring_functions=all_scoring_functions,
-                               output_y_test=False,
+                               output_y_hat_optimization=False,
                                include=include,
                                exclude=exclude,
                                disable_file_output=disable_file_output)
@@ -322,31 +315,29 @@ def eval_partial_cv(queue, config, data, backend, cv, seed, num_run, instance,
 
 
 def eval_partial_cv_iterative(queue, config, data, backend, cv, seed, num_run,
-                              instance, subsample, with_predictions,
-                              all_scoring_functions, output_y_test,
-                              include, exclude, disable_file_output):
+                              instance, subsample, all_scoring_functions,
+                              output_y_hat_optimization, include, exclude,
+                              disable_file_output):
     return eval_partial_cv(queue=queue, config=config, data=data, backend=backend,
                            cv=cv, seed=seed, num_run=num_run, instance=instance,
-                           subsample=subsample, with_predictions=with_predictions,
-                           all_scoring_functions=all_scoring_functions,
-                           output_y_test=output_y_test, include=include,
+                           subsample=subsample, all_scoring_functions=all_scoring_functions,
+                           output_y_hat_optimization=output_y_hat_optimization, include=include,
                            exclude=exclude, disable_file_output=disable_file_output,
                            iterative=True)
 
 
 # create closure for evaluating an algorithm
 def eval_cv(queue, config, data, backend, cv, seed, num_run, instance,
-            subsample, with_predictions, all_scoring_functions,
-            output_y_test, include, exclude, disable_file_output):
+            subsample, all_scoring_functions, output_y_hat_optimization, include,
+            exclude, disable_file_output):
     evaluator = TrainEvaluator(data, backend, queue,
                                configuration=config,
                                seed=seed,
                                num_run=num_run,
                                cv=cv,
                                subsample=subsample,
-                               with_predictions=with_predictions,
                                all_scoring_functions=all_scoring_functions,
-                               output_y_test=output_y_test,
+                               output_y_hat_optimization=output_y_hat_optimization,
                                include=include,
                                exclude=exclude,
                                disable_file_output=disable_file_output)

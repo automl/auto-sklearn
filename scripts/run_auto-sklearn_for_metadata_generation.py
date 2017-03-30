@@ -101,7 +101,6 @@ for entry in trajectory:
         ta = ExecuteTaFuncWithQueue(backend=automl._automl._automl._backend,
                                     autosklearn_seed=seed,
                                     resampling_strategy='test',
-                                    with_predictions=False,
                                     memory_limit=memory_limit_factor * automl_arguments['ml_memory_limit'],
                                     disable_file_output=True,
                                     logger=logger,
