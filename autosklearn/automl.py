@@ -748,7 +748,7 @@ class AutoML(BaseEstimator):
         sio = io.StringIO()
         sio.write('auto-sklearn results:\n')
         sio.write('  Dataset name: %s\n' % self._dataset_name)
-        sio.write('  Metric: %s\n' % METRIC_TO_STRING[self._metric])
+        sio.write('  Metric: %s\n' % self._metric)
         idx_best_run = np.argmax(cv_results['mean_test_score'])
         best_score = cv_results['mean_test_score'][idx_best_run]
         sio.write('  Best validation score: %f\n' % best_score)
@@ -765,7 +765,6 @@ class AutoML(BaseEstimator):
         sio.write('  Number of target algorithms that exceeded the time '
                   'limit: %d\n' % num_memout)
         return sio.getvalue()
-
 
     def show_models(self):
         if self.models_ is None or len(self.models_) == 0 or \

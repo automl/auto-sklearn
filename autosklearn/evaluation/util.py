@@ -1,8 +1,7 @@
 import queue
 
 from autosklearn.constants import *
-from autosklearn.metrics import sanitize_array, \
-    regression_metrics, classification_metrics
+from autosklearn.metrics import sanitize_array, classification_metrics
 
 
 __all__ = [
@@ -38,8 +37,9 @@ def calculate_score(solution, prediction, task_type, metric, num_classes,
             score = regression_metrics.calculate_score(
                 metric, solution, cprediction)
         else:
-            score = classification_metrics.calculate_score(
-                metric, solution, prediction, task=task_type)
+            score = metric(solution, prediction)
+            #score = classification_metrics.calculate_score(
+            #    metric, solution, prediction, task=task_type)
 
     return score
 

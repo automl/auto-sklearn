@@ -7,6 +7,7 @@ import six
 from autosklearn.constants import *
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.evaluation.util import calculate_score
+from autosklearn.metrics import Scorer
 
 
 class EnsembleSelection(AbstractEnsemble):
@@ -25,8 +26,8 @@ class EnsembleSelection(AbstractEnsemble):
             raise ValueError('Ensemble size cannot be less than one!')
         if not self.task_type in TASK_TYPES:
             raise ValueError('Unknown task type %s.' % self.task_type)
-        if not self.metric in METRIC:
-            raise ValueError('Unknown metric %s.' % self.metric)
+        if not isinstance(self.metric, Scorer):
+            raise ValueError('Metric must be of type scorer')
         if self.mode not in ('fast', 'slow'):
             raise ValueError('Unknown mode %s' % self.mode)
 

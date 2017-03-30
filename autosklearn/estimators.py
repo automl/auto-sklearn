@@ -340,11 +340,9 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         y : array-like, shape = [n_samples] or [n_samples, n_outputs]
             The target classes.
 
-        metric : str, optional (default='acc_metric')
-            The metric to optimize for. Can be one of: ['acc_metric',
-            'auc_metric', 'bac_metric', 'f1_metric', 'pac_metric']. A
-            description of the metrics can be found in `the paper describing
-            the AutoML Challenge.
+        metric : callable, optional (default='acc_metric')
+            An instance of ``autosklearn.metrics.Scorer.
+
         feat_type : list, optional (default=None)
             List of str of `len(X.shape[1])` describing the attribute type.
             Possible types are `Categorical` and `Numerical`. `Categorical`
