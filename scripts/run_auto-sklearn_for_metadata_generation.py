@@ -88,10 +88,10 @@ else:
     memory_limit_factor = 2
 
 for entry in trajectory:
-    incumbent_id = entry[1]
-    train_performance = entry[0]
+    incumbent_id = entry.incumbent_id
+    train_performance = entry.train_perf
     if incumbent_id not in incumbent_id_to_model:
-        config = entry[2]
+        config = entry.incumbent
 
         logger = logging.getLogger('Testing:)')
         stats = Stats(Scenario({'cutoff_time': per_run_time_limit * 2}))
@@ -121,7 +121,7 @@ for entry in trajectory:
 
         # print(additional_run_info)
 
-        validated_trajectory.append(list(entry) + [scores])
+        validated_trajectory.append(list(entry) + [task_id] + [scores])
 
 validated_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
                         for entry in validated_trajectory]

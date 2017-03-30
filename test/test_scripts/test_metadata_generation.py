@@ -7,6 +7,8 @@ import subprocess
 import sys
 import unittest
 
+import arff
+
 
 class TestMetadataGeneration(unittest.TestCase):
 
@@ -133,6 +135,24 @@ class TestMetadataGeneration(unittest.TestCase):
                                                         'metadata',
                                                         'acc_metric_binary.classification_dense',
                                                         file)))
+
+        with open(os.path.join(self.working_directory,
+                               'metadata',
+                               'acc_metric_binary.classification_dense',
+                               'algorithm_runs.arff')) as fh:
+            algorithm_runs = arff.load(fh)
+            self.assertEqual(algorithm_runs['attributes'],
+                             [('instance_id', 'STRING'),
+                              ('repetition', 'NUMERIC'),
+                              ('algorithm', 'STRING'),
+                              ('acc_metric', 'NUMERIC'),
+                              ('runstatus',
+                               ['ok', 'timeout', 'memout', 'not_applicable',
+                                'crash', 'other'])])
+            self.assertEqual(len(algorithm_runs['data']), 1)
+            self.assertEqual(len(algorithm_runs['data'][0]), 5)
+            self.assertLess(algorithm_runs['data'][0][3], 0.9)
+            self.assertEqual(algorithm_runs['data'][0][4], 'ok')
 
     def tearDown(self):
         for i in range(5):

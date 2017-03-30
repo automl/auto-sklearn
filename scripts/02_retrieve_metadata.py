@@ -29,12 +29,11 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
     possible_experiment_directories = os.listdir(validation_directory)
 
     for ped in possible_experiment_directories:
-        task_name = ped
-        ped = os.path.join(validation_directory, ped)
+        task_name = None
 
+        ped = os.path.join(validation_directory, ped)
         if not os.path.exists(ped) or not os.path.isdir(ped):
             continue
-
         print("Going through directory %s" % ped)
 
         validation_trajectory_file = os.path.join(ped, 'smac3-output_1',
@@ -46,6 +45,7 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
         best_configuration = None
         for entry in validation_trajectory:
             config = entry[2]
+            task_name = entry[-2]
             score = entry[-1][str(metric)]
 
             if score < best_value:
@@ -55,6 +55,9 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                     best_value = score
                 except:
                     pass
+
+        if task_name is None:
+            continue
 
         if best_configuration in configurations_to_ids:
             config_id = configurations_to_ids[best_configuration]
