@@ -33,14 +33,14 @@ loggers:
     handlers: [file_handler]
     propagate: no
 
-  intensifier:
+  smac.intensification.intensification.Intensifier:
     level: INFO
     handlers: [file_handler, console]
 
-  localsearch:
+  smac.smbo.local_search.LocalSearch:
     level: INFO
     handlers: [file_handler, console]
 
-  SMBO:
+  smac.smbo.smbo.SMBO:
     level: INFO
     handlers: [file_handler, console]

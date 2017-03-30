@@ -1,3 +1,4 @@
+import glob
 import json
 import os
 import time
@@ -673,7 +674,7 @@ class AutoMLSMBO(object):
 
             if smac.solver.scenario.shared_model:
                 pSMAC.read(run_history=smac.solver.runhistory,
-                           output_dirs=[self.backend.temporary_directory],
+                           output_dirs=glob.glob(self.backend.get_smac_output_glob()),
                            configuration_space=self.config_space,
                            logger=self.logger)
 
