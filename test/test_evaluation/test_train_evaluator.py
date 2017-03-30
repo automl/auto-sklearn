@@ -1,4 +1,5 @@
 import copy
+import json
 import queue
 import multiprocessing
 import os
@@ -578,11 +579,16 @@ class FunctionsTest(unittest.TestCase):
         self.backend = unittest.mock.Mock()
         self.backend.get_model_dir.return_value = 'udiaetzrpduaeirdaetr'
         self.backend.output_directory = 'duapdbaetpdbe'
+        self.dataset_name = json.dumps({'dataset_name': 'test'})
 
     def test_eval_holdout(self):
         kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
-        eval_holdout(self.queue, self.configuration, self.data, self.backend,
-                     kfold, 1, 1, None, True, False, True, None, None, False)
+        eval_holdout(queue=self.queue, config=self.configuration,
+                     data=self.data, backend=self.backend, cv=kfold,
+                     seed=1, num_run=1, subsample=None, with_predictions=True,
+                     all_scoring_functions=False, output_y_test=True,
+                     include=None, exclude=None, disable_file_output=False,
+                     instance = self.dataset_name)
         info = get_last_result(self.queue)
         self.assertAlmostEqual(info[1], 0.095, places=3)
         self.assertEqual(info[2], 1)
@@ -590,8 +596,12 @@ class FunctionsTest(unittest.TestCase):
 
     def test_eval_holdout_all_loss_functions(self):
         kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
-        eval_holdout(self.queue, self.configuration, self.data, self.backend,
-                     kfold, 1, 1, None, True, True, True, None, None, False)
+        eval_holdout(queue=self.queue, config=self.configuration, data=self.data,
+                     backend=self.backend, cv=kfold, seed=1, num_run=1,
+                     subsample=None, with_predictions=True,
+                     all_scoring_functions=True, output_y_test=True,
+                     include=None, exclude=None, disable_file_output=False,
+                     instance=self.dataset_name)
         info = get_last_result(self.queue)
 
         fixture = {'f1_metric': 0.0954545454545,
@@ -619,9 +629,12 @@ class FunctionsTest(unittest.TestCase):
 
     def test_eval_holdout_iterative_fit_no_timeout(self):
         kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
-        eval_iterative_holdout(self.queue, self.configuration, self.data,
-                               self.backend, kfold, 1, 1, None, True,
-                               False, True, None, None, False)
+        eval_iterative_holdout(queue=self.queue, config=self.configuration,
+                               data=self.data, backend=self.backend,
+                               cv=kfold, seed=1, num_run=1, subsample=None,
+                               with_predictions=True, all_scoring_functions=False,
+                               output_y_test=True, include=None, exclude=None,
+                               disable_file_output=False, instance=self.dataset_name)
         info = get_last_result(self.queue)
         self.assertAlmostEqual(info[1], 0.09545454545454557)
         self.assertEqual(info[2], 1)
@@ -642,7 +655,7 @@ class FunctionsTest(unittest.TestCase):
                 backend=self.backend, seed=1, num_run=1, cv=cv, subsample=None,
                 with_predictions=True, all_scoring_functions=False,
                 output_y_test=True, include=None, exclude=None,
-                disable_file_output=False)
+                disable_file_output=False, instance=self.dataset_name)
         info = get_last_result(self.queue)
         self.assertAlmostEqual(info[1], 0.063004032258064502)
         self.assertEqual(info[2], 1)
@@ -654,7 +667,7 @@ class FunctionsTest(unittest.TestCase):
                 backend=self.backend, seed=1, num_run=1, cv=cv, subsample=None,
                 with_predictions=True, all_scoring_functions=True,
                 output_y_test=True, include=None, exclude=None,
-                disable_file_output=False)
+                disable_file_output=False, instance=self.dataset_name)
         info = get_last_result(self.queue)
 
         fixture = {'f1_metric': 0.0635080645161,
@@ -691,9 +704,10 @@ class FunctionsTest(unittest.TestCase):
                    0.16666666666666674,
                    0.0]
         for fold in range(5):
+            instance = json.dumps({'dataset_name': 'data', 'fold': fold})
             eval_partial_cv(queue=self.queue, config=self.configuration,
                             data=self.data, backend=self.backend, seed=1,
-                            num_run=1, instance=fold, cv=cv,
+                            num_run=1, instance=instance, cv=cv,
                             subsample=None, with_predictions=True,
                             all_scoring_functions=False, output_y_test=True,
                             include=None, exclude=None,

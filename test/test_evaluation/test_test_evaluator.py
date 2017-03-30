@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 import copy
+import json
 import multiprocessing
 import os
 import shutil
@@ -62,6 +63,7 @@ class FunctionsTest(unittest.TestCase):
         self.tmp_dir = os.path.join(os.path.dirname(__file__),
                                     '.test_cv_functions')
         self.backend = unittest.mock.Mock(spec=Backend)
+        self.dataset_name = json.dumps({'dataset_name': 'test'})
 
     def tearDown(self):
         try:
@@ -76,7 +78,8 @@ class FunctionsTest(unittest.TestCase):
                data=self.data,
                seed=1, num_run=1, subsample=None, with_predictions=True,
                all_scoring_functions=False, output_y_test=True,
-               include=None, exclude=None, disable_file_output=False)
+               include=None, exclude=None, disable_file_output=False,
+               instance=self.dataset_name)
         info = get_last_result(self.queue)
         self.assertAlmostEqual(info[1], 0.041666666666666852)
         self.assertEqual(info[2], 1)
@@ -89,7 +92,8 @@ class FunctionsTest(unittest.TestCase):
                data=self.data,
                seed=1, num_run=1, subsample=None, with_predictions=True,
                all_scoring_functions=True, output_y_test=True,
-               include=None, exclude=None, disable_file_output=False)
+               include=None, exclude=None, disable_file_output=False,
+               instance=self.dataset_name)
         info = get_last_result(self.queue)
         fixture = {'f1_metric': 0.0511508951407,
                    'pac_metric': 0.185257565321,

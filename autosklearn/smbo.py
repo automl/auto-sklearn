@@ -1,3 +1,4 @@
+import json
 import os
 import time
 import traceback
@@ -5,9 +6,6 @@ import warnings
 
 import numpy as np
 import pynisher
-
-# JTS TODO: notify aaron to clean up these nasty nested modules
-from ConfigSpace.configuration_space import Configuration
 
 from smac.facade.smac_facade import SMAC
 from smac.facade.roar_facade import ROAR
@@ -34,8 +32,6 @@ from autosklearn.util import get_logger
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.metafeatures.metafeatures import \
     calculate_all_metafeatures_with_labels, calculate_all_metafeatures_encoded_labels
-
-SENTINEL = 'uiaeo'
 
 EXCLUDE_META_FEATURES_CLASSIFICATION = {
     'Landmark1NN',
@@ -103,7 +99,7 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
         logger.info('Start calculating metafeatures for %s', basename)
         result = calculate_all_metafeatures_with_labels(
             x_train, y_train, categorical=categorical,
-            dataset_name=basename+SENTINEL,
+            dataset_name=basename,
             dont_calculate=EXCLUDE_META_FEATURES, )
         for key in list(result.metafeature_values.keys()):
             if result.metafeature_values[key].type_ != 'METAFEATURE':
@@ -127,7 +123,7 @@ def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
     watcher.start_task(task_name)
     result = calculate_all_metafeatures_encoded_labels(
         x_train, y_train, categorical=[False] * x_train.shape[1],
-        dataset_name=basename+SENTINEL, dont_calculate=EXCLUDE_META_FEATURES)
+        dataset_name=basename, dont_calculate=EXCLUDE_META_FEATURES)
     for key in list(result.metafeature_values.keys()):
         if result.metafeature_values[key].type_ != 'METAFEATURE':
             del result.metafeature_values[key]
@@ -199,8 +195,6 @@ class AutoMLSMBO(object):
         super(AutoMLSMBO, self).__init__()
         # data related
         self.dataset_name = dataset_name
-        #self.output_dir = output_dir
-        #self.tmp_dir = tmp_dir
         self.datamanager = None
         self.metric = None
         self.task = None
@@ -264,7 +258,7 @@ class AutoMLSMBO(object):
     def collect_metalearning_suggestions(self, meta_base):
         metalearning_configurations = _get_metalearning_configurations(
             meta_base=meta_base,
-            basename=self.dataset_name+SENTINEL,
+            basename=self.dataset_name,
             metric=self.metric,
             configuration_space=self.config_space,
             task=self.task,
@@ -353,7 +347,6 @@ class AutoMLSMBO(object):
         num_params = len(self.config_space.get_hyperparameters())
         # allocate a run history
         num_run = self.start_num_run
-        instance_id = self.dataset_name + SENTINEL
 
         # Initialize some SMAC dependencies
         runhistory = RunHistory(aggregate_func=average_cost)
@@ -383,6 +376,11 @@ class AutoMLSMBO(object):
 
             self.logger.info('Metadata directory: %s', self.metadata_directory)
             meta_base = MetaBase(self.config_space, self.metadata_directory)
+
+            try:
+                meta_base.remove_dataset(self.dataset_name)
+            except:
+                pass
 
             metafeature_calculation_time_limit = int(
                 self.total_walltime_limit / 4)
@@ -419,7 +417,7 @@ class AutoMLSMBO(object):
                         meta_features_encoded.metafeature_values)
 
             if meta_features is not None:
-                meta_base.add_dataset(instance_id, meta_features)
+                meta_base.add_dataset(self.dataset_name, meta_features)
                 # Do mean imputation of the meta-features - should be done specific
                 # for each prediction model!
                 all_metafeatures = meta_base.get_metafeatures(
@@ -500,9 +498,11 @@ class AutoMLSMBO(object):
         if self.resampling_strategy in ['partial-cv',
                                         'partial-cv-iterative-fit']:
             num_folds = self.resampling_strategy_args['folds']
-            instances = [[fold_number] for fold_number in range(num_folds)]
+            instances = [[json.dumps({'dataset_name': self.dataset_name,
+                                      'fold': fold_number})]
+                         for fold_number in range(num_folds)]
         else:
-            instances = None
+            instances = [[json.dumps({'dataset_name': self.dataset_name})]]
 
         startup_time = self.watcher.wall_elapsed(self.dataset_name)
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
@@ -510,7 +510,6 @@ class AutoMLSMBO(object):
                          'cutoff-time': self.func_eval_time_limit,
                          'memory-limit': self.memory_limit,
                          'wallclock-limit': total_walltime_limit,
-                         # 'instances': [[name] for name in meta_features_dict],
                          'output-dir':
                              self.backend.get_smac_output_directory(self.seed),
                          'shared-model': self.shared_mode,
@@ -674,7 +673,7 @@ class AutoMLSMBO(object):
 
             if smac.solver.scenario.shared_model:
                 pSMAC.read(run_history=smac.solver.runhistory,
-                           output_directory=self.scenario.output_dir,
+                           output_dirs=[self.backend.temporary_directory],
                            configuration_space=self.config_space,
                            logger=self.logger)
 

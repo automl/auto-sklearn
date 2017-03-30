@@ -65,18 +65,20 @@ class TestMetadataGeneration(unittest.TestCase):
         expected_output_directory = os.path.join(self.working_directory,
                                                  'configuration',
                                                  'classification',
-                                                 '253-1')
+                                                 '253')
         self.assertTrue(os.path.exists(expected_output_directory))
         smac_log = os.path.join(self.working_directory,
-                                'configuration/classification/253-1',
+                                'configuration/classification/253',
                                 'AutoML(1):253.log')
         with open(smac_log) as fh:
             smac_output = fh.read()
         self.assertEqual(rval.returncode, 0, msg=str(rval) + '\n' + smac_output)
         expected_validation_output = os.path.join(expected_output_directory,
+                                                  'smac3-output_1',
                                                   'validation_trajectory.json')
         self.assertTrue(os.path.exists(expected_validation_output))
-        trajectory = os.path.join(expected_output_directory, 'trajectory.json')
+        trajectory = os.path.join(expected_output_directory, 'smac3-output_1',
+                                  'trajectory.json')
 
         with open(expected_validation_output) as fh_validation:
             with open(trajectory) as fh_trajectory:

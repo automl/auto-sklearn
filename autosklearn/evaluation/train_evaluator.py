@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 import sklearn.cross_validation
 
@@ -265,7 +267,7 @@ class TrainEvaluator(AbstractEvaluator):
 
 
 # create closure for evaluating an algorithm
-def eval_holdout(queue, config, data, backend, cv, seed, num_run,
+def eval_holdout(queue, config, data, backend, cv, seed, num_run, instance,
                  subsample, with_predictions, all_scoring_functions,
                  output_y_test, include, exclude, disable_file_output,
                  iterative=False):
@@ -285,7 +287,7 @@ def eval_holdout(queue, config, data, backend, cv, seed, num_run,
 
 
 def eval_iterative_holdout(queue, config, data, backend, cv, seed,
-                           num_run, subsample, with_predictions,
+                           num_run, instance, subsample, with_predictions,
                            all_scoring_functions, output_y_test,
                            include, exclude, disable_file_output):
     return eval_holdout(queue=queue, config=config, data=data, backend=backend,
@@ -293,7 +295,7 @@ def eval_iterative_holdout(queue, config, data, backend, cv, seed,
                         with_predictions=with_predictions,
                         all_scoring_functions=all_scoring_functions,
                         output_y_test=output_y_test,
-                        include=include, exclude=exclude,
+                        include=include, exclude=exclude, instance=instance,
                         disable_file_output=disable_file_output, iterative=True)
 
 
@@ -314,7 +316,9 @@ def eval_partial_cv(queue, config, data, backend, cv, seed, num_run, instance,
                                exclude=exclude,
                                disable_file_output=disable_file_output)
 
-    evaluator.partial_fit_predict_and_loss(fold=instance, iterative=iterative)
+    instance = json.loads(instance)
+    fold = instance['fold']
+    evaluator.partial_fit_predict_and_loss(fold=fold, iterative=iterative)
 
 
 def eval_partial_cv_iterative(queue, config, data, backend, cv, seed, num_run,
@@ -331,7 +335,7 @@ def eval_partial_cv_iterative(queue, config, data, backend, cv, seed, num_run,
 
 
 # create closure for evaluating an algorithm
-def eval_cv(queue, config, data, backend, cv, seed, num_run,
+def eval_cv(queue, config, data, backend, cv, seed, num_run, instance,
             subsample, with_predictions, all_scoring_functions,
             output_y_test, include, exclude, disable_file_output):
     evaluator = TrainEvaluator(data, backend, queue,

@@ -3,19 +3,18 @@ import logging
 import math
 import multiprocessing
 
-import numpy as np
 import pynisher
 from sklearn.cross_validation import ShuffleSplit, StratifiedShuffleSplit, KFold, \
     StratifiedKFold
 from smac.tae.execute_ta_run import StatusType
 from smac.tae.execute_func import AbstractTAFunc
+from ConfigSpace import Configuration
 
 from .abstract_evaluator import *
 from .train_evaluator import *
 from .test_evaluator import *
 from .util import *
-from autosklearn.constants import REGRESSION_TASKS, CLASSIFICATION_TASKS, \
-    MULTILABEL_CLASSIFICATION
+from autosklearn.constants import CLASSIFICATION_TASKS, MULTILABEL_CLASSIFICATION
 
 WORST_POSSIBLE_RESULT = 1.0
 
@@ -71,27 +70,50 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             memory_limit = int(math.ceil(memory_limit))
         self.memory_limit = memory_limit
 
-    def start(self, config, instance,
-              cutoff=None,
-              seed=12345,
-              instance_specific=None):
-        # Overwrite the start function here. This allows us to abort target
-        # algorithm runs if the time us over without having the start method
-        # of the parent class adding the run to the runhistory
+    def start(self, config: Configuration,
+              instance: str,
+              cutoff: float = None,
+              seed: int = 12345,
+              instance_specific: str = "0",
+              capped: bool = False):
+        """
+        wrapper function for ExecuteTARun.start() to cap the target algorithm
+        runtime if it would run over the total allowed runtime.
 
-        # Restrict the cutoff to not go over the final time limit, but stop ten
-        # seconds earlier
+        Parameters
+        ----------
+            config : Configuration
+                mainly a dictionary param -> value
+            instance : string
+                problem instance
+            cutoff : float
+                runtime cutoff
+            seed : int
+                random seed
+            instance_specific: str
+                instance specific information (e.g., domain file or solution)
+            capped: bool
+                if true and status is StatusType.TIMEOUT,
+                uses StatusType.CAPPED
+        Returns
+        -------
+            status: enum of StatusType (int)
+                {SUCCESS, TIMEOUT, CRASHED, ABORT}
+            cost: float
+                cost/regret/quality (float) (None, if not returned by TA)
+            runtime: float
+                runtime (None if not returned by TA)
+            additional_info: dict
+                all further additional run information
+        """
         remaining_time = self.stats.get_remaing_time_budget()
+
         if remaining_time - 5 < cutoff:
             cutoff = int(remaining_time - 5)
 
-        if cutoff <= 0:
-            self.logger.debug(
-                "Skip target algorithm run due to exhausted configuration budget")
-            return StatusType.ABORT, np.nan, 0, {"misc": "exhausted bugdet -- ABORT"}
-
         return super().start(config=config, instance=instance, cutoff=cutoff,
-                             seed=seed, instance_specific=instance_specific)
+                             seed=seed, instance_specific=instance_specific,
+                             capped=capped)
 
     def run(self, config, instance=None,
             cutoff=None,
@@ -125,13 +147,14 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                           subsample=subsample,
                           include=self.include,
                           exclude=self.exclude,
-                          disable_file_output=self.disable_file_output)
+                          disable_file_output=self.disable_file_output,
+                          instance=instance)
 
         if self.resampling_strategy != 'test':
             cv = self.get_splitter(D)
             obj_kwargs['cv'] = cv
-        if instance is not None:
-            obj_kwargs['instance'] = instance
+        #if instance is not None:
+        #    obj_kwargs['instance'] = instance
 
         obj = pynisher.enforce_limits(**arguments)(self.ta)
         obj(**obj_kwargs)

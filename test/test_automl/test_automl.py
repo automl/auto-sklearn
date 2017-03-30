@@ -92,7 +92,6 @@ class AutoMLTest(Base, unittest.TestCase):
         self.automl._disable_evaluator_output = True
         self.automl._load_models()
 
-
     def test_fit(self):
         output = os.path.join(self.test_dir, '..', '.tmp_test_fit')
         self._setUp(output)
@@ -111,7 +110,7 @@ class AutoMLTest(Base, unittest.TestCase):
         self._tearDown(output)
 
     def test_fit_roar(self):
-        output = os.path.join(self.test_dir, '..', '.tmp_test_fit')
+        output = os.path.join(self.test_dir, '..', '.tmp_test_fit_roar')
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')

@@ -12,7 +12,7 @@ this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 
 import pynisher
-from smac.tae.execute_ta_run import StatusType
+from smac.tae.execute_ta_run import StatusType, FirstRunCrashedException
 from smac.stats.stats import Stats
 import sklearn.cross_validation
 
@@ -106,9 +106,10 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger,
                                     stats=self.stats)
         self.scenario.wallclock_limit = 5
-        info = ta.start(None, instance=None, cutoff=10)
-        fixture = (StatusType.ABORT, np.nan, 0, {"misc": "exhausted bugdet -- ABORT"})
-        self.assertEqual(info, fixture)
+        self.assertRaisesRegex(FirstRunCrashedException,
+                               "First run crashed, abort. \(To prevent this, "
+                               "toggle the 'abort_on_first_run_crash'-option!\)",
+                               ta.start, None, instance=None, cutoff=10)
 
     @unittest.mock.patch('pynisher.enforce_limits')
     def test_cutoff_lower_than_remaining_time(self, pynisher_mock):

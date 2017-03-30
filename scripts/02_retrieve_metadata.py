@@ -29,7 +29,7 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
     possible_experiment_directories = os.listdir(validation_directory)
 
     for ped in possible_experiment_directories:
-        task_name, seed = ped.split('-')[0], ped.split('-')[1]
+        task_name = ped
         ped = os.path.join(validation_directory, ped)
 
         if not os.path.exists(ped) or not os.path.isdir(ped):
@@ -37,7 +37,8 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
 
         print("Going through directory %s" % ped)
 
-        validation_trajectory_file = os.path.join(ped, 'validation_trajectory.json')
+        validation_trajectory_file = os.path.join(ped, 'smac3-output_1',
+                                                  'validation_trajectory.json')
         with open(validation_trajectory_file) as fh:
             validation_trajectory = json.load(fh)
 

@@ -42,7 +42,7 @@ try:
     os.makedirs(configuration_output_dir)
 except:
     pass
-tmp_dir = os.path.join(configuration_output_dir, '%d-%d' % (task_id, seed))
+tmp_dir = os.path.join(configuration_output_dir, str(task_id))
 
 automl_arguments = {'time_left_for_this_task': time_limit,
                     'per_run_time_limit': per_run_time_limit,
@@ -125,6 +125,7 @@ for entry in trajectory:
 
 validated_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
                         for entry in validated_trajectory]
-validated_trajectory_file = os.path.join(tmp_dir, 'validation_trajectory.json')
+validated_trajectory_file = os.path.join(tmp_dir, 'smac3-output_%d' % seed,
+                                         'validation_trajectory.json')
 with open(validated_trajectory_file, 'w') as fh:
     json.dump(validated_trajectory, fh)
