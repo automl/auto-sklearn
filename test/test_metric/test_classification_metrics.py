@@ -19,36 +19,43 @@ class BalancedAccurayTest(unittest.TestCase):
     def test_cases_binary_score_verification(self):
         cases = []
         sol = np.array([0, 0, 1, 1])
-        pred = np.array([[1, 0], [1, 0], [0, 1], [0, 1]])
+        pred = np.array([0, 0, 1, 1])
 
         cases.append(('perfect', sol, pred, 1.0))
         cases.append(('anti-perfect', sol, 1 - pred, -1.0,))
 
         uneven_proba = np.array(
             [[0.7, 0.3], [0.4, 0.6], [0.49, 0.51], [0.2, 0.8]])
+        uneven_proba = np.argmax(uneven_proba, axis=1)
 
         cases.append(('uneven proba', sol, uneven_proba, 0.5))
 
         eps = 1.e-15
         ties = np.array([[0.5 + eps, 0.5 - eps], [0.5 - eps, 0.5 + eps],
                          [0.5 + eps, 0.5 - eps], [0.5 - eps, 0.5 + eps]])
+        ties = np.argmax(ties, axis=1)
         cases.append(('ties_broken', sol, ties, 0.0))
 
         ties = np.array([[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5]])
+        ties = np.argmax(ties, axis=1)
         cases.append(('ties', sol, ties, 0.0))
 
         sol = np.array([0, 1, 1])
         pred = np.array([[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]])
+        pred = np.argmax(pred, axis=1)
         cases.append(('even proba', sol, pred, 0.0))
 
         _pred = np.array([[1, 0], [0, 1], [0, 1]])
         pred = np.array([sum(_pred) * 1. / len(_pred)] * len(_pred))
+        pred = np.argmax(pred, axis=1)
         cases.append(('correct PAC prior', sol, pred, 0.0))
 
         pred = np.array([[1., 1.], [1., 1.], [1., 1.]])
+        pred = np.argmax(pred, axis=1)
         cases.append(('all positive', sol, pred, 0.0))
 
         pred = np.array([[0, 0], [0, 0], [0, 0]])
+        pred = np.argmax(pred, axis=1)
         cases.append(('all negative', sol, pred, 0.0))
 
         for case in cases:
@@ -57,7 +64,7 @@ class BalancedAccurayTest(unittest.TestCase):
             pred = pred.astype(np.float32)
             with self.subTest('%s' % testname):
                 sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = balanced_accuracy(sol, pred, task=BINARY_CLASSIFICATION)
+                bac = balanced_accuracy(sol, pred)
                 self.assertAlmostEqual(bac, result)
 
     def test_cases_multiclass_score_verification(self):
