@@ -213,7 +213,7 @@ for name, metric in [('precision', sklearn.metrics.precision_score),
     CLASSIFICATION_METRICS[name] = globals()[name]
     for average in ['macro', 'micro', 'samples', 'weighted']:
         qualified_name = '{0}_{1}'.format(name, average)
-        globals()[qualified_name] = make_scorer(name,
+        globals()[qualified_name] = make_scorer(qualified_name,
                                                 partial(metric,
                                                         pos_label=None,
                                                         average=average))

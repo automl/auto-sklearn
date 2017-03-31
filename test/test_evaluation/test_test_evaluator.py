@@ -104,16 +104,25 @@ class FunctionsTest(unittest.TestCase):
                include=None, exclude=None, disable_file_output=False,
                instance=self.dataset_name)
         info = get_last_result(self.queue)
-        fixture = {'f1': 0.0396930946292,
-                   'accuracy': 0.04,
+        fixture = {'accuracy': 0.04,
+                   'f1': 0.0396930946292,
+                   'f1_macro': 0.0341005967604,
+                   'f1_micro': 0.04,
+                   'f1_weighted': 0.0396930946292,
                    'log_loss': 1.1274919837,
                    'precision': 0.0355555555556,
+                   'precision_macro': 0.037037037037,
+                   'precision_micro': 0.04,
+                   'precision_weighted': 0.0355555555556,
                    'recall': 0.04,
+                   'recall_macro': 0.0277777777778,
+                   'recall_micro': 0.04,
+                   'recall_weighted': 0.04,
                    'num_run': -1}
         rval = {i.split(':')[0]: float(i.split(':')[1]) for i in info[3].split(';')}
         for key, value in fixture.items():
             self.assertAlmostEqual(rval[key], fixture[key], msg=key)
-        self.assertEqual(len(rval), len(fixture) + 1, msg=rval)
+        self.assertEqual(len(rval), len(fixture) + 1, msg=sorted(rval.items()))
         self.assertIn('duration', rval)
         self.assertAlmostEqual(info[1], 0.04)
         self.assertEqual(info[2], 1)

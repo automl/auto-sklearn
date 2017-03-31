@@ -613,17 +613,28 @@ class FunctionsTest(unittest.TestCase):
                      instance=self.dataset_name, metric=accuracy)
         info = get_last_result(self.queue)
 
-        fixture = {'f1': 0.0606060606061,
-                   'accuracy': 0.0606060606061,
+        fixture = {'accuracy': 0.0606060606061,
+                   'f1': 0.0606060606061,
+                   'f1_macro': 0.0636363636364,
+                   'f1_micro': 0.0606060606061,
+                   'f1_weighted': 0.0606060606061,
                    'log_loss': 1.14529191037,
                    'precision': 0.0606060606061,
+                   'precision_macro': 0.0636363636364,
+                   'precision_micro': 0.0606060606061,
+                   'precision_weighted': 0.0606060606061,
                    'recall': 0.0606060606061,
+                   'recall_macro': 0.0636363636364,
+                   'recall_micro': 0.0606060606061,
+                   'recall_weighted': 0.0606060606061,
                    'num_run': 1}
+
         rval = {i.split(':')[0]: float(i.split(':')[1]) for i in info[3].split(';')}
         for key, value in fixture.items():
-            self.assertAlmostEqual(rval[key], fixture[key])
+            self.assertAlmostEqual(rval[key], fixture[key], msg=key)
         self.assertIn('duration', rval)
-        self.assertEqual(len(rval), len(fixture) + 1, msg=rval)
+        self.assertEqual(len(rval), len(fixture) + 1,
+                         msg=sorted(rval.items()))
 
         self.assertAlmostEqual(info[1], 0.060606060606060552, places=3)
         self.assertEqual(info[2], 1)
@@ -683,17 +694,28 @@ class FunctionsTest(unittest.TestCase):
                 metric=accuracy)
         info = get_last_result(self.queue)
 
-        fixture = {'f1': 0.0400201612903,
-                   'accuracy': 0.04,
+        fixture = {'accuracy': 0.04,
+                   'f1': 0.0400201612903,
+                   'f1_macro': 0.0423387096774,
+                   'f1_micro': 0.04,
+                   'f1_weighted': 0.040020161290,
                    'log_loss': 1.11651433976,
                    'precision': 0.0388484848485,
+                   'precision_macro': 0.0414141414141,
+                   'precision_micro': 0.04,
+                   'precision_weighted': 0.0388484848485,
                    'recall': 0.04,
+                   'recall_macro': 0.042002688172,
+                   'recall_micro': 0.04,
+                   'recall_weighted': 0.04,
                    'num_run': 1}
+
         rval = {i.split(':')[0]: float(i.split(':')[1]) for i in info[3].split(';')}
         for key, value in fixture.items():
-            self.assertAlmostEqual(rval[key], fixture[key])
+            self.assertAlmostEqual(rval[key], fixture[key], msg=key)
         self.assertIn('duration', rval)
-        self.assertEqual(len(rval), len(fixture) + 1, msg=rval)
+        self.assertEqual(len(rval), len(fixture) + 1,
+                         msg=sorted(rval.items()))
 
         self.assertAlmostEqual(info[1], 0.040000000000000036)
         self.assertEqual(info[2], 1)
