@@ -17,6 +17,7 @@ from autosklearn.evaluation import get_last_result, TrainEvaluator, eval_holdout
 from autosklearn.util import backend
 from autosklearn.util.pipeline import get_configuration_space
 from autosklearn.constants import *
+from autosklearn.metrics import accuracy, r2, f1_macro
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
@@ -51,7 +52,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    cv=kfold,
                                    all_scoring_functions=False,
-                                   output_y_hat_optimization=True)
+                                   output_y_hat_optimization=True,
+                                   metric=accuracy)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
 
@@ -61,7 +63,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(evaluator.file_output.call_count, 1)
-        self.assertEqual(result, 1.7142857142857144)
+        self.assertEqual(result, 0.85714285714285721)
         self.assertEqual(pipeline_mock.fit.call_count, 1)
         # three calls because of the holdout, the validation and the test set
         self.assertEqual(pipeline_mock.predict_proba.call_count, 3)
@@ -102,7 +104,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    cv=kfold,
                                    all_scoring_functions=False,
-                                   output_y_hat_optimization=True)
+                                   output_y_hat_optimization=True,
+                                   metric=accuracy)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
 
@@ -169,7 +172,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    cv=kfold,
                                    all_scoring_functions=False,
-                                   output_y_hat_optimization=True)
+                                   output_y_hat_optimization=True,
+                                   metric=accuracy)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
 
@@ -224,7 +228,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    cv=kfold,
                                    all_scoring_functions=False,
-                                   output_y_hat_optimization=True)
+                                   output_y_hat_optimization=True,
+                                   metric=accuracy)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
 
@@ -232,7 +237,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(evaluator.file_output.call_count, 1)
 
         duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
-        self.assertAlmostEqual(result, 1.7142857142857144)
+        self.assertAlmostEqual(result, 0.85714285714285721)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(pipeline_mock.iterative_fit.call_count, 0)
@@ -263,7 +268,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    cv=kfold,
                                    all_scoring_functions=False,
-                                   output_y_hat_optimization=True)
+                                   output_y_hat_optimization=True,
+                                   metric=accuracy)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
 
@@ -273,7 +279,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(evaluator.file_output.call_count, 1)
-        self.assertEqual(result, 0.92753623188405787)
+        self.assertEqual(result, 0.46376811594202894)
         self.assertEqual(pipeline_mock.fit.call_count, 5)
         # Fifteen calls because of the holdout, the validation and the test set
         self.assertEqual(pipeline_mock.predict_proba.call_count, 15)
@@ -305,7 +311,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    cv=kfold,
                                    all_scoring_functions=False,
-                                   output_y_hat_optimization=True)
+                                   output_y_hat_optimization=True,
+                                   metric=accuracy)
 
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
@@ -316,7 +323,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(evaluator.file_output.call_count, 0)
-        self.assertEqual(result, 0.93333333333333335)
+        self.assertEqual(result, 0.46666666666666667)
         self.assertEqual(pipeline_mock.fit.call_count, 1)
         self.assertEqual(pipeline_mock.predict_proba.call_count, 3)
         # The model prior to fitting is saved, this cannot be directly tested
@@ -355,7 +362,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    cv=kfold,
                                    all_scoring_functions=False,
-                                   output_y_hat_optimization=True)
+                                   output_y_hat_optimization=True,
+                                   metric=accuracy)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
 
@@ -404,7 +412,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    cv=kfold,
                                    all_scoring_functions=True,
-                                   output_y_hat_optimization=True)
+                                   output_y_hat_optimization=True,
+                                   metric=accuracy)
 
         backend_mock.get_model_dir.return_value = True
         evaluator.model = 'model'
@@ -439,7 +448,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
         evaluator = TrainEvaluator(D, backend_mock, queue_,
                                    configuration=configuration,
-                                   cv=kfold, subsample=10)
+                                   cv=kfold, subsample=10,
+                                   metric=accuracy)
         train_indices = np.arange(69, dtype=int)
         train_indices1 = evaluator.subsample_indices(train_indices)
         evaluator.subsample = 20
@@ -482,7 +492,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
         evaluator = TrainEvaluator(D, backend_mock, queue_,
                                    configuration=configuration,
-                                   cv=kfold, subsample=30)
+                                   cv=kfold, subsample=30,
+                                   metric=accuracy)
         train_indices = np.arange(69, dtype=int)
         train_indices3 = evaluator.subsample_indices(train_indices)
         evaluator.subsample = 67
@@ -513,10 +524,10 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator = TrainEvaluator(D, backend_mock, queue_,
                                    configuration=configuration,
-                                   cv=kfold, output_y_hat_optimization=False)
+                                   cv=kfold, output_y_hat_optimization=False,
+                                   metric=accuracy)
         evaluator.fit_predict_and_loss()
         Y_optimization_pred = backend_mock.save_predictions_as_npy.call_args_list[0][0][0]
-        print(Y_optimization_pred)
 
         for i in range(7):
             self.assertEqual(0.9, Y_optimization_pred[i][1])
@@ -549,9 +560,14 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                     D_.data['Y_train'] = y.flatten()
                 kfold = ShuffleSplit(n=len(y), n_iter=5, random_state=1)
                 queue_ = multiprocessing.Queue()
+                metric_lookup = {MULTILABEL_CLASSIFICATION: f1_macro,
+                                 BINARY_CLASSIFICATION: accuracy,
+                                 MULTICLASS_CLASSIFICATION: accuracy,
+                                 REGRESSION: r2}
                 evaluator = TrainEvaluator(D_, backend_mock, queue_,
                                            cv=kfold,
-                                           output_y_hat_optimization=False)
+                                           output_y_hat_optimization=False,
+                                           metric=metric_lookup[D.info['task']])
 
                 evaluator.fit_predict_and_loss()
                 duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
@@ -577,37 +593,39 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout(self):
         kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
         eval_holdout(queue=self.queue, config=self.configuration,
-                     data=self.data, backend=self.backend, cv=kfold,
+                     datamanager=self.data, backend=self.backend, cv=kfold,
                      seed=1, num_run=1, subsample=None,
                      all_scoring_functions=False, output_y_hat_optimization=True,
                      include=None, exclude=None, disable_file_output=False,
-                     instance = self.dataset_name)
+                     instance=self.dataset_name, metric=accuracy)
         info = get_last_result(self.queue)
-        self.assertAlmostEqual(info[1], 0.095, places=3)
+        self.assertAlmostEqual(info[1], 0.060606060606060552, places=3)
         self.assertEqual(info[2], 1)
         self.assertNotIn('bac_metric', info[3])
 
     def test_eval_holdout_all_loss_functions(self):
         kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
-        eval_holdout(queue=self.queue, config=self.configuration, data=self.data,
-                     backend=self.backend, cv=kfold, seed=1, num_run=1,
-                     subsample=None, all_scoring_functions=True,
-                     output_y_hat_optimization=True, include=None, exclude=None,
-                     disable_file_output=False, instance=self.dataset_name)
+        eval_holdout(queue=self.queue, config=self.configuration,
+                     datamanager=self.data, backend=self.backend, cv=kfold,
+                     seed=1, num_run=1, subsample=None,
+                     all_scoring_functions=True, output_y_hat_optimization=True,
+                     include=None, exclude=None, disable_file_output=False,
+                     instance=self.dataset_name, metric=accuracy)
         info = get_last_result(self.queue)
 
-        fixture = {'f1_metric': 0.0954545454545,
-                   'pac_metric': 0.203125867166,
-                   'acc_metric': 0.0909090909091,
-                   'auc_metric': 0.0197868008145,
-                   'bac_metric': 0.0954545454545,
+        fixture = {'f1': 0.0606060606061,
+                   'accuracy': 0.0606060606061,
+                   'log_loss': 1.14529191037,
+                   'precision': 0.0606060606061,
+                   'recall': 0.0606060606061,
                    'num_run': 1}
         rval = {i.split(':')[0]: float(i.split(':')[1]) for i in info[3].split(';')}
         for key, value in fixture.items():
             self.assertAlmostEqual(rval[key], fixture[key])
         self.assertIn('duration', rval)
+        self.assertEqual(len(rval), len(fixture) + 1, msg=rval)
 
-        self.assertAlmostEqual(info[1], 0.095, places=3)
+        self.assertAlmostEqual(info[1], 0.060606060606060552, places=3)
         self.assertEqual(info[2], 1)
 
     # def test_eval_holdout_on_subset(self):
@@ -622,13 +640,14 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_holdout_iterative_fit_no_timeout(self):
         kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
         eval_iterative_holdout(queue=self.queue, config=self.configuration,
-                               data=self.data, backend=self.backend,
+                               datamanager=self.data, backend=self.backend,
                                cv=kfold, seed=1, num_run=1, subsample=None,
-                               all_scoring_functions=False, output_y_hat_optimization=True,
-                               include=None, exclude=None,
-                               disable_file_output=False, instance=self.dataset_name)
+                               all_scoring_functions=False,
+                               output_y_hat_optimization=True, include=None,
+                               exclude=None, disable_file_output=False,
+                               instance=self.dataset_name, metric=accuracy)
         info = get_last_result(self.queue)
-        self.assertAlmostEqual(info[1], 0.09545454545454557)
+        self.assertAlmostEqual(info[1], 0.060606060606060552)
         self.assertEqual(info[2], 1)
 
     # def test_eval_holdout_iterative_fit_on_subset_no_timeout(self):
@@ -643,37 +662,40 @@ class FunctionsTest(unittest.TestCase):
 
     def test_eval_cv(self):
         cv = StratifiedKFold(y=self.y, shuffle=True, random_state=1)
-        eval_cv(queue=self.queue, config=self.configuration, data=self.data,
-                backend=self.backend, seed=1, num_run=1, cv=cv, subsample=None,
-                all_scoring_functions=False, output_y_hat_optimization=True,
-                include=None, exclude=None, disable_file_output=False,
-                instance=self.dataset_name)
+        eval_cv(queue=self.queue, config=self.configuration,
+                datamanager=self.data, backend=self.backend, seed=1, num_run=1,
+                cv=cv, subsample=None, all_scoring_functions=False,
+                output_y_hat_optimization=True, include=None, exclude=None,
+                disable_file_output=False, instance=self.dataset_name,
+                metric=accuracy)
         info = get_last_result(self.queue)
-        self.assertAlmostEqual(info[1], 0.063004032258064502)
+        self.assertAlmostEqual(info[1], 0.040000000000000036)
         self.assertEqual(info[2], 1)
         self.assertNotIn('bac_metric', info[3])
 
     def test_eval_cv_all_loss_functions(self):
         cv = StratifiedKFold(y=self.y, shuffle=True, random_state=1)
-        eval_cv(queue=self.queue, config=self.configuration, data=self.data,
-                backend=self.backend, seed=1, num_run=1, cv=cv, subsample=None,
-                all_scoring_functions=True, output_y_hat_optimization=True,
-                include=None, exclude=None, disable_file_output=False,
-                instance=self.dataset_name)
+        eval_cv(queue=self.queue, config=self.configuration,
+                datamanager=self.data, backend=self.backend, seed=1, num_run=1,
+                cv=cv, subsample=None, all_scoring_functions=True,
+                output_y_hat_optimization=True, include=None, exclude=None,
+                disable_file_output=False, instance=self.dataset_name,
+                metric=accuracy)
         info = get_last_result(self.queue)
 
-        fixture = {'f1_metric': 0.0635080645161,
-                   'pac_metric': 0.165226664054,
-                   'acc_metric': 0.06,
-                   'auc_metric': 0.0154405176049,
-                   'bac_metric': 0.0630040322581,
+        fixture = {'f1': 0.0400201612903,
+                   'accuracy': 0.04,
+                   'log_loss': 1.11651433976,
+                   'precision': 0.0388484848485,
+                   'recall': 0.04,
                    'num_run': 1}
         rval = {i.split(':')[0]: float(i.split(':')[1]) for i in info[3].split(';')}
         for key, value in fixture.items():
             self.assertAlmostEqual(rval[key], fixture[key])
         self.assertIn('duration', rval)
+        self.assertEqual(len(rval), len(fixture) + 1, msg=rval)
 
-        self.assertAlmostEqual(info[1], 0.063004032258064502)
+        self.assertAlmostEqual(info[1], 0.040000000000000036)
         self.assertEqual(info[2], 1)
 
     # def test_eval_cv_on_subset(self):
@@ -690,19 +712,20 @@ class FunctionsTest(unittest.TestCase):
     def test_eval_partial_cv(self):
         cv = StratifiedKFold(y=self.y, shuffle=True, random_state=1,
                              n_folds=5)
-        results = [0.071428571428571508,
-                   0.15476190476190488,
-                   0.08333333333333337,
-                   0.16666666666666674,
+        results = [0.045454545454545414,
+                   0.095238095238095233,
+                   0.052631578947368474,
+                   0.10526315789473684,
                    0.0]
         for fold in range(5):
             instance = json.dumps({'dataset_name': 'data', 'fold': fold})
             eval_partial_cv(queue=self.queue, config=self.configuration,
-                            data=self.data, backend=self.backend, seed=1,
+                            datamanager=self.data, backend=self.backend, seed=1,
                             num_run=1, instance=instance, cv=cv,
                             subsample=None, all_scoring_functions=False,
                             output_y_hat_optimization=True, include=None,
-                            exclude=None, disable_file_output=False)
+                            exclude=None, disable_file_output=False,
+                            metric=accuracy)
             info = get_last_result(self.queue)
             results.append(info[1])
             self.assertAlmostEqual(info[1], results[fold])
