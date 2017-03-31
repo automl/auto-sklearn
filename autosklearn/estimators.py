@@ -5,6 +5,7 @@ import six
 import warnings
 
 import autosklearn.automl
+from autosklearn.metrics import f1_macro, accuracy, r2
 from autosklearn.constants import *
 from autosklearn.util.backend import create
 from sklearn.base import BaseEstimator
@@ -326,7 +327,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         return AutoMLClassifier(automl)
 
     def fit(self, X, y,
-            metric='acc_metric',
+            metric=None,
             feat_type=None,
             dataset_name=None):
         """Fit *auto-sklearn* to given training set (X, y).
@@ -402,7 +403,7 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         return AutoMLRegressor(automl)
 
     def fit(self, X, y,
-            metric='r2_metric',
+            metric=None,
             feat_type=None,
             dataset_name=None):
         """Fit *autosklearn* to given training set (X, y).
@@ -468,12 +469,11 @@ class AutoMLClassifier(AutoMLDecorator):
         super(AutoMLClassifier, self).__init__(automl)
 
     def fit(self, X, y,
-            metric='acc_metric',
+            metric=None,
             loss=None,
             feat_type=None,
             dataset_name=None,
             ):
-        # From sklearn.tree.DecisionTreeClassifier
         X = sklearn.utils.check_array(X, accept_sparse="csr",
                                       force_all_finite=False)
         if scipy.sparse.issparse(X):
@@ -481,6 +481,7 @@ class AutoMLClassifier(AutoMLDecorator):
 
         y = self._process_target_classes(y)
 
+        # TODO replace by scikit-learn helper functions
         if self._n_outputs > 1:
             task = MULTILABEL_CLASSIFICATION
         else:
@@ -488,6 +489,12 @@ class AutoMLClassifier(AutoMLDecorator):
                 task = BINARY_CLASSIFICATION
             else:
                 task = MULTICLASS_CLASSIFICATION
+
+        if metric is None:
+            if task == MULTILABEL_CLASSIFICATION:
+                metric = f1_macro
+            else:
+                metric=accuracy
 
         return self._automl.fit(X, y, task, metric, feat_type, dataset_name)
 
@@ -559,10 +566,11 @@ class AutoMLClassifier(AutoMLDecorator):
 class AutoMLRegressor(AutoMLDecorator):
 
     def fit(self, X, y,
-            metric='r2_metric',
-            loss=None,
+            metric=None,
             feat_type=None,
             dataset_name=None,
             ):
+        if metric is None:
+            metric = r2
         return self._automl.fit(X=X, y=y, task=REGRESSION, metric=metric,
                                 feat_type=feat_type, dataset_name=dataset_name)

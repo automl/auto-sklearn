@@ -20,6 +20,7 @@ from evaluation_util import get_multiclass_classification_datamanager
 from autosklearn.constants import *
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
 from autosklearn.data.abstract_data_manager import AbstractDataManager
+from autosklearn.metrics import accuracy
 
 
 def safe_eval_success_mock(*args, **kwargs):
@@ -104,7 +105,8 @@ class EvaluationTest(unittest.TestCase):
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     logger=self.logger,
-                                    stats=self.stats)
+                                    stats=self.stats,
+                                    metric=accuracy)
         self.scenario.wallclock_limit = 5
         self.assertRaisesRegex(FirstRunCrashedException,
                                "First run crashed, abort. \(To prevent this, "
@@ -116,7 +118,8 @@ class EvaluationTest(unittest.TestCase):
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
                                     logger=self.logger,
-                                    stats=self.stats)
+                                    stats=self.stats,
+                                    metric=accuracy)
         self.stats.ta_runs = 1
         ta.start(None, cutoff=30, instance=None)
         self.assertEqual(pynisher_mock.call_args[1]['wall_time_in_s'], 4)
@@ -129,7 +132,8 @@ class EvaluationTest(unittest.TestCase):
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats,
-                                    memory_limit=3072)
+                                    memory_limit=3072,
+                                    metric=accuracy)
         info = ta.run(None, cutoff=30)
         self.assertEqual(info[0], StatusType.CRASHED)
         self.assertEqual(info[1], 1.0)
@@ -142,7 +146,8 @@ class EvaluationTest(unittest.TestCase):
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats,
-                                    memory_limit=3072)
+                                    memory_limit=3072,
+                                    metric=accuracy)
         info = ta.run(None, cutoff=30)
         self.assertEqual(info[0], StatusType.MEMOUT)
         self.assertEqual(info[1], 1.0)
@@ -155,7 +160,8 @@ class EvaluationTest(unittest.TestCase):
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats,
-                                    memory_limit=3072)
+                                    memory_limit=3072,
+                                    metric=accuracy)
         info = ta.run(None, cutoff=30)
         self.assertEqual(info[0], StatusType.TIMEOUT)
         self.assertEqual(info[1], 1.0)
@@ -171,7 +177,8 @@ class EvaluationTest(unittest.TestCase):
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats,
-                                    memory_limit=3072)
+                                    memory_limit=3072,
+                                    metric=accuracy)
         info = ta.run(None, cutoff=30)
         self.assertEqual(info[0], StatusType.SUCCESS)
         self.assertEqual(info[1], 0.5)
@@ -187,7 +194,8 @@ class EvaluationTest(unittest.TestCase):
                                     resampling_strategy='holdout',
                                     logger=self.logger,
                                     stats=self.stats,
-                                    memory_limit=3072)
+                                    memory_limit=3072,
+                                    metric=accuracy)
         self.scenario.wallclock_limit = 180
         info = ta.start(None, cutoff=30, instance=None,
                         instance_specific='subsample=30')
@@ -196,7 +204,8 @@ class EvaluationTest(unittest.TestCase):
 
     def test_get_splitter(self):
         ta_args = dict(backend=BackendMock(), autosklearn_seed=1,
-                       logger=self.logger, stats=self.stats, memory_limit=3072)
+                       logger=self.logger, stats=self.stats, memory_limit=3072,
+                       metric=accuracy)
         D = unittest.mock.Mock(spec=AbstractDataManager)
         D.data = dict(Y_train=np.array([0, 0, 0, 1, 1, 1]))
         D.info = dict(task=BINARY_CLASSIFICATION)

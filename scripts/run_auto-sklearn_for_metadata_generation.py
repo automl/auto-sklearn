@@ -7,7 +7,7 @@ import sys
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
-from autosklearn.constants import *
+from autosklearn.metrics import r2, balanced_accuracy
 
 from smac.stats.stats import Stats
 from smac.scenario.scenario import Scenario
@@ -60,10 +60,10 @@ X_train, y_train, X_test, y_test, cat = load_task(task_id)
 
 if task_type == 'classification':
     automl = AutoSklearnClassifier(**automl_arguments)
-    metric = BAC_METRIC
+    metric = balanced_accuracy
 elif task_type == 'regression':
     automl = AutoSklearnRegressor(**automl_arguments)
-    metric = R2_METRIC
+    metric = r2
 else:
     raise ValueError(task_type)
 
@@ -113,8 +113,6 @@ for entry in trajectory:
             scores = additional_run_info.split(';')
             scores = [score.split(':') for score in scores]
             scores = [(score[0].strip(), score[1].strip()) for score in scores]
-            scores = [(STRING_TO_METRIC[score[0]], score[1]) for score in scores
-                      if score[0] in STRING_TO_METRIC]
             scores = {score[0]: float(score[1]) for score in scores}
             assert len(scores) > 1, scores
 

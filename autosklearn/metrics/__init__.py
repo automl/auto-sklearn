@@ -4,7 +4,7 @@ from functools import partial
 import sklearn.metrics
 from sklearn.utils.multiclass import type_of_target
 
-from .classification_metrics import *
+from .classification_metrics import balanced_accuracy
 from .util import *
 
 

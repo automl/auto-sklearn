@@ -14,6 +14,7 @@ from sklearn.grid_search import _CVScoreTuple
 
 import autosklearn.pipeline.util as putil
 from autosklearn.classification import AutoSklearnClassifier
+from autosklearn.metrics import accuracy
 from autosklearn.estimators import AutoMLClassifier
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import *
@@ -141,7 +142,7 @@ class EstimatorTest(Base, unittest.TestCase):
                                        ensemble_size=0)
         automl.fit_ensemble(Y_train,
                             task=MULTICLASS_CLASSIFICATION,
-                            metric=ACC_METRIC,
+                            metric=accuracy,
                             precision='32',
                             dataset_name='iris',
                             ensemble_size=20,

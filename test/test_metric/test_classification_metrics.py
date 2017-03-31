@@ -4,7 +4,7 @@ import unittest
 
 import numpy as np
 from autosklearn.constants import *
-from autosklearn.metrics import bac_metric
+from autosklearn.metrics import balanced_accuracy
 
 
 def copy_and_preprocess_arrays(solution, prediction):
@@ -57,7 +57,7 @@ class BalancedAccurayTest(unittest.TestCase):
             pred = pred.astype(np.float32)
             with self.subTest('%s' % testname):
                 sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = bac_metric(sol, pred, task=BINARY_CLASSIFICATION)
+                bac = balanced_accuracy(sol, pred, task=BINARY_CLASSIFICATION)
                 self.assertAlmostEqual(bac, result)
 
     def test_cases_multiclass_score_verification(self):
@@ -87,7 +87,7 @@ class BalancedAccurayTest(unittest.TestCase):
             pred = pred.astype(np.float32)
             with self.subTest('%s' % testname):
                 sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = bac_metric(sol, pred, task=MULTICLASS_CLASSIFICATION)
+                bac = balanced_accuracy(sol, pred, task=MULTICLASS_CLASSIFICATION)
                 self.assertAlmostEqual(bac, result)
 
     def test_cases_multilabel_1l(self):
@@ -144,7 +144,7 @@ class BalancedAccurayTest(unittest.TestCase):
             pred = pred.astype(np.float32)
             with self.subTest('%s' % testname):
                 sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = bac_metric(sol, pred, task=MULTILABEL_CLASSIFICATION)
+                bac = balanced_accuracy(sol, pred, task=MULTILABEL_CLASSIFICATION)
                 self.assertAlmostEqual(bac, result)
 
     def test_cases_multilabel_2(self):
@@ -175,5 +175,5 @@ class BalancedAccurayTest(unittest.TestCase):
             pred = pred.astype(np.float32)
             with self.subTest('_%s' % testname):
                 sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = bac_metric(sol, pred, task=MULTILABEL_CLASSIFICATION)
+                bac = balanced_accuracy(sol, pred, task=MULTILABEL_CLASSIFICATION)
                 self.assertAlmostEqual(bac, result)

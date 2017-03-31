@@ -1,6 +1,7 @@
 import unittest
 
 from autosklearn.smbo import AutoMLSMBO
+from autosklearn.metrics import accuracy
 from smac.facade.smac_facade import SMAC
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_ta_run import StatusType
@@ -19,8 +20,15 @@ class TestSMBO(unittest.TestCase):
         total_walltime_limit = 15
         memory_limit = 3072
 
-        auto = AutoMLSMBO(None, dataset_name, None, func_eval_time_limit,
-                          total_walltime_limit, memory_limit, None)
+        auto = AutoMLSMBO(
+            config_space=None,
+            dataset_name=dataset_name,
+            backend=None,
+            func_eval_time_limit=func_eval_time_limit,
+            total_walltime_limit=total_walltime_limit,
+            memory_limit=memory_limit,
+            watcher=None,
+            metric=accuracy)
         auto.config_space = configspace
         scenario = Scenario({'cs': configspace,
                              'cutoff-time': func_eval_time_limit,

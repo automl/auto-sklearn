@@ -8,7 +8,7 @@ from autosklearn.metrics.util import binarize_predictions, \
 
 
 
-def bac_metric(solution, prediction, task=BINARY_CLASSIFICATION):
+def balanced_accuracy(solution, prediction, task=BINARY_CLASSIFICATION):
     """
     Compute the normalized balanced accuracy.
 

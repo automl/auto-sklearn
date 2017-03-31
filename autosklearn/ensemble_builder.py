@@ -11,8 +11,8 @@ import warnings
 import numpy as np
 import pynisher
 
-from autosklearn.constants import BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
-    MULTILABEL_CLASSIFICATION, CLASSIFICATION_TASKS, BAC_METRIC, F1_METRIC
+from autosklearn.constants import BINARY_CLASSIFICATION, \
+    MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION, CLASSIFICATION_TASKS
 from autosklearn.evaluation.util import calculate_score
 from autosklearn.util import StopWatch
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
@@ -22,8 +22,7 @@ from autosklearn.util.logging_ import get_logger
 class EnsembleBuilder(multiprocessing.Process):
     def __init__(self, backend, dataset_name, task_type, metric,
                  limit, ensemble_size=None, ensemble_nbest=None,
-                 seed=1, shared_mode=False, max_iterations=-1, precision="32",
-                 low_precision=True):
+                 seed=1, shared_mode=False, max_iterations=-1, precision="32"):
         super(EnsembleBuilder, self).__init__()
 
         self.backend = backend
@@ -37,7 +36,6 @@ class EnsembleBuilder(multiprocessing.Process):
         self.shared_mode = shared_mode
         self.max_iterations = max_iterations
         self.precision = precision
-        self.low_precision = low_precision
 
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
         self.logger = get_logger(logger_name)
@@ -188,9 +186,11 @@ class EnsembleBuilder(multiprocessing.Process):
                         else:
                             predictions = np.load(fh)
 
-                    score = calculate_score(targets_ensemble, predictions,
-                                            self.task_type, self.metric,
-                                            predictions.shape[1])
+                    score = calculate_score(solution=targets_ensemble,
+                                            prediction=predictions,
+                                            task_type=self.task_type,
+                                            metric=self.metric,
+                                            all_scoring_functions=False)
 
                 except Exception as e:
                     self.logger.warning('Error loading %s: %s - %s',
@@ -309,11 +309,11 @@ class EnsembleBuilder(multiprocessing.Process):
                     used_time = watch.wall_elapsed('ensemble_builder')
                     time.sleep(2)
                     continue
-                except Exception as e:
-                    self.logger.error('Caught error! %s', str(e))
-                    used_time = watch.wall_elapsed('ensemble_builder')
-                    time.sleep(2)
-                    continue
+                #except Exception as e:
+                #    self.logger.error('Caught error! %s', str(e))
+                #    used_time = watch.wall_elapsed('ensemble_builder')
+                #    time.sleep(2)
+                #    continue
 
                 # Output the score
                 self.logger.info('Training performance: %f' % ensemble.train_score_)
@@ -356,35 +356,9 @@ class EnsembleBuilder(multiprocessing.Process):
                 ensemble_predictions_valid = ensemble.predict(all_predictions_valid)
                 if self.task_type == BINARY_CLASSIFICATION:
                     ensemble_predictions_valid = ensemble_predictions_valid[:, 1]
-                if self.low_precision:
-                    if self.task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
-                        ensemble_predictions_valid[ensemble_predictions_valid < 1e-4] = 0.
-                    if self.metric in [BAC_METRIC, F1_METRIC]:
-                        bin_array = np.zeros(ensemble_predictions_valid.shape, dtype=np.int32)
-                        if (self.task_type != MULTICLASS_CLASSIFICATION) or (
-                            ensemble_predictions_valid.shape[1] == 1):
-                            bin_array[ensemble_predictions_valid >= 0.5] = 1
-                        else:
-                            sample_num = ensemble_predictions_valid.shape[0]
-                            for i in range(sample_num):
-                                j = np.argmax(ensemble_predictions_valid[i, :])
-                                bin_array[i, j] = 1
-                        ensemble_predictions_valid = bin_array
-                    if self.task_type in CLASSIFICATION_TASKS:
-                        if ensemble_predictions_valid.size < (20000 * 20):
-                            precision = 3
-                        else:
-                            precision = 2
-                    else:
-                        if ensemble_predictions_valid.size > 1000000:
-                            precision = 4
-                        else:
-                            # File size maximally 2.1MB
-                            precision = 6
 
                 self.backend.save_predictions_as_txt(ensemble_predictions_valid,
-                                                'valid', index_run, prefix=self.dataset_name,
-                                                precision=precision)
+                                                'valid', index_run, prefix=self.dataset_name)
             else:
                 self.logger.info('Could not find as many validation set predictions (%d)'
                              'as ensemble predictions (%d)!.',
@@ -397,35 +371,9 @@ class EnsembleBuilder(multiprocessing.Process):
                 ensemble_predictions_test = ensemble.predict(all_predictions_test)
                 if self.task_type == BINARY_CLASSIFICATION:
                     ensemble_predictions_test = ensemble_predictions_test[:, 1]
-                if self.low_precision:
-                    if self.task_type in [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION]:
-                        ensemble_predictions_test[ensemble_predictions_test < 1e-4] = 0.
-                    if self.metric in [BAC_METRIC, F1_METRIC]:
-                        bin_array = np.zeros(ensemble_predictions_test.shape,
-                                             dtype=np.int32)
-                        if (self.task_type != MULTICLASS_CLASSIFICATION) or (
-                                    ensemble_predictions_test.shape[1] == 1):
-                            bin_array[ensemble_predictions_test >= 0.5] = 1
-                        else:
-                            sample_num = ensemble_predictions_test.shape[0]
-                            for i in range(sample_num):
-                                j = np.argmax(ensemble_predictions_test[i, :])
-                                bin_array[i, j] = 1
-                        ensemble_predictions_test = bin_array
-                    if self.task_type in CLASSIFICATION_TASKS:
-                        if ensemble_predictions_test.size < (20000 * 20):
-                            precision = 3
-                        else:
-                            precision = 2
-                    else:
-                        if ensemble_predictions_test.size > 1000000:
-                            precision = 4
-                        else:
-                            precision = 6
 
                 self.backend.save_predictions_as_txt(ensemble_predictions_test,
-                                                     'test', index_run, prefix=self.dataset_name,
-                                                     precision=precision)
+                                                     'test', index_run, prefix=self.dataset_name)
             else:
                 self.logger.info('Could not find as many test set predictions (%d) as '
                              'ensemble predictions (%d)!',

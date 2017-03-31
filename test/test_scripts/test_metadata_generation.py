@@ -145,7 +145,7 @@ class TestMetadataGeneration(unittest.TestCase):
                              [('instance_id', 'STRING'),
                               ('repetition', 'NUMERIC'),
                               ('algorithm', 'STRING'),
-                              ('acc_metric', 'NUMERIC'),
+                              ('accuracy', 'NUMERIC'),
                               ('runstatus',
                                ['ok', 'timeout', 'memout', 'not_applicable',
                                 'crash', 'other'])])
