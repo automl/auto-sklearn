@@ -50,15 +50,10 @@ def balanced_accuracy(solution, prediction):
         neg_num = sp.maximum(eps, tn + fp)
         tnr = tn / neg_num  # true negative rate (specificity)
         bac = 0.5 * (tpr + tnr)
-        base_bac = 0.5  # random predictions for binary case
     elif y_type == 'multiclass':
         label_num = solution.shape[1]
         bac = tpr
-        base_bac = 1. / label_num  # random predictions for multiclass case
     else:
         raise ValueError(y_type)
 
     return np.mean(bac)  # average over all classes
-    # Normalize: 0 for random, 1 for perfect
-    #score = (bac - base_bac) / sp.maximum(eps, (1 - base_bac))
-    #return score
