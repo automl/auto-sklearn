@@ -58,7 +58,7 @@ def balanced_accuracy(solution, prediction):
     else:
         raise ValueError(y_type)
 
-    bac = np.mean(bac)  # average over all classes
+    return np.mean(bac)  # average over all classes
     # Normalize: 0 for random, 1 for perfect
-    score = (bac - base_bac) / sp.maximum(eps, (1 - base_bac))
-    return score
+    #score = (bac - base_bac) / sp.maximum(eps, (1 - base_bac))
+    #return score
