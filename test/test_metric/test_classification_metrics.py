@@ -1,9 +1,7 @@
 # -*- encoding: utf-8 -*-
-import sys
 import unittest
 
 import numpy as np
-from autosklearn.constants import *
 from autosklearn.metrics import balanced_accuracy
 
 
@@ -62,40 +60,32 @@ class BalancedAccurayTest(unittest.TestCase):
             testname, sol, pred, result = case
 
             pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = balanced_accuracy(sol, pred)
-                self.assertAlmostEqual(bac, result)
+            sol, pred = copy_and_preprocess_arrays(sol, pred)
+            bac = balanced_accuracy(sol, pred)
+            self.assertAlmostEqual(bac, result)
 
     def test_cases_multiclass_score_verification(self):
         cases = []
-        sol = np.array([0, 1, 0, 0])
-        pred = np.array([[1, 0, 0], [0, 1, 0], [1, 0, 0], [1, 0, 0]])
+        sol = np.array([0, 1, 2, 0])
+        pred = np.array([0, 1, 2, 0])
 
         cases.append(('3 classes perfect', sol, pred, 1.0))
 
-        cases.append(('all classes wrong', sol, 1 - pred, 0.0))
+        pred = np.array([1, 2, 0, 1])
+        cases.append(('all classes wrong', sol, pred, -0.5))
 
-        pred = np.array([[1. / 3, 1. / 3, 1. / 3], [1. / 3, 1. / 3, 1. / 3],
-                         [1. / 3, 1. / 3, 1. / 3], [1. / 3, 1. / 3, 1. / 3]])
-        cases.append(('equi proba', sol, pred, 0.5))
+        pred = np.array([0, 0, 0, 0])
+        cases.append(('equi proba', sol, pred, 0.0))
 
-        pred = np.array([[0.2, 0, 0.5], [0.8, 0.4, 0.1], [0.9, 0.1, 0.2],
-                         [0.7, 0.3, 0.3]])
-        cases.append(('sum(proba) < 1.0', sol, pred, 0.333333333333))
-
-        pred = np.array([[0.75, 0.25, 0.], [0.75, 0.25, 0.], [0.75, 0.25, 0.],
-                         [0.75, 0.25, 0.]])
-        cases.append(('predict prior', sol, pred, 0.5))
+        pred = np.array([2, 0, 0, 0])
+        cases.append(('sum(proba) < 1.0', sol, pred, -0.25))
 
         for case in cases:
-            testname, sol, pred, result = case
-
+            testname, sol, pred, target = case
             pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = balanced_accuracy(sol, pred, task=MULTICLASS_CLASSIFICATION)
-                self.assertAlmostEqual(bac, result)
+            sol, pred = copy_and_preprocess_arrays(sol, pred)
+            bac = balanced_accuracy(sol, pred)
+            self.assertAlmostEqual(bac, target)
 
     def test_cases_multilabel_1l(self):
         cases = []
@@ -111,76 +101,16 @@ class BalancedAccurayTest(unittest.TestCase):
         cases.append(('All wrong, in the multi-label sense', sol3, 1 - sol3,
                       -1.0))
 
-        pred = np.array([[0.5, 0.5, 0.5], [0.5, 0.5, 0.5], [0.5, 0.5, 0.5],
-                         [0.5, 0.5, 0.5]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('All equi proba: 0.5', sol3, pred, 0.0))
-
-        pred = np.array(
-            [[0.25, 0.25, 0.25], [0.25, 0.25, 0.25], [0.25, 0.25, 0.25],
-             [0.25, 0.25, 0.25]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('All equi proba, prior: 0.25', sol3, pred, 0.0))
-
-        pred = np.array([[0.2, 0.2, 0.2], [0.8, 0.8, 0.8], [0.9, 0.9, 0.9],
-                         [0.7, 0.7, 0.7]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('Some proba', sol3, pred, -1.0))
-
-        pred = np.array([[0.2, 0.2, 0.2], [0.8, 0.8, 0.8], [0.9, 0.9, 0.9],
-                         [0.7, 0.7, 0.7]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('Invert both solution and prediction', 1 - sol3, pred,
-                      1.0))
-
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = balanced_accuracy(sol, pred, task=MULTILABEL_CLASSIFICATION)
-                self.assertAlmostEqual(bac, result)
-
-    def test_cases_multilabel_2(self):
-        cases = []
-
         sol4 = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 1]])
         cases.append(('Three labels perfect', sol4, sol4, 1.0))
 
         cases.append(('Three classes all wrong, in the multi-label sense',
                       sol4, 1 - sol4, -1.0))
 
-        pred = np.array([[1 / 3, 1 / 3, 1 / 3], [1 / 3, 1 / 3, 1 / 3],
-                         [1 / 3, 1 / 3, 1 / 3], [1 / 3, 1 / 3, 1 / 3]])
-        cases.append(('Three classes equi proba', sol4, pred, 0.0))
-
-        pred = np.array([[0.2, 0, 0.5], [0.8, 0.4, 0.1], [0.9, 0.1, 0.2],
-                         [0.7, 0.3, 0.3]])
-        cases.append(('Three classes some proba that do not add up', sol4,
-                      pred, -0.5))
-
-        pred = np.array([[0.25, 0.25, 0.5], [0.25, 0.25, 0.5],
-                         [0.25, 0.25, 0.5], [0.25, 0.25, 0.5]])
-        cases.append(('Three classes predict prior', sol4, pred, 0.0))
-
         for case in cases:
             testname, sol, pred, result = case
 
             pred = pred.astype(np.float32)
-            with self.subTest('_%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = balanced_accuracy(sol, pred, task=MULTILABEL_CLASSIFICATION)
-                self.assertAlmostEqual(bac, result)
+            sol, pred = copy_and_preprocess_arrays(sol, pred)
+            bac = balanced_accuracy(sol, pred)
+            self.assertAlmostEqual(bac, result)
