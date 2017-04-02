@@ -1,7 +1,51 @@
 # -*- encoding: utf-8 -*-
 import numpy as np
-from autosklearn.constants import MULTICLASS_CLASSIFICATION, \
-    BINARY_CLASSIFICATION
+from autosklearn.constants import *
+
+
+def calculate_score(solution, prediction, task_type, metric, all_scoring_functions=False):
+
+    if task_type not in TASK_TYPES:
+        raise NotImplementedError(task_type)
+
+    if all_scoring_functions:
+        score = dict()
+        if task_type in REGRESSION_TASKS:
+            # TODO put this into the regression metric itself
+            cprediction = sanitize_array(prediction)
+            for metric_ in REGRESSION_METRICS:
+                func = REGRESSION_METRICS[metric_]
+                score[func.name] = func(solution, cprediction)
+
+        else:
+            for metric_ in CLASSIFICATION_METRICS:
+                func = CLASSIFICATION_METRICS[metric_]
+
+                # TODO maybe annotate metrics to define which cases they can
+                # handle?
+
+                try:
+                    score[func.name] = func(solution, prediction)
+                except ValueError as e:
+                    if e.args[0] == 'multiclass format is not supported':
+                        continue
+                    elif e.args[0] == 'Sample-based precision, recall, ' \
+                                      'fscore is not meaningful outside ' \
+                                      'multilabel classification. See the ' \
+                                      'accuracy_score instead.':
+                        continue
+                    else:
+                        raise e
+
+    else:
+        if task_type in REGRESSION_TASKS:
+            # TODO put this into the regression metric itself
+            cprediction = sanitize_array(prediction)
+            score = metric(solution, cprediction)
+        else:
+            score = metric(solution, prediction)
+
+    return score
 
 
 def sanitize_array(array):
@@ -18,41 +62,3 @@ def sanitize_array(array):
     mid = (maxi + mini) / 2
     array[np.isnan(array)] = mid
     return array
-
-
-def binarize_predictions(array, task=BINARY_CLASSIFICATION):
-    """
-    Turn predictions into decisions {0,1} by selecting the class with largest
-    score for multi class problems and thresh holding at 0.5 for other cases.
-
-    :param array:
-    :param task:
-    :return:
-    """
-    # add a very small random value as tie breaker (a bit bad because
-    # this changes the score every time)
-    # so to make sure we get the same result every time, we seed it
-    # eps = 1e-15
-    # np.random.seed(sum(array.shape))
-    # array = array + eps*np.random.rand(array.shape[0],array.shape[1])
-    bin_array = np.zeros(array.shape, dtype=np.int32)
-    if (task != MULTICLASS_CLASSIFICATION) or (array.shape[1] == 1):
-        bin_array[array >= 0.5] = 1
-    else:
-        sample_num = array.shape[0]
-        for i in range(sample_num):
-            j = np.argmax(array[i, :])
-            bin_array[i, j] = 1
-    return bin_array
-
-
-def create_multiclass_solution(solution, prediction):
-    solution_binary = np.zeros((prediction.shape), dtype=np.int32)
-    for i in range(solution_binary.shape[0]):
-        try:
-            solution_binary[i, int(solution[i])] = 1
-        except IndexError as e:
-            raise IndexError('too many indices to array. array has shape %s, '
-                             'indices are "%s %s"' %
-                             (solution_binary.shape, str(i), solution[i]))
-    return solution_binary

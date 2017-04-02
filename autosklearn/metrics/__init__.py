@@ -1,10 +1,11 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
 
+import numpy as np
 import sklearn.metrics
 from sklearn.utils.multiclass import type_of_target
 
-from .classification_metrics import balanced_accuracy
+from . import classification_metrics
 from .util import *
 
 
@@ -44,8 +45,18 @@ class _PredictScorer(Scorer):
             Score function applied to prediction of estimator on X.
         """
         type_true = type_of_target(y_true)
-        if type_true != 'multilabel-indicator':
+        if len(y_pred.shape) == 1 or y_pred.shape[1] == 1 or \
+                type_true == 'continuous':
+            # must be regression, all other task types would return at least
+            # two probabilities
+            pass
+        elif type_true in ['binary', 'multiclass']:
             y_pred = np.argmax(y_pred, axis=1)
+        elif type_true == 'multilabel-indicator':
+            y_pred[y_pred > 0.5] = 1.0
+            y_pred[y_pred <= 0.5] = 0.0
+        else:
+            raise ValueError(type_true)
 
         if sample_weight is not None:
             return self._sign * self._score_func(y_true, y_pred,
@@ -179,6 +190,8 @@ median_absolute_error = make_scorer('median_absolute_error',
 
 # Standard Classification Scores
 accuracy = make_scorer('accuracy', sklearn.metrics.accuracy_score)
+balanced_accuracy = make_scorer('balanced_accuracy',
+                                classification_metrics.balanced_accuracy)
 f1 = make_scorer('f1', sklearn.metrics.f1_score)
 
 # Score functions that need decision values
