@@ -21,7 +21,7 @@ from autosklearn.metrics import Scorer
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
-from autosklearn.metrics.util import calculate_score
+from autosklearn.metrics import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline
 from autosklearn.ensemble_builder import EnsembleBuilder

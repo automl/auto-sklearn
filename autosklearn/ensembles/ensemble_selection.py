@@ -6,7 +6,7 @@ import six
 
 from autosklearn.constants import *
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
-from autosklearn.metrics.util import calculate_score
+from autosklearn.metrics import calculate_score
 from autosklearn.metrics import Scorer
 
 
