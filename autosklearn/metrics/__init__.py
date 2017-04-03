@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+import copy
 from functools import partial
 
 import sklearn.metrics
@@ -220,7 +221,8 @@ for scorer in [r2, mean_squared_error, mean_absolute_error,
 
 CLASSIFICATION_METRICS = dict()
 
-for scorer in [accuracy, roc_auc, average_precision, log_loss, pac_score]:
+for scorer in [accuracy, balanced_accuracy, roc_auc, average_precision,
+               log_loss, pac_score]:
     CLASSIFICATION_METRICS[scorer.name] = scorer
 
 for name, metric in [('precision', sklearn.metrics.precision_score),
@@ -247,12 +249,16 @@ def calculate_score(solution, prediction, task_type, metric,
         if task_type in REGRESSION_TASKS:
             # TODO put this into the regression metric itself
             cprediction = sanitize_array(prediction)
+            metric_dict = copy.copy(REGRESSION_METRICS)
+            metric_dict[metric.name] = metric
             for metric_ in REGRESSION_METRICS:
                 func = REGRESSION_METRICS[metric_]
                 score[func.name] = func(solution, cprediction)
 
         else:
-            for metric_ in CLASSIFICATION_METRICS:
+            metric_dict = copy.copy(CLASSIFICATION_METRICS)
+            metric_dict[metric.name] = metric
+            for metric_ in metric_dict:
                 func = CLASSIFICATION_METRICS[metric_]
 
                 # TODO maybe annotate metrics to define which cases they can

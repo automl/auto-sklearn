@@ -105,10 +105,11 @@ for entry in trajectory:
                                     disable_file_output=True,
                                     logger=logger,
                                     stats=stats,
-                                    all_scoring_functions=True)
-        status, cost, runtime, additional_run_info = ta.start(config=config,
-                                                              instance=None,
-                                                              cutoff=per_run_time_limit)
+                                    all_scoring_functions=True,
+                                    metric=metric)
+        status, cost, runtime, additional_run_info = ta.start(
+            config=config, instance=None, cutoff=per_run_time_limit)
+
         if status == StatusType.SUCCESS:
             scores = additional_run_info.split(';')
             scores = [score.split(':') for score in scores]

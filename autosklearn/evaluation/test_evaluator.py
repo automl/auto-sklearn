@@ -80,10 +80,10 @@ class TestEvaluator(AbstractEvaluator):
 
 # create closure for evaluating an algorithm
 # Has a stupid name so nosetests doesn't regard it as a test
-def eval_t(queue, config, data, backend, metric, seed, num_run, instance,
+def eval_t(queue, config, datamanager, backend, metric, seed, num_run, instance,
            subsample, all_scoring_functions, output_y_hat_optimization, include,
            exclude, disable_file_output):
-    evaluator = TestEvaluator(datamanager=data, configuration=config,
+    evaluator = TestEvaluator(datamanager=datamanager, configuration=config,
                               backend=backend, metric=metric, seed=seed,
                               queue=queue,
                               all_scoring_functions=all_scoring_functions,
