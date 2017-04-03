@@ -614,6 +614,7 @@ class FunctionsTest(unittest.TestCase):
         info = get_last_result(self.queue)
 
         fixture = {'accuracy': 0.0606060606061,
+                   'balanced_accuracy': 0.0636363636364,
                    'f1': 0.0606060606061,
                    'f1_macro': 0.0636363636364,
                    'f1_micro': 0.0606060606061,
@@ -696,6 +697,7 @@ class FunctionsTest(unittest.TestCase):
         info = get_last_result(self.queue)
 
         fixture = {'accuracy': 0.04,
+                   'balanced_accuracy': 0.042002688172,
                    'f1': 0.0400201612903,
                    'f1_macro': 0.0423387096774,
                    'f1_micro': 0.04,

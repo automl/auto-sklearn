@@ -82,7 +82,7 @@ class FunctionsTest(unittest.TestCase):
         eval_t(queue=self.queue,
                backend=self.backend,
                config=self.configuration,
-               data=self.data,
+               datamanager=self.data,
                metric=accuracy,
                seed=1, num_run=1, subsample=None,
                all_scoring_functions=False, output_y_hat_optimization=False,
@@ -97,7 +97,7 @@ class FunctionsTest(unittest.TestCase):
         eval_t(queue=self.queue,
                backend=self.backend,
                config=self.configuration,
-               data=self.data,
+               datamanager=self.data,
                metric=accuracy,
                seed=1, num_run=1, subsample=None,
                all_scoring_functions=True, output_y_hat_optimization=False,
@@ -105,6 +105,7 @@ class FunctionsTest(unittest.TestCase):
                instance=self.dataset_name)
         info = get_last_result(self.queue)
         fixture = {'accuracy': 0.04,
+                   'balanced_accuracy': 0.0277777777778,
                    'f1': 0.0396930946292,
                    'f1_macro': 0.0341005967604,
                    'f1_micro': 0.04,
