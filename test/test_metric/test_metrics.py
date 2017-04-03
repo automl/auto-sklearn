@@ -243,6 +243,34 @@ class TestScorer(unittest.TestCase):
         score = scorer(y_true, y_pred)
         self.assertAlmostEqual(score, -1.0)
 
+    def test_sign_flip(self):
+        y_true = np.arange(0, 1.01, 0.1)
+        y_pred = y_true.copy()
+
+        scorer = autosklearn.metrics.make_scorer(
+            'r2', sklearn.metrics.r2_score, greater_is_better=True)
+
+        score = scorer(y_true, y_pred + 1.0)
+        self.assertAlmostEqual(score, -9.0)
+
+        score = scorer(y_true, y_pred + 0.5)
+        self.assertAlmostEqual(score, -1.5)
+
+        score = scorer(y_true, y_pred)
+        self.assertAlmostEqual(score, 1.0)
+
+        scorer = autosklearn.metrics.make_scorer(
+            'r2', sklearn.metrics.r2_score, greater_is_better=False)
+
+        score = scorer(y_true, y_pred + 1.0)
+        self.assertAlmostEqual(score, 9.0)
+
+        score = scorer(y_true, y_pred + 0.5)
+        self.assertAlmostEqual(score, 1.5)
+
+        score = scorer(y_true, y_pred)
+        self.assertAlmostEqual(score, -1.0)
+
 
 class TestMetricsDoNotAlterInput(unittest.TestCase):
 

@@ -9,9 +9,10 @@ import numpy as np
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
-from evaluation_util import get_multiclass_classification_datamanager
+from evaluation_util import get_multiclass_classification_datamanager, \
+    get_regression_datamanager
 from autosklearn.evaluation import AbstractEvaluator
-from autosklearn.metrics import accuracy
+from autosklearn.metrics import accuracy, r2, mean_squared_error
 
 
 class AbstractEvaluatorTest(unittest.TestCase):

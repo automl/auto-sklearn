@@ -10,7 +10,7 @@ import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
 from autosklearn.constants import *
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
-from autosklearn.metrics.util import calculate_score
+from autosklearn.metrics import calculate_score
 from autosklearn.util.logging_ import get_logger
 
 from ConfigSpace import Configuration

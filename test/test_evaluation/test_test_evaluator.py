@@ -110,6 +110,7 @@ class FunctionsTest(unittest.TestCase):
                    'f1_micro': 0.04,
                    'f1_weighted': 0.0396930946292,
                    'log_loss': 1.1274919837,
+                   'pac_score': 0.185257565321,
                    'precision': 0.0355555555556,
                    'precision_macro': 0.037037037037,
                    'precision_micro': 0.04,

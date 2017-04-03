@@ -4,6 +4,7 @@ from functools import partial
 import sklearn.metrics
 from sklearn.utils.multiclass import type_of_target
 
+from autosklearn.constants import *
 from . import classification_metrics
 from .util import *
 
@@ -219,7 +220,7 @@ for scorer in [r2, mean_squared_error, mean_absolute_error,
 
 CLASSIFICATION_METRICS = dict()
 
-for scorer in [accuracy, roc_auc, average_precision, log_loss]:
+for scorer in [accuracy, roc_auc, average_precision, log_loss, pac_score]:
     CLASSIFICATION_METRICS[scorer.name] = scorer
 
 for name, metric in [('precision', sklearn.metrics.precision_score),
@@ -234,3 +235,48 @@ for name, metric in [('precision', sklearn.metrics.precision_score),
                                                         pos_label=None,
                                                         average=average))
         CLASSIFICATION_METRICS[qualified_name] = globals()[qualified_name]
+
+
+def calculate_score(solution, prediction, task_type, metric,
+                    all_scoring_functions=False):
+    if task_type not in TASK_TYPES:
+        raise NotImplementedError(task_type)
+
+    if all_scoring_functions:
+        score = dict()
+        if task_type in REGRESSION_TASKS:
+            # TODO put this into the regression metric itself
+            cprediction = sanitize_array(prediction)
+            for metric_ in REGRESSION_METRICS:
+                func = REGRESSION_METRICS[metric_]
+                score[func.name] = func(solution, cprediction)
+
+        else:
+            for metric_ in CLASSIFICATION_METRICS:
+                func = CLASSIFICATION_METRICS[metric_]
+
+                # TODO maybe annotate metrics to define which cases they can
+                # handle?
+
+                try:
+                    score[func.name] = func(solution, prediction)
+                except ValueError as e:
+                    if e.args[0] == 'multiclass format is not supported':
+                        continue
+                    elif e.args[0] == 'Sample-based precision, recall, ' \
+                                      'fscore is not meaningful outside ' \
+                                      'multilabel classification. See the ' \
+                                      'accuracy_score instead.':
+                        continue
+                    else:
+                        raise e
+
+    else:
+        if task_type in REGRESSION_TASKS:
+            # TODO put this into the regression metric itself
+            cprediction = sanitize_array(prediction)
+            score = metric(solution, cprediction)
+        else:
+            score = metric(solution, prediction)
+
+    return score
