@@ -367,5 +367,5 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         predictions = automl.predict(X_test)
         self.assertEqual(predictions.shape, (356,))
         score = mean_squared_error(Y_test, predictions)
-        # On average np.sqrt(20) away from the target -> ~4.5 on average
-        self.assertGreaterEqual(score, -20)
+        # On average np.sqrt(30) away from the target -> ~5.5 on average
+        self.assertGreaterEqual(score, -30)
