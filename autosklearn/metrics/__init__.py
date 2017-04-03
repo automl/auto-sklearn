@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
 
-import numpy as np
 import sklearn.metrics
 from sklearn.utils.multiclass import type_of_target
 
@@ -184,9 +183,11 @@ mean_squared_error = make_scorer('mean_squared_error',
                                  sklearn.metrics.mean_squared_error,
                                  greater_is_better=False)
 mean_absolute_error = make_scorer('mean_absolute_error',
-                                  sklearn.metrics.mean_absolute_error)
+                                  sklearn.metrics.mean_absolute_error,
+                                  greater_is_better=False)
 median_absolute_error = make_scorer('median_absolute_error',
-                                    sklearn.metrics.median_absolute_error)
+                                    sklearn.metrics.median_absolute_error,
+                                    greater_is_better=False)
 
 # Standard Classification Scores
 accuracy = make_scorer('accuracy', sklearn.metrics.accuracy_score)
@@ -206,6 +207,8 @@ recall = make_scorer('recall', sklearn.metrics.recall_score)
 # Score function for probabilistic classification
 log_loss = make_scorer('log_loss', sklearn.metrics.log_loss,
                        greater_is_better=False, needs_proba=True)
+pac_score = make_scorer('pac_score', classification_metrics.pac_score,
+                        greater_is_better=True, needs_proba=True)
 # TODO what about mathews correlation coefficient etc?
 
 

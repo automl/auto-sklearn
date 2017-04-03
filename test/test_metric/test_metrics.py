@@ -9,8 +9,8 @@ import autosklearn.metrics.classification_metrics
 class TestScorer(unittest.TestCase):
 
     def test_predict_scorer_binary(self):
-        y_true = [0, 0, 1, 1]
-        y_pred = [[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]
+        y_true = np.array([0, 0, 1, 1])
+        y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
 
         scorer = autosklearn.metrics._PredictScorer(
             'accuracy', sklearn.metrics.accuracy_score, 1, {})
@@ -18,11 +18,11 @@ class TestScorer(unittest.TestCase):
         score = scorer(y_true, y_pred)
         self.assertAlmostEqual(score, 1.0)
 
-        y_pred = [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
+        y_pred = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
         score = scorer(y_true, y_pred)
         self.assertAlmostEqual(score, 0.5)
 
-        y_pred = [[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]
+        y_pred = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])
         score = scorer(y_true, y_pred)
         self.assertAlmostEqual(score, 0.5)
 
@@ -36,13 +36,13 @@ class TestScorer(unittest.TestCase):
         scorer = autosklearn.metrics._PredictScorer(
             'accuracy', sklearn.metrics.accuracy_score, -1, {})
 
-        y_pred = [[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]
+        y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
         score = scorer(y_true, y_pred)
         self.assertAlmostEqual(score, -1.0)
 
     def test_predict_scorer_multiclass(self):
-        y_true = [0, 1, 2]
-        y_pred = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        y_true = np.array([0, 1, 2])
+        y_pred = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
 
         scorer = autosklearn.metrics._PredictScorer(
             'accuracy', sklearn.metrics.accuracy_score, 1, {})
@@ -50,11 +50,11 @@ class TestScorer(unittest.TestCase):
         score = scorer(y_true, y_pred)
         self.assertAlmostEqual(score, 1.0)
 
-        y_pred = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+        y_pred = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
         score = scorer(y_true, y_pred)
         self.assertAlmostEqual(score, 0.333333333)
 
-        y_pred = [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+        y_pred = np.array([[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]])
         score = scorer(y_true, y_pred)
         self.assertAlmostEqual(score, 0.333333333)
 
@@ -68,7 +68,7 @@ class TestScorer(unittest.TestCase):
         scorer = autosklearn.metrics._PredictScorer(
             'accuracy', sklearn.metrics.accuracy_score, -1, {})
 
-        y_pred = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        y_pred = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
         score = scorer(y_true, y_pred)
         self.assertAlmostEqual(score, -1.0)
 

@@ -2,7 +2,7 @@
 from smac.tae.execute_ta_run import StatusType
 
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
-from autosklearn.evaluation.util import calculate_score
+from autosklearn.metrics.util import calculate_score
 
 
 __all__ = [

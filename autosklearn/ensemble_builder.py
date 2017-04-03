@@ -13,7 +13,7 @@ import pynisher
 
 from autosklearn.constants import BINARY_CLASSIFICATION, \
     MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION, CLASSIFICATION_TASKS
-from autosklearn.evaluation.util import calculate_score
+from autosklearn.metrics.util import calculate_score
 from autosklearn.util import StopWatch
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.util.logging_ import get_logger
