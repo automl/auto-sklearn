@@ -6,7 +6,8 @@ import six
 
 from autosklearn.constants import *
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
-from autosklearn.evaluation.util import calculate_score
+from autosklearn.metrics import calculate_score
+from autosklearn.metrics import Scorer
 
 
 class EnsembleSelection(AbstractEnsemble):
@@ -25,8 +26,8 @@ class EnsembleSelection(AbstractEnsemble):
             raise ValueError('Ensemble size cannot be less than one!')
         if not self.task_type in TASK_TYPES:
             raise ValueError('Unknown task type %s.' % self.task_type)
-        if not self.metric in METRIC:
-            raise ValueError('Unknown metric %s.' % self.metric)
+        if not isinstance(self.metric, Scorer):
+            raise ValueError('Metric must be of type scorer')
         if self.mode not in ('fast', 'slow'):
             raise ValueError('Unknown mode %s' % self.mode)
 
@@ -81,8 +82,11 @@ class EnsembleSelection(AbstractEnsemble):
                 fant_ensemble_prediction = weighted_ensemble_prediction + \
                                            (1. / float(s + 1)) * pred
                 scores[j] = calculate_score(
-                    labels, fant_ensemble_prediction, self.task_type,
-                    self.metric, fant_ensemble_prediction.shape[1])
+                    solution=labels,
+                    prediction=fant_ensemble_prediction,
+                    task_type=self.task_type,
+                    metric=self.metric,
+                    all_scoring_functions=False)
             best = np.nanargmax(scores)
             ensemble.append(predictions[best])
             trajectory.append(scores[best])
@@ -114,8 +118,11 @@ class EnsembleSelection(AbstractEnsemble):
                 order.append(idx)
                 ensemble_ = np.array(ensemble).mean(axis=0)
                 ensemble_performance = calculate_score(
-                    labels, ensemble_, self.task_type, self.metric,
-                    ensemble_.shape[1])
+                    solution=labels,
+                    prediction=ensemble_,
+                    task_type=self.task_type,
+                    metric=self.metric,
+                    all_scoring_functions=False)
                 trajectory.append(ensemble_performance)
             ensemble_size -= n_best
 
@@ -124,9 +131,12 @@ class EnsembleSelection(AbstractEnsemble):
             for j, pred in enumerate(predictions):
                 ensemble.append(pred)
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-                scores[j] = calculate_score(labels, ensemble_prediction,
-                                            self.task_type, self.metric,
-                                            ensemble_prediction.shape[1])
+                scores[j] = calculate_score(
+                    solution=labels,
+                    prediction=ensemble_prediction,
+                    task_type=self.task_type,
+                    metric=self.metric,
+                    all_scoring_functions=False)
                 ensemble.pop()
             best = np.nanargmax(scores)
             ensemble.append(predictions[best])

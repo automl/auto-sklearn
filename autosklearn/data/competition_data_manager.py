@@ -5,12 +5,13 @@
 
 import os
 import re
+import warnings
 
 import numpy as np
 import scipy.sparse
 
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
-    STRING_TO_TASK_TYPES, MULTICLASS_CLASSIFICATION, STRING_TO_METRIC
+    STRING_TO_TASK_TYPES, MULTICLASS_CLASSIFICATION
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.util import convert_to_num
 try:
@@ -329,7 +330,10 @@ class CompetitionDataManager(AbstractDataManager):
                                       'file.')
 
         self.info['task'] = STRING_TO_TASK_TYPES[self.info['task']]
-        self.info['metric'] = STRING_TO_METRIC[self.info['metric']]
+        self.info['metric'] = self.info['metric']
+        warnings.warn('auto-sklearn will no longer take the metric given by '
+                      'the data manager into account. Please specify the '
+                      'metric when calling fit().')
 
         return self.info
 

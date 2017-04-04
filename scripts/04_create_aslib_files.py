@@ -5,6 +5,7 @@ import os
 import arff
 
 from autosklearn.constants import *
+from autosklearn.metrics import CLASSIFICATION_METRICS, REGRESSION_METRICS
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -36,22 +37,21 @@ if __name__ == "__main__":
     if task_type == 'classification':
         metadata_sets = itertools.product(
             [0, 1], [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION],
-            [ACC_METRIC, AUC_METRIC, BAC_METRIC, F1_METRIC, PAC_METRIC])
+            CLASSIFICATION_METRICS)
         input_directory = os.path.join(working_directory, 'configuration',
                                        'classification')
     elif task_type == 'regression':
         metadata_sets = itertools.product(
-            [0, 1], [REGRESSION], [A_METRIC, R2_METRIC])
+            [0, 1], [REGRESSION], REGRESSION_METRICS)
         input_directory = os.path.join(working_directory, 'configuration',
                                        'regression')
     else:
         raise ValueError(task_type)
 
     for sparse, task, metric in metadata_sets:
-        print(TASK_TYPES_TO_STRING[task], METRIC_TO_STRING[metric], sparse)
+        print(TASK_TYPES_TO_STRING[task], metric, sparse)
 
-        dir_name = '%s_%s_%s' % (METRIC_TO_STRING[metric],
-                                 TASK_TYPES_TO_STRING[task],
+        dir_name = '%s_%s_%s' % (metric, TASK_TYPES_TO_STRING[task],
                                  'sparse' if sparse else 'dense')
         output_dir_ = os.path.join(output_dir, dir_name)
         results_dir_ = os.path.join(results_dir, dir_name)

@@ -1,15 +1,18 @@
 # -*- encoding: utf-8 -*-
 
 import numpy as np
-import six
 import warnings
 
-import autosklearn.automl
-from autosklearn.constants import *
-from autosklearn.util.backend import create
+from sklearn.metrics.classification import type_of_target
 from sklearn.base import BaseEstimator
 import sklearn.utils
 import scipy.sparse
+
+import autosklearn.automl
+from autosklearn.metrics import f1_macro, accuracy, r2
+from autosklearn.constants import *
+from autosklearn.util.backend import create
+
 
 
 class AutoMLDecorator(object):
@@ -326,7 +329,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         return AutoMLClassifier(automl)
 
     def fit(self, X, y,
-            metric='acc_metric',
+            metric=None,
             feat_type=None,
             dataset_name=None):
         """Fit *auto-sklearn* to given training set (X, y).
@@ -340,11 +343,9 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         y : array-like, shape = [n_samples] or [n_samples, n_outputs]
             The target classes.
 
-        metric : str, optional (default='acc_metric')
-            The metric to optimize for. Can be one of: ['acc_metric',
-            'auc_metric', 'bac_metric', 'f1_metric', 'pac_metric']. A
-            description of the metrics can be found in `the paper describing
-            the AutoML Challenge.
+        metric : callable, optional (default='acc_metric')
+            An instance of ``autosklearn.metrics.Scorer.
+
         feat_type : list, optional (default=None)
             List of str of `len(X.shape[1])` describing the attribute type.
             Possible types are `Categorical` and `Numerical`. `Categorical`
@@ -404,7 +405,7 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         return AutoMLRegressor(automl)
 
     def fit(self, X, y,
-            metric='r2_metric',
+            metric=None,
             feat_type=None,
             dataset_name=None):
         """Fit *autosklearn* to given training set (X, y).
@@ -470,26 +471,33 @@ class AutoMLClassifier(AutoMLDecorator):
         super(AutoMLClassifier, self).__init__(automl)
 
     def fit(self, X, y,
-            metric='acc_metric',
+            metric=None,
             loss=None,
             feat_type=None,
-            dataset_name=None,
-            ):
-        # From sklearn.tree.DecisionTreeClassifier
+            dataset_name=None):
         X = sklearn.utils.check_array(X, accept_sparse="csr",
                                       force_all_finite=False)
+        y = sklearn.utils.check_array(y, ensure_2d=False)
+
         if scipy.sparse.issparse(X):
             X.sort_indices()
 
-        y = self._process_target_classes(y)
+        y_task = type_of_target(y)
+        task_mapping = {'multilabel-indicator': MULTILABEL_CLASSIFICATION,
+                        'multiclass': MULTICLASS_CLASSIFICATION,
+                        'binary': BINARY_CLASSIFICATION}
 
-        if self._n_outputs > 1:
-            task = MULTILABEL_CLASSIFICATION
-        else:
-            if len(self._classes[0]) == 2:
-                task = BINARY_CLASSIFICATION
+        task = task_mapping.get(y_task)
+        if task is None:
+            raise ValueError('Cannot work on data of type %s' % y_task)
+
+        if metric is None:
+            if task == MULTILABEL_CLASSIFICATION:
+                metric = f1_macro
             else:
-                task = MULTICLASS_CLASSIFICATION
+                metric=accuracy
+
+        y = self._process_target_classes(y)
 
         return self._automl.fit(X, y, task, metric, feat_type, dataset_name)
 
@@ -520,19 +528,17 @@ class AutoMLClassifier(AutoMLDecorator):
         self._classes = []
         self._n_classes = []
 
-        for k in six.moves.range(self._n_outputs):
+        for k in range(self._n_outputs):
             classes_k, y[:, k] = np.unique(y[:, k], return_inverse=True)
             self._classes.append(classes_k)
             self._n_classes.append(classes_k.shape[0])
 
         self._n_classes = np.array(self._n_classes, dtype=np.int)
 
-        # TODO: fix metafeatures calculation to allow this!
         if y.shape[1] == 1:
             y = y.flatten()
 
         return y
-
 
     def predict(self, X):
         predicted_probabilities = self._automl.predict(X)
@@ -542,14 +548,12 @@ class AutoMLClassifier(AutoMLDecorator):
 
             return predicted_classes
         else:
-            argmax_v = np.vectorize(np.argmax, otypes=[int])
-            predicted_indexes = argmax_v(predicted_probabilities)
-            #predicted_indexes = np.argmax(predicted_probabilities, axis=1)
+            predicted_indices = (predicted_probabilities > 0.5).astype(int)
             n_samples = predicted_probabilities.shape[0]
-            predicted_classes = np.zeros((n_samples, self._n_outputs), dtype=object)
+            predicted_classes = np.zeros((n_samples, self._n_outputs))
 
-            for k in six.moves.range(self._n_outputs):
-                output_predicted_indexes = predicted_indexes[:, k].reshape(-1)
+            for k in range(self._n_outputs):
+                output_predicted_indexes = predicted_indices[:, k].reshape(-1)
                 predicted_classes[:, k] = self._classes[k].take(output_predicted_indexes)
 
             return predicted_classes
@@ -561,10 +565,11 @@ class AutoMLClassifier(AutoMLDecorator):
 class AutoMLRegressor(AutoMLDecorator):
 
     def fit(self, X, y,
-            metric='r2_metric',
-            loss=None,
+            metric=None,
             feat_type=None,
             dataset_name=None,
             ):
+        if metric is None:
+            metric = r2
         return self._automl.fit(X=X, y=y, task=REGRESSION, metric=metric,
                                 feat_type=feat_type, dataset_name=dataset_name)
