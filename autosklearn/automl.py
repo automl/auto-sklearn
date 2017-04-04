@@ -425,7 +425,8 @@ class AutoML(BaseEstimator):
                                     exclude_preprocessors=self._exclude_preprocessors,
                                     disable_file_output=self._disable_evaluator_output,
                                     configuration_mode=self._configuration_mode)
-            self.runhistory_, self.trajectory_ = _proc_smac.run_smbo()
+            self.runhistory_, self.trajectory_, self.fANOVA_input_ = \
+                _proc_smac.run_smbo()
             trajectory_filename = os.path.join(
                 self._backend.get_smac_output_directory(self._seed),
                 'trajectory.json')

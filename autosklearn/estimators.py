@@ -92,6 +92,10 @@ class AutoMLDecorator(object):
     def trajectory_(self):
         return self._automl.trajectory_
 
+    @property
+    def fANOVA_input_(self):
+        return self._automl.fANOVA_input_
+
     def sprint_statistics(self):
         return self._automl.sprint_statistics()
 
