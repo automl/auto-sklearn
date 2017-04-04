@@ -95,6 +95,8 @@ class FeedForwardNet(object):
         self.tanh_alpha_per_layer = np.asarray(tanh_alpha_per_layer, dtype=theano.config.floatX)
         self.tanh_beta_per_layer = np.asarray(tanh_beta_per_layer, dtype=theano.config.floatX)
         self.momentum = T.cast(momentum, dtype=theano.config.floatX)
+
+        self.init_learning_rate = np.asarray(learning_rate, dtype=theano.config.floatX)
         self.learning_rate = np.asarray(learning_rate, dtype=theano.config.floatX)
         self.lambda2 = T.cast(lambda2, dtype=theano.config.floatX)
         self.beta1 = T.cast(beta1, dtype=theano.config.floatX)
@@ -283,7 +285,7 @@ class FeedForwardNet(object):
                 train_batches += 1
             decay = self.update_function(self.gamma, epoch+1.0,
                                          self.power, self.epoch_step)
-            self.learning_rate *= decay
+            self.learning_rate = self.init_learning_rate * decay
             print("  training loss:\t\t{:.6f}".format(train_err / train_batches))
         return self
 
