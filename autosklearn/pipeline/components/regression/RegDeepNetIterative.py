@@ -6,11 +6,11 @@ from ConfigSpace import ConfigurationSpace, EqualsCondition, InCondition, \
     UniformFloatHyperparameter, UniformIntegerHyperparameter, \
     CategoricalHyperparameter
 
-from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
 
 
-class RegDeepNetIterative(AutoSklearnClassificationAlgorithm):
+class RegDeepNetIterative(AutoSklearnRegressionAlgorithm):
     def __init__(self, batch_size, num_layers,
                  dropout_output, learning_rate, solver,
                  lambda2, number_epochs=None, random_state=None,
