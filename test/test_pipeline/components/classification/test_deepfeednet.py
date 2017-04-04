@@ -22,7 +22,7 @@ class DeepNetIterativeComponentTest(unittest.TestCase):
         for i in range(2):
             predictions, targets = \
                 _test_classifier_predict_proba(DeepFeedNet)
-            self.assertAlmostEqual(0.79799380509486573,
+            self.assertAlmostEqual(0.76018262995220975,
                                    sklearn.metrics.log_loss(
                                        targets, predictions))
 
@@ -30,7 +30,7 @@ class DeepNetIterativeComponentTest(unittest.TestCase):
         for i in range(2):
             predictions, targets = \
                 _test_classifier(DeepFeedNet, sparse=True)
-            self.assertAlmostEqual(0.34,
+            self.assertAlmostEqual(0.38,
                                    sklearn.metrics.accuracy_score(targets,
                                                                   predictions))
 
@@ -38,7 +38,7 @@ class DeepNetIterativeComponentTest(unittest.TestCase):
         for i in range(2):
             predictions, targets = \
                 _test_classifier(DeepFeedNet, make_binary=True)
-            self.assertAlmostEqual(1,
+            self.assertAlmostEqual(0.95999999999999996,
                                    sklearn.metrics.accuracy_score(targets,
                                                                   predictions))
 
@@ -46,7 +46,7 @@ class DeepNetIterativeComponentTest(unittest.TestCase):
         for i in range(2):
             predictions, targets = \
                 _test_classifier(DeepFeedNet, make_multilabel=True)
-            self.assertAlmostEqual(0.76777777777777778,
+            self.assertAlmostEqual(0.71361111111111108,
                                    sklearn.metrics.average_precision_score(
                                        targets, predictions))
 
@@ -56,6 +56,6 @@ class DeepNetIterativeComponentTest(unittest.TestCase):
                 _test_classifier_predict_proba(DeepFeedNet,
                                                make_multilabel=True)
             self.assertEqual(predictions.shape, ((50, 3)))
-            self.assertAlmostEqual(0.77877804151779928,
+            self.assertAlmostEqual(0.76835649552496521,
                                    sklearn.metrics.average_precision_score(
                                        targets, predictions))

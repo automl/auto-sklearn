@@ -156,6 +156,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 elif 'The condensed distance matrix must contain only finite ' \
                      'values.' in e.args[0]:
                     continue
+                elif 'which is larger than the original space with n_features=' \
+                        in e.args[0]:
+                    continue
                 else:
                     print(config)
                     print(traceback.format_exc())

@@ -81,7 +81,9 @@ class DeepFeedNet(AutoSklearnClassificationAlgorithm):
     def _prefit(self, X, y):
         self.batch_size = int(self.batch_size)
         self.n_features = X.shape[1]
-        self.input_shape = (self.batch_size, self.n_features)
+        # cap batchsize to the number of data points if necessary
+        batch_size = np.min((self.batch_size, X.shape[0]))
+        self.input_shape = (batch_size, self.n_features)
 
         assert len(self.num_units_per_layer) == self.num_layers - 1,\
             "Number of created layers is different than actual layers"
