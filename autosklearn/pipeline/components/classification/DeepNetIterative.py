@@ -266,15 +266,16 @@ class DeepNetIterative(AutoSklearnClassificationAlgorithm):
                                               default='fixed')
 
         gamma = UniformFloatHyperparameter(name="gamma",
-                                           lower=1e-3, upper=1e-1,
-                                           default=1e-2)
+                                           lower=1e-1, upper=1e0,
+                                           default=1e-1,
+                                           log=True)
 
         power = UniformFloatHyperparameter("power",
                                            0.0, 1.0,
                                            default=0.5)
 
         epoch_step = UniformIntegerHyperparameter("epoch_step",
-                                                  2, 20,
+                                                  5, 50,
                                                   default=5)
 
         cs.add_hyperparameter(solver)
