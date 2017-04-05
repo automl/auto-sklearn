@@ -53,7 +53,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    cv=kfold,
                                    all_scoring_functions=False,
                                    output_y_hat_optimization=True,
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   subsample=50)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, None)
 
@@ -594,10 +595,10 @@ class FunctionsTest(unittest.TestCase):
         kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
         eval_holdout(queue=self.queue, config=self.configuration,
                      datamanager=self.data, backend=self.backend, cv=kfold,
-                     seed=1, num_run=1, subsample=None,
-                     all_scoring_functions=False, output_y_hat_optimization=True,
-                     include=None, exclude=None, disable_file_output=False,
-                     instance=self.dataset_name, metric=accuracy)
+                     seed=1, num_run=1, all_scoring_functions=False,
+                     output_y_hat_optimization=True, include=None, exclude=None,
+                     disable_file_output=False, instance=self.dataset_name,
+                     metric=accuracy)
         info = get_last_result(self.queue)
         self.assertAlmostEqual(info[1], 0.060606060606060552, places=3)
         self.assertEqual(info[2], 1)
@@ -607,10 +608,10 @@ class FunctionsTest(unittest.TestCase):
         kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
         eval_holdout(queue=self.queue, config=self.configuration,
                      datamanager=self.data, backend=self.backend, cv=kfold,
-                     seed=1, num_run=1, subsample=None,
-                     all_scoring_functions=True, output_y_hat_optimization=True,
-                     include=None, exclude=None, disable_file_output=False,
-                     instance=self.dataset_name, metric=accuracy)
+                     seed=1, num_run=1, all_scoring_functions=True,
+                     output_y_hat_optimization=True, include=None, exclude=None,
+                     disable_file_output=False, instance=self.dataset_name,
+                     metric=accuracy)
         info = get_last_result(self.queue)
 
         fixture = {'accuracy': 0.0606060606061,
@@ -654,7 +655,7 @@ class FunctionsTest(unittest.TestCase):
         kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
         eval_iterative_holdout(queue=self.queue, config=self.configuration,
                                datamanager=self.data, backend=self.backend,
-                               cv=kfold, seed=1, num_run=1, subsample=None,
+                               cv=kfold, seed=1, num_run=1,
                                all_scoring_functions=False,
                                output_y_hat_optimization=True, include=None,
                                exclude=None, disable_file_output=False,
@@ -677,7 +678,7 @@ class FunctionsTest(unittest.TestCase):
         cv = StratifiedKFold(y=self.y, shuffle=True, random_state=1)
         eval_cv(queue=self.queue, config=self.configuration,
                 datamanager=self.data, backend=self.backend, seed=1, num_run=1,
-                cv=cv, subsample=None, all_scoring_functions=False,
+                cv=cv, all_scoring_functions=False,
                 output_y_hat_optimization=True, include=None, exclude=None,
                 disable_file_output=False, instance=self.dataset_name,
                 metric=accuracy)
@@ -690,7 +691,7 @@ class FunctionsTest(unittest.TestCase):
         cv = StratifiedKFold(y=self.y, shuffle=True, random_state=1)
         eval_cv(queue=self.queue, config=self.configuration,
                 datamanager=self.data, backend=self.backend, seed=1, num_run=1,
-                cv=cv, subsample=None, all_scoring_functions=True,
+                cv=cv, all_scoring_functions=True,
                 output_y_hat_optimization=True, include=None, exclude=None,
                 disable_file_output=False, instance=self.dataset_name,
                 metric=accuracy)
@@ -748,7 +749,7 @@ class FunctionsTest(unittest.TestCase):
             eval_partial_cv(queue=self.queue, config=self.configuration,
                             datamanager=self.data, backend=self.backend, seed=1,
                             num_run=1, instance=instance, cv=cv,
-                            subsample=None, all_scoring_functions=False,
+                            all_scoring_functions=False,
                             output_y_hat_optimization=True, include=None,
                             exclude=None, disable_file_output=False,
                             metric=accuracy)

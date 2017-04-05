@@ -196,7 +196,7 @@ class EvaluationTest(unittest.TestCase):
     def test_eval_with_limits_holdout(self, eval_houldout_mock):
         def side_effect(*args, **kwargs):
             queue = kwargs['queue']
-            queue.put((StatusType.SUCCESS, 0.5, 0.12345, kwargs['subsample']))
+            queue.put((StatusType.SUCCESS, 0.5, 0.12345, kwargs['instance']))
         eval_houldout_mock.side_effect = side_effect
         ta = ExecuteTaFuncWithQueue(backend=BackendMock(), autosklearn_seed=1,
                                     resampling_strategy='holdout',
@@ -205,10 +205,10 @@ class EvaluationTest(unittest.TestCase):
                                     memory_limit=3072,
                                     metric=accuracy)
         self.scenario.wallclock_limit = 180
-        info = ta.start(None, cutoff=30, instance=None,
-                        instance_specific='subsample=30')
+        instance = "{'subsample': 30}"
+        info = ta.start(None, cutoff=30, instance=instance)
         self.assertEqual(info[0], StatusType.SUCCESS)
-        self.assertEqual(info[-1], 30)
+        self.assertEqual(info[-1], instance)
 
     def test_get_splitter(self):
         ta_args = dict(backend=BackendMock(), autosklearn_seed=1,

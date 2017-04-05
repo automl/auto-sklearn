@@ -122,13 +122,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         D = self.backend.load_datamanager()
         queue = multiprocessing.Queue()
 
-        if instance_specific is None or instance_specific == '0':
-            instance_specific = {}
-        else:
-            instance_specific = [specific.split('=') for specific in instance_specific.split(',')]
-            instance_specific = {specific[0]: specific[1] for specific in instance_specific}
-        subsample = instance_specific.get('subsample')
-        subsample = int(subsample) if subsample is not None else None
+        if not (instance_specific is None or instance_specific == '0'):
+            raise ValueError(instance_specific)
 
         arguments = dict(logger=logging.getLogger("pynisher"),
                          wall_time_in_s=cutoff,
@@ -142,7 +137,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                           num_run=self.num_run,
                           all_scoring_functions=self.all_scoring_functions,
                           output_y_hat_optimization=self.output_y_hat_optimization,
-                          subsample=subsample,
                           include=self.include,
                           exclude=self.exclude,
                           disable_file_output=self.disable_file_output,

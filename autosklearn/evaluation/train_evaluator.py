@@ -269,9 +269,10 @@ class TrainEvaluator(AbstractEvaluator):
 
 # create closure for evaluating an algorithm
 def eval_holdout(queue, config, datamanager, backend, cv, metric, seed, num_run,
-                 instance, subsample, all_scoring_functions,
-                 output_y_hat_optimization, include, exclude,
-                 disable_file_output, iterative=False):
+                 instance, all_scoring_functions, output_y_hat_optimization,
+                 include, exclude, disable_file_output, iterative=False):
+    instance = json.loads(instance) if instance is not None else {}
+    subsample = instance.get('subsample')
     evaluator = TrainEvaluator(datamanager=datamanager,
                                backend=backend,
                                queue=queue,
@@ -290,9 +291,9 @@ def eval_holdout(queue, config, datamanager, backend, cv, metric, seed, num_run,
 
 
 def eval_iterative_holdout(queue, config, datamanager, backend, cv, metric,
-                           seed, num_run, instance, subsample,
-                           all_scoring_functions, output_y_hat_optimization,
-                           include, exclude, disable_file_output):
+                           seed, num_run, instance, all_scoring_functions,
+                           output_y_hat_optimization, include, exclude,
+                           disable_file_output):
     return eval_holdout(queue=queue,
                         config=config,
                         datamanager=datamanager,
@@ -301,7 +302,6 @@ def eval_iterative_holdout(queue, config, datamanager, backend, cv, metric,
                         cv=cv,
                         seed=seed,
                         num_run=num_run,
-                        subsample=subsample,
                         all_scoring_functions=all_scoring_functions,
                         output_y_hat_optimization=output_y_hat_optimization,
                         include=include,
@@ -312,9 +312,13 @@ def eval_iterative_holdout(queue, config, datamanager, backend, cv, metric,
 
 
 def eval_partial_cv(queue, config, datamanager, backend, cv, metric, seed,
-                    num_run, instance, subsample, all_scoring_functions,
+                    num_run, instance, all_scoring_functions,
                     output_y_hat_optimization, include, exclude,
                     disable_file_output, iterative=False):
+    instance = json.loads(instance) if instance is not None else {}
+    subsample = instance.get('subsample')
+    fold = instance['fold']
+
     evaluator = TrainEvaluator(datamanager=datamanager,
                                backend=backend,
                                queue=queue,
@@ -330,15 +334,13 @@ def eval_partial_cv(queue, config, datamanager, backend, cv, metric, seed,
                                exclude=exclude,
                                disable_file_output=disable_file_output)
 
-    instance = json.loads(instance)
-    fold = instance['fold']
     evaluator.partial_fit_predict_and_loss(fold=fold, iterative=iterative)
 
 
 def eval_partial_cv_iterative(queue, config, datamanager, backend, cv, metric,
-                              seed, num_run, instance, subsample,
-                              all_scoring_functions, output_y_hat_optimization,
-                              include, exclude, disable_file_output):
+                              seed, num_run, instance, all_scoring_functions,
+                              output_y_hat_optimization, include, exclude,
+                              disable_file_output):
     return eval_partial_cv(queue=queue,
                            config=config,
                            datamanager=datamanager,
@@ -348,7 +350,6 @@ def eval_partial_cv_iterative(queue, config, datamanager, backend, cv, metric,
                            seed=seed,
                            num_run=num_run,
                            instance=instance,
-                           subsample=subsample,
                            all_scoring_functions=all_scoring_functions,
                            output_y_hat_optimization=output_y_hat_optimization,
                            include=include,
@@ -359,8 +360,10 @@ def eval_partial_cv_iterative(queue, config, datamanager, backend, cv, metric,
 
 # create closure for evaluating an algorithm
 def eval_cv(queue, config, datamanager, backend, cv, metric, seed, num_run,
-            instance, subsample, all_scoring_functions,
-            output_y_hat_optimization, include, exclude, disable_file_output):
+            instance, all_scoring_functions, output_y_hat_optimization,
+            include, exclude, disable_file_output):
+    instance = json.loads(instance) if instance is not None else {}
+    subsample = instance.get('subsample')
     evaluator = TrainEvaluator(datamanager=datamanager,
                                backend=backend,
                                queue=queue,

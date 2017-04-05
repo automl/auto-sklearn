@@ -84,7 +84,7 @@ class FunctionsTest(unittest.TestCase):
                config=self.configuration,
                datamanager=self.data,
                metric=accuracy,
-               seed=1, num_run=1, subsample=None,
+               seed=1, num_run=1,
                all_scoring_functions=False, output_y_hat_optimization=False,
                include=None, exclude=None, disable_file_output=False,
                instance=self.dataset_name)
@@ -99,7 +99,7 @@ class FunctionsTest(unittest.TestCase):
                config=self.configuration,
                datamanager=self.data,
                metric=accuracy,
-               seed=1, num_run=1, subsample=None,
+               seed=1, num_run=1,
                all_scoring_functions=True, output_y_hat_optimization=False,
                include=None, exclude=None, disable_file_output=False,
                instance=self.dataset_name)
