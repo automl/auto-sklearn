@@ -166,10 +166,8 @@ class AutoML(BaseEstimator):
         self._data_memory_limit = None
         loaded_data_manager = XYDataManager(X, y,
                                             task=task,
-                                            metric=metric,
                                             feat_type=feat_type,
-                                            dataset_name=dataset_name,
-                                            encode_labels=False)
+                                            dataset_name=dataset_name)
 
         return self._fit(loaded_data_manager, metric)
 
@@ -187,8 +185,7 @@ class AutoML(BaseEstimator):
         # Encoding the labels will be done after the metafeature calculation!
         self._data_memory_limit = float(self._ml_memory_limit) / 3
         loaded_data_manager = CompetitionDataManager(
-            dataset, encode_labels=False,
-            max_memory_in_mb=self._data_memory_limit)
+            dataset, max_memory_in_mb=self._data_memory_limit)
         loaded_data_manager_str = str(loaded_data_manager).split('\n')
         for part in loaded_data_manager_str:
             self._logger.debug(part)

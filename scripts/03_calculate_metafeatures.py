@@ -12,7 +12,7 @@ import pandas as pd
 import pynisher
 import scipy.sparse
 
-from autosklearn.data.generic_one_hot_encoding import perform_one_hot_encoding
+from autosklearn.data.abstract_data_manager import perform_one_hot_encoding
 from autosklearn.metalearning.metafeatures import metafeatures, metafeature
 
 sys.path.append('.')

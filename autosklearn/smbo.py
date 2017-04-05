@@ -77,9 +77,9 @@ def load_data(dataset_info, backend, max_mem=None):
     # Datamanager probably doesn't exist
     if D is None:
         if max_mem is None:
-            D = CompetitionDataManager(dataset_info, encode_labels=True)
+            D = CompetitionDataManager(dataset_info)
         else:
-            D = CompetitionDataManager(dataset_info, encode_labels=True, max_memory_in_mb=max_mem)
+            D = CompetitionDataManager(dataset_info, max_memory_in_mb=max_mem)
     return D
 
 
@@ -253,7 +253,7 @@ class AutoMLSMBO(object):
         else:
             self.datamanager = load_data(self.dataset_name,
                                          self.backend,
-                                         max_mem = max_mem)
+                                         max_mem=max_mem)
 
         self.task = self.datamanager.info['task']
 
