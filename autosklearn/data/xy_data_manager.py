@@ -38,11 +38,12 @@ class XYDataManager(AbstractDataManager):
         self.data['X_train'] = data_x
         self.data['Y_train'] = y
 
-        for feat in feat_type:
-            allowed_types = ['numerical', 'categorical']
-            if feat.lower() not in allowed_types:
-                raise ValueError("Entry '%s' in feat_type not in %s" %
-                                 (feat.lower(), str(allowed_types)))
+        if feat_type is not None:
+            for feat in feat_type:
+                allowed_types = ['numerical', 'categorical']
+                if feat.lower() not in allowed_types:
+                    raise ValueError("Entry '%s' in feat_type not in %s" %
+                                     (feat.lower(), str(allowed_types)))
 
         self.feat_type = feat_type
 
