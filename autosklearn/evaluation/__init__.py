@@ -132,8 +132,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         arguments = dict(logger=logging.getLogger("pynisher"),
                          wall_time_in_s=cutoff,
-                         mem_in_mb=self.memory_limit,
-                         grace_period_in_s=15)
+                         mem_in_mb=self.memory_limit)
         obj_kwargs = dict(queue=queue,
                           config=config,
                           datamanager=D,
