@@ -12,6 +12,7 @@ import sklearn.datasets
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.automl import AutoML
 import autosklearn.automl
+from autosklearn.metrics import accuracy
 import autosklearn.pipeline.util as putil
 from autosklearn.util import setup_logger, get_logger, backend
 from autosklearn.constants import *
@@ -99,9 +100,7 @@ class AutoMLTest(Base, unittest.TestCase):
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         backend_api = backend.create(output, output)
         automl = autosklearn.automl.AutoML(backend_api, 30, 5)
-        automl.fit(X_train, Y_train)
-        #print(automl.show_models(), flush=True)
-        #print(automl.cv_results_, flush=True)
+        automl.fit(X_train, Y_train, metric=accuracy)
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
@@ -118,7 +117,7 @@ class AutoMLTest(Base, unittest.TestCase):
         automl = autosklearn.automl.AutoML(backend_api, 30, 5,
                                            initial_configurations_via_metalearning=0,
                                            configuration_mode='ROAR')
-        automl.fit(X_train, Y_train)
+        automl.fit(X_train, Y_train, metric=accuracy)
         # print(automl.show_models(), flush=True)
         # print(automl.cv_results_, flush=True)
         score = automl.score(X_test, Y_test)
@@ -149,9 +148,8 @@ class AutoMLTest(Base, unittest.TestCase):
         automl = autosklearn.automl.AutoML(backend_api, 30, 5,
                                            include_estimators=['sgd'],
                                            include_preprocessors=['no_preprocessing'])
-        automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION)
-        #print(automl.show_models(), flush=True)
-        #print(automl.cv_results_, flush=True)
+        automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION,
+                   metric=accuracy)
         self.assertEqual(automl._task, BINARY_CLASSIFICATION)
 
         # TODO, the assumption from above is not really tested here
@@ -176,7 +174,7 @@ class AutoMLTest(Base, unittest.TestCase):
             backend_api, 30, 5,
             initial_configurations_via_metalearning=25,
             seed=100)
-        auto.fit_automl_dataset(dataset)
+        auto.fit_automl_dataset(dataset, accuracy)
 
         # pickled data manager (without one hot encoding!)
         with open(data_manager_file, 'rb') as fh:

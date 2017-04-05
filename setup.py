@@ -29,7 +29,7 @@ requirements = [
     "ConfigSpace>=0.3.1,<0.4",
     "pynisher>=0.4",
     "pyrfr",
-    "smac==0.3.0"
+    "smac==0.4.0"
 ]
 
 with open("autosklearn/__version__.py") as fh:

@@ -20,6 +20,7 @@ from autosklearn.evaluation import TestEvaluator
 from autosklearn.evaluation import eval_t, get_last_result
 from autosklearn.util.pipeline import get_configuration_space
 from autosklearn.util import Backend
+from autosklearn.metrics import accuracy, r2, f1_macro
 
 N_TEST_RUNS = 3
 
@@ -45,8 +46,14 @@ class TestEvaluator_Test(BaseEvaluatorTest, unittest.TestCase):
                 y = D.data['Y_train']
                 if len(y.shape) == 2 and y.shape[1] == 1:
                     D_.data['Y_train'] = y.flatten()
+                metric_lookup = {MULTILABEL_CLASSIFICATION: f1_macro,
+                                 BINARY_CLASSIFICATION: accuracy,
+                                 MULTICLASS_CLASSIFICATION: accuracy,
+                                 REGRESSION: r2}
                 queue_ = multiprocessing.Queue()
-                evaluator = TestEvaluator(D_, backend_mock, queue_)
+
+                evaluator = TestEvaluator(D_, backend_mock, queue_,
+                                          metric=metric_lookup[D.info['task']])
 
                 evaluator.fit_predict_and_loss()
                 duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
@@ -75,13 +82,14 @@ class FunctionsTest(unittest.TestCase):
         eval_t(queue=self.queue,
                backend=self.backend,
                config=self.configuration,
-               data=self.data,
+               datamanager=self.data,
+               metric=accuracy,
                seed=1, num_run=1, subsample=None,
                all_scoring_functions=False, output_y_hat_optimization=False,
                include=None, exclude=None, disable_file_output=False,
                instance=self.dataset_name)
         info = get_last_result(self.queue)
-        self.assertAlmostEqual(info[1], 0.041666666666666852)
+        self.assertAlmostEqual(info[1], 0.04)
         self.assertEqual(info[2], 1)
         self.assertNotIn('bac_metric', info[3])
 
@@ -89,21 +97,34 @@ class FunctionsTest(unittest.TestCase):
         eval_t(queue=self.queue,
                backend=self.backend,
                config=self.configuration,
-               data=self.data,
+               datamanager=self.data,
+               metric=accuracy,
                seed=1, num_run=1, subsample=None,
                all_scoring_functions=True, output_y_hat_optimization=False,
                include=None, exclude=None, disable_file_output=False,
                instance=self.dataset_name)
         info = get_last_result(self.queue)
-        fixture = {'f1_metric': 0.0511508951407,
-                   'pac_metric': 0.185257565321,
-                   'acc_metric': 0.06,
-                   'auc_metric': 0.00917546505782,
-                   'bac_metric': 0.0416666666667,
+        fixture = {'accuracy': 0.04,
+                   'balanced_accuracy': 0.0277777777778,
+                   'f1': 0.0396930946292,
+                   'f1_macro': 0.0341005967604,
+                   'f1_micro': 0.04,
+                   'f1_weighted': 0.0396930946292,
+                   'log_loss': 1.1274919837,
+                   'pac_score': 0.185257565321,
+                   'precision': 0.0355555555556,
+                   'precision_macro': 0.037037037037,
+                   'precision_micro': 0.04,
+                   'precision_weighted': 0.0355555555556,
+                   'recall': 0.04,
+                   'recall_macro': 0.0277777777778,
+                   'recall_micro': 0.04,
+                   'recall_weighted': 0.04,
                    'num_run': -1}
         rval = {i.split(':')[0]: float(i.split(':')[1]) for i in info[3].split(';')}
         for key, value in fixture.items():
-            self.assertAlmostEqual(rval[key], fixture[key])
+            self.assertAlmostEqual(rval[key], fixture[key], msg=key)
+        self.assertEqual(len(rval), len(fixture) + 1, msg=sorted(rval.items()))
         self.assertIn('duration', rval)
-        self.assertAlmostEqual(info[1], 0.041666666666666852)
+        self.assertAlmostEqual(info[1], 0.04)
         self.assertEqual(info[2], 1)

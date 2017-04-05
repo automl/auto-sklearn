@@ -98,12 +98,18 @@ class TestMetadataGeneration(unittest.TestCase):
         # print(rval.stdout, flush=True)
         # print(rval.stderr, flush=True)
         self.assertEqual(rval.returncode, 0, msg=str(rval))
+
         for file in ['algorithm_runs.arff', 'configurations.csv',
                      'description.results.txt']:
-            self.assertTrue(os.path.exists(os.path.join(self.working_directory,
-                                                        'configuration_results',
-                                                        'acc_metric_binary.classification_dense',
-                                                        file)))
+            for metric in ['accuracy', 'balanced_accuracy', 'log_loss']:
+                self.assertTrue(os.path.exists(os.path.join(self.working_directory,
+                                                            'configuration_results',
+                                                            '%s_binary.classification_dense' % metric,
+                                                            file)), msg=str((metric, file)))
+            self.assertFalse(os.path.exists(os.path.join(self.working_directory,
+                                                         'configuration_results',
+                                                         'roc_auc_binary.classification_dense',
+                                                         file)), msg=file)
 
         # 6. Calculate metafeatures
         script_filename = os.path.join(scripts_directory, '03_calculate_metafeatures.py')
@@ -133,19 +139,19 @@ class TestMetadataGeneration(unittest.TestCase):
                      'readme.txt']:
             self.assertTrue(os.path.exists(os.path.join(self.working_directory,
                                                         'metadata',
-                                                        'acc_metric_binary.classification_dense',
+                                                        'accuracy_binary.classification_dense',
                                                         file)))
 
         with open(os.path.join(self.working_directory,
                                'metadata',
-                               'acc_metric_binary.classification_dense',
+                               'accuracy_binary.classification_dense',
                                'algorithm_runs.arff')) as fh:
             algorithm_runs = arff.load(fh)
             self.assertEqual(algorithm_runs['attributes'],
                              [('instance_id', 'STRING'),
                               ('repetition', 'NUMERIC'),
                               ('algorithm', 'STRING'),
-                              ('acc_metric', 'NUMERIC'),
+                              ('accuracy', 'NUMERIC'),
                               ('runstatus',
                                ['ok', 'timeout', 'memout', 'not_applicable',
                                 'crash', 'other'])])

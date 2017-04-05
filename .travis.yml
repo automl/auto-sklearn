@@ -66,7 +66,7 @@ before_install:
 
 install:
   # Install general requirements the way setup.py suggests
-  - pip install coverage pep8 python-coveralls
+  - pip install pep8 codecov
   - cat requirements.txt | xargs -n 1 -L 1 pip install
   # Install openml dependency for metadata generation unittest
   - pip install xmltodict requests
@@ -75,8 +75,6 @@ install:
   - mkdir ~/.openml
   - echo "apikey = 610344db6388d9ba34f6db45a3cf71de" > ~/.openml/config
   # Debug output to know all exact package versions!
-  - pip uninstall smac -y
-  - pip install git+https://github.com/automl/smac3@development
   - pip freeze
   - python setup.py install
   

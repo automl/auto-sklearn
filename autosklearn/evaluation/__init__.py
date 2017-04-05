@@ -23,7 +23,7 @@ WORST_POSSIBLE_RESULT = 1.0
 # easier debugging of potential crashes
 class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
-    def __init__(self, backend, autosklearn_seed, resampling_strategy,
+    def __init__(self, backend, autosklearn_seed, resampling_strategy, metric,
                  logger, initial_num_run=1, stats=None, runhistory=None,
                  run_obj='quality', par_factor=1, all_scoring_functions=False,
                  output_y_hat_optimization=True, include=None, exclude=None,
@@ -54,6 +54,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.autosklearn_seed = autosklearn_seed
         self.resampling_strategy = resampling_strategy
         self.num_run = initial_num_run
+        self.metric = metric
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_args = resampling_strategy_args
         self.all_scoring_functions = all_scoring_functions
@@ -135,8 +136,9 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                          grace_period_in_s=15)
         obj_kwargs = dict(queue=queue,
                           config=config,
-                          data=D,
+                          datamanager=D,
                           backend=self.backend,
+                          metric=self.metric,
                           seed=self.autosklearn_seed,
                           num_run=self.num_run,
                           all_scoring_functions=self.all_scoring_functions,

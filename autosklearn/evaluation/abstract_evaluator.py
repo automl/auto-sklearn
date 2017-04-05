@@ -1,5 +1,4 @@
 import os
-import queue
 import time
 import warnings
 
@@ -11,7 +10,7 @@ import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
 from autosklearn.constants import *
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
-from autosklearn.evaluation.util import calculate_score
+from autosklearn.metrics import calculate_score
 from autosklearn.util.logging_ import get_logger
 
 from ConfigSpace import Configuration
@@ -82,7 +81,8 @@ class MyDummyRegressor(DummyRegressor):
 
 
 class AbstractEvaluator(object):
-    def __init__(self, Datamanager, backend, queue, configuration=None,
+    def __init__(self, datamanager, backend, queue, metric,
+                 configuration=None,
                  all_scoring_functions=False,
                  seed=1,
                  output_y_hat_optimization=True,
@@ -98,15 +98,15 @@ class AbstractEvaluator(object):
         self.backend = backend
         self.queue = queue
 
-        self.D = Datamanager
+        self.datamanager = datamanager
         self.include = include
         self.exclude = exclude
 
-        self.X_valid = Datamanager.data.get('X_valid')
-        self.X_test = Datamanager.data.get('X_test')
+        self.X_valid = datamanager.data.get('X_valid')
+        self.X_test = datamanager.data.get('X_test')
 
-        self.metric = Datamanager.info['metric']
-        self.task_type = Datamanager.info['task']
+        self.metric = metric
+        self.task_type = datamanager.info['task']
         self.seed = seed
 
         self.output_y_hat_optimization = output_y_hat_optimization
@@ -129,7 +129,7 @@ class AbstractEvaluator(object):
             self.predict_function = self._predict_proba
 
         categorical_mask = []
-        for feat in Datamanager.feat_type:
+        for feat in datamanager.feat_type:
             if feat.lower() == 'numerical':
                 categorical_mask.append(False)
             elif feat.lower() == 'categorical':
@@ -149,7 +149,7 @@ class AbstractEvaluator(object):
         self.subsample = subsample
 
         logger_name = '%s(%d):%s' % (self.__class__.__name__.split('.')[-1],
-                                     self.seed, self.D.name)
+                                     self.seed, self.datamanager.name)
         self.logger = get_logger(logger_name)
 
     def _get_model(self):
@@ -159,7 +159,7 @@ class AbstractEvaluator(object):
                                      init_params=self._init_params)
         else:
             dataset_properties = {'task': self.task_type,
-                                  'sparse': self.D.info['is_sparse'] == 1,
+                                  'sparse': self.datamanager.info['is_sparse'] == 1,
                                   'multilabel': self.task_type ==
                                                 MULTILABEL_CLASSIFICATION,
                                   'multiclass': self.task_type ==
@@ -180,8 +180,7 @@ class AbstractEvaluator(object):
                 return 1.0
 
         score = calculate_score(
-            y_true, y_hat, self.task_type,
-            self.metric, self.D.info['label_num'],
+            y_true, y_hat, self.task_type, self.metric,
             all_scoring_functions=self.all_scoring_functions)
 
         if hasattr(score, '__len__'):
@@ -214,12 +213,11 @@ class AbstractEvaluator(object):
         num_run = str(self.num_run).zfill(5)
         if isinstance(loss, dict):
             loss_ = loss
-            loss = loss_[self.D.info['metric']]
+            loss = loss_[self.metric.name]
         else:
             loss_ = {}
-        additional_run_info = ';'.join(['%s: %s' %
-                                        (METRIC_TO_STRING[metric] if metric in METRIC_TO_STRING else metric, value)
-                                        for metric, value in loss_.items()])
+        additional_run_info = ';'.join(['%s: %s' % (metric_name, value)
+                                        for metric_name, value in loss_.items()])
         additional_run_info += ';' + 'duration: ' + str(self.duration)
         additional_run_info += ';' + 'num_run:' + num_run
 
@@ -306,7 +304,7 @@ class AbstractEvaluator(object):
         return Y_pred
 
     def _ensure_prediction_array_sizes(self, prediction, Y_train):
-        num_classes = self.D.info['label_num']
+        num_classes = self.datamanager.info['label_num']
 
         if self.task_type == MULTICLASS_CLASSIFICATION and \
                 prediction.shape[1] < num_classes:

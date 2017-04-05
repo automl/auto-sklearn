@@ -17,10 +17,11 @@ from smac.stats.stats import Stats
 from sklearn.grid_search import _CVScoreTuple
 
 from autosklearn.constants import *
+from autosklearn.metrics import Scorer
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
-from autosklearn.evaluation import calculate_score
+from autosklearn.metrics import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline
 from autosklearn.ensemble_builder import EnsembleBuilder
@@ -117,7 +118,7 @@ class AutoML(BaseEstimator):
 
     def fit(self, X, y,
             task=MULTICLASS_CLASSIFICATION,
-            metric='acc_metric',
+            metric=None,
             feat_type=None,
             dataset_name=None):
         if not self._shared_mode:
@@ -143,8 +144,11 @@ class AutoML(BaseEstimator):
 
         self._logger = self._get_logger(dataset_name)
 
-        if isinstance(metric, str):
-            metric = STRING_TO_METRIC[metric]
+        if metric is None:
+            raise ValueError('No metric given.')
+        if not isinstance(metric, Scorer):
+            raise ValueError('Metric must be instance of '
+                             'autosklearn.metric.Scorer.')
 
         if feat_type is not None and len(feat_type) != X.shape[1]:
             raise ValueError('Array feat_type does not have same number of '
@@ -167,9 +171,9 @@ class AutoML(BaseEstimator):
                                             dataset_name=dataset_name,
                                             encode_labels=False)
 
-        return self._fit(loaded_data_manager)
+        return self._fit(loaded_data_manager, metric)
 
-    def fit_automl_dataset(self, dataset):
+    def fit_automl_dataset(self, dataset, metric):
         self._stopwatch = StopWatch()
         self._backend.save_start_time(self._seed)
 
@@ -189,9 +193,9 @@ class AutoML(BaseEstimator):
         for part in loaded_data_manager_str:
             self._logger.debug(part)
 
-        return self._fit(loaded_data_manager)
+        return self._fit(loaded_data_manager, metric)
 
-    def fit_on_datamanager(self, datamanager):
+    def fit_on_datamanager(self, datamanager, metric):
         self._stopwatch = StopWatch()
         self._backend.save_start_time(self._seed)
 
@@ -201,7 +205,7 @@ class AutoML(BaseEstimator):
         self._dataset_name = name
 
         self._logger = self._get_logger(name)
-        self._fit(datamanager)
+        self._fit(datamanager, metric)
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
@@ -247,6 +251,7 @@ class AutoML(BaseEstimator):
                                     initial_num_run=num_run,
                                     logger=self._logger,
                                     stats=stats,
+                                    metric=self._metric,
                                     memory_limit=memory_limit,
                                     disable_file_output=self._disable_evaluator_output,
                                     **self._resampling_strategy_arguments)
@@ -261,7 +266,7 @@ class AutoML(BaseEstimator):
 
         return ta.num_run
 
-    def _fit(self, datamanager):
+    def _fit(self, datamanager, metric):
         # Reset learnt stuff
         self.models_ = None
         self.ensemble_ = None
@@ -304,7 +309,7 @@ class AutoML(BaseEstimator):
                 if not self._shared_mode:
                     raise
 
-        self._metric = datamanager.info['metric']
+        self._metric = metric
         self._task = datamanager.info['task']
         self._label_num = datamanager.info['label_num']
 
@@ -409,6 +414,7 @@ class AutoML(BaseEstimator):
                                     smac_iters=self._max_iter_smac,
                                     seed=self._seed,
                                     metadata_directory=self._metadata_directory,
+                                    metric=self._metric,
                                     resampling_strategy=self._resampling_strategy,
                                     resampling_strategy_args=self._resampling_strategy_arguments,
                                     acquisition_function=self.acquisition_function,
@@ -419,7 +425,8 @@ class AutoML(BaseEstimator):
                                     exclude_preprocessors=self._exclude_preprocessors,
                                     disable_file_output=self._disable_evaluator_output,
                                     configuration_mode=self._configuration_mode)
-            self.runhistory_, self.trajectory_ = _proc_smac.run_smbo()
+            self.runhistory_, self.trajectory_, self.fANOVA_input_ = \
+                _proc_smac.run_smbo()
             trajectory_filename = os.path.join(
                 self._backend.get_smac_output_directory(self._seed),
                 'trajectory.json')
@@ -625,9 +632,11 @@ class AutoML(BaseEstimator):
         # fix: Consider only index 1 of second dimension
         # Don't know if the reshaping should be done there or in calculate_score
         prediction = self.predict(X)
-        return calculate_score(y, prediction, self._task,
-                               self._metric, self._label_num,
-                               logger=self._logger)
+        return calculate_score(solution=y,
+                               prediction=prediction,
+                               task_type=self._task,
+                               metric=self._metric,
+                               all_scoring_functions=False)
 
     @property
     def grid_scores_(self):
@@ -748,7 +757,7 @@ class AutoML(BaseEstimator):
         sio = io.StringIO()
         sio.write('auto-sklearn results:\n')
         sio.write('  Dataset name: %s\n' % self._dataset_name)
-        sio.write('  Metric: %s\n' % METRIC_TO_STRING[self._metric])
+        sio.write('  Metric: %s\n' % self._metric)
         idx_best_run = np.argmax(cv_results['mean_test_score'])
         best_score = cv_results['mean_test_score'][idx_best_run]
         sio.write('  Best validation score: %f\n' % best_score)
@@ -765,7 +774,6 @@ class AutoML(BaseEstimator):
         sio.write('  Number of target algorithms that exceeded the time '
                   'limit: %d\n' % num_memout)
         return sio.getvalue()
-
 
     def show_models(self):
         if self.models_ is None or len(self.models_) == 0 or \
