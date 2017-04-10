@@ -1,9 +1,5 @@
 import queue
 
-from autosklearn.constants import *
-from autosklearn.metrics import sanitize_array, CLASSIFICATION_METRICS, \
-    REGRESSION_METRICS
-
 
 __all__ = [
     'get_last_result'
@@ -18,4 +14,7 @@ def get_last_result(queue_):
         except queue.Empty:
             break
         stack.append(rval)
-    return stack.pop()
+    if len(stack) == 0:
+        raise queue.Empty
+    else:
+        return stack.pop()

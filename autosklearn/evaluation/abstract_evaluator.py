@@ -205,7 +205,7 @@ class AbstractEvaluator(object):
             loss_, additional_run_info_ = self.file_output(
                 opt_pred, valid_pred, test_pred)
         else:
-            loss_, additional_run_info_ = None, None
+            loss_, additional_run_info_ = None, {}
 
         if loss_ is not None:
             return self.duration, loss_, self.seed, additional_run_info_
@@ -216,17 +216,19 @@ class AbstractEvaluator(object):
             loss = loss_[self.metric.name]
         else:
             loss_ = {}
-        additional_run_info = ';'.join(['%s: %s' % (metric_name, value)
-                                        for metric_name, value in loss_.items()])
-        additional_run_info += ';' + 'duration: ' + str(self.duration)
-        additional_run_info += ';' + 'num_run:' + num_run
 
-        self.queue.put((self.duration, loss, self.seed, additional_run_info,
-                        StatusType.SUCCESS))
+        additional_run_info = {metric_name: value for metric_name, value in
+                               loss_.items()}
+        additional_run_info['duration'] = self.duration
+        additional_run_info['num_run'] = self.num_run
+
+        self.queue.put({'loss': loss,
+                        'additional_run_info': additional_run_info,
+                        'status': StatusType.SUCCESS})
 
     def file_output(self, Y_optimization_pred, Y_valid_pred, Y_test_pred):
         if self.disable_file_output is True:
-            return None, None
+            return None, {}
 
         seed = self.seed
 
@@ -234,15 +236,18 @@ class AbstractEvaluator(object):
         # obviously no output should be saved.
         if self.Y_optimization is not None and \
                 self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
-            return 1.0, "Targets %s and prediction %s don't have the same " \
-            "length. Probably training didn't finish" % (
-                self.Y_optimization.shape, Y_optimization_pred.shape)
+            return 1.0, {'error': "Targets %s and prediction %s don't have "
+                                  "the same length. Probably training didn't "
+                                  "finish" % (self.Y_optimization.shape,
+                                              Y_optimization_pred.shape)}
 
         if not np.all(np.isfinite(Y_optimization_pred)):
-            return 1.0, 'Model predictions for optimization set contains NaNs.'
+            return 1.0, {'error': 'Model predictions for optimization set ' \
+                                  'contains NaNs.'}
         for y, s in [[Y_valid_pred, 'validation'], [Y_test_pred, 'test']]:
             if y is not None and not np.all(np.isfinite(y)):
-                return 1.0, 'Model predictions for %s set contains NaNs.' % s
+                return 1.0, {'error': 'Model predictions for %s set contains '
+                                      'NaNs.' % s}
 
         num_run = str(self.num_run).zfill(5)
 

@@ -12,8 +12,9 @@ import numpy as np
 from sklearn.cross_validation import StratifiedKFold, ShuffleSplit
 from smac.tae.execute_ta_run import StatusType
 
-from autosklearn.evaluation import get_last_result, TrainEvaluator, eval_holdout, \
-    eval_iterative_holdout, eval_cv, eval_partial_cv
+from autosklearn.evaluation.util import get_last_result
+from autosklearn.evaluation.train_evaluator import TrainEvaluator, \
+    eval_holdout, eval_iterative_holdout, eval_cv, eval_partial_cv
 from autosklearn.util import backend
 from autosklearn.util.pipeline import get_configuration_space
 from autosklearn.constants import *
@@ -60,7 +61,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator.fit_predict_and_loss()
 
-        duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
+        rval = evaluator.queue.get(timeout=1)
+        result = rval['loss']
+        self.assertEqual(len(rval), 3)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(evaluator.file_output.call_count, 1)
@@ -125,7 +128,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(evaluator.file_output.call_count, 5)
 
         for i in range(1, 6):
-            duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
+            rval = evaluator.queue.get(timeout=1)
+            result = rval['loss']
+            self.assertEqual(len(rval), 3)
             self.assertAlmostEqual(result, 1.0 - (0.2 * i))
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
@@ -193,8 +198,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(evaluator.file_output.call_count, 2)
 
         for i in range(1, 3):
-            duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
-            self.assertAlmostEqual(result, 1.0 - (0.2 * i))
+            rval = evaluator.queue.get(timeout=1)
+            self.assertAlmostEqual(rval['loss'], 1.0 - (0.2 * i))
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(pipeline_mock.iterative_fit.call_count, 2)
@@ -237,8 +242,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.fit_predict_and_loss(iterative=True)
         self.assertEqual(evaluator.file_output.call_count, 1)
 
-        duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
-        self.assertAlmostEqual(result, 0.85714285714285721)
+        rval = evaluator.queue.get(timeout=1)
+        self.assertAlmostEqual(rval['loss'], 0.85714285714285721)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(pipeline_mock.iterative_fit.call_count, 0)
@@ -276,7 +281,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator.fit_predict_and_loss()
 
-        duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
+        rval = evaluator.queue.get(timeout=1)
+        result = rval['loss']
+        self.assertEqual(len(rval), 3)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(evaluator.file_output.call_count, 1)
@@ -320,11 +327,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator.partial_fit_predict_and_loss(1)
 
-        duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
+        rval = evaluator.queue.get(timeout=1)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(evaluator.file_output.call_count, 0)
-        self.assertEqual(result, 0.46666666666666667)
+        self.assertEqual(rval['loss'], 0.46666666666666667)
         self.assertEqual(pipeline_mock.fit.call_count, 1)
         self.assertEqual(pipeline_mock.predict_proba.call_count, 3)
         # The model prior to fitting is saved, this cannot be directly tested
@@ -384,8 +391,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(evaluator.file_output.call_count, 0)
 
         for i in range(1, 6):
-            duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
-            self.assertAlmostEqual(result, 1.0 - (0.2 * i))
+            rval = evaluator.queue.get(timeout=1)
+            self.assertAlmostEqual(rval['loss'], 1.0 - (0.2 * i))
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(pipeline_mock.iterative_fit.call_count, 5)
@@ -433,11 +440,14 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data['Y_valid'][0] = np.NaN
         rval = evaluator.file_output(D.data['Y_train'], D.data['Y_valid'],
                                      D.data['Y_test'])
-        self.assertEqual(rval, (1.0, 'Model predictions for validation set contains NaNs.'))
+        self.assertEqual(rval, (1.0, {'error': 'Model predictions for validation '
+                                               'set contains NaNs.'}))
         D.data['Y_train'][0] = np.NaN
         rval = evaluator.file_output(D.data['Y_train'], D.data['Y_valid'],
                                      D.data['Y_test'])
-        self.assertEqual(rval, (1.0, 'Model predictions for optimization set contains NaNs.'))
+        self.assertEqual(rval, (1.0, {'error': 'Model predictions for '
+                                               'optimization set contains '
+                                               'NaNs.'}))
 
     @unittest.mock.patch('autosklearn.util.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
@@ -571,8 +581,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                            metric=metric_lookup[D.info['task']])
 
                 evaluator.fit_predict_and_loss()
-                duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
-                self.assertTrue(np.isfinite(result))
+                rval = evaluator.queue.get(timeout=1)
+                self.assertTrue(np.isfinite(rval['loss']))
 
 
 class FunctionsTest(unittest.TestCase):
@@ -600,9 +610,9 @@ class FunctionsTest(unittest.TestCase):
                      disable_file_output=False, instance=self.dataset_name,
                      metric=accuracy)
         info = get_last_result(self.queue)
-        self.assertAlmostEqual(info[1], 0.060606060606060552, places=3)
-        self.assertEqual(info[2], 1)
-        self.assertNotIn('bac_metric', info[3])
+        self.assertAlmostEqual(info['loss'], 0.060606060606060552, places=3)
+        self.assertEqual(info['status'], StatusType.SUCCESS)
+        self.assertNotIn('bac_metric', info['additional_run_info'])
 
     def test_eval_holdout_all_loss_functions(self):
         kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
@@ -612,7 +622,7 @@ class FunctionsTest(unittest.TestCase):
                      output_y_hat_optimization=True, include=None, exclude=None,
                      disable_file_output=False, instance=self.dataset_name,
                      metric=accuracy)
-        info = get_last_result(self.queue)
+        rval = get_last_result(self.queue)
 
         fixture = {'accuracy': 0.0606060606061,
                    'balanced_accuracy': 0.0636363636364,
@@ -632,15 +642,16 @@ class FunctionsTest(unittest.TestCase):
                    'recall_weighted': 0.0606060606061,
                    'num_run': 1}
 
-        rval = {i.split(':')[0]: float(i.split(':')[1]) for i in info[3].split(';')}
+        additional_run_info = rval['additional_run_info']
         for key, value in fixture.items():
-            self.assertAlmostEqual(rval[key], fixture[key], msg=key)
-        self.assertIn('duration', rval)
-        self.assertEqual(len(rval), len(fixture) + 1,
-                         msg=sorted(rval.items()))
+            self.assertAlmostEqual(additional_run_info[key], fixture[key],
+                                   msg=key)
+        self.assertIn('duration', additional_run_info)
+        self.assertEqual(len(additional_run_info), len(fixture) + 1,
+                         msg=sorted(additional_run_info.items()))
 
-        self.assertAlmostEqual(info[1], 0.060606060606060552, places=3)
-        self.assertEqual(info[2], 1)
+        self.assertAlmostEqual(rval['loss'], 0.060606060606060552, places=3)
+        self.assertEqual(rval['status'], StatusType.SUCCESS)
 
     # def test_eval_holdout_on_subset(self):
     #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)
@@ -660,9 +671,9 @@ class FunctionsTest(unittest.TestCase):
                                output_y_hat_optimization=True, include=None,
                                exclude=None, disable_file_output=False,
                                instance=self.dataset_name, metric=accuracy)
-        info = get_last_result(self.queue)
-        self.assertAlmostEqual(info[1], 0.060606060606060552)
-        self.assertEqual(info[2], 1)
+        rval = get_last_result(self.queue)
+        self.assertAlmostEqual(rval['loss'], 0.060606060606060552)
+        self.assertEqual(rval['status'], StatusType.SUCCESS)
 
     # def test_eval_holdout_iterative_fit_on_subset_no_timeout(self):
     #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)
@@ -682,10 +693,10 @@ class FunctionsTest(unittest.TestCase):
                 output_y_hat_optimization=True, include=None, exclude=None,
                 disable_file_output=False, instance=self.dataset_name,
                 metric=accuracy)
-        info = get_last_result(self.queue)
-        self.assertAlmostEqual(info[1], 0.040000000000000036)
-        self.assertEqual(info[2], 1)
-        self.assertNotIn('bac_metric', info[3])
+        rval = get_last_result(self.queue)
+        self.assertAlmostEqual(rval['loss'], 0.040000000000000036)
+        self.assertEqual(rval['status'], StatusType.SUCCESS)
+        self.assertNotIn('bac_metric', rval['additional_run_info'])
 
     def test_eval_cv_all_loss_functions(self):
         cv = StratifiedKFold(y=self.y, shuffle=True, random_state=1)
@@ -695,7 +706,7 @@ class FunctionsTest(unittest.TestCase):
                 output_y_hat_optimization=True, include=None, exclude=None,
                 disable_file_output=False, instance=self.dataset_name,
                 metric=accuracy)
-        info = get_last_result(self.queue)
+        rval = get_last_result(self.queue)
 
         fixture = {'accuracy': 0.04,
                    'balanced_accuracy': 0.042002688172,
@@ -715,15 +726,15 @@ class FunctionsTest(unittest.TestCase):
                    'recall_weighted': 0.04,
                    'num_run': 1}
 
-        rval = {i.split(':')[0]: float(i.split(':')[1]) for i in info[3].split(';')}
+        additional_run_info = rval['additional_run_info']
         for key, value in fixture.items():
-            self.assertAlmostEqual(rval[key], fixture[key], msg=key)
-        self.assertIn('duration', rval)
-        self.assertEqual(len(rval), len(fixture) + 1,
-                         msg=sorted(rval.items()))
+            self.assertAlmostEqual(additional_run_info[key], fixture[key], msg=key)
+        self.assertIn('duration', additional_run_info)
+        self.assertEqual(len(additional_run_info), len(fixture) + 1,
+                         msg=sorted(additional_run_info.items()))
 
-        self.assertAlmostEqual(info[1], 0.040000000000000036)
-        self.assertEqual(info[2], 1)
+        self.assertAlmostEqual(rval['loss'], 0.040000000000000036)
+        self.assertEqual(rval['status'], StatusType.SUCCESS)
 
     # def test_eval_cv_on_subset(self):
     #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)
@@ -753,10 +764,9 @@ class FunctionsTest(unittest.TestCase):
                             output_y_hat_optimization=True, include=None,
                             exclude=None, disable_file_output=False,
                             metric=accuracy)
-            info = get_last_result(self.queue)
-            results.append(info[1])
-            self.assertAlmostEqual(info[1], results[fold])
-            self.assertEqual(info[2], 1)
+            rval = get_last_result(self.queue)
+            self.assertAlmostEqual(rval['loss'], results[fold])
+            self.assertEqual(rval['status'], StatusType.SUCCESS)
 
     # def test_eval_partial_cv_on_subset_no_timeout(self):
     #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)

@@ -258,8 +258,8 @@ class AutoML(BaseEstimator):
         if status == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy predictions.")
         else:
-            self._logger.error('Error creating dummy predictions:%s ',
-                               additional_info)
+            self._logger.error('Error creating dummy predictions: %s ',
+                               str(additional_info))
 
         return ta.num_run
 

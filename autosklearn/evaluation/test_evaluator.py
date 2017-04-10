@@ -29,7 +29,7 @@ class TestEvaluator(AbstractEvaluator):
             all_scoring_functions=all_scoring_functions,
             seed=seed,
             output_y_hat_optimization=False,
-            num_run='-1',
+            num_run=-1,
             subsample=None,
             include=include,
             exclude=exclude,

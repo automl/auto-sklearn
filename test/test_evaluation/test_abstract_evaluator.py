@@ -11,7 +11,7 @@ this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 from evaluation_util import get_multiclass_classification_datamanager, \
     get_regression_datamanager
-from autosklearn.evaluation import AbstractEvaluator
+from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.metrics import accuracy, r2, mean_squared_error
 
 
@@ -38,8 +38,9 @@ class AbstractEvaluatorTest(unittest.TestCase):
         _, loss, _, additional_run_info = ae.finish_up(
             0.1, predictions_ensemble, predictions_valid, predictions_test)
         self.assertEqual(loss, 1.0)
-        self.assertEqual(additional_run_info, 'Model predictions for '
-                                              'optimization set contains NaNs.')
+        self.assertEqual(additional_run_info,
+                         {'error': 'Model predictions for optimization set '
+                                   'contains NaNs.'})
 
         # NaNs in prediction validation
         predictions_ensemble[5, 2] = 0.5
@@ -47,8 +48,9 @@ class AbstractEvaluatorTest(unittest.TestCase):
         _, loss, _, additional_run_info = ae.finish_up(
             0.1, predictions_ensemble, predictions_valid, predictions_test)
         self.assertEqual(loss, 1.0)
-        self.assertEqual(additional_run_info, 'Model predictions for '
-                                              'validation set contains NaNs.')
+        self.assertEqual(additional_run_info,
+                         {'error': 'Model predictions for validation set '
+                                   'contains NaNs.'})
 
         # NaNs in prediction test
         predictions_valid[5, 2] = 0.5
@@ -56,8 +58,9 @@ class AbstractEvaluatorTest(unittest.TestCase):
         _, loss, _, additional_run_info = ae.finish_up(
             0.1, predictions_ensemble, predictions_valid, predictions_test)
         self.assertEqual(loss, 1.0)
-        self.assertEqual(additional_run_info, 'Model predictions for '
-                                              'test set contains NaNs.')
+        self.assertEqual(additional_run_info,
+                         {'error': 'Model predictions for test set contains '
+                                   'NaNs.'})
 
         self.assertEqual(backend_api.save_predictions_as_npy.call_count, 0)
 
@@ -82,7 +85,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
             predictions_ensemble, predictions_valid, predictions_test)
 
         self.assertIsNone(loss_)
-        self.assertIsNone(additional_run_info_)
+        self.assertEqual(additional_run_info_, {})
         # This function is not guarded by a an if statement
         self.assertEqual(backend_mock.save_predictions_as_npy.call_count, 0)
         self.assertEqual(backend_mock.save_model.call_count, 0)

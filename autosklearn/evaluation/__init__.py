@@ -1,22 +1,43 @@
 # -*- encoding: utf-8 -*-
+import functools
 import logging
 import math
 import multiprocessing
+from queue import Empty
+import traceback
 
 import pynisher
 from sklearn.cross_validation import ShuffleSplit, StratifiedShuffleSplit, KFold, \
     StratifiedKFold
-from smac.tae.execute_ta_run import StatusType
+from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException
 from smac.tae.execute_func import AbstractTAFunc
 from ConfigSpace import Configuration
 
-from .abstract_evaluator import *
-from .train_evaluator import *
-from .test_evaluator import *
-from .util import *
+import autosklearn.evaluation.train_evaluator
+import autosklearn.evaluation.test_evaluator
+import autosklearn.evaluation.util
 from autosklearn.constants import CLASSIFICATION_TASKS, MULTILABEL_CLASSIFICATION
 
 WORST_POSSIBLE_RESULT = 1.0
+
+
+def fit_predict_try_except_decorator(ta, queue, **kwargs):
+
+    try:
+        return ta(queue=queue, **kwargs)
+    except Exception as e:
+        if isinstance(e, MemoryError):
+            # Re-raise the memory error to let the pynisher handle that
+            # correctly
+            raise e
+
+        exception_traceback = traceback.format_exc()
+        error_message = repr(e)
+
+        queue.put({'loss': WORST_POSSIBLE_RESULT,
+                   'additional_run_info': {'traceback': exception_traceback,
+                                           'error': error_message},
+                   'status': StatusType.CRASHED})
 
 
 # TODO potentially log all inputs to this class to pickle them in order to do
@@ -31,22 +52,24 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                  **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
-            eval_function = eval_holdout
+            eval_function = autosklearn.evaluation.train_evaluator.eval_holdout
         elif resampling_strategy == 'holdout-iterative-fit':
-            eval_function = eval_iterative_holdout
+            eval_function = autosklearn.evaluation.train_evaluator.eval_iterative_holdout
         elif resampling_strategy == 'cv':
-            eval_function = eval_cv
+            eval_function = autosklearn.evaluation.train_evaluator.eval_cv
         elif resampling_strategy == 'partial-cv':
-            eval_function = eval_partial_cv
+            eval_function = autosklearn.evaluation.train_evaluator.eval_partial_cv
         elif resampling_strategy == 'partial-cv-iterative-fit':
-            eval_function = eval_partial_cv_iterative
+            eval_function = autosklearn.evaluation.train_evaluator.eval_partial_cv_iterative
         elif resampling_strategy == 'test':
-            eval_function = eval_t
+            eval_function = autosklearn.evaluation.test_evaluator.eval_t
             output_y_hat_optimization = False
         else:
             raise ValueError('Unknown resampling strategy %s' %
                              resampling_strategy)
 
+        eval_function = functools.partial(fit_predict_try_except_decorator,
+                                          ta=eval_function)
         super().__init__(ta=eval_function, stats=stats, runhistory=runhistory,
                          run_obj=run_obj, par_factor=par_factor)
 
@@ -110,6 +133,9 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         if remaining_time - 5 < cutoff:
             cutoff = int(remaining_time - 5)
 
+        if cutoff <= 0:
+            raise BudgetExhaustedException()
+
         return super().start(config=config, instance=instance, cutoff=cutoff,
                              seed=seed, instance_specific=instance_specific,
                              capped=capped)
@@ -156,39 +182,46 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             # the target algorithm wrote something into the queue - then we
             # treat it as a succesful run
             try:
-                info = get_last_result(queue)
-                result = info[1]
-                additional_run_info = info[3]
+                info = autosklearn.evaluation.util.get_last_result(queue)
+                result = info['loss']
+                status = info['status']
+                additional_run_info = info['additional_run_info']
+                additional_run_info['info'] = 'Run stopped because of timeout.'
 
-                if obj.exit_status == pynisher.TimeoutException and result is not None:
-                    status = StatusType.SUCCESS
+                if status == StatusType.SUCCESS:
                     cost = result
                 else:
-                    status = StatusType.CRASHED
                     cost = WORST_POSSIBLE_RESULT
-            except Exception:
+
+            except Empty:
                 status = StatusType.TIMEOUT
                 cost = WORST_POSSIBLE_RESULT
-                additional_run_info = 'Timeout'
+                additional_run_info = {'error': 'Timeout'}
 
         elif obj.exit_status is pynisher.MemorylimitException:
             status = StatusType.MEMOUT
             cost = WORST_POSSIBLE_RESULT
-            additional_run_info = 'Memout'
+            additional_run_info = {'error': 'Memout (used more than %d MB).' %
+                                            self.memory_limit}
+
         else:
             try:
-                info = get_last_result(queue)
-                result = info[1]
-                additional_run_info = info[3]
+                info = autosklearn.evaluation.util.get_last_result(queue)
+                result = info['loss']
+                status = info['status']
+                additional_run_info = info['additional_run_info']
 
-                if obj.exit_status == 0 and result is not None:
-                    status = StatusType.SUCCESS
+                if obj.exit_status == 0:
                     cost = result
                 else:
                     status = StatusType.CRASHED
                     cost = WORST_POSSIBLE_RESULT
-            except Exception as e0:
-                additional_run_info = 'Unknown error (%s) %s' % (type(e0), e0)
+                    additional_run_info['info'] = 'Run treated as crashed ' \
+                                                  'because the pynisher exit ' \
+                                                  'status %s is unknown.' % \
+                                                  str(obj.exit_status)
+            except Empty:
+                additional_run_info = {'error': 'Result queue is empty'}
                 status = StatusType.CRASHED
                 cost = WORST_POSSIBLE_RESULT
 

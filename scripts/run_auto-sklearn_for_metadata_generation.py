@@ -111,15 +111,12 @@ for entry in trajectory:
             config=config, instance=None, cutoff=per_run_time_limit)
 
         if status == StatusType.SUCCESS:
-            scores = additional_run_info.split(';')
-            scores = [score.split(':') for score in scores]
-            scores = [(score[0].strip(), score[1].strip()) for score in scores]
-            scores = {score[0]: float(score[1]) for score in scores}
-            assert len(scores) > 1, scores
+            assert len(additional_run_info) > 1, additional_run_info
 
         # print(additional_run_info)
 
-        validated_trajectory.append(list(entry) + [task_id] + [scores])
+        validated_trajectory.append(list(entry) + [task_id] +
+                                    [additional_run_info])
 
 validated_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
                         for entry in validated_trajectory]
