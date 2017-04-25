@@ -14,7 +14,7 @@ Restrict Searchspace
 Instead of using all available estimators, it is possible to restrict
 *auto-sklearn*'s searchspace. The following shows an example of how to exclude
 all preprocessing methods and restrict the configuration space to only
-random forests:
+random forests.
 
 >>> import autosklearn.classification
 >>> automl = autosklearn.classification.AutoSklearnClassifier(include_estimators=["random_forest", ],
@@ -23,17 +23,18 @@ random forests:
 >>> cls.fit(X_train, y_train)
 >>> predictions = cls.predict(X_test, y_test)
 
-Please have a look at the source code for a full list (in `autosklearn/pipeline/components/`):
+**Note:** The strings used to identify estimators and preprocessors are the filenames without *.py*.
+
+For a full list please have a look at the source code (in `autosklearn/pipeline/components/`):
 
   * `Classifiers <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/classification>`_
-  * `Regressors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/classification>`_
-  * `Preprocessors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/classification>`_
+  * `Regressors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/regression>`_
+  * `Preprocessors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/feature_preprocessing>`_
 
 Resampling strategies
 *********************
 
-Examples for using holdout and cross-validation can be found in the example
-directory of *auto-sklearn*.
+Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <https://github.com/automl/auto-sklearn/tree/master/example>`_
 
 Parallel computation
 ********************
