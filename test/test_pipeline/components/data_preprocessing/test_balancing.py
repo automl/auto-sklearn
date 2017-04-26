@@ -72,11 +72,11 @@ class BalancingComponentTest(unittest.TestCase):
                  ('decision_tree', DecisionTree, 0.780, 0.643),
                  ('extra_trees', ExtraTreesClassifier, 0.75, 0.800),
                  ('gradient_boosting', GradientBoostingClassifier,
-                    0.789, 0.762),
+                  0.789, 0.762),
                  ('random_forest', RandomForest, 0.75, 0.821),
                  ('libsvm_svc', LibSVM_SVC, 0.769, 0.706),
                  ('liblinear_svc', LibLinear_SVC, 0.762, 0.72),
-                 ('sgd', SGD, 0.696, 0.623)
+                 ('sgd', SGD, 0.704, 0.667)
                 ]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
@@ -121,9 +121,9 @@ class BalancingComponentTest(unittest.TestCase):
 
         for name, pre, acc_no_weighting, acc_weighting in \
                 [('extra_trees_preproc_for_classification',
-                    ExtraTreesPreprocessorClassification, 0.737, 0.644),
+                    ExtraTreesPreprocessorClassification, 0.691, 0.692),
                  ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
-                    0.696, 0.643)]:
+                    0.692, 0.590)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
                 data_ = copy.copy(data)
@@ -144,7 +144,7 @@ class BalancingComponentTest(unittest.TestCase):
                 predictions = predictor.predict(X_test)
                 self.assertAlmostEqual(
                     sklearn.metrics.f1_score(predictions, Y_test), acc,
-                    places=3)
+                    places=3, msg=(name, strategy))
 
                 # pre_transform and fit_estimator
                 data_ = copy.copy(data)

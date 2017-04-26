@@ -44,7 +44,6 @@ class SGD(AutoSklearnRegressionAlgorithm):
             self.scaler = None
 
         if self.estimator is None:
-            self._iterations = 0
 
             self.alpha = float(self.alpha)
             self.fit_intercept = self.fit_intercept == 'True'
@@ -61,7 +60,7 @@ class SGD(AutoSklearnRegressionAlgorithm):
                                           penalty=self.penalty,
                                           alpha=self.alpha,
                                           fit_intercept=self.fit_intercept,
-                                          n_iter=self.n_iter,
+                                          n_iter=n_iter,
                                           learning_rate=self.learning_rate,
                                           l1_ratio=self.l1_ratio,
                                           epsilon=self.epsilon,
@@ -73,18 +72,24 @@ class SGD(AutoSklearnRegressionAlgorithm):
 
             self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
             self.scaler.fit(y.reshape((-1, 1)))
+        else:
+            self.estimator.n_iter += n_iter
 
         Y_scaled = self.scaler.transform(y.reshape((-1, 1))).ravel()
-
-        self.estimator.n_iter = n_iter
-        self._iterations += n_iter
         self.estimator.partial_fit(X, Y_scaled)
+
+        if self.estimator.n_iter >= self.n_iter:
+            self.fully_fit_ = True
+
         return self
 
     def configuration_fully_fitted(self):
         if self.estimator is None:
             return False
-        return not self._iterations < self.n_iter
+        elif not hasattr(self, 'fully_fit_'):
+            return False
+        else:
+            return self.fully_fit_
 
     def predict(self, X):
         if self.estimator is None:

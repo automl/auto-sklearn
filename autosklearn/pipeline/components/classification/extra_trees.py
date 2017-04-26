@@ -79,21 +79,25 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
                 float(self.max_features) * (np.log(num_features) + 1))
             # Use at most half of the features
             max_features = max(1, min(int(X.shape[1] / 2), max_features))
-            self.estimator = ETC(
-                n_estimators=0, criterion=self.criterion,
-                max_depth=self.max_depth, min_samples_split=self.min_samples_split,
-                min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,
-                max_features=max_features, max_leaf_nodes=self.max_leaf_nodes,
-                oob_score=self.oob_score, n_jobs=self.n_jobs, verbose=self.verbose,
-                random_state=self.random_state,
-                class_weight=self.class_weight,
-                warm_start=True
-            )
+            self.estimator = ETC(n_estimators=n_iter,
+                                 criterion=self.criterion,
+                                 max_depth=self.max_depth,
+                                 min_samples_split=self.min_samples_split,
+                                 min_samples_leaf=self.min_samples_leaf,
+                                 bootstrap=self.bootstrap,
+                                 max_features=max_features,
+                                 max_leaf_nodes=self.max_leaf_nodes,
+                                 oob_score=self.oob_score,
+                                 n_jobs=self.n_jobs,
+                                 verbose=self.verbose,
+                                 random_state=self.random_state,
+                                 class_weight=self.class_weight,
+                                 warm_start=True)
 
-        tmp = self.estimator  # TODO copy ?
-        tmp.n_estimators += n_iter
-        tmp.fit(X, y, sample_weight=sample_weight)
-        self.estimator = tmp
+        else:
+            self.estimator.n_estimators += n_iter
+
+        self.estimator.fit(X, y, sample_weight=sample_weight)
         return self
 
     def configuration_fully_fitted(self):

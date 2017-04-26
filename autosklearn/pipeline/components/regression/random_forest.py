@@ -65,7 +65,7 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
                 self.max_leaf_nodes = None
 
             self.estimator = RandomForestRegressor(
-                n_estimators=0,
+                n_estimators=n_iter,
                 criterion=self.criterion,
                 max_features=max_features,
                 max_depth=self.max_depth,
@@ -77,11 +77,10 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
                 random_state=self.random_state,
                 n_jobs=self.n_jobs,
                 warm_start=True)
+        else:
+            self.estimator.n_estimators += n_iter
 
-        tmp = self.estimator
-        tmp.n_estimators += n_iter
-        tmp.fit(X, y)
-        self.estimator = tmp
+        self.estimator.fit(X, y)
         return self
 
     def configuration_fully_fitted(self):

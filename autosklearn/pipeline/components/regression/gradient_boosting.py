@@ -76,7 +76,7 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
             self.estimator = sklearn.ensemble.GradientBoostingRegressor(
                 loss=self.loss,
                 learning_rate=self.learning_rate,
-                n_estimators=0,
+                n_estimators=n_iter,
                 subsample=self.subsample,
                 min_samples_split=self.min_samples_split,
                 min_samples_leaf=self.min_samples_leaf,
@@ -89,11 +89,10 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
                 verbose=self.verbose,
                 warm_start=True,
             )
+        else:
+            self.estimator.n_estimators += n_iter
 
-        tmp = self.estimator  # TODO copy ?
-        tmp.n_estimators += n_iter
-        tmp.fit(X, y, sample_weight=sample_weight)
-        self.estimator = tmp
+        self.estimator.fit(X, y, sample_weight=sample_weight)
 
         return self
 

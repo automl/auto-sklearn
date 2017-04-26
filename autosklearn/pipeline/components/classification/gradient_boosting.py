@@ -71,7 +71,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             self.estimator = sklearn.ensemble.GradientBoostingClassifier(
                 loss=self.loss,
                 learning_rate=self.learning_rate,
-                n_estimators=0,
+                n_estimators=n_iter,
                 subsample=self.subsample,
                 min_samples_split=self.min_samples_split,
                 min_samples_leaf=self.min_samples_leaf,
@@ -85,7 +85,9 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 warm_start=True,
             )
 
-        self.estimator.n_estimators += n_iter
+        else:
+            self.estimator.n_estimators += n_iter
+
         self.estimator.fit(X, y, sample_weight=sample_weight)
 
         # Apparently this if is necessary
