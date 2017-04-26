@@ -76,7 +76,7 @@ class BalancingComponentTest(unittest.TestCase):
                  ('random_forest', RandomForest, 0.75, 0.821),
                  ('libsvm_svc', LibSVM_SVC, 0.769, 0.706),
                  ('liblinear_svc', LibLinear_SVC, 0.762, 0.72),
-                 ('sgd', SGD, 0.739, 0.735)
+                 ('sgd', SGD, 0.696, 0.623)
                 ]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
@@ -121,9 +121,9 @@ class BalancingComponentTest(unittest.TestCase):
 
         for name, pre, acc_no_weighting, acc_weighting in \
                 [('extra_trees_preproc_for_classification',
-                    ExtraTreesPreprocessorClassification, 0.625, 0.634),
+                    ExtraTreesPreprocessorClassification, 0.737, 0.644),
                  ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
-                    0.75, 0.706)]:
+                    0.696, 0.643)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
                 data_ = copy.copy(data)
