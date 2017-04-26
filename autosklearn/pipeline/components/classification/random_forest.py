@@ -44,7 +44,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
 
         if self.estimator is None:
             self.n_estimators = int(self.n_estimators)
-            if self.max_depth == "None":
+            if self.max_depth == "None" or self.max_depth is None:
                 self.max_depth = None
             else:
                 self.max_depth = int(self.max_depth)
@@ -62,7 +62,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
                 self.bootstrap = True
             else:
                 self.bootstrap = False
-            if self.max_leaf_nodes == "None":
+            if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
                 self.max_leaf_nodes = None
 
             # initial fit of only increment trees
