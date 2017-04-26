@@ -98,8 +98,8 @@ class BalancingComponentTest(unittest.TestCase):
                     default, random_state=1, include=include)
                 predictor = classifier.fit(X_train, Y_train)
                 predictions = predictor.predict(X_test)
-                self.assertAlmostEqual(acc,
-                    sklearn.metrics.f1_score(predictions, Y_test),
+                self.assertAlmostEqual(
+                    sklearn.metrics.f1_score(predictions, Y_test), acc,
                     places=3)
 
                 # pre_transform and fit_estimator
@@ -115,10 +115,9 @@ class BalancingComponentTest(unittest.TestCase):
                 Xt, fit_params = classifier.pre_transform(X_train, Y_train)
                 classifier.fit_estimator(Xt, Y_train, **fit_params)
                 predictions = classifier.predict(X_test)
-                self.assertAlmostEqual(acc,
-                                       sklearn.metrics.f1_score(
-                                           predictions, Y_test),
-                                       places=3)
+                self.assertAlmostEqual(
+                    sklearn.metrics.f1_score(predictions, Y_test), acc,
+                    places=3)
 
         for name, pre, acc_no_weighting, acc_weighting in \
                 [('extra_trees_preproc_for_classification',
@@ -143,10 +142,9 @@ class BalancingComponentTest(unittest.TestCase):
                 classifier.set_hyperparameters(default)
                 predictor = classifier.fit(X_train, Y_train)
                 predictions = predictor.predict(X_test)
-                self.assertAlmostEqual(acc,
-                                       sklearn.metrics.f1_score(
-                                           predictions, Y_test),
-                                       places=3)
+                self.assertAlmostEqual(
+                    sklearn.metrics.f1_score(predictions, Y_test), acc,
+                    places=3)
 
                 # pre_transform and fit_estimator
                 data_ = copy.copy(data)
@@ -161,7 +159,6 @@ class BalancingComponentTest(unittest.TestCase):
                 Xt, fit_params = classifier.pre_transform(X_train, Y_train)
                 classifier.fit_estimator(Xt, Y_train, **fit_params)
                 predictions = classifier.predict(X_test)
-                self.assertAlmostEqual(acc,
-                                       sklearn.metrics.f1_score(
-                                           predictions, Y_test),
-                                       places=3)
+                self.assertAlmostEqual(
+                    sklearn.metrics.f1_score(predictions, Y_test), acc,
+                    places=3)

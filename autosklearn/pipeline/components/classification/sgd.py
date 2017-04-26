@@ -30,6 +30,8 @@ class SGD(AutoSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None):
+        self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight,
+                           refit=True)
         while not self.configuration_fully_fitted():
             self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight)
 
@@ -42,7 +44,6 @@ class SGD(AutoSklearnClassificationAlgorithm):
             self.estimator = None
 
         if self.estimator is None:
-            self._iterations = 0
 
             self.alpha = float(self.alpha)
             self.fit_intercept = self.fit_intercept == 'True'
@@ -67,13 +68,13 @@ class SGD(AutoSklearnClassificationAlgorithm):
                                            average=self.average,
                                            random_state=self.random_state,)
 
-        self.estimator.n_iter = n_iter
+        self.estimator.n_iter += n_iter
         self.estimator.partial_fit(X, y, classes=np.unique(y),
                                    sample_weight=sample_weight)
 
-        if self._iterations >= self.n_iter:
+        if self.estimator.n_iter >= self.n_iter:
             self.fully_fit_ = True
-        self._iterations += n_iter
+
         return self
 
     def configuration_fully_fitted(self):

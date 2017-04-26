@@ -32,10 +32,8 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.fully_fit_ = False
 
     def fit(self, X, y, sample_weight=None, refit=False):
-        if self.estimator is None or refit:
-            self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight,
-                               refit=refit)
-
+        self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight,
+                           refit=True)
         while not self.configuration_fully_fitted():
             self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight)
         return self
@@ -87,10 +85,9 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 warm_start=True,
             )
 
-        tmp = self.estimator  # TODO copy ?
-        tmp.n_estimators += n_iter
-        tmp.fit(X, y, sample_weight=sample_weight)
-        self.estimator = tmp
+        self.estimator.n_estimators += n_iter
+        self.estimator.fit(X, y, sample_weight=sample_weight)
+
         # Apparently this if is necessary
         if self.estimator.n_estimators >= self.n_estimators:
             self.fully_fit_ = True

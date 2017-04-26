@@ -28,12 +28,11 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
         self.n_jobs = n_jobs
         self.estimator = None
 
-    def fit(self, X, y, sample_weight=None, refit=False):
-        if self.estimator is None or refit:
-            self.iterative_fit(X, y, n_iter=1, refit=refit)
-
+    def fit(self, X, y, sample_weight=None):
+        self.iterative_fit(X, y, n_iter=1, refit=True)
         while not self.configuration_fully_fitted():
             self.iterative_fit(X, y, n_iter=1)
+
         return self
 
     def iterative_fit(self, X, y, n_iter=1, refit=False):

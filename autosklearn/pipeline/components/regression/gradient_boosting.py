@@ -33,12 +33,11 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None, refit=False):
-        if self.estimator is None or refit:
-            self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight,
-                               refit=refit)
-
+        self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight,
+                           refit=True)
         while not self.configuration_fully_fitted():
             self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight)
+
         return self
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):

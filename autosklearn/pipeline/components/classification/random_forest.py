@@ -16,7 +16,6 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
                  min_weight_fraction_leaf, bootstrap, max_leaf_nodes,
                  random_state=None, n_jobs=1, class_weight=None):
         self.n_estimators = n_estimators
-        self.estimator_increment = 10
         self.criterion = criterion
         self.max_features = max_features
         self.max_depth = max_depth
@@ -31,10 +30,8 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None, refit=False):
-        if self.estimator is None or refit:
-            self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight,
-                               refit=refit)
-
+        self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight,
+                           refit=True)
         while not self.configuration_fully_fitted():
             self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight)
         return self
