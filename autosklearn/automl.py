@@ -473,11 +473,14 @@ class AutoML(BaseEstimator):
                             warnings.showwarning = send_warnings_to_log
                             model.fit(X.copy(), y.copy())
                         break
-                    except ValueError:
+                    except ValueError as e:
                         indices = list(range(X.shape[0]))
                         random_state.shuffle(indices)
                         X = X[indices]
                         y = y[indices]
+
+                        if i == 9:
+                            raise e
 
         self._can_predict = True
         return self

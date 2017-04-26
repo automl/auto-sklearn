@@ -446,21 +446,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(84, cls_predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
-        # Multilabel
-        X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
-        Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
-                                 for y in Y_train]))
-        cls.fit(X_train, Y_train)
-        X_test_ = X_test.copy()
-        prediction_ = cls.predict_proba(X_test_)
-        # The object behind the last step in the pipeline
-        cls_predict = unittest.mock.Mock(wraps=cls.steps[-1][1].predict_proba)
-        cls.steps[-1][-1].predict_proba = cls_predict
-        prediction = cls.predict_proba(X_test, batch_size=20)
-        self.assertEqual((1647, 10), prediction.shape)
-        self.assertEqual(84, cls_predict.call_count)
-        assert_array_almost_equal(prediction_, prediction)
-
     def test_predict_batched_sparse(self):
         cls = SimpleClassificationPipeline(dataset_properties={'sparse': True},
                                            include={'classifier': ['sgd']})
@@ -468,22 +453,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         # Multiclass
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                        make_sparse=True)
-        cls.fit(X_train, Y_train)
-        X_test_ = X_test.copy()
-        prediction_ = cls.predict_proba(X_test_)
-        # The object behind the last step in the pipeline
-        cls_predict = unittest.mock.Mock(wraps=cls.steps[-1][1].predict_proba)
-        cls.steps[-1][-1].predict_proba = cls_predict
-        prediction = cls.predict_proba(X_test, batch_size=20)
-        self.assertEqual((1647, 10), prediction.shape)
-        self.assertEqual(84, cls_predict.call_count)
-        assert_array_almost_equal(prediction_, prediction)
-
-        # Multilabel
-        X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
-                                                       make_sparse=True)
-        Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
-                                 for y in Y_train]))
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)
