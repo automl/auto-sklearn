@@ -72,7 +72,7 @@ class FunctionsTest(unittest.TestCase):
         self.tmp_dir = os.path.join(os.path.dirname(__file__),
                                     '.test_cv_functions')
         self.backend = unittest.mock.Mock(spec=Backend)
-        self.dataset_name = json.dumps({'dataset_name': 'test'})
+        self.dataset_name = json.dumps({'task_id': 'test'})
 
     def tearDown(self):
         try:

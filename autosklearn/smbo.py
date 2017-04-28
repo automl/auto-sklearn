@@ -505,11 +505,11 @@ class AutoMLSMBO(object):
         if self.resampling_strategy in ['partial-cv',
                                         'partial-cv-iterative-fit']:
             num_folds = self.resampling_strategy_args['folds']
-            instances = [[json.dumps({'dataset_name': self.dataset_name,
+            instances = [[json.dumps({'task_id': self.dataset_name,
                                       'fold': fold_number})]
                          for fold_number in range(num_folds)]
         else:
-            instances = [[json.dumps({'dataset_name': self.dataset_name})]]
+            instances = [[json.dumps({'task_id': self.dataset_name})]]
 
         startup_time = self.watcher.wall_elapsed(self.dataset_name)
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
@@ -754,7 +754,7 @@ class AutoMLSMBO(object):
         next_configs_tmp = smac.solver.choose_next(
             X_cfg, Y_cfg,
             num_configurations_by_local_search=10,
-            num_configurations_by_random_search_sorted=100)
+            num_configurations_by_random_search_sorted=500)
 
         challengers.extend(next_configs_tmp)
 

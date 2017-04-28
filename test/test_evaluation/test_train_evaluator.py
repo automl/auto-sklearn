@@ -599,7 +599,7 @@ class FunctionsTest(unittest.TestCase):
         self.backend = unittest.mock.Mock()
         self.backend.get_model_dir.return_value = 'udiaetzrpduaeirdaetr'
         self.backend.output_directory = 'duapdbaetpdbe'
-        self.dataset_name = json.dumps({'dataset_name': 'test'})
+        self.dataset_name = json.dumps({'task_id': 'test'})
 
     def test_eval_holdout(self):
         kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
@@ -756,7 +756,7 @@ class FunctionsTest(unittest.TestCase):
                    0.10526315789473684,
                    0.0]
         for fold in range(5):
-            instance = json.dumps({'dataset_name': 'data', 'fold': fold})
+            instance = json.dumps({'task_id': 'data', 'fold': fold})
             eval_partial_cv(queue=self.queue, config=self.configuration,
                             datamanager=self.data, backend=self.backend, seed=1,
                             num_run=1, instance=instance, cv=cv,

@@ -8,7 +8,7 @@ numpy>=1.9,<1.12
 scikit-learn==0.17.1
 smac==0.4.0
 lockfile>=0.10
-ConfigSpace>=0.3.1,<0.4
+ConfigSpace>=0.3.3,<0.4
 pyrfr==0.2.0
 xgboost==0.4a30
 '''

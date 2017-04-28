@@ -26,7 +26,7 @@ requirements = [
     "liac-arff",
     "pandas",
     "xgboost==0.4a30",
-    "ConfigSpace>=0.3.1,<0.4",
+    "ConfigSpace>=0.3.3,<0.4",
     "pynisher>=0.4",
     "pyrfr",
     "smac==0.4.0"
