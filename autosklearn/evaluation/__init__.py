@@ -37,7 +37,8 @@ def fit_predict_try_except_decorator(ta, queue, **kwargs):
         queue.put({'loss': WORST_POSSIBLE_RESULT,
                    'additional_run_info': {'traceback': exception_traceback,
                                            'error': error_message},
-                   'status': StatusType.CRASHED})
+                   'status': StatusType.CRASHED,
+                   'final_queue_element': True})
 
 
 # TODO potentially log all inputs to this class to pickle them in order to do

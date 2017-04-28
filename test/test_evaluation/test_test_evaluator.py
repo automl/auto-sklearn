@@ -57,7 +57,7 @@ class TestEvaluator_Test(BaseEvaluatorTest, unittest.TestCase):
                                           metric=metric_lookup[D.info['task']])
 
                 evaluator.fit_predict_and_loss()
-                rval = evaluator.queue.get(timeout=1)
+                rval = get_last_result(evaluator.queue)
                 self.assertEqual(len(rval), 3)
                 self.assertTrue(np.isfinite(rval['loss']))
 

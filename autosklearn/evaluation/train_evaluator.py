@@ -121,7 +121,7 @@ class TrainEvaluator(AbstractEvaluator):
                 self._added_empty_model = True
 
             self.finish_up(loss, Y_optimization_pred, Y_valid_pred, Y_test_pred,
-                           file_output=True)
+                           file_output=True, final_call=True)
 
     def partial_fit_predict_and_loss(self, fold, iterative=False):
         if fold > self.cv_folds:
@@ -153,7 +153,7 @@ class TrainEvaluator(AbstractEvaluator):
                 self._added_empty_model = True
 
             self.finish_up(loss, opt_pred, valid_pred, test_pred,
-                           file_output=False)
+                           file_output=False, final_call=True)
 
     def _partial_fit_and_predict(self, fold, train_indices, test_indices,
                                  iterative=False):
@@ -186,8 +186,13 @@ class TrainEvaluator(AbstractEvaluator):
 
                     loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
 
+                    if model.configuration_fully_fitted():
+                        final_call = True
+                    else:
+                        final_call = False
                     self.finish_up(loss, Y_optimization_pred, Y_valid_pred,
-                                   Y_test_pred, file_output=file_output)
+                                   Y_test_pred, file_output=file_output,
+                                   final_call=final_call)
                     n_iter *= 2
 
                 return
@@ -205,7 +210,8 @@ class TrainEvaluator(AbstractEvaluator):
                     model=model, train_indices=train_indices, test_indices=test_indices)
                 loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
                 self.finish_up(loss, Y_optimization_pred, Y_valid_pred,
-                               Y_test_pred, file_output=file_output)
+                               Y_test_pred, file_output=file_output,
+                               final_call=True)
                 return
 
         else:

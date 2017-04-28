@@ -190,7 +190,8 @@ class AbstractEvaluator(object):
 
         return err
 
-    def finish_up(self, loss, opt_pred, valid_pred, test_pred, file_output=True):
+    def finish_up(self, loss, opt_pred, valid_pred, test_pred,
+                  file_output=True, final_call=True):
         """This function does everything necessary after the fitting is done:
 
         * predicting
@@ -222,9 +223,13 @@ class AbstractEvaluator(object):
         additional_run_info['duration'] = self.duration
         additional_run_info['num_run'] = self.num_run
 
-        self.queue.put({'loss': loss,
-                        'additional_run_info': additional_run_info,
-                        'status': StatusType.SUCCESS})
+        rval_dict = {'loss': loss,
+                     'additional_run_info': additional_run_info,
+                     'status': StatusType.SUCCESS}
+        if final_call:
+            rval_dict['final_queue_element'] = True
+
+        self.queue.put(rval_dict)
 
     def file_output(self, Y_optimization_pred, Y_valid_pred, Y_test_pred):
         if self.disable_file_output is True:

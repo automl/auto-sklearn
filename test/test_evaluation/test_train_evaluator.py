@@ -61,7 +61,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator.fit_predict_and_loss()
 
-        rval = evaluator.queue.get(timeout=1)
+        rval = get_last_result(evaluator.queue)
         result = rval['loss']
         self.assertEqual(len(rval), 3)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
@@ -90,7 +90,10 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
             def configuration_fully_fitted(self):
                 self.fully_fitted_call_count += 1
-                return self.fully_fitted_call_count > 5
+                # Is called twice as often as call to fit because we also check
+                # if we need to add a special indicator to show that this is the
+                # final call to iterative fit
+                return self.fully_fitted_call_count > 10
 
         Xt_fixture = 'Xt_fixture'
         pipeline_mock.estimator_supports_iterative_fit.return_value = True
@@ -158,9 +161,12 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
             def configuration_fully_fitted(self):
                 self.fully_fitted_call_count += 1
-                if self.fully_fitted_call_count == 3:
+                # Is called twice as often as call to fit because we also check
+                # if we need to add a special indicator to show that this is the
+                # final call to iterative fit
+                if self.fully_fitted_call_count == 5:
                     raise ValueError()
-                return self.fully_fitted_call_count > 5
+                return self.fully_fitted_call_count > 10
 
         Xt_fixture = 'Xt_fixture'
         pipeline_mock.estimator_supports_iterative_fit.return_value = True
@@ -281,7 +287,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator.fit_predict_and_loss()
 
-        rval = evaluator.queue.get(timeout=1)
+        rval = get_last_result(evaluator.queue)
         result = rval['loss']
         self.assertEqual(len(rval), 3)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
@@ -352,7 +358,10 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
             def configuration_fully_fitted(self):
                 self.fully_fitted_call_count += 1
-                return self.fully_fitted_call_count > 5
+                # Is called twice as often as call to fit because we also check
+                # if we need to add a special indicator to show that this is the
+                # final call to iterative fit
+                return self.fully_fitted_call_count > 10
 
         Xt_fixture = 'Xt_fixture'
         pipeline_mock.estimator_supports_iterative_fit.return_value = True
