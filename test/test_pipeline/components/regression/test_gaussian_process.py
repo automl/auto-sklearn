@@ -15,10 +15,10 @@ class GaussianProcessComponentTest(unittest.TestCase):
                                                    dataset='boston')
             # My machine: 0.574913739659292
             # travis-ci: 0.49562471963524557
-            self.assertGreaterEqual(
-                sklearn.metrics.r2_score(y_true=targets, y_pred=predictions),
-                0.4)
             self.assertLessEqual(
+                sklearn.metrics.r2_score(y_true=targets, y_pred=predictions),
+                0.6)
+            self.assertGreaterEqual(
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions),
                 0.4)
 
