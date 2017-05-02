@@ -13,7 +13,7 @@ class GaussianProcessComponentTest(unittest.TestCase):
             # Float32 leads to numeric instabilities
             predictions, targets = _test_regressor(GaussianProcess,
                                                    dataset='boston')
-            self.assertAlmostEqual(0.83362335184173442,
+            self.assertAlmostEqual(0.57491373965929204,
                 sklearn.metrics.r2_score(y_true=targets, y_pred=predictions),
                 places=2)
 
