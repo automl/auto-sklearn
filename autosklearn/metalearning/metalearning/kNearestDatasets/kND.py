@@ -104,6 +104,7 @@ class KNearestDatasets(object):
             k = self.num_datasets
 
         X_train, x = self._scale(self.metafeatures, x)
+        x = x.values.reshape((1, -1))
         self._nearest_neighbors.fit(X_train)
         distances, neighbor_indices = self._nearest_neighbors.kneighbors(
             x, n_neighbors=k, return_distance=True)
@@ -153,7 +154,7 @@ class KNearestDatasets(object):
         return kbest[:k]
 
     def _scale(self, metafeatures, other):
-        assert isinstance(other, pd.Series)
+        assert isinstance(other, pd.Series), type(other)
         assert other.values.dtype == np.float64
         scaled_metafeatures = metafeatures.copy(deep=True)
         other = other.copy(deep=True)

@@ -607,7 +607,7 @@ class ClassEntropy(MetaFeature):
 @metafeatures.define("LandmarkLDA")
 class LandmarkLDA(MetaFeature):
     def _calculate(self, X, y, categorical):
-        import sklearn.lda
+        import sklearn.discriminant_analysis
         if len(y.shape) == 1 or y.shape[1] == 1:
             kf = sklearn.model_selection.StratifiedKFold(n_splits=10)
         else:
