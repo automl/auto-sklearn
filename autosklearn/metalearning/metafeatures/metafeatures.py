@@ -9,7 +9,7 @@ import scipy.sparse
 import sklearn
 # TODO use balanced accuracy!
 import sklearn.metrics
-import sklearn.cross_validation
+import sklearn.model_selection
 from sklearn.utils import check_array
 from sklearn.multiclass import OneVsRestClassifier
 
@@ -609,13 +609,13 @@ class LandmarkLDA(MetaFeature):
     def _calculate(self, X, y, categorical):
         import sklearn.lda
         if len(y.shape) == 1 or y.shape[1] == 1:
-            kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+            kf = sklearn.model_selection.StratifiedKFold(n_splits=10)
         else:
-            kf = sklearn.cross_validation.KFold(y.shape[0], n_folds=10)
+            kf = sklearn.model_selection.KFold(n_splits=10)
 
         accuracy = 0.
         try:
-            for train, test in kf:
+            for train, test in kf.split(X, y):
                 lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
 
                 if len(y.shape) == 1 or y.shape[1] == 1:
@@ -644,12 +644,12 @@ class LandmarkNaiveBayes(MetaFeature):
         import sklearn.naive_bayes
 
         if len(y.shape) == 1 or y.shape[1] == 1:
-            kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+            kf = sklearn.model_selection.StratifiedKFold(n_splits=10)
         else:
-            kf = sklearn.cross_validation.KFold(y.shape[0], n_folds=10)
+            kf = sklearn.model_selection.KFold(n_splits=10)
 
         accuracy = 0.
-        for train, test in kf:
+        for train, test in kf.split(X, y):
             nb = sklearn.naive_bayes.GaussianNB()
 
             if len(y.shape) == 1 or y.shape[1] == 1:
@@ -672,12 +672,12 @@ class LandmarkDecisionTree(MetaFeature):
         import sklearn.tree
 
         if len(y.shape) == 1 or y.shape[1] == 1:
-            kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+            kf = sklearn.model_selection.StratifiedKFold(n_splits=10)
         else:
-            kf = sklearn.cross_validation.KFold(y.shape[0], n_folds=10)
+            kf = sklearn.model_selection.KFold(n_splits=10)
 
         accuracy = 0.
-        for train, test in kf:
+        for train, test in kf.split(X, y):
             random_state = sklearn.utils.check_random_state(42)
             tree = sklearn.tree.DecisionTreeClassifier(random_state=random_state)
 
@@ -706,16 +706,16 @@ class LandmarkDecisionNodeLearner(MetaFeature):
         import sklearn.tree
 
         if len(y.shape) == 1 or y.shape[1] == 1:
-            kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+            kf = sklearn.model_selection.StratifiedKFold(n_splits=10)
         else:
-            kf = sklearn.cross_validation.KFold(y.shape[0], n_folds=10)
+            kf = sklearn.model_selection.KFold(n_splits=10)
 
         accuracy = 0.
-        for train, test in kf:
+        for train, test in kf.split(X, y):
             random_state = sklearn.utils.check_random_state(42)
             node = sklearn.tree.DecisionTreeClassifier(
                 criterion="entropy", max_depth=1, random_state=random_state,
-                min_samples_split=1, min_samples_leaf=1,  max_features=None)
+                min_samples_split=2, min_samples_leaf=1,  max_features=None)
             if len(y.shape) == 1 or y.shape[1] == 1:
                 node.fit(X[train], y[train])
             else:
@@ -734,21 +734,17 @@ class LandmarkRandomNodeLearner(MetaFeature):
         import sklearn.tree
 
         if len(y.shape) == 1 or y.shape[1] == 1:
-            kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+            kf = sklearn.model_selection.StratifiedKFold(n_splits=10)
         else:
-            kf = sklearn.cross_validation.KFold(y.shape[0], n_folds=10)
+            kf = sklearn.model_selection.KFold(n_splits=10)
         accuracy = 0.
 
-        for train, test in kf:
+        for train, test in kf.split(X, y):
             random_state = sklearn.utils.check_random_state(42)
             node = sklearn.tree.DecisionTreeClassifier(
                 criterion="entropy", max_depth=1, random_state=random_state,
-                min_samples_split=1, min_samples_leaf=1, max_features=1)
-            if len(y.shape) == 1 or y.shape[1] == 1:
-                node.fit(X[train], y[train])
-            else:
-                node = OneVsRestClassifier(node)
-                node.fit(X[train], y[train])
+                min_samples_split=2, min_samples_leaf=1, max_features=1)
+            node.fit(X[train], y[train])
             predictions = node.predict(X[test])
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
         return accuracy / 10
@@ -766,7 +762,7 @@ def landmark_worst_node_learner(X, y):
     import sklearn.tree
     performances = []
     for attribute_idx in range(X.shape[1]):
-        kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+        kf = sklearn.model_selection.StratifiedKFold(y, n_folds=10)
         accuracy = 0.
         for train, test in kf:
             node = sklearn.tree.DecisionTreeClassifier(criterion="entropy",
@@ -788,12 +784,12 @@ class Landmark1NN(MetaFeature):
         import sklearn.neighbors
 
         if len(y.shape) == 1 or y.shape[1] == 1:
-            kf = sklearn.cross_validation.StratifiedKFold(y, n_folds=10)
+            kf = sklearn.model_selection.StratifiedKFold(n_splits=10)
         else:
-            kf = sklearn.cross_validation.KFold(y.shape[0], n_folds=10)
+            kf = sklearn.model_selection.KFold(n_splits=10)
 
         accuracy = 0.
-        for train, test in kf:
+        for train, test in kf.split(X, y):
             kNN = sklearn.neighbors.KNeighborsClassifier(n_neighbors=1)
             if len(y.shape) == 1 or y.shape[1] == 1:
                 kNN.fit(X[train], y[train])

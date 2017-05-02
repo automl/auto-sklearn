@@ -1,7 +1,7 @@
 from operator import itemgetter
 
 import numpy as np
-import sklearn.cross_validation
+import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 
@@ -26,7 +26,7 @@ def main():
     X = digits.data
     y = digits.target
     X_train, X_test, y_train, y_test = \
-        sklearn.cross_validation.train_test_split(X, y, random_state=1)
+        sklearn.model_selection.train_test_split(X, y, random_state=1)
 
     automl = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120, per_run_time_limit=30,

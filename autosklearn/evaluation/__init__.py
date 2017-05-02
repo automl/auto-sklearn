@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import copy
 import functools
 import logging
 import math
@@ -7,7 +8,7 @@ from queue import Empty
 import traceback
 
 import pynisher
-from sklearn.cross_validation import ShuffleSplit, StratifiedShuffleSplit, KFold, \
+from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold, \
     StratifiedKFold
 from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException
 from smac.tae.execute_func import AbstractTAFunc
@@ -232,39 +233,38 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def get_splitter(self, D):
         y = D.data['Y_train'].ravel()
-        n = D.data['Y_train'].shape[0]
+
         if D.info['task'] in CLASSIFICATION_TASKS and \
                         D.info['task'] != MULTILABEL_CLASSIFICATION:
 
             if self.resampling_strategy in ['holdout',
                                             'holdout-iterative-fit']:
                 try:
-                    cv = StratifiedShuffleSplit(y=y, n_iter=1, train_size=0.67,
+                    cv = StratifiedShuffleSplit(n_splits=1, train_size=0.67,
                                                 test_size=0.33, random_state=1)
+                    test_cv = copy.deepcopy(cv)
+                    next(test_cv.split(y, y))
                 except ValueError as e:
                     if 'The least populated class in y has only' in e.args[0]:
-                        cv = ShuffleSplit(n=n, n_iter=1, train_size=0.67,
+                        cv = ShuffleSplit(n_splits=1, train_size=0.67,
                                           test_size=0.33, random_state=1)
                     else:
                         raise
 
             elif self.resampling_strategy in ['cv', 'partial-cv',
                                               'partial-cv-iterative-fit']:
-                cv = StratifiedKFold(y=y,
-                                     n_folds=self.resampling_strategy_args[
-                                         'folds'],
+                cv = StratifiedKFold(n_splits=self.resampling_strategy_args['folds'],
                                      shuffle=True, random_state=1)
             else:
                 raise ValueError(self.resampling_strategy)
         else:
             if self.resampling_strategy in ['holdout',
                                             'holdout-iterative-fit']:
-                cv = ShuffleSplit(n=n, n_iter=1, train_size=0.67,
+                cv = ShuffleSplit(n_splits=1, train_size=0.67,
                                   test_size=0.33, random_state=1)
             elif self.resampling_strategy in ['cv', 'partial-cv',
                                               'partial-cv-iterative-fit']:
-                cv = KFold(n=n,
-                           n_folds=self.resampling_strategy_args['folds'],
+                cv = KFold(n_splits=self.resampling_strategy_args['folds'],
                            shuffle=True, random_state=1)
             else:
                 raise ValueError(self.resampling_strategy)

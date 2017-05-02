@@ -1,7 +1,7 @@
 import json
 
 import numpy as np
-import sklearn.cross_validation
+import sklearn.model_selection
 
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.constants import *
@@ -9,6 +9,15 @@ from autosklearn.constants import *
 
 __all__ = ['TrainEvaluator', 'eval_holdout', 'eval_iterative_holdout',
            'eval_cv', 'eval_partial_cv', 'eval_partial_cv_iterative']
+
+
+def _get_y_array(y, task_type):
+    if task_type in CLASSIFICATION_TASKS and task_type != \
+            MULTILABEL_CLASSIFICATION:
+        return y.ravel()
+    else:
+        return y
+
 
 
 class TrainEvaluator(AbstractEvaluator):
@@ -40,7 +49,7 @@ class TrainEvaluator(AbstractEvaluator):
             disable_file_output=disable_file_output)
 
         self.cv = cv
-        self.cv_folds = cv.n_folds if hasattr(cv, 'n_folds') else cv.n_iter
+        self.cv_folds = cv.n_splits
         self.X_train = self.datamanager.data['X_train']
         self.Y_train = self.datamanager.data['Y_train']
         self.Y_optimization = None
@@ -61,7 +70,7 @@ class TrainEvaluator(AbstractEvaluator):
                 raise ValueError('Cannot use partial fitting together with full'
                                  'cross-validation!')
 
-            for train_split, test_split in self.cv:
+            for train_split, test_split in self.cv.split(self.X_train, self.Y_train):
                 self.Y_optimization = self.Y_train[test_split]
                 self._partial_fit_and_predict(0, train_indices=train_split,
                                               test_indices=test_split,
@@ -75,7 +84,11 @@ class TrainEvaluator(AbstractEvaluator):
             Y_valid_pred = [None] * self.cv_folds
             Y_test_pred = [None] * self.cv_folds
 
-            for i, (train_split, test_split) in enumerate(self.cv):
+
+            y = _get_y_array(self.Y_train, self.task_type)
+            for i, (train_split, test_split) in enumerate(self.cv.split(
+                    self.X_train, y)):
+
                 opt_pred, valid_pred, test_pred = self._partial_fit_and_predict(
                     i, train_indices=train_split, test_indices=test_split)
 
@@ -127,7 +140,10 @@ class TrainEvaluator(AbstractEvaluator):
         if fold > self.cv_folds:
             raise ValueError('Cannot evaluate a fold %d which is higher than '
                              'the number of folds %d.' % (fold, self.cv_folds))
-        for i, (train_split, test_split) in enumerate(self.cv):
+
+        y = _get_y_array(self.Y_train, self.task_type)
+        for i, (train_split, test_split) in enumerate(self.cv.split(
+                self.X_train, y)):
             if i != fold:
                 continue
             else:
@@ -171,8 +187,8 @@ class TrainEvaluator(AbstractEvaluator):
             file_output = True if self.cv_folds == 1 else False
 
             if model.estimator_supports_iterative_fit():
-                Xt, fit_params = model.pre_transform(self.X_train[train_indices],
-                                                     self.Y_train[train_indices])
+                Xt, fit_params = model.fit_transformer(self.X_train[train_indices],
+                                                       self.Y_train[train_indices])
 
                 n_iter = 2
                 while not model.configuration_fully_fitted():
@@ -240,7 +256,7 @@ class TrainEvaluator(AbstractEvaluator):
 
             if len(train_indices) > self.subsample:
                 indices = np.arange(len(train_indices))
-                cv_indices_train, _ = sklearn.cross_validation.train_test_split(
+                cv_indices_train, _ = sklearn.model_selection.train_test_split(
                     indices, stratify=stratify,
                     train_size=self.subsample, random_state=1)
                 train_indices = train_indices[cv_indices_train]

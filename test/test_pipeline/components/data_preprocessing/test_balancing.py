@@ -102,7 +102,7 @@ class BalancingComponentTest(unittest.TestCase):
                     sklearn.metrics.f1_score(predictions, Y_test), acc,
                     places=3)
 
-                # pre_transform and fit_estimator
+                # fit_transformer and fit_estimator
                 data_ = copy.copy(data)
                 X_train = data_[0][:100]
                 Y_train = data_[1][:100]
@@ -112,7 +112,7 @@ class BalancingComponentTest(unittest.TestCase):
                 classifier = SimpleClassificationPipeline(
                     default, random_state=1, include=include)
                 classifier.set_hyperparameters(configuration=default)
-                Xt, fit_params = classifier.pre_transform(X_train, Y_train)
+                Xt, fit_params = classifier.fit_transformer(X_train, Y_train)
                 classifier.fit_estimator(Xt, Y_train, **fit_params)
                 predictions = classifier.predict(X_test)
                 self.assertAlmostEqual(
@@ -146,7 +146,7 @@ class BalancingComponentTest(unittest.TestCase):
                     sklearn.metrics.f1_score(predictions, Y_test), acc,
                     places=3, msg=(name, strategy))
 
-                # pre_transform and fit_estimator
+                # fit_transformer and fit_estimator
                 data_ = copy.copy(data)
                 X_train = data_[0][:100]
                 Y_train = data_[1][:100]
@@ -156,7 +156,7 @@ class BalancingComponentTest(unittest.TestCase):
                 default._values['balancing:strategy'] = strategy
                 classifier = SimpleClassificationPipeline(
                     default, random_state=1, include=include)
-                Xt, fit_params = classifier.pre_transform(X_train, Y_train)
+                Xt, fit_params = classifier.fit_transformer(X_train, Y_train)
                 classifier.fit_estimator(Xt, Y_train, **fit_params)
                 predictions = classifier.predict(X_test)
                 self.assertAlmostEqual(

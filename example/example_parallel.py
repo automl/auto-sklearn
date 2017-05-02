@@ -2,7 +2,7 @@
 import multiprocessing
 import shutil
 
-import sklearn.cross_validation
+import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     X = digits.data
     y = digits.target
     X_train, X_test, y_train, y_test = \
-        sklearn.cross_validation.train_test_split(X, y, random_state=1)
+        sklearn.model_selection.train_test_split(X, y, random_state=1)
 
     processes = []
     for i in range(4): # set this at roughly half of your cores
