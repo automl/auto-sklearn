@@ -54,11 +54,11 @@ class BalancingComponentTest(unittest.TestCase):
         balancing = Balancing(strategy='weighting')
         init_params, fit_params = balancing.get_weights(
             Y, 'libsvm_svc', None, None, None)
-        self.assertEqual(("classifier:class_weight", "auto"),
+        self.assertEqual(("classifier:class_weight", "balanced"),
                          list(init_params.items())[0])
         init_params, fit_params = balancing.get_weights(
             Y, None, 'liblinear_svc_preprocessor', None, None)
-        self.assertEqual(("preprocessor:class_weight", "auto"),
+        self.assertEqual(("preprocessor:class_weight", "balanced"),
                          list(init_params.items())[0])
 
     def test_weighting_effect(self):
@@ -74,8 +74,8 @@ class BalancingComponentTest(unittest.TestCase):
                  ('gradient_boosting', GradientBoostingClassifier,
                   0.789, 0.762),
                  ('random_forest', RandomForest, 0.75, 0.821),
-                 ('libsvm_svc', LibSVM_SVC, 0.769, 0.706),
-                 ('liblinear_svc', LibLinear_SVC, 0.762, 0.72),
+                 ('libsvm_svc', LibSVM_SVC, 0.769, 0.72),
+                 ('liblinear_svc', LibLinear_SVC, 0.762, 0.735),
                  ('sgd', SGD, 0.704, 0.667)
                 ]:
             for strategy, acc in [('none', acc_no_weighting),
@@ -100,7 +100,7 @@ class BalancingComponentTest(unittest.TestCase):
                 predictions = predictor.predict(X_test)
                 self.assertAlmostEqual(
                     sklearn.metrics.f1_score(predictions, Y_test), acc,
-                    places=3)
+                    places=3, msg=(name, strategy))
 
                 # fit_transformer and fit_estimator
                 data_ = copy.copy(data)
