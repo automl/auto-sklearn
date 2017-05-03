@@ -9,49 +9,39 @@ from autosklearn.pipeline.constants import *
 
 
 class GaussianProcess(AutoSklearnRegressionAlgorithm):
-    def __init__(self, nugget, thetaL, thetaU, normalize=False, copy_X=False, 
-                 random_state=None):
-        self.nugget = float(nugget)
+    def __init__(self, alpha, thetaL, thetaU, random_state=None):
+        self.alpha = float(alpha)
         self.thetaL = float(thetaL)
         self.thetaU = float(thetaU)
-        self.normalize = normalize
-        self.copy_X = copy_X
         # We ignore it
         self.random_state = random_state
         self.estimator = None
         self.scaler = None
 
-    def fit(self, X, Y):
+    def fit(self, X, y):
         import sklearn.gaussian_process
-        import sklearn.preprocessing
+        n_features = X.shape[1]
+        kernel = sklearn.gaussian_process.kernels.RBF(
+            length_scale=[1.0]*n_features,
+            length_scale_bounds=[(self.thetaL, self.thetaU)]*n_features)
 
         # Instanciate a Gaussian Process model
-        self.estimator = sklearn.gaussian_process.GaussianProcess(
-            corr='squared_exponential', 
-            theta0=np.ones(X.shape[1]) * 1e-1,
-            thetaL=np.ones(X.shape[1]) * self.thetaL,
-            thetaU=np.ones(X.shape[1]) * self.thetaU,
-            nugget=self.nugget,
-            optimizer='Welch',
-            random_state=self.random_state)
+        self.estimator = sklearn.gaussian_process.GaussianProcessRegressor(
+            kernel=kernel,
+            n_restarts_optimizer=10,
+            optimizer='fmin_l_bfgs_b',
+            alpha=self.alpha,
+            copy_X_train=True,
+            random_state=self.random_state,
+            normalize_y=True)
 
-        # Remove this in sklearn==0.18 as the GP class will be refactored and
-        #  hopefully not be affected by this problem any more.
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
-            self.scaler.fit(Y.reshape((-1, 1)))
-            Y_scaled = self.scaler.transform(Y.reshape((-1, 1))).ravel()
-            self.estimator.fit(X, Y_scaled)
+        self.estimator.fit(X, y)
         return self
 
     def predict(self, X):
         if self.estimator is None:
             raise NotImplementedError
-        if self.scaler is None:
-            raise NotImplementedError
-        Y_pred = self.estimator.predict(X, batch_size=512)
-        return self.scaler.inverse_transform(Y_pred)
+        return self.estimator.predict(X)
 
     @staticmethod
     def get_properties(dataset_properties=None):
@@ -67,13 +57,13 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        nugget = UniformFloatHyperparameter(
-            name="nugget", lower=0.0001, upper=10, default=0.1, log=True)
+        alpha = UniformFloatHyperparameter(
+            name="alpha", lower=1e-14, upper=1.0, default=1e-8, log=True)
         thetaL = UniformFloatHyperparameter(
-            name="thetaL", lower=1e-6, upper=1e-3, default=1e-4, log=True)
+            name="thetaL", lower=1e-10, upper=1e-3, default=1e-6, log=True)
         thetaU = UniformFloatHyperparameter(
-            name="thetaU", lower=0.2, upper=10, default=1.0, log=True)
+            name="thetaU", lower=1.0, upper=100000, default=100000.0, log=True)
 
         cs = ConfigurationSpace()
-        cs.add_hyperparameters([nugget, thetaL, thetaU])
+        cs.add_hyperparameters([alpha, thetaL, thetaU])
         return cs

@@ -80,7 +80,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             config, pipeline, dataset_properties, include, exclude,
             random_state, init_params)
 
-    def pre_transform(self, X, y, fit_params=None):
+    def fit_transformer(self, X, y, fit_params=None):
         self.num_targets = 1 if len(y.shape) == 1 else y.shape[1]
 
         if fit_params is None:
@@ -98,7 +98,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             if _fit_params is not None:
                 fit_params.update(_fit_params)
 
-        X, fit_params = super(SimpleClassificationPipeline, self).pre_transform(
+        X, fit_params = super(SimpleClassificationPipeline, self).fit_transformer(
             X, y, fit_params=fit_params)
 
         return X, fit_params

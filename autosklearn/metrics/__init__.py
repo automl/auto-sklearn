@@ -274,6 +274,10 @@ def calculate_score(solution, prediction, task_type, metric,
                                       'multilabel classification. See the ' \
                                       'accuracy_score instead.':
                         continue
+                    elif e.args[0] == "Target is multiclass but " \
+                                      "average='binary'. Please choose another " \
+                                      "average setting.":
+                        continue
                     else:
                         raise e
 

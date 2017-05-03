@@ -21,16 +21,16 @@ class LibSVM_SVCComponentTest(unittest.TestCase):
             predictions, targets = _test_classifier_predict_proba(
                 LibSVM_SVC, sparse=True, dataset='digits',
                 train_size_maximum=500)
-            self.assertAlmostEqual(4.6680593525563063,
+            self.assertAlmostEqual(5.4706296711768925,
                                    sklearn.metrics.log_loss(targets,
                                                             predictions))
 
         for i in range(2):
             predictions, targets = _test_classifier_predict_proba(
                 LibSVM_SVC, sparse=True, dataset='iris')
-            self.assertAlmostEqual(0.8649665185853217,
-                               sklearn.metrics.log_loss(targets,
-                                                        predictions))
+            self.assertAlmostEqual(0.84333924656905945,
+                                   sklearn.metrics.log_loss(targets,
+                                                            predictions))
 
         # 2 class
         for i in range(2):

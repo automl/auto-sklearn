@@ -85,17 +85,17 @@ class BasePipeline(Pipeline):
             NoModelException is raised if fit() is called without specifying
             a classification algorithm first.
         """
-        X, fit_params = self.pre_transform(X, y, fit_params=fit_params)
+        X, fit_params = self.fit_transformer(X, y, fit_params=fit_params)
         self.fit_estimator(X, y, **fit_params)
         return self
 
-    def pre_transform(self, X, y, fit_params=None):
+    def fit_transformer(self, X, y, fit_params=None):
         if fit_params is None or not isinstance(fit_params, dict):
             fit_params = dict()
         else:
             fit_params = {key.replace(":", "__"): value for key, value in
                           fit_params.items()}
-        X, fit_params = self._pre_transform(X, y, **fit_params)
+        X, fit_params = self._fit(X, y, **fit_params)
         return X, fit_params
 
     def fit_estimator(self, X, y, **fit_params):

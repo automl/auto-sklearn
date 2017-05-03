@@ -9,7 +9,7 @@ import unittest.mock
 
 from ConfigSpace import Configuration
 import numpy as np
-from sklearn.cross_validation import StratifiedKFold, ShuffleSplit
+from sklearn.model_selection import StratifiedKFold, ShuffleSplit
 from smac.tae.execute_ta_run import StatusType
 
 from autosklearn.evaluation.util import get_last_result
@@ -39,7 +39,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     def test_holdout(self, pipeline_mock):
         D = get_binary_classification_datamanager()
         D.name = 'test'
-        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
+        kfold = ShuffleSplit(random_state=1, n_splits=1)
 
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
@@ -82,7 +82,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # Regular fitting
         D = get_binary_classification_datamanager()
         D.name = 'test'
-        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
+        kfold = ShuffleSplit(random_state=1, n_splits=1)
 
         class SideEffect(object):
             def __init__(self):
@@ -98,7 +98,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         Xt_fixture = 'Xt_fixture'
         pipeline_mock.estimator_supports_iterative_fit.return_value = True
         pipeline_mock.configuration_fully_fitted.side_effect = SideEffect().configuration_fully_fitted
-        pipeline_mock.pre_transform.return_value = Xt_fixture, {}
+        pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         output_dir = os.path.join(os.getcwd(), '.test_iterative_holdout')
@@ -153,7 +153,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # Regular fitting
         D = get_binary_classification_datamanager()
         D.name = 'test'
-        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
+        kfold = ShuffleSplit(random_state=1, n_splits=1)
 
         class SideEffect(object):
             def __init__(self):
@@ -171,7 +171,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         Xt_fixture = 'Xt_fixture'
         pipeline_mock.estimator_supports_iterative_fit.return_value = True
         pipeline_mock.configuration_fully_fitted.side_effect = SideEffect().configuration_fully_fitted
-        pipeline_mock.pre_transform.return_value = Xt_fixture, {}
+        pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         output_dir = os.path.join(os.getcwd(), '.test_iterative_holdout_interuption')
@@ -223,11 +223,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # Regular fitting
         D = get_binary_classification_datamanager()
         D.name = 'test'
-        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
+        kfold = ShuffleSplit(random_state=1, n_splits=1)
 
         Xt_fixture = 'Xt_fixture'
         pipeline_mock.estimator_supports_iterative_fit.return_value = False
-        pipeline_mock.pre_transform.return_value = Xt_fixture, {}
+        pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         output_dir = os.path.join(os.getcwd(), '.test_iterative_holdout_not_iterative')
@@ -265,8 +265,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_cv(self, pipeline_mock):
         D = get_binary_classification_datamanager()
-        kfold = StratifiedKFold(y=D.data['Y_train'].flatten(), random_state=1,
-                                n_folds=5, shuffle=True)
+        kfold = StratifiedKFold(random_state=1, n_splits=5, shuffle=True)
 
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
@@ -308,8 +307,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_partial_cv(self, pipeline_mock):
         D = get_binary_classification_datamanager()
-        kfold = StratifiedKFold(y=D.data['Y_train'].flatten(), random_state=1,
-                                n_folds=5, shuffle=True)
+        kfold = StratifiedKFold(random_state=1, n_splits=5, shuffle=True)
 
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
@@ -350,7 +348,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # Regular fitting
         D = get_binary_classification_datamanager()
         D.name = 'test'
-        kfold = StratifiedKFold(y=D.data['Y_train'].flatten(), random_state=1, n_folds=3)
+        kfold = StratifiedKFold(random_state=1, n_splits=3)
 
         class SideEffect(object):
             def __init__(self):
@@ -366,7 +364,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         Xt_fixture = 'Xt_fixture'
         pipeline_mock.estimator_supports_iterative_fit.return_value = True
         pipeline_mock.configuration_fully_fitted.side_effect = SideEffect().configuration_fully_fitted
-        pipeline_mock.pre_transform.return_value = Xt_fixture, {}
+        pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         output_dir = os.path.join(os.getcwd(), '.test_iterative_partial_cv')
@@ -423,8 +421,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         configuration = unittest.mock.Mock(spec=Configuration)
         queue_ = multiprocessing.Queue()
 
-        kfold = StratifiedKFold(y=D.data['Y_train'].flatten(),
-                                n_folds=5, shuffle=True, random_state=1)
+        kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
         evaluator = TrainEvaluator(D, backend_mock, queue=queue_,
                                    configuration=configuration,
                                    cv=kfold,
@@ -465,7 +462,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         configuration = unittest.mock.Mock(spec=Configuration)
         queue_ = multiprocessing.Queue()
-        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
+        kfold = ShuffleSplit(random_state=1, n_splits=1)
         evaluator = TrainEvaluator(D, backend_mock, queue_,
                                    configuration=configuration,
                                    cv=kfold, subsample=10,
@@ -509,7 +506,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         configuration = unittest.mock.Mock(spec=Configuration)
         queue_ = multiprocessing.Queue()
-        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
+        kfold = ShuffleSplit(random_state=1, n_splits=1)
         evaluator = TrainEvaluator(D, backend_mock, queue_,
                                    configuration=configuration,
                                    cv=kfold, subsample=30,
@@ -540,7 +537,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         configuration = unittest.mock.Mock(spec=Configuration)
         queue_ = multiprocessing.Queue()
-        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
+        kfold = ShuffleSplit(random_state=1, n_splits=1)
 
         evaluator = TrainEvaluator(D, backend_mock, queue_,
                                    configuration=configuration,
@@ -556,7 +553,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         backend_mock = unittest.mock.Mock(spec=backend.Backend)
         backend_mock.get_model_dir.return_value = 'dutirapbdxvltcrpbdlcatepdeau'
         D = get_binary_classification_datamanager()
-        kfold = ShuffleSplit(n=len(D.data['Y_train']), random_state=1, n_iter=1)
         queue_ = multiprocessing.Queue()
         for i in range(5):
             queue_.put((i * 1, 1 - (i * 0.2), 0, "", StatusType.SUCCESS))
@@ -578,7 +574,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                 y = D.data['Y_train']
                 if len(y.shape) == 2 and y.shape[1] == 1:
                     D_.data['Y_train'] = y.flatten()
-                kfold = ShuffleSplit(n=len(y), n_iter=5, random_state=1)
+                kfold = ShuffleSplit(n_splits=5, random_state=1)
                 queue_ = multiprocessing.Queue()
                 metric_lookup = {MULTILABEL_CLASSIFICATION: f1_macro,
                                  BINARY_CLASSIFICATION: accuracy,
@@ -611,7 +607,7 @@ class FunctionsTest(unittest.TestCase):
         self.dataset_name = json.dumps({'task_id': 'test'})
 
     def test_eval_holdout(self):
-        kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
+        kfold = ShuffleSplit(random_state=1, n_splits=1, test_size=0.33)
         eval_holdout(queue=self.queue, config=self.configuration,
                      datamanager=self.data, backend=self.backend, cv=kfold,
                      seed=1, num_run=1, all_scoring_functions=False,
@@ -624,7 +620,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertNotIn('bac_metric', info['additional_run_info'])
 
     def test_eval_holdout_all_loss_functions(self):
-        kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
+        kfold = ShuffleSplit(random_state=1, n_splits=1, test_size=0.33)
         eval_holdout(queue=self.queue, config=self.configuration,
                      datamanager=self.data, backend=self.backend, cv=kfold,
                      seed=1, num_run=1, all_scoring_functions=True,
@@ -635,17 +631,14 @@ class FunctionsTest(unittest.TestCase):
 
         fixture = {'accuracy': 0.0606060606061,
                    'balanced_accuracy': 0.0636363636364,
-                   'f1': 0.0606060606061,
                    'f1_macro': 0.0636363636364,
                    'f1_micro': 0.0606060606061,
                    'f1_weighted': 0.0606060606061,
                    'log_loss': 1.14529191037,
                    'pac_score': 0.203125867166,
-                   'precision': 0.0606060606061,
                    'precision_macro': 0.0636363636364,
                    'precision_micro': 0.0606060606061,
                    'precision_weighted': 0.0606060606061,
-                   'recall': 0.0606060606061,
                    'recall_macro': 0.0636363636364,
                    'recall_micro': 0.0606060606061,
                    'recall_weighted': 0.0606060606061,
@@ -672,7 +665,7 @@ class FunctionsTest(unittest.TestCase):
     #     self.assertEqual(info[2], 1)
 
     def test_eval_holdout_iterative_fit_no_timeout(self):
-        kfold = ShuffleSplit(n=self.n, random_state=1, n_iter=1, test_size=0.33)
+        kfold = ShuffleSplit(random_state=1, n_splits=1, test_size=0.33)
         eval_iterative_holdout(queue=self.queue, config=self.configuration,
                                datamanager=self.data, backend=self.backend,
                                cv=kfold, seed=1, num_run=1,
@@ -695,7 +688,7 @@ class FunctionsTest(unittest.TestCase):
     #     self.assertEqual(info[2], 1)
 
     def test_eval_cv(self):
-        cv = StratifiedKFold(y=self.y, shuffle=True, random_state=1)
+        cv = StratifiedKFold(shuffle=True, random_state=1)
         eval_cv(queue=self.queue, config=self.configuration,
                 datamanager=self.data, backend=self.backend, seed=1, num_run=1,
                 cv=cv, all_scoring_functions=False,
@@ -708,7 +701,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertNotIn('bac_metric', rval['additional_run_info'])
 
     def test_eval_cv_all_loss_functions(self):
-        cv = StratifiedKFold(y=self.y, shuffle=True, random_state=1)
+        cv = StratifiedKFold(shuffle=True, random_state=1)
         eval_cv(queue=self.queue, config=self.configuration,
                 datamanager=self.data, backend=self.backend, seed=1, num_run=1,
                 cv=cv, all_scoring_functions=True,
@@ -719,17 +712,14 @@ class FunctionsTest(unittest.TestCase):
 
         fixture = {'accuracy': 0.04,
                    'balanced_accuracy': 0.042002688172,
-                   'f1': 0.0400201612903,
                    'f1_macro': 0.0423387096774,
                    'f1_micro': 0.04,
                    'f1_weighted': 0.040020161290,
                    'log_loss': 1.11651433976,
                    'pac_score': 0.165226664054,
-                   'precision': 0.0388484848485,
                    'precision_macro': 0.0414141414141,
                    'precision_micro': 0.04,
                    'precision_weighted': 0.0388484848485,
-                   'recall': 0.04,
                    'recall_macro': 0.042002688172,
                    'recall_micro': 0.04,
                    'recall_weighted': 0.04,
@@ -757,8 +747,7 @@ class FunctionsTest(unittest.TestCase):
     #     self.assertEqual(info[2], 1)
 
     def test_eval_partial_cv(self):
-        cv = StratifiedKFold(y=self.y, shuffle=True, random_state=1,
-                             n_folds=5)
+        cv = StratifiedKFold(shuffle=True, random_state=1, n_splits=5)
         results = [0.045454545454545414,
                    0.095238095238095233,
                    0.052631578947368474,

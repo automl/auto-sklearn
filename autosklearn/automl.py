@@ -14,7 +14,6 @@ import scipy.stats
 from sklearn.base import BaseEstimator
 from smac.tae.execute_ta_run import StatusType
 from smac.stats.stats import Stats
-from sklearn.grid_search import _CVScoreTuple
 
 from autosklearn.constants import *
 from autosklearn.metrics import Scorer
@@ -637,35 +636,6 @@ class AutoML(BaseEstimator):
                                task_type=self._task,
                                metric=self._metric,
                                all_scoring_functions=False)
-
-    @property
-    def grid_scores_(self):
-        grid_scores = list()
-
-        scores_per_config = defaultdict(list)
-        config_list = list()
-
-        for run_key in self.runhistory_.data:
-            run_value = self.runhistory_.data[run_key]
-
-            config_id = run_key.config_id
-            cost = run_value.cost
-
-            if config_id not in config_list:
-                config_list.append(config_id)
-
-            scores_per_config[config_id].append(cost)
-
-        for config_id in config_list:
-            scores = [1 - score for score in scores_per_config[config_id]]
-            mean_score = np.mean(scores)
-            config = self.runhistory_.ids_config[config_id]
-
-            grid_score = _CVScoreTuple(config.get_dictionary(), mean_score,
-                                       scores)
-            grid_scores.append(grid_score)
-
-        return grid_scores
 
     @property
     def cv_results_(self):
