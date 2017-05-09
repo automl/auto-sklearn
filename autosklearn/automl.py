@@ -14,6 +14,8 @@ import scipy.stats
 from sklearn.base import BaseEstimator
 from smac.tae.execute_ta_run import StatusType
 from smac.stats.stats import Stats
+from sklearn.grid_search import _CVScoreTuple
+from sklearn.externals import joblib
 
 from autosklearn.constants import *
 from autosklearn.metrics import Scorer
@@ -26,6 +28,29 @@ from autosklearn.util import StopWatch, get_logger, setup_logger, \
 from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_numpy_array
+
+
+def _model_predict(self, X, batch_size, identifier):
+    def send_warnings_to_log(
+            message, category, filename, lineno, file=None, line=None):
+        self._logger.debug('%s:%s: %s:%s' %
+                       (filename, lineno, category.__name__, message))
+        return
+    model = self.models_[identifier]
+    X_ = X.copy()
+    with warnings.catch_warnings():
+        warnings.showwarning = send_warnings_to_log
+        if self._task in REGRESSION_TASKS:
+            prediction = model.predict(X_, batch_size=batch_size)
+        else:
+            prediction = model.predict_proba(X_, batch_size=batch_size)
+    if len(prediction.shape) < 1 or len(X_.shape) < 1 or \
+            X_.shape[0] < 1 or prediction.shape[0] != X_.shape[0]:
+        self._logger.warning("Prediction shape for model %s is %s "
+                             "while X_.shape is %s" %
+                             (model, str(prediction.shape),
+                              str(X_.shape)))
+    return prediction
 
 
 class AutoML(BaseEstimator):
@@ -484,7 +509,22 @@ class AutoML(BaseEstimator):
         self._can_predict = True
         return self
 
-    def predict(self, X):
+    def predict(self, X, batch_size=None, n_jobs=1):
+        """predict.
+
+        Parameters
+        ----------
+        X: array-like, shape = (n_samples, n_features)
+
+        batch_size: int or None, defaults to None
+            batch_size controls whether the pipelines will be
+            called on small chunks of the data. Useful when calling the
+            predict method on the whole array X results in a MemoryError.
+
+        n_jobs: int, defaults to 1
+            Parallelize the predictions across the models with n_jobs
+            processes.
+        """
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
@@ -499,31 +539,11 @@ class AutoML(BaseEstimator):
                 self.ensemble_ is None:
             self._load_models()
 
-        def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None, line=None):
-            self._logger.debug('%s:%s: %s:%s' %
-                               (filename, lineno, category.__name__, message))
-            return
-
-        all_predictions = []
-        for identifier in self.ensemble_.get_model_identifiers():
-            model = self.models_[identifier]
-
-            X_ = X.copy()
-            with warnings.catch_warnings():
-                warnings.showwarning = send_warnings_to_log
-                if self._task in REGRESSION_TASKS:
-                    prediction = model.predict(X_)
-                else:
-                    prediction = model.predict_proba(X_)
-
-            if len(prediction.shape) < 1 or len(X_.shape) < 1 or \
-                    X_.shape[0] < 1 or prediction.shape[0] != X_.shape[0]:
-                self._logger.warning("Prediction shape for model %s is %s "
-                                     "while X_.shape is %s" %
-                                     (model, str(prediction.shape),
-                                      str(X_.shape)))
-            all_predictions.append(prediction)
+        # Parallelize predictions across models with n_jobs processes.
+        # Each process computes predictions in chunks of batch_size rows.
+        all_predictions = joblib.Parallel(n_jobs=n_jobs)(
+            joblib.delayed(_model_predict)(self, X, batch_size, identifier)
+            for identifier in self.ensemble_.get_model_identifiers())
 
         if len(all_predictions) == 0:
             raise ValueError('Something went wrong generating the predictions. '
