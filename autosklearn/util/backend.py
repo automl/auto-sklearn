@@ -171,7 +171,7 @@ class Backend(object):
         return os.path.join(self.temporary_directory, 'smac3-output_%d' % seed)
 
     def get_smac_output_glob(self):
-        return os.path.join(self.temporary_directory, 'smac3-output_*')
+        return os.path.join(self.temporary_directory, 'smac3-output_*_run1')
 
     def _get_targets_ensemble_filename(self):
         return os.path.join(self.internals_directory,

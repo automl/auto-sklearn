@@ -424,7 +424,7 @@ class AutoML(BaseEstimator):
             self.runhistory_, self.trajectory_, self.fANOVA_input_ = \
                 _proc_smac.run_smbo()
             trajectory_filename = os.path.join(
-                self._backend.get_smac_output_directory(self._seed),
+                self._backend.get_smac_output_directory(self._seed) + '_run1',
                 'trajectory.json')
             saveable_trajectory = \
                 [list(entry[:2]) + [entry[2].get_dictionary()] + list(entry[3:])

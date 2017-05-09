@@ -28,8 +28,8 @@ requirements = [
     "xgboost==0.6a2",
     "ConfigSpace>=0.3.3,<0.4",
     "pynisher>=0.4",
-    "pyrfr",
-    "smac==0.4.0"
+    "pyrfr>=0.4,<0.5",
+    "smac==0.5.0"
 ]
 
 with open("autosklearn/__version__.py") as fh:

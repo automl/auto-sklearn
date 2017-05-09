@@ -13,15 +13,15 @@ from smac.facade.roar_facade import ROAR
 from smac.utils.util_funcs import get_types
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_ta_run import StatusType
-from smac.smbo.objective import average_cost
+from smac.optimizer.objective import average_cost
 from smac.runhistory.runhistory import RunHistory
 from smac.runhistory.runhistory2epm import RunHistory2EPM4Cost, \
     RunHistory2EPM4EIPS
 from smac.epm.uncorrelated_mo_rf_with_instances import \
     UncorrelatedMultiObjectiveRandomForestWithInstances
 from smac.epm.rf_with_instances import RandomForestWithInstances
-from smac.smbo.acquisition import EIPS
-from smac.smbo import pSMAC
+from smac.optimizer.acquisition import EIPS
+from smac.optimizer import pSMAC
 
 import autosklearn.metalearning
 from autosklearn.constants import *
@@ -576,12 +576,13 @@ class AutoMLSMBO(object):
                                     disable_file_output=self.disable_file_output,
                                     **self.resampling_strategy_args)
 
-        types = get_types(self.config_space, self.scenario.feature_array)
+        types, bounds = get_types(self.config_space,
+                                  self.scenario.feature_array)
 
         # TODO extract generation of SMAC object into it's own function for
         # testing
         if self.acquisition_function == 'EI':
-            model = RandomForestWithInstances(types,
+            model = RandomForestWithInstances(types=types, bounds=bounds,
                                               #instance_features=meta_features_list,
                                               seed=1, num_trees=10)
             rh2EPM = RunHistory2EPM4Cost(num_params=num_params,

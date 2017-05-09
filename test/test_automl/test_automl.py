@@ -48,7 +48,7 @@ class AutoMLTest(Base, unittest.TestCase):
         failing_model = unittest.mock.Mock()
         failing_model.fit.side_effect = [ValueError(), ValueError(), None]
 
-        auto = AutoML(backend, 30, 5)
+        auto = AutoML(backend, 20, 5)
         ensemble_mock = unittest.mock.Mock()
         auto.ensemble_ = ensemble_mock
         ensemble_mock.get_model_identifiers.return_value = [1]
@@ -99,7 +99,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         backend_api = backend.create(output, output)
-        automl = autosklearn.automl.AutoML(backend_api, 30, 5)
+        automl = autosklearn.automl.AutoML(backend_api, 20, 5)
         automl.fit(X_train, Y_train, metric=accuracy)
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
@@ -114,7 +114,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         backend_api = backend.create(output, output)
-        automl = autosklearn.automl.AutoML(backend_api, 30, 5,
+        automl = autosklearn.automl.AutoML(backend_api, 20, 5,
                                            initial_configurations_via_metalearning=0,
                                            configuration_mode='ROAR')
         automl.fit(X_train, Y_train, metric=accuracy)
@@ -145,7 +145,7 @@ class AutoMLTest(Base, unittest.TestCase):
         Y_test = data[1][200:]
 
         backend_api = backend.create(output, output)
-        automl = autosklearn.automl.AutoML(backend_api, 30, 5,
+        automl = autosklearn.automl.AutoML(backend_api, 20, 5,
                                            include_estimators=['sgd'],
                                            include_preprocessors=['no_preprocessing'])
         automl.fit(X_train, Y_train, task=BINARY_CLASSIFICATION,
@@ -171,7 +171,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
         backend_api = backend.create(output, output)
         auto = autosklearn.automl.AutoML(
-            backend_api, 30, 5,
+            backend_api, 20, 5,
             initial_configurations_via_metalearning=25,
             seed=100)
         auto.fit_automl_dataset(dataset, accuracy)
@@ -225,7 +225,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
             backend_api = backend.create(output, output)
             auto = autosklearn.automl.AutoML(
-                backend_api, 30, 5,
+                backend_api, 20, 5,
                 initial_configurations_via_metalearning=25)
             setup_logger()
             auto._logger = get_logger('test_do_dummy_predictions')

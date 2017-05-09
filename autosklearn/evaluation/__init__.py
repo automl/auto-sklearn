@@ -135,8 +135,9 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         if remaining_time - 5 < cutoff:
             cutoff = int(remaining_time - 5)
 
-        if cutoff <= 0:
+        if cutoff <= 1.0:
             raise BudgetExhaustedException()
+        cutoff = int(cutoff)
 
         return super().start(config=config, instance=instance, cutoff=cutoff,
                              seed=seed, instance_specific=instance_specific,

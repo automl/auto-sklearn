@@ -37,10 +37,10 @@ loggers:
     level: INFO
     handlers: [file_handler, console]
 
-  smac.smbo.local_search.LocalSearch:
+  smac.optimizer.local_search.LocalSearch:
     level: INFO
     handlers: [file_handler, console]
 
-  smac.smbo.smbo.SMBO:
+  smac.optimizer.smbo.SMBO:
     level: INFO
     handlers: [file_handler, console]
