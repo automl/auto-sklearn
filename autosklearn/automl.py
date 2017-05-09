@@ -14,7 +14,6 @@ import scipy.stats
 from sklearn.base import BaseEstimator
 from smac.tae.execute_ta_run import StatusType
 from smac.stats.stats import Stats
-from sklearn.grid_search import _CVScoreTuple
 from sklearn.externals import joblib
 
 from autosklearn.constants import *

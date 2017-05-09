@@ -607,7 +607,7 @@ class AutoMLSMBO(object):
                                          impute_censored_data=False,
                                          impute_state=None)
             model = UncorrelatedMultiObjectiveRandomForestWithInstances(
-                ['cost', 'runtime'], types, num_trees=10,
+                ['cost', 'runtime'], types=types, bounds=bounds, num_trees=10,
                 instance_features=meta_features_list, seed=1)
             acquisition_function = EIPS(model)
             _smac_arguments = dict(scenario=self.scenario,
