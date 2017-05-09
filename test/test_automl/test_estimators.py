@@ -25,7 +25,7 @@ class ArrayReturningDummyPredictor(object):
     def __init__(self, test):
         self.arr = test
 
-    def predict_proba(self, X):
+    def predict_proba(self, X, *args, **kwargs):
         return self.arr
 
 class EstimatorTest(Base, unittest.TestCase):
