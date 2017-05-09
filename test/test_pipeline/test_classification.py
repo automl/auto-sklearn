@@ -13,7 +13,7 @@ import sklearn.model_selection
 import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.testing import assert_array_almost_equal
-from xgboost.core import XGBoostError
+#from xgboost.core import XGBoostError
 
 from ConfigSpace.configuration_space import ConfigurationSpace, \
     Configuration
@@ -327,13 +327,13 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     print(traceback.format_exc())
                     print(config)
                     raise e
-            except XGBoostError as e:
-                if "std::bad_alloc" in e.args[0]:
-                    continue
-                else:
-                    print(traceback.format_exc())
-                    print(config)
-                    raise e
+            #except XGBoostError as e:
+            #    if "std::bad_alloc" in e.args[0]:
+            #        continue
+            #    else:
+            #        print(traceback.format_exc())
+            #        print(config)
+            #        raise e
 
     def test_get_hyperparameter_search_space(self):
         cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
@@ -343,12 +343,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(len(cs.get_hyperparameter(
             'rescaling:__choice__').choices), 4)
         self.assertEqual(len(cs.get_hyperparameter(
-            'classifier:__choice__').choices), 16)
+            'classifier:__choice__').choices), 15)
         self.assertEqual(len(cs.get_hyperparameter(
             'preprocessor:__choice__').choices), 13)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(154, len(hyperparameters))
+        self.assertEqual(141, len(hyperparameters))
 
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp

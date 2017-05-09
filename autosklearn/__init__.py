@@ -10,7 +10,6 @@ smac==0.5.0
 lockfile>=0.10
 ConfigSpace>=0.3.3,<0.4
 pyrfr>=0.4.0,<0.5
-xgboost==0.6a2
 '''
 
 dependencies.verify_packages(__MANDATORY_PACKAGES__)
