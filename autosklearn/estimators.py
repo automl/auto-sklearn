@@ -60,6 +60,7 @@ class AutoMLDecorator(object):
         Returns
         -------
         self
+
         """
         return self._automl.fit_ensemble(y, task, metric, precision,
                                          dataset_name, ensemble_nbest,
@@ -72,11 +73,12 @@ class AutoMLDecorator(object):
         return self._automl.score(X, y)
 
     def show_models(self):
-        """Return a representation of the final ensemble found by auto-sklearn
+        """Return a representation of the final ensemble found by auto-sklearn.
 
         Returns
         -------
         str
+
         """
         return self._automl.show_models()
 
@@ -127,6 +129,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             models. By increasing this value, *auto-sklearn* has a higher
             chance of finding better models.
 
+
         per_run_time_limit : int, optional (default=360)
             Time limit for a single call to the machine learning model.
             Model fitting will be terminated if the machine learning
@@ -141,8 +144,8 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             should start from scratch.
 
         ensemble_size : int, optional (default=50)
-            Number of models added to the ensemble built by `Ensemble
-            selection from libraries of models. Models are drawn with
+            Number of models added to the ensemble built by *Ensemble
+            selection from libraries of models*. Models are drawn with
             replacement.
 
         ensemble_nbest : int, optional (default=50)
@@ -212,14 +215,15 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
 
         disable_evaluator_output: bool or list, optional (False)
             If True, disable model and prediction output. Cannot be used
-            together with ensemble building. predict() cannot be used when
+            together with ensemble building. ``predict()`` cannot be used when
             setting this True. Can also be used as a list to pass more
             fine-grained information on what to save. Allowed elements in the
             list are:
-            * 'y_optimization' : do not save the predictions for the
+
+            * ``'y_optimization'`` : do not save the predictions for the
               optimization/validation set, which would later on be used to build
               an ensemble.
-            * 'model' : do not save any model files
+            * ``'model'`` : do not save any model files
 
         Attributes
         ----------
@@ -311,6 +315,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
 class AutoSklearnClassifier(AutoSklearnEstimator):
     """
     This class implements the classification task.
+
     """
 
     def build_automl(self):
@@ -333,7 +338,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             The target classes.
 
         metric : callable, optional (default='acc_metric')
-            An instance of ``autosklearn.metrics.Scorer.
+            An instance of ``autosklearn.metrics.Scorer``.
 
         feat_type : list, optional (default=None)
             List of str of `len(X.shape[1])` describing the attribute type.
@@ -381,6 +386,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         -------
         y : array of shape = [n_samples, n_classes] or [n_samples, n_labels]
             The predicted class probabilities.
+
         """
         return self._automl.predict_proba(
             X, batch_size=batch_size, n_jobs=n_jobs)
@@ -389,6 +395,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
 class AutoSklearnRegressor(AutoSklearnEstimator):
     """
     This class implements the regression task.
+
     """
 
     def build_automl(self):
