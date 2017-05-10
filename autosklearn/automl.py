@@ -554,7 +554,7 @@ class AutoML(BaseEstimator):
         predictions = self.ensemble_.predict(all_predictions)
         return predictions
 
-    def fit_ensemble(self, task=None, metric=None, precision='32',
+    def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit']:
