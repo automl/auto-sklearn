@@ -32,6 +32,18 @@ For a full list please have a look at the source code (in `autosklearn/pipeline/
   * `Regressors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/regression>`_
   * `Preprocessors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/feature_preprocessing>`_
 
+Turning of preprocessing
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Preprocessing in *auto-sklearn* is divided into data preprocessing and
+feature preprocessing. Data preprocessing includes One-Hot encoding of
+categorical features, imputation of missing values and the normalization of
+features or samples. These steps currently cannot be turned off. Feature
+preprocessing is a single transformer which implements for example feature
+selection or transformation of features into a different space (i.e. PCA).
+This can be turned off by setting
+``include_preprocessors=["no_preprocessing"]`` as shown in the example above.
+
 Resampling strategies
 =====================
 
