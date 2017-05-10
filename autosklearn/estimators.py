@@ -50,7 +50,7 @@ class AutoMLDecorator(object):
         """
         return self._automl.refit(X, y)
 
-    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+    def fit_ensemble(self, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         """Build the ensemble.
@@ -62,7 +62,7 @@ class AutoMLDecorator(object):
         self
 
         """
-        return self._automl.fit_ensemble(y, task, metric, precision,
+        return self._automl.fit_ensemble(task, metric, precision,
                                          dataset_name, ensemble_nbest,
                                          ensemble_size)
 
@@ -302,12 +302,47 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
         self._automl = self.build_automl()
         super(AutoSklearnEstimator, self).fit(*args, **kwargs)
 
-    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+    def fit_ensemble(self, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
+        """Fit an ensemble to models trained during an optimization process.
+
+        All parameters are ``None`` by default. If no other value is given,
+        the default values which were set in a call to ``fit()`` are used.
+
+        Parameters
+        ----------
+        task : int
+            A constant from the module ``autosklearn.constants``. Determines
+            the task type (binary classification, multiclass classification,
+            multilabel classification or regression).
+
+        metric : callable, optional (default='acc_metric')
+            An instance of ``autosklearn.metrics.Scorer``.
+
+        precision : str
+            Numeric precision used when loading ensemble data. Can be either
+            ``'16'``, ``'32'`` or ``'64'``.
+
+        dataset_name : str
+            Name of the current data set.
+
+        ensemble_nbest : int
+            Determines how many models should be considered from the ensemble
+            building. This is inspired by a concept called library pruning
+            introduced in `Getting Most out of Ensemble Selection`.
+
+        ensemble_size : int
+            Size of the ensemble built by `Ensomble Selection`.
+
+        Returns
+        -------
+        self
+
+        """
         if self._automl is None:
             self._automl = self.build_automl()
-        return self._automl.fit_ensemble(y, task, metric, precision,
+        return self._automl.fit_ensemble(task, metric, precision,
                                          dataset_name, ensemble_nbest,
                                          ensemble_size)
 
