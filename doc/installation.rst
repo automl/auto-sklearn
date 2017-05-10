@@ -55,8 +55,8 @@ be solved by istalling the *gcc* compiler shipped with AnaConda (as well as
     conda install gcc swig
 
 
-Windows/OSX compabilities
-=========================
+Windows/OSX compability
+=======================
 
 Windows
 ~~~~~~~
