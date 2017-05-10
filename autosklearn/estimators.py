@@ -378,7 +378,10 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         feat_type : list, optional (default=None)
             List of str of `len(X.shape[1])` describing the attribute type.
             Possible types are `Categorical` and `Numerical`. `Categorical`
-            attributes will be automatically One-Hot encoded.
+            attributes will be automatically One-Hot encoded. The values
+            used for a categorical attribute must be integers, obtainde for
+            example by `sklearn.preprocessing.LabelEncoder
+            <http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html>`_.
 
         dataset_name : str, optional (default=None)
             Create nicer output. If None, a string will be determined by the
