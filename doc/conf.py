@@ -131,6 +131,8 @@ html_theme_options = {
     # be in the form [(name, page), ..]
     'navbar_links': [
         ('Start', 'index'),
+        ('Releases', 'releases'),
+        ('Installation', 'installation'),
         ('API', 'api'),
         ('Extending', 'extending'),
         ('Manual', 'manual'),

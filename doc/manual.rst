@@ -9,6 +9,18 @@ Manual
 This manual shows how to use several aspects of auto-sklearn. It either
 references the examples where possible or explains certain configurations.
 
+Examples
+========
+
+*auto-sklearn* comes with the following examples which demonstrate several
+aspects of its usage:
+
+* `Holdout <https://github.com/automl/auto-sklearn/blob/master/example/example_holdout.py>`_
+* `Cross-validation <https://github.com/automl/auto-sklearn/blob/master/example/example_crossvalidation.py>`_
+* `Parallel usage <https://github.com/automl/auto-sklearn/blob/master/example/example_parallel.py>`_
+* `Sequential usage <https://github.com/automl/auto-sklearn/blob/master/example/example_sequential.py>`_
+* `Regression <https://github.com/automl/auto-sklearn/blob/master/example/example_regression.py>`_
+
 Restrict Searchspace
 ====================
 
