@@ -11,7 +11,7 @@ from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
 
 
-class XGradientBoostingRegressor(AutoSklearnRegressionAlgorithm):
+class XGradientBoostingRegressor():#AutoSklearnRegressionAlgorithm):
     def __init__(self, learning_rate, n_estimators, subsample,
                  max_depth, colsample_bylevel, colsample_bytree, gamma,
                  min_child_weight, max_delta_step, reg_alpha, reg_lambda,

@@ -25,7 +25,6 @@ requirements = [
     "pyyaml",
     "liac-arff",
     "pandas",
-    "xgboost==0.6a2",
     "ConfigSpace>=0.3.3,<0.4",
     "pynisher>=0.4",
     "pyrfr>=0.4,<0.5",

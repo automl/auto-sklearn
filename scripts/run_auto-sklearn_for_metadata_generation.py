@@ -108,7 +108,7 @@ for entry in trajectory:
                                     all_scoring_functions=True,
                                     metric=metric)
         status, cost, runtime, additional_run_info = ta.start(
-            config=config, instance=None, cutoff=per_run_time_limit)
+            config=config, instance=None, cutoff=per_run_time_limit*3)
 
         if status == StatusType.SUCCESS:
             assert len(additional_run_info) > 1, additional_run_info
