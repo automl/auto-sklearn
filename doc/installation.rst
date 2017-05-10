@@ -27,7 +27,7 @@ Please install all dependencies manually with:
 
     curl https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt | xargs -n 1 -L 1 pip install
 
-Then install *auto-sklearn*
+Then install *auto-sklearn*:
 
 .. code:: bash
 
@@ -58,3 +58,33 @@ be solved by istalling the *gcc* compiler shipped with AnaConda (as well as
 Windows/OSX compabilities
 =========================
 
+Windows
+~~~~~~~
+
+*auto-sklearn* relies heavily on the Python module ``resource``. ``resource``
+is part of Python's `Unix Specific Services <https://docs.python.org/3/library/unix.html>`_
+and not available on a Windows machine. Therefore, it is not possible to run
+*auto-sklearn* on a Windows machine.
+
+Possible solutions (not tested):
+
+* Windows 10 bash shell
+* virtual machine
+* docker image
+
+Mac OSX
+~~~~~~~
+
+Auto-sklearn is known to work on OSX systems. Nevertheless, there are two
+issues holding us back from actively supporting OSX:
+
+* The ``resource`` module cannot enforce a memory limit on a Python process
+  (see `SMAC3/issues/115 <https://github.com/automl/SMAC3/issues/115>`_).
+* OSX machines on `travis-ci <https://travis-ci.org/>`_ take more than 30
+  minutes to spawn. This makes it impossible for us to run unit tests for
+  *auto-sklearn* and its requirements.
+
+Possible solutions (not tested):
+
+* virtual machine
+* docker image
