@@ -47,8 +47,8 @@ This will run for one hour should result in an accuracy above 0.98.
 Manual
 ******
 
-* :ref:`API`
 * :ref:`manual`
+* :ref:`API`
 * :ref:`extending`
 * :ref:`installation`
 
@@ -101,20 +101,3 @@ which is marked with `Needs contributer`.
 When developing new features, please create a new branch from the development
 branch. Prior to submitting a pull request, make sure that all tests are
 still passing.
-
-Contributors
-************
-
-* Matthias Feurer
-* Katharina Eggensperger
-* Jost Tobias Springenberg
-* Aaron Klein
-* Anatolii Domashnev
-* Alexander Sapronov
-* Stefan Falkner
-* Manuel Blum
-* Hector Mendoza
-* Farooq Ahmed Zuberi
-* Frank Hutter
-* Diego Kobylkin
-* Marius Lindauer
