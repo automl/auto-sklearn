@@ -2,14 +2,15 @@
 
 .. _manual:
 
+======
 Manual
-~~~~~~
+======
 
 This manual shows how to use several aspects of auto-sklearn. It either
 references the examples where possible or explains certain configurations.
 
 Restrict Searchspace
-*********************
+====================
 
 Instead of using all available estimators, it is possible to restrict
 *auto-sklearn*'s searchspace. The following shows an example of how to exclude
@@ -17,9 +18,9 @@ all preprocessing methods and restrict the configuration space to only
 random forests.
 
 >>> import autosklearn.classification
->>> automl = autosklearn.classification.AutoSklearnClassifier(include_estimators=["random_forest", ],
->>>                            exclude_estimators=None, include_preprocessors=["no_preprocessing", ],
->>>                            exclude_preprocessors=None)
+>>> automl = autosklearn.classification.AutoSklearnClassifier(
+>>>     include_estimators=["random_forest", ], exclude_estimators=None,
+>>>     include_preprocessors=["no_preprocessing", ], exclude_preprocessors=None)
 >>> cls.fit(X_train, y_train)
 >>> predictions = cls.predict(X_test, y_test)
 
@@ -32,12 +33,12 @@ For a full list please have a look at the source code (in `autosklearn/pipeline/
   * `Preprocessors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/feature_preprocessing>`_
 
 Resampling strategies
-*********************
+=====================
 
 Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <https://github.com/automl/auto-sklearn/tree/master/example>`_
 
 Parallel computation
-********************
+====================
 
 *auto-sklearn* supports parallel execution by data sharing on a shared file
 system. In this mode, the SMAC algorithm shares the training data for it's
@@ -60,9 +61,25 @@ from `pypi` as a binary wheel (`see here <http://scikit-learn-general.narkive
 only use a single core at a time.
 
 Model persistence
-*****************
+=================
 
 *auto-sklearn* is mostly a wrapper around scikit-learn. Therefore, it is
 possible to follow the `persistence example
 <http://scikit-learn.org/stable/modules/model_persistence.html#persistence-example>`_
 from scikit-learn.
+
+Vanilla auto-sklearn
+====================
+
+In order to obtain *vanilla auto-sklearn* as used in `Efficient and Robust Automated Machine Learning
+<https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine -learning>`_
+set ``ensemble_size=1`` and ``initial_configurations_via_metalearning=0``:
+
+>>> import autosklearn.classification
+>>> automl = autosklearn.classification.AutoSklearnClassifier(
+>>>     ensemble_size=1, initial_configurations_via_metalearning=0)
+
+An ensemble of size one will result in always choosing the current best model
+according to its performance on the validation set. Setting the initial
+configurations found by meta-learning to zero makes *auto-sklearn* use the
+regular SMAC algorithm for suggesting new hyperparameter configurations.
