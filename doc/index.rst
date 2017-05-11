@@ -30,9 +30,7 @@ Example
     >>> import sklearn.model_selection
     >>> import sklearn.datasets
     >>> import sklearn.metrics
-    >>> digits = sklearn.datasets.load_digits()
-    >>> X = digits.data
-    >>> y = digits.target
+    >>> X, y = sklearn.datasets.load_digits(return_X_y=True)
     >>> X_train, X_test, y_train, y_test = \
             sklearn.model_selection.train_test_split(X, y, random_state=1)
     >>> automl = autosklearn.classification.AutoSklearnClassifier()
@@ -47,10 +45,10 @@ This will run for one hour should result in an accuracy above 0.98.
 Manual
 ******
 
+* :ref:`installation`
 * :ref:`manual`
 * :ref:`API`
 * :ref:`extending`
-* :ref:`installation`
 
 
 License
@@ -86,7 +84,7 @@ references to the following paper:
 Contributing
 ************
 
-We appreciate all contribution to auto-sklearn, from bug reports,
+We appreciate all contribution to auto-sklearn, from bug reports and
 documentation to new features. If you want to contribute to the code, you can
 pick an issue from the `issue tracker <https://github.com/automl/auto-sklearn/issues>`_
 which is marked with `Needs contributer`.
@@ -99,5 +97,5 @@ which is marked with `Needs contributer`.
     .com/automl/auto-sklearn/issues>`_ before starting to work.
 
 When developing new features, please create a new branch from the development
-branch. Prior to submitting a pull request, make sure that all tests are
+branch. When to submitting a pull request, make sure that all tests are
 still passing.

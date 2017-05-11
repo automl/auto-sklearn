@@ -13,13 +13,13 @@ auto-sklearn has the following system requirements:
 
 * Linux operating system (for example Ubuntu),
 * Python (>=3.4).
-* C++ compiler (which supports C++11) and SWIG
+* C++ compiler (with C++11 supports) and SWIG
 
 For an explanation of missing Microsoft Windows and MAC OSX support please
-check the Section `Windows/OSX compabilities`_.
+check the Section `Windows/OSX compability`_.
 
-Python requirements
-===================
+Installing auto-sklearn
+=======================
 
 Please install all dependencies manually with:
 
@@ -42,7 +42,7 @@ Anaconda installation
 
 Anaconda does not ship *auto-sklearn*, and there are no conda packages for
 *auto-sklearn*. Thus, it is easiest to install *auto-sklearn* as detailed in
-the Section `Python requirements`_.
+the Section `Installing auto-sklearn`_.
 
 A common installation problem under recent Linux distribution is the
 incompability of the compiler version used to compile the Python binary
@@ -82,7 +82,8 @@ issues holding us back from actively supporting OSX:
   (see `SMAC3/issues/115 <https://github.com/automl/SMAC3/issues/115>`_).
 * OSX machines on `travis-ci <https://travis-ci.org/>`_ take more than 30
   minutes to spawn. This makes it impossible for us to run unit tests for
-  *auto-sklearn* and its requirements.
+  *auto-sklearn* and its dependencies `SMAC3 <https://github.com/automl/SMAC3>`_
+  and `ConfigSpace <https://github.com/automl/ConfigSpace>`_.
 
 Possible solutions (not tested):
 

@@ -24,6 +24,8 @@ Major changes
 * Upgrade to scikit-learn 0.18.1.
 * Drop XGBoost as the latest release (0.6a2) does not work when spawned by
   the pyninsher.
+* *auto-sklearn* can use multiprocessing in calls to ``predict()`` and
+  ``predict_proba``. By `Laurent Sorber <https://github.com/lsorber>`_.
 
 Contributors
 ~~~~~~~~~~~~

@@ -137,12 +137,10 @@ def make_scorer(name, score_func, greater_is_better=True, needs_proba=False,
                 needs_threshold=False, **kwargs):
     """Make a scorer from a performance metric or loss function.
 
-    Factory inspired by scikit-learn which wraps scoring functions to be used in
-    auto-sklearn. In difference to scikit-learn, auto-sklearn always needs to
-    call ``predict_proba`` in order to have predictions on a seperate validation
-    set to build ensembles with.
+    Factory inspired by scikit-learn which wraps scikit-learn scoring functions
+    to be used in auto-sklearn.
 
-    Paramaters
+    Parameters
     ----------
     score_func : callable
         Score function (or loss function) with signature

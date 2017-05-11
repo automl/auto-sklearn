@@ -53,15 +53,7 @@ class AutoMLDecorator(object):
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
-        """Build the ensemble.
 
-        This method only needs to be called in the parallel mode.
-
-        Returns
-        -------
-        self
-
-        """
         return self._automl.fit_ensemble(y, task, metric, precision,
                                          dataset_name, ensemble_nbest,
                                          ensemble_size)
@@ -225,6 +217,16 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
               an ensemble.
             * ``'model'`` : do not save any model files
 
+        configuration_mode : ``SMAC`` or ``ROAR``
+            Defines the configuration mode as described in the paper
+            `Sequential Model-Based Optimization for General Algorithm
+            Configuration <http://aad.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_:
+
+            * ``SMAC`` (default): Sequential Model-based Algorithm
+              Configuration, which is a Bayesian optimization algorithm
+            * ``ROAR``: Random Online Aggressive Racing, which is basically
+              random search
+
         Attributes
         ----------
 
@@ -321,7 +323,9 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             multilabel classification or regression).
 
         metric : callable, optional (default='acc_metric')
-            An instance of ``autosklearn.metrics.Scorer``.
+            An instance of :class:`autosklearn.metrics.Scorer` as created by
+            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
+            Metrics`_.
 
         precision : str
             Numeric precision used when loading ensemble data. Can be either
@@ -376,7 +380,9 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             The target classes.
 
         metric : callable, optional (default='acc_metric')
-            An instance of ``autosklearn.metrics.Scorer``.
+            An instance of :class:`autosklearn.metrics.Scorer` as created by
+            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
+            Metrics`_.
 
         feat_type : list, optional (default=None)
             List of str of `len(X.shape[1])` describing the attribute type.
