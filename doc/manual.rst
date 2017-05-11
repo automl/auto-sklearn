@@ -21,8 +21,28 @@ aspects of its usage:
 * `Sequential usage <https://github.com/automl/auto-sklearn/blob/master/example/example_sequential.py>`_
 * `Regression <https://github.com/automl/auto-sklearn/blob/master/example/example_regression.py>`_
 
-Restrict Searchspace
-====================
+Time and memory limits
+======================
+
+A crucial feature of *auto-sklearn* is limiting the resources (memory and
+time) which the scikit-learn algorithms are allowed to use. Especially for
+large datasets, on which algorithms can take several hours and make the
+machine swap, it is important to stop the evaluations after some time in order
+to make progress in a reasonable amount of time. Setting the resource limits
+is therefore a tradeoff between optimization time and the number of models
+that can be tested.
+
+While *auto-sklearn* alleviates manual hyperparameter tuning, the user still
+has to set memory and time limits. For most datasets a memory limit of 3GB or
+6GB as found on most modern computers is sufficient. For the time limits it
+is harder to give clear guidelines. If possible, a good default is a total
+time limit of one day, and a time limit of 30 minutes for a single run.
+
+Further guidelines can be found in
+`auto-sklearn/issues/142 <https://github.com/automl/auto-sklearn/issues/142>`_.
+
+Restricting the Searchspace
+===========================
 
 Instead of using all available estimators, it is possible to restrict
 *auto-sklearn*'s searchspace. The following shows an example of how to exclude
