@@ -141,8 +141,7 @@ class EstimatorTest(Base, unittest.TestCase):
                                        seed=2,
                                        initial_configurations_via_metalearning=0,
                                        ensemble_size=0)
-        automl.fit_ensemble(Y_train,
-                            task=MULTICLASS_CLASSIFICATION,
+        automl.fit_ensemble(Y_train, task=MULTICLASS_CLASSIFICATION,
                             metric=accuracy,
                             precision='32',
                             dataset_name='iris',

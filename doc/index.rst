@@ -30,9 +30,7 @@ Example
     >>> import sklearn.model_selection
     >>> import sklearn.datasets
     >>> import sklearn.metrics
-    >>> digits = sklearn.datasets.load_digits()
-    >>> X = digits.data
-    >>> y = digits.target
+    >>> X, y = sklearn.datasets.load_digits(return_X_y=True)
     >>> X_train, X_test, y_train, y_test = \
             sklearn.model_selection.train_test_split(X, y, random_state=1)
     >>> automl = autosklearn.classification.AutoSklearnClassifier()
@@ -44,34 +42,12 @@ Example
 This will run for one hour should result in an accuracy above 0.98.
 
 
-Installation
-************
-**Prerequisities**: *auto-sklearn* is written in python and was developed
-with Ubuntu. It should run on other Linux distributions, but won't work on a MAC
-or on a windows PC. We aim to always support the two latests python versions,
-which are 3.4 and 3.5 at the moment. It is built around scikit-learn 0.17.1 and
-needs a compiler for C++ 11.
-
-Please install all dependencies manually with:
-
-.. code:: bash
-
-    curl https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt | xargs -n 1 -L 1 pip install
-
-Then install *auto-sklearn*
-
-.. code:: bash
-
-    pip install auto-sklearn
-
-We recommend installing *auto-sklearn* into a `virtual environment
-<http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_.
-
 Manual
 ******
 
-* :ref:`API`
+* :ref:`installation`
 * :ref:`manual`
+* :ref:`API`
 * :ref:`extending`
 
 
@@ -108,7 +84,7 @@ references to the following paper:
 Contributing
 ************
 
-We appreciate all contribution to auto-sklearn, from bug reports,
+We appreciate all contribution to auto-sklearn, from bug reports and
 documentation to new features. If you want to contribute to the code, you can
 pick an issue from the `issue tracker <https://github.com/automl/auto-sklearn/issues>`_
 which is marked with `Needs contributer`.
@@ -121,24 +97,5 @@ which is marked with `Needs contributer`.
     .com/automl/auto-sklearn/issues>`_ before starting to work.
 
 When developing new features, please create a new branch from the development
-branch. Prior to submitting a pull request, make sure that all tests are
+branch. When to submitting a pull request, make sure that all tests are
 still passing.
-
-Contributors
-************
-
-* Matthias Feurer
-* Katharina Eggensperger
-* Jost Tobias Springenberg
-* Aaron Klein
-* Anatolii Domashnev
-* Alexander Sapronov
-* Stefan Falkner
-* Manuel Blum
-* Hector Mendoza
-* Farooq Ahmed Zuberi
-* Frank Hutter
-* Diego Kobylkin
-* Marius Lindauer
-
-
