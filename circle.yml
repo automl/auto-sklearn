@@ -2,6 +2,19 @@ machine:
   environment:
     PATH: /home/ubuntu/miniconda/bin:$PATH
 
+    # The github organization or username of the repository which hosts the
+    # project and documentation.
+    USERNAME: "automl"
+
+    # The repository where the documentation will be hosted
+    DOC_REPO: "auto-sklearn"
+
+    # The base URL for the Github page where the documentation will be hosted
+    DOC_URL: ""
+
+    # The email is to be used for commits in the Github Page
+    EMAIL: "feurerm@informatik.uni-freiburg.de"
+
 dependencies:
 
   # Various dependencies
