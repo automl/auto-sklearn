@@ -20,6 +20,7 @@ aspects of its usage:
 * `Parallel usage <https://github.com/automl/auto-sklearn/blob/master/example/example_parallel.py>`_
 * `Sequential usage <https://github.com/automl/auto-sklearn/blob/master/example/example_sequential.py>`_
 * `Regression <https://github.com/automl/auto-sklearn/blob/master/example/example_regression.py>`_
+* `Continuous and Categorical Data <https://github.com/automl/auto-sklearn/blob/master/example/example_feature_types.py>`_
 
 Time and memory limits
 ======================
@@ -64,7 +65,7 @@ For a full list please have a look at the source code (in `autosklearn/pipeline/
   * `Regressors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/regression>`_
   * `Preprocessors <https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/feature_preprocessing>`_
 
-Turning of preprocessing
+Turning off preprocessing
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Preprocessing in *auto-sklearn* is divided into data preprocessing and
