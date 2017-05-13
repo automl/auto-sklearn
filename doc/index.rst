@@ -50,7 +50,21 @@ Installation
 with Ubuntu. It should run on other Linux distributions, but won't work on a MAC
 or on a windows PC. We aim to always support the two latests python versions,
 which are 3.4 and 3.5 at the moment. It is built around scikit-learn 0.17.1 and
-needs a compiler for C++ 11.
+needs a compiler for C++ 11. On Ubuntu you can provide a C++ 11 building environment
+by running:
+
+.. code:: bash
+
+    sudo apt-get install build-essential
+
+One of *auto-sklearn*'s python dependencies (pyrfr) depends on swig-3.0 or later 
+to be built. On ubuntu swig can be installed with:
+
+.. code:: bash
+    
+    sudo apt-get install swig
+
+If you're not using ubuntu please check how to install swig-3.0 or later on your distribution.     
 
 Please install all dependencies manually with:
 
