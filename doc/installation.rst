@@ -13,7 +13,7 @@ auto-sklearn has the following system requirements:
 
 * Linux operating system (for example Ubuntu),
 * Python (>=3.4).
-* C++ compiler (with C++11 supports) and SWIG
+* C++ compiler (with C++11 supports) and SWIG (version 3.0 or later) 
 
 For an explanation of missing Microsoft Windows and MAC OSX support please
 check the Section `Windows/OSX compability`_.
@@ -40,7 +40,8 @@ environment <https://conda.io/docs/using/envs.html>`_.
 Ubuntu installation
 ===================
 
-To provide install a C++11 building environment and SWIG on Ubuntu, run:
+To provide install a C++11 building environment and the lateste SWIG 
+version on Ubuntu, run:
 
 .. code:: bash
 
