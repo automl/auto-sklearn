@@ -37,6 +37,16 @@ We recommend installing *auto-sklearn* into a `virtual environment
 <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or an `Anaconda
 environment <https://conda.io/docs/using/envs.html>`_.
 
+Ubuntu installation
+===================
+
+To provide install a C++11 building environment and SWIG on Ubuntu, run:
+
+.. code:: bash
+
+    sudo apt-get install build-essential swig
+
+
 Anaconda installation
 =====================
 
