@@ -40,8 +40,8 @@ environment <https://conda.io/docs/using/envs.html>`_.
 Ubuntu installation
 ===================
 
-To provide install a C++11 building environment and the lateste SWIG 
-version on Ubuntu, run:
+To provide a C++11 building environment and the lateste SWIG version on Ubuntu,
+run:
 
 .. code:: bash
 

@@ -33,6 +33,7 @@ Contributors
 * Matthias Feurer
 * Katharina Eggensperger
 * Laurent Sorber
+* Rafael Calsaverini
 
 Version 0.1.x
 =============
