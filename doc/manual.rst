@@ -21,6 +21,8 @@ aspects of its usage:
 * `Sequential usage <https://github.com/automl/auto-sklearn/blob/master/example/example_sequential.py>`_
 * `Regression <https://github.com/automl/auto-sklearn/blob/master/example/example_regression.py>`_
 * `Continuous and Categorical Data <https://github.com/automl/auto-sklearn/blob/master/example/example_feature_types.py>`_
+* `Using Custom metrics <https://github.com/automl/auto-sklearn/blob/master/example/example_metrics.py>`_
+
 
 Time and memory limits
 ======================
