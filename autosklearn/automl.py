@@ -26,7 +26,7 @@ from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline
 from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
-from autosklearn.util.hash import hash_numpy_array
+from autosklearn.util.hash import hash_array_or_matrix
 
 
 def _model_predict(self, X, batch_size, identifier):
@@ -158,7 +158,7 @@ class AutoML(BaseEstimator):
         self._backend.context.create_directories()
 
         if dataset_name is None:
-            dataset_name = hash_numpy_array(X)
+            dataset_name = hash_array_or_matrix(X)
 
         self._backend.save_start_time(self._seed)
         self._stopwatch = StopWatch()
