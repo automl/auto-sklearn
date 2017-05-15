@@ -14,7 +14,6 @@ from autosklearn.constants import *
 from autosklearn.util.backend import create
 
 
-
 class AutoMLDecorator(object):
 
     def __init__(self, automl):
@@ -379,7 +378,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         y : array-like, shape = [n_samples] or [n_samples, n_outputs]
             The target classes.
 
-        metric : callable, optional (default='acc_metric')
+        metric : callable, optional (default='autosklearn.metrics.accuracy')
             An instance of :class:`autosklearn.metrics.Scorer` as created by
             :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
             Metrics`_.
@@ -464,11 +463,10 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         y : array-like, shape = [n_samples] or [n_samples, n_outputs]
             The regression target.
 
-        metric : str, optional (default='r2_metric')
-            The metric to optimize for. Can be one of: ['r2_metric',
-            'a_metric']. A description of the metrics can be found in
-            `the paper describing the AutoML Challenge
-            <http://www.causality.inf.ethz.ch/AutoML/automl_ijcnn15.pdf>`_.
+        metric : callable, optional (default='autosklearn.metrics.accuracy')
+            An instance of :class:`autosklearn.metrics.Scorer` as created by
+            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
+            Metrics`_.
 
         feat_type : list, optional (default=None)
             List of str of `len(X.shape[1])` describing the attribute type.
@@ -541,7 +539,7 @@ class AutoMLClassifier(AutoMLDecorator):
             if task == MULTILABEL_CLASSIFICATION:
                 metric = f1_macro
             else:
-                metric=accuracy
+                metric = accuracy
 
         y = self._process_target_classes(y)
 
@@ -585,7 +583,6 @@ class AutoMLClassifier(AutoMLDecorator):
             y = y.flatten()
 
         return y
-
 
     def predict(self, X, batch_size=None, n_jobs=1):
         predicted_probabilities = self._automl.predict(
