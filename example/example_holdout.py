@@ -1,6 +1,3 @@
-from operator import itemgetter
-
-import numpy as np
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
