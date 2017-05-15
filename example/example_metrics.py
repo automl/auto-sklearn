@@ -27,9 +27,15 @@ except ImportError:
 
 
 def accuracy(solution, prediction):
+    # function defining accuracy
     return np.mean(solution == prediction)
 
-def accuracy_with_kwargs(solution, prediction, )
+
+def accuracy_wk(solution, prediction, dummy):
+    # function defining accuracy and accepting an additional argument
+    assert dummy is None
+    return np.mean(solution == prediction)
+
 
 def main():
     # Load adult dataset from openml.org, see https://www.openml.org/t/2117
@@ -52,22 +58,61 @@ def main():
     feat_type = ['categorical' if ci else 'numerical'
                  for ci in categorical_indicator]
 
-    # Run auto-sklearn with our metric
-    accuracy_scorer = autosklearn.metrics.make_scorer(name="accu_self",
+    # Print a list of available metrics
+    print("Available CLASSIFICATION metrics autosklearn.metrics.*:")
+    print("\t*" + "\n\t*".join(autosklearn.metrics.CLASSIFICATION_METRICS))
+
+    print("Available REGRESSION autosklearn.metrics.*:")
+    print("\t*" + "\n\t*".join(autosklearn.metrics.REGRESSION_METRICS))
+
+    # First example: Use predefined accuracy metric
+    print("#"*80)
+    print("Use predefined accuracy metric")
+    cls = autosklearn.classification.\
+        AutoSklearnClassifier(time_left_for_this_task=60,
+                              per_run_time_limit=30, seed=1)
+    cls.fit(X_train, y_train, feat_type=feat_type,
+            metric=autosklearn.metrics.accuracy)
+
+    predictions = cls.predict(X_test)
+    print("Accuracy score {:g} using {:s}".
+          format(sklearn.metrics.accuracy_score(y_test, predictions),
+                 cls._automl._automl._metric.name))
+
+    print("#"*80)
+    print("Use self defined accuracy accuracy metric")
+    accuracy_scorer = autosklearn.metrics.make_scorer(name="accu",
                                                       score_func=accuracy,
                                                       greater_is_better=True,
                                                       needs_proba=False,
                                                       needs_threshold=False)
     cls = autosklearn.classification.\
         AutoSklearnClassifier(time_left_for_this_task=60,
-                              per_run_time_limit=30)
+                              per_run_time_limit=30, seed=1)
     cls.fit(X_train, y_train, feat_type=feat_type, metric=accuracy_scorer)
 
     predictions = cls.predict(X_test)
-    print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+    print("Accuracy score {:g} using {:s}".
+          format(sklearn.metrics.accuracy_score(y_test, predictions),
+                 cls._automl._automl._metric.name))
 
+    print("#"*80)
+    print("Use self defined accuracy with additional argument")
+    accuracy_scorer = autosklearn.metrics.make_scorer(name="accu_add",
+                                                      score_func=accuracy_wk,
+                                                      greater_is_better=True,
+                                                      needs_proba=False,
+                                                      needs_threshold=False,
+                                                      dummy=None)
+    cls = autosklearn.classification.\
+        AutoSklearnClassifier(time_left_for_this_task=60,
+                              per_run_time_limit=30, seed=1)
+    cls.fit(X_train, y_train, feat_type=feat_type, metric=accuracy_scorer)
 
-
+    predictions = cls.predict(X_test)
+    print("Accuracy score {:g} using {:s}".
+          format(sklearn.metrics.accuracy_score(y_test, predictions),
+                 cls._automl._automl._metric.name))
 
 
 if __name__ == "__main__":
