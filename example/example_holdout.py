@@ -6,9 +6,7 @@ import autosklearn.classification
 
 
 def main():
-    digits = sklearn.datasets.load_digits()
-    X = digits.data
-    y = digits.target
+    X, y = sklearn.datasets.load_digits(return_X_y=True)
     X_train, X_test, y_train, y_test = \
         sklearn.model_selection.train_test_split(X, y, random_state=1)
 

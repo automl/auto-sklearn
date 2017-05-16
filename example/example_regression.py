@@ -7,9 +7,7 @@ import autosklearn.regression
 
 
 def main():
-    boston = sklearn.datasets.load_boston()
-    X = boston.data
-    y = boston.target
+    X, y = sklearn.datasets.load_boston(return_X_y=True)
     feature_types = (['numerical'] * 3) + ['categorical'] + (['numerical'] * 9)
     X_train, X_test, y_train, y_test = \
         sklearn.model_selection.train_test_split(X, y, random_state=1)

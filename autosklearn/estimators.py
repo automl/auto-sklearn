@@ -321,7 +321,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             the task type (binary classification, multiclass classification,
             multilabel classification or regression).
 
-        metric : callable, optional (default='acc_metric')
+        metric : callable, optional
             An instance of :class:`autosklearn.metrics.Scorer` as created by
             :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
             Metrics`_.
@@ -463,7 +463,7 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         y : array-like, shape = [n_samples] or [n_samples, n_outputs]
             The regression target.
 
-        metric : callable, optional (default='autosklearn.metrics.accuracy')
+        metric : callable, optional (default='autosklearn.metrics.r2')
             An instance of :class:`autosklearn.metrics.Scorer` as created by
             :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
             Metrics`_.

@@ -11,14 +11,9 @@ except ImportError:
     print("#"*80 + """
     To run this example you need to install openml-python:
 
-    git+https://github.com/renatopp/liac-arff
-    # OpenML is currently not on pypi, use an old version to not depend on
-    # scikit-learn 0.18
-    requests
-    xmltodict
-    git+https://github.com/renatopp/liac-arff
-    git+https://github.com/openml/""" +
-    "openml-python@0b9009b0436fda77d9f7c701bd116aff4158d5e1\n""" +
+    pip install git+https://github.com/renatopp/liac-arff
+    pip install requests xmltodict
+    pip install git+https://github.com/openml/openml-python@develop --no-deps\n""" +
           "#"*80)
     raise
 
@@ -41,7 +36,7 @@ def main():
         get_data(target=task.target_name, return_categorical_indicator=True)
 
     # Create feature type list from openml.org indicator and run autosklearn
-    feat_type = ['categorical' if ci else 'numerical'
+    feat_type = ['Categorical' if ci else 'Numerical'
                  for ci in categorical_indicator]
 
     cls = autosklearn.classification.\
