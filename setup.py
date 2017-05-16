@@ -12,26 +12,23 @@ extensions = cythonize(
      ])
 
 requirements = [
-    "unittest2",
     "setuptools",
     "nose",
     "six",
     "Cython",
-    "numpy>=1.9.0,<1.12",
+    "numpy>=1.9.0",
     "scipy>=0.14.1",
-    "scikit-learn==0.17.1",
+    "scikit-learn==0.18.1",
     "lockfile",
     "joblib",
     "psutil",
     "pyyaml",
-    "ConfigArgParse",
     "liac-arff",
     "pandas",
-    "xgboost==0.4a30",
-    "ConfigSpace>=0.3.1,<0.4",
+    "ConfigSpace>=0.3.3,<0.4",
     "pynisher>=0.4",
-    "pyrfr",
-    "smac==0.3.0"
+    "pyrfr>=0.4,<0.5",
+    "smac==0.5.0"
 ]
 
 with open("autosklearn/__version__.py") as fh:

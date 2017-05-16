@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-import sklearn.cross_validation
+import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 
@@ -7,11 +7,9 @@ import autosklearn.classification
 
 
 def main():
-    digits = sklearn.datasets.load_digits()
-    X = digits.data
-    y = digits.target
+    X, y = sklearn.datasets.load_digits(return_X_y=True)
     X_train, X_test, y_train, y_test = \
-        sklearn.cross_validation.train_test_split(X, y, random_state=1)
+        sklearn.model_selection.train_test_split(X, y, random_state=1)
 
     automl = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120, per_run_time_limit=30,

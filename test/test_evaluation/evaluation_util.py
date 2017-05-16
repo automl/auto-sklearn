@@ -2,11 +2,7 @@ import functools
 import os
 import sys
 import traceback
-
-if sys.version_info[0] == 2:
-    import unittest2 as unittest
-else:
-    import unittest
+import unittest
 
 import numpy as np
 from numpy.linalg import LinAlgError
@@ -94,7 +90,6 @@ def get_multiclass_classification_datamanager():
 
     D = Dummy()
     D.info = {
-        'metric': BAC_METRIC,
         'task': MULTICLASS_CLASSIFICATION,
         'is_sparse': False,
         'label_num': 3
@@ -143,7 +138,6 @@ def get_multilabel_classification_datamanager():
 
     D = Dummy()
     D.info = {
-        'metric': ACC_METRIC,
         'task': MULTILABEL_CLASSIFICATION,
         'is_sparse': False,
         'label_num': 3
@@ -183,7 +177,6 @@ def get_binary_classification_datamanager():
 
     D = Dummy()
     D.info = {
-        'metric': ACC_METRIC,
         'task': BINARY_CLASSIFICATION,
         'is_sparse': False,
         'label_num': 2
@@ -215,7 +208,6 @@ def get_regression_datamanager():
 
     D = Dummy()
     D.info = {
-        'metric': R2_METRIC,
         'task': REGRESSION,
         'is_sparse': False,
         'label_num': 1
@@ -254,7 +246,6 @@ def get_500_classes_datamanager():
 
     D = Dummy()
     D.info = {
-        'metric': ACC_METRIC,
         'task': MULTICLASS_CLASSIFICATION,
         'is_sparse': False,
         'label_num': 500

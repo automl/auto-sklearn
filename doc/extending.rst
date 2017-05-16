@@ -8,7 +8,7 @@ Extending auto-sklearn
 
 auto-sklearn can be easily extended with new classification, regression and
 feature preprocessing methods. In order to do so, a user has to implement a
-wrapper class and make it known to auto-sklearn. This manual will walk you
+wrapper class and register it to auto-sklearn. This manual will walk you
 through the process.
 
 

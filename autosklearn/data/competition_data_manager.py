@@ -3,16 +3,15 @@
 # Functions performing various input/output operations for the ChaLearn
 # AutoML challenge
 
-from __future__ import print_function
 import os
 import re
-import time
+import warnings
 
 import numpy as np
 import scipy.sparse
 
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
-    STRING_TO_TASK_TYPES, MULTICLASS_CLASSIFICATION, STRING_TO_METRIC
+    STRING_TO_TASK_TYPES, MULTICLASS_CLASSIFICATION
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.util import convert_to_num
 try:
@@ -156,7 +155,7 @@ def load_labels(filename):
 
 
 class CompetitionDataManager(AbstractDataManager):
-    def __init__(self, name, encode_labels=True, max_memory_in_mb=1048576):
+    def __init__(self, name, max_memory_in_mb=1048576):
         """ max_memory_size in Mb """
         if name.endswith("/"):
             name = name[:-1]
@@ -213,9 +212,6 @@ class CompetitionDataManager(AbstractDataManager):
                 self.data['Y_test'] = self.load_label(p, self.info['test_num'])
             except (IOError, OSError):
                 pass
-
-        if encode_labels:
-            self.perform1HotEncoding()
 
     def load_data(self, filename, num_points, max_memory_in_mb):
         """Get the data from a text file in one of 3 formats:
@@ -331,7 +327,9 @@ class CompetitionDataManager(AbstractDataManager):
                                       'file.')
 
         self.info['task'] = STRING_TO_TASK_TYPES[self.info['task']]
-        self.info['metric'] = STRING_TO_METRIC[self.info['metric']]
+        warnings.warn('auto-sklearn will no longer take the metric given by '
+                      'the data manager into account. Please specify the '
+                      'metric when calling fit().')
 
         return self.info
 

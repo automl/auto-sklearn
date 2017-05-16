@@ -2,7 +2,6 @@
 # Functions performing various data conversions for the ChaLearn AutoML
 # challenge
 
-from __future__ import print_function
 from six.moves import range
 
 import numpy as np

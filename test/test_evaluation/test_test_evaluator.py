@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
-from __future__ import print_function
 import copy
+import json
 import multiprocessing
 import os
 import shutil
@@ -9,17 +9,19 @@ import unittest
 import unittest.mock
 
 import numpy as np
+from smac.tae.execute_ta_run import StatusType
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 from evaluation_util import get_dataset_getters, BaseEvaluatorTest, \
     get_multiclass_classification_datamanager
 from autosklearn.constants import *
-from autosklearn.evaluation import TestEvaluator
+from autosklearn.evaluation.test_evaluator import TestEvaluator, eval_t
 # Otherwise nosetests thinks this is a test to run...
-from autosklearn.evaluation import eval_t, get_last_result
+from autosklearn.evaluation.util import get_last_result
 from autosklearn.util.pipeline import get_configuration_space
 from autosklearn.util import Backend
+from autosklearn.metrics import accuracy, r2, f1_macro
 
 N_TEST_RUNS = 3
 
@@ -45,12 +47,19 @@ class TestEvaluator_Test(BaseEvaluatorTest, unittest.TestCase):
                 y = D.data['Y_train']
                 if len(y.shape) == 2 and y.shape[1] == 1:
                     D_.data['Y_train'] = y.flatten()
+                metric_lookup = {MULTILABEL_CLASSIFICATION: f1_macro,
+                                 BINARY_CLASSIFICATION: accuracy,
+                                 MULTICLASS_CLASSIFICATION: accuracy,
+                                 REGRESSION: r2}
                 queue_ = multiprocessing.Queue()
-                evaluator = TestEvaluator(D_, backend_mock, queue_)
+
+                evaluator = TestEvaluator(D_, backend_mock, queue_,
+                                          metric=metric_lookup[D.info['task']])
 
                 evaluator.fit_predict_and_loss()
-                duration, result, seed, run_info, status = evaluator.queue.get(timeout=1)
-                self.assertTrue(np.isfinite(result))
+                rval = get_last_result(evaluator.queue)
+                self.assertEqual(len(rval), 3)
+                self.assertTrue(np.isfinite(rval['loss']))
 
 
 class FunctionsTest(unittest.TestCase):
@@ -63,6 +72,7 @@ class FunctionsTest(unittest.TestCase):
         self.tmp_dir = os.path.join(os.path.dirname(__file__),
                                     '.test_cv_functions')
         self.backend = unittest.mock.Mock(spec=Backend)
+        self.dataset_name = json.dumps({'task_id': 'test'})
 
     def tearDown(self):
         try:
@@ -74,33 +84,48 @@ class FunctionsTest(unittest.TestCase):
         eval_t(queue=self.queue,
                backend=self.backend,
                config=self.configuration,
-               data=self.data,
-               seed=1, num_run=1, subsample=None, with_predictions=True,
-               all_scoring_functions=False, output_y_test=True,
-               include=None, exclude=None, disable_file_output=False)
-        info = get_last_result(self.queue)
-        self.assertAlmostEqual(info[1], 0.041666666666666852)
-        self.assertEqual(info[2], 1)
-        self.assertNotIn('bac_metric', info[3])
+               datamanager=self.data,
+               metric=accuracy,
+               seed=1, num_run=1,
+               all_scoring_functions=False, output_y_hat_optimization=False,
+               include=None, exclude=None, disable_file_output=False,
+               instance=self.dataset_name)
+        rval = get_last_result(self.queue)
+        self.assertAlmostEqual(rval['loss'], 0.04)
+        self.assertEqual(rval['status'], StatusType.SUCCESS)
+        self.assertNotIn('bac_metric', rval['additional_run_info'])
 
     def test_eval_test_all_loss_functions(self):
         eval_t(queue=self.queue,
                backend=self.backend,
                config=self.configuration,
-               data=self.data,
-               seed=1, num_run=1, subsample=None, with_predictions=True,
-               all_scoring_functions=True, output_y_test=True,
-               include=None, exclude=None, disable_file_output=False)
-        info = get_last_result(self.queue)
-        fixture = {'f1_metric': 0.0511508951407,
-                   'pac_metric': 0.185257565321,
-                   'acc_metric': 0.06,
-                   'auc_metric': 0.00917546505782,
-                   'bac_metric': 0.0416666666667,
+               datamanager=self.data,
+               metric=accuracy,
+               seed=1, num_run=1,
+               all_scoring_functions=True, output_y_hat_optimization=False,
+               include=None, exclude=None, disable_file_output=False,
+               instance=self.dataset_name)
+        rval = get_last_result(self.queue)
+        fixture = {'accuracy': 0.04,
+                   'balanced_accuracy': 0.0277777777778,
+                   'f1_macro': 0.0341005967604,
+                   'f1_micro': 0.04,
+                   'f1_weighted': 0.0396930946292,
+                   'log_loss': 1.1274919837,
+                   'pac_score': 0.185257565321,
+                   'precision_macro': 0.037037037037,
+                   'precision_micro': 0.04,
+                   'precision_weighted': 0.0355555555556,
+                   'recall_macro': 0.0277777777778,
+                   'recall_micro': 0.04,
+                   'recall_weighted': 0.04,
                    'num_run': -1}
-        rval = {i.split(':')[0]: float(i.split(':')[1]) for i in info[3].split(';')}
+
+        additional_run_info = rval['additional_run_info']
         for key, value in fixture.items():
-            self.assertAlmostEqual(rval[key], fixture[key])
-        self.assertIn('duration', rval)
-        self.assertAlmostEqual(info[1], 0.041666666666666852)
-        self.assertEqual(info[2], 1)
+            self.assertAlmostEqual(additional_run_info[key], fixture[key], msg=key)
+        self.assertEqual(len(additional_run_info), len(fixture) + 1,
+                         msg=sorted(additional_run_info.items()))
+        self.assertIn('duration', additional_run_info)
+        self.assertAlmostEqual(rval['loss'], 0.04)
+        self.assertEqual(rval['status'], StatusType.SUCCESS)

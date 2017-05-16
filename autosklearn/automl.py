@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-from __future__ import print_function
-
 from collections import defaultdict
 import io
 import json
@@ -16,18 +14,42 @@ import scipy.stats
 from sklearn.base import BaseEstimator
 from smac.tae.execute_ta_run import StatusType
 from smac.stats.stats import Stats
-from sklearn.grid_search import _CVScoreTuple
+from sklearn.externals import joblib
 
 from autosklearn.constants import *
+from autosklearn.metrics import Scorer
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
-from autosklearn.evaluation import calculate_score
+from autosklearn.metrics import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline
 from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
-from autosklearn.util.hash import hash_numpy_array
+from autosklearn.util.hash import hash_array_or_matrix
+
+
+def _model_predict(self, X, batch_size, identifier):
+    def send_warnings_to_log(
+            message, category, filename, lineno, file=None, line=None):
+        self._logger.debug('%s:%s: %s:%s' %
+                       (filename, lineno, category.__name__, message))
+        return
+    model = self.models_[identifier]
+    X_ = X.copy()
+    with warnings.catch_warnings():
+        warnings.showwarning = send_warnings_to_log
+        if self._task in REGRESSION_TASKS:
+            prediction = model.predict(X_, batch_size=batch_size)
+        else:
+            prediction = model.predict_proba(X_, batch_size=batch_size)
+    if len(prediction.shape) < 1 or len(X_.shape) < 1 or \
+            X_.shape[0] < 1 or prediction.shape[0] != X_.shape[0]:
+        self._logger.warning("Prediction shape for model %s is %s "
+                             "while X_.shape is %s" %
+                             (model, str(prediction.shape),
+                              str(X_.shape)))
+    return prediction
 
 
 class AutoML(BaseEstimator):
@@ -119,7 +141,7 @@ class AutoML(BaseEstimator):
 
     def fit(self, X, y,
             task=MULTICLASS_CLASSIFICATION,
-            metric='acc_metric',
+            metric=None,
             feat_type=None,
             dataset_name=None):
         if not self._shared_mode:
@@ -136,7 +158,7 @@ class AutoML(BaseEstimator):
         self._backend.context.create_directories()
 
         if dataset_name is None:
-            dataset_name = hash_numpy_array(X)
+            dataset_name = hash_array_or_matrix(X)
 
         self._backend.save_start_time(self._seed)
         self._stopwatch = StopWatch()
@@ -145,8 +167,11 @@ class AutoML(BaseEstimator):
 
         self._logger = self._get_logger(dataset_name)
 
-        if isinstance(metric, str):
-            metric = STRING_TO_METRIC[metric]
+        if metric is None:
+            raise ValueError('No metric given.')
+        if not isinstance(metric, Scorer):
+            raise ValueError('Metric must be instance of '
+                             'autosklearn.metric.Scorer.')
 
         if feat_type is not None and len(feat_type) != X.shape[1]:
             raise ValueError('Array feat_type does not have same number of '
@@ -164,14 +189,12 @@ class AutoML(BaseEstimator):
         self._data_memory_limit = None
         loaded_data_manager = XYDataManager(X, y,
                                             task=task,
-                                            metric=metric,
                                             feat_type=feat_type,
-                                            dataset_name=dataset_name,
-                                            encode_labels=False)
+                                            dataset_name=dataset_name)
 
-        return self._fit(loaded_data_manager)
+        return self._fit(loaded_data_manager, metric)
 
-    def fit_automl_dataset(self, dataset):
+    def fit_automl_dataset(self, dataset, metric):
         self._stopwatch = StopWatch()
         self._backend.save_start_time(self._seed)
 
@@ -185,15 +208,14 @@ class AutoML(BaseEstimator):
         # Encoding the labels will be done after the metafeature calculation!
         self._data_memory_limit = float(self._ml_memory_limit) / 3
         loaded_data_manager = CompetitionDataManager(
-            dataset, encode_labels=False,
-            max_memory_in_mb=self._data_memory_limit)
+            dataset, max_memory_in_mb=self._data_memory_limit)
         loaded_data_manager_str = str(loaded_data_manager).split('\n')
         for part in loaded_data_manager_str:
             self._logger.debug(part)
 
-        return self._fit(loaded_data_manager)
+        return self._fit(loaded_data_manager, metric)
 
-    def fit_on_datamanager(self, datamanager):
+    def fit_on_datamanager(self, datamanager, metric):
         self._stopwatch = StopWatch()
         self._backend.save_start_time(self._seed)
 
@@ -203,7 +225,7 @@ class AutoML(BaseEstimator):
         self._dataset_name = name
 
         self._logger = self._get_logger(name)
-        self._fit(datamanager)
+        self._fit(datamanager, metric)
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
@@ -249,6 +271,7 @@ class AutoML(BaseEstimator):
                                     initial_num_run=num_run,
                                     logger=self._logger,
                                     stats=stats,
+                                    metric=self._metric,
                                     memory_limit=memory_limit,
                                     disable_file_output=self._disable_evaluator_output,
                                     **self._resampling_strategy_arguments)
@@ -258,17 +281,27 @@ class AutoML(BaseEstimator):
         if status == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy predictions.")
         else:
-            self._logger.error('Error creating dummy predictions:%s ',
-                               additional_info)
+            self._logger.error('Error creating dummy predictions: %s ',
+                               str(additional_info))
 
         return ta.num_run
 
-    def _fit(self, datamanager):
+    def _fit(self, datamanager, metric):
         # Reset learnt stuff
         self.models_ = None
         self.ensemble_ = None
 
         # Check arguments prior to doing anything!
+        if not isinstance(self._disable_evaluator_output, (bool, list)):
+            raise ValueError('disable_evaluator_output must be of type bool '
+                             'or list.')
+        if isinstance(self._disable_evaluator_output, list):
+            allowed_elements = ['model', 'y_optimization']
+            for element in self._disable_evaluator_output:
+                if element not in allowed_elements:
+                    raise ValueError("List member '%s' for argument "
+                                     "'disable_evaluator_output' must be one "
+                                     "of " + str(allowed_elements))
         if self._resampling_strategy not in ['holdout', 'holdout-iterative-fit',
                                              'cv', 'partial-cv',
                                              'partial-cv-iterative-fit']:
@@ -296,7 +329,7 @@ class AutoML(BaseEstimator):
                 if not self._shared_mode:
                     raise
 
-        self._metric = datamanager.info['metric']
+        self._metric = metric
         self._task = datamanager.info['task']
         self._label_num = datamanager.info['label_num']
 
@@ -401,6 +434,7 @@ class AutoML(BaseEstimator):
                                     smac_iters=self._max_iter_smac,
                                     seed=self._seed,
                                     metadata_directory=self._metadata_directory,
+                                    metric=self._metric,
                                     resampling_strategy=self._resampling_strategy,
                                     resampling_strategy_args=self._resampling_strategy_arguments,
                                     acquisition_function=self.acquisition_function,
@@ -411,14 +445,14 @@ class AutoML(BaseEstimator):
                                     exclude_preprocessors=self._exclude_preprocessors,
                                     disable_file_output=self._disable_evaluator_output,
                                     configuration_mode=self._configuration_mode)
-            self.runhistory_, self.trajectory_ = _proc_smac.run_smbo()
-            runhistory_filename = os.path.join(self._backend.temporary_directory,
-                                               'runhistory.json',)
-            self.runhistory_.save_json(runhistory_filename)
+            self.runhistory_, self.trajectory_, self.fANOVA_input_ = \
+                _proc_smac.run_smbo()
             trajectory_filename = os.path.join(
-                self._backend.temporary_directory, 'trajectory.json')
-            saveable_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
-                                   for entry in self.trajectory_]
+                self._backend.get_smac_output_directory(self._seed) + '_run1',
+                'trajectory.json')
+            saveable_trajectory = \
+                [list(entry[:2]) + [entry[2].get_dictionary()] + list(entry[3:])
+                 for entry in self.trajectory_]
             with open(trajectory_filename, 'w') as fh:
                 json.dump(saveable_trajectory, fh)
 
@@ -434,7 +468,7 @@ class AutoML(BaseEstimator):
 
     def refit(self, X, y):
         def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None):
+                                 file=None, line=None):
             self._logger.debug('%s:%s: %s:%s' %
                                (filename, lineno, category.__name__, message))
             return
@@ -462,16 +496,34 @@ class AutoML(BaseEstimator):
                             warnings.showwarning = send_warnings_to_log
                             model.fit(X.copy(), y.copy())
                         break
-                    except ValueError:
+                    except ValueError as e:
                         indices = list(range(X.shape[0]))
                         random_state.shuffle(indices)
                         X = X[indices]
                         y = y[indices]
 
+                        if i == 9:
+                            raise e
+
         self._can_predict = True
         return self
 
-    def predict(self, X):
+    def predict(self, X, batch_size=None, n_jobs=1):
+        """predict.
+
+        Parameters
+        ----------
+        X: array-like, shape = (n_samples, n_features)
+
+        batch_size: int or None, defaults to None
+            batch_size controls whether the pipelines will be
+            called on small chunks of the data. Useful when calling the
+            predict method on the whole array X results in a MemoryError.
+
+        n_jobs: int, defaults to 1
+            Parallelize the predictions across the models with n_jobs
+            processes.
+        """
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
@@ -486,31 +538,11 @@ class AutoML(BaseEstimator):
                 self.ensemble_ is None:
             self._load_models()
 
-        def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None):
-            self._logger.debug('%s:%s: %s:%s' %
-                               (filename, lineno, category.__name__, message))
-            return
-
-        all_predictions = []
-        for identifier in self.ensemble_.get_model_identifiers():
-            model = self.models_[identifier]
-
-            X_ = X.copy()
-            with warnings.catch_warnings():
-                warnings.showwarning = send_warnings_to_log
-                if self._task in REGRESSION_TASKS:
-                    prediction = model.predict(X_)
-                else:
-                    prediction = model.predict_proba(X_)
-
-            if len(prediction.shape) < 1 or len(X_.shape) < 1 or \
-                    X_.shape[0] < 1 or prediction.shape[0] != X_.shape[0]:
-                self._logger.warning("Prediction shape for model %s is %s "
-                                     "while X_.shape is %s" %
-                                     (model, str(prediction.shape),
-                                      str(X_.shape)))
-            all_predictions.append(prediction)
+        # Parallelize predictions across models with n_jobs processes.
+        # Each process computes predictions in chunks of batch_size rows.
+        all_predictions = joblib.Parallel(n_jobs=n_jobs)(
+            joblib.delayed(_model_predict)(self, X, batch_size, identifier)
+            for identifier in self.ensemble_.get_model_identifiers())
 
         if len(all_predictions) == 0:
             raise ValueError('Something went wrong generating the predictions. '
@@ -596,49 +628,33 @@ class AutoML(BaseEstimator):
         if self.ensemble_:
             identifiers = self.ensemble_.identifiers_
             self.models_ = self._backend.load_models_by_identifiers(identifiers)
-        else:
-            self.models_ = self._backend.load_all_models(seed)
+            if len(self.models_) == 0 and self._resampling_strategy not in \
+                    ['partial-cv', 'partial-cv-iterative-fit']:
+                raise ValueError('No models fitted!')
 
-        if len(self.models_) == 0 and self._resampling_strategy not in \
-                ['partial-cv', 'partial-cv-iterative-fit']:
-            raise ValueError('No models fitted!')
+        elif self._disable_evaluator_output is False or \
+                (isinstance(self._disable_evaluator_output, list) and
+                 'model' not in self._disable_evaluator_output):
+            model_names = self._backend.list_all_models(seed)
+
+            if len(model_names) == 0 and self._resampling_strategy not in \
+                    ['partial-cv', 'partial-cv-iterative-fit']:
+                raise ValueError('No models fitted!')
+
+            self.models = []
+
+        else:
+            self.models = []
 
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
         # Don't know if the reshaping should be done there or in calculate_score
         prediction = self.predict(X)
-        return calculate_score(y, prediction, self._task,
-                               self._metric, self._label_num,
-                               logger=self._logger)
-
-    @property
-    def grid_scores_(self):
-        grid_scores = list()
-
-        scores_per_config = defaultdict(list)
-        config_list = list()
-
-        for run_key in self.runhistory_.data:
-            run_value = self.runhistory_.data[run_key]
-
-            config_id = run_key.config_id
-            cost = run_value.cost
-
-            if config_id not in config_list:
-                config_list.append(config_id)
-
-            scores_per_config[config_id].append(cost)
-
-        for config_id in config_list:
-            scores = [1 - score for score in scores_per_config[config_id]]
-            mean_score = np.mean(scores)
-            config = self.runhistory_.ids_config[config_id]
-
-            grid_score = _CVScoreTuple(config.get_dictionary(), mean_score,
-                                       scores)
-            grid_scores.append(grid_score)
-
-        return grid_scores
+        return calculate_score(solution=y,
+                               prediction=prediction,
+                               task_type=self._task,
+                               metric=self._metric,
+                               all_scoring_functions=False)
 
     @property
     def cv_results_(self):
@@ -730,7 +746,7 @@ class AutoML(BaseEstimator):
         sio = io.StringIO()
         sio.write('auto-sklearn results:\n')
         sio.write('  Dataset name: %s\n' % self._dataset_name)
-        sio.write('  Metric: %s\n' % METRIC_TO_STRING[self._metric])
+        sio.write('  Metric: %s\n' % self._metric)
         idx_best_run = np.argmax(cv_results['mean_test_score'])
         best_score = cv_results['mean_test_score'][idx_best_run]
         sio.write('  Best validation score: %f\n' % best_score)
@@ -747,7 +763,6 @@ class AutoML(BaseEstimator):
         sio.write('  Number of target algorithms that exceeded the time '
                   'limit: %d\n' % num_memout)
         return sio.getvalue()
-
 
     def show_models(self):
         if self.models_ is None or len(self.models_) == 0 or \

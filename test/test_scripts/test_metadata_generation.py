@@ -7,6 +7,8 @@ import subprocess
 import sys
 import unittest
 
+import arff
+
 
 class TestMetadataGeneration(unittest.TestCase):
 
@@ -46,7 +48,10 @@ class TestMetadataGeneration(unittest.TestCase):
         self.assertTrue(os.path.exists(commands_output_file))
 
         with open(commands_output_file) as fh:
-            cmd = fh.readline()
+            while True:
+                cmd = fh.readline()
+                if 'task-id 253' in cmd:
+                    break
 
         self.assertIn('time-limit 86400', cmd)
         self.assertIn('per-run-time-limit 1800', cmd)
@@ -62,18 +67,20 @@ class TestMetadataGeneration(unittest.TestCase):
         expected_output_directory = os.path.join(self.working_directory,
                                                  'configuration',
                                                  'classification',
-                                                 '233-1')
+                                                 '253')
         self.assertTrue(os.path.exists(expected_output_directory))
         smac_log = os.path.join(self.working_directory,
-                                'configuration/classification/233-1',
-                                'AutoML(1):233.log')
+                                'configuration/classification/253',
+                                'AutoML(1):253.log')
         with open(smac_log) as fh:
             smac_output = fh.read()
         self.assertEqual(rval.returncode, 0, msg=str(rval) + '\n' + smac_output)
         expected_validation_output = os.path.join(expected_output_directory,
+                                                  'smac3-output_1_run1',
                                                   'validation_trajectory.json')
         self.assertTrue(os.path.exists(expected_validation_output))
-        trajectory = os.path.join(expected_output_directory, 'trajectory.json')
+        trajectory = os.path.join(expected_output_directory,
+                                  'smac3-output_1_run1', 'trajectory.json')
 
         with open(expected_validation_output) as fh_validation:
             with open(trajectory) as fh_trajectory:
@@ -91,12 +98,18 @@ class TestMetadataGeneration(unittest.TestCase):
         # print(rval.stdout, flush=True)
         # print(rval.stderr, flush=True)
         self.assertEqual(rval.returncode, 0, msg=str(rval))
+
         for file in ['algorithm_runs.arff', 'configurations.csv',
                      'description.results.txt']:
-            self.assertTrue(os.path.exists(os.path.join(self.working_directory,
-                                                        'configuration_results',
-                                                        'acc_metric_binary.classification_dense',
-                                                        file)))
+            for metric in ['accuracy', 'balanced_accuracy', 'log_loss']:
+                self.assertTrue(os.path.exists(os.path.join(self.working_directory,
+                                                            'configuration_results',
+                                                            '%s_binary.classification_dense' % metric,
+                                                            file)), msg=str((metric, file)))
+            self.assertFalse(os.path.exists(os.path.join(self.working_directory,
+                                                         'configuration_results',
+                                                         'roc_auc_binary.classification_dense',
+                                                         file)), msg=file)
 
         # 6. Calculate metafeatures
         script_filename = os.path.join(scripts_directory, '03_calculate_metafeatures.py')
@@ -126,8 +139,26 @@ class TestMetadataGeneration(unittest.TestCase):
                      'readme.txt']:
             self.assertTrue(os.path.exists(os.path.join(self.working_directory,
                                                         'metadata',
-                                                        'acc_metric_binary.classification_dense',
+                                                        'accuracy_binary.classification_dense',
                                                         file)))
+
+        with open(os.path.join(self.working_directory,
+                               'metadata',
+                               'accuracy_binary.classification_dense',
+                               'algorithm_runs.arff')) as fh:
+            algorithm_runs = arff.load(fh)
+            self.assertEqual(algorithm_runs['attributes'],
+                             [('instance_id', 'STRING'),
+                              ('repetition', 'NUMERIC'),
+                              ('algorithm', 'STRING'),
+                              ('accuracy', 'NUMERIC'),
+                              ('runstatus',
+                               ['ok', 'timeout', 'memout', 'not_applicable',
+                                'crash', 'other'])])
+            self.assertEqual(len(algorithm_runs['data']), 1)
+            self.assertEqual(len(algorithm_runs['data'][0]), 5)
+            self.assertLess(algorithm_runs['data'][0][3], 0.9)
+            self.assertEqual(algorithm_runs['data'][0][4], 'ok')
 
     def tearDown(self):
         for i in range(5):

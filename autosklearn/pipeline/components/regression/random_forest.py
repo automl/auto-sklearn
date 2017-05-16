@@ -28,12 +28,11 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
         self.n_jobs = n_jobs
         self.estimator = None
 
-    def fit(self, X, y, sample_weight=None, refit=False):
-        if self.estimator is None or refit:
-            self.iterative_fit(X, y, n_iter=1, refit=refit)
-
+    def fit(self, X, y, sample_weight=None):
+        self.iterative_fit(X, y, n_iter=1, refit=True)
         while not self.configuration_fully_fitted():
             self.iterative_fit(X, y, n_iter=1)
+
         return self
 
     def iterative_fit(self, X, y, n_iter=1, refit=False):
@@ -44,7 +43,7 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
 
         if self.estimator is None:
             self.n_estimators = int(self.n_estimators)
-            if self.max_depth == "None":
+            if self.max_depth == "None" or self.max_depth is None:
                 self.max_depth = None
             else:
                 self.max_depth = int(self.max_depth)
@@ -62,11 +61,11 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
                 self.bootstrap = True
             else:
                 self.bootstrap = False
-            if self.max_leaf_nodes == "None":
+            if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
                 self.max_leaf_nodes = None
 
             self.estimator = RandomForestRegressor(
-                n_estimators=0,
+                n_estimators=n_iter,
                 criterion=self.criterion,
                 max_features=max_features,
                 max_depth=self.max_depth,
@@ -78,11 +77,10 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
                 random_state=self.random_state,
                 n_jobs=self.n_jobs,
                 warm_start=True)
+        else:
+            self.estimator.n_estimators += n_iter
 
-        tmp = self.estimator
-        tmp.n_estimators += n_iter
-        tmp.fit(X, y)
-        self.estimator = tmp
+        self.estimator.fit(X, y)
         return self
 
     def configuration_fully_fitted(self):

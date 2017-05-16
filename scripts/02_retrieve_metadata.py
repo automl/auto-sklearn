@@ -11,6 +11,7 @@ import numpy as np
 from ConfigSpace.configuration_space import Configuration
 
 from autosklearn.constants import *
+from autosklearn.metrics import CLASSIFICATION_METRICS, REGRESSION_METRICS
 from autosklearn.util import pipeline
 
 
@@ -29,15 +30,15 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
     possible_experiment_directories = os.listdir(validation_directory)
 
     for ped in possible_experiment_directories:
-        task_name, seed = ped.split('-')[0], ped.split('-')[1]
-        ped = os.path.join(validation_directory, ped)
+        task_name = None
 
+        ped = os.path.join(validation_directory, ped)
         if not os.path.exists(ped) or not os.path.isdir(ped):
             continue
-
         print("Going through directory %s" % ped)
 
-        validation_trajectory_file = os.path.join(ped, 'validation_trajectory.json')
+        validation_trajectory_file = os.path.join(ped, 'smac3-output_1_run1',
+                                                  'validation_trajectory.json')
         with open(validation_trajectory_file) as fh:
             validation_trajectory = json.load(fh)
 
@@ -45,7 +46,8 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
         best_configuration = None
         for entry in validation_trajectory:
             config = entry[2]
-            score = entry[-1][str(metric)]
+            task_name = entry[-2]
+            score = entry[-1].get(str(metric), np.inf)
 
             if score < best_value:
                 try:
@@ -55,7 +57,12 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                 except:
                     pass
 
-        if best_configuration in configurations_to_ids:
+        if task_name is None:
+            continue
+
+        if best_configuration is None:
+            continue
+        elif best_configuration in configurations_to_ids:
             config_id = configurations_to_ids[best_configuration]
         else:
             config_id = len(configurations_to_ids)
@@ -72,9 +79,9 @@ def write_output(outputs, configurations, output_dir, configuration_space,
     arff_object = dict()
     arff_object['attributes'] = [('instance_id', 'STRING'),
                                  ('repetition', 'NUMERIC'),
-                                 ('algorithm', 'STRING')] + \
-                                [(METRIC_TO_STRING[metric], 'NUMERIC')] + \
-                                [('runstatus',
+                                 ('algorithm', 'STRING'),
+                                 (metric, 'NUMERIC'),
+                                 ('runstatus',
                                   ['ok', 'timeout', 'memout', 'not_applicable',
                                    'crash', 'other'])]
     arff_object['relation'] = "ALGORITHM_RUNS"
@@ -124,7 +131,7 @@ def write_output(outputs, configurations, output_dir, configuration_space,
                   for configuration_id in sorted(configurations.keys())])
     description['algorithms_stochastic'] = \
         ",".join([])
-    description['performance_measures'] = METRIC_TO_STRING[metric]
+    description['performance_measures'] = metric
     description['performance_type'] = 'solution_quality'
 
     with open(os.path.join(output_dir, "description.results.txt"),
@@ -151,12 +158,12 @@ def main():
     if task_type == 'classification':
         metadata_sets = itertools.product(
             [0, 1], [BINARY_CLASSIFICATION, MULTICLASS_CLASSIFICATION],
-            [ACC_METRIC, AUC_METRIC, BAC_METRIC, F1_METRIC, PAC_METRIC])
+            CLASSIFICATION_METRICS)
         input_directory = os.path.join(working_directory, 'configuration',
                                        'classification')
     elif task_type == 'regression':
         metadata_sets = itertools.product(
-            [0, 1], [REGRESSION], [A_METRIC, R2_METRIC])
+            [0, 1], [REGRESSION], REGRESSION_METRICS)
         input_directory = os.path.join(working_directory, 'configuration',
                                        'regression')
     else:
@@ -165,19 +172,14 @@ def main():
     output_dir = os.path.join(working_directory, 'configuration_results')
 
     for sparse, task, metric in metadata_sets:
-        print(TASK_TYPES_TO_STRING[task], METRIC_TO_STRING[metric], sparse)
+        print(TASK_TYPES_TO_STRING[task], metric, sparse)
 
         output_dir_ = os.path.join(output_dir, '%s_%s_%s' % (
-            METRIC_TO_STRING[metric], TASK_TYPES_TO_STRING[task],
+            metric, TASK_TYPES_TO_STRING[task],
             'sparse' if sparse else 'dense'))
 
         configuration_space = pipeline.get_configuration_space(
             {'is_sparse': sparse, 'task': task})
-
-        try:
-            os.makedirs(output_dir_)
-        except:
-            pass
 
         outputs, configurations = retrieve_matadata(
             validation_directory=input_directory,
@@ -188,9 +190,14 @@ def main():
 
         if len(outputs) == 0:
             print("No output found for %s, %s, %s" %
-                  (STRING_TO_METRIC[metric], TASK_TYPES_TO_STRING[task],
+                  (metric, TASK_TYPES_TO_STRING[task],
                    'sparse' if sparse else 'dense'))
             continue
+
+        try:
+            os.makedirs(output_dir_)
+        except:
+            pass
 
         write_output(outputs, configurations, output_dir_,
                      configuration_space, metric)

@@ -7,7 +7,7 @@ import sys
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
-from autosklearn.constants import *
+from autosklearn.metrics import r2, balanced_accuracy
 
 from smac.stats.stats import Stats
 from smac.scenario.scenario import Scenario
@@ -42,7 +42,7 @@ try:
     os.makedirs(configuration_output_dir)
 except:
     pass
-tmp_dir = os.path.join(configuration_output_dir, '%d-%d' % (task_id, seed))
+tmp_dir = os.path.join(configuration_output_dir, str(task_id))
 
 automl_arguments = {'time_left_for_this_task': time_limit,
                     'per_run_time_limit': per_run_time_limit,
@@ -60,10 +60,10 @@ X_train, y_train, X_test, y_test, cat = load_task(task_id)
 
 if task_type == 'classification':
     automl = AutoSklearnClassifier(**automl_arguments)
-    metric = BAC_METRIC
+    metric = balanced_accuracy
 elif task_type == 'regression':
     automl = AutoSklearnRegressor(**automl_arguments)
-    metric = R2_METRIC
+    metric = r2
 else:
     raise ValueError(task_type)
 
@@ -88,10 +88,10 @@ else:
     memory_limit_factor = 2
 
 for entry in trajectory:
-    incumbent_id = entry[1]
-    train_performance = entry[0]
+    incumbent_id = entry.incumbent_id
+    train_performance = entry.train_perf
     if incumbent_id not in incumbent_id_to_model:
-        config = entry[2]
+        config = entry.incumbent
 
         logger = logging.getLogger('Testing:)')
         stats = Stats(Scenario({'cutoff_time': per_run_time_limit * 2}))
@@ -101,30 +101,26 @@ for entry in trajectory:
         ta = ExecuteTaFuncWithQueue(backend=automl._automl._automl._backend,
                                     autosklearn_seed=seed,
                                     resampling_strategy='test',
-                                    with_predictions=False,
                                     memory_limit=memory_limit_factor * automl_arguments['ml_memory_limit'],
                                     disable_file_output=True,
                                     logger=logger,
                                     stats=stats,
-                                    all_scoring_functions=True)
-        status, cost, runtime, additional_run_info = ta.start(config=config,
-                                                              instance=None,
-                                                              cutoff=per_run_time_limit)
+                                    all_scoring_functions=True,
+                                    metric=metric)
+        status, cost, runtime, additional_run_info = ta.start(
+            config=config, instance=None, cutoff=per_run_time_limit*3)
+
         if status == StatusType.SUCCESS:
-            scores = additional_run_info.split(';')
-            scores = [score.split(':') for score in scores]
-            scores = [(score[0].strip(), score[1].strip()) for score in scores]
-            scores = [(STRING_TO_METRIC[score[0]], score[1]) for score in scores
-                      if score[0] in STRING_TO_METRIC]
-            scores = {score[0]: float(score[1]) for score in scores}
-            assert len(scores) > 1, scores
+            assert len(additional_run_info) > 1, additional_run_info
 
         # print(additional_run_info)
 
-        validated_trajectory.append(list(entry) + [scores])
+        validated_trajectory.append(list(entry) + [task_id] +
+                                    [additional_run_info])
 
 validated_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
                         for entry in validated_trajectory]
-validated_trajectory_file = os.path.join(tmp_dir, 'validation_trajectory.json')
+validated_trajectory_file = os.path.join(tmp_dir, 'smac3-output_%d_run1' % seed,
+                                         'validation_trajectory.json')
 with open(validated_trajectory_file, 'w') as fh:
     json.dump(validated_trajectory, fh)

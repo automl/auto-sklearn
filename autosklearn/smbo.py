@@ -1,3 +1,5 @@
+import glob
+import json
 import os
 import time
 import traceback
@@ -6,23 +8,20 @@ import warnings
 import numpy as np
 import pynisher
 
-# JTS TODO: notify aaron to clean up these nasty nested modules
-from ConfigSpace.configuration_space import Configuration
-
 from smac.facade.smac_facade import SMAC
 from smac.facade.roar_facade import ROAR
 from smac.utils.util_funcs import get_types
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_ta_run import StatusType
-from smac.smbo.objective import average_cost
+from smac.optimizer.objective import average_cost
 from smac.runhistory.runhistory import RunHistory
 from smac.runhistory.runhistory2epm import RunHistory2EPM4Cost, \
     RunHistory2EPM4EIPS
 from smac.epm.uncorrelated_mo_rf_with_instances import \
     UncorrelatedMultiObjectiveRandomForestWithInstances
 from smac.epm.rf_with_instances import RandomForestWithInstances
-from smac.smbo.acquisition import EIPS
-from smac.smbo import pSMAC
+from smac.optimizer.acquisition import EIPS
+from smac.optimizer import pSMAC
 
 import autosklearn.metalearning
 from autosklearn.constants import *
@@ -34,8 +33,6 @@ from autosklearn.util import get_logger
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.metafeatures.metafeatures import \
     calculate_all_metafeatures_with_labels, calculate_all_metafeatures_encoded_labels
-
-SENTINEL = 'uiaeo'
 
 EXCLUDE_META_FEATURES_CLASSIFICATION = {
     'Landmark1NN',
@@ -80,9 +77,9 @@ def load_data(dataset_info, backend, max_mem=None):
     # Datamanager probably doesn't exist
     if D is None:
         if max_mem is None:
-            D = CompetitionDataManager(dataset_info, encode_labels=True)
+            D = CompetitionDataManager(dataset_info)
         else:
-            D = CompetitionDataManager(dataset_info, encode_labels=True, max_memory_in_mb=max_mem)
+            D = CompetitionDataManager(dataset_info, max_memory_in_mb=max_mem)
     return D
 
 
@@ -103,7 +100,7 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
         logger.info('Start calculating metafeatures for %s', basename)
         result = calculate_all_metafeatures_with_labels(
             x_train, y_train, categorical=categorical,
-            dataset_name=basename+SENTINEL,
+            dataset_name=basename,
             dont_calculate=EXCLUDE_META_FEATURES, )
         for key in list(result.metafeature_values.keys()):
             if result.metafeature_values[key].type_ != 'METAFEATURE':
@@ -127,7 +124,7 @@ def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
     watcher.start_task(task_name)
     result = calculate_all_metafeatures_encoded_labels(
         x_train, y_train, categorical=[False] * x_train.shape[1],
-        dataset_name=basename+SENTINEL, dont_calculate=EXCLUDE_META_FEATURES)
+        dataset_name=basename, dont_calculate=EXCLUDE_META_FEATURES)
     for key in list(result.metafeature_values.keys()):
         if result.metafeature_values[key].type_ != 'METAFEATURE':
             del result.metafeature_values[key]
@@ -179,6 +176,7 @@ class AutoMLSMBO(object):
                  total_walltime_limit,
                  func_eval_time_limit,
                  memory_limit,
+                 metric,
                  watcher, start_num_run=1,
                  data_memory_limit=None,
                  num_metalearning_cfgs=25,
@@ -199,10 +197,8 @@ class AutoMLSMBO(object):
         super(AutoMLSMBO, self).__init__()
         # data related
         self.dataset_name = dataset_name
-        #self.output_dir = output_dir
-        #self.tmp_dir = tmp_dir
         self.datamanager = None
-        self.metric = None
+        self.metric = metric
         self.task = None
         self.backend = backend
 
@@ -243,7 +239,7 @@ class AutoMLSMBO(object):
         self.logger = get_logger(logger_name)
 
     def _send_warnings_to_log(self, message, category, filename, lineno,
-                              file=None):
+                              file=None, line=None):
         self.logger.debug('%s:%s: %s:%s', filename, lineno, category.__name__,
                           message)
 
@@ -257,14 +253,14 @@ class AutoMLSMBO(object):
         else:
             self.datamanager = load_data(self.dataset_name,
                                          self.backend,
-                                         max_mem = max_mem)
-        self.metric = self.datamanager.info['metric']
+                                         max_mem=max_mem)
+
         self.task = self.datamanager.info['task']
 
     def collect_metalearning_suggestions(self, meta_base):
         metalearning_configurations = _get_metalearning_configurations(
             meta_base=meta_base,
-            basename=self.dataset_name+SENTINEL,
+            basename=self.dataset_name,
             metric=self.metric,
             configuration_space=self.config_space,
             task=self.task,
@@ -353,7 +349,6 @@ class AutoMLSMBO(object):
         num_params = len(self.config_space.get_hyperparameters())
         # allocate a run history
         num_run = self.start_num_run
-        instance_id = self.dataset_name + SENTINEL
 
         # Initialize some SMAC dependencies
         runhistory = RunHistory(aggregate_func=average_cost)
@@ -375,116 +370,126 @@ class AutoMLSMBO(object):
                     meta_task = self.task
                 metadata_directory = os.path.join(
                     metalearning_directory, 'files',
-                    '%s_%s_%s' % (METRIC_TO_STRING[self.metric],
-                                  TASK_TYPES_TO_STRING[meta_task],
+                    '%s_%s_%s' % (self.metric, TASK_TYPES_TO_STRING[meta_task],
                                   'sparse' if self.datamanager.info['is_sparse']
                                   else 'dense'))
                 self.metadata_directory = metadata_directory
 
-            self.logger.info('Metadata directory: %s', self.metadata_directory)
-            meta_base = MetaBase(self.config_space, self.metadata_directory)
+            if os.path.exists(self.metadata_directory):
 
-            metafeature_calculation_time_limit = int(
-                self.total_walltime_limit / 4)
-            metafeature_calculation_start_time = time.time()
-            meta_features = self._calculate_metafeatures_with_limits(
-                metafeature_calculation_time_limit)
-            metafeature_calculation_end_time = time.time()
-            metafeature_calculation_time_limit = \
-                metafeature_calculation_time_limit - (
-                metafeature_calculation_end_time -
-                metafeature_calculation_start_time)
+                self.logger.info('Metadata directory: %s', self.metadata_directory)
+                meta_base = MetaBase(self.config_space, self.metadata_directory)
 
-            if metafeature_calculation_time_limit < 1:
-                self.logger.warning('Time limit for metafeature calculation less '
-                                    'than 1 seconds (%f). Skipping calculation '
-                                    'of metafeatures for encoded dataset.',
-                                    metafeature_calculation_time_limit)
-                meta_features_encoded = None
+                try:
+                    meta_base.remove_dataset(self.dataset_name)
+                except:
+                    pass
+
+                metafeature_calculation_time_limit = int(
+                    self.total_walltime_limit / 4)
+                metafeature_calculation_start_time = time.time()
+                meta_features = self._calculate_metafeatures_with_limits(
+                    metafeature_calculation_time_limit)
+                metafeature_calculation_end_time = time.time()
+                metafeature_calculation_time_limit = \
+                    metafeature_calculation_time_limit - (
+                    metafeature_calculation_end_time -
+                    metafeature_calculation_start_time)
+
+                if metafeature_calculation_time_limit < 1:
+                    self.logger.warning('Time limit for metafeature calculation less '
+                                        'than 1 seconds (%f). Skipping calculation '
+                                        'of metafeatures for encoded dataset.',
+                                        metafeature_calculation_time_limit)
+                    meta_features_encoded = None
+                else:
+                    with warnings.catch_warnings():
+                        warnings.showwarning = self._send_warnings_to_log
+                        self.datamanager.perform1HotEncoding()
+                    meta_features_encoded = \
+                        self._calculate_metafeatures_encoded_with_limits(
+                            metafeature_calculation_time_limit)
+
+                # In case there is a problem calculating the encoded meta-features
+                if meta_features is None:
+                    if meta_features_encoded is not None:
+                        meta_features = meta_features_encoded
+                else:
+                    if meta_features_encoded is not None:
+                        meta_features.metafeature_values.update(
+                            meta_features_encoded.metafeature_values)
+
+                if meta_features is not None:
+                    meta_base.add_dataset(self.dataset_name, meta_features)
+                    # Do mean imputation of the meta-features - should be done specific
+                    # for each prediction model!
+                    all_metafeatures = meta_base.get_metafeatures(
+                        features=list(meta_features.keys()))
+                    all_metafeatures.fillna(all_metafeatures.mean(), inplace=True)
+
+                    with warnings.catch_warnings():
+                        warnings.showwarning = self._send_warnings_to_log
+                        metalearning_configurations = self.collect_metalearning_suggestions(
+                            meta_base)
+                    if metalearning_configurations is None:
+                        metalearning_configurations = []
+                    self.reset_data_manager()
+
+                    self.logger.info('%s', meta_features)
+
+                    # Convert meta-features into a dictionary because the scenario
+                    # expects a dictionary
+                    meta_features_dict = {}
+                    for dataset, series in all_metafeatures.iterrows():
+                        meta_features_dict[dataset] = series.values
+                    meta_features_list = []
+                    for meta_feature_name in all_metafeatures.columns:
+                        meta_features_list.append(
+                            meta_features[meta_feature_name].value)
+                    meta_features_list = np.array(meta_features_list).reshape(
+                        (1, -1))
+                    self.logger.info(list(meta_features_dict.keys()))
+
+                    # meta_runs = meta_base.get_all_runs(METRIC_TO_STRING[self.metric])
+                    # meta_runs_index = 0
+                    # try:
+                    #    meta_durations = meta_base.get_all_runs('runtime')
+                    #    read_runtime_data = True
+                    # except KeyError:
+                    #    read_runtime_data = False
+                    #    self.logger.critical('Cannot read runtime data.')
+                    #    if self.acquisition_function == 'EIPS':
+                    #        self.logger.critical('Reverting to acquisition function EI!')
+                    #        self.acquisition_function = 'EI'
+
+                    # for meta_dataset in meta_runs.index:
+                    #     meta_dataset_start_index = meta_runs_index
+                    #     for meta_configuration in meta_runs.columns:
+                    #         if np.isfinite(meta_runs.loc[meta_dataset, meta_configuration]):
+                    #             try:
+                    #                 config = meta_base.get_configuration_from_algorithm_index(
+                    #                     meta_configuration)
+                    #                 cost = meta_runs.loc[meta_dataset, meta_configuration]
+                    #                 if read_runtime_data:
+                    #                     runtime = meta_durations.loc[meta_dataset,
+                    #                                                  meta_configuration]
+                    #                 else:
+                    #                     runtime = 1
+                    #                 # TODO read out other status types!
+                    #                 meta_runhistory.add(config, cost, runtime,
+                    #                                     StatusType.SUCCESS,
+                    #                                     instance_id=meta_dataset)
+                    #                 meta_runs_index += 1
+                    #             except:
+                    #                 # TODO maybe add warning
+                    #                 pass
+                    #
+                    #     meta_runs_dataset_indices[meta_dataset] = (
+                    #         meta_dataset_start_index, meta_runs_index)
             else:
-                with warnings.catch_warnings():
-                    warnings.showwarning = self._send_warnings_to_log
-                    self.datamanager.perform1HotEncoding()
-                meta_features_encoded = \
-                    self._calculate_metafeatures_encoded_with_limits(
-                        metafeature_calculation_time_limit)
-
-            # In case there is a problem calculating the encoded meta-features
-            if meta_features is None:
-                if meta_features_encoded is not None:
-                    meta_features = meta_features_encoded
-            else:
-                if meta_features_encoded is not None:
-                    meta_features.metafeature_values.update(
-                        meta_features_encoded.metafeature_values)
-
-            if meta_features is not None:
-                meta_base.add_dataset(instance_id, meta_features)
-                # Do mean imputation of the meta-features - should be done specific
-                # for each prediction model!
-                all_metafeatures = meta_base.get_metafeatures(
-                    features=list(meta_features.keys()))
-                all_metafeatures.fillna(all_metafeatures.mean(), inplace=True)
-
-                with warnings.catch_warnings():
-                    warnings.showwarning = self._send_warnings_to_log
-                    metalearning_configurations = self.collect_metalearning_suggestions(
-                        meta_base)
-                if metalearning_configurations is None:
-                    metalearning_configurations = []
-                self.reset_data_manager()
-
-                self.logger.info('%s', meta_features)
-
-                # Convert meta-features into a dictionary because the scenario
-                # expects a dictionary
-                meta_features_dict = {}
-                for dataset, series in all_metafeatures.iterrows():
-                    meta_features_dict[dataset] = series.values
-                meta_features_list = []
-                for meta_feature_name in all_metafeatures.columns:
-                    meta_features_list.append(
-                        meta_features[meta_feature_name].value)
-                meta_features_list = np.array(meta_features_list).reshape(
-                    (1, -1))
-                self.logger.info(list(meta_features_dict.keys()))
-
-                # meta_runs = meta_base.get_all_runs(METRIC_TO_STRING[self.metric])
-                # meta_runs_index = 0
-                # try:
-                #    meta_durations = meta_base.get_all_runs('runtime')
-                #    read_runtime_data = True
-                # except KeyError:
-                #    read_runtime_data = False
-                #    self.logger.critical('Cannot read runtime data.')
-                #    if self.acquisition_function == 'EIPS':
-                #        self.logger.critical('Reverting to acquisition function EI!')
-                #        self.acquisition_function = 'EI'
-
-                # for meta_dataset in meta_runs.index:
-                #     meta_dataset_start_index = meta_runs_index
-                #     for meta_configuration in meta_runs.columns:
-                #         if np.isfinite(meta_runs.loc[meta_dataset, meta_configuration]):
-                #             try:
-                #                 config = meta_base.get_configuration_from_algorithm_index(
-                #                     meta_configuration)
-                #                 cost = meta_runs.loc[meta_dataset, meta_configuration]
-                #                 if read_runtime_data:
-                #                     runtime = meta_durations.loc[meta_dataset,
-                #                                                  meta_configuration]
-                #                 else:
-                #                     runtime = 1
-                #                 # TODO read out other status types!
-                #                 meta_runhistory.add(config, cost, runtime,
-                #                                     StatusType.SUCCESS,
-                #                                     instance_id=meta_dataset)
-                #                 meta_runs_index += 1
-                #             except:
-                #                 # TODO maybe add warning
-                #                 pass
-                #
-                #     meta_runs_dataset_indices[meta_dataset] = (
-                #         meta_dataset_start_index, meta_runs_index)
+                meta_features = None
+                self.logger.warning('Could not find meta-data directory %s' %
+                                    metadata_directory)
 
         else:
             meta_features = None
@@ -500,9 +505,11 @@ class AutoMLSMBO(object):
         if self.resampling_strategy in ['partial-cv',
                                         'partial-cv-iterative-fit']:
             num_folds = self.resampling_strategy_args['folds']
-            instances = [[fold_number] for fold_number in range(num_folds)]
+            instances = [[json.dumps({'task_id': self.dataset_name,
+                                      'fold': fold_number})]
+                         for fold_number in range(num_folds)]
         else:
-            instances = None
+            instances = [[json.dumps({'task_id': self.dataset_name})]]
 
         startup_time = self.watcher.wall_elapsed(self.dataset_name)
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
@@ -510,8 +517,8 @@ class AutoMLSMBO(object):
                          'cutoff-time': self.func_eval_time_limit,
                          'memory-limit': self.memory_limit,
                          'wallclock-limit': total_walltime_limit,
-                         # 'instances': [[name] for name in meta_features_dict],
-                         'output-dir': self.backend.temporary_directory,
+                         'output-dir':
+                             self.backend.get_smac_output_directory(self.seed),
                          'shared-model': self.shared_mode,
                          'run-obj': 'quality',
                          'deterministic': 'true',
@@ -564,16 +571,18 @@ class AutoMLSMBO(object):
                                     logger=self.logger,
                                     include=include,
                                     exclude=exclude,
+                                    metric=self.metric,
                                     memory_limit=self.memory_limit,
                                     disable_file_output=self.disable_file_output,
                                     **self.resampling_strategy_args)
 
-        types = get_types(self.config_space, self.scenario.feature_array)
+        types, bounds = get_types(self.config_space,
+                                  self.scenario.feature_array)
 
         # TODO extract generation of SMAC object into it's own function for
         # testing
         if self.acquisition_function == 'EI':
-            model = RandomForestWithInstances(types,
+            model = RandomForestWithInstances(types=types, bounds=bounds,
                                               #instance_features=meta_features_list,
                                               seed=1, num_trees=10)
             rh2EPM = RunHistory2EPM4Cost(num_params=num_params,
@@ -598,7 +607,7 @@ class AutoMLSMBO(object):
                                          impute_censored_data=False,
                                          impute_state=None)
             model = UncorrelatedMultiObjectiveRandomForestWithInstances(
-                ['cost', 'runtime'], types, num_trees=10,
+                ['cost', 'runtime'], types=types, bounds=bounds, num_trees=10,
                 instance_features=meta_features_list, seed=1)
             acquisition_function = EIPS(model)
             _smac_arguments = dict(scenario=self.scenario,
@@ -673,7 +682,7 @@ class AutoMLSMBO(object):
 
             if smac.solver.scenario.shared_model:
                 pSMAC.read(run_history=smac.solver.runhistory,
-                           output_directory=self.scenario.output_dir,
+                           output_dirs=glob.glob(self.backend.get_smac_output_glob()),
                            configuration_space=self.config_space,
                            logger=self.logger)
 
@@ -708,8 +717,10 @@ class AutoMLSMBO(object):
 
         self.runhistory = smac.solver.runhistory
         self.trajectory = smac.solver.intensifier.traj_logger.trajectory
+        smac.runhistory = self.runhistory
+        self.fANOVA_input = smac.get_X_y()
 
-        return self.runhistory, self.trajectory
+        return self.runhistory, self.trajectory, self.fANOVA_input
 
     def choose_next(self, smac):
         challengers = []
@@ -744,7 +755,7 @@ class AutoMLSMBO(object):
         next_configs_tmp = smac.solver.choose_next(
             X_cfg, Y_cfg,
             num_configurations_by_local_search=10,
-            num_configurations_by_random_search_sorted=100)
+            num_configurations_by_random_search_sorted=500)
 
         challengers.extend(next_configs_tmp)
 

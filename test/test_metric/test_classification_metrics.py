@@ -1,15 +1,8 @@
 # -*- encoding: utf-8 -*-
-from __future__ import print_function
-import sys
-if sys.version_info[0] == 2:
-    import unittest2 as unittest
-else:
-    import unittest
+import unittest
+
 import numpy as np
-from autosklearn.constants import *
-from autosklearn.metrics.util import normalize_array
-from autosklearn.metrics import acc_metric, auc_metric, bac_metric, \
-    f1_metric, pac_metric
+from autosklearn.metrics import balanced_accuracy, pac_score
 
 
 def copy_and_preprocess_arrays(solution, prediction):
@@ -18,323 +11,117 @@ def copy_and_preprocess_arrays(solution, prediction):
     return solution, prediction
 
 
-class AccuracyTest(unittest.TestCase):
-    _multiprocess_can_split_ = True
-
-    def test_accuracy_metric_4_binary_classification(self):
-        # 100% correct
-        expected = np.array([0, 1, 1, 1, 0, 0, 1, 1, 1, 0]).reshape((-1, 1))
-        prediction = np.array([[1., 0.], [0., 1.], [0., 1.], [0., 1.],
-                               [1., 0.], [1., 0.], [0., 1.], [0., 1.],
-                               [0., 1.], [1., 0.]])
-        score = acc_metric(expected, prediction, task=BINARY_CLASSIFICATION)
-        self.assertEqual(1, score)
-
-        # 100% incorrect
-        prediction = (prediction.copy() - 1) * -1
-        score = acc_metric(expected, prediction, task=BINARY_CLASSIFICATION)
-        self.assertAlmostEqual(-1, score)
-
-        # Random
-        prediction = np.array([[1., 0.], [1., 0.], [1., 0.], [1., 0.], [1., 0.],
-                               [0., 1.], [0., 1.], [0., 1.], [0., 1.], [0., 1.]])
-        score = acc_metric(expected, prediction, task=BINARY_CLASSIFICATION)
-        self.assertAlmostEqual(0, score)
-
-    def test_accuracy_metric_4_multiclass_classification(self):
-        # 100% correct
-        expected = np.array([1, 1, 0, 0, 1, 0, 2, 0, 2, 1])
-        prediction = np.array([[0.0, 1.0, 0.0], [0.0, 1.0, 0.0],
-                               [1.0, 0.0, 0.0], [1.0, 0.0, 0.0],
-                               [0.0, 1.0, 0.0], [1.0, 0.0, 0.0],
-                               [0.0, 0.0, 1.0], [1.0, 0.0, 0.0],
-                               [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]])
-        score = acc_metric(expected, prediction, task=MULTICLASS_CLASSIFICATION)
-        self.assertEqual(1, score)
-
-        # 100% incorrect
-        prediction = (prediction.copy() - 1) * -1
-        score = acc_metric(expected, prediction, task=MULTICLASS_CLASSIFICATION)
-        self.assertAlmostEqual(-0.5, score)
-
-        # Pseudorandom
-        prediction = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0],
-                               [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0],
-                               [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0],
-                               [1.0, 0.0, 0.0]])
-        score = acc_metric(expected, prediction, task=MULTICLASS_CLASSIFICATION)
-        self.assertAlmostEqual(0.1, score)
-
-    def test_accuracy_metric_4_multilabel_classification(self):
-        # 100% correct
-        expected = np.array([[0, 1, 1], [0, 1, 1], [1, 0, 0], [1, 0, 0],
-                             [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 0, 0],
-                             [0, 1, 1], [1, 0, 0]])
-        prediction = expected.copy()
-        score = acc_metric(expected, prediction.astype(float),
-                           task=MULTILABEL_CLASSIFICATION)
-        self.assertEqual(1, score)
-
-        # 100% incorrect
-        prediction = (prediction.copy() - 1) * -1
-        score = acc_metric(expected, prediction.astype(float),
-                           task=MULTILABEL_CLASSIFICATION)
-        self.assertAlmostEqual(-1, score)
-
-        # Pseudorandom
-        prediction = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0],
-                               [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0],
-                               [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
-                               [1.0, 1.0, 1.0]])
-        score = acc_metric(expected, prediction, task=MULTILABEL_CLASSIFICATION)
-        self.assertAlmostEqual(-0.0666666666, score)
-
-
-class AreaUnderCurveTest(unittest.TestCase):
-    _multiprocess_can_split_ = True
-
-    def test_cases_binary_score_verification(self):
-        cases = []
-        sol = np.array([0, 0, 1, 1])
-        pred = np.array([[1, 0], [1, 0], [0, 1], [0, 1]])
-
-        cases.append(('perfect', sol, pred, 1.0))
-        cases.append(('anti-perfect', sol, 1 - pred, -1.0))
-
-        uneven_proba = np.array(
-            [[0.7, 0.3], [0.4, 0.6], [0.49, 0.51], [0.2, 0.8]])
-
-        cases.append(('uneven proba', sol, uneven_proba, 0.5))
-
-        eps = 1.e-15
-        ties = np.array([[0.5 + eps, 0.5 - eps], [0.5 - eps, 0.5 + eps],
-                         [0.5 + eps, 0.5 - eps], [0.5 - eps, 0.5 + eps]])
-        cases.append(('ties_broken', sol, ties, 0.0))
-
-        ties = np.array([[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5]])
-        cases.append(('ties', sol, ties, 0.0))
-
-        sol = np.array([0, 1, 1])
-        pred = np.array([[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]])
-        cases.append(('even proba', sol, pred, 0.0))
-
-        _pred = np.array([[1, 0], [0, 1], [0, 1]])
-        pred =  np.array([sum(_pred) * 1. / len(_pred)] * len(_pred))
-        cases.append(('correct PAC prior', sol, pred, 0.0))
-
-        pred = np.array([[1., 1.], [1., 1.], [1., 1.]])
-        cases.append(('all positive', sol, pred, 0.0))
-
-        pred = np.array([[0, 0], [0, 0], [0, 0]])
-        cases.append(('all negative', sol, pred, 0.0))
-
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                auc = auc_metric(sol, pred)
-                self.assertAlmostEqual(auc, result)
-
-    def test_cases_multiclass_score_verification(self):
-        cases = []
-        sol = np.array([0, 1, 0, 0])
-        pred = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0],
-                         [1.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
-
-        cases.append(('3 classes perfect', sol, pred, 0.333333333333))
-
-        pred = np.array([[0, 1, 0], [0, 0, 1], [0, 1, 0], [0, 0, 1]])
-        cases.append(('all classes wrong', sol, pred, -0.555555555556))
-
-        pred = np.array([[1. / 3, 1. / 3, 1. / 3], [1. / 3, 1. / 3, 1. / 3],
-                         [1. / 3, 1. / 3, 1. / 3], [1. / 3, 1. / 3, 1. / 3]])
-        cases.append(('equi proba', sol, pred, -0.333333333333))
-
-        pred = np.array([[0.2, 0, 0.5], [0.8, 0.4, 0.1], [0.9, 0.1, 0.2],
-                         [0.7, 0.3, 0.3]])
-        cases.append(('sum(proba) < 1.0', sol, pred, -0.111111111111))
-
-        pred = np.array([[0.75, 0.25, 0.], [0.75, 0.25, 0.], [0.75, 0.25, 0.],
-                         [0.75, 0.25, 0.]])
-        cases.append(('predict prior', sol, pred, -0.333333333333))
-
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = auc_metric(sol, pred, task=MULTICLASS_CLASSIFICATION)
-                self.assertAlmostEqual(bac, result)
-
-    def test_cases_multilabel_1l(self):
-        cases = []
-        num = 2
-
-        sol = np.array([[1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0]])
-        sol3 = sol[:, 0:num]
-        if num == 1:
-            sol3 = np.array([sol3[:, 0]]).transpose()
-
-        cases.append(('{} labels perfect'.format(num), sol3, sol3, 1.0))
-
-        cases.append(('All wrong, in the multi-label sense', sol3, 1 - sol3,
-                      -1.0))
-
-        pred = np.array([[0.5, 0.5, 0.5], [0.5, 0.5, 0.5], [0.5, 0.5, 0.5],
-                        [0.5, 0.5, 0.5]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('All equi proba: 0.5', sol3, pred, 0.0))
-
-        pred = np.array([[0.25, 0.25, 0.25], [0.25, 0.25, 0.25], [0.25, 0.25, 0.25],
-                        [0.25, 0.25, 0.25]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('All equi proba, prior: 0.25', sol3, pred, 0.0))
-
-        pred = np.array([[0.2, 0.2, 0.2], [0.8, 0.8, 0.8], [0.9, 0.9, 0.9],
-                         [0.7, 0.7, 0.7]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('Some proba', sol3, pred, -1.0))
-
-        pred = np.array([[0.2, 0.2, 0.2], [0.8, 0.8, 0.8], [0.9, 0.9, 0.9],
-                         [0.7, 0.7, 0.7]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('Invert both solution and prediction', 1 - sol3, pred,
-                      1.0))
-
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                auc = auc_metric(sol, pred, task=MULTILABEL_CLASSIFICATION)
-                self.assertAlmostEqual(auc, result)
-
-    def test_cases_multilabel_2(self):
-        cases = []
-
-        sol4 = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 1]])
-        cases.append(('Three labels perfect', sol4, sol4, 1.0))
-
-        cases.append(('Three classes all wrong, in the multi-label sense',
-                      sol4, 1 - sol4, -1.0))
-
-        pred = np.array([[1 / 3, 1 / 3, 1 / 3], [1 / 3, 1 / 3, 1 / 3],
-                         [1 / 3, 1 / 3, 1 / 3], [1 / 3, 1 / 3, 1 / 3]])
-        cases.append(('Three classes equi proba', sol4, pred, 0.0))
-
-        pred = np.array([[0.2, 0, 0.5], [0.8, 0.4, 0.1], [0.9, 0.1, 0.2],
-                         [0.7, 0.3, 0.3]])
-        cases.append(('Three classes some proba that do not add up', sol4,
-                      pred, 0.0))
-
-        pred = np.array([[0.25, 0.25, 0.5], [0.25, 0.25, 0.5],
-                         [0.25, 0.25, 0.5], [0.25, 0.25, 0.5]])
-        cases.append(('Three classes predict prior', sol4, pred, 0.0))
-
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                auc = auc_metric(sol, pred, task=MULTILABEL_CLASSIFICATION)
-                self.assertAlmostEqual(auc, result)
-
-
 class BalancedAccurayTest(unittest.TestCase):
     _multiprocess_can_split_ = True
 
-    def test_cases_binary_score_verification(self):
+    def _test_cases(self, cases):
+        for case in cases:
+            testname, sol, pred, result = case
+
+            pred = pred.astype(np.float32)
+            sol, pred = copy_and_preprocess_arrays(sol, pred)
+            bac = balanced_accuracy(sol, pred)
+            self.assertAlmostEqual(bac, result, msg=testname)
+
+    def test_binary_balanced(self):
         cases = []
         sol = np.array([0, 0, 1, 1])
-        pred = np.array([[1, 0], [1, 0], [0, 1], [0, 1]])
+        pred = np.array([0, 0, 1, 1])
 
         cases.append(('perfect', sol, pred, 1.0))
-        cases.append(('anti-perfect', sol, 1 - pred, -1.0,))
+        cases.append(('completely wrong', sol, 1 - pred, 0.0))
 
-        uneven_proba = np.array(
-            [[0.7, 0.3], [0.4, 0.6], [0.49, 0.51], [0.2, 0.8]])
+        pred = np.array([0, 1, 1, 1])
+        cases.append(('partially correct 1', sol, pred, 0.75))
 
-        cases.append(('uneven proba', sol, uneven_proba, 0.5))
+        pred = np.array([0, 1, 0, 1])
+        cases.append(('partially correct 2', sol, pred, 0.5))
 
-        eps = 1.e-15
-        ties = np.array([[0.5 + eps, 0.5 - eps], [0.5 - eps, 0.5 + eps],
-                         [0.5 + eps, 0.5 - eps], [0.5 - eps, 0.5 + eps]])
-        cases.append(('ties_broken', sol, ties, 0.0))
+        pred = np.array([0, 1, 0, 0])
+        cases.append(('partially correct 3', sol, pred, 0.25))
 
-        ties = np.array([[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5]])
-        cases.append(('ties', sol, ties, 0.0))
+        self._test_cases(cases)
 
-        sol = np.array([0, 1, 1])
-        pred = np.array([[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]])
-        cases.append(('even proba', sol, pred, 0.0))
-
-        _pred = np.array([[1, 0], [0, 1], [0, 1]])
-        pred = np.array([sum(_pred) * 1. / len(_pred)] * len(_pred))
-        cases.append(('correct PAC prior', sol, pred, 0.0))
-
-        pred = np.array([[1., 1.], [1., 1.], [1., 1.]])
-        cases.append(('all positive', sol, pred, 0.0))
-
-        pred = np.array([[0, 0], [0, 0], [0, 0]])
-        cases.append(('all negative', sol, pred, 0.0))
-
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = bac_metric(sol, pred, task=BINARY_CLASSIFICATION)
-                self.assertAlmostEqual(bac, result)
-
-    def test_cases_multiclass_score_verification(self):
+    def test_binary_imbalanced(self):
         cases = []
-        sol = np.array([0, 1, 0, 0])
-        pred = np.array([[1, 0, 0], [0, 1, 0], [1, 0, 0], [1, 0, 0]])
+        sol = np.array([0, 1, 1])
+        pred = np.array([0, 1, 1])
 
-        cases.append(('3 classes perfect', sol, pred, 1.0))
+        cases.append(('perfect', sol, pred, 1.0))
+        cases.append(('completely wrong', sol, 1 - pred, 0.0))
 
-        cases.append(('all classes wrong', sol, 1 - pred, 0.0))
+        pred = np.array([0, 0, 0])
+        cases.append(('one class correct', sol, pred, 0.5))
 
-        pred = np.array([[1. / 3, 1. / 3, 1. / 3], [1. / 3, 1. / 3, 1. / 3],
-                         [1. / 3, 1. / 3, 1. / 3], [1. / 3, 1. / 3, 1. / 3]])
-        cases.append(('equi proba', sol, pred, 0.5))
+        pred = np.array([0, 1, 0])
+        cases.append(('one class correct, one partially correct',
+                      sol, pred, 0.75))
 
-        pred = np.array([[0.2, 0, 0.5], [0.8, 0.4, 0.1], [0.9, 0.1, 0.2],
-                         [0.7, 0.3, 0.3]])
-        cases.append(('sum(proba) < 1.0', sol, pred, 0.333333333333))
+        pred = np.array([1, 0, 1])
+        cases.append(('one class partially correct', sol, pred, 0.25))
 
-        pred = np.array([[0.75, 0.25, 0.], [0.75, 0.25, 0.], [0.75, 0.25, 0.],
-                         [0.75, 0.25, 0.]])
-        cases.append(('predict prior', sol, pred, 0.5))
+        self._test_cases(cases)
 
-        for case in cases:
-            testname, sol, pred, result = case
+    def test_multiclass_balanced(self):
+        cases = []
+        sol = np.array([0, 0, 1, 1, 2, 2])
+        pred = np.array([0, 0, 1, 1, 2, 2])
 
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = bac_metric(sol, pred, task=MULTICLASS_CLASSIFICATION)
-                self.assertAlmostEqual(bac, result)
+        cases.append(('perfect', sol, pred, 1.0))
 
-    def test_cases_multilabel_1l(self):
+        pred = np.array([1, 1, 2, 2, 0, 0])
+        cases.append(('completely wrong', sol, pred, 0.0))
+
+        pred = np.array([0, 0, 0, 0, 0, 0])
+        cases.append(('one class correct', sol, pred, 0.33333333))
+
+        pred = np.array([0, 0, 1, 1, 0, 0])
+        cases.append(('two classes correct', sol, pred, 0.66666666))
+
+        pred = np.array([0, 0, 1, 0, 2, 0])
+        cases.append(('one class correct, two partially correct', sol, pred, 0.66666666))
+
+        pred = np.array([0, 1, 1, 2, 2, 0])
+        cases.append(('all partially correct', sol, pred, 0.5))
+        self._test_cases(cases)
+
+    def test_multiclass_imbalanced(self):
+        cases = []
+        sol = np.array([0, 1, 2, 0])
+        pred = np.array([0, 1, 2, 0])
+
+        cases.append(('all classes perfect', sol, pred, 1.0))
+
+        pred = np.array([1, 2, 0, 1])
+        cases.append(('all classes wrong', sol, pred, 0.0))
+
+        pred = np.array([0, 0, 0, 0])
+        cases.append(('one class correct', sol, pred, 0.33333333))
+
+        pred = np.array([2, 0, 0, 0])
+        cases.append(('one class half-correct', sol, pred, 0.16666666))
+
+        self._test_cases(cases)
+
+    def test_multilabel_balanced(self):
+        cases = []
+        sol = np.array([[0, 0], [0, 0], [1, 1], [1, 1]])
+        pred = np.array([[0, 0], [0, 0], [1, 1], [1, 1]])
+
+        cases.append(('perfect', sol, pred, 1.0))
+        cases.append(('completely wrong', sol, 1 - pred, 0.0))
+
+        pred = np.array([[0, 0], [0, 0], [0, 0], [1, 1]])
+        cases.append(('one sample per label wrong', sol, pred, 0.75))
+
+        pred = np.array([[0, 0], [0, 0], [0, 1], [1, 1]])
+        cases.append(('one sample in one label wrong', sol, pred, 0.875))
+
+        pred = np.array([[0, 0], [0, 0], [0, 1], [0, 1]])
+        cases.append(('two samples in one label wrong', sol, pred, 0.75))
+        self._test_cases(cases)
+
+    def test_cases_multilabel(self):
         cases = []
         num = 2
 
@@ -346,255 +133,28 @@ class BalancedAccurayTest(unittest.TestCase):
         cases.append(('{} labels perfect'.format(num), sol3, sol3, 1.0))
 
         cases.append(('All wrong, in the multi-label sense', sol3, 1 - sol3,
-                      -1.0))
-
-        pred = np.array([[0.5, 0.5, 0.5], [0.5, 0.5, 0.5], [0.5, 0.5, 0.5],
-                         [0.5, 0.5, 0.5]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('All equi proba: 0.5', sol3, pred, 0.0))
-
-        pred = np.array(
-            [[0.25, 0.25, 0.25], [0.25, 0.25, 0.25], [0.25, 0.25, 0.25],
-             [0.25, 0.25, 0.25]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('All equi proba, prior: 0.25', sol3, pred, 0.0))
-
-        pred = np.array([[0.2, 0.2, 0.2], [0.8, 0.8, 0.8], [0.9, 0.9, 0.9],
-                         [0.7, 0.7, 0.7]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('Some proba', sol3, pred, -1.0))
-
-        pred = np.array([[0.2, 0.2, 0.2], [0.8, 0.8, 0.8], [0.9, 0.9, 0.9],
-                         [0.7, 0.7, 0.7]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('Invert both solution and prediction', 1 - sol3, pred,
-                      1.0))
-
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = bac_metric(sol, pred, task=MULTILABEL_CLASSIFICATION)
-                self.assertAlmostEqual(bac, result)
-
-    def test_cases_multilabel_2(self):
-        cases = []
+                      0.0))
 
         sol4 = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 1]])
         cases.append(('Three labels perfect', sol4, sol4, 1.0))
 
         cases.append(('Three classes all wrong, in the multi-label sense',
-                      sol4, 1 - sol4, -1.0))
+                      sol4, 1 - sol4, 0.0))
 
-        pred = np.array([[1 / 3, 1 / 3, 1 / 3], [1 / 3, 1 / 3, 1 / 3],
-                         [1 / 3, 1 / 3, 1 / 3], [1 / 3, 1 / 3, 1 / 3]])
-        cases.append(('Three classes equi proba', sol4, pred, 0.0))
-
-        pred = np.array([[0.2, 0, 0.5], [0.8, 0.4, 0.1], [0.9, 0.1, 0.2],
-                         [0.7, 0.3, 0.3]])
-        cases.append(('Three classes some proba that do not add up', sol4,
-                      pred, -0.5))
-
-        pred = np.array([[0.25, 0.25, 0.5], [0.25, 0.25, 0.5],
-                         [0.25, 0.25, 0.5], [0.25, 0.25, 0.5]])
-        cases.append(('Three classes predict prior', sol4, pred, 0.0))
-
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('_%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = bac_metric(sol, pred, task=MULTILABEL_CLASSIFICATION)
-                self.assertAlmostEqual(bac, result)
-
-
-class F1Test(unittest.TestCase):
-    _multiprocess_can_split_ = True
-
-    def test_cases_binary_score_verification(self):
-        cases = []
-        sol = np.array([0, 0, 1, 1])
-        pred = np.array([[1, 0], [1, 0], [0, 1], [0, 1]])
-
-        cases.append(('perfect', sol, pred, 1.0))
-        cases.append(('anti-perfect', sol, 1 - pred, -1.0))
-
-        uneven_proba = np.array(
-            [[0.7, 0.3], [0.4, 0.6], [0.49, 0.51], [0.2, 0.8]])
-
-        cases.append(('uneven proba', sol, uneven_proba, 0.60000000000000009))
-
-        # We cannot have lower eps for float32
-        eps = 1.e-7
-        ties = np.array([[0.5 + eps, 0.5 - eps], [0.5 - eps, 0.5 + eps],
-                         [0.5 + eps, 0.5 - eps], [0.5 - eps, 0.5 + eps]])
-        cases.append(('ties_broken', sol, ties, 0.0))
-
-        ties = np.array([[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5]])
-        cases.append(('ties', sol, ties, 0.333333333333))
-
-        sol = np.array([0, 1, 1])
-        pred = np.array([[0.5, 0.5], [0.5, 0.5], [0.5, 0.5]])
-        cases.append(('even proba', sol, pred, 0.60000000000000009))
-
-        _pred = np.array([[1, 0], [0, 1], [0, 1]])
-        pred = np.array([sum(_pred) * 1. / len(_pred)] * len(_pred))
-        cases.append(('correct PAC prior', sol, pred, 0.60000000000000009))
-
-        pred = np.array([[1., 1.], [1., 1.], [1., 1.]])
-        cases.append(('all positive', sol, pred, 0.60000000000000009))
-
-        pred = np.array([[0, 0], [0, 0], [0, 0]])
-        cases.append(('all negative', sol, pred, -1.0))
-
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                f1 = f1_metric(sol, pred, task=BINARY_CLASSIFICATION)
-                self.assertAlmostEqual(f1, result)
-
-    def test_cases_multiclass_score_verification(self):
-        cases = []
-        sol = np.array([0, 1, 0, 0])
-        pred = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0],
-                         [1.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
-
-        cases.append(('3 classes perfect', sol, pred, 1.0))
-
-        pred = np.array([[0, 1, 0], [0, 0, 1], [0, 1, 0], [0, 0, 1]])
-        cases.append(('all classes wrong', sol, pred, -0.5))
-
-        pred = np.array([[1. / 3, 1. / 3, 1. / 3], [1. / 3, 1. / 3, 1. / 3],
-                         [1. / 3, 1. / 3, 1. / 3], [1. / 3, 1. / 3, 1. / 3]])
-        cases.append(('equi proba', sol, pred, 0.428571428571))
-
-        pred = np.array([[0.2, 0, 0.5], [0.8, 0.4, 0.1], [0.9, 0.1, 0.2],
-                         [0.7, 0.3, 0.3]])
-        cases.append(('sum(proba) < 1.0', sol, pred, -0.166666666667))
-
-        pred = np.array([[0.75, 0.25, 0.], [0.75, 0.25, 0.], [0.75, 0.25, 0.],
-                         [0.75, 0.25, 0.]])
-        cases.append(('predict prior', sol, pred, 0.428571428571))
-
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = f1_metric(sol, pred, task=MULTICLASS_CLASSIFICATION)
-                self.assertAlmostEqual(bac, result)
-
-    def test_cases_multilabel_1l(self):
-        cases = []
-        num = 2
-
-        sol = np.array([[1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0]])
-        sol3 = sol[:, 0:num]
-        if num == 1:
-            sol3 = np.array([sol3[:, 0]]).transpose()
-
-        cases.append(('{} labels perfect'.format(num), sol3, sol3, 1.0))
-
-        cases.append(('All wrong, in the multi-label sense', sol3, 1 - sol3,
-                      -1.0))
-
-        pred = np.array([[0.5, 0.5, 0.5], [0.5, 0.5, 0.5], [0.5, 0.5, 0.5],
-                         [0.5, 0.5, 0.5]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('All equi proba: 0.5', sol3, pred, -0.2))
-
-        pred = np.array(
-            [[0.25, 0.25, 0.25], [0.25, 0.25, 0.25], [0.25, 0.25, 0.25],
-             [0.25, 0.25, 0.25]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('All equi proba, prior: 0.25', sol3, pred, -1.0))
-
-        pred = np.array([[0.2, 0.2, 0.2], [0.8, 0.8, 0.8], [0.9, 0.9, 0.9],
-                         [0.7, 0.7, 0.7]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('Some proba', sol3, pred, -1.0))
-
-        pred = np.array([[0.2, 0.2, 0.2], [0.8, 0.8, 0.8], [0.9, 0.9, 0.9],
-                         [0.7, 0.7, 0.7]])
-        if num == 1:
-            pred = np.array([pred[:, 0]]).transpose()
-        else:
-            pred = pred[:, 0:num]
-        cases.append(('Invert both solution and prediction', 1 - sol3, pred,
-                      1.0))
-
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = f1_metric(sol, pred, task=MULTILABEL_CLASSIFICATION)
-                self.assertAlmostEqual(bac, result)
-
-    def test_cases_multilabel_2(self):
-        cases = []
-
-        sol4 = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 1]])
-        cases.append(('Three labels perfect', sol4, sol4, 1.0))
-
-        cases.append(('Three classes all wrong, in the multi-label sense',
-                      sol4, 1 - sol4, -1.0))
-
-        pred = np.array([[1 / 3, 1 / 3, 1 / 3], [1 / 3, 1 / 3, 1 / 3],
-                         [1 / 3, 1 / 3, 1 / 3], [1 / 3, 1 / 3, 1 / 3]])
-        cases.append(('Three classes equi proba', sol4, pred, -1.0))
-
-        pred = np.array([[0.2, 0, 0.5], [0.8, 0.4, 0.1], [0.9, 0.1, 0.2],
-                         [0.7, 0.3, 0.3]])
-        cases.append(('Three classes some proba that do not add up', sol4,
-                      pred, -1.0))
-
-        pred = np.array([[0.25, 0.25, 0.5], [0.25, 0.25, 0.5],
-                         [0.25, 0.25, 0.5], [0.25, 0.25, 0.5]])
-        cases.append(('Three classes predict prior', sol4, pred,
-                      -0.555555555556))
-
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' %  testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = f1_metric(sol, pred, task=MULTILABEL_CLASSIFICATION)
-                self.assertAlmostEqual(bac, result)
+        self._test_cases(cases)
 
 
 class PACTest(unittest.TestCase):
     _multiprocess_can_split_ = True
+
+    def _test_cases(self, cases):
+        for case in cases:
+            testname, sol, pred, result = case
+
+            pred = pred.astype(np.float32)
+            sol, pred = copy_and_preprocess_arrays(sol, pred)
+            pac = pac_score(sol, pred)
+            self.assertAlmostEqual(pac, result, msg=testname, places=1)
 
     def test_cases_binary_score_verification(self):
         cases = []
@@ -631,52 +191,35 @@ class PACTest(unittest.TestCase):
         pred = np.array([[0, 0], [0, 0], [0, 0]])
         cases.append(('all negative', sol, pred, -1.1237237959))
 
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = pac_metric(sol, pred, task=BINARY_CLASSIFICATION)
-                # Very inaccurate!
-                self.assertAlmostEqual(bac, result, places=1)
+        self._test_cases(cases)
 
     def test_cases_multiclass_score_verification(self):
         cases = []
-        sol = np.array([0, 1, 0, 0])
-        pred = np.array([[1, 0, 0], [0, 1, 0], [1, 0, 0], [1, 0, 0]])
+        sol = np.array([0, 1, 2, 0])
+        pred = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 2], [1, 0, 0]])
 
         cases.append(('3 classes perfect', sol, pred, 1.0))
 
         pred = np.array([[0, 1, 0], [0, 0, 1], [0, 1, 0], [0, 0, 1]])
-        cases.append(('all classes wrong', sol, pred, -1.32491508679))
+        cases.append(('all classes wrong', sol, pred, -0.5469181142705154))
 
-        pred = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-        cases.append(('equi proba (wrong test from the starting kit)', sol,
-                      pred, -1.32491508679))
+        pred = np.array([[0., 0., 0.]] * 4)
+        cases.append(('equi proba (wrong test from the starting kit)',
+                      sol, pred, -0.5469181142705154))
 
         pred = np.array([[1. / 3, 1. / 3, 1. / 3], [1. / 3, 1. / 3, 1. / 3],
                          [1. / 3, 1. / 3, 1. / 3], [1. / 3, 1. / 3, 1. / 3]])
-        cases.append(('equi proba', sol, pred, -0.54994340656358087))
+        cases.append(('equi proba', sol, pred, -0.031278784012588157))
 
         pred = np.array([[0.2, 0, 0.5], [0.8, 0.4, 0.1], [0.9, 0.1, 0.2],
                          [0.7, 0.3, 0.3]])
-        cases.append(('sum(proba) < 1.0', sol, pred, -0.315724404334))
+        cases.append(('sum(proba) < 1.0', sol, pred, -0.085886926180064257))
 
-        pred = np.array([[0.75, 0.25, 0.], [0.75, 0.25, 0.], [0.75, 0.25, 0.],
-                         [0.75, 0.25, 0.]])
-        cases.append(
-            ('predict prior', sol, pred, 1.54870455579e-15))
+        pred = np.array([[0.5, 0.25, 0.25], [0.5, 0.25, 0.25],
+                         [0.5, 0.25, 0.25], [0.5, 0.25, 0.25]])
+        cases.append(('predict prior', sol, pred, 0))
 
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = pac_metric(sol, pred, task=MULTICLASS_CLASSIFICATION)
-                if bac != -1.3096137080181987 and result != -1.32470836935:
-                    self.assertAlmostEqual(bac, result, places=2)
+        self._test_cases(cases)
 
     def test_cases_multilabel_1l(self):
         cases = []
@@ -726,15 +269,7 @@ class PACTest(unittest.TestCase):
         cases.append(('Invert both solution and prediction', 1 - sol3, pred,
                       0.5277086603))
 
-        for case in cases:
-            testname, sol, pred, result = case
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                bac = pac_metric(sol, pred, task=MULTILABEL_CLASSIFICATION)
-                # Very weak test
-                self.assertAlmostEqual(bac, result, places=1)
+        self._test_cases(cases)
 
     def test_cases_multilabel_2(self):
         cases = []
@@ -745,13 +280,15 @@ class PACTest(unittest.TestCase):
         cases.append(('Three classes all wrong, in the multi-label sense',
                       sol4, 1 - sol4, -1.20548265539))
 
+        # Not at random because different classes have different priors
         pred = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]])
         cases.append(('Three classes equi proba (wrong test from StartingKit)',
                       sol4, pred, -1.20522116785))
 
         pred = np.array([[1. / 3, 1. / 3, 1. / 3], [1. / 3, 1. / 3, 1. / 3],
                          [1. / 3, 1. / 3, 1. / 3], [1. / 3, 1. / 3, 1. / 3]])
-        cases.append(('Three classes equi proba', sol4, pred, -1.20522116785))
+        cases.append(('Three classes equi proba', sol4, pred,
+                      -0.034665665346400684))
 
         pred = np.array([[0.2, 0, 0.5], [0.8, 0.4, 0.1], [0.9, 0.1, 0.2],
                          [0.7, 0.3, 0.3]])
@@ -762,15 +299,4 @@ class PACTest(unittest.TestCase):
                          [0.25, 0.25, 0.5], [0.25, 0.25, 0.5]])
         cases.append(('Three classes predict prior', sol4, pred, 0.0))
 
-        for case in cases:
-            testname, sol, pred, result = case
-
-
-            pred = pred.astype(np.float32)
-            with self.subTest('%s' % testname):
-                sol, pred = copy_and_preprocess_arrays(sol, pred)
-                pac = pac_metric(sol, pred, task=MULTILABEL_CLASSIFICATION)
-
-                # Another weak test
-                if pac != -1.1860048034278985 and result != -1.20522116785:
-                    self.assertAlmostEqual(pac, result, places=3)
+        self._test_cases(cases)

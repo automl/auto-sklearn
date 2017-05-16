@@ -1,5 +1,4 @@
 import os
-import queue
 import time
 import warnings
 
@@ -11,7 +10,7 @@ import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
 from autosklearn.constants import *
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
-from autosklearn.evaluation.util import calculate_score
+from autosklearn.metrics import calculate_score
 from autosklearn.util.logging_ import get_logger
 
 from ConfigSpace import Configuration
@@ -82,11 +81,11 @@ class MyDummyRegressor(DummyRegressor):
 
 
 class AbstractEvaluator(object):
-    def __init__(self, Datamanager, backend, queue, configuration=None,
-                 with_predictions=False,
+    def __init__(self, datamanager, backend, queue, metric,
+                 configuration=None,
                  all_scoring_functions=False,
                  seed=1,
-                 output_y_test=False,
+                 output_y_hat_optimization=True,
                  num_run=None,
                  subsample=None,
                  include=None,
@@ -99,19 +98,18 @@ class AbstractEvaluator(object):
         self.backend = backend
         self.queue = queue
 
-        self.D = Datamanager
+        self.datamanager = datamanager
         self.include = include
         self.exclude = exclude
 
-        self.X_valid = Datamanager.data.get('X_valid')
-        self.X_test = Datamanager.data.get('X_test')
+        self.X_valid = datamanager.data.get('X_valid')
+        self.X_test = datamanager.data.get('X_test')
 
-        self.metric = Datamanager.info['metric']
-        self.task_type = Datamanager.info['task']
+        self.metric = metric
+        self.task_type = datamanager.info['task']
         self.seed = seed
 
-        self.output_y_test = output_y_test
-        self.with_predictions = with_predictions
+        self.output_y_hat_optimization = output_y_hat_optimization
         self.all_scoring_functions = all_scoring_functions
         self.disable_file_output = disable_file_output
 
@@ -131,7 +129,7 @@ class AbstractEvaluator(object):
             self.predict_function = self._predict_proba
 
         categorical_mask = []
-        for feat in Datamanager.feat_type:
+        for feat in datamanager.feat_type:
             if feat.lower() == 'numerical':
                 categorical_mask.append(False)
             elif feat.lower() == 'categorical':
@@ -151,7 +149,7 @@ class AbstractEvaluator(object):
         self.subsample = subsample
 
         logger_name = '%s(%d):%s' % (self.__class__.__name__.split('.')[-1],
-                                     self.seed, self.D.name)
+                                     self.seed, self.datamanager.name)
         self.logger = get_logger(logger_name)
 
     def _get_model(self):
@@ -161,7 +159,7 @@ class AbstractEvaluator(object):
                                      init_params=self._init_params)
         else:
             dataset_properties = {'task': self.task_type,
-                                  'sparse': self.D.info['is_sparse'] == 1,
+                                  'sparse': self.datamanager.info['is_sparse'] == 1,
                                   'multilabel': self.task_type ==
                                                 MULTILABEL_CLASSIFICATION,
                                   'multiclass': self.task_type ==
@@ -182,8 +180,7 @@ class AbstractEvaluator(object):
                 return 1.0
 
         score = calculate_score(
-            y_true, y_hat, self.task_type,
-            self.metric, self.D.info['label_num'],
+            y_true, y_hat, self.task_type, self.metric,
             all_scoring_functions=self.all_scoring_functions)
 
         if hasattr(score, '__len__'):
@@ -193,7 +190,8 @@ class AbstractEvaluator(object):
 
         return err
 
-    def finish_up(self, loss, opt_pred, valid_pred, test_pred, file_output=True):
+    def finish_up(self, loss, opt_pred, valid_pred, test_pred,
+                  file_output=True, final_call=True):
         """This function does everything necessary after the fitting is done:
 
         * predicting
@@ -208,7 +206,7 @@ class AbstractEvaluator(object):
             loss_, additional_run_info_ = self.file_output(
                 opt_pred, valid_pred, test_pred)
         else:
-            loss_, additional_run_info_ = None, None
+            loss_, additional_run_info_ = None, {}
 
         if loss_ is not None:
             return self.duration, loss_, self.seed, additional_run_info_
@@ -216,21 +214,26 @@ class AbstractEvaluator(object):
         num_run = str(self.num_run).zfill(5)
         if isinstance(loss, dict):
             loss_ = loss
-            loss = loss_[self.D.info['metric']]
+            loss = loss_[self.metric.name]
         else:
             loss_ = {}
-        additional_run_info = ';'.join(['%s: %s' %
-                                        (METRIC_TO_STRING[metric] if metric in METRIC_TO_STRING else metric, value)
-                                        for metric, value in loss_.items()])
-        additional_run_info += ';' + 'duration: ' + str(self.duration)
-        additional_run_info += ';' + 'num_run:' + num_run
 
-        self.queue.put((self.duration, loss, self.seed, additional_run_info,
-                        StatusType.SUCCESS))
+        additional_run_info = {metric_name: value for metric_name, value in
+                               loss_.items()}
+        additional_run_info['duration'] = self.duration
+        additional_run_info['num_run'] = self.num_run
+
+        rval_dict = {'loss': loss,
+                     'additional_run_info': additional_run_info,
+                     'status': StatusType.SUCCESS}
+        if final_call:
+            rval_dict['final_queue_element'] = True
+
+        self.queue.put(rval_dict)
 
     def file_output(self, Y_optimization_pred, Y_valid_pred, Y_test_pred):
-        if self.disable_file_output:
-            return None, None
+        if self.disable_file_output is True:
+            return None, {}
 
         seed = self.seed
 
@@ -238,30 +241,37 @@ class AbstractEvaluator(object):
         # obviously no output should be saved.
         if self.Y_optimization is not None and \
                 self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
-            return 1.0, "Targets %s and prediction %s don't have the same " \
-            "length. Probably training didn't finish" % (
-                self.Y_optimization.shape, Y_optimization_pred.shape)
+            return 1.0, {'error': "Targets %s and prediction %s don't have "
+                                  "the same length. Probably training didn't "
+                                  "finish" % (self.Y_optimization.shape,
+                                              Y_optimization_pred.shape)}
 
         if not np.all(np.isfinite(Y_optimization_pred)):
-            return 1.0, 'Model predictions for optimization set contains NaNs.'
-        for y, s in [[Y_valid_pred, 'validation'],
-                  [Y_test_pred, 'test']]:
+            return 1.0, {'error': 'Model predictions for optimization set ' \
+                                  'contains NaNs.'}
+        for y, s in [[Y_valid_pred, 'validation'], [Y_test_pred, 'test']]:
             if y is not None and not np.all(np.isfinite(y)):
-                return 1.0, 'Model predictions for %s set contains NaNs.' % s
+                return 1.0, {'error': 'Model predictions for %s set contains '
+                                      'NaNs.' % s}
 
         num_run = str(self.num_run).zfill(5)
-        if os.path.exists(self.backend.get_model_dir()):
-            self.backend.save_model(self.model, self.num_run, seed)
 
-        if self.output_y_test:
-            try:
-                os.makedirs(self.backend.output_directory)
-            except OSError:
-                pass
-            self.backend.save_targets_ensemble(self.Y_optimization)
+        if not isinstance(self.disable_file_output, list) or \
+                'model' not in self.disable_file_output:
+            if os.path.exists(self.backend.get_model_dir()):
+                self.backend.save_model(self.model, self.num_run, seed)
 
-        self.backend.save_predictions_as_npy(Y_optimization_pred, 'ensemble',
-                                             seed, num_run)
+        if not isinstance(self.disable_file_output, list) or \
+                'y_optimization' not in self.disable_file_output:
+            if self.output_y_hat_optimization:
+                try:
+                    os.makedirs(self.backend.output_directory)
+                except OSError:
+                    pass
+                self.backend.save_targets_ensemble(self.Y_optimization)
+
+            self.backend.save_predictions_as_npy(Y_optimization_pred, 'ensemble',
+                                                 seed, num_run)
 
         if Y_valid_pred is not None:
             self.backend.save_predictions_as_npy(Y_valid_pred, 'valid',
@@ -275,7 +285,7 @@ class AbstractEvaluator(object):
 
     def _predict_proba(self, X, model, task_type, Y_train):
         def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None):
+                                 file=None, line=None):
             self.logger.debug('%s:%s: %s:%s' %
                               (filename, lineno, category.__name__, message))
             return
@@ -289,7 +299,7 @@ class AbstractEvaluator(object):
 
     def _predict_regression(self, X, model, task_type, Y_train=None):
         def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None):
+                                 file=None, line=None):
             self.logger.debug('%s:%s: %s:%s' %
                               (filename, lineno, category.__name__, message))
             return
@@ -304,7 +314,7 @@ class AbstractEvaluator(object):
         return Y_pred
 
     def _ensure_prediction_array_sizes(self, prediction, Y_train):
-        num_classes = self.D.info['label_num']
+        num_classes = self.datamanager.info['label_num']
 
         if self.task_type == MULTICLASS_CLASSIFICATION and \
                 prediction.shape[1] < num_classes:
@@ -330,7 +340,7 @@ class AbstractEvaluator(object):
 
     def _fit_and_suppress_warnings(self, model, X, y):
         def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None):
+                                 file=None, line=None):
             self.logger.debug('%s:%s: %s:%s' %
                 (filename, lineno, category.__name__, message))
             return

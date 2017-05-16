@@ -21,6 +21,7 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, y):
+        self.iterative_fit(X, y, n_iter=1, refit=True)
         while not self.configuration_fully_fitted():
             self.iterative_fit(X, y, n_iter=1)
 

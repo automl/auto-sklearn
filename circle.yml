@@ -1,8 +1,7 @@
 machine:
-  python:
-    version: 3.4.3
-
   environment:
+    PATH: /home/ubuntu/miniconda/bin:$PATH
+
     # The github organization or username of the repository which hosts the
     # project and documentation.
     USERNAME: "automl"
@@ -20,30 +19,23 @@ dependencies:
 
   # Various dependencies
   pre:
+    # Get rid of existing virtualenvs on circle ci as they conflict with conda.
+    # From nilearn: https://github.com/nilearn/nilearn/blob/master/circle.yml
+    - cd && rm -rf ~/.pyenv && rm -rf ~/virtualenvs
     # from scikit-learn contrib
     - sudo -E apt-get -yq remove texlive-binaries --purge
-    - sudo apt-get update
-    - sudo apt-get install libatlas-dev libatlas3gf-base
-    - sudo apt-get install build-essential python-dev python-setuptools
-    # upgrade pip and wheel to allow for fast installation
-    - pip install wheel pip --upgrade
-    # install numpy first as it is a compile time dependency for other packages
-    - pip install --upgrade numpy
-    # install documentation building dependencies
-    - pip install --upgrade matplotlib setuptools nose coverage sphinx pillow sphinx-gallery sphinx_bootstrap_theme cython numpydoc
-    # Installing required packages for `make -C doc check command` to work.
     - sudo -E apt-get -yq update
     - sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install dvipng texlive-latex-base texlive-latex-extra
-    # Installing packages to build the random forest
-    # finally install the requirements of the package to allow autodoc
-    - pip install -r requirements.txt
+    # Conda installation
+    - wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+    - bash ~/miniconda.sh -b -p $HOME/miniconda
+    - conda update --yes conda
+    - conda create -n testenv --yes python=3.6 pip wheel nose gcc swig
 
   # The --user is needed to let sphinx see the source and the binaries
   # The pipefail is requested to propagate exit code
   override:
-    - python setup.py clean
-    - python setup.py develop
-    - set -o pipefail && cd doc && make html 2>&1 | tee ~/log.txt
+    - source ci_scripts/circle_install.sh
 test:
   # Grep error on the documentation
   override:
@@ -63,7 +55,7 @@ general:
     - "doc/_build/html"
     - "~/log.txt"
   # Restric the build to the branch master only
-  branches:
-    only:
-       - development
-       - master
+  #branches:
+  #  only:
+  #     - development
+  #     - master

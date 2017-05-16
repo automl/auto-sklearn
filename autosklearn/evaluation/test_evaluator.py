@@ -2,7 +2,7 @@
 from smac.tae.execute_ta_run import StatusType
 
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
-from autosklearn.evaluation.util import calculate_score
+from autosklearn.metrics import calculate_score
 
 
 __all__ = [
@@ -13,33 +13,34 @@ __all__ = [
 
 class TestEvaluator(AbstractEvaluator):
 
-    def __init__(self, Datamanager, backend, queue,
+    def __init__(self, datamanager, backend, queue, metric,
                  configuration=None,
-                 with_predictions=False,
                  all_scoring_functions=False,
                  seed=1,
                  include=None,
                  exclude=None,
                  disable_file_output=False):
         super(TestEvaluator, self).__init__(
-            Datamanager, backend, queue=queue,
+            datamanager=datamanager,
+            backend=backend,
+            queue=queue,
             configuration=configuration,
-            with_predictions=with_predictions,
+            metric=metric,
             all_scoring_functions=all_scoring_functions,
             seed=seed,
-            output_y_test=False,
-            num_run='-1',
+            output_y_hat_optimization=False,
+            num_run=-1,
             subsample=None,
             include=include,
             exclude=exclude,
             disable_file_output= disable_file_output)
         self.configuration = configuration
 
-        self.X_train = Datamanager.data['X_train']
-        self.Y_train = Datamanager.data['Y_train']
+        self.X_train = datamanager.data['X_train']
+        self.Y_train = datamanager.data['Y_train']
 
-        self.X_test = Datamanager.data.get('X_test')
-        self.Y_test = Datamanager.data.get('Y_test')
+        self.X_test = datamanager.data.get('X_test')
+        self.Y_test = datamanager.data.get('Y_test')
 
         self.model = self._get_model()
 
@@ -58,7 +59,6 @@ class TestEvaluator(AbstractEvaluator):
                 prediction=Y_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                num_classes=self.D.info['label_num'],
                 all_scoring_functions=self.all_scoring_functions)
         else:
             Y_pred = self.predict_function(self.X_test, self.model,
@@ -68,7 +68,6 @@ class TestEvaluator(AbstractEvaluator):
                 prediction=Y_pred,
                 task_type=self.task_type,
                 metric=self.metric,
-                num_classes=self.D.info['label_num'],
                 all_scoring_functions=self.all_scoring_functions)
 
         if hasattr(score, '__len__'):
@@ -81,12 +80,12 @@ class TestEvaluator(AbstractEvaluator):
 
 # create closure for evaluating an algorithm
 # Has a stupid name so nosetests doesn't regard it as a test
-def eval_t(queue, config, data, backend, seed, num_run, subsample,
-           with_predictions, all_scoring_functions,
-           output_y_test, include, exclude, disable_file_output):
-    evaluator = TestEvaluator(Datamanager=data, configuration=config,
-                              backend=backend, seed=seed, queue=queue,
-                              with_predictions=with_predictions,
+def eval_t(queue, config, datamanager, backend, metric, seed, num_run, instance,
+           all_scoring_functions, output_y_hat_optimization, include,
+           exclude, disable_file_output):
+    evaluator = TestEvaluator(datamanager=datamanager, configuration=config,
+                              backend=backend, metric=metric, seed=seed,
+                              queue=queue,
                               all_scoring_functions=all_scoring_functions,
                               include=include, exclude=exclude,
                               disable_file_output=disable_file_output)

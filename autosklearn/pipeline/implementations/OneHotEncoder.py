@@ -27,13 +27,13 @@ def _transform_selected(X, transform, selected="all", copy=True):
     -------
     X : array or sparse matrix, shape=(n_samples, n_features_new)
     """
+    X = check_array(X, accept_sparse='csc', force_all_finite=False, copy=copy)
+
     if selected == "all":
         return transform(X)
 
     if len(selected) == 0:
         return X
-
-    X = check_array(X, accept_sparse='csc', force_all_finite=False)
 
     n_features = X.shape[1]
     ind = np.arange(n_features)
@@ -177,7 +177,6 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
             do_not_replace_by_other = list()
             for column in range(X.shape[1]):
                 do_not_replace_by_other.append(list())
-
 
                 if sparse.issparse(X):
                     indptr_start = X.indptr[column]

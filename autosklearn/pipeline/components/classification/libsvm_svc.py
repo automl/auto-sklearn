@@ -1,7 +1,5 @@
 import resource
 
-import numpy as np
-
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.conditions import EqualsCondition, InCondition
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -11,51 +9,6 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
-
-
-# From the scikit-learn master branch. Will hopefully be there in sklearn 0.17
-def _ovr_decision_function(predictions, confidences, n_classes):
-    """Compute a continuous, tie-breaking ovr decision function.
-    It is important to include a continuous value, not only votes,
-    to make computing AUC or calibration meaningful.
-    Parameters
-    ----------
-    predictions : array-like, shape (n_samples, n_classifiers)
-        Predicted classes for each binary classifier.
-    confidences : array-like, shape (n_samples, n_classifiers)
-        Decision functions or predicted probabilities for positive class
-        for each binary classifier.
-    n_classes : int
-        Number of classes. n_classifiers must be
-        ``n_classes * (n_classes - 1 ) / 2``
-    """
-    n_samples = predictions.shape[0]
-    votes = np.zeros((n_samples, n_classes))
-    sum_of_confidences = np.zeros((n_samples, n_classes))
-
-    k = 0
-    for i in range(n_classes):
-        for j in range(i + 1, n_classes):
-            sum_of_confidences[:, i] -= confidences[:, k]
-            sum_of_confidences[:, j] += confidences[:, k]
-            votes[predictions[:, k] == 0, i] += 1
-            votes[predictions[:, k] == 1, j] += 1
-            k += 1
-
-    max_confidences = sum_of_confidences.max()
-    min_confidences = sum_of_confidences.min()
-
-    if max_confidences == min_confidences:
-        return votes
-
-    # Scale the sum_of_confidences to (-0.5, 0.5) and add it with votes.
-    # The motivation is to use confidence levels as a way to break ties in
-    # the votes without switching any decision made based on a difference
-    # of 1 vote.
-    eps = np.finfo(sum_of_confidences.dtype).eps
-    max_abs_confidence = max(abs(max_confidences), abs(min_confidences))
-    scale = (0.5 - eps) / max_abs_confidence
-    return votes + sum_of_confidences * scale
 
 
 class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
@@ -117,8 +70,9 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
                                          class_weight=self.class_weight,
                                          max_iter=self.max_iter,
                                          random_state=self.random_state,
-                                         cache_size=cache_size)
-                                         # probability=True)
+                                         cache_size=cache_size,
+                                         decision_function_shape='ovr')
+                                         #probability=True)
         self.estimator.fit(X, Y)
         return self
 
@@ -132,9 +86,9 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
             raise NotImplementedError()
         # return self.estimator.predict_proba(X)
         decision = self.estimator.decision_function(X)
-        if len(self.estimator.classes_) > 2:
-            decision = _ovr_decision_function(decision < 0, decision,
-                                              len(self.estimator.classes_))
+        #if len(self.estimator.classes_) > 2:
+        #    decision = _ovr_decision_function(decision < 0, decision,
+        #                                      len(self.estimator.classes_))
         return softmax(decision)
 
 

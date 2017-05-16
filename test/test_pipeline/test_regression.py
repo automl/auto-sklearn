@@ -153,6 +153,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     continue
                 elif 'Bug in scikit-learn' in e.args[0]:
                     continue
+                elif 'The condensed distance matrix must contain only finite ' \
+                     'values.' in e.args[0]:
+                    continue
                 else:
                     print(config)
                     print(traceback.format_exc())
@@ -202,7 +205,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             include={'regressor': ['random_forest'],
                      'preprocessor': ['no_preprocessing']})
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
-        XT = regressor.pre_transform(X_train, Y_train)
+        XT = regressor.fit_transformer(X_train, Y_train)
         for i in range(1, 11):
             regressor.iterative_fit(X_train, Y_train)
             self.assertEqual(regressor.steps[-1][-1].choice.estimator.n_estimators,
@@ -218,7 +221,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(143, len(hyperparameters))
+        self.assertEqual(130, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 5, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):

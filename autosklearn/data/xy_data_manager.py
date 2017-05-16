@@ -10,18 +10,13 @@ from autosklearn.data.abstract_data_manager import AbstractDataManager
 
 class XYDataManager(AbstractDataManager):
 
-    def __init__(self, data_x, y, task, metric, feat_type, dataset_name,
-                 encode_labels):
+    def __init__(self, data_x, y, task, feat_type, dataset_name):
         super(XYDataManager, self).__init__(dataset_name)
 
         if isinstance(task, six.string_types):
             task = STRING_TO_TASK_TYPES[task]
 
-        if isinstance(metric, six.string_types):
-            metric = STRING_TO_METRIC[metric]
-
         self.info['task'] = task
-        self.info['metric'] = metric
         if sparse.issparse(data_x):
             self.info['is_sparse'] = 1
             self.info['has_missing'] = np.all(np.isfinite(data_x.data))
@@ -40,6 +35,14 @@ class XYDataManager(AbstractDataManager):
 
         self.data['X_train'] = data_x
         self.data['Y_train'] = y
+
+        if feat_type is not None:
+            for feat in feat_type:
+                allowed_types = ['numerical', 'categorical']
+                if feat.lower() not in allowed_types:
+                    raise ValueError("Entry '%s' in feat_type not in %s" %
+                                     (feat.lower(), str(allowed_types)))
+
         self.feat_type = feat_type
 
         # TODO: try to guess task type!
@@ -58,6 +61,3 @@ class XYDataManager(AbstractDataManager):
             raise ValueError('X and feat type must have the same dimensions, '
                              'but are %d and %d.' %
                              (data_x.shape[1], len(self.feat_type)))
-
-        if encode_labels:
-            self.perform1HotEncoding()

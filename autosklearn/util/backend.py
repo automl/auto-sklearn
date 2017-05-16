@@ -167,6 +167,12 @@ class Backend(object):
             start_time = float(fh.read())
         return start_time
 
+    def get_smac_output_directory(self, seed):
+        return os.path.join(self.temporary_directory, 'smac3-output_%d' % seed)
+
+    def get_smac_output_glob(self):
+        return os.path.join(self.temporary_directory, 'smac3-output_*_run1')
+
     def _get_targets_ensemble_filename(self):
         return os.path.join(self.internals_directory,
                             "true_targets_ensemble.npy")
@@ -195,7 +201,7 @@ class Backend(object):
         lock_path = filepath + '.lock'
         with lockfile.LockFile(lock_path):
             if os.path.exists(filepath):
-                with open(filepath) as fh:
+                with open(filepath, 'rb') as fh:
                     existing_targets = np.load(fh)
                     if existing_targets.shape[0] > targets.shape[0] or \
                             (existing_targets.shape == targets.shape and
@@ -261,18 +267,21 @@ class Backend(object):
 
         os.rename(tempname, filepath)
 
-    def load_all_models(self, seed):
+    def list_all_models(self, seed):
         model_directory = self.get_model_dir()
-
         if seed >= 0:
             model_files = glob.glob(os.path.join(model_directory,
                                                  '%s.*.model' % seed))
         else:
             model_files = os.listdir(model_directory)
-            model_files = [os.path.join(model_directory, mf) for mf in model_files]
+            model_files = [os.path.join(model_directory, mf)
+                           for mf in model_files]
 
+        return model_files
+
+    def load_all_models(self, seed):
+        model_files = self.list_all_models(seed)
         models = self.load_models_by_file_names(model_files)
-
         return models
 
     def load_models_by_file_names(self, model_file_names):
