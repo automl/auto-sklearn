@@ -11,9 +11,9 @@ RUN apt-get update && apt-get install -y \
 
 # Upgrade pip then install dependencies
 RUN pip3 install --upgrade pip
-RUN pip3 install git+https://github.com/automl/auto-sklearn
+RUN curl https://raw.githubusercontent.com/automl/auto-sklearn/master/requirements.txt \
+  | xargs -n 1 -L 1 pip3 install
 
 # Install
-RUN pip3 install \
-  auto-sklearn \
-  jupyter
+RUN pip3 install git+https://github.com/automl/auto-sklearn
+RUN pip3 install jupyter
