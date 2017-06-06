@@ -95,7 +95,7 @@ the example directory.
 
 In it's default mode, *auto-sklearn* already uses two cores. The first one is
 used for model building, the second for building an ensemble every time a new
-machine learning model has finished training. The file `example_sequential
+machine learning model has finished training. The file `example_parallel
 .py` in the example directory describes how to run these tasks sequentially
 to use only a single core at a time.
 
