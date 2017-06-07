@@ -136,8 +136,12 @@ class BasePipeline(Pipeline):
         if batch_size is None:
             return super(BasePipeline, self).predict(X).astype(self._output_dtype)
         else:
-            if type(batch_size) is not int or batch_size <= 0:
-                raise Exception("batch_size must be a positive integer")
+            if not isinstance(batch_size, int):
+                raise ValueError("Argument 'batch_size' must be of type int, "
+                                 "but is '%s'" % type(batch_size))
+            if batch_size <= 0:
+                raise ValueError("Argument 'batch_size' must be positive, "
+                                 "but is %d" % batch_size)
 
             else:
                 if self.num_targets == 1:
