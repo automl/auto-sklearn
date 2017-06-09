@@ -14,7 +14,7 @@ replacement for a scikit-learn estimator:
     >>> import autosklearn.classification
     >>> cls = autosklearn.classification.AutoSklearnClassifier()
     >>> cls.fit(X_train, y_train)
-    >>> predictions = cls.predict(X_test, y_test)
+    >>> predictions = cls.predict(X_test)
 
 *auto-sklearn* frees a machine learning user from algorithm selection and
 hyperparameter tuning. It leverages recent advantages in *Bayesian
