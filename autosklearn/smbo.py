@@ -530,7 +530,6 @@ class AutoMLSMBO(object):
 
         self.scenario = Scenario(scenario_dict)
 
-
         # TODO rebuild target algorithm to be it's own target algorithm
         # evaluator, which takes into account that a run can be killed prior
         # to the model being fully fitted; thus putting intermediate results
@@ -545,8 +544,9 @@ class AutoMLSMBO(object):
             include['preprocessor'] = self.include_preprocessors
         elif self.exclude_preprocessors is not None:
             exclude['preprocessor'] = self.exclude_preprocessors
+
         if self.include_estimators is not None and \
-                self.exclude_preprocessors is not None:
+                self.exclude_estimators is not None:
             raise ValueError('Cannot specify include_estimators and '
                              'exclude_estimators.')
         elif self.include_estimators is not None:
