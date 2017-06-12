@@ -57,7 +57,7 @@ random forests.
 >>>     include_estimators=["random_forest", ], exclude_estimators=None,
 >>>     include_preprocessors=["no_preprocessing", ], exclude_preprocessors=None)
 >>> automl.fit(X_train, y_train)
->>> predictions = cls.predict(X_test, y_test)
+>>> predictions = automl.predict(X_test)
 
 **Note:** The strings used to identify estimators and preprocessors are the filenames without *.py*.
 
