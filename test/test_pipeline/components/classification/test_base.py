@@ -1,6 +1,8 @@
 import unittest
 
-from autosklearn.pipeline.util import _test_classifier, _test_classifier_predict_proba
+from autosklearn.pipeline.util import _test_classifier, \
+    _test_classifier_predict_proba, _test_classifier_iterative_fit
+from autosklearn.pipeline.constants import *
 
 import sklearn.metrics
 import numpy as np
@@ -8,48 +10,116 @@ import numpy as np
 
 class BaseClassificationComponentTest(unittest.TestCase):
 
-    res_dict = None
+    res = None
     module = None
     sk_module = None
 
     # Magic command to not run tests on base class
     __test__ = False
 
-    def test_default_configuration_iris(self):
+    def test_default_iris(self):
         for i in range(2):
             predictions, targets = \
-                _test_classifier(self.module)
-            self.assertAlmostEqual(self.res["default_on_iris"],
+                _test_classifier(dataset="iris",
+                                 classifier=self.module)
+            self.assertAlmostEqual(self.res["default_iris"],
                                    sklearn.metrics.accuracy_score(targets,
                                                                   predictions))
 
-    def test_default_configuration_iris_predict_proba(self):
+    def test_default_iris_iterative_fit(self):
+        if not hasattr(self.module, 'iterative_fit'):
+            return
+
         for i in range(2):
             predictions, targets = \
-                _test_classifier_predict_proba(self.module)
-            self.assertAlmostEqual(self.res["default_on_iris_proba"],
+                _test_classifier_iterative_fit(dataset="iris",
+                                               classifier=self.module)
+            self.assertAlmostEqual(self.res["default_iris_iterative"],
+                                   sklearn.metrics.accuracy_score(predictions,
+                                                                  targets))
+
+    def test_default_iris_predict_proba(self):
+        for i in range(2):
+            predictions, targets = \
+                _test_classifier_predict_proba(dataset="iris",
+                                               classifier=self.module)
+            self.assertAlmostEqual(self.res["default_iris_proba"],
                                    sklearn.metrics.log_loss(targets, predictions))
 
-    def test_default_configuration_iris_sparse(self):
+    def test_default_iris_sparse(self):
+        if SPARSE not in self.module.get_properties()["input"]:
+            return
+
         for i in range(2):
             predictions, targets = \
-                _test_classifier(self.module, sparse=True)
-            self.assertAlmostEqual(self.res["default_on_iris_sparse"],
+                _test_classifier(dataset="iris",
+                                 classifier=self.module,
+                                 sparse=True)
+            self.assertAlmostEqual(self.res["default_iris_sparse"],
                                    sklearn.metrics.accuracy_score(targets,
                                                                   predictions))
 
-    def test_default_configuration_binary(self):
+    def test_default_digits_binary(self):
         for i in range(2):
             predictions, targets = \
                 _test_classifier(classifier=self.module,
-                                 dataset='digits', sparse=True,
+                                 dataset='digits', sparse=False,
                                  make_binary=True)
-            self.assertAlmostEqual(self.res["default_binary"],
+            self.assertAlmostEqual(self.res["default_digits_binary"],
                                    sklearn.metrics.accuracy_score(
                                        targets, predictions))
 
+    def test_default_digits(self):
+        for i in range(2):
+            predictions, targets = \
+                _test_classifier(dataset="digits",
+                                 classifier=self.module)
+            self.assertAlmostEqual(self.res["default_digits"],
+                                   sklearn.metrics.accuracy_score(targets,
+                                                                  predictions))
+
+    def test_default_digits_iterative_fit(self):
+        if not hasattr(self.module, 'iterative_fit'):
+            return
+
+        for i in range(2):
+            predictions, targets = \
+                _test_classifier_iterative_fit(dataset="digits",
+                                               classifier=self.module)
+            self.assertAlmostEqual(self.res["default_digits_iterative"],
+                                   sklearn.metrics.accuracy_score(predictions,
+                                                                  targets))
+
+    def test_default_digits_multilabel(self):
+        if not self.module.get_properties()["handles_multilabel"]:
+            return
+
+        for i in range(2):
+            predictions, targets = \
+                _test_classifier(classifier=self.module,
+                                 dataset='digits',
+                                 make_multilabel=True)
+            self.assertAlmostEqual(self.res["default_digits_multilabel"],
+                                   sklearn.metrics.average_precision_score(
+                                       targets, predictions))
+
+    def test_default_digits_multilabel_predict_proba(self):
+        if not self.module.get_properties()["handles_multilabel"]:
+            return
+
+        for i in range(2):
+            predictions, targets = \
+                _test_classifier_predict_proba(classifier=self.module,
+                                               make_multilabel=True)
+            self.assertEqual(predictions.shape, ((50, 3)))
+            self.assertAlmostEqual(self.res["default_digits_multilabel_proba"],
+                                   sklearn.metrics.average_precision_score(
+                                       targets, predictions))
+
     def test_target_algorithm_multioutput_multiclass_support(self):
-        if self.sk_module is not None:
+        if not self.module.get_properties()["handles_multiclass"]:
+            return
+        elif self.sk_module is not None:
             cls = self.sk_module
             X = np.random.random((10, 10))
             y = np.random.randint(0, 1, size=(10, 10))

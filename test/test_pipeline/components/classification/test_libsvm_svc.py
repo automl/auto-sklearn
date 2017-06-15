@@ -1,22 +1,33 @@
-import unittest
-
-from autosklearn.pipeline.components.classification.libsvm_svc import LibSVM_SVC
-from autosklearn.pipeline.util import _test_classifier, \
-    _test_classifier_predict_proba, get_dataset
-
-import numpy as np
 import sklearn.metrics
 import sklearn.svm
 
+from autosklearn.pipeline.components.classification.libsvm_svc import LibSVM_SVC
+from autosklearn.pipeline.util import get_dataset, \
+    _test_classifier_predict_proba
 
-class LibSVM_SVCComponentTest(unittest.TestCase):
-    def test_default_configuration(self):
-        for i in range(2):
-            predictions, targets = _test_classifier(LibSVM_SVC, dataset='iris')
-            self.assertAlmostEqual(0.96,
-                sklearn.metrics.accuracy_score(predictions, targets))
+from .test_base import BaseClassificationComponentTest
 
-    def test_default_configuration_predict_proba(self):
+
+class LibSVM_SVCComponentTest(BaseClassificationComponentTest):
+
+    __test__ = True
+
+    res = dict()
+    res["default_iris"] = 0.96
+    res["default_iris_iterative"] = -1
+    res["default_iris_proba"] = 0.32243463915795706
+    res["default_iris_sparse"] = 0.64
+    res["default_digits"] = 0.096539162112932606
+    res["default_digits_iterative"] = -1
+    res["default_digits_binary"] = 0.90103217972070426
+    res["default_digits_multilabel"] = -1
+    res["default_digits_multilabel_proba"] = -1
+
+    sk_mod = sklearn.svm.SVC
+    module = LibSVM_SVC
+
+    def test_default_configuration_predict_proba_individual(self):
+        # Leave this additional test here
         for i in range(2):
             predictions, targets = _test_classifier_predict_proba(
                 LibSVM_SVC, sparse=True, dataset='digits',
@@ -54,19 +65,3 @@ class LibSVM_SVCComponentTest(unittest.TestCase):
             prediction = cls.predict_proba(X_test)
             self.assertAlmostEqual(sklearn.metrics.log_loss(Y_test, prediction),
                                    0.69323680119641773)
-
-    def test_default_configuration_binary(self):
-        for i in range(2):
-            predictions, targets = _test_classifier(LibSVM_SVC,
-                                                    make_binary=True)
-            self.assertAlmostEqual(1.0,
-                                   sklearn.metrics.accuracy_score(
-                                       predictions, targets))
-
-    def test_target_algorithm_multioutput_multiclass_support(self):
-        cls = sklearn.svm.SVC()
-
-        X = np.random.random((10, 10))
-        y = np.random.randint(0, 1, size=(10, 10))
-        self.assertRaisesRegexp(ValueError, 'bad input shape \(10, 10\)',
-                                cls.fit, X, y)
