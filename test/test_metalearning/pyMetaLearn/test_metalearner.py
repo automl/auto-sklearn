@@ -35,7 +35,8 @@ class MetaLearnerTest(unittest.TestCase):
 
     def test_metalearning_suggest_all(self):
         ret = self.meta_optimizer.metalearning_suggest_all()
-        self.assertEqual(18, len(ret))
+        self.assertEqual(17, len(ret))
+        # Reduced to 17 as we changed QDA searchspace
         self.assertEqual('gradient_boosting', ret[0]['classifier:__choice__'])
         self.assertEqual('random_forest', ret[1]['classifier:__choice__'])
         # There is no test for exclude_double_configuration as it's not present
@@ -45,7 +46,8 @@ class MetaLearnerTest(unittest.TestCase):
         self.meta_optimizer.meta_base.metafeatures.loc["38_acc"].iloc[:10] = \
             np.NaN
         ret = self.meta_optimizer.metalearning_suggest_all()
-        self.assertEqual(18, len(ret))
+        self.assertEqual(17, len(ret))
+        # Reduced to 17 as we changed QDA searchspace
         self.assertEqual('gradient_boosting', ret[0]['classifier:__choice__'])
         self.assertEqual('random_forest', ret[1]['classifier:__choice__'])
 
