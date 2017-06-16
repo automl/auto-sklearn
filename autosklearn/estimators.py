@@ -171,15 +171,17 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
         resampling_strategy : string, optional ('holdout')
             how to to handle overfitting, might need 'resampling_strategy_arguments'
 
-            * 'holdout': 66:33 (train:test) split
-            * 'holdout-iterative-fit':  66:33 (train:test) split, calls iterative
+            * 'holdout': 67:33 (train:test) split
+            * 'holdout-iterative-fit':  67:33 (train:test) split, calls iterative
               fit where possible
             * 'cv': crossvalidation, requires 'folds'
 
-        resampling_strategy_arguments : dict, optional if 'holdout' (None)
+        resampling_strategy_arguments : dict, optional if 'holdout' (train_size default=0.67)
             Additional arguments for resampling_strategy
-            * 'holdout': None
-            * 'holdout-iterative-fit':  None
+            ``train_size`` should be between 0.0 and 1.0 and represent the
+            proportion of the dataset to include in the train split.
+            * 'holdout': {'train_size': float}
+            * 'holdout-iterative-fit':  {'train_size': float}
             * 'cv': {'folds': int}
 
         tmp_folder : string, optional (None)
