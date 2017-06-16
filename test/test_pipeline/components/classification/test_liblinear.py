@@ -15,7 +15,7 @@ class LibLinearComponentTest(BaseClassificationComponentTest):
     res["default_iris_iterative"] = -1
     res["default_iris_proba"] = 0.33728319465089696
     res["default_iris_sparse"] = 0.56
-    res["default_digits"] = 0.91560412871888286
+    res["default_digits"] = 0.91499696417729204
     res["default_digits_iterative"] = -1
     res["default_digits_binary"] = 0.98907103825136611
     res["default_digits_multilabel"] = 0.89539354612444322

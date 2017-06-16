@@ -11,6 +11,7 @@ import numpy as np
 class BaseClassificationComponentTest(unittest.TestCase):
 
     res = None
+
     module = None
     sk_module = None
 
@@ -24,7 +25,9 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                  classifier=self.module)
             self.assertAlmostEqual(self.res["default_iris"],
                                    sklearn.metrics.accuracy_score(targets,
-                                                                  predictions))
+                                                                  predictions),
+                                   places=self.res.get(
+                                           "default_iris_places", 7))
 
     def test_default_iris_iterative_fit(self):
         if not hasattr(self.module, 'iterative_fit'):
@@ -35,8 +38,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                 _test_classifier_iterative_fit(dataset="iris",
                                                classifier=self.module)
             self.assertAlmostEqual(self.res["default_iris_iterative"],
-                                   sklearn.metrics.accuracy_score(predictions,
-                                                                  targets))
+                                   sklearn.metrics.accuracy_score(targets,
+                                                                  predictions),
+                                   places=self.res.get(
+                                           "default_iris_iterative_places", 7))
 
     def test_default_iris_predict_proba(self):
         for i in range(2):
@@ -44,7 +49,9 @@ class BaseClassificationComponentTest(unittest.TestCase):
                 _test_classifier_predict_proba(dataset="iris",
                                                classifier=self.module)
             self.assertAlmostEqual(self.res["default_iris_proba"],
-                                   sklearn.metrics.log_loss(targets, predictions))
+                                   sklearn.metrics.log_loss(targets, predictions),
+                                   places=self.res.get(
+                                           "default_iris_proba_places", 7))
 
     def test_default_iris_sparse(self):
         if SPARSE not in self.module.get_properties()["input"]:
@@ -57,7 +64,9 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                  sparse=True)
             self.assertAlmostEqual(self.res["default_iris_sparse"],
                                    sklearn.metrics.accuracy_score(targets,
-                                                                  predictions))
+                                                                  predictions),
+                                   places=self.res.get(
+                                           "default_iris_sparse_places", 7))
 
     def test_default_digits_binary(self):
         for i in range(2):
@@ -67,7 +76,9 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                  make_binary=True)
             self.assertAlmostEqual(self.res["default_digits_binary"],
                                    sklearn.metrics.accuracy_score(
-                                       targets, predictions))
+                                       targets, predictions),
+                                   places=self.res.get(
+                                           "default_digits_binary_places", 7))
 
     def test_default_digits(self):
         for i in range(2):
@@ -76,7 +87,9 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                  classifier=self.module)
             self.assertAlmostEqual(self.res["default_digits"],
                                    sklearn.metrics.accuracy_score(targets,
-                                                                  predictions))
+                                                                  predictions),
+                                   places=self.res.get(
+                                           "default_digits_places", 7))
 
     def test_default_digits_iterative_fit(self):
         if not hasattr(self.module, 'iterative_fit'):
@@ -88,7 +101,9 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                                classifier=self.module)
             self.assertAlmostEqual(self.res["default_digits_iterative"],
                                    sklearn.metrics.accuracy_score(predictions,
-                                                                  targets))
+                                                                  targets),
+                                   places=self.res.get(
+                                           "default_digits_iterative_places", 7))
 
     def test_default_digits_multilabel(self):
         if not self.module.get_properties()["handles_multilabel"]:
@@ -101,7 +116,9 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                  make_multilabel=True)
             self.assertAlmostEqual(self.res["default_digits_multilabel"],
                                    sklearn.metrics.average_precision_score(
-                                       targets, predictions))
+                                       targets, predictions),
+                                   places=self.res.get(
+                                           "default_digits_multilabel_places", 7))
 
     def test_default_digits_multilabel_predict_proba(self):
         if not self.module.get_properties()["handles_multilabel"]:
@@ -114,7 +131,9 @@ class BaseClassificationComponentTest(unittest.TestCase):
             self.assertEqual(predictions.shape, ((50, 3)))
             self.assertAlmostEqual(self.res["default_digits_multilabel_proba"],
                                    sklearn.metrics.average_precision_score(
-                                       targets, predictions))
+                                       targets, predictions),
+                                   places=self.res.get(
+                                           "default_digits_multilabel_proba_places", 7))
 
     def test_target_algorithm_multioutput_multiclass_support(self):
         if not self.module.get_properties()["handles_multiclass"]:
