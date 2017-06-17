@@ -235,8 +235,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
     def get_splitter(self, D):
         y = D.data['Y_train'].ravel()
         train_size = 0.67
-        if not self.resampling_strategy_args and self.resampling_strategy_args.get('train_size'):
-            train_size = self.resampling_strategy_args.get('train_size')
+        if self.resampling_strategy_args:
+            train_size = self.resampling_strategy_args.get('train_size', train_size)
         test_size = 1 - train_size
         if D.info['task'] in CLASSIFICATION_TASKS and \
                         D.info['task'] != MULTILABEL_CLASSIFICATION:
