@@ -18,7 +18,8 @@ class QDA(AutoSklearnClassificationAlgorithm):
     def fit(self, X, Y):
         import sklearn.discriminant_analysis
 
-        estimator = sklearn.discriminant_analysis.QuadraticDiscriminantAnalysis(self.reg_param)
+        estimator = sklearn.discriminant_analysis.\
+            QuadraticDiscriminantAnalysis(reg_param=self.reg_param)
 
         if len(Y.shape) == 2 and Y.shape[1] > 1:
             self.estimator = sklearn.multiclass.OneVsRestClassifier(estimator, n_jobs=1)
@@ -68,8 +69,8 @@ class QDA(AutoSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        reg_param = UniformFloatHyperparameter('reg_param', 0.0, 10.0,
-                                               default=0.5)
+        reg_param = UniformFloatHyperparameter('reg_param', 0.0, 1.0,
+                                               default=0.0)
         cs = ConfigurationSpace()
         cs.add_hyperparameter(reg_param)
         return cs
