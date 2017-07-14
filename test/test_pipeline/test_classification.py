@@ -211,6 +211,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                     "data_preprocessing", "dataset.pkl"))
         y = X[:, -1].copy()
         X = X[:,:-1]
+
+        # In order to usefully test the neural networks
+        _, y = np.unique(y, return_inverse=True)
+
         X_train, X_test, Y_train, Y_test = \
             sklearn.model_selection.train_test_split(X, y)
         data = {'X_train': X_train, 'Y_train': Y_train,
@@ -301,7 +305,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                 elif 'Bug in scikit-learn' in e.args[0]:
                     continue
                 elif 'The condensed distance matrix must contain only finite ' \
-                     'values.' in e.args[0]:
+                        'values.' in e.args[0]:
+                    continue
+                elif 'which is larger than the original space with n_features='\
+                        in e.args[0]:
                     continue
                 else:
                     print(config)
@@ -343,12 +350,14 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(len(cs.get_hyperparameter(
             'rescaling:__choice__').choices), 4)
         self.assertEqual(len(cs.get_hyperparameter(
-            'classifier:__choice__').choices), 15)
+            'classifier:__choice__').choices), 18)
+
         self.assertEqual(len(cs.get_hyperparameter(
-            'preprocessor:__choice__').choices), 13)
+            'preprocessor:__choice__').choices), 14)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(141, len(hyperparameters))
+        self.assertEqual(243, len(hyperparameters))
+
 
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp

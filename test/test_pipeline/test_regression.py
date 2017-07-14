@@ -156,6 +156,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 elif 'The condensed distance matrix must contain only finite ' \
                      'values.' in e.args[0]:
                     continue
+                elif 'which is larger than the original space with n_features=' \
+                        in e.args[0]:
+                    continue
                 else:
                     print(config)
                     print(traceback.format_exc())
@@ -221,7 +224,9 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(130, len(hyperparameters))
+
+        self.assertEqual(207, len(hyperparameters))
+
         self.assertEqual(len(hyperparameters) - 5, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):

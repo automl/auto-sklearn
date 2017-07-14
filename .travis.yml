@@ -74,6 +74,8 @@ install:
   - pip install git+https://github.com/openml/openml-python@0b9009b0436fda77d9f7c701bd116aff4158d5e1 --no-deps
   - mkdir ~/.openml
   - echo "apikey = 610344db6388d9ba34f6db45a3cf71de" > ~/.openml/config
+  # Install dependencies for Auto-Net
+  - pip install theano git+https://github.com/Lasagne/Lasagne
   # Debug output to know all exact package versions!
   - pip freeze
   - python setup.py install
