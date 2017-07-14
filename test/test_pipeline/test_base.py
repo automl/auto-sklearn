@@ -62,11 +62,13 @@ class BaseTest(unittest.TestCase):
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
                          14)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
-                         16)
-        self.assertEqual(len(cs.get_hyperparameter("c:__choice__").choices),
-                         18)
-        self.assertEqual(114, len(cs.forbidden_clauses))
 
+                         15)
+        self.assertEqual(len(cs.get_hyperparameter("c:__choice__").choices),
+                         15)
+        #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
+        #    print(clause)
+        self.assertEqual(107, len(cs.forbidden_clauses))
 
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification', 'sparse': True}

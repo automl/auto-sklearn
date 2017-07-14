@@ -78,8 +78,8 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             include=include, exclude=exclude, random_state=random_state,
             init_params=init_params)
 
-    def pre_transform(self, X, Y, fit_params=None, init_params=None):
-        X, fit_params = super(SimpleRegressionPipeline, self).pre_transform(
+    def fit_transformer(self, X, Y, fit_params=None, init_params=None):
+        X, fit_params = super(SimpleRegressionPipeline, self).fit_transformer(
             X, Y, fit_params=fit_params)
         self.num_targets = 1 if len(Y.shape) == 1 else Y.shape[1]
         return X, fit_params

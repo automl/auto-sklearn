@@ -81,36 +81,28 @@ class StopWatch:
             self._tasks[name].stop()
             self._tasks[name]._wall_dur = wall_dur
             self._tasks[name]._cpu_dur = cpu_dur
-        else:
-            sys.stderr.write('You are already timing task: %s\n' % name)
 
     def start_task(self, name):
         if name not in self._tasks:
             self._tasks[name] = TimingTask(name)
-        else:
-            sys.stderr.write('You are already timing task: %s\n' % name)
 
     def wall_elapsed(self, name):
         tmp = time.time()
-        try:
+        if name in self._tasks:
             if not self._tasks[name].wall_dur:
                 tsk_start = self._tasks[name].wall_tic
                 return tmp - tsk_start
             else:
                 return self._tasks[name].wall_dur
-        except KeyError:
-            sys.stderr.write('You are already timing task: %s\n' % name)
 
     def cpu_elapsed(self, name):
         tmp = time.clock()
-        try:
+        if name in self._tasks:
             if not self._tasks[name].cpu_dur:
                 tsk_start = self._tasks[name].cpu_tic
                 return tmp - tsk_start
             else:
                 return self._tasks[name].cpu_dur
-        except KeyError:
-            sys.stderr.write('You are already timing task: %s\n' % name)
 
     def stop_task(self, name):
         try:

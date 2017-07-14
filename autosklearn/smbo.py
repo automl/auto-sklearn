@@ -13,15 +13,15 @@ from smac.facade.roar_facade import ROAR
 from smac.utils.util_funcs import get_types
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_ta_run import StatusType
-from smac.smbo.objective import average_cost
+from smac.optimizer.objective import average_cost
 from smac.runhistory.runhistory import RunHistory
 from smac.runhistory.runhistory2epm import RunHistory2EPM4Cost, \
     RunHistory2EPM4EIPS
 from smac.epm.uncorrelated_mo_rf_with_instances import \
     UncorrelatedMultiObjectiveRandomForestWithInstances
 from smac.epm.rf_with_instances import RandomForestWithInstances
-from smac.smbo.acquisition import EIPS
-from smac.smbo import pSMAC
+from smac.optimizer.acquisition import EIPS
+from smac.optimizer import pSMAC
 
 import autosklearn.metalearning
 from autosklearn.constants import *
@@ -77,9 +77,9 @@ def load_data(dataset_info, backend, max_mem=None):
     # Datamanager probably doesn't exist
     if D is None:
         if max_mem is None:
-            D = CompetitionDataManager(dataset_info, encode_labels=True)
+            D = CompetitionDataManager(dataset_info)
         else:
-            D = CompetitionDataManager(dataset_info, encode_labels=True, max_memory_in_mb=max_mem)
+            D = CompetitionDataManager(dataset_info, max_memory_in_mb=max_mem)
     return D
 
 
@@ -253,7 +253,7 @@ class AutoMLSMBO(object):
         else:
             self.datamanager = load_data(self.dataset_name,
                                          self.backend,
-                                         max_mem = max_mem)
+                                         max_mem=max_mem)
 
         self.task = self.datamanager.info['task']
 
@@ -505,11 +505,11 @@ class AutoMLSMBO(object):
         if self.resampling_strategy in ['partial-cv',
                                         'partial-cv-iterative-fit']:
             num_folds = self.resampling_strategy_args['folds']
-            instances = [[json.dumps({'dataset_name': self.dataset_name,
+            instances = [[json.dumps({'task_id': self.dataset_name,
                                       'fold': fold_number})]
                          for fold_number in range(num_folds)]
         else:
-            instances = [[json.dumps({'dataset_name': self.dataset_name})]]
+            instances = [[json.dumps({'task_id': self.dataset_name})]]
 
         startup_time = self.watcher.wall_elapsed(self.dataset_name)
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
@@ -530,7 +530,6 @@ class AutoMLSMBO(object):
 
         self.scenario = Scenario(scenario_dict)
 
-
         # TODO rebuild target algorithm to be it's own target algorithm
         # evaluator, which takes into account that a run can be killed prior
         # to the model being fully fitted; thus putting intermediate results
@@ -545,8 +544,9 @@ class AutoMLSMBO(object):
             include['preprocessor'] = self.include_preprocessors
         elif self.exclude_preprocessors is not None:
             exclude['preprocessor'] = self.exclude_preprocessors
+
         if self.include_estimators is not None and \
-                self.exclude_preprocessors is not None:
+                self.exclude_estimators is not None:
             raise ValueError('Cannot specify include_estimators and '
                              'exclude_estimators.')
         elif self.include_estimators is not None:
@@ -576,12 +576,13 @@ class AutoMLSMBO(object):
                                     disable_file_output=self.disable_file_output,
                                     **self.resampling_strategy_args)
 
-        types = get_types(self.config_space, self.scenario.feature_array)
+        types, bounds = get_types(self.config_space,
+                                  self.scenario.feature_array)
 
         # TODO extract generation of SMAC object into it's own function for
         # testing
         if self.acquisition_function == 'EI':
-            model = RandomForestWithInstances(types,
+            model = RandomForestWithInstances(types=types, bounds=bounds,
                                               #instance_features=meta_features_list,
                                               seed=1, num_trees=10)
             rh2EPM = RunHistory2EPM4Cost(num_params=num_params,
@@ -606,7 +607,7 @@ class AutoMLSMBO(object):
                                          impute_censored_data=False,
                                          impute_state=None)
             model = UncorrelatedMultiObjectiveRandomForestWithInstances(
-                ['cost', 'runtime'], types, num_trees=10,
+                ['cost', 'runtime'], types=types, bounds=bounds, num_trees=10,
                 instance_features=meta_features_list, seed=1)
             acquisition_function = EIPS(model)
             _smac_arguments = dict(scenario=self.scenario,
@@ -754,7 +755,7 @@ class AutoMLSMBO(object):
         next_configs_tmp = smac.solver.choose_next(
             X_cfg, Y_cfg,
             num_configurations_by_local_search=10,
-            num_configurations_by_random_search_sorted=100)
+            num_configurations_by_random_search_sorted=500)
 
         challengers.extend(next_configs_tmp)
 

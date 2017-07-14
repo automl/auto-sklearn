@@ -5,7 +5,7 @@ import scipy.sparse
 from sklearn.utils.testing import assert_array_almost_equal
 import sklearn.tree
 import sklearn.datasets
-import sklearn.cross_validation
+import sklearn.model_selection
 import sklearn.pipeline
 import openml
 
@@ -227,9 +227,9 @@ class TestOneHotEncoder(unittest.TestCase):
         pipeline = sklearn.pipeline.Pipeline((('ohe', ohe), ('tree', tree)))
 
         X_train, X_test, y_train, y_test = \
-            sklearn.cross_validation.train_test_split(X, y, random_state=3,
-                                                      train_size=0.5,
-                                                      test_size=0.5)
+            sklearn.model_selection.train_test_split(X, y, random_state=3,
+                                                     train_size=0.5,
+                                                     test_size=0.5)
         pipeline.fit(X_train, y_train)
         self.assertEqual(np.mean(y_train == pipeline.predict(X_train)), 1)
         # With an incorrect copy operation the OneHotEncoder would rearrange

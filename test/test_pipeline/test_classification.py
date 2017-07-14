@@ -9,11 +9,11 @@ import unittest.mock
 import numpy as np
 import sklearn.datasets
 import sklearn.decomposition
-import sklearn.cross_validation
+import sklearn.model_selection
 import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.testing import assert_array_almost_equal
-from xgboost.core import XGBoostError
+#from xgboost.core import XGBoostError
 
 from ConfigSpace.configuration_space import ConfigurationSpace, \
     Configuration
@@ -141,7 +141,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             include={'classifier': ['random_forest'],
                      'preprocessor': ['no_preprocessing']})
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
-        XT = classifier.pre_transform(X_train, Y_train)
+        XT = classifier.fit_transformer(X_train, Y_train)
         for i in range(1, 11):
             classifier.iterative_fit(X_train, Y_train)
             self.assertEqual(classifier.steps[-1][-1].choice.estimator.n_estimators,
@@ -216,7 +216,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         _, y = np.unique(y, return_inverse=True)
 
         X_train, X_test, Y_train, Y_test = \
-            sklearn.cross_validation.train_test_split(X, y)
+            sklearn.model_selection.train_test_split(X, y)
         data = {'X_train': X_train, 'Y_train': Y_train,
                 'X_test': X_test, 'Y_test': Y_test}
 
@@ -334,13 +334,13 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     print(traceback.format_exc())
                     print(config)
                     raise e
-            except XGBoostError as e:
-                if "std::bad_alloc" in e.args[0]:
-                    continue
-                else:
-                    print(traceback.format_exc())
-                    print(config)
-                    raise e
+            #except XGBoostError as e:
+            #    if "std::bad_alloc" in e.args[0]:
+            #        continue
+            #    else:
+            #        print(traceback.format_exc())
+            #        print(config)
+            #        raise e
 
     def test_get_hyperparameter_search_space(self):
         cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
@@ -351,11 +351,13 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             'rescaling:__choice__').choices), 4)
         self.assertEqual(len(cs.get_hyperparameter(
             'classifier:__choice__').choices), 18)
+
         self.assertEqual(len(cs.get_hyperparameter(
             'preprocessor:__choice__').choices), 14)
 
         hyperparameters = cs.get_hyperparameters()
         self.assertEqual(243, len(hyperparameters))
+
 
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
@@ -453,21 +455,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(84, cls_predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
 
-        # Multilabel
-        X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
-        Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
-                                 for y in Y_train]))
-        cls.fit(X_train, Y_train)
-        X_test_ = X_test.copy()
-        prediction_ = cls.predict_proba(X_test_)
-        # The object behind the last step in the pipeline
-        cls_predict = unittest.mock.Mock(wraps=cls.steps[-1][1].predict_proba)
-        cls.steps[-1][-1].predict_proba = cls_predict
-        prediction = cls.predict_proba(X_test, batch_size=20)
-        self.assertEqual((1647, 10), prediction.shape)
-        self.assertEqual(84, cls_predict.call_count)
-        assert_array_almost_equal(prediction_, prediction)
-
     def test_predict_batched_sparse(self):
         cls = SimpleClassificationPipeline(dataset_properties={'sparse': True},
                                            include={'classifier': ['sgd']})
@@ -475,22 +462,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         # Multiclass
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
                                                        make_sparse=True)
-        cls.fit(X_train, Y_train)
-        X_test_ = X_test.copy()
-        prediction_ = cls.predict_proba(X_test_)
-        # The object behind the last step in the pipeline
-        cls_predict = unittest.mock.Mock(wraps=cls.steps[-1][1].predict_proba)
-        cls.steps[-1][-1].predict_proba = cls_predict
-        prediction = cls.predict_proba(X_test, batch_size=20)
-        self.assertEqual((1647, 10), prediction.shape)
-        self.assertEqual(84, cls_predict.call_count)
-        assert_array_almost_equal(prediction_, prediction)
-
-        # Multilabel
-        X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
-                                                       make_sparse=True)
-        Y_train = np.array(list([(list([1 if i != y else 0 for i in range(10)]))
-                                 for y in Y_train]))
         cls.fit(X_train, Y_train)
         X_test_ = X_test.copy()
         prediction_ = cls.predict_proba(X_test_)

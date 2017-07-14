@@ -108,22 +108,19 @@ for entry in trajectory:
                                     all_scoring_functions=True,
                                     metric=metric)
         status, cost, runtime, additional_run_info = ta.start(
-            config=config, instance=None, cutoff=per_run_time_limit)
+            config=config, instance=None, cutoff=per_run_time_limit*3)
 
         if status == StatusType.SUCCESS:
-            scores = additional_run_info.split(';')
-            scores = [score.split(':') for score in scores]
-            scores = [(score[0].strip(), score[1].strip()) for score in scores]
-            scores = {score[0]: float(score[1]) for score in scores}
-            assert len(scores) > 1, scores
+            assert len(additional_run_info) > 1, additional_run_info
 
         # print(additional_run_info)
 
-        validated_trajectory.append(list(entry) + [task_id] + [scores])
+        validated_trajectory.append(list(entry) + [task_id] +
+                                    [additional_run_info])
 
 validated_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
                         for entry in validated_trajectory]
-validated_trajectory_file = os.path.join(tmp_dir, 'smac3-output_%d' % seed,
+validated_trajectory_file = os.path.join(tmp_dir, 'smac3-output_%d_run1' % seed,
                                          'validation_trajectory.json')
 with open(validated_trajectory_file, 'w') as fh:
     json.dump(validated_trajectory, fh)

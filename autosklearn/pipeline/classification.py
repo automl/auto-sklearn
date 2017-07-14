@@ -80,7 +80,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             config, pipeline, dataset_properties, include, exclude,
             random_state, init_params)
 
-    def pre_transform(self, X, y, fit_params=None):
+    def fit_transformer(self, X, y, fit_params=None):
         self.num_targets = 1 if len(y.shape) == 1 else y.shape[1]
 
         if fit_params is None:
@@ -98,7 +98,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             if _fit_params is not None:
                 fit_params.update(_fit_params)
 
-        X, fit_params = super(SimpleClassificationPipeline, self).pre_transform(
+        X, fit_params = super(SimpleClassificationPipeline, self).fit_transformer(
             X, y, fit_params=fit_params)
 
         return X, fit_params
@@ -127,8 +127,12 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             return self.steps[-1][-1].predict_proba(Xt)
 
         else:
-            if type(batch_size) is not int or batch_size <= 0:
-                raise Exception("batch_size must be a positive integer")
+            if not isinstance(batch_size, int):
+                raise ValueError("Argument 'batch_size' must be of type int, "
+                                 "but is '%s'" % type(batch_size))
+            if batch_size <= 0:
+                raise ValueError("Argument 'batch_size' must be positive, "
+                                 "but is %d" % batch_size)
 
             else:
                 # Probe for the target array dimensions

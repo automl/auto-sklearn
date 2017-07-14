@@ -2,10 +2,11 @@
 import multiprocessing
 import shutil
 
-import sklearn.cross_validation
+import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 
+from autosklearn.metrics import accuracy
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import *
 
@@ -42,10 +43,10 @@ def spawn_classifier(seed, dataset_name):
     # models.
     # 3. all instances of the AutoSklearnClassifier must have a different seed!
     automl = AutoSklearnClassifier(
-        time_left_for_this_task=120, # sec., how long should this seed fit
+        time_left_for_this_task=60, # sec., how long should this seed fit
         # process run
-        per_run_time_limit=60, # sec., each model may only take this long before it's killed
-        ml_memory_limit=1024, # MB, memory limit imposed on each call to a ML  algorithm
+        per_run_time_limit=15, # sec., each model may only take this long before it's killed
+        ml_memory_limit=1024, # MB, memory limit imposed on each call to a ML algorithm
         shared_mode=True, # tmp folder will be shared between seeds
         tmp_folder=tmp_folder,
         output_folder=output_folder,
@@ -57,11 +58,9 @@ def spawn_classifier(seed, dataset_name):
 
 if __name__ == '__main__':
     
-    digits = sklearn.datasets.load_digits()
-    X = digits.data
-    y = digits.target
+    X, y = sklearn.datasets.load_digits(return_X_y=True)
     X_train, X_test, y_train, y_test = \
-        sklearn.cross_validation.train_test_split(X, y, random_state=1)
+        sklearn.model_selection.train_test_split(X, y, random_state=1)
 
     processes = []
     for i in range(4): # set this at roughly half of your cores
@@ -87,7 +86,7 @@ if __name__ == '__main__':
     # necessary
     automl.fit_ensemble(y_train,
                         task=MULTICLASS_CLASSIFICATION,
-                        metric=ACC_METRIC,
+                        metric=accuracy,
                         precision='32',
                         dataset_name='digits',
                         ensemble_size=20,

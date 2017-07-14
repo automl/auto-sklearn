@@ -63,9 +63,9 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
         pre_ = ['liblinear_svc_preprocessor',
                 'extra_trees_preproc_for_classification']
         if classifier in clf_:
-            init_params['classifier:class_weight'] = 'auto'
+            init_params['classifier:class_weight'] = 'balanced'
         if preprocessor in pre_:
-            init_params['preprocessor:class_weight'] = 'auto'
+            init_params['preprocessor:class_weight'] = 'balanced'
 
         clf_ = ['ridge']
         if classifier in clf_:

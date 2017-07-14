@@ -13,7 +13,7 @@ from autosklearn.pipeline.constants import *
 
 
 class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
-    def __init__(self, kernel, C, epsilon, tol, shrinking, gamma=0.0,
+    def __init__(self, kernel, C, epsilon, tol, shrinking, gamma=0.1,
                  degree=3, coef0=0.0, verbose=False,
                  max_iter=-1, random_state=None):
         self.kernel = kernel

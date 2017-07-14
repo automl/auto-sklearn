@@ -30,6 +30,8 @@ class SGD(AutoSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None):
+        self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight,
+                           refit=True)
         while not self.configuration_fully_fitted():
             self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight)
 
@@ -42,7 +44,6 @@ class SGD(AutoSklearnClassificationAlgorithm):
             self.estimator = None
 
         if self.estimator is None:
-            self._iterations = 0
 
             self.alpha = float(self.alpha)
             self.fit_intercept = self.fit_intercept == 'True'
@@ -57,7 +58,7 @@ class SGD(AutoSklearnClassificationAlgorithm):
                                            penalty=self.penalty,
                                            alpha=self.alpha,
                                            fit_intercept=self.fit_intercept,
-                                           n_iter=1,
+                                           n_iter=n_iter,
                                            learning_rate=self.learning_rate,
                                            l1_ratio=self.l1_ratio,
                                            epsilon=self.epsilon,
@@ -65,15 +66,16 @@ class SGD(AutoSklearnClassificationAlgorithm):
                                            power_t=self.power_t,
                                            shuffle=True,
                                            average=self.average,
-                                           random_state=self.random_state,)
+                                           random_state=self.random_state)
+        else:
+            self.estimator.n_iter += n_iter
 
-        self.estimator.n_iter = n_iter
         self.estimator.partial_fit(X, y, classes=np.unique(y),
                                    sample_weight=sample_weight)
 
-        if self._iterations >= self.n_iter:
+        if self.estimator.n_iter >= self.n_iter:
             self.fully_fit_ = True
-        self._iterations += n_iter
+
         return self
 
     def configuration_fully_fitted(self):
@@ -125,7 +127,8 @@ class SGD(AutoSklearnClassificationAlgorithm):
         l1_ratio = UniformFloatHyperparameter(
             "l1_ratio", 1e-9, 1,  log=True, default=0.15)
         fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
-        n_iter = UniformIntegerHyperparameter("n_iter", 5, 1000, log=True, default=20)
+        n_iter = UniformIntegerHyperparameter("n_iter", 5, 1000, log=True,
+                                              default=20)
         epsilon = UniformFloatHyperparameter(
             "epsilon", 1e-5, 1e-1, default=1e-4, log=True)
         learning_rate = CategoricalHyperparameter(

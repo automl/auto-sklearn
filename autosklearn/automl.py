@@ -14,7 +14,7 @@ import scipy.stats
 from sklearn.base import BaseEstimator
 from smac.tae.execute_ta_run import StatusType
 from smac.stats.stats import Stats
-from sklearn.grid_search import _CVScoreTuple
+from sklearn.externals import joblib
 
 from autosklearn.constants import *
 from autosklearn.metrics import Scorer
@@ -26,7 +26,30 @@ from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline
 from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
-from autosklearn.util.hash import hash_numpy_array
+from autosklearn.util.hash import hash_array_or_matrix
+
+
+def _model_predict(self, X, batch_size, identifier):
+    def send_warnings_to_log(
+            message, category, filename, lineno, file=None, line=None):
+        self._logger.debug('%s:%s: %s:%s' %
+                       (filename, lineno, category.__name__, message))
+        return
+    model = self.models_[identifier]
+    X_ = X.copy()
+    with warnings.catch_warnings():
+        warnings.showwarning = send_warnings_to_log
+        if self._task in REGRESSION_TASKS:
+            prediction = model.predict(X_, batch_size=batch_size)
+        else:
+            prediction = model.predict_proba(X_, batch_size=batch_size)
+    if len(prediction.shape) < 1 or len(X_.shape) < 1 or \
+            X_.shape[0] < 1 or prediction.shape[0] != X_.shape[0]:
+        self._logger.warning("Prediction shape for model %s is %s "
+                             "while X_.shape is %s" %
+                             (model, str(prediction.shape),
+                              str(X_.shape)))
+    return prediction
 
 
 class AutoML(BaseEstimator):
@@ -135,7 +158,7 @@ class AutoML(BaseEstimator):
         self._backend.context.create_directories()
 
         if dataset_name is None:
-            dataset_name = hash_numpy_array(X)
+            dataset_name = hash_array_or_matrix(X)
 
         self._backend.save_start_time(self._seed)
         self._stopwatch = StopWatch()
@@ -166,10 +189,8 @@ class AutoML(BaseEstimator):
         self._data_memory_limit = None
         loaded_data_manager = XYDataManager(X, y,
                                             task=task,
-                                            metric=metric,
                                             feat_type=feat_type,
-                                            dataset_name=dataset_name,
-                                            encode_labels=False)
+                                            dataset_name=dataset_name)
 
         return self._fit(loaded_data_manager, metric)
 
@@ -187,8 +208,7 @@ class AutoML(BaseEstimator):
         # Encoding the labels will be done after the metafeature calculation!
         self._data_memory_limit = float(self._ml_memory_limit) / 3
         loaded_data_manager = CompetitionDataManager(
-            dataset, encode_labels=False,
-            max_memory_in_mb=self._data_memory_limit)
+            dataset, max_memory_in_mb=self._data_memory_limit)
         loaded_data_manager_str = str(loaded_data_manager).split('\n')
         for part in loaded_data_manager_str:
             self._logger.debug(part)
@@ -261,8 +281,8 @@ class AutoML(BaseEstimator):
         if status == StatusType.SUCCESS:
             self._logger.info("Finished creating dummy predictions.")
         else:
-            self._logger.error('Error creating dummy predictions:%s ',
-                               additional_info)
+            self._logger.error('Error creating dummy predictions: %s ',
+                               str(additional_info))
 
         return ta.num_run
 
@@ -428,7 +448,7 @@ class AutoML(BaseEstimator):
             self.runhistory_, self.trajectory_, self.fANOVA_input_ = \
                 _proc_smac.run_smbo()
             trajectory_filename = os.path.join(
-                self._backend.get_smac_output_directory(self._seed),
+                self._backend.get_smac_output_directory(self._seed) + '_run1',
                 'trajectory.json')
             saveable_trajectory = \
                 [list(entry[:2]) + [entry[2].get_dictionary()] + list(entry[3:])
@@ -476,16 +496,34 @@ class AutoML(BaseEstimator):
                             warnings.showwarning = send_warnings_to_log
                             model.fit(X.copy(), y.copy())
                         break
-                    except ValueError:
+                    except ValueError as e:
                         indices = list(range(X.shape[0]))
                         random_state.shuffle(indices)
                         X = X[indices]
                         y = y[indices]
 
+                        if i == 9:
+                            raise e
+
         self._can_predict = True
         return self
 
-    def predict(self, X):
+    def predict(self, X, batch_size=None, n_jobs=1):
+        """predict.
+
+        Parameters
+        ----------
+        X: array-like, shape = (n_samples, n_features)
+
+        batch_size: int or None, defaults to None
+            batch_size controls whether the pipelines will be
+            called on small chunks of the data. Useful when calling the
+            predict method on the whole array X results in a MemoryError.
+
+        n_jobs: int, defaults to 1
+            Parallelize the predictions across the models with n_jobs
+            processes.
+        """
         if self._keep_models is not True:
             raise ValueError(
                 "Predict can only be called if 'keep_models==True'")
@@ -500,31 +538,11 @@ class AutoML(BaseEstimator):
                 self.ensemble_ is None:
             self._load_models()
 
-        def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None, line=None):
-            self._logger.debug('%s:%s: %s:%s' %
-                               (filename, lineno, category.__name__, message))
-            return
-
-        all_predictions = []
-        for identifier in self.ensemble_.get_model_identifiers():
-            model = self.models_[identifier]
-
-            X_ = X.copy()
-            with warnings.catch_warnings():
-                warnings.showwarning = send_warnings_to_log
-                if self._task in REGRESSION_TASKS:
-                    prediction = model.predict(X_)
-                else:
-                    prediction = model.predict_proba(X_)
-
-            if len(prediction.shape) < 1 or len(X_.shape) < 1 or \
-                    X_.shape[0] < 1 or prediction.shape[0] != X_.shape[0]:
-                self._logger.warning("Prediction shape for model %s is %s "
-                                     "while X_.shape is %s" %
-                                     (model, str(prediction.shape),
-                                      str(X_.shape)))
-            all_predictions.append(prediction)
+        # Parallelize predictions across models with n_jobs processes.
+        # Each process computes predictions in chunks of batch_size rows.
+        all_predictions = joblib.Parallel(n_jobs=n_jobs)(
+            joblib.delayed(_model_predict)(self, X, batch_size, identifier)
+            for identifier in self.ensemble_.get_model_identifiers())
 
         if len(all_predictions) == 0:
             raise ValueError('Something went wrong generating the predictions. '
@@ -637,35 +655,6 @@ class AutoML(BaseEstimator):
                                task_type=self._task,
                                metric=self._metric,
                                all_scoring_functions=False)
-
-    @property
-    def grid_scores_(self):
-        grid_scores = list()
-
-        scores_per_config = defaultdict(list)
-        config_list = list()
-
-        for run_key in self.runhistory_.data:
-            run_value = self.runhistory_.data[run_key]
-
-            config_id = run_key.config_id
-            cost = run_value.cost
-
-            if config_id not in config_list:
-                config_list.append(config_id)
-
-            scores_per_config[config_id].append(cost)
-
-        for config_id in config_list:
-            scores = [1 - score for score in scores_per_config[config_id]]
-            mean_score = np.mean(scores)
-            config = self.runhistory_.ids_config[config_id]
-
-            grid_score = _CVScoreTuple(config.get_dictionary(), mean_score,
-                                       scores)
-            grid_scores.append(grid_score)
-
-        return grid_scores
 
     @property
     def cv_results_(self):
