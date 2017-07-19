@@ -171,7 +171,7 @@ class AutoML(BaseEstimator):
             raise ValueError('No metric given.')
         if not isinstance(metric, Scorer):
             raise ValueError('Metric must be instance of '
-                             'autosklearn.metric.Scorer.')
+                             'autosklearn.metrics.Scorer.')
 
         if feat_type is not None and len(feat_type) != X.shape[1]:
             raise ValueError('Array feat_type does not have same number of '
