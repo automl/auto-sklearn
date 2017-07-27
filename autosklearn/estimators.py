@@ -341,7 +341,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             introduced in `Getting Most out of Ensemble Selection`.
 
         ensemble_size : int
-            Size of the ensemble built by `Ensomble Selection`.
+            Size of the ensemble built by `Ensemble Selection`.
 
         Returns
         -------
