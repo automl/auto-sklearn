@@ -18,7 +18,7 @@ requirements = [
     "Cython",
     "numpy>=1.9.0",
     "scipy>=0.14.1",
-    "scikit-learn==0.18.1",
+    "scikit-learn>=0.18.1,<0.19.0",
     "lockfile",
     "joblib",
     "psutil",
