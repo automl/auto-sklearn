@@ -73,6 +73,16 @@ class AutoMLDecorator(object):
         """
         return self._automl.show_models()
 
+    def get_models_with_weights(self):
+        """Return a list of the final ensemble found by auto-sklearn.
+
+        Returns
+        -------
+        [(weight_1, model_1), ..., (weight_n, model_n)]
+
+        """
+        return self._automl.get_models_with_weights()
+
     @property
     def cv_results_(self):
         return self._automl.cv_results_

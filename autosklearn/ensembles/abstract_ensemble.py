@@ -42,8 +42,8 @@ class AbstractEnsemble(object):
         self
 
     @abstractmethod
-    def pprint_ensemble_string(self, models):
-        """Return a nicely-readable representation of the ensmble.
+    def get_models_with_weights(self, models):
+        """Return a list of (wight, model) pairs
 
         Parameters
         ----------
@@ -53,8 +53,9 @@ class AbstractEnsemble(object):
 
         Returns
         -------
-        str
+        array : [(weight_1, model_1), ..., (weight_n, model_n)]
         """
+
 
     @abstractmethod
     def get_model_identifiers(self):
