@@ -43,7 +43,7 @@ class AbstractEnsemble(object):
 
     @abstractmethod
     def get_models_with_weights(self, models):
-        """Return a list of (wight, model) pairs
+        """Return a list of (weight, model) pairs
 
         Parameters
         ----------
