@@ -531,8 +531,8 @@ class AutoML(BaseEstimator):
                 self._resampling_strategy not in  \
                         ['holdout', 'holdout-iterative-fit']:
             raise NotImplementedError(
-                'Predict is currently only implemented for resampling '
-                'strategy %s.' % self._resampling_strategy)
+                'Predict is currently not implemented for resampling '
+                'strategy %s, please call refit().' % self._resampling_strategy)
 
         if self.models_ is None or len(self.models_) == 0 or \
                 self.ensemble_ is None:
