@@ -1,17 +1,24 @@
-import unittest
+import sklearn.linear_model
 
 from autosklearn.pipeline.components.regression.ard_regression import \
     ARDRegression
-from autosklearn.pipeline.util import _test_regressor
-
-import sklearn.metrics
+from .test_base import BaseRegressionComponentTest
 
 
-class ARDRegressionComponentTest(unittest.TestCase):
-    def test_default_configuration(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_regressor(ARDRegression, dataset='boston')
-            self.assertAlmostEqual(0.70316694175513961,
-                                   sklearn.metrics.r2_score(targets,
-                                                            predictions))
+class ARDRegressionComponentTest(BaseRegressionComponentTest):
+
+    __test__ = True
+
+    res = dict()
+    res["default_boston"] = 0.70316694175513961
+    res["default_boston_iterative"] = -1
+    res["default_boston_sparse"] = -1
+    res["default_boston_iterative_sparse"] = 0.0
+    res["default_diabetes"] = 0.4172236487551515
+    res["default_diabetes_iterative"] = -1
+    res["default_diabetes_sparse"] = -1
+    res["default_diabetes_iterative_sparse"] = 0.0
+
+    sk_mod = sklearn.linear_model.ARDRegression
+
+    module = ARDRegression

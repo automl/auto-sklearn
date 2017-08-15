@@ -1,25 +1,24 @@
-import unittest
+import sklearn.ensemble
 
 from autosklearn.pipeline.components.regression.adaboost import \
     AdaboostRegressor
-from autosklearn.pipeline.util import _test_regressor
-
-import sklearn.metrics
+from .test_base import BaseRegressionComponentTest
 
 
-class AdaBoostComponentTest(unittest.TestCase):
-    def test_default_configuration(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_regressor(AdaboostRegressor, dataset='boston')
-            self.assertAlmostEqual(0.60525743737887405,
-                                   sklearn.metrics.r2_score(targets,
-                                                            predictions))
+class AdaBoostComponentTest(BaseRegressionComponentTest):
 
-    def test_default_configuration_sparse(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_regressor(AdaboostRegressor, sparse=True, dataset='boston')
-            self.assertAlmostEqual(0.22111559712318207,
-                                   sklearn.metrics.r2_score(targets,
-                                                            predictions))
+    __test__ = True
+
+    res = dict()
+    res["default_boston"] = 0.60525743737887405
+    res["default_boston_iterative"] = -1
+    res["default_boston_sparse"] = 0.22111559712318207
+    res["default_boston_iterative_sparse"] = 0.0
+    res["default_diabetes"] = 0.25129853514492517
+    res["default_diabetes_iterative"] = -1
+    res["default_diabetes_sparse"] = 0.090755670764629537
+    res["default_diabetes_iterative_sparse"] = 0.0
+
+    sk_mod = sklearn.ensemble.AdaBoostRegressor
+
+    module = AdaboostRegressor
