@@ -13,13 +13,13 @@ class GaussianProcessComponentTest(BaseRegressionComponentTest):
     res = dict()
     res["default_boston_le_ge"] = [0.6, 0.4]
     res["default_boston_places"] = 1
-    res["default_boston_iterative"] = -1
-    res["default_boston_sparse"] = -1
-    res["default_boston_iterative_sparse"] = 0.0
+    res["default_boston_iterative"] = None
+    res["default_boston_sparse"] = None
+    res["default_boston_iterative_sparse"] = None
     res["default_diabetes"] = -7.4131230585194885e-06
-    res["default_diabetes_iterative"] = -1
-    res["default_diabetes_sparse"] = -1
-    res["default_diabetes_iterative_sparse"] = 0.0
+    res["default_diabetes_iterative"] = None
+    res["default_diabetes_sparse"] = None
+    res["default_diabetes_iterative_sparse"] = None
 
     sk_mod = sklearn.gaussian_process.GaussianProcessRegressor
 

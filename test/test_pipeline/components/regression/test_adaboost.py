@@ -11,13 +11,13 @@ class AdaBoostComponentTest(BaseRegressionComponentTest):
 
     res = dict()
     res["default_boston"] = 0.60525743737887405
-    res["default_boston_iterative"] = -1
+    res["default_boston_iterative"] = None
     res["default_boston_sparse"] = 0.22111559712318207
-    res["default_boston_iterative_sparse"] = 0.0
+    res["default_boston_iterative_sparse"] = None
     res["default_diabetes"] = 0.25129853514492517
-    res["default_diabetes_iterative"] = -1
+    res["default_diabetes_iterative"] = None
     res["default_diabetes_sparse"] = 0.090755670764629537
-    res["default_diabetes_iterative_sparse"] = 0.0
+    res["default_diabetes_iterative_sparse"] = None
 
     sk_mod = sklearn.ensemble.AdaBoostRegressor
 

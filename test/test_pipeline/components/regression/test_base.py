@@ -6,7 +6,6 @@ from autosklearn.pipeline.util import _test_regressor, \
 from autosklearn.pipeline.constants import *
 
 import sklearn.metrics
-import numpy as np
 
 
 class BaseRegressionComponentTest(unittest.TestCase):
@@ -58,6 +57,8 @@ class BaseRegressionComponentTest(unittest.TestCase):
 
     def test_default_boston_iterative_sparse_fit(self):
         if not hasattr(self.module, 'iterative_fit'):
+            return
+        if SPARSE not in self.module.get_properties()["input"]:
             return
 
         for i in range(2):
@@ -114,6 +115,8 @@ class BaseRegressionComponentTest(unittest.TestCase):
 
     def test_default_diabetes_iterative_sparse_fit(self):
         if not hasattr(self.module, 'iterative_fit'):
+            return
+        if SPARSE not in self.module.get_properties()["input"]:
             return
 
         for i in range(2):
