@@ -25,11 +25,22 @@ class BaseRegressionComponentTest(unittest.TestCase):
                 _test_regressor(dataset="boston",
                                 Regressor=self.module)
 
-            self.assertAlmostEqual(self.res["default_boston"],
-                                   sklearn.metrics.r2_score(targets,
-                                                            predictions),
-                                   places=self.res.get(
-                                           "default_boston_places", 7))
+            if "default_boston_le_ge" in self.res:
+                # Special treatment for Gaussian Process Regression
+                self.assertLessEqual(
+                    sklearn.metrics.r2_score(y_true=targets,
+                                             y_pred=predictions),
+                    self.res["default_boston_le_ge"][0])
+                self.assertGreaterEqual(
+                    sklearn.metrics.r2_score(y_true=targets,
+                                             y_pred=predictions),
+                    self.res["default_boston_le_ge"][1])
+            else:
+                self.assertAlmostEqual(self.res["default_boston"],
+                                       sklearn.metrics.r2_score(targets,
+                                                                predictions),
+                                       places=self.res.get(
+                                               "default_boston_places", 7))
 
     def test_default_boston_iterative_fit(self):
         if not hasattr(self.module, 'iterative_fit'):
