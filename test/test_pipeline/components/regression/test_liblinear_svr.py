@@ -1,20 +1,23 @@
-import unittest
+import sklearn.svm
 
 from autosklearn.pipeline.components.regression.liblinear_svr import \
     LibLinear_SVR
-from autosklearn.pipeline.util import _test_regressor
-
-import sklearn.metrics
+from .test_base import BaseRegressionComponentTest
 
 
-class SupportVectorComponentTest(unittest.TestCase):
-    def test_default_configuration(self):
-        for i in range(2):
-            predictions, targets = _test_regressor(LibLinear_SVR,
-                                                   dataset='boston')
-            # Lenient test because of travis-ci which gets quite different
-            # results here!
-            self.assertAlmostEqual(0.68,
-                                   sklearn.metrics.r2_score(y_true=targets,
-                                                            y_pred=predictions),
-                                   places=2)
+class SupportVectorComponentTest(BaseRegressionComponentTest):
+    __test__ = True
+
+    res = dict()
+    res["default_boston"] = 0.6768297818275556
+    res["default_boston_iterative"] = None
+    res["default_boston_sparse"] = 0.12626519114138912
+    res["default_boston_iterative_sparse"] = None
+    res["default_diabetes"] = 0.39152218711865661
+    res["default_diabetes_iterative"] = None
+    res["default_diabetes_sparse"] = 0.18704323088631891
+    res["default_diabetes_iterative_sparse"] = None
+
+    sk_mod = sklearn.svm.LinearSVR
+
+    module = LibLinear_SVR

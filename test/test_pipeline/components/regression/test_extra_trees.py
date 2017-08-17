@@ -1,33 +1,24 @@
-import unittest
+import sklearn.ensemble
 
 from autosklearn.pipeline.components.regression.extra_trees import \
     ExtraTreesRegressor
-from autosklearn.pipeline.util import _test_regressor, _test_regressor_iterative_fit
-
-import sklearn.metrics
+from .test_base import BaseRegressionComponentTest
 
 
-class ExtraTreesComponentTest(unittest.TestCase):
-    def test_default_configuration(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_regressor(ExtraTreesRegressor)
-            self.assertAlmostEqual(0.43258995365114405,
-                                   sklearn.metrics.r2_score(targets,
-                                                             predictions))
+class ExtraTreesComponentTest(BaseRegressionComponentTest):
 
-    def test_default_configuration_sparse(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_regressor(ExtraTreesRegressor, sparse=True)
-            self.assertAlmostEqual(0.28016012771570553,
-                                   sklearn.metrics.r2_score(targets,
-                                                            predictions))
+    __test__ = True
 
-    def test_default_configuration_iterative_fit(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_regressor_iterative_fit(ExtraTreesRegressor)
-            self.assertAlmostEqual(0.43258995365114405,
-                                   sklearn.metrics.r2_score(targets,
-                                                            predictions))
+    res = dict()
+    res["default_boston"] = 0.77744792837581866
+    res["default_boston_iterative"] = 0.77744792837581866
+    res["default_boston_sparse"] = 0.32936702992375644
+    res["default_boston_iterative_sparse"] = 0.32936702992375644
+    res["default_diabetes"] = 0.43258995365114405
+    res["default_diabetes_iterative"] = 0.43258995365114405
+    res["default_diabetes_sparse"] = 0.28016012771570553
+    res["default_diabetes_iterative_sparse"] = 0.28016012771570553
+
+    sk_mod = sklearn.ensemble.ExtraTreesRegressor
+
+    module = ExtraTreesRegressor

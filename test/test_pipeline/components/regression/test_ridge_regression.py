@@ -1,43 +1,23 @@
-import unittest
+import sklearn.linear_model
 
-from autosklearn.pipeline.components.regression.ridge_regression import RidgeRegression
-from autosklearn.pipeline.components.feature_preprocessing.kitchen_sinks import RandomKitchenSinks
-from autosklearn.pipeline.util import _test_regressor, get_dataset
-
-import sklearn.metrics
+from autosklearn.pipeline.components.regression.ridge_regression import \
+    RidgeRegression
+from .test_base import BaseRegressionComponentTest
 
 
-class RidgeComponentTest(unittest.TestCase):
-    def test_default_configuration(self):
-        configuration_space = RidgeRegression.get_hyperparameter_search_space()
-        default = configuration_space.get_default_configuration()
-        configuration_space_preproc = RandomKitchenSinks.get_hyperparameter_search_space()
-        default_preproc = configuration_space_preproc.get_default_configuration()
+class RidgeComponentTest(BaseRegressionComponentTest):
+    __test__ = True
 
-        for i in range(2):
-            # This should be a bad results
-            predictions, targets = _test_regressor(RidgeRegression,)
-            self.assertAlmostEqual(0.32614416980439365,
-                sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
+    res = dict()
+    res["default_boston"] = 0.70337988453496891
+    res["default_boston_iterative"] = None
+    res["default_boston_sparse"] = 0.11243478302989141
+    res["default_boston_iterative_sparse"] = None
+    res["default_diabetes"] = 0.32614416980439365
+    res["default_diabetes_iterative"] = None
+    res["default_diabetes_sparse"] = 0.12989713186102791
+    res["default_diabetes_iterative_sparse"] = None
 
-            # This should be much more better
-            X_train, Y_train, X_test, Y_test = get_dataset(dataset='diabetes',
-                                                           make_sparse=False)
-            preprocessor = RandomKitchenSinks(
-                random_state=1,
-                **{hp_name: default_preproc[hp_name] for hp_name in
-                   default_preproc if default_preproc[hp_name] is not None})
+    sk_mod = sklearn.linear_model.Ridge
 
-            transformer = preprocessor.fit(X_train, Y_train)
-            X_train_transformed = transformer.transform(X_train)
-            X_test_transformed = transformer.transform(X_test)
-
-            regressor = RidgeRegression(
-                random_state=1,
-                **{hp_name: default[hp_name] for hp_name in
-                   default if default[hp_name] is not None})
-            predictor = regressor.fit(X_train_transformed, Y_train)
-            predictions = predictor.predict(X_test_transformed)
-
-            self.assertAlmostEqual(0.37183512452087852,
-                sklearn.metrics.r2_score(y_true=Y_test, y_pred=predictions))
+    module = RidgeRegression
