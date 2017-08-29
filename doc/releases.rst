@@ -11,6 +11,32 @@
 Releases
 ========
 
+Version 0.2.1
+=============
+
+Changes
+~~~~~~~
+
+* Allows the usage of scikit-learn 0.18.2.
+* Fixes requirement pyrfr to version ``0.4.0``.
+* Added a Dockerfile.
+* Added the possibility to change the size of the holdout set when
+  using holdout resampling strategy.
+* Fixed a bug in QDA's hyperparameters.
+* Typo fixes in print statements.
+* New method to retrieve the models used in the final ensemble.
+
+Contributors
+~~~~~~~~~~~~
+
+* Matthias Feurer
+* Katharina Eggensperger
+* Felix Leung
+* caoyi0905
+* Young Ryul Bae
+* Vicente Alencar
+* Lukas Großberger
+
 Version 0.2.0
 =============
 
