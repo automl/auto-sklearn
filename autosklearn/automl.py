@@ -764,12 +764,23 @@ class AutoML(BaseEstimator):
                   'limit: %d\n' % num_memout)
         return sio.getvalue()
 
-    def show_models(self):
+    def get_models_with_weights(self):
         if self.models_ is None or len(self.models_) == 0 or \
                 self.ensemble_ is None:
             self._load_models()
 
-        return self.ensemble_.pprint_ensemble_string(self.models_)
+        return self.ensemble_.get_models_with_weights(self.models_)
+
+    def show_models(self):
+        models_with_weights = self.get_models_with_weights()
+
+        with io.StringIO() as sio:
+            sio.write("[")
+            for weight, model in models_with_weights:
+                sio.write("(%f, %s),\n" % (weight, model))
+            sio.write("]")
+
+            return sio.getvalue()
 
     def _create_search_space(self, tmp_dir, backend, datamanager,
                              include_estimators=None,

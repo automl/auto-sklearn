@@ -1,35 +1,23 @@
-import unittest
+import sklearn.ensemble
 
-from autosklearn.pipeline.components.regression.random_forest import RandomForest
-from autosklearn.pipeline.util import _test_regressor, _test_regressor_iterative_fit
+from autosklearn.pipeline.components.regression.random_forest import \
+    RandomForest
+from .test_base import BaseRegressionComponentTest
 
-import sklearn.metrics
 
+class RandomForestComponentTest(BaseRegressionComponentTest):
+    __test__ = True
 
-class RandomForestComponentTest(unittest.TestCase):
-    def test_default_configuration(self):
-        for i in range(2):
+    res = dict()
+    res["default_boston"] = 0.78435242169129116
+    res["default_boston_iterative"] = 0.78435242169129116
+    res["default_boston_sparse"] = 0.42374643794982714
+    res["default_boston_iterative_sparse"] = 0.42374643794982714
+    res["default_diabetes"] = 0.41795829411621988
+    res["default_diabetes_iterative"] = 0.41795829411621988
+    res["default_diabetes_sparse"] = 0.24225685933770469
+    res["default_diabetes_iterative_sparse"] = 0.24225685933770469
 
-            predictions, targets = _test_regressor(RandomForest)
-            self.assertAlmostEqual(0.41795829411621988,
-                sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
+    sk_mod = sklearn.ensemble.RandomForestRegressor
 
-    def test_default_configuration_sparse(self):
-        for i in range(2):
-            predictions, targets = _test_regressor(RandomForest, sparse=True)
-            self.assertAlmostEqual(0.24225685933770469,
-                sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
-
-    def test_default_configuration_iterative_fit(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_regressor_iterative_fit(RandomForest)
-            self.assertAlmostEqual(0.41795829411621988,
-                sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
-
-    def test_default_configuration_iterative_fit_sparse(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_regressor_iterative_fit(RandomForest, sparse=True)
-            self.assertAlmostEqual(0.24225685933770469,
-                sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
+    module = RandomForest

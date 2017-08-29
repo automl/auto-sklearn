@@ -1,22 +1,24 @@
-import unittest
+import sklearn.tree
 
-from autosklearn.pipeline.components.regression.decision_tree import DecisionTree
-from autosklearn.pipeline.util import _test_regressor
+from autosklearn.pipeline.components.regression.decision_tree import \
+    DecisionTree
+from .test_base import BaseRegressionComponentTest
 
-import sklearn.metrics
 
+class DecisionTreeComponentTest(BaseRegressionComponentTest):
 
-class DecisionTreetComponentTest(unittest.TestCase):
-    def test_default_configuration(self):
-        for i in range(2):
-            predictions, targets = _test_regressor(DecisionTree,)
-            self.assertAlmostEqual(0.1564592449511697,
-                                   sklearn.metrics.r2_score(targets,
-                                                            predictions))
+    __test__ = True
 
-    def test_default_configuration_sparse(self):
-        for i in range(2):
-            predictions, targets = _test_regressor(DecisionTree, sparse=True)
-            self.assertAlmostEqual(-0.020818312539637507,
-                                   sklearn.metrics.r2_score(targets,
-                                                            predictions))
+    res = dict()
+    res["default_boston"] = 0.35616796434879905
+    res["default_boston_iterative"] = None
+    res["default_boston_sparse"] = 0.18031669797027394
+    res["default_boston_iterative_sparse"] = None
+    res["default_diabetes"] = 0.1564592449511697
+    res["default_diabetes_iterative"] = None
+    res["default_diabetes_sparse"] = -0.020818312539637507
+    res["default_diabetes_iterative_sparse"] = None
+
+    sk_mod = sklearn.tree.DecisionTreeRegressor
+
+    module = DecisionTree

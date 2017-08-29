@@ -22,7 +22,8 @@ class RidgeRegression(AutoSklearnRegressionAlgorithm):
                                                     fit_intercept=self.fit_intercept,
                                                     tol=self.tol,
                                                     copy_X=False,
-                                                    normalize=False)
+                                                    normalize=False,
+                                                    random_state=self.random_state)
         self.estimator.fit(X, Y)
         return self
 
