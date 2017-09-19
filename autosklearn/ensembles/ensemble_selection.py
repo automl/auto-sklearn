@@ -2,7 +2,6 @@ from collections import Counter
 import random
 
 import numpy as np
-import six
 
 from autosklearn.constants import *
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
@@ -204,9 +203,9 @@ class EnsembleSelection(AbstractEnsemble):
                           enumerate(self.identifiers_)
                           if self.weights_[idx] > 0]))
 
-    def pprint_ensemble_string(self, models):
+    def get_models_with_weights(self, models):
         output = []
-        sio = six.StringIO()
+
         for i, weight in enumerate(self.weights_):
             identifier = self.identifiers_[i]
             model = models[identifier]
@@ -215,12 +214,7 @@ class EnsembleSelection(AbstractEnsemble):
 
         output.sort(reverse=True, key=lambda t: t[0])
 
-        sio.write("[")
-        for weight, model in output:
-            sio.write("(%f, %s),\n" % (weight, model))
-        sio.write("]")
-
-        return sio.getvalue()
+        return output
 
     def get_model_identifiers(self):
         return self.identifiers_

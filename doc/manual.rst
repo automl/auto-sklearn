@@ -56,8 +56,8 @@ random forests.
 >>> automl = autosklearn.classification.AutoSklearnClassifier(
 >>>     include_estimators=["random_forest", ], exclude_estimators=None,
 >>>     include_preprocessors=["no_preprocessing", ], exclude_preprocessors=None)
->>> cls.fit(X_train, y_train)
->>> predictions = cls.predict(X_test, y_test)
+>>> automl.fit(X_train, y_train)
+>>> predictions = automl.predict(X_test)
 
 **Note:** The strings used to identify estimators and preprocessors are the filenames without *.py*.
 

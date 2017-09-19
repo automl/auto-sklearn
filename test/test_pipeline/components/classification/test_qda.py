@@ -1,60 +1,25 @@
-import unittest
-
-from autosklearn.pipeline.components.classification.qda import QDA
-from autosklearn.pipeline.util import _test_classifier, _test_classifier_predict_proba
-
-import numpy as np
-import sklearn.metrics
 import sklearn.discriminant_analysis
 
+from autosklearn.pipeline.components.classification.qda import QDA
 
-class QDAComponentTest(unittest.TestCase):
-    def test_default_configuration_iris(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier(QDA)
-            self.assertAlmostEqual(1.0,
-                                   sklearn.metrics.accuracy_score(predictions,
-                                                                  targets))
+from .test_base import BaseClassificationComponentTest
 
-    #@unittest.skip("QDA fails on this one")
-    def test_default_configuration_digits(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier(classifier=QDA, dataset='digits')
-            self.assertAlmostEqual(0.18882817243472982,
-                                   sklearn.metrics.accuracy_score(predictions,
-                                                                  targets))
 
-    def test_default_configuration_binary(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier(QDA, make_binary=True)
-            self.assertAlmostEqual(1.0,
-                                   sklearn.metrics.accuracy_score(predictions,
-                                                                  targets))
+class QDAComponentTest(BaseClassificationComponentTest):
 
-    def test_default_configuration_multilabel(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier(QDA, make_multilabel=True)
-            self.assertAlmostEqual(0.99456140350877187,
-                                   sklearn.metrics.average_precision_score(
-                                       predictions, targets))
+    __test__ = True
 
-    def test_default_configuration_predict_proba_multilabel(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier_predict_proba(QDA,
-                                               make_multilabel=True)
-            self.assertEqual(predictions.shape, ((50, 3)))
-            self.assertAlmostEqual(1.0,
-                                   sklearn.metrics.average_precision_score(
-                                       targets, predictions))
+    res = dict()
+    res["default_iris"] = 1.0
+    res["default_iris_iterative"] = -1
+    res["default_iris_proba"] = 0.56124476634783993
+    res["default_iris_sparse"] = -1
+    res["default_digits"] = 0.18882817243472982
+    res["default_digits_iterative"] = -1
+    res["default_digits_binary"] = 0.89071038251366119
+    res["default_digits_multilabel"] = 0.17011293429111091
+    res["default_digits_multilabel_places"] = 1
+    res["default_digits_multilabel_proba"] = 0.99999999999999989
 
-    def test_target_algorithm_multioutput_multiclass_support(self):
-        cls = sklearn.discriminant_analysis.QuadraticDiscriminantAnalysis()
-        X = np.random.random((10, 10))
-        y = np.random.randint(0, 1, size=(10, 10))
-        self.assertRaisesRegexp(ValueError, 'bad input shape \(10, 10\)',
-                                cls.fit, X, y)
+    sk_mod = sklearn.discriminant_analysis.QuadraticDiscriminantAnalysis
+    module = QDA

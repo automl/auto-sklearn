@@ -1,23 +1,22 @@
-import unittest
+import sklearn.linear_model
 
 from autosklearn.pipeline.components.regression.libsvm_svr import LibSVM_SVR
-from autosklearn.pipeline.util import _test_regressor
+from .test_base import BaseRegressionComponentTest
 
 
-import sklearn.metrics
+class SupportVectorComponentTest(BaseRegressionComponentTest):
+    __test__ = True
 
+    res = dict()
+    res["default_boston"] = -0.030006883949312613
+    res["default_boston_iterative"] = None
+    res["default_boston_sparse"] = -0.062749211736050192
+    res["default_boston_iterative_sparse"] = None
+    res["default_diabetes"] = 0.12849591861430087
+    res["default_diabetes_iterative"] = None
+    res["default_diabetes_sparse"] = 0.0098877566961463881
+    res["default_diabetes_iterative_sparse"] = None
 
-class SupportVectorComponentTest(unittest.TestCase):
+    sk_mod = sklearn.svm.SVR
 
-    def test_default_configuration(self):
-        for i in range(2):
-            predictions, targets = _test_regressor(LibSVM_SVR)
-            self.assertAlmostEqual(0.12849591861430087,
-                sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
-
-    def test_default_configuration_sparse(self):
-        for i in range(2):
-            predictions, targets = _test_regressor(LibSVM_SVR,
-                                                   sparse=True)
-            self.assertAlmostEqual(0.0098877566961463881,
-                sklearn.metrics.r2_score(y_true=targets, y_pred=predictions))
+    module = LibSVM_SVR

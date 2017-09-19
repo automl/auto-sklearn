@@ -127,8 +127,12 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             return self.steps[-1][-1].predict_proba(Xt)
 
         else:
-            if type(batch_size) is not int or batch_size <= 0:
-                raise Exception("batch_size must be a positive integer")
+            if not isinstance(batch_size, int):
+                raise ValueError("Argument 'batch_size' must be of type int, "
+                                 "but is '%s'" % type(batch_size))
+            if batch_size <= 0:
+                raise ValueError("Argument 'batch_size' must be positive, "
+                                 "but is %d" % batch_size)
 
             else:
                 # Probe for the target array dimensions

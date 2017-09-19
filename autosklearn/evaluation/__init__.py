@@ -234,21 +234,24 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
     def get_splitter(self, D):
         y = D.data['Y_train'].ravel()
-
+        train_size = 0.67
+        if self.resampling_strategy_args:
+            train_size = self.resampling_strategy_args.get('train_size', train_size)
+        test_size = 1 - train_size
         if D.info['task'] in CLASSIFICATION_TASKS and \
                         D.info['task'] != MULTILABEL_CLASSIFICATION:
 
             if self.resampling_strategy in ['holdout',
                                             'holdout-iterative-fit']:
                 try:
-                    cv = StratifiedShuffleSplit(n_splits=1, train_size=0.67,
-                                                test_size=0.33, random_state=1)
+                    cv = StratifiedShuffleSplit(n_splits=1, train_size=train_size,
+                                                test_size=test_size, random_state=1)
                     test_cv = copy.deepcopy(cv)
                     next(test_cv.split(y, y))
                 except ValueError as e:
                     if 'The least populated class in y has only' in e.args[0]:
-                        cv = ShuffleSplit(n_splits=1, train_size=0.67,
-                                          test_size=0.33, random_state=1)
+                        cv = ShuffleSplit(n_splits=1, train_size=train_size,
+                                          test_size=test_size, random_state=1)
                     else:
                         raise
 
@@ -261,8 +264,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         else:
             if self.resampling_strategy in ['holdout',
                                             'holdout-iterative-fit']:
-                cv = ShuffleSplit(n_splits=1, train_size=0.67,
-                                  test_size=0.33, random_state=1)
+                cv = ShuffleSplit(n_splits=1, train_size=train_size,
+                                  test_size=test_size, random_state=1)
             elif self.resampling_strategy in ['cv', 'partial-cv',
                                               'partial-cv-iterative-fit']:
                 cv = KFold(n_splits=self.resampling_strategy_args['folds'],

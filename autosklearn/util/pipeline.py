@@ -25,8 +25,9 @@ def get_configuration_space(info,
         include['preprocessor'] = include_preprocessors
     elif exclude_preprocessors is not None:
         exclude['preprocessor'] = exclude_preprocessors
+
     if include_estimators is not None and \
-            exclude_preprocessors is not None:
+            exclude_estimators is not None:
         raise ValueError('Cannot specify include_estimators and '
                          'exclude_estimators.')
     elif include_estimators is not None:

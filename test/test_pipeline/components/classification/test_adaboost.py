@@ -1,51 +1,25 @@
-import unittest
+import sklearn.ensemble
 
 from autosklearn.pipeline.components.classification.adaboost import \
     AdaboostClassifier
-from autosklearn.pipeline.util import _test_classifier, _test_classifier_predict_proba
-
-import sklearn.metrics
-import sklearn.ensemble
-import numpy as np
+from .test_base import BaseClassificationComponentTest
 
 
-class AdaBoostComponentTest(unittest.TestCase):
-    def test_default_configuration_iris(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier(AdaboostClassifier)
-            self.assertAlmostEqual(0.93999999999999995,
-                                   sklearn.metrics.accuracy_score(targets,
-                                                                  predictions))
+class AdaBoostComponentTest(BaseClassificationComponentTest):
 
-    def test_default_configuration_iris_predict_proba(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier_predict_proba(AdaboostClassifier)
-            self.assertAlmostEqual(0.22452300738472031,
-                                   sklearn.metrics.log_loss(targets, predictions))
+    __test__ = True
 
-    def test_default_configuration_iris_sparse(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier(AdaboostClassifier, sparse=True)
-            self.assertAlmostEqual(0.85999999999999999,
-                                   sklearn.metrics.accuracy_score(targets,
-                                                                  predictions))
+    res = dict()
+    res["default_iris"] = 0.93999999999999995
+    res["default_iris_iterative"] = -1
+    res["default_iris_proba"] = 0.22452300738472031
+    res["default_iris_sparse"] = 0.85999999999999999
+    res["default_digits"] = 0.6879174256223437
+    res["default_digits_iterative"] = -1
+    res["default_digits_binary"] = 0.98299939283545845
+    res["default_digits_multilabel"] = -1
+    res["default_digits_multilabel_proba"] = -1
 
-    def test_default_configuration_binary(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier(classifier=AdaboostClassifier,
-                                 dataset='digits', sparse=True,
-                                 make_binary=True)
-            self.assertAlmostEqual(0.93564055859137829,
-                                   sklearn.metrics.accuracy_score(
-                                       targets, predictions))
+    sk_mod = sklearn.ensemble.AdaBoostClassifier
 
-    def test_target_algorithm_multioutput_multiclass_support(self):
-        cls = sklearn.ensemble.AdaBoostClassifier()
-        X = np.random.random((10, 10))
-        y = np.random.randint(0, 1, size=(10, 10))
-        self.assertRaisesRegexp(ValueError, 'bad input shape \(10, 10\)',
-                                cls.fit, X, y)
+    module = AdaboostClassifier
