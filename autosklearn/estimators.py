@@ -313,7 +313,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
 
     def fit(self, *args, **kwargs):
         self._automl = self.build_automl()
-        super(AutoSklearnEstimator, self).fit(*args, **kwargs)
+        super().fit(*args, **kwargs)
 
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
@@ -517,33 +517,68 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
             X, batch_size=batch_size, n_jobs=n_jobs)
 
 
-class AutoMLClassifier(AutoMLDecorator):
+
+class BaseAutoML(AutoMLDecorator):
+    """Base class for AutoML objects to hold abstract functions for both
+    regression and classification."""
 
     def __init__(self, automl):
-        self._classes = []
-        self._n_classes = []
         self._n_outputs = 0
+        super().__init__(automl)
 
-        super(AutoMLClassifier, self).__init__(automl)
+    def _perform_input_checks(self, X, y):
+        X = self._check_X(X)
+        y = self._check_y(y)
+        return X, y
+
+    def _check_X(self, X):
+        X = sklearn.utils.check_array(X, accept_sparse="csr",
+                                      force_all_finite=False)
+        if scipy.sparse.issparse(X):
+            X.sort_indices()
+        return X
+
+    def _check_y(self, y):
+        y = sklearn.utils.check_array(y, ensure_2d=False)
+
+        y = np.atleast_1d(y)
+        if y.ndim == 2 and y.shape[1] == 1:
+            warnings.warn("A column-vector y was passed when a 1d array was"
+                          " expected. Will change shape via np.ravel().",
+                          sklearn.utils.DataConversionWarning, stacklevel=2)
+            y = np.ravel(y)
+
+        return y
+
+    def refit(self, X, y):
+        X, y = self._perform_input_checks(X, y)
+        _n_outputs = y.shape[1]
+        if self._n_outputs != _n_outputs:
+            raise ValueError('Number of outputs changed from %d to %d!' %
+                             (self._n_outputs, _n_outputs))
+
+        return super().refit(X, y)
+
+
+class AutoMLClassifier(BaseAutoML):
+
+    def __init__(self, automl):
+
+        super().__init__(automl)
+
+        self._task_mapping = {'multilabel-indicator': MULTILABEL_CLASSIFICATION,
+                              'multiclass': MULTICLASS_CLASSIFICATION,
+                              'binary': BINARY_CLASSIFICATION}
 
     def fit(self, X, y,
             metric=None,
             loss=None,
             feat_type=None,
             dataset_name=None):
-        X = sklearn.utils.check_array(X, accept_sparse="csr",
-                                      force_all_finite=False)
-        y = sklearn.utils.check_array(y, ensure_2d=False)
-
-        if scipy.sparse.issparse(X):
-            X.sort_indices()
+        X, y = self._perform_input_checks(X, y)
 
         y_task = type_of_target(y)
-        task_mapping = {'multilabel-indicator': MULTILABEL_CLASSIFICATION,
-                        'multiclass': MULTICLASS_CLASSIFICATION,
-                        'binary': BINARY_CLASSIFICATION}
-
-        task = task_mapping.get(y_task)
+        task = self._task_mapping.get(y_task)
         if task is None:
             raise ValueError('Cannot work on data of type %s' % y_task)
 
@@ -553,52 +588,48 @@ class AutoMLClassifier(AutoMLDecorator):
             else:
                 metric = accuracy
 
-        y = self._process_target_classes(y)
+        y, self._classes, self._n_classes = self._process_target_classes(y)
 
-        return self._automl.fit(X, y, task, metric, feat_type, dataset_name)
+        return super().fit(X, y, task, metric, feat_type, dataset_name)
 
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
-        self._process_target_classes(y)
-        return self._automl.fit_ensemble(y, task, metric, precision, dataset_name,
-                                         ensemble_nbest, ensemble_size)
+        y, _classes, _n_classes = self._process_target_classes(y)
+        if not hasattr(self, '_classes'):
+            self._classes = _classes
+        if not hasattr(self, '_n_classes'):
+            self._n_classes = _n_classes
+
+        return super().fit_ensemble(y, task, metric, precision, dataset_name,
+                                    ensemble_nbest, ensemble_size)
 
     def _process_target_classes(self, y):
-        y = np.atleast_1d(y)
-        if y.ndim == 2 and y.shape[1] == 1:
-            warnings.warn("A column-vector y was passed when a 1d array was"
-                          " expected. Please change the shape of y to "
-                          "(n_samples,), for example using ravel().",
-                          sklearn.utils.DataConversionWarning, stacklevel=2)
-
-        if y.ndim == 1:
-            # reshape is necessary to preserve the data contiguity against vs
-            # [:, np.newaxis] that does not.
-            y = np.reshape(y, (-1, 1))
-
-        self._n_outputs = y.shape[1]
+        y = super()._check_y(y)
+        self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
 
         y = np.copy(y)
 
-        self._classes = []
-        self._n_classes = []
+        _classes = []
+        _n_classes = []
 
-        for k in range(self._n_outputs):
-            classes_k, y[:, k] = np.unique(y[:, k], return_inverse=True)
-            self._classes.append(classes_k)
-            self._n_classes.append(classes_k.shape[0])
+        if self._n_outputs == 1:
+            classes_k, y = np.unique(y, return_inverse=True)
+            _classes.append(classes_k)
+            _n_classes.append(classes_k.shape[0])
+        else:
+            for k in range(self._n_outputs):
+                classes_k, y[:, k] = np.unique(y[:, k], return_inverse=True)
+                _classes.append(classes_k)
+                _n_classes.append(classes_k.shape[0])
 
-        self._n_classes = np.array(self._n_classes, dtype=np.int)
+        self._n_classes = np.array(_n_classes, dtype=np.int)
 
-        if y.shape[1] == 1:
-            y = y.flatten()
-
-        return y
+        return y, _classes, _n_classes
 
     def predict(self, X, batch_size=None, n_jobs=1):
-        predicted_probabilities = self._automl.predict(
-            X, batch_size=batch_size, n_jobs=n_jobs)
+        predicted_probabilities = super().predict(X, batch_size=batch_size,
+                                                  n_jobs=n_jobs)
 
         if self._n_outputs == 1:
             predicted_indexes = np.argmax(predicted_probabilities, axis=1)
@@ -620,14 +651,18 @@ class AutoMLClassifier(AutoMLDecorator):
         return self._automl.predict(X, batch_size=batch_size, n_jobs=n_jobs)
 
 
-class AutoMLRegressor(AutoMLDecorator):
+class AutoMLRegressor(BaseAutoML):
 
-    def fit(self, X, y,
-            metric=None,
-            feat_type=None,
-            dataset_name=None,
-            ):
+    def fit(self, X, y, metric=None, feat_type=None, dataset_name=None):
+        X, y = super()._perform_input_checks(X, y)
         if metric is None:
             metric = r2
-        return self._automl.fit(X=X, y=y, task=REGRESSION, metric=metric,
-                                feat_type=feat_type, dataset_name=dataset_name)
+        return super().fit(X=X, y=y, task=REGRESSION, metric=metric,
+                           feat_type=feat_type, dataset_name=dataset_name)
+
+    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+                     dataset_name=None, ensemble_nbest=None,
+                     ensemble_size=None):
+        y = super()._check_y(y)
+        return super().fit_ensemble(y, task, metric, precision, dataset_name,
+                                    ensemble_nbest, ensemble_size)
