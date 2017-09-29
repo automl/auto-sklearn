@@ -1,7 +1,7 @@
 import copy
 import os
 import resource
-import sys
+import tempfile
 import traceback
 import unittest
 import unittest.mock
@@ -13,7 +13,7 @@ import sklearn.model_selection
 import sklearn.ensemble
 import sklearn.svm
 from sklearn.utils.testing import assert_array_almost_equal
-#from xgboost.core import XGBoostError
+from sklearn.externals.joblib import Memory
 
 from ConfigSpace.configuration_space import ConfigurationSpace, \
     Configuration
@@ -153,18 +153,22 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertIsInstance(cls, SimpleClassificationPipeline)
 
     def test_multilabel(self):
-
-        X, Y = sklearn.datasets.\
-                make_multilabel_classification(n_samples=150,
-                                               n_features=20,
-                                               n_classes=5,
-                                               n_labels=2,
-                                               length=50,
-                                               allow_unlabeled=True,
-                                               sparse=False,
-                                               return_indicator=True,
-                                               return_distributions=False,
-                                               random_state=1)
+        cache = Memory(cachedir=tempfile.gettempdir())
+        cached_func = cache.cache(
+            sklearn.datasets.make_multilabel_classification
+        )
+        X, Y = sklearn.datasets.cached_func(
+            n_samples=150,
+            n_features=20,
+            n_classes=5,
+            n_labels=2,
+            length=50,
+            allow_unlabeled=True,
+            sparse=False,
+            return_indicator=True,
+            return_distributions=False,
+            random_state=1
+        )
         X_train = X[:100, :]
         Y_train = Y[:100, :]
         X_test = X[101:, :]

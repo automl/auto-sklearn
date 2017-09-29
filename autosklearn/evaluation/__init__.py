@@ -72,8 +72,14 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         eval_function = functools.partial(fit_predict_try_except_decorator,
                                           ta=eval_function)
-        super().__init__(ta=eval_function, stats=stats, runhistory=runhistory,
-                         run_obj=run_obj, par_factor=par_factor)
+        super().__init__(
+            ta=eval_function,
+            stats=stats,
+            runhistory=runhistory,
+            run_obj=run_obj,
+            par_factor=par_factor,
+            cost_for_crash=WORST_POSSIBLE_RESULT,
+        )
 
         self.backend = backend
         self.autosklearn_seed = autosklearn_seed
