@@ -94,7 +94,12 @@ for entry in trajectory:
         config = entry.incumbent
 
         logger = logging.getLogger('Testing:)')
-        stats = Stats(Scenario({'cutoff_time': per_run_time_limit * 2}))
+        stats = Stats(
+            Scenario({
+                'cutoff_time': per_run_time_limit * 2,
+                'run_obj': 'quality',
+            })
+        )
         stats.start_timing()
         # To avoid the output "first run crashed"...
         stats.ta_runs += 1
