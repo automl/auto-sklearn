@@ -26,10 +26,11 @@ dependencies:
     - sudo -E apt-get -yq remove texlive-binaries --purge
     - sudo -E apt-get -yq update
     - sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install dvipng texlive-latex-base texlive-latex-extra
+    # Other stuff...
+    - sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install build-essential
     # Conda installation
     - wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
     - bash ~/miniconda.sh -b -p $HOME/miniconda
-    - conda update --yes conda
     - conda create -n testenv --yes python=3.6 pip wheel nose gcc swig
 
   # The --user is needed to let sphinx see the source and the binaries

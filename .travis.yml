@@ -55,14 +55,11 @@ before_install:
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - if [[ `which conda` ]]; then echo 'Conda installation successful'; else exit 1; fi
-  - conda update --yes conda
   - conda create -n testenv --yes python=$PYTHON_VERSION pip wheel nose
   - source activate testenv
   - conda install --yes gcc swig
   - echo "Using GCC at "`which gcc`
   - export CC=`which gcc`
-  # Fixes version `GLIBCXX_3.4.21' not found (on Ubuntu 16.04)
-  - conda install --yes libgcc
 
 install:
   # Install general requirements the way setup.py suggests

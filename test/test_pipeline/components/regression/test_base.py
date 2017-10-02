@@ -1,11 +1,11 @@
 import unittest
 
+import numpy as np
+import sklearn.metrics
+
 from autosklearn.pipeline.util import _test_regressor, \
     _test_regressor_iterative_fit
-
 from autosklearn.pipeline.constants import *
-
-import sklearn.metrics
 
 
 class BaseRegressionComponentTest(unittest.TestCase):
@@ -35,11 +35,18 @@ class BaseRegressionComponentTest(unittest.TestCase):
                                              y_pred=predictions),
                     self.res["default_boston_le_ge"][1])
             else:
-                self.assertAlmostEqual(self.res["default_boston"],
-                                       sklearn.metrics.r2_score(targets,
-                                                                predictions),
-                                       places=self.res.get(
-                                               "default_boston_places", 7))
+                score = sklearn.metrics.r2_score(targets, predictions)
+                fixture = self.res["default_boston"]
+
+                if score < -1e10:
+                    score = np.log(-score)
+                    fixture = np.log(-fixture)
+
+                self.assertAlmostEqual(
+                    fixture,
+                    score,
+                    places=self.res.get("default_boston_places", 7),
+                )
 
     def test_default_boston_iterative_fit(self):
         if not hasattr(self.module, 'iterative_fit'):
@@ -49,11 +56,18 @@ class BaseRegressionComponentTest(unittest.TestCase):
             predictions, targets = \
                 _test_regressor_iterative_fit(dataset="boston",
                                               Regressor=self.module)
-            self.assertAlmostEqual(self.res["default_boston_iterative"],
-                                   sklearn.metrics.r2_score(targets,
-                                                            predictions),
-                                   places=self.res.get(
-                                           "default_boston_iterative_places", 7))
+            score = sklearn.metrics.r2_score(targets, predictions)
+            fixture = self.res["default_boston_iterative"]
+
+            if score < -1e10:
+                score = np.log(-score)
+                fixture = np.log(-fixture)
+
+            self.assertAlmostEqual(
+                fixture,
+                score,
+                places=self.res.get("default_boston_iterative_places", 7),
+            )
 
     def test_default_boston_iterative_sparse_fit(self):
         if not hasattr(self.module, 'iterative_fit'):

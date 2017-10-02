@@ -58,7 +58,7 @@ the Section `Installing auto-sklearn`_.
 A common installation problem under recent Linux distribution is the
 incompability of the compiler version used to compile the Python binary
 shipped by AnaConda and the compiler installed by the distribution. This can
-be solved by istalling the *gcc* compiler shipped with AnaConda (as well as
+be solved by installing the *gcc* compiler shipped with AnaConda (as well as
 *swig*):
 
 .. code:: bash
