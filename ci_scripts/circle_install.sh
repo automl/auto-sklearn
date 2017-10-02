@@ -6,6 +6,7 @@
 # here.
 source activate testenv
 
+export CC=`which gcc`
 # install documentation building dependencies
 pip install --upgrade numpy
 pip install --upgrade matplotlib setuptools nose coverage sphinx==1.5.5 sphinx_bootstrap_theme numpydoc
