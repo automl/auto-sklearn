@@ -157,7 +157,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cached_func = cache.cache(
             sklearn.datasets.make_multilabel_classification
         )
-        X, Y = sklearn.datasets.cached_func(
+        X, Y = cached_func(
             n_samples=150,
             n_features=20,
             n_classes=5,
