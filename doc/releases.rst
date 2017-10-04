@@ -18,7 +18,8 @@ Changes
 ~~~~~~~
 
 * Allows the usage of scikit-learn 0.18.2.
-* Fixes requirement pyrfr to version ``0.4.0``.
+* Upgrade to latest SMAC version (``0.6.0``) and latest random forest version
+  (``0.6.1``).
 * Added a Dockerfile.
 * Added the possibility to change the size of the holdout set when
   using holdout resampling strategy.
