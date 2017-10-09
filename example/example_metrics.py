@@ -49,7 +49,7 @@ def main():
 
     # Second example: Use own accuracy metric
     print("#"*80)
-    print("Use self defined accuracy accuracy metric")
+    print("Use self defined accuracy metric")
     accuracy_scorer = autosklearn.metrics.make_scorer(name="accu",
                                                       score_func=accuracy,
                                                       greater_is_better=True,

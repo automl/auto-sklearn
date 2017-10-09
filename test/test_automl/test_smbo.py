@@ -28,18 +28,24 @@ class TestSMBO(unittest.TestCase):
             total_walltime_limit=total_walltime_limit,
             memory_limit=memory_limit,
             watcher=None,
-            metric=accuracy)
+            metric=accuracy
+        )
         auto.config_space = configspace
-        scenario = Scenario({'cs': configspace,
-                             'cutoff-time': func_eval_time_limit,
-                             'wallclock-limit': total_walltime_limit,
-                             'memory-limit': memory_limit,
-                             'run-obj': 'quality'})
+        scenario = Scenario({
+            'cs': configspace,
+            'cutoff_time': func_eval_time_limit,
+            'wallclock_limit': total_walltime_limit,
+            'memory_limit': memory_limit,
+            'run_obj': 'quality',
+        })
         smac = SMAC(scenario)
 
-        self.assertRaisesRegex(ValueError, 'Cannot use SMBO algorithm on '
-                                           'empty runhistory',
-                               auto.choose_next, smac)
+        self.assertRaisesRegex(
+            ValueError,
+            'Cannot use SMBO algorithm on empty runhistory',
+            auto.choose_next,
+            smac
+        )
 
         config = Configuration(configspace, values={'a': 0.1, 'b': 0.2})
         # TODO make sure the incumbent is always set?

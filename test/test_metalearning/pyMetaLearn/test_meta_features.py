@@ -1,13 +1,15 @@
+import os
+import tempfile
 from six import StringIO
 from unittest import TestCase
 import unittest
-import os
 
 import arff
 import numpy as np
 import scipy.sparse
 from sklearn.preprocessing.imputation import Imputer
 from sklearn.datasets import make_multilabel_classification
+from sklearn.externals.joblib import Memory
 
 from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
@@ -81,12 +83,16 @@ class MetaFeaturesTest(TestCase):
         os.chdir(self.cwd)
 
     def get_multilabel(self):
-        return make_multilabel_classification(n_samples=100,
-                                              n_features=10,
-                                              n_classes=5,
-                                              n_labels=5,
-                                              return_indicator=True,
-                                              random_state=1)
+        cache = Memory(cachedir=tempfile.gettempdir())
+        cached_func = cache.cache(make_multilabel_classification)
+        return cached_func(
+            n_samples=100,
+            n_features=10,
+            n_classes=5,
+            n_labels=5,
+            return_indicator=True,
+            random_state=1
+        )
 
     def test_number_of_instance(self):
         mf = self.mf["NumberOfInstances"](self.X, self.y, self.categorical)

@@ -1,67 +1,25 @@
-import unittest
+import sklearn.neighbors
 
 from autosklearn.pipeline.components.classification.k_nearest_neighbors import \
     KNearestNeighborsClassifier
-from autosklearn.pipeline.util import _test_classifier, _test_classifier_predict_proba
 
-import numpy as np
-import sklearn.metrics
-import sklearn.neighbors
+from .test_base import BaseClassificationComponentTest
 
 
-class KNearestNeighborsComponentTest(unittest.TestCase):
-    def test_default_configuration(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier(KNearestNeighborsClassifier)
-            self.assertAlmostEqual(0.959999999999999,
-                sklearn.metrics.accuracy_score(predictions, targets))
+class KNearestNeighborsComponentTest(BaseClassificationComponentTest):
 
-    def test_default_configuration_sparse_data(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier(KNearestNeighborsClassifier, sparse=True)
-            self.assertAlmostEqual(0.82,
-                                   sklearn.metrics.accuracy_score(predictions,
-                                                                  targets))
+    __test__ = True
 
-    def test_default_configuration_predict_proba(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier_predict_proba(KNearestNeighborsClassifier)
-            self.assertAlmostEqual(1.381551055796429,
-                sklearn.metrics.log_loss(targets, predictions))
+    res = dict()
+    res["default_iris"] = 0.959999999999999
+    res["default_iris_iterative"] = -1
+    res["default_iris_proba"] = 1.381551055796429
+    res["default_iris_sparse"] = 0.82
+    res["default_digits"] = 0.93321190042501523
+    res["default_digits_iterative"] = -1
+    res["default_digits_binary"] = 0.99574984820886459
+    res["default_digits_multilabel"] = 0.93733794389823633
+    res["default_digits_multilabel_proba"] = 0.97060428849902536
 
-    def test_default_configuration_binary(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier(KNearestNeighborsClassifier, make_binary=True)
-            self.assertAlmostEqual(1.0,
-                                   sklearn.metrics.accuracy_score(predictions,
-                                                                  targets))
-
-    def test_default_configuration_multilabel(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier(KNearestNeighborsClassifier,
-                                 make_multilabel=True)
-            self.assertAlmostEqual(0.959999999999999,
-                                   sklearn.metrics.accuracy_score(predictions,
-                                                                  targets))
-
-    def test_default_configuration_predict_proba_multilabel(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier_predict_proba(KNearestNeighborsClassifier,
-                                               make_multilabel=True)
-            self.assertEqual(predictions.shape, ((50, 3)))
-            self.assertAlmostEqual(0.97060428849902536,
-                                   sklearn.metrics.average_precision_score(
-                                       targets, predictions))
-
-    def test_target_algorithm_multioutput_multiclass_support(self):
-        cls = sklearn.neighbors.KNeighborsClassifier()
-        X = np.random.random((10, 10))
-        y = np.random.randint(0, 1, size=(10, 10))
-        # Running this without an exception is the purpose of this test!
-        cls.fit(X, y)
+    sk_mod = sklearn.neighbors.KNeighborsClassifier
+    module = KNearestNeighborsClassifier

@@ -1,31 +1,32 @@
-import unittest
+import numpy as np
+
+import sklearn.naive_bayes
+import sklearn.preprocessing
 
 from autosklearn.pipeline.components.classification.multinomial_nb import \
     MultinomialNB
-from autosklearn.pipeline.util import _test_classifier, _test_classifier_iterative_fit, \
-    get_dataset, _test_classifier_predict_proba
+from autosklearn.pipeline.util import get_dataset
 
-import numpy as np
-import sklearn.metrics
-import sklearn.naive_bayes
+from .test_base import BaseClassificationComponentTest
 
 
-class MultinomialNBComponentTest(unittest.TestCase):
-    def test_default_configuration(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier(MultinomialNB)
-            self.assertAlmostEqual(0.97999999999999998,
-                                   sklearn.metrics.accuracy_score(predictions,
-                                                                  targets))
+class MultinomialNBComponentTest(BaseClassificationComponentTest):
 
-    def test_default_configuration_iterative_fit(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier_iterative_fit(MultinomialNB)
-            self.assertAlmostEqual(0.97999999999999998,
-                                   sklearn.metrics.accuracy_score(predictions,
-                                                                  targets))
+    __test__ = True
+
+    res = dict()
+    res["default_iris"] = 0.97999999999999998
+    res["default_iris_iterative"] = 0.97999999999999998
+    res["default_iris_proba"] = 0.5879188799085624
+    res["default_iris_sparse"] = 0.54
+    res["default_digits"] = 0.89496053430479661
+    res["default_digits_iterative"] = 0.89496053430479661
+    res["default_digits_binary"] = 0.98967820279295693
+    res["default_digits_multilabel"] = 0.81239938943608647
+    res["default_digits_multilabel_proba"] = 0.76548981051208942
+
+    sk_mod = sklearn.naive_bayes.MultinomialNB
+    module = MultinomialNB
 
     def test_default_configuration_negative_values(self):
         # Custon preprocessing test to check if clipping to zero works
@@ -44,38 +45,3 @@ class MultinomialNBComponentTest(unittest.TestCase):
         prediction = cls.predict(X_test)
         self.assertAlmostEqual(np.nanmean(prediction == Y_test),
                                0.88888888888888884)
-
-    def test_default_configuration_binary(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier(MultinomialNB, make_binary=True)
-            self.assertAlmostEqual(1.0,
-                                   sklearn.metrics.accuracy_score(
-                                       predictions, targets))
-
-    def test_default_configuration_multilabel(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier(classifier=MultinomialNB,
-                                 dataset='digits',
-                                 make_multilabel=True)
-            self.assertAlmostEqual(0.81239938943608647,
-                                   sklearn.metrics.average_precision_score(
-                                       targets, predictions))
-
-    def test_default_configuration_multilabel_predict_proba(self):
-        for i in range(2):
-            predictions, targets = \
-                _test_classifier_predict_proba(classifier=MultinomialNB,
-                                               make_multilabel=True)
-            self.assertEqual(predictions.shape, ((50, 3)))
-            self.assertAlmostEqual(0.76548981051208942,
-                                   sklearn.metrics.average_precision_score(
-                                       targets, predictions))
-
-    def test_target_algorithm_multioutput_multiclass_support(self):
-        cls = sklearn.naive_bayes.MultinomialNB()
-        X = np.random.random((10, 10))
-        y = np.random.randint(0, 1, size=(10, 10))
-        self.assertRaisesRegexp(ValueError, 'bad input shape \(10, 10\)',
-                                cls.fit, X, y)

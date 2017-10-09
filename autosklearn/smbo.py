@@ -450,42 +450,6 @@ class AutoMLSMBO(object):
                         (1, -1))
                     self.logger.info(list(meta_features_dict.keys()))
 
-                    # meta_runs = meta_base.get_all_runs(METRIC_TO_STRING[self.metric])
-                    # meta_runs_index = 0
-                    # try:
-                    #    meta_durations = meta_base.get_all_runs('runtime')
-                    #    read_runtime_data = True
-                    # except KeyError:
-                    #    read_runtime_data = False
-                    #    self.logger.critical('Cannot read runtime data.')
-                    #    if self.acquisition_function == 'EIPS':
-                    #        self.logger.critical('Reverting to acquisition function EI!')
-                    #        self.acquisition_function = 'EI'
-
-                    # for meta_dataset in meta_runs.index:
-                    #     meta_dataset_start_index = meta_runs_index
-                    #     for meta_configuration in meta_runs.columns:
-                    #         if np.isfinite(meta_runs.loc[meta_dataset, meta_configuration]):
-                    #             try:
-                    #                 config = meta_base.get_configuration_from_algorithm_index(
-                    #                     meta_configuration)
-                    #                 cost = meta_runs.loc[meta_dataset, meta_configuration]
-                    #                 if read_runtime_data:
-                    #                     runtime = meta_durations.loc[meta_dataset,
-                    #                                                  meta_configuration]
-                    #                 else:
-                    #                     runtime = 1
-                    #                 # TODO read out other status types!
-                    #                 meta_runhistory.add(config, cost, runtime,
-                    #                                     StatusType.SUCCESS,
-                    #                                     instance_id=meta_dataset)
-                    #                 meta_runs_index += 1
-                    #             except:
-                    #                 # TODO maybe add warning
-                    #                 pass
-                    #
-                    #     meta_runs_dataset_indices[meta_dataset] = (
-                    #         meta_dataset_start_index, meta_runs_index)
             else:
                 meta_features = None
                 self.logger.warning('Could not find meta-data directory %s' %
@@ -514,13 +478,13 @@ class AutoMLSMBO(object):
         startup_time = self.watcher.wall_elapsed(self.dataset_name)
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
         scenario_dict = {'cs': self.config_space,
-                         'cutoff-time': self.func_eval_time_limit,
-                         'memory-limit': self.memory_limit,
-                         'wallclock-limit': total_walltime_limit,
+                         'cutoff_time': self.func_eval_time_limit,
+                         'memory_limit': self.memory_limit,
+                         'wallclock_limit': total_walltime_limit,
                          'output-dir':
                              self.backend.get_smac_output_directory(self.seed),
                          'shared-model': self.shared_mode,
-                         'run-obj': 'quality',
+                         'run_obj': 'quality',
                          'deterministic': 'true',
                          'instances': instances}
 
@@ -529,7 +493,6 @@ class AutoMLSMBO(object):
             scenario_dict['initial_incumbent'] = 'RANDOM'
 
         self.scenario = Scenario(scenario_dict)
-
 
         # TODO rebuild target algorithm to be it's own target algorithm
         # evaluator, which takes into account that a run can be killed prior
@@ -545,8 +508,9 @@ class AutoMLSMBO(object):
             include['preprocessor'] = self.include_preprocessors
         elif self.exclude_preprocessors is not None:
             exclude['preprocessor'] = self.exclude_preprocessors
+
         if self.include_estimators is not None and \
-                self.exclude_preprocessors is not None:
+                self.exclude_estimators is not None:
             raise ValueError('Cannot specify include_estimators and '
                              'exclude_estimators.')
         elif self.include_estimators is not None:
@@ -631,31 +595,6 @@ class AutoMLSMBO(object):
         else:
             raise ValueError(self.configuration_mode)
 
-        # Build a runtime model
-        # runtime_rf = RandomForestWithInstances(types,
-        #                                        instance_features=meta_features_list,
-        #                                        seed=1, num_trees=10)
-        # runtime_rh2EPM = RunHistory2EPM4EIPS(num_params=num_params,
-        #                                      scenario=self.scenario,
-        #                                      success_states=None,
-        #                                      impute_censored_data=False,
-        #                                      impute_state=None)
-        # X_runtime, y_runtime = runtime_rh2EPM.transform(meta_runhistory)
-        # runtime_rf.train(X_runtime, y_runtime[:, 1].flatten())
-        # X_meta, Y_meta = rh2EPM.transform(meta_runhistory)
-        # # Transform Y_meta on a per-dataset base
-        # for meta_dataset in meta_runs_dataset_indices:
-        #     start_index, end_index = meta_runs_dataset_indices[meta_dataset]
-        #     end_index += 1  # Python indexing
-        #     Y_meta[start_index:end_index, 0]\
-        #         [Y_meta[start_index:end_index, 0] >2.0] =  2.0
-        #     dataset_minimum = np.min(Y_meta[start_index:end_index, 0])
-        #     Y_meta[start_index:end_index, 0] = 1 - (
-        #         (1. - Y_meta[start_index:end_index, 0]) /
-        #         (1. - dataset_minimum))
-        #     Y_meta[start_index:end_index, 0]\
-        #           [Y_meta[start_index:end_index, 0] > 2] = 2
-
         smac.solver.stats.start_timing()
         # == first, evaluate all metelearning and default configurations
         smac.solver.incumbent = smac.solver.initial_design.run()
@@ -670,9 +609,10 @@ class AutoMLSMBO(object):
                 time_bound=self.total_walltime_limit)
 
             if smac.solver.scenario.shared_model:
-                pSMAC.write(run_history=smac.solver.runhistory,
-                            output_directory=smac.solver.scenario.output_dir,
-                            num_run=self.seed)
+                pSMAC.write(
+                    run_history=smac.solver.runhistory,
+                    output_directory=smac.solver.scenario.output_dir,
+                )
 
             if smac.solver.stats.is_budget_exhausted():
                 break
@@ -687,14 +627,7 @@ class AutoMLSMBO(object):
                            logger=self.logger)
 
             choose_next_start_time = time.time()
-            try:
-                challengers = self.choose_next(smac)
-            except Exception as e:
-                self.logger.error(e)
-                self.logger.error("Error in getting next configurations "
-                                  "with SMAC. Using random configuration!")
-                next_config = self.config_space.sample_configuration()
-                challengers = [next_config]
+            challengers = self.choose_next(smac)
             time_for_choose_next = time.time() - choose_next_start_time
             self.logger.info('Used %g seconds to find next '
                              'configurations' % (time_for_choose_next))
@@ -708,9 +641,10 @@ class AutoMLSMBO(object):
                 time_bound=time_for_choose_next)
 
             if smac.solver.scenario.shared_model:
-                pSMAC.write(run_history=smac.solver.runhistory,
-                            output_directory=smac.solver.scenario.output_dir,
-                            num_run=self.seed)
+                pSMAC.write(
+                    run_history=smac.solver.runhistory,
+                    output_directory=smac.solver.scenario.output_dir,
+                )
 
             if smac.solver.stats.is_budget_exhausted():
                 break
@@ -737,18 +671,8 @@ class AutoMLSMBO(object):
                                (1. - dataset_minimum))
             Y_cfg[:, 0][Y_cfg[:, 0] > 2] = 2
 
-        # if len(X_meta) > 0 and len(X_cfg) > 0:
-        #    pass
-        #    X_cfg = np.concatenate((X_meta, X_cfg))
-        #    Y_cfg = np.concatenate((Y_meta, Y_cfg))
-        # elif len(X_meta) > 0:
-        #    X_cfg = X_meta.copy()
-        #    Y_cfg = Y_meta.copy()
-        # elif len(X_cfg) > 0:
         X_cfg = X_cfg.copy()
         Y_cfg = Y_cfg.copy()
-        # else:
-        #    raise ValueError('No training data for SMAC random forest!')
 
         self.logger.info('Using %d training points for SMAC.' %
                          X_cfg.shape[0])
