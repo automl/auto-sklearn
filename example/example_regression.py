@@ -14,7 +14,7 @@ def main():
 
     automl = autosklearn.regression.AutoSklearnRegressor(
         time_left_for_this_task=120, per_run_time_limit=30,
-        tmp_folder='/tmp/autoslearn_regression_example_tmp',
+        tmp_folder='/tmp/autosklearn_regression_example_tmp',
         output_folder='/tmp/autosklearn_regression_example_out')
     automl.fit(X_train, y_train, dataset_name='boston',
                feat_type=feature_types)

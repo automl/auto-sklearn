@@ -13,7 +13,7 @@ def main():
 
     automl = autosklearn.classification.AutoSklearnClassifier(
         time_left_for_this_task=120, per_run_time_limit=30,
-        tmp_folder='/tmp/autoslearn_cv_example_tmp',
+        tmp_folder='/tmp/autosklearn_cv_example_tmp',
         output_folder='/tmp/autosklearn_cv_example_out',
         delete_tmp_folder_after_terminate=False,
         resampling_strategy='cv',
