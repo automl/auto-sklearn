@@ -49,8 +49,8 @@ class RidgeRegression(AutoSklearnRegressionAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
         alpha = UniformFloatHyperparameter(
-            "alpha", 10 ** -5, 10., log=True, default=1.)
+            "alpha", 10 ** -5, 10., log=True, default_value=1.)
         fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default=1e-4, log=True)
+        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4, log=True)
         cs.add_hyperparameters([alpha, fit_intercept, tol])
         return cs

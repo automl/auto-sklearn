@@ -188,7 +188,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
         possible_default_regressor = copy.copy(list(
             available_regressors.keys()))
-        default = cs.get_hyperparameter('regressor:__choice__').default
+        default = cs.get_hyperparameter('regressor:__choice__').default_value
         del possible_default_regressor[
             possible_default_regressor.index(default)]
 
@@ -216,7 +216,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                                 raise ValueError(
                                     "Cannot find a legal default configuration.")
                             cs.get_hyperparameter(
-                                'regressor:__choice__').default = default
+                                'regressor:__choice__').default_value = default
 
         # which would take too long
         # Combinations of tree-based models with feature learning:
@@ -248,7 +248,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                         raise ValueError(
                             "Cannot find a legal default configuration.")
                     cs.get_hyperparameter(
-                        'regressor:__choice__').default = default
+                        'regressor:__choice__').default_value = default
 
         self.configuration_space_ = cs
         self.dataset_properties_ = dataset_properties

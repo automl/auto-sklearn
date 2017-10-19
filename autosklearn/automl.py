@@ -7,7 +7,7 @@ import unittest.mock
 import warnings
 
 
-from ConfigSpace.io import pcs
+from ConfigSpace.read_and_write import pcs
 import numpy as np
 import numpy.ma as ma
 import scipy.stats

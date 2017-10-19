@@ -132,9 +132,11 @@ class EvaluationTest(unittest.TestCase):
                                     metric=accuracy)
 
         self.assertRaisesRegex(FirstRunCrashedException,
-                               "First run crashed, abort. \(To prevent this, "
-                               "toggle the "
-                               "'abort_on_first_run_crash'-option!\)",
+                               "First run crashed, abort. Please check your "
+                               "setup -- we assume that your "
+                               "defaultconfiguration does not crashes. \(To "
+                               "deactivate this exception, use the SMAC "
+                               "scenario option 'abort_on_first_run_crash'\)",
                                ta.start, config=None, instance=None, cutoff=30)
 
         self.stats.ta_runs += 1

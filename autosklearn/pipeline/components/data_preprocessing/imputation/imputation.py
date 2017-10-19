@@ -48,7 +48,7 @@ class Imputation(AutoSklearnPreprocessingAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         # TODO add replace by zero!
         strategy = CategoricalHyperparameter(
-            "strategy", ["mean", "median", "most_frequent"], default="mean")
+            "strategy", ["mean", "median", "most_frequent"], default_value="mean")
         cs = ConfigurationSpace()
         cs.add_hyperparameter(strategy)
         return cs

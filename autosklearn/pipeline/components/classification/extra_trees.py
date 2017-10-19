@@ -135,20 +135,20 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
 
         n_estimators = Constant("n_estimators", 100)
         criterion = CategoricalHyperparameter(
-            "criterion", ["gini", "entropy"], default="gini")
+            "criterion", ["gini", "entropy"], default_value="gini")
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default=1)
+            "max_features", 0.5, 5, default_value=1)
 
         max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
 
         min_samples_split = UniformIntegerHyperparameter(
-            "min_samples_split", 2, 20, default=2)
+            "min_samples_split", 2, 20, default_value=2)
         min_samples_leaf = UniformIntegerHyperparameter(
-            "min_samples_leaf", 1, 20, default=1)
+            "min_samples_leaf", 1, 20, default_value=1)
         min_weight_fraction_leaf = Constant('min_weight_fraction_leaf', 0.)
 
         bootstrap = CategoricalHyperparameter(
-            "bootstrap", ["True", "False"], default="False")
+            "bootstrap", ["True", "False"], default_value="False")
         cs.add_hyperparameters([n_estimators, criterion, max_features,
                                 max_depth, min_samples_split, min_samples_leaf,
                                 min_weight_fraction_leaf, bootstrap])

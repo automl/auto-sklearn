@@ -94,10 +94,10 @@ class SelectRates(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         alpha = UniformFloatHyperparameter(
-            name="alpha", lower=0.01, upper=0.5, default=0.1)
+            name="alpha", lower=0.01, upper=0.5, default_value=0.1)
 
         score_func = CategoricalHyperparameter(
-            name="score_func", choices=["chi2", "f_classif"], default="chi2")
+            name="score_func", choices=["chi2", "f_classif"], default_value="chi2")
         if dataset_properties is not None:
             # Chi2 can handle sparse data, so we respect this
             if 'sparse' in dataset_properties and dataset_properties['sparse']:

@@ -88,10 +88,10 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
         kernel = CategoricalHyperparameter('kernel', possible_kernels, 'rbf')
         degree = UniformIntegerHyperparameter('degree', 2, 5, 3)
         gamma = UniformFloatHyperparameter("gamma", 3.0517578125e-05, 8,
-                                           log=True, default=0.1)
-        coef0 = UniformFloatHyperparameter("coef0", -1, 1, default=0)
+                                           log=True, default_value=0.1)
+        coef0 = UniformFloatHyperparameter("coef0", -1, 1, default_value=0)
         n_components = UniformIntegerHyperparameter(
-            "n_components", 50, 10000, default=100, log=True)
+            "n_components", 50, 10000, default_value=100, log=True)
 
         cs = ConfigurationSpace()
         cs.add_hyperparameters([kernel, degree, gamma, coef0, n_components])

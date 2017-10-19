@@ -80,11 +80,11 @@ class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
 
         penalty = Constant("penalty", "l1")
         loss = CategoricalHyperparameter(
-            "loss", ["hinge", "squared_hinge"], default="squared_hinge")
+            "loss", ["hinge", "squared_hinge"], default_value="squared_hinge")
         dual = Constant("dual", "False")
         # This is set ad-hoc
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default=1e-4, log=True)
-        C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True, default=1.0)
+        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4, log=True)
+        C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True, default_value=1.0)
         multi_class = Constant("multi_class", "ovr")
         # These are set ad-hoc
         fit_intercept = Constant("fit_intercept", "True")

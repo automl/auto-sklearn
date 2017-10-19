@@ -85,15 +85,15 @@ class DecisionTree(AutoSklearnClassificationAlgorithm):
         cs = ConfigurationSpace()
 
         criterion = CategoricalHyperparameter(
-            "criterion", ["gini", "entropy"], default="gini")
+            "criterion", ["gini", "entropy"], default_value="gini")
         splitter = Constant("splitter", "best")
         max_features = Constant('max_features', 1.0)
         max_depth = UniformFloatHyperparameter(
-            'max_depth', 0., 2., default=0.5)
+            'max_depth', 0., 2., default_value=0.5)
         min_samples_split = UniformIntegerHyperparameter(
-            "min_samples_split", 2, 20, default=2)
+            "min_samples_split", 2, 20, default_value=2)
         min_samples_leaf = UniformIntegerHyperparameter(
-            "min_samples_leaf", 1, 20, default=1)
+            "min_samples_leaf", 1, 20, default_value=1)
         min_weight_fraction_leaf = Constant("min_weight_fraction_leaf", 0.0)
         max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")
 

@@ -58,11 +58,11 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         alpha = UniformFloatHyperparameter(
-            name="alpha", lower=1e-14, upper=1.0, default=1e-8, log=True)
+            name="alpha", lower=1e-14, upper=1.0, default_value=1e-8, log=True)
         thetaL = UniformFloatHyperparameter(
-            name="thetaL", lower=1e-10, upper=1e-3, default=1e-6, log=True)
+            name="thetaL", lower=1e-10, upper=1e-3, default_value=1e-6, log=True)
         thetaU = UniformFloatHyperparameter(
-            name="thetaU", lower=1.0, upper=100000, default=100000.0, log=True)
+            name="thetaU", lower=1.0, upper=100000, default_value=100000.0, log=True)
 
         cs = ConfigurationSpace()
         cs.add_hyperparameters([alpha, thetaL, thetaU])

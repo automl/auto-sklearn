@@ -124,27 +124,27 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
         loss = CategoricalHyperparameter(
-            "loss", ["ls", "lad", "huber", "quantile"], default="ls")
+            "loss", ["ls", "lad", "huber", "quantile"], default_value="ls")
         learning_rate = UniformFloatHyperparameter(
-            name="learning_rate", lower=0.01, upper=1, default=0.1, log=True)
+            name="learning_rate", lower=0.01, upper=1, default_value=0.1, log=True)
         n_estimators = UniformIntegerHyperparameter(
-            "n_estimators", 50, 500, default=100)
+            "n_estimators", 50, 500, default_value=100)
         max_depth = UniformIntegerHyperparameter(
-            name="max_depth", lower=1, upper=10, default=3)
+            name="max_depth", lower=1, upper=10, default_value=3)
         min_samples_split = UniformIntegerHyperparameter(
-            name="min_samples_split", lower=2, upper=20, default=2, log=False)
+            name="min_samples_split", lower=2, upper=20, default_value=2, log=False)
         min_samples_leaf = UniformIntegerHyperparameter(
-            name="min_samples_leaf", lower=1, upper=20, default=1, log=False)
+            name="min_samples_leaf", lower=1, upper=20, default_value=1, log=False)
         min_weight_fraction_leaf = UnParametrizedHyperparameter(
             "min_weight_fraction_leaf", 0.)
         subsample = UniformFloatHyperparameter(
-            name="subsample", lower=0.01, upper=1.0, default=1.0, log=False)
+            name="subsample", lower=0.01, upper=1.0, default_value=1.0, log=False)
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default=1)
+            "max_features", 0.5, 5, default_value=1)
         max_leaf_nodes = UnParametrizedHyperparameter(
             name="max_leaf_nodes", value="None")
         alpha = UniformFloatHyperparameter(
-            "alpha", lower=0.75, upper=0.99, default=0.9)
+            "alpha", lower=0.75, upper=0.99, default_value=0.9)
 
         cs.add_hyperparameters([loss, learning_rate, n_estimators, max_depth,
                                 min_samples_split, min_samples_leaf,
