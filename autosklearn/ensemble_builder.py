@@ -203,7 +203,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 num_run = int(match.group(2))
 
                 if self.ensemble_nbest is not None:
-                    if score <= 0.001:
+                    if score <= 0.001 or num_run == 1:
                         self.logger.info('Model only predicts at random: ' +
                                          model_name + ' has score: ' + str(score))
                         backup_num_runs.append((automl_seed, num_run))
@@ -243,7 +243,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
                 else:
                     # Load all predictions that are better than random
-                    if score <= 0.001:
+                    if score <= 0.001 or num_run == 1:
                         # include_num_runs.append(True)
                         self.logger.info('Model only predicts at random: ' +
                                          model_name + ' has score: ' +

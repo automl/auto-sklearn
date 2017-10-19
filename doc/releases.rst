@@ -11,6 +11,12 @@
 Releases
 ========
 
+Version 0.2.2
+=============
+
+* Do not use the ``DummyClassifier`` or ``DummyRegressor`` as part of an
+  ensemble. Fixes `#140 <https://github.com/automl/auto-sklearn/issues/140>`_.
+
 Version 0.2.1
 =============
 
