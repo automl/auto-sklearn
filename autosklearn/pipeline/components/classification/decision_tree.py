@@ -31,7 +31,7 @@ class DecisionTree(AutoSklearnClassificationAlgorithm):
         from sklearn.tree import DecisionTreeClassifier
 
         self.max_features = float(self.max_features)
-        if self.max_depth == "None":
+        if self.max_depth == "None" or self.max_depth is None:
             max_depth = self.max_depth = None
         else:
             num_features = X.shape[1]
@@ -39,7 +39,7 @@ class DecisionTree(AutoSklearnClassificationAlgorithm):
             max_depth = max(1, int(np.round(self.max_depth * num_features, 0)))
         self.min_samples_split = int(self.min_samples_split)
         self.min_samples_leaf = int(self.min_samples_leaf)
-        if self.max_leaf_nodes == "None":
+        if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
             self.max_leaf_nodes = None
         else:
             self.max_leaf_nodes = int(self.max_leaf_nodes)

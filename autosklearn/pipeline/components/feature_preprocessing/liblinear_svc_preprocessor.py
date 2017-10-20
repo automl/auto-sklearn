@@ -37,7 +37,7 @@ class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
         self.fit_intercept = self.fit_intercept == 'True'
         self.intercept_scaling = float(self.intercept_scaling)
 
-        if self.class_weight == "None":
+        if self.class_weight == "None" or self.class_weight is None:
             self.class_weight = None
 
         estimator = sklearn.svm.LinearSVC(penalty=self.penalty,

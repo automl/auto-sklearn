@@ -53,7 +53,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             self.min_samples_split = int(self.min_samples_split)
             self.min_samples_leaf = int(self.min_samples_leaf)
             self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
-            if self.max_depth == "None":
+            if self.max_depth == "None" or self.max_depth is None:
                 self.max_depth = None
             else:
                 self.max_depth = int(self.max_depth)
@@ -62,7 +62,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 float(self.max_features) * (np.log(num_features) + 1))
             # Use at most half of the features
             max_features = max(1, min(int(X.shape[1] / 2), max_features))
-            if self.max_leaf_nodes == "None":
+            if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
                 self.max_leaf_nodes = None
             else:
                 self.max_leaf_nodes = int(self.max_leaf_nodes)

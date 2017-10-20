@@ -57,7 +57,7 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         self.max_iter = float(self.max_iter)
         self.shrinking = self.shrinking == 'True'
 
-        if self.class_weight == "None":
+        if self.class_weight == "None" or self.class_weight is None:
             self.class_weight = None
 
         self.estimator = sklearn.svm.SVC(C=self.C,

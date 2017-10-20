@@ -24,11 +24,11 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
     def fit(self, X, Y=None):
         import sklearn.ensemble
 
-        if self.max_depth == "None":
+        if self.max_depth == "None" or self.max_depth is None:
             self.max_depth = None
         else:
             self.max_depth = int(self.max_depth)
-        if self.max_leaf_nodes == "None":
+        if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
             self.max_leaf_nodes = None
         else:
             self.max_leaf_nodes = int(self.max_leaf_nodes)

@@ -22,7 +22,7 @@ class LDA(AutoSklearnClassificationAlgorithm):
         import sklearn.discriminant_analysis
         import sklearn.multiclass
 
-        if self.shrinkage == "None":
+        if self.shrinkage == "None" or self.shrinkage is None:
             self.shrinkage = None
             solver = 'svd'
         elif self.shrinkage == "auto":
