@@ -1,4 +1,3 @@
-import collections
 import os
 import pickle
 import sys
@@ -15,6 +14,7 @@ from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
 from autosklearn.estimators import AutoMLClassifier
+from autosklearn.automl import AutoML
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import *
 sys.path.append(os.path.dirname(__file__))
@@ -315,6 +315,25 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         score = accuracy(Y_test, predictions)
         self.assertGreaterEqual(score, 0.9)
 
+    @unittest.mock.patch.object(AutoML, 'fit')
+    @unittest.mock.patch.object(AutoML, 'refit')
+    @unittest.mock.patch.object(AutoML, 'fit_ensemble')
+    def test_conversion_of_list_to_np(self, fit_ensemble, refit, fit):
+        automl = AutoSklearnClassifier()
+        X = [[1], [2], [3]]
+        y = [1, 2, 3]
+        automl.fit(X, y)
+        self.assertEqual(fit.call_count, 1)
+        self.assertIsInstance(fit.call_args[0][0], np.ndarray)
+        self.assertIsInstance(fit.call_args[0][1], np.ndarray)
+        automl.refit(X, y)
+        self.assertEqual(refit.call_count, 1)
+        self.assertIsInstance(refit.call_args[0][0], np.ndarray)
+        self.assertIsInstance(refit.call_args[0][1], np.ndarray)
+        automl.fit_ensemble(y)
+        self.assertEqual(fit_ensemble.call_count, 1)
+        self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
+
 
 class AutoMLRegressorTest(Base, unittest.TestCase):
     def test_regression(self):
@@ -333,3 +352,22 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         score = mean_squared_error(Y_test, predictions)
         # On average np.sqrt(30) away from the target -> ~5.5 on average
         self.assertGreaterEqual(score, -30)
+
+    @unittest.mock.patch.object(AutoML, 'fit')
+    @unittest.mock.patch.object(AutoML, 'refit')
+    @unittest.mock.patch.object(AutoML, 'fit_ensemble')
+    def test_conversion_of_list_to_np(self, fit_ensemble, refit, fit):
+        automl = AutoSklearnRegressor()
+        X = [[1], [2], [3]]
+        y = [1, 2, 3]
+        automl.fit(X, y)
+        self.assertEqual(fit.call_count, 1)
+        self.assertIsInstance(fit.call_args[0][0], np.ndarray)
+        self.assertIsInstance(fit.call_args[0][1], np.ndarray)
+        automl.refit(X, y)
+        self.assertEqual(refit.call_count, 1)
+        self.assertIsInstance(refit.call_args[0][0], np.ndarray)
+        self.assertIsInstance(refit.call_args[0][1], np.ndarray)
+        automl.fit_ensemble(y)
+        self.assertEqual(fit_ensemble.call_count, 1)
+        self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)

@@ -523,7 +523,7 @@ class BaseAutoML(AutoMLDecorator):
     regression and classification."""
 
     def __init__(self, automl):
-        self._n_outputs = 0
+        self._n_outputs = 1
         super().__init__(automl)
 
     def _perform_input_checks(self, X, y):
@@ -552,13 +552,26 @@ class BaseAutoML(AutoMLDecorator):
 
     def refit(self, X, y):
         X, y = self._perform_input_checks(X, y)
-        _n_outputs = y.shape[1]
+        _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
         if self._n_outputs != _n_outputs:
             raise ValueError('Number of outputs changed from %d to %d!' %
                              (self._n_outputs, _n_outputs))
 
         return super().refit(X, y)
 
+    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+                     dataset_name=None, ensemble_nbest=None,
+                     ensemble_size=None):
+        _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
+        if self._n_outputs != _n_outputs:
+            raise ValueError('Number of outputs changed from %d to %d!' %
+                             (self._n_outputs, _n_outputs))
+
+        return super().fit_ensemble(
+            y, task=task, metric=metric, precision=precision,
+            dataset_name=dataset_name, ensemble_nbest=ensemble_nbest,
+            ensemble_size=ensemble_size
+        )
 
 class AutoMLClassifier(BaseAutoML):
 
@@ -655,9 +668,12 @@ class AutoMLRegressor(BaseAutoML):
 
     def fit(self, X, y, metric=None, feat_type=None, dataset_name=None):
         X, y = super()._perform_input_checks(X, y)
+        _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
+        if _n_outputs > 1:
+            raise NotImplementedError('Multi-output regression is not implemented.')
         if metric is None:
             metric = r2
-        return super().fit(X=X, y=y, task=REGRESSION, metric=metric,
+        return super().fit(X, y, task=REGRESSION, metric=metric,
                            feat_type=feat_type, dataset_name=dataset_name)
 
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
