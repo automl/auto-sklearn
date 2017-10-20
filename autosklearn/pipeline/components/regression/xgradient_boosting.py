@@ -149,14 +149,14 @@ class XGradientBoostingRegressor():#AutoSklearnRegressionAlgorithm):
 
         # Parameterized Hyperparameters
         max_depth = UniformIntegerHyperparameter(
-            name="max_depth", lower=1, upper=10, default=3)
+            name="max_depth", lower=1, upper=10, default_value=3)
         learning_rate = UniformFloatHyperparameter(
-            name="learning_rate", lower=0.01, upper=1, default=0.1, log=True)
-        n_estimators = UniformIntegerHyperparameter("n_estimators", 50, 500, default=100)
+            name="learning_rate", lower=0.01, upper=1, default_value=0.1, log=True)
+        n_estimators = UniformIntegerHyperparameter("n_estimators", 50, 500, default_value=100)
         subsample = UniformFloatHyperparameter(
-            name="subsample", lower=0.01, upper=1.0, default=1.0, log=False)
+            name="subsample", lower=0.01, upper=1.0, default_value=1.0, log=False)
         min_child_weight = UniformIntegerHyperparameter(
-            name="min_child_weight", lower=1, upper=20, default=1, log=False)
+            name="min_child_weight", lower=1, upper=20, default_value=1, log=False)
 
         # Unparameterized Hyperparameters
         max_delta_step = UnParametrizedHyperparameter(

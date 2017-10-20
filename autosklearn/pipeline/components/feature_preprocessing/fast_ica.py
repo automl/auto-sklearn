@@ -59,7 +59,7 @@ class FastICA(AutoSklearnPreprocessingAlgorithm):
         cs = ConfigurationSpace()
 
         n_components = UniformIntegerHyperparameter(
-            "n_components", 10, 2000, default=100)
+            "n_components", 10, 2000, default_value=100)
         algorithm = CategoricalHyperparameter('algorithm',
             ['parallel', 'deflation'], 'parallel')
         whiten = CategoricalHyperparameter('whiten',

@@ -119,26 +119,26 @@ class SGD(AutoSklearnClassificationAlgorithm):
 
         loss = CategoricalHyperparameter("loss",
             ["hinge", "log", "modified_huber", "squared_hinge", "perceptron"],
-            default="log")
+            default_value="log")
         penalty = CategoricalHyperparameter(
-            "penalty", ["l1", "l2", "elasticnet"], default="l2")
+            "penalty", ["l1", "l2", "elasticnet"], default_value="l2")
         alpha = UniformFloatHyperparameter(
-            "alpha", 10e-7, 1e-1, log=True, default=0.0001)
+            "alpha", 10e-7, 1e-1, log=True, default_value=0.0001)
         l1_ratio = UniformFloatHyperparameter(
-            "l1_ratio", 1e-9, 1,  log=True, default=0.15)
+            "l1_ratio", 1e-9, 1,  log=True, default_value=0.15)
         fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
         n_iter = UniformIntegerHyperparameter("n_iter", 5, 1000, log=True,
-                                              default=20)
+                                              default_value=20)
         epsilon = UniformFloatHyperparameter(
-            "epsilon", 1e-5, 1e-1, default=1e-4, log=True)
+            "epsilon", 1e-5, 1e-1, default_value=1e-4, log=True)
         learning_rate = CategoricalHyperparameter(
             "learning_rate", ["optimal", "invscaling", "constant"],
-            default="optimal")
+            default_value="optimal")
         eta0 = UniformFloatHyperparameter(
-            "eta0", 10**-7, 0.1, default=0.01)
-        power_t = UniformFloatHyperparameter("power_t", 1e-5, 1, default=0.25)
+            "eta0", 10**-7, 0.1, default_value=0.01)
+        power_t = UniformFloatHyperparameter("power_t", 1e-5, 1, default_value=0.25)
         average = CategoricalHyperparameter(
-            "average", ["False", "True"], default="False")
+            "average", ["False", "True"], default_value="False")
         cs.add_hyperparameters([loss, penalty, alpha, l1_ratio, fit_intercept,
                                 n_iter, epsilon, learning_rate, eta0, power_t,
                                 average])

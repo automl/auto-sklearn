@@ -20,6 +20,8 @@ from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding\
     .one_hot_encoding import OneHotEncoder
 from autosklearn.pipeline.components import feature_preprocessing as \
     feature_preprocessing_components
+from autosklearn.pipeline.components.data_preprocessing.variance_threshold.variance_threshold \
+    import VarianceThreshold
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
 
@@ -186,7 +188,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
         possible_default_classifier = copy.copy(list(
             available_classifiers.keys()))
-        default = cs.get_hyperparameter('classifier:__choice__').default
+        default = cs.get_hyperparameter('classifier:__choice__').default_value
         del possible_default_classifier[possible_default_classifier.index(default)]
 
         # A classifier which can handle sparse data after the densifier is
@@ -214,7 +216,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                             except IndexError:
                                 raise ValueError("Cannot find a legal default configuration.")
                             cs.get_hyperparameter(
-                                'classifier:__choice__').default = default
+                                'classifier:__choice__').default_value = default
 
         # which would take too long
         # Combinations of non-linear models with feature learning:
@@ -247,7 +249,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                         raise ValueError(
                             "Cannot find a legal default configuration.")
                     cs.get_hyperparameter(
-                        'classifier:__choice__').default = default
+                        'classifier:__choice__').default_value = default
 
         # Won't work
         # Multinomial NB etc don't use with features learning, pca etc
@@ -278,7 +280,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                         raise ValueError(
                             "Cannot find a legal default configuration.")
                     cs.get_hyperparameter(
-                        'classifier:__choice__').default = default
+                        'classifier:__choice__').default_value = default
 
         self.configuration_space_ = cs
         self.dataset_properties_ = dataset_properties
@@ -294,6 +296,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         steps.extend(
             [["one_hot_encoding", OneHotEncoder()],
              ["imputation", Imputation()],
+             ["variance_threshold", VarianceThreshold()],
              ["rescaling",
               rescaling_components.RescalingChoice(default_dataset_properties)],
              ["balancing", Balancing()]])

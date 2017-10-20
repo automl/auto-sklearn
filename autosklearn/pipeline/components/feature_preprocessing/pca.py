@@ -48,9 +48,9 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         keep_variance = UniformFloatHyperparameter(
-            "keep_variance", 0.5, 0.9999, default=0.9999)
+            "keep_variance", 0.5, 0.9999, default_value=0.9999)
         whiten = CategoricalHyperparameter(
-            "whiten", ["False", "True"], default="False")
+            "whiten", ["False", "True"], default_value="False")
         cs = ConfigurationSpace()
         cs.add_hyperparameters([keep_variance, whiten])
         return cs

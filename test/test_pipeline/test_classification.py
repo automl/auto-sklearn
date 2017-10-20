@@ -387,13 +387,17 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cs = SimpleClassificationPipeline(
             include={'preprocessor': ['densifier']}, dataset_properties={'sparse': True}).\
             get_hyperparameter_search_space()
-        self.assertEqual(cs.get_hyperparameter('classifier:__choice__').default,
-                         'qda')
+        self.assertEqual(cs.get_hyperparameter(
+            'classifier:__choice__').default_value,
+            'qda'
+        )
 
         cs = SimpleClassificationPipeline(include={'preprocessor': ['nystroem_sampler']}).\
             get_hyperparameter_search_space()
-        self.assertEqual(cs.get_hyperparameter('classifier:__choice__').default,
-                         'sgd')
+        self.assertEqual(cs.get_hyperparameter(
+            'classifier:__choice__').default_value,
+            'sgd'
+        )
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(AssertionError, "No valid pipeline found.",

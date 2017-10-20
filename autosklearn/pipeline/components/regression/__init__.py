@@ -95,7 +95,7 @@ class RegressorChoice(AutoSklearnChoice):
 
         estimator = CategoricalHyperparameter('__choice__',
                                               list(available_estimators.keys()),
-                                              default=default)
+                                              default_value=default)
         cs.add_hyperparameter(estimator)
         for estimator_name in available_estimators.keys():
             estimator_configuration_space = available_estimators[estimator_name].\

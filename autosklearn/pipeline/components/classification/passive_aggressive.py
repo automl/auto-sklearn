@@ -98,9 +98,9 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         loss = CategoricalHyperparameter("loss",
                                          ["hinge", "squared_hinge"],
-                                         default="hinge")
+                                         default_value="hinge")
         fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
-        n_iter = UniformIntegerHyperparameter("n_iter", 5, 1000, default=20,
+        n_iter = UniformIntegerHyperparameter("n_iter", 5, 1000, default_value=20,
                                               log=True)
         C = UniformFloatHyperparameter("C", 1e-5, 10, 1, log=True)
         cs = ConfigurationSpace()

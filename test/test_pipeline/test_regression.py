@@ -249,13 +249,17 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         cs = SimpleRegressionPipeline(include={'preprocessor': ['densifier']},
                                       dataset_properties={'sparse': True}).\
             get_hyperparameter_search_space()
-        self.assertEqual(cs.get_hyperparameter('regressor:__choice__').default,
-                         'gradient_boosting')
+        self.assertEqual(
+            cs.get_hyperparameter('regressor:__choice__').default_value,
+            'gradient_boosting'
+        )
 
         cs = SimpleRegressionPipeline(include={'preprocessor': ['nystroem_sampler']}).\
             get_hyperparameter_search_space()
-        self.assertEqual(cs.get_hyperparameter('regressor:__choice__').default,
-                         'sgd')
+        self.assertEqual(
+            cs.get_hyperparameter('regressor:__choice__').default_value,
+            'sgd'
+        )
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(ValueError, "Cannot find a legal default "

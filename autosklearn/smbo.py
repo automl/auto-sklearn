@@ -477,16 +477,19 @@ class AutoMLSMBO(object):
 
         startup_time = self.watcher.wall_elapsed(self.dataset_name)
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
-        scenario_dict = {'cs': self.config_space,
-                         'cutoff_time': self.func_eval_time_limit,
-                         'memory_limit': self.memory_limit,
-                         'wallclock_limit': total_walltime_limit,
-                         'output-dir':
-                             self.backend.get_smac_output_directory(self.seed),
-                         'shared-model': self.shared_mode,
-                         'run_obj': 'quality',
-                         'deterministic': 'true',
-                         'instances': instances}
+        scenario_dict = {
+            'cs': self.config_space,
+            'cutoff_time': self.func_eval_time_limit,
+            'memory_limit': self.memory_limit,
+            'wallclock_limit': total_walltime_limit,
+            'output-dir':
+             self.backend.get_smac_output_directory(self.seed),
+            'shared-model': self.shared_mode,
+            'run_obj': 'quality',
+            'deterministic': 'true',
+            'instances': instances,
+            'abort_on_first_run_crash': False,
+        }
 
         if self.configuration_mode == 'RANDOM':
             scenario_dict['minR'] = len(instances) if instances is not None else 1
@@ -553,7 +556,11 @@ class AutoMLSMBO(object):
                                          scenario=self.scenario,
                                          success_states=[StatusType.SUCCESS,
                                                          StatusType.MEMOUT,
-                                                         StatusType.TIMEOUT],
+                                                         StatusType.TIMEOUT,
+                                                         # As long as we
+                                                         # don't have a model
+                                                         # for crashes yet!
+                                                         StatusType.CRASHED],
                                          impute_censored_data=False,
                                          impute_state=None)
             _smac_arguments = dict(scenario=self.scenario,
@@ -567,7 +574,11 @@ class AutoMLSMBO(object):
                                          scenario=self.scenario,
                                          success_states=[StatusType.SUCCESS,
                                                          StatusType.MEMOUT,
-                                                         StatusType.TIMEOUT],
+                                                         StatusType.TIMEOUT,
+                                                         # As long as we
+                                                         # don't have a model
+                                                         # for crashes yet!
+                                                         StatusType.CRASHED],
                                          impute_censored_data=False,
                                          impute_state=None)
             model = UncorrelatedMultiObjectiveRandomForestWithInstances(
@@ -657,7 +668,6 @@ class AutoMLSMBO(object):
         return self.runhistory, self.trajectory, self.fANOVA_input
 
     def choose_next(self, smac):
-        challengers = []
 
         if len(smac.solver.runhistory.data) == 0:
             raise ValueError('Cannot use SMBO algorithm on empty runhistory.')
@@ -676,12 +686,8 @@ class AutoMLSMBO(object):
 
         self.logger.info('Using %d training points for SMAC.' %
                          X_cfg.shape[0])
-        next_configs_tmp = smac.solver.choose_next(
+        return smac.solver.choose_next(
             X_cfg, Y_cfg,
             num_configurations_by_local_search=10,
-            num_configurations_by_random_search_sorted=500)
-
-        challengers.extend(next_configs_tmp)
-
-        return challengers
-
+            num_configurations_by_random_search_sorted=10000
+        )

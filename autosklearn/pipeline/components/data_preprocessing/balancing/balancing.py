@@ -107,7 +107,7 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         # TODO add replace by zero!
         strategy = CategoricalHyperparameter(
-            "strategy", ["none", "weighting"], default="none")
+            "strategy", ["none", "weighting"], default_value="none")
         cs = ConfigurationSpace()
         cs.add_hyperparameter(strategy)
         return cs
