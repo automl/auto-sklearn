@@ -703,18 +703,18 @@ class AutoML(BaseEstimator):
             mean_test_score.append(1 - run_value.cost)
             mean_fit_time.append(run_value.time)
             s = run_value.status
-            if s == 1:
+            if s == StatusType.SUCCESS:
                 status.append('Success')
-            elif s == 2:
+            elif s == StatusType.TIMEOUT:
                 status.append('Timeout')
-            elif s == 3:
+            elif s == StatusType.CRASHED:
                 status.append('Crash')
-            elif s == 4:
+            elif s == StatusType.ABORT:
                 status.append('Abort')
-            elif s == 5:
+            elif s == StatusType.MEMOUT:
                 status.append('Memout')
             else:
-                status.append('Unknown')
+                raise NotImplementedError(s)
 
             for hp_name in hp_names:
                 if hp_name in param_dict:
