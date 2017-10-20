@@ -29,7 +29,7 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
 
         if max_leaf_nodes_or_max_depth == "max_depth":
             self.max_leaf_nodes = None
-            if max_depth == "None":
+            if max_depth == "None" or max_depth is None:
                 self.max_depth = None
             else:
                 self.max_depth = int(max_depth)
@@ -38,7 +38,7 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
                 #elif use_max_depth == "False":
                 #    self.max_depth = None
         else:
-            if max_leaf_nodes == "None":
+            if max_leaf_nodes == "None" or max_leaf_nodes is None:
                 self.max_leaf_nodes = None
             else:
                 self.max_leaf_nodes = int(max_leaf_nodes)
