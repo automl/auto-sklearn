@@ -1,5 +1,6 @@
 import hashlib
 
+import numpy as np
 import scipy.sparse
 
 
@@ -16,8 +17,9 @@ def hash_array_or_matrix(X):
             m.update(X.data)
             m.update(str(X.shape).encode('utf8'))
         else:
-            m.update(X.T.data)
-            m.update(str(X.T.shape).encode('utf8'))
+            X_tmp = np.ascontiguousarray(X.T)
+            m.update(X_tmp.data)
+            m.update(str(X_tmp.shape).encode('utf8'))
 
     hash = m.hexdigest()
     return hash
