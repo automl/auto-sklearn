@@ -689,5 +689,5 @@ class AutoMLSMBO(object):
         return smac.solver.choose_next(
             X_cfg, Y_cfg,
             num_configurations_by_local_search=10,
-            num_configurations_by_random_search_sorted=1000
+            num_configurations_by_random_search_sorted=10000
         )
