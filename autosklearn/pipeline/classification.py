@@ -20,6 +20,8 @@ from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding\
     .one_hot_encoding import OneHotEncoder
 from autosklearn.pipeline.components import feature_preprocessing as \
     feature_preprocessing_components
+from autosklearn.pipeline.components.data_preprocessing.variance_threshold.variance_threshold \
+    import VarianceThreshold
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
 
@@ -294,6 +296,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         steps.extend(
             [["one_hot_encoding", OneHotEncoder()],
              ["imputation", Imputation()],
+             ["variance_threshold", VarianceThreshold()],
              ["rescaling",
               rescaling_components.RescalingChoice(default_dataset_properties)],
              ["balancing", Balancing()]])
