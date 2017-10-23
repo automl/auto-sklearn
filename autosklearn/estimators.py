@@ -1,105 +1,11 @@
 # -*- encoding: utf-8 -*-
-
-import numpy as np
-import warnings
-
-from sklearn.metrics.classification import type_of_target
 from sklearn.base import BaseEstimator
-import sklearn.utils
-import scipy.sparse
 
-import autosklearn.automl
-from autosklearn.metrics import f1_macro, accuracy, r2
-from autosklearn.constants import *
+from autosklearn.automl import AutoMLClassifier, AutoMLRegressor
 from autosklearn.util.backend import create
 
 
-class AutoMLDecorator(object):
-
-    def __init__(self, automl):
-        self._automl = automl
-
-    def fit(self, *args, **kwargs):
-        self._automl.fit(*args, **kwargs)
-
-    def refit(self, X, y):
-        """Refit all models found with fit to new data.
-
-        Necessary when using cross-validation. During training, auto-sklearn
-        fits each model k times on the dataset, but does not keep any trained
-        model and can therefore not be used to predict for new data points.
-        This methods fits all models found during a call to fit on the data
-        given. This method may also be used together with holdout to avoid
-        only using 66% of the training data to fit the final model.
-
-        Parameters
-        ----------
-
-        X : array-like or sparse matrix of shape = [n_samples, n_features]
-            The training input samples.
-
-        y : array-like, shape = [n_samples] or [n_samples, n_outputs]
-            The targets.
-
-        Returns
-        -------
-
-        self
-
-        """
-        return self._automl.refit(X, y)
-
-    def fit_ensemble(self, y, task=None, metric=None, precision='32',
-                     dataset_name=None, ensemble_nbest=None,
-                     ensemble_size=None):
-
-        return self._automl.fit_ensemble(y, task, metric, precision,
-                                         dataset_name, ensemble_nbest,
-                                         ensemble_size)
-
-    def predict(self, X, batch_size=None, n_jobs=1):
-        return self._automl.predict(X, batch_size=batch_size, n_jobs=n_jobs)
-
-    def score(self, X, y):
-        return self._automl.score(X, y)
-
-    def show_models(self):
-        """Return a representation of the final ensemble found by auto-sklearn.
-
-        Returns
-        -------
-        str
-
-        """
-        return self._automl.show_models()
-
-    def get_models_with_weights(self):
-        """Return a list of the final ensemble found by auto-sklearn.
-
-        Returns
-        -------
-        [(weight_1, model_1), ..., (weight_n, model_n)]
-
-        """
-        return self._automl.get_models_with_weights()
-
-    @property
-    def cv_results_(self):
-        return self._automl.cv_results_
-
-    @property
-    def trajectory_(self):
-        return self._automl.trajectory_
-
-    @property
-    def fANOVA_input_(self):
-        return self._automl.fANOVA_input_
-
-    def sprint_statistics(self):
-        return self._automl.sprint_statistics()
-
-
-class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
+class AutoSklearnEstimator(BaseEstimator):
 
     def __init__(self,
                  time_left_for_this_task=3600,
@@ -129,7 +35,6 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
             Time limit in seconds for the search of appropriate
             models. By increasing this value, *auto-sklearn* has a higher
             chance of finding better models.
-
 
         per_run_time_limit : int, optional (default=360)
             Time limit for a single call to the machine learning model.
@@ -268,9 +173,11 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
         self.shared_mode = shared_mode
         self.disable_evaluator_output = disable_evaluator_output
         self.configuration_mode = configuration_mode
-        super(AutoSklearnEstimator, self).__init__(None)
 
-    def build_automl(self):
+        self._automl = None
+        super().__init__()
+
+    def build_automl(self, cls):
         if self.shared_mode:
             self.delete_output_folder_after_terminate = False
             self.delete_tmp_folder_after_terminate = False
@@ -285,7 +192,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
                          output_directory=self.output_folder,
                          delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
                          delete_output_folder_after_terminate=self.delete_output_folder_after_terminate)
-        automl = autosklearn.automl.AutoML(
+        automl = cls(
             backend=backend,
             time_left_for_this_task=self.time_left_for_this_task,
             per_run_time_limit=self.per_run_time_limit,
@@ -313,7 +220,7 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
 
     def fit(self, *args, **kwargs):
         self._automl = self.build_automl()
-        super(AutoSklearnEstimator, self).fit(*args, **kwargs)
+        self._automl.fit(*args, **kwargs)
 
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
@@ -364,6 +271,74 @@ class AutoSklearnEstimator(AutoMLDecorator, BaseEstimator):
                                          dataset_name, ensemble_nbest,
                                          ensemble_size)
 
+    def refit(self, X, y):
+        """Refit all models found with fit to new data.
+
+        Necessary when using cross-validation. During training, auto-sklearn
+        fits each model k times on the dataset, but does not keep any trained
+        model and can therefore not be used to predict for new data points.
+        This methods fits all models found during a call to fit on the data
+        given. This method may also be used together with holdout to avoid
+        only using 66% of the training data to fit the final model.
+
+        Parameters
+        ----------
+
+        X : array-like or sparse matrix of shape = [n_samples, n_features]
+            The training input samples.
+
+        y : array-like, shape = [n_samples] or [n_samples, n_outputs]
+            The targets.
+
+        Returns
+        -------
+
+        self
+
+        """
+        return self._automl.refit(X, y)
+
+    def predict(self, X, batch_size=None, n_jobs=1):
+        return self._automl.predict(X, batch_size=batch_size, n_jobs=n_jobs)
+
+    def score(self, X, y):
+        return self._automl.score(X, y)
+
+    def show_models(self):
+        """Return a representation of the final ensemble found by auto-sklearn.
+
+        Returns
+        -------
+        str
+
+        """
+        return self._automl.show_models()
+
+    def get_models_with_weights(self):
+        """Return a list of the final ensemble found by auto-sklearn.
+
+        Returns
+        -------
+        [(weight_1, model_1), ..., (weight_n, model_n)]
+
+        """
+        return self._automl.get_models_with_weights()
+
+    @property
+    def cv_results_(self):
+        return self._automl.cv_results_
+
+    @property
+    def trajectory_(self):
+        return self._automl.trajectory_
+
+    @property
+    def fANOVA_input_(self):
+        return self._automl.fANOVA_input_
+
+    def sprint_statistics(self):
+        return self._automl.sprint_statistics()
+
 
 class AutoSklearnClassifier(AutoSklearnEstimator):
     """
@@ -372,8 +347,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
     """
 
     def build_automl(self):
-        automl = super(AutoSklearnClassifier, self).build_automl()
-        return AutoMLClassifier(automl)
+        return super().build_automl(AutoMLClassifier)
 
     def fit(self, X, y,
             metric=None,
@@ -412,9 +386,8 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         self
 
         """
-        return super(AutoSklearnClassifier, self).fit(X=X, y=y, metric=metric,
-                                                      feat_type=feat_type,
-                                                      dataset_name=dataset_name)
+        return super().fit(X=X, y=y, metric=metric, feat_type=feat_type,
+                           dataset_name=dataset_name)
 
     def predict(self, X, batch_size=None, n_jobs=1):
         """Predict classes for X.
@@ -429,8 +402,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             The predicted classes.
 
         """
-        return super(AutoSklearnClassifier, self).predict(
-            X, batch_size=batch_size, n_jobs=n_jobs)
+        return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
 
     def predict_proba(self, X, batch_size=None, n_jobs=1):
 
@@ -457,8 +429,7 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
     """
 
     def build_automl(self):
-        automl = super(AutoSklearnRegressor, self).build_automl()
-        return AutoMLRegressor(automl)
+        return super().build_automl(AutoMLRegressor)
 
     def fit(self, X, y,
             metric=None,
@@ -496,9 +467,8 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         """
         # Fit is supposed to be idempotent!
         # But not if we use share_mode.
-        return super(AutoSklearnRegressor, self).fit(X=X, y=y, metric=metric,
-                                                     feat_type=feat_type,
-                                                     dataset_name=dataset_name)
+        return super().fit(X=X, y=y, metric=metric, feat_type=feat_type,
+                           dataset_name=dataset_name)
 
     def predict(self, X, batch_size=None, n_jobs=1):
         """Predict regression target for X.
@@ -513,121 +483,4 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
             The predicted values.
 
         """
-        return super(AutoSklearnRegressor, self).predict(
-            X, batch_size=batch_size, n_jobs=n_jobs)
-
-
-class AutoMLClassifier(AutoMLDecorator):
-
-    def __init__(self, automl):
-        self._classes = []
-        self._n_classes = []
-        self._n_outputs = 0
-
-        super(AutoMLClassifier, self).__init__(automl)
-
-    def fit(self, X, y,
-            metric=None,
-            loss=None,
-            feat_type=None,
-            dataset_name=None):
-        X = sklearn.utils.check_array(X, accept_sparse="csr",
-                                      force_all_finite=False)
-        y = sklearn.utils.check_array(y, ensure_2d=False)
-
-        if scipy.sparse.issparse(X):
-            X.sort_indices()
-
-        y_task = type_of_target(y)
-        task_mapping = {'multilabel-indicator': MULTILABEL_CLASSIFICATION,
-                        'multiclass': MULTICLASS_CLASSIFICATION,
-                        'binary': BINARY_CLASSIFICATION}
-
-        task = task_mapping.get(y_task)
-        if task is None:
-            raise ValueError('Cannot work on data of type %s' % y_task)
-
-        if metric is None:
-            if task == MULTILABEL_CLASSIFICATION:
-                metric = f1_macro
-            else:
-                metric = accuracy
-
-        y = self._process_target_classes(y)
-
-        return self._automl.fit(X, y, task, metric, feat_type, dataset_name)
-
-    def fit_ensemble(self, y, task=None, metric=None, precision='32',
-                     dataset_name=None, ensemble_nbest=None,
-                     ensemble_size=None):
-        self._process_target_classes(y)
-        return self._automl.fit_ensemble(y, task, metric, precision, dataset_name,
-                                         ensemble_nbest, ensemble_size)
-
-    def _process_target_classes(self, y):
-        y = np.atleast_1d(y)
-        if y.ndim == 2 and y.shape[1] == 1:
-            warnings.warn("A column-vector y was passed when a 1d array was"
-                          " expected. Please change the shape of y to "
-                          "(n_samples,), for example using ravel().",
-                          sklearn.utils.DataConversionWarning, stacklevel=2)
-
-        if y.ndim == 1:
-            # reshape is necessary to preserve the data contiguity against vs
-            # [:, np.newaxis] that does not.
-            y = np.reshape(y, (-1, 1))
-
-        self._n_outputs = y.shape[1]
-
-        y = np.copy(y)
-
-        self._classes = []
-        self._n_classes = []
-
-        for k in range(self._n_outputs):
-            classes_k, y[:, k] = np.unique(y[:, k], return_inverse=True)
-            self._classes.append(classes_k)
-            self._n_classes.append(classes_k.shape[0])
-
-        self._n_classes = np.array(self._n_classes, dtype=np.int)
-
-        if y.shape[1] == 1:
-            y = y.flatten()
-
-        return y
-
-    def predict(self, X, batch_size=None, n_jobs=1):
-        predicted_probabilities = self._automl.predict(
-            X, batch_size=batch_size, n_jobs=n_jobs)
-
-        if self._n_outputs == 1:
-            predicted_indexes = np.argmax(predicted_probabilities, axis=1)
-            predicted_classes = self._classes[0].take(predicted_indexes)
-
-            return predicted_classes
-        else:
-            predicted_indices = (predicted_probabilities > 0.5).astype(int)
-            n_samples = predicted_probabilities.shape[0]
-            predicted_classes = np.zeros((n_samples, self._n_outputs))
-
-            for k in range(self._n_outputs):
-                output_predicted_indexes = predicted_indices[:, k].reshape(-1)
-                predicted_classes[:, k] = self._classes[k].take(output_predicted_indexes)
-
-            return predicted_classes
-
-    def predict_proba(self, X, batch_size=None, n_jobs=1):
-        return self._automl.predict(X, batch_size=batch_size, n_jobs=n_jobs)
-
-
-class AutoMLRegressor(AutoMLDecorator):
-
-    def fit(self, X, y,
-            metric=None,
-            feat_type=None,
-            dataset_name=None,
-            ):
-        if metric is None:
-            metric = r2
-        return self._automl.fit(X=X, y=y, task=REGRESSION, metric=metric,
-                                feat_type=feat_type, dataset_name=dataset_name)
+        return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
