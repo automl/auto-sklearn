@@ -45,7 +45,7 @@ def main():
     predictions = cls.predict(X_test)
     print("Accuracy score {:g} using {:s}".
           format(sklearn.metrics.accuracy_score(y_test, predictions),
-                 cls._automl._automl._metric.name))
+                 cls._automl._metric.name))
 
     # Second example: Use own accuracy metric
     print("#"*80)
@@ -63,7 +63,7 @@ def main():
     predictions = cls.predict(X_test)
     print("Accuracy score {:g} using {:s}".
           format(sklearn.metrics.accuracy_score(y_test, predictions),
-                 cls._automl._automl._metric.name))
+                 cls._automl._metric.name))
 
     # Third example: Use own accuracy metric with additional argument
     print("#"*80)
@@ -82,7 +82,7 @@ def main():
     predictions = cls.predict(X_test)
     print("Accuracy score {:g} using {:s}".
           format(sklearn.metrics.accuracy_score(y_test, predictions),
-                 cls._automl._automl._metric.name))
+                 cls._automl._metric.name))
 
 
 if __name__ == "__main__":

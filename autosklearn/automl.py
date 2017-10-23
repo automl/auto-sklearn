@@ -1,11 +1,9 @@
 # -*- encoding: utf-8 -*-
-from collections import defaultdict
 import io
 import json
 import os
 import unittest.mock
 import warnings
-
 
 from ConfigSpace.read_and_write import pcs
 import numpy as np
@@ -15,6 +13,9 @@ from sklearn.base import BaseEstimator
 from smac.tae.execute_ta_run import StatusType
 from smac.stats.stats import Stats
 from sklearn.externals import joblib
+import sklearn.utils
+import scipy.sparse
+from sklearn.metrics.classification import type_of_target
 
 from autosklearn.constants import *
 from autosklearn.metrics import Scorer
@@ -27,6 +28,8 @@ from autosklearn.util import StopWatch, get_logger, setup_logger, \
 from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
+from autosklearn.metrics import f1_macro, accuracy, r2
+from autosklearn.constants import *
 
 
 def _model_predict(self, X, batch_size, identifier):
@@ -808,3 +811,120 @@ class AutoML(BaseEstimator):
 
     def configuration_space_created_hook(self, datamanager, configuration_space):
         return configuration_space
+
+
+class AutoMLClassifier(AutoML):
+    def __init__(self, *args, **kwargs):
+        self._classes = []
+        self._n_classes = []
+        self._n_outputs = 0
+
+        super().__init__(*args, **kwargs)
+
+    def fit(self, X, y,
+            task=MULTICLASS_CLASSIFICATION,
+            metric=None,
+            feat_type=None,
+            dataset_name=None):
+        X = sklearn.utils.check_array(X, accept_sparse="csr",
+                                      force_all_finite=False)
+        y = sklearn.utils.check_array(y, ensure_2d=False)
+
+        if scipy.sparse.issparse(X):
+            X.sort_indices()
+
+        y_task = type_of_target(y)
+        task_mapping = {'multilabel-indicator': MULTILABEL_CLASSIFICATION,
+                        'multiclass': MULTICLASS_CLASSIFICATION,
+                        'binary': BINARY_CLASSIFICATION}
+
+        task = task_mapping.get(y_task)
+        if task is None:
+            raise ValueError('Cannot work on data of type %s' % y_task)
+
+        if metric is None:
+            if task == MULTILABEL_CLASSIFICATION:
+                metric = f1_macro
+            else:
+                metric = accuracy
+
+        y = self._process_target_classes(y)
+
+        return super().fit(X, y, task, metric, feat_type, dataset_name)
+
+    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+                     dataset_name=None, ensemble_nbest=None,
+                     ensemble_size=None):
+        self._process_target_classes(y)
+        return super().fit_ensemble(y, task, metric, precision,
+                                    dataset_name,
+                                    ensemble_nbest, ensemble_size)
+
+    def _process_target_classes(self, y):
+        y = np.atleast_1d(y)
+        if y.ndim == 2 and y.shape[1] == 1:
+            warnings.warn("A column-vector y was passed when a 1d array was"
+                          " expected. Please change the shape of y to "
+                          "(n_samples,), for example using ravel().",
+                          sklearn.utils.DataConversionWarning, stacklevel=2)
+
+        if y.ndim == 1:
+            # reshape is necessary to preserve the data contiguity against vs
+            # [:, np.newaxis] that does not.
+            y = np.reshape(y, (-1, 1))
+
+        self._n_outputs = y.shape[1]
+
+        y = np.copy(y)
+
+        self._classes = []
+        self._n_classes = []
+
+        for k in range(self._n_outputs):
+            classes_k, y[:, k] = np.unique(y[:, k], return_inverse=True)
+            self._classes.append(classes_k)
+            self._n_classes.append(classes_k.shape[0])
+
+        self._n_classes = np.array(self._n_classes, dtype=np.int)
+
+        if y.shape[1] == 1:
+            y = y.flatten()
+
+        return y
+
+    def predict(self, X, batch_size=None, n_jobs=1):
+        predicted_probabilities = super().predict(
+            X, batch_size=batch_size, n_jobs=n_jobs
+        )
+
+        if self._n_outputs == 1:
+            predicted_indexes = np.argmax(predicted_probabilities, axis=1)
+            predicted_classes = self._classes[0].take(predicted_indexes)
+
+            return predicted_classes
+        else:
+            predicted_indices = (predicted_probabilities > 0.5).astype(int)
+            n_samples = predicted_probabilities.shape[0]
+            predicted_classes = np.zeros((n_samples, self._n_outputs))
+
+            for k in range(self._n_outputs):
+                output_predicted_indexes = predicted_indices[:, k].reshape(-1)
+                predicted_classes[:, k] = self._classes[k].take(
+                    output_predicted_indexes)
+
+            return predicted_classes
+
+    def predict_proba(self, X, batch_size=None, n_jobs=1):
+        return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
+
+
+class AutoMLRegressor(AutoML):
+    def fit(self, X, y,
+            task=MULTICLASS_CLASSIFICATION,
+            metric=None,
+            feat_type=None,
+            dataset_name=None):
+        if metric is None:
+            metric = r2
+        return super().fit(X=X, y=y, task=REGRESSION, metric=metric,
+                           feat_type=feat_type, dataset_name=dataset_name)
