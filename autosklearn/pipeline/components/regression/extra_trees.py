@@ -18,9 +18,9 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
 
         self.n_estimators = int(n_estimators)
         self.estimator_increment = 10
-        if criterion not in ("mse"):
-            raise ValueError("'criterion' is not in ('mse'): "
-                             "%s" % criterion)
+        if criterion not in ("mse", "friedman_mse", "mae"):
+            raise ValueError("'criterion' is not in ('mse', 'friedman_mse', "
+                             "'mae): %s" % criterion)
         self.criterion = criterion
 
         if max_leaf_nodes_or_max_depth == "max_depth":
@@ -29,10 +29,6 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
                 self.max_depth = None
             else:
                 self.max_depth = int(max_depth)
-                #if use_max_depth == "True":
-                #    self.max_depth = int(max_depth)
-                #elif use_max_depth == "False":
-                #    self.max_depth = None
         else:
             if max_leaf_nodes == "None" or max_leaf_nodes is None:
                 self.max_leaf_nodes = None

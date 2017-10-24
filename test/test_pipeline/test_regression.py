@@ -86,9 +86,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     def test_configurations_sparse(self):
         dataset_properties = {'sparse': True}
         cs = SimpleRegressionPipeline(
-            # TODO remove in sklearn 0.18
-            dataset_properties=dataset_properties,
-            exclude={'regressor': 'gaussian_process'}).get_hyperparameter_search_space()
+            dataset_properties=dataset_properties
+        ).get_hyperparameter_search_space()
 
         self._test_configurations(cs, make_sparse=True,
                                   dataset_properties=dataset_properties)
