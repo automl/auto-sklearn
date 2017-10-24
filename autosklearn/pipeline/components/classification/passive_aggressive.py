@@ -38,9 +38,14 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
             self._iterations = 0
 
             self.estimator = PassiveAggressiveClassifier(
-                C=self.C, fit_intercept=self.fit_intercept, n_iter=1,
-                loss=self.loss, shuffle=True, random_state=self.random_state,
-                warm_start=True)
+                C=self.C,
+                fit_intercept=self.fit_intercept,
+                n_iter=1,
+                loss=self.loss,
+                shuffle=True,
+                random_state=self.random_state,
+                warm_start=True
+            )
             self.classes_ = np.unique(y.astype(int))
 
         # Fallback for multilabel classification
@@ -96,13 +101,15 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
+        C = UniformFloatHyperparameter("C", 1e-5, 10, 1, log=True)
+        fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
         loss = CategoricalHyperparameter("loss",
                                          ["hinge", "squared_hinge"],
                                          default_value="hinge")
-        fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
+
         n_iter = UniformIntegerHyperparameter("n_iter", 5, 1000, default_value=20,
                                               log=True)
-        C = UniformFloatHyperparameter("C", 1e-5, 10, 1, log=True)
+
         cs = ConfigurationSpace()
         cs.add_hyperparameters([loss, fit_intercept, n_iter, C])
         return cs

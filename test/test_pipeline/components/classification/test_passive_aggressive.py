@@ -18,8 +18,8 @@ class PassiveAggressiveComponentTest(BaseClassificationComponentTest):
     res["default_digits"] = 0.92046144505160898
     res["default_digits_iterative"] = 0.92349726775956287
     res["default_digits_binary"] = 0.99574984820886459
-    res["default_digits_multilabel"] = 0.8975269956947447
-    res["default_digits_multilabel_proba"] = 0.99703892466326138
+    res["default_digits_multilabel"] = 0.93337431764214218
+    res["default_digits_multilabel_proba"] = 0.99827666163616924
 
     sk_mod = sklearn.linear_model.PassiveAggressiveClassifier
     module = PassiveAggressive

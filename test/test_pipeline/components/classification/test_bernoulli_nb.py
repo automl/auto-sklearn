@@ -18,8 +18,8 @@ class BernoulliNBComponentTest(BaseClassificationComponentTest):
     res["default_digits"] = 0.81238615664845171
     res["default_digits_iterative"] = 0.81238615664845171
     res["default_digits_binary"] = 0.99392835458409234
-    res["default_digits_multilabel"] = 0.73112394623587451
-    res["default_digits_multilabel_proba"] = 0.66666666666666663
+    res["default_digits_multilabel"] = 0.67651391068802913
+    res["default_digits_multilabel_proba"] = 0.5
 
     sk_mod = sklearn.naive_bayes.BernoulliNB
     module = BernoulliNB

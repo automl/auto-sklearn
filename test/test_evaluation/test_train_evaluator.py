@@ -696,7 +696,7 @@ class FunctionsTest(unittest.TestCase):
                 disable_file_output=False, instance=self.dataset_name,
                 metric=accuracy)
         rval = get_last_result(self.queue)
-        self.assertAlmostEqual(rval['loss'], 0.040000000000000036)
+        self.assertAlmostEqual(rval['loss'], 0.06)
         self.assertEqual(rval['status'], StatusType.SUCCESS)
         self.assertNotIn('bac_metric', rval['additional_run_info'])
 
@@ -710,19 +710,19 @@ class FunctionsTest(unittest.TestCase):
                 metric=accuracy)
         rval = get_last_result(self.queue)
 
-        fixture = {'accuracy': 0.04,
-                   'balanced_accuracy': 0.042002688172,
-                   'f1_macro': 0.0423387096774,
-                   'f1_micro': 0.04,
-                   'f1_weighted': 0.040020161290,
-                   'log_loss': 1.1170492260716856,
-                   'pac_score': 0.16594165340740463,
-                   'precision_macro': 0.0414141414141,
-                   'precision_micro': 0.04,
-                   'precision_weighted': 0.0388484848485,
-                   'recall_macro': 0.042002688172,
-                   'recall_micro': 0.04,
-                   'recall_weighted': 0.04,
+        fixture = {'accuracy': 0.06,
+                   'balanced_accuracy': 0.063508064516129004,
+                   'f1_macro': 0.063508064516129004,
+                   'f1_micro': 0.06,
+                   'f1_weighted': 0.06,
+                   'log_loss': 1.4434709423780441,
+                   'pac_score': 0.35696863167504633,
+                   'precision_macro': 0.063508064516129004,
+                   'precision_micro': 0.06,
+                   'precision_weighted': 0.06,
+                   'recall_macro': 0.063508064516129004,
+                   'recall_micro': 0.06,
+                   'recall_weighted': 0.06,
                    'num_run': 1}
 
         additional_run_info = rval['additional_run_info']
@@ -732,7 +732,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(len(additional_run_info), len(fixture) + 1,
                          msg=sorted(additional_run_info.items()))
 
-        self.assertAlmostEqual(rval['loss'], 0.040000000000000036)
+        self.assertAlmostEqual(rval['loss'], 0.06)
         self.assertEqual(rval['status'], StatusType.SUCCESS)
 
     # def test_eval_cv_on_subset(self):
@@ -748,8 +748,8 @@ class FunctionsTest(unittest.TestCase):
 
     def test_eval_partial_cv(self):
         cv = StratifiedKFold(shuffle=True, random_state=1, n_splits=5)
-        results = [0.045454545454545414,
-                   0.095238095238095233,
+        results = [0.090909090909090939,
+                   0.047619047619047672,
                    0.052631578947368474,
                    0.10526315789473684,
                    0.0]

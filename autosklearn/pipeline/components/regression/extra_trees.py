@@ -127,7 +127,8 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
         cs = ConfigurationSpace()
 
         n_estimators = Constant("n_estimators", 100)
-        criterion = Constant("criterion", "mse")
+        criterion = CategoricalHyperparameter("criterion",
+                                              ['mse', 'friedman_mse', 'mae'])
         max_features = UniformFloatHyperparameter(
             "max_features", 0.5, 5, default_value=1)
 

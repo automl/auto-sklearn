@@ -47,7 +47,7 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         gamma = UniformFloatHyperparameter(
-            "gamma", 0.3, 2., default_value=1.0)
+            "gamma", 3.0517578125e-05, 8, default_value=1.0, log=True)
         n_components = UniformIntegerHyperparameter(
             "n_components", 50, 10000, default_value=100, log=True)
         cs = ConfigurationSpace()

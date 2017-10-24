@@ -99,17 +99,19 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        # Copied from libsvm_c
         C = UniformFloatHyperparameter(
             name="C", lower=0.03125, upper=32768, log=True, default_value=1.0)
+        # Random Guess
+        epsilon = UniformFloatHyperparameter(name="epsilon", lower=0.001,
+                                             upper=1, default_value=0.1,
+                                             log=True)
 
         kernel = CategoricalHyperparameter(
             name="kernel", choices=['linear', 'poly', 'rbf', 'sigmoid'],
             default_value="rbf")
         degree = UniformIntegerHyperparameter(
-            name="degree", lower=1, upper=5, default_value=3)
+            name="degree", lower=2, upper=5, default_value=3)
 
-        # Changed the gamma value to 0.0 (is 0.1 for classification)
         gamma = UniformFloatHyperparameter(
             name="gamma", lower=3.0517578125e-05, upper=8, log=True, default_value=0.1)
 
@@ -123,9 +125,6 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
             name="tol", lower=1e-5, upper=1e-1, default_value=1e-3, log=True)
         max_iter = UnParametrizedHyperparameter("max_iter", -1)
 
-        # Random Guess
-        epsilon = UniformFloatHyperparameter(name="epsilon", lower=0.001,
-                                             upper=1, default_value=0.1, log=True)
         cs = ConfigurationSpace()
         cs.add_hyperparameters([C, kernel, degree, gamma, coef0, shrinking,
                                tol, max_iter, epsilon])

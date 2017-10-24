@@ -21,9 +21,9 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
 
         self.n_estimators = int(n_estimators)
         self.estimator_increment = 10
-        if criterion not in ("mse", ):
-            raise ValueError("'criterion' is not in ('mse', ): "
-                             "%s" % criterion)
+        if criterion not in ("mse", "friedman_mse", "mae"):
+            raise ValueError("'criterion' is not in ('mse', 'friedman_mse', "
+                             "'mae'): %s" % criterion)
         self.criterion = criterion
 
         if max_leaf_nodes_or_max_depth == "max_depth":
@@ -105,7 +105,8 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
         cs = ConfigurationSpace()
 
         n_estimators = Constant("n_estimators", 100)
-        criterion = Constant("criterion", "mse")
+        criterion = CategoricalHyperparameter("criterion",
+                                              ["mse", 'friedman_mse', 'mae'])
         max_features = UniformFloatHyperparameter(
             "max_features", 0.5, 5, default_value=1)
 

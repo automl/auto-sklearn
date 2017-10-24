@@ -58,6 +58,7 @@ class BasePipeline(Pipeline):
             self.random_state = check_random_state(1)
         else:
             self.random_state = check_random_state(random_state)
+        super().__init__(steps=self.steps)
 
     def fit(self, X, y, fit_params=None):
         """Fit the selected algorithm to the training data.

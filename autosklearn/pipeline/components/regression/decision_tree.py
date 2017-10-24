@@ -74,7 +74,8 @@ class DecisionTree(AutoSklearnRegressionAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        criterion = Constant('criterion', 'mse')
+        criterion = CategoricalHyperparameter('criterion',
+                                              ['mse', 'friedman_mse', 'mae'])
         splitter = Constant("splitter", "best")
         max_features = Constant('max_features', 1.0)
         max_depth = UniformFloatHyperparameter(

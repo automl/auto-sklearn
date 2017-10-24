@@ -1,6 +1,6 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformIntegerHyperparameter, \
-    UnParametrizedHyperparameter, Constant
+    UnParametrizedHyperparameter, Constant, CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
@@ -10,13 +10,14 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self, n_estimators, max_depth, min_samples_split,
                  min_samples_leaf, min_weight_fraction_leaf, max_leaf_nodes,
-                 sparse_output=True, n_jobs=1, random_state=None):
+                 bootstrap, sparse_output=True, n_jobs=1, random_state=None):
         self.n_estimators = n_estimators
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
         self.max_leaf_nodes = max_leaf_nodes
         self.min_weight_fraction_leaf = min_weight_fraction_leaf
+        self.bootstrap = bootstrap
         self.sparse_output = sparse_output
         self.n_jobs = n_jobs
         self.random_state = random_state
@@ -32,6 +33,8 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
             self.max_leaf_nodes = None
         else:
             self.max_leaf_nodes = int(self.max_leaf_nodes)
+        if self.bootstrap in ['true', 'false']:
+            self.bootstrap = bool(self.bootstrap)
 
         self.preprocessor = sklearn.ensemble.RandomTreesEmbedding(
             n_estimators=self.n_estimators,
@@ -80,8 +83,9 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
         min_weight_fraction_leaf = Constant('min_weight_fraction_leaf', 1.0)
         max_leaf_nodes = UnParametrizedHyperparameter(name="max_leaf_nodes",
                                                       value="None")
+        bootstrap = CategoricalHyperparameter('bootstrap', ['True', 'False'])
         cs = ConfigurationSpace()
         cs.add_hyperparameters([n_estimators, max_depth, min_samples_split,
                                 min_samples_leaf, min_weight_fraction_leaf,
-                                max_leaf_nodes])
+                                max_leaf_nodes, bootstrap])
         return cs

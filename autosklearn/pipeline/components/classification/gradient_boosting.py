@@ -13,8 +13,8 @@ from autosklearn.pipeline.constants import *
 class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
     def __init__(self, loss, learning_rate, n_estimators, subsample,
                  min_samples_split, min_samples_leaf,
-                 min_weight_fraction_leaf, max_depth, max_features,
-                 max_leaf_nodes, init=None, random_state=None, verbose=0):
+                 min_weight_fraction_leaf, max_depth, criterion, max_features,
+                 max_leaf_nodes, random_state=None, verbose=0):
         self.loss = loss
         self.learning_rate = learning_rate
         self.n_estimators = n_estimators
@@ -23,9 +23,9 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.min_samples_leaf = min_samples_leaf
         self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.max_depth = max_depth
+        self.criterion=criterion
         self.max_features = max_features
         self.max_leaf_nodes = max_leaf_nodes
-        self.init = init
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
@@ -77,9 +77,9 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 min_samples_leaf=self.min_samples_leaf,
                 min_weight_fraction_leaf=self.min_weight_fraction_leaf,
                 max_depth=self.max_depth,
+                criterion=self.criterion,
                 max_features=max_features,
                 max_leaf_nodes=self.max_leaf_nodes,
-                init=self.init,
                 random_state=self.random_state,
                 verbose=self.verbose,
                 warm_start=True,
@@ -136,6 +136,9 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             "n_estimators", 50, 500, default_value=100)
         max_depth = UniformIntegerHyperparameter(
             name="max_depth", lower=1, upper=10, default_value=3)
+        criterion = CategoricalHyperparameter(
+            'criterion', ['friedman_mse', 'mse', 'mae'],
+            default_value='friedman_mse')
         min_samples_split = UniformIntegerHyperparameter(
             name="min_samples_split", lower=2, upper=20, default_value=2, log=False)
         min_samples_leaf = UniformIntegerHyperparameter(
@@ -148,7 +151,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         max_leaf_nodes = UnParametrizedHyperparameter(
             name="max_leaf_nodes", value="None")
         cs.add_hyperparameters([loss, learning_rate, n_estimators, max_depth,
-                                min_samples_split, min_samples_leaf,
+                                criterion, min_samples_split, min_samples_leaf,
                                 min_weight_fraction_leaf, subsample,
                                 max_features, max_leaf_nodes])
 

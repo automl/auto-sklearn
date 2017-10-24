@@ -363,6 +363,7 @@ class AutoSklearnChoice(object):
         new_params['random_state'] = self.random_state
 
         self.new_params = new_params
+        print(choice)
         self.choice = self.get_components()[choice](**new_params)
 
         return self

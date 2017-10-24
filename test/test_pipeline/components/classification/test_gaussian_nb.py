@@ -18,8 +18,8 @@ class GaussianNBComponentTest(BaseClassificationComponentTest):
     res["default_digits"] = 0.80692167577413476
     res["default_digits_iterative"] = 0.80692167577413476
     res["default_digits_binary"] = 0.98664238008500305
-    res["default_digits_multilabel"] = 0.71507312748717466
-    res["default_digits_multilabel_proba"] = 0.98533237262174234
+    res["default_digits_multilabel"] = 0.54135471896765841
+    res["default_digits_multilabel_proba"] = 0.99028976450984096
 
     sk_mod = sklearn.naive_bayes.GaussianNB
     module = GaussianNB
