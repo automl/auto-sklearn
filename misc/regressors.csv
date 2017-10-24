@@ -2,9 +2,9 @@ class,added,comment
 <class 'sklearn.base.RegressorMixin'>,False,BaseClass
 <class 'sklearn.calibration._SigmoidCalibration'>,,
 <class 'sklearn.cross_decomposition.cca_.CCA'>,False,Is a preprocessing method
-<class 'sklearn.cross_decomposition.pls_._PLS'>,False,Is a preprocessing method
 <class 'sklearn.cross_decomposition.pls_.PLSCanonical'>,False,Is a preprocessing method
 <class 'sklearn.cross_decomposition.pls_.PLSRegression'>,False,Is a preprocessing method
+<class 'sklearn.cross_decomposition.pls_._PLS'>,False,Is a preprocessing method
 <class 'sklearn.dummy.DummyRegressor'>,False,See module name
 <class 'sklearn.ensemble.bagging.BaggingRegressor'>,False,This can blow up the configuration space; because we need to define a configured base object. Maybe consider later.
 <class 'sklearn.ensemble.forest.ExtraTreesRegressor'>,True,
@@ -12,7 +12,8 @@ class,added,comment
 <class 'sklearn.ensemble.forest.RandomForestRegressor'>,True,
 <class 'sklearn.ensemble.gradient_boosting.GradientBoostingRegressor'>,True,
 <class 'sklearn.ensemble.weight_boosting.AdaBoostRegressor'>,True,
-<class 'sklearn.gaussian_process.gaussian_process.GaussianProcess'>,True,Crashes when getting two similar inputs
+<class 'sklearn.gaussian_process.gaussian_process.GaussianProcess'>,False,Deprecated
+<class 'sklearn.gaussian_process.gpr.GaussianProcessRegressor'>,True,
 <class 'sklearn.isotonic.IsotonicRegression'>,False,Calibration instead of prediction method
 <class 'sklearn.kernel_ridge.KernelRidge'>,False,Add
 <class 'sklearn.linear_model.base.LinearRegression'>,False,No
@@ -26,6 +27,7 @@ class,added,comment
 <class 'sklearn.linear_model.coordinate_descent.MultiTaskElasticNetCV'>,False,We want to perform CV ourselves
 <class 'sklearn.linear_model.coordinate_descent.MultiTaskLasso'>,False,MultiTask
 <class 'sklearn.linear_model.coordinate_descent.MultiTaskLassoCV'>,False,MultiTask
+<class 'sklearn.linear_model.huber.HuberRegressor'>,False,No
 <class 'sklearn.linear_model.least_angle.Lars'>,,No
 <class 'sklearn.linear_model.least_angle.LarsCV'>,False,We want to perform CV ourselves
 <class 'sklearn.linear_model.least_angle.LassoLars'>,,No
@@ -41,8 +43,10 @@ class,added,comment
 <class 'sklearn.linear_model.stochastic_gradient.SGDRegressor'>,True,
 <class 'sklearn.linear_model.tests.test_sgd.SparseSGDRegressor'>,FALSE,This regressor is inside a test module
 <class 'sklearn.linear_model.theil_sen.TheilSenRegressor'>,,
+<class 'sklearn.multioutput.MultiOutputRegressor'>,,
 <class 'sklearn.neighbors.regression.KNeighborsRegressor'>,True,
 <class 'sklearn.neighbors.regression.RadiusNeighborsRegressor'>,False,Can crash when there is no neighbour within the radius
+<class 'sklearn.neural_network.multilayer_perceptron.MLPRegressor'>,False,TODO
 <class 'sklearn.svm.classes.LinearSVR'>,True,
 <class 'sklearn.svm.classes.NuSVR'>,False,Mathematical idental to SVR
 <class 'sklearn.svm.classes.SVR'>,True,
