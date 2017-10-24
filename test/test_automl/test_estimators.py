@@ -1,4 +1,3 @@
-import collections
 import os
 import pickle
 import sys
@@ -14,7 +13,7 @@ import autosklearn.pipeline.util as putil
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
-from autosklearn.estimators import AutoMLClassifier
+from autosklearn.automl import AutoMLClassifier, AutoML
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import *
 sys.path.append(os.path.dirname(__file__))
@@ -155,9 +154,9 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertEqual(len(os.listdir(os.path.join(output, '.auto-sklearn',
                                                      'ensembles'))), 1)
         self.assertGreaterEqual(score, 0.90)
-        self.assertEqual(automl._automl._automl._task, MULTICLASS_CLASSIFICATION)
+        self.assertEqual(automl._automl._task, MULTICLASS_CLASSIFICATION)
 
-        models = automl._automl._automl.models_
+        models = automl._automl.models_
         classifier_types = [type(c) for c in models.values()]
         self.assertIn(ArrayReturningDummyPredictor, classifier_types)
 
@@ -193,18 +192,21 @@ class EstimatorTest(Base, unittest.TestCase):
 
         
 class AutoMLClassifierTest(Base, unittest.TestCase):
-
-    def test_multiclass_prediction(self):
+    @unittest.mock.patch('autosklearn.automl.AutoML.predict')
+    def test_multiclass_prediction(self, predict_mock):
         classes = [['a', 'b', 'c']]
         predicted_probabilities = [[0, 0, 0.99], [0, 0.99, 0], [0.99, 0, 0],
                                    [0, 0.99, 0], [0, 0, 0.99]]
         predicted_indexes = [2, 1, 0, 1, 2]
         expected_result = ['c', 'b', 'a', 'b', 'c']
 
-        automl_mock = unittest.mock.Mock()
-        automl_mock.predict.return_value = np.array(predicted_probabilities)
+        predict_mock.return_value = np.array(predicted_probabilities)
 
-        classifier = AutoMLClassifier(automl_mock)
+        classifier = AutoMLClassifier(
+            time_left_for_this_task=1,
+            per_run_time_limit=1,
+            backend=None,
+        )
         classifier._classes = [np.array(classes)]
         classifier._n_outputs = 1
         classifier._n_classes = np.array([3])
@@ -213,7 +215,8 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
         np.testing.assert_array_equal(expected_result, actual_result)
 
-    def test_multilabel_prediction(self):
+    @unittest.mock.patch('autosklearn.automl.AutoML.predict')
+    def test_multilabel_prediction(self, predict_mock):
         classes = [[1, 2], [13, 17]]
         predicted_probabilities = [[0.99, 0],
                                    [0.99, 0],
@@ -223,10 +226,13 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         predicted_indexes = np.array([[1, 0], [1, 0], [0, 1], [1, 1], [1, 1]])
         expected_result = np.array([[2, 13], [2, 13], [1, 17], [2, 17], [2, 17]])
 
-        automl_mock = unittest.mock.Mock()
-        automl_mock.predict.return_value = np.array(predicted_probabilities)
+        predict_mock.return_value = np.array(predicted_probabilities)
 
-        classifier = AutoMLClassifier(automl_mock)
+        classifier = AutoMLClassifier(
+            time_left_for_this_task=1,
+            per_run_time_limit=1,
+            backend=None,
+        )
         classifier._classes = list(map(np.array, classes))
         classifier._n_outputs = 2
         classifier._n_classes = np.array([3, 2])
@@ -315,6 +321,25 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         score = accuracy(Y_test, predictions)
         self.assertGreaterEqual(score, 0.9)
 
+    @unittest.mock.patch.object(AutoML, 'fit')
+    @unittest.mock.patch.object(AutoML, 'refit')
+    @unittest.mock.patch.object(AutoML, 'fit_ensemble')
+    def test_conversion_of_list_to_np(self, fit_ensemble, refit, fit):
+        automl = AutoSklearnClassifier()
+        X = [[1], [2], [3]]
+        y = [1, 2, 3]
+        automl.fit(X, y)
+        self.assertEqual(fit.call_count, 1)
+        self.assertIsInstance(fit.call_args[0][0], np.ndarray)
+        self.assertIsInstance(fit.call_args[0][1], np.ndarray)
+        automl.refit(X, y)
+        self.assertEqual(refit.call_count, 1)
+        self.assertIsInstance(refit.call_args[0][0], np.ndarray)
+        self.assertIsInstance(refit.call_args[0][1], np.ndarray)
+        automl.fit_ensemble(y)
+        self.assertEqual(fit_ensemble.call_count, 1)
+        self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
+
 
 class AutoMLRegressorTest(Base, unittest.TestCase):
     def test_regression(self):
@@ -333,3 +358,22 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         score = mean_squared_error(Y_test, predictions)
         # On average np.sqrt(30) away from the target -> ~5.5 on average
         self.assertGreaterEqual(score, -30)
+
+    @unittest.mock.patch.object(AutoML, 'fit')
+    @unittest.mock.patch.object(AutoML, 'refit')
+    @unittest.mock.patch.object(AutoML, 'fit_ensemble')
+    def test_conversion_of_list_to_np(self, fit_ensemble, refit, fit):
+        automl = AutoSklearnRegressor()
+        X = [[1], [2], [3]]
+        y = [1, 2, 3]
+        automl.fit(X, y)
+        self.assertEqual(fit.call_count, 1)
+        self.assertIsInstance(fit.call_args[0][0], np.ndarray)
+        self.assertIsInstance(fit.call_args[0][1], np.ndarray)
+        automl.refit(X, y)
+        self.assertEqual(refit.call_count, 1)
+        self.assertIsInstance(refit.call_args[0][0], np.ndarray)
+        self.assertIsInstance(refit.call_args[0][1], np.ndarray)
+        automl.fit_ensemble(y)
+        self.assertEqual(fit_ensemble.call_count, 1)
+        self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
