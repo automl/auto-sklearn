@@ -9,14 +9,14 @@ from autosklearn.pipeline.constants import *
 
 
 class SGD(AutoSklearnRegressionAlgorithm):
-    def __init__(self, loss, penalty, alpha, fit_intercept, n_iter,
+    def __init__(self, loss, penalty, alpha, fit_intercept, tol,
                  learning_rate, l1_ratio=0.15, epsilon=0.1,
                  eta0=0.01, power_t=0.5, average=False, random_state=None):
         self.loss = loss
         self.penalty = penalty
         self.alpha = alpha
         self.fit_intercept = fit_intercept
-        self.n_iter = n_iter
+        self.tol = tol
         self.learning_rate = learning_rate
         self.l1_ratio = l1_ratio
         self.epsilon = epsilon
@@ -47,7 +47,7 @@ class SGD(AutoSklearnRegressionAlgorithm):
 
             self.alpha = float(self.alpha)
             self.fit_intercept = self.fit_intercept == 'True'
-            self.n_iter = int(self.n_iter)
+            self.tol = float(self.tol)
             self.l1_ratio = float(
                 self.l1_ratio) if self.l1_ratio is not None else 0.15
             self.epsilon = float(
@@ -60,7 +60,7 @@ class SGD(AutoSklearnRegressionAlgorithm):
                                           penalty=self.penalty,
                                           alpha=self.alpha,
                                           fit_intercept=self.fit_intercept,
-                                          n_iter=n_iter,
+                                          max_iter=1,
                                           learning_rate=self.learning_rate,
                                           l1_ratio=self.l1_ratio,
                                           epsilon=self.epsilon,
@@ -73,12 +73,13 @@ class SGD(AutoSklearnRegressionAlgorithm):
             self.scaler = sklearn.preprocessing.StandardScaler(copy=True)
             self.scaler.fit(y.reshape((-1, 1)))
         else:
-            self.estimator.n_iter += n_iter
+            self.estimator.max_iter += n_iter
 
         Y_scaled = self.scaler.transform(y.reshape((-1, 1))).ravel()
-        self.estimator.partial_fit(X, Y_scaled)
+        self.estimator.fit(X, Y_scaled)
 
-        if self.estimator.n_iter >= self.n_iter:
+        if self.estimator.max_iter >= 50 or \
+                        self.estimator.max_iter > self.estimator.n_iter_:
             self.fully_fit_ = True
 
         return self
@@ -101,11 +102,6 @@ class SGD(AutoSklearnRegressionAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': 'SGD Regressor',
                 'name': 'Stochastic Gradient Descent Regressor',
-                'handles_missing_values': False,
-                'handles_nominal_values': False,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': True,
-                'prefers_data_normalized': True,
                 'handles_regression': True,
                 'handles_classification': False,
                 'handles_multiclass': False,
@@ -114,8 +110,7 @@ class SGD(AutoSklearnRegressionAlgorithm):
                 'handles_sparse': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (PREDICTIONS,),
-                # TODO find out what is best used here!
-                'preferred_dtype': None}
+                }
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
@@ -132,8 +127,8 @@ class SGD(AutoSklearnRegressionAlgorithm):
             "l1_ratio", 1e-9, 1., log=True, default_value=0.15)
         fit_intercept = UnParametrizedHyperparameter(
             "fit_intercept", "True")
-        n_iter = UniformIntegerHyperparameter(
-            "n_iter", 5, 1000, log=True, default_value=20)
+        tol = UniformFloatHyperparameter(
+            "tol", 1e-4, 1e-1, default_value=1e-3, log=True)
         epsilon = UniformFloatHyperparameter(
             "epsilon", 1e-5, 1e-1, default_value=1e-4, log=True)
         learning_rate = CategoricalHyperparameter(
@@ -147,7 +142,7 @@ class SGD(AutoSklearnRegressionAlgorithm):
             "average", ["False", "True"], default_value="False")
 
         cs.add_hyperparameters([loss, penalty, alpha, l1_ratio, fit_intercept,
-                                n_iter, epsilon, learning_rate, eta0,
+                                tol, epsilon, learning_rate, eta0,
                                 power_t, average])
 
         # TODO add passive/aggressive here, although not properly documented?

@@ -10,13 +10,13 @@ class SGDComponentTest(BaseClassificationComponentTest):
     __test__ = True
 
     res = dict()
-    res["default_iris"] = 0.64
-    res["default_iris_iterative"] = 0.76
-    res["default_iris_proba"] = 12.433959502167845
-    res["default_iris_sparse"] = 0.26
-    res["default_digits"] = 0.89981785063752273
-    res["default_digits_iterative"] = 0.89981785063752273
-    res["default_digits_binary"] = 0.9927140255009107
+    res["default_iris"] = 0.92
+    res["default_iris_iterative"] = 0.68
+    res["default_iris_proba"] = 0.32146556612186317
+    res["default_iris_sparse"] = 0.41999999999999998
+    res["default_digits"] = 0.88767455980570731
+    res["default_digits_iterative"] = 0.91317547055251969
+    res["default_digits_binary"] = 0.9884638737097754
     res["default_digits_multilabel"] = -1
     res["default_digits_multilabel_proba"] = -1
 

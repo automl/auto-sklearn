@@ -105,9 +105,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             config._populate_values()
 
             # Restrict configurations which could take too long on travis-ci
-            restrictions = {'regressor:passive_aggressive:n_iter': 5,
-                            'regressor:sgd:n_iter': 5,
-                            'regressor:adaboost:n_estimators': 50,
+            restrictions = {'regressor:adaboost:n_estimators': 50,
                             'regressor:adaboost:max_depth': 1,
                             'preprocessor:kernel_pca:n_components': 10,
                             'preprocessor:kitchen_sinks:n_components': 50,

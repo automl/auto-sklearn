@@ -12,10 +12,10 @@ from autosklearn.pipeline.implementations.util import softmax
 
 
 class PassiveAggressive(AutoSklearnClassificationAlgorithm):
-    def __init__(self, C, fit_intercept, n_iter, loss, random_state=None):
+    def __init__(self, C, fit_intercept, tol, loss, random_state=None):
         self.C = float(C)
         self.fit_intercept = fit_intercept == 'True'
-        self.n_iter = int(n_iter)
+        self.tol = float(tol)
         self.loss = loss
         self.random_state = random_state
         self.estimator = None
@@ -35,12 +35,11 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
             self.estimator = None
 
         if self.estimator is None:
-            self._iterations = 0
 
             self.estimator = PassiveAggressiveClassifier(
                 C=self.C,
                 fit_intercept=self.fit_intercept,
-                n_iter=1,
+                max_iter=1,
                 loss=self.loss,
                 shuffle=True,
                 random_state=self.random_state,
@@ -51,7 +50,7 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
         # Fallback for multilabel classification
         if len(y.shape) > 1 and y.shape[1] > 1:
             import sklearn.multiclass
-            self.estimator.n_iter = self.n_iter
+            self.estimator.max_iter = 50
             self.estimator = sklearn.multiclass.OneVsRestClassifier(
                 self.estimator, n_jobs=1)
             self.estimator.fit(X, y)
@@ -59,11 +58,11 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
         else:
             # In the first iteration, there is not yet an intercept
 
-            self.estimator.n_iter = n_iter
-            self.estimator.partial_fit(X, y, classes=np.unique(y))
-            if self._iterations >= self.n_iter:
+            self.estimator.max_iter += n_iter
+            self.estimator.fit(X, y)
+            if self.estimator.max_iter >= 50 or \
+                            self.estimator.max_iter > self.estimator.n_iter_:
                 self.fully_fit_ = True
-            self._iterations += n_iter
 
         return self
 
@@ -107,9 +106,9 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
                                          ["hinge", "squared_hinge"],
                                          default_value="hinge")
 
-        n_iter = UniformIntegerHyperparameter("n_iter", 5, 1000, default_value=20,
+        tol = UniformFloatHyperparameter("tol", 1e-4, 1e-1, default_value=1e-3,
                                               log=True)
 
         cs = ConfigurationSpace()
-        cs.add_hyperparameters([loss, fit_intercept, n_iter, C])
+        cs.add_hyperparameters([loss, fit_intercept, tol, C])
         return cs
