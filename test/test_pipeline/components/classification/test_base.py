@@ -100,8 +100,8 @@ class BaseClassificationComponentTest(unittest.TestCase):
                 _test_classifier_iterative_fit(dataset="digits",
                                                classifier=self.module)
             self.assertAlmostEqual(self.res["default_digits_iterative"],
-                                   sklearn.metrics.accuracy_score(predictions,
-                                                                  targets),
+                                   sklearn.metrics.accuracy_score(targets,
+                                                                  predictions),
                                    places=self.res.get(
                                            "default_digits_iterative_places", 7))
 

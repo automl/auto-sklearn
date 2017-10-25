@@ -57,11 +57,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 self.max_depth = None
             else:
                 self.max_depth = int(self.max_depth)
-            num_features = X.shape[1]
-            max_features = int(
-                float(self.max_features) * (np.log(num_features) + 1))
-            # Use at most half of the features
-            max_features = max(1, min(int(X.shape[1] / 2), max_features))
+            self.max_features = float(self.max_features)
             if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
                 self.max_leaf_nodes = None
             else:
@@ -78,7 +74,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 min_weight_fraction_leaf=self.min_weight_fraction_leaf,
                 max_depth=self.max_depth,
                 criterion=self.criterion,
-                max_features=max_features,
+                max_features=self.max_features,
                 max_leaf_nodes=self.max_leaf_nodes,
                 random_state=self.random_state,
                 verbose=self.verbose,
@@ -138,16 +134,16 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             name="max_depth", lower=1, upper=10, default_value=3)
         criterion = CategoricalHyperparameter(
             'criterion', ['friedman_mse', 'mse', 'mae'],
-            default_value='friedman_mse')
+            default_value='mse')
         min_samples_split = UniformIntegerHyperparameter(
-            name="min_samples_split", lower=2, upper=20, default_value=2, log=False)
+            name="min_samples_split", lower=2, upper=20, default_value=2)
         min_samples_leaf = UniformIntegerHyperparameter(
-            name="min_samples_leaf", lower=1, upper=20, default_value=1, log=False)
+            name="min_samples_leaf", lower=1, upper=20, default_value=1)
         min_weight_fraction_leaf = UnParametrizedHyperparameter("min_weight_fraction_leaf", 0.)
         subsample = UniformFloatHyperparameter(
-                name="subsample", lower=0.01, upper=1.0, default_value=1.0, log=False)
+                name="subsample", lower=0.01, upper=1.0, default_value=1.0)
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default_value=1)
+            "max_features", 0.1, 1.0 , default_value=1)
         max_leaf_nodes = UnParametrizedHyperparameter(
             name="max_leaf_nodes", value="None")
         cs.add_hyperparameters([loss, learning_rate, n_estimators, max_depth,

@@ -60,11 +60,7 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
                 self.max_depth = None
             else:
                 self.max_depth = int(self.max_depth)
-            num_features = X.shape[1]
-            max_features = int(
-                float(self.max_features) * (np.log(num_features) + 1))
-            # Use at most half of the features
-            max_features = max(1, min(int(X.shape[1] / 2), max_features))
+            self.max_features = float(self.max_features)
             if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
                 self.max_leaf_nodes = None
             else:
@@ -82,7 +78,7 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
                 min_samples_leaf=self.min_samples_leaf,
                 min_weight_fraction_leaf=self.min_weight_fraction_leaf,
                 max_depth=self.max_depth,
-                max_features=max_features,
+                max_features=self.max_features,
                 max_leaf_nodes=self.max_leaf_nodes,
                 init=self.init,
                 random_state=self.random_state,
@@ -140,7 +136,7 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
         subsample = UniformFloatHyperparameter(
             name="subsample", lower=0.01, upper=1.0, default_value=1.0, log=False)
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default_value=1)
+            "max_features", 0.1, 1.0, default_value=1)
         max_leaf_nodes = UnParametrizedHyperparameter(
             name="max_leaf_nodes", value="None")
         alpha = UniformFloatHyperparameter(

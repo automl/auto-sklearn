@@ -72,7 +72,7 @@ class BalancingComponentTest(unittest.TestCase):
                  ('decision_tree', DecisionTree, 0.780, 0.643),
                  ('extra_trees', ExtraTreesClassifier, 0.75, 0.800),
                  ('gradient_boosting', GradientBoostingClassifier,
-                  0.789, 0.762),
+                  0.737, 0.684),
                  ('random_forest', RandomForest, 0.75, 0.821),
                  ('libsvm_svc', LibSVM_SVC, 0.769, 0.72),
                  ('liblinear_svc', LibLinear_SVC, 0.762, 0.735),
