@@ -230,6 +230,9 @@ class AutoSklearnEstimator(BaseEstimator):
         All parameters are ``None`` by default. If no other value is given,
         the default values which were set in a call to ``fit()`` are used.
 
+        Calling this function is only necessary if ``ensemble_size==0``, for
+        example when executing *auto-sklearn* in parallel.
+
         Parameters
         ----------
         y : array-like
@@ -355,6 +358,9 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             dataset_name=None):
         """Fit *auto-sklearn* to given training set (X, y).
 
+        Fit both optimizes the machine learning models and builds an ensemble
+        out of them. To disable ensembling, set ``ensemble_size==1``.
+
         Parameters
         ----------
 
@@ -435,7 +441,10 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
             metric=None,
             feat_type=None,
             dataset_name=None):
-        """Fit *autosklearn* to given training set (X, y).
+        """Fit *Auto-sklearn* to given training set (X, y).
+
+        Fit both optimizes the machine learning models and builds an ensemble
+        out of them. To disable ensembling, set ``ensemble_size==1``.
 
         Parameters
         ----------
