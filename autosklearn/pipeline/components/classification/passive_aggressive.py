@@ -12,11 +12,12 @@ from autosklearn.pipeline.implementations.util import softmax
 
 
 class PassiveAggressive(AutoSklearnClassificationAlgorithm):
-    def __init__(self, C, fit_intercept, tol, loss, random_state=None):
+    def __init__(self, C, fit_intercept, tol, loss, average, random_state=None):
         self.C = float(C)
         self.fit_intercept = fit_intercept == 'True'
         self.tol = float(tol)
         self.loss = loss
+        self.average = average == 'True'
         self.random_state = random_state
         self.estimator = None
 
@@ -43,7 +44,8 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
                 loss=self.loss,
                 shuffle=True,
                 random_state=self.random_state,
-                warm_start=True
+                warm_start=True,
+                average=self.average,
             )
             self.classes_ = np.unique(y.astype(int))
 
@@ -108,7 +110,8 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
 
         tol = UniformFloatHyperparameter("tol", 1e-4, 1e-1, default_value=1e-3,
                                               log=True)
+        average = CategoricalHyperparameter('average', [False, True])
 
         cs = ConfigurationSpace()
-        cs.add_hyperparameters([loss, fit_intercept, tol, C])
+        cs.add_hyperparameters([loss, fit_intercept, tol, C, average])
         return cs

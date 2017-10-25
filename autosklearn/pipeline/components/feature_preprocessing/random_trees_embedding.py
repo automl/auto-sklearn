@@ -33,8 +33,8 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
             self.max_leaf_nodes = None
         else:
             self.max_leaf_nodes = int(self.max_leaf_nodes)
-        if self.bootstrap in ['true', 'false']:
-            self.bootstrap = bool(self.bootstrap)
+        if self.bootstrap in ['True', 'False']:
+            self.bootstrap = self.bootstrap == 'True'
 
         self.preprocessor = sklearn.ensemble.RandomTreesEmbedding(
             n_estimators=self.n_estimators,

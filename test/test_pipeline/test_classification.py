@@ -251,7 +251,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             config._populate_values()
 
             # Restrict configurations which could take too long on travis-ci
-            restrictions = {'classifier:adaboost:n_estimators': 50,
+            restrictions = {'classifier:passive_aggressive:n_iter': 5,
+                            'classifier:sgd:n_iter': 5,
+                            'classifier:adaboost:n_estimators': 50,
                             'classifier:adaboost:max_depth': 1,
                             'preprocessor:kernel_pca:n_components': 10,
                             'preprocessor:kitchen_sinks:n_components': 50,
@@ -350,7 +352,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             'preprocessor:__choice__').choices), 13)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(147, len(hyperparameters))
+        self.assertEqual(148, len(hyperparameters))
 
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
