@@ -27,7 +27,8 @@ class AutoSklearnEstimator(BaseEstimator):
                  delete_output_folder_after_terminate=True,
                  shared_mode=False,
                  disable_evaluator_output=False,
-                 configuration_mode='SMAC'):
+                 get_smac_object_callback=None,
+                 smac_scenario_args=None):
         """
         Parameters
         ----------
@@ -132,16 +133,19 @@ class AutoSklearnEstimator(BaseEstimator):
               optimization/validation set, which would later on be used to build
               an ensemble.
             * ``'model'`` : do not save any model files
-
-        configuration_mode : ``SMAC`` or ``ROAR``
-            Defines the configuration mode as described in the paper
-            `Sequential Model-Based Optimization for General Algorithm
-            Configuration <http://aad.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_:
-
-            * ``SMAC`` (default): Sequential Model-based Algorithm
-              Configuration, which is a Bayesian optimization algorithm
-            * ``ROAR``: Random Online Aggressive Racing, which is basically
-              random search
+              
+        smac_scenario_args : dict, optional (None)
+            Additional arguments inserted into the scenario of SMAC. See the
+            `SMAC documentation <https://automl.github.io/SMAC3/stable/options.html?highlight=scenario#scenario>`_
+            for a list of available arguments.
+            
+        get_smac_object_callback : callable
+            Callback function to create an object of class
+            `smac.optimizer.smbo.SMBO <https://automl.github.io/SMAC3/stable/apidoc/smac.optimizer.smbo.html>`_.
+            The function must accept the arguments ``scenario_dict``, 
+            ``instances``, ``num_params``, ``runhistory``, ``seed`` and ``ta``.
+            This is an advanced feature. Use only if you are familiar with
+            `SMAC <https://automl.github.io/SMAC3/stable/index.html>`_.
 
         Attributes
         ----------
@@ -172,7 +176,8 @@ class AutoSklearnEstimator(BaseEstimator):
         self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
         self.shared_mode = shared_mode
         self.disable_evaluator_output = disable_evaluator_output
-        self.configuration_mode = configuration_mode
+        self.get_smac_object_callback = get_smac_object_callback
+        self.smac_scenario_args = smac_scenario_args
 
         self._automl = None
         super().__init__()
@@ -196,7 +201,6 @@ class AutoSklearnEstimator(BaseEstimator):
             backend=backend,
             time_left_for_this_task=self.time_left_for_this_task,
             per_run_time_limit=self.per_run_time_limit,
-            log_dir=backend.temporary_directory,
             initial_configurations_via_metalearning=
             self.initial_configurations_via_metalearning,
             ensemble_size=self.ensemble_size,
@@ -209,12 +213,11 @@ class AutoSklearnEstimator(BaseEstimator):
             exclude_preprocessors=self.exclude_preprocessors,
             resampling_strategy=self.resampling_strategy,
             resampling_strategy_arguments=self.resampling_strategy_arguments,
-            delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
-            delete_output_folder_after_terminate=
-            self.delete_output_folder_after_terminate,
             shared_mode=self.shared_mode,
-            configuration_mode=self.configuration_mode,
-            disable_evaluator_output=self.disable_evaluator_output)
+            get_smac_object_callback=self.get_smac_object_callback,
+            disable_evaluator_output=self.disable_evaluator_output,
+            smac_scenario_args=self.smac_scenario_args
+        )
 
         return automl
 
