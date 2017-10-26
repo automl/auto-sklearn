@@ -19,7 +19,7 @@ class LibLinearComponentTest(BaseClassificationComponentTest):
     res['default_digits_places'] = 2
     res["default_digits_iterative"] = -1
     res["default_digits_binary"] = 0.98907103825136611
-    res["default_digits_multilabel"] = 0.89539354612444322
+    res["default_digits_multilabel"] = 0.89889188078944637
     res["default_digits_multilabel_proba"] = 0.99999999999999989
 
     sk_mod = sklearn.svm.LinearSVC

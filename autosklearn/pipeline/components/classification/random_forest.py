@@ -14,7 +14,8 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
     def __init__(self, n_estimators, criterion, max_features,
                  max_depth, min_samples_split, min_samples_leaf,
                  min_weight_fraction_leaf, bootstrap, max_leaf_nodes,
-                 random_state=None, n_jobs=1, class_weight=None):
+                 min_impurity_decrease, random_state=None, n_jobs=1,
+                 class_weight=None):
         self.n_estimators = n_estimators
         self.criterion = criterion
         self.max_features = max_features
@@ -24,6 +25,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.bootstrap = bootstrap
         self.max_leaf_nodes = max_leaf_nodes
+        self.min_impurity_decrease = min_impurity_decrease
         self.random_state = random_state
         self.n_jobs = n_jobs
         self.class_weight = class_weight
@@ -64,6 +66,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
                 self.bootstrap = False
             if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
                 self.max_leaf_nodes = None
+            self.min_impurity_decrease = float(self.min_impurity_decrease)
 
             # initial fit of only increment trees
             self.estimator = RandomForestClassifier(
@@ -76,6 +79,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
                 min_weight_fraction_leaf=self.min_weight_fraction_leaf,
                 bootstrap=self.bootstrap,
                 max_leaf_nodes=self.max_leaf_nodes,
+                min_impurity_decrease=self.min_impurity_decrease,
                 random_state=self.random_state,
                 n_jobs=self.n_jobs,
                 class_weight=self.class_weight,
@@ -132,10 +136,11 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
             "min_samples_leaf", 1, 20, default_value=1)
         min_weight_fraction_leaf = UnParametrizedHyperparameter("min_weight_fraction_leaf", 0.)
         max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")
+        min_impurity_decrease = UnParametrizedHyperparameter('min_impurity_decrease', 0.0)
         bootstrap = CategoricalHyperparameter(
             "bootstrap", ["True", "False"], default_value="True")
         cs.add_hyperparameters([n_estimators, criterion, max_features,
                                 max_depth, min_samples_split, min_samples_leaf,
                                 min_weight_fraction_leaf, max_leaf_nodes,
-                                bootstrap])
+                                bootstrap, min_impurity_decrease])
         return cs

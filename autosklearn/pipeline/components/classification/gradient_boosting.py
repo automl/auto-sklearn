@@ -13,8 +13,9 @@ from autosklearn.pipeline.constants import *
 class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
     def __init__(self, loss, learning_rate, n_estimators, subsample,
                  min_samples_split, min_samples_leaf,
-                 min_weight_fraction_leaf, max_depth, max_features,
-                 max_leaf_nodes, init=None, random_state=None, verbose=0):
+                 min_weight_fraction_leaf, max_depth, criterion, max_features,
+                 max_leaf_nodes, min_impurity_decrease, random_state=None,
+                 verbose=0):
         self.loss = loss
         self.learning_rate = learning_rate
         self.n_estimators = n_estimators
@@ -23,9 +24,10 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.min_samples_leaf = min_samples_leaf
         self.min_weight_fraction_leaf = min_weight_fraction_leaf
         self.max_depth = max_depth
+        self.criterion=criterion
         self.max_features = max_features
         self.max_leaf_nodes = max_leaf_nodes
-        self.init = init
+        self.min_impurity_decrease = min_impurity_decrease
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
@@ -57,15 +59,12 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 self.max_depth = None
             else:
                 self.max_depth = int(self.max_depth)
-            num_features = X.shape[1]
-            max_features = int(
-                float(self.max_features) * (np.log(num_features) + 1))
-            # Use at most half of the features
-            max_features = max(1, min(int(X.shape[1] / 2), max_features))
+            self.max_features = float(self.max_features)
             if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
                 self.max_leaf_nodes = None
             else:
                 self.max_leaf_nodes = int(self.max_leaf_nodes)
+            self.min_impurity_decrease = float(self.min_impurity_decrease)
             self.verbose = int(self.verbose)
 
             self.estimator = sklearn.ensemble.GradientBoostingClassifier(
@@ -77,9 +76,9 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 min_samples_leaf=self.min_samples_leaf,
                 min_weight_fraction_leaf=self.min_weight_fraction_leaf,
                 max_depth=self.max_depth,
-                max_features=max_features,
+                criterion=self.criterion,
+                max_features=self.max_features,
                 max_leaf_nodes=self.max_leaf_nodes,
-                init=self.init,
                 random_state=self.random_state,
                 verbose=self.verbose,
                 warm_start=True,
@@ -136,21 +135,27 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             "n_estimators", 50, 500, default_value=100)
         max_depth = UniformIntegerHyperparameter(
             name="max_depth", lower=1, upper=10, default_value=3)
+        criterion = CategoricalHyperparameter(
+            'criterion', ['friedman_mse', 'mse', 'mae'],
+            default_value='mse')
         min_samples_split = UniformIntegerHyperparameter(
-            name="min_samples_split", lower=2, upper=20, default_value=2, log=False)
+            name="min_samples_split", lower=2, upper=20, default_value=2)
         min_samples_leaf = UniformIntegerHyperparameter(
-            name="min_samples_leaf", lower=1, upper=20, default_value=1, log=False)
+            name="min_samples_leaf", lower=1, upper=20, default_value=1)
         min_weight_fraction_leaf = UnParametrizedHyperparameter("min_weight_fraction_leaf", 0.)
         subsample = UniformFloatHyperparameter(
-                name="subsample", lower=0.01, upper=1.0, default_value=1.0, log=False)
+                name="subsample", lower=0.01, upper=1.0, default_value=1.0)
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default_value=1)
+            "max_features", 0.1, 1.0 , default_value=1)
         max_leaf_nodes = UnParametrizedHyperparameter(
             name="max_leaf_nodes", value="None")
+        min_impurity_decrease = UnParametrizedHyperparameter(
+            name='min_impurity_decrease', value=0.0)
         cs.add_hyperparameters([loss, learning_rate, n_estimators, max_depth,
-                                min_samples_split, min_samples_leaf,
+                                criterion, min_samples_split, min_samples_leaf,
                                 min_weight_fraction_leaf, subsample,
-                                max_features, max_leaf_nodes])
+                                max_features, max_leaf_nodes,
+                                min_impurity_decrease])
 
         return cs
 

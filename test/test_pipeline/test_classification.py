@@ -345,14 +345,14 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         conditions = cs.get_conditions()
 
         self.assertEqual(len(cs.get_hyperparameter(
-            'rescaling:__choice__').choices), 4)
+            'rescaling:__choice__').choices), 6)
         self.assertEqual(len(cs.get_hyperparameter(
             'classifier:__choice__').choices), 15)
         self.assertEqual(len(cs.get_hyperparameter(
             'preprocessor:__choice__').choices), 13)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(141, len(hyperparameters))
+        self.assertEqual(154, len(hyperparameters))
 
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
@@ -542,18 +542,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(84, cls_predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
-
-    @unittest.skip("test_check_random_state Not yet Implemented")
-    def test_check_random_state(self):
-        raise NotImplementedError()
-
-    @unittest.skip("test_validate_input_X Not yet Implemented")
-    def test_validate_input_X(self):
-        raise NotImplementedError()
-
-    @unittest.skip("test_validate_input_Y Not yet Implemented")
-    def test_validate_input_Y(self):
-        raise NotImplementedError()
 
     def test_set_params(self):
         pass

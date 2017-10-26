@@ -74,37 +74,26 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                  include=None, exclude=None, random_state=None,
                  init_params=None):
         self._output_dtype = np.float32
-        super(SimpleRegressionPipeline, self).__init__(
+        super().__init__(
             config=config, pipeline=pipeline,
             dataset_properties=dataset_properties,
             include=include, exclude=exclude, random_state=random_state,
             init_params=init_params)
 
-    def fit_transformer(self, X, Y, fit_params=None, init_params=None):
-        X, fit_params = super(SimpleRegressionPipeline, self).fit_transformer(
-            X, Y, fit_params=fit_params)
-        self.num_targets = 1 if len(Y.shape) == 1 else Y.shape[1]
-        return X, fit_params
-
-    def fit_estimator(self, X, y, fit_params=None):
+    def fit_estimator(self, X, y, **fit_params):
         self.y_max_ = np.nanmax(y)
         self.y_min_ = np.nanmin(y)
-        if fit_params is None:
-            fit_params = {}
         return super(SimpleRegressionPipeline, self).fit_estimator(
             X, y, **fit_params)
 
-    def iterative_fit(self, X, y, fit_params=None, n_iter=1):
+    def iterative_fit(self, X, y, n_iter=1, **fit_params):
         self.y_max_ = np.nanmax(y)
         self.y_min_ = np.nanmin(y)
-        if fit_params is None:
-            fit_params = {}
         return super(SimpleRegressionPipeline, self).iterative_fit(
             X, y, n_iter=n_iter, **fit_params)
 
     def predict(self, X, batch_size=None):
-        y = super(SimpleRegressionPipeline, self).\
-            predict(X, batch_size=batch_size)
+        y = super().predict(X, batch_size=batch_size)
         y[y > (2 * self.y_max_)] = 2 * self.y_max_
         if self.y_min_ < 0:
             y[y < (2 * self.y_min_)] = 2 * self.y_min_
@@ -176,16 +165,13 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             # This dataset is probaby dense
             dataset_properties['sparse'] = False
 
-        pipeline = self.steps
         cs = self._get_base_search_space(
             cs=cs, dataset_properties=dataset_properties,
-            exclude=exclude, include=include, pipeline=pipeline)
+            exclude=exclude, include=include, pipeline=self.steps)
 
         regressors = cs.get_hyperparameter('regressor:__choice__').choices
         preprocessors = cs.get_hyperparameter('preprocessor:__choice__').choices
-        available_regressors = pipeline[-1][1].get_available_components(
-            dataset_properties)
-        available_preprocessors = pipeline[-2][1].get_available_components(
+        available_regressors = self._final_estimator.get_available_components(
             dataset_properties)
 
         possible_default_regressor = copy.copy(list(

@@ -100,8 +100,8 @@ class BaseClassificationComponentTest(unittest.TestCase):
                 _test_classifier_iterative_fit(dataset="digits",
                                                classifier=self.module)
             self.assertAlmostEqual(self.res["default_digits_iterative"],
-                                   sklearn.metrics.accuracy_score(predictions,
-                                                                  targets),
+                                   sklearn.metrics.accuracy_score(targets,
+                                                                  predictions),
                                    places=self.res.get(
                                            "default_digits_iterative_places", 7))
 
@@ -115,8 +115,8 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                  dataset='digits',
                                  make_multilabel=True)
             self.assertAlmostEqual(self.res["default_digits_multilabel"],
-                                   sklearn.metrics.average_precision_score(
-                                       targets, predictions),
+                                   sklearn.metrics.precision_score(
+                                       targets, predictions, average='macro'),
                                    places=self.res.get(
                                            "default_digits_multilabel_places", 7))
 
@@ -130,8 +130,8 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                                make_multilabel=True)
             self.assertEqual(predictions.shape, ((50, 3)))
             self.assertAlmostEqual(self.res["default_digits_multilabel_proba"],
-                                   sklearn.metrics.average_precision_score(
-                                       targets, predictions),
+                                   sklearn.metrics.roc_auc_score(
+                                       targets, predictions, average='macro'),
                                    places=self.res.get(
                                            "default_digits_multilabel_proba_places", 7))
 

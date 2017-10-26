@@ -78,12 +78,11 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                  include=None, exclude=None, random_state=None,
                  init_params=None):
         self._output_dtype = np.int32
-        super(SimpleClassificationPipeline, self).__init__(
+        super().__init__(
             config, pipeline, dataset_properties, include, exclude,
             random_state, init_params)
 
     def fit_transformer(self, X, y, fit_params=None):
-        self.num_targets = 1 if len(y.shape) == 1 else y.shape[1]
 
         if fit_params is None:
             fit_params = {}
@@ -100,7 +99,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             if _fit_params is not None:
                 fit_params.update(_fit_params)
 
-        X, fit_params = super(SimpleClassificationPipeline, self).fit_transformer(
+        X, fit_params = super().fit_transformer(
             X, y, fit_params=fit_params)
 
         return X, fit_params
@@ -122,11 +121,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)
         """
         if batch_size is None:
-            Xt = X
-            for name, transform in self.steps[:-1]:
-                Xt = transform.transform(Xt)
-
-            return self.steps[-1][-1].predict_proba(Xt)
+            return super().predict_proba(X)
 
         else:
             if not isinstance(batch_size, int):
@@ -174,16 +169,13 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         if dataset_properties['target_type'] != 'classification':
             dataset_properties['target_type'] = 'classification'
 
-        pipeline = self.steps
         cs = self._get_base_search_space(
             cs=cs, dataset_properties=dataset_properties,
-            exclude=exclude, include=include, pipeline=pipeline)
+            exclude=exclude, include=include, pipeline=self.steps)
 
         classifiers = cs.get_hyperparameter('classifier:__choice__').choices
         preprocessors = cs.get_hyperparameter('preprocessor:__choice__').choices
-        available_classifiers = pipeline[-1][1].get_available_components(
-            dataset_properties)
-        available_preprocessors = pipeline[-2][1].get_available_components(
+        available_classifiers = self._final_estimator.get_available_components(
             dataset_properties)
 
         possible_default_classifier = copy.copy(list(

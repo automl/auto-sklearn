@@ -14,34 +14,25 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self, n_estimators, criterion, min_samples_leaf,
                  min_samples_split, max_features,
-                 max_leaf_nodes_or_max_depth="max_depth",
                  bootstrap=False, max_leaf_nodes=None, max_depth="None",
                  min_weight_fraction_leaf=0.0,
                  oob_score=False, n_jobs=1, random_state=None, verbose=0):
 
         self.n_estimators = int(n_estimators)
         self.estimator_increment = 10
-        if criterion not in ("mse", ):
-            raise ValueError("'criterion' is not in ('mse', ): "
-                             "%s" % criterion)
+        if criterion not in ("mse", "friedman_mse", "mae"):
+            raise ValueError("'criterion' is not in ('mse', 'friedman_mse', "
+                             "'mae'): %s" % criterion)
         self.criterion = criterion
 
-        if max_leaf_nodes_or_max_depth == "max_depth":
-            self.max_leaf_nodes = None
-            if max_depth == "None" or max_depth is None:
-                self.max_depth = None
-            else:
-                self.max_depth = int(max_depth)
-                # if use_max_depth == "True":
-                #    self.max_depth = int(max_depth)
-                #elif use_max_depth == "False":
-                #    self.max_depth = None
-        else:
-            if max_leaf_nodes == "None" or max_leaf_nodes is None:
-                self.max_leaf_nodes = None
-            else:
-                self.max_leaf_nodes = int(max_leaf_nodes)
+        if max_depth == "None" or max_depth is None:
             self.max_depth = None
+        else:
+            self.max_depth = int(max_depth)
+        if max_leaf_nodes == "None" or max_leaf_nodes is None:
+            self.max_leaf_nodes = None
+        else:
+            self.max_leaf_nodes = int(max_leaf_nodes)
 
         self.min_samples_leaf = int(min_samples_leaf)
         self.min_samples_split = int(min_samples_split)
@@ -105,11 +96,13 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
         cs = ConfigurationSpace()
 
         n_estimators = Constant("n_estimators", 100)
-        criterion = Constant("criterion", "mse")
+        criterion = CategoricalHyperparameter("criterion",
+                                              ["mse", 'friedman_mse', 'mae'])
         max_features = UniformFloatHyperparameter(
             "max_features", 0.5, 5, default_value=1)
 
         max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
+        max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")
 
         min_samples_split = UniformIntegerHyperparameter(
             "min_samples_split", 2, 20, default_value=2)
@@ -121,7 +114,8 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
             "bootstrap", ["True", "False"], default_value="False")
 
         cs.add_hyperparameters([n_estimators, criterion, max_features, max_depth,
-                                min_samples_split, min_samples_leaf,
-                                min_weight_fraction_leaf, bootstrap])
+                                max_leaf_nodes, min_samples_split,
+                                min_samples_leaf, min_weight_fraction_leaf,
+                                bootstrap])
 
         return cs

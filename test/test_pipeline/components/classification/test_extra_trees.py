@@ -18,8 +18,8 @@ class ExtraTreesComponentTest(BaseClassificationComponentTest):
     res["default_digits"] = 0.8986035215543412
     res["default_digits_iterative"] = 0.81785063752276865
     res["default_digits_binary"] = 0.99392835458409234
-    res["default_digits_multilabel"] = 0.82229416703109792
-    res["default_digits_multilabel_proba"] = 0.99401797442008899
+    res["default_digits_multilabel"] = 0.99746415200960636
+    res["default_digits_multilabel_proba"] = 0.99628313054140716
 
     sk_mod = sklearn.ensemble.ExtraTreesClassifier
     module = ExtraTreesClassifier

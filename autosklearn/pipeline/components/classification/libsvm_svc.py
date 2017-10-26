@@ -72,7 +72,6 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
                                          random_state=self.random_state,
                                          cache_size=cache_size,
                                          decision_function_shape='ovr')
-                                         #probability=True)
         self.estimator.fit(X, Y)
         return self
 
@@ -84,11 +83,7 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
     def predict_proba(self, X):
         if self.estimator is None:
             raise NotImplementedError()
-        # return self.estimator.predict_proba(X)
         decision = self.estimator.decision_function(X)
-        #if len(self.estimator.classes_) > 2:
-        #    decision = _ovr_decision_function(decision < 0, decision,
-        #                                      len(self.estimator.classes_))
         return softmax(decision)
 
 
@@ -112,7 +107,7 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         kernel = CategoricalHyperparameter(name="kernel",
                                            choices=["rbf", "poly", "sigmoid"],
                                            default_value="rbf")
-        degree = UniformIntegerHyperparameter("degree", 1, 5, default_value=3)
+        degree = UniformIntegerHyperparameter("degree", 2, 5, default_value=3)
         gamma = UniformFloatHyperparameter("gamma", 3.0517578125e-05, 8,
                                            log=True, default_value=0.1)
         # TODO this is totally ad-hoc
@@ -120,7 +115,7 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         # probability is no hyperparameter, but an argument to the SVM algo
         shrinking = CategoricalHyperparameter("shrinking", ["True", "False"],
                                               default_value="True")
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4,
+        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-3,
                                          log=True)
         # cache size is not a hyperparameter, but an argument to the program!
         max_iter = UnParametrizedHyperparameter("max_iter", -1)
