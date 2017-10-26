@@ -112,10 +112,10 @@ class BasePipeline(Pipeline):
                                             **fit_params)
 
     def estimator_supports_iterative_fit(self):
-        return self.steps._final_estimator.estimator_supports_iterative_fit()
+        return self._final_estimator.estimator_supports_iterative_fit()
 
     def configuration_fully_fitted(self):
-        return self.steps._final_estimator.configuration_fully_fitted()
+        return self._final_estimator.configuration_fully_fitted()
 
     def predict(self, X, batch_size=None):
         """Predict the classes using the selected model.

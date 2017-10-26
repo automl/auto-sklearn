@@ -674,7 +674,7 @@ class AutoMLSMBO(object):
 
         X_cfg, Y_cfg = smac.solver.rh2EPM.transform(smac.solver.runhistory)
 
-        if not smac.solver.runhistory.empty():
+        if len(X_cfg) > 0:
             # Update costs by normalization
             dataset_minimum = np.min(Y_cfg[:, 0])
             Y_cfg[:, 0] = 1 - ((1. - Y_cfg[:, 0]) /
