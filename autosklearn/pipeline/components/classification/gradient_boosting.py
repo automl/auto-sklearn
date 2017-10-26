@@ -14,7 +14,8 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
     def __init__(self, loss, learning_rate, n_estimators, subsample,
                  min_samples_split, min_samples_leaf,
                  min_weight_fraction_leaf, max_depth, criterion, max_features,
-                 max_leaf_nodes, random_state=None, verbose=0):
+                 max_leaf_nodes, min_impurity_decrease, random_state=None,
+                 verbose=0):
         self.loss = loss
         self.learning_rate = learning_rate
         self.n_estimators = n_estimators
@@ -26,6 +27,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.criterion=criterion
         self.max_features = max_features
         self.max_leaf_nodes = max_leaf_nodes
+        self.min_impurity_decrease = min_impurity_decrease
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
@@ -62,6 +64,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                 self.max_leaf_nodes = None
             else:
                 self.max_leaf_nodes = int(self.max_leaf_nodes)
+            self.min_impurity_decrease = float(self.min_impurity_decrease)
             self.verbose = int(self.verbose)
 
             self.estimator = sklearn.ensemble.GradientBoostingClassifier(
@@ -146,10 +149,13 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             "max_features", 0.1, 1.0 , default_value=1)
         max_leaf_nodes = UnParametrizedHyperparameter(
             name="max_leaf_nodes", value="None")
+        min_impurity_decrease = UnParametrizedHyperparameter(
+            name='min_impurity_decrease', value=0.0)
         cs.add_hyperparameters([loss, learning_rate, n_estimators, max_depth,
                                 criterion, min_samples_split, min_samples_leaf,
                                 min_weight_fraction_leaf, subsample,
-                                max_features, max_leaf_nodes])
+                                max_features, max_leaf_nodes,
+                                min_impurity_decrease])
 
         return cs
 

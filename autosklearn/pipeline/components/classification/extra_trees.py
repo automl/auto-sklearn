@@ -13,9 +13,8 @@ from autosklearn.pipeline.implementations.util import convert_multioutput_multic
 class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
 
     def __init__(self, n_estimators, criterion, min_samples_leaf,
-                 min_samples_split,  max_features, max_leaf_nodes_or_max_depth="max_depth",
-                 bootstrap=False, max_leaf_nodes=None, max_depth="None",
-                 min_weight_fraction_leaf=0.0,
+                 min_samples_split,  max_features, bootstrap, max_leaf_nodes,
+                 max_depth, min_weight_fraction_leaf, min_impurity_decrease,
                  oob_score=False, n_jobs=1, random_state=None, verbose=0,
                  class_weight=None):
 
@@ -26,22 +25,14 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
                              "%s" % criterion)
         self.criterion = criterion
 
-        if max_leaf_nodes_or_max_depth == "max_depth":
-            self.max_leaf_nodes = None
-            if max_depth == "None" or max_depth is None:
-                self.max_depth = None
-            else:
-                self.max_depth = int(max_depth)
-            #if use_max_depth == "True":
-            #    self.max_depth = int(max_depth)
-            #elif use_max_depth == "False":
-            #    self.max_depth = None
-        else:
-            if max_leaf_nodes == "None" or max_leaf_nodes is None:
-                self.max_leaf_nodes = None
-            else:
-                self.max_leaf_nodes = int(max_leaf_nodes)
+        if max_depth == "None" or max_depth is None:
             self.max_depth = None
+        else:
+            self.max_depth = int(max_depth)
+        if max_leaf_nodes == "None" or max_leaf_nodes is None:
+            self.max_leaf_nodes = None
+        else:
+            self.max_leaf_nodes = int(max_leaf_nodes)
 
         self.min_samples_leaf = int(min_samples_leaf)
         self.min_samples_split = int(min_samples_split)
@@ -52,6 +43,9 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
             self.bootstrap = True
         elif bootstrap == "False":
             self.bootstrap = False
+
+        self.min_weight_fraction_leaf = float(min_weight_fraction_leaf)
+        self.min_impurity_decrease = float(min_impurity_decrease)
 
         self.oob_score = oob_score
         self.n_jobs = int(n_jobs)
@@ -87,6 +81,8 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
                                  bootstrap=self.bootstrap,
                                  max_features=max_features,
                                  max_leaf_nodes=self.max_leaf_nodes,
+                                 min_weight_fraction_leaf=self.min_weight_fraction_leaf,
+                                 min_impurity_decrease=self.min_impurity_decrease,
                                  oob_score=self.oob_score,
                                  n_jobs=self.n_jobs,
                                  verbose=self.verbose,
@@ -145,12 +141,15 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
             "min_samples_split", 2, 20, default_value=2)
         min_samples_leaf = UniformIntegerHyperparameter(
             "min_samples_leaf", 1, 20, default_value=1)
-        min_weight_fraction_leaf = Constant('min_weight_fraction_leaf', 0.)
+        min_weight_fraction_leaf = UnParametrizedHyperparameter('min_weight_fraction_leaf', 0.)
+        max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")
+        min_impurity_decrease = UnParametrizedHyperparameter('min_impurity_decrease', 0.0)
 
         bootstrap = CategoricalHyperparameter(
             "bootstrap", ["True", "False"], default_value="False")
         cs.add_hyperparameters([n_estimators, criterion, max_features,
                                 max_depth, min_samples_split, min_samples_leaf,
-                                min_weight_fraction_leaf, bootstrap])
+                                min_weight_fraction_leaf, max_leaf_nodes,
+                                min_impurity_decrease, bootstrap])
 
         return cs

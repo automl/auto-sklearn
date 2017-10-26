@@ -11,10 +11,9 @@ from autosklearn.pipeline.constants import *
 
 class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
     def __init__(self, n_estimators, criterion, min_samples_leaf,
-                 min_samples_split, max_features,
-                 max_leaf_nodes_or_max_depth="max_depth",
-                 bootstrap=False, max_leaf_nodes=None, max_depth="None",
-                 oob_score=False, n_jobs=1, random_state=None, verbose=0):
+                 min_samples_split, max_features, bootstrap, max_leaf_nodes,
+                 max_depth, min_impurity_decrease, oob_score=False, n_jobs=1,
+                 random_state=None, verbose=0):
 
         self.n_estimators = int(n_estimators)
         self.estimator_increment = 10
@@ -23,23 +22,20 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
                              "'mae): %s" % criterion)
         self.criterion = criterion
 
-        if max_leaf_nodes_or_max_depth == "max_depth":
-            self.max_leaf_nodes = None
-            if max_depth == "None" or max_depth is None:
-                self.max_depth = None
-            else:
-                self.max_depth = int(max_depth)
-        else:
-            if max_leaf_nodes == "None" or max_leaf_nodes is None:
-                self.max_leaf_nodes = None
-            else:
-                self.max_leaf_nodes = int(max_leaf_nodes)
+        if max_depth == "None" or max_depth is None:
             self.max_depth = None
+        else:
+            self.max_depth = int(max_depth)
+        if max_leaf_nodes == "None" or max_leaf_nodes is None:
+            self.max_leaf_nodes = None
+        else:
+            self.max_leaf_nodes = int(max_leaf_nodes)
 
         self.min_samples_leaf = int(min_samples_leaf)
         self.min_samples_split = int(min_samples_split)
 
         self.max_features = float(max_features)
+        self.min_impurity_decrease = float(min_impurity_decrease)
 
         if bootstrap == "True":
             self.bootstrap = True
@@ -66,19 +62,15 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
             self.estimator = None
 
         if self.estimator is None:
-            num_features = X.shape[1]
-            max_features = int(
-                float(self.max_features) * (np.log(num_features) + 1))
-            # Use at most half of the features
-            max_features = max(1, min(int(X.shape[1] / 2), max_features))
             self.estimator = ETR(n_estimators=n_iter,
                                  criterion=self.criterion,
                                  max_depth=self.max_depth,
                                  min_samples_split=self.min_samples_split,
                                  min_samples_leaf=self.min_samples_leaf,
                                  bootstrap=self.bootstrap,
-                                 max_features=max_features,
+                                 max_features=self.max_features,
                                  max_leaf_nodes=self.max_leaf_nodes,
+                                 min_impurity_decrease=self.min_impurity_decrease,
                                  oob_score=self.oob_score,
                                  n_jobs=self.n_jobs,
                                  verbose=self.verbose,
@@ -126,47 +118,25 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
         criterion = CategoricalHyperparameter("criterion",
                                               ['mse', 'friedman_mse', 'mae'])
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default_value=1)
+            "max_features", 0.1, 1.0, default_value=1)
 
         max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
+        max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")
 
         min_samples_split = UniformIntegerHyperparameter(
             "min_samples_split", 2, 20, default_value=2)
         min_samples_leaf = UniformIntegerHyperparameter(
             "min_samples_leaf", 1, 20, default_value=1)
-
-        # Unparametrized, we use min_samples as regularization
-        # max_leaf_nodes_or_max_depth = UnParametrizedHyperparameter(
-        # name="max_leaf_nodes_or_max_depth", value="max_depth")
-        # CategoricalHyperparameter("max_leaf_nodes_or_max_depth",
-        # choices=["max_leaf_nodes", "max_depth"], default_value="max_depth")
-        # min_weight_fraction_leaf = UniformFloatHyperparameter(
-        #    "min_weight_fraction_leaf", 0.0, 0.1)
-        # max_leaf_nodes = UnParametrizedHyperparameter(name="max_leaf_nodes",
-        #                                              value="None")
+        min_impurity_decrease = UnParametrizedHyperparameter(
+            'min_impurity_decrease', 0.0
+        )
 
         bootstrap = CategoricalHyperparameter(
             "bootstrap", ["True", "False"], default_value="False")
 
         cs.add_hyperparameters([n_estimators, criterion, max_features,
-                                max_depth, min_samples_split, min_samples_leaf,
+                                max_depth, max_leaf_nodes, min_samples_split,
+                                min_samples_leaf, min_impurity_decrease,
                                 bootstrap])
-
-        # Conditions
-        # Not applicable because max_leaf_nodes is no legal value of the parent
-        #cond_max_leaf_nodes_or_max_depth = \
-        #    EqualsCondition(child=max_leaf_nodes,
-        #                    parent=max_leaf_nodes_or_max_depth,
-        #                    value="max_leaf_nodes")
-        #cond2_max_leaf_nodes_or_max_depth = \
-        #    EqualsCondition(child=use_max_depth,
-        #                    parent=max_leaf_nodes_or_max_depth,
-        #                    value="max_depth")
-
-        #cond_max_depth = EqualsCondition(child=max_depth, parent=use_max_depth,
-        #value="True")
-        #cs.add_condition(cond_max_leaf_nodes_or_max_depth)
-        #cs.add_condition(cond2_max_leaf_nodes_or_max_depth)
-        #cs.add_condition(cond_max_depth)
 
         return cs

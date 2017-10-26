@@ -10,14 +10,14 @@ class ExtraTreesComponentTest(BaseRegressionComponentTest):
     __test__ = True
 
     res = dict()
-    res["default_boston"] = 0.77812069925853511
-    res["default_boston_iterative"] = 0.77812069925853511
-    res["default_boston_sparse"] = 0.33175043290947837
-    res["default_boston_iterative_sparse"] = 0.33175043290947837
-    res["default_diabetes"] = 0.43359660671062761
-    res["default_diabetes_iterative"] = 0.43359660671062761
-    res["default_diabetes_sparse"] = 0.28040986328860906
-    res["default_diabetes_iterative_sparse"] = 0.28040986328860906
+    res["default_boston"] = 0.84600084385083418
+    res["default_boston_iterative"] = 0.84600084385083418
+    res["default_boston_sparse"] = 0.4241336980285072
+    res["default_boston_iterative_sparse"] = 0.4241336980285072
+    res["default_diabetes"] = 0.38869684680884398
+    res["default_diabetes_iterative"] = 0.38869684680884398
+    res["default_diabetes_sparse"] = 0.25345808769763623
+    res["default_diabetes_iterative_sparse"] = 0.25345808769763623
 
     sk_mod = sklearn.ensemble.ExtraTreesRegressor
 

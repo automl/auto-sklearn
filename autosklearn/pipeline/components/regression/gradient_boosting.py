@@ -14,8 +14,8 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
     def __init__(self, loss, learning_rate, n_estimators, subsample,
                  min_samples_split, min_samples_leaf,
                  min_weight_fraction_leaf, max_depth, max_features,
-                 max_leaf_nodes, alpha=None, init=None, random_state=None,
-                 verbose=0):
+                 max_leaf_nodes, min_impurity_decrease, alpha=None, init=None,
+                 random_state=None, verbose=0):
         self.loss = loss
         self.learning_rate = learning_rate
         self.n_estimators = n_estimators
@@ -26,6 +26,7 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
         self.max_depth = max_depth
         self.max_features = max_features
         self.max_leaf_nodes = max_leaf_nodes
+        self.min_impurity_decrease = min_impurity_decrease
         self.alpha = alpha
         self.init = init
         self.random_state = random_state
@@ -65,6 +66,7 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
                 self.max_leaf_nodes = None
             else:
                 self.max_leaf_nodes = int(self.max_leaf_nodes)
+            self.min_impurity_decrease = float(self.min_impurity_decrease)
             if self.alpha is not None:
                 self.alpha = float(self.alpha)
             self.verbose = int(self.verbose)
@@ -80,6 +82,7 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
                 max_depth=self.max_depth,
                 max_features=self.max_features,
                 max_leaf_nodes=self.max_leaf_nodes,
+                min_impurity_decrease=self.min_impurity_decrease,
                 init=self.init,
                 random_state=self.random_state,
                 verbose=self.verbose,
@@ -139,13 +142,15 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
             "max_features", 0.1, 1.0, default_value=1)
         max_leaf_nodes = UnParametrizedHyperparameter(
             name="max_leaf_nodes", value="None")
+        min_impurity_decrease = UnParametrizedHyperparameter(
+            name='min_impurity_decrease', value=0.0)
         alpha = UniformFloatHyperparameter(
             "alpha", lower=0.75, upper=0.99, default_value=0.9)
 
         cs.add_hyperparameters([loss, learning_rate, n_estimators, max_depth,
                                 min_samples_split, min_samples_leaf,
                                 min_weight_fraction_leaf, subsample, max_features,
-                                max_leaf_nodes, alpha])
+                                max_leaf_nodes, min_impurity_decrease, alpha])
 
         cs.add_condition(InCondition(alpha, loss, ['huber', 'quantile']))
         return cs
