@@ -15,10 +15,10 @@ class RandomForestComponentTest(BaseClassificationComponentTest):
     res["default_iris_iterative"] = 0.95999999999999996
     res["default_iris_proba"] = 0.12735301219200268
     res["default_iris_sparse"] = 0.85999999999999999
-    res["default_digits"] = 0.88585306618093507
-    res["default_digits_iterative"] = 0.78870673952641168
-    res["default_digits_binary"] = 0.98664238008500305
-    res["default_digits_multilabel"] = 0.89737735528772711
+    res["default_digits"] = 0.88281724347298118
+    res["default_digits_iterative"] = 0.77231329690346084
+    res["default_digits_binary"] = 0.98907103825136611
+    res["default_digits_multilabel"] = 0.99232171389942414
     res["default_digits_multilabel_proba"] = 0.99514488225492048
 
     sk_mod = sklearn.ensemble.RandomForestClassifier

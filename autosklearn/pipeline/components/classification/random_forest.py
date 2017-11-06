@@ -54,10 +54,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
             self.min_samples_leaf = int(self.min_samples_leaf)
             self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
             if self.max_features not in ("sqrt", "log2", "auto"):
-                num_features = X.shape[1]
-                max_features = int(float(self.max_features) * (np.log(num_features) + 1))
-                # Use at most half of the features
-                max_features = max(1, min(int(X.shape[1] / 2), max_features))
+                max_features = int(X.shape[1] ** float(self.max_features))
             else:
                 max_features = self.max_features
             if self.bootstrap == "True":
@@ -127,8 +124,14 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         n_estimators = Constant("n_estimators", 100)
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default_value="gini")
+
+        # The maximum number of features used in the forest is calculated as m^max_features, where
+        # m is the total number of features, and max_features is the hyperparameter specified below.
+        # The default is 0.5, which yields sqrt(m) features as max_features in the estimator. This
+        # corresponds with Geurts' heuristic.
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default_value=1)
+            "max_features", 0., 1., default_value=0.5)
+        
         max_depth = UnParametrizedHyperparameter("max_depth", "None")
         min_samples_split = UniformIntegerHyperparameter(
             "min_samples_split", 2, 20, default_value=2)
