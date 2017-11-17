@@ -93,6 +93,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                 y, self.configuration['classifier:__choice__'],
                 self.configuration['preprocessor:__choice__'],
                 {}, {})
+            _init_params.update(self._init_params)
             self.set_hyperparameters(configuration=self.configuration,
                                      init_params=_init_params)
 
