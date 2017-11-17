@@ -9,7 +9,7 @@ class NormalizerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
         # Use custom implementation because sklearn implementation cannot
         # handle float32 input matrix
         from autosklearn.pipeline.implementations.Normalizer import Normalizer
-        self.preprocessor = Normalizer()
+        self.preprocessor = Normalizer(copy=False)
 
     @staticmethod
     def get_properties(dataset_properties=None):

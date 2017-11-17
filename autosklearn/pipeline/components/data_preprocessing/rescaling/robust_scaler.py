@@ -11,7 +11,11 @@ from autosklearn.pipeline.components.base import \
 class RobustScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
     def __init__(self, q_min, q_max, random_state):
         from sklearn.preprocessing import RobustScaler
-        self.preprocessor = RobustScaler(quantile_range=(q_min, q_max))
+        self.q_min = q_min
+        self.q_max = q_max
+        self.preprocessor = RobustScaler(
+            quantile_range=(self.q_min, self.q_max), copy=False,
+        )
 
     @staticmethod
     def get_properties(dataset_properties=None):

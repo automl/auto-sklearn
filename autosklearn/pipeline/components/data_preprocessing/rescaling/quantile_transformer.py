@@ -12,9 +12,12 @@ from autosklearn.pipeline.components.base import \
 class QuantileTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
     def __init__(self, n_quantiles, output_distribution, random_state):
         from sklearn.preprocessing import QuantileTransformer
+        self.n_quantiles = n_quantiles
+        self.output_distribution = output_distribution
         self.preprocessor = QuantileTransformer(
             n_quantiles=n_quantiles,
             output_distribution=output_distribution,
+            copy=False
         )
 
     @staticmethod
