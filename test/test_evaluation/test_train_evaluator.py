@@ -10,7 +10,7 @@ import unittest.mock
 from ConfigSpace import Configuration
 import numpy as np
 from sklearn.model_selection import StratifiedKFold, ShuffleSplit
-from smac.tae.execute_ta_run import StatusType
+from smac.tae.execute_ta_run import StatusType, TAEAbortException
 
 from autosklearn.evaluation.util import get_last_result
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, \
@@ -43,6 +43,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
+        pipeline_mock.get_additional_run_info.return_value = None
         output_dir = os.path.join(os.getcwd(), '.test_holdout')
 
         configuration = unittest.mock.Mock(spec=Configuration)
@@ -100,6 +101,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.configuration_fully_fitted.side_effect = SideEffect().configuration_fully_fitted
         pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         output_dir = os.path.join(os.getcwd(), '.test_iterative_holdout')
 
@@ -174,6 +176,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
+        pipeline_mock.get_additional_run_info.return_value = None
         output_dir = os.path.join(os.getcwd(), '.test_iterative_holdout_interuption')
 
         configuration = unittest.mock.Mock(spec=Configuration)
@@ -230,6 +233,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
+        pipeline_mock.get_additional_run_info.return_value = None
         output_dir = os.path.join(os.getcwd(), '.test_iterative_holdout_not_iterative')
 
         configuration = unittest.mock.Mock(spec=Configuration)
@@ -269,6 +273,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
+        pipeline_mock.get_additional_run_info.return_value = None
         output_dir = os.path.join(os.getcwd(), '.test_cv')
 
         configuration = unittest.mock.Mock(spec=Configuration)
@@ -311,6 +316,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
+        pipeline_mock.get_additional_run_info.return_value = None
         output_dir = os.path.join(os.getcwd(), '.test_partial_cv')
         D = get_binary_classification_datamanager()
         D.name = 'test'
@@ -366,6 +372,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.configuration_fully_fitted.side_effect = SideEffect().configuration_fully_fitted
         pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         output_dir = os.path.join(os.getcwd(), '.test_iterative_partial_cv')
 
@@ -548,6 +555,47 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         for i in range(7):
             self.assertEqual(0.9, Y_optimization_pred[i][1])
+
+    @unittest.mock.patch.object(TrainEvaluator, 'file_output')
+    @unittest.mock.patch.object(TrainEvaluator, '_partial_fit_and_predict')
+    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_fit_predict_and_loss_additional_run_info(
+        self, mock, backend_mock, _partial_fit_and_predict_mock,
+            file_output_mock,
+    ):
+        D = get_binary_classification_datamanager()
+        mock.side_effect = lambda **kwargs: mock
+        _partial_fit_and_predict_mock.return_value = (
+            [[0.1, 0.9]] * 7, [[0.1, 0.9]] * 7, [[0.1, 0.9]] * 7, {'a': 5}
+        )
+        file_output_mock.return_value = None, None
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        queue_ = multiprocessing.Queue()
+        kfold = ShuffleSplit(random_state=1, n_splits=1)
+
+        evaluator = TrainEvaluator(
+            D, backend_mock, queue_,
+            configuration=configuration,
+            cv=kfold, output_y_hat_optimization=False,
+            metric=accuracy)
+        evaluator.Y_targets[0] = [1] * 7
+        evaluator.fit_predict_and_loss(iterative=False)
+
+        kfold = ShuffleSplit(random_state=1, n_splits=2)
+        evaluator = TrainEvaluator(
+            D, backend_mock, queue_,
+            configuration=configuration,
+            cv=kfold, output_y_hat_optimization=False,
+            metric=accuracy)
+        evaluator.Y_targets[0] = [1] * 7
+
+        self.assertRaises(
+            TAEAbortException,
+            evaluator.fit_predict_and_loss,
+            iterative=False
+        )
 
     def test_get_results(self):
         backend_mock = unittest.mock.Mock(spec=backend.Backend)

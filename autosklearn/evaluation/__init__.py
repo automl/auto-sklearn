@@ -10,7 +10,8 @@ import traceback
 import pynisher
 from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold, \
     StratifiedKFold
-from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException
+from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException, \
+    TAEAbortException
 from smac.tae.execute_func import AbstractTAFunc
 from ConfigSpace import Configuration
 
@@ -212,6 +213,12 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             cost = WORST_POSSIBLE_RESULT
             additional_run_info = {'error': 'Memout (used more than %d MB).' %
                                             self.memory_limit}
+
+        elif obj.exit_status is TAEAbortException:
+            status = StatusType.ABORT
+            cost = WORST_POSSIBLE_RESULT
+            additional_run_info = {'error': 'Your configuration of '
+                                            'auto-sklearn does not work!'}
 
         else:
             try:

@@ -60,6 +60,8 @@ class BasePipeline(Pipeline):
             self.random_state = check_random_state(random_state)
         super().__init__(steps=self.steps)
 
+        self._additional_run_info = {}
+
     def fit(self, X, y, **fit_params):
         """Fit the selected algorithm to the training data.
 
@@ -96,10 +98,10 @@ class BasePipeline(Pipeline):
             fit_params = {}
         fit_params = {key.replace(":", "__"): value for key, value in
                       fit_params.items()}
-        X, fit_params = self._fit(X, y, **fit_params)
+        Xt, fit_params = self._fit(X, y, **fit_params)
         if fit_params is None:
             fit_params = {}
-        return X, fit_params
+        return Xt, fit_params
 
     def fit_estimator(self, X, y, **fit_params):
         fit_params = {key.replace(":", "__"): value for key, value in
@@ -377,4 +379,12 @@ class BasePipeline(Pipeline):
 
     def _get_estimator_hyperparameter_name(self):
         raise NotImplementedError()
+
+    def get_additional_run_info(self):
+        """Allows retrieving additional run information from the pipeline.
+
+        Can be overridden by subclasses to return additional information to
+        the optimization algorithm.
+        """
+        return self._additional_run_info
 

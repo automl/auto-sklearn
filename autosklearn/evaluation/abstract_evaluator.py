@@ -51,6 +51,9 @@ class MyDummyClassifier(DummyClassifier):
     def estimator_supports_iterative_fit(self):
         return False
 
+    def get_additional_run_info(self):
+        return None
+
 
 class MyDummyRegressor(DummyRegressor):
     def __init__(self, configuration, random_state, init_params=None):
@@ -78,6 +81,9 @@ class MyDummyRegressor(DummyRegressor):
 
     def estimator_supports_iterative_fit(self):
         return False
+
+    def get_additional_run_info(self):
+        return None
 
 
 class AbstractEvaluator(object):
@@ -191,7 +197,7 @@ class AbstractEvaluator(object):
         return err
 
     def finish_up(self, loss, opt_pred, valid_pred, test_pred,
-                  file_output=True, final_call=True):
+                  additional_run_info=None, file_output=True, final_call=True):
         """This function does everything necessary after the fitting is done:
 
         * predicting
@@ -211,15 +217,15 @@ class AbstractEvaluator(object):
         if loss_ is not None:
             return self.duration, loss_, self.seed, additional_run_info_
 
-        num_run = str(self.num_run).zfill(5)
         if isinstance(loss, dict):
             loss_ = loss
             loss = loss_[self.metric.name]
         else:
             loss_ = {}
 
-        additional_run_info = {metric_name: value for metric_name, value in
-                               loss_.items()}
+        additional_run_info = {} if additional_run_info is None else additional_run_info
+        for metric_name, value in loss_.items():
+            additional_run_info[metric_name] = value
         additional_run_info['duration'] = self.duration
         additional_run_info['num_run'] = self.num_run
 

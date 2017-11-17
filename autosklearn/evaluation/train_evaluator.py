@@ -1,6 +1,7 @@
 import json
 
 import numpy as np
+from smac.tae.execute_ta_run import TAEAbortException
 import sklearn.model_selection
 
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
@@ -83,14 +84,31 @@ class TrainEvaluator(AbstractEvaluator):
             Y_optimization_pred = [None] * self.cv_folds
             Y_valid_pred = [None] * self.cv_folds
             Y_test_pred = [None] * self.cv_folds
-
+            additional_run_info = None
 
             y = _get_y_array(self.Y_train, self.task_type)
+            # TODO: mention that no additional run info is possible in this
+            # case! -> maybe remove full CV from the train evaluator anyway and
+            # make the user implement this!
             for i, (train_split, test_split) in enumerate(self.cv.split(
                     self.X_train, y)):
 
-                opt_pred, valid_pred, test_pred = self._partial_fit_and_predict(
-                    i, train_indices=train_split, test_indices=test_split)
+                opt_pred, valid_pred, test_pred, additional_run_info = (
+                    self._partial_fit_and_predict(
+                       i, train_indices=train_split, test_indices=test_split
+                    )
+                )
+
+                if (
+                    additional_run_info is not None
+                    and len(additional_run_info) > 0
+                    and i > 0
+                ):
+                    raise TAEAbortException(
+                        'Found additional run info "%s" in fold %d, '
+                        'but cannot handle additional run info if fold >= 1.' %
+                        (additional_run_info, i)
+                    )
 
                 Y_optimization_pred[i] = opt_pred
                 Y_valid_pred[i] = valid_pred
@@ -133,8 +151,15 @@ class TrainEvaluator(AbstractEvaluator):
                 # actually a new model
                 self._added_empty_model = True
 
-            self.finish_up(loss, Y_optimization_pred, Y_valid_pred, Y_test_pred,
-                           file_output=True, final_call=True)
+            self.finish_up(
+                loss,
+                Y_optimization_pred,
+                Y_valid_pred,
+                Y_test_pred,
+                additional_run_info=additional_run_info,
+                file_output=True,
+                final_call=True
+            )
 
     def partial_fit_predict_and_loss(self, fold, iterative=False):
         if fold > self.cv_folds:
@@ -157,9 +182,14 @@ class TrainEvaluator(AbstractEvaluator):
                 fold, train_indices=train_split, test_indices=test_split,
                 iterative=iterative)
         else:
-            opt_pred, valid_pred, test_pred = self._partial_fit_and_predict(
-                fold, train_indices=train_split, test_indices=test_split,
-                iterative=iterative)
+            opt_pred, valid_pred, test_pred, additional_run_info = (
+                self._partial_fit_and_predict(
+                    fold,
+                    train_indices=train_split,
+                    test_indices=test_split,
+                    iterative=iterative,
+                )
+            )
             loss = self._loss(self.Y_targets[fold], opt_pred)
 
             if self.cv_folds > 1:
@@ -201,14 +231,21 @@ class TrainEvaluator(AbstractEvaluator):
                         self.model = model
 
                     loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
+                    additional_run_info = model.get_additional_run_info()
 
                     if model.configuration_fully_fitted():
                         final_call = True
                     else:
                         final_call = False
-                    self.finish_up(loss, Y_optimization_pred, Y_valid_pred,
-                                   Y_test_pred, file_output=file_output,
-                                   final_call=final_call)
+                    self.finish_up(
+                        loss,
+                        Y_optimization_pred,
+                        Y_valid_pred,
+                        Y_test_pred,
+                        additional_run_info=additional_run_info,
+                        file_output=file_output,
+                        final_call=final_call,
+                    )
                     n_iter *= 2
 
                 return
@@ -225,9 +262,16 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_optimization_pred, Y_valid_pred, Y_test_pred = self._predict(
                     model=model, train_indices=train_indices, test_indices=test_indices)
                 loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
-                self.finish_up(loss, Y_optimization_pred, Y_valid_pred,
-                               Y_test_pred, file_output=file_output,
-                               final_call=True)
+                additional_run_info = model.get_additional_run_info()
+                self.finish_up(
+                    loss,
+                    Y_optimization_pred,
+                    Y_valid_pred,
+                    Y_test_pred,
+                    additional_run_info=additional_run_info,
+                    file_output=file_output,
+                    final_call=True
+                )
                 return
 
         else:
@@ -240,8 +284,14 @@ class TrainEvaluator(AbstractEvaluator):
 
             train_indices, test_indices = self.indices[fold]
             self.Y_targets[fold] = self.Y_train[test_indices]
-            return self._predict(model=model, train_indices=train_indices,
-                                 test_indices=test_indices)
+
+            opt_pred, valid_pred, test_pred = self._predict(
+                model=model,
+                train_indices=train_indices,
+                test_indices=test_indices,
+            )
+            additional_run_info = model.get_additional_run_info()
+            return opt_pred, valid_pred, test_pred, additional_run_info
 
     def subsample_indices(self, train_indices):
         if self.subsample is not None:
