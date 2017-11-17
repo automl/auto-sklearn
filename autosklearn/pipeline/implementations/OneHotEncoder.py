@@ -6,7 +6,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import check_array
 
 
-def _transform_selected(X, transform, selected="all", copy=True):
+def _transform_selected(X, transform, selected="all", copy=False):
     """Apply a transform function to portion of selected features
 
     Parameters
@@ -53,7 +53,19 @@ def _transform_selected(X, transform, selected="all", copy=True):
         X_not_sel = X[:, ind[not_sel]]
 
         if sparse.issparse(X_sel) or sparse.issparse(X_not_sel):
-            return sparse.hstack((X_sel, X_not_sel), format='csr')
+            # This is pretty memory-intense, making the memory usage for OpenML
+            # task 146810 go over 3GB
+            X_not_sel = sparse.coo_matrix(X_not_sel, dtype=np.float32)
+            del X
+            gc.collect()
+            X_tmp = sparse.hstack((X_sel, X_not_sel))
+            del X_not_sel
+            del X_sel
+            gc.collect()
+            #X_tmp_csr = X_tmp.tocsr()
+            #print(X_tmp_csr.data.nbytes, X_tmp_csr.indices.nbytes,
+            #      X_tmp_csr.indptr.nbytes)
+            return X_tmp.tocsr()
         else:
             return np.hstack((X_sel, X_not_sel))
 
@@ -166,7 +178,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
             X[~np.isfinite(X)] = 2
 
         X = check_array(X, accept_sparse='csc', force_all_finite=False,
-                        dtype=int)
+                        dtype=np.int32)
 
         if X.min() < 0:
             raise ValueError("X needs to contain only non-negative integers.")
@@ -242,20 +254,20 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
                 column_indices.extend(column_indices_)
             data = np.ones(X.data.size)
         else:
-            column_indices = (X + indices[:-1]).ravel()
+            column_indices = (X + indices[:-1]).ravel().astype(np.int32)
             row_indices = np.repeat(np.arange(n_samples, dtype=np.int32),
                                     n_features)
-            data = np.ones(n_samples * n_features)
+            data = np.ones(n_samples * n_features, dtype=np.int32)
 
         out = sparse.coo_matrix((data, (row_indices, column_indices)),
                                 shape=(n_samples, indices[-1]),
-                                dtype=self.dtype).tocsc()
+                                dtype=np.int32).tocsc()
 
         mask = np.array(out.sum(axis=0)).ravel() != 0
         active_features = np.where(mask)[0]
         out = out[:, active_features]
         self.active_features_ = active_features
-        return out.tocsr() if self.sparse else out.toarray()
+        return out.tocoo() if self.sparse else out.toarray()
 
     def fit_transform(self, X, y=None):
         """Fit OneHotEncoder to X, then transform X.
@@ -264,7 +276,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
         efficient. See fit for the parameters, transform for the return value.
         """
         return _transform_selected(X, self._fit_transform,
-                                   self.categorical_features, copy=True)
+                                   self.categorical_features, copy=False)
 
     def _transform(self, X):
         """Asssumes X contains only categorical features."""
@@ -280,7 +292,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
             X[~np.isfinite(X)] = 2
 
         X = check_array(X, accept_sparse='csc', force_all_finite=False,
-                        dtype=int)
+                        dtype=np.int32)
         if X.min() < 0:
             raise ValueError("X needs to contain only non-negative integers.")
         n_samples, n_features = X.shape
@@ -342,16 +354,16 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
                 column_indices.extend(column_indices_)
             data = np.ones(X.data.size)
         else:
-            column_indices = (X + indices[:-1]).ravel()
+            column_indices = (X + indices[:-1]).ravel().astype(np.int32)
             row_indices = np.repeat(np.arange(n_samples, dtype=np.int32),
                                     n_features)
-            data = np.ones(n_samples * n_features)
+            data = np.ones(n_samples * n_features, dtype=np.int32)
         out = sparse.coo_matrix((data, (row_indices, column_indices)),
                                 shape=(n_samples, indices[-1]),
-                                dtype=self.dtype).tocsc()
+                                dtype=np.int32).tocsc()
 
         out = out[:, self.active_features_]
-        return out.tocsr() if self.sparse else out.toarray()
+        return out.tocoo() if self.sparse else out.toarray()
 
     def transform(self, X):
         """Transform X using one-hot encoding.
@@ -367,4 +379,4 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
             Transformed input.
         """
         return _transform_selected(X, self._transform,
-                                   self.categorical_features, copy=True)
+                                   self.categorical_features, copy=False)
