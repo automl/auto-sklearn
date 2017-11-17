@@ -99,7 +99,7 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
         criterion = CategoricalHyperparameter("criterion",
                                               ["mse", 'friedman_mse', 'mae'])
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default_value=1)
+            "max_features", 0.1, 1.0, default_value=1.0)
 
         max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
         max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")

@@ -57,11 +57,7 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
         from sklearn.ensemble import ExtraTreesClassifier
         from sklearn.feature_selection import SelectFromModel
 
-        num_features = X.shape[1]
-        max_features = int(
-            float(self.max_features) * (np.log(num_features) + 1))
-        # Use at most half of the features
-        max_features = max(1, min(int(X.shape[1] / 2), max_features))
+        max_features = int(X.shape[1] ** float(self.max_features))
         estimator = ExtraTreesClassifier(
             n_estimators=self.n_estimators,
             criterion=self.criterion,
@@ -107,7 +103,8 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
         n_estimators = Constant("n_estimators", 100)
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default_value="gini")
-        max_features = UniformFloatHyperparameter("max_features", 0.5, 5, default_value=1)
+        max_features = UniformFloatHyperparameter("max_features", 0, 1,
+                                                  default_value=0.5)
 
         max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
         max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")
