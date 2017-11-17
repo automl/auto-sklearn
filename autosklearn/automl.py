@@ -61,7 +61,6 @@ class AutoML(BaseEstimator):
                  backend,
                  time_left_for_this_task,
                  per_run_time_limit,
-                 log_dir=None,
                  initial_configurations_via_metalearning=25,
                  ensemble_size=1,
                  ensemble_nbest=1,
@@ -76,21 +75,18 @@ class AutoML(BaseEstimator):
                  exclude_preprocessors=None,
                  resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
-                 delete_tmp_folder_after_terminate=False,
-                 delete_output_folder_after_terminate=False,
                  shared_mode=False,
                  precision=32,
-                 max_iter_smac=None,
-                 acquisition_function='EI',
                  disable_evaluator_output=False,
-                 configuration_mode='SMAC'):
+                 get_smac_object_callback=None,
+                 smac_scenario_args=None,
+                 ):
         super(AutoML, self).__init__()
         self._backend = backend
         #self._tmp_dir = tmp_dir
         #self._output_dir = output_dir
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
-        #self._log_dir = log_dir if log_dir is not None else self._tmp_dir
         self._initial_configurations_via_metalearning = \
             initial_configurations_via_metalearning
         self._ensemble_size = ensemble_size
@@ -107,16 +103,11 @@ class AutoML(BaseEstimator):
         self._resampling_strategy = resampling_strategy
         self._resampling_strategy_arguments = resampling_strategy_arguments \
             if resampling_strategy_arguments is not None else {}
-        self._max_iter_smac = max_iter_smac
-        #self.delete_tmp_folder_after_terminate = \
-        #    delete_tmp_folder_after_terminate
-        #self.delete_output_folder_after_terminate = \
-        #    delete_output_folder_after_terminate
         self._shared_mode = shared_mode
         self.precision = precision
-        self.acquisition_function = acquisition_function
         self._disable_evaluator_output = disable_evaluator_output
-        self._configuration_mode = configuration_mode
+        self._get_smac_object_callback = get_smac_object_callback
+        self._smac_scenario_args = smac_scenario_args
 
         self._datamanager = None
         self._dataset_name = None
@@ -319,11 +310,6 @@ class AutoML(BaseEstimator):
                 not 'folds' in self._resampling_strategy_arguments:
             self._resampling_strategy_arguments['folds'] = 5
 
-        acquisition_functions = ['EI', 'EIPS']
-        if self.acquisition_function not in acquisition_functions:
-            raise ValueError('Illegal acquisition %s: Must be one of %s.' %
-                             (self.acquisition_function, acquisition_functions))
-
         self._backend._make_internals_directory()
         if self._keep_models:
             try:
@@ -423,32 +409,33 @@ class AutoML(BaseEstimator):
             else:
                 per_run_time_limit = self._per_run_time_limit
 
-            _proc_smac = AutoMLSMBO(config_space=self.configuration_space,
-                                    dataset_name=self._dataset_name,
-                                    backend=self._backend,
-                                    total_walltime_limit=time_left_for_smac,
-                                    func_eval_time_limit=per_run_time_limit,
-                                    memory_limit=self._ml_memory_limit,
-                                    data_memory_limit=self._data_memory_limit,
-                                    watcher=self._stopwatch,
-                                    start_num_run=num_run,
-                                    num_metalearning_cfgs=self._initial_configurations_via_metalearning,
-                                    config_file=configspace_path,
-                                    smac_iters=self._max_iter_smac,
-                                    seed=self._seed,
-                                    metadata_directory=self._metadata_directory,
-                                    metric=self._metric,
-                                    resampling_strategy=self._resampling_strategy,
-                                    resampling_strategy_args=self._resampling_strategy_arguments,
-                                    acquisition_function=self.acquisition_function,
-                                    shared_mode=self._shared_mode,
-                                    include_estimators=self._include_estimators,
-                                    exclude_estimators=self._exclude_estimators,
-                                    include_preprocessors=self._include_preprocessors,
-                                    exclude_preprocessors=self._exclude_preprocessors,
-                                    disable_file_output=self._disable_evaluator_output,
-                                    configuration_mode=self._configuration_mode)
-            self.runhistory_, self.trajectory_, self.fANOVA_input_ = \
+            _proc_smac = AutoMLSMBO(
+                config_space=self.configuration_space,
+                dataset_name=self._dataset_name,
+                backend=self._backend,
+                total_walltime_limit=time_left_for_smac,
+                func_eval_time_limit=per_run_time_limit,
+                memory_limit=self._ml_memory_limit,
+                data_memory_limit=self._data_memory_limit,
+                watcher=self._stopwatch,
+                start_num_run=num_run,
+                num_metalearning_cfgs=self._initial_configurations_via_metalearning,
+                config_file=configspace_path,
+                seed=self._seed,
+                metadata_directory=self._metadata_directory,
+                metric=self._metric,
+                resampling_strategy=self._resampling_strategy,
+                resampling_strategy_args=self._resampling_strategy_arguments,
+                shared_mode=self._shared_mode,
+                include_estimators=self._include_estimators,
+                exclude_estimators=self._exclude_estimators,
+                include_preprocessors=self._include_preprocessors,
+                exclude_preprocessors=self._exclude_preprocessors,
+                disable_file_output=self._disable_evaluator_output,
+                get_smac_object_callback=self._get_smac_object_callback,
+                smac_scenario_args=self._smac_scenario_args,
+            )
+            self.runhistory_, self.trajectory_ = \
                 _proc_smac.run_smbo()
             trajectory_filename = os.path.join(
                 self._backend.get_smac_output_directory(self._seed) + '_run1',

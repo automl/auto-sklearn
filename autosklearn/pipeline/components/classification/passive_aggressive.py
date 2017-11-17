@@ -22,25 +22,34 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, y):
-        self.iterative_fit(X, y, n_iter=1, refit=True)
+        self.iterative_fit(X, y, n_iter=2, refit=True)
         while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=1)
+            self.iterative_fit(X, y, n_iter=2)
 
         return self
 
-    def iterative_fit(self, X, y, n_iter=1, refit=False):
+    def iterative_fit(self, X, y, n_iter=2, refit=False):
         from sklearn.linear_model.passive_aggressive import \
             PassiveAggressiveClassifier
+
+        # Need to fit at least two iterations, otherwise early stopping will not
+        # work because we cannot determine whether the algorithm actually
+        # converged. The only way of finding this out is if the sgd spends less
+        # iterations than max_iter. If max_iter == 1, it has to spend at least
+        # one iteration and will always spend at least one iteration, so we
+        # cannot know about convergence.
+        n_iter = max(n_iter, 2)
 
         if refit:
             self.estimator = None
 
         if self.estimator is None:
-
+            call_fit = True
             self.estimator = PassiveAggressiveClassifier(
                 C=self.C,
                 fit_intercept=self.fit_intercept,
-                max_iter=1,
+                max_iter=n_iter,
+                tol=self.tol,
                 loss=self.loss,
                 shuffle=True,
                 random_state=self.random_state,
@@ -48,6 +57,8 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
                 average=self.average,
             )
             self.classes_ = np.unique(y.astype(int))
+        else:
+            call_fit = False
 
         # Fallback for multilabel classification
         if len(y.shape) > 1 and y.shape[1] > 1:
@@ -58,13 +69,29 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
             self.estimator.fit(X, y)
             self.fully_fit_ = True
         else:
-            # In the first iteration, there is not yet an intercept
-
-            self.estimator.max_iter += n_iter
-            self.estimator.fit(X, y)
-            if self.estimator.max_iter >= 50 or \
-                            self.estimator.max_iter > self.estimator.n_iter_:
-                self.fully_fit_ = True
+            if call_fit:
+                self.estimator.fit(X, y)
+            else:
+                self.estimator.max_iter += n_iter
+                self.estimator._validate_params()
+                lr = "pa1" if self.estimator.loss == "hinge" else "pa2"
+                self.estimator._partial_fit(
+                    X, y,
+                    alpha=1.0,
+                    C=self.estimator.C,
+                    loss="hinge",
+                    learning_rate=lr,
+                    max_iter=n_iter,
+                    classes=None,
+                    sample_weight=None,
+                    coef_init=None,
+                    intercept_init=None
+                )
+                if (
+                    self.estimator._max_iter >= 1000
+                    or n_iter > self.estimator.n_iter_
+                ):
+                    self.fully_fit_ = True
 
         return self
 
@@ -102,14 +129,14 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        C = UniformFloatHyperparameter("C", 1e-5, 10, 1, log=True)
+        C = UniformFloatHyperparameter("C", 1e-5, 10, 1.0, log=True)
         fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
-        loss = CategoricalHyperparameter("loss",
-                                         ["hinge", "squared_hinge"],
-                                         default_value="hinge")
+        loss = CategoricalHyperparameter(
+            "loss", ["hinge", "squared_hinge"], default_value="hinge"
+        )
 
         tol = UniformFloatHyperparameter("tol", 1e-4, 1e-1, default_value=1e-3,
-                                              log=True)
+                                         log=True)
         average = CategoricalHyperparameter('average', [False, True])
 
         cs = ConfigurationSpace()

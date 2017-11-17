@@ -8,14 +8,14 @@ class SGDComponentTest(BaseRegressionComponentTest):
     __test__ = True
 
     res = dict()
-    res["default_boston"] = -7.76508935746e+30
-    res["default_boston_iterative"] = -7.76508935746e+30
-    res["default_boston_sparse"] = -8.4314088748670574e+30
-    res["default_boston_iterative_sparse"] = -8.4314088748670574e+30
-    res["default_diabetes"] = 0.28217342878579466
-    res["default_diabetes_iterative"] = 0.28217342878579466
-    res["default_diabetes_sparse"] = 0.099141102939435899
-    res["default_diabetes_iterative_sparse"] = 0.099141102939435899
+    res["default_boston"] = -4.19960551863e+26
+    res["default_boston_iterative"] = -4.19960551863e+26
+    res["default_boston_sparse"] = -3.4078908871512885e+27
+    res["default_boston_iterative_sparse"] = -3.4078908871512885e+27
+    res["default_diabetes"] = 0.31775104100149354
+    res["default_diabetes_iterative"] = 0.31775104100149354
+    res["default_diabetes_sparse"] = 0.10849537848918589
+    res["default_diabetes_iterative_sparse"] = 0.10849537848918589
 
     sk_mod = sklearn.linear_model.SGDRegressor
 
