@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.sparse
 
 import autosklearn.pipeline.implementations.OneHotEncoder
 
@@ -35,7 +36,8 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
 
         self.preprocessor = autosklearn.pipeline.implementations.OneHotEncoder\
             .OneHotEncoder(minimum_fraction=self.minimum_fraction,
-                           categorical_features=categorical_features)
+                           categorical_features=categorical_features,
+                           sparse=True)
 
         return self.preprocessor.fit_transform(X)
 
@@ -44,11 +46,16 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
         return self
 
     def fit_transform(self, X, y=None):
-        return self._fit(X, y)
+        is_sparse = scipy.sparse.issparse(X)
+        X = self._fit(X)
+        if is_sparse:
+            return X
+        elif isinstance(X, np.ndarray):
+            return X
+        else:
+            return X.toarray()
 
     def transform(self, X):
-        import scipy.sparse
-
         is_sparse = scipy.sparse.issparse(X)
         if self.preprocessor is None:
             raise NotImplementedError()
@@ -64,22 +71,15 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': '1Hot',
                 'name': 'One Hot Encoder',
-                'handles_missing_values': True,
-                'handles_nominal_values': True,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': False,
-                'prefers_data_normalized': False,
                 'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
-                'is_deterministic': True,
                 # TODO find out of this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (INPUT,),
-                'preferred_dtype': None}
+                'output': (INPUT,),}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
