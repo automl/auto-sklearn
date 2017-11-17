@@ -1,4 +1,3 @@
-import glob
 import json
 import os
 import time
@@ -9,16 +8,19 @@ import numpy as np
 import pynisher
 
 from smac.facade.smac_facade import SMAC
+from smac.optimizer.objective import average_cost
+from smac.runhistory.runhistory import RunHistory
+from smac.runhistory.runhistory2epm import RunHistory2EPM4Cost
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_ta_run import StatusType
-from smac.runhistory.runhistory2epm import RunHistory2EPM4Cost
+
 
 import autosklearn.metalearning
 from autosklearn.constants import *
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
-from autosklearn.evaluation import ExecuteTaFuncWithQueue
+from autosklearn.evaluation import ExecuteTaFuncWithQueue, WORST_POSSIBLE_RESULT
 from autosklearn.util import get_logger
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.metafeatures.metafeatures import \
@@ -446,6 +448,7 @@ class AutoMLSMBO(object):
             'run_obj': 'quality',
             'shared-model': self.shared_mode,
             'wallclock_limit': total_walltime_limit,
+            'cost_for_crash': WORST_POSSIBLE_RESULT,
         }
         if self.smac_scenario_args is not None:
             for arg in [
@@ -456,6 +459,7 @@ class AutoMLSMBO(object):
                 'output-dir',
                 'run_obj',
                 'shared-model',
+                'cost_for_crash',
             ]:
                 if arg in self.smac_scenario_args:
                     self.logger.warning('Cannot override scenario argument %s, '
@@ -475,12 +479,14 @@ class AutoMLSMBO(object):
                     )
             scenario_dict.update(self.smac_scenario_args)
 
+        runhistory = RunHistory(aggregate_func=average_cost)
         smac_args = {
             'scenario_dict': scenario_dict,
             'seed': seed,
             'ta': ta,
             'backend': self.backend,
             'metalearning_configurations': metalearning_configurations,
+            'runhistory': runhistory,
         }
         if self.get_smac_object_callback is not None:
             smac = self.get_smac_object_callback(**smac_args)
