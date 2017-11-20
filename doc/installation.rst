@@ -105,3 +105,18 @@ Possible other solutions (not tested):
 
 * virtual machine
 * docker image
+
+
+Docker image
+============
+To pull the Docker image for *auto-sklearn* from `Docker hub<https://hub.docker.com/r/mfeurer/auto-sklearn/>`_:
+
+.. code:: bash
+
+    docker pull mfeurer/auto-sklearn
+
+To start a Jupyter notebook, you could run e.g.:
+
+.. code:: bash
+
+    docker run -it -v $PWD:/opt/nb -p 8888:8888 mfeurer/auto-sklearn /bin/bash -c "mkdir -p /opt/nb && jupyter notebook --notebook-dir=/opt/nb --ip='0.0.0.0' --port=8888 --no-browser --allow-root"
