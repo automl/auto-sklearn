@@ -32,10 +32,12 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None, refit=False):
-        self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight,
+        n_iter = 2
+        self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight,
                            refit=True)
         while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight)
+            n_iter *= 2
+            self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight)
         return self
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
@@ -82,10 +84,11 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
                 class_weight=self.class_weight,
                 warm_start=True)
 
-        tmp = self.estimator
-        tmp.n_estimators += n_iter
-        tmp.fit(X, y, sample_weight=sample_weight)
-        self.estimator = tmp
+        self.estimator.n_estimators += n_iter
+        self.estimator.n_estimators = min(self.estimator.n_estimators,
+                                          self.n_estimators)
+
+        self.estimator.fit(X, y, sample_weight=sample_weight)
         return self
 
     def configuration_fully_fitted(self):

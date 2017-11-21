@@ -9,7 +9,7 @@ class RidgeComponentTest(BaseRegressionComponentTest):
     __test__ = True
 
     res = dict()
-    res["default_boston"] = 0.70337994943813897
+    res["default_boston"] = 0.70337988575176991
     res["default_boston_iterative"] = None
     res["default_boston_sparse"] = 0.1086535440527433
     res["default_boston_iterative_sparse"] = None

@@ -1,12 +1,10 @@
 import numpy as np
 from scipy import sparse
-
 from sklearn.base import BaseEstimator, TransformerMixin
-
 from sklearn.utils import check_array
 
 
-def _transform_selected(X, transform, selected="all", copy=False):
+def _transform_selected(X, transform, selected="all", copy=True):
     """Apply a transform function to portion of selected features
 
     Parameters
@@ -55,17 +53,7 @@ def _transform_selected(X, transform, selected="all", copy=False):
         if sparse.issparse(X_sel) or sparse.issparse(X_not_sel):
             # This is pretty memory-intense, making the memory usage for OpenML
             # task 146810 go over 3GB
-            X_not_sel = sparse.coo_matrix(X_not_sel, dtype=np.float32)
-            del X
-            gc.collect()
-            X_tmp = sparse.hstack((X_sel, X_not_sel))
-            del X_not_sel
-            del X_sel
-            gc.collect()
-            #X_tmp_csr = X_tmp.tocsr()
-            #print(X_tmp_csr.data.nbytes, X_tmp_csr.indices.nbytes,
-            #      X_tmp_csr.indptr.nbytes)
-            return X_tmp.tocsr()
+            return sparse.hstack((X_sel, X_not_sel), format='csr')
         else:
             return np.hstack((X_sel, X_not_sel))
 
@@ -188,38 +176,26 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
         if self.minimum_fraction is not None:
             do_not_replace_by_other = list()
             for column in range(X.shape[1]):
-                do_not_replace_by_other.append(list())
+                do_not_replace_by_other.append(set())
 
                 if sparse.issparse(X):
                     indptr_start = X.indptr[column]
                     indptr_end = X.indptr[column + 1]
-                    unique = np.unique(X.data[indptr_start:indptr_end])
+                    unique, counts = np.unique(
+                        X.data[indptr_start:indptr_end], return_counts=True,
+                    )
                     colsize = indptr_end - indptr_start
                 else:
-                    unique = np.unique(X[:, column])
+                    unique, counts = np.unique(
+                        X[:, column], return_counts=True,
+                    )
                     colsize = X.shape[0]
 
-                for unique_value in unique:
-                    if np.isfinite(unique_value):
-                        if sparse.issparse(X):
-                            indptr_start = X.indptr[column]
-                            indptr_end = X.indptr[column + 1]
-                            count = np.nansum(unique_value ==
-                                              X.data[indptr_start:indptr_end])
-                        else:
-                            count = np.nansum(unique_value == X[:, column])
-                    else:
-                        if sparse.issparse(X):
-                            indptr_start = X.indptr[column]
-                            indptr_end = X.indptr[column + 1]
-                            count = np.nansum(~np.isfinite(
-                                X.data[indptr_start:indptr_end]))
-                        else:
-                            count = np.nansum(~np.isfinite(X[:, column]))
+                for unique_value, count in zip(unique, counts):
 
                     fraction = float(count) / colsize
                     if fraction >= self.minimum_fraction:
-                        do_not_replace_by_other[-1].append(unique_value)
+                        do_not_replace_by_other[-1].add(unique_value)
 
                 for unique_value in unique:
                     if unique_value not in do_not_replace_by_other[-1]:
@@ -267,7 +243,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
         active_features = np.where(mask)[0]
         out = out[:, active_features]
         self.active_features_ = active_features
-        return out.tocoo() if self.sparse else out.toarray()
+        return out.tocsr() if self.sparse else out.toarray()
 
     def fit_transform(self, X, y=None):
         """Fit OneHotEncoder to X, then transform X.
@@ -276,7 +252,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
         efficient. See fit for the parameters, transform for the return value.
         """
         return _transform_selected(X, self._fit_transform,
-                                   self.categorical_features, copy=False)
+                                   self.categorical_features, copy=True)
 
     def _transform(self, X):
         """Asssumes X contains only categorical features."""
@@ -363,7 +339,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
                                 dtype=np.int32).tocsc()
 
         out = out[:, self.active_features_]
-        return out.tocoo() if self.sparse else out.toarray()
+        return out.tocsr() if self.sparse else out.toarray()
 
     def transform(self, X):
         """Transform X using one-hot encoding.
@@ -379,4 +355,4 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
             Transformed input.
         """
         return _transform_selected(X, self._transform,
-                                   self.categorical_features, copy=False)
+                                   self.categorical_features, copy=True)

@@ -49,9 +49,11 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
         self.estimator = None
 
     def fit(self, X, y, refit=False):
-        self.iterative_fit(X, y, n_iter=1, refit=refit)
+        n_iter = 2
+        self.iterative_fit(X, y, n_iter=n_iter, refit=refit)
         while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=1)
+            n_iter *= 2
+            self.iterative_fit(X, y, n_iter=n_iter)
 
         return self
 
@@ -78,6 +80,8 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
                                  warm_start=True)
         else:
             self.estimator.n_estimators += n_iter
+            self.estimator.n_estimators = min(self.estimator.n_estimators,
+                                              self.n_estimators)
 
         self.estimator.fit(X, y,)
 

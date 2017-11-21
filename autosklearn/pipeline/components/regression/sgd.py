@@ -86,6 +86,7 @@ class SGD(AutoSklearnRegressionAlgorithm):
             self.estimator.fit(X, Y_scaled)
         else:
             self.estimator.max_iter += n_iter
+            self.estimator.max_iter = min(self.estimator.max_iter, 1000)
             Y_scaled = self.scaler.transform(y.reshape((-1, 1))).ravel()
             self.estimator._validate_params()
             self.estimator._partial_fit(

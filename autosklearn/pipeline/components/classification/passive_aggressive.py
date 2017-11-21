@@ -22,9 +22,11 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, y):
-        self.iterative_fit(X, y, n_iter=2, refit=True)
+        n_iter = 2
+        self.iterative_fit(X, y, n_iter=n_iter, refit=True)
         while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=2)
+            n_iter *= 2
+            self.iterative_fit(X, y, n_iter=n_iter)
 
         return self
 
@@ -38,7 +40,6 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
         # iterations than max_iter. If max_iter == 1, it has to spend at least
         # one iteration and will always spend at least one iteration, so we
         # cannot know about convergence.
-        n_iter = max(n_iter, 2)
 
         if refit:
             self.estimator = None
@@ -73,6 +74,8 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
                 self.estimator.fit(X, y)
             else:
                 self.estimator.max_iter += n_iter
+                self.estimator.max_iter = min(self.estimator.max_iter,
+                                              1000)
                 self.estimator._validate_params()
                 lr = "pa1" if self.estimator.loss == "hinge" else "pa2"
                 self.estimator._partial_fit(
@@ -135,7 +138,7 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
             "loss", ["hinge", "squared_hinge"], default_value="hinge"
         )
 
-        tol = UniformFloatHyperparameter("tol", 1e-4, 1e-1, default_value=1e-3,
+        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4,
                                          log=True)
         average = CategoricalHyperparameter('average', [False, True])
 

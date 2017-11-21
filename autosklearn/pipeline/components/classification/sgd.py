@@ -30,10 +30,12 @@ class SGD(AutoSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None):
-        self.iterative_fit(X, y, n_iter=2, sample_weight=sample_weight,
+        n_iter = 2
+        self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight,
                            refit=True)
         while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=2, sample_weight=sample_weight)
+            n_iter *= 2
+            self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight)
 
         return self
 
@@ -46,7 +48,6 @@ class SGD(AutoSklearnClassificationAlgorithm):
         # iterations than max_iter. If max_iter == 1, it has to spend at least
         # one iteration and will always spend at least one iteration, so we
         # cannot know about convergence.
-        n_iter = max(n_iter, 2)
 
         if refit:
             self.estimator = None
@@ -148,8 +149,8 @@ class SGD(AutoSklearnClassificationAlgorithm):
         l1_ratio = UniformFloatHyperparameter(
             "l1_ratio", 1e-9, 1,  log=True, default_value=0.15)
         fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
-        tol = UniformFloatHyperparameter("tol", 1e-4, 1e-1, log=True,
-                                         default_value=1e-3)
+        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, log=True,
+                                         default_value=1e-4)
         epsilon = UniformFloatHyperparameter(
             "epsilon", 1e-5, 1e-1, default_value=1e-4, log=True)
         learning_rate = CategoricalHyperparameter(
