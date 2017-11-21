@@ -202,8 +202,13 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self._test_configurations(configurations_space=cs, make_sparse=True)
 
     def test_configurations_categorical_data(self):
-        cs = SimpleClassificationPipeline(dataset_properties={'sparse': True}).\
-            get_hyperparameter_search_space()
+        cs = SimpleClassificationPipeline(
+            dataset_properties={'sparse': False},
+            include={
+                'preprocessor': ['no_preprocessing'],
+                'classifier': ['sgd', 'gradient_boosting']
+            }
+        ).get_hyperparameter_search_space()
 
         categorical = [True, True, True, False, False, True, True, True,
                        False, True, True, True, True, True, True, True,
@@ -220,7 +225,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         data = {'X_train': X_train, 'Y_train': Y_train,
                 'X_test': X_test, 'Y_test': Y_test}
 
-        init_params = {'one_hot_encoding:categorical_features': categorical}
+        init_params = {
+            'categorical_encoding:one_hot_encoding:categorical_features':
+                categorical
+        }
 
         self._test_configurations(configurations_space=cs, make_sparse=True,
                                   data=data, init_params=init_params)
@@ -246,6 +254,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         limit = 3072 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
+        print(configurations_space)
+
         for i in range(10):
             config = configurations_space.sample_configuration()
             config._populate_values()
@@ -264,7 +274,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'preprocessor:polynomial:degree': 2,
                             'classifier:lda:n_components': 10,
                             'preprocessor:nystroem_sampler:n_components': 50,
-                            'preprocessor:feature_agglomeration:n_clusters': 2}
+                            'preprocessor:feature_agglomeration:n_clusters': 2,
+                            'classifier:gradient_boosting:max_depth': 2,
+                            'classifier:gradient_boosting:n_estimators': 50}
 
             for restrict_parameter in restrictions:
                 restrict_to = restrictions[restrict_parameter]
@@ -272,6 +284,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                         config[restrict_parameter] is not None:
                     config._values[restrict_parameter] = restrict_to
 
+            print(config)
 
             if data is None:
                 X_train, Y_train, X_test, Y_test = get_dataset(
@@ -285,11 +298,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             init_params_ = copy.deepcopy(init_params)
             cls = SimpleClassificationPipeline(random_state=1,
                                                dataset_properties=dataset_properties,
-                                               init_params=init_params_)
-            cls.set_hyperparameters(config)
+                                               init_params=init_params_,)
+            cls.set_hyperparameters(config, init_params=init_params_)
             try:
                 cls.fit(X_train, Y_train, )
-                predictions = cls.predict(X_test)
+                predictions = cls.predict(X_test.copy())
+                predictions = cls.predict_proba(X_test)
             except MemoryError as e:
                 continue
             except ValueError as e:

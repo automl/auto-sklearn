@@ -16,8 +16,8 @@ from autosklearn.pipeline.components.data_preprocessing.balancing.balancing impo
     Balancing
 from autosklearn.pipeline.components.data_preprocessing.imputation.imputation \
     import Imputation
-from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding\
-    .one_hot_encoding import OneHotEncoder
+from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding \
+     import OHEChoice
 from autosklearn.pipeline.components import feature_preprocessing as \
     feature_preprocessing_components
 from autosklearn.pipeline.components.data_preprocessing.variance_threshold.variance_threshold \
@@ -287,7 +287,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         # Add the always active preprocessing components
 
         steps.extend(
-            [["one_hot_encoding", OneHotEncoder()],
+            [["categorical_encoding", OHEChoice(default_dataset_properties)],
              ["imputation", Imputation()],
              ["variance_threshold", VarianceThreshold()],
              ["rescaling",
