@@ -168,6 +168,7 @@ def get_smac_object(
     backend,
     metalearning_configurations,
     runhistory,
+    run_id,
 ):
     scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
     scenario = Scenario(scenario_dict)
@@ -196,6 +197,7 @@ def get_smac_object(
         tae_runner=ta,
         initial_configurations=initial_configurations,
         runhistory=runhistory,
+        run_id=run_id,
     )
 
 
@@ -489,6 +491,7 @@ class AutoMLSMBO(object):
             'backend': self.backend,
             'metalearning_configurations': metalearning_configurations,
             'runhistory': runhistory,
+            'run_id': seed,
         }
         if self.get_smac_object_callback is not None:
             smac = self.get_smac_object_callback(**smac_args)

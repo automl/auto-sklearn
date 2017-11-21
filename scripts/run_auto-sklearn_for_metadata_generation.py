@@ -125,7 +125,9 @@ for entry in trajectory:
 
 validated_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
                         for entry in validated_trajectory]
-validated_trajectory_file = os.path.join(tmp_dir, 'smac3-output_%d_run1' % seed,
+validated_trajectory_file = os.path.join(tmp_dir,
+                                         'smac3-output',
+                                         'run_%d' % seed,
                                          'validation_trajectory.json')
 with open(validated_trajectory_file, 'w') as fh:
     json.dump(validated_trajectory, fh)

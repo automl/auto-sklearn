@@ -189,9 +189,7 @@ class AutoMLTest(Base, unittest.TestCase):
         data_manager_file = os.path.join(output, '.auto-sklearn',
                                          'datamanager.pkl')
 
-        backend_api = backend.create(output, output,
-                                     delete_tmp_folder_after_terminate=False)
-        print(backend_api.temporary_directory)
+        backend_api = backend.create(output, output)
         auto = autosklearn.automl.AutoML(
             backend_api, 20, 5,
             initial_configurations_via_metalearning=0,
