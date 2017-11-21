@@ -167,11 +167,18 @@ class Backend(object):
             start_time = float(fh.read())
         return start_time
 
-    def get_smac_output_directory(self, seed):
-        return os.path.join(self.temporary_directory, 'smac3-output_%d' % seed)
+    def get_smac_output_directory(self):
+        return os.path.join(self.temporary_directory, 'smac3-output')
+
+    def get_smac_output_directory_for_run(self, seed):
+        return os.path.join(
+            self.temporary_directory,
+            'smac3-output',
+            'run_%d' % seed
+        )
 
     def get_smac_output_glob(self):
-        return os.path.join(self.temporary_directory, 'smac3-output_*_run1')
+        return os.path.join(self.temporary_directory, 'smac3-output', 'run_1')
 
     def _get_targets_ensemble_filename(self):
         return os.path.join(self.internals_directory,

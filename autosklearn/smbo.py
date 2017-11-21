@@ -167,6 +167,7 @@ def get_smac_object(
     ta,
     backend,
     metalearning_configurations,
+    runhistory,
 ):
     scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
     scenario = Scenario(scenario_dict)
@@ -194,6 +195,7 @@ def get_smac_object(
         runhistory2epm=rh2EPM,
         tae_runner=ta,
         initial_configurations=initial_configurations,
+        runhistory=runhistory,
     )
 
 
@@ -444,7 +446,7 @@ class AutoMLSMBO(object):
             'instances': instances,
             'memory_limit': self.memory_limit,
             'output-dir':
-                self.backend.get_smac_output_directory(self.seed),
+                self.backend.get_smac_output_directory(),
             'run_obj': 'quality',
             'shared-model': self.shared_mode,
             'wallclock_limit': total_walltime_limit,
