@@ -19,7 +19,7 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
         self.minimum_fraction = minimum_fraction
         self.categorical_features = categorical_features
 
-    def fit(self, X, y=None):
+    def _fit(self, X, y=None):
         if self.use_minimum_fraction is None or \
                 self.use_minimum_fraction is False or \
                 (isinstance(self.use_minimum_fraction, str) and
@@ -37,8 +37,14 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
             .OneHotEncoder(minimum_fraction=self.minimum_fraction,
                            categorical_features=categorical_features)
 
-        self.preprocessor = self.preprocessor.fit(X)
+        return self.preprocessor.fit_transform(X)
+
+    def fit(self, X, y=None):
+        self._fit(X, y)
         return self
+
+    def fit_transform(self, X, y=None):
+        return self._fit(X, y)
 
     def transform(self, X):
         import scipy.sparse

@@ -7,10 +7,10 @@ from autosklearn.pipeline.constants import *
 
 class Imputation(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, strategy='median', random_state=None):
-        # TODO pay attention to the cases when a copy is made (CSR matrices)
         self.strategy = strategy
 
     def fit(self, X, y=None):
+        # Imputation does not support fit_transform (as of 0.19.1)!
         import sklearn.preprocessing
 
         self.preprocessor = sklearn.preprocessing.Imputer(

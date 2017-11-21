@@ -9,6 +9,7 @@ import sklearn.feature_selection
 
 class VarianceThreshold(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, random_state=None):
+        # VarianceThreshold does not support fit_transform (as of 0.19.1)!
         pass
 
     def fit(self, X, y=None):

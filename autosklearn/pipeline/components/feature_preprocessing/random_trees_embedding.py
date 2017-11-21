@@ -22,7 +22,7 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
         self.n_jobs = n_jobs
         self.random_state = random_state
 
-    def fit(self, X, Y=None):
+    def _fit(self, X, Y=None):
         import sklearn.ensemble
 
         if self.max_depth == "None" or self.max_depth is None:
@@ -48,6 +48,13 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
         )
         self.preprocessor.fit(X, Y)
         return self
+
+    def fit(self, X, y):
+        self._fit(X)
+        return self
+
+    def fit_transform(self, X, y=None):
+        return self._fit(X)
 
     def transform(self, X):
         if self.preprocessor is None:
