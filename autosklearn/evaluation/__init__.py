@@ -241,6 +241,12 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 status = StatusType.CRASHED
                 cost = WORST_POSSIBLE_RESULT
 
+        if isinstance(config, int):
+            origin = 'DUMMY'
+        else:
+            origin = getattr(config, 'origin', 'UNKNOWN')
+        additional_run_info['configuration_origin'] = origin
+
         runtime = float(obj.wall_clock_time)
         self.num_run += 1
         return status, cost, runtime, additional_run_info
