@@ -43,7 +43,7 @@ class OHEChoice(AutoSklearnChoice):
                 "component.")
 
         if default is None:
-            defaults = ['one_hot_encoding', 'none']
+            defaults = ['one_hot_encoding', 'no_encoding']
             for default_ in defaults:
                 if default_ in available_preprocessors:
                     default = default_

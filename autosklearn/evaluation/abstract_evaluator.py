@@ -143,8 +143,10 @@ class AbstractEvaluator(object):
             else:
                 raise ValueError(feat)
         if np.sum(categorical_mask) > 0:
-            self._init_params = {'one_hot_encoding:categorical_features':
-                                     categorical_mask}
+            self._init_params = {
+                'categorical_encoding:one_hot_encoding:categorical_features':
+                    categorical_mask
+            }
         else:
             self._init_params = {}
 

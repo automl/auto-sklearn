@@ -44,17 +44,20 @@ except:
     pass
 tmp_dir = os.path.join(configuration_output_dir, str(task_id))
 
-automl_arguments = {'time_left_for_this_task': time_limit,
-                    'per_run_time_limit': per_run_time_limit,
-                    'initial_configurations_via_metalearning': 0,
-                    'ensemble_size': 0,
-                    'ensemble_nbest': 0,
-                    'seed': seed,
-                    'ml_memory_limit': 3072,
-                    'resampling_strategy': 'partial-cv',
-                    'resampling_strategy_arguments': {'folds': 10},
-                    'delete_tmp_folder_after_terminate': False,
-                    'tmp_folder': tmp_dir}
+automl_arguments = {
+    'time_left_for_this_task': time_limit,
+    'per_run_time_limit': per_run_time_limit,
+    'initial_configurations_via_metalearning': 0,
+    'ensemble_size': 0,
+    'ensemble_nbest': 0,
+    'seed': seed,
+    'ml_memory_limit': 3072,
+    'resampling_strategy': 'partial-cv',
+    'resampling_strategy_arguments': {'folds': 10},
+    'delete_tmp_folder_after_terminate': False,
+    'tmp_folder': tmp_dir,
+    'disable_evaluator_output': True,
+}
 
 X_train, y_train, X_test, y_test, cat = load_task(task_id)
 
