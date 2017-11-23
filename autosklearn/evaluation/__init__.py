@@ -51,7 +51,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                  logger, initial_num_run=1, stats=None, runhistory=None,
                  run_obj='quality', par_factor=1, all_scoring_functions=False,
                  output_y_hat_optimization=True, include=None, exclude=None,
-                 memory_limit=None, disable_file_output=False,
+                 memory_limit=None, disable_file_output=False, init_params=None,
                  **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
@@ -95,6 +95,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.include = include
         self.exclude = exclude
         self.disable_file_output = disable_file_output
+        self.init_params = init_params
         self.logger = logger
 
         if memory_limit is not None:
@@ -160,6 +161,9 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         if not (instance_specific is None or instance_specific == '0'):
             raise ValueError(instance_specific)
+        init_params = {'instance': instance}
+        if self.init_params is not None:
+            init_params.update(self.init_params)
 
         arguments = dict(logger=logging.getLogger("pynisher"),
                          wall_time_in_s=cutoff,
@@ -176,7 +180,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                           include=self.include,
                           exclude=self.exclude,
                           disable_file_output=self.disable_file_output,
-                          instance=instance)
+                          instance=instance,
+                          init_params=init_params)
 
         if self.resampling_strategy != 'test':
             cv = self.get_splitter(D)
@@ -240,6 +245,9 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 additional_run_info = {'error': 'Result queue is empty'}
                 status = StatusType.CRASHED
                 cost = WORST_POSSIBLE_RESULT
+
+        if not isinstance(additional_run_info, dict):
+            additional_run_info = {'message': additional_run_info}
 
         if isinstance(config, int):
             origin = 'DUMMY'

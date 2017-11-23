@@ -19,7 +19,8 @@ class TestEvaluator(AbstractEvaluator):
                  seed=1,
                  include=None,
                  exclude=None,
-                 disable_file_output=False):
+                 disable_file_output=False,
+                 init_params=None):
         super(TestEvaluator, self).__init__(
             datamanager=datamanager,
             backend=backend,
@@ -33,7 +34,9 @@ class TestEvaluator(AbstractEvaluator):
             subsample=None,
             include=include,
             exclude=exclude,
-            disable_file_output= disable_file_output)
+            disable_file_output= disable_file_output,
+            init_params=init_params
+        )
         self.configuration = configuration
 
         self.X_train = datamanager.data['X_train']
@@ -82,13 +85,14 @@ class TestEvaluator(AbstractEvaluator):
 # Has a stupid name so nosetests doesn't regard it as a test
 def eval_t(queue, config, datamanager, backend, metric, seed, num_run, instance,
            all_scoring_functions, output_y_hat_optimization, include,
-           exclude, disable_file_output):
+           exclude, disable_file_output, init_params=None):
     evaluator = TestEvaluator(datamanager=datamanager, configuration=config,
                               backend=backend, metric=metric, seed=seed,
                               queue=queue,
                               all_scoring_functions=all_scoring_functions,
                               include=include, exclude=exclude,
-                              disable_file_output=disable_file_output)
+                              disable_file_output=disable_file_output,
+                              init_params=init_params)
 
     evaluator.fit_predict_and_loss()
 

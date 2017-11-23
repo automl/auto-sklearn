@@ -144,7 +144,8 @@ class EvaluationTest(unittest.TestCase):
         self.assertEqual(info[0], StatusType.CRASHED)
         self.assertEqual(info[1], 1.0)
         self.assertIsInstance(info[2], float)
-        self.assertEqual(info[3], {'error': "Result queue is empty"})
+        self.assertEqual(info[3], {'configuration_origin': 'UNKNOWN',
+                                   'error': "Result queue is empty"})
 
     @unittest.mock.patch('autosklearn.evaluation.train_evaluator.eval_holdout')
     def test_eval_with_limits_holdout_fail_memory_error(self, pynisher_mock):
@@ -242,7 +243,8 @@ class EvaluationTest(unittest.TestCase):
         instance = "{'subsample': 30}"
         info = ta.start(None, cutoff=30, instance=instance)
         self.assertEqual(info[0], StatusType.SUCCESS)
-        self.assertEqual(info[-1], instance)
+        self.assertEqual(info[-1], {'message': "{'subsample': 30}",
+                                    'configuration_origin': 'UNKNOWN'})
 
     @unittest.mock.patch('autosklearn.evaluation.train_evaluator.eval_holdout')
     def test_exception_in_target_function(self, eval_holdout_mock):

@@ -96,7 +96,8 @@ class AbstractEvaluator(object):
                  subsample=None,
                  include=None,
                  exclude=None,
-                 disable_file_output=False):
+                 disable_file_output=False,
+                 init_params=None):
 
         self.starttime = time.time()
 
@@ -149,6 +150,8 @@ class AbstractEvaluator(object):
             }
         else:
             self._init_params = {}
+        if init_params is not None:
+            self._init_params.update(init_params)
 
         if num_run is None:
             num_run = 0
