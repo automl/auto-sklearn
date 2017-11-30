@@ -8,8 +8,14 @@ from smac.tae.execute_ta_run import StatusType
 
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
-from autosklearn.constants import *
-from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
+from autosklearn.constants import (
+    REGRESSION_TASKS,
+    MULTILABEL_CLASSIFICATION,
+    MULTICLASS_CLASSIFICATION,
+)
+from autosklearn.pipeline.implementations.util import (
+    convert_multioutput_multiclass_to_multilabel
+)
 from autosklearn.metrics import calculate_score
 from autosklearn.util.logging_ import get_logger
 
@@ -29,7 +35,7 @@ class MyDummyClassifier(DummyClassifier):
         else:
             super(MyDummyClassifier, self).__init__(strategy="most_frequent")
 
-    def pre_transform(self, X, y, fit_params=None):
+    def pre_transform(self, X, y, fit_params=None):  # pylint: disable=R0201
         if fit_params is None:
             fit_params = {}
         return X, fit_params
@@ -48,10 +54,10 @@ class MyDummyClassifier(DummyClassifier):
             np.float32)
         return probas
 
-    def estimator_supports_iterative_fit(self):
+    def estimator_supports_iterative_fit(self):  # pylint: disable=R0201
         return False
 
-    def get_additional_run_info(self):
+    def get_additional_run_info(self):  # pylint: disable=R0201
         return None
 
 
@@ -79,10 +85,10 @@ class MyDummyRegressor(DummyRegressor):
         new_X = np.ones((X.shape[0], 1))
         return super(MyDummyRegressor, self).predict(new_X).astype(np.float32)
 
-    def estimator_supports_iterative_fit(self):
+    def estimator_supports_iterative_fit(self):  # pylint: disable=R0201
         return False
 
-    def get_additional_run_info(self):
+    def get_additional_run_info(self):  # pylint: disable=R0201
         return None
 
 
@@ -131,8 +137,10 @@ class AbstractEvaluator(object):
             if not isinstance(self.configuration, Configuration):
                 self.model_class = MyDummyClassifier
             else:
-                self.model_class = \
-                    autosklearn.pipeline.classification.SimpleClassificationPipeline
+                self.model_class = (
+                    autosklearn.pipeline.classification.
+                        SimpleClassificationPipeline
+                )
             self.predict_function = self._predict_proba
 
         categorical_mask = []
@@ -169,12 +177,12 @@ class AbstractEvaluator(object):
                                      random_state=self.seed,
                                      init_params=self._init_params)
         else:
-            dataset_properties = {'task': self.task_type,
-                                  'sparse': self.datamanager.info['is_sparse'] == 1,
-                                  'multilabel': self.task_type ==
-                                                MULTILABEL_CLASSIFICATION,
-                                  'multiclass': self.task_type ==
-                                                MULTICLASS_CLASSIFICATION}
+            dataset_properties = {
+                'task': self.task_type,
+                'sparse': self.datamanager.info['is_sparse'] == 1,
+                'multilabel': self.task_type == MULTILABEL_CLASSIFICATION,
+                'multiclass': self.task_type == MULTICLASS_CLASSIFICATION,
+            }
             model = self.model_class(config=self.configuration,
                                      dataset_properties=dataset_properties,
                                      random_state=self.seed,
@@ -228,7 +236,9 @@ class AbstractEvaluator(object):
         else:
             loss_ = {}
 
-        additional_run_info = {} if additional_run_info is None else additional_run_info
+        additional_run_info = (
+            {} if additional_run_info is None else additional_run_info
+        )
         for metric_name, value in loss_.items():
             additional_run_info[metric_name] = value
         additional_run_info['duration'] = self.duration
@@ -281,8 +291,9 @@ class AbstractEvaluator(object):
                     pass
                 self.backend.save_targets_ensemble(self.Y_optimization)
 
-            self.backend.save_predictions_as_npy(Y_optimization_pred, 'ensemble',
-                                                 seed, num_run)
+            self.backend.save_predictions_as_npy(
+                Y_optimization_pred, 'ensemble', seed, num_run
+            )
 
         if Y_valid_pred is not None:
             self.backend.save_predictions_as_npy(Y_valid_pred, 'valid',
