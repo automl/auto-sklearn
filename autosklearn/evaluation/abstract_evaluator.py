@@ -87,7 +87,7 @@ class MyDummyRegressor(DummyRegressor):
 
 
 class AbstractEvaluator(object):
-    def __init__(self, datamanager, backend, queue, metric,
+    def __init__(self, backend, queue, metric,
                  configuration=None,
                  all_scoring_functions=False,
                  seed=1,
@@ -105,15 +105,15 @@ class AbstractEvaluator(object):
         self.backend = backend
         self.queue = queue
 
-        self.datamanager = datamanager
+        self.datamanager = self.backend.load_datamanager()
         self.include = include
         self.exclude = exclude
 
-        self.X_valid = datamanager.data.get('X_valid')
-        self.X_test = datamanager.data.get('X_test')
+        self.X_valid = self.datamanager.data.get('X_valid')
+        self.X_test = self.datamanager.data.get('X_test')
 
         self.metric = metric
-        self.task_type = datamanager.info['task']
+        self.task_type = self.datamanager.info['task']
         self.seed = seed
 
         self.output_y_hat_optimization = output_y_hat_optimization
@@ -136,7 +136,7 @@ class AbstractEvaluator(object):
             self.predict_function = self._predict_proba
 
         categorical_mask = []
-        for feat in datamanager.feat_type:
+        for feat in self.datamanager.feat_type:
             if feat.lower() == 'numerical':
                 categorical_mask.append(False)
             elif feat.lower() == 'categorical':

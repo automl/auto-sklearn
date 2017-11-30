@@ -13,7 +13,7 @@ __all__ = [
 
 class TestEvaluator(AbstractEvaluator):
 
-    def __init__(self, datamanager, backend, queue, metric,
+    def __init__(self, backend, queue, metric,
                  configuration=None,
                  all_scoring_functions=False,
                  seed=1,
@@ -22,7 +22,6 @@ class TestEvaluator(AbstractEvaluator):
                  disable_file_output=False,
                  init_params=None):
         super(TestEvaluator, self).__init__(
-            datamanager=datamanager,
             backend=backend,
             queue=queue,
             configuration=configuration,
@@ -39,11 +38,11 @@ class TestEvaluator(AbstractEvaluator):
         )
         self.configuration = configuration
 
-        self.X_train = datamanager.data['X_train']
-        self.Y_train = datamanager.data['Y_train']
+        self.X_train = self.datamanager.data['X_train']
+        self.Y_train = self.datamanager.data['Y_train']
 
-        self.X_test = datamanager.data.get('X_test')
-        self.Y_test = datamanager.data.get('Y_test')
+        self.X_test = self.datamanager.data.get('X_test')
+        self.Y_test = self.datamanager.data.get('Y_test')
 
         self.model = self._get_model()
 
@@ -83,10 +82,10 @@ class TestEvaluator(AbstractEvaluator):
 
 # create closure for evaluating an algorithm
 # Has a stupid name so nosetests doesn't regard it as a test
-def eval_t(queue, config, datamanager, backend, metric, seed, num_run, instance,
+def eval_t(queue, config, backend, metric, seed, num_run, instance,
            all_scoring_functions, output_y_hat_optimization, include,
            exclude, disable_file_output, init_params=None):
-    evaluator = TestEvaluator(datamanager=datamanager, configuration=config,
+    evaluator = TestEvaluator(configuration=config,
                               backend=backend, metric=metric, seed=seed,
                               queue=queue,
                               all_scoring_functions=all_scoring_functions,

@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-import copy
 import functools
 import logging
 import math
@@ -16,7 +15,6 @@ from ConfigSpace import Configuration
 import autosklearn.evaluation.train_evaluator
 import autosklearn.evaluation.test_evaluator
 import autosklearn.evaluation.util
-from autosklearn.constants import CLASSIFICATION_TASKS, MULTILABEL_CLASSIFICATION
 
 WORST_POSSIBLE_RESULT = 1.0
 
@@ -154,7 +152,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             seed=12345,
             instance_specific=None):
 
-        D = self.backend.load_datamanager()
         queue = multiprocessing.Queue()
 
         if not (instance_specific is None or instance_specific == '0'):
@@ -168,7 +165,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                          mem_in_mb=self.memory_limit)
         obj_kwargs = dict(queue=queue,
                           config=config,
-                          datamanager=D,
                           backend=self.backend,
                           metric=self.metric,
                           seed=self.autosklearn_seed,

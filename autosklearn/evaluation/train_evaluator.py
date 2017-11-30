@@ -24,7 +24,7 @@ def _get_y_array(y, task_type):
 
 
 class TrainEvaluator(AbstractEvaluator):
-    def __init__(self, datamanager, backend, queue, metric,
+    def __init__(self, backend, queue, metric,
                  configuration=None,
                  all_scoring_functions=False,
                  seed=1,
@@ -39,7 +39,6 @@ class TrainEvaluator(AbstractEvaluator):
                  disable_file_output=False,
                  init_params=None):
         super().__init__(
-            datamanager=datamanager,
             backend=backend,
             queue=queue,
             configuration=configuration,
@@ -57,7 +56,7 @@ class TrainEvaluator(AbstractEvaluator):
 
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_args = resampling_strategy_args
-        self.cv = self.get_splitter(datamanager)
+        self.cv = self.get_splitter(self.datamanager)
         self.cv_folds = self.cv.n_splits
         self.X_train = self.datamanager.data['X_train']
         self.Y_train = self.datamanager.data['Y_train']
@@ -401,7 +400,6 @@ class TrainEvaluator(AbstractEvaluator):
 def eval_holdout(
         queue,
         config,
-        datamanager,
         backend,
         resampling_strategy,
         resampling_strategy_args,
@@ -420,7 +418,6 @@ def eval_holdout(
     instance = json.loads(instance) if instance is not None else {}
     subsample = instance.get('subsample')
     evaluator = TrainEvaluator(
-        datamanager=datamanager,
         backend=backend,
         queue=queue,
         resampling_strategy=resampling_strategy,
@@ -443,7 +440,6 @@ def eval_holdout(
 def eval_iterative_holdout(
         queue,
         config,
-        datamanager,
         backend,
         resampling_strategy,
         resampling_strategy_args,
@@ -461,7 +457,6 @@ def eval_iterative_holdout(
     return eval_holdout(
         queue=queue,
         config=config,
-        datamanager=datamanager,
         backend=backend,
         metric=metric,
         resampling_strategy=resampling_strategy,
@@ -503,7 +498,6 @@ def eval_partial_cv(
     fold = instance['fold']
 
     evaluator = TrainEvaluator(
-        datamanager=datamanager,
         backend=backend,
         queue=queue,
         metric=metric,
@@ -567,7 +561,6 @@ def eval_partial_cv_iterative(
 def eval_cv(
         queue,
         config,
-        datamanager,
         backend,
         resampling_strategy,
         resampling_strategy_args,
@@ -585,7 +578,6 @@ def eval_cv(
     instance = json.loads(instance) if instance is not None else {}
     subsample = instance.get('subsample')
     evaluator = TrainEvaluator(
-        datamanager=datamanager,
         backend=backend,
         queue=queue,
         metric=metric,
