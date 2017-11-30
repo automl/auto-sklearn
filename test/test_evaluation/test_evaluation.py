@@ -15,12 +15,9 @@ import pynisher
 from smac.tae.execute_ta_run import StatusType, FirstRunCrashedException, \
     BudgetExhaustedException
 from smac.stats.stats import Stats
-import sklearn.model_selection
 
 from evaluation_util import get_multiclass_classification_datamanager
-from autosklearn.constants import *
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
-from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.metrics import accuracy
 
 
@@ -262,54 +259,3 @@ class EvaluationTest(unittest.TestCase):
         self.assertIsInstance(info[2], float)
         self.assertEqual(info[3]['error'], 'ValueError()')
         self.assertIn('traceback', info[3])
-
-    ############################################################################
-    # Test obtaining a splitter object from scikit-learn
-    def test_get_splitter(self):
-        ta_args = dict(backend=BackendMock(), autosklearn_seed=1,
-                       logger=self.logger, stats=self.stats, memory_limit=3072,
-                       metric=accuracy)
-        D = unittest.mock.Mock(spec=AbstractDataManager)
-        D.data = dict(Y_train=np.array([0, 0, 0, 1, 1, 1]))
-        D.info = dict(task=BINARY_CLASSIFICATION)
-
-        # holdout, binary classification
-        ta = ExecuteTaFuncWithQueue(resampling_strategy='holdout', **ta_args)
-        cv = ta.get_splitter(D)
-        self.assertIsInstance(cv,
-                              sklearn.model_selection.StratifiedShuffleSplit)
-
-        # holdout, binary classification, fallback to shuffle split
-        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1, 2])
-        ta = ExecuteTaFuncWithQueue(resampling_strategy='holdout', **ta_args)
-        cv = ta.get_splitter(D)
-        self.assertIsInstance(cv, sklearn.model_selection._split.ShuffleSplit)
-
-        # cv, binary classification
-        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
-        ta = ExecuteTaFuncWithQueue(resampling_strategy='cv', folds=5,
-                                    **ta_args)
-        cv = ta.get_splitter(D)
-        self.assertIsInstance(cv, sklearn.model_selection._split.StratifiedKFold)
-
-        # cv, binary classification, no fallback anticipated
-        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1, 2])
-        ta = ExecuteTaFuncWithQueue(resampling_strategy='cv', folds=5,
-                                    **ta_args)
-        cv = ta.get_splitter(D)
-        self.assertIsInstance(cv, sklearn.model_selection._split.StratifiedKFold)
-
-        # regression, shuffle split
-        D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        D.info['task'] = REGRESSION
-        ta = ExecuteTaFuncWithQueue(resampling_strategy='holdout', **ta_args)
-        cv = ta.get_splitter(D)
-        self.assertIsInstance(cv, sklearn.model_selection._split.ShuffleSplit)
-
-        # regression cv, KFold
-        D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        D.info['task'] = REGRESSION
-        ta = ExecuteTaFuncWithQueue(resampling_strategy='cv', folds=5,
-                                    **ta_args)
-        cv = ta.get_splitter(D)
-        self.assertIsInstance(cv, sklearn.model_selection._split.KFold)

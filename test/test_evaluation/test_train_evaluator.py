@@ -10,8 +10,11 @@ import unittest.mock
 from ConfigSpace import Configuration
 import numpy as np
 from sklearn.model_selection import StratifiedKFold, ShuffleSplit
+import sklearn.model_selection
 from smac.tae.execute_ta_run import StatusType, TAEAbortException
 
+from autosklearn.data.abstract_data_manager import AbstractDataManager
+from autosklearn.evaluation import ExecuteTaFuncWithQueue
 from autosklearn.evaluation.util import get_last_result
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, \
     eval_holdout, eval_iterative_holdout, eval_cv, eval_partial_cv
@@ -27,6 +30,11 @@ from evaluation_util import get_regression_datamanager, BaseEvaluatorTest, \
     get_multiclass_classification_datamanager
 
 
+class BackendMock(object):
+    def load_datamanager(self):
+        return get_multiclass_classification_datamanager()
+
+
 class Dummy(object):
     def __init__(self):
         self.name = 'dummy'
@@ -39,7 +47,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     def test_holdout(self, pipeline_mock):
         D = get_binary_classification_datamanager()
         D.name = 'test'
-        kfold = ShuffleSplit(random_state=1, n_splits=1)
 
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
@@ -52,7 +59,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator = TrainEvaluator(D, backend_api, queue_,
                                    configuration=configuration,
-                                   cv=kfold,
+                                   resampling_strategy='holdout',
+                                   resampling_strategy_args={'train_size': 0.66},
                                    all_scoring_functions=False,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
@@ -68,12 +76,12 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(evaluator.file_output.call_count, 1)
-        self.assertEqual(result, 0.85714285714285721)
+        self.assertEqual(result, 0.45833333333333337)
         self.assertEqual(pipeline_mock.fit.call_count, 1)
         # three calls because of the holdout, the validation and the test set
         self.assertEqual(pipeline_mock.predict_proba.call_count, 3)
         self.assertEqual(evaluator.file_output.call_count, 1)
-        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 7)
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 24)
         self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], D.data['Y_valid'].shape[0])
         self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_test'].shape[0])
         self.assertEqual(evaluator.model.fit.call_count, 1)
@@ -111,7 +119,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator = TrainEvaluator(D, backend_api, queue_,
                                    configuration=configuration,
-                                   cv=kfold,
+                                   resampling_strategy='holdout',
                                    all_scoring_functions=False,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
@@ -144,7 +152,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # fifteen calls because of the holdout, the validation and the test set
         # and a total of five calls because of five iterations of fitting
         self.assertEqual(evaluator.model.predict_proba.call_count, 15)
-        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 7)
+        # 1/3 of 69
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 23)
         self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], D.data['Y_valid'].shape[0])
         self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_test'].shape[0])
         self.assertEqual(evaluator.file_output.call_count, 5)
@@ -155,7 +164,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # Regular fitting
         D = get_binary_classification_datamanager()
         D.name = 'test'
-        kfold = ShuffleSplit(random_state=1, n_splits=1)
 
         class SideEffect(object):
             def __init__(self):
@@ -185,7 +193,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator = TrainEvaluator(D, backend_api, queue_,
                                    configuration=configuration,
-                                   cv=kfold,
+                                   resampling_strategy='holdout-iterative-fit',
                                    all_scoring_functions=False,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
@@ -215,7 +223,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # fifteen calls because of the holdout, the validation and the test set
         # and a total of five calls because of five iterations of fitting
         self.assertEqual(evaluator.model.predict_proba.call_count, 6)
-        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 7)
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 23)
         self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], D.data['Y_valid'].shape[0])
         self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_test'].shape[0])
         self.assertEqual(evaluator.file_output.call_count, 2)
@@ -242,7 +250,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator = TrainEvaluator(D, backend_api, queue_,
                                    configuration=configuration,
-                                   cv=kfold,
+                                   resampling_strategy='holdout-iterative-fit',
                                    all_scoring_functions=False,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
@@ -253,14 +261,14 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(evaluator.file_output.call_count, 1)
 
         rval = evaluator.queue.get(timeout=1)
-        self.assertAlmostEqual(rval['loss'], 0.85714285714285721)
+        self.assertAlmostEqual(rval['loss'], 0.47826086956521741)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(pipeline_mock.iterative_fit.call_count, 0)
         # fifteen calls because of the holdout, the validation and the test set
         # and a total of five calls because of five iterations of fitting
         self.assertEqual(evaluator.model.predict_proba.call_count, 3)
-        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 7)
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 23)
         self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], D.data['Y_valid'].shape[0])
         self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_test'].shape[0])
         self.assertEqual(evaluator.file_output.call_count, 1)
@@ -269,7 +277,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_cv(self, pipeline_mock):
         D = get_binary_classification_datamanager()
-        kfold = StratifiedKFold(random_state=1, n_splits=5, shuffle=True)
 
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
@@ -282,7 +289,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator = TrainEvaluator(D, backend_api, queue_,
                                    configuration=configuration,
-                                   cv=kfold,
+                                   resampling_strategy='cv',
+                                   resampling_strategy_args={'folds': 5},
                                    all_scoring_functions=False,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
@@ -312,7 +320,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_partial_cv(self, pipeline_mock):
         D = get_binary_classification_datamanager()
-        kfold = StratifiedKFold(random_state=1, n_splits=5, shuffle=True)
 
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
@@ -327,7 +334,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator = TrainEvaluator(D, backend_api, queue_,
                                    configuration=configuration,
-                                   cv=kfold,
+                                   resampling_strategy='partial-cv',
+                                   resampling_strategy_args={'folds': 5},
                                    all_scoring_functions=False,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
@@ -382,7 +390,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         evaluator = TrainEvaluator(D, backend_api, queue_,
                                    configuration=configuration,
-                                   cv=kfold,
+                                   resampling_strategy='partial-cv-iterative-fit',
+                                   resampling_strategy_args={'folds': 5},
                                    all_scoring_functions=False,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
@@ -431,7 +440,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
         evaluator = TrainEvaluator(D, backend_mock, queue=queue_,
                                    configuration=configuration,
-                                   cv=kfold,
+                                   resampling_strategy='cv',
+                                   resampling_strategy_args={'folds': 5},
                                    all_scoring_functions=True,
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
@@ -469,10 +479,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         configuration = unittest.mock.Mock(spec=Configuration)
         queue_ = multiprocessing.Queue()
-        kfold = ShuffleSplit(random_state=1, n_splits=1)
         evaluator = TrainEvaluator(D, backend_mock, queue_,
                                    configuration=configuration,
-                                   cv=kfold, subsample=10,
+                                   resampling_strategy='cv',
+                                   resampling_strategy_args={'folds': 10},
+                                   subsample=10,
                                    metric=accuracy)
         train_indices = np.arange(69, dtype=int)
         train_indices1 = evaluator.subsample_indices(train_indices)
@@ -513,10 +524,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         configuration = unittest.mock.Mock(spec=Configuration)
         queue_ = multiprocessing.Queue()
-        kfold = ShuffleSplit(random_state=1, n_splits=1)
         evaluator = TrainEvaluator(D, backend_mock, queue_,
                                    configuration=configuration,
-                                   cv=kfold, subsample=30,
+                                   resampling_strategy='cv',
+                                   resampling_strategy_args={'folds': 10},
+                                   subsample=30,
                                    metric=accuracy)
         train_indices = np.arange(69, dtype=int)
         train_indices3 = evaluator.subsample_indices(train_indices)
@@ -539,16 +551,19 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_predict_proba_binary_classification(self, mock, backend_mock):
         D = get_binary_classification_datamanager()
-        mock.predict_proba.side_effect = lambda y, batch_size: np.array([[0.1, 0.9]] * 7)
+        mock.predict_proba.side_effect = lambda y, batch_size: np.array(
+            [[0.1, 0.9]] * y.shape[0]
+        )
         mock.side_effect = lambda **kwargs: mock
 
         configuration = unittest.mock.Mock(spec=Configuration)
         queue_ = multiprocessing.Queue()
-        kfold = ShuffleSplit(random_state=1, n_splits=1)
 
         evaluator = TrainEvaluator(D, backend_mock, queue_,
                                    configuration=configuration,
-                                   cv=kfold, output_y_hat_optimization=False,
+                                   resampling_strategy='cv',
+                                   resampling_strategy_args={'folds': 10},
+                                   output_y_hat_optimization=False,
                                    metric=accuracy)
         evaluator.fit_predict_and_loss()
         Y_optimization_pred = backend_mock.save_predictions_as_npy.call_args_list[0][0][0]
@@ -567,29 +582,53 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D = get_binary_classification_datamanager()
         mock.side_effect = lambda **kwargs: mock
         _partial_fit_and_predict_mock.return_value = (
-            [[0.1, 0.9]] * 7, [[0.1, 0.9]] * 7, [[0.1, 0.9]] * 7, {'a': 5}
+            [[0.1, 0.9]] * 23, [[0.1, 0.9]] * 7, [[0.1, 0.9]] * 7, {'a': 5}
         )
         file_output_mock.return_value = None, None
 
         configuration = unittest.mock.Mock(spec=Configuration)
         queue_ = multiprocessing.Queue()
-        kfold = ShuffleSplit(random_state=1, n_splits=1)
 
         evaluator = TrainEvaluator(
             D, backend_mock, queue_,
             configuration=configuration,
-            cv=kfold, output_y_hat_optimization=False,
-            metric=accuracy)
-        evaluator.Y_targets[0] = [1] * 7
+            resampling_strategy='holdout',
+            output_y_hat_optimization=False,
+            metric=accuracy,
+        )
+        evaluator.Y_targets[0] = [1] * 23
         evaluator.fit_predict_and_loss(iterative=False)
 
-        kfold = ShuffleSplit(random_state=1, n_splits=2)
+        class SideEffect(object):
+            def __init__(self):
+                self.n_call = 0
+            def __call__(self, *args, **kwargs):
+                if self.n_call == 0:
+                    self.n_call += 1
+                    return (
+                        [[0.1, 0.9]] * 35,
+                        [[0.1, 0.9]] * 7,
+                        [[0.1, 0.9]] * 7,
+                        {'a': 5}
+                    )
+                else:
+                    return (
+                        [[0.1, 0.9]] * 34,
+                        [[0.1, 0.9]] * 7,
+                        [[0.1, 0.9]] * 7,
+                        {'a': 5}
+                    )
+        _partial_fit_and_predict_mock.side_effect = SideEffect()
         evaluator = TrainEvaluator(
             D, backend_mock, queue_,
             configuration=configuration,
-            cv=kfold, output_y_hat_optimization=False,
-            metric=accuracy)
-        evaluator.Y_targets[0] = [1] * 7
+            resampling_strategy='cv',
+            resampling_strategy_args={'folds': 2},
+            output_y_hat_optimization=False,
+            metric=accuracy,
+        )
+        evaluator.Y_targets[0] = [1] * 35
+        evaluator.Y_targets[1] = [1] * 34
 
         self.assertRaises(
             TAEAbortException,
@@ -622,20 +661,84 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                 y = D.data['Y_train']
                 if len(y.shape) == 2 and y.shape[1] == 1:
                     D_.data['Y_train'] = y.flatten()
-                kfold = ShuffleSplit(n_splits=5, random_state=1)
                 queue_ = multiprocessing.Queue()
                 metric_lookup = {MULTILABEL_CLASSIFICATION: f1_macro,
                                  BINARY_CLASSIFICATION: accuracy,
                                  MULTICLASS_CLASSIFICATION: accuracy,
                                  REGRESSION: r2}
                 evaluator = TrainEvaluator(D_, backend_mock, queue_,
-                                           cv=kfold,
+                                           resampling_strategy='cv',
+                                           resampling_strategy_args={'folds': 2},
                                            output_y_hat_optimization=False,
                                            metric=metric_lookup[D.info['task']])
 
                 evaluator.fit_predict_and_loss()
                 rval = evaluator.queue.get(timeout=1)
                 self.assertTrue(np.isfinite(rval['loss']))
+
+    ############################################################################
+    # Test obtaining a splitter object from scikit-learn
+    @unittest.mock.patch.object(TrainEvaluator, "__init__")
+    def test_get_splitter(self, te_mock):
+        te_mock.return_value = None
+        D = unittest.mock.Mock(spec=AbstractDataManager)
+        D.data = dict(Y_train=np.array([0, 0, 0, 1, 1, 1]))
+        D.info = dict(task=BINARY_CLASSIFICATION)
+        D.feat_type = []
+
+        # holdout, binary classification
+        evaluator = TrainEvaluator()
+        evaluator.resampling_strategy = 'holdout'
+        evaluator.resampling_strategy_args = None
+        cv = evaluator.get_splitter(D)
+        self.assertIsInstance(cv,
+                              sklearn.model_selection.StratifiedShuffleSplit)
+
+        # holdout, binary classification, fallback to shuffle split
+        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1, 2])
+        evaluator = TrainEvaluator()
+        evaluator.resampling_strategy = 'holdout'
+        evaluator.resampling_strategy_args = None
+        cv = evaluator.get_splitter(D)
+        self.assertIsInstance(cv,
+                              sklearn.model_selection._split.ShuffleSplit)
+
+        # cv, binary classification
+        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
+        evaluator = TrainEvaluator()
+        evaluator.resampling_strategy = 'cv'
+        evaluator.resampling_strategy_args = {'folds': 5}
+        cv = evaluator.get_splitter(D)
+        self.assertIsInstance(cv,
+                              sklearn.model_selection._split.StratifiedKFold)
+
+        # cv, binary classification, no fallback anticipated
+        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1, 2])
+        evaluator = TrainEvaluator()
+        evaluator.resampling_strategy = 'cv'
+        evaluator.resampling_strategy_args = {'folds': 5}
+        cv = evaluator.get_splitter(D)
+        self.assertIsInstance(cv,
+                              sklearn.model_selection._split.StratifiedKFold)
+
+        # regression, shuffle split
+        D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        D.info['task'] = REGRESSION
+        evaluator = TrainEvaluator()
+        evaluator.resampling_strategy = 'holdout'
+        evaluator.resampling_strategy_args = None
+        cv = evaluator.get_splitter(D)
+        self.assertIsInstance(cv,
+                              sklearn.model_selection._split.ShuffleSplit)
+
+        # regression cv, KFold
+        D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        D.info['task'] = REGRESSION
+        evaluator = TrainEvaluator()
+        evaluator.resampling_strategy = 'cv'
+        evaluator.resampling_strategy_args = {'folds': 5}
+        cv = evaluator.get_splitter(D)
+        self.assertIsInstance(cv, sklearn.model_selection._split.KFold)
 
 
 class FunctionsTest(unittest.TestCase):
@@ -655,41 +758,61 @@ class FunctionsTest(unittest.TestCase):
         self.dataset_name = json.dumps({'task_id': 'test'})
 
     def test_eval_holdout(self):
-        kfold = ShuffleSplit(random_state=1, n_splits=1, test_size=0.33)
-        eval_holdout(queue=self.queue, config=self.configuration,
-                     datamanager=self.data, backend=self.backend, cv=kfold,
-                     seed=1, num_run=1, all_scoring_functions=False,
-                     output_y_hat_optimization=True, include=None, exclude=None,
-                     disable_file_output=False, instance=self.dataset_name,
-                     metric=accuracy)
+        eval_holdout(
+            queue=self.queue,
+            config=self.configuration,
+            datamanager=self.data,
+            backend=self.backend,
+            resampling_strategy='holdout',
+            resampling_strategy_args=None,
+            seed=1,
+            num_run=1,
+            all_scoring_functions=False,
+            output_y_hat_optimization=True,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name,
+            metric=accuracy,
+        )
         info = get_last_result(self.queue)
-        self.assertAlmostEqual(info['loss'], 0.060606060606060552, places=3)
+        self.assertAlmostEqual(info['loss'], 0.030303030303030276, places=3)
         self.assertEqual(info['status'], StatusType.SUCCESS)
         self.assertNotIn('bac_metric', info['additional_run_info'])
 
     def test_eval_holdout_all_loss_functions(self):
-        kfold = ShuffleSplit(random_state=1, n_splits=1, test_size=0.33)
-        eval_holdout(queue=self.queue, config=self.configuration,
-                     datamanager=self.data, backend=self.backend, cv=kfold,
-                     seed=1, num_run=1, all_scoring_functions=True,
-                     output_y_hat_optimization=True, include=None, exclude=None,
-                     disable_file_output=False, instance=self.dataset_name,
-                     metric=accuracy)
+        eval_holdout(
+            queue=self.queue,
+            config=self.configuration,
+            datamanager=self.data,
+            backend=self.backend,
+            resampling_strategy='holdout',
+            resampling_strategy_args=None,
+            seed=1,
+            num_run=1,
+            all_scoring_functions=True,
+            output_y_hat_optimization=True,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name,
+            metric=accuracy,
+        )
         rval = get_last_result(self.queue)
 
-        fixture = {'accuracy': 0.0606060606061,
-                   'balanced_accuracy': 0.0636363636364,
-                   'f1_macro': 0.0636363636364,
-                   'f1_micro': 0.0606060606061,
-                   'f1_weighted': 0.0606060606061,
-                   'log_loss': 1.153175128398068,
-                   'pac_score': 0.21332550117206728,
-                   'precision_macro': 0.0636363636364,
-                   'precision_micro': 0.0606060606061,
-                   'precision_weighted': 0.0606060606061,
-                   'recall_macro': 0.0636363636364,
-                   'recall_micro': 0.0606060606061,
-                   'recall_weighted': 0.0606060606061,
+        fixture = {'accuracy': 0.030303030303030276,
+                   'balanced_accuracy': 0.033333333333333326,
+                   'f1_macro': 0.032036613272311221,
+                   'f1_micro': 0.030303030303030276,
+                   'f1_weighted': 0.030441716940572849,
+                   'log_loss': 1.0634089940876672,
+                   'pac_score': 0.092288218582651682,
+                   'precision_macro': 0.02777777777777779,
+                   'precision_micro': 0.030303030303030276,
+                   'precision_weighted': 0.027777777777777901,
+                   'recall_macro': 0.033333333333333326,
+                   'recall_micro': 0.030303030303030276,
+                   'recall_weighted': 0.030303030303030276,
                    'num_run': 1}
 
         additional_run_info = rval['additional_run_info']
@@ -700,7 +823,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(len(additional_run_info), len(fixture) + 1,
                          msg=sorted(additional_run_info.items()))
 
-        self.assertAlmostEqual(rval['loss'], 0.060606060606060552, places=3)
+        self.assertAlmostEqual(rval['loss'], 0.030303030303030276, places=3)
         self.assertEqual(rval['status'], StatusType.SUCCESS)
 
     # def test_eval_holdout_on_subset(self):
@@ -713,16 +836,25 @@ class FunctionsTest(unittest.TestCase):
     #     self.assertEqual(info[2], 1)
 
     def test_eval_holdout_iterative_fit_no_timeout(self):
-        kfold = ShuffleSplit(random_state=1, n_splits=1, test_size=0.33)
-        eval_iterative_holdout(queue=self.queue, config=self.configuration,
-                               datamanager=self.data, backend=self.backend,
-                               cv=kfold, seed=1, num_run=1,
-                               all_scoring_functions=False,
-                               output_y_hat_optimization=True, include=None,
-                               exclude=None, disable_file_output=False,
-                               instance=self.dataset_name, metric=accuracy)
+        eval_iterative_holdout(
+            queue=self.queue,
+            config=self.configuration,
+            datamanager=self.data,
+            backend=self.backend,
+            resampling_strategy='holdout',
+            resampling_strategy_args=None,
+            seed=1,
+            num_run=1,
+            all_scoring_functions=False,
+            output_y_hat_optimization=True,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name,
+            metric=accuracy,
+        )
         rval = get_last_result(self.queue)
-        self.assertAlmostEqual(rval['loss'], 0.060606060606060552)
+        self.assertAlmostEqual(rval['loss'], 0.030303030303030276)
         self.assertEqual(rval['status'], StatusType.SUCCESS)
 
     # def test_eval_holdout_iterative_fit_on_subset_no_timeout(self):
@@ -736,26 +868,46 @@ class FunctionsTest(unittest.TestCase):
     #     self.assertEqual(info[2], 1)
 
     def test_eval_cv(self):
-        cv = StratifiedKFold(shuffle=True, random_state=1)
-        eval_cv(queue=self.queue, config=self.configuration,
-                datamanager=self.data, backend=self.backend, seed=1, num_run=1,
-                cv=cv, all_scoring_functions=False,
-                output_y_hat_optimization=True, include=None, exclude=None,
-                disable_file_output=False, instance=self.dataset_name,
-                metric=accuracy)
+        eval_cv(
+            queue=self.queue,
+            config=self.configuration,
+            datamanager=self.data,
+            backend=self.backend,
+            seed=1,
+            num_run=1,
+            resampling_strategy='cv',
+            resampling_strategy_args={'folds': 3},
+            all_scoring_functions=False,
+            output_y_hat_optimization=True,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name,
+            metric=accuracy,
+        )
         rval = get_last_result(self.queue)
         self.assertAlmostEqual(rval['loss'], 0.06)
         self.assertEqual(rval['status'], StatusType.SUCCESS)
         self.assertNotIn('bac_metric', rval['additional_run_info'])
 
     def test_eval_cv_all_loss_functions(self):
-        cv = StratifiedKFold(shuffle=True, random_state=1)
-        eval_cv(queue=self.queue, config=self.configuration,
-                datamanager=self.data, backend=self.backend, seed=1, num_run=1,
-                cv=cv, all_scoring_functions=True,
-                output_y_hat_optimization=True, include=None, exclude=None,
-                disable_file_output=False, instance=self.dataset_name,
-                metric=accuracy)
+        eval_cv(
+            queue=self.queue,
+            config=self.configuration,
+            datamanager=self.data,
+            backend=self.backend,
+            seed=1,
+            num_run=1,
+            resampling_strategy='cv',
+            resampling_strategy_args={'folds': 3},
+            all_scoring_functions=True,
+            output_y_hat_optimization=True,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name,
+            metric=accuracy,
+        )
         rval = get_last_result(self.queue)
 
         fixture = {'accuracy': 0.06,
@@ -795,7 +947,6 @@ class FunctionsTest(unittest.TestCase):
     #     self.assertEqual(info[2], 1)
 
     def test_eval_partial_cv(self):
-        cv = StratifiedKFold(shuffle=True, random_state=1, n_splits=5)
         results = [0.090909090909090939,
                    0.047619047619047672,
                    0.052631578947368474,
@@ -803,13 +954,23 @@ class FunctionsTest(unittest.TestCase):
                    0.0]
         for fold in range(5):
             instance = json.dumps({'task_id': 'data', 'fold': fold})
-            eval_partial_cv(queue=self.queue, config=self.configuration,
-                            datamanager=self.data, backend=self.backend, seed=1,
-                            num_run=1, instance=instance, cv=cv,
-                            all_scoring_functions=False,
-                            output_y_hat_optimization=True, include=None,
-                            exclude=None, disable_file_output=False,
-                            metric=accuracy)
+            eval_partial_cv(
+                queue=self.queue,
+                config=self.configuration,
+                datamanager=self.data,
+                backend=self.backend,
+                seed=1,
+                num_run=1,
+                instance=instance,
+                resampling_strategy='partial-cv',
+                resampling_strategy_args={'folds': 5},
+                all_scoring_functions=False,
+                output_y_hat_optimization=True,
+                include=None,
+                exclude=None,
+                disable_file_output=False,
+                metric=accuracy,
+            )
             rval = get_last_result(self.queue)
             self.assertAlmostEqual(rval['loss'], results[fold])
             self.assertEqual(rval['status'], StatusType.SUCCESS)
@@ -852,3 +1013,4 @@ class FunctionsTest(unittest.TestCase):
     #         info = self.queue.get()
     #         self.assertAlmostEqual(info[1], results[fold])
     #         self.assertEqual(info[2], 1)
+
