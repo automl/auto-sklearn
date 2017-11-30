@@ -477,7 +477,6 @@ def eval_iterative_holdout(
 def eval_partial_cv(
         queue,
         config,
-        datamanager,
         backend,
         resampling_strategy,
         resampling_strategy_args,
@@ -521,7 +520,6 @@ def eval_partial_cv(
 def eval_partial_cv_iterative(
         queue,
         config,
-        datamanager,
         backend,
         resampling_strategy,
         resampling_strategy_args,
@@ -539,7 +537,6 @@ def eval_partial_cv_iterative(
     return eval_partial_cv(
         queue=queue,
         config=config,
-        datamanager=datamanager,
         backend=backend,
         metric=metric,
         resampling_strategy=resampling_strategy,
