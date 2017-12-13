@@ -61,6 +61,7 @@ class AutoSklearnEstimator(BaseEstimator):
             most out of ensemble selection`.
 
         seed : int, optional (default=1)
+            Used to seed SMAC. Will determine the output file names.
 
         ml_memory_limit : int, optional (3072)
             Memory limit in MB for the machine learning algorithm.
