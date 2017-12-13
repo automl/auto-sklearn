@@ -958,7 +958,6 @@ class FunctionsTest(unittest.TestCase):
             eval_partial_cv(
                 queue=self.queue,
                 config=self.configuration,
-                datamanager=self.data,
                 backend=self.backend,
                 seed=1,
                 num_run=1,
