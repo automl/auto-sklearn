@@ -19,4 +19,4 @@ pandas
 ConfigSpace>=0.4.0,<0.5
 pynisher>=0.4
 pyrfr>=0.6.1,<0.8
-git+https://github.com/automl/SMAC3@development
+smac
