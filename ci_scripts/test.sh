@@ -5,7 +5,7 @@ set -e
 mkdir -p $TEST_DIR
 
 cwd=`pwd`
-examples_dir=$pwd/example
+examples_dir=$cwd/example
 test_dir=$cwd/test/
 
 cd $TEST_DIR
