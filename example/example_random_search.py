@@ -12,7 +12,10 @@ def get_roar_object_callback(
     scenario_dict,
     seed,
     ta,
-    **kwargs
+    backend,
+    metalearning_configurations,
+    runhistory,
+    run_id,
 ):
     """Random online adaptive racing.
 
@@ -22,14 +25,19 @@ def get_roar_object_callback(
         scenario=scenario,
         rng=seed,
         tae_runner=ta,
+        runhistory=runhistory,
+        run_id=run_id,
     )
 
 
 def get_random_search_object_callback(
-    scenario_dict,
-    seed,
-    ta,
-    **kwargs
+        scenario_dict,
+        seed,
+        ta,
+        backend,
+        metalearning_configurations,
+        runhistory,
+        run_id,
 ):
     """Random search.
 
@@ -41,6 +49,8 @@ def get_random_search_object_callback(
         scenario=scenario,
         rng=seed,
         tae_runner=ta,
+        runhistory=runhistory,
+        run_id=run_id,
     )
 
 
@@ -69,7 +79,8 @@ def main():
     print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
     automl = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=120, per_run_time_limit=30,
+        time_left_for_this_task=120,
+        per_run_time_limit=30,
         tmp_folder='/tmp/autosklearn_random_search_example_tmp',
         output_folder='/tmp/autosklearn_random_search_example_out',
         get_smac_object_callback=get_random_search_object_callback,

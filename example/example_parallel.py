@@ -55,7 +55,8 @@ def spawn_classifier(seed, dataset_name):
         ensemble_size=0, # ensembles will be built when all optimization runs are finished
         initial_configurations_via_metalearning=initial_configurations_via_metalearning,
         seed=seed,
-        smac_scenario_args=smac_scenario_args)
+        smac_scenario_args=smac_scenario_args,
+    )
     automl.fit(X_train, y_train, dataset_name=dataset_name)
 
 if __name__ == '__main__':
@@ -73,26 +74,30 @@ if __name__ == '__main__':
         p.join()
 
     print('Starting to build an ensemble!')
-    automl = AutoSklearnClassifier(time_left_for_this_task=15,
-                                   per_run_time_limit=15,
-                                   ml_memory_limit=1024,
-                                   shared_mode=True,
-                                   ensemble_size=50,
-                                   ensemble_nbest=200,
-                                   tmp_folder=tmp_folder,
-                                   output_folder=output_folder,
-                                   initial_configurations_via_metalearning=0,
-                                   seed=1)
+    automl = AutoSklearnClassifier(
+        time_left_for_this_task=15,
+        per_run_time_limit=15,
+        ml_memory_limit=1024,
+        shared_mode=True,
+        ensemble_size=50,
+        ensemble_nbest=200,
+        tmp_folder=tmp_folder,
+        output_folder=output_folder,
+        initial_configurations_via_metalearning=0,
+        seed=1,
+    )
 
     # Both the ensemble_size and ensemble_nbest parameters can be changed now if
     # necessary
-    automl.fit_ensemble(y_train,
-                        task=MULTICLASS_CLASSIFICATION,
-                        metric=accuracy,
-                        precision='32',
-                        dataset_name='digits',
-                        ensemble_size=20,
-                        ensemble_nbest=50)
+    automl.fit_ensemble(
+        y_train,
+        task=MULTICLASS_CLASSIFICATION,
+        metric=accuracy,
+        precision='32',
+        dataset_name='digits',
+        ensemble_size=20,
+        ensemble_nbest=50,
+    )
 
     predictions = automl.predict(X_test)
     print(automl.show_models())

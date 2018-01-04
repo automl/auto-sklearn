@@ -49,7 +49,8 @@ def get_eips_object_callback(
         tae_runner=ta,
         runhistory2epm=rh2EPM,
         model=model,
-        acquisition_function=acquisition_function
+        acquisition_function=acquisition_function,
+        **kwargs
     )
 
 
@@ -59,11 +60,11 @@ def main():
         sklearn.model_selection.train_test_split(X, y, random_state=1)
 
     automl = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=120, per_run_time_limit=30,
+        time_left_for_this_task=120,
+        per_run_time_limit=30,
         tmp_folder='/tmp/autosklearn_eips_example_tmp',
         output_folder='/tmp/autosklearn_eips_example_out',
         get_smac_object_callback=get_eips_object_callback,
-        delete_tmp_folder_after_terminate=False,
         initial_configurations_via_metalearning=0,
     )
     automl.fit(X_train, y_train, dataset_name='digits')
