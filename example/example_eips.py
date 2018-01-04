@@ -18,8 +18,12 @@ def get_eips_object_callback(
         scenario_dict,
         seed,
         ta,
-        **kwargs
+        backend,
+        metalearning_configurations,
+        runhistory,
+        run_id,
 ):
+    scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
     scenario = Scenario(scenario_dict)
     rh2EPM = RunHistory2EPM4EIPS(
         num_params=len(scenario.cs.get_hyperparameters()),
@@ -44,13 +48,14 @@ def get_eips_object_callback(
     )
     acquisition_function = EIPS(model)
     return SMAC(
+        runhistory=runhistory,
         scenario=scenario,
         rng=seed,
         tae_runner=ta,
         runhistory2epm=rh2EPM,
         model=model,
         acquisition_function=acquisition_function,
-        **kwargs
+        run_id=run_id,
     )
 
 

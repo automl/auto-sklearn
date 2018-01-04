@@ -20,6 +20,7 @@ def get_roar_object_callback(
     """Random online adaptive racing.
 
     http://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf"""
+    scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
     scenario = Scenario(scenario_dict)
     return ROAR(
         scenario=scenario,
@@ -42,6 +43,7 @@ def get_random_search_object_callback(
     """Random search.
 
     http://www.jmlr.org/papers/v13/bergstra12a.html"""
+    scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
     scenario_dict['minR'] = len(scenario_dict['instances'])
     scenario_dict['initial_incumbent'] = 'RANDOM'
     scenario = Scenario(scenario_dict)
