@@ -9,7 +9,7 @@ from autosklearn.pipeline.components.base import \
 class StandardScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
     def __init__(self, random_state):
         from sklearn.preprocessing import StandardScaler
-        self.preprocessor = StandardScaler()
+        self.preprocessor = StandardScaler(copy=False)
 
     @staticmethod
     def get_properties(dataset_properties=None):

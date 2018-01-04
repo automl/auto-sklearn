@@ -6,6 +6,7 @@ env:
   global:
   - OPENBLAS_NUM_THREADS=1
   - OMP_NUM_THREADS=1
+  - MKL_NUM_THREADS=1
 
 matrix:
   allow_failures:
@@ -13,21 +14,17 @@ matrix:
   
   include:
   - os: linux
-    env: DISTRIB="conda" PYTHON_VERSION="3.4" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh"
+    env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
   - os: linux
-    env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh"
+    env: DISTRIB="conda" PYTHON_VERSION="3.6" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
   - os: linux
-    env: DISTRIB="conda" PYTHON_VERSION="3.6" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh"
+    env: DISTRIB="conda" PYTHON_VERSION="3.6" EXAMPLES="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
 
   # Temporarily disabling OSX builds because thy take too long
   # Set language to generic to not break travis-ci
   # https://github.com/travis-ci/travis-ci/issues/2312#issuecomment-195620855
   # so far, this issue is still open and there is no good solution
   # python will then be installed by anaconda
-  #- os: osx
-  #  sudo: required
-  #  language: generic
-  #  env: DISTRIB="conda" PYTHON_VERSION="3.4" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh"
   #- os: osx
   #  sudo: required
   #  language: generic
@@ -55,11 +52,8 @@ before_install:
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - if [[ `which conda` ]]; then echo 'Conda installation successful'; else exit 1; fi
-  - conda create -n testenv --yes python=$PYTHON_VERSION pip wheel nose
+  - conda create -n testenv --yes python=$PYTHON_VERSION pip wheel nose gxx_linux-64 gcc_linux-64 swig
   - source activate testenv
-  - conda install --yes gcc swig
-  - echo "Using GCC at "`which gcc`
-  - export CC=`which gcc`
 
 install:
   # Install general requirements the way setup.py suggests

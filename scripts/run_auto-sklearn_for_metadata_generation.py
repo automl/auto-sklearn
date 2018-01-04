@@ -44,17 +44,20 @@ except:
     pass
 tmp_dir = os.path.join(configuration_output_dir, str(task_id))
 
-automl_arguments = {'time_left_for_this_task': time_limit,
-                    'per_run_time_limit': per_run_time_limit,
-                    'initial_configurations_via_metalearning': 0,
-                    'ensemble_size': 0,
-                    'ensemble_nbest': 0,
-                    'seed': seed,
-                    'ml_memory_limit': 3072,
-                    'resampling_strategy': 'partial-cv',
-                    'resampling_strategy_arguments': {'folds': 10},
-                    'delete_tmp_folder_after_terminate': False,
-                    'tmp_folder': tmp_dir}
+automl_arguments = {
+    'time_left_for_this_task': time_limit,
+    'per_run_time_limit': per_run_time_limit,
+    'initial_configurations_via_metalearning': 0,
+    'ensemble_size': 0,
+    'ensemble_nbest': 0,
+    'seed': seed,
+    'ml_memory_limit': 3072,
+    'resampling_strategy': 'partial-cv',
+    'resampling_strategy_arguments': {'folds': 10},
+    'delete_tmp_folder_after_terminate': False,
+    'tmp_folder': tmp_dir,
+    'disable_evaluator_output': True,
+}
 
 X_train, y_train, X_test, y_test, cat = load_task(task_id)
 
@@ -69,13 +72,13 @@ else:
 
 automl.fit(X_train, y_train, dataset_name=str(task_id), metric=metric,
            feat_type=cat)
-data = automl._automl._automl._backend.load_datamanager()
+data = automl._automl._backend.load_datamanager()
 # Data manager can't be replaced with save_datamanager, it has to be deleted
 # first
-os.remove(automl._automl._automl._backend._get_datamanager_pickle_filename())
+os.remove(automl._automl._backend._get_datamanager_pickle_filename())
 data.data['X_test'] = X_test
 data.data['Y_test'] = y_test
-automl._automl._automl._backend.save_datamanager(data)
+automl._automl._backend.save_datamanager(data)
 trajectory = automl.trajectory_
 
 incumbent_id_to_model = {}
@@ -103,7 +106,7 @@ for entry in trajectory:
         stats.start_timing()
         # To avoid the output "first run crashed"...
         stats.ta_runs += 1
-        ta = ExecuteTaFuncWithQueue(backend=automl._automl._automl._backend,
+        ta = ExecuteTaFuncWithQueue(backend=automl._automl._backend,
                                     autosklearn_seed=seed,
                                     resampling_strategy='test',
                                     memory_limit=memory_limit_factor * automl_arguments['ml_memory_limit'],
@@ -125,7 +128,9 @@ for entry in trajectory:
 
 validated_trajectory = [entry[:2] + [entry[2].get_dictionary()] + entry[3:]
                         for entry in validated_trajectory]
-validated_trajectory_file = os.path.join(tmp_dir, 'smac3-output_%d_run1' % seed,
+validated_trajectory_file = os.path.join(tmp_dir,
+                                         'smac3-output',
+                                         'run_%d' % seed,
                                          'validation_trajectory.json')
 with open(validated_trajectory_file, 'w') as fh:
     json.dump(validated_trajectory, fh)

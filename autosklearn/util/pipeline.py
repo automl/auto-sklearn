@@ -56,8 +56,10 @@ def _get_regression_configuration_space(info, include, exclude):
     if info['is_sparse'] == 1:
         sparse = True
     configuration_space = SimpleRegressionPipeline(
-        dataset_properties=info, include=include, exclude=exclude).\
-        get_hyperparameter_search_space()
+        dataset_properties={'sparse': sparse},
+        include=include,
+        exclude=exclude
+    ).get_hyperparameter_search_space()
     return configuration_space
 
 

@@ -1,3 +1,4 @@
+import numpy as np
 import openml
 
 
@@ -45,5 +46,10 @@ def load_task(task_id):
     del _
     del dataset
     cat = ['categorical' if c else 'numerical' for c in cat]
+
+    unique = np.unique(y_train)
+    mapping = {unique_value: i for i, unique_value in enumerate(unique)}
+    y_train = np.array([mapping[value] for value in y_train])
+    y_test = np.array([mapping[value] for value in y_test])
 
     return X_train, y_train, X_test, y_test, cat

@@ -13,10 +13,8 @@ from autosklearn.pipeline.constants import *
 class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self, n_estimators, criterion, min_samples_leaf,
-                 min_samples_split, max_features,
-                 max_leaf_nodes_or_max_depth="max_depth",
-                 bootstrap=False, max_leaf_nodes=None, max_depth="None",
-                 min_weight_fraction_leaf=0.0,
+                 min_samples_split, max_features, bootstrap, max_leaf_nodes,
+                 max_depth, min_weight_fraction_leaf, min_impurity_decrease,
                  oob_score=False, n_jobs=1, random_state=None, verbose=0,
                  class_weight=None):
 
@@ -27,27 +25,21 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
                              "%s" % criterion)
         self.criterion = criterion
 
-        if max_leaf_nodes_or_max_depth == "max_depth":
-            self.max_leaf_nodes = None
-            if max_depth == "None":
-                self.max_depth = None
-            else:
-                self.max_depth = int(max_depth)
-                # if use_max_depth == "True":
-                #    self.max_depth = int(max_depth)
-                #elif use_max_depth == "False":
-                #    self.max_depth = None
-        else:
-            if max_leaf_nodes == "None":
-                self.max_leaf_nodes = None
-            else:
-                self.max_leaf_nodes = int(max_leaf_nodes)
+        if max_depth == "None" or max_depth is None:
             self.max_depth = None
+        else:
+            self.max_depth = int(max_depth)
+        if max_leaf_nodes == "None" or max_leaf_nodes is None:
+            self.max_leaf_nodes = None
+        else:
+            self.max_leaf_nodes = int(max_leaf_nodes)
 
         self.min_samples_leaf = int(min_samples_leaf)
         self.min_samples_split = int(min_samples_split)
 
         self.max_features = float(max_features)
+        self.min_weight_fraction_leaf = min_weight_fraction_leaf
+        self.min_impurity_decrease = float(min_impurity_decrease)
 
         if bootstrap == "True":
             self.bootstrap = True
@@ -65,18 +57,22 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
         from sklearn.ensemble import ExtraTreesClassifier
         from sklearn.feature_selection import SelectFromModel
 
-        num_features = X.shape[1]
-        max_features = int(
-            float(self.max_features) * (np.log(num_features) + 1))
-        # Use at most half of the features
-        max_features = max(1, min(int(X.shape[1] / 2), max_features))
+        max_features = int(X.shape[1] ** float(self.max_features))
         estimator = ExtraTreesClassifier(
-            n_estimators=self.n_estimators, criterion=self.criterion,
-            max_depth=self.max_depth, min_samples_split=self.min_samples_split,
-            min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,
-            max_features=max_features, max_leaf_nodes=self.max_leaf_nodes,
-            oob_score=self.oob_score, n_jobs=self.n_jobs, verbose=self.verbose,
-            random_state=self.random_state, class_weight=self.class_weight)
+            n_estimators=self.n_estimators,
+            criterion=self.criterion,
+            max_depth=self.max_depth,
+            min_samples_split=self.min_samples_split,
+            min_samples_leaf=self.min_samples_leaf,
+            bootstrap=self.bootstrap,
+            max_features=max_features,
+            max_leaf_nodes=self.max_leaf_nodes,
+            min_impurity_decrease=self.min_impurity_decrease,
+            oob_score=self.oob_score,
+            n_jobs=self.n_jobs,
+            verbose=self.verbose,
+            random_state=self.random_state,
+            class_weight=self.class_weight)
         estimator.fit(X, Y, sample_weight=sample_weight)
         self.preprocessor = SelectFromModel(estimator=estimator,
                                             threshold='mean',
@@ -106,23 +102,28 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
 
         n_estimators = Constant("n_estimators", 100)
         criterion = CategoricalHyperparameter(
-            "criterion", ["gini", "entropy"], default="gini")
-        max_features = UniformFloatHyperparameter("max_features", 0.5, 5, default=1)
+            "criterion", ["gini", "entropy"], default_value="gini")
+        max_features = UniformFloatHyperparameter("max_features", 0, 1,
+                                                  default_value=0.5)
 
         max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
+        max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")
 
         min_samples_split = UniformIntegerHyperparameter(
-            "min_samples_split", 2, 20, default=2)
+            "min_samples_split", 2, 20, default_value=2)
         min_samples_leaf = UniformIntegerHyperparameter(
-            "min_samples_leaf", 1, 20, default=1)
-        min_weight_fraction_leaf = Constant(
+            "min_samples_leaf", 1, 20, default_value=1)
+        min_weight_fraction_leaf = UnParametrizedHyperparameter(
             'min_weight_fraction_leaf', 0.)
+        min_impurity_decrease = UnParametrizedHyperparameter(
+            'min_impurity_decrease', 0.)
 
         bootstrap = CategoricalHyperparameter(
-            "bootstrap", ["True", "False"], default="False")
+            "bootstrap", ["True", "False"], default_value="False")
 
         cs.add_hyperparameters([n_estimators, criterion, max_features,
-                                max_depth, min_samples_split, min_samples_leaf,
-                                min_weight_fraction_leaf, bootstrap])
+                                max_depth, max_leaf_nodes, min_samples_split,
+                                min_samples_leaf, min_weight_fraction_leaf,
+                                min_impurity_decrease, bootstrap])
 
         return cs

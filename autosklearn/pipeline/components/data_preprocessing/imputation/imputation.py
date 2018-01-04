@@ -7,10 +7,10 @@ from autosklearn.pipeline.constants import *
 
 class Imputation(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, strategy='median', random_state=None):
-        # TODO pay attention to the cases when a copy is made (CSR matrices)
         self.strategy = strategy
 
     def fit(self, X, y=None):
+        # Imputation does not support fit_transform (as of 0.19.1)!
         import sklearn.preprocessing
 
         self.preprocessor = sklearn.preprocessing.Imputer(
@@ -48,7 +48,7 @@ class Imputation(AutoSklearnPreprocessingAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         # TODO add replace by zero!
         strategy = CategoricalHyperparameter(
-            "strategy", ["mean", "median", "most_frequent"], default="mean")
+            "strategy", ["mean", "median", "most_frequent"], default_value="mean")
         cs = ConfigurationSpace()
         cs.add_hyperparameter(strategy)
         return cs

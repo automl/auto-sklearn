@@ -24,8 +24,10 @@ class SelectPercentileClassification(SelectPercentileBase,
             self.score_func = sklearn.feature_selection.chi2
         elif score_func == "f_classif":
             self.score_func = sklearn.feature_selection.f_classif
+        elif score_func == "mutual_info":
+            self.score_func = sklearn.feature_selection.mutual_info_classif
         else:
-            raise ValueError("score_func must be in ('chi2, 'f_classif'), "
+            raise ValueError("score_func must be in ('chi2, 'f_classif', 'mutual_info'), "
                              "but is: %s" % score_func)
 
     def fit(self, X, y):
@@ -89,10 +91,13 @@ class SelectPercentileClassification(SelectPercentileBase,
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         percentile = UniformFloatHyperparameter(
-            name="percentile", lower=1, upper=99, default=50)
+            name="percentile", lower=1, upper=99, default_value=50)
 
         score_func = CategoricalHyperparameter(
-            name="score_func", choices=["chi2", "f_classif"], default="chi2")
+            name="score_func",
+            choices=["chi2", "f_classif", "mutual_info"],
+            default_value="chi2"
+        )
         if dataset_properties is not None:
             # Chi2 can handle sparse data, so we respect this
             if 'sparse' in dataset_properties and dataset_properties['sparse']:

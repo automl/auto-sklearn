@@ -11,10 +11,12 @@ def main():
         sklearn.model_selection.train_test_split(X, y, random_state=1)
 
     automl = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=120, per_run_time_limit=30,
-        tmp_folder='/tmp/autoslearn_holdout_example_tmp',
+        time_left_for_this_task=120,
+        per_run_time_limit=30,
+        tmp_folder='/tmp/autosklearn_holdout_example_tmp',
         output_folder='/tmp/autosklearn_holdout_example_out',
-        disable_evaluator_output=False)
+        disable_evaluator_output=False,
+    )
     automl.fit(X_train, y_train, dataset_name='digits')
 
     # Print the final ensemble constructed by auto-sklearn.

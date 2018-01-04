@@ -37,7 +37,7 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
         self.fit_intercept = self.fit_intercept == 'True'
         self.intercept_scaling = float(self.intercept_scaling)
 
-        if self.class_weight == "None":
+        if self.class_weight == "None" or self.class_weight is None:
             self.class_weight = None
 
         estimator = sklearn.svm.LinearSVC(penalty=self.penalty,
@@ -88,15 +88,15 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
         cs = ConfigurationSpace()
 
         penalty = CategoricalHyperparameter(
-            "penalty", ["l1", "l2"], default="l2")
+            "penalty", ["l1", "l2"], default_value="l2")
         loss = CategoricalHyperparameter(
-            "loss", ["hinge", "squared_hinge"], default="squared_hinge")
+            "loss", ["hinge", "squared_hinge"], default_value="squared_hinge")
         dual = Constant("dual", "False")
         # This is set ad-hoc
         tol = UniformFloatHyperparameter(
-            "tol", 1e-5, 1e-1, default=1e-4, log=True)
+            "tol", 1e-5, 1e-1, default_value=1e-4, log=True)
         C = UniformFloatHyperparameter(
-            "C", 0.03125, 32768, log=True, default=1.0)
+            "C", 0.03125, 32768, log=True, default_value=1.0)
         multi_class = Constant("multi_class", "ovr")
         # These are set ad-hoc
         fit_intercept = Constant("fit_intercept", "True")

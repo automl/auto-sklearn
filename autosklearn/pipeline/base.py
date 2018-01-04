@@ -22,6 +22,7 @@ class BasePipeline(Pipeline):
                  include=None, exclude=None, random_state=None,
                  init_params=None):
 
+        self._init_params = init_params if init_params is not None else {}
         self.include_ = include if include is not None else {}
         self.exclude_ = exclude if exclude is not None else {}
         self.dataset_properties_ = dataset_properties if \
@@ -58,8 +59,11 @@ class BasePipeline(Pipeline):
             self.random_state = check_random_state(1)
         else:
             self.random_state = check_random_state(random_state)
+        super().__init__(steps=self.steps)
 
-    def fit(self, X, y, fit_params=None):
+        self._additional_run_info = {}
+
+    def fit(self, X, y, **fit_params):
         """Fit the selected algorithm to the training data.
 
         Parameters
@@ -85,35 +89,36 @@ class BasePipeline(Pipeline):
             NoModelException is raised if fit() is called without specifying
             a classification algorithm first.
         """
-        X, fit_params = self.fit_transformer(X, y, fit_params=fit_params)
+        X, fit_params = self.fit_transformer(X, y, **fit_params)
         self.fit_estimator(X, y, **fit_params)
         return self
 
     def fit_transformer(self, X, y, fit_params=None):
-        if fit_params is None or not isinstance(fit_params, dict):
-            fit_params = dict()
-        else:
-            fit_params = {key.replace(":", "__"): value for key, value in
-                          fit_params.items()}
-        X, fit_params = self._fit(X, y, **fit_params)
-        return X, fit_params
-
-    def fit_estimator(self, X, y, **fit_params):
+        self.num_targets = 1 if len(y.shape) == 1 else y.shape[1]
         if fit_params is None:
             fit_params = {}
-        self.steps[-1][-1].fit(X, y, **fit_params)
+        fit_params = {key.replace(":", "__"): value for key, value in
+                      fit_params.items()}
+        Xt, fit_params = self._fit(X, y, **fit_params)
+        if fit_params is None:
+            fit_params = {}
+        return Xt, fit_params
+
+    def fit_estimator(self, X, y, **fit_params):
+        fit_params = {key.replace(":", "__"): value for key, value in
+                      fit_params.items()}
+        self._final_estimator.fit(X, y, **fit_params)
         return self
 
     def iterative_fit(self, X, y, n_iter=1, **fit_params):
-        if fit_params is None:
-            fit_params = {}
-        self.steps[-1][-1].iterative_fit(X, y, n_iter=n_iter, **fit_params)
+        self._final_estimator.iterative_fit(X, y, n_iter=n_iter,
+                                            **fit_params)
 
     def estimator_supports_iterative_fit(self):
-        return self.steps[-1][-1].estimator_supports_iterative_fit()
+        return self._final_estimator.estimator_supports_iterative_fit()
 
     def configuration_fully_fitted(self):
-        return self.steps[-1][-1].configuration_fully_fitted()
+        return self._final_estimator.configuration_fully_fitted()
 
     def predict(self, X, batch_size=None):
         """Predict the classes using the selected model.
@@ -131,10 +136,9 @@ class BasePipeline(Pipeline):
         -------
         array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)
             Returns the predicted values"""
-        # TODO check if fit() was called before...
 
         if batch_size is None:
-            return super(BasePipeline, self).predict(X).astype(self._output_dtype)
+            return super().predict(X).astype(self._output_dtype)
         else:
             if not isinstance(batch_size, int):
                 raise ValueError("Argument 'batch_size' must be of type int, "
@@ -376,4 +380,12 @@ class BasePipeline(Pipeline):
 
     def _get_estimator_hyperparameter_name(self):
         raise NotImplementedError()
+
+    def get_additional_run_info(self):
+        """Allows retrieving additional run information from the pipeline.
+
+        Can be overridden by subclasses to return additional information to
+        the optimization algorithm.
+        """
+        return self._additional_run_info
 

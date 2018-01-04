@@ -19,7 +19,7 @@ class FastICA(AutoSklearnPreprocessingAlgorithm):
         self.fun = fun
         self.random_state = random_state
 
-    def fit(self, X, Y=None):
+    def _fit(self, X, Y=None):
         import sklearn.decomposition
 
         self.preprocessor = sklearn.decomposition.FastICA(
@@ -30,12 +30,19 @@ class FastICA(AutoSklearnPreprocessingAlgorithm):
         with warnings.catch_warnings():
             warnings.filterwarnings("error", message='array must not contain infs or NaNs')
             try:
-                self.preprocessor.fit(X)
+                return self.preprocessor.fit_transform(X)
             except ValueError as e:
                 if 'array must not contain infs or NaNs' in e.args[0]:
                     raise ValueError("Bug in scikit-learn: https://github.com/scikit-learn/scikit-learn/pull/2738")
 
         return self
+
+    def fit(self, X, y):
+        self._fit(X)
+        return self
+
+    def fit_transform(self, X, y=None):
+        return self._fit(X)
 
     def transform(self, X):
         if self.preprocessor is None:
@@ -59,7 +66,7 @@ class FastICA(AutoSklearnPreprocessingAlgorithm):
         cs = ConfigurationSpace()
 
         n_components = UniformIntegerHyperparameter(
-            "n_components", 10, 2000, default=100)
+            "n_components", 10, 2000, default_value=100)
         algorithm = CategoricalHyperparameter('algorithm',
             ['parallel', 'deflation'], 'parallel')
         whiten = CategoricalHyperparameter('whiten',

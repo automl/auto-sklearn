@@ -11,6 +11,27 @@
 Releases
 ========
 
+Version 0.3.0
+=============
+
+* Upgrade to scikit-learn 0.19.1.
+* Do not use the ``DummyClassifier`` or ``DummyRegressor`` as part of an
+  ensemble. Fixes `#140 <https://github.com/automl/auto-sklearn/issues/140>`_.
+* Fixes #295 by loading the data in the subprocess instead of the main process.
+* Fixes #326: refitting could result in a type error. This is now fixed by
+  better type checking in the classification components.
+* Updated search space for ``RandomForestClassifier``, ``ExtraTreesClassifier``
+  and ``GradientBoostingClassifier`` (fixes #358).
+* Removal of constant features is now a part of the pipeline.
+* Allow passing an SMBO object into the ``AutoSklearnClassifier`` and
+  ``AutoSklearnRegressor``.
+
+Contributors
+~~~~~~~~~~~~
+
+* Matthias Feurer
+* Jesper van Engelen
+
 Version 0.2.1
 =============
 

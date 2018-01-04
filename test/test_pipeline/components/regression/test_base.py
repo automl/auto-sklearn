@@ -37,11 +37,9 @@ class BaseRegressionComponentTest(unittest.TestCase):
             else:
                 score = sklearn.metrics.r2_score(targets, predictions)
                 fixture = self.res["default_boston"]
-
                 if score < -1e10:
                     score = np.log(-score)
                     fixture = np.log(-fixture)
-
                 self.assertAlmostEqual(
                     fixture,
                     score,

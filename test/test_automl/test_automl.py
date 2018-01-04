@@ -8,6 +8,8 @@ import unittest.mock
 
 import numpy as np
 import sklearn.datasets
+from smac.scenario.scenario import Scenario
+from smac.facade.roar_facade import ROAR
 
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.automl import AutoML
@@ -109,17 +111,35 @@ class AutoMLTest(Base, unittest.TestCase):
         self._tearDown(output)
 
     def test_fit_roar(self):
+        def get_roar_object_callback(
+                scenario_dict,
+                seed,
+                ta,
+                **kwargs
+        ):
+            """Random online adaptive racing.
+
+            http://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf"""
+            scenario = Scenario(scenario_dict)
+            return ROAR(
+                scenario=scenario,
+                rng=seed,
+                tae_runner=ta,
+            )
+
         output = os.path.join(self.test_dir, '..', '.tmp_test_fit_roar')
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         backend_api = backend.create(output, output)
-        automl = autosklearn.automl.AutoML(backend_api, 20, 5,
-                                           initial_configurations_via_metalearning=0,
-                                           configuration_mode='ROAR')
+        automl = autosklearn.automl.AutoML(
+            backend=backend_api,
+            time_left_for_this_task=20,
+            per_run_time_limit=5,
+            initial_configurations_via_metalearning=0,
+            get_smac_object_callback=get_roar_object_callback,
+        )
         automl.fit(X_train, Y_train, metric=accuracy)
-        # print(automl.show_models(), flush=True)
-        # print(automl.cv_results_, flush=True)
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
@@ -172,8 +192,9 @@ class AutoMLTest(Base, unittest.TestCase):
         backend_api = backend.create(output, output)
         auto = autosklearn.automl.AutoML(
             backend_api, 20, 5,
-            initial_configurations_via_metalearning=25,
-            seed=100)
+            initial_configurations_via_metalearning=0,
+            seed=100,
+        )
         auto.fit_automl_dataset(dataset, accuracy)
 
         # pickled data manager (without one hot encoding!)

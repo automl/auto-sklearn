@@ -12,53 +12,89 @@ from autosklearn.pipeline.implementations.util import softmax
 
 
 class PassiveAggressive(AutoSklearnClassificationAlgorithm):
-    def __init__(self, C, fit_intercept, n_iter, loss, random_state=None):
+    def __init__(self, C, fit_intercept, tol, loss, average, random_state=None):
         self.C = float(C)
         self.fit_intercept = fit_intercept == 'True'
-        self.n_iter = int(n_iter)
+        self.tol = float(tol)
         self.loss = loss
+        self.average = average == 'True'
         self.random_state = random_state
         self.estimator = None
 
     def fit(self, X, y):
-        self.iterative_fit(X, y, n_iter=1, refit=True)
+        n_iter = 2
+        self.iterative_fit(X, y, n_iter=n_iter, refit=True)
         while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=1)
+            n_iter *= 2
+            self.iterative_fit(X, y, n_iter=n_iter)
 
         return self
 
-    def iterative_fit(self, X, y, n_iter=1, refit=False):
+    def iterative_fit(self, X, y, n_iter=2, refit=False):
         from sklearn.linear_model.passive_aggressive import \
             PassiveAggressiveClassifier
+
+        # Need to fit at least two iterations, otherwise early stopping will not
+        # work because we cannot determine whether the algorithm actually
+        # converged. The only way of finding this out is if the sgd spends less
+        # iterations than max_iter. If max_iter == 1, it has to spend at least
+        # one iteration and will always spend at least one iteration, so we
+        # cannot know about convergence.
 
         if refit:
             self.estimator = None
 
         if self.estimator is None:
-            self._iterations = 0
-
+            call_fit = True
             self.estimator = PassiveAggressiveClassifier(
-                C=self.C, fit_intercept=self.fit_intercept, n_iter=1,
-                loss=self.loss, shuffle=True, random_state=self.random_state,
-                warm_start=True)
+                C=self.C,
+                fit_intercept=self.fit_intercept,
+                max_iter=n_iter,
+                tol=self.tol,
+                loss=self.loss,
+                shuffle=True,
+                random_state=self.random_state,
+                warm_start=True,
+                average=self.average,
+            )
             self.classes_ = np.unique(y.astype(int))
+        else:
+            call_fit = False
 
         # Fallback for multilabel classification
         if len(y.shape) > 1 and y.shape[1] > 1:
             import sklearn.multiclass
-            self.estimator.n_iter = self.n_iter
+            self.estimator.max_iter = 50
             self.estimator = sklearn.multiclass.OneVsRestClassifier(
                 self.estimator, n_jobs=1)
             self.estimator.fit(X, y)
             self.fully_fit_ = True
         else:
-            # In the first iteration, there is not yet an intercept
-
-            self.estimator.n_iter = n_iter
-            self.estimator.partial_fit(X, y, classes=np.unique(y))
-            if self._iterations >= self.n_iter:
-                self.fully_fit_ = True
-            self._iterations += n_iter
+            if call_fit:
+                self.estimator.fit(X, y)
+            else:
+                self.estimator.max_iter += n_iter
+                self.estimator.max_iter = min(self.estimator.max_iter,
+                                              1000)
+                self.estimator._validate_params()
+                lr = "pa1" if self.estimator.loss == "hinge" else "pa2"
+                self.estimator._partial_fit(
+                    X, y,
+                    alpha=1.0,
+                    C=self.estimator.C,
+                    loss="hinge",
+                    learning_rate=lr,
+                    max_iter=n_iter,
+                    classes=None,
+                    sample_weight=None,
+                    coef_init=None,
+                    intercept_init=None
+                )
+                if (
+                    self.estimator._max_iter >= 1000
+                    or n_iter > self.estimator.n_iter_
+                ):
+                    self.fully_fit_ = True
 
         return self
 
@@ -96,13 +132,16 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        loss = CategoricalHyperparameter("loss",
-                                         ["hinge", "squared_hinge"],
-                                         default="hinge")
+        C = UniformFloatHyperparameter("C", 1e-5, 10, 1.0, log=True)
         fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
-        n_iter = UniformIntegerHyperparameter("n_iter", 5, 1000, default=20,
-                                              log=True)
-        C = UniformFloatHyperparameter("C", 1e-5, 10, 1, log=True)
+        loss = CategoricalHyperparameter(
+            "loss", ["hinge", "squared_hinge"], default_value="hinge"
+        )
+
+        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4,
+                                         log=True)
+        average = CategoricalHyperparameter('average', [False, True])
+
         cs = ConfigurationSpace()
-        cs.add_hyperparameters([loss, fit_intercept, n_iter, C])
+        cs.add_hyperparameters([loss, fit_intercept, tol, C, average])
         return cs

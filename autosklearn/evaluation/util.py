@@ -30,3 +30,14 @@ def get_last_result(queue_):
         raise queue.Empty
     else:
         return stack.pop()
+
+
+def empty_queue(queue_):
+    while True:
+        try:
+            rval = queue_.get(block=False)
+        except queue.Empty:
+            break
+
+    queue_.close()
+

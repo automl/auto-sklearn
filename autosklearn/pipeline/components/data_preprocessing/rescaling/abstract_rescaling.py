@@ -2,6 +2,8 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 
 
 class Rescaling(object):
+    # Rescaling does not support fit_transform (as of 0.19.1)!
+
     def fit(self, X, y=None):
         self.preprocessor.fit(X)
         return self

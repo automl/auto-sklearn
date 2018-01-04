@@ -24,8 +24,9 @@ class AbstractEvaluatorTest(unittest.TestCase):
         D = get_multiclass_classification_datamanager()
 
         backend_api = unittest.mock.Mock()
+        backend_api.load_datamanager.return_value = D
         queue_mock = unittest.mock.Mock()
-        ae = AbstractEvaluator(datamanager=D, backend=backend_api,
+        ae = AbstractEvaluator(backend=backend_api,
                                output_y_hat_optimization=False,
                                queue=queue_mock, metric=accuracy)
         ae.Y_optimization = rs.rand(33, 3)
@@ -68,14 +69,19 @@ class AbstractEvaluatorTest(unittest.TestCase):
     def test_disable_file_output(self, exists_mock):
         backend_mock = unittest.mock.Mock()
         backend_mock.get_model_dir.return_value = 'abc'
+        D = get_multiclass_classification_datamanager()
+        backend_mock.load_datamanager.return_value = D
         queue_mock = unittest.mock.Mock()
 
         rs = np.random.RandomState(1)
-        D = get_multiclass_classification_datamanager()
 
-        ae = AbstractEvaluator(datamanager=D, backend=backend_mock,
-                               queue=queue_mock, disable_file_output=True,
-                               metric=accuracy)
+
+        ae = AbstractEvaluator(
+            backend=backend_mock,
+            queue=queue_mock,
+            disable_file_output=True,
+            metric=accuracy,
+        )
 
         predictions_ensemble = rs.rand(33, 3)
         predictions_test = rs.rand(25, 3)
@@ -90,10 +96,13 @@ class AbstractEvaluatorTest(unittest.TestCase):
         self.assertEqual(backend_mock.save_predictions_as_npy.call_count, 0)
         self.assertEqual(backend_mock.save_model.call_count, 0)
 
-        ae = AbstractEvaluator(datamanager=D, backend=backend_mock,
-                               output_y_hat_optimization=False,
-                               queue=queue_mock, disable_file_output=['model'],
-                               metric=accuracy)
+        ae = AbstractEvaluator(
+            backend=backend_mock,
+            output_y_hat_optimization=False,
+            queue=queue_mock,
+            disable_file_output=['model'],
+            metric=accuracy,
+        )
         ae.Y_optimization = predictions_ensemble
 
         loss_, additional_run_info_ = ae.file_output(
@@ -105,10 +114,13 @@ class AbstractEvaluatorTest(unittest.TestCase):
         self.assertEqual(backend_mock.save_predictions_as_npy.call_count, 3)
         self.assertEqual(backend_mock.save_model.call_count, 0)
 
-        ae = AbstractEvaluator(datamanager=D, backend=backend_mock,
-                               output_y_hat_optimization=False,
-                               queue=queue_mock, metric=accuracy,
-                               disable_file_output=['y_optimization'])
+        ae = AbstractEvaluator(
+            backend=backend_mock,
+            output_y_hat_optimization=False,
+            queue=queue_mock,
+            metric=accuracy,
+            disable_file_output=['y_optimization'],
+        )
         exists_mock.return_value = True
         ae.Y_optimization = predictions_ensemble
         ae.model = 'model'

@@ -1,5 +1,6 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import UniformFloatHyperparameter, UnParametrizedHyperparameter
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter,  \
+    CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.components.feature_preprocessing.select_percentile import SelectPercentileBase
@@ -22,6 +23,8 @@ class SelectPercentileRegression(SelectPercentileBase,
         self.percentile = int(float(percentile))
         if score_func == "f_regression":
             self.score_func = sklearn.feature_selection.f_regression
+        elif score_func == "mutual_info":
+            self.score_func = sklearn.feature_selection.mutual_info_regression
         else:
             raise ValueError("Don't know this scoring function: %s" % score_func)
 
@@ -34,16 +37,16 @@ class SelectPercentileRegression(SelectPercentileBase,
                 'handles_multiclass': False,
                 'handles_multilabel': False,
                 'is_deterministic': True,
-                'input': (DENSE, UNSIGNED_DATA),
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (INPUT,)}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         percentile = UniformFloatHyperparameter(
-            "percentile", lower=1, upper=99, default=50)
+            "percentile", lower=1, upper=99, default_value=50)
 
-        score_func = UnParametrizedHyperparameter(
-            name="score_func", value="f_regression")
+        score_func = CategoricalHyperparameter(
+            name="score_func", choices=["f_regression", "mutual_info"])
 
         cs = ConfigurationSpace()
         cs.add_hyperparameters([percentile, score_func])

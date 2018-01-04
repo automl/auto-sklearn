@@ -1,13 +1,11 @@
 # -*- encoding: utf-8 -*-
-from collections import defaultdict
 import io
 import json
 import os
 import unittest.mock
 import warnings
 
-
-from ConfigSpace.io import pcs
+from ConfigSpace.read_and_write import pcs
 import numpy as np
 import numpy.ma as ma
 import scipy.stats
@@ -15,6 +13,9 @@ from sklearn.base import BaseEstimator
 from smac.tae.execute_ta_run import StatusType
 from smac.stats.stats import Stats
 from sklearn.externals import joblib
+import sklearn.utils
+import scipy.sparse
+from sklearn.metrics.classification import type_of_target
 
 from autosklearn.constants import *
 from autosklearn.metrics import Scorer
@@ -27,6 +28,8 @@ from autosklearn.util import StopWatch, get_logger, setup_logger, \
 from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
+from autosklearn.metrics import f1_macro, accuracy, r2
+from autosklearn.constants import *
 
 
 def _model_predict(self, X, batch_size, identifier):
@@ -58,7 +61,6 @@ class AutoML(BaseEstimator):
                  backend,
                  time_left_for_this_task,
                  per_run_time_limit,
-                 log_dir=None,
                  initial_configurations_via_metalearning=25,
                  ensemble_size=1,
                  ensemble_nbest=1,
@@ -73,21 +75,18 @@ class AutoML(BaseEstimator):
                  exclude_preprocessors=None,
                  resampling_strategy='holdout-iterative-fit',
                  resampling_strategy_arguments=None,
-                 delete_tmp_folder_after_terminate=False,
-                 delete_output_folder_after_terminate=False,
                  shared_mode=False,
                  precision=32,
-                 max_iter_smac=None,
-                 acquisition_function='EI',
                  disable_evaluator_output=False,
-                 configuration_mode='SMAC'):
+                 get_smac_object_callback=None,
+                 smac_scenario_args=None,
+                 ):
         super(AutoML, self).__init__()
         self._backend = backend
         #self._tmp_dir = tmp_dir
         #self._output_dir = output_dir
         self._time_for_task = time_left_for_this_task
         self._per_run_time_limit = per_run_time_limit
-        #self._log_dir = log_dir if log_dir is not None else self._tmp_dir
         self._initial_configurations_via_metalearning = \
             initial_configurations_via_metalearning
         self._ensemble_size = ensemble_size
@@ -104,16 +103,11 @@ class AutoML(BaseEstimator):
         self._resampling_strategy = resampling_strategy
         self._resampling_strategy_arguments = resampling_strategy_arguments \
             if resampling_strategy_arguments is not None else {}
-        self._max_iter_smac = max_iter_smac
-        #self.delete_tmp_folder_after_terminate = \
-        #    delete_tmp_folder_after_terminate
-        #self.delete_output_folder_after_terminate = \
-        #    delete_output_folder_after_terminate
         self._shared_mode = shared_mode
         self.precision = precision
-        self.acquisition_function = acquisition_function
         self._disable_evaluator_output = disable_evaluator_output
-        self._configuration_mode = configuration_mode
+        self._get_smac_object_callback = get_smac_object_callback
+        self._smac_scenario_args = smac_scenario_args
 
         self._datamanager = None
         self._dataset_name = None
@@ -316,11 +310,6 @@ class AutoML(BaseEstimator):
                 not 'folds' in self._resampling_strategy_arguments:
             self._resampling_strategy_arguments['folds'] = 5
 
-        acquisition_functions = ['EI', 'EIPS']
-        if self.acquisition_function not in acquisition_functions:
-            raise ValueError('Illegal acquisition %s: Must be one of %s.' %
-                             (self.acquisition_function, acquisition_functions))
-
         self._backend._make_internals_directory()
         if self._keep_models:
             try:
@@ -420,35 +409,36 @@ class AutoML(BaseEstimator):
             else:
                 per_run_time_limit = self._per_run_time_limit
 
-            _proc_smac = AutoMLSMBO(config_space=self.configuration_space,
-                                    dataset_name=self._dataset_name,
-                                    backend=self._backend,
-                                    total_walltime_limit=time_left_for_smac,
-                                    func_eval_time_limit=per_run_time_limit,
-                                    memory_limit=self._ml_memory_limit,
-                                    data_memory_limit=self._data_memory_limit,
-                                    watcher=self._stopwatch,
-                                    start_num_run=num_run,
-                                    num_metalearning_cfgs=self._initial_configurations_via_metalearning,
-                                    config_file=configspace_path,
-                                    smac_iters=self._max_iter_smac,
-                                    seed=self._seed,
-                                    metadata_directory=self._metadata_directory,
-                                    metric=self._metric,
-                                    resampling_strategy=self._resampling_strategy,
-                                    resampling_strategy_args=self._resampling_strategy_arguments,
-                                    acquisition_function=self.acquisition_function,
-                                    shared_mode=self._shared_mode,
-                                    include_estimators=self._include_estimators,
-                                    exclude_estimators=self._exclude_estimators,
-                                    include_preprocessors=self._include_preprocessors,
-                                    exclude_preprocessors=self._exclude_preprocessors,
-                                    disable_file_output=self._disable_evaluator_output,
-                                    configuration_mode=self._configuration_mode)
-            self.runhistory_, self.trajectory_, self.fANOVA_input_ = \
+            _proc_smac = AutoMLSMBO(
+                config_space=self.configuration_space,
+                dataset_name=self._dataset_name,
+                backend=self._backend,
+                total_walltime_limit=time_left_for_smac,
+                func_eval_time_limit=per_run_time_limit,
+                memory_limit=self._ml_memory_limit,
+                data_memory_limit=self._data_memory_limit,
+                watcher=self._stopwatch,
+                start_num_run=num_run,
+                num_metalearning_cfgs=self._initial_configurations_via_metalearning,
+                config_file=configspace_path,
+                seed=self._seed,
+                metadata_directory=self._metadata_directory,
+                metric=self._metric,
+                resampling_strategy=self._resampling_strategy,
+                resampling_strategy_args=self._resampling_strategy_arguments,
+                shared_mode=self._shared_mode,
+                include_estimators=self._include_estimators,
+                exclude_estimators=self._exclude_estimators,
+                include_preprocessors=self._include_preprocessors,
+                exclude_preprocessors=self._exclude_preprocessors,
+                disable_file_output=self._disable_evaluator_output,
+                get_smac_object_callback=self._get_smac_object_callback,
+                smac_scenario_args=self._smac_scenario_args,
+            )
+            self.runhistory_, self.trajectory_ = \
                 _proc_smac.run_smbo()
             trajectory_filename = os.path.join(
-                self._backend.get_smac_output_directory(self._seed) + '_run1',
+                self._backend.get_smac_output_directory_for_run(self._seed),
                 'trajectory.json')
             saveable_trajectory = \
                 [list(entry[:2]) + [entry[2].get_dictionary()] + list(entry[3:])
@@ -703,18 +693,18 @@ class AutoML(BaseEstimator):
             mean_test_score.append(1 - run_value.cost)
             mean_fit_time.append(run_value.time)
             s = run_value.status
-            if s == 1:
+            if s == StatusType.SUCCESS:
                 status.append('Success')
-            elif s == 2:
+            elif s == StatusType.TIMEOUT:
                 status.append('Timeout')
-            elif s == 3:
+            elif s == StatusType.CRASHED:
                 status.append('Crash')
-            elif s == 4:
+            elif s == StatusType.ABORT:
                 status.append('Abort')
-            elif s == 5:
+            elif s == StatusType.MEMOUT:
                 status.append('Memout')
             else:
-                status.append('Unknown')
+                raise NotImplementedError(s)
 
             for hp_name in hp_names:
                 if hp_name in param_dict:
@@ -808,3 +798,169 @@ class AutoML(BaseEstimator):
 
     def configuration_space_created_hook(self, datamanager, configuration_space):
         return configuration_space
+
+
+class BaseAutoML(AutoML):
+    """Base class for AutoML objects to hold abstract functions for both
+    regression and classification."""
+
+    def __init__(self, *args, **kwargs):
+        self._n_outputs = 1
+        super().__init__(*args, **kwargs)
+
+    def _perform_input_checks(self, X, y):
+        X = self._check_X(X)
+        y = self._check_y(y)
+        return X, y
+
+    def _check_X(self, X):
+        X = sklearn.utils.check_array(X, accept_sparse="csr",
+                                      force_all_finite=False)
+        if scipy.sparse.issparse(X):
+            X.sort_indices()
+        return X
+
+    def _check_y(self, y):
+        y = sklearn.utils.check_array(y, ensure_2d=False)
+
+        y = np.atleast_1d(y)
+        if y.ndim == 2 and y.shape[1] == 1:
+            warnings.warn("A column-vector y was passed when a 1d array was"
+                          " expected. Will change shape via np.ravel().",
+                          sklearn.utils.DataConversionWarning, stacklevel=2)
+            y = np.ravel(y)
+
+        return y
+
+    def refit(self, X, y):
+        X, y = self._perform_input_checks(X, y)
+        _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
+        if self._n_outputs != _n_outputs:
+            raise ValueError('Number of outputs changed from %d to %d!' %
+                             (self._n_outputs, _n_outputs))
+
+        return super().refit(X, y)
+
+    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+                     dataset_name=None, ensemble_nbest=None,
+                     ensemble_size=None):
+        _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
+        if self._n_outputs != _n_outputs:
+            raise ValueError('Number of outputs changed from %d to %d!' %
+                             (self._n_outputs, _n_outputs))
+
+        return super().fit_ensemble(
+            y, task=task, metric=metric, precision=precision,
+            dataset_name=dataset_name, ensemble_nbest=ensemble_nbest,
+            ensemble_size=ensemble_size
+        )
+
+
+class AutoMLClassifier(BaseAutoML):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._task_mapping = {'multilabel-indicator': MULTILABEL_CLASSIFICATION,
+                              'multiclass': MULTICLASS_CLASSIFICATION,
+                              'binary': BINARY_CLASSIFICATION}
+
+    def fit(self, X, y,
+            metric=None,
+            loss=None,
+            feat_type=None,
+            dataset_name=None):
+        X, y = self._perform_input_checks(X, y)
+
+        y_task = type_of_target(y)
+        task = self._task_mapping.get(y_task)
+        if task is None:
+            raise ValueError('Cannot work on data of type %s' % y_task)
+
+        if metric is None:
+            if task == MULTILABEL_CLASSIFICATION:
+                metric = f1_macro
+            else:
+                metric = accuracy
+
+        y, self._classes, self._n_classes = self._process_target_classes(y)
+
+        return super().fit(X, y, task, metric, feat_type, dataset_name)
+
+    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+                     dataset_name=None, ensemble_nbest=None,
+                     ensemble_size=None):
+        y, _classes, _n_classes = self._process_target_classes(y)
+        if not hasattr(self, '_classes'):
+            self._classes = _classes
+        if not hasattr(self, '_n_classes'):
+            self._n_classes = _n_classes
+
+        return super().fit_ensemble(y, task, metric, precision, dataset_name,
+                                    ensemble_nbest, ensemble_size)
+
+    def _process_target_classes(self, y):
+        y = super()._check_y(y)
+        self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
+
+        y = np.copy(y)
+
+        _classes = []
+        _n_classes = []
+
+        if self._n_outputs == 1:
+            classes_k, y = np.unique(y, return_inverse=True)
+            _classes.append(classes_k)
+            _n_classes.append(classes_k.shape[0])
+        else:
+            for k in range(self._n_outputs):
+                classes_k, y[:, k] = np.unique(y[:, k], return_inverse=True)
+                _classes.append(classes_k)
+                _n_classes.append(classes_k.shape[0])
+
+        self._n_classes = np.array(_n_classes, dtype=np.int)
+
+        return y, _classes, _n_classes
+
+    def predict(self, X, batch_size=None, n_jobs=1):
+        predicted_probabilities = super().predict(X, batch_size=batch_size,
+                                                  n_jobs=n_jobs)
+
+        if self._n_outputs == 1:
+            predicted_indexes = np.argmax(predicted_probabilities, axis=1)
+            predicted_classes = self._classes[0].take(predicted_indexes)
+
+            return predicted_classes
+        else:
+            predicted_indices = (predicted_probabilities > 0.5).astype(int)
+            n_samples = predicted_probabilities.shape[0]
+            predicted_classes = np.zeros((n_samples, self._n_outputs))
+
+            for k in range(self._n_outputs):
+                output_predicted_indexes = predicted_indices[:, k].reshape(-1)
+                predicted_classes[:, k] = self._classes[k].take(
+                    output_predicted_indexes)
+
+            return predicted_classes
+
+    def predict_proba(self, X, batch_size=None, n_jobs=1):
+        return self._automl.predict(X, batch_size=batch_size, n_jobs=n_jobs)
+
+
+class AutoMLRegressor(BaseAutoML):
+    def fit(self, X, y, metric=None, feat_type=None, dataset_name=None):
+        X, y = super()._perform_input_checks(X, y)
+        _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
+        if _n_outputs > 1:
+            raise NotImplementedError(
+                'Multi-output regression is not implemented.')
+        if metric is None:
+            metric = r2
+        return super().fit(X, y, task=REGRESSION, metric=metric,
+                           feat_type=feat_type, dataset_name=dataset_name)
+
+    def fit_ensemble(self, y, task=None, metric=None, precision='32',
+                     dataset_name=None, ensemble_nbest=None,
+                     ensemble_size=None):
+        y = super()._check_y(y)
+        return super().fit_ensemble(y, task, metric, precision, dataset_name,
+                                    ensemble_nbest, ensemble_size)

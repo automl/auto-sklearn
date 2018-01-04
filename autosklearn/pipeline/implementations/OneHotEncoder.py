@@ -1,8 +1,6 @@
 import numpy as np
 from scipy import sparse
-
 from sklearn.base import BaseEstimator, TransformerMixin
-
 from sklearn.utils import check_array
 
 
@@ -53,6 +51,8 @@ def _transform_selected(X, transform, selected="all", copy=True):
         X_not_sel = X[:, ind[not_sel]]
 
         if sparse.issparse(X_sel) or sparse.issparse(X_not_sel):
+            # This is pretty memory-intense, making the memory usage for OpenML
+            # task 146810 go over 3GB
             return sparse.hstack((X_sel, X_not_sel), format='csr')
         else:
             return np.hstack((X_sel, X_not_sel))
@@ -166,7 +166,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
             X[~np.isfinite(X)] = 2
 
         X = check_array(X, accept_sparse='csc', force_all_finite=False,
-                        dtype=int)
+                        dtype=np.int32)
 
         if X.min() < 0:
             raise ValueError("X needs to contain only non-negative integers.")
@@ -176,38 +176,26 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
         if self.minimum_fraction is not None:
             do_not_replace_by_other = list()
             for column in range(X.shape[1]):
-                do_not_replace_by_other.append(list())
+                do_not_replace_by_other.append(set())
 
                 if sparse.issparse(X):
                     indptr_start = X.indptr[column]
                     indptr_end = X.indptr[column + 1]
-                    unique = np.unique(X.data[indptr_start:indptr_end])
+                    unique, counts = np.unique(
+                        X.data[indptr_start:indptr_end], return_counts=True,
+                    )
                     colsize = indptr_end - indptr_start
                 else:
-                    unique = np.unique(X[:, column])
+                    unique, counts = np.unique(
+                        X[:, column], return_counts=True,
+                    )
                     colsize = X.shape[0]
 
-                for unique_value in unique:
-                    if np.isfinite(unique_value):
-                        if sparse.issparse(X):
-                            indptr_start = X.indptr[column]
-                            indptr_end = X.indptr[column + 1]
-                            count = np.nansum(unique_value ==
-                                              X.data[indptr_start:indptr_end])
-                        else:
-                            count = np.nansum(unique_value == X[:, column])
-                    else:
-                        if sparse.issparse(X):
-                            indptr_start = X.indptr[column]
-                            indptr_end = X.indptr[column + 1]
-                            count = np.nansum(~np.isfinite(
-                                X.data[indptr_start:indptr_end]))
-                        else:
-                            count = np.nansum(~np.isfinite(X[:, column]))
+                for unique_value, count in zip(unique, counts):
 
                     fraction = float(count) / colsize
                     if fraction >= self.minimum_fraction:
-                        do_not_replace_by_other[-1].append(unique_value)
+                        do_not_replace_by_other[-1].add(unique_value)
 
                 for unique_value in unique:
                     if unique_value not in do_not_replace_by_other[-1]:
@@ -242,14 +230,14 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
                 column_indices.extend(column_indices_)
             data = np.ones(X.data.size)
         else:
-            column_indices = (X + indices[:-1]).ravel()
+            column_indices = (X + indices[:-1]).ravel().astype(np.int32)
             row_indices = np.repeat(np.arange(n_samples, dtype=np.int32),
                                     n_features)
-            data = np.ones(n_samples * n_features)
+            data = np.ones(n_samples * n_features, dtype=np.int32)
 
         out = sparse.coo_matrix((data, (row_indices, column_indices)),
                                 shape=(n_samples, indices[-1]),
-                                dtype=self.dtype).tocsc()
+                                dtype=np.int32).tocsc()
 
         mask = np.array(out.sum(axis=0)).ravel() != 0
         active_features = np.where(mask)[0]
@@ -280,7 +268,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
             X[~np.isfinite(X)] = 2
 
         X = check_array(X, accept_sparse='csc', force_all_finite=False,
-                        dtype=int)
+                        dtype=np.int32)
         if X.min() < 0:
             raise ValueError("X needs to contain only non-negative integers.")
         n_samples, n_features = X.shape
@@ -342,13 +330,13 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
                 column_indices.extend(column_indices_)
             data = np.ones(X.data.size)
         else:
-            column_indices = (X + indices[:-1]).ravel()
+            column_indices = (X + indices[:-1]).ravel().astype(np.int32)
             row_indices = np.repeat(np.arange(n_samples, dtype=np.int32),
                                     n_features)
-            data = np.ones(n_samples * n_features)
+            data = np.ones(n_samples * n_features, dtype=np.int32)
         out = sparse.coo_matrix((data, (row_indices, column_indices)),
                                 shape=(n_samples, indices[-1]),
-                                dtype=self.dtype).tocsc()
+                                dtype=np.int32).tocsc()
 
         out = out[:, self.active_features_]
         return out.tocsr() if self.sparse else out.toarray()

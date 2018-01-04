@@ -18,8 +18,8 @@ class KNearestNeighborsComponentTest(BaseClassificationComponentTest):
     res["default_digits"] = 0.93321190042501523
     res["default_digits_iterative"] = -1
     res["default_digits_binary"] = 0.99574984820886459
-    res["default_digits_multilabel"] = 0.93733794389823633
-    res["default_digits_multilabel_proba"] = 0.97060428849902536
+    res["default_digits_multilabel"] = 0.93433756191199024
+    res["default_digits_multilabel_proba"] = 0.9713841334968244
 
     sk_mod = sklearn.neighbors.KNeighborsClassifier
     module = KNearestNeighborsClassifier

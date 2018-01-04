@@ -53,12 +53,14 @@ class RescalingChoice(AutoSklearnChoice):
         preprocessor = CategoricalHyperparameter('__choice__',
                                                  list(
                                                      available_preprocessors.keys()),
-                                                 default=default)
+                                                 default_value=default)
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors:
             preprocessor_configuration_space = available_preprocessors[name]. \
                 get_hyperparameter_search_space(dataset_properties)
-            cs.add_configuration_space(name, preprocessor_configuration_space)
+            parent_hyperparameter = {'parent': preprocessor, 'value': name}
+            cs.add_configuration_space(name, preprocessor_configuration_space,
+                                       parent_hyperparameter=parent_hyperparameter)
 
         self.configuration_space_ = cs
         self.dataset_properties_ = dataset_properties

@@ -12,17 +12,18 @@ from autosklearn.pipeline.implementations.util import convert_multioutput_multic
 
 
 class DecisionTree(AutoSklearnClassificationAlgorithm):
-    def __init__(self, criterion, splitter, max_features, max_depth,
+    def __init__(self, criterion, max_features, max_depth,
                  min_samples_split, min_samples_leaf, min_weight_fraction_leaf,
-                 max_leaf_nodes, class_weight=None, random_state=None):
+                 max_leaf_nodes, min_impurity_decrease, class_weight=None,
+                 random_state=None):
         self.criterion = criterion
-        self.splitter = splitter
         self.max_features = max_features
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
         self.max_leaf_nodes = max_leaf_nodes
         self.min_weight_fraction_leaf = min_weight_fraction_leaf
+        self.min_impurity_decrease = min_impurity_decrease
         self.random_state = random_state
         self.class_weight = class_weight
         self.estimator = None
@@ -31,7 +32,7 @@ class DecisionTree(AutoSklearnClassificationAlgorithm):
         from sklearn.tree import DecisionTreeClassifier
 
         self.max_features = float(self.max_features)
-        if self.max_depth == "None":
+        if self.max_depth == "None" or self.max_depth is None:
             max_depth = self.max_depth = None
         else:
             num_features = X.shape[1]
@@ -39,11 +40,12 @@ class DecisionTree(AutoSklearnClassificationAlgorithm):
             max_depth = max(1, int(np.round(self.max_depth * num_features, 0)))
         self.min_samples_split = int(self.min_samples_split)
         self.min_samples_leaf = int(self.min_samples_leaf)
-        if self.max_leaf_nodes == "None":
+        if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
             self.max_leaf_nodes = None
         else:
             self.max_leaf_nodes = int(self.max_leaf_nodes)
         self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
+        self.min_impurity_decrease = float(self.min_impurity_decrease)
 
         self.estimator = DecisionTreeClassifier(
             criterion=self.criterion,
@@ -51,6 +53,8 @@ class DecisionTree(AutoSklearnClassificationAlgorithm):
             min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf,
             max_leaf_nodes=self.max_leaf_nodes,
+            min_weight_fraction_leaf=self.min_weight_fraction_leaf,
+            min_impurity_decrease=self.min_impurity_decrease,
             class_weight=self.class_weight,
             random_state=self.random_state)
         self.estimator.fit(X, y, sample_weight=sample_weight)
@@ -85,20 +89,21 @@ class DecisionTree(AutoSklearnClassificationAlgorithm):
         cs = ConfigurationSpace()
 
         criterion = CategoricalHyperparameter(
-            "criterion", ["gini", "entropy"], default="gini")
-        splitter = Constant("splitter", "best")
-        max_features = Constant('max_features', 1.0)
+            "criterion", ["gini", "entropy"], default_value="gini")
         max_depth = UniformFloatHyperparameter(
-            'max_depth', 0., 2., default=0.5)
+            'max_depth', 0., 2., default_value=0.5)
         min_samples_split = UniformIntegerHyperparameter(
-            "min_samples_split", 2, 20, default=2)
+            "min_samples_split", 2, 20, default_value=2)
         min_samples_leaf = UniformIntegerHyperparameter(
-            "min_samples_leaf", 1, 20, default=1)
+            "min_samples_leaf", 1, 20, default_value=1)
         min_weight_fraction_leaf = Constant("min_weight_fraction_leaf", 0.0)
+        max_features = UnParametrizedHyperparameter('max_features', 1.0)
         max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")
+        min_impurity_decrease = UnParametrizedHyperparameter('min_impurity_decrease', 0.0)
 
-        cs.add_hyperparameters([criterion, splitter, max_features, max_depth,
+        cs.add_hyperparameters([criterion, max_features, max_depth,
                                 min_samples_split, min_samples_leaf,
-                                min_weight_fraction_leaf, max_leaf_nodes])
+                                min_weight_fraction_leaf, max_leaf_nodes,
+                                min_impurity_decrease])
 
         return cs

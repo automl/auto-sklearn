@@ -11,15 +11,15 @@ class PassiveAggressiveComponentTest(BaseClassificationComponentTest):
     __test__ = True
 
     res = dict()
-    res["default_iris"] = 0.71999999999999997
-    res["default_iris_iterative"] = 0.81999999999999995
-    res["default_iris_proba"] = 0.46713079533751622
-    res["default_iris_sparse"] = 0.4
-    res["default_digits"] = 0.92046144505160898
-    res["default_digits_iterative"] = 0.92349726775956287
-    res["default_digits_binary"] = 0.99574984820886459
-    res["default_digits_multilabel"] = 0.8975269956947447
-    res["default_digits_multilabel_proba"] = 0.99703892466326138
+    res["default_iris"] = 0.66000000000000003
+    res["default_iris_iterative"] = 0.95999999999999996
+    res["default_iris_proba"] = 0.52834934001514167
+    res["default_iris_sparse"] = 0.38
+    res["default_digits"] = 0.91803278688524592
+    res["default_digits_iterative"] = 0.9174256223436551
+    res["default_digits_binary"] = 0.99089253187613846
+    res["default_digits_multilabel"] = 0.93818765184149111
+    res["default_digits_multilabel_proba"] = 1.0
 
     sk_mod = sklearn.linear_model.PassiveAggressiveClassifier
     module = PassiveAggressive

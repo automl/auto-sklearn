@@ -1,6 +1,6 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformIntegerHyperparameter, \
-    UnParametrizedHyperparameter, Constant
+    UnParametrizedHyperparameter, Constant, CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
@@ -10,28 +10,31 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self, n_estimators, max_depth, min_samples_split,
                  min_samples_leaf, min_weight_fraction_leaf, max_leaf_nodes,
-                 sparse_output=True, n_jobs=1, random_state=None):
+                 bootstrap, sparse_output=True, n_jobs=1, random_state=None):
         self.n_estimators = n_estimators
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
         self.max_leaf_nodes = max_leaf_nodes
         self.min_weight_fraction_leaf = min_weight_fraction_leaf
+        self.bootstrap = bootstrap
         self.sparse_output = sparse_output
         self.n_jobs = n_jobs
         self.random_state = random_state
 
-    def fit(self, X, Y=None):
+    def _fit(self, X, Y=None):
         import sklearn.ensemble
 
-        if self.max_depth == "None":
+        if self.max_depth == "None" or self.max_depth is None:
             self.max_depth = None
         else:
             self.max_depth = int(self.max_depth)
-        if self.max_leaf_nodes == "None":
+        if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
             self.max_leaf_nodes = None
         else:
             self.max_leaf_nodes = int(self.max_leaf_nodes)
+        if self.bootstrap in ['True', 'False']:
+            self.bootstrap = self.bootstrap == 'True'
 
         self.preprocessor = sklearn.ensemble.RandomTreesEmbedding(
             n_estimators=self.n_estimators,
@@ -45,6 +48,13 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
         )
         self.preprocessor.fit(X, Y)
         return self
+
+    def fit(self, X, y):
+        self._fit(X)
+        return self
+
+    def fit_transform(self, X, y=None):
+        return self._fit(X)
 
     def transform(self, X):
         if self.preprocessor is None:
@@ -67,21 +77,22 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         n_estimators = UniformIntegerHyperparameter(name="n_estimators",
                                                     lower=10, upper=100,
-                                                    default=10)
+                                                    default_value=10)
         max_depth = UniformIntegerHyperparameter(name="max_depth",
                                                  lower=2, upper=10,
-                                                 default=5)
+                                                 default_value=5)
         min_samples_split = UniformIntegerHyperparameter(name="min_samples_split",
                                                          lower=2, upper=20,
-                                                         default=2)
+                                                         default_value=2)
         min_samples_leaf = UniformIntegerHyperparameter(name="min_samples_leaf",
                                                         lower=1, upper=20,
-                                                        default=1)
+                                                        default_value=1)
         min_weight_fraction_leaf = Constant('min_weight_fraction_leaf', 1.0)
         max_leaf_nodes = UnParametrizedHyperparameter(name="max_leaf_nodes",
                                                       value="None")
+        bootstrap = CategoricalHyperparameter('bootstrap', ['True', 'False'])
         cs = ConfigurationSpace()
         cs.add_hyperparameters([n_estimators, max_depth, min_samples_split,
                                 min_samples_leaf, min_weight_fraction_leaf,
-                                max_leaf_nodes])
+                                max_leaf_nodes, bootstrap])
         return cs

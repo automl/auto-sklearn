@@ -7,7 +7,7 @@ from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorit
 class MinMaxScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
     def __init__(self, random_state):
         from sklearn.preprocessing import MinMaxScaler
-        self.preprocessor = MinMaxScaler()
+        self.preprocessor = MinMaxScaler(copy=False)
 
     @staticmethod
     def get_properties(dataset_properties=None):

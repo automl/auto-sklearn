@@ -13,9 +13,8 @@ from autosklearn.pipeline.implementations.util import convert_multioutput_multic
 class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
 
     def __init__(self, n_estimators, criterion, min_samples_leaf,
-                 min_samples_split,  max_features, max_leaf_nodes_or_max_depth="max_depth",
-                 bootstrap=False, max_leaf_nodes=None, max_depth="None",
-                 min_weight_fraction_leaf=0.0,
+                 min_samples_split,  max_features, bootstrap, max_leaf_nodes,
+                 max_depth, min_weight_fraction_leaf, min_impurity_decrease,
                  oob_score=False, n_jobs=1, random_state=None, verbose=0,
                  class_weight=None):
 
@@ -26,22 +25,14 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
                              "%s" % criterion)
         self.criterion = criterion
 
-        if max_leaf_nodes_or_max_depth == "max_depth":
-            self.max_leaf_nodes = None
-            if max_depth == "None":
-                self.max_depth = None
-            else:
-                self.max_depth = int(max_depth)
-            #if use_max_depth == "True":
-            #    self.max_depth = int(max_depth)
-            #elif use_max_depth == "False":
-            #    self.max_depth = None
-        else:
-            if max_leaf_nodes == "None":
-                self.max_leaf_nodes = None
-            else:
-                self.max_leaf_nodes = int(max_leaf_nodes)
+        if max_depth == "None" or max_depth is None:
             self.max_depth = None
+        else:
+            self.max_depth = int(max_depth)
+        if max_leaf_nodes == "None" or max_leaf_nodes is None:
+            self.max_leaf_nodes = None
+        else:
+            self.max_leaf_nodes = int(max_leaf_nodes)
 
         self.min_samples_leaf = int(min_samples_leaf)
         self.min_samples_split = int(min_samples_split)
@@ -53,6 +44,9 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
         elif bootstrap == "False":
             self.bootstrap = False
 
+        self.min_weight_fraction_leaf = float(min_weight_fraction_leaf)
+        self.min_impurity_decrease = float(min_impurity_decrease)
+
         self.oob_score = oob_score
         self.n_jobs = int(n_jobs)
         self.random_state = random_state
@@ -61,10 +55,12 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None):
-        self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight,
+        n_iter = 2
+        self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight,
                            refit=True)
         while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight)
+            n_iter *= 2
+            self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight)
         return self
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
@@ -74,11 +70,7 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
             self.estimator = None
 
         if self.estimator is None:
-            num_features = X.shape[1]
-            max_features = int(
-                float(self.max_features) * (np.log(num_features) + 1))
-            # Use at most half of the features
-            max_features = max(1, min(int(X.shape[1] / 2), max_features))
+            max_features = int(X.shape[1] ** float(self.max_features))
             self.estimator = ETC(n_estimators=n_iter,
                                  criterion=self.criterion,
                                  max_depth=self.max_depth,
@@ -87,6 +79,8 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
                                  bootstrap=self.bootstrap,
                                  max_features=max_features,
                                  max_leaf_nodes=self.max_leaf_nodes,
+                                 min_weight_fraction_leaf=self.min_weight_fraction_leaf,
+                                 min_impurity_decrease=self.min_impurity_decrease,
                                  oob_score=self.oob_score,
                                  n_jobs=self.n_jobs,
                                  verbose=self.verbose,
@@ -96,6 +90,8 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
 
         else:
             self.estimator.n_estimators += n_iter
+            self.estimator.n_estimators = min(self.estimator.n_estimators,
+                                              self.n_estimators)
 
         self.estimator.fit(X, y, sample_weight=sample_weight)
         return self
@@ -135,22 +131,30 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
 
         n_estimators = Constant("n_estimators", 100)
         criterion = CategoricalHyperparameter(
-            "criterion", ["gini", "entropy"], default="gini")
+            "criterion", ["gini", "entropy"], default_value="gini")
+
+        # The maximum number of features used in the forest is calculated as m^max_features, where
+        # m is the total number of features, and max_features is the hyperparameter specified below.
+        # The default is 0.5, which yields sqrt(m) features as max_features in the estimator. This
+        # corresponds with Geurts' heuristic.
         max_features = UniformFloatHyperparameter(
-            "max_features", 0.5, 5, default=1)
+            "max_features", 0., 1., default_value=0.5)
 
         max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
 
         min_samples_split = UniformIntegerHyperparameter(
-            "min_samples_split", 2, 20, default=2)
+            "min_samples_split", 2, 20, default_value=2)
         min_samples_leaf = UniformIntegerHyperparameter(
-            "min_samples_leaf", 1, 20, default=1)
-        min_weight_fraction_leaf = Constant('min_weight_fraction_leaf', 0.)
+            "min_samples_leaf", 1, 20, default_value=1)
+        min_weight_fraction_leaf = UnParametrizedHyperparameter('min_weight_fraction_leaf', 0.)
+        max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")
+        min_impurity_decrease = UnParametrizedHyperparameter('min_impurity_decrease', 0.0)
 
         bootstrap = CategoricalHyperparameter(
-            "bootstrap", ["True", "False"], default="False")
+            "bootstrap", ["True", "False"], default_value="False")
         cs.add_hyperparameters([n_estimators, criterion, max_features,
                                 max_depth, min_samples_split, min_samples_leaf,
-                                min_weight_fraction_leaf, bootstrap])
+                                min_weight_fraction_leaf, max_leaf_nodes,
+                                min_impurity_decrease, bootstrap])
 
         return cs

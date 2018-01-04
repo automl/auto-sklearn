@@ -12,14 +12,14 @@ from autosklearn.pipeline.implementations.util import softmax
 
 
 class SGD(AutoSklearnClassificationAlgorithm):
-    def __init__(self, loss, penalty, alpha, fit_intercept, n_iter,
+    def __init__(self, loss, penalty, alpha, fit_intercept, tol,
                  learning_rate, l1_ratio=0.15, epsilon=0.1,
                  eta0=0.01, power_t=0.5, average=False, random_state=None):
         self.loss = loss
         self.penalty = penalty
         self.alpha = alpha
         self.fit_intercept = fit_intercept
-        self.n_iter = n_iter
+        self.tol = tol
         self.learning_rate = learning_rate
         self.l1_ratio = l1_ratio
         self.epsilon = epsilon
@@ -30,15 +30,24 @@ class SGD(AutoSklearnClassificationAlgorithm):
         self.estimator = None
 
     def fit(self, X, y, sample_weight=None):
-        self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight,
+        n_iter = 2
+        self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight,
                            refit=True)
         while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=1, sample_weight=sample_weight)
+            n_iter *= 2
+            self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight)
 
         return self
 
-    def iterative_fit(self, X, y, n_iter=1, refit=False, sample_weight=None):
+    def iterative_fit(self, X, y, n_iter=2, refit=False, sample_weight=None):
         from sklearn.linear_model.stochastic_gradient import SGDClassifier
+
+        # Need to fit at least two iterations, otherwise early stopping will not
+        # work because we cannot determine whether the algorithm actually
+        # converged. The only way of finding this out is if the sgd spends less
+        # iterations than max_iter. If max_iter == 1, it has to spend at least
+        # one iteration and will always spend at least one iteration, so we
+        # cannot know about convergence.
 
         if refit:
             self.estimator = None
@@ -47,18 +56,19 @@ class SGD(AutoSklearnClassificationAlgorithm):
 
             self.alpha = float(self.alpha)
             self.fit_intercept = self.fit_intercept == 'True'
-            self.n_iter = int(self.n_iter)
             self.l1_ratio = float(self.l1_ratio) if self.l1_ratio is not None else 0.15
             self.epsilon = float(self.epsilon) if self.epsilon is not None else 0.1
             self.eta0 = float(self.eta0)
             self.power_t = float(self.power_t) if self.power_t is not None else 0.25
             self.average = self.average == 'True'
+            self.tol = float(self.tol)
 
             self.estimator = SGDClassifier(loss=self.loss,
                                            penalty=self.penalty,
                                            alpha=self.alpha,
                                            fit_intercept=self.fit_intercept,
-                                           n_iter=n_iter,
+                                           max_iter=n_iter,
+                                           tol=self.tol,
                                            learning_rate=self.learning_rate,
                                            l1_ratio=self.l1_ratio,
                                            epsilon=self.epsilon,
@@ -66,14 +76,26 @@ class SGD(AutoSklearnClassificationAlgorithm):
                                            power_t=self.power_t,
                                            shuffle=True,
                                            average=self.average,
-                                           random_state=self.random_state)
+                                           random_state=self.random_state,
+                                           warm_start=True)
+            self.estimator.fit(X, y, sample_weight=sample_weight)
         else:
-            self.estimator.n_iter += n_iter
+            self.estimator.max_iter += n_iter
+            self.estimator._validate_params()
+            self.estimator._partial_fit(
+                X, y,
+                alpha=self.estimator.alpha,
+                C=1.0,
+                loss=self.estimator.loss,
+                learning_rate=self.estimator.learning_rate,
+                max_iter=n_iter,
+                sample_weight=sample_weight,
+                classes=None,
+                coef_init=None,
+                intercept_init=None
+            )
 
-        self.estimator.partial_fit(X, y, classes=np.unique(y),
-                                   sample_weight=sample_weight)
-
-        if self.estimator.n_iter >= self.n_iter:
+        if self.estimator._max_iter >= 1000 or n_iter > self.estimator.n_iter_:
             self.fully_fit_ = True
 
         return self
@@ -119,28 +141,29 @@ class SGD(AutoSklearnClassificationAlgorithm):
 
         loss = CategoricalHyperparameter("loss",
             ["hinge", "log", "modified_huber", "squared_hinge", "perceptron"],
-            default="log")
+            default_value="log")
         penalty = CategoricalHyperparameter(
-            "penalty", ["l1", "l2", "elasticnet"], default="l2")
+            "penalty", ["l1", "l2", "elasticnet"], default_value="l2")
         alpha = UniformFloatHyperparameter(
-            "alpha", 10e-7, 1e-1, log=True, default=0.0001)
+            "alpha", 1e-7, 1e-1, log=True, default_value=0.0001)
         l1_ratio = UniformFloatHyperparameter(
-            "l1_ratio", 1e-9, 1,  log=True, default=0.15)
+            "l1_ratio", 1e-9, 1,  log=True, default_value=0.15)
         fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
-        n_iter = UniformIntegerHyperparameter("n_iter", 5, 1000, log=True,
-                                              default=20)
+        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, log=True,
+                                         default_value=1e-4)
         epsilon = UniformFloatHyperparameter(
-            "epsilon", 1e-5, 1e-1, default=1e-4, log=True)
+            "epsilon", 1e-5, 1e-1, default_value=1e-4, log=True)
         learning_rate = CategoricalHyperparameter(
             "learning_rate", ["optimal", "invscaling", "constant"],
-            default="optimal")
+            default_value="invscaling")
         eta0 = UniformFloatHyperparameter(
-            "eta0", 10**-7, 0.1, default=0.01)
-        power_t = UniformFloatHyperparameter("power_t", 1e-5, 1, default=0.25)
+            "eta0", 1e-7, 1e-1, default_value=0.01)
+        power_t = UniformFloatHyperparameter("power_t", 1e-5, 1,
+                                             default_value=0.25)
         average = CategoricalHyperparameter(
-            "average", ["False", "True"], default="False")
+            "average", ["False", "True"], default_value="False")
         cs.add_hyperparameters([loss, penalty, alpha, l1_ratio, fit_intercept,
-                                n_iter, epsilon, learning_rate, eta0, power_t,
+                                tol, epsilon, learning_rate, eta0, power_t,
                                 average])
 
         # TODO add passive/aggressive here, although not properly documented?

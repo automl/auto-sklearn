@@ -202,8 +202,13 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self._test_configurations(configurations_space=cs, make_sparse=True)
 
     def test_configurations_categorical_data(self):
-        cs = SimpleClassificationPipeline(dataset_properties={'sparse': True}).\
-            get_hyperparameter_search_space()
+        cs = SimpleClassificationPipeline(
+            dataset_properties={'sparse': False},
+            include={
+                'preprocessor': ['no_preprocessing'],
+                'classifier': ['sgd', 'gradient_boosting']
+            }
+        ).get_hyperparameter_search_space()
 
         categorical = [True, True, True, False, False, True, True, True,
                        False, True, True, True, True, True, True, True,
@@ -220,24 +225,38 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         data = {'X_train': X_train, 'Y_train': Y_train,
                 'X_test': X_test, 'Y_test': Y_test}
 
-        init_params = {'one_hot_encoding:categorical_features': categorical}
+        init_params = {
+            'categorical_encoding:one_hot_encoding:categorical_features':
+                categorical
+        }
 
         self._test_configurations(configurations_space=cs, make_sparse=True,
                                   data=data, init_params=init_params)
 
     @unittest.mock.patch('autosklearn.pipeline.components.data_preprocessing'
-                         '.one_hot_encoding.one_hot_encoding.OneHotEncoder'
-                         '.set_hyperparameters')
+                         '.one_hot_encoding.OHEChoice.set_hyperparameters')
     def test_categorical_passed_to_one_hot_encoder(self, ohe_mock):
-        cls = SimpleClassificationPipeline(init_params={
-            'one_hot_encoding:categorical_features': [True, False]})
-        self.assertEqual(ohe_mock.call_args[1]['init_params'],
-                         {'categorical_features': [True, False]})
+        cls = SimpleClassificationPipeline(
+            init_params={
+                'categorical_encoding:one_hot_encoding:categorical_features':
+                    [True, False]
+            }
+        )
+        self.assertEqual(
+            ohe_mock.call_args[1]['init_params'],
+            {'one_hot_encoding:categorical_features': [True, False]}
+        )
         default = cls.get_hyperparameter_search_space().get_default_configuration()
         cls.set_hyperparameters(configuration=default,
-            init_params={'one_hot_encoding:categorical_features': [True, True, False]})
-        self.assertEqual(ohe_mock.call_args[1]['init_params'],
-                         {'categorical_features': [True, True, False]})
+            init_params={
+                'categorical_encoding:one_hot_encoding:categorical_features':
+                    [True, True, False]
+            }
+        )
+        self.assertEqual(
+            ohe_mock.call_args[1]['init_params'],
+            {'one_hot_encoding:categorical_features': [True, True, False]}
+        )
 
     def _test_configurations(self, configurations_space, make_sparse=False,
                              data=None, init_params=None,
@@ -245,6 +264,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         # Use a limit of ~3GiB
         limit = 3072 * 1024 * 1024
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
+        print(configurations_space)
 
         for i in range(10):
             config = configurations_space.sample_configuration()
@@ -264,7 +285,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'preprocessor:polynomial:degree': 2,
                             'classifier:lda:n_components': 10,
                             'preprocessor:nystroem_sampler:n_components': 50,
-                            'preprocessor:feature_agglomeration:n_clusters': 2}
+                            'preprocessor:feature_agglomeration:n_clusters': 2,
+                            'classifier:gradient_boosting:max_depth': 2,
+                            'classifier:gradient_boosting:n_estimators': 50}
 
             for restrict_parameter in restrictions:
                 restrict_to = restrictions[restrict_parameter]
@@ -272,6 +295,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                         config[restrict_parameter] is not None:
                     config._values[restrict_parameter] = restrict_to
 
+            print(config)
 
             if data is None:
                 X_train, Y_train, X_test, Y_test = get_dataset(
@@ -285,11 +309,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             init_params_ = copy.deepcopy(init_params)
             cls = SimpleClassificationPipeline(random_state=1,
                                                dataset_properties=dataset_properties,
-                                               init_params=init_params_)
-            cls.set_hyperparameters(config)
+                                               init_params=init_params_,)
+            cls.set_hyperparameters(config, init_params=init_params_)
             try:
                 cls.fit(X_train, Y_train, )
-                predictions = cls.predict(X_test)
+                predictions = cls.predict(X_test.copy())
+                predictions = cls.predict_proba(X_test)
             except MemoryError as e:
                 continue
             except ValueError as e:
@@ -345,14 +370,14 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         conditions = cs.get_conditions()
 
         self.assertEqual(len(cs.get_hyperparameter(
-            'rescaling:__choice__').choices), 4)
+            'rescaling:__choice__').choices), 6)
         self.assertEqual(len(cs.get_hyperparameter(
             'classifier:__choice__').choices), 15)
         self.assertEqual(len(cs.get_hyperparameter(
             'preprocessor:__choice__').choices), 13)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(141, len(hyperparameters))
+        self.assertEqual(155, len(hyperparameters))
 
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
@@ -387,13 +412,17 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cs = SimpleClassificationPipeline(
             include={'preprocessor': ['densifier']}, dataset_properties={'sparse': True}).\
             get_hyperparameter_search_space()
-        self.assertEqual(cs.get_hyperparameter('classifier:__choice__').default,
-                         'qda')
+        self.assertEqual(cs.get_hyperparameter(
+            'classifier:__choice__').default_value,
+            'qda'
+        )
 
         cs = SimpleClassificationPipeline(include={'preprocessor': ['nystroem_sampler']}).\
             get_hyperparameter_search_space()
-        self.assertEqual(cs.get_hyperparameter('classifier:__choice__').default,
-                         'sgd')
+        self.assertEqual(cs.get_hyperparameter(
+            'classifier:__choice__').default_value,
+            'sgd'
+        )
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(AssertionError, "No valid pipeline found.",
@@ -538,18 +567,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(84, cls_predict.call_count)
         assert_array_almost_equal(prediction_, prediction)
-
-    @unittest.skip("test_check_random_state Not yet Implemented")
-    def test_check_random_state(self):
-        raise NotImplementedError()
-
-    @unittest.skip("test_validate_input_X Not yet Implemented")
-    def test_validate_input_X(self):
-        raise NotImplementedError()
-
-    @unittest.skip("test_validate_input_Y Not yet Implemented")
-    def test_validate_input_Y(self):
-        raise NotImplementedError()
 
     def test_set_params(self):
         pass

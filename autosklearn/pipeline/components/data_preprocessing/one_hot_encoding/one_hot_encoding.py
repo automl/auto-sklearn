@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.sparse
 
 import autosklearn.pipeline.implementations.OneHotEncoder
 
@@ -19,7 +20,7 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
         self.minimum_fraction = minimum_fraction
         self.categorical_features = categorical_features
 
-    def fit(self, X, y=None):
+    def _fit(self, X, y=None):
         if self.use_minimum_fraction is None or \
                 self.use_minimum_fraction is False or \
                 (isinstance(self.use_minimum_fraction, str) and
@@ -35,14 +36,26 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
 
         self.preprocessor = autosklearn.pipeline.implementations.OneHotEncoder\
             .OneHotEncoder(minimum_fraction=self.minimum_fraction,
-                           categorical_features=categorical_features)
+                           categorical_features=categorical_features,
+                           sparse=True)
 
-        self.preprocessor = self.preprocessor.fit(X)
+        return self.preprocessor.fit_transform(X)
+
+    def fit(self, X, y=None):
+        self._fit(X, y)
         return self
 
-    def transform(self, X):
-        import scipy.sparse
+    def fit_transform(self, X, y=None):
+        is_sparse = scipy.sparse.issparse(X)
+        X = self._fit(X)
+        if is_sparse:
+            return X
+        elif isinstance(X, np.ndarray):
+            return X
+        else:
+            return X.toarray()
 
+    def transform(self, X):
         is_sparse = scipy.sparse.issparse(X)
         if self.preprocessor is None:
             raise NotImplementedError()
@@ -58,30 +71,23 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
     def get_properties(dataset_properties=None):
         return {'shortname': '1Hot',
                 'name': 'One Hot Encoder',
-                'handles_missing_values': True,
-                'handles_nominal_values': True,
-                'handles_numerical_features': True,
-                'prefers_data_scaled': False,
-                'prefers_data_normalized': False,
                 'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
                 'handles_multilabel': True,
-                'is_deterministic': True,
                 # TODO find out of this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (INPUT,),
-                'preferred_dtype': None}
+                'output': (INPUT,),}
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
         use_minimum_fraction = CategoricalHyperparameter(
-            "use_minimum_fraction", ["True", "False"], default="True")
+            "use_minimum_fraction", ["True", "False"], default_value="True")
         minimum_fraction = UniformFloatHyperparameter(
-            "minimum_fraction", lower=.0001, upper=0.5, default=0.01, log=True)
+            "minimum_fraction", lower=.0001, upper=0.5, default_value=0.01, log=True)
         cs.add_hyperparameters([use_minimum_fraction, minimum_fraction])
         cs.add_condition(EqualsCondition(minimum_fraction,
                                          use_minimum_fraction, 'True'))

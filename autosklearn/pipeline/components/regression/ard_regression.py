@@ -64,23 +64,23 @@ class ARDRegression(AutoSklearnRegressionAlgorithm):
         cs = ConfigurationSpace()
         n_iter = UnParametrizedHyperparameter("n_iter", value=300)
         tol = UniformFloatHyperparameter("tol", 10 ** -5, 10 ** -1,
-                                         default=10 ** -4, log=True)
+                                         default_value=10 ** -3, log=True)
         alpha_1 = UniformFloatHyperparameter(name="alpha_1", lower=10 ** -10,
-                                             upper=10 ** -3, default=10 ** -6)
+                                             upper=10 ** -3, default_value=10 ** -6)
         alpha_2 = UniformFloatHyperparameter(name="alpha_2", log=True,
                                              lower=10 ** -10, upper=10 ** -3,
-                                             default=10 ** -6)
+                                             default_value=10 ** -6)
         lambda_1 = UniformFloatHyperparameter(name="lambda_1", log=True,
                                               lower=10 ** -10, upper=10 ** -3,
-                                              default=10 ** -6)
+                                              default_value=10 ** -6)
         lambda_2 = UniformFloatHyperparameter(name="lambda_2", log=True,
                                               lower=10 ** -10, upper=10 ** -3,
-                                              default=10 ** -6)
+                                              default_value=10 ** -6)
         threshold_lambda = UniformFloatHyperparameter(name="threshold_lambda",
                                                      log=True,
                                                      lower=10 ** 3,
                                                      upper=10 ** 5,
-                                                     default=10 ** 4)
+                                                     default_value=10 ** 4)
         fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
 
         cs.add_hyperparameters([n_iter, tol, alpha_1, alpha_2, lambda_1,

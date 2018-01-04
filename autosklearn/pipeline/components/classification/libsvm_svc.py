@@ -57,7 +57,7 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         self.max_iter = float(self.max_iter)
         self.shrinking = self.shrinking == 'True'
 
-        if self.class_weight == "None":
+        if self.class_weight == "None" or self.class_weight is None:
             self.class_weight = None
 
         self.estimator = sklearn.svm.SVC(C=self.C,
@@ -72,7 +72,6 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
                                          random_state=self.random_state,
                                          cache_size=cache_size,
                                          decision_function_shape='ovr')
-                                         #probability=True)
         self.estimator.fit(X, Y)
         return self
 
@@ -84,11 +83,7 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
     def predict_proba(self, X):
         if self.estimator is None:
             raise NotImplementedError()
-        # return self.estimator.predict_proba(X)
         decision = self.estimator.decision_function(X)
-        #if len(self.estimator.classes_) > 2:
-        #    decision = _ovr_decision_function(decision < 0, decision,
-        #                                      len(self.estimator.classes_))
         return softmax(decision)
 
 
@@ -107,20 +102,20 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True,
-                                       default=1.0)
+                                       default_value=1.0)
         # No linear kernel here, because we have liblinear
         kernel = CategoricalHyperparameter(name="kernel",
                                            choices=["rbf", "poly", "sigmoid"],
-                                           default="rbf")
-        degree = UniformIntegerHyperparameter("degree", 1, 5, default=3)
+                                           default_value="rbf")
+        degree = UniformIntegerHyperparameter("degree", 2, 5, default_value=3)
         gamma = UniformFloatHyperparameter("gamma", 3.0517578125e-05, 8,
-                                           log=True, default=0.1)
+                                           log=True, default_value=0.1)
         # TODO this is totally ad-hoc
-        coef0 = UniformFloatHyperparameter("coef0", -1, 1, default=0)
+        coef0 = UniformFloatHyperparameter("coef0", -1, 1, default_value=0)
         # probability is no hyperparameter, but an argument to the SVM algo
         shrinking = CategoricalHyperparameter("shrinking", ["True", "False"],
-                                              default="True")
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default=1e-4,
+                                              default_value="True")
+        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-3,
                                          log=True)
         # cache size is not a hyperparameter, but an argument to the program!
         max_iter = UnParametrizedHyperparameter("max_iter", -1)

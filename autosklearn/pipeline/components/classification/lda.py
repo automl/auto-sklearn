@@ -22,7 +22,7 @@ class LDA(AutoSklearnClassificationAlgorithm):
         import sklearn.discriminant_analysis
         import sklearn.multiclass
 
-        if self.shrinkage == "None":
+        if self.shrinkage == "None" or self.shrinkage is None:
             self.shrinkage = None
             solver = 'svd'
         elif self.shrinkage == "auto":
@@ -76,11 +76,11 @@ class LDA(AutoSklearnClassificationAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
         shrinkage = CategoricalHyperparameter(
-            "shrinkage", ["None", "auto", "manual"], default="None")
+            "shrinkage", ["None", "auto", "manual"], default_value="None")
         shrinkage_factor = UniformFloatHyperparameter(
             "shrinkage_factor", 0., 1., 0.5)
-        n_components = UniformIntegerHyperparameter('n_components', 1, 250, default=10)
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default=1e-4, log=True)
+        n_components = UniformIntegerHyperparameter('n_components', 1, 250, default_value=10)
+        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4, log=True)
         cs.add_hyperparameters([shrinkage, shrinkage_factor, n_components, tol])
 
         cs.add_condition(EqualsCondition(shrinkage_factor, shrinkage, "manual"))

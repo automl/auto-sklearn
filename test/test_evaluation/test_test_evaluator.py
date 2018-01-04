@@ -47,14 +47,18 @@ class TestEvaluator_Test(BaseEvaluatorTest, unittest.TestCase):
                 y = D.data['Y_train']
                 if len(y.shape) == 2 and y.shape[1] == 1:
                     D_.data['Y_train'] = y.flatten()
+                backend_mock.load_datamanager.return_value = D_
                 metric_lookup = {MULTILABEL_CLASSIFICATION: f1_macro,
                                  BINARY_CLASSIFICATION: accuracy,
                                  MULTICLASS_CLASSIFICATION: accuracy,
                                  REGRESSION: r2}
                 queue_ = multiprocessing.Queue()
 
-                evaluator = TestEvaluator(D_, backend_mock, queue_,
-                                          metric=metric_lookup[D.info['task']])
+                evaluator = TestEvaluator(
+                    backend_mock,
+                    queue_,
+                    metric=metric_lookup[D.info['task']]
+                )
 
                 evaluator.fit_predict_and_loss()
                 rval = get_last_result(evaluator.queue)
@@ -72,6 +76,7 @@ class FunctionsTest(unittest.TestCase):
         self.tmp_dir = os.path.join(os.path.dirname(__file__),
                                     '.test_cv_functions')
         self.backend = unittest.mock.Mock(spec=Backend)
+        self.backend.load_datamanager.return_value = self.data
         self.dataset_name = json.dumps({'task_id': 'test'})
 
     def tearDown(self):
@@ -84,35 +89,42 @@ class FunctionsTest(unittest.TestCase):
         eval_t(queue=self.queue,
                backend=self.backend,
                config=self.configuration,
-               datamanager=self.data,
                metric=accuracy,
                seed=1, num_run=1,
-               all_scoring_functions=False, output_y_hat_optimization=False,
-               include=None, exclude=None, disable_file_output=False,
-               instance=self.dataset_name)
+               all_scoring_functions=False,
+               output_y_hat_optimization=False,
+               include=None,
+               exclude=None,
+               disable_file_output=False,
+               instance=self.dataset_name
+        )
         rval = get_last_result(self.queue)
         self.assertAlmostEqual(rval['loss'], 0.04)
         self.assertEqual(rval['status'], StatusType.SUCCESS)
         self.assertNotIn('bac_metric', rval['additional_run_info'])
 
     def test_eval_test_all_loss_functions(self):
-        eval_t(queue=self.queue,
-               backend=self.backend,
-               config=self.configuration,
-               datamanager=self.data,
-               metric=accuracy,
-               seed=1, num_run=1,
-               all_scoring_functions=True, output_y_hat_optimization=False,
-               include=None, exclude=None, disable_file_output=False,
-               instance=self.dataset_name)
+        eval_t(
+            queue=self.queue,
+            backend=self.backend,
+            config=self.configuration,
+            metric=accuracy,
+            seed=1, num_run=1,
+            all_scoring_functions=True,
+            output_y_hat_optimization=False,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name,
+        )
         rval = get_last_result(self.queue)
         fixture = {'accuracy': 0.04,
                    'balanced_accuracy': 0.0277777777778,
                    'f1_macro': 0.0341005967604,
                    'f1_micro': 0.04,
                    'f1_weighted': 0.0396930946292,
-                   'log_loss': 1.1274919837,
-                   'pac_score': 0.185257565321,
+                   'log_loss': 1.1352229526638984,
+                   'pac_score': 0.19574985585209126,
                    'precision_macro': 0.037037037037,
                    'precision_micro': 0.04,
                    'precision_weighted': 0.0355555555556,

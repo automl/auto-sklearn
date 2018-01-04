@@ -56,7 +56,7 @@ class ExtreTreesClassificationComponentTest(PreprocessingTestCase):
             predictor = classifier.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
             accuracy = sklearn.metrics.accuracy_score(predictions, Y_test)
-            self.assertAlmostEqual(accuracy, 0.45051608986035213, places=2)
+            self.assertAlmostEqual(accuracy, 0.43715846994535518, places=2)
 
     def test_preprocessing_dtype(self):
         super(ExtreTreesClassificationComponentTest, self).\

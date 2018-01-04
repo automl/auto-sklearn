@@ -1,7 +1,10 @@
+import copy
 import json
 
 import numpy as np
-import sklearn.model_selection
+from smac.tae.execute_ta_run import TAEAbortException
+from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold, \
+    StratifiedKFold, train_test_split
 
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.constants import *
@@ -21,20 +24,21 @@ def _get_y_array(y, task_type):
 
 
 class TrainEvaluator(AbstractEvaluator):
-    def __init__(self, datamanager, backend, queue, metric,
+    def __init__(self, backend, queue, metric,
                  configuration=None,
                  all_scoring_functions=False,
                  seed=1,
                  output_y_hat_optimization=True,
-                 cv=None,
+                 resampling_strategy=None,
+                 resampling_strategy_args=None,
                  num_run=None,
                  subsample=None,
                  keep_models=False,
                  include=None,
                  exclude=None,
-                 disable_file_output=False):
+                 disable_file_output=False,
+                 init_params=None):
         super().__init__(
-            datamanager=datamanager,
             backend=backend,
             queue=queue,
             configuration=configuration,
@@ -46,10 +50,14 @@ class TrainEvaluator(AbstractEvaluator):
             subsample=subsample,
             include=include,
             exclude=exclude,
-            disable_file_output=disable_file_output)
+            disable_file_output=disable_file_output,
+            init_params=init_params,
+        )
 
-        self.cv = cv
-        self.cv_folds = cv.n_splits
+        self.resampling_strategy = resampling_strategy
+        self.resampling_strategy_args = resampling_strategy_args
+        self.cv = self.get_splitter(self.datamanager)
+        self.cv_folds = self.cv.n_splits
         self.X_train = self.datamanager.data['X_train']
         self.Y_train = self.datamanager.data['Y_train']
         self.Y_optimization = None
@@ -83,14 +91,32 @@ class TrainEvaluator(AbstractEvaluator):
             Y_optimization_pred = [None] * self.cv_folds
             Y_valid_pred = [None] * self.cv_folds
             Y_test_pred = [None] * self.cv_folds
-
+            additional_run_info = None
 
             y = _get_y_array(self.Y_train, self.task_type)
+            # TODO: mention that no additional run info is possible in this
+            # case! -> maybe remove full CV from the train evaluator anyway and
+            # make the user implement this!
             for i, (train_split, test_split) in enumerate(self.cv.split(
                     self.X_train, y)):
 
-                opt_pred, valid_pred, test_pred = self._partial_fit_and_predict(
-                    i, train_indices=train_split, test_indices=test_split)
+                opt_pred, valid_pred, test_pred, additional_run_info = (
+                    self._partial_fit_and_predict(
+                       i, train_indices=train_split, test_indices=test_split
+                    )
+                )
+                assert len(opt_pred) == len(test_split), (len(opt_pred), len(test_split))
+
+                if (
+                    additional_run_info is not None
+                    and len(additional_run_info) > 0
+                    and i > 0
+                ):
+                    raise TAEAbortException(
+                        'Found additional run info "%s" in fold %d, '
+                        'but cannot handle additional run info if fold >= 1.' %
+                        (additional_run_info, i)
+                    )
 
                 Y_optimization_pred[i] = opt_pred
                 Y_valid_pred[i] = valid_pred
@@ -133,8 +159,15 @@ class TrainEvaluator(AbstractEvaluator):
                 # actually a new model
                 self._added_empty_model = True
 
-            self.finish_up(loss, Y_optimization_pred, Y_valid_pred, Y_test_pred,
-                           file_output=True, final_call=True)
+            self.finish_up(
+                loss,
+                Y_optimization_pred,
+                Y_valid_pred,
+                Y_test_pred,
+                additional_run_info=additional_run_info,
+                file_output=True,
+                final_call=True
+            )
 
     def partial_fit_predict_and_loss(self, fold, iterative=False):
         if fold > self.cv_folds:
@@ -157,9 +190,14 @@ class TrainEvaluator(AbstractEvaluator):
                 fold, train_indices=train_split, test_indices=test_split,
                 iterative=iterative)
         else:
-            opt_pred, valid_pred, test_pred = self._partial_fit_and_predict(
-                fold, train_indices=train_split, test_indices=test_split,
-                iterative=iterative)
+            opt_pred, valid_pred, test_pred, additional_run_info = (
+                self._partial_fit_and_predict(
+                    fold,
+                    train_indices=train_split,
+                    test_indices=test_split,
+                    iterative=iterative,
+                )
+            )
             loss = self._loss(self.Y_targets[fold], opt_pred)
 
             if self.cv_folds > 1:
@@ -201,14 +239,21 @@ class TrainEvaluator(AbstractEvaluator):
                         self.model = model
 
                     loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
+                    additional_run_info = model.get_additional_run_info()
 
                     if model.configuration_fully_fitted():
                         final_call = True
                     else:
                         final_call = False
-                    self.finish_up(loss, Y_optimization_pred, Y_valid_pred,
-                                   Y_test_pred, file_output=file_output,
-                                   final_call=final_call)
+                    self.finish_up(
+                        loss,
+                        Y_optimization_pred,
+                        Y_valid_pred,
+                        Y_test_pred,
+                        additional_run_info=additional_run_info,
+                        file_output=file_output,
+                        final_call=final_call,
+                    )
                     n_iter *= 2
 
                 return
@@ -225,9 +270,16 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_optimization_pred, Y_valid_pred, Y_test_pred = self._predict(
                     model=model, train_indices=train_indices, test_indices=test_indices)
                 loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
-                self.finish_up(loss, Y_optimization_pred, Y_valid_pred,
-                               Y_test_pred, file_output=file_output,
-                               final_call=True)
+                additional_run_info = model.get_additional_run_info()
+                self.finish_up(
+                    loss,
+                    Y_optimization_pred,
+                    Y_valid_pred,
+                    Y_test_pred,
+                    additional_run_info=additional_run_info,
+                    file_output=file_output,
+                    final_call=True
+                )
                 return
 
         else:
@@ -240,8 +292,14 @@ class TrainEvaluator(AbstractEvaluator):
 
             train_indices, test_indices = self.indices[fold]
             self.Y_targets[fold] = self.Y_train[test_indices]
-            return self._predict(model=model, train_indices=train_indices,
-                                 test_indices=test_indices)
+
+            opt_pred, valid_pred, test_pred = self._predict(
+                model=model,
+                train_indices=train_indices,
+                test_indices=test_indices,
+            )
+            additional_run_info = model.get_additional_run_info()
+            return opt_pred, valid_pred, test_pred, additional_run_info
 
     def subsample_indices(self, train_indices):
         if self.subsample is not None:
@@ -256,9 +314,12 @@ class TrainEvaluator(AbstractEvaluator):
 
             if len(train_indices) > self.subsample:
                 indices = np.arange(len(train_indices))
-                cv_indices_train, _ = sklearn.model_selection.train_test_split(
-                    indices, stratify=stratify,
-                    train_size=self.subsample, random_state=1)
+                cv_indices_train, _ = train_test_split(
+                    indices,
+                    stratify=stratify,
+                    train_size=self.subsample,
+                    random_state=1
+                )
                 train_indices = train_indices[cv_indices_train]
                 return train_indices
 
@@ -288,117 +349,247 @@ class TrainEvaluator(AbstractEvaluator):
 
         return opt_pred, valid_pred, test_pred
 
+    def get_splitter(self, D):
+        y = D.data['Y_train'].ravel()
+        train_size = 0.67
+        if self.resampling_strategy_args:
+            train_size = self.resampling_strategy_args.get('train_size',
+                                                           train_size)
+        test_size = 1 - train_size
+        if D.info['task'] in CLASSIFICATION_TASKS and \
+                        D.info['task'] != MULTILABEL_CLASSIFICATION:
+
+            if self.resampling_strategy in ['holdout',
+                                            'holdout-iterative-fit']:
+                try:
+                    cv = StratifiedShuffleSplit(n_splits=1,
+                                                train_size=train_size,
+                                                test_size=test_size,
+                                                random_state=1)
+                    test_cv = copy.deepcopy(cv)
+                    next(test_cv.split(y, y))
+                except ValueError as e:
+                    if 'The least populated class in y has only' in e.args[0]:
+                        cv = ShuffleSplit(n_splits=1, train_size=train_size,
+                                          test_size=test_size, random_state=1)
+                    else:
+                        raise
+
+            elif self.resampling_strategy in ['cv', 'partial-cv',
+                                              'partial-cv-iterative-fit']:
+                cv = StratifiedKFold(
+                    n_splits=self.resampling_strategy_args['folds'],
+                    shuffle=True, random_state=1)
+            else:
+                raise ValueError(self.resampling_strategy)
+        else:
+            if self.resampling_strategy in ['holdout',
+                                            'holdout-iterative-fit']:
+                cv = ShuffleSplit(n_splits=1, train_size=train_size,
+                                  test_size=test_size, random_state=1)
+            elif self.resampling_strategy in ['cv', 'partial-cv',
+                                              'partial-cv-iterative-fit']:
+                cv = KFold(n_splits=self.resampling_strategy_args['folds'],
+                           shuffle=True, random_state=1)
+            else:
+                raise ValueError(self.resampling_strategy)
+        return cv
+
 
 # create closure for evaluating an algorithm
-def eval_holdout(queue, config, datamanager, backend, cv, metric, seed, num_run,
-                 instance, all_scoring_functions, output_y_hat_optimization,
-                 include, exclude, disable_file_output, iterative=False):
+def eval_holdout(
+        queue,
+        config,
+        backend,
+        resampling_strategy,
+        resampling_strategy_args,
+        metric,
+        seed,
+        num_run,
+        instance,
+        all_scoring_functions,
+        output_y_hat_optimization,
+        include,
+        exclude,
+        disable_file_output,
+        init_params=None,
+        iterative=False,
+):
     instance = json.loads(instance) if instance is not None else {}
     subsample = instance.get('subsample')
-    evaluator = TrainEvaluator(datamanager=datamanager,
-                               backend=backend,
-                               queue=queue,
-                               cv=cv,
-                               metric=metric,
-                               configuration=config,
-                               seed=seed,
-                               num_run=num_run,
-                               subsample=subsample,
-                               all_scoring_functions=all_scoring_functions,
-                               output_y_hat_optimization=output_y_hat_optimization,
-                               include=include,
-                               exclude=exclude,
-                               disable_file_output=disable_file_output)
+    evaluator = TrainEvaluator(
+        backend=backend,
+        queue=queue,
+        resampling_strategy=resampling_strategy,
+        resampling_strategy_args=resampling_strategy_args,
+        metric=metric,
+        configuration=config,
+        seed=seed,
+        num_run=num_run,
+        subsample=subsample,
+        all_scoring_functions=all_scoring_functions,
+        output_y_hat_optimization=output_y_hat_optimization,
+        include=include,
+        exclude=exclude,
+        disable_file_output=disable_file_output,
+        init_params=init_params
+    )
     evaluator.fit_predict_and_loss(iterative=iterative)
 
 
-def eval_iterative_holdout(queue, config, datamanager, backend, cv, metric,
-                           seed, num_run, instance, all_scoring_functions,
-                           output_y_hat_optimization, include, exclude,
-                           disable_file_output):
-    return eval_holdout(queue=queue,
-                        config=config,
-                        datamanager=datamanager,
-                        backend=backend,
-                        metric=metric,
-                        cv=cv,
-                        seed=seed,
-                        num_run=num_run,
-                        all_scoring_functions=all_scoring_functions,
-                        output_y_hat_optimization=output_y_hat_optimization,
-                        include=include,
-                        exclude=exclude,
-                        instance=instance,
-                        disable_file_output=disable_file_output,
-                        iterative=True)
+def eval_iterative_holdout(
+        queue,
+        config,
+        backend,
+        resampling_strategy,
+        resampling_strategy_args,
+        metric,
+        seed,
+        num_run,
+        instance,
+        all_scoring_functions,
+        output_y_hat_optimization,
+        include,
+        exclude,
+        disable_file_output,
+        init_params=None,
+):
+    return eval_holdout(
+        queue=queue,
+        config=config,
+        backend=backend,
+        metric=metric,
+        resampling_strategy=resampling_strategy,
+        resampling_strategy_args=resampling_strategy_args,
+        seed=seed,
+        num_run=num_run,
+        all_scoring_functions=all_scoring_functions,
+        output_y_hat_optimization=output_y_hat_optimization,
+        include=include,
+        exclude=exclude,
+        instance=instance,
+        disable_file_output=disable_file_output,
+        iterative=True,
+        init_params=init_params
+    )
 
 
-def eval_partial_cv(queue, config, datamanager, backend, cv, metric, seed,
-                    num_run, instance, all_scoring_functions,
-                    output_y_hat_optimization, include, exclude,
-                    disable_file_output, iterative=False):
+def eval_partial_cv(
+        queue,
+        config,
+        backend,
+        resampling_strategy,
+        resampling_strategy_args,
+        metric,
+        seed,
+        num_run,
+        instance,
+        all_scoring_functions,
+        output_y_hat_optimization,
+        include,
+        exclude,
+        disable_file_output,
+        init_params=None,
+        iterative=False
+):
     instance = json.loads(instance) if instance is not None else {}
     subsample = instance.get('subsample')
     fold = instance['fold']
 
-    evaluator = TrainEvaluator(datamanager=datamanager,
-                               backend=backend,
-                               queue=queue,
-                               metric=metric,
-                               configuration=config,
-                               cv=cv,
-                               seed=seed,
-                               num_run=num_run,
-                               subsample=subsample,
-                               all_scoring_functions=all_scoring_functions,
-                               output_y_hat_optimization=False,
-                               include=include,
-                               exclude=exclude,
-                               disable_file_output=disable_file_output)
+    evaluator = TrainEvaluator(
+        backend=backend,
+        queue=queue,
+        metric=metric,
+        configuration=config,
+        resampling_strategy=resampling_strategy,
+        resampling_strategy_args=resampling_strategy_args,
+        seed=seed,
+        num_run=num_run,
+        subsample=subsample,
+        all_scoring_functions=all_scoring_functions,
+        output_y_hat_optimization=False,
+        include=include,
+        exclude=exclude,
+        disable_file_output=disable_file_output,
+        init_params=init_params,
+    )
 
     evaluator.partial_fit_predict_and_loss(fold=fold, iterative=iterative)
 
 
-def eval_partial_cv_iterative(queue, config, datamanager, backend, cv, metric,
-                              seed, num_run, instance, all_scoring_functions,
-                              output_y_hat_optimization, include, exclude,
-                              disable_file_output):
-    return eval_partial_cv(queue=queue,
-                           config=config,
-                           datamanager=datamanager,
-                           backend=backend,
-                           metric=metric,
-                           cv=cv,
-                           seed=seed,
-                           num_run=num_run,
-                           instance=instance,
-                           all_scoring_functions=all_scoring_functions,
-                           output_y_hat_optimization=output_y_hat_optimization,
-                           include=include,
-                           exclude=exclude,
-                           disable_file_output=disable_file_output,
-                           iterative=True)
+def eval_partial_cv_iterative(
+        queue,
+        config,
+        backend,
+        resampling_strategy,
+        resampling_strategy_args,
+        metric,
+        seed,
+        num_run,
+        instance,
+        all_scoring_functions,
+        output_y_hat_optimization,
+        include,
+        exclude,
+        disable_file_output,
+        init_params=None,
+):
+    return eval_partial_cv(
+        queue=queue,
+        config=config,
+        backend=backend,
+        metric=metric,
+        resampling_strategy=resampling_strategy,
+        resampling_strategy_args=resampling_strategy_args,
+        seed=seed,
+        num_run=num_run,
+        instance=instance,
+        all_scoring_functions=all_scoring_functions,
+        output_y_hat_optimization=output_y_hat_optimization,
+        include=include,
+        exclude=exclude,
+        disable_file_output=disable_file_output,
+        iterative=True,
+        init_params=init_params,
+    )
 
 
 # create closure for evaluating an algorithm
-def eval_cv(queue, config, datamanager, backend, cv, metric, seed, num_run,
-            instance, all_scoring_functions, output_y_hat_optimization,
-            include, exclude, disable_file_output):
+def eval_cv(
+        queue,
+        config,
+        backend,
+        resampling_strategy,
+        resampling_strategy_args,
+        metric,
+        seed,
+        num_run,
+        instance,
+        all_scoring_functions,
+        output_y_hat_optimization,
+        include,
+        exclude,
+        disable_file_output,
+        init_params=None,
+):
     instance = json.loads(instance) if instance is not None else {}
     subsample = instance.get('subsample')
-    evaluator = TrainEvaluator(datamanager=datamanager,
-                               backend=backend,
-                               queue=queue,
-                               metric=metric,
-                               configuration=config,
-                               seed=seed,
-                               num_run=num_run,
-                               cv=cv,
-                               subsample=subsample,
-                               all_scoring_functions=all_scoring_functions,
-                               output_y_hat_optimization=output_y_hat_optimization,
-                               include=include,
-                               exclude=exclude,
-                               disable_file_output=disable_file_output)
+    evaluator = TrainEvaluator(
+        backend=backend,
+        queue=queue,
+        metric=metric,
+        configuration=config,
+        seed=seed,
+        num_run=num_run,
+        resampling_strategy=resampling_strategy,
+        resampling_strategy_args=resampling_strategy_args,
+        subsample=subsample,
+        all_scoring_functions=all_scoring_functions,
+        output_y_hat_optimization=output_y_hat_optimization,
+        include=include,
+        exclude=exclude,
+        disable_file_output=disable_file_output,
+        init_params=init_params,
+    )
 
     evaluator.fit_predict_and_loss()

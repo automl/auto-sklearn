@@ -22,8 +22,8 @@ class MultinomialNBComponentTest(BaseClassificationComponentTest):
     res["default_digits"] = 0.89496053430479661
     res["default_digits_iterative"] = 0.89496053430479661
     res["default_digits_binary"] = 0.98967820279295693
-    res["default_digits_multilabel"] = 0.81239938943608647
-    res["default_digits_multilabel_proba"] = 0.76548981051208942
+    res["default_digits_multilabel"] = 0.70484946987667163
+    res["default_digits_multilabel_proba"] = 0.80324074074074081
 
     sk_mod = sklearn.naive_bayes.MultinomialNB
     module = MultinomialNB

@@ -8,8 +8,14 @@ from smac.tae.execute_ta_run import StatusType
 
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
-from autosklearn.constants import *
-from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
+from autosklearn.constants import (
+    REGRESSION_TASKS,
+    MULTILABEL_CLASSIFICATION,
+    MULTICLASS_CLASSIFICATION,
+)
+from autosklearn.pipeline.implementations.util import (
+    convert_multioutput_multiclass_to_multilabel
+)
 from autosklearn.metrics import calculate_score
 from autosklearn.util.logging_ import get_logger
 
@@ -29,7 +35,7 @@ class MyDummyClassifier(DummyClassifier):
         else:
             super(MyDummyClassifier, self).__init__(strategy="most_frequent")
 
-    def pre_transform(self, X, y, fit_params=None):
+    def pre_transform(self, X, y, fit_params=None):  # pylint: disable=R0201
         if fit_params is None:
             fit_params = {}
         return X, fit_params
@@ -48,8 +54,11 @@ class MyDummyClassifier(DummyClassifier):
             np.float32)
         return probas
 
-    def estimator_supports_iterative_fit(self):
+    def estimator_supports_iterative_fit(self):  # pylint: disable=R0201
         return False
+
+    def get_additional_run_info(self):  # pylint: disable=R0201
+        return None
 
 
 class MyDummyRegressor(DummyRegressor):
@@ -76,12 +85,15 @@ class MyDummyRegressor(DummyRegressor):
         new_X = np.ones((X.shape[0], 1))
         return super(MyDummyRegressor, self).predict(new_X).astype(np.float32)
 
-    def estimator_supports_iterative_fit(self):
+    def estimator_supports_iterative_fit(self):  # pylint: disable=R0201
         return False
+
+    def get_additional_run_info(self):  # pylint: disable=R0201
+        return None
 
 
 class AbstractEvaluator(object):
-    def __init__(self, datamanager, backend, queue, metric,
+    def __init__(self, backend, queue, metric,
                  configuration=None,
                  all_scoring_functions=False,
                  seed=1,
@@ -90,7 +102,8 @@ class AbstractEvaluator(object):
                  subsample=None,
                  include=None,
                  exclude=None,
-                 disable_file_output=False):
+                 disable_file_output=False,
+                 init_params=None):
 
         self.starttime = time.time()
 
@@ -98,15 +111,15 @@ class AbstractEvaluator(object):
         self.backend = backend
         self.queue = queue
 
-        self.datamanager = datamanager
+        self.datamanager = self.backend.load_datamanager()
         self.include = include
         self.exclude = exclude
 
-        self.X_valid = datamanager.data.get('X_valid')
-        self.X_test = datamanager.data.get('X_test')
+        self.X_valid = self.datamanager.data.get('X_valid')
+        self.X_test = self.datamanager.data.get('X_test')
 
         self.metric = metric
-        self.task_type = datamanager.info['task']
+        self.task_type = self.datamanager.info['task']
         self.seed = seed
 
         self.output_y_hat_optimization = output_y_hat_optimization
@@ -124,12 +137,14 @@ class AbstractEvaluator(object):
             if not isinstance(self.configuration, Configuration):
                 self.model_class = MyDummyClassifier
             else:
-                self.model_class = \
-                    autosklearn.pipeline.classification.SimpleClassificationPipeline
+                self.model_class = (
+                    autosklearn.pipeline.classification.
+                        SimpleClassificationPipeline
+                )
             self.predict_function = self._predict_proba
 
         categorical_mask = []
-        for feat in datamanager.feat_type:
+        for feat in self.datamanager.feat_type:
             if feat.lower() == 'numerical':
                 categorical_mask.append(False)
             elif feat.lower() == 'categorical':
@@ -137,10 +152,14 @@ class AbstractEvaluator(object):
             else:
                 raise ValueError(feat)
         if np.sum(categorical_mask) > 0:
-            self._init_params = {'one_hot_encoding:categorical_features':
-                                     categorical_mask}
+            self._init_params = {
+                'categorical_encoding:one_hot_encoding:categorical_features':
+                    categorical_mask
+            }
         else:
             self._init_params = {}
+        if init_params is not None:
+            self._init_params.update(init_params)
 
         if num_run is None:
             num_run = 0
@@ -158,12 +177,12 @@ class AbstractEvaluator(object):
                                      random_state=self.seed,
                                      init_params=self._init_params)
         else:
-            dataset_properties = {'task': self.task_type,
-                                  'sparse': self.datamanager.info['is_sparse'] == 1,
-                                  'multilabel': self.task_type ==
-                                                MULTILABEL_CLASSIFICATION,
-                                  'multiclass': self.task_type ==
-                                                MULTICLASS_CLASSIFICATION}
+            dataset_properties = {
+                'task': self.task_type,
+                'sparse': self.datamanager.info['is_sparse'] == 1,
+                'multilabel': self.task_type == MULTILABEL_CLASSIFICATION,
+                'multiclass': self.task_type == MULTICLASS_CLASSIFICATION,
+            }
             model = self.model_class(config=self.configuration,
                                      dataset_properties=dataset_properties,
                                      random_state=self.seed,
@@ -191,7 +210,7 @@ class AbstractEvaluator(object):
         return err
 
     def finish_up(self, loss, opt_pred, valid_pred, test_pred,
-                  file_output=True, final_call=True):
+                  additional_run_info=None, file_output=True, final_call=True):
         """This function does everything necessary after the fitting is done:
 
         * predicting
@@ -211,15 +230,17 @@ class AbstractEvaluator(object):
         if loss_ is not None:
             return self.duration, loss_, self.seed, additional_run_info_
 
-        num_run = str(self.num_run).zfill(5)
         if isinstance(loss, dict):
             loss_ = loss
             loss = loss_[self.metric.name]
         else:
             loss_ = {}
 
-        additional_run_info = {metric_name: value for metric_name, value in
-                               loss_.items()}
+        additional_run_info = (
+            {} if additional_run_info is None else additional_run_info
+        )
+        for metric_name, value in loss_.items():
+            additional_run_info[metric_name] = value
         additional_run_info['duration'] = self.duration
         additional_run_info['num_run'] = self.num_run
 
@@ -270,8 +291,9 @@ class AbstractEvaluator(object):
                     pass
                 self.backend.save_targets_ensemble(self.Y_optimization)
 
-            self.backend.save_predictions_as_npy(Y_optimization_pred, 'ensemble',
-                                                 seed, num_run)
+            self.backend.save_predictions_as_npy(
+                Y_optimization_pred, 'ensemble', seed, num_run
+            )
 
         if Y_valid_pred is not None:
             self.backend.save_predictions_as_npy(Y_valid_pred, 'valid',

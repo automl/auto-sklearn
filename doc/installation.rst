@@ -12,7 +12,7 @@ System requirements
 auto-sklearn has the following system requirements:
 
 * Linux operating system (for example Ubuntu),
-* Python (>=3.4).
+* Python (>=3.5).
 * C++ compiler (with C++11 supports) and SWIG (version 3.0 or later) 
 
 For an explanation of missing Microsoft Windows and MAC OSX support please
@@ -63,7 +63,7 @@ be solved by installing the *gcc* compiler shipped with AnaConda (as well as
 
 .. code:: bash
 
-    conda install gcc swig
+    conda install gxx_linux-64 gcc_linux-64 swig
 
 
 Windows/OSX compability
@@ -86,7 +86,7 @@ Possible solutions (not tested):
 Mac OSX
 ~~~~~~~
 
-Auto-sklearn is known to work on OSX systems. Nevertheless, there are two
+We currently do not know if *auto-sklearn* works on OSX. There are at least two
 issues holding us back from actively supporting OSX:
 
 * The ``resource`` module cannot enforce a memory limit on a Python process
@@ -96,7 +96,12 @@ issues holding us back from actively supporting OSX:
   *auto-sklearn* and its dependencies `SMAC3 <https://github.com/automl/SMAC3>`_
   and `ConfigSpace <https://github.com/automl/ConfigSpace>`_.
 
-Possible solutions (not tested):
+In case you're having issues installing the
+`pyrfr package <https://github.com/automl/random_forest_run>`_, check out this
+`installation suggestion on github<https://github.com/automl/auto-sklearn/issues/360#issuecomment-335150470>`_
+.
+
+Possible other solutions (not tested):
 
 * virtual machine
 * docker image

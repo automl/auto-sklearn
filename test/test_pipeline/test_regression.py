@@ -86,9 +86,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     def test_configurations_sparse(self):
         dataset_properties = {'sparse': True}
         cs = SimpleRegressionPipeline(
-            # TODO remove in sklearn 0.18
-            dataset_properties=dataset_properties,
-            exclude={'regressor': 'gaussian_process'}).get_hyperparameter_search_space()
+            dataset_properties=dataset_properties
+        ).get_hyperparameter_search_space()
 
         self._test_configurations(cs, make_sparse=True,
                                   dataset_properties=dataset_properties)
@@ -106,9 +105,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             config._populate_values()
 
             # Restrict configurations which could take too long on travis-ci
-            restrictions = {'regressor:passive_aggressive:n_iter': 5,
-                            'regressor:sgd:n_iter': 5,
-                            'regressor:adaboost:n_estimators': 50,
+            restrictions = {'regressor:adaboost:n_estimators': 50,
                             'regressor:adaboost:max_depth': 1,
                             'preprocessor:kernel_pca:n_components': 10,
                             'preprocessor:kitchen_sinks:n_components': 50,
@@ -196,7 +193,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             predictions = auto.predict(copy.deepcopy(X_test))
             # The lower the worse
             r2_score = sklearn.metrics.r2_score(Y_test, predictions)
-            self.assertAlmostEqual(0.417, r2_score, places=3)
+            self.assertAlmostEqual(0.347, r2_score, places=3)
             model_score = auto.score(copy.deepcopy(X_test), Y_test)
             self.assertAlmostEqual(model_score, r2_score, places=5)
 
@@ -221,7 +218,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(130, len(hyperparameters))
+        self.assertEqual(141, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 5, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
@@ -249,13 +246,17 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         cs = SimpleRegressionPipeline(include={'preprocessor': ['densifier']},
                                       dataset_properties={'sparse': True}).\
             get_hyperparameter_search_space()
-        self.assertEqual(cs.get_hyperparameter('regressor:__choice__').default,
-                         'gradient_boosting')
+        self.assertEqual(
+            cs.get_hyperparameter('regressor:__choice__').default_value,
+            'gradient_boosting'
+        )
 
         cs = SimpleRegressionPipeline(include={'preprocessor': ['nystroem_sampler']}).\
             get_hyperparameter_search_space()
-        self.assertEqual(cs.get_hyperparameter('regressor:__choice__').default,
-                         'sgd')
+        self.assertEqual(
+            cs.get_hyperparameter('regressor:__choice__').default_value,
+            'sgd'
+        )
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
         self.assertRaisesRegexp(ValueError, "Cannot find a legal default "

@@ -16,10 +16,12 @@ from autosklearn.pipeline.components.data_preprocessing.balancing.balancing impo
     Balancing
 from autosklearn.pipeline.components.data_preprocessing.imputation.imputation \
     import Imputation
-from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding\
-    .one_hot_encoding import OneHotEncoder
+from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding \
+     import OHEChoice
 from autosklearn.pipeline.components import feature_preprocessing as \
     feature_preprocessing_components
+from autosklearn.pipeline.components.data_preprocessing.variance_threshold.variance_threshold \
+    import VarianceThreshold
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
 
@@ -76,12 +78,11 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                  include=None, exclude=None, random_state=None,
                  init_params=None):
         self._output_dtype = np.int32
-        super(SimpleClassificationPipeline, self).__init__(
+        super().__init__(
             config, pipeline, dataset_properties, include, exclude,
             random_state, init_params)
 
     def fit_transformer(self, X, y, fit_params=None):
-        self.num_targets = 1 if len(y.shape) == 1 else y.shape[1]
 
         if fit_params is None:
             fit_params = {}
@@ -92,13 +93,14 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                 y, self.configuration['classifier:__choice__'],
                 self.configuration['preprocessor:__choice__'],
                 {}, {})
+            _init_params.update(self._init_params)
             self.set_hyperparameters(configuration=self.configuration,
                                      init_params=_init_params)
 
             if _fit_params is not None:
                 fit_params.update(_fit_params)
 
-        X, fit_params = super(SimpleClassificationPipeline, self).fit_transformer(
+        X, fit_params = super().fit_transformer(
             X, y, fit_params=fit_params)
 
         return X, fit_params
@@ -120,11 +122,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)
         """
         if batch_size is None:
-            Xt = X
-            for name, transform in self.steps[:-1]:
-                Xt = transform.transform(Xt)
-
-            return self.steps[-1][-1].predict_proba(Xt)
+            return super().predict_proba(X)
 
         else:
             if not isinstance(batch_size, int):
@@ -172,21 +170,18 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         if dataset_properties['target_type'] != 'classification':
             dataset_properties['target_type'] = 'classification'
 
-        pipeline = self.steps
         cs = self._get_base_search_space(
             cs=cs, dataset_properties=dataset_properties,
-            exclude=exclude, include=include, pipeline=pipeline)
+            exclude=exclude, include=include, pipeline=self.steps)
 
         classifiers = cs.get_hyperparameter('classifier:__choice__').choices
         preprocessors = cs.get_hyperparameter('preprocessor:__choice__').choices
-        available_classifiers = pipeline[-1][1].get_available_components(
-            dataset_properties)
-        available_preprocessors = pipeline[-2][1].get_available_components(
+        available_classifiers = self._final_estimator.get_available_components(
             dataset_properties)
 
         possible_default_classifier = copy.copy(list(
             available_classifiers.keys()))
-        default = cs.get_hyperparameter('classifier:__choice__').default
+        default = cs.get_hyperparameter('classifier:__choice__').default_value
         del possible_default_classifier[possible_default_classifier.index(default)]
 
         # A classifier which can handle sparse data after the densifier is
@@ -214,7 +209,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                             except IndexError:
                                 raise ValueError("Cannot find a legal default configuration.")
                             cs.get_hyperparameter(
-                                'classifier:__choice__').default = default
+                                'classifier:__choice__').default_value = default
 
         # which would take too long
         # Combinations of non-linear models with feature learning:
@@ -247,7 +242,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                         raise ValueError(
                             "Cannot find a legal default configuration.")
                     cs.get_hyperparameter(
-                        'classifier:__choice__').default = default
+                        'classifier:__choice__').default_value = default
 
         # Won't work
         # Multinomial NB etc don't use with features learning, pca etc
@@ -278,7 +273,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                         raise ValueError(
                             "Cannot find a legal default configuration.")
                     cs.get_hyperparameter(
-                        'classifier:__choice__').default = default
+                        'classifier:__choice__').default_value = default
 
         self.configuration_space_ = cs
         self.dataset_properties_ = dataset_properties
@@ -292,8 +287,9 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         # Add the always active preprocessing components
 
         steps.extend(
-            [["one_hot_encoding", OneHotEncoder()],
+            [["categorical_encoding", OHEChoice(default_dataset_properties)],
              ["imputation", Imputation()],
+             ["variance_threshold", VarianceThreshold()],
              ["rescaling",
               rescaling_components.RescalingChoice(default_dataset_properties)],
              ["balancing", Balancing()]])

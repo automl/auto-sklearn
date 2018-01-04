@@ -67,19 +67,21 @@ class BalancingComponentTest(unittest.TestCase):
             n_repeated=2, n_clusters_per_class=2, weights=[0.8, 0.2],
             random_state=1)
 
-        for name, clf, acc_no_weighting, acc_weighting in \
-                [('adaboost', AdaboostClassifier, 0.810, 0.735),
-                 ('decision_tree', DecisionTree, 0.780, 0.643),
-                 ('extra_trees', ExtraTreesClassifier, 0.75, 0.800),
+        for name, clf, acc_no_weighting, acc_weighting, places in \
+                [('adaboost', AdaboostClassifier, 0.810, 0.735, 3),
+                 ('decision_tree', DecisionTree, 0.780, 0.643, 3),
+                 ('extra_trees', ExtraTreesClassifier, 0.821, 0.842, 3),
                  ('gradient_boosting', GradientBoostingClassifier,
-                  0.789, 0.762),
-                 ('random_forest', RandomForest, 0.75, 0.821),
-                 ('libsvm_svc', LibSVM_SVC, 0.769, 0.72),
-                 ('liblinear_svc', LibLinear_SVC, 0.762, 0.735),
-                 ('sgd', SGD, 0.704, 0.667)
+                  0.737, 0.684, 3),
+                 ('random_forest', RandomForest, 0.78, 0.778, 3),
+                 ('libsvm_svc', LibSVM_SVC, 0.769, 0.72, 3),
+                 ('liblinear_svc', LibLinear_SVC, 0.762, 0.735, 3),
+                 ('sgd', SGD, 0.72, 0.6, 2)
                 ]:
-            for strategy, acc in [('none', acc_no_weighting),
-                                  ('weighting', acc_weighting)]:
+            for strategy, acc in [
+                ('none', acc_no_weighting),
+                ('weighting', acc_weighting)
+            ]:
                 # Fit
                 data_ = copy.copy(data)
                 X_train = data_[0][:100]
@@ -100,7 +102,7 @@ class BalancingComponentTest(unittest.TestCase):
                 predictions = predictor.predict(X_test)
                 self.assertAlmostEqual(
                     sklearn.metrics.f1_score(predictions, Y_test), acc,
-                    places=3, msg=(name, strategy))
+                    places=places, msg=(name, strategy))
 
                 # fit_transformer and fit_estimator
                 data_ = copy.copy(data)
@@ -117,13 +119,13 @@ class BalancingComponentTest(unittest.TestCase):
                 predictions = classifier.predict(X_test)
                 self.assertAlmostEqual(
                     sklearn.metrics.f1_score(predictions, Y_test), acc,
-                    places=3)
+                    places=places)
 
         for name, pre, acc_no_weighting, acc_weighting in \
                 [('extra_trees_preproc_for_classification',
-                    ExtraTreesPreprocessorClassification, 0.691, 0.692),
+                    ExtraTreesPreprocessorClassification, 0.800, 0.621),
                  ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
-                    0.692, 0.590)]:
+                    0.780, 0.61)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
                 data_ = copy.copy(data)

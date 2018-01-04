@@ -4,6 +4,7 @@ import inspect
 import pkgutil
 import sys
 
+from sklearn.base import BaseEstimator
 from sklearn.utils import check_random_state
 
 
@@ -59,7 +60,7 @@ class ThirdPartyComponents(object):
         self.components[name] = classifier
 
 
-class AutoSklearnComponent(object):
+class AutoSklearnComponent(BaseEstimator):
     @staticmethod
     def get_properties(dataset_properties=None):
         """Get the properties of the underlying algorithm.

@@ -11,13 +11,13 @@ class GradientBoostingComponentTest(BaseClassificationComponentTest):
     __test__ = True
 
     res = dict()
-    res["default_iris"] = 0.93999999999999995
-    res["default_iris_iterative"] = 0.95999999999999996
-    res["default_iris_proba"] = 0.36351844058108812
+    res["default_iris"] = 0.92
+    res["default_iris_iterative"] = 0.92
+    res["default_iris_proba"] = 0.48109031836615801
     res["default_iris_sparse"] = -1
-    res["default_digits"] = 0.87795992714025506
-    res["default_digits_iterative"] = 0.78324225865209474
-    res["default_digits_binary"] = 0.99089253187613846
+    res["default_digits"] = 0.80206435944140864
+    res["default_digits_iterative"] = 0.74741955069823918
+    res["default_digits_binary"] = 0.98178506375227692
     res["default_digits_multilabel"] = -1
     res["default_digits_multilabel_proba"] = -1
 
