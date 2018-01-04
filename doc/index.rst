@@ -1,6 +1,6 @@
-*********************
-What is auto-sklearn?
-*********************
+************
+auto-sklearn
+************
 
 .. role:: bash(code)
     :language: bash
@@ -19,8 +19,8 @@ replacement for a scikit-learn estimator:
 *auto-sklearn* frees a machine learning user from algorithm selection and
 hyperparameter tuning. It leverages recent advantages in *Bayesian
 optimization*, *meta-learning* and *ensemble construction*. Learn more about
-the technology behind *auto-sklearn* by reading this paper published at
-the `NIPS 2015 <http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf>`_
+the technology behind *auto-sklearn* by reading our paper published at
+`NIPS 2015 <http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf>`_
 .
 
 Example
@@ -39,7 +39,7 @@ Example
     >>> print("Accuracy score", sklearn.metrics.accuracy_score(y_test, y_hat))
 
 
-This will run for one hour should result in an accuracy above 0.98.
+This will run for one hour and should result in an accuracy above 0.98.
 
 
 Manual
@@ -59,8 +59,8 @@ namely the 3-clause BSD license.
 Citing auto-sklearn
 *******************
 
-If you use auto-sklearn in a scientific publication, we would appreciate
-references to the following paper:
+If you use auto-sklearn in a scientific publication, we would appreciate a
+reference to the following paper:
 
 
  `Efficient and Robust Automated Machine Learning
