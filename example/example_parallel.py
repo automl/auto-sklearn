@@ -21,7 +21,7 @@ for dir in [tmp_folder, output_folder]:
         pass
 
 
-def run_spawn_classifier(X_train, y_train):
+def get_spawn_classifier(X_train, y_train):
     def spawn_classifier(seed, dataset_name):
         """Spawn a subprocess.
 
@@ -69,9 +69,9 @@ if __name__ == '__main__':
         sklearn.model_selection.train_test_split(X, y, random_state=1)
 
     processes = []
-    f = run_spawn_classifier(X_train, y_train)
+    spawn_classifier = get_spawn_classifier(X_train, y_train)
     for i in range(4): # set this at roughly half of your cores
-        p = multiprocessing.Process(target=f, args=(i, 'digits'))
+        p = multiprocessing.Process(target=spawn_classifier, args=(i, 'digits'))
         p.start()
         processes.append(p)
     for p in processes:
