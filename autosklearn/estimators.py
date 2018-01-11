@@ -308,6 +308,10 @@ class AutoSklearnEstimator(BaseEstimator):
     def predict(self, X, batch_size=None, n_jobs=1):
         return self._automl.predict(X, batch_size=batch_size, n_jobs=n_jobs)
 
+    def predict_proba(self, X, batch_size=None, n_jobs=1):
+        return self._automl.predict_proba(
+             X, batch_size=batch_size, n_jobs=n_jobs)
+
     def score(self, X, y):
         return self._automl.score(X, y)
 
@@ -428,7 +432,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             The predicted class probabilities.
 
         """
-        return self._automl.predict_proba(
+        return super().predict_proba(
             X, batch_size=batch_size, n_jobs=n_jobs)
 
 
