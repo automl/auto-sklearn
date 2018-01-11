@@ -103,7 +103,6 @@ class EstimatorTest(Base, unittest.TestCase):
                                        initial_configurations_via_metalearning=0,
                                        ensemble_size=0)
         automl.fit(X_train, Y_train)
-
         # Create a 'dummy model' for the first run, which has an accuracy of
         # more than 99%; it should be in the final ensemble if the ensemble
         # building of the second AutoSklearn classifier works correct
@@ -303,6 +302,8 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self.assertEqual(predictions.shape, (50, 3))
         score = f1_macro(Y_test, predictions)
         self.assertGreaterEqual(score, 0.9)
+        probs = automl.predict_proba(X_train)
+        self.assertAlmostEqual(np.mean(probs), 0.33333333333333331)
 
     def test_binary(self):
         output = os.path.join(self.test_dir, '..', '.tmp_binary_fit')
