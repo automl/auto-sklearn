@@ -51,6 +51,12 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
             self.max_leaf_nodes = None
         else:
             self.max_leaf_nodes = int(self.max_leaf_nodes)
+
+        if check_none(self.max_depth):
+            self.max_depth = None
+        else:
+            self.max_depth = int(self.max_depth)
+
         self.bootstrap = check_for_bool(self.bootstrap)
         self.n_jobs = int(self.n_jobs)
         self.min_impurity_decrease = float(self.min_impurity_decrease)

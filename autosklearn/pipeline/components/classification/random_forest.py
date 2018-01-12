@@ -48,7 +48,8 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
 
         if self.estimator is None:
             self.n_estimators = int(self.n_estimators)
-            self.max_depth = check_for_bool(self.max_depth)
+            if check_none(self.max_depth):
+                self.max_depth = None
 
             self.min_samples_split = int(self.min_samples_split)
             self.min_samples_leaf = int(self.min_samples_leaf)

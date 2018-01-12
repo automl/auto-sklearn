@@ -56,6 +56,11 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
         else:
             self.max_leaf_nodes = int(self.max_leaf_nodes)
 
+        if check_none(self.max_depth):
+            self.max_depth = None
+        else:
+            self.max_depth = int(self.max_depth)
+
         self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
 
         num_features = X.shape[1]
