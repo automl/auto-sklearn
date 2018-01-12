@@ -8,6 +8,8 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
+from autosklearn.util.common import check_true, check_false, \
+    check_none
 
 
 class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
@@ -25,11 +27,12 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
                              "'mae'): %s" % criterion)
         self.criterion = criterion
 
-        if max_depth == "None" or max_depth is None:
+        if check_none(max_depth):
             self.max_depth = None
         else:
             self.max_depth = int(max_depth)
-        if max_leaf_nodes == "None" or max_leaf_nodes is None:
+
+        if check_none(max_leaf_nodes):
             self.max_leaf_nodes = None
         else:
             self.max_leaf_nodes = int(max_leaf_nodes)
@@ -39,9 +42,9 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
 
         self.max_features = float(max_features)
 
-        if bootstrap == "True":
+        if check_true(bootstrap):
             self.bootstrap = True
-        elif bootstrap == "False":
+        elif check_false(bootstrap):
             self.bootstrap = False
 
         self.oob_score = oob_score

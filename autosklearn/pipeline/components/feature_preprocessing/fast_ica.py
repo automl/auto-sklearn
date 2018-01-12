@@ -8,6 +8,7 @@ from ConfigSpace.conditions import EqualsCondition
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
+from autosklearn.util.common import check_true, check_false
 
 
 class FastICA(AutoSklearnPreprocessingAlgorithm):
@@ -15,7 +16,14 @@ class FastICA(AutoSklearnPreprocessingAlgorithm):
                  random_state=None):
         self.n_components = None if n_components is None else int(n_components)
         self.algorithm = algorithm
-        self.whiten = whiten == 'True'
+
+        if check_true(whiten):
+            self.whiten = True
+        elif check_false(whiten):
+            self.whiten = False
+        else:
+            self.whiten = whiten
+
         self.fun = fun
         self.random_state = random_state
 

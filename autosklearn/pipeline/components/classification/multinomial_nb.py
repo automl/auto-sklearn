@@ -6,15 +6,17 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
+from autosklearn.util.common import check_false, check_true
 
 
 class MultinomialNB(AutoSklearnClassificationAlgorithm):
 
     def __init__(self, alpha, fit_prior, random_state=None, verbose=0):
         self.alpha = alpha
-        if fit_prior.lower() == "true":
+
+        if check_true(fit_prior):
             self.fit_prior = True
-        elif fit_prior.lower() == "false":
+        elif check_false(fit_prior):
             self.fit_prior = False
         else:
             self.fit_prior = fit_prior

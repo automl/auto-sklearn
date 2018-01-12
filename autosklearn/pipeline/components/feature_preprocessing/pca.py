@@ -6,12 +6,19 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
-
+from autosklearn.util.common import check_true, check_false
 
 class PCA(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, keep_variance, whiten, random_state=None):
         self.keep_variance = keep_variance
-        self.whiten = whiten
+
+        if check_true(whiten):
+            self.whiten = True
+        elif check_false(whiten):
+            self.whiten = False
+        else:
+            self.whiten = whiten
+
         self.random_state = random_state
 
     def fit(self, X, Y=None):

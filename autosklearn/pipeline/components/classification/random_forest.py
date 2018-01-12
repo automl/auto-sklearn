@@ -8,7 +8,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
-
+from autosklearn.util.common import check_true, check_false, check_none
 
 class RandomForest(AutoSklearnClassificationAlgorithm):
     def __init__(self, n_estimators, criterion, max_features,
@@ -48,23 +48,30 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
 
         if self.estimator is None:
             self.n_estimators = int(self.n_estimators)
-            if self.max_depth == "None" or self.max_depth is None:
+            if check_none(self.max_depth):
                 self.max_depth = None
             else:
                 self.max_depth = int(self.max_depth)
+
             self.min_samples_split = int(self.min_samples_split)
             self.min_samples_leaf = int(self.min_samples_leaf)
             self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
+
             if self.max_features not in ("sqrt", "log2", "auto"):
                 max_features = int(X.shape[1] ** float(self.max_features))
             else:
                 max_features = self.max_features
-            if self.bootstrap == "True":
+
+            if check_true(self.bootstrap):
                 self.bootstrap = True
-            else:
+            elif check_false(self.bootstrap):
                 self.bootstrap = False
-            if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
+            else:
+                self.bootstrap = self.bootstrap
+
+            if check_none(self.max_leaf_nodes):
                 self.max_leaf_nodes = None
+
             self.min_impurity_decrease = float(self.min_impurity_decrease)
 
             # initial fit of only increment trees

@@ -9,15 +9,28 @@ from autosklearn.pipeline.components.base import \
     AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
-
+from autosklearn.util.common import check_true, check_false
 
 class PassiveAggressive(AutoSklearnClassificationAlgorithm):
     def __init__(self, C, fit_intercept, tol, loss, average, random_state=None):
         self.C = float(C)
-        self.fit_intercept = fit_intercept == 'True'
+
+        if check_true(fit_intercept):
+            self.fit_intercept = True
+        elif check_false(fit_intercept):
+            self.fit_intercept = False
+        else:
+            self.fit_intercept = fit_intercept
+
+        if check_true(average):
+            self.average = True
+        elif check_false(average):
+            self.average = False
+        else:
+            self.average = average
+
         self.tol = float(tol)
         self.loss = loss
-        self.average = average == 'True'
         self.random_state = random_state
         self.estimator = None
 
@@ -140,7 +153,9 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
 
         tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4,
                                          log=True)
-        average = CategoricalHyperparameter('average', [False, True])
+        # Note: Average could also be an Integer if > 1
+        average = CategoricalHyperparameter('average', ['False', 'True'],
+                                            default='False')
 
         cs = ConfigurationSpace()
         cs.add_hyperparameters([loss, fit_intercept, tol, C, average])

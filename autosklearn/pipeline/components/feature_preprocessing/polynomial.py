@@ -5,13 +5,26 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
-
+from autosklearn.util.common import check_false, check_true
 
 class PolynomialFeatures(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, degree, interaction_only, include_bias, random_state=None):
         self.degree = int(degree)
-        self.interaction_only = interaction_only.lower() == 'true'
-        self.include_bias = include_bias.lower() == 'true'
+
+        if check_true(interaction_only):
+            self.interaction_only = True
+        elif check_false(interaction_only):
+            self.interaction_only = False
+        else:
+            self.interaction_only = interaction_only
+
+        if check_true(include_bias):
+            self.include_bias = True
+        elif check_false(include_bias):
+            self.include_bias = False
+        else:
+            self.include_bias = include_bias
+
         self.random_state = random_state
         self.preprocessor = None
 
