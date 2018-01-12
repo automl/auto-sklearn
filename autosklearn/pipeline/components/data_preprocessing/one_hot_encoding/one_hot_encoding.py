@@ -10,7 +10,7 @@ from ConfigSpace.conditions import EqualsCondition
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
-from autosklearn.util.common import check_true, check_false
+from autosklearn.util.common import check_for_bool
 
 
 class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
@@ -18,13 +18,7 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
                  categorical_features=None, random_state=None):
         # TODO pay attention to the cases when a copy is made (CSR matrices)
 
-        if check_true(use_minimum_fraction):
-            self.use_minimum_fraction = True
-        elif check_false(use_minimum_fraction):
-            self.use_minimum_fraction = False
-        else:
-            self.use_minimum_fraction = use_minimum_fraction
-
+        self.use_minimum_fraction = check_for_bool(self.use_minimum_fraction)
         self.minimum_fraction = minimum_fraction
         self.categorical_features = categorical_features
 

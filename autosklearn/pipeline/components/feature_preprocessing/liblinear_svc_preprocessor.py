@@ -7,8 +7,7 @@ from ConfigSpace.forbidden import ForbiddenEqualsClause, \
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
-from autosklearn.util.common import check_false, check_true, \
-    check_none
+from autosklearn.util.common import check_for_bool, check_none
 
 
 class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
@@ -34,21 +33,8 @@ class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
 
         self.C = float(self.C)
         self.tol = float(self.tol)
-
-        if check_true(self.dual):
-            self.dual = True
-        elif check_false(self.dual):
-            self.dual = False
-        else:
-            self.dual = self.dual
-
-        if check_true(self.fit_intercept):
-            self.fit_intercept = True
-        elif check_false(self.fit_intercept):
-            self.fit_intercept = False
-        else:
-            self.fit_intercept = self.fit_intercept
-
+        self.dual = check_for_bool(self.dual)
+        self.fit_intercept = check_for_bool(self.fit_intercept)
         self.intercept_scaling = float(self.intercept_scaling)
 
         if check_none(self.class_weight):

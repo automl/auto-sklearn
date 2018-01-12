@@ -50,3 +50,12 @@ def check_none(p):
     if p in ("None", "none", None):
         return True
     return False
+
+
+def check_for_bool(p):
+    if check_false(p):
+        return False
+    elif check_true(p):
+        return True
+    else:
+        raise ValueError("%s is not a bool" % str(p))

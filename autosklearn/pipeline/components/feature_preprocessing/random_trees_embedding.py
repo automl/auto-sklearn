@@ -4,7 +4,7 @@ from ConfigSpace.hyperparameters import UniformIntegerHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
-
+from autosklearn.util.common import check_none, check_for_bool
 
 class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
 
@@ -25,16 +25,19 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
     def _fit(self, X, Y=None):
         import sklearn.ensemble
 
-        if self.max_depth == "None" or self.max_depth is None:
+        self.n_estimators = int(self.n_estimators)
+        if check_none(self.max_depth):
             self.max_depth = None
         else:
             self.max_depth = int(self.max_depth)
-        if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
+        self.min_samples_split = int(self.min_samples_split)
+        self.min_samples_leaf = int(self.min_samples_leaf)
+        if check_none(self.max_leaf_nodes):
             self.max_leaf_nodes = None
         else:
             self.max_leaf_nodes = int(self.max_leaf_nodes)
-        if self.bootstrap in ['True', 'False']:
-            self.bootstrap = self.bootstrap == 'True'
+        self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
+        self.bootstrap = check_for_bool(self.bootstrap)
 
         self.preprocessor = sklearn.ensemble.RandomTreesEmbedding(
             n_estimators=self.n_estimators,

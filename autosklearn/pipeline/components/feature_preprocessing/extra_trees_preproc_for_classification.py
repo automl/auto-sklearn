@@ -8,8 +8,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
-from autosklearn.util.common import check_true, check_false, \
-    check_none
+from autosklearn.util.common import check_for_bool, check_none
 
 
 class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
@@ -20,45 +19,45 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
                  oob_score=False, n_jobs=1, random_state=None, verbose=0,
                  class_weight=None):
 
-        self.n_estimators = int(n_estimators)
+        self.n_estimators = n_estimators
         self.estimator_increment = 10
         if criterion not in ("gini", "entropy"):
             raise ValueError("'criterion' is not in ('gini', 'entropy'): "
                              "%s" % criterion)
         self.criterion = criterion
-
-        if check_none(max_depth):
-            self.max_depth = None
-        else:
-            self.max_depth = int(max_depth)
-
-        if check_none(max_leaf_nodes):
-            self.max_leaf_nodes = None
-        else:
-            self.max_leaf_nodes = int(max_leaf_nodes)
-
-        self.min_samples_leaf = int(min_samples_leaf)
-        self.min_samples_split = int(min_samples_split)
-
-        self.max_features = float(max_features)
+        self.min_samples_leaf = min_samples_leaf
+        self.min_samples_split = min_samples_split
+        self.max_features = max_features
+        self.bootstrap = bootstrap
+        self.max_leaf_nodes = max_leaf_nodes
+        self.max_depth = max_depth
         self.min_weight_fraction_leaf = min_weight_fraction_leaf
-        self.min_impurity_decrease = float(min_impurity_decrease)
-
-        if check_true(bootstrap):
-            self.bootstrap = True
-        elif check_false(bootstrap):
-            self.bootstrap = False
+        self.min_impurity_decrease = min_impurity_decrease
 
         self.oob_score = oob_score
-        self.n_jobs = int(n_jobs)
+        self.n_jobs = n_jobs
         self.random_state = random_state
-        self.verbose = int(verbose)
+        self.verbose = verbose
         self.class_weight = class_weight
         self.preprocessor = None
 
     def fit(self, X, Y, sample_weight=None):
         from sklearn.ensemble import ExtraTreesClassifier
         from sklearn.feature_selection import SelectFromModel
+
+        self.n_estimators = int(self.n_estimators)
+
+        if check_none(self.max_leaf_nodes):
+            self.max_leaf_nodes = None
+        else:
+            self.max_leaf_nodes = int(self.max_leaf_nodes)
+        self.bootstrap = check_for_bool(self.bootstrap)
+        self.n_jobs = int(self.n_jobs)
+        self.min_impurity_decrease = float(self.min_impurity_decrease)
+        self.max_features = self.max_features
+        self.min_samples_leaf = int(self.min_samples_leaf)
+        self.min_samples_split = int(self.min_samples_split)
+        self.verbose = int(self.verbose)
 
         max_features = int(X.shape[1] ** float(self.max_features))
         estimator = ExtraTreesClassifier(

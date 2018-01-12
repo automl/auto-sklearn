@@ -6,18 +6,24 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
+from autosklearn.util.common import check_for_bool
 
 
 class RidgeRegression(AutoSklearnRegressionAlgorithm):
     def __init__(self, alpha, fit_intercept, tol, random_state=None):
-        self.alpha = float(alpha)
-        self.fit_intercept = fit_intercept == 'True'
-        self.tol = float(tol)
+        self.alpha = alpha
+        self.fit_intercept = fit_intercept
+        self.tol = tol
         self.random_state = random_state
         self.estimator = None
 
     def fit(self, X, Y):
         import sklearn.linear_model
+
+        self.alpha = float(self.alpha)
+        self.fit_intercept = check_for_bool(self.fit_intercept)
+        self.tol = float(self.tol)
+
         self.estimator = sklearn.linear_model.Ridge(alpha=self.alpha,
                                                     fit_intercept=self.fit_intercept,
                                                     tol=self.tol,

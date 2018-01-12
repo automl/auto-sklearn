@@ -16,6 +16,9 @@ class KNearestNeighborsRegressor(AutoSklearnRegressionAlgorithm):
     def fit(self, X, Y):
         import sklearn.neighbors
 
+        self.n_neighbors = int(self.n_neighbors)
+        self.p = int(self.p)
+
         self.estimator = \
             sklearn.neighbors.KNeighborsRegressor(
                 n_neighbors=self.n_neighbors,

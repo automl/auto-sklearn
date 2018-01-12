@@ -22,6 +22,9 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
     def fit(self, X, Y=None):
         import sklearn.kernel_approximation
 
+        self.n_components = int(self.n_components)
+        self.gamma = float(self.gamma)
+
         self.preprocessor = sklearn.kernel_approximation.RBFSampler(
             self.gamma, self.n_components, self.random_state)
         self.preprocessor.fit(X)

@@ -6,7 +6,7 @@ from ConfigSpace.forbidden import ForbiddenEqualsClause, \
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
-
+from autosklearn.util.common import check_for_bool, check_none
 
 class LibLinear_SVR(AutoSklearnRegressionAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
@@ -29,8 +29,8 @@ class LibLinear_SVR(AutoSklearnRegressionAlgorithm):
         self.tol = float(self.tol)
         self.epsilon = float(self.epsilon)
 
-        self.dual = self.dual == 'True'
-        self.fit_intercept = self.fit_intercept == 'True'
+        self.dual = check_for_bool(self.dual)
+        self.fit_intercept = check_for_bool(self.fit_intercept)
         self.intercept_scaling = float(self.intercept_scaling)
 
         self.estimator = sklearn.svm.LinearSVR(epsilon=self.epsilon,

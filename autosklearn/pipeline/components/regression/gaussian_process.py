@@ -10,9 +10,9 @@ from autosklearn.pipeline.constants import *
 
 class GaussianProcess(AutoSklearnRegressionAlgorithm):
     def __init__(self, alpha, thetaL, thetaU, random_state=None):
-        self.alpha = float(alpha)
-        self.thetaL = float(thetaL)
-        self.thetaU = float(thetaU)
+        self.alpha = alpha
+        self.thetaL = thetaL
+        self.thetaU = thetaU
         # We ignore it
         self.random_state = random_state
         self.estimator = None
@@ -20,6 +20,11 @@ class GaussianProcess(AutoSklearnRegressionAlgorithm):
 
     def fit(self, X, y):
         import sklearn.gaussian_process
+
+        self.alpha = float(self.alpha)
+        self.thetaL = float(self.thetaL)
+        self.thetaU = float(self.thetaU)
+
         n_features = X.shape[1]
         kernel = sklearn.gaussian_process.kernels.RBF(
             length_scale=[1.0]*n_features,

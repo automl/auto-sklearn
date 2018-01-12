@@ -9,7 +9,7 @@ from ConfigSpace.conditions import EqualsCondition
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
-from autosklearn.util.common import check_false, check_true
+from autosklearn.util.common import check_for_bool
 
 
 class SGD(AutoSklearnClassificationAlgorithm):
@@ -60,21 +60,8 @@ class SGD(AutoSklearnClassificationAlgorithm):
             self.epsilon = float(self.epsilon) if self.epsilon is not None else 0.1
             self.eta0 = float(self.eta0)
             self.power_t = float(self.power_t) if self.power_t is not None else 0.25
-
-            if check_true(self.average):
-                self.average = True
-            elif check_false(self.average):
-                self.average = False
-            else:
-                self.average = self.average
-
-            if check_true(self.fit_intercept):
-                self.fit_intercept = True
-            elif check_false(self.fit_intercept):
-                self.fit_intercept = False
-            else:
-                self.fit_intercept = self.fit_intercept
-
+            self.average = check_for_bool(self.average)
+            self.fit_intercept = check_for_bool(self.fit_intercept)
             self.tol = float(self.tol)
 
             self.estimator = SGDClassifier(loss=self.loss,

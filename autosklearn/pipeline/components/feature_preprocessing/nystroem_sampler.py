@@ -14,15 +14,20 @@ class Nystroem(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, kernel, n_components, gamma=1.0, degree=3,
                  coef0=1, random_state=None):
         self.kernel = kernel
-        self.n_components = int(n_components)
-        self.gamma = float(gamma)
-        self.degree = int(degree)
-        self.coef0 = float(coef0)
+        self.n_components = n_components
+        self.gamma = gamma
+        self.degree = degree
+        self.coef0 = coef0
         self.random_state = random_state
 
     def fit(self, X, Y=None):
         import scipy.sparse
         import sklearn.kernel_approximation
+
+        self.n_components = int(self.n_components)
+        self.gamma = float(self.gamma)
+        self.degree = int(self.degree)
+        self.coef0 = float(self.coef0)
 
         self.preprocessor = sklearn.kernel_approximation.Nystroem(
             kernel=self.kernel, n_components=self.n_components,

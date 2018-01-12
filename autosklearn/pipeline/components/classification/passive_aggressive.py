@@ -9,27 +9,14 @@ from autosklearn.pipeline.components.base import \
     AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
-from autosklearn.util.common import check_true, check_false
+from autosklearn.util.common import check_for_bool
 
 class PassiveAggressive(AutoSklearnClassificationAlgorithm):
     def __init__(self, C, fit_intercept, tol, loss, average, random_state=None):
-        self.C = float(C)
-
-        if check_true(fit_intercept):
-            self.fit_intercept = True
-        elif check_false(fit_intercept):
-            self.fit_intercept = False
-        else:
-            self.fit_intercept = fit_intercept
-
-        if check_true(average):
-            self.average = True
-        elif check_false(average):
-            self.average = False
-        else:
-            self.average = average
-
-        self.tol = float(tol)
+        self.C = C
+        self.fit_intercept = fit_intercept
+        self.average = average
+        self.tol = tol
         self.loss = loss
         self.random_state = random_state
         self.estimator = None
@@ -58,6 +45,12 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
             self.estimator = None
 
         if self.estimator is None:
+
+            self.average = check_for_bool(self.average)
+            self.fit_intercept = check_for_bool(self.fit_intercept)
+            self.tol = float(self.tol)
+            self.C = float(self.C)
+
             call_fit = True
             self.estimator = PassiveAggressiveClassifier(
                 C=self.C,
@@ -155,7 +148,7 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
                                          log=True)
         # Note: Average could also be an Integer if > 1
         average = CategoricalHyperparameter('average', ['False', 'True'],
-                                            default='False')
+                                            default_value='False')
 
         cs = ConfigurationSpace()
         cs.add_hyperparameters([loss, fit_intercept, tol, C, average])

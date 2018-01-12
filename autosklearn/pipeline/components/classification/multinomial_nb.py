@@ -6,21 +6,14 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
-from autosklearn.util.common import check_false, check_true
+from autosklearn.util.common import check_for_bool
 
 
 class MultinomialNB(AutoSklearnClassificationAlgorithm):
 
     def __init__(self, alpha, fit_prior, random_state=None, verbose=0):
         self.alpha = alpha
-
-        if check_true(fit_prior):
-            self.fit_prior = True
-        elif check_false(fit_prior):
-            self.fit_prior = False
-        else:
-            self.fit_prior = fit_prior
-
+        self.fit_prior = fit_prior
         self.random_state = random_state
         self.verbose = int(verbose)
         self.estimator = None
@@ -39,6 +32,8 @@ class MultinomialNB(AutoSklearnClassificationAlgorithm):
             self.estimator = None
 
         if self.estimator is None:
+            self.fit_prior = check_for_bool(self.fit_prior)
+            self.alpha = float(self.alpha)
             self.n_iter = 0
             self.fully_fit_ = False
             self.estimator = sklearn.naive_bayes.MultinomialNB(
