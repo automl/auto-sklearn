@@ -54,6 +54,7 @@ class SGD(AutoSklearnClassificationAlgorithm):
             self.estimator = None
 
         if self.estimator is None:
+            self.fully_fit_ = False
 
             self.alpha = float(self.alpha)
             self.l1_ratio = float(self.l1_ratio) if self.l1_ratio is not None else 0.15

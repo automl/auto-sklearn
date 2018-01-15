@@ -45,6 +45,7 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
             self.estimator = None
 
         if self.estimator is None:
+            self.fully_fit_ = False
 
             self.average = check_for_bool(self.average)
             self.fit_intercept = check_for_bool(self.fit_intercept)

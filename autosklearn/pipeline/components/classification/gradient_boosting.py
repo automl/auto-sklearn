@@ -33,7 +33,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.estimator = None
         self.fully_fit_ = False
 
-    def fit(self, X, y, sample_weight=None, refit=False):
+    def fit(self, X, y, sample_weight=None):
         n_iter = 2
         self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight,
                            refit=True)
@@ -102,10 +102,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
     def configuration_fully_fitted(self):
         if self.estimator is None:
             return False
-        elif not hasattr(self, 'fully_fit_'):
-            return False
-        else:
-            return self.fully_fit_
+        return not len(self.estimator.estimators_) < self.n_estimators
 
     def predict(self, X):
         if self.estimator is None:

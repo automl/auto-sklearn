@@ -31,7 +31,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         self.class_weight = class_weight
         self.estimator = None
 
-    def fit(self, X, y, sample_weight=None, refit=False):
+    def fit(self, X, y, sample_weight=None):
         n_iter = 2
         self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight,
                            refit=True)
