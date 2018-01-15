@@ -50,6 +50,8 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
             self.n_estimators = int(self.n_estimators)
             if check_none(self.max_depth):
                 self.max_depth = None
+            else:
+                self.max_depth = int(self.max_depth)
 
             self.min_samples_split = int(self.min_samples_split)
             self.min_samples_leaf = int(self.min_samples_leaf)
@@ -64,6 +66,8 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
 
             if check_none(self.max_leaf_nodes):
                 self.max_leaf_nodes = None
+            else:
+                self.max_leaf_nodes = int(self.max_leaf_nodes)
 
             self.min_impurity_decrease = float(self.min_impurity_decrease)
 

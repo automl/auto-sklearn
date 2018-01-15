@@ -23,6 +23,7 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
         self.categorical_features = categorical_features
 
     def _fit(self, X, y=None):
+        self.use_minimum_fraction = check_for_bool(self.use_minimum_fraction)
         if self.use_minimum_fraction is False:
             self.minimum_fraction = None
         else:

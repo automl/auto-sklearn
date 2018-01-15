@@ -11,8 +11,8 @@ from autosklearn.pipeline.constants import *
 class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
     def __init__(self, n_estimators, learning_rate, loss, max_depth,
                  random_state=None):
-        self.n_estimators = int(n_estimators)
-        self.learning_rate = float(learning_rate)
+        self.n_estimators = n_estimators
+        self.learning_rate = learning_rate
         self.loss = loss
         self.random_state = random_state
         self.max_depth = max_depth

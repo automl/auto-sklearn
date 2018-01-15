@@ -56,6 +56,8 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
             self.bootstrap = check_for_bool(self.bootstrap)
             if check_none(self.max_leaf_nodes):
                 self.max_leaf_nodes = None
+            else:
+                self.max_leaf_nodes = int(self.max_leaf_nodes)
             self.min_impurity_decrease = float(self.min_impurity_decrease)
 
             self.estimator = RandomForestRegressor(

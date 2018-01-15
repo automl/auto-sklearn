@@ -7,6 +7,7 @@ from autosklearn.pipeline.components.base import \
     AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
+from autosklearn.util.common import check_none
 
 
 class LDA(AutoSklearnClassificationAlgorithm):
@@ -22,7 +23,7 @@ class LDA(AutoSklearnClassificationAlgorithm):
         import sklearn.discriminant_analysis
         import sklearn.multiclass
 
-        if self.shrinkage == "None" or self.shrinkage is None:
+        if check_none(self.shrinkage):
             self.shrinkage_ = None
             solver = 'svd'
         elif self.shrinkage == "auto":
