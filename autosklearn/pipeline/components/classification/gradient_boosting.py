@@ -8,6 +8,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
+from autosklearn.util.common import check_none
 
 
 class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
@@ -33,7 +34,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.estimator = None
         self.fully_fit_ = False
 
-    def fit(self, X, y, sample_weight=None, refit=False):
+    def fit(self, X, y, sample_weight=None):
         n_iter = 2
         self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight,
                            refit=True)
@@ -57,12 +58,12 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             self.min_samples_split = int(self.min_samples_split)
             self.min_samples_leaf = int(self.min_samples_leaf)
             self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
-            if self.max_depth == "None" or self.max_depth is None:
+            if check_none(self.max_depth):
                 self.max_depth = None
             else:
                 self.max_depth = int(self.max_depth)
             self.max_features = float(self.max_features)
-            if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
+            if check_none(self.max_leaf_nodes):
                 self.max_leaf_nodes = None
             else:
                 self.max_leaf_nodes = int(self.max_leaf_nodes)
@@ -102,10 +103,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
     def configuration_fully_fitted(self):
         if self.estimator is None:
             return False
-        elif not hasattr(self, 'fully_fit_'):
-            return False
-        else:
-            return self.fully_fit_
+        return not len(self.estimator.estimators_) < self.n_estimators
 
     def predict(self, X):
         if self.estimator is None:

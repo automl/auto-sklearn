@@ -8,7 +8,7 @@ from ConfigSpace.conditions import InCondition
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
-
+from autosklearn.util.common import check_none, check_for_bool
 
 class GradientBoosting(AutoSklearnRegressionAlgorithm):
     def __init__(self, loss, learning_rate, n_estimators, subsample,
@@ -59,17 +59,17 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
             self.min_samples_split = int(self.min_samples_split)
             self.min_samples_leaf = int(self.min_samples_leaf)
             self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
-            if self.max_depth == "None" or self.max_depth is None:
+            if check_none(self.max_depth):
                 self.max_depth = None
             else:
                 self.max_depth = int(self.max_depth)
             self.max_features = float(self.max_features)
-            if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
+            if check_none(self.max_leaf_nodes):
                 self.max_leaf_nodes = None
             else:
                 self.max_leaf_nodes = int(self.max_leaf_nodes)
             self.min_impurity_decrease = float(self.min_impurity_decrease)
-            if self.alpha is not None:
+            if not check_none(self.alpha):
                 self.alpha = float(self.alpha)
             self.verbose = int(self.verbose)
 

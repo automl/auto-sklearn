@@ -6,18 +6,13 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
+from autosklearn.util.common import check_for_bool
 
 
 class BernoulliNB(AutoSklearnClassificationAlgorithm):
     def __init__(self, alpha, fit_prior, random_state=None, verbose=0):
         self.alpha = alpha
-        if fit_prior.lower() == "true":
-            self.fit_prior = True
-        elif fit_prior.lower() == "false":
-            self.fit_prior = False
-        else:
-            self.fit_prior = fit_prior
-
+        self.fit_prior = fit_prior
         self.random_state = random_state
         self.verbose = int(verbose)
         self.estimator = None
@@ -37,6 +32,7 @@ class BernoulliNB(AutoSklearnClassificationAlgorithm):
         if self.estimator is None:
             self.n_iter = 0
             self.fully_fit_ = False
+            self.fit_prior = check_for_bool(self.fit_prior)
             self.estimator = sklearn.naive_bayes.BernoulliNB(
                 alpha=self.alpha, fit_prior=self.fit_prior)
             self.classes_ = np.unique(y.astype(int))

@@ -9,15 +9,15 @@ from autosklearn.pipeline.components.base import \
     AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
-
+from autosklearn.util.common import check_for_bool
 
 class PassiveAggressive(AutoSklearnClassificationAlgorithm):
     def __init__(self, C, fit_intercept, tol, loss, average, random_state=None):
-        self.C = float(C)
-        self.fit_intercept = fit_intercept == 'True'
-        self.tol = float(tol)
+        self.C = C
+        self.fit_intercept = fit_intercept
+        self.average = average
+        self.tol = tol
         self.loss = loss
-        self.average = average == 'True'
         self.random_state = random_state
         self.estimator = None
 
@@ -45,6 +45,13 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
             self.estimator = None
 
         if self.estimator is None:
+            self.fully_fit_ = False
+
+            self.average = check_for_bool(self.average)
+            self.fit_intercept = check_for_bool(self.fit_intercept)
+            self.tol = float(self.tol)
+            self.C = float(self.C)
+
             call_fit = True
             self.estimator = PassiveAggressiveClassifier(
                 C=self.C,
@@ -140,7 +147,9 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
 
         tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4,
                                          log=True)
-        average = CategoricalHyperparameter('average', [False, True])
+        # Note: Average could also be an Integer if > 1
+        average = CategoricalHyperparameter('average', ['False', 'True'],
+                                            default_value='False')
 
         cs = ConfigurationSpace()
         cs.add_hyperparameters([loss, fit_intercept, tol, C, average])

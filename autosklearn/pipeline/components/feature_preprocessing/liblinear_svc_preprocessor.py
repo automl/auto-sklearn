@@ -7,6 +7,7 @@ from ConfigSpace.forbidden import ForbiddenEqualsClause, \
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
+from autosklearn.util.common import check_for_bool, check_none
 
 
 class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
@@ -32,12 +33,11 @@ class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
 
         self.C = float(self.C)
         self.tol = float(self.tol)
-
-        self.dual = self.dual == 'True'
-        self.fit_intercept = self.fit_intercept == 'True'
+        self.dual = check_for_bool(self.dual)
+        self.fit_intercept = check_for_bool(self.fit_intercept)
         self.intercept_scaling = float(self.intercept_scaling)
 
-        if self.class_weight == "None" or self.class_weight is None:
+        if check_none(self.class_weight):
             self.class_weight = None
 
         estimator = sklearn.svm.LinearSVC(penalty=self.penalty,

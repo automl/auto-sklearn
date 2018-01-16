@@ -9,6 +9,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
+from autosklearn.util.common import check_for_bool, check_none
 
 
 class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
@@ -55,9 +56,10 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
             self.coef0 = float(self.coef0)
         self.tol = float(self.tol)
         self.max_iter = float(self.max_iter)
-        self.shrinking = self.shrinking == 'True'
 
-        if self.class_weight == "None" or self.class_weight is None:
+        self.shrinking = check_for_bool(self.shrinking)
+
+        if check_none(self.class_weight):
             self.class_weight = None
 
         self.estimator = sklearn.svm.SVC(C=self.C,

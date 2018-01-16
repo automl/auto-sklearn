@@ -6,6 +6,7 @@ from ConfigSpace.conditions import InCondition, EqualsCondition
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
+from autosklearn.util.common import check_for_bool
 
 
 class SGD(AutoSklearnRegressionAlgorithm):
@@ -54,7 +55,7 @@ class SGD(AutoSklearnRegressionAlgorithm):
         if self.estimator is None:
 
             self.alpha = float(self.alpha)
-            self.fit_intercept = self.fit_intercept == 'True'
+            self.fit_intercept = check_for_bool(self.fit_intercept)
             self.tol = float(self.tol)
             self.l1_ratio = float(
                 self.l1_ratio) if self.l1_ratio is not None else 0.15
@@ -63,7 +64,7 @@ class SGD(AutoSklearnRegressionAlgorithm):
             self.eta0 = float(self.eta0)
             self.power_t = float(
                 self.power_t) if self.power_t is not None else 0.25
-            self.average = self.average == 'True'
+            self.average = check_for_bool(self.average)
             self.estimator = SGDRegressor(loss=self.loss,
                                           penalty=self.penalty,
                                           alpha=self.alpha,

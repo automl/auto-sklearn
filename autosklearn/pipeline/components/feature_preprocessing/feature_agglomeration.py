@@ -13,8 +13,8 @@ from autosklearn.pipeline.constants import *
 
 class FeatureAgglomeration(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, n_clusters, affinity, linkage, pooling_func,
-        random_state=None):
-        self.n_clusters = int(n_clusters)
+                 random_state=None):
+        self.n_clusters = n_clusters
         self.affinity = affinity
         self.linkage = linkage
         self.pooling_func = pooling_func
@@ -26,6 +26,8 @@ class FeatureAgglomeration(AutoSklearnPreprocessingAlgorithm):
 
     def fit(self, X, Y=None):
         import sklearn.cluster
+
+        self.n_clusters = int(self.n_clusters)
 
         n_clusters = min(self.n_clusters, X.shape[1])
         if not callable(self.pooling_func):

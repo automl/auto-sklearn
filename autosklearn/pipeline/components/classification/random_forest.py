@@ -8,7 +8,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
-
+from autosklearn.util.common import check_for_bool, check_none
 
 class RandomForest(AutoSklearnClassificationAlgorithm):
     def __init__(self, n_estimators, criterion, max_features,
@@ -31,7 +31,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         self.class_weight = class_weight
         self.estimator = None
 
-    def fit(self, X, y, sample_weight=None, refit=False):
+    def fit(self, X, y, sample_weight=None):
         n_iter = 2
         self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight,
                            refit=True)
@@ -48,23 +48,27 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
 
         if self.estimator is None:
             self.n_estimators = int(self.n_estimators)
-            if self.max_depth == "None" or self.max_depth is None:
+            if check_none(self.max_depth):
                 self.max_depth = None
             else:
                 self.max_depth = int(self.max_depth)
+
             self.min_samples_split = int(self.min_samples_split)
             self.min_samples_leaf = int(self.min_samples_leaf)
             self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
+
             if self.max_features not in ("sqrt", "log2", "auto"):
                 max_features = int(X.shape[1] ** float(self.max_features))
             else:
                 max_features = self.max_features
-            if self.bootstrap == "True":
-                self.bootstrap = True
-            else:
-                self.bootstrap = False
-            if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
+
+            self.bootstrap = check_for_bool(self.bootstrap)
+
+            if check_none(self.max_leaf_nodes):
                 self.max_leaf_nodes = None
+            else:
+                self.max_leaf_nodes = int(self.max_leaf_nodes)
+
             self.min_impurity_decrease = float(self.min_impurity_decrease)
 
             # initial fit of only increment trees
