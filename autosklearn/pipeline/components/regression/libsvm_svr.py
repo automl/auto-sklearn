@@ -10,7 +10,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
-
+from autosklearn.util.common import check_for_bool, check_none
 
 class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
     def __init__(self, kernel, C, epsilon, tol, shrinking, gamma=0.1,
@@ -46,10 +46,10 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
         self.C = float(self.C)
         self.epsilon = float(self.epsilon)
         self.tol = float(self.tol)
-        self.shrinking = self.shrinking == 'True'
+        self.shrinking = check_for_bool(self.shrinking)
         self.degree = int(self.degree)
         self.gamma = float(self.gamma)
-        if self.coef0 is None:
+        if check_none(self.coef0):
             self.coef0 = 0.0
         else:
             self.coef0 = float(self.coef0)

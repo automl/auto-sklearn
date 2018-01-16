@@ -8,19 +8,27 @@ from ConfigSpace.conditions import EqualsCondition
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
+from autosklearn.util.common import check_for_bool, check_none
 
 
 class FastICA(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, algorithm, whiten, fun, n_components=None,
                  random_state=None):
-        self.n_components = None if n_components is None else int(n_components)
         self.algorithm = algorithm
-        self.whiten = whiten == 'True'
+        self.whiten = whiten
         self.fun = fun
+        self.n_components = n_components
+
         self.random_state = random_state
 
     def _fit(self, X, Y=None):
         import sklearn.decomposition
+
+        self.whiten = check_for_bool(self.whiten)
+        if check_none(self.n_components):
+            self.n_components = None
+        else:
+            self.n_components = int(self.n_components)
 
         self.preprocessor = sklearn.decomposition.FastICA(
             n_components=self.n_components, algorithm=self.algorithm,

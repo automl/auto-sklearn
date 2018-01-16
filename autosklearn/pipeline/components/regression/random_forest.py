@@ -7,7 +7,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
-
+from autosklearn.util.common import check_for_bool, check_none
 
 class RandomForest(AutoSklearnRegressionAlgorithm):
     def __init__(self, n_estimators, criterion, max_features,
@@ -46,19 +46,18 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
 
         if self.estimator is None:
             self.n_estimators = int(self.n_estimators)
-            if self.max_depth == "None" or self.max_depth is None:
+            if check_none(self.max_depth):
                 self.max_depth = None
             else:
                 self.max_depth = int(self.max_depth)
             self.min_samples_split = int(self.min_samples_split)
             self.min_samples_leaf = int(self.min_samples_leaf)
             self.max_features = float(self.max_features)
-            if self.bootstrap == "True":
-                self.bootstrap = True
-            else:
-                self.bootstrap = False
-            if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
+            self.bootstrap = check_for_bool(self.bootstrap)
+            if check_none(self.max_leaf_nodes):
                 self.max_leaf_nodes = None
+            else:
+                self.max_leaf_nodes = int(self.max_leaf_nodes)
             self.min_impurity_decrease = float(self.min_impurity_decrease)
 
             self.estimator = RandomForestRegressor(
