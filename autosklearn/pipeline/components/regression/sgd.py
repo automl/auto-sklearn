@@ -140,7 +140,8 @@ class SGD(AutoSklearnRegressionAlgorithm):
         cs = ConfigurationSpace()
 
         loss = CategoricalHyperparameter("loss",
-            ["squared_loss", "huber", "epsilon_insensitive", "squared_epsilon_insensitive"],
+            ["squared_loss", "huber", "epsilon_insensitive",
+             "squared_epsilon_insensitive"],
             default_value="squared_loss")
         penalty = CategoricalHyperparameter(
             "penalty", ["l1", "l2", "elasticnet"], default_value="l2")
@@ -158,7 +159,7 @@ class SGD(AutoSklearnRegressionAlgorithm):
             "learning_rate", ["optimal", "invscaling", "constant"],
             default_value="invscaling")
         eta0 = UniformFloatHyperparameter(
-            "eta0", 1e-7, 1e-1, default_value=0.01)
+            "eta0", 1e-7, 1e-1, default_value=0.01, log=True)
         power_t = UniformFloatHyperparameter(
             "power_t", 1e-5, 1, default_value=0.25)
         average = CategoricalHyperparameter(
@@ -172,15 +173,16 @@ class SGD(AutoSklearnRegressionAlgorithm):
         elasticnet = EqualsCondition(l1_ratio, penalty, "elasticnet")
         epsilon_condition = InCondition(epsilon, loss,
             ["huber", "epsilon_insensitive", "squared_epsilon_insensitive"])
-        # eta0 seems to be always active according to the source code; when
-        # learning_rate is set to optimial, eta0 is the starting value:
-        # https://github.com/scikit-learn/scikit-learn/blob/0.15.X/sklearn/linear_model/sgd_fast.pyx
-        # eta0_and_inv = EqualsCondition(eta0, learning_rate, "invscaling")
-        #eta0_and_constant = EqualsCondition(eta0, learning_rate, "constant")
-        #eta0_condition = OrConjunction(eta0_and_inv, eta0_and_constant)
+
+        # eta0 is only relevant if learning_rate!='optimal' according to code
+        # https://github.com/scikit-learn/scikit-learn/blob/0.19.X/sklearn/
+        # linear_model/sgd_fast.pyx#L603
+        eta0_in_inv_con = InCondition(eta0, learning_rate, ["invscaling",
+                                                            "constant"])
         power_t_condition = EqualsCondition(power_t, learning_rate,
                                             "invscaling")
 
-        cs.add_conditions([elasticnet, epsilon_condition, power_t_condition])
+        cs.add_conditions([elasticnet, epsilon_condition, power_t_condition,
+                           eta0_in_inv_con])
 
         return cs
