@@ -57,10 +57,13 @@ class SGD(AutoSklearnClassificationAlgorithm):
             self.fully_fit_ = False
 
             self.alpha = float(self.alpha)
-            self.l1_ratio = float(self.l1_ratio) if self.l1_ratio is not None else 0.15
-            self.epsilon = float(self.epsilon) if self.epsilon is not None else 0.1
+            self.l1_ratio = float(self.l1_ratio) if self.l1_ratio is not None \
+                else 0.15
+            self.epsilon = float(self.epsilon) if self.epsilon is not None \
+                else 0.1
             self.eta0 = float(self.eta0)
-            self.power_t = float(self.power_t) if self.power_t is not None else 0.5
+            self.power_t = float(self.power_t) if self.power_t is not None \
+                else 0.5
             self.average = check_for_bool(self.average)
             self.fit_intercept = check_for_bool(self.fit_intercept)
             self.tol = float(self.tol)
@@ -172,10 +175,12 @@ class SGD(AutoSklearnClassificationAlgorithm):
         elasticnet = EqualsCondition(l1_ratio, penalty, "elasticnet")
         epsilon_condition = EqualsCondition(epsilon, loss, "modified_huber")
 
-        power_t_condition = EqualsCondition(power_t, learning_rate, "invscaling")
+        power_t_condition = EqualsCondition(power_t, learning_rate,
+                                            "invscaling")
 
         # eta0 is only relevant if learning_rate!='optimal' according to code
-        # https://github.com/scikit-learn/scikit-learn/blob/0.19.X/sklearn/linear_model/sgd_fast.pyx#L603
+        # https://github.com/scikit-learn/scikit-learn/blob/0.19.X/sklearn/
+        # linear_model/sgd_fast.pyx#L603
         eta0_in_inv_con = InCondition(eta0, learning_rate, ["invscaling",
                                                             "constant"])
         cs.add_conditions([elasticnet, epsilon_condition, power_t_condition,

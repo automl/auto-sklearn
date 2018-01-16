@@ -2,7 +2,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, UnParametrizedHyperparameter, \
     UniformIntegerHyperparameter
-from ConfigSpace.conditions import InCondition, EqualsCondition, OrConjunction
+from ConfigSpace.conditions import InCondition, EqualsCondition
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
@@ -140,7 +140,8 @@ class SGD(AutoSklearnRegressionAlgorithm):
         cs = ConfigurationSpace()
 
         loss = CategoricalHyperparameter("loss",
-            ["squared_loss", "huber", "epsilon_insensitive", "squared_epsilon_insensitive"],
+            ["squared_loss", "huber", "epsilon_insensitive",
+             "squared_epsilon_insensitive"],
             default_value="squared_loss")
         penalty = CategoricalHyperparameter(
             "penalty", ["l1", "l2", "elasticnet"], default_value="l2")
@@ -174,7 +175,8 @@ class SGD(AutoSklearnRegressionAlgorithm):
             ["huber", "epsilon_insensitive", "squared_epsilon_insensitive"])
 
         # eta0 is only relevant if learning_rate!='optimal' according to code
-        # https://github.com/scikit-learn/scikit-learn/blob/0.19.X/sklearn/linear_model/sgd_fast.pyx#L603
+        # https://github.com/scikit-learn/scikit-learn/blob/0.19.X/sklearn/
+        # linear_model/sgd_fast.pyx#L603
         eta0_in_inv_con = InCondition(eta0, learning_rate, ["invscaling",
                                                             "constant"])
         power_t_condition = EqualsCondition(power_t, learning_rate,
