@@ -28,7 +28,7 @@ class LDA(AutoSklearnClassificationAlgorithm):
         elif self.shrinkage == "auto":
             solver = 'lsqr'
         elif self.shrinkage == "manual":
-            self.shrinkage = float(self.shrinkage_factor)
+            self.shrinkage_factor = float(self.shrinkage_factor)
             solver = 'lsqr'
         else:
             raise ValueError(self.shrinkage)
@@ -37,7 +37,7 @@ class LDA(AutoSklearnClassificationAlgorithm):
         self.tol = float(self.tol)
 
         estimator = sklearn.discriminant_analysis.LinearDiscriminantAnalysis(
-            n_components=self.n_components, shrinkage=self.shrinkage,
+            n_components=self.n_components, shrinkage=self.shrinkage_factor,
             tol=self.tol, solver=solver)
 
         if len(Y.shape) == 2 and Y.shape[1] > 1:
