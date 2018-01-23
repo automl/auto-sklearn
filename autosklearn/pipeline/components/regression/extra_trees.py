@@ -33,7 +33,7 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
 
     def fit(self, X, y, refit=False):
         n_iter = 2
-        self.iterative_fit(X, y, n_iter=n_iter, refit=refit)
+        self.iterative_fit(X, y, n_iter=n_iter, refit=True)
         while not self.configuration_fully_fitted():
             n_iter *= 2
             self.iterative_fit(X, y, n_iter=n_iter)
