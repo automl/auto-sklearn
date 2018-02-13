@@ -20,29 +20,97 @@ from autosklearn.util.logging_ import get_logger
 
 
 class EnsembleBuilder(multiprocessing.Process):
-    def __init__(self, backend, dataset_name, task_type, metric,
-                 limit, ensemble_size=None, ensemble_nbest=None,
-                 seed=1, shared_mode=False, max_iterations=-1, precision="32"):
+    def __init__(self, backend, dataset_name:str, task_type:str, metric:str,
+                 limit:int, ensemble_size:int=None, ensemble_nbest:int=None,
+                 seed:int=1, shared_mode:bool=False, max_iterations:int=None, precision:str="32",
+                 sleep_duration:int=2):
+        '''
+            Constructor
+            
+            Parameters
+            ----------
+            backend: ???
+                backend to write and read files
+            dataset_name: str
+                name of dataset
+            task_type: str
+                type of ML task
+            metric: str
+                name of metric to score predictions
+            limit: int
+                time limit in sec
+            ensemble_size: int
+                maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
+            ensemble_nbest: int
+                consider only the n best prediction (wrt validation predictions)
+            seed: int
+                random seed
+            shared_model: bool
+                auto-sklearn used shared model mode (aka pSMAC)
+            max_iterations: int
+                maximal number of iterations to run this script
+                (default None --> deactivated)
+            precision: ["16","32","64","128"]
+                precision of floats to read the predictions 
+            sleep_duration: int
+                duration of sleeping time between two iterations of this script (in sec)
+        '''
+        
+        
         super(EnsembleBuilder, self).__init__()
 
-        self.backend = backend
+        self.backend = backend # communication with filesystem
         self.dataset_name = dataset_name
         self.task_type = task_type
         self.metric = metric
-        self.limit = limit
+        self.time_limit = limit #time limit
         self.ensemble_size = ensemble_size
-        self.ensemble_nbest = ensemble_nbest
+        self.ensemble_nbest = ensemble_nbest #max number of members that will be used for building the ensemble
         self.seed = seed
-        self.shared_mode = shared_mode
+        self.shared_mode = shared_mode #pSMAC?
         self.max_iterations = max_iterations
         self.precision = precision
+        self.sleep_duration = sleep_duration
+
+        
+        # part of the original training set
+        # used to build the ensemble
+        self.dir_ensemble = os.path.join(self.backend.temporary_directory,
+                                    '.auto-sklearn',
+                                    'predictions_ensemble')
+
+        # validation set -- y_true not known        
+        self.dir_valid = os.path.join(self.backend.temporary_directory,
+                                 '.auto-sklearn',
+                                 'predictions_valid')
+        # test set -- y_true not known
+        self.dir_test = os.path.join(self.backend.temporary_directory,
+                                '.auto-sklearn',
+                                'predictions_test')
 
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
         self.logger = get_logger(logger_name)
 
+        self.start_time = 0
+        self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy')
+        
+        # already read prediction files
+        # {"file name": {
+        #    "ens_score": float
+        #    "mtime": str,
+        #    "seed": int,
+        #    "num_run": int,
+        #    "y_ensemble": np.ndarray
+        #    "y_valid": np.ndarray
+        #    "y_test": np.ndarray
+        # }
+        self.read_preds = {}
+        self.last_hash = None # hash of ensemble training data
+        self.y_true_ensemble = None
+
     def run(self):
-        buffer_time = 5
-        time_left = self.limit - buffer_time
+        buffer_time = 5 #TODO: Buffer time should also be used in main!?
+        time_left = self.time_limit - buffer_time
         safe_ensemble_script = pynisher.enforce_limits(
             wall_time_in_s=int(time_left), logger=self.logger)(self.main)
         safe_ensemble_script()
@@ -52,384 +120,276 @@ class EnsembleBuilder(multiprocessing.Process):
         watch = StopWatch()
         watch.start_task('ensemble_builder')
 
-        used_time = 0
-        time_iter = 0
+        self.start_time = time.time()
         index_run = 0
-        num_iteration = 0
-        current_num_models = 0
-        last_hash = None
-        current_hash = None
+        
+        while True:
 
-        dir_ensemble = os.path.join(self.backend.temporary_directory,
-                                    '.auto-sklearn',
-                                    'predictions_ensemble')
-        dir_valid = os.path.join(self.backend.temporary_directory,
-                                 '.auto-sklearn',
-                                 'predictions_valid')
-        dir_test = os.path.join(self.backend.temporary_directory,
-                                '.auto-sklearn',
-                                'predictions_test')
-        paths_ = [dir_ensemble, dir_valid, dir_test]
-
-        dir_ensemble_list_mtimes = []
-
-        self.logger.debug('Starting main loop with %f seconds and %d iterations '
-                          'left.' % (self.limit - used_time, num_iteration))
-        while used_time < self.limit or (self.max_iterations > 0 and
-                                         self.max_iterations >= num_iteration):
-            num_iteration += 1
-            self.logger.debug('Time left: %f', self.limit - used_time)
-            self.logger.debug('Time last ensemble building: %f', time_iter)
-
-            # Reload the ensemble targets every iteration, important, because cv may
-            # update the ensemble targets in the cause of running auto-sklearn
-            # TODO update cv in order to not need this any more!
-            targets_ensemble = self.backend.load_targets_ensemble()
-
-            # Load the predictions from the models
-            exists = [os.path.isdir(dir_) for dir_ in paths_]
-            if not exists[0]:  # all(exists):
-                self.logger.debug('Prediction directory %s does not exist!' %
-                              dir_ensemble)
-                time.sleep(2)
-                used_time = watch.wall_elapsed('ensemble_builder')
+            #maximal number of iterations
+            if self.max_iterations is not None \
+               and self.max_iterations > 0 \
+               and index_run >= self.max_iterations:
+                self.logger.info("Terminate ensemble building because of max iterations: %d of %d" %(self.max_iterations, index_run))
+                break 
+            
+            used_time = time.time() - self.start_time
+            self.logger.debug('Time left: %f', self.time_limit - used_time)
+            
+            # populates self.read_preds
+            if not self.read_ensemble_preds():
+                time.sleep(self.sleep_duration)
                 continue
-
-            if self.shared_mode is False:
-                dir_ensemble_list = sorted(glob.glob(os.path.join(
-                    dir_ensemble, 'predictions_ensemble_%s_*.npy' % self.seed)))
-                if exists[1]:
-                    dir_valid_list = sorted(glob.glob(os.path.join(
-                        dir_valid, 'predictions_valid_%s_*.npy' % self.seed)))
-                else:
-                    dir_valid_list = []
-                if exists[2]:
-                    dir_test_list = sorted(glob.glob(os.path.join(
-                        dir_test, 'predictions_test_%s_*.npy' % self.seed)))
-                else:
-                    dir_test_list = []
-            else:
-                dir_ensemble_list = sorted(os.listdir(dir_ensemble))
-                dir_valid_list = sorted(os.listdir(dir_valid)) if exists[1] else []
-                dir_test_list = sorted(os.listdir(dir_test)) if exists[2] else []
-
-            # Check the modification times because predictions can be updated
-            # over time!
-            old_dir_ensemble_list_mtimes = dir_ensemble_list_mtimes
-            dir_ensemble_list_mtimes = []
-            # The ensemble dir can contain non-model files. We filter them and
-            # use the following list instead
-            dir_ensemble_model_files = []
-
-            for dir_ensemble_file in dir_ensemble_list:
-                if dir_ensemble_file.endswith("/"):
-                    dir_ensemble_file = dir_ensemble_file[:-1]
-                if not dir_ensemble_file.endswith(".npy"):
-                    self.logger.info('Error loading file (not .npy): %s', dir_ensemble_file)
-                    continue
-
-                dir_ensemble_model_files.append(dir_ensemble_file)
-                basename = os.path.basename(dir_ensemble_file)
-                dir_ensemble_file = os.path.join(dir_ensemble, basename)
-                mtime = os.path.getmtime(dir_ensemble_file)
-                dir_ensemble_list_mtimes.append(mtime)
-
-            if len(dir_ensemble_model_files) == 0:
-                self.logger.debug('Directories are empty')
-                time.sleep(2)
-                used_time = watch.wall_elapsed('ensemble_builder')
+                
+            selected_models = self.get_n_best_preds()
+            if not selected_models: # nothing selected
                 continue
-
-            if len(dir_ensemble_model_files) <= current_num_models and \
-                    old_dir_ensemble_list_mtimes == dir_ensemble_list_mtimes:
-                self.logger.debug('Nothing has changed since the last time')
-                time.sleep(2)
-                used_time = watch.wall_elapsed('ensemble_builder')
+            
+            # train ensemble
+            ensemble = self.fit_ensemble(selected_keys=selected_models)
+            
+            if ensemble is not None:
+                # populates predictions in self.read_preds
+                # reduces selected models if file reading failed
+                n_sel_valid, n_sel_test = self.get_valid_test_preds(selected_keys=selected_models)
+                
+                self.save_preds(set_="valid", ensemble=ensemble, selected_keys=n_sel_valid, n_preds=len(selected_models), index_run=index_run)
+                self.save_preds(set_="test", ensemble=ensemble, selected_keys=n_sel_test, n_preds=len(selected_models), index_run=index_run)
+                index_run += 1
+            
+            time.sleep(self.sleep_duration)
+            
+    def read_ensemble_preds(self):
+        """
+            reading predictions on ensemble building data set; 
+            populates self.read_preds
+        """
+        self.logger.debug("Read ensemble data set predictions")
+        
+        self.y_true_ensemble = self.backend.load_targets_ensemble()
+        
+        # no validation predictions so far -- no dir
+        if not os.path.isdir(self.dir_ensemble):
+            self.logger.debug("No ensemble dataset prediction directory found")
+            return False
+        
+        y_ens_files = glob.glob(os.path.join(self.dir_ensemble, 'predictions_ensemble_%s_*.npy' % self.seed))
+        
+        #TODO: pSMAC -- read all seeds
+        
+        # no validation predictions so far -- no files
+        if len(y_ens_files) == 0:
+            self.logger.debug("Found no prediction files on ensemble data set: %s" %(self.dir_ensemble))
+            return False
+        
+        for y_ens_fn in y_ens_files:
+            
+            if not y_ens_fn.endswith(".npy"):
+                self.logger.info('Error loading file (not .npy): %s', y_ens_fn)
                 continue
-
-            with warnings.catch_warnings():
-                warnings.simplefilter('ignore')
-                # TODO restructure time management in the ensemble builder,
-                # what is the time of index_run actually needed for?
-                watch.start_task('index_run' + str(index_run))
-            watch.start_task('ensemble_iter_' + str(num_iteration))
-
-            # List of num_runs (which are in the filename) which will be included
-            #  later
-            include_num_runs = []
-            backup_num_runs = []
-            model_and_automl_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy')
-            if self.ensemble_nbest is not None:
-                # Keeps track of the single scores of each model in our ensemble
-                scores_nbest = []
-                # The indices of the model that are currently in our ensemble
-                indices_nbest = []
-                # The names of the models
-                model_names = []
-
-            model_names_to_scores = dict()
-
-            model_idx = 0
-            for model_name in dir_ensemble_model_files:
-                if model_name.endswith("/"):
-                    model_name = model_name[:-1]
-                basename = os.path.basename(model_name)
-
-                try:
-                    with open(os.path.join(dir_ensemble, basename), 'rb') as fh:
-                        if self.precision is "16":
-                            predictions = np.load(fh).astype(dtype=np.float16)
-                        elif self.precision is "32":
-                            predictions = np.load(fh).astype(dtype=np.float32)
-                        elif self.precision is "64":
-                            predictions = np.load(fh).astype(dtype=np.float64)
-                        else:
-                            predictions = np.load(fh)
-
-                    score = calculate_score(solution=targets_ensemble,
-                                            prediction=predictions,
+            
+            match = self.model_fn_re.search(y_ens_fn)
+            _seed = int(match.group(1))
+            _num_run = int(match.group(2))
+            
+            if not self.read_preds.get(y_ens_fn):
+                self.read_preds[y_ens_fn] = {"ens_score": -1,
+                                                 "mtime": 0,
+                                                 "seed": _seed,
+                                                 "num_run": _num_run,
+                                                 "y_ensemble": None,
+                                                 "y_valid": None,
+                                                 "y_test": None}
+                
+            if self.read_preds[y_ens_fn]["mtime"] == os.path.getmtime(y_ens_fn):
+                # same time stamp; nothing changed;
+                continue
+            
+            # actually read the predictions
+            # and score them
+            try:
+                with open(y_ens_fn, 'rb') as fp:
+                    y_ensemble = self._read_np_fn(fp=fp)
+                    score = calculate_score(solution=self.y_true_ensemble, # y_ensemble = y_true for ensemble set
+                                            prediction=y_ensemble,
                                             task_type=self.task_type,
                                             metric=self.metric,
                                             all_scoring_functions=False)
 
+                    self.read_preds[y_ens_fn]["ens_score"] = score
+                    self.read_preds[y_ens_fn]["y_ensemble"] = y_ensemble
+
+            except Exception as e:
+                self.logger.warning('Error loading %s: %s - %s',
+                                    y_ens_fn, type(e), e)
+                self.read_preds[y_ens_fn]["ens_score"] = -1
+                
+        return True
+                
+    def get_n_best_preds(self):
+        """
+            get best n predictions (i.e., keys of self.read_preds)
+            according to score on "ensemble set" 
+            n: self.ensemble_nbest
+            
+            Side effect: delete predictions of non-winning models
+        """
+        
+        sorted_keys = sorted([[k,v["ens_score"],v["num_run"]] for k,v in self.read_preds.items()], key=lambda x: x[1])
+        # remove all that are at most as good as random (<0.001)
+        sorted_keys = filter(lambda x: x[1]>0.001, sorted_keys)
+        # remove Dummy Classifier
+        sorted_keys = filter(lambda x: x[2]>1, sorted_keys)
+        if not sorted_keys: 
+            # no model left; try to use dummy classifier (num_run==0)
+            self.logger.warning("Use Dummy Classifier")
+            #TODO: Check if this works correctly?
+            sorted_keys = [k for k,v in self.read_preds.items() if v["seed"] == self.seed and v["num_run"] == 1]
+        # reduce to keys
+        sorted_keys = list(map(lambda x: x[0], sorted_keys))
+        # remove loaded predictions for non-winning models
+        for k in sorted_keys[self.ensemble_nbest:]:
+            self.read_preds[k]["y_ensemble"] = None
+            self.read_preds[k]["y_valid"] = None
+            self.read_preds[k]["y_test"] = None
+        #return best scored keys of self.read_preds
+        return sorted_keys[:self.ensemble_nbest]
+
+    def get_valid_test_preds(self, selected_keys:list):
+        """
+            get valid and test predictions from disc
+            and store them in self.read_preds
+            
+            Parameters
+            ---------
+            selected_keys: list
+                list of selected keys of self.read_preds
+                
+            Return
+            ------
+            success_keys:
+                all keys in selected keys for which we could read the valid and test predictions
+        """
+        success_keys_valid = []
+        success_keys_test = []
+        
+        for k in selected_keys:
+            valid_fn = os.path.join(self.dir_valid, 'predictions_valid_%d_%d.npy' % (self.read_preds[k]["seed"], self.read_preds[k]["num_run"]))
+            test_fn = os.path.join(self.dir_test, 'predictions_test_%d_%d.npy' % (self.read_preds[k]["seed"], self.read_preds[k]["num_run"]))
+            
+            if not os.path.isfile(valid_fn):
+                self.logger.debug("Not found validation prediction file (although ensemble predictions available):%s" %(valid_fn))
+            else:
+                try:
+                    with open(valid_fn, 'rb') as fp:
+                        y_valid = self._read_np_fn(fp)
+                        self.read_preds[k]["y_valid"] = y_valid
+                        success_keys_valid.append(k)
                 except Exception as e:
                     self.logger.warning('Error loading %s: %s - %s',
-                                        basename, type(e), e)
-                    score = -1
-
-                model_names_to_scores[model_name] = score
-                match = model_and_automl_re.search(model_name)
-                automl_seed = int(match.group(1))
-                num_run = int(match.group(2))
-
-                if self.ensemble_nbest is not None:
-                    if score <= 0.001 or num_run == 1:
-                        self.logger.info('Model only predicts at random: ' +
-                                         model_name + ' has score: ' + str(score))
-                        backup_num_runs.append((automl_seed, num_run))
-                    # If we have less models in our ensemble than ensemble_nbest add
-                    # the current model if it is better than random
-                    elif len(scores_nbest) < self.ensemble_nbest:
-                        scores_nbest.append(score)
-                        indices_nbest.append(model_idx)
-                        include_num_runs.append((automl_seed, num_run))
-                        model_names.append(model_name)
-                    else:
-                        # Take the worst performing model in our ensemble so far
-                        idx = np.argmin(np.array([scores_nbest]))
-
-                        # If the current model is better than the worst model in
-                        # our ensemble replace it by the current model
-                        if scores_nbest[idx] < score:
-                            self.logger.info(
-                                'Worst model in our ensemble: %s with score %f '
-                                'will be replaced by model %s with score %f',
-                                model_names[idx], scores_nbest[idx], model_name,
-                                score)
-                            # Exclude the old model
-                            del scores_nbest[idx]
-                            scores_nbest.append(score)
-                            del include_num_runs[idx]
-                            del indices_nbest[idx]
-                            indices_nbest.append(model_idx)
-                            include_num_runs.append((automl_seed, num_run))
-                            del model_names[idx]
-                            model_names.append(model_name)
-
-                        # Otherwise exclude the current model from the ensemble
-                        else:
-                            # include_num_runs.append(True)
-                            pass
-
-                else:
-                    # Load all predictions that are better than random
-                    if score <= 0.001 or num_run == 1:
-                        # include_num_runs.append(True)
-                        self.logger.info('Model only predicts at random: ' +
-                                         model_name + ' has score: ' +
-                                         str(score))
-                        backup_num_runs.append((automl_seed, num_run))
-                    else:
-                        include_num_runs.append((automl_seed, num_run))
-
-                model_idx += 1
-
-            # If there is no model better than random guessing, we have to use
-            # all models which do random guessing
-            if len(include_num_runs) == 0:
-                include_num_runs = backup_num_runs
-
-            indices_to_model_names = dict()
-            indices_to_run_num = dict()
-            for i, model_name in enumerate(dir_ensemble_model_files):
-                match = model_and_automl_re.search(model_name)
-                automl_seed = int(match.group(1))
-                num_run = int(match.group(2))
-                if (automl_seed, num_run) in include_num_runs:
-                    num_indices = len(indices_to_model_names)
-                    indices_to_model_names[num_indices] = model_name
-                    indices_to_run_num[num_indices] = (automl_seed, num_run)
-
-            try:
-                all_predictions_train, all_predictions_valid, all_predictions_test =\
-                    self.get_all_predictions(dir_ensemble,
-                                             dir_ensemble_model_files,
-                                             dir_valid, dir_valid_list,
-                                             dir_test, dir_test_list,
-                                             include_num_runs,
-                                             model_and_automl_re,
-                                             self.precision)
-            except IOError as e:
-                print(e)
-                self.logger.error('Could not load the predictions.')
-                continue
-
-            if len(include_num_runs) == 0:
-                self.logger.error('All models do just random guessing')
-                time.sleep(2)
-                continue
-
+                                    valid_fn, type(e), e)
+        
+            if not os.path.isfile(test_fn):
+                self.logger.debug("Not found test prediction file (although ensemble predictions available):%s" %(test_fn))
             else:
-                ensemble = EnsembleSelection(ensemble_size=self.ensemble_size,
-                                             task_type=self.task_type,
-                                             metric=self.metric)
-
                 try:
-                    ensemble.fit(all_predictions_train, targets_ensemble,
-                                 include_num_runs)
-                    self.logger.info(ensemble)
+                    with open(test_fn, 'rb') as fp:
+                        y_test = self._read_np_fn(fp)
+                        self.read_preds[k]["y_test"] = y_test
+                        success_keys_test.append(k)
+                except Exception as e:
+                    self.logger.warning('Error loading %s: %s - %s',
+                                    test_fn, type(e), e)
+                
+        return success_keys_valid,success_keys_test
+        
+    def fit_ensemble(self, selected_keys:list):
+        """
+            fit ensemble 
+            
+            Parameters
+            ---------
+            selected_keys: list
+                list of selected keys of self.read_preds
+                
+            Returns
+            -------
+            ensemble: EnsembleSelection
+                trained Ensemble
+        """
+        
+        predictions_train = np.array([self.read_preds[k]["y_ensemble"] for k in selected_keys])
+        include_num_runs = [(self.read_preds[k]["seed"],self.read_preds[k]["num_run"]) for k in selected_keys]
+        
+        # check hash if ensemble training data changed
+        current_hash = hash(predictions_train.data.tobytes())
+        if self.last_hash == current_hash:
+            self.logger.debug("No new model predictions selected -- skip ensemble building")
+            return None
+        
+        ensemble = EnsembleSelection(ensemble_size=self.ensemble_size,
+                                     task_type=self.task_type,
+                                     metric=self.metric)
+        
+        try:
+            self.logger.debug("Fit Ensemble")
+            ensemble.fit(predictions_train, self.y_true_ensemble,
+                         include_num_runs)
+            self.logger.info(ensemble)
 
-                except ValueError as e:
-                    self.logger.error('Caught ValueError: ' + str(e))
-                    used_time = watch.wall_elapsed('ensemble_builder')
-                    time.sleep(2)
-                    continue
-                except IndexError as e:
-                    self.logger.error('Caught IndexError: ' + str(e))
-                    used_time = watch.wall_elapsed('ensemble_builder')
-                    time.sleep(2)
-                    continue
-                #except Exception as e:
-                #    self.logger.error('Caught error! %s', str(e))
-                #    used_time = watch.wall_elapsed('ensemble_builder')
-                #    time.sleep(2)
-                #    continue
+        except ValueError as e:
+            self.logger.error('Caught ValueError: ' + str(e))
+            time.sleep(self.sleep_duration)
+            return None
+        except IndexError as e:
+            self.logger.error('Caught IndexError: ' + str(e))
+            time.sleep(self.sleep_duration)
+            return None
+        
+        return ensemble
+    
+    def save_preds(self, set_:str, ensemble:EnsembleSelection, selected_keys: list, n_preds:int, index_run:int):
+        """
+            save preditions on ensemble, validation and test data on disc
+            
+            Parameters
+            ----------
+            set_: ["valid","test"]
+                data split name
+            ensemble: EnsembleSelection
+                trained Ensemble
+            selected_keys: list
+                list of selected keys of self.read_preds
+            n_preds: int
+                number of prediction models used for ensemble building
+                same number of predictions on valid and test are necessary
+            index_run: int
+                n-th time that ensemble predictions are written to disc
+        """
+        self.logger.debug("Predict with Ensemble")
+        
+        # Save the ensemble for later use in the main auto-sklearn module!
+        self.backend.save_ensemble(ensemble, index_run, self.seed)
 
-                # Output the score
-                self.logger.info('Training performance: %f' % ensemble.train_score_)
-
-                self.logger.info('Building the ensemble took %f seconds' %
-                            watch.wall_elapsed('ensemble_iter_' + str(num_iteration)))
-
-            # Set this variable here to avoid re-running the ensemble builder
-            # every two seconds in case the ensemble did not change
-            current_num_models = len(dir_ensemble_model_files)
-
-            ensemble_predictions = ensemble.predict(all_predictions_train)
-            if sys.version_info[0] == 2:
-                ensemble_predictions.flags.writeable = False
-                current_hash = hash(ensemble_predictions.data)
-            else:
-                current_hash = hash(ensemble_predictions.data.tobytes())
-
-            # Only output a new ensemble and new predictions if the output of the
-            # ensemble would actually change!
-            # TODO this is neither safe (collisions, tests only with the ensemble
-            #  prediction, but not the ensemble), implement a hash function for
-            # each possible ensemble builder.
-            if last_hash is not None:
-                if current_hash == last_hash:
-                    self.logger.info('Ensemble output did not change.')
-                    time.sleep(2)
-                    continue
-                else:
-                    last_hash = current_hash
-            else:
-                last_hash = current_hash
-
-            # Save the ensemble for later use in the main auto-sklearn module!
-            self.backend.save_ensemble(ensemble, index_run, self.seed)
-
-            # Save predictions for valid and test data set
-            if len(dir_valid_list) == len(dir_ensemble_model_files):
-                all_predictions_valid = np.array(all_predictions_valid)
-                ensemble_predictions_valid = ensemble.predict(all_predictions_valid)
-                if self.task_type == BINARY_CLASSIFICATION:
-                    ensemble_predictions_valid = ensemble_predictions_valid[:, 1]
-
-                self.backend.save_predictions_as_txt(ensemble_predictions_valid,
-                                                'valid', index_run, prefix=self.dataset_name)
-            else:
-                self.logger.info('Could not find as many validation set predictions (%d)'
-                             'as ensemble predictions (%d)!.',
-                            len(dir_valid_list), len(dir_ensemble_model_files))
-
-            del all_predictions_valid
-
-            if len(dir_test_list) == len(dir_ensemble_model_files):
-                all_predictions_test = np.array(all_predictions_test)
-                ensemble_predictions_test = ensemble.predict(all_predictions_test)
-                if self.task_type == BINARY_CLASSIFICATION:
-                    ensemble_predictions_test = ensemble_predictions_test[:, 1]
-
-                self.backend.save_predictions_as_txt(ensemble_predictions_test,
-                                                     'test', index_run, prefix=self.dataset_name)
-            else:
-                self.logger.info('Could not find as many test set predictions (%d) as '
-                             'ensemble predictions (%d)!',
-                            len(dir_test_list), len(dir_ensemble_model_files))
-
-            del all_predictions_test
-
-            current_num_models = len(dir_ensemble_model_files)
-            watch.stop_task('index_run' + str(index_run))
-            time_iter = watch.get_wall_dur('index_run' + str(index_run))
-            used_time = watch.wall_elapsed('ensemble_builder')
-            index_run += 1
-        return
-
-    def get_predictions(self, dir_path, dir_path_list, include_num_runs,
-                        model_and_automl_re, precision="32"):
-        result = []
-
-        for i, model_name in enumerate(dir_path_list):
-            match = model_and_automl_re.search(model_name)
-            automl_seed = int(match.group(1))
-            num_run = int(match.group(2))
-
-            if model_name.endswith("/"):
-                model_name = model_name[:-1]
-            basename = os.path.basename(model_name)
-
-            if (automl_seed, num_run) in include_num_runs:
-                with open(os.path.join(dir_path, basename), 'rb') as fh:
-                    if precision == "16":
-                        predictions = np.load(fh).astype(
-                            dtype=np.float16)
-                    elif precision == "32":
-                        predictions = np.load(fh).astype(
-                            dtype=np.float32)
-                    elif precision == "64":
-                        predictions = np.load(fh).astype(
-                            dtype=np.float64)
-                    else:
-                        predictions = np.load(fh)
-                result.append(predictions)
-        return result
-
-
-    def get_all_predictions(self, dir_train, dir_train_list,
-                            dir_valid, dir_valid_list,
-                            dir_test, dir_test_list,
-                            include_num_runs,
-                            model_and_automl_re, precision="32"):
-        train_pred = self.get_predictions(dir_train, dir_train_list,
-                                          include_num_runs,
-                                          model_and_automl_re, precision)
-        valid_pred = self.get_predictions(dir_valid, dir_valid_list,
-                                          include_num_runs,
-                                          model_and_automl_re, precision)
-        test_pred = self.get_predictions(dir_test, dir_test_list,
-                                         include_num_runs,
-                                         model_and_automl_re, precision)
-        return train_pred, valid_pred, test_pred
+        predictions_valid = np.array([self.read_preds[k]["y_%s" %(set_)] for k in selected_keys])
+        
+        if n_preds == predictions_valid.shape[0]:
+            y = ensemble.predict(predictions_valid)
+            if self.task_type == BINARY_CLASSIFICATION:
+                y = y[:,1]
+            self.backend.save_predictions_as_txt(y,set_, index_run, prefix=self.dataset_name)
+        else:
+            self.logger.debug("Less predictions on %s -- no ensemble predictions on %s" %(set_,set_))
+        
+        #TODO: ADD saving of predictions on "ensemble data" 
+    
+    def _read_np_fn(self, fp):
+        if self.precision is "16":
+            predictions = np.load(fp).astype(dtype=np.float16)
+        elif self.precision is "32":
+            predictions = np.load(fp).astype(dtype=np.float32)
+        elif self.precision is "64":
+            predictions = np.load(fp).astype(dtype=np.float64)
+        else:
+            predictions = np.load(fp)
+        return predictions
+        
