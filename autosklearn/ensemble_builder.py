@@ -22,7 +22,7 @@ from autosklearn.util.logging_ import get_logger
 
 class EnsembleBuilder(multiprocessing.Process):
     def __init__(self, backend, dataset_name:str, task_type:str, metric:str,
-                 limit:int, ensemble_size:int=10, ensemble_nbest:int=None,
+                 limit:int, ensemble_size:int=10, ensemble_nbest:int=100,
                  seed:int=1, shared_mode:bool=False, max_iterations:int=None, precision:str="32",
                  sleep_duration:int=2,
                  memory_limit:int=1000,
