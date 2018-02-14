@@ -79,6 +79,8 @@ class EnsembleSelection(AbstractEnsemble):
                                                ensemble_prediction
             fant_ensemble_prediction = np.zeros(weighted_ensemble_prediction.shape)
             for j, pred in enumerate(predictions):
+                # TODO: this could potentially be vectorized! - let's profile
+                # the script first!
                 fant_ensemble_prediction[:,:] = weighted_ensemble_prediction + \
                                              (1. / float(s + 1)) * pred
                 scores[j] = calculate_score(
