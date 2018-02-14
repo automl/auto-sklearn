@@ -24,6 +24,11 @@ class BackendMock(object):
         with open(os.path.join(self.temporary_directory,".auto-sklearn","predictions_ensemble","predictions_ensemble_true.npy"),"rb") as fp:
             y = np.load(fp)
         return y
+    
+class EnsembleBuilderMemMock(EnsembleBuilder):
+    
+    def fit_ensemble(self,selected_keys):
+        np.ones([10000000,1000000])
 
 
 class EnsembleTest(unittest.TestCase):
@@ -190,3 +195,23 @@ class EnsembleTest(unittest.TestCase):
         self.assertEqual(len(ensbuilder.read_preds), 2)
         self.assertIsNotNone(ensbuilder.last_hash)
         self.assertIsNotNone(ensbuilder.y_true_ensemble)
+        
+    def testLimit(self):
+        
+                
+        ensbuilder = EnsembleBuilderMemMock(backend=self.backend, 
+                                            dataset_name="TEST",
+                                            task_type=1,  #Binary Classification
+                                            metric=roc_auc,
+                                            limit=1000, # not used,
+                                            seed=0, # important to find the test files
+                                            ensemble_nbest=10,
+                                            max_iterations=1, # prevents infinite loop
+                                            memory_limit=10 # small memory limit to trigger MemoryException
+                                            )
+        ensbuilder.SAVE2DISC = False
+        
+        ensbuilder.run()
+        
+        # it should try to reduce ensemble_nbest until it also failed at 2
+        self.assertEqual(ensbuilder.ensemble_nbest,2)
