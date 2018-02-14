@@ -336,6 +336,7 @@ class EnsembleBuilder(multiprocessing.Process):
                         self.read_preds[k]["y_test"] = y_test
                         success_keys_test.append(k)
                 except Exception as e:
+                    traceback.print_exc()
                     self.logger.warning('Error loading %s: %s - %s',
                                     test_fn, type(e), e)
                 
@@ -377,10 +378,12 @@ class EnsembleBuilder(multiprocessing.Process):
             self.logger.info(ensemble)
 
         except ValueError as e:
+            traceback.print_exc()
             self.logger.error('Caught ValueError: ' + str(e))
             time.sleep(self.sleep_duration)
             return None
         except IndexError as e:
+            traceback.print_exc()
             self.logger.error('Caught IndexError: ' + str(e))
             time.sleep(self.sleep_duration)
             return None
