@@ -77,9 +77,10 @@ class EnsembleSelection(AbstractEnsemble):
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
                 weighted_ensemble_prediction = (s / float(s + 1)) * \
                                                ensemble_prediction
+            fant_ensemble_prediction = np.zeros(weighted_ensemble_prediction.shape)
             for j, pred in enumerate(predictions):
-                fant_ensemble_prediction = weighted_ensemble_prediction + \
-                                           (1. / float(s + 1)) * pred
+                fant_ensemble_prediction[:,:] = weighted_ensemble_prediction + \
+                                             (1. / float(s + 1)) * pred
                 scores[j] = calculate_score(
                     solution=labels,
                     prediction=fant_ensemble_prediction,
