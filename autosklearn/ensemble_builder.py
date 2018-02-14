@@ -48,6 +48,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 consider only the n best prediction (wrt validation predictions)
             seed: int
                 random seed
+                if set to -1, read files with any seed (e.g., for shared model mode)
             shared_model: bool
                 auto-sklearn used shared model mode (aka pSMAC)
             max_iterations: int
@@ -105,7 +106,9 @@ class EnsembleBuilder(multiprocessing.Process):
         # already read prediction files
         # {"file name": {
         #    "ens_score": float
-        #    "mtime": str,
+        #    "mtime_ens": str,
+        #    "mtime_valid": str,
+        #    "mtime_test": str,
         #    "seed": int,
         #    "num_run": int,
         #    "y_ensemble": np.ndarray
@@ -165,13 +168,22 @@ class EnsembleBuilder(multiprocessing.Process):
             if not selected_models: # nothing selected
                 continue
             
+            # populates predictions in self.read_preds
+            # reduces selected models if file reading failed
+            n_sel_valid, n_sel_test = self.get_valid_test_preds(selected_keys=selected_models)
+            
+            selected_models_set = set(selected_models)
+            if selected_models_set.intersection(n_sel_test):
+                selected_models = list(selected_models_set.intersection(n_sel_test))
+            elif selected_models_set.intersection(n_sel_valid):
+                selected_models = list(selected_models_set.intersection(n_sel_valid))
+            # else
+                #use selected_models only defined by ensemble data set
+            
             # train ensemble
             ensemble = self.fit_ensemble(selected_keys=selected_models)
             
             if ensemble is not None:
-                # populates predictions in self.read_preds
-                # reduces selected models if file reading failed
-                n_sel_valid, n_sel_test = self.get_valid_test_preds(selected_keys=selected_models)
                 
                 self.predict(set_="valid", 
                              ensemble=ensemble, 
@@ -207,9 +219,10 @@ class EnsembleBuilder(multiprocessing.Process):
             self.logger.debug("No ensemble dataset prediction directory found")
             return False
         
-        y_ens_files = glob.glob(os.path.join(self.dir_ensemble, 'predictions_ensemble_%s_*.npy' % self.seed))
-        
-        #TODO: pSMAC -- read all seeds
+        if self.seed > -1:
+            y_ens_files = glob.glob(os.path.join(self.dir_ensemble, 'predictions_ensemble_%s_*.npy' % self.seed))
+        else:
+            y_ens_files = glob.glob(os.path.join(self.dir_ensemble, 'predictions_ensemble_*_*.npy'))
         
         # no validation predictions so far -- no files
         if len(y_ens_files) == 0:
@@ -234,14 +247,16 @@ class EnsembleBuilder(multiprocessing.Process):
             
             if not self.read_preds.get(y_ens_fn):
                 self.read_preds[y_ens_fn] = {"ens_score": -1,
-                                                 "mtime": 0,
-                                                 "seed": _seed,
-                                                 "num_run": _num_run,
-                                                 "y_ensemble": None,
-                                                 "y_valid": None,
-                                                 "y_test": None}
+                                             "mtime_ens": 0,
+                                             "mtime_valid": 0,
+                                             "mtime_test": 0,
+                                             "seed": _seed,
+                                             "num_run": _num_run,
+                                             "y_ensemble": None,
+                                             "y_valid": None,
+                                             "y_test": None}
                 
-            if self.read_preds[y_ens_fn]["mtime"] == os.path.getmtime(y_ens_fn):
+            if self.read_preds[y_ens_fn]["mtime_ens"] == os.path.getmtime(y_ens_fn):
                 # same time stamp; nothing changed;
                 continue
             
@@ -283,7 +298,6 @@ class EnsembleBuilder(multiprocessing.Process):
         if not sorted_keys: 
             # no model left; try to use dummy classifier (num_run==0)
             self.logger.warning("Use Dummy Classifier")
-            #TODO: Check if this works correctly?
             sorted_keys = [[k] for k,v in self.read_preds.items() if v["seed"] == self.seed and v["num_run"] == 1]
         # reduce to keys
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
@@ -317,26 +331,37 @@ class EnsembleBuilder(multiprocessing.Process):
             valid_fn = os.path.join(self.dir_valid, 'predictions_valid_%d_%d.npy' % (self.read_preds[k]["seed"], self.read_preds[k]["num_run"]))
             test_fn = os.path.join(self.dir_test, 'predictions_test_%d_%d.npy' % (self.read_preds[k]["seed"], self.read_preds[k]["num_run"]))
             
+            #TODO don't read valid and test if not changed
+            
             if not os.path.isfile(valid_fn):
                 self.logger.debug("Not found validation prediction file (although ensemble predictions available):%s" %(valid_fn))
             else:
+                if self.read_preds[k]["mtime_valid"] == os.path.getmtime(valid_fn) \
+                    and self.read_preds[k]["y_valid"] is not None:
+                    continue
                 try:
                     with open(valid_fn, 'rb') as fp:
                         y_valid = self._read_np_fn(fp)
                         self.read_preds[k]["y_valid"] = y_valid
                         success_keys_valid.append(k)
+                        self.read_preds[k]["mtime_valid"] == os.path.getmtime(valid_fn)
                 except Exception as e:
+                    traceback.print_exc
                     self.logger.warning('Error loading %s: %s - %s',
                                     valid_fn, type(e), e)
         
             if not os.path.isfile(test_fn):
                 self.logger.debug("Not found test prediction file (although ensemble predictions available):%s" %(test_fn))
             else:
+                if self.read_preds[k]["mtime_test"] == os.path.getmtime(test_fn) \
+                    and self.read_preds[k]["y_test"] is not None:
+                    continue
                 try:
                     with open(test_fn, 'rb') as fp:
                         y_test = self._read_np_fn(fp)
                         self.read_preds[k]["y_test"] = y_test
                         success_keys_test.append(k)
+                        self.read_preds[k]["mtime_test"] == os.path.getmtime(test_fn)
                 except Exception as e:
                     traceback.print_exc()
                     self.logger.warning('Error loading %s: %s - %s',
