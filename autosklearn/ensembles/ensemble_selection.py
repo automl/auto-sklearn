@@ -86,7 +86,9 @@ class EnsembleSelection(AbstractEnsemble):
                     task_type=self.task_type,
                     metric=self.metric,
                     all_scoring_functions=False)
-            best = np.nanargmax(scores)
+            
+            all_best = np.argwhere(scores == np.nanmax(scores)).flatten() 
+            best = np.random.choice(all_best)
             ensemble.append(predictions[best])
             trajectory.append(scores[best])
             order.append(best)
