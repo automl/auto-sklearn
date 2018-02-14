@@ -195,8 +195,13 @@ class EnsembleBuilder(multiprocessing.Process):
         self.logger.debug("Read ensemble data set predictions")
         
         if self.y_true_ensemble is None:
-            self.y_true_ensemble = self.backend.load_targets_ensemble()
-        
+            try:
+                self.y_true_ensemble = self.backend.load_targets_ensemble()
+            except:
+                traceback.print_exc()
+                logging.debug("Could not find true targets on ensemble dat set")
+                return False
+            
         # no validation predictions so far -- no dir
         if not os.path.isdir(self.dir_ensemble):
             self.logger.debug("No ensemble dataset prediction directory found")
