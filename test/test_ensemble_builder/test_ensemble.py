@@ -115,11 +115,78 @@ class EnsembleTest(unittest.TestCase):
         ensbuilder.get_valid_test_preds(selected_keys=sel_keys)
         
         # selected --> read valid and test predictions
-        self.assertIsNot(ensbuilder.read_preds[d2]["y_valid"], None)
-        self.assertIsNot(ensbuilder.read_preds[d2]["y_test"], None)
+        self.assertIsNotNone(ensbuilder.read_preds[d2]["y_valid"])
+        self.assertIsNotNone(ensbuilder.read_preds[d2]["y_test"])
         
         # not selected --> should still be None
-        self.assertIs(ensbuilder.read_preds[d1]["y_valid"], None)
-        self.assertIs(ensbuilder.read_preds[d1]["y_test"], None)
+        self.assertIsNone(ensbuilder.read_preds[d1]["y_valid"])
+        self.assertIsNone(ensbuilder.read_preds[d1]["y_test"])
+        
+    def testEntireEnsembleBuilder(self):
+        
+        ensbuilder = EnsembleBuilder(backend=self.backend, 
+                                    dataset_name="TEST",
+                                    task_type=1,  #Binary Classification
+                                    metric=roc_auc,
+                                    limit=-1, # not used,
+                                    seed=0, # important to find the test files
+                                    ensemble_nbest=2
+                                    )
+        ensbuilder.SAVE2DISC = False
+        
+        ensbuilder.read_ensemble_preds()
+        
+        d2 = "test/test_ensemble_builder/data/.auto-sklearn/predictions_ensemble/predictions_ensemble_0_2.npy"
+        d1 = "test/test_ensemble_builder/data/.auto-sklearn/predictions_ensemble/predictions_ensemble_0_1.npy"
+        
+        sel_keys = ensbuilder.get_n_best_preds()
+        
+        ensemble = ensbuilder.fit_ensemble(selected_keys=sel_keys)
+        
+        ensbuilder.get_valid_test_preds(selected_keys=sel_keys)
+        
+        n_sel_valid, n_sel_test = ensbuilder.get_valid_test_preds(selected_keys=sel_keys)
+        
+        # both valid and test prediction files are available
+        self.assertEqual(n_sel_valid, n_sel_test)
         
         
+        y_valid = ensbuilder.predict(set_="valid", 
+                             ensemble=ensemble, 
+                             selected_keys=n_sel_valid, 
+                             n_preds=len(sel_keys), 
+                             index_run=1)
+        y_test = ensbuilder.predict(set_="test", 
+                             ensemble=ensemble, 
+                             selected_keys=n_sel_test, 
+                             n_preds=len(sel_keys), 
+                             index_run=1)
+        
+        # predictions for valid and test are the same
+        # --> should results in the same predictions
+        self.assertTrue(np.all(y_valid==y_test))
+        
+        # since d2 provides perfect predictions
+        # it should get a higher weight
+        # so that y_valid should be exactly y_valid_d2
+        y_valid_d2 = ensbuilder.read_preds[d2]["y_valid"][:,1]
+        self.assertTrue(np.all(y_valid==y_valid_d2))
+        
+    def testMain(self):
+        
+        ensbuilder = EnsembleBuilder(backend=self.backend, 
+                                    dataset_name="TEST",
+                                    task_type=1,  #Binary Classification
+                                    metric=roc_auc,
+                                    limit=-1, # not used,
+                                    seed=0, # important to find the test files
+                                    ensemble_nbest=2,
+                                    max_iterations=1 # prevents infinite loop
+                                    )
+        ensbuilder.SAVE2DISC = False
+        
+        ensbuilder.main()
+        
+        self.assertEqual(len(ensbuilder.read_preds), 2)
+        self.assertIsNotNone(ensbuilder.last_hash)
+        self.assertIsNotNone(ensbuilder.y_true_ensemble)
