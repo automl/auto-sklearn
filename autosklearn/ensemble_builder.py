@@ -129,7 +129,7 @@ class EnsembleBuilder(multiprocessing.Process):
             if safe_ensemble_script.exit_status is pynisher.MemorylimitException:
                 # if ensemble script died because of memory error,
                 # reduce nbest to reduce memory consumption and try it again
-                if self.ensemble_nbest == 2:
+                if self.ensemble_nbest == 1:
                     self.logger.error("Memory Exception -- Unable to escape from memory exception")
                 else:
                     self.ensemble_nbest =  int(self.ensemble_nbest/2)

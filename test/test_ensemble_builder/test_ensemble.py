@@ -214,4 +214,4 @@ class EnsembleTest(unittest.TestCase):
         ensbuilder.run()
         
         # it should try to reduce ensemble_nbest until it also failed at 2
-        self.assertEqual(ensbuilder.ensemble_nbest,2)
+        self.assertEqual(ensbuilder.ensemble_nbest,1)
