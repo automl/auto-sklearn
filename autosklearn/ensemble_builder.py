@@ -7,6 +7,7 @@ import re
 import sys
 import time
 import warnings
+import traceback
 
 import numpy as np
 import pynisher
@@ -242,9 +243,9 @@ class EnsembleBuilder(multiprocessing.Process):
                     self.read_preds[y_ens_fn]["y_ensemble"] = y_ensemble
                     n_read_files += 1
 
-            except Exception as e:
-                self.logger.warning('Error loading %s: %s - %s',
-                                    y_ens_fn, type(e), e)
+            except:
+                traceback.print_exc()
+                self.logger.warning('Error loading %s' %(y_ens_fn))
                 self.read_preds[y_ens_fn]["ens_score"] = -1
                 
         return True
@@ -257,17 +258,16 @@ class EnsembleBuilder(multiprocessing.Process):
             
             Side effect: delete predictions of non-winning models
         """
-        
         sorted_keys = sorted([[k,v["ens_score"],v["num_run"]] for k,v in self.read_preds.items()], key=lambda x: x[1])
         # remove all that are at most as good as random (<0.001)
         sorted_keys = filter(lambda x: x[1]>0.001, sorted_keys)
         # remove Dummy Classifier
-        sorted_keys = filter(lambda x: x[2]>1, sorted_keys)
+        sorted_keys = list(filter(lambda x: x[2]>1, sorted_keys))
         if not sorted_keys: 
             # no model left; try to use dummy classifier (num_run==0)
             self.logger.warning("Use Dummy Classifier")
             #TODO: Check if this works correctly?
-            sorted_keys = [k for k,v in self.read_preds.items() if v["seed"] == self.seed and v["num_run"] == 1]
+            sorted_keys = [[k] for k,v in self.read_preds.items() if v["seed"] == self.seed and v["num_run"] == 1]
         # reduce to keys
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
         # remove loaded predictions for non-winning models
