@@ -23,13 +23,15 @@ class EnsembleBuilder(multiprocessing.Process):
     def __init__(self, backend, dataset_name:str, task_type:str, metric:str,
                  limit:int, ensemble_size:int=None, ensemble_nbest:int=None,
                  seed:int=1, shared_mode:bool=False, max_iterations:int=None, precision:str="32",
-                 sleep_duration:int=2):
+                 sleep_duration:int=2,
+                 memory_limit:int=1000,
+                 read_at_most:int=5):
         '''
             Constructor
             
             Parameters
             ----------
-            backend: ???
+            backend: util.backend.Backend
                 backend to write and read files
             dataset_name: str
                 name of dataset
@@ -54,6 +56,10 @@ class EnsembleBuilder(multiprocessing.Process):
                 precision of floats to read the predictions 
             sleep_duration: int
                 duration of sleeping time between two iterations of this script (in sec)
+            memory_limit: int
+                memory limit in mb
+            read_at_most: int 
+                read at most n new prediction files in each iteration
         '''
         
         
@@ -71,7 +77,8 @@ class EnsembleBuilder(multiprocessing.Process):
         self.max_iterations = max_iterations
         self.precision = precision
         self.sleep_duration = sleep_duration
-
+        self.memory_limit = memory_limit
+        self.read_at_most = read_at_most
         
         # part of the original training set
         # used to build the ensemble
@@ -110,10 +117,20 @@ class EnsembleBuilder(multiprocessing.Process):
 
     def run(self):
         buffer_time = 5 #TODO: Buffer time should also be used in main!?
-        time_left = self.time_limit - buffer_time
-        safe_ensemble_script = pynisher.enforce_limits(
-            wall_time_in_s=int(time_left), logger=self.logger)(self.main)
-        safe_ensemble_script()
+        while True:
+            time_left = self.time_limit - buffer_time
+            safe_ensemble_script = pynisher.enforce_limits(
+                wall_time_in_s=int(time_left),
+                mem_in_mb=self.memory_limit,
+                logger=self.logger)(self.main)
+            safe_ensemble_script()
+            if safe_ensemble_script.exit_status is pynisher.MemorylimitException:
+                # if ensemble script died because of memory error,
+                # reduce nbest to reduce memory consumption and try it again
+                self.ensemble_nbest = min(2, int(self.ensemble_nbest/2))
+                self.logger.warn("Memory Exception -- restart with less ensemle_nbest: %d" %(self.ensemble_nbest ))
+                continue
+            break
 
     def main(self):
 
@@ -181,7 +198,13 @@ class EnsembleBuilder(multiprocessing.Process):
             self.logger.debug("Found no prediction files on ensemble data set: %s" %(self.dir_ensemble))
             return False
         
+        n_read_files = 0
         for y_ens_fn in y_ens_files:
+            
+            if self.read_at_most and n_read_files >= self.read_at_most:
+                # limit the number of files that will be read 
+                # to limit memory consumption
+                break
             
             if not y_ens_fn.endswith(".npy"):
                 self.logger.info('Error loading file (not .npy): %s', y_ens_fn)
@@ -217,6 +240,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
                     self.read_preds[y_ens_fn]["ens_score"] = score
                     self.read_preds[y_ens_fn]["y_ensemble"] = y_ensemble
+                    n_read_files += 1
 
             except Exception as e:
                 self.logger.warning('Error loading %s: %s - %s',
