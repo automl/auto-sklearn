@@ -199,7 +199,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 self.y_true_ensemble = self.backend.load_targets_ensemble()
             except:
                 traceback.print_exc()
-                logging.debug("Could not find true targets on ensemble dat set")
+                self.logger.debug("Could not find true targets on ensemble dat set")
                 return False
             
         # no validation predictions so far -- no dir
