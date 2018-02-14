@@ -141,9 +141,6 @@ class EnsembleBuilder(multiprocessing.Process):
 
     def main(self):
 
-        watch = StopWatch()
-        watch.start_task('ensemble_builder')
-
         self.start_time = time.time()
         index_run = 0
         
