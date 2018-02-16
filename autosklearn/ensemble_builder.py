@@ -23,7 +23,7 @@ class EnsembleBuilder(multiprocessing.Process):
             self,
             backend: Backend,
             dataset_name: str,
-            task_type: str,
+            task_type: int,
             metric: str,
             limit: int,
             ensemble_size: int=10,
@@ -45,7 +45,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 backend to write and read files
             dataset_name: str
                 name of dataset
-            task_type: str
+            task_type: int
                 type of ML task
             metric: str
                 name of metric to score predictions
