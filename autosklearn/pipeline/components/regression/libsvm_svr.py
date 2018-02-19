@@ -1,8 +1,6 @@
 import resource
 import sys
 
-import numpy as np
-
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.conditions import InCondition
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
