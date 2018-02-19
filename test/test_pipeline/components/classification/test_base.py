@@ -145,4 +145,59 @@ class BaseClassificationComponentTest(unittest.TestCase):
             self.assertRaisesRegexp(ValueError, 'bad input shape \(10, 10\)',
                                     cls.fit, X, y)
         else:
-            return 
+            return
+
+    def test_module_idempotent(self):
+        def check_classifier(cls):
+            X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+            y = np.array([0, 1, 1, 0])
+            params = []
+
+            for i in range(2):
+                try:
+                    classifier.fit(X, y)
+                except ValueError as e:
+                    if (
+                        isinstance(e.args[0], str)
+                    ) and (
+                        "Numerical problems in QDA" in e.args[0]
+                    ):
+                        continue
+                    elif (
+                        "BaseClassifier in AdaBoostClassifier ensemble is "
+                        "worse than random, ensemble can not be fit." in e.args[0]
+                    ):
+                        continue
+                    else:
+                        raise e
+
+                p = classifier.estimator.get_params()
+                if 'random_state' in p:
+                    del p['random_state']
+                if 'base_estimator' in p:
+                    del p['base_estimator']
+                for ignore_hp in self.res.get('ignore_hps', []):
+                    del p[ignore_hp]
+                params.append(p)
+
+                if i > 0:
+                    self.assertEquals(
+                        params[-1],
+                        params[0],
+                    )
+
+        classifier = self.module
+        configuration_space = classifier.get_hyperparameter_search_space()
+        default = configuration_space.get_default_configuration()
+        classifier = classifier(random_state=np.random.RandomState(1),
+                                **{hp_name: default[hp_name] for hp_name in
+                                   default if default[hp_name] is not None})
+        check_classifier(classifier)
+
+        for i in range(10):
+            classifier = self.module
+            config = configuration_space.sample_configuration()
+            classifier = classifier(random_state=np.random.RandomState(1),
+                                    **{hp_name: config[hp_name] for hp_name in
+                                       config if config[hp_name] is not None})
+            check_classifier(classifier)

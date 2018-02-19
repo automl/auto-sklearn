@@ -11,8 +11,8 @@ from autosklearn.pipeline.constants import *
 class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
     def __init__(self, n_estimators, learning_rate, loss, max_depth,
                  random_state=None):
-        self.n_estimators = int(n_estimators)
-        self.learning_rate = float(learning_rate)
+        self.n_estimators = n_estimators
+        self.learning_rate = learning_rate
         self.loss = loss
         self.random_state = random_state
         self.max_depth = max_depth
@@ -61,9 +61,11 @@ class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
 
         # base_estimator = Constant(name="base_estimator", value="None")
         n_estimators = UniformIntegerHyperparameter(
-            name="n_estimators", lower=50, upper=500, default_value=50, log=False)
+            name="n_estimators", lower=50, upper=500, default_value=50,
+            log=False)
         learning_rate = UniformFloatHyperparameter(
-            name="learning_rate", lower=0.01, upper=2, default_value=0.1, log=True)
+            name="learning_rate", lower=0.01, upper=2, default_value=0.1,
+            log=True)
         loss = CategoricalHyperparameter(
             name="loss", choices=["linear", "square", "exponential"],
             default_value="linear")

@@ -8,6 +8,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
+from autosklearn.util.common import check_for_bool, check_none
 
 
 class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
@@ -18,41 +19,49 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
                  min_weight_fraction_leaf=0.0,
                  oob_score=False, n_jobs=1, random_state=None, verbose=0):
 
-        self.n_estimators = int(n_estimators)
+        self.n_estimators = n_estimators
         self.estimator_increment = 10
         if criterion not in ("mse", "friedman_mse", "mae"):
             raise ValueError("'criterion' is not in ('mse', 'friedman_mse', "
                              "'mae'): %s" % criterion)
         self.criterion = criterion
-
-        if max_depth == "None" or max_depth is None:
-            self.max_depth = None
-        else:
-            self.max_depth = int(max_depth)
-        if max_leaf_nodes == "None" or max_leaf_nodes is None:
-            self.max_leaf_nodes = None
-        else:
-            self.max_leaf_nodes = int(max_leaf_nodes)
-
-        self.min_samples_leaf = int(min_samples_leaf)
-        self.min_samples_split = int(min_samples_split)
-
-        self.max_features = float(max_features)
-
-        if bootstrap == "True":
-            self.bootstrap = True
-        elif bootstrap == "False":
-            self.bootstrap = False
+        self.min_samples_leaf = min_samples_leaf
+        self.min_samples_split = min_samples_split
+        self.max_features = max_features
+        self.bootstrap = bootstrap
+        self.max_leaf_nodes = max_leaf_nodes
+        self.max_depth = max_depth
+        self.min_weight_fraction_leaf = min_weight_fraction_leaf
 
         self.oob_score = oob_score
-        self.n_jobs = int(n_jobs)
+        self.n_jobs = n_jobs
         self.random_state = random_state
-        self.verbose = int(verbose)
+        self.verbose = verbose
         self.preprocessor = None
 
     def fit(self, X, Y):
         from sklearn.ensemble import ExtraTreesRegressor
         from sklearn.feature_selection import SelectFromModel
+
+        self.n_estimators = int(self.n_estimators)
+        self.min_samples_leaf = int(self.min_samples_leaf)
+        self.min_samples_split = int(self.min_samples_split)
+        self.max_features = float(self.max_features)
+        self.bootstrap = check_for_bool(self.bootstrap)
+        self.n_jobs = int(self.n_jobs)
+        self.verbose = int(self.verbose)
+
+        if check_none(self.max_leaf_nodes):
+            self.max_leaf_nodes = None
+        else:
+            self.max_leaf_nodes = int(self.max_leaf_nodes)
+
+        if check_none(self.max_depth):
+            self.max_depth = None
+        else:
+            self.max_depth = int(self.max_depth)
+
+        self.min_weight_fraction_leaf = float(self.min_weight_fraction_leaf)
 
         num_features = X.shape[1]
         max_features = int(
@@ -65,6 +74,7 @@ class ExtraTreesPreprocessorRegression(AutoSklearnPreprocessingAlgorithm):
             min_samples_leaf=self.min_samples_leaf, bootstrap=self.bootstrap,
             max_features=max_features, max_leaf_nodes=self.max_leaf_nodes,
             oob_score=self.oob_score, n_jobs=self.n_jobs, verbose=self.verbose,
+            min_weight_fraction_leaf=self.min_weight_fraction_leaf,
             random_state=self.random_state)
 
         estimator.fit(X, Y)

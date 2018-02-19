@@ -6,6 +6,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
+from autosklearn.util.common import check_for_bool
 
 
 class ARDRegression(AutoSklearnRegressionAlgorithm):
@@ -14,17 +15,28 @@ class ARDRegression(AutoSklearnRegressionAlgorithm):
         self.random_state = random_state
         self.estimator = None
 
-        self.n_iter = int(n_iter)
-        self.tol = float(tol)
-        self.alpha_1 = float(alpha_1)
-        self.alpha_2 = float(alpha_2)
-        self.lambda_1 = float(lambda_1)
-        self.lambda_2 = float(lambda_2)
-        self.threshold_lambda = float(threshold_lambda)
-        self.fit_intercept = fit_intercept == True
+        self.n_iter = n_iter
+        self.tol = tol
+        self.alpha_1 = alpha_1
+        self.alpha_2 = alpha_2
+        self.lambda_1 = lambda_1
+        self.lambda_2 = lambda_2
+        self.threshold_lambda = threshold_lambda
+        self.fit_intercept = fit_intercept
 
     def fit(self, X, Y):
         import sklearn.linear_model
+
+        self.n_iter = int(self.n_iter)
+        self.tol = float(self.tol)
+        self.alpha_1 = float(self.alpha_1)
+        self.alpha_2 = float(self.alpha_2)
+        self.lambda_1 = float(self.lambda_1)
+        self.lambda_2 = float(self.lambda_2)
+        self.threshold_lambda = float(self.threshold_lambda)
+        self.fit_intercept = check_for_bool(self.fit_intercept)
+
+
         self.estimator = sklearn.linear_model.\
             ARDRegression(n_iter=self.n_iter,
                           tol=self.tol,
@@ -77,10 +89,10 @@ class ARDRegression(AutoSklearnRegressionAlgorithm):
                                               lower=10 ** -10, upper=10 ** -3,
                                               default_value=10 ** -6)
         threshold_lambda = UniformFloatHyperparameter(name="threshold_lambda",
-                                                     log=True,
-                                                     lower=10 ** 3,
-                                                     upper=10 ** 5,
-                                                     default_value=10 ** 4)
+                                                      log=True,
+                                                      lower=10 ** 3,
+                                                      upper=10 ** 5,
+                                                      default_value=10 ** 4)
         fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
 
         cs.add_hyperparameters([n_iter, tol, alpha_1, alpha_2, lambda_1,

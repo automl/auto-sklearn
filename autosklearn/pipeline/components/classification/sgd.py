@@ -4,11 +4,12 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter, UnParametrizedHyperparameter, \
     UniformIntegerHyperparameter
-from ConfigSpace.conditions import EqualsCondition
+from ConfigSpace.conditions import EqualsCondition, InCondition
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
+from autosklearn.util.common import check_for_bool
 
 
 class SGD(AutoSklearnClassificationAlgorithm):
@@ -53,14 +54,18 @@ class SGD(AutoSklearnClassificationAlgorithm):
             self.estimator = None
 
         if self.estimator is None:
+            self.fully_fit_ = False
 
             self.alpha = float(self.alpha)
-            self.fit_intercept = self.fit_intercept == 'True'
-            self.l1_ratio = float(self.l1_ratio) if self.l1_ratio is not None else 0.15
-            self.epsilon = float(self.epsilon) if self.epsilon is not None else 0.1
+            self.l1_ratio = float(self.l1_ratio) if self.l1_ratio is not None \
+                else 0.15
+            self.epsilon = float(self.epsilon) if self.epsilon is not None \
+                else 0.1
             self.eta0 = float(self.eta0)
-            self.power_t = float(self.power_t) if self.power_t is not None else 0.25
-            self.average = self.average == 'True'
+            self.power_t = float(self.power_t) if self.power_t is not None \
+                else 0.5
+            self.average = check_for_bool(self.average)
+            self.fit_intercept = check_for_bool(self.fit_intercept)
             self.tol = float(self.tol)
 
             self.estimator = SGDClassifier(loss=self.loss,
@@ -157,9 +162,9 @@ class SGD(AutoSklearnClassificationAlgorithm):
             "learning_rate", ["optimal", "invscaling", "constant"],
             default_value="invscaling")
         eta0 = UniformFloatHyperparameter(
-            "eta0", 1e-7, 1e-1, default_value=0.01)
+            "eta0", 1e-7, 1e-1, default_value=0.01, log=True)
         power_t = UniformFloatHyperparameter("power_t", 1e-5, 1,
-                                             default_value=0.25)
+                                             default_value=0.5)
         average = CategoricalHyperparameter(
             "average", ["False", "True"], default_value="False")
         cs.add_hyperparameters([loss, penalty, alpha, l1_ratio, fit_intercept,
@@ -169,15 +174,17 @@ class SGD(AutoSklearnClassificationAlgorithm):
         # TODO add passive/aggressive here, although not properly documented?
         elasticnet = EqualsCondition(l1_ratio, penalty, "elasticnet")
         epsilon_condition = EqualsCondition(epsilon, loss, "modified_huber")
-        # eta0 seems to be always active according to the source code; when
-        # learning_rate is set to optimial, eta0 is the starting value:
-        # https://github.com/scikit-learn/scikit-learn/blob/0.15.X/sklearn/linear_model/sgd_fast.pyx
-        #eta0_and_inv = EqualsCondition(eta0, learning_rate, "invscaling")
-        #eta0_and_constant = EqualsCondition(eta0, learning_rate, "constant")
-        #eta0_condition = OrConjunction(eta0_and_inv, eta0_and_constant)
-        power_t_condition = EqualsCondition(power_t, learning_rate, "invscaling")
 
-        cs.add_conditions([elasticnet, epsilon_condition, power_t_condition])
+        power_t_condition = EqualsCondition(power_t, learning_rate,
+                                            "invscaling")
+
+        # eta0 is only relevant if learning_rate!='optimal' according to code
+        # https://github.com/scikit-learn/scikit-learn/blob/0.19.X/sklearn/
+        # linear_model/sgd_fast.pyx#L603
+        eta0_in_inv_con = InCondition(eta0, learning_rate, ["invscaling",
+                                                            "constant"])
+        cs.add_conditions([elasticnet, epsilon_condition, power_t_condition,
+                           eta0_in_inv_con])
 
         return cs
 

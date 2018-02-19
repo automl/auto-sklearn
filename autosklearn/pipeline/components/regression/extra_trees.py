@@ -7,7 +7,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
-
+from autosklearn.util.common import check_for_bool, check_none
 
 class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
     def __init__(self, n_estimators, criterion, min_samples_leaf,
@@ -15,42 +15,25 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
                  max_depth, min_impurity_decrease, oob_score=False, n_jobs=1,
                  random_state=None, verbose=0):
 
-        self.n_estimators = int(n_estimators)
+        self.n_estimators = n_estimators
         self.estimator_increment = 10
-        if criterion not in ("mse", "friedman_mse", "mae"):
-            raise ValueError("'criterion' is not in ('mse', 'friedman_mse', "
-                             "'mae): %s" % criterion)
         self.criterion = criterion
-
-        if max_depth == "None" or max_depth is None:
-            self.max_depth = None
-        else:
-            self.max_depth = int(max_depth)
-        if max_leaf_nodes == "None" or max_leaf_nodes is None:
-            self.max_leaf_nodes = None
-        else:
-            self.max_leaf_nodes = int(max_leaf_nodes)
-
-        self.min_samples_leaf = int(min_samples_leaf)
-        self.min_samples_split = int(min_samples_split)
-
-        self.max_features = float(max_features)
-        self.min_impurity_decrease = float(min_impurity_decrease)
-
-        if bootstrap == "True":
-            self.bootstrap = True
-        elif bootstrap == "False":
-            self.bootstrap = False
-
+        self.max_depth = max_depth
+        self.max_leaf_nodes = max_leaf_nodes
+        self.min_samples_leaf = min_samples_leaf
+        self.min_samples_split = min_samples_split
+        self.max_features = max_features
+        self.min_impurity_decrease = min_impurity_decrease
+        self.bootstrap = bootstrap
         self.oob_score = oob_score
-        self.n_jobs = int(n_jobs)
+        self.n_jobs = n_jobs
         self.random_state = random_state
-        self.verbose = int(verbose)
+        self.verbose = verbose
         self.estimator = None
 
-    def fit(self, X, y, refit=False):
+    def fit(self, X, y):
         n_iter = 2
-        self.iterative_fit(X, y, n_iter=n_iter, refit=refit)
+        self.iterative_fit(X, y, n_iter=n_iter, refit=True)
         while not self.configuration_fully_fitted():
             n_iter *= 2
             self.iterative_fit(X, y, n_iter=n_iter)
@@ -64,6 +47,31 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
             self.estimator = None
 
         if self.estimator is None:
+
+            self.n_estimators = int(self.n_estimators)
+            if self.criterion not in ("mse", "friedman_mse", "mae"):
+                raise ValueError(
+                    "'criterion' is not in ('mse', 'friedman_mse', "
+                    "'mae): %s" % self.criterion)
+
+            if check_none(self.max_depth):
+                self.max_depth = None
+            else:
+                self.max_depth = int(self.max_depth)
+
+            if check_none(self.max_leaf_nodes):
+                self.max_leaf_nodes = None
+            else:
+                self.max_leaf_nodes = int(self.max_leaf_nodes)
+
+            self.min_samples_leaf = int(self.min_samples_leaf)
+            self.min_samples_split = int(self.min_samples_split)
+            self.max_features = float(self.max_features)
+            self.min_impurity_decrease = float(self.min_impurity_decrease)
+            self.bootstrap = check_for_bool(self.bootstrap)
+            self.n_jobs = int(self.n_jobs)
+            self.verbose = int(self.verbose)
+
             self.estimator = ETR(n_estimators=n_iter,
                                  criterion=self.criterion,
                                  max_depth=self.max_depth,
