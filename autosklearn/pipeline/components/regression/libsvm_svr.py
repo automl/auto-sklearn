@@ -1,6 +1,5 @@
 import resource
-
-import numpy as np
+import sys
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.conditions import InCondition
@@ -32,12 +31,29 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
     def fit(self, X, Y):
         import sklearn.svm
 
+        # Calculate the size of the kernel cache (in MB) for sklearn's LibSVM. The cache size is
+        # calculated as 2/3 of the available memory (which is calculated as the memory limit minus
+        # the used memory)
         try:
+            # Retrieve memory limits imposed on the process
             soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+
             if soft > 0:
+                # Convert limit to units of megabytes
                 soft /= 1024 * 1024
+
+                # Retrieve memory used by this process
                 maxrss = resource.getrusage(resource.RUSAGE_SELF)[2] / 1024
+
+                # In MacOS, the MaxRSS output of resource.getrusage in bytes; on other platforms,
+                # it's in kilobytes
+                if sys.platform == 'darwin':
+                    maxrss = maxrss / 1024
+
                 cache_size = (soft - maxrss) / 1.5
+
+                if cache_size < 0:
+                    cache_size = 200
             else:
                 cache_size = 200
         except Exception:
