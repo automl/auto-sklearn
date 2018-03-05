@@ -282,16 +282,22 @@ class EnsembleBuilder(multiprocessing.Process):
             _num_run = int(match.group(2))
             
             if not self.read_preds.get(y_ens_fn):
-                self.read_preds[y_ens_fn] = {"ens_score": -1,
-                                             "mtime_ens": 0,
-                                             "mtime_valid": 0,
-                                             "mtime_test": 0,
-                                             "seed": _seed,
-                                             "num_run": _num_run,
-                                             "y_ensemble": None,
-                                             "y_valid": None,
-                                             "y_test": None,
-                                             "loaded": False}
+                self.read_preds[y_ens_fn] = {
+                    "ens_score": -1,
+                    "mtime_ens": 0,
+                    "mtime_valid": 0,
+                    "mtime_test": 0,
+                    "seed": _seed,
+                    "num_run": _num_run,
+                    "y_ensemble": None,
+                    "y_valid": None,
+                    "y_test": None,
+                    # Lazy keys so far:
+                    # 0 - not loaded
+                    # 1 - loaded and ind memory
+                    # 2 - loaded but dropped again
+                    "loaded": 0
+                }
                 
             if self.read_preds[y_ens_fn]["mtime_ens"] == os.path.getmtime(y_ens_fn):
                 # same time stamp; nothing changed;
@@ -313,7 +319,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     self.read_preds[y_ens_fn]["mtime_ens"] = os.path.getmtime(
                         y_ens_fn
                     )
-                    self.read_preds[y_ens_fn]["loaded"] = True
+                    self.read_preds[y_ens_fn]["loaded"] = 1
 
                     n_read_files += 1
 
@@ -329,7 +335,7 @@ class EnsembleBuilder(multiprocessing.Process):
             'Done reading %d new prediction files. Loaded %d predictions in '
             'total.',
             n_read_files,
-            np.sum([pred["loaded"] for pred in self.read_preds.values()])
+            np.sum([pred["loaded"] > 0 for pred in self.read_preds.values()])
         )
         return True
                 
@@ -366,6 +372,14 @@ class EnsembleBuilder(multiprocessing.Process):
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
         # remove loaded predictions for non-winning models
         for k in sorted_keys[self.ensemble_nbest:]:
+            if self.read_preds[k]['loaded'] == 1:
+                self.logger.debug(
+                    'Dropping model (%d,%d) with score %f.',
+                    self.read_preds[k]['seed'],
+                    self.read_preds[k]['num_run'],
+                    self.read_preds[k]['ens_score'],
+                )
+                self.read_preds[k]['loaded'] = 2
             self.read_preds[k]["y_ensemble"] = None
             self.read_preds[k]["y_valid"] = None
             self.read_preds[k]["y_test"] = None
