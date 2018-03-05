@@ -223,3 +223,6 @@ class EnsembleSelection(AbstractEnsemble):
 
     def get_model_identifiers(self):
         return self.identifiers_
+
+    def get_validation_performance(self):
+        return self.trajectory_[-1]

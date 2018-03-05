@@ -8,6 +8,9 @@ class AbstractEnsemble(object):
     def fit(self, base_models_predictions, true_targets, model_identifiers):
         """Fit an ensemble given predictions of base models and targets.
 
+        Ensemble building maximizes performance (in contrast to
+        hyperparameter optimization)!
+
         Parameters
         ----------
         base_models_predictions : array of shape = [n_base_models, n_data_points, n_targets]
@@ -66,4 +69,13 @@ class AbstractEnsemble(object):
         Returns
         -------
         list
+        """
+
+    @abstractmethod
+    def get_validation_performance(self):
+        """Return validation performance of ensemble.
+
+        Return
+        ------
+        float
         """
