@@ -387,8 +387,8 @@ class Backend(object):
             tempname = fh.name
         os.rename(tempname, filepath)
 
-    def save_predictions_as_txt(self, predictions, subset, idx, prefix=None,
-                                precision=3):
+    def save_predictions_as_txt(self, predictions, subset, idx, precision,
+                                prefix=None):
         # Write prediction scores in prescribed format
         filepath = os.path.join(self.output_directory,
                                 ('%s_' % prefix if prefix else '') +
