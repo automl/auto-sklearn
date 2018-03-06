@@ -17,6 +17,10 @@ from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.util.logging_ import get_logger
 
+Y_ENSEMBLE = 0
+Y_VALID = 1
+Y_TEST = 2
+
 
 class EnsembleBuilder(multiprocessing.Process):
     def __init__(
@@ -125,9 +129,9 @@ class EnsembleBuilder(multiprocessing.Process):
         #    "mtime_test": str,
         #    "seed": int,
         #    "num_run": int,
-        #    "y_ensemble": np.ndarray
-        #    "y_valid": np.ndarray
-        #    "y_test": np.ndarray
+        #    Y_ENSEMBLE: np.ndarray
+        #    Y_VALID: np.ndarray
+        #    Y_TEST: np.ndarray
         # }
         self.read_preds = {}
         self.last_hash = None  # hash of ensemble training data
@@ -289,9 +293,9 @@ class EnsembleBuilder(multiprocessing.Process):
                     "mtime_test": 0,
                     "seed": _seed,
                     "num_run": _num_run,
-                    "y_ensemble": None,
-                    "y_valid": None,
-                    "y_test": None,
+                    Y_ENSEMBLE: None,
+                    Y_VALID: None,
+                    Y_TEST: None,
                     # Lazy keys so far:
                     # 0 - not loaded
                     # 1 - loaded and ind memory
@@ -302,7 +306,7 @@ class EnsembleBuilder(multiprocessing.Process):
             if self.read_preds[y_ens_fn]["mtime_ens"] == os.path.getmtime(y_ens_fn):
                 # same time stamp; nothing changed;
                 continue
-            
+
             # actually read the predictions
             # and score them
             try:
@@ -314,8 +318,19 @@ class EnsembleBuilder(multiprocessing.Process):
                                             metric=self.metric,
                                             all_scoring_functions=False)
 
+                    if self.read_preds[y_ens_fn]["ens_score"] > -1:
+                        self.logger.critical(
+                            'Changing ensemble score for file %s from %f to %f '
+                            'because file modification time changed? %f - %f',
+                            y_ens_fn,
+                            self.read_preds[y_ens_fn]["ens_score"],
+                            score,
+                            self.read_preds[y_ens_fn]["mtime_ens"],
+                            os.path.getmtime(y_ens_fn),
+                        )
+
                     self.read_preds[y_ens_fn]["ens_score"] = score
-                    self.read_preds[y_ens_fn]["y_ensemble"] = y_ensemble
+                    self.read_preds[y_ens_fn][Y_ENSEMBLE] = y_ensemble
                     self.read_preds[y_ens_fn]["mtime_ens"] = os.path.getmtime(
                         y_ens_fn
                     )
@@ -370,19 +385,27 @@ class EnsembleBuilder(multiprocessing.Process):
             ]
         # reduce to keys
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
+        # reload predictions if scores changed over time and a model is
+        # considered to be in the top models again!
+        for k in sorted_keys[:self.ensemble_nbest]:
+            if self.read_preds[k][Y_ENSEMBLE] is None:
+                self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(fp=k)
+            self.read_preds[k]['loaded'] = 1
         # remove loaded predictions for non-winning models
         for k in sorted_keys[self.ensemble_nbest:]:
+            self.read_preds[k][Y_ENSEMBLE] = None
+            self.read_preds[k][Y_VALID] = None
+            self.read_preds[k][Y_TEST] = None
             if self.read_preds[k]['loaded'] == 1:
                 self.logger.debug(
-                    'Dropping model (%d,%d) with score %f.',
+                    'Dropping model %s (%d,%d) with score %f.',
+                    k,
                     self.read_preds[k]['seed'],
                     self.read_preds[k]['num_run'],
                     self.read_preds[k]['ens_score'],
                 )
                 self.read_preds[k]['loaded'] = 2
-            self.read_preds[k]["y_ensemble"] = None
-            self.read_preds[k]["y_valid"] = None
-            self.read_preds[k]["y_test"] = None
+
         # return best scored keys of self.read_preds
         return sorted_keys[:self.ensemble_nbest]
 
@@ -444,13 +467,13 @@ class EnsembleBuilder(multiprocessing.Process):
                 test_fn = test_fn[0]
                 if self.read_preds[k]["mtime_test"] == \
                         os.path.getmtime(test_fn) \
-                        and self.read_preds[k]["y_test"] is not None:
+                        and self.read_preds[k][Y_TEST] is not None:
                     success_keys_test.append(k)
                     continue
                 try:
                     with open(test_fn, 'rb') as fp:
                         y_test = self._read_np_fn(fp)
-                        self.read_preds[k]["y_test"] = y_test
+                        self.read_preds[k][Y_TEST] = y_test
                         success_keys_test.append(k)
                         self.read_preds[k]["mtime_test"] = os.path.getmtime(test_fn)
                 except Exception as e:
@@ -473,8 +496,8 @@ class EnsembleBuilder(multiprocessing.Process):
             ensemble: EnsembleSelection
                 trained Ensemble
         """
-        
-        predictions_train = np.array([self.read_preds[k]["y_ensemble"] for k in selected_keys])
+
+        predictions_train = np.array([self.read_preds[k][Y_ENSEMBLE] for k in selected_keys])
         include_num_runs = [(self.read_preds[k]["seed"], self.read_preds[k]["num_run"]) for k in selected_keys]
         
         # check hash if ensemble training data changed
@@ -555,7 +578,8 @@ class EnsembleBuilder(multiprocessing.Process):
             self.backend.save_ensemble(ensemble, index_run, self.seed)
 
         predictions = np.array([
-            self.read_preds[k]["y_%s" % set_] for k in selected_keys
+            self.read_preds[k][Y_VALID if set_ == 'valid' else Y_TEST]
+            for k in selected_keys
         ])
         
         if n_preds == predictions.shape[0]:
