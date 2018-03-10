@@ -366,33 +366,50 @@ class EnsembleBuilder(multiprocessing.Process):
         # Sort by score - higher is better!
         sorted_keys = list(reversed(sorted(
             [
-                [k, v["ens_score"], v["num_run"]]
+                (k, v["ens_score"], v["num_run"])
                 for k, v in self.read_preds.items()
             ],
             key=lambda x: x[1],
         )))
-        # remove all that are at most as good as random (<0.001)
-        sorted_keys = filter(lambda x: x[1] > 0.001, sorted_keys)
+        # remove all that are at most as good as random (<0.500 for AUC)
+        sorted_keys = filter(lambda x: x[1] > 0.500, sorted_keys)
         # remove Dummy Classifier
         sorted_keys = list(filter(lambda x: x[2] > 1, sorted_keys))
         if not sorted_keys: 
             # no model left; try to use dummy classifier (num_run==0)
             self.logger.warning("No models better than random - using Dummy Classifier!")
-            # TODO: Check if this works correctly?
             sorted_keys = [
-                [k] for k, v in self.read_preds.items()
+                (k, v["ens_score"], v["num_run"]) for k, v in self.read_preds.items()
                 if v["seed"] == self.seed and v["num_run"] == 1
             ]
-        # reduce to keys
-        sorted_keys = list(map(lambda x: x[0], sorted_keys))
         # reload predictions if scores changed over time and a model is
         # considered to be in the top models again!
-        for k in sorted_keys[:self.ensemble_nbest]:
+        for k, _, _ in sorted_keys[:self.ensemble_nbest]:
             if self.read_preds[k][Y_ENSEMBLE] is None:
                 self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(fp=k)
+                # No need to load valid and test here because they are loaded
+                #  only if the model ends up in the ensemble
             self.read_preds[k]['loaded'] = 1
+
+        # Hack ensemble_nbest to only consider models which are half as good
+        # as the best (and better than random)
+        ensemble_n_best = None
+        for i in range(1, min(self.ensemble_nbest, len(sorted_keys))):
+            if ((sorted_keys[0][1] - 0.5) * 0.75) > (sorted_keys[i][1] - 0.5):
+                ensemble_n_best = i
+                self.logger.info('Reduce ensemble_nbest to %d!', ensemble_n_best)
+                break
+        if ensemble_n_best is None:
+            ensemble_n_best = self.ensemble_nbest
+
+        if len(sorted_keys) > 10 and ensemble_n_best > len(sorted_keys) * 0.2:
+            pass
+
+        # reduce to keys
+        sorted_keys = list(map(lambda x: x[0], sorted_keys))
+
         # remove loaded predictions for non-winning models
-        for k in sorted_keys[self.ensemble_nbest:]:
+        for k in sorted_keys[ensemble_n_best:]:
             self.read_preds[k][Y_ENSEMBLE] = None
             self.read_preds[k][Y_VALID] = None
             self.read_preds[k][Y_TEST] = None
@@ -407,7 +424,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 self.read_preds[k]['loaded'] = 2
 
         # return best scored keys of self.read_preds
-        return sorted_keys[:self.ensemble_nbest]
+        return sorted_keys[:ensemble_n_best]
 
     def get_valid_test_preds(self, selected_keys: list):
         """
