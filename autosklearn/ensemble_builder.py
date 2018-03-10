@@ -394,8 +394,10 @@ class EnsembleBuilder(multiprocessing.Process):
         # Hack ensemble_nbest to only consider models which are half as good
         # as the best (and better than random)
         ensemble_n_best = None
+        best_loss = 1 - (sorted_keys[0][1] * 2 - 1)
         for i in range(1, min(self.ensemble_nbest, len(sorted_keys))):
-            if ((sorted_keys[0][1] - 0.5) * 0.75) > (sorted_keys[i][1] - 0.5):
+            current_loss = 1 - (sorted_keys[i][1] * 2 - 1)
+            if best_loss * 1.3 < current_loss:
                 ensemble_n_best = i
                 self.logger.info('Reduce ensemble_nbest to %d!', ensemble_n_best)
                 break
