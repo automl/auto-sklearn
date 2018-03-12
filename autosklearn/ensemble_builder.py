@@ -391,8 +391,8 @@ class EnsembleBuilder(multiprocessing.Process):
                 #  only if the model ends up in the ensemble
             self.read_preds[k]['loaded'] = 1
 
-        # Hack ensemble_nbest to only consider models which are half as good
-        # as the best (and better than random)
+        # Hack ensemble_nbest to only consider models which are not
+        # significantly worse than the best(and better than random)
         ensemble_n_best = None
         best_loss = 1 - (sorted_keys[0][1] * 2 - 1)
         for i in range(1, min(self.ensemble_nbest, len(sorted_keys))):
