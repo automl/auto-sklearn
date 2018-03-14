@@ -20,8 +20,8 @@ aspects of its usage:
 * `Parallel usage <https://github.com/automl/auto-sklearn/blob/master/example/example_parallel.py>`_
 * `Sequential usage <https://github.com/automl/auto-sklearn/blob/master/example/example_sequential.py>`_
 * `Regression <https://github.com/automl/auto-sklearn/blob/master/example/example_regression.py>`_
-* `Continuous and Categorical Data <https://github.com/automl/auto-sklearn/blob/master/example/example_feature_types.py>`_
-* `Using Custom metrics <https://github.com/automl/auto-sklearn/blob/master/example/example_metrics.py>`_
+* `Continuous and categorical data <https://github.com/automl/auto-sklearn/blob/master/example/example_feature_types.py>`_
+* `Using custom metrics <https://github.com/automl/auto-sklearn/blob/master/example/example_metrics.py>`_
 
 
 Time and memory limits
@@ -44,7 +44,7 @@ time limit of one day, and a time limit of 30 minutes for a single run.
 Further guidelines can be found in
 `auto-sklearn/issues/142 <https://github.com/automl/auto-sklearn/issues/142>`_.
 
-Restricting the Searchspace
+Restricting the searchspace
 ===========================
 
 Instead of using all available estimators, it is possible to restrict
