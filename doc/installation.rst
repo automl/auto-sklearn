@@ -96,10 +96,8 @@ issues holding us back from actively supporting OSX:
   *auto-sklearn* and its dependencies `SMAC3 <https://github.com/automl/SMAC3>`_
   and `ConfigSpace <https://github.com/automl/ConfigSpace>`_.
 
-In case you're having issues installing the
-`pyrfr package <https://github.com/automl/random_forest_run>`_, check out this
-`installation suggestion on github<https://github.com/automl/auto-sklearn/issues/360#issuecomment-335150470>`_
-.
+In case you're having issues installing the `pyrfr package <https://github.com/automl/random_forest_run>`_, check out
+`this installation suggestion on github <https://github.com/automl/auto-sklearn/issues/360#issuecomment-335150470>`_.
 
 Possible other solutions (not tested):
 
