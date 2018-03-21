@@ -254,10 +254,11 @@ class EnsembleBuilder(multiprocessing.Process):
             self.logger.debug("No ensemble dataset prediction directory found")
             return False
         
-        if self.seed > -1:
+        if self.shared_mode is False:
             pred_path = os.path.join(
                     self.dir_ensemble,
                     'predictions_ensemble_%s_*.npy' % self.seed)
+        # pSMAC
         else:
             pred_path = os.path.join(
                     self.dir_ensemble,
