@@ -83,14 +83,14 @@ class EnsembleSelection(AbstractEnsemble):
                 # the script first!
                 fant_ensemble_prediction[:,:] = weighted_ensemble_prediction + \
                                              (1. / float(s + 1)) * pred
-                scores[j] = calculate_score(
+                scores[j] = 1 - calculate_score(
                     solution=labels,
                     prediction=fant_ensemble_prediction,
                     task_type=self.task_type,
                     metric=self.metric,
                     all_scoring_functions=False)
             
-            all_best = np.argwhere(scores == np.nanmax(scores)).flatten() 
+            all_best = np.argwhere(scores == np.nanmin(scores)).flatten()
             best = np.random.choice(all_best)
             ensemble.append(predictions[best])
             trajectory.append(scores[best])
@@ -135,14 +135,14 @@ class EnsembleSelection(AbstractEnsemble):
             for j, pred in enumerate(predictions):
                 ensemble.append(pred)
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-                scores[j] = calculate_score(
+                scores[j] = 1 - calculate_score(
                     solution=labels,
                     prediction=ensemble_prediction,
                     task_type=self.task_type,
                     metric=self.metric,
                     all_scoring_functions=False)
                 ensemble.pop()
-            best = np.nanargmax(scores)
+            best = np.nanargmin(scores)
             ensemble.append(predictions[best])
             trajectory.append(scores[best])
             order.append(best)
