@@ -4,7 +4,7 @@ import json
 import numpy as np
 from smac.tae.execute_ta_run import TAEAbortException
 from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold, \
-    StratifiedKFold, train_test_split
+    StratifiedKFold, train_test_split, BaseCrossValidator
 
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.constants import *
@@ -57,7 +57,7 @@ class TrainEvaluator(AbstractEvaluator):
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_args = resampling_strategy_args
         self.cv = self.get_splitter(self.datamanager)
-        self.cv_folds = self.cv.n_splits
+        self.cv_folds = self.cv.get_n_splits()
         self.X_train = self.datamanager.data['X_train']
         self.Y_train = self.datamanager.data['Y_train']
         self.Y_optimization = None
@@ -350,6 +350,10 @@ class TrainEvaluator(AbstractEvaluator):
         return opt_pred, valid_pred, test_pred
 
     def get_splitter(self, D):
+
+        if isinstance(self.resampling_strategy, BaseCrossValidator):
+            return self.resampling_strategy
+
         y = D.data['Y_train'].ravel()
         train_size = 0.67
         if self.resampling_strategy_args:

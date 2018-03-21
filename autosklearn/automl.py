@@ -10,6 +10,7 @@ import numpy as np
 import numpy.ma as ma
 import scipy.stats
 from sklearn.base import BaseEstimator
+from sklearn.model_selection import BaseCrossValidator
 from smac.tae.execute_ta_run import StatusType
 from smac.stats.stats import Stats
 from sklearn.externals import joblib
@@ -298,7 +299,8 @@ class AutoML(BaseEstimator):
                                      "of " + str(allowed_elements))
         if self._resampling_strategy not in ['holdout', 'holdout-iterative-fit',
                                              'cv', 'partial-cv',
-                                             'partial-cv-iterative-fit']:
+                                             'partial-cv-iterative-fit'] and not isinstance(self._resampling_strategy,
+                                                                                           BaseCrossValidator):
             raise ValueError('Illegal resampling strategy: %s' %
                              self._resampling_strategy)
         if self._resampling_strategy in ['partial-cv', 'partial-cv-iterative-fit'] \
