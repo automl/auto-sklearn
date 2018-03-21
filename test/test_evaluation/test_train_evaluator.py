@@ -723,16 +723,24 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # holdout, binary classification
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = 'holdout'
-        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy_args = {}
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv,
                               sklearn.model_selection.StratifiedShuffleSplit)
+
+        # holdout, binary classification, no shuffle
+        evaluator = TrainEvaluator()
+        evaluator.resampling_strategy = 'holdout'
+        evaluator.resampling_strategy_args = {'shuffle': False}
+        cv = evaluator.get_splitter(D)
+        self.assertIsInstance(cv,
+                              sklearn.model_selection.PredefinedSplit)
 
         # holdout, binary classification, fallback to shuffle split
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1, 2])
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = 'holdout'
-        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy_args = {}
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv,
                               sklearn.model_selection._split.ShuffleSplit)
@@ -745,6 +753,26 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv,
                               sklearn.model_selection._split.StratifiedKFold)
+
+        # cv, binary classification, shuffle is True
+        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
+        evaluator = TrainEvaluator()
+        evaluator.resampling_strategy = 'cv'
+        evaluator.resampling_strategy_args = {'folds': 5}
+        cv = evaluator.get_splitter(D)
+        self.assertIsInstance(cv,
+                              sklearn.model_selection._split.StratifiedKFold)
+        self.assertTrue(cv.shuffle)
+
+        # cv, binary classification, shuffle is False
+        D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
+        evaluator = TrainEvaluator()
+        evaluator.resampling_strategy = 'cv'
+        evaluator.resampling_strategy_args = {'folds': 5, 'shuffle': False}
+        cv = evaluator.get_splitter(D)
+        self.assertIsInstance(cv,
+                              sklearn.model_selection._split.KFold)
+        self.assertFalse(cv.shuffle)
 
         # cv, binary classification, no fallback anticipated
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1, 2])
@@ -760,10 +788,20 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.info['task'] = REGRESSION
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = 'holdout'
-        evaluator.resampling_strategy_args = None
+        evaluator.resampling_strategy_args = {}
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv,
                               sklearn.model_selection._split.ShuffleSplit)
+
+        # regression, no shuffle
+        D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        D.info['task'] = REGRESSION
+        evaluator = TrainEvaluator()
+        evaluator.resampling_strategy = 'holdout'
+        evaluator.resampling_strategy_args = {'shuffle': False}
+        cv = evaluator.get_splitter(D)
+        self.assertIsInstance(cv,
+                              sklearn.model_selection._split.PredefinedSplit)
 
         # regression cv, KFold
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -773,6 +811,17 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = {'folds': 5}
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, sklearn.model_selection._split.KFold)
+        self.assertTrue(cv.shuffle)
+
+        # regression cv, KFold, no shuffling
+        D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        D.info['task'] = REGRESSION
+        evaluator = TrainEvaluator()
+        evaluator.resampling_strategy = 'cv'
+        evaluator.resampling_strategy_args = {'folds': 5, 'shuffle': False}
+        cv = evaluator.get_splitter(D)
+        self.assertIsInstance(cv, sklearn.model_selection._split.KFold)
+        self.assertFalse(cv.shuffle)
 
 
 class FunctionsTest(unittest.TestCase):

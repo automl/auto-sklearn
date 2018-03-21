@@ -86,20 +86,23 @@ class AutoSklearnEstimator(BaseEstimator):
             include_preprocessors.
 
         resampling_strategy : string, optional ('holdout')
-            how to to handle overfitting, might need 'resampling_strategy_arguments'
+            how to to avoid overfitting, might need
+            'resampling_strategy_arguments'
 
             * 'holdout': 67:33 (train:test) split
             * 'holdout-iterative-fit':  67:33 (train:test) split, calls iterative
               fit where possible
             * 'cv': crossvalidation, requires 'folds'
+            * 'partial-cv': crossvalidation with intensification, requires
+              'folds'
 
         resampling_strategy_arguments : dict, optional if 'holdout' (train_size default=0.67)
             Additional arguments for resampling_strategy
             ``train_size`` should be between 0.0 and 1.0 and represent the
             proportion of the dataset to include in the train split.
-            * 'holdout': {'train_size': float}
-            * 'holdout-iterative-fit':  {'train_size': float}
-            * 'cv': {'folds': int}
+            * 'holdout': {'train_size': float, 'shuffle': bool}
+            * 'holdout-iterative-fit':  {'train_size': float, 'shuffle': bool}
+            * 'cv': {'folds': int, 'shuffle': bool}
 
         tmp_folder : string, optional (None)
             folder to store configuration output and log files, if ``None``

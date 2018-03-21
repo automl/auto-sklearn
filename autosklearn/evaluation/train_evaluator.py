@@ -4,7 +4,7 @@ import json
 import numpy as np
 from smac.tae.execute_ta_run import TAEAbortException
 from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold, \
-    StratifiedKFold, train_test_split
+    StratifiedKFold, train_test_split, PredefinedSplit
 
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.constants import *
@@ -55,7 +55,10 @@ class TrainEvaluator(AbstractEvaluator):
         )
 
         self.resampling_strategy = resampling_strategy
-        self.resampling_strategy_args = resampling_strategy_args
+        if resampling_strategy_args is None:
+            self.resampling_strategy_args = {}
+        else:
+            self.resampling_strategy_args = resampling_strategy_args
         self.cv = self.get_splitter(self.datamanager)
         self.cv_folds = self.cv.n_splits
         self.X_train = self.datamanager.data['X_train']
@@ -356,6 +359,7 @@ class TrainEvaluator(AbstractEvaluator):
 
     def get_splitter(self, D):
         y = D.data['Y_train'].ravel()
+        shuffle = self.resampling_strategy_args.get('shuffle', True)
         train_size = 0.67
         if self.resampling_strategy_args:
             train_size = self.resampling_strategy_args.get('train_size',
@@ -366,36 +370,54 @@ class TrainEvaluator(AbstractEvaluator):
 
             if self.resampling_strategy in ['holdout',
                                             'holdout-iterative-fit']:
-                try:
-                    cv = StratifiedShuffleSplit(n_splits=1,
-                                                train_size=train_size,
-                                                test_size=test_size,
-                                                random_state=1)
-                    test_cv = copy.deepcopy(cv)
-                    next(test_cv.split(y, y))
-                except ValueError as e:
-                    if 'The least populated class in y has only' in e.args[0]:
-                        cv = ShuffleSplit(n_splits=1, train_size=train_size,
-                                          test_size=test_size, random_state=1)
-                    else:
-                        raise
-
+                if shuffle:
+                    try:
+                        cv = StratifiedShuffleSplit(n_splits=1,
+                                                    train_size=train_size,
+                                                    test_size=test_size,
+                                                    random_state=1)
+                        test_cv = copy.deepcopy(cv)
+                        next(test_cv.split(y, y))
+                    except ValueError as e:
+                        if 'The least populated class in y has only' in e.args[0]:
+                            cv = ShuffleSplit(n_splits=1, train_size=train_size,
+                                              test_size=test_size, random_state=1)
+                        else:
+                            raise e
+                else:
+                    tmp_train_size = int(np.floor(train_size * y.shape[0]))
+                    test_fold = np.zeros(y.shape[0])
+                    test_fold[:tmp_train_size] = -1
+                    cv = PredefinedSplit(test_fold=test_fold)
+                    cv.n_splits = 1  # As sklearn is inconsistent here
             elif self.resampling_strategy in ['cv', 'partial-cv',
                                               'partial-cv-iterative-fit']:
-                cv = StratifiedKFold(
-                    n_splits=self.resampling_strategy_args['folds'],
-                    shuffle=True, random_state=1)
+                if shuffle:
+                    cv = StratifiedKFold(
+                        n_splits=self.resampling_strategy_args['folds'],
+                        shuffle=shuffle, random_state=1)
+                else:
+                    cv = KFold(n_splits=self.resampling_strategy_args['folds'],
+                               shuffle=shuffle, random_state=1)
             else:
                 raise ValueError(self.resampling_strategy)
         else:
             if self.resampling_strategy in ['holdout',
                                             'holdout-iterative-fit']:
-                cv = ShuffleSplit(n_splits=1, train_size=train_size,
-                                  test_size=test_size, random_state=1)
+                # TODO shuffle not taken into account for this
+                if shuffle:
+                    cv = ShuffleSplit(n_splits=1, train_size=train_size,
+                                      test_size=test_size, random_state=1)
+                else:
+                    tmp_train_size = int(np.floor(train_size * y.shape[0]))
+                    test_fold = np.zeros(y.shape[0])
+                    test_fold[:tmp_train_size] = -1
+                    cv = PredefinedSplit(test_fold=test_fold)
+                    cv.n_splits = 1  # As sklearn is inconsistent here
             elif self.resampling_strategy in ['cv', 'partial-cv',
                                               'partial-cv-iterative-fit']:
                 cv = KFold(n_splits=self.resampling_strategy_args['folds'],
-                           shuffle=True, random_state=1)
+                           shuffle=shuffle, random_state=1)
             else:
                 raise ValueError(self.resampling_strategy)
         return cv
