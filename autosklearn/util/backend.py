@@ -361,7 +361,7 @@ class Backend(object):
 
         filepath = os.path.join(self.get_ensemble_dir(),
                                 '%s.%s.ensemble' % (str(seed),
-                                                    str(idx).zfill(10)))
+                                                    str(idx)))
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
             pickle.dump(ensemble, fh)
@@ -392,7 +392,7 @@ class Backend(object):
         # Write prediction scores in prescribed format
         filepath = os.path.join(self.output_directory,
                                 ('%s_' % prefix if prefix else '') +
-                                 '%s_%s.predict' % (subset, str(idx).zfill(5)))
+                                 '%s_%s.predict' % (subset, str(idx)))
 
         format_string = '{:.%dg} ' % precision
         with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(

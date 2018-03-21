@@ -205,21 +205,22 @@ class EnsembleBuilder(multiprocessing.Process):
             selected_models_set = set(selected_models)
             if selected_models_set.intersection(n_sel_test):
                 selected_models = list(selected_models_set.intersection(n_sel_test))
-            #elif selected_models_set.intersection(n_sel_valid):
-            #    selected_models = list(selected_models_set.intersection(n_sel_valid))
-            # else
+            elif selected_models_set.intersection(n_sel_valid):
+                selected_models = list(selected_models_set.intersection(n_sel_valid))
+            else:
                 # use selected_models only defined by ensemble data set
+                pass
             
             # train ensemble
             ensemble = self.fit_ensemble(selected_keys=selected_models)
             
             if ensemble is not None:
                 
-                # self.predict(set_="valid",
-                #              ensemble=ensemble,
-                #              selected_keys=n_sel_valid,
-                #              n_preds=len(selected_models),
-                #              index_run=iteration)
+                self.predict(set_="valid",
+                             ensemble=ensemble,
+                             selected_keys=n_sel_valid,
+                             n_preds=len(selected_models),
+                             index_run=iteration)
                 # TODO if predictions fails, build the model again during the
                 #  next iteration!
                 self.predict(set_="test", 
@@ -307,8 +308,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 # same time stamp; nothing changed;
                 continue
 
-            # actually read the predictions
-            # and score them
+            # actually read the predictions and score them
             try:
                 with open(y_ens_fn, 'rb') as fp:
                     y_ensemble = self._read_np_fn(fp=fp)
@@ -371,8 +371,9 @@ class EnsembleBuilder(multiprocessing.Process):
             ],
             key=lambda x: x[1],
         )))
-        # remove all that are at most as good as random (<0.500 for AUC)
-        sorted_keys = filter(lambda x: x[1] > 0.500, sorted_keys)
+        # remove all that are at most as good as random, cannot assume a
+        # minimum number here because all kinds of metric can be used
+        sorted_keys = filter(lambda x: x[1] > 0.001, sorted_keys)
         # remove Dummy Classifier
         sorted_keys = list(filter(lambda x: x[2] > 1, sorted_keys))
         if not sorted_keys: 
@@ -394,18 +395,16 @@ class EnsembleBuilder(multiprocessing.Process):
         # Hack ensemble_nbest to only consider models which are not
         # significantly worse than the best(and better than random)
         ensemble_n_best = None
-        best_loss = 1 - (sorted_keys[0][1] * 2 - 1)
-        for i in range(1, min(self.ensemble_nbest, len(sorted_keys))):
-            current_loss = 1 - (sorted_keys[i][1] * 2 - 1)
-            if best_loss * 1.3 < current_loss:
-                ensemble_n_best = i
-                self.logger.info('Reduce ensemble_nbest to %d!', ensemble_n_best)
-                break
+        # TODO generalize this and re-add
+        # best_loss = 1 - (sorted_keys[0][1] * 2 - 1)
+        # for i in range(1, min(self.ensemble_nbest, len(sorted_keys))):
+        #     current_loss = 1 - (sorted_keys[i][1] * 2 - 1)
+        #     if best_loss * 1.3 < current_loss:
+        #         ensemble_n_best = i
+        #         self.logger.info('Reduce ensemble_nbest to %d!', ensemble_n_best)
+        #         break
         if ensemble_n_best is None:
             ensemble_n_best = self.ensemble_nbest
-
-        if len(sorted_keys) > 10 and ensemble_n_best > len(sorted_keys) * 0.2:
-            pass
 
         # reduce to keys
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
@@ -430,53 +429,52 @@ class EnsembleBuilder(multiprocessing.Process):
 
     def get_valid_test_preds(self, selected_keys: list):
         """
-            get valid and test predictions from disc
-            and store them in self.read_preds
-            
-            Parameters
-            ---------
-            selected_keys: list
-                list of selected keys of self.read_preds
-                
-            Return
-            ------
-            success_keys:
-                all keys in selected keys for which we could read the valid and test predictions
+        get valid and test predictions from disc
+        and store them in self.read_preds
+
+        Parameters
+        ---------
+        selected_keys: list
+            list of selected keys of self.read_preds
+
+        Return
+        ------
+        success_keys:
+            all keys in selected keys for which we could read the valid and test predictions
         """
         success_keys_valid = []
         success_keys_test = []
         
         for k in selected_keys:
-            # valid_fn = glob.glob(
-            #     os.path.join(self.dir_valid, 'predictions_valid_%d_*0%d.npy'
-            #                         % (self.read_preds[k]["seed"],
-            #                            self.read_preds[k]["num_run"])))
+            valid_fn = glob.glob(
+                os.path.join(self.dir_valid, 'predictions_valid_%d_%d.npy'
+                                    % (self.read_preds[k]["seed"],
+                                       self.read_preds[k]["num_run"])))
             test_fn = glob.glob(
-                os.path.join(self.dir_test, 'predictions_test_%d_*0%d.npy' %
+                os.path.join(self.dir_test, 'predictions_test_%d_%d.npy' %
                                    (self.read_preds[k]["seed"],
                                     self.read_preds[k]["num_run"])))
             
             # TODO don't read valid and test if not changed
-            
-            # if len(valid_fn) == 0:
-            #     self.logger.debug("Not found validation prediction file "
-            #                       "(although ensemble predictions available): "
-            #                       "%s" % valid_fn)
-            # else:
-            #     valid_fn = valid_fn[0]
-            #     if self.read_preds[k]["mtime_valid"] == os.path.getmtime(valid_fn) \
-            #             and self.read_preds[k]["y_valid"] is not None:
-            #         success_keys_valid.append(k)
-            #         continue
-            #     try:
-            #         with open(valid_fn, 'rb') as fp:
-            #             y_valid = self._read_np_fn(fp)
-            #             self.read_preds[k]["y_valid"] = y_valid
-            #             success_keys_valid.append(k)
-            #             self.read_preds[k]["mtime_valid"] = os.path.getmtime(valid_fn)
-            #     except Exception as e:
-            #         self.logger.warning('Error loading %s: %s',
-            #                             valid_fn, traceback.format_exc())
+            if len(valid_fn) == 0:
+                self.logger.debug("Not found validation prediction file "
+                                  "(although ensemble predictions available): "
+                                  "%s" % valid_fn)
+            else:
+                valid_fn = valid_fn[0]
+                if self.read_preds[k]["mtime_valid"] == os.path.getmtime(valid_fn) \
+                        and self.read_preds[k][Y_VALID] is not None:
+                    success_keys_valid.append(k)
+                    continue
+                try:
+                    with open(valid_fn, 'rb') as fp:
+                        y_valid = self._read_np_fn(fp)
+                        self.read_preds[k][Y_VALID] = y_valid
+                        success_keys_valid.append(k)
+                        self.read_preds[k]["mtime_valid"] = os.path.getmtime(valid_fn)
+                except Exception as e:
+                    self.logger.warning('Error loading %s: %s',
+                                        valid_fn, traceback.format_exc())
         
             if len(test_fn) == 0:
                 self.logger.debug("Not found test prediction file (although "
@@ -615,7 +613,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 )
             return y
         else:
-            self.logger.error(
+            self.logger.info(
                 "Found inconsistent number of predictions and models (%d vs "
                 "%d) for subset %s",
                 predictions.shape[0],

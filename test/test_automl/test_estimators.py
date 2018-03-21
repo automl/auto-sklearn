@@ -303,7 +303,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         score = f1_macro(Y_test, predictions)
         self.assertGreaterEqual(score, 0.9)
         probs = automl.predict_proba(X_train)
-        self.assertAlmostEqual(np.mean(probs), 0.33333333333333331)
+        self.assertAlmostEqual(np.mean(probs), 0.33, places=2)
 
     def test_binary(self):
         output = os.path.join(self.test_dir, '..', '.tmp_binary_fit')

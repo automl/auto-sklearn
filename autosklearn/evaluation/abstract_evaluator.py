@@ -275,7 +275,7 @@ class AbstractEvaluator(object):
                 return 1.0, {'error': 'Model predictions for %s set contains '
                                       'NaNs.' % s}
 
-        num_run = str(self.num_run).zfill(5)
+        num_run = str(self.num_run)
 
         if not isinstance(self.disable_file_output, list) or \
                 'model' not in self.disable_file_output:

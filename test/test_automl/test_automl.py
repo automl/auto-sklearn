@@ -220,7 +220,7 @@ class AutoMLTest(Base, unittest.TestCase):
         # model and one ensemble
         fixture = os.listdir(os.path.join(output, '.auto-sklearn',
                                           'predictions_ensemble'))
-        self.assertIn('predictions_ensemble_100_00001.npy', fixture)
+        self.assertIn('predictions_ensemble_100_1.npy', fixture)
 
         fixture = os.listdir(os.path.join(output, '.auto-sklearn',
                                           'models'))
@@ -228,7 +228,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
         fixture = os.listdir(os.path.join(output, '.auto-sklearn',
                                           'ensembles'))
-        self.assertIn('100.0000000000.ensemble', fixture)
+        self.assertIn('100.0.ensemble', fixture)
 
         # Start time
         start_time_file_path = os.path.join(output, '.auto-sklearn',
@@ -265,7 +265,7 @@ class AutoMLTest(Base, unittest.TestCase):
                                                          '.auto-sklearn')))
             self.assertTrue(os.path.exists(os.path.join(
                 output, '.auto-sklearn', 'predictions_ensemble',
-                'predictions_ensemble_1_00001.npy')))
+                'predictions_ensemble_1_1.npy')))
 
             del auto
             self._tearDown(output)
