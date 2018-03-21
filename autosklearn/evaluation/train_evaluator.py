@@ -228,8 +228,13 @@ class TrainEvaluator(AbstractEvaluator):
                 Xt, fit_params = model.fit_transformer(self.X_train[train_indices],
                                                        self.Y_train[train_indices])
 
-                n_iter = 2
-                while not model.configuration_fully_fitted():
+                iteration = 1
+                total_n_iteration = 0
+                while (
+                    not model.configuration_fully_fitted()
+                ):
+                    n_iter = int(2**iteration/2) if iteration > 1 else 2
+                    total_n_iteration += n_iter
                     model.iterative_fit(Xt, self.Y_train[train_indices],
                                         n_iter=n_iter, **fit_params)
                     Y_optimization_pred, Y_valid_pred, Y_test_pred = self._predict(
@@ -254,7 +259,7 @@ class TrainEvaluator(AbstractEvaluator):
                         file_output=file_output,
                         final_call=final_call,
                     )
-                    n_iter *= 2
+                    iteration += 1
 
                 return
             else:
@@ -318,13 +323,13 @@ class TrainEvaluator(AbstractEvaluator):
                     indices,
                     stratify=stratify,
                     train_size=self.subsample,
-                    random_state=1
+                    random_state=1,
+                    shuffle=True,
                 )
                 train_indices = train_indices[cv_indices_train]
                 return train_indices
 
         return train_indices
-
 
     def _predict(self, model, test_indices, train_indices):
         opt_pred = self.predict_function(self.X_train[test_indices],

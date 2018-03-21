@@ -144,8 +144,8 @@ class EstimatorTest(Base, unittest.TestCase):
                             precision='32',
                             dataset_name='iris',
                             ensemble_size=20,
-                            ensemble_nbest=50)
-        #print(automl.show_models(), flush=True)
+                            ensemble_nbest=50,
+                            )
 
         predictions = automl.predict(X_test)
         score = sklearn.metrics.accuracy_score(Y_test, predictions)

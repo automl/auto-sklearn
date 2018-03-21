@@ -87,8 +87,11 @@ class AbstractEvaluatorTest(unittest.TestCase):
         predictions_test = rs.rand(25, 3)
         predictions_valid = rs.rand(25, 3)
 
-        loss_, additional_run_info_ = ae.file_output(
-            predictions_ensemble, predictions_valid, predictions_test)
+        loss_, additional_run_info_, validation_loss, test_loss = (
+            ae.file_output(
+                predictions_ensemble, predictions_valid, predictions_test
+            )
+        )
 
         self.assertIsNone(loss_)
         self.assertEqual(additional_run_info_, {})
@@ -105,11 +108,12 @@ class AbstractEvaluatorTest(unittest.TestCase):
         )
         ae.Y_optimization = predictions_ensemble
 
-        loss_, additional_run_info_ = ae.file_output(
-            predictions_ensemble, predictions_valid, predictions_test)
+        loss_, additional_run_info_, validation_loss, test_loss = ae.file_output(
+            predictions_ensemble, predictions_valid, predictions_test
+        )
 
         self.assertIsNone(loss_)
-        self.assertIsNone(additional_run_info_)
+        self.assertEqual(additional_run_info_, {})
         # This function is not guarded by a an if statement
         self.assertEqual(backend_mock.save_predictions_as_npy.call_count, 3)
         self.assertEqual(backend_mock.save_model.call_count, 0)
@@ -125,11 +129,11 @@ class AbstractEvaluatorTest(unittest.TestCase):
         ae.Y_optimization = predictions_ensemble
         ae.model = 'model'
 
-        loss_, additional_run_info_ = ae.file_output(
+        loss_, additional_run_info_, validation_loss, test_loss = ae.file_output(
             predictions_ensemble, predictions_valid, predictions_test)
 
         self.assertIsNone(loss_)
-        self.assertIsNone(additional_run_info_)
+        self.assertEqual(additional_run_info_, {})
         # This function is not guarded by a an if statement
         self.assertEqual(backend_mock.save_predictions_as_npy.call_count, 5)
         self.assertEqual(backend_mock.save_model.call_count, 1)

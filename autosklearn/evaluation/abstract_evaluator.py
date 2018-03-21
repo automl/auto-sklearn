@@ -116,7 +116,9 @@ class AbstractEvaluator(object):
         self.exclude = exclude
 
         self.X_valid = self.datamanager.data.get('X_valid')
+        self.y_valid = self.datamanager.data.get('Y_valid')
         self.X_test = self.datamanager.data.get('X_test')
+        self.y_test = self.datamanager.data.get('Y_test')
 
         self.metric = metric
         self.task_type = self.datamanager.info['task']
@@ -171,6 +173,8 @@ class AbstractEvaluator(object):
                                      self.seed, self.datamanager.name)
         self.logger = get_logger(logger_name)
 
+        self.Y_optimization = None
+
     def _get_model(self):
         if not isinstance(self.configuration, Configuration):
             model = self.model_class(configuration=self.configuration,
@@ -222,10 +226,16 @@ class AbstractEvaluator(object):
         self.duration = time.time() - self.starttime
 
         if file_output:
-            loss_, additional_run_info_ = self.file_output(
-                opt_pred, valid_pred, test_pred)
+            loss_, additional_run_info_, validation_loss, test_loss = (
+                self.file_output(
+                    opt_pred, valid_pred, test_pred
+                )
+            )
         else:
-            loss_, additional_run_info_ = None, {}
+            loss_ = None
+            additional_run_info_ = {}
+            validation_loss = None
+            test_loss = None
 
         if loss_ is not None:
             return self.duration, loss_, self.seed, additional_run_info_
@@ -243,6 +253,10 @@ class AbstractEvaluator(object):
             additional_run_info[metric_name] = value
         additional_run_info['duration'] = self.duration
         additional_run_info['num_run'] = self.num_run
+        if validation_loss is not None:
+            additional_run_info['validation_loss'] = validation_loss
+        if test_loss is not None:
+            additional_run_info['test_loss'] = test_loss
 
         rval_dict = {'loss': loss,
                      'additional_run_info': additional_run_info,
@@ -252,38 +266,72 @@ class AbstractEvaluator(object):
 
         self.queue.put(rval_dict)
 
-    def file_output(self, Y_optimization_pred, Y_valid_pred, Y_test_pred):
-        if self.disable_file_output is True:
-            return None, {}
-
+    def file_output(
+            self,
+            Y_optimization_pred,
+            Y_valid_pred,
+            Y_test_pred
+    ):
+        # TODO refactor this function to only output and calculate the loss
+        # for one specific data set - optimization, validation or test!
         seed = self.seed
 
         # self.Y_optimization can be None if we use partial-cv, then,
         # obviously no output should be saved.
         if self.Y_optimization is not None and \
                 self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
-            return 1.0, {'error': "Targets %s and prediction %s don't have "
-                                  "the same length. Probably training didn't "
-                                  "finish" % (self.Y_optimization.shape,
-                                              Y_optimization_pred.shape)}
+            return (
+                1.0,
+                {
+                    'error':
+                        "Targets %s and prediction %s don't have "
+                        "the same length. Probably training didn't "
+                        "finish" % (self.Y_optimization.shape, Y_optimization_pred.shape)
+                 },
+                None,
+                None,
+            )
 
         if not np.all(np.isfinite(Y_optimization_pred)):
-            return 1.0, {'error': 'Model predictions for optimization set ' \
-                                  'contains NaNs.'}
+            return (
+                1.0,
+                {
+                    'error':
+                        'Model predictions for optimization set '
+                        'contains NaNs.'
+                },
+                None,
+                None,
+            )
         for y, s in [[Y_valid_pred, 'validation'], [Y_test_pred, 'test']]:
             if y is not None and not np.all(np.isfinite(y)):
-                return 1.0, {'error': 'Model predictions for %s set contains '
-                                      'NaNs.' % s}
+                return (
+                    1.0,
+                    {
+                        'error':
+                            'Model predictions for %s set contains NaNs.' % s
+                    },
+                    None,
+                    None,
+                )
 
         num_run = str(self.num_run)
 
-        if not isinstance(self.disable_file_output, list) or \
-                'model' not in self.disable_file_output:
+        if (
+            self.disable_file_output != True and (
+                not isinstance(self.disable_file_output, list)
+                or 'model' not in self.disable_file_output
+            )
+        ):
             if os.path.exists(self.backend.get_model_dir()):
                 self.backend.save_model(self.model, self.num_run, seed)
 
-        if not isinstance(self.disable_file_output, list) or \
-                'y_optimization' not in self.disable_file_output:
+        if (
+            self.disable_file_output != True and (
+                not isinstance(self.disable_file_output, list)
+                or 'y_optimization' not in self.disable_file_output
+            )
+        ):
             if self.output_y_hat_optimization:
                 try:
                     os.makedirs(self.backend.output_directory)
@@ -296,14 +344,32 @@ class AbstractEvaluator(object):
             )
 
         if Y_valid_pred is not None:
-            self.backend.save_predictions_as_npy(Y_valid_pred, 'valid',
-                                                 seed, num_run)
+            if self.disable_file_output != True:
+                self.backend.save_predictions_as_npy(Y_valid_pred, 'valid',
+                                                     seed, num_run)
+            if self.y_valid is not None:
+                validation_loss = self._loss(self.y_valid, Y_valid_pred)
+                if isinstance(validation_loss, dict):
+                    validation_loss = validation_loss[self.metric.name]
+            else:
+                validation_loss = None
+        else:
+            validation_loss = None
 
         if Y_test_pred is not None:
-            self.backend.save_predictions_as_npy(Y_test_pred, 'test',
-                                                 seed, num_run)
+            if self.disable_file_output != True:
+                self.backend.save_predictions_as_npy(Y_test_pred, 'test',
+                                                     seed, num_run)
+            if self.y_test is not None:
+                test_loss = self._loss(self.y_test, Y_test_pred)
+                if isinstance(test_loss, dict):
+                    test_loss = test_loss[self.metric.name]
+            else:
+                test_loss = None
+        else:
+            test_loss = None
 
-        return None, None
+        return None, {}, validation_loss, test_loss
 
     def _predict_proba(self, X, model, task_type, Y_train):
         def send_warnings_to_log(message, category, filename, lineno,
@@ -367,6 +433,7 @@ class AbstractEvaluator(object):
                 (filename, lineno, category.__name__, message))
             return
 
+        # TODO: Add sample weights if given
         with warnings.catch_warnings():
             warnings.showwarning = send_warnings_to_log
             model.fit(X, y)

@@ -18,7 +18,7 @@ from evaluation_util import get_dataset_getters, BaseEvaluatorTest, \
 from autosklearn.constants import *
 from autosklearn.evaluation.test_evaluator import TestEvaluator, eval_t
 # Otherwise nosetests thinks this is a test to run...
-from autosklearn.evaluation.util import get_last_result
+from autosklearn.evaluation.util import read_queue
 from autosklearn.util.pipeline import get_configuration_space
 from autosklearn.util import Backend
 from autosklearn.metrics import accuracy, r2, f1_macro
@@ -61,9 +61,10 @@ class TestEvaluator_Test(BaseEvaluatorTest, unittest.TestCase):
                 )
 
                 evaluator.fit_predict_and_loss()
-                rval = get_last_result(evaluator.queue)
-                self.assertEqual(len(rval), 3)
-                self.assertTrue(np.isfinite(rval['loss']))
+                rval = read_queue(evaluator.queue)
+                self.assertEqual(len(rval), 1)
+                self.assertEqual(len(rval[0]), 3)
+                self.assertTrue(np.isfinite(rval[0]['loss']))
 
 
 class FunctionsTest(unittest.TestCase):
@@ -98,10 +99,11 @@ class FunctionsTest(unittest.TestCase):
                disable_file_output=False,
                instance=self.dataset_name
         )
-        rval = get_last_result(self.queue)
-        self.assertAlmostEqual(rval['loss'], 0.04)
-        self.assertEqual(rval['status'], StatusType.SUCCESS)
-        self.assertNotIn('bac_metric', rval['additional_run_info'])
+        rval = read_queue(self.queue)
+        self.assertEqual(len(rval), 1)
+        self.assertAlmostEqual(rval[0]['loss'], 0.04)
+        self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
+        self.assertNotIn('bac_metric', rval[0]['additional_run_info'])
 
     def test_eval_test_all_loss_functions(self):
         eval_t(
@@ -117,7 +119,9 @@ class FunctionsTest(unittest.TestCase):
             disable_file_output=False,
             instance=self.dataset_name,
         )
-        rval = get_last_result(self.queue)
+        rval = read_queue(self.queue)
+        self.assertEqual(len(rval), 1)
+
         fixture = {'accuracy': 0.04,
                    'balanced_accuracy': 0.0277777777778,
                    'f1_macro': 0.0341005967604,
@@ -133,11 +137,11 @@ class FunctionsTest(unittest.TestCase):
                    'recall_weighted': 0.04,
                    'num_run': -1}
 
-        additional_run_info = rval['additional_run_info']
+        additional_run_info = rval[0]['additional_run_info']
         for key, value in fixture.items():
             self.assertAlmostEqual(additional_run_info[key], fixture[key], msg=key)
         self.assertEqual(len(additional_run_info), len(fixture) + 1,
                          msg=sorted(additional_run_info.items()))
         self.assertIn('duration', additional_run_info)
-        self.assertAlmostEqual(rval['loss'], 0.04)
-        self.assertEqual(rval['status'], StatusType.SUCCESS)
+        self.assertAlmostEqual(rval[0]['loss'], 0.04)
+        self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
