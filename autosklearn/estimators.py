@@ -183,7 +183,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self._automl = None
         super().__init__()
 
-    def build_automl(self, cls):
+    def build_automl(self):
         if self.shared_mode:
             self.delete_output_folder_after_terminate = False
             self.delete_tmp_folder_after_terminate = False
@@ -198,7 +198,7 @@ class AutoSklearnEstimator(BaseEstimator):
                          output_directory=self.output_folder,
                          delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
                          delete_output_folder_after_terminate=self.delete_output_folder_after_terminate)
-        automl = cls(
+        automl = self._get_automl_class()(
             backend=backend,
             time_left_for_this_task=self.time_left_for_this_task,
             per_run_time_limit=self.per_run_time_limit,
@@ -350,6 +350,13 @@ class AutoSklearnEstimator(BaseEstimator):
     def sprint_statistics(self):
         return self._automl.sprint_statistics()
 
+    def _get_automl_class(self):
+        raise NotImplementedError()
+
+    def get_configuration_space(self, X, y):
+        self._automl = self.build_automl()
+        return self._automl.fit(X, y, only_return_configuration_space=True)
+
 
 class AutoSklearnClassifier(AutoSklearnEstimator):
     """
@@ -357,10 +364,9 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
 
     """
 
-    def build_automl(self):
-        return super().build_automl(AutoMLClassifier)
-
     def fit(self, X, y,
+            X_test=None,
+            y_test=None,
             metric=None,
             feat_type=None,
             dataset_name=None):
@@ -377,6 +383,16 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
 
         y : array-like, shape = [n_samples] or [n_samples, n_outputs]
             The target classes.
+
+        X_test : array-like or sparse matrix of shape = [n_samples, n_features]
+            Test data input samples. Will be used to save test predictions for
+            all models. This allows to evaluate the performance of Auto-sklearn
+            over time.
+
+        y_test : array-like, shape = [n_samples] or [n_samples, n_outputs]
+            Test data target classes. Will be used to calculate the test error
+            of all models. This allows to evaluate the performance of
+            Auto-sklearn over time.
 
         metric : callable, optional (default='autosklearn.metrics.accuracy')
             An instance of :class:`autosklearn.metrics.Scorer` as created by
@@ -400,8 +416,15 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         self
 
         """
-        return super().fit(X=X, y=y, metric=metric, feat_type=feat_type,
-                           dataset_name=dataset_name)
+        return super().fit(
+            X=X,
+            y=y,
+            X_test=X_test,
+            y_test=y_test,
+            metric=metric,
+            feat_type=feat_type,
+            dataset_name=dataset_name,
+        )
 
     def predict(self, X, batch_size=None, n_jobs=1):
         """Predict classes for X.
@@ -435,6 +458,9 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         return super().predict_proba(
             X, batch_size=batch_size, n_jobs=n_jobs)
 
+    def _get_automl_class(self):
+        return AutoMLClassifier
+
 
 class AutoSklearnRegressor(AutoSklearnEstimator):
     """
@@ -442,10 +468,9 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
 
     """
 
-    def build_automl(self):
-        return super().build_automl(AutoMLRegressor)
-
     def fit(self, X, y,
+            X_test=None,
+            y_test=None,
             metric=None,
             feat_type=None,
             dataset_name=None):
@@ -460,8 +485,18 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         X : array-like or sparse matrix of shape = [n_samples, n_features]
             The training input samples.
 
-        y : array-like, shape = [n_samples] or [n_samples, n_outputs]
+        y : array-like, shape = [n_samples]
             The regression target.
+
+        X_test : array-like or sparse matrix of shape = [n_samples, n_features]
+            Test data input samples. Will be used to save test predictions for
+            all models. This allows to evaluate the performance of Auto-sklearn
+            over time.
+
+        y_test : array-like, shape = [n_samples]
+            The regression target. Will be used to calculate the test error
+            of all models. This allows to evaluate the performance of
+            Auto-sklearn over time.
 
         metric : callable, optional (default='autosklearn.metrics.r2')
             An instance of :class:`autosklearn.metrics.Scorer` as created by
@@ -484,8 +519,15 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         """
         # Fit is supposed to be idempotent!
         # But not if we use share_mode.
-        return super().fit(X=X, y=y, metric=metric, feat_type=feat_type,
-                           dataset_name=dataset_name)
+        return super().fit(
+            X=X,
+            y=y,
+            X_test=X_test,
+            y_test=y_test,
+            metric=metric,
+            feat_type=feat_type,
+            dataset_name=dataset_name,
+        )
 
     def predict(self, X, batch_size=None, n_jobs=1):
         """Predict regression target for X.
@@ -501,3 +543,6 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
 
         """
         return super().predict(X, batch_size=batch_size, n_jobs=n_jobs)
+
+    def _get_automl_class(self):
+        return AutoMLRegressor
