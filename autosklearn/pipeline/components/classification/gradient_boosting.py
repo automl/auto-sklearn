@@ -6,12 +6,16 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant, \
     CategoricalHyperparameter
 
-from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.base import (
+    AutoSklearnClassificationAlgorithm,
+    IterativeComponentWithSampleWeight,
+)
 from autosklearn.pipeline.constants import *
 from autosklearn.util.common import check_none
 
 
-class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
+class GradientBoostingClassifier(IterativeComponentWithSampleWeight,
+                                 AutoSklearnClassificationAlgorithm):
     def __init__(self, loss, learning_rate, n_estimators, subsample,
                  min_samples_split, min_samples_leaf,
                  min_weight_fraction_leaf, max_depth, criterion, max_features,
@@ -33,15 +37,6 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.verbose = verbose
         self.estimator = None
         self.fully_fit_ = False
-
-    def fit(self, X, y, sample_weight=None):
-        n_iter = 2
-        self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight,
-                           refit=True)
-        while not self.configuration_fully_fitted():
-            n_iter *= 2
-            self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight)
-        return self
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
 

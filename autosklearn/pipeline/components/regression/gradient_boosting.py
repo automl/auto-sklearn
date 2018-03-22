@@ -6,11 +6,17 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UnParametrizedHyperparameter
 from ConfigSpace.conditions import InCondition
 
-from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
+from autosklearn.pipeline.components.base import (
+    AutoSklearnRegressionAlgorithm,
+    IterativeComponent,
+)
 from autosklearn.pipeline.constants import *
 from autosklearn.util.common import check_none, check_for_bool
 
-class GradientBoosting(AutoSklearnRegressionAlgorithm):
+class GradientBoosting(
+    IterativeComponent,
+    AutoSklearnRegressionAlgorithm,
+):
     def __init__(self, loss, learning_rate, n_estimators, subsample,
                  min_samples_split, min_samples_leaf,
                  min_weight_fraction_leaf, max_depth, max_features,
@@ -32,16 +38,6 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
-
-    def fit(self, X, y, sample_weight=None, refit=False):
-        n_iter = 2
-        self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight,
-                           refit=True)
-        while not self.configuration_fully_fitted():
-            n_iter *= 2
-            self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight)
-
-        return self
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
         import sklearn.ensemble

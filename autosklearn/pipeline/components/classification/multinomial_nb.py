@@ -4,12 +4,15 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
 
-from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.base import (
+    AutoSklearnClassificationAlgorithm,
+    IterativeComponent,
+)
 from autosklearn.pipeline.constants import *
 from autosklearn.util.common import check_for_bool
 
 
-class MultinomialNB(AutoSklearnClassificationAlgorithm):
+class MultinomialNB(IterativeComponent, AutoSklearnClassificationAlgorithm):
 
     def __init__(self, alpha, fit_prior, random_state=None, verbose=0):
         self.alpha = alpha
@@ -17,12 +20,6 @@ class MultinomialNB(AutoSklearnClassificationAlgorithm):
         self.random_state = random_state
         self.verbose = int(verbose)
         self.estimator = None
-
-    def fit(self, X, y):
-        self.iterative_fit(X, y, n_iter=1, refit=True)
-        while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=1)
-        return self
 
     def iterative_fit(self, X, y, n_iter=1, refit=False):
         import sklearn.naive_bayes

@@ -2,23 +2,20 @@ import numpy as np
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
-from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.base import (
+    AutoSklearnClassificationAlgorithm,
+    IterativeComponent,
+)
 from autosklearn.pipeline.constants import *
 
 
-class GaussianNB(AutoSklearnClassificationAlgorithm):
+class GaussianNB(IterativeComponent, AutoSklearnClassificationAlgorithm):
 
     def __init__(self, random_state=None, verbose=0):
 
         self.random_state = random_state
         self.verbose = int(verbose)
         self.estimator = None
-
-    def fit(self, X, y):
-        self.iterative_fit(X, y, n_iter=1, refit=True)
-        while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=1)
-        return self
 
     def iterative_fit(self, X, y, n_iter=1, refit=False):
         import sklearn.naive_bayes

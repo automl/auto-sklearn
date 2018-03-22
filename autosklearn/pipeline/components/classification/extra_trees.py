@@ -5,13 +5,19 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
-from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.base import (
+    AutoSklearnClassificationAlgorithm,
+    IterativeComponentWithSampleWeight,
+)
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 from autosklearn.util.common import check_for_bool, check_none
 
 
-class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
+class ExtraTreesClassifier(
+    IterativeComponentWithSampleWeight,
+    AutoSklearnClassificationAlgorithm,
+):
 
     def __init__(self, n_estimators, criterion, min_samples_leaf,
                  min_samples_split,  max_features, bootstrap, max_leaf_nodes,
@@ -47,15 +53,6 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
         self.verbose = int(verbose)
         self.class_weight = class_weight
         self.estimator = None
-
-    def fit(self, X, y, sample_weight=None):
-        n_iter = 2
-        self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight,
-                           refit=True)
-        while not self.configuration_fully_fitted():
-            n_iter *= 2
-            self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight)
-        return self
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
         from sklearn.ensemble import ExtraTreesClassifier as ETC

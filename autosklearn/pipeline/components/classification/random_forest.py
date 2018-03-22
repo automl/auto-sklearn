@@ -5,12 +5,18 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
-from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.base import (
+    AutoSklearnClassificationAlgorithm,
+    IterativeComponentWithSampleWeight,
+)
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 from autosklearn.util.common import check_for_bool, check_none
 
-class RandomForest(AutoSklearnClassificationAlgorithm):
+class RandomForest(
+    IterativeComponentWithSampleWeight,
+    AutoSklearnClassificationAlgorithm,
+):
     def __init__(self, n_estimators, criterion, max_features,
                  max_depth, min_samples_split, min_samples_leaf,
                  min_weight_fraction_leaf, bootstrap, max_leaf_nodes,
@@ -30,15 +36,6 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
         self.n_jobs = n_jobs
         self.class_weight = class_weight
         self.estimator = None
-
-    def fit(self, X, y, sample_weight=None):
-        n_iter = 2
-        self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight,
-                           refit=True)
-        while not self.configuration_fully_fitted():
-            n_iter *= 2
-            self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight)
-        return self
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
         from sklearn.ensemble import RandomForestClassifier
@@ -73,7 +70,7 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
 
             # initial fit of only increment trees
             self.estimator = RandomForestClassifier(
-                n_estimators=0,
+                n_estimators=n_iter,
                 criterion=self.criterion,
                 max_features=max_features,
                 max_depth=self.max_depth,
@@ -87,10 +84,11 @@ class RandomForest(AutoSklearnClassificationAlgorithm):
                 n_jobs=self.n_jobs,
                 class_weight=self.class_weight,
                 warm_start=True)
+        else:
 
-        self.estimator.n_estimators += n_iter
-        self.estimator.n_estimators = min(self.estimator.n_estimators,
-                                          self.n_estimators)
+            self.estimator.n_estimators += n_iter
+            self.estimator.n_estimators = min(self.estimator.n_estimators,
+                                              self.n_estimators)
 
         self.estimator.fit(X, y, sample_weight=sample_weight)
         return self

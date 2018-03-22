@@ -4,12 +4,18 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter
 from ConfigSpace.conditions import InCondition, EqualsCondition
 
-from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
+from autosklearn.pipeline.components.base import (
+    AutoSklearnRegressionAlgorithm,
+    IterativeComponent,
+)
 from autosklearn.pipeline.constants import *
 from autosklearn.util.common import check_for_bool
 
 
-class SGD(AutoSklearnRegressionAlgorithm):
+class SGD(
+    IterativeComponent,
+    AutoSklearnRegressionAlgorithm,
+):
     def __init__(self, loss, penalty, alpha, fit_intercept, tol,
                  learning_rate, l1_ratio=0.15, epsilon=0.1,
                  eta0=0.01, power_t=0.5, average=False, random_state=None):
@@ -28,13 +34,6 @@ class SGD(AutoSklearnRegressionAlgorithm):
 
         self.estimator = None
         self.scaler = None
-
-    def fit(self, X, y):
-        self.iterative_fit(X, y, n_iter=2, refit=True)
-        while not self.configuration_fully_fitted():
-            self.iterative_fit(X, y, n_iter=2)
-
-        return self
 
     def iterative_fit(self, X, y, n_iter=2, refit=False):
         from sklearn.linear_model.stochastic_gradient import SGDRegressor
@@ -87,7 +86,7 @@ class SGD(AutoSklearnRegressionAlgorithm):
             self.estimator.fit(X, Y_scaled)
         else:
             self.estimator.max_iter += n_iter
-            self.estimator.max_iter = min(self.estimator.max_iter, 1000)
+            self.estimator.max_iter = min(self.estimator.max_iter, 512)
             Y_scaled = self.scaler.transform(y.reshape((-1, 1))).ravel()
             self.estimator._validate_params()
             self.estimator._partial_fit(
@@ -102,7 +101,7 @@ class SGD(AutoSklearnRegressionAlgorithm):
                 intercept_init=None
             )
 
-        if self.estimator._max_iter >= 1000 or n_iter > self.estimator.n_iter_:
+        if self.estimator.max_iter >= 512 or n_iter > self.estimator.n_iter_:
             self.fully_fit_ = True
 
         return self
@@ -152,7 +151,7 @@ class SGD(AutoSklearnRegressionAlgorithm):
         fit_intercept = UnParametrizedHyperparameter(
             "fit_intercept", "True")
         tol = UniformFloatHyperparameter(
-            "tol", 1e-4, 1e-1, default_value=1e-3, log=True)
+            "tol", 1e-5, 1e-1, default_value=1e-4, log=True)
         epsilon = UniformFloatHyperparameter(
             "epsilon", 1e-5, 1e-1, default_value=0.1, log=True)
         learning_rate = CategoricalHyperparameter(

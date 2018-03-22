@@ -6,13 +6,19 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter
 from ConfigSpace.conditions import EqualsCondition, InCondition
 
-from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.base import (
+    AutoSklearnClassificationAlgorithm,
+    IterativeComponentWithSampleWeight,
+)
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.util.common import check_for_bool
 
 
-class SGD(AutoSklearnClassificationAlgorithm):
+class SGD(
+    IterativeComponentWithSampleWeight,
+    AutoSklearnClassificationAlgorithm,
+):
     def __init__(self, loss, penalty, alpha, fit_intercept, tol,
                  learning_rate, l1_ratio=0.15, epsilon=0.1,
                  eta0=0.01, power_t=0.5, average=False, random_state=None):
@@ -29,16 +35,6 @@ class SGD(AutoSklearnClassificationAlgorithm):
         self.random_state = random_state
         self.average = average
         self.estimator = None
-
-    def fit(self, X, y, sample_weight=None):
-        n_iter = 2
-        self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight,
-                           refit=True)
-        while not self.configuration_fully_fitted():
-            n_iter *= 2
-            self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight)
-
-        return self
 
     def iterative_fit(self, X, y, n_iter=2, refit=False, sample_weight=None):
         from sklearn.linear_model.stochastic_gradient import SGDClassifier
@@ -86,6 +82,7 @@ class SGD(AutoSklearnClassificationAlgorithm):
             self.estimator.fit(X, y, sample_weight=sample_weight)
         else:
             self.estimator.max_iter += n_iter
+            self.estimator.max_iter = min(self.estimator.max_iter, 512)
             self.estimator._validate_params()
             self.estimator._partial_fit(
                 X, y,
@@ -100,7 +97,7 @@ class SGD(AutoSklearnClassificationAlgorithm):
                 intercept_init=None
             )
 
-        if self.estimator._max_iter >= 1000 or n_iter > self.estimator.n_iter_:
+        if self.estimator._max_iter >= 512 or n_iter > self.estimator.n_iter_:
             self.fully_fit_ = True
 
         return self

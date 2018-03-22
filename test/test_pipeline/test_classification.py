@@ -115,7 +115,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             auto = SimpleClassificationPipeline()
             auto = auto.fit(X_train, Y_train)
             predictions = auto.predict(X_test)
-            self.assertAlmostEqual(0.9599999999999995,
+            self.assertAlmostEqual(0.94,
                 sklearn.metrics.accuracy_score(predictions, Y_test))
             scores = auto.predict_proba(X_test)
 
@@ -131,7 +131,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             classifier.set_hyperparameters(default)
             classifier = classifier.fit(X_train, Y_train)
             predictions = classifier.predict(X_test)
-            self.assertAlmostEqual(0.9599999999999995,
+            self.assertAlmostEqual(0.94,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   Y_test))
             scores = classifier.predict_proba(X_test)

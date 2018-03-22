@@ -2,16 +2,20 @@ import numpy as np
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    CategoricalHyperparameter, UnParametrizedHyperparameter, \
-    UniformIntegerHyperparameter
+    CategoricalHyperparameter, UnParametrizedHyperparameter
 
-from autosklearn.pipeline.components.base import \
-    AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.base import (
+    AutoSklearnClassificationAlgorithm,
+    IterativeComponentWithSampleWeight,
+)
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.util.common import check_for_bool
 
-class PassiveAggressive(AutoSklearnClassificationAlgorithm):
+class PassiveAggressive(
+    IterativeComponentWithSampleWeight,
+    AutoSklearnClassificationAlgorithm,
+):
     def __init__(self, C, fit_intercept, tol, loss, average, random_state=None):
         self.C = C
         self.fit_intercept = fit_intercept
@@ -21,16 +25,8 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
         self.random_state = random_state
         self.estimator = None
 
-    def fit(self, X, y):
-        n_iter = 2
-        self.iterative_fit(X, y, n_iter=n_iter, refit=True)
-        while not self.configuration_fully_fitted():
-            n_iter *= 2
-            self.iterative_fit(X, y, n_iter=n_iter)
 
-        return self
-
-    def iterative_fit(self, X, y, n_iter=2, refit=False):
+    def iterative_fit(self, X, y, n_iter=2, refit=False, sample_weight=None):
         from sklearn.linear_model.passive_aggressive import \
             PassiveAggressiveClassifier
 
@@ -93,7 +89,7 @@ class PassiveAggressive(AutoSklearnClassificationAlgorithm):
                     learning_rate=lr,
                     max_iter=n_iter,
                     classes=None,
-                    sample_weight=None,
+                    sample_weight=sample_weight,
                     coef_init=None,
                     intercept_init=None
                 )

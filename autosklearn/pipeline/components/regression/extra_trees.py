@@ -5,11 +5,17 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
-from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
+from autosklearn.pipeline.components.base import (
+    AutoSklearnRegressionAlgorithm,
+    IterativeComponent,
+)
 from autosklearn.pipeline.constants import *
 from autosklearn.util.common import check_for_bool, check_none
 
-class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
+class ExtraTreesRegressor(
+    IterativeComponent,
+    AutoSklearnRegressionAlgorithm,
+):
     def __init__(self, n_estimators, criterion, min_samples_leaf,
                  min_samples_split, max_features, bootstrap, max_leaf_nodes,
                  max_depth, min_impurity_decrease, oob_score=False, n_jobs=1,
@@ -30,15 +36,6 @@ class ExtraTreesRegressor(AutoSklearnRegressionAlgorithm):
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
-
-    def fit(self, X, y):
-        n_iter = 2
-        self.iterative_fit(X, y, n_iter=n_iter, refit=True)
-        while not self.configuration_fully_fitted():
-            n_iter *= 2
-            self.iterative_fit(X, y, n_iter=n_iter)
-
-        return self
 
     def iterative_fit(self, X, y, n_iter=1, refit=False):
         from sklearn.ensemble import ExtraTreesRegressor as ETR
