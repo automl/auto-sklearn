@@ -97,12 +97,19 @@ class AutoSklearnEstimator(BaseEstimator):
               'folds'
 
         resampling_strategy_arguments : dict, optional if 'holdout' (train_size default=0.67)
-            Additional arguments for resampling_strategy
-            ``train_size`` should be between 0.0 and 1.0 and represent the
-            proportion of the dataset to include in the train split.
+            Additional arguments for resampling_strategy:
+
+            * ``train_size`` should be between 0.0 and 1.0 and represent the
+              proportion of the dataset to include in the train split.
+            * ``shuffle`` determines whether the data is shuffled prior to
+              splitting it into train and validation.
+
+            Available arguments:
+
             * 'holdout': {'train_size': float, 'shuffle': bool}
             * 'holdout-iterative-fit':  {'train_size': float, 'shuffle': bool}
             * 'cv': {'folds': int, 'shuffle': bool}
+            * 'partial-cv': {'folds': int, 'shuffle': bool}
 
         tmp_folder : string, optional (None)
             folder to store configuration output and log files, if ``None``
