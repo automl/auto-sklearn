@@ -433,7 +433,6 @@ class AbstractEvaluator(object):
                 (filename, lineno, category.__name__, message))
             return
 
-        # TODO: Add sample weights if given
         with warnings.catch_warnings():
             warnings.showwarning = send_warnings_to_log
             model.fit(X, y)

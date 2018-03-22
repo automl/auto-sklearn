@@ -88,7 +88,7 @@ class EstimatorTest(Base, unittest.TestCase):
         output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
         self._setUp(output)
 
-        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('digits')
 
         # test parallel Classifier to predict classes, not only indexes
         Y_train = Y_train + 1
@@ -112,7 +112,7 @@ class EstimatorTest(Base, unittest.TestCase):
             true_targets_ensemble = np.load(fh)
         true_targets_ensemble[-1] = 1 if true_targets_ensemble[-1] != 1 else 0
         true_targets_ensemble = true_targets_ensemble.astype(int)
-        probas = np.zeros((len(true_targets_ensemble), 3), dtype=float)
+        probas = np.zeros((len(true_targets_ensemble), 10), dtype=float)
 
         for i, value in enumerate(true_targets_ensemble):
             probas[i, value] = 1.0
@@ -122,7 +122,7 @@ class EstimatorTest(Base, unittest.TestCase):
         with open(dummy_predictions_path, 'wb') as fh:
             np.save(fh, probas)
 
-        probas_test = np.zeros((len(Y_test), 3), dtype=float)
+        probas_test = np.zeros((len(Y_test), 10), dtype=float)
         for i, value in enumerate(Y_test):
             probas_test[i, value - 1] = 1.0
 
@@ -138,7 +138,7 @@ class EstimatorTest(Base, unittest.TestCase):
                                        shared_mode=True,
                                        seed=2,
                                        initial_configurations_via_metalearning=0,
-                                       ensemble_size=0)
+                                       ensemble_size=0,)
         automl.fit_ensemble(Y_train, task=MULTICLASS_CLASSIFICATION,
                             metric=accuracy,
                             precision='32',
@@ -316,11 +316,15 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
                                        tmp_folder=output,
                                        output_folder=output)
 
-        automl.fit(X_train, Y_train)
+        automl.fit(X_train, Y_train, X_test=X_test, y_test=Y_test,
+                   dataset_name='binary_test_dataset')
         predictions = automl.predict(X_test)
         self.assertEqual(predictions.shape, (50, ))
         score = accuracy(Y_test, predictions)
         self.assertGreaterEqual(score, 0.9)
+
+        output_files = os.listdir(output)
+        self.assertIn('binary_test_dataset_test_1.predict', output_files)
 
     @unittest.mock.patch.object(AutoML, 'fit')
     @unittest.mock.patch.object(AutoML, 'refit')

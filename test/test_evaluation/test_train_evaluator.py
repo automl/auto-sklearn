@@ -890,8 +890,8 @@ class FunctionsTest(unittest.TestCase):
             'f1_macro': 0.032036613272311221,
             'f1_micro': 0.030303030303030276,
             'f1_weighted': 0.030441716940572849,
-            'log_loss': 1.0634089940876672,
-            'pac_score': 0.092288218582651682,
+            'log_loss': 1.0635047098903945,
+            'pac_score': 0.09242315351515851,
             'precision_macro': 0.02777777777777779,
             'precision_micro': 0.030303030303030276,
             'precision_weighted': 0.027777777777777901,
@@ -1004,8 +1004,8 @@ class FunctionsTest(unittest.TestCase):
             'f1_macro': 0.063508064516129004,
             'f1_micro': 0.06,
             'f1_weighted': 0.06,
-            'log_loss': 1.1299444831535221,
-            'pac_score': 0.18306366567302557,
+            'log_loss': 1.1408473360538482,
+            'pac_score': 0.1973689470076717,
             'precision_macro': 0.063508064516129004,
             'precision_micro': 0.06,
             'precision_weighted': 0.06,
@@ -1042,7 +1042,7 @@ class FunctionsTest(unittest.TestCase):
         results = [0.090909090909090939,
                    0.047619047619047672,
                    0.052631578947368474,
-                   0.15789473684210531,
+                   0.10526315789473684,
                    0.0]
         for fold in range(5):
             instance = json.dumps({'task_id': 'data', 'fold': fold})

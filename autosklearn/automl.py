@@ -621,7 +621,8 @@ class AutoML(BaseEstimator):
                                seed=self._seed,
                                shared_mode=self._shared_mode,
                                precision=precision,
-                               max_iterations=max_iterations)
+                               max_iterations=max_iterations,
+                               read_at_most=np.inf)
 
     def _load_models(self):
         if self._shared_mode:

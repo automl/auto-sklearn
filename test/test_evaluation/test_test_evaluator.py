@@ -101,7 +101,7 @@ class FunctionsTest(unittest.TestCase):
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
-        self.assertAlmostEqual(rval[0]['loss'], 0.04)
+        self.assertAlmostEqual(rval[0]['loss'], 0.08)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
         self.assertNotIn('bac_metric', rval[0]['additional_run_info'])
 
@@ -122,19 +122,19 @@ class FunctionsTest(unittest.TestCase):
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
 
-        fixture = {'accuracy': 0.04,
-                   'balanced_accuracy': 0.0277777777778,
-                   'f1_macro': 0.0341005967604,
-                   'f1_micro': 0.04,
-                   'f1_weighted': 0.0396930946292,
-                   'log_loss': 1.1352229526638984,
-                   'pac_score': 0.19574985585209126,
-                   'precision_macro': 0.037037037037,
-                   'precision_micro': 0.04,
-                   'precision_weighted': 0.0355555555556,
-                   'recall_macro': 0.0277777777778,
-                   'recall_micro': 0.04,
-                   'recall_weighted': 0.04,
+        fixture = {'accuracy': 0.08,
+                   'balanced_accuracy': 0.05555555555555547,
+                   'f1_macro': 0.06734006734006737,
+                   'f1_micro': 0.08,
+                   'f1_weighted': 0.07919191919191915,
+                   'log_loss': 1.1234581741690635,
+                   'pac_score': 0.17975068124899285,
+                   'precision_macro': 0.06666666666666676,
+                   'precision_micro': 0.08,
+                   'precision_weighted': 0.064,
+                   'recall_macro': 0.05555555555555547,
+                   'recall_micro': 0.08,
+                   'recall_weighted': 0.08,
                    'num_run': -1}
 
         additional_run_info = rval[0]['additional_run_info']
@@ -143,5 +143,5 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(len(additional_run_info), len(fixture) + 1,
                          msg=sorted(additional_run_info.items()))
         self.assertIn('duration', additional_run_info)
-        self.assertAlmostEqual(rval[0]['loss'], 0.04)
+        self.assertAlmostEqual(rval[0]['loss'], 0.08)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
