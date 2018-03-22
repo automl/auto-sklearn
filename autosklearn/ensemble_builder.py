@@ -138,7 +138,7 @@ class EnsembleBuilder(multiprocessing.Process):
         self.y_true_ensemble = None
         self.SAVE2DISC = True
 
-        self.validation_performance_ = -np.inf
+        self.validation_performance_ = np.inf
 
     def run(self):
         buffer_time = 5  # TODO: Buffer time should also be used in main!?
@@ -458,9 +458,10 @@ class EnsembleBuilder(multiprocessing.Process):
             
             # TODO don't read valid and test if not changed
             if len(valid_fn) == 0:
-                self.logger.debug("Not found validation prediction file "
-                                  "(although ensemble predictions available): "
-                                  "%s" % valid_fn)
+                # self.logger.debug("Not found validation prediction file "
+                #                   "(although ensemble predictions available): "
+                #                   "%s" % valid_fn)
+                pass
             else:
                 valid_fn = valid_fn[0]
                 if self.read_preds[k]["mtime_valid"] == os.path.getmtime(valid_fn) \
@@ -478,9 +479,10 @@ class EnsembleBuilder(multiprocessing.Process):
                                         valid_fn, traceback.format_exc())
         
             if len(test_fn) == 0:
-                self.logger.debug("Not found test prediction file (although "
-                                  "ensemble predictions available):%s" %
-                                  test_fn)
+                # self.logger.debug("Not found test prediction file (although "
+                #                   "ensemble predictions available):%s" %
+                #                   test_fn)
+                pass
             else:
                 test_fn = test_fn[0]
                 if self.read_preds[k]["mtime_test"] == \
@@ -547,7 +549,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 end_time - start_time,
             )
             self.logger.info(ensemble)
-            self.validation_performance_ = max(
+            self.validation_performance_ = min(
                 self.validation_performance_,
                 ensemble.get_validation_performance(),
             )
