@@ -201,6 +201,7 @@ class AutoML(BaseEstimator):
             only_return_configuration_space,
         )
 
+    # TODO this is very old code which can be dropped!
     def fit_automl_dataset(self, dataset, metric):
         self._stopwatch = StopWatch()
         self._backend.save_start_time(self._seed)

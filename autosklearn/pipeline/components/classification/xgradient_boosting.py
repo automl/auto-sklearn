@@ -21,9 +21,9 @@ class XGradientBoostingClassifier(
     def __init__(self,
         # General Hyperparameters
         learning_rate, n_estimators, subsample, booster, max_depth,
+        colsample_bylevel, colsample_bytree, reg_alpha, reg_lambda,
         # Inactive Hyperparameters
-        colsample_bylevel, colsample_bytree, gamma, min_child_weight,
-        max_delta_step, reg_alpha, reg_lambda,
+        gamma, min_child_weight, max_delta_step,
         base_score, scale_pos_weight, n_jobs=1, init=None,
         random_state=None, verbose=0,
         # (Conditional) DART Hyperparameters
@@ -128,9 +128,9 @@ class XGradientBoostingClassifier(
             # We don't support multilabel, so we only need 1 objective function
             if len(np.unique(y) == 2):
                 # We probably have binary classification
+                # TODO: use logitraw ?
                 self.objective = 'binary:logistic'
             else:
-                # Shouldn't this be softmax?
                 self.objective = 'multi:softmax'
 
             arguments = dict(
@@ -210,10 +210,11 @@ class XGradientBoostingClassifier(
 
         # Parameterized Hyperparameters
         max_depth = UniformIntegerHyperparameter(
-            name="max_depth", lower=1, upper=10, default_value=3
+            name="max_depth", lower=1, upper=20, default_value=3
         )
         learning_rate = UniformFloatHyperparameter(
-            name="learning_rate", lower=0.01, upper=1, default_value=0.1, log=True
+            name="learning_rate", lower=0.001, upper=1, default_value=0.1,
+            log=True,
         )
         n_estimators = UniformIntegerHyperparameter(
             "n_estimators", lower=64, upper=512, default_value=128
@@ -225,9 +226,21 @@ class XGradientBoostingClassifier(
             name="subsample", lower=0.01, upper=1.0, default_value=1.0, log=False
         )
         min_child_weight = UniformIntegerHyperparameter(
-            name="min_child_weight", lower=1e-10,
+            name="min_child_weight", lower=0,
             upper=20, default_value=1, log=False
         )
+        colsample_bytree = UniformFloatHyperparameter(
+            name="colsample_bytree", lower=0.1, upper=1.0, default_value=1,
+        )
+        colsample_bylevel = UniformFloatHyperparameter(
+            name="colsample_bylevel", lower=0.1, upper=1.0, default_value=1,
+        )
+        reg_alpha = UniformFloatHyperparameter(
+            name="reg_alpha", lower=1e-10, upper=1e-1, log=True,
+            default_value=1e-10)
+        reg_lambda = UniformFloatHyperparameter(
+            name="reg_lambda", lower=1e-10, upper=1e-1, log=True,
+            default_value=1e-10)
 
         # DART Hyperparameters
         sample_type = CategoricalHyperparameter(
@@ -241,18 +254,16 @@ class XGradientBoostingClassifier(
         )
 
         # Unparameterized Hyperparameters
+        # https://xgboost.readthedocs.io/en/latest//parameter.html
+        # minimum loss reduction required to make a further partition on a
+        # leaf node of the tree
         gamma = UnParametrizedHyperparameter(
             name="gamma", value=0)
+        # absolute regularization (in contrast to eta), comparable to
+        # gradient clipping in deep learning - according to the internet this
+        #  is most important for unbalanced data
         max_delta_step = UnParametrizedHyperparameter(
             name="max_delta_step", value=0)
-        colsample_bytree = UnParametrizedHyperparameter(
-            name="colsample_bytree", value=1)
-        colsample_bylevel = UnParametrizedHyperparameter(
-            name="colsample_bylevel", value=1)
-        reg_alpha = UnParametrizedHyperparameter(
-            name="reg_alpha", value=0)
-        reg_lambda = UnParametrizedHyperparameter(
-            name="reg_lambda", value=1)
         base_score = UnParametrizedHyperparameter(
             name="base_score", value=0.5)
         scale_pos_weight = UnParametrizedHyperparameter(
@@ -261,13 +272,13 @@ class XGradientBoostingClassifier(
         cs.add_hyperparameters([
             # Active
             max_depth, learning_rate, n_estimators, booster,
-            subsample,
+            subsample, colsample_bytree, colsample_bylevel,
+            reg_alpha, reg_lambda,
             # DART
             sample_type, normalize_type, rate_drop,
             # Inactive
-            min_child_weight, max_delta_step,
-            colsample_bytree, gamma, colsample_bylevel,
-            reg_alpha, reg_lambda, base_score, scale_pos_weight
+            min_child_weight, max_delta_step, gamma,
+            base_score, scale_pos_weight
         ])
 
         sample_type_condition = EqualsCondition(
