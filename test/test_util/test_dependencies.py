@@ -1,9 +1,10 @@
 import unittest
+import pkg_resources
 import re
 
 from unittest.mock import patch, Mock
 
-import pkg_resources
+import numpy as np
 
 from autosklearn.util.dependencies import verify_packages, MissingPackageError, \
     IncorrectPackageVersionError
@@ -14,6 +15,9 @@ class VerifyPackagesTests(unittest.TestCase):
 
     def test_existing_package(self, getDistributionMock):
         requirement = 'package'
+        distribution_mock = unittest.mock.Mock()
+        getDistributionMock.return_value = distribution_mock
+        distribution_mock.version = '1.0.0'
 
         verify_packages(requirement)
 
@@ -24,8 +28,22 @@ class VerifyPackagesTests(unittest.TestCase):
 
         getDistributionMock.side_effect = pkg_resources.DistributionNotFound()
 
-        self.assertRaisesRegex(MissingPackageError,
-                               "mandatory package 'package' not found", verify_packages, requirement)
+        self.assertRaisesRegex(
+            MissingPackageError,
+            "Mandatory package 'package' not found",
+            verify_packages,
+            requirement,
+        )
+
+    @patch('importlib.import_module')
+    def test_package_can_only_be_imported(self, import_mock, getDistributionMock):
+
+        getDistributionMock.side_effect = pkg_resources.DistributionNotFound()
+        package = unittest.mock.Mock()
+        package.__version__ = np.__version__
+        import_mock.return_value = package
+
+        verify_packages('numpy')
 
     def test_correct_package_versions(self, getDistributionMock):
         requirement = 'package==0.1.2\n' \
