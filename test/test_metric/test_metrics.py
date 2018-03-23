@@ -308,14 +308,7 @@ class TestMetricsDoNotAlterInput(unittest.TestCase):
                     pass
                 else:
                     raise e
-<<<<<<< HEAD
-=======
 
-
-<<<<<<< HEAD
-=======
-
->>>>>>> f62f644... Added new unittest class for mean squared error.
 class test_MSE(unittest.TestCase):
     def test_mean_squared_error(self):
         y_true = np.array([1, 2, 3, 4])
@@ -345,4 +338,3 @@ class test_MSE(unittest.TestCase):
         previous_score = current_score
         current_score = scorer(y_true, y_pred)
         self.assertGreater(current_score, previous_score)
->>>>>>> 4824f34... .
