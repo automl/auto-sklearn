@@ -308,3 +308,41 @@ class TestMetricsDoNotAlterInput(unittest.TestCase):
                     pass
                 else:
                     raise e
+<<<<<<< HEAD
+=======
+
+
+<<<<<<< HEAD
+=======
+
+>>>>>>> f62f644... Added new unittest class for mean squared error.
+class test_MSE(unittest.TestCase):
+    def test_mean_squared_error(self):
+        y_true = np.array([1, 2, 3, 4])
+        scorer = autosklearn.metrics.make_scorer('mean squared error', autosklearn.metrics.mean_squared_error, \
+                                                 greater_is_better=False)
+
+        y_pred = y_true.copy()
+        current_score = scorer(y_true, y_pred)
+        self.assertAlmostEqual(current_score, 0)
+
+        y_pred = np.array([1, 2.5, 3, 4])
+        previous_score = current_score
+        current_score = scorer(y_true, y_pred)
+        self.assertGreater(current_score, previous_score)
+
+        y_pred = np.array([2, 3, 4, 5])
+        previous_score = current_score
+        current_score = scorer(y_true, y_pred)
+        self.assertGreater(current_score, previous_score)
+
+        y_pred = np.array([1, 1, 1, 1])
+        previous_score = current_score
+        current_score = scorer(y_true, y_pred)
+        self.assertGreater(current_score, previous_score)
+
+        y_pred = np.array([-5, 10, 7, -3])
+        previous_score = current_score
+        current_score = scorer(y_true, y_pred)
+        self.assertGreater(current_score, previous_score)
+>>>>>>> 4824f34... .
