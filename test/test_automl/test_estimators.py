@@ -27,6 +27,7 @@ class ArrayReturningDummyPredictor(object):
     def predict_proba(self, X, *args, **kwargs):
         return self.arr
 
+
 class EstimatorTest(Base, unittest.TestCase):
     _multiprocess_can_split_ = True
 
@@ -91,17 +92,19 @@ class EstimatorTest(Base, unittest.TestCase):
         X_train, Y_train, X_test, Y_test = putil.get_dataset('digits')
 
         # test parallel Classifier to predict classes, not only indexes
-        Y_train = Y_train + 1
-        Y_test = Y_test + 1
+        Y_train += 1
+        Y_test += 1
 
-        automl = AutoSklearnClassifier(time_left_for_this_task=20,
-                                       per_run_time_limit=5,
-                                       output_folder=output,
-                                       tmp_folder=output,
-                                       shared_mode=True,
-                                       seed=1,
-                                       initial_configurations_via_metalearning=0,
-                                       ensemble_size=0)
+        automl = AutoSklearnClassifier(
+            time_left_for_this_task=20,
+            per_run_time_limit=5,
+            output_folder=output,
+            tmp_folder=output,
+            shared_mode=True,
+            seed=1,
+            initial_configurations_via_metalearning=0,
+            ensemble_size=0,
+        )
         automl.fit(X_train, Y_train)
         # Create a 'dummy model' for the first run, which has an accuracy of
         # more than 99%; it should be in the final ensemble if the ensemble
@@ -116,9 +119,12 @@ class EstimatorTest(Base, unittest.TestCase):
 
         for i, value in enumerate(true_targets_ensemble):
             probas[i, value] = 1.0
-        dummy_predictions_path = os.path.join(output, '.auto-sklearn',
-                                              'predictions_ensemble',
-                                              'predictions_ensemble_1_00030.npy')
+        dummy_predictions_path = os.path.join(
+            output,
+            '.auto-sklearn',
+            'predictions_ensemble',
+            'predictions_ensemble_1_00030.npy',
+        )
         with open(dummy_predictions_path, 'wb') as fh:
             np.save(fh, probas)
 
@@ -131,14 +137,16 @@ class EstimatorTest(Base, unittest.TestCase):
         backend = Backend(context)
         backend.save_model(dummy, 30, 1)
 
-        automl = AutoSklearnClassifier(time_left_for_this_task=20,
-                                       per_run_time_limit=5,
-                                       output_folder=output,
-                                       tmp_folder=output,
-                                       shared_mode=True,
-                                       seed=2,
-                                       initial_configurations_via_metalearning=0,
-                                       ensemble_size=0,)
+        automl = AutoSklearnClassifier(
+            time_left_for_this_task=20,
+            per_run_time_limit=5,
+            output_folder=output,
+            tmp_folder=output,
+            shared_mode=True,
+            seed=2,
+            initial_configurations_via_metalearning=0,
+            ensemble_size=0,
+        )
         automl.fit_ensemble(Y_train, task=MULTICLASS_CLASSIFICATION,
                             metric=accuracy,
                             precision='32',

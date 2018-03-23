@@ -174,6 +174,7 @@ class AbstractEvaluator(object):
         self.logger = get_logger(logger_name)
 
         self.Y_optimization = None
+        self.Y_actual_train = None
 
     def _get_model(self):
         if not isinstance(self.configuration, Configuration):
@@ -195,16 +196,21 @@ class AbstractEvaluator(object):
                                      init_params=self._init_params)
         return model
 
-    def _loss(self, y_true, y_hat):
+    def _loss(self, y_true, y_hat, all_scoring_functions=None):
+        all_scoring_functions = (
+            self.all_scoring_functions
+            if all_scoring_functions is None
+            else all_scoring_functions
+        )
         if not isinstance(self.configuration, Configuration):
-            if self.all_scoring_functions:
+            if all_scoring_functions:
                 return {self.metric: 1.0}
             else:
                 return 1.0
 
         score = calculate_score(
             y_true, y_hat, self.task_type, self.metric,
-            all_scoring_functions=self.all_scoring_functions)
+            all_scoring_functions=all_scoring_functions)
 
         if hasattr(score, '__len__'):
             err = {key: 1 - score[key] for key in score}
@@ -213,8 +219,8 @@ class AbstractEvaluator(object):
 
         return err
 
-    def finish_up(self, loss, opt_pred, valid_pred, test_pred,
-                  additional_run_info=None, file_output=True, final_call=True):
+    def finish_up(self, loss, train_pred, opt_pred, valid_pred, test_pred,
+                  additional_run_info, file_output, final_call):
         """This function does everything necessary after the fitting is done:
 
         * predicting
@@ -226,16 +232,16 @@ class AbstractEvaluator(object):
         self.duration = time.time() - self.starttime
 
         if file_output:
-            loss_, additional_run_info_, validation_loss, test_loss = (
-                self.file_output(
-                    opt_pred, valid_pred, test_pred
-                )
+            loss_, additional_run_info_ = self.file_output(
+                train_pred, opt_pred, valid_pred, test_pred,
             )
         else:
             loss_ = None
             additional_run_info_ = {}
-            validation_loss = None
-            test_loss = None
+
+        train_loss, validation_loss, test_loss = self.calculate_auxiliary_losses(
+            train_pred, valid_pred, test_pred,
+        )
 
         if loss_ is not None:
             return self.duration, loss_, self.seed, additional_run_info_
@@ -253,6 +259,8 @@ class AbstractEvaluator(object):
             additional_run_info[metric_name] = value
         additional_run_info['duration'] = self.duration
         additional_run_info['num_run'] = self.num_run
+        if train_loss is not None:
+            additional_run_info['train_loss'] = train_loss
         if validation_loss is not None:
             additional_run_info['validation_loss'] = validation_loss
         if test_loss is not None:
@@ -266,8 +274,69 @@ class AbstractEvaluator(object):
 
         self.queue.put(rval_dict)
 
+    def calculate_auxiliary_losses(
+        self,
+        Y_train_pred,
+        Y_valid_pred,
+        Y_test_pred
+    ):
+        # Second check makes unit tests easier as it is not necessary to
+        # actually inject data to compare against for calculating a loss
+        if Y_train_pred is not None and self.Y_actual_train is not None:
+            if len(self.Y_actual_train.shape) > 1:
+                assert (
+                    np.sum(np.isfinite(self.Y_actual_train[:, 0]))
+                    == Y_train_pred.shape[0]
+                ), (
+                    np.sum(np.isfinite(self.Y_actual_train[:, 0])),
+                    Y_train_pred.shape[0],
+                )
+            else:
+                assert (
+                    np.sum(np.isfinite(self.Y_actual_train))
+                    == Y_train_pred.shape[0]
+                ), (
+                    np.sum(np.isfinite(self.Y_actual_train)),
+                    Y_train_pred.shape[0],
+                )
+            Y_true_tmp = self.Y_actual_train
+            if len(Y_true_tmp.shape) == 1:
+                Y_true_tmp = Y_true_tmp[np.isfinite(self.Y_actual_train)]
+            else:
+                Y_true_tmp = Y_true_tmp[np.isfinite(self.Y_actual_train[:, 0])]
+            train_loss = self._loss(
+                Y_true_tmp,
+                Y_train_pred,
+                all_scoring_functions=False,
+            )
+        else:
+            train_loss = None
+
+        if Y_valid_pred is not None:
+            if self.y_valid is not None:
+                validation_loss = self._loss(self.y_valid, Y_valid_pred)
+                if isinstance(validation_loss, dict):
+                    validation_loss = validation_loss[self.metric.name]
+            else:
+                validation_loss = None
+        else:
+            validation_loss = None
+
+        if Y_test_pred is not None:
+            if self.y_test is not None:
+                test_loss = self._loss(self.y_test, Y_test_pred)
+                if isinstance(test_loss, dict):
+                    test_loss = test_loss[self.metric.name]
+            else:
+                test_loss = None
+        else:
+            test_loss = None
+
+        return train_loss, validation_loss, test_loss
+
     def file_output(
             self,
+            Y_train_pred,
             Y_optimization_pred,
             Y_valid_pred,
             Y_test_pred
@@ -288,22 +357,14 @@ class AbstractEvaluator(object):
                         "the same length. Probably training didn't "
                         "finish" % (self.Y_optimization.shape, Y_optimization_pred.shape)
                  },
-                None,
-                None,
             )
 
-        if not np.all(np.isfinite(Y_optimization_pred)):
-            return (
-                1.0,
-                {
-                    'error':
-                        'Model predictions for optimization set '
-                        'contains NaNs.'
-                },
-                None,
-                None,
-            )
-        for y, s in [[Y_valid_pred, 'validation'], [Y_test_pred, 'test']]:
+        for y, s in [
+            [Y_train_pred, 'train'],
+            [Y_optimization_pred, 'optimization'],
+            [Y_valid_pred, 'validation'],
+            [Y_test_pred, 'test']
+        ]:
             if y is not None and not np.all(np.isfinite(y)):
                 return (
                     1.0,
@@ -311,8 +372,6 @@ class AbstractEvaluator(object):
                         'error':
                             'Model predictions for %s set contains NaNs.' % s
                     },
-                    None,
-                    None,
                 )
 
         num_run = str(self.num_run)
@@ -347,29 +406,13 @@ class AbstractEvaluator(object):
             if self.disable_file_output != True:
                 self.backend.save_predictions_as_npy(Y_valid_pred, 'valid',
                                                      seed, num_run)
-            if self.y_valid is not None:
-                validation_loss = self._loss(self.y_valid, Y_valid_pred)
-                if isinstance(validation_loss, dict):
-                    validation_loss = validation_loss[self.metric.name]
-            else:
-                validation_loss = None
-        else:
-            validation_loss = None
 
         if Y_test_pred is not None:
             if self.disable_file_output != True:
                 self.backend.save_predictions_as_npy(Y_test_pred, 'test',
                                                      seed, num_run)
-            if self.y_test is not None:
-                test_loss = self._loss(self.y_test, Y_test_pred)
-                if isinstance(test_loss, dict):
-                    test_loss = test_loss[self.metric.name]
-            else:
-                test_loss = None
-        else:
-            test_loss = None
 
-        return None, {}, validation_loss, test_loss
+        return None, {}
 
     def _predict_proba(self, X, model, task_type, Y_train):
         def send_warnings_to_log(message, category, filename, lineno,

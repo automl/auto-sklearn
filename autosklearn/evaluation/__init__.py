@@ -278,6 +278,14 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             if len(learning_curve) > 1:
                 additional_run_info['learning_curve'] = learning_curve
                 additional_run_info['learning_curve_runtime'] = learning_curve_runtime
+
+            train_learning_curve = util.extract_learning_curve(
+                info, 'train_loss'
+            )
+            if len(train_learning_curve) > 1:
+                additional_run_info['train_learning_curve'] = train_learning_curve
+                additional_run_info['learning_curve_runtime'] = learning_curve_runtime
+
             if self._get_validation_loss:
                 validation_learning_curve = util.extract_learning_curve(
                     info, 'validation_loss',
