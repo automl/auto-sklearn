@@ -350,21 +350,14 @@ class AutoSklearnEstimator(BaseEstimator):
     def sprint_statistics(self):
         """Return the following statistics of the training result:
 
-        dataset name
-
-        metric used
-
-        best validation score
-
-        number of target algorithm runs
-
-        number of successful target algorithm runs
-
-        number of crashed target algorithm runs
-
-        number of target algorithms that exceeded memory limit
-
-        number of target algorithms that exceeded time limit
+        - dataset name
+        - metric used
+        - best validation score
+        - number of target algorithm runs
+        - number of successful target algorithm runs
+        - number of crashed target algorithm runs
+        - number of target algorithms that exceeded memory limit
+        - number of target algorithms that exceeded time limit
 
         Returns
         -------
