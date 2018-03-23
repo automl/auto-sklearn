@@ -13,6 +13,27 @@ from autosklearn.constants import *
 __all__ = ['TrainEvaluator', 'eval_holdout', 'eval_iterative_holdout',
            'eval_cv', 'eval_partial_cv', 'eval_partial_cv_iterative']
 
+__baseCrossValidator_defaults__ = {'GroupKFold': {'n_splits': 3},
+                                   'KFold': {'n_splits': 3,
+                                             'shuffle': False,
+                                             'random_state': None},
+                                   'LeaveOneGroupOut': {},
+                                   'LeavePGroupsOut': {'n_groups': 2},
+                                   'LeaveOneOut': {},
+                                   'LeavePOut': {'p': 2},
+                                   'PredefinedSplit': {'test_fold': None},
+                                   'RepeatedKFold': {'n_splits': 5,
+                                                     'n_repeats': 10,
+                                                     'random_state': None},
+                                   'RepeatedStratifiedKFold': {'n_splits': 5,
+                                                               'n_repeats': 10,
+                                                               'random_state': None},
+                                   'StratifiedKFold': {'n_splits': 3,
+                                                       'shuffle': False,
+                                                       'random_state': None},
+                                   'TimeSeriesSplit': {'n_splits': 3,
+                                                       'max_train_size': None}
+                                   }
 
 def _get_y_array(y, task_type):
     if task_type in CLASSIFICATION_TASKS and task_type != \
@@ -57,7 +78,7 @@ class TrainEvaluator(AbstractEvaluator):
         self.resampling_strategy = resampling_strategy
         self.resampling_strategy_args = resampling_strategy_args
         self.cv = self.get_splitter(self.datamanager)
-        self.cv_folds = self.cv.get_n_splits()
+        self.cv_folds = self.cv.get_n_splits(groups=self.resampling_strategy_args['groups'])
         self.X_train = self.datamanager.data['X_train']
         self.Y_train = self.datamanager.data['Y_train']
         self.Y_optimization = None
@@ -98,7 +119,7 @@ class TrainEvaluator(AbstractEvaluator):
             # case! -> maybe remove full CV from the train evaluator anyway and
             # make the user implement this!
             for i, (train_split, test_split) in enumerate(self.cv.split(
-                    self.X_train, y)):
+                    self.X_train, y, groups=self.resampling_strategy_args['groups'])):
 
                 opt_pred, valid_pred, test_pred, additional_run_info = (
                     self._partial_fit_and_predict(
@@ -351,8 +372,52 @@ class TrainEvaluator(AbstractEvaluator):
 
     def get_splitter(self, D):
 
+        if self.resampling_strategy_args is None:
+            self.resampling_strategy_args = {}
+        if 'groups' not in self.resampling_strategy_args:
+            self.resampling_strategy_args['groups'] = None
+
         if isinstance(self.resampling_strategy, BaseCrossValidator):
-            return self.resampling_strategy
+
+            class_name = self.resampling_strategy.__class__.__name__
+            if class_name not in __baseCrossValidator_defaults__:
+                raise ValueError('Unknown BaseCrossValidator.')
+            ref_arg_dict = __baseCrossValidator_defaults__[class_name]
+
+            y = D.data['Y_train'].ravel()
+            if class_name == 'LeaveOneGroupOut' or class_name == 'LeavePGroupsOut':
+                if self.resampling_strategy_args['groups'] is None:
+                    raise ValueError('Must provide parameter groups '
+                                     'for class LeaveOneGroupOut')
+                try:
+                    if self.resampling_strategy_args['groups'].shape != y.shape:
+                        raise ValueError('Groups must be array-like with shape (n_samples,).')
+                except Exception:
+                    raise ValueError('Groups must be array-like with shape (n_samples,).')
+            else:
+                if self.resampling_strategy_args['groups'] is not None and \
+                        self.resampling_strategy_args['groups'].shape != y.shape:
+                    raise ValueError('Groups must be array-like with shape (n_samples,).')
+
+            # Put args in self.resampling_strategy_args
+            for key in ref_arg_dict:
+                if key == 'n_splits':
+                    if 'folds' not in self.resampling_strategy_args:
+                        self.resampling_strategy_args['folds'] = ref_arg_dict['n_splits']
+                else:
+                    if key not in self.resampling_strategy_args:
+                        if key == 'test_fold' and class_name == 'PredefinedSplit':
+                            raise ValueError('Must provide parameter test_fold for class PredefinedSplit.')
+                        self.resampling_strategy_args[key] = ref_arg_dict[key]
+
+            # Instantiate new object with args
+            cv = copy.deepcopy(self.resampling_strategy)
+            for key in ref_arg_dict:
+                if key == 'n_splits':
+                    setattr(cv, key, self.resampling_strategy_args['folds'])
+                else:
+                    setattr(cv, key, self.resampling_strategy_args[key])
+            return cv
 
         y = D.data['Y_train'].ravel()
         train_size = 0.67
