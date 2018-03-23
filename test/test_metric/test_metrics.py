@@ -310,7 +310,6 @@ class TestMetricsDoNotAlterInput(unittest.TestCase):
                     raise e
 
 
-
 class test_MSE(unittest.TestCase):
     def test_mean_squared_error(self):
         y_true = np.array([1, 2, 3, 4])
