@@ -16,10 +16,6 @@ Classification
 .. autoclass:: autosklearn.classification.AutoSklearnClassifier
     :members:
     :inherited-members: show_models, fit_ensemble, sprint_statistics
-	
-
-
-	
 
 ~~~~~~~~~~
 Regression
