@@ -22,9 +22,9 @@ class XGradientBoostingRegressor(
     def __init__(self,
                  # General Hyperparameters
                  learning_rate, n_estimators, subsample, booster, max_depth,
+                 colsample_bylevel, colsample_bytree, reg_alpha, reg_lambda,
                  # Inactive Hyperparameters
-                 colsample_bylevel, colsample_bytree, gamma, min_child_weight,
-                 max_delta_step, reg_alpha, reg_lambda,
+                 gamma, min_child_weight, max_delta_step,
                  base_score, scale_pos_weight, n_jobs=1, init=None,
                  random_state=None, verbose=0,
                  # (Conditional) DART Hyperparameters
@@ -99,6 +99,11 @@ class XGradientBoostingRegressor(
 
     def iterative_fit(self, X, y, n_iter=2, refit=False, sample_weight=None):
 
+        import sklearn.model_selection
+        X_train, X_test, y_train, y_test = \
+            sklearn.model_selection.train_test_split(
+                X, y, random_state=1, test_size=0.1)
+
         if refit:
             self.estimator = None
 
@@ -127,6 +132,7 @@ class XGradientBoostingRegressor(
                     pass
 
             self.objective = 'reg:linear'
+            self.eval_metric = 'mae'
 
             arguments = dict(
                 max_depth=self.max_depth,
@@ -156,24 +162,43 @@ class XGradientBoostingRegressor(
                 **arguments
             )
             self.estimator.fit(
-                X, y,
+                X_train, y_train,
+                eval_set=[(X_test, y_test)],
+                eval_metric=self.eval_metric,
+                verbose=False,
             )
 
         elif not self.configuration_fully_fitted():
+            n_estimators_before_fit = self.estimator.n_estimators
             self.estimator.n_estimators += n_iter
             self.estimator.n_estimators = min(self.estimator.n_estimators,
                                               self.n_estimators)
             self.estimator.fit(
-                X, y,
+                X_train, y_train,
                 xgb_model=self.estimator.get_booster(),
+                eval_set=[(X_train, y_train), (X_test, y_test)],
+                early_stopping_rounds=int(self.n_estimators / 10),
+                eval_metric=self.eval_metric,
+                verbose=False,
             )
+            if (
+                        n_estimators_before_fit + n_iter
+                    > self.estimator.best_iteration + int(
+                        self.n_estimators / 10)
+            ) or (
+                    self.estimator.n_estimators >= self.n_estimators
+            ):
+                self.fully_fit_ = True
 
         return self
 
     def configuration_fully_fitted(self):
         if self.estimator is None:
             return False
-        return not self.estimator.n_estimators < self.n_estimators
+        elif not hasattr(self, 'fully_fit_'):
+            return False
+        else:
+            return self.fully_fit_
 
     def predict(self, X):
         if self.estimator is None:
@@ -182,15 +207,17 @@ class XGradientBoostingRegressor(
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'XGB',
-                'name': 'XGradient Boosting Regressor',
-                'handles_regression': True,
-                'handles_classification': False,
-                'handles_multiclass': False,
-                'handles_multilabel': False,
-                'is_deterministic': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,)}
+        return {
+            'shortname': 'XGB',
+            'name': 'XGradient Boosting Regressor',
+            'handles_regression': True,
+            'handles_classification': False,
+            'handles_multiclass': False,
+            'handles_multilabel': False,
+            'is_deterministic': True,
+            'input': (DENSE, SPARSE, UNSIGNED_DATA),
+            'output': (PREDICTIONS,)
+            }
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
@@ -216,6 +243,18 @@ class XGradientBoostingRegressor(
             name="min_child_weight", lower=1e-10,
             upper=20, default_value=1, log=False
         )
+        colsample_bytree = UniformFloatHyperparameter(
+            name="colsample_bytree", lower=0.1, upper=1.0, default_value=1,
+        )
+        colsample_bylevel = UniformFloatHyperparameter(
+            name="colsample_bylevel", lower=0.1, upper=1.0, default_value=1,
+        )
+        reg_alpha = UniformFloatHyperparameter(
+            name="reg_alpha", lower=1e-10, upper=1e-1, log=True,
+            default_value=1e-10)
+        reg_lambda = UniformFloatHyperparameter(
+            name="reg_lambda", lower=1e-10, upper=1e-1, log=True,
+            default_value=1e-10)
 
         # DART Hyperparameters
         sample_type = CategoricalHyperparameter(
@@ -229,18 +268,16 @@ class XGradientBoostingRegressor(
         )
 
         # Unparameterized Hyperparameters
+        # https://xgboost.readthedocs.io/en/latest//parameter.html
+        # minimum loss reduction required to make a further partition on a
+        # leaf node of the tree
         gamma = UnParametrizedHyperparameter(
             name="gamma", value=0)
+        # absolute regularization (in contrast to eta), comparable to
+        # gradient clipping in deep learning - according to the internet this
+        #  is most important for unbalanced data
         max_delta_step = UnParametrizedHyperparameter(
             name="max_delta_step", value=0)
-        colsample_bytree = UnParametrizedHyperparameter(
-            name="colsample_bytree", value=1)
-        colsample_bylevel = UnParametrizedHyperparameter(
-            name="colsample_bylevel", value=1)
-        reg_alpha = UnParametrizedHyperparameter(
-            name="reg_alpha", value=0)
-        reg_lambda = UnParametrizedHyperparameter(
-            name="reg_lambda", value=1)
         base_score = UnParametrizedHyperparameter(
             name="base_score", value=0.5)
         scale_pos_weight = UnParametrizedHyperparameter(
@@ -249,13 +286,13 @@ class XGradientBoostingRegressor(
         cs.add_hyperparameters([
             # Active
             max_depth, learning_rate, n_estimators, booster,
-            subsample,
+            subsample, colsample_bytree, colsample_bylevel,
+            reg_alpha, reg_lambda,
             # DART
             sample_type, normalize_type, rate_drop,
             # Inactive
-            min_child_weight, max_delta_step,
-            colsample_bytree, gamma, colsample_bylevel,
-            reg_alpha, reg_lambda, base_score, scale_pos_weight
+            min_child_weight, max_delta_step, gamma,
+            base_score, scale_pos_weight
         ])
 
         sample_type_condition = EqualsCondition(

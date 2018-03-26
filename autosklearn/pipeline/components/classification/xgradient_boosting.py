@@ -98,6 +98,11 @@ class XGradientBoostingClassifier(
 
     def iterative_fit(self, X, y, n_iter=2, refit=False, sample_weight=None):
 
+        import sklearn.model_selection
+        X_train, X_test, y_train, y_test = \
+            sklearn.model_selection.train_test_split(
+                X, y, random_state=1, test_size=0.1)
+
         if refit:
             self.estimator = None
 
@@ -126,12 +131,14 @@ class XGradientBoostingClassifier(
                     pass
 
             # We don't support multilabel, so we only need 1 objective function
-            if len(np.unique(y) == 2):
+            if len(np.unique(y)) == 2:
                 # We probably have binary classification
                 # TODO: use logitraw ?
                 self.objective = 'binary:logistic'
+                self.eval_metric = 'error'
             else:
                 self.objective = 'multi:softmax'
+                self.eval_metric = 'merror'
 
             arguments = dict(
                 max_depth=self.max_depth,
@@ -161,26 +168,44 @@ class XGradientBoostingClassifier(
                 **arguments
             )
             self.estimator.fit(
-                X, y,
+                X_train, y_train,
                 sample_weight=sample_weight,
+                eval_set=[(X_test, y_test)],
+                eval_metric=self.eval_metric,
+                verbose=False,
             )
 
         elif not self.configuration_fully_fitted():
+            n_estimators_before_fit = self.estimator.n_estimators
             self.estimator.n_estimators += n_iter
             self.estimator.n_estimators = min(self.estimator.n_estimators,
                                               self.n_estimators)
             self.estimator.fit(
-                X, y,
+                X_train, y_train,
                 xgb_model=self.estimator.get_booster(),
                 sample_weight=sample_weight,
+                eval_set=[(X_train, y_train), (X_test, y_test)],
+                early_stopping_rounds=int(self.n_estimators / 10),
+                eval_metric=self.eval_metric,
+                verbose=False,
             )
+            if (
+                n_estimators_before_fit + n_iter
+                > self.estimator.best_iteration + int(self.n_estimators / 10)
+            ) or (
+                self.estimator.n_estimators >= self.n_estimators
+            ):
+                self.fully_fit_ = True
 
         return self
 
     def configuration_fully_fitted(self):
         if self.estimator is None:
             return False
-        return not self.estimator.n_estimators < self.n_estimators
+        elif not hasattr(self, 'fully_fit_'):
+            return False
+        else:
+            return self.fully_fit_
 
     def predict(self, X):
         if self.estimator is None:
