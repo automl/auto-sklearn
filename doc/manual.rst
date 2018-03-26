@@ -84,6 +84,25 @@ Resampling strategies
 
 Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <https://github.com/automl/auto-sklearn/tree/master/example>`_
 
+Inspecting the results
+======================
+
+*auto-sklearn* allows users to inspect the training results and statistics. The following example shows how different 
+statistics can be printed for the inspection.
+
+>>> import autoskleran.classification
+>>> automl = autosklearn.classification.AutoSklearnClassifier()
+>>> automl.fit(X_train, y_train)
+>>> automl.cv_results_
+>>> automl.sprint_statistics()
+>>> automl.show_models()
+
+``cv_results_`` returns a dict with keys as column headers and values as columns, that can be imported into a pandas DataFrame.
+``sprint_statistics()`` is a method that prints the name of the  dataset, the metric used, and the best validation score
+obtained by running *auto-sklearn*. It additionally prints the number of both successful and unsuccessful
+algorithm runs.
+The results obtained from the final ensemble can be printed by calling ``show_models()``.
+
 Parallel computation
 ====================
 
