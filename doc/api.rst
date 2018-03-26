@@ -15,7 +15,7 @@ Classification
 
 .. autoclass:: autosklearn.classification.AutoSklearnClassifier
     :members:
-    :inherited-members: show_models, fit_ensemble, refit
+    :inherited-members: show_models, fit_ensemble, refit, sprint_statistics
 
 ~~~~~~~~~~
 Regression
@@ -23,7 +23,7 @@ Regression
 
 .. autoclass:: autosklearn.regression.AutoSklearnRegressor
     :members:
-    :inherited-members: show_models, fit_ensemble, refit
+    :inherited-members: show_models, fit_ensemble, refit, sprint_statistics
 
 =======
 Metrics

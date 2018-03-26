@@ -358,6 +358,21 @@ class AutoSklearnEstimator(BaseEstimator):
         return self._automl.fANOVA_input_
 
     def sprint_statistics(self):
+        """Return the following statistics of the training result:
+
+        - dataset name
+        - metric used
+        - best validation score
+        - number of target algorithm runs
+        - number of successful target algorithm runs
+        - number of crashed target algorithm runs
+        - number of target algorithm runs that exceeded the memory limit
+        - number of target algorithm runs that exceeded the time limit
+
+        Returns
+        -------
+        str
+        """
         return self._automl.sprint_statistics()
 
     def _get_automl_class(self):
