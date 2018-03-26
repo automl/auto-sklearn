@@ -356,8 +356,8 @@ class AutoSklearnEstimator(BaseEstimator):
         - number of target algorithm runs
         - number of successful target algorithm runs
         - number of crashed target algorithm runs
-        - number of target algorithms that exceeded memory limit
-        - number of target algorithms that exceeded time limit
+        - number of target algorithm runs that exceeded the memory limit
+        - number of target algorithm runs that exceeded the time limit
 
         Returns
         -------
