@@ -386,60 +386,62 @@ class TrainEvaluator(AbstractEvaluator):
         if self.resampling_strategy_args is None:
             self.resampling_strategy_args = {}
 
-        if issubclass(self.resampling_strategy, BaseCrossValidator) or\
+        if not isinstance(self.resampling_strategy, str):
+
+            if issubclass(self.resampling_strategy, BaseCrossValidator) or\
                 issubclass(self.resampling_strategy, _RepeatedSplits) or\
                 issubclass(self.resampling_strategy, BaseShuffleSplit):
 
-            class_name = self.resampling_strategy.__name__
-            if class_name not in __baseCrossValidator_defaults__:
-                raise ValueError('Unknown CrossValidator.')
-            ref_arg_dict = __baseCrossValidator_defaults__[class_name]
+                class_name = self.resampling_strategy.__name__
+                if class_name not in __baseCrossValidator_defaults__:
+                    raise ValueError('Unknown CrossValidator.')
+                ref_arg_dict = __baseCrossValidator_defaults__[class_name]
 
-            y = D.data['Y_train'].ravel()
-            if class_name == 'PredefinedSplit':
-                if 'test_fold' not in self.resampling_strategy_args:
-                    raise ValueError('Must provide parameter test_fold'
-                                     ' for class PredefinedSplit.')
-            if class_name == 'LeaveOneGroupOut' or \
-                    class_name == 'LeavePGroupsOut' or\
-                    class_name == 'GroupKFold' or\
-                    class_name == 'GroupShuffleSplit':
-                if 'groups' not in self.resampling_strategy_args:
-                    raise ValueError('Must provide parameter groups '
-                                     'for chosen CrossValidator.')
-                try:
-                    if self.resampling_strategy_args['groups'].shape != y.shape:
+                y = D.data['Y_train'].ravel()
+                if class_name == 'PredefinedSplit':
+                    if 'test_fold' not in self.resampling_strategy_args:
+                        raise ValueError('Must provide parameter test_fold'
+                                         ' for class PredefinedSplit.')
+                if class_name == 'LeaveOneGroupOut' or \
+                        class_name == 'LeavePGroupsOut' or\
+                        class_name == 'GroupKFold' or\
+                        class_name == 'GroupShuffleSplit':
+                    if 'groups' not in self.resampling_strategy_args:
+                        raise ValueError('Must provide parameter groups '
+                                         'for chosen CrossValidator.')
+                    try:
+                        if self.resampling_strategy_args['groups'].shape != y.shape:
+                            raise ValueError('Groups must be array-like '
+                                             'with shape (n_samples,).')
+                    except Exception:
                         raise ValueError('Groups must be array-like '
                                          'with shape (n_samples,).')
-                except Exception:
-                    raise ValueError('Groups must be array-like '
-                                     'with shape (n_samples,).')
-            else:
-                if 'groups' in self.resampling_strategy_args:
-                    if self.resampling_strategy_args['groups'].shape != y.shape:
-                        raise ValueError('Groups must be array-like'
-                                         ' with shape (n_samples,).')
-
-            # Put args in self.resampling_strategy_args
-            for key in ref_arg_dict:
-                if key == 'n_splits':
-                    if 'folds' not in self.resampling_strategy_args:
-                        self.resampling_strategy_args['folds'] = ref_arg_dict['n_splits']
                 else:
-                    if key not in self.resampling_strategy_args:
-                        self.resampling_strategy_args[key] = ref_arg_dict[key]
+                    if 'groups' in self.resampling_strategy_args:
+                        if self.resampling_strategy_args['groups'].shape != y.shape:
+                            raise ValueError('Groups must be array-like'
+                                             ' with shape (n_samples,).')
 
-            # Instantiate object with args
-            init_dict = copy.deepcopy(self.resampling_strategy_args)
-            init_dict.pop('groups', None)
-            if 'folds' in init_dict:
-                init_dict['n_splits'] = init_dict.pop('folds', None)
-            cv = copy.deepcopy(self.resampling_strategy)(**init_dict)
+                # Put args in self.resampling_strategy_args
+                for key in ref_arg_dict:
+                    if key == 'n_splits':
+                        if 'folds' not in self.resampling_strategy_args:
+                            self.resampling_strategy_args['folds'] = ref_arg_dict['n_splits']
+                    else:
+                        if key not in self.resampling_strategy_args:
+                            self.resampling_strategy_args[key] = ref_arg_dict[key]
 
-            if 'groups' not in self.resampling_strategy_args:
-                self.resampling_strategy_args['groups'] = None
+                # Instantiate object with args
+                init_dict = copy.deepcopy(self.resampling_strategy_args)
+                init_dict.pop('groups', None)
+                if 'folds' in init_dict:
+                    init_dict['n_splits'] = init_dict.pop('folds', None)
+                cv = copy.deepcopy(self.resampling_strategy)(**init_dict)
 
-            return cv
+                if 'groups' not in self.resampling_strategy_args:
+                    self.resampling_strategy_args['groups'] = None
+
+                return cv
 
         y = D.data['Y_train'].ravel()
         train_size = 0.67
