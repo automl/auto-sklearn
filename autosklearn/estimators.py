@@ -92,8 +92,12 @@ class AutoSklearnEstimator(BaseEstimator):
             * 'holdout-iterative-fit':  67:33 (train:test) split, calls iterative
               fit where possible
             * 'cv': crossvalidation, requires 'folds'
-            * BaseCrossValidator object: an instance of any BaseCrossValidator class found
+            * BaseCrossValidator object: any BaseCrossValidator class found
                                         in scikit-learn model_selection module
+            * _RepeatedSplits object: any _RepeatedSplits class found
+                                      in scikit-learn model_selection module
+            * BaseShuffleSplit object: any BaseShuffleSplit class found
+                                      in scikit-learn model_selection module
 
         resampling_strategy_arguments : dict, optional if 'holdout' (train_size default=0.67)
             Additional arguments for resampling_strategy
@@ -102,10 +106,11 @@ class AutoSklearnEstimator(BaseEstimator):
             * 'holdout': {'train_size': float}
             * 'holdout-iterative-fit':  {'train_size': float}
             * 'cv': {'folds': int}
-            * BaseCrossValidator object: all arguments required by specific splitter class
-                as specified in scikit-learn documentation. If arguments are not provided,
-                scikit-learn defaults are used. If no defaults are available, an exception
-                is raised. You should refer to the 'n_splits' argument as 'folds'.
+            * BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments
+                required by chosen class as specified in scikit-learn documentation.
+                If arguments are not provided, scikit-learn defaults are used.
+                If no defaults are available, an exception is raised.
+                Refer to the 'n_splits' argument as 'folds'.
 
         tmp_folder : string, optional (None)
             folder to store configuration output and log files, if ``None``

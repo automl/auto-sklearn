@@ -5,6 +5,7 @@ import numpy as np
 from smac.tae.execute_ta_run import TAEAbortException
 from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold, \
     StratifiedKFold, train_test_split, BaseCrossValidator
+from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit
 
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.constants import *
@@ -21,7 +22,7 @@ __baseCrossValidator_defaults__ = {'GroupKFold': {'n_splits': 3},
                                    'LeavePGroupsOut': {'n_groups': 2},
                                    'LeaveOneOut': {},
                                    'LeavePOut': {'p': 2},
-                                   'PredefinedSplit': {'test_fold': None},
+                                   'PredefinedSplit': {},
                                    'RepeatedKFold': {'n_splits': 5,
                                                      'n_repeats': 10,
                                                      'random_state': None},
@@ -32,7 +33,16 @@ __baseCrossValidator_defaults__ = {'GroupKFold': {'n_splits': 3},
                                                        'shuffle': False,
                                                        'random_state': None},
                                    'TimeSeriesSplit': {'n_splits': 3,
-                                                       'max_train_size': None}
+                                                       'max_train_size': None},
+                                   'GroupShuffleSplit': {'n_splits': 5,
+                                                         'test_size': 'default',
+                                                         'random_state': None},
+                                   'StratifiedShuffleSplit': {'n_splits': 10,
+                                                              'test_size': 'default',
+                                                              'random_state': None},
+                                   'ShuffleSplit': {'n_splits': 10,
+                                                    'test_size': 'default',
+                                                    'random_state': None}
                                    }
 
 def _get_y_array(y, task_type):
@@ -99,7 +109,8 @@ class TrainEvaluator(AbstractEvaluator):
                 raise ValueError('Cannot use partial fitting together with full'
                                  'cross-validation!')
 
-            for train_split, test_split in self.cv.split(self.X_train, self.Y_train):
+            for train_split, test_split in self.cv.split(self.X_train, self.Y_train,
+                                    groups=self.resampling_strategy_args['groups']):
                 self.Y_optimization = self.Y_train[test_split]
                 self._partial_fit_and_predict(0, train_indices=train_split,
                                               test_indices=test_split,
@@ -197,7 +208,7 @@ class TrainEvaluator(AbstractEvaluator):
 
         y = _get_y_array(self.Y_train, self.task_type)
         for i, (train_split, test_split) in enumerate(self.cv.split(
-                self.X_train, y)):
+                self.X_train, y, groups=self.resampling_strategy_args['groups'])):
             if i != fold:
                 continue
             else:
@@ -374,30 +385,40 @@ class TrainEvaluator(AbstractEvaluator):
 
         if self.resampling_strategy_args is None:
             self.resampling_strategy_args = {}
-        if 'groups' not in self.resampling_strategy_args:
-            self.resampling_strategy_args['groups'] = None
 
-        if isinstance(self.resampling_strategy, BaseCrossValidator):
+        if issubclass(self.resampling_strategy, BaseCrossValidator) or\
+                issubclass(self.resampling_strategy, _RepeatedSplits) or\
+                issubclass(self.resampling_strategy, BaseShuffleSplit):
 
-            class_name = self.resampling_strategy.__class__.__name__
+            class_name = self.resampling_strategy.__name__
             if class_name not in __baseCrossValidator_defaults__:
-                raise ValueError('Unknown BaseCrossValidator.')
+                raise ValueError('Unknown CrossValidator.')
             ref_arg_dict = __baseCrossValidator_defaults__[class_name]
 
             y = D.data['Y_train'].ravel()
-            if class_name == 'LeaveOneGroupOut' or class_name == 'LeavePGroupsOut':
-                if self.resampling_strategy_args['groups'] is None:
+            if class_name == 'PredefinedSplit':
+                if 'test_fold' not in self.resampling_strategy_args:
+                    raise ValueError('Must provide parameter test_fold'
+                                     ' for class PredefinedSplit.')
+            if class_name == 'LeaveOneGroupOut' or \
+                    class_name == 'LeavePGroupsOut' or\
+                    class_name == 'GroupKFold' or\
+                    class_name == 'GroupShuffleSplit':
+                if 'groups' not in self.resampling_strategy_args:
                     raise ValueError('Must provide parameter groups '
-                                     'for class LeaveOneGroupOut')
+                                     'for chosen CrossValidator.')
                 try:
                     if self.resampling_strategy_args['groups'].shape != y.shape:
-                        raise ValueError('Groups must be array-like with shape (n_samples,).')
+                        raise ValueError('Groups must be array-like '
+                                         'with shape (n_samples,).')
                 except Exception:
-                    raise ValueError('Groups must be array-like with shape (n_samples,).')
+                    raise ValueError('Groups must be array-like '
+                                     'with shape (n_samples,).')
             else:
-                if self.resampling_strategy_args['groups'] is not None and \
-                        self.resampling_strategy_args['groups'].shape != y.shape:
-                    raise ValueError('Groups must be array-like with shape (n_samples,).')
+                if 'groups' in self.resampling_strategy_args:
+                    if self.resampling_strategy_args['groups'].shape != y.shape:
+                        raise ValueError('Groups must be array-like'
+                                         ' with shape (n_samples,).')
 
             # Put args in self.resampling_strategy_args
             for key in ref_arg_dict:
@@ -406,17 +427,18 @@ class TrainEvaluator(AbstractEvaluator):
                         self.resampling_strategy_args['folds'] = ref_arg_dict['n_splits']
                 else:
                     if key not in self.resampling_strategy_args:
-                        if key == 'test_fold' and class_name == 'PredefinedSplit':
-                            raise ValueError('Must provide parameter test_fold for class PredefinedSplit.')
                         self.resampling_strategy_args[key] = ref_arg_dict[key]
 
-            # Instantiate new object with args
-            cv = copy.deepcopy(self.resampling_strategy)
-            for key in ref_arg_dict:
-                if key == 'n_splits':
-                    setattr(cv, key, self.resampling_strategy_args['folds'])
-                else:
-                    setattr(cv, key, self.resampling_strategy_args[key])
+            # Instantiate object with args
+            init_dict = copy.deepcopy(self.resampling_strategy_args)
+            init_dict.pop('groups', None)
+            if 'folds' in init_dict:
+                init_dict['n_splits'] = init_dict.pop('folds', None)
+            cv = copy.deepcopy(self.resampling_strategy)(**init_dict)
+
+            if 'groups' not in self.resampling_strategy_args:
+                self.resampling_strategy_args['groups'] = None
+
             return cv
 
         y = D.data['Y_train'].ravel()
