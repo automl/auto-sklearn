@@ -91,7 +91,9 @@ class TrainEvaluator(AbstractEvaluator):
         else:
             self.resampling_strategy_args = resampling_strategy_args
         self.cv = self.get_splitter(self.datamanager)
-        self.cv_folds = self.cv.get_n_splits(groups=self.resampling_strategy_args['groups'])
+        self.cv_folds = self.cv.get_n_splits(
+            groups=self.resampling_strategy_args.get('groups')
+        )
         self.X_train = self.datamanager.data['X_train']
         self.Y_train = self.datamanager.data['Y_train']
         self.Y_optimization = None
@@ -113,8 +115,10 @@ class TrainEvaluator(AbstractEvaluator):
                 raise ValueError('Cannot use partial fitting together with full'
                                  'cross-validation!')
 
-            for train_split, test_split in self.cv.split(self.X_train, self.Y_train,
-                                    groups=self.resampling_strategy_args['groups']):
+            for train_split, test_split in self.cv.split(
+                self.X_train, self.Y_train,
+                groups=self.resampling_strategy_args.get('groups')
+            ):
                 self.Y_optimization = self.Y_train[test_split]
                 self.Y_actual_train = self.Y_train[train_split]
                 self._partial_fit_and_predict(0, train_indices=train_split,
@@ -137,7 +141,9 @@ class TrainEvaluator(AbstractEvaluator):
             # case! -> maybe remove full CV from the train evaluator anyway and
             # make the user implement this!
             for i, (train_split, test_split) in enumerate(self.cv.split(
-                    self.X_train, y, groups=self.resampling_strategy_args['groups'])):
+                    self.X_train, y,
+                    groups=self.resampling_strategy_args.get('groups')
+            )):
 
                 # TODO add check that split is actually an integer array,
                 # not a boolean array (to allow indexed assignement of
@@ -251,7 +257,9 @@ class TrainEvaluator(AbstractEvaluator):
 
         y = _get_y_array(self.Y_train, self.task_type)
         for i, (train_split, test_split) in enumerate(self.cv.split(
-                self.X_train, y, groups=self.resampling_strategy_args['groups'])):
+                self.X_train, y,
+                groups=self.resampling_strategy_args.get('groups')
+        )):
             if i != fold:
                 continue
             else:

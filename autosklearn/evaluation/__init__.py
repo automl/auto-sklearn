@@ -60,9 +60,13 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         elif resampling_strategy == 'holdout-iterative-fit':
             eval_function = autosklearn.evaluation.train_evaluator.eval_iterative_holdout
         elif resampling_strategy == 'cv' or \
-                issubclass(resampling_strategy, BaseCrossValidator) or \
-                issubclass(resampling_strategy, _RepeatedSplits) or \
-                issubclass(resampling_strategy, BaseShuffleSplit):
+        (
+            isinstance(resampling_strategy, type) and (
+                issubclass(resampling_strategy, BaseCrossValidator) or
+                issubclass(resampling_strategy, _RepeatedSplits) or
+                issubclass(resampling_strategy, BaseShuffleSplit)
+            )
+        ):
             eval_function = autosklearn.evaluation.train_evaluator.eval_cv
         elif resampling_strategy == 'partial-cv':
             eval_function = autosklearn.evaluation.train_evaluator.eval_partial_cv
