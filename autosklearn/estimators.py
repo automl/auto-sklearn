@@ -85,9 +85,8 @@ class AutoSklearnEstimator(BaseEstimator):
             of preprocessors not to use. Incompatible with
             include_preprocessors.
 
-        resampling_strategy : string, optional ('holdout')
-            how to to avoid overfitting, might need
-            'resampling_strategy_arguments'
+        resampling_strategy : string or object, optional ('holdout')
+            how to to handle overfitting, might need 'resampling_strategy_arguments'
 
             * 'holdout': 67:33 (train:test) split
             * 'holdout-iterative-fit':  67:33 (train:test) split, calls iterative
@@ -95,6 +94,12 @@ class AutoSklearnEstimator(BaseEstimator):
             * 'cv': crossvalidation, requires 'folds'
             * 'partial-cv': crossvalidation with intensification, requires
               'folds'
+            * BaseCrossValidator object: any BaseCrossValidator class found
+                                        in scikit-learn model_selection module
+            * _RepeatedSplits object: any _RepeatedSplits class found
+                                      in scikit-learn model_selection module
+            * BaseShuffleSplit object: any BaseShuffleSplit class found
+                                      in scikit-learn model_selection module
 
         resampling_strategy_arguments : dict, optional if 'holdout' (train_size default=0.67)
             Additional arguments for resampling_strategy:
@@ -106,10 +111,15 @@ class AutoSklearnEstimator(BaseEstimator):
 
             Available arguments:
 
-            * 'holdout': {'train_size': float, 'shuffle': bool}
-            * 'holdout-iterative-fit':  {'train_size': float, 'shuffle': bool}
-            * 'cv': {'folds': int, 'shuffle': bool}
+            * 'holdout': {'train_size': float}
+            * 'holdout-iterative-fit':  {'train_size': float}
+            * 'cv': {'folds': int}
             * 'partial-cv': {'folds': int, 'shuffle': bool}
+            * BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments
+                required by chosen class as specified in scikit-learn documentation.
+                If arguments are not provided, scikit-learn defaults are used.
+                If no defaults are available, an exception is raised.
+                Refer to the 'n_splits' argument as 'folds'.
 
         tmp_folder : string, optional (None)
             folder to store configuration output and log files, if ``None``

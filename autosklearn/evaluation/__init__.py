@@ -14,6 +14,8 @@ from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException, \
     TAEAbortException
 from smac.tae.execute_func import AbstractTAFunc
 from ConfigSpace import Configuration
+from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit,\
+    BaseCrossValidator
 
 import autosklearn.evaluation.train_evaluator
 import autosklearn.evaluation.test_evaluator
@@ -57,7 +59,10 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             eval_function = autosklearn.evaluation.train_evaluator.eval_holdout
         elif resampling_strategy == 'holdout-iterative-fit':
             eval_function = autosklearn.evaluation.train_evaluator.eval_iterative_holdout
-        elif resampling_strategy == 'cv':
+        elif resampling_strategy == 'cv' or \
+                issubclass(resampling_strategy, BaseCrossValidator) or \
+                issubclass(resampling_strategy, _RepeatedSplits) or \
+                issubclass(resampling_strategy, BaseShuffleSplit):
             eval_function = autosklearn.evaluation.train_evaluator.eval_cv
         elif resampling_strategy == 'partial-cv':
             eval_function = autosklearn.evaluation.train_evaluator.eval_partial_cv
