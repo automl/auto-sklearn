@@ -38,8 +38,9 @@ class QuantileTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm)
 
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
+        # TODO parametrize like the Random Forest as n_quantiles = n_features^param
         n_quantiles = UniformIntegerHyperparameter(
-            'n_quantiles', lower=10, upper=int(1e5), default_value=1000
+            'n_quantiles', lower=10, upper=2000, default_value=1000
         )
         output_distribution = CategoricalHyperparameter(
             'output_distribution', ['uniform', 'normal']

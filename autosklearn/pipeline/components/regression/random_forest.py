@@ -5,11 +5,17 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
-from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
+from autosklearn.pipeline.components.base import (
+    AutoSklearnRegressionAlgorithm,
+    IterativeComponent,
+)
 from autosklearn.pipeline.constants import *
+from autosklearn.util.common import check_for_bool, check_none
 
-
-class RandomForest(AutoSklearnRegressionAlgorithm):
+class RandomForest(
+    IterativeComponent,
+    AutoSklearnRegressionAlgorithm,
+):
     def __init__(self, n_estimators, criterion, max_features,
                  max_depth, min_samples_split, min_samples_leaf,
                  min_weight_fraction_leaf, bootstrap, max_leaf_nodes,
@@ -29,15 +35,6 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
         self.n_jobs = n_jobs
         self.estimator = None
 
-    def fit(self, X, y, sample_weight=None):
-        n_iter = 2
-        self.iterative_fit(X, y, n_iter=n_iter, refit=True)
-        while not self.configuration_fully_fitted():
-            n_iter *= 2
-            self.iterative_fit(X, y, n_iter=n_iter)
-
-        return self
-
     def iterative_fit(self, X, y, n_iter=1, refit=False):
         from sklearn.ensemble import RandomForestRegressor
 
@@ -46,19 +43,18 @@ class RandomForest(AutoSklearnRegressionAlgorithm):
 
         if self.estimator is None:
             self.n_estimators = int(self.n_estimators)
-            if self.max_depth == "None" or self.max_depth is None:
+            if check_none(self.max_depth):
                 self.max_depth = None
             else:
                 self.max_depth = int(self.max_depth)
             self.min_samples_split = int(self.min_samples_split)
             self.min_samples_leaf = int(self.min_samples_leaf)
             self.max_features = float(self.max_features)
-            if self.bootstrap == "True":
-                self.bootstrap = True
-            else:
-                self.bootstrap = False
-            if self.max_leaf_nodes == "None" or self.max_leaf_nodes is None:
+            self.bootstrap = check_for_bool(self.bootstrap)
+            if check_none(self.max_leaf_nodes):
                 self.max_leaf_nodes = None
+            else:
+                self.max_leaf_nodes = int(self.max_leaf_nodes)
             self.min_impurity_decrease = float(self.min_impurity_decrease)
 
             self.estimator = RandomForestRegressor(

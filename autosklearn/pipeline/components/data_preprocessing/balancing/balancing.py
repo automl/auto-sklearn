@@ -32,7 +32,7 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
         # Have RF and ET in here because they emit a warning if class_weights
         #  are used together with warmstarts
         clf_ = ['adaboost', 'gradient_boosting', 'random_forest',
-                'extra_trees', 'sgd']
+                'extra_trees', 'sgd', 'passive_aggressive', 'xgradient_boosting']
         pre_ = []
         if classifier in clf_ or preprocessor in pre_:
             if len(Y.shape) > 1:

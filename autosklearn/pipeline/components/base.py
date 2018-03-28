@@ -142,6 +142,29 @@ class AutoSklearnComponent(BaseEstimator):
         return "autosklearn.pipeline %s" % name
 
 
+class IterativeComponent(AutoSklearnComponent):
+    def fit(self, X, y, sample_weight=None):
+        self.iterative_fit(X, y, n_iter=2, refit=True)
+        iteration = 2
+        while not self.configuration_fully_fitted():
+            n_iter = int(2 ** iteration / 2)
+            self.iterative_fit(X, y, n_iter=n_iter, refit=False)
+            iteration += 1
+        return self
+
+
+class IterativeComponentWithSampleWeight(AutoSklearnComponent):
+    def fit(self, X, y, sample_weight=None):
+        self.iterative_fit(
+            X, y, n_iter=2, refit=True, sample_weight=sample_weight
+        )
+        iteration = 2
+        while not self.configuration_fully_fitted():
+            n_iter = int(2 ** iteration / 2)
+            self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight)
+            iteration += 1
+        return self
+
 
 class AutoSklearnClassificationAlgorithm(AutoSklearnComponent):
     """Provide an abstract interface for classification algorithms in

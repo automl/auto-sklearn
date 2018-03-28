@@ -27,6 +27,7 @@ class ArrayReturningDummyPredictor(object):
     def predict_proba(self, X, *args, **kwargs):
         return self.arr
 
+
 class EstimatorTest(Base, unittest.TestCase):
     _multiprocess_can_split_ = True
 
@@ -88,20 +89,22 @@ class EstimatorTest(Base, unittest.TestCase):
         output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
         self._setUp(output)
 
-        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('digits')
 
         # test parallel Classifier to predict classes, not only indexes
-        Y_train = Y_train + 1
-        Y_test = Y_test + 1
+        Y_train += 1
+        Y_test += 1
 
-        automl = AutoSklearnClassifier(time_left_for_this_task=20,
-                                       per_run_time_limit=5,
-                                       output_folder=output,
-                                       tmp_folder=output,
-                                       shared_mode=True,
-                                       seed=1,
-                                       initial_configurations_via_metalearning=0,
-                                       ensemble_size=0)
+        automl = AutoSklearnClassifier(
+            time_left_for_this_task=20,
+            per_run_time_limit=5,
+            output_folder=output,
+            tmp_folder=output,
+            shared_mode=True,
+            seed=1,
+            initial_configurations_via_metalearning=0,
+            ensemble_size=0,
+        )
         automl.fit(X_train, Y_train)
         # Create a 'dummy model' for the first run, which has an accuracy of
         # more than 99%; it should be in the final ensemble if the ensemble
@@ -112,17 +115,20 @@ class EstimatorTest(Base, unittest.TestCase):
             true_targets_ensemble = np.load(fh)
         true_targets_ensemble[-1] = 1 if true_targets_ensemble[-1] != 1 else 0
         true_targets_ensemble = true_targets_ensemble.astype(int)
-        probas = np.zeros((len(true_targets_ensemble), 3), dtype=float)
+        probas = np.zeros((len(true_targets_ensemble), 10), dtype=float)
 
         for i, value in enumerate(true_targets_ensemble):
             probas[i, value] = 1.0
-        dummy_predictions_path = os.path.join(output, '.auto-sklearn',
-                                              'predictions_ensemble',
-                                              'predictions_ensemble_1_00030.npy')
+        dummy_predictions_path = os.path.join(
+            output,
+            '.auto-sklearn',
+            'predictions_ensemble',
+            'predictions_ensemble_1_00030.npy',
+        )
         with open(dummy_predictions_path, 'wb') as fh:
             np.save(fh, probas)
 
-        probas_test = np.zeros((len(Y_test), 3), dtype=float)
+        probas_test = np.zeros((len(Y_test), 10), dtype=float)
         for i, value in enumerate(Y_test):
             probas_test[i, value - 1] = 1.0
 
@@ -131,21 +137,23 @@ class EstimatorTest(Base, unittest.TestCase):
         backend = Backend(context)
         backend.save_model(dummy, 30, 1)
 
-        automl = AutoSklearnClassifier(time_left_for_this_task=20,
-                                       per_run_time_limit=5,
-                                       output_folder=output,
-                                       tmp_folder=output,
-                                       shared_mode=True,
-                                       seed=2,
-                                       initial_configurations_via_metalearning=0,
-                                       ensemble_size=0)
+        automl = AutoSklearnClassifier(
+            time_left_for_this_task=20,
+            per_run_time_limit=5,
+            output_folder=output,
+            tmp_folder=output,
+            shared_mode=True,
+            seed=2,
+            initial_configurations_via_metalearning=0,
+            ensemble_size=0,
+        )
         automl.fit_ensemble(Y_train, task=MULTICLASS_CLASSIFICATION,
                             metric=accuracy,
                             precision='32',
                             dataset_name='iris',
                             ensemble_size=20,
-                            ensemble_nbest=50)
-        #print(automl.show_models(), flush=True)
+                            ensemble_nbest=50,
+                            )
 
         predictions = automl.predict(X_test)
         score = sklearn.metrics.accuracy_score(Y_test, predictions)
@@ -303,7 +311,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         score = f1_macro(Y_test, predictions)
         self.assertGreaterEqual(score, 0.9)
         probs = automl.predict_proba(X_train)
-        self.assertAlmostEqual(np.mean(probs), 0.33333333333333331)
+        self.assertAlmostEqual(np.mean(probs), 0.33, places=2)
 
     def test_binary(self):
         output = os.path.join(self.test_dir, '..', '.tmp_binary_fit')
@@ -316,11 +324,15 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
                                        tmp_folder=output,
                                        output_folder=output)
 
-        automl.fit(X_train, Y_train)
+        automl.fit(X_train, Y_train, X_test=X_test, y_test=Y_test,
+                   dataset_name='binary_test_dataset')
         predictions = automl.predict(X_test)
         self.assertEqual(predictions.shape, (50, ))
         score = accuracy(Y_test, predictions)
         self.assertGreaterEqual(score, 0.9)
+
+        output_files = os.listdir(output)
+        self.assertIn('binary_test_dataset_test_1.predict', output_files)
 
     @unittest.mock.patch.object(AutoML, 'fit')
     @unittest.mock.patch.object(AutoML, 'refit')

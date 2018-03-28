@@ -30,6 +30,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
                                output_y_hat_optimization=False,
                                queue=queue_mock, metric=accuracy)
         ae.Y_optimization = rs.rand(33, 3)
+        predictions_train = rs.rand(66, 3)
         predictions_ensemble = rs.rand(33, 3)
         predictions_test = rs.rand(25, 3)
         predictions_valid = rs.rand(25, 3)
@@ -37,7 +38,15 @@ class AbstractEvaluatorTest(unittest.TestCase):
         # NaNs in prediction ensemble
         predictions_ensemble[5, 2] = np.NaN
         _, loss, _, additional_run_info = ae.finish_up(
-            0.1, predictions_ensemble, predictions_valid, predictions_test)
+            loss=0.1,
+            train_pred=predictions_train,
+            opt_pred=predictions_ensemble,
+            valid_pred=predictions_valid,
+            test_pred=predictions_test,
+            additional_run_info=None,
+            final_call=True,
+            file_output=True,
+        )
         self.assertEqual(loss, 1.0)
         self.assertEqual(additional_run_info,
                          {'error': 'Model predictions for optimization set '
@@ -47,7 +56,15 @@ class AbstractEvaluatorTest(unittest.TestCase):
         predictions_ensemble[5, 2] = 0.5
         predictions_valid[5, 2] = np.NaN
         _, loss, _, additional_run_info = ae.finish_up(
-            0.1, predictions_ensemble, predictions_valid, predictions_test)
+            loss=0.1,
+            train_pred=predictions_train,
+            opt_pred=predictions_ensemble,
+            valid_pred=predictions_valid,
+            test_pred=predictions_test,
+            additional_run_info=None,
+            final_call=True,
+            file_output=True,
+        )
         self.assertEqual(loss, 1.0)
         self.assertEqual(additional_run_info,
                          {'error': 'Model predictions for validation set '
@@ -57,7 +74,15 @@ class AbstractEvaluatorTest(unittest.TestCase):
         predictions_valid[5, 2] = 0.5
         predictions_test[5, 2] = np.NaN
         _, loss, _, additional_run_info = ae.finish_up(
-            0.1, predictions_ensemble, predictions_valid, predictions_test)
+            loss=0.1,
+            train_pred=predictions_train,
+            opt_pred=predictions_ensemble,
+            valid_pred=predictions_valid,
+            test_pred=predictions_test,
+            additional_run_info=None,
+            final_call=True,
+            file_output=True,
+        )
         self.assertEqual(loss, 1.0)
         self.assertEqual(additional_run_info,
                          {'error': 'Model predictions for test set contains '
@@ -75,7 +100,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         rs = np.random.RandomState(1)
 
-
         ae = AbstractEvaluator(
             backend=backend_mock,
             queue=queue_mock,
@@ -83,12 +107,19 @@ class AbstractEvaluatorTest(unittest.TestCase):
             metric=accuracy,
         )
 
+        predictions_train = rs.rand(66, 3)
         predictions_ensemble = rs.rand(33, 3)
         predictions_test = rs.rand(25, 3)
         predictions_valid = rs.rand(25, 3)
 
-        loss_, additional_run_info_ = ae.file_output(
-            predictions_ensemble, predictions_valid, predictions_test)
+        loss_, additional_run_info_ = (
+            ae.file_output(
+                predictions_train,
+                predictions_ensemble,
+                predictions_valid,
+                predictions_test,
+            )
+        )
 
         self.assertIsNone(loss_)
         self.assertEqual(additional_run_info_, {})
@@ -105,11 +136,17 @@ class AbstractEvaluatorTest(unittest.TestCase):
         )
         ae.Y_optimization = predictions_ensemble
 
-        loss_, additional_run_info_ = ae.file_output(
-            predictions_ensemble, predictions_valid, predictions_test)
+        loss_, additional_run_info_ = (
+            ae.file_output(
+                predictions_train,
+                predictions_ensemble,
+                predictions_valid,
+                predictions_test,
+            )
+        )
 
         self.assertIsNone(loss_)
-        self.assertIsNone(additional_run_info_)
+        self.assertEqual(additional_run_info_, {})
         # This function is not guarded by a an if statement
         self.assertEqual(backend_mock.save_predictions_as_npy.call_count, 3)
         self.assertEqual(backend_mock.save_model.call_count, 0)
@@ -125,11 +162,17 @@ class AbstractEvaluatorTest(unittest.TestCase):
         ae.Y_optimization = predictions_ensemble
         ae.model = 'model'
 
-        loss_, additional_run_info_ = ae.file_output(
-            predictions_ensemble, predictions_valid, predictions_test)
+        loss_, additional_run_info_ = (
+            ae.file_output(
+                predictions_train,
+                predictions_ensemble,
+                predictions_valid,
+                predictions_test,
+            )
+        )
 
         self.assertIsNone(loss_)
-        self.assertIsNone(additional_run_info_)
+        self.assertEqual(additional_run_info_, {})
         # This function is not guarded by a an if statement
         self.assertEqual(backend_mock.save_predictions_as_npy.call_count, 5)
         self.assertEqual(backend_mock.save_model.call_count, 1)

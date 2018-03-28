@@ -135,11 +135,16 @@ class AutoML(BaseEstimator):
         # After assignging and checking variables...
         #self._backend = Backend(self._output_dir, self._tmp_dir)
 
-    def fit(self, X, y,
-            task=MULTICLASS_CLASSIFICATION,
-            metric=None,
-            feat_type=None,
-            dataset_name=None):
+    def fit(
+        self, X, y,
+        task,
+        metric,
+        X_test=None,
+        y_test=None,
+        feat_type=None,
+        dataset_name=None,
+        only_return_configuration_space=False,
+    ):
         if not self._shared_mode:
             self._backend.context.delete_directories()
         else:
@@ -183,13 +188,22 @@ class AutoML(BaseEstimator):
                                      'valid feature types, you passed `%s`' % ft)
 
         self._data_memory_limit = None
-        loaded_data_manager = XYDataManager(X, y,
-                                            task=task,
-                                            feat_type=feat_type,
-                                            dataset_name=dataset_name)
+        loaded_data_manager = XYDataManager(
+            X, y,
+            X_test=X_test,
+            y_test=y_test,
+            task=task,
+            feat_type=feat_type,
+            dataset_name=dataset_name,
+        )
 
-        return self._fit(loaded_data_manager, metric)
+        return self._fit(
+            loaded_data_manager,
+            metric,
+            only_return_configuration_space,
+        )
 
+    # TODO this is very old code which can be dropped!
     def fit_automl_dataset(self, dataset, metric):
         self._stopwatch = StopWatch()
         self._backend.save_start_time(self._seed)
@@ -282,7 +296,7 @@ class AutoML(BaseEstimator):
 
         return ta.num_run
 
-    def _fit(self, datamanager, metric):
+    def _fit(self, datamanager, metric, only_return_configuration_space=False):
         # Reset learnt stuff
         self.models_ = None
         self.ensemble_ = None
@@ -360,6 +374,8 @@ class AutoML(BaseEstimator):
             exclude_estimators=self._exclude_estimators,
             include_preprocessors=self._include_preprocessors,
             exclude_preprocessors=self._exclude_preprocessors)
+        if only_return_configuration_space:
+            return self.configuration_space
 
         # == RUN ensemble builder
         # Do this before calculating the meta-features to make sure that the
@@ -612,7 +628,8 @@ class AutoML(BaseEstimator):
                                seed=self._seed,
                                shared_mode=self._shared_mode,
                                precision=precision,
-                               max_iterations=max_iterations)
+                               max_iterations=max_iterations,
+                               read_at_most=np.inf)
 
     def _load_models(self):
         if self._shared_mode:
@@ -816,7 +833,8 @@ class BaseAutoML(AutoML):
 
     def _perform_input_checks(self, X, y):
         X = self._check_X(X)
-        y = self._check_y(y)
+        if y is not None:
+            y = self._check_y(y)
         return X, y
 
     def _check_X(self, X):
@@ -870,12 +888,21 @@ class AutoMLClassifier(BaseAutoML):
                               'multiclass': MULTICLASS_CLASSIFICATION,
                               'binary': BINARY_CLASSIFICATION}
 
-    def fit(self, X, y,
-            metric=None,
-            loss=None,
-            feat_type=None,
-            dataset_name=None):
+    def fit(
+        self, X, y,
+        X_test=None,
+        y_test=None,
+        metric=None,
+        feat_type=None,
+        dataset_name=None,
+        only_return_configuration_space=False,
+    ):
         X, y = self._perform_input_checks(X, y)
+        if X_test is not None:
+            X_test, y_test = self._perform_input_checks(X_test, y_test)
+            if len(y.shape) != len(y_test.shape):
+                raise ValueError('Target value shapes do not match: %s vs %s'
+                                 % (y.shape, y_test.shape))
 
         y_task = type_of_target(y)
         task = self._task_mapping.get(y_task)
@@ -889,8 +916,31 @@ class AutoMLClassifier(BaseAutoML):
                 metric = accuracy
 
         y, self._classes, self._n_classes = self._process_target_classes(y)
+        if y_test is not None:
+            # Map test values to actual values - TODO: copy to all kinds of
+            # other parts in this code and test it!!!
+            y_test_new = []
+            for output_idx in range(len(self._classes)):
+                mapping = {self._classes[output_idx][idx]: idx
+                           for idx in range(len(self._classes[output_idx]))}
+                enumeration = y_test if len(self._classes) == 1 else y_test[output_idx]
+                y_test_new.append(
+                    np.array([mapping[value] for value in enumeration])
+                )
+            y_test = np.array(y_test_new)
+            if self._n_outputs == 1:
+                y_test = y_test.flatten()
 
-        return super().fit(X, y, task, metric, feat_type, dataset_name)
+        return super().fit(
+            X, y,
+            X_test=X_test,
+            y_test=y_test,
+            task=task,
+            metric=metric,
+            feat_type=feat_type,
+            dataset_name=dataset_name,
+            only_return_configuration_space=only_return_configuration_space,
+        )
 
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
@@ -923,7 +973,7 @@ class AutoMLClassifier(BaseAutoML):
                 _classes.append(classes_k)
                 _n_classes.append(classes_k.shape[0])
 
-        self._n_classes = np.array(_n_classes, dtype=np.int)
+        _n_classes = np.array(_n_classes, dtype=np.int)
 
         return y, _classes, _n_classes
 
@@ -953,7 +1003,15 @@ class AutoMLClassifier(BaseAutoML):
 
 
 class AutoMLRegressor(BaseAutoML):
-    def fit(self, X, y, metric=None, feat_type=None, dataset_name=None):
+    def fit(
+        self, X, y,
+        X_test=None,
+        y_test=None,
+        metric=None,
+        feat_type=None,
+        dataset_name=None,
+        only_return_configuration_space=False,
+    ):
         X, y = super()._perform_input_checks(X, y)
         _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
         if _n_outputs > 1:
@@ -961,8 +1019,16 @@ class AutoMLRegressor(BaseAutoML):
                 'Multi-output regression is not implemented.')
         if metric is None:
             metric = r2
-        return super().fit(X, y, task=REGRESSION, metric=metric,
-                           feat_type=feat_type, dataset_name=dataset_name)
+        return super().fit(
+            X, y,
+            X_test=X_test,
+            y_test=y_test,
+            task=REGRESSION,
+            metric=metric,
+            feat_type=feat_type,
+            dataset_name=dataset_name,
+            only_return_configuration_space=only_return_configuration_space,
+        )
 
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,

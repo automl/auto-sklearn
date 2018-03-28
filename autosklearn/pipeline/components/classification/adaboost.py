@@ -10,8 +10,8 @@ class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
 
     def __init__(self, n_estimators, learning_rate, algorithm, max_depth,
                  random_state=None):
-        self.n_estimators = int(n_estimators)
-        self.learning_rate = float(learning_rate)
+        self.n_estimators = n_estimators
+        self.learning_rate = learning_rate
         self.algorithm = algorithm
         self.random_state = random_state
         self.max_depth = max_depth

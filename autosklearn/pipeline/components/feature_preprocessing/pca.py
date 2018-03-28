@@ -6,17 +6,20 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
-
+from autosklearn.util.common import check_for_bool
 
 class PCA(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, keep_variance, whiten, random_state=None):
         self.keep_variance = keep_variance
         self.whiten = whiten
+
         self.random_state = random_state
 
     def fit(self, X, Y=None):
         import sklearn.decomposition
         n_components = float(self.keep_variance)
+        self.whiten = check_for_bool(self.whiten)
+
         self.preprocessor = sklearn.decomposition.PCA(n_components=n_components,
                                                       whiten=self.whiten,
                                                       copy=True)

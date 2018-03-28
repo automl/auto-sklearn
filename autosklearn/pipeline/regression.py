@@ -180,7 +180,8 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         del possible_default_regressor[
             possible_default_regressor.index(default)]
 
-        # A regressor which can handle sparse data after the densifier
+        # A regressor which can handle sparse data after the densifier is
+        # forbidden for memory issues
         for key in regressors:
             if SPARSE in available_regressors[key].get_properties(dataset_properties=None)['input']:
                 if 'densifier' in preprocessors:
@@ -195,6 +196,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                                         cs.get_hyperparameter(
                                             'preprocessor:__choice__'), 'densifier')
                                 ))
+                            # Success
                             break
                         except ValueError:
                             # Change the default and try again

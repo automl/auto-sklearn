@@ -1,6 +1,5 @@
 import resource
-
-import numpy as np
+import sys
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.conditions import InCondition
@@ -10,7 +9,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
-
+from autosklearn.util.common import check_for_bool, check_none
 
 class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
     def __init__(self, kernel, C, epsilon, tol, shrinking, gamma=0.1,
@@ -32,12 +31,29 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
     def fit(self, X, Y):
         import sklearn.svm
 
+        # Calculate the size of the kernel cache (in MB) for sklearn's LibSVM. The cache size is
+        # calculated as 2/3 of the available memory (which is calculated as the memory limit minus
+        # the used memory)
         try:
+            # Retrieve memory limits imposed on the process
             soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+
             if soft > 0:
+                # Convert limit to units of megabytes
                 soft /= 1024 * 1024
+
+                # Retrieve memory used by this process
                 maxrss = resource.getrusage(resource.RUSAGE_SELF)[2] / 1024
+
+                # In MacOS, the MaxRSS output of resource.getrusage in bytes; on other platforms,
+                # it's in kilobytes
+                if sys.platform == 'darwin':
+                    maxrss = maxrss / 1024
+
                 cache_size = (soft - maxrss) / 1.5
+
+                if cache_size < 0:
+                    cache_size = 200
             else:
                 cache_size = 200
         except Exception:
@@ -46,10 +62,10 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
         self.C = float(self.C)
         self.epsilon = float(self.epsilon)
         self.tol = float(self.tol)
-        self.shrinking = self.shrinking == 'True'
+        self.shrinking = check_for_bool(self.shrinking)
         self.degree = int(self.degree)
         self.gamma = float(self.gamma)
-        if self.coef0 is None:
+        if check_none(self.coef0):
             self.coef0 = 0.0
         else:
             self.coef0 = float(self.coef0)

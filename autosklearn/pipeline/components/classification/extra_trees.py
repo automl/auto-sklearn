@@ -5,12 +5,19 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, \
     UnParametrizedHyperparameter, Constant
 
-from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.components.base import (
+    AutoSklearnClassificationAlgorithm,
+    IterativeComponentWithSampleWeight,
+)
 from autosklearn.pipeline.constants import *
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
+from autosklearn.util.common import check_for_bool, check_none
 
 
-class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
+class ExtraTreesClassifier(
+    IterativeComponentWithSampleWeight,
+    AutoSklearnClassificationAlgorithm,
+):
 
     def __init__(self, n_estimators, criterion, min_samples_leaf,
                  min_samples_split,  max_features, bootstrap, max_leaf_nodes,
@@ -25,43 +32,27 @@ class ExtraTreesClassifier(AutoSklearnClassificationAlgorithm):
                              "%s" % criterion)
         self.criterion = criterion
 
-        if max_depth == "None" or max_depth is None:
+        if check_none(max_depth):
             self.max_depth = None
         else:
             self.max_depth = int(max_depth)
-        if max_leaf_nodes == "None" or max_leaf_nodes is None:
+        if check_none(max_leaf_nodes):
             self.max_leaf_nodes = None
         else:
             self.max_leaf_nodes = int(max_leaf_nodes)
 
         self.min_samples_leaf = int(min_samples_leaf)
         self.min_samples_split = int(min_samples_split)
-
         self.max_features = float(max_features)
-
-        if bootstrap == "True":
-            self.bootstrap = True
-        elif bootstrap == "False":
-            self.bootstrap = False
-
+        self.bootstrap = check_for_bool(bootstrap)
         self.min_weight_fraction_leaf = float(min_weight_fraction_leaf)
         self.min_impurity_decrease = float(min_impurity_decrease)
-
         self.oob_score = oob_score
         self.n_jobs = int(n_jobs)
         self.random_state = random_state
         self.verbose = int(verbose)
         self.class_weight = class_weight
         self.estimator = None
-
-    def fit(self, X, y, sample_weight=None):
-        n_iter = 2
-        self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight,
-                           refit=True)
-        while not self.configuration_fully_fitted():
-            n_iter *= 2
-            self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight)
-        return self
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
         from sklearn.ensemble import ExtraTreesClassifier as ETC
