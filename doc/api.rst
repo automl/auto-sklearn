@@ -29,7 +29,7 @@ Regression
 Metrics
 =======
 
-.. autofunction:: autosklearn.metrics.make_scorer
+.. autofunction:: autosklearn.metrics.make_loss_function
 
 ~~~~~~~~~~~~~~~~
 Built-in Metrics

@@ -6,6 +6,7 @@ import sklearn.metrics
 import autosklearn.metrics.classification_metrics
 
 
+
 class TestScorer(unittest.TestCase):
 
     def test_predict_scorer_binary(self):
@@ -247,8 +248,22 @@ class TestScorer(unittest.TestCase):
         y_true = np.arange(0, 1.01, 0.1)
         y_pred = y_true.copy()
 
-        scorer = autosklearn.metrics.make_scorer(
+        scorer = autosklearn.metrics.make_loss_function(
             'r2', sklearn.metrics.r2_score, greater_is_better=True)
+
+
+        # The signs of the scores in the assertions are all fliped since the behavior of greater_is_better changed.
+        score = scorer(y_true, y_pred + 1.0)
+        self.assertAlmostEqual(score, 9.0)
+
+        score = scorer(y_true, y_pred + 0.5)
+        self.assertAlmostEqual(score, 1.5)
+
+        score = scorer(y_true, y_pred)
+        self.assertAlmostEqual(score, -1.0)
+
+        scorer = autosklearn.metrics.make_loss_function(
+            'r2', sklearn.metrics.r2_score, greater_is_better=False)
 
         score = scorer(y_true, y_pred + 1.0)
         self.assertAlmostEqual(score, -9.0)
@@ -258,18 +273,6 @@ class TestScorer(unittest.TestCase):
 
         score = scorer(y_true, y_pred)
         self.assertAlmostEqual(score, 1.0)
-
-        scorer = autosklearn.metrics.make_scorer(
-            'r2', sklearn.metrics.r2_score, greater_is_better=False)
-
-        score = scorer(y_true, y_pred + 1.0)
-        self.assertAlmostEqual(score, 9.0)
-
-        score = scorer(y_true, y_pred + 0.5)
-        self.assertAlmostEqual(score, 1.5)
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, -1.0)
 
 
 class TestMetricsDoNotAlterInput(unittest.TestCase):
@@ -310,36 +313,118 @@ class TestMetricsDoNotAlterInput(unittest.TestCase):
                     raise e
 
 
-<<<<<<< HEAD
-=======
+class TestMetric(unittest.TestCase):
 
->>>>>>> f62f644... Added new unittest class for mean squared error.
-class test_MSE(unittest.TestCase):
-    def test_mean_squared_error(self):
-        y_true = np.array([1, 2, 3, 4])
-        scorer = autosklearn.metrics.make_scorer('mean squared error', autosklearn.metrics.mean_squared_error, \
-                                                 greater_is_better=False)
+    def test_regression_all(self):
 
-        y_pred = y_true.copy()
-        current_score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(current_score, 0)
+        for metric, scorer in autosklearn.metrics.REGRESSION_METRICS.items():
+            y_true = np.array([1, 2, 3, 4])
+            y_pred = y_true.copy()
 
-        y_pred = np.array([1, 2.5, 3, 4])
-        previous_score = current_score
-        current_score = scorer(y_true, y_pred)
-        self.assertGreater(current_score, previous_score)
+            # the best possible score of r2 loss is 1, but the sign will be fliped in order to minimize.
+            # Therefore, the best possible prediction score will be -1, and poorer predictions will make
+            # the score larger and positive.
+            if metric == 'r2':
+                previous_score = -1
+            else:
+                previous_score = 0
+            current_score = scorer(y_true, y_pred)
+            self.assertAlmostEqual(current_score, previous_score)
 
-        y_pred = np.array([2, 3, 4, 5])
-        previous_score = current_score
-        current_score = scorer(y_true, y_pred)
-        self.assertGreater(current_score, previous_score)
+            y_pred = np.array([3, 4, 5, 6])
+            current_score = scorer(y_true, y_pred)
+            self.assertGreater(current_score, previous_score)
 
-        y_pred = np.array([1, 1, 1, 1])
-        previous_score = current_score
-        current_score = scorer(y_true, y_pred)
-        self.assertGreater(current_score, previous_score)
+            y_pred = np.array([-1, 0, -1, 0])
+            previous_score = current_score
+            current_score = scorer(y_true, y_pred)
+            self.assertGreater(current_score, previous_score)
 
-        y_pred = np.array([-5, 10, 7, -3])
-        previous_score = current_score
-        current_score = scorer(y_true, y_pred)
-        self.assertGreater(current_score, previous_score)
+            y_pred = np.array([-5, 10, 7, -3])
+            previous_score = current_score
+            current_score = scorer(y_true, y_pred)
+            self.assertGreater(current_score, previous_score)
+
+
+    def test_classification_binary(self):
+
+        for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
+            # Skip functions not applicable for binary classification.
+            if metric in ['pac_score', 'precision_samples', 'recall_samples', 'f1_samples']:
+                continue
+
+            y_true = np.array([1.0, 1.0, 1.0, 0.0, 0.0])
+            y_pred = np.array([[0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [1.0, 0.0], [1.0, 0.0]])
+            if metric is 'log_loss':
+                previous_score = 0      # the best value for log loss is 0.
+            else:
+                previous_score = -1     # the best value for other losses is 1, and we flip the sign to minimize.
+            current_score = scorer(y_true, y_pred)
+            self.assertAlmostEqual(current_score, previous_score)
+
+            if metric is 'recall':
+                y_pred = np.array([[0.0, 1.0], [0.0, 1.0], [1.0, 0.0], [1.0, 0.0], [1.0, 0.0]])
+            else:
+                y_pred = np.array([[0.0, 1.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0], [1.0, 0.0]])
+            previous_score = current_score
+            current_score = scorer(y_true, y_pred)
+            self.assertGreater(current_score, previous_score)
+
+            y_pred = np.array([[0.0, 1.0], [1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]])
+            previous_score = current_score
+            current_score = scorer(y_true, y_pred)
+            self.assertGreater(current_score, previous_score)
+
+    def test_classification_multiclass(self):
+
+        for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
+            # Skip functions not applicable for multiclass classification.
+            if metric in ['pac_score', 'roc_auc', 'average_precision', 'precision', 'recall', 'f1',
+                          'precision_samples', 'recall_samples', 'f1_samples']:
+                continue
+            y_true = np.array([0.0, 0.0, 1.0, 1.0, 2.0])
+            y_pred = np.array([[1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+            if metric is 'log_loss': # the best possible score for log_loss is 0.
+                previous_score = 0
+            else:
+                previous_score = -1 # the best value for other losses is 1, and we flip the sign to minimize.
+            current_score = scorer(y_true, y_pred)
+            self.assertAlmostEqual(current_score, previous_score)
+
+            y_pred = np.array([[1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+            previous_score = current_score
+            current_score = scorer(y_true, y_pred)
+            self.assertGreater(current_score, previous_score)
+
+            y_pred = np.array([[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 1.0, 0.0]])
+            previous_score = current_score
+            current_score = scorer(y_true, y_pred)
+            self.assertGreater(current_score, previous_score)
+
+
+    def test_classification_multilabel(self):
+
+        for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
+            # Skip functions not applicable for multi-label classification.
+            if metric in ['accuracy', 'balanced_accuracy', 'roc_auc', 'average_precision', 'log_loss',
+                          'pac_score', 'precision', 'recall', 'f1']:
+                continue
+            y_true = np.array([[1, 0, 0], [1, 1, 0], [0, 1, 1], [1, 1, 1]])
+            y_pred = y_true.copy()
+            previous_score = -1
+            current_score = scorer(y_true, y_pred)
+            self.assertAlmostEqual(current_score, previous_score)
+
+            y_pred = np.array([[1, 0, 0], [0, 0, 1], [0, 1, 1], [1, 1, 1]])
+            previous_score = current_score
+            current_score = scorer(y_true, y_pred)
+            self.assertGreater(current_score, previous_score)
+
+            y_pred = np.array([[0, 0, 0], [0, 0, 1], [1, 0, 1], [1, 1, 0]])
+            previous_score = current_score
+            current_score = scorer(y_true, y_pred)
+            self.assertGreater(current_score, previous_score)
+
+
+if __name__ == "__main__":
+    unittest.main()
