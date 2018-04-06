@@ -89,7 +89,7 @@ class EnsembleSelection(AbstractEnsemble):
                     task_type=self.task_type,
                     metric=self.metric,
                     all_scoring_functions=False)
-            
+
             all_best = np.argwhere(scores == np.nanmin(scores)).flatten()
             best = np.random.choice(all_best)
             ensemble.append(predictions[best])
@@ -222,7 +222,16 @@ class EnsembleSelection(AbstractEnsemble):
         return output
 
     def get_model_identifiers(self):
-        return self.identifiers_
+        output = []
+
+        for i, weight in enumerate(self.weights_):
+            identifier = self.identifiers_[i]
+            if weight > 0.0:
+                output.append(identifier)
+
+        output.sort(reverse=True, key=lambda t: t[0])
+
+        return output
 
     def get_validation_performance(self):
         return self.trajectory_[-1]
