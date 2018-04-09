@@ -195,7 +195,8 @@ class EnsembleSelection(AbstractEnsemble):
 
     def predict(self, predictions):
         for i, weight in enumerate(self.weights_):
-            predictions[i] *= weight
+            if weight > 0.0:
+                predictions[i] *= weight
         return np.sum(predictions, axis=0)
 
     def __str__(self):
