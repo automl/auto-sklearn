@@ -52,7 +52,7 @@ def main():
     # Second example: Use own accuracy metric
     print("#"*80)
     print("Use self defined accuracy metric")
-    accuracy_scorer = autosklearn.metrics.make_loss_function(
+    accuracy_scorer = autosklearn.metrics.make_scorer(
         name="accu",
         score_func=accuracy,
         greater_is_better=True,
@@ -74,7 +74,7 @@ def main():
     # Third example: Use own accuracy metric with additional argument
     print("#"*80)
     print("Use self defined accuracy with additional argument")
-    accuracy_scorer = autosklearn.metrics.make_loss_function(
+    accuracy_scorer = autosklearn.metrics.make_scorer(
         name="accu_add",
         score_func=accuracy_wk,
         greater_is_better=True,

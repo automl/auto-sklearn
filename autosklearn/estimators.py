@@ -249,7 +249,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         metric : callable, optional
             An instance of :class:`autosklearn.metrics.Scorer` as created by
-            :meth:`autosklearn.metrics.make_loss_function`. These are the `Built-in
+            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
             Metrics`_.
 
         precision : str
@@ -380,7 +380,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
 
         metric : callable, optional (default='autosklearn.metrics.accuracy')
             An instance of :class:`autosklearn.metrics.Scorer` as created by
-            :meth:`autosklearn.metrics.make_loss_function`. These are the `Built-in
+            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
             Metrics`_.
 
         feat_type : list, optional (default=None)
@@ -465,7 +465,7 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
 
         metric : callable, optional (default='autosklearn.metrics.r2')
             An instance of :class:`autosklearn.metrics.Scorer` as created by
-            :meth:`autosklearn.metrics.make_loss_function`. These are the `Built-in
+            :meth:`autosklearn.metrics.make_scorer`. These are the `Built-in
             Metrics`_.
 
         feat_type : list, optional (default=None)

@@ -26,7 +26,7 @@ class EnsembleSelection(AbstractEnsemble):
         if not self.task_type in TASK_TYPES:
             raise ValueError('Unknown task type %s.' % self.task_type)
         if not isinstance(self.metric, Scorer):
-            raise ValueError('Metric must be of type scorer')
+            raise ValueError('Metric must be of type Scorer')
         if self.mode not in ('fast', 'slow'):
             raise ValueError('Unknown mode %s' % self.mode)
 
