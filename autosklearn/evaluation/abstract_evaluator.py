@@ -213,9 +213,10 @@ class AbstractEvaluator(object):
             all_scoring_functions=all_scoring_functions)
 
         if hasattr(score, '__len__'):
-            err = {key: 1 - score[key] for key in score}
+            # Best value of the scorer minus the score gives the loss (the smaller the better)
+            err = {key: self.metric.optimum - score[key] for key in score}
         else:
-            err = 1 - score
+            err = self.metric.optimum - score
 
         return err
 

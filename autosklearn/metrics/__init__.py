@@ -11,11 +11,13 @@ from .util import *
 
 
 class Scorer(object, metaclass=ABCMeta):
-    def __init__(self, name, score_func, sign, kwargs):
+    def __init__(self, name, score_func, optimum, sign, kwargs):
         self.name = name
         self._kwargs = kwargs
         self._score_func = score_func
         self._sign = sign
+        self._optimum = optimum
+        #TODO: add optimum to document
 
     @abstractmethod
     def __call__(self, y_true, y_pred, sample_weight=None):
@@ -133,7 +135,7 @@ class _ThresholdScorer(Scorer):
             return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
 
 
-def make_scorer(name, score_func, greater_is_better=True, needs_proba=False,
+def make_scorer(name, score_func, optimum=1, greater_is_better=True, needs_proba=False,
                 needs_threshold=False, **kwargs):
     """Make a scorer from a performance metric or loss function.
 
@@ -145,6 +147,9 @@ def make_scorer(name, score_func, greater_is_better=True, needs_proba=False,
     score_func : callable
         Score function (or loss function) with signature
         ``score_func(y, y_pred, **kwargs)``.
+
+    optimum : float or int, default=1
+        Best possible value achievable by the score_func.
 
     greater_is_better : boolean, default=True
         Whether score_func is a score function (default), meaning high is good,
@@ -174,41 +179,36 @@ def make_scorer(name, score_func, greater_is_better=True, needs_proba=False,
         cls = _ThresholdScorer
     else:
         cls = _PredictScorer
-    return cls(name, score_func, sign, kwargs)
+    return cls(name, score_func, optimum, sign, kwargs)
 
 
 # Standard regression scores
 r2 = make_scorer('r2', sklearn.metrics.r2_score)
 mean_squared_error = make_scorer('mean_squared_error',
-                                 sklearn.metrics.mean_squared_error,
+                                 sklearn.metrics.mean_squared_error, optimum=0,
                                  greater_is_better=False)
-mean_absolute_error = make_scorer('mean_absolute_error',
-                                  sklearn.metrics.mean_absolute_error,
-                                  greater_is_better=False)
-median_absolute_error = make_scorer('median_absolute_error',
-                                    sklearn.metrics.median_absolute_error,
-                                    greater_is_better=False)
+mean_absolute_error = make_scorer('mean_absolute_error', sklearn.metrics.mean_absolute_error,
+                                  optimum=0, greater_is_better=False)
+median_absolute_error = make_scorer('median_absolute_error', sklearn.metrics.median_absolute_error,
+                                optimum=0, greater_is_better=False)
 
 # Standard Classification Scores
 accuracy = make_scorer('accuracy', sklearn.metrics.accuracy_score)
-balanced_accuracy = make_scorer('balanced_accuracy',
-                                classification_metrics.balanced_accuracy)
+balanced_accuracy = make_scorer('balanced_accuracy', classification_metrics.balanced_accuracy)
 f1 = make_scorer('f1', sklearn.metrics.f1_score)
 
 # Score functions that need decision values
-roc_auc = make_scorer('roc_auc', sklearn.metrics.roc_auc_score,
-                      greater_is_better=True, needs_threshold=True)
+roc_auc = make_scorer('roc_auc', sklearn.metrics.roc_auc_score, needs_threshold=True)
 average_precision = make_scorer('average_precision',
-                                sklearn.metrics.average_precision_score,
-                                needs_threshold=True)
+                                sklearn.metrics.average_precision_score, needs_threshold=True)
 precision = make_scorer('precision', sklearn.metrics.precision_score)
 recall = make_scorer('recall', sklearn.metrics.recall_score)
 
 # Score function for probabilistic classification
-log_loss = make_scorer('log_loss', sklearn.metrics.log_loss,
-                       greater_is_better=False, needs_proba=True)
+log_loss = make_scorer('log_loss', sklearn.metrics.log_loss, optimum=0,
+                        greater_is_better=False, needs_proba=True)
 pac_score = make_scorer('pac_score', classification_metrics.pac_score,
-                        greater_is_better=True, needs_proba=True)
+                        greater_is_better=False, needs_proba=True)
 # TODO what about mathews correlation coefficient etc?
 
 
