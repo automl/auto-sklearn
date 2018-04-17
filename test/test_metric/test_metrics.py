@@ -345,12 +345,15 @@ class TestMetric(unittest.TestCase):
 
         for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
             # Skip functions not applicable for binary classification.
-            # TODO: Average precision should work for binary classification, but its behavior is not right.
-            if metric in ['average_precision', 'pac_score', 'precision_samples', 'recall_samples', 'f1_samples']:
+            # TODO: Average precision should work for binary classification,
+            # TODO: but its behavior is not right.
+            if metric in ['average_precision', 'pac_score',
+                          'precision_samples', 'recall_samples', 'f1_samples']:
                 continue
 
             y_true = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
-            y_pred = np.array([[0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [1.0, 0.0], [1.0, 0.0], [1.0, 0.0]])
+            y_pred = np.array([[0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [1.0, 0.0],
+                                [1.0, 0.0], [1.0, 0.0]])
             if metric is 'log_loss':
                 previous_score = 0      # the best value for log loss is 0.
             else:
@@ -358,17 +361,20 @@ class TestMetric(unittest.TestCase):
             current_score = scorer(y_true, y_pred)
             self.assertAlmostEqual(current_score, previous_score)
 
-            y_pred = np.array([[0.0, 1.0], [1.0, 0.0], [0.0, 1.0], [1.0, 0.0], [0.0, 1.0], [1.0, 0.0]])
+            y_pred = np.array([[0.0, 1.0], [1.0, 0.0], [0.0, 1.0], [1.0, 0.0],
+                                [0.0, 1.0], [1.0, 0.0]])
             previous_score = current_score
             current_score = scorer(y_true, y_pred)
             self.assertLess(current_score, previous_score)
 
-            y_pred = np.array([[0.0, 1.0], [1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0]])
+            y_pred = np.array([[0.0, 1.0], [1.0, 0.0], [1.0, 0.0], [0.0, 1.0],
+                               [0.0, 1.0], [0.0, 1.0]])
             previous_score = current_score
             current_score = scorer(y_true, y_pred)
             self.assertLess(current_score, previous_score)
 
-            y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0], [0.0, 1.0]])
+            y_pred = np.array([[1.0, 0.0], [1.0, 0.0], [1.0, 0.0], [0.0, 1.0],
+                               [0.0, 1.0], [0.0, 1.0]])
             previous_score = current_score
             current_score = scorer(y_true, y_pred)
             self.assertLess(current_score, previous_score)
@@ -377,29 +383,34 @@ class TestMetric(unittest.TestCase):
 
         for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
             # Skip functions not applicable for multiclass classification.
-            if metric in ['pac_score', 'roc_auc', 'average_precision', 'precision', 'recall', 'f1',
-                          'precision_samples', 'recall_samples', 'f1_samples']:
+            if metric in ['pac_score', 'roc_auc', 'average_precision',
+                          'precision', 'recall', 'f1','precision_samples',
+                          'recall_samples', 'f1_samples']:
                 continue
             y_true = np.array([0.0, 0.0, 1.0, 1.0, 2.0])
-            y_pred = np.array([[1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+            y_pred = np.array([[1.0, 0.0, 0.0], [1.0, 0.0, 0.0],
+                            [0.0, 1.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
             if metric is 'log_loss': # the best possible score for log_loss is 0.
                 previous_score = 0
             else:
-                previous_score = 1 # the best value for other losses is 1, and we flip the sign to minimize.
+                previous_score = 1 # the best value for other losses is 1.
             current_score = scorer(y_true, y_pred)
             self.assertAlmostEqual(current_score, previous_score)
 
-            y_pred = np.array([[1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+            y_pred = np.array([[1.0, 0.0, 0.0], [1.0, 0.0, 0.0],
+                            [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
             previous_score = current_score
             current_score = scorer(y_true, y_pred)
             self.assertLess(current_score, previous_score)
 
-            y_pred = np.array([[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 1.0, 0.0]])
+            y_pred = np.array([[0.0, 0.0, 1.0], [0.0, 1.0, 0.0],
+                            [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 1.0, 0.0]])
             previous_score = current_score
             current_score = scorer(y_true, y_pred)
             self.assertLess(current_score, previous_score)
 
-            y_pred = np.array([[0.0, 0.0, 1.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+            y_pred = np.array([[0.0, 0.0, 1.0], [0.0, 0.0, 1.0],
+                            [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
             previous_score = current_score
             current_score = scorer(y_true, y_pred)
             self.assertLess(current_score, previous_score)

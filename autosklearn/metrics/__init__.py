@@ -134,8 +134,8 @@ class _ThresholdScorer(Scorer):
             return self._sign * self._score_func(y_true, y_pred, **self._kwargs)
 
 
-def make_scorer(name, score_func, optimum=1, greater_is_better=True, needs_proba=False,
-                needs_threshold=False, **kwargs):
+def make_scorer(name, score_func, optimum=1, greater_is_better=True,
+                needs_proba=False, needs_threshold=False, **kwargs):
     """Make a scorer from a performance metric or loss function.
 
     Factory inspired by scikit-learn which wraps scikit-learn scoring functions
@@ -187,11 +187,11 @@ mean_squared_error = make_scorer('mean_squared_error',
                                  sklearn.metrics.mean_squared_error, optimum=0,
                                  greater_is_better=False)
 mean_absolute_error = make_scorer('mean_absolute_error',
-                                  sklearn.metrics.mean_absolute_error, optimum=0,
-                                  greater_is_better=False)
+                                  sklearn.metrics.mean_absolute_error,
+                                  optimum=0, greater_is_better=False)
 median_absolute_error = make_scorer('median_absolute_error',
-                                    sklearn.metrics.median_absolute_error, optimum=0,
-                                    greater_is_better=False)
+                                    sklearn.metrics.median_absolute_error,
+                                    optimum=0, greater_is_better=False)
 
 # Standard Classification Scores
 accuracy = make_scorer('accuracy', sklearn.metrics.accuracy_score)

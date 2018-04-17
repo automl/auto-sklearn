@@ -55,6 +55,7 @@ def main():
     accuracy_scorer = autosklearn.metrics.make_scorer(
         name="accu",
         score_func=accuracy,
+        optimum=1,
         greater_is_better=True,
         needs_proba=False,
         needs_threshold=False,
@@ -77,6 +78,7 @@ def main():
     accuracy_scorer = autosklearn.metrics.make_scorer(
         name="accu_add",
         score_func=accuracy_wk,
+        optimum=1,
         greater_is_better=True,
         needs_proba=False,
         needs_threshold=False,
