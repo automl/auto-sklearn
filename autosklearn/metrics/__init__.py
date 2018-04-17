@@ -148,7 +148,8 @@ def make_scorer(name, score_func, optimum=1, greater_is_better=True,
         ``score_func(y, y_pred, **kwargs)``.
 
     optimum : int or float, default=1
-        The best score achievable by the score function.
+        The best score achievable by the score function, i.e. maximum in case of
+        scorer function and minimum in case of loss function.
 
     greater_is_better : boolean, default=True
         Whether score_func is a score function (default), meaning high is good,
