@@ -406,7 +406,7 @@ class AutoML(BaseEstimator):
             del self._datamanager
         except Exception:
             pass
-            
+
         # => RUN SMAC
         smac_task_name = 'runSMAC'
         self._stopwatch.start_task(smac_task_name)
@@ -554,7 +554,7 @@ class AutoML(BaseEstimator):
         # Each process computes predictions in chunks of batch_size rows.
         all_predictions = joblib.Parallel(n_jobs=n_jobs)(
             joblib.delayed(_model_predict)(self, X, batch_size, identifier)
-            for identifier in self.ensemble_.get_model_identifiers())
+            for identifier in self.ensemble_.get_model_selected_identifiers())
 
         if len(all_predictions) == 0:
             raise ValueError('Something went wrong generating the predictions. '
