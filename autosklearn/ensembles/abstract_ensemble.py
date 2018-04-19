@@ -61,7 +61,7 @@ class AbstractEnsemble(object):
 
 
     @abstractmethod
-    def get_model_identifiers(self):
+    def get_selected_model_identifiers(self):
         """Return identifiers of models in the ensemble.
 
         This includes models which have a weight of zero!

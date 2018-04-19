@@ -222,10 +222,7 @@ class EnsembleSelection(AbstractEnsemble):
 
         return output
 
-    def get_model_identifiers(self):
-        return self.identifiers_
-
-    def get_model_selected_identifiers(self):
+    def get_selected_model_identifiers(self):
         output = []
 
         for i, weight in enumerate(self.weights_):

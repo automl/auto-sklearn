@@ -494,7 +494,7 @@ class AutoML(BaseEstimator):
 
         random_state = np.random.RandomState(self._seed)
         for identifier in self.models_:
-            if identifier in self.ensemble_.get_model_identifiers():
+            if identifier in self.ensemble_.get_selected_model_identifiers():
                 model = self.models_[identifier]
                 # this updates the model inplace, it can then later be used in
                 # predict method
@@ -554,7 +554,7 @@ class AutoML(BaseEstimator):
         # Each process computes predictions in chunks of batch_size rows.
         all_predictions = joblib.Parallel(n_jobs=n_jobs)(
             joblib.delayed(_model_predict)(self, X, batch_size, identifier)
-            for identifier in self.ensemble_.get_model_selected_identifiers())
+            for identifier in self.ensemble_.get_selected_model_identifiers())
 
         if len(all_predictions) == 0:
             raise ValueError('Something went wrong generating the predictions. '
