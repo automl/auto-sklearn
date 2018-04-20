@@ -1,4 +1,10 @@
 # -*- encoding: utf-8 -*-
+"""
+=======
+Metrics
+=======
+"""
+
 import numpy as np
 
 import sklearn.model_selection

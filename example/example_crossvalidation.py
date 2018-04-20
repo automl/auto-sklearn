@@ -1,10 +1,15 @@
 # -*- encoding: utf-8 -*-
+"""
+================
+Cross Validation
+================
+"""
+
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 
 import autosklearn.classification
-
 
 def main():
     X, y = sklearn.datasets.load_digits(return_X_y=True)

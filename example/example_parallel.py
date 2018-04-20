@@ -1,4 +1,10 @@
 # -*- encoding: utf-8 -*-
+"""
+====================
+Parallel Computation
+====================
+"""
+
 import multiprocessing
 import shutil
 

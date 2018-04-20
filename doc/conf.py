@@ -41,7 +41,15 @@ import autosklearn
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary',
               'sphinx.ext.doctest', 'sphinx.ext.coverage',
               'sphinx.ext.mathjax', 'sphinx.ext.viewcode',
-              'numpydoc']
+              'sphinx_gallery.gen_gallery', 'numpydoc']
+
+# Sphinx-gallery configuration.
+sphinx_gallery_conf = {
+    # path to the examples
+    'examples_dirs': '../example',
+    # path where to save gallery generated examples
+    'gallery_dirs': 'auto_examples'
+}
 
 # Configure the extensions
 numpydoc_show_class_members = False
