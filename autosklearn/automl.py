@@ -581,6 +581,7 @@ class AutoML(BaseEstimator):
             ensemble_nbest=ensemble_nbest, ensemble_size=ensemble_size)
         self._proc_ensemble.main()
         self._proc_ensemble = None
+        self._load_models()
         return self
 
     def _get_ensemble_process(self, time_left_for_ensembles,
