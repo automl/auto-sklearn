@@ -183,7 +183,8 @@ def make_scorer(name, score_func, optimum=1, greater_is_better=True,
 
 
 # Standard regression scores
-r2 = make_scorer('r2', sklearn.metrics.r2_score)
+r2 = make_scorer('r2',
+                 sklearn.metrics.r2_score)
 mean_squared_error = make_scorer('mean_squared_error',
                                  sklearn.metrics.mean_squared_error,
                                  optimum=0,
