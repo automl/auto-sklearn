@@ -213,9 +213,9 @@ class AbstractEvaluator(object):
             all_scoring_functions=all_scoring_functions)
 
         if hasattr(score, '__len__'):
-            err = {key: 1 - score[key] for key in score}
+            err = {key: self.metric._optimum - score[key] for key in score}
         else:
-            err = 1 - score
+            err = self.metric._optimum - score
 
         return err
 
