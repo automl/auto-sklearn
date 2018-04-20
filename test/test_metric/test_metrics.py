@@ -317,12 +317,7 @@ class TestMetric(unittest.TestCase):
         for metric, scorer in autosklearn.metrics.REGRESSION_METRICS.items():
             y_true = np.array([1, 2, 3, 4])
             y_pred = y_true.copy()
-
-            # the best possible score of r2 loss is 1.
-            if metric == 'r2':
-                previous_score = 1
-            else:
-                previous_score = 0
+            previous_score = scorer._optimum
             current_score = scorer(y_true, y_pred)
             self.assertAlmostEqual(current_score, previous_score)
 
@@ -346,7 +341,9 @@ class TestMetric(unittest.TestCase):
         for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
             # Skip functions not applicable for binary classification.
             # TODO: Average precision should work for binary classification,
-            # TODO: but its behavior is not right.
+            # TODO: but its behavior is not right. When y_pred is completely
+            # TODO: wrong, it does return 0.5, but when it is not completely
+            # TODO: wrong, it returns value smaller than 0.5.
             if metric in ['average_precision', 'pac_score',
                           'precision_samples', 'recall_samples', 'f1_samples']:
                 continue
@@ -354,10 +351,7 @@ class TestMetric(unittest.TestCase):
             y_true = np.array([1.0, 1.0, 1.0, 0.0, 0.0, 0.0])
             y_pred = np.array([[0.0, 1.0], [0.0, 1.0], [0.0, 1.0], [1.0, 0.0],
                                 [1.0, 0.0], [1.0, 0.0]])
-            if metric is 'log_loss':
-                previous_score = 0      # the best value for log loss is 0.
-            else:
-                previous_score = 1     # the best value for other losses is 1.
+            previous_score = scorer._optimum
             current_score = scorer(y_true, y_pred)
             self.assertAlmostEqual(current_score, previous_score)
 
@@ -390,10 +384,7 @@ class TestMetric(unittest.TestCase):
             y_true = np.array([0.0, 0.0, 1.0, 1.0, 2.0])
             y_pred = np.array([[1.0, 0.0, 0.0], [1.0, 0.0, 0.0],
                             [0.0, 1.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-            if metric is 'log_loss': # the best possible score for log_loss is 0.
-                previous_score = 0
-            else:
-                previous_score = 1 # the best value for other losses is 1.
+            previous_score = scorer._optimum
             current_score = scorer(y_true, y_pred)
             self.assertAlmostEqual(current_score, previous_score)
 
@@ -424,7 +415,7 @@ class TestMetric(unittest.TestCase):
                 continue
             y_true = np.array([[1, 0, 0], [1, 1, 0], [0, 1, 1], [1, 1, 1]])
             y_pred = y_true.copy()
-            previous_score = 1
+            previous_score = scorer._optimum
             current_score = scorer(y_true, y_pred)
             self.assertAlmostEqual(current_score, previous_score)
 
