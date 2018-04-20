@@ -53,7 +53,7 @@ class AutoMLTest(Base, unittest.TestCase):
         auto = AutoML(backend, 20, 5)
         ensemble_mock = unittest.mock.Mock()
         auto.ensemble_ = ensemble_mock
-        ensemble_mock.get_model_identifiers.return_value = [1]
+        ensemble_mock.get_selected_model_identifiers.return_value = [1]
 
         auto.models_ = {1: failing_model}
 

@@ -6,6 +6,8 @@ from Cython.Build import cythonize
 import os
 import sys
 
+
+# Check if Auto-sklearn *could* run on the given system
 if os.name != 'posix':
     raise ValueError(
         'Detected unsupported operating system: %s. Please check '
@@ -13,6 +15,13 @@ if os.name != 'posix':
         '/auto-sklearn/stable/installation.html#windows-osx-compability' %
         sys.platform
     )
+
+if sys.version_info < (3, 5):
+    raise ValueError(
+        'Unsupported python version %s found. Auto-sklearn requires Python '
+        '3.5 or higher.' % sys.version_info
+    )
+
 
 extensions = cythonize(
     [Extension('autosklearn.data.competition_c_functions',
