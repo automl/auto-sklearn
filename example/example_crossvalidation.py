@@ -3,6 +3,8 @@
 ================
 Cross Validation
 ================
+
+The following example shows how to use cross-validation in *auto-sklearn*.
 """
 
 import sklearn.model_selection

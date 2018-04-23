@@ -3,6 +3,8 @@
 ====================
 Parallel Computation
 ====================
+
+Example description goes here.
 """
 
 import multiprocessing

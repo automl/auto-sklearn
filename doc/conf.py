@@ -19,6 +19,7 @@
 import os
 import sys
 import sphinx_bootstrap_theme
+from sphinx_gallery.sorting import FileNameSortKey
 import autosklearn
 # Add the parent directory of this file to the PYTHONPATH
 import os
@@ -48,7 +49,18 @@ sphinx_gallery_conf = {
     # path to the examples
     'examples_dirs': '../example',
     # path where to save gallery generated examples
-    'gallery_dirs': 'auto_examples'
+    'gallery_dirs': 'examples',
+    #'subsection_order': ExplicitOrder(['../example/example_holdout',
+    #                                   '../example/example_crossvalidation',
+    #                                   '../example/example_parallel',
+    #                                   '../example/example_sequential',
+    #                                   '../example/example_regression',
+    #                                   '../example/example_feature_types',
+    #                                   '../example/example_metrics',
+    #                                   '../example/example_random_search',
+    #                                   '../example/example_eips']),
+    'within_subsection_order': FileNameSortKey,
+    'thumbnail_size': (10, 10)
 }
 
 # Configure the extensions
@@ -142,6 +154,7 @@ html_theme_options = {
         ('Releases', 'releases'),
         ('Installation', 'installation'),
         ('Manual', 'manual'),
+        ('Examples', 'examples/index'),
         ('API', 'api'),
         ('Extending', 'extending'),
     ],

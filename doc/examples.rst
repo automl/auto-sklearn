@@ -1,1 +1,4 @@
+:orphan:
+
 .. _examples:
+

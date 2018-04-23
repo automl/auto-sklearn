@@ -3,6 +3,8 @@
 ================
 Sequential Usage
 ================
+
+Example description goes here.
 """
 import sklearn.model_selection
 import sklearn.datasets

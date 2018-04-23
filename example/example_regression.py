@@ -4,6 +4,8 @@
 ==========
 Regression
 ==========
+
+Example description here.
 """
 import sklearn.model_selection
 import sklearn.datasets

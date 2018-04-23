@@ -2,6 +2,13 @@
 =======
 Holdout
 =======
+
+
+In *auto-sklearn* it is possible to use different resampling strategies
+by specifying the parameters ``resampling_strategy`` and
+``resampling_strategy_arguments``. The following example shows how to use the
+holdout method as well as set the train-test split ratio when instantiating
+``AutoSklearnClassifier``.
 """
 
 import sklearn.model_selection
@@ -22,6 +29,8 @@ def main():
         tmp_folder='/tmp/autosklearn_holdout_example_tmp',
         output_folder='/tmp/autosklearn_holdout_example_out',
         disable_evaluator_output=False,
+        resampling_strategy='holdout',
+        resampling_strategy_arguments={'train_size': 0.67}
     )
     automl.fit(X_train, y_train, dataset_name='digits')
 
