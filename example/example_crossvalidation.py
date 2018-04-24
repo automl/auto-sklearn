@@ -17,6 +17,7 @@ import sklearn.metrics
 
 import autosklearn.classification
 
+
 def main():
     X, y = sklearn.datasets.load_digits(return_X_y=True)
     X_train, X_test, y_train, y_test = \

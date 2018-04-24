@@ -28,6 +28,9 @@ def main():
         tmp_folder='/tmp/autosklearn_holdout_example_tmp',
         output_folder='/tmp/autosklearn_holdout_example_out',
         disable_evaluator_output=False,
+        # 'holdout' with 'train_size'=0.67 is the default argument setting
+        # for AutoSklearnClassifier. It is explicitly specified in this example
+        # for demonstrational purpose.
         resampling_strategy='holdout',
         resampling_strategy_arguments={'train_size': 0.67}
     )
