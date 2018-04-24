@@ -1,10 +1,14 @@
 # -*- encoding: utf-8 -*-
 """
 ================
-Cross Validation
+Cross-Validation
 ================
 
-The following example shows how to use cross-validation in *auto-sklearn*.
+In *auto-sklearn* it is possible to use different resampling strategies
+by specifying the parameters ``resampling_strategy`` and
+``resampling_strategy_arguments``. The following example shows how to use the
+cross-validation method as well as set its folds when instantiating
+``AutoSklearnClassifier``.
 """
 
 import sklearn.model_selection

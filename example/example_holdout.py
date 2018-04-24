@@ -3,7 +3,6 @@
 Holdout
 =======
 
-
 In *auto-sklearn* it is possible to use different resampling strategies
 by specifying the parameters ``resampling_strategy`` and
 ``resampling_strategy_arguments``. The following example shows how to use the

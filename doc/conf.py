@@ -50,17 +50,9 @@ sphinx_gallery_conf = {
     'examples_dirs': '../example',
     # path where to save gallery generated examples
     'gallery_dirs': 'examples',
-    #'subsection_order': ExplicitOrder(['../example/example_holdout',
-    #                                   '../example/example_crossvalidation',
-    #                                   '../example/example_parallel',
-    #                                   '../example/example_sequential',
-    #                                   '../example/example_regression',
-    #                                   '../example/example_feature_types',
-    #                                   '../example/example_metrics',
-    #                                   '../example/example_random_search',
-    #                                   '../example/example_eips']),
     'within_subsection_order': FileNameSortKey,
-    'thumbnail_size': (10, 10)
+    #TODO: It seems that sphinx-gallery does not support removing the thumbnails.
+    #'thumbnail_size': (600, 600)
 }
 
 # Configure the extensions

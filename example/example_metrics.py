@@ -5,9 +5,9 @@ Metrics
 =======
 
 *Auto-sklearn* supports various built-in metrics, which can be found `here <metric_>`_.
-However, it is also possible to define your own metric and use it to fit your model.
-The following examples show how to use built-in as well as self-defined metrics
-for a classification problem.
+However, it is also possible to define your own metric and use it to fit and
+evaluate your model. The following examples show how to use built-in as well
+as self-defined metrics for a sample classification problem.
 
 .. _metric: ../../../build/html/api.html#built-in-metrics
 """
@@ -24,23 +24,23 @@ import autosklearn.metrics
 
 
 def accuracy(solution, prediction):
-    # function defining accuracy
+    # custom function defining accuracy
     return np.mean(solution == prediction)
 
 def error(solution, prediction):
-    # function defining error
+    # custom function defining error
     return np.mean(solution != prediction)
 
 
 def accuracy_wk(solution, prediction, dummy):
-    # function defining accuracy and accepting an additional argument
+    # custom function defining accuracy and accepting an additional argument
     assert dummy is None
     return np.mean(solution == prediction)
 
 def error_wk(solution, prediction, dummy):
-    # function defining error and accepting an additional argument
+    # custom function defining error and accepting an additional argument
     assert dummy is None
-    return np.mean(solution == prediction)
+    return np.mean(solution != prediction)
 
 
 def main():

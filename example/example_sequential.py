@@ -4,8 +4,13 @@
 Sequential Usage
 ================
 
-Example description goes here.
+*Auto-sklearn* allows users to determine whether to run multiple instances of it
+either in parallel, using several cores, or sequentially, using just one core,
+depending on their need. This example demonstrates how to appropriately set
+the arguments to run *auto-sklearn* sequentially, and build the ensemble
+afterwards.
 """
+
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics

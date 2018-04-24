@@ -1,11 +1,14 @@
 # -*- encoding: utf-8 -*-
 """
 ====================
-Parallel Computation
+Parallel Usage
 ====================
 
-Example description goes here.
+*Auto-sklearn* allows users to determine whether to run multiple instances of it
+either in parallel, using several cores, or sequentially, using just one core,
+depending on their need. This example shows how to execute *auto-sklearn* in parallel.
 """
+#TODO: add link to Psmac? Anyhting more specific?
 
 import multiprocessing
 import shutil
@@ -70,8 +73,8 @@ def get_spawn_classifier(X_train, y_train):
     return spawn_classifier
 
 
-if __name__ == '__main__':
-    
+def main():
+
     X, y = sklearn.datasets.load_digits(return_X_y=True)
     X_train, X_test, y_train, y_test = \
         sklearn.model_selection.train_test_split(X, y, random_state=1)
@@ -114,3 +117,7 @@ if __name__ == '__main__':
     predictions = automl.predict(X_test)
     print(automl.show_models())
     print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+
+
+if __name__ == '__main__':
+    main()

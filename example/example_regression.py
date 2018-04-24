@@ -5,7 +5,8 @@
 Regression
 ==========
 
-Example description here.
+The following example shows how to fit a simple regression model with
+*auto-sklearn*.
 """
 import sklearn.model_selection
 import sklearn.datasets
