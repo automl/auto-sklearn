@@ -15,13 +15,15 @@ Examples
 *auto-sklearn* comes with the following examples which demonstrate several
 aspects of its usage:
 
-* `Holdout <https://github.com/automl/auto-sklearn/blob/master/example/example_holdout.py>`_
-* `Cross-validation <https://github.com/automl/auto-sklearn/blob/master/example/example_crossvalidation.py>`_
-* `Parallel usage <https://github.com/automl/auto-sklearn/blob/master/example/example_parallel.py>`_
-* `Sequential usage <https://github.com/automl/auto-sklearn/blob/master/example/example_sequential.py>`_
-* `Regression <https://github.com/automl/auto-sklearn/blob/master/example/example_regression.py>`_
-* `Continuous and categorical data <https://github.com/automl/auto-sklearn/blob/master/example/example_feature_types.py>`_
-* `Using custom metrics <https://github.com/automl/auto-sklearn/blob/master/example/example_metrics.py>`_
+* `Holdout <examples/example_holdout.html>`_
+* `Cross-validation <examples/example_crossvalidation.html>`_
+* `Parallel usage <examples/example_parallel.html>`_
+* `Sequential usage <examples/example_sequential.html>`_
+* `Regression <examples/example_regression.html>`_
+* `Continuous and categorical data <examples/example_feature_types.html>`_
+* `Using custom metrics <examples/example_metrics.html>`_
+* `Random search <examples/example_random_search.html>`_
+* `EIPS <examples/example_eips.html>`_
 
 
 Time and memory limits

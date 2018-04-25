@@ -19,7 +19,6 @@
 import os
 import sys
 import sphinx_bootstrap_theme
-from sphinx_gallery.sorting import FileNameSortKey
 import autosklearn
 # Add the parent directory of this file to the PYTHONPATH
 import os
@@ -44,15 +43,18 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary',
               'sphinx.ext.mathjax', 'sphinx.ext.viewcode',
               'sphinx_gallery.gen_gallery', 'numpydoc']
 
+from sphinx_gallery.sorting import ExplicitOrder, FileNameSortKey
+
 # Sphinx-gallery configuration.
 sphinx_gallery_conf = {
     # path to the examples
-    'examples_dirs': '../example',
+    'examples_dirs': '../examples',
     # path where to save gallery generated examples
     'gallery_dirs': 'examples',
-    'within_subsection_order': FileNameSortKey,
-    #TODO: It seems that sphinx-gallery does not support removing the thumbnails.
+    # It seems that sphinx-gallery does not support removing the thumbnails. Also,
+    # the example files cannot be sorted in custom order
     #'thumbnail_size': (600, 600)
+    #TODO: add sphinx-gallery to the list of libs to be imported
 }
 
 # Configure the extensions
