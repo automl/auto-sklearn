@@ -4,11 +4,14 @@
 Parallel Usage
 ====================
 
-*Auto-sklearn* allows users to determine whether to run multiple instances of it
-either in parallel, using several cores, or sequentially, using just one core,
-depending on their need. This example shows how to execute *auto-sklearn* in parallel.
+*Auto-sklearn* uses *SMAC* to automatically optimize the hyperparameters of
+the training models. A variant of *SMAC*, called *pSMAC* (parallel SMAC),
+provides a means of running several instances of *auto-sklearn* in a parallel
+mode using several computational resources (detailed information of
+*pSMAC* can be found `here <https://automl.github.io/SMAC3/stable/psmac.html>`_).
+This example shows the necessary steps to configure *auto-sklearn* in
+parallel mode.
 """
-#TODO: add link to Psmac? Anyhting more specific?
 
 import multiprocessing
 import shutil

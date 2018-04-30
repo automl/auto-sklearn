@@ -4,7 +4,7 @@ Holdout
 =======
 
 In *auto-sklearn* it is possible to use different resampling strategies
-by specifying the parameters ``resampling_strategy`` and
+by specifying the arguments ``resampling_strategy`` and
 ``resampling_strategy_arguments``. The following example shows how to use the
 holdout method as well as set the train-test split ratio when instantiating
 ``AutoSklearnClassifier``.

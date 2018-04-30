@@ -103,3 +103,5 @@ Extension Interfaces
 
 .. autoclass:: autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm
     :members:
+
+

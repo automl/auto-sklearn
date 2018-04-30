@@ -3,11 +3,10 @@
 Sequential Usage
 ================
 
-*Auto-sklearn* allows users to determine whether to run multiple instances of it
-either in parallel, using several cores, or sequentially, using just one core,
-depending on their need. This example demonstrates how to appropriately set
-the arguments to run *auto-sklearn* sequentially, and build the ensemble
-afterwards.
+By default, *auto-sklearn* fits the machine learning models and build their
+ensembles in parallel. However, it is also possible to run the two processes
+sequentially. The example below shows how to first fit the models and build the
+ensembles afterwards.
 """
 
 import sklearn.model_selection

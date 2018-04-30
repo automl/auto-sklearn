@@ -11,8 +11,9 @@ import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 
-import autosklearn.regression
+from autosklearn.regression import AutoSklearnRegressor
 
+import autosklearn.regression
 
 def main():
     X, y = sklearn.datasets.load_boston(return_X_y=True)

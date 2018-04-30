@@ -408,7 +408,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         """Fit *auto-sklearn* to given training set (X, y).
 
         Fit both optimizes the machine learning models and builds an ensemble
-        out of them. To disable ensembling, set ``ensemble_size==1``.
+        out of them. To disable ensembling, set ``ensemble_size==0``.
 
         Parameters
         ----------
@@ -512,7 +512,7 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         """Fit *Auto-sklearn* to given training set (X, y).
 
         Fit both optimizes the machine learning models and builds an ensemble
-        out of them. To disable ensembling, set ``ensemble_size==1``.
+        out of them. To disable ensembling, set ``ensemble_size==0``.
 
         Parameters
         ----------

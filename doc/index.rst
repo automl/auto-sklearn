@@ -47,7 +47,7 @@ Manual
 
 * :ref:`installation`
 * :ref:`manual`
-* :ref:`API`
+* :ref:`api`
 * :ref:`extending`
 
 

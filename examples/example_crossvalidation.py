@@ -1,13 +1,15 @@
 # -*- encoding: utf-8 -*-
+
+
 """
 ================
 Cross-Validation
 ================
 
 In *auto-sklearn* it is possible to use different resampling strategies
-by specifying the parameters ``resampling_strategy`` and
-``resampling_strategy_arguments``. The following example shows how to use the
-cross-validation method as well as set its folds when instantiating
+by specifying the arguments ``resampling_strategy`` and
+``resampling_strategy_arguments``. The following example shows how to use
+cross-validation and how to set the folds when instantiating
 ``AutoSklearnClassifier``.
 """
 

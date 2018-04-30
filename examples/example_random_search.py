@@ -6,8 +6,7 @@ Random Search
 A crucial feature of *auto-sklearn* is automatically optimizing the hyperparameters
 through SMAC, introduced `here <http://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_.
 Additionally, it is possible to use `random search <http://www.jmlr.org/papers/v13/bergstra12a.html>`_
-instead of SMAC, as demonstrated in the example below. Since this is an
-advanced feature, we recommend first getting familiar with SMAC before using it.
+instead of SMAC, as demonstrated in the example below.
 """
 
 import sklearn.model_selection
