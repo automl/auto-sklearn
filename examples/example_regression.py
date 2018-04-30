@@ -11,8 +11,6 @@ import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 
-from autosklearn.regression import AutoSklearnRegressor
-
 import autosklearn.regression
 
 def main():
