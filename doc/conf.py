@@ -41,11 +41,36 @@ import autosklearn
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary',
               'sphinx.ext.doctest', 'sphinx.ext.coverage',
               'sphinx.ext.mathjax', 'sphinx.ext.viewcode',
+              'sphinx_gallery.gen_gallery', 'sphinx.ext.autosectionlabel',
+              # sphinx.ext.autosexctionlabel raises duplicate label warnings
+              # because same section headers are used multiple times throughout
+              # the documentation.
               'numpydoc']
+
+
+from sphinx_gallery.sorting import ExplicitOrder, FileNameSortKey
 
 # Configure the extensions
 numpydoc_show_class_members = False
 autosummary_generate = True
+
+# prefix each section label with the name of the document it is in, in order to avoid
+# ambiguity when there are multiple same section labels in different documents.
+autosectionlabel_prefix_document = True
+
+# Sphinx-gallery configuration.
+sphinx_gallery_conf = {
+    # path to the examples
+    'examples_dirs': '../examples',
+    # path where to save gallery generated examples
+    'gallery_dirs': 'examples',
+    #TODO: fix back/forward references for the examples.
+    #'doc_module': ('autosklearn'),
+    #'reference_url': {
+    #    'autosklearn': None
+    #},
+    #'backreferences_dir': 'gen_modules/backreferences'
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -134,6 +159,7 @@ html_theme_options = {
         ('Releases', 'releases'),
         ('Installation', 'installation'),
         ('Manual', 'manual'),
+        ('Examples', 'examples/index'),
         ('API', 'api'),
         ('Extending', 'extending'),
     ],

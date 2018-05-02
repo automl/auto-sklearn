@@ -1,3 +1,14 @@
+"""
+================
+Sequential Usage
+================
+
+By default, *auto-sklearn* fits the machine learning models and build their
+ensembles in parallel. However, it is also possible to run the two processes
+sequentially. The example below shows how to first fit the models and build the
+ensembles afterwards.
+"""
+
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics

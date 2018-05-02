@@ -1,3 +1,14 @@
+"""
+=============
+Random Search
+=============
+
+A crucial feature of *auto-sklearn* is automatically optimizing the hyperparameters
+through SMAC, introduced `here <http://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_.
+Additionally, it is possible to use `random search <http://www.jmlr.org/papers/v13/bergstra12a.html>`_
+instead of SMAC, as demonstrated in the example below.
+"""
+
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
@@ -17,9 +28,7 @@ def get_roar_object_callback(
     runhistory,
     run_id,
 ):
-    """Random online adaptive racing.
-
-    http://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf"""
+    """Random online adaptive racing."""
     scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
     scenario = Scenario(scenario_dict)
     return ROAR(
@@ -40,9 +49,7 @@ def get_random_search_object_callback(
         runhistory,
         run_id,
 ):
-    """Random search.
-
-    http://www.jmlr.org/papers/v13/bergstra12a.html"""
+    """Random search."""
     scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
     scenario_dict['minR'] = len(scenario_dict['instances'])
     scenario_dict['initial_incumbent'] = 'RANDOM'

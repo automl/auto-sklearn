@@ -1,4 +1,18 @@
 # -*- encoding: utf-8 -*-
+"""
+====================
+Parallel Usage
+====================
+
+*Auto-sklearn* uses *SMAC* to automatically optimize the hyperparameters of
+the training models. A variant of *SMAC*, called *pSMAC* (parallel SMAC),
+provides a means of running several instances of *auto-sklearn* in a parallel
+mode using several computational resources (detailed information of
+*pSMAC* can be found `here <https://automl.github.io/SMAC3/stable/psmac.html>`_).
+This example shows the necessary steps to configure *auto-sklearn* in
+parallel mode.
+"""
+
 import multiprocessing
 import shutil
 
@@ -62,8 +76,8 @@ def get_spawn_classifier(X_train, y_train):
     return spawn_classifier
 
 
-if __name__ == '__main__':
-    
+def main():
+
     X, y = sklearn.datasets.load_digits(return_X_y=True)
     X_train, X_test, y_train, y_test = \
         sklearn.model_selection.train_test_split(X, y, random_state=1)
@@ -106,3 +120,7 @@ if __name__ == '__main__':
     predictions = automl.predict(X_test)
     print(automl.show_models())
     print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+
+
+if __name__ == '__main__':
+    main()
