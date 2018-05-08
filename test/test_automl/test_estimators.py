@@ -390,3 +390,9 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         automl.fit_ensemble(y)
         self.assertEqual(fit_ensemble.call_count, 1)
         self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
+
+class AutoSklearnClassifierTest(unittest.TestCase):
+    def test_fit_returns_self(self):
+        # Test that AutoSklearnClassifier.fit() method returns self.
+#TODO: check for every methods that should return self. refit returns automlclassifier object, which should be corrected.
+
