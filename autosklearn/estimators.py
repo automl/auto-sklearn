@@ -244,7 +244,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
     def fit(self, *args, **kwargs):
         self._automl = self.build_automl()
-        self._automl.fit(*args, **kwargs)
+        return self._automl.fit(*args, **kwargs)
 
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
@@ -294,9 +294,10 @@ class AutoSklearnEstimator(BaseEstimator):
         """
         if self._automl is None:
             self._automl = self.build_automl()
-        return self._automl.fit_ensemble(y, task, metric, precision,
-                                         dataset_name, ensemble_nbest,
-                                         ensemble_size)
+        self._automl.fit_ensemble(y, task, metric, precision,
+                                  dataset_name, ensemble_nbest,
+                                  ensemble_size)
+        return self
 
     def refit(self, X, y):
         """Refit all models found with fit to new data.
@@ -323,7 +324,9 @@ class AutoSklearnEstimator(BaseEstimator):
         self
 
         """
-        return self._automl.refit(X, y)
+        self._automl.refit(X, y)
+        return self
+
 
     def predict(self, X, batch_size=None, n_jobs=1):
         return self._automl.predict(X, batch_size=batch_size, n_jobs=n_jobs)
@@ -451,7 +454,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         self
 
         """
-        return super().fit(
+        super().fit(
             X=X,
             y=y,
             X_test=X_test,
@@ -460,6 +463,8 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             feat_type=feat_type,
             dataset_name=dataset_name,
         )
+
+        return self
 
     def predict(self, X, batch_size=None, n_jobs=1):
         """Predict classes for X.
@@ -554,7 +559,7 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         """
         # Fit is supposed to be idempotent!
         # But not if we use share_mode.
-        return super().fit(
+        super().fit(
             X=X,
             y=y,
             X_test=X_test,
@@ -563,6 +568,10 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
             feat_type=feat_type,
             dataset_name=dataset_name,
         )
+
+        return self
+
+
 
     def predict(self, X, batch_size=None, n_jobs=1):
         """Predict regression target for X.

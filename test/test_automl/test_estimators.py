@@ -391,8 +391,87 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         self.assertEqual(fit_ensemble.call_count, 1)
         self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
 
-class AutoSklearnClassifierTest(unittest.TestCase):
-    def test_fit_returns_self(self):
-        # Test that AutoSklearnClassifier.fit() method returns self.
-#TODO: check for every methods that should return self. refit returns automlclassifier object, which should be corrected.
 
+class AutoSklearnClassifierTest(unittest.TestCase):
+    # Currentl this class only tests that the methods of AutoSklearnClassifier
+    # which should return self actually return self.
+    def test_classification_fit_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
+        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+                                       per_run_time_limit=5)
+
+        automl_fitted = automl.fit(X_train, y_train)
+        self.assertIs(automl_fitted, automl)
+
+    def test_classification_refit_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
+        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+                                       per_run_time_limit=5)
+
+        automl.fit(X_train.copy(), y_train.copy())
+        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+        self.assertIs(automl_refitted, automl)
+
+    def test_classification_fit_ensemble_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
+        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+                                       per_run_time_limit=5,
+                                       ensemble_size=0)
+
+        automl.fit(X_train, y_train)
+        automl_ensemble_fitted = automl.fit_ensemble(y_test, ensemble_size=10)
+        self.assertIs(automl_ensemble_fitted, automl)
+
+    def test_classification_set_params_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
+        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+                                       per_run_time_limit=5)
+
+        automl.fit(X_train, y_train)
+        params = automl.get_params()
+        pass
+        #TODO: where is the set_param method?!
+
+
+class AutoSklearnRegressorTest(unittest.TestCase):
+    # Currently this class only tests that the methods of AutoSklearnRegressor
+    # that should return self actually return self.
+    def test_regression_fit_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
+        automl = AutoSklearnRegressor(time_left_for_this_task=15,
+                                      per_run_time_limit=5)
+
+        automl_fitted = automl.fit(X_train, y_train)
+        self.assertIs(automl_fitted, automl)
+
+    def test_regression_refit_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
+        automl = AutoSklearnRegressor(time_left_for_this_task=15,
+                                      per_run_time_limit=5)
+
+        automl.fit(X_train.copy(), y_train.copy())
+        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+        self.assertIs(automl_refitted, automl)
+
+    def test_regression_fit_ensemble_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
+        automl = AutoSklearnRegressor(time_left_for_this_task=15,
+                                      per_run_time_limit=5,
+                                      ensemble_size=0)
+
+        automl.fit(X_train, y_train)
+        automl_ensemble_fitted = automl.fit_ensemble(y_test, ensemble_size=10)
+        self.assertIs(automl_ensemble_fitted, automl)
+
+    def test_regression_set_params_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
+        automl = AutoSklearnRegressor(time_left_for_this_task=15,
+                                      per_run_time_limit=5)
+
+        automl.fit(X_train, y_train)
+        params = automl.get_params()
+        pass
+        #TODO: where is the set_param method?!
+
+if __name__=="__main__":
+    unittest.main()
