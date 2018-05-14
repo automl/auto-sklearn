@@ -245,6 +245,7 @@ class AutoSklearnEstimator(BaseEstimator):
     def fit(self, *args, **kwargs):
         self._automl = self.build_automl()
         return self._automl.fit(*args, **kwargs)
+    #TODO: maybe its better to call fit and return self.
 
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
