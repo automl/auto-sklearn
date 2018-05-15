@@ -771,10 +771,10 @@ class AutoML(BaseEstimator):
         num_crash = sum([s == 'Crash' for s in cv_results['status']])
         sio.write('  Number of crashed target algorithm runs: %d\n' % num_crash)
         num_timeout = sum([s == 'Timeout' for s in cv_results['status']])
-        sio.write('  Number of target algorithms that exceeded the memory '
+        sio.write('  Number of target algorithms that exceeded the time '
                   'limit: %d\n' % num_timeout)
         num_memout = sum([s == 'Memout' for s in cv_results['status']])
-        sio.write('  Number of target algorithms that exceeded the time '
+        sio.write('  Number of target algorithms that exceeded the memory '
                   'limit: %d\n' % num_memout)
         return sio.getvalue()
 
