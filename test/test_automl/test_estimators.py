@@ -393,65 +393,41 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
 
 
 class AutoSklearnClassifierTest(unittest.TestCase):
-    # Currentl this class only tests that the methods of AutoSklearnClassifier
+    # Currently this class only tests that the methods of AutoSklearnClassifier
     # which should return self actually return self.
-    def test_classification_fit_returns_self(self):
+    def test_classification_methods_returns_self(self):
         X_train, y_train, X_test, y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
-                                       per_run_time_limit=5)
-
-        automl_fitted = automl.fit(X_train, y_train)
-        self.assertIs(automl_fitted, automl)
-
-    def test_classification_refit_returns_self(self):
-        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
-                                       per_run_time_limit=5)
-
-        automl.fit(X_train.copy(), y_train.copy())
-        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
-        self.assertIs(automl_refitted, automl)
-
-    def test_classification_fit_ensemble_returns_self(self):
-        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=15,
+        automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
                                        ensemble_size=0)
 
-        automl.fit(X_train, y_train)
-        automl_ensemble_fitted = automl.fit_ensemble(y_test, ensemble_size=10)
-        self.assertIs(automl_ensemble_fitted, automl)
+        automl_fitted = automl.fit(X_train, y_train)
+        self.assertIs(automl, automl_fitted)
+
+        automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
+        self.assertIs(automl, automl_ensemble_fitted)
+
+        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+        self.assertIs(automl, automl_refitted)
 
 
 class AutoSklearnRegressorTest(unittest.TestCase):
     # Currently this class only tests that the methods of AutoSklearnRegressor
     # that should return self actually return self.
-    def test_regression_fit_returns_self(self):
-        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
-        automl = AutoSklearnRegressor(time_left_for_this_task=15,
-                                      per_run_time_limit=5)
-
-        automl_fitted = automl.fit(X_train, y_train)
-        self.assertIs(automl_fitted, automl)
-
-    def test_regression_refit_returns_self(self):
-        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
-        automl = AutoSklearnRegressor(time_left_for_this_task=15,
-                                      per_run_time_limit=5)
-
-        automl.fit(X_train.copy(), y_train.copy())
-        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
-        self.assertIs(automl_refitted, automl)
-
-    def test_regression_fit_ensemble_returns_self(self):
-        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
-        automl = AutoSklearnRegressor(time_left_for_this_task=15,
+    def test_regression_methods_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('boston')
+        automl = AutoSklearnRegressor(time_left_for_this_task=20,
                                       per_run_time_limit=5,
                                       ensemble_size=0)
 
-        automl.fit(X_train, y_train)
-        automl_ensemble_fitted = automl.fit_ensemble(y_test, ensemble_size=10)
-        self.assertIs(automl_ensemble_fitted, automl)
+        automl_fitted = automl.fit(X_train, y_train)
+        self.assertIs(automl, automl_fitted)
+
+        automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
+        self.assertIs(automl, automl_ensemble_fitted)
+
+        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+        self.assertIs(automl, automl_refitted)
 
 
 if __name__=="__main__":
