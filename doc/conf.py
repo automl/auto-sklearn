@@ -69,7 +69,7 @@ sphinx_gallery_conf = {
     #'reference_url': {
     #    'autosklearn': None
     #},
-    'backreferences_dir': False
+    #'backreferences_dir': 'gen_modules/backreferences'
 }
 
 # Add any paths that contain templates here, relative to this directory.
