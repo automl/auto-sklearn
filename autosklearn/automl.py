@@ -490,7 +490,11 @@ class AutoML(BaseEstimator):
                 "Predict can only be called if 'keep_models==True'")
         if self.models_ is None or len(self.models_) == 0 or \
                 self.ensemble_ is None:
+            # If self.ensemble_ is None, shouldn't autosklearn generate one?
+            # _load_models() does not generate one.
+            print("Self.ensemble_ is", self.ensemble_)
             self._load_models()
+            print("Self.ensemble_ is", self.ensemble_)
 
         random_state = np.random.RandomState(self._seed)
         for identifier in self.models_:
@@ -549,6 +553,7 @@ class AutoML(BaseEstimator):
         if self.models_ is None or len(self.models_) == 0 or \
                 self.ensemble_ is None:
             self._load_models()
+            #self._load_models() does not generate self.ensemble_.
 
         # Parallelize predictions across models with n_jobs processes.
         # Each process computes predictions in chunks of batch_size rows.
@@ -646,6 +651,7 @@ class AutoML(BaseEstimator):
                     ['partial-cv', 'partial-cv-iterative-fit']:
                 raise ValueError('No models fitted!')
 
+        # When trying to reproduce error for refit_parallel, this part is called.
         elif self._disable_evaluator_output is False or \
                 (isinstance(self._disable_evaluator_output, list) and
                  'model' not in self._disable_evaluator_output):
@@ -655,10 +661,14 @@ class AutoML(BaseEstimator):
                     ['partial-cv', 'partial-cv-iterative-fit']:
                 raise ValueError('No models fitted!')
 
-            self.models = []
+            self.models_ = []
+            # self.models -> self.models_ (underscore was missing)
+            # question: shouldn't _load_models load models? sometimes it sets
+            # self.models_ to be an empty list. In the refit method:
+            # model = self.models_[identifier] wouldnt do anything.
 
         else:
-            self.models = []
+            self.models_ = []
 
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
