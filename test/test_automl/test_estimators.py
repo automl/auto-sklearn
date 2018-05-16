@@ -390,3 +390,45 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         automl.fit_ensemble(y)
         self.assertEqual(fit_ensemble.call_count, 1)
         self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
+
+
+class AutoSklearnClassifierTest(unittest.TestCase):
+    # Currently this class only tests that the methods of AutoSklearnClassifier
+    # which should return self actually return self.
+    def test_classification_methods_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
+        automl = AutoSklearnClassifier(time_left_for_this_task=20,
+                                       per_run_time_limit=5,
+                                       ensemble_size=0)
+
+        automl_fitted = automl.fit(X_train, y_train)
+        self.assertIs(automl, automl_fitted)
+
+        automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
+        self.assertIs(automl, automl_ensemble_fitted)
+
+        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+        self.assertIs(automl, automl_refitted)
+
+
+class AutoSklearnRegressorTest(unittest.TestCase):
+    # Currently this class only tests that the methods of AutoSklearnRegressor
+    # that should return self actually return self.
+    def test_regression_methods_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('boston')
+        automl = AutoSklearnRegressor(time_left_for_this_task=20,
+                                      per_run_time_limit=5,
+                                      ensemble_size=0)
+
+        automl_fitted = automl.fit(X_train, y_train)
+        self.assertIs(automl, automl_fitted)
+
+        automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
+        self.assertIs(automl, automl_ensemble_fitted)
+
+        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+        self.assertIs(automl, automl_refitted)
+
+
+if __name__=="__main__":
+    unittest.main()
