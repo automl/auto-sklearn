@@ -672,7 +672,7 @@ class AutoML(BaseEstimator):
             self.models_ = []
 
         else:
-            self.models = []
+            self.models_ = []
 
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
