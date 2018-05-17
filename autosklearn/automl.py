@@ -490,7 +490,7 @@ class AutoML(BaseEstimator):
 
         if self._keep_models is not True:
             raise ValueError(
-                "Predict can only be called if 'keep_models==True'")
+                "Refit can only be called if 'keep_models==True'")
         if self.models_ is None or len(self.models_) == 0 or \
                 self.ensemble_ is None:
             self._load_models()
@@ -557,11 +557,12 @@ class AutoML(BaseEstimator):
                 self.ensemble_ is None:
             self._load_models()
 
-        # Self.ensemble_ is None when ensemble_size is set to zero. Raise error
-        # in such case, because predict and predict_proba requires the ensemble.
+        # If self.ensemble_ is None, it means that ensemble_size is set to zero.
+        # In such cases, raise error because predict and predict_proba cannot
+        # be called.
         if self.ensemble_ is None:
-            raise ValueError("Predict and predict_proba can only be called if "
-                             "'ensemble_size != 0'")
+            raise ValueError("Predict and predict_proba can only be callued "
+                             "if 'ensemble_size != 0'")
 
         # Parallelize predictions across models with n_jobs processes.
         # Each process computes predictions in chunks of batch_size rows.
