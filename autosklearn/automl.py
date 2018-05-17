@@ -561,7 +561,7 @@ class AutoML(BaseEstimator):
         # In such cases, raise error because predict and predict_proba cannot
         # be called.
         if self.ensemble_ is None:
-            raise ValueError("Predict and predict_proba can only be callued "
+            raise ValueError("Predict and predict_proba can only be called "
                              "if 'ensemble_size != 0'")
 
         # Parallelize predictions across models with n_jobs processes.
