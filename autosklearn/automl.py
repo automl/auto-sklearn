@@ -390,10 +390,11 @@ class AutoML(BaseEstimator):
                 'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
         if time_left_for_ensembles <= 0:
             self._proc_ensemble = None
-            # Fit only raises error when ensemble_size is not zero but time_left_for_ensembles is zero.
+            # Fit only raises error when ensemble_size is not zero but
+            # time_left_for_ensembles is zero.
             if self._ensemble_size > 0:
                 raise ValueError("Not starting ensemble builder because there "
-                                 "is no time left. Try increasing the value " 
+                                 "is no time left. Try increasing the value "
                                  "of time_left_for_this_task.")
         else:
             self._proc_ensemble = self._get_ensemble_process(time_left_for_ensembles)
