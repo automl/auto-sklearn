@@ -389,9 +389,13 @@ class AutoML(BaseEstimator):
             self._logger.info(
                 'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
         if time_left_for_ensembles <= 0:
-            self._logger.warning("Not starting ensemble builder because there "
-                                 "is no time left!")
             self._proc_ensemble = None
+            # Fit only raises error when ensemble_size is not zero but
+            # time_left_for_ensembles is zero.
+            if self._ensemble_size > 0:
+                raise ValueError("Not starting ensemble builder because there "
+                                 "is no time left. Try increasing the value "
+                                 "of time_left_for_this_task.")
         else:
             self._proc_ensemble = self._get_ensemble_process(time_left_for_ensembles)
             if self._ensemble_size > 0:
@@ -487,10 +491,14 @@ class AutoML(BaseEstimator):
 
         if self._keep_models is not True:
             raise ValueError(
-                "Predict can only be called if 'keep_models==True'")
+                "Refit can only be called if 'keep_models==True'")
         if self.models_ is None or len(self.models_) == 0 or \
                 self.ensemble_ is None:
             self._load_models()
+
+        # Refit is not applicable when ensemble_size is set to zero.
+        if self.ensemble_ is None:
+            raise ValueError("Refit can only be called if 'ensemble_size != 0'")
 
         random_state = np.random.RandomState(self._seed)
         for identifier in self.models_:
@@ -549,6 +557,13 @@ class AutoML(BaseEstimator):
         if self.models_ is None or len(self.models_) == 0 or \
                 self.ensemble_ is None:
             self._load_models()
+
+        # If self.ensemble_ is None, it means that ensemble_size is set to zero.
+        # In such cases, raise error because predict and predict_proba cannot
+        # be called.
+        if self.ensemble_ is None:
+            raise ValueError("Predict and predict_proba can only be called "
+                             "if 'ensemble_size != 0'")
 
         # Parallelize predictions across models with n_jobs processes.
         # Each process computes predictions in chunks of batch_size rows.
@@ -655,10 +670,10 @@ class AutoML(BaseEstimator):
                     ['partial-cv', 'partial-cv-iterative-fit']:
                 raise ValueError('No models fitted!')
 
-            self.models = []
+            self.models_ = []
 
         else:
-            self.models = []
+            self.models_ = []
 
     def score(self, X, y):
         # fix: Consider only index 1 of second dimension
