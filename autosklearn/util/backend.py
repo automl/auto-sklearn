@@ -40,13 +40,16 @@ class BackendContext(object):
         self._logger = logging.get_logger(__name__)
         self.create_directories()
 
+
     @property
     def output_directory(self):
-        return self.__output_directory
+        # make sure that tilde does not appear on the path.
+        return os.path.expanduser(self.__output_directory)
 
     @property
     def temporary_directory(self):
-        return self.__temporary_directory
+        # make sure that tilde does not appear on the path.
+        return os.path.expanduser(self.__temporary_directory)
 
     def _prepare_directories(self, temporary_directory, output_directory):
         random_number = random.randint(0, 10000)
@@ -61,14 +64,15 @@ class BackendContext(object):
             else '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
 
     def create_directories(self):
-        try:
-            os.makedirs(self.temporary_directory)
-        except OSError:
-            pass
-        try:
-            os.makedirs(self.output_directory)
-        except OSError:
-            pass
+        # make sure the directory that is being created does not already exist.
+        if os.path.isdir(self.temporary_directory):
+            # TODO: what kind of error should be raised? except?
+            raise OSError("Cannot create temporary dir: %s because it already exists!" % self.temporary_directory)
+        if os.path.isdir(self.output_directory):
+            # TODO: what kind of error?
+            raise OSError("Cannot create output dir: %s because it already exists!" % self.output_directory)
+        os.makedirs(self.temporary_directory)
+        os.makedirs(self.output_directory)
 
     def __del__(self):
         self.delete_directories(force=False)
@@ -76,6 +80,7 @@ class BackendContext(object):
     def delete_directories(self, force=True):
         if self.delete_output_folder_after_terminate or force:
             try:
+                #TODO: even if delete_dir is set to True, if self.dir was not created by autosklearn, it should not remove it.
                 shutil.rmtree(self.output_directory)
             except Exception:
                 if self._logger is not None:
@@ -111,15 +116,15 @@ class Backend(object):
         self.context = context
 
         # Create the temporary directory if it does not yet exist
-        try:
-            os.makedirs(self.temporary_directory)
-        except Exception:
-            pass
-        # This does not have to exist or be specified
-        if self.output_directory is not None:
-            if not os.path.exists(self.output_directory):
-                raise ValueError("Output directory %s does not exist." %
-                                 self.output_directory)
+    #    try:
+    #        os.makedirs(self.temporary_directory)
+    #    except Exception:
+    #        pass
+    #    # This does not have to exist or be specified
+    #    if self.output_directory is not None:
+    #        if not os.path.exists(self.output_directory):
+    #            raise ValueError("Output directory %s does not exist." %
+    #                             self.output_directory)
 
         self.internals_directory = os.path.join(self.temporary_directory,
                                                 ".auto-sklearn")
@@ -419,3 +424,6 @@ class Backend(object):
             else:
                 self.logger.debug('%s file already present %s' %
                                   (name, filepath))
+
+
+
