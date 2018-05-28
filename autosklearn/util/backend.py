@@ -40,7 +40,6 @@ class BackendContext(object):
         self._logger = logging.get_logger(__name__)
         self.create_directories()
 
-
     @property
     def output_directory(self):
         # make sure that tilde does not appear on the path.
@@ -424,6 +423,3 @@ class Backend(object):
             else:
                 self.logger.debug('%s file already present %s' %
                                   (name, filepath))
-
-
-
