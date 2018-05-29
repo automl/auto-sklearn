@@ -146,7 +146,9 @@ class AutoML(BaseEstimator):
         only_return_configuration_space=False,
     ):
         if not self._shared_mode:
-            self._backend.context.delete_directories()
+            # Disabled to check if it is ok to not run this. TODO: what is the purpose of this?
+            #self._backend.context.delete_directories()
+            pass
         else:
             # If this fails, it's likely that this is the first call to get
             # the data manager
@@ -156,7 +158,8 @@ class AutoML(BaseEstimator):
             except IOError:
                 pass
 
-        self._backend.context.create_directories()
+        # Disabled to check if it is ok to not run this, since directories are already created (supposedly).
+        #self._backend.context.create_directories()
 
         if dataset_name is None:
             dataset_name = hash_array_or_matrix(X)

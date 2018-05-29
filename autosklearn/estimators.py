@@ -243,6 +243,10 @@ class AutoSklearnEstimator(BaseEstimator):
         return automl
 
     def fit(self, *args, **kwargs):
+        # TODO: self.build_automl() and self._automl.fit() both calls create_directory in backend.
+        # TODO: build_automl() -> backend.create() -> BackendContext.create_directories
+        # TODO: _automl.fit() -> AutoML.fit() -> self._backendcontext.create_directories
+        # TODO: If not shared mode, it deletes the folder therefore it works, but this is not intended.
         self._automl = self.build_automl()
         self._automl.fit(*args, **kwargs)
         return self

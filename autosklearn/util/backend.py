@@ -39,6 +39,9 @@ class BackendContext(object):
         self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
         self._logger = logging.get_logger(__name__)
         self.create_directories()
+        # new attribute to check that directories were created by autosklearn.
+        self.tmp_dir_created = False
+        self.output_dir_created = False
 
     @property
     def output_directory(self):
@@ -64,22 +67,34 @@ class BackendContext(object):
 
     def create_directories(self):
         # make sure the directory that is being created does not already exist.
-        if os.path.isdir(self.temporary_directory):
-            # TODO: what kind of error should be raised? except?
-            raise OSError("Cannot create temporary dir: %s because it already exists!" % self.temporary_directory)
-        if os.path.isdir(self.output_directory):
-            # TODO: what kind of error?
-            raise OSError("Cannot create output dir: %s because it already exists!" % self.output_directory)
-        os.makedirs(self.temporary_directory)
-        os.makedirs(self.output_directory)
+        try:
+            os.makedirs(self.output_directory)
+            # Check that output_directory is created by autosklearn.
+            self.output_dir_created = True
+        except FileExistsError:
+            pass
+
+        try:
+            os.makedirs(self.temporary_directory)
+            # Check that tmp_directory is created by autosklearn.
+            self.tmp_dir_created = True
+        except FileExistsError:
+            pass
 
     def __del__(self):
         self.delete_directories(force=False)
 
     def delete_directories(self, force=True):
         if self.delete_output_folder_after_terminate or force:
+            if self.output_dir_created == False:
+                raise OSError("autosklearn failed to create output_dir because it already exists but "
+                              "it is attempting to delete it. Please make sure that the specified output_folder"
+                              "does not exist.")
             try:
                 #TODO: even if delete_dir is set to True, if self.dir was not created by autosklearn, it should not remove it.
+                #TODO: Talk to Matthias: I think that the best way to ensure that autosklearn
+                #TODO: does not delete folders it is not supposed to is to check in this function whether the folder
+                #TODO: that it wants to remove is created by autosklearn and only delete those that pass the check.
                 shutil.rmtree(self.output_directory)
             except Exception:
                 if self._logger is not None:
@@ -90,6 +105,10 @@ class BackendContext(object):
                           self.output_directory)
 
         if self.delete_tmp_folder_after_terminate or force:
+            if self.tmp_dir_created == False:
+                raise OSError("autosklearn failed to create tmp_folder because it already exists but "
+                              "it is attempting to delete it. Please make sure that the specified tmp_folder"
+                              "does not exist.")
             try:
                 shutil.rmtree(self.temporary_directory)
             except Exception:
