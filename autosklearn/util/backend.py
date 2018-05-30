@@ -85,10 +85,10 @@ class BackendContext(object):
 
     def delete_directories(self, force=True):
         if self.delete_output_folder_after_terminate or force:
-            if self._output_dir_created == False:
+            if self._output_dir_created is False:
                 raise OSError("Auto-sklearn failed to create output dir "
                               "because it already exists. Please make "
-                              "sure that the specified output dir does"
+                              "sure that the specified output dir does "
                               "not exist.")
             try:
                 shutil.rmtree(self.output_directory)
@@ -101,7 +101,7 @@ class BackendContext(object):
                           self.output_directory)
 
         if self.delete_tmp_folder_after_terminate or force:
-            if self._tmp_dir_created == False:
+            if self._tmp_dir_created is False:
                 raise OSError("Auto-sklearn failed to create tmp dir "
                               "because it already exists. Please make "
                               "sure that the specified tmp dir does not "
@@ -131,15 +131,15 @@ class Backend(object):
         self.context = context
 
         # Create the temporary directory if it does not yet exist
-    #    try:
-    #        os.makedirs(self.temporary_directory)
-    #    except Exception:
-    #        pass
-    #    # This does not have to exist or be specified
-    #    if self.output_directory is not None:
-    #        if not os.path.exists(self.output_directory):
-    #            raise ValueError("Output directory %s does not exist." %
-    #                             self.output_directory)
+        try:
+            os.makedirs(self.temporary_directory)
+        except Exception:
+            pass
+        # This does not have to exist or be specified
+        if self.output_directory is not None:
+            if not os.path.exists(self.output_directory):
+                raise ValueError("Output directory %s does not exist." %
+                                 self.output_directory)
 
         self.internals_directory = os.path.join(self.temporary_directory,
                                                 ".auto-sklearn")
