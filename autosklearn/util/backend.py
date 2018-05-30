@@ -89,7 +89,7 @@ class BackendContext(object):
                 raise OSError("Failed to delete output dir "
                               "because auto-sklearn did not create it. "
                               "Please make sure that the specified output dir does "
-                              "not exist.")
+                              "not exist when instantiating auto-sklearn.")
             try:
                 shutil.rmtree(self.output_directory)
             except Exception:
@@ -105,7 +105,7 @@ class BackendContext(object):
                 raise OSError("Failed to delete tmp dir "
                               "because auto-sklearn did not create it. "
                               "Please make sure that the specified tmp dir does "
-                              "not exist.")
+                              "not exist when instantiating auto-sklearn.")
             try:
                 shutil.rmtree(self.temporary_directory)
             except Exception:
