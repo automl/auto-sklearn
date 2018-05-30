@@ -86,9 +86,9 @@ class BackendContext(object):
     def delete_directories(self, force=True):
         if self.delete_output_folder_after_terminate or force:
             if self._output_dir_created is False:
-                raise OSError("Auto-sklearn failed to create output dir "
-                              "because it already exists. Please make "
-                              "sure that the specified output dir does "
+                raise OSError("Failed to delete output dir "
+                              "because auto-sklearn did not create it. "
+                              "Please make sure that the specified output dir does "
                               "not exist.")
             try:
                 shutil.rmtree(self.output_directory)
@@ -102,10 +102,10 @@ class BackendContext(object):
 
         if self.delete_tmp_folder_after_terminate or force:
             if self._tmp_dir_created is False:
-                raise OSError("Auto-sklearn failed to create tmp dir "
-                              "because it already exists. Please make "
-                              "sure that the specified tmp dir does not "
-                              "exist.")
+                raise OSError("Failed to delete tmp dir "
+                              "because auto-sklearn did not create it. "
+                              "Please make sure that the specified tmp dir does "
+                              "not exist.")
             try:
                 shutil.rmtree(self.temporary_directory)
             except Exception:
