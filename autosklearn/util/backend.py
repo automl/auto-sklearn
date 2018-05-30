@@ -66,7 +66,6 @@ class BackendContext(object):
             else '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
 
     def create_directories(self):
-        # make sure the directory that is being created does not already exist.
         try:
             os.makedirs(self.output_directory)
             # Set this to true only if output_dir is created.
