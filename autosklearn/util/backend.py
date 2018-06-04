@@ -66,6 +66,7 @@ class BackendContext(object):
             else '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
 
     def create_directories(self):
+        # TODO: tmp dir and output dir must not have the same name!
         try:
             os.makedirs(self.output_directory)
             # Set this to true only if output_dir is created.
@@ -86,10 +87,10 @@ class BackendContext(object):
     def delete_directories(self, force=True):
         if self.delete_output_folder_after_terminate or force:
             if self._output_dir_created is False:
-                raise OSError("Failed to delete output dir "
+                raise OSError("Failed to delete output dir: %s "
                               "because auto-sklearn did not create it. "
                               "Please make sure that the specified output dir does "
-                              "not exist when instantiating auto-sklearn.")
+                              "not exist when instantiating auto-sklearn." % self.output_directory)
             try:
                 shutil.rmtree(self.output_directory)
             except Exception:
@@ -102,10 +103,10 @@ class BackendContext(object):
 
         if self.delete_tmp_folder_after_terminate or force:
             if self._tmp_dir_created is False:
-                raise OSError("Failed to delete tmp dir "
+                raise OSError("Failed to delete tmp dir: % s "
                               "because auto-sklearn did not create it. "
                               "Please make sure that the specified tmp dir does "
-                              "not exist when instantiating auto-sklearn.")
+                              "not exist when instantiating auto-sklearn." % self.temporary_directory)
             try:
                 shutil.rmtree(self.temporary_directory)
             except Exception:
