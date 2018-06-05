@@ -43,8 +43,9 @@ class AutoMLTest(Base, unittest.TestCase):
         self.automl._delete_output_directories = lambda: 0
 
     def test_refit_shuffle_on_fail(self):
-        output = os.path.join(self.test_dir, '..', '.tmp_refit_shuffle_on_fail')
-        context = BackendContext(output, output, False, False)
+        tmp = os.path.join(self.test_dir, '..', '.tmp._refit_shuffle_on_fail')
+        output = os.path.join(self.test_dir, '..', '.out_refit_shuffle_on_fail')
+        context = BackendContext(tmp, output, False, False)
         backend = Backend(context)
 
         failing_model = unittest.mock.Mock()
@@ -96,11 +97,14 @@ class AutoMLTest(Base, unittest.TestCase):
         self.automl._load_models()
 
     def test_fit(self):
-        output = os.path.join(self.test_dir, '..', '.tmp_test_fit')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_test_fit')
+        output = os.path.join(self.test_dir, '..', '.out_test_fit')
+
         self._setUp(output)
+        self._setUp(tmp)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        backend_api = backend.create(output, output)
+        backend_api = backend.create(tmp, output)
         automl = autosklearn.automl.AutoML(backend_api, 20, 5)
         automl.fit(
             X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
@@ -110,6 +114,7 @@ class AutoMLTest(Base, unittest.TestCase):
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
+        self._tearDown(tmp)
         self._tearDown(output)
 
     def test_fit_roar(self):
@@ -129,11 +134,13 @@ class AutoMLTest(Base, unittest.TestCase):
                 tae_runner=ta,
             )
 
-        output = os.path.join(self.test_dir, '..', '.tmp_test_fit_roar')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_test_fit_roar')
+        output = os.path.join(self.test_dir, '..', '.out_test_fit_roar')
+        self._setUp(tmp)
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        backend_api = backend.create(output, output)
+        backend_api = backend.create(tmp, output)
         automl = autosklearn.automl.AutoML(
             backend=backend_api,
             time_left_for_this_task=20,
@@ -149,6 +156,7 @@ class AutoMLTest(Base, unittest.TestCase):
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
+        self._tearDown(tmp)
         self._tearDown(output)
 
     def test_binary_score_and_include(self):
@@ -157,8 +165,10 @@ class AutoMLTest(Base, unittest.TestCase):
         taking the index 1 of second dimension in prediction matrix
         """
 
-        output = os.path.join(self.test_dir, '..', '.tmp_test_binary_score')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_test_binary_score')
+        output = os.path.join(self.test_dir, '..', '.out_test_binary_score')
         self._setUp(output)
+        self._setUp(tmp)
 
         data = sklearn.datasets.make_classification(
             n_samples=400, n_features=10, n_redundant=1, n_informative=3,
@@ -168,7 +178,7 @@ class AutoMLTest(Base, unittest.TestCase):
         X_test = data[0][200:]
         Y_test = data[1][200:]
 
-        backend_api = backend.create(output, output)
+        backend_api = backend.create(tmp, output)
         automl = autosklearn.automl.AutoML(backend_api, 20, 5,
                                            include_estimators=['sgd'],
                                            include_preprocessors=['no_preprocessing'])
@@ -182,18 +192,22 @@ class AutoMLTest(Base, unittest.TestCase):
         self.assertGreaterEqual(score, 0.4)
 
         del automl
+        self._tearDown(tmp)
         self._tearDown(output)
 
     def test_automl_outputs(self):
-        output = os.path.join(self.test_dir, '..',
+        tmp = os.path.join(self.test_dir, '..',
                               '.tmp_test_automl_outputs')
+        output = os.path.join(self.test_dir, '..',
+                              '.out_test_automl_outputs')
         self._setUp(output)
+        self._setUp(tmp)
         name = '31_bac'
         dataset = os.path.join(self.test_dir, '..', '.data', name)
         data_manager_file = os.path.join(output, '.auto-sklearn',
                                          'datamanager.pkl')
 
-        backend_api = backend.create(output, output)
+        backend_api = backend.create(tmp, output)
         auto = autosklearn.automl.AutoML(
             backend_api, 20, 5,
             initial_configurations_via_metalearning=0,
@@ -238,17 +252,21 @@ class AutoMLTest(Base, unittest.TestCase):
         self.assertGreaterEqual(time.time() - start_time, 10)
 
         del auto
+        self._tearDown(tmp)
         self._tearDown(output)
 
     def test_do_dummy_prediction(self):
         for name in ['401_bac', '31_bac', 'adult', 'cadata']:
-            output = os.path.join(self.test_dir, '..',
+            tmp = os.path.join(self.test_dir, '..',
                                   '.tmp_test_do_dummy_prediction')
+            output = os.path.join(self.test_dir, '..',
+                                  '.out_test_do_dummy_prediction')
             self._setUp(output)
+            self._setUp(tmp)
 
             dataset = os.path.join(self.test_dir, '..', '.data', name)
 
-            backend_api = backend.create(output, output)
+            backend_api = backend.create(tmp, output)
             auto = autosklearn.automl.AutoML(
                 backend_api, 20, 5,
                 initial_configurations_via_metalearning=25)
@@ -268,6 +286,9 @@ class AutoMLTest(Base, unittest.TestCase):
                 'predictions_ensemble_1_1.npy')))
 
             del auto
+            self._tearDown(tmp)
             self._tearDown(output)
 
 
+if __name__=="__main__":
+    unittest.main()

@@ -56,10 +56,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
-        output_dir = os.path.join(os.getcwd(), '.test_holdout')
+        tmp_dir = os.path.join(os.getcwd(), '.out_test_holdout')
+        output_dir = os.path.join(os.getcwd(), '.tmp_test_holdout')
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(output_dir, output_dir)
+        backend_api = backend.create(tmp_dir, output_dir)
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -118,10 +119,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
-        output_dir = os.path.join(os.getcwd(), '.test_iterative_holdout')
+        tmp_dir = os.path.join(os.getcwd(), '.tmp_test_iterative_holdout')
+        output_dir = os.path.join(os.getcwd(), '.out_test_iterative_holdout')
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(output_dir, output_dir)
+        backend_api = backend.create(tmp_dir, output_dir)
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -199,10 +201,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
-        output_dir = os.path.join(os.getcwd(), '.test_iterative_holdout_interuption')
+        tmp_dir = os.path.join(os.getcwd(), '.tmp_test_iterative_holdout_interuption')
+        output_dir = os.path.join(os.getcwd(), '.out_test_iterative_holdout_interuption')
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(output_dir, output_dir)
+        backend_api = backend.create(tmp_dir, output_dir)
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -266,10 +269,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
-        output_dir = os.path.join(os.getcwd(), '.test_iterative_holdout_not_iterative')
+        tmp_dir = os.path.join(os.getcwd(), '.tmp_test_iterative_holdout_not_iterative')
+        output_dir = os.path.join(os.getcwd(), '.out_test_iterative_holdout_not_iterative')
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(output_dir, output_dir)
+        backend_api = backend.create(tmp_dir, output_dir)
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -306,10 +310,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
-        output_dir = os.path.join(os.getcwd(), '.test_cv')
+        tmp_dir = os.path.join(os.getcwd(), '.tmp_test_cv')
+        output_dir = os.path.join(os.getcwd(), '.out_test_cv')
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(output_dir, output_dir)
+        backend_api = backend.create(tmp_dir, output_dir)
         backend_api.load_datamanager = lambda : D
         queue_ = multiprocessing.Queue()
 
@@ -353,12 +358,13 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
-        output_dir = os.path.join(os.getcwd(), '.test_partial_cv')
+        tmp_dir = os.path.join(os.getcwd(), '.tmp_test_partial_cv')
+        output_dir = os.path.join(os.getcwd(), '.out_test_partial_cv')
         D = get_binary_classification_datamanager()
         D.name = 'test'
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(output_dir, output_dir)
+        backend_api = backend.create(tmp_dir, output_dir)
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
@@ -411,10 +417,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
-        output_dir = os.path.join(os.getcwd(), '.test_iterative_partial_cv')
+        tmp_dir = os.path.join(os.getcwd(), '.tmp_test_iterative_partial_cv')
+        output_dir = os.path.join(os.getcwd(), '.out_test_iterative_partial_cv')
 
         configuration = unittest.mock.Mock(spec=Configuration)
-        backend_api = backend.create(output_dir, output_dir)
+        backend_api = backend.create(tmp_dir, output_dir)
         backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 

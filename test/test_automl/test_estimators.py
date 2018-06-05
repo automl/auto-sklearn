@@ -86,7 +86,9 @@ class EstimatorTest(Base, unittest.TestCase):
                                 X=X, y=y, feat_type=['Car']*100)
 
     def test_fit_pSMAC(self):
-        output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
+        output = os.path.join(self.test_dir, '..', '.out_estimator_fit_pSMAC')
+        self._setUp(tmp)
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('digits')
@@ -99,7 +101,7 @@ class EstimatorTest(Base, unittest.TestCase):
             time_left_for_this_task=20,
             per_run_time_limit=5,
             output_folder=output,
-            tmp_folder=output,
+            tmp_folder=tmp,
             shared_mode=True,
             seed=1,
             initial_configurations_via_metalearning=0,
@@ -168,12 +170,15 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertIn(ArrayReturningDummyPredictor, classifier_types)
 
         del automl
+        self._tearDown(tmp)
         self._tearDown(output)
 
     def test_cv_results(self):
         # TODO restructure and actually use real SMAC output from a long run
         # to do this unittest!
-        output = os.path.join(self.test_dir, '..', '.tmp_cv_results')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_cv_results')
+        output = os.path.join(self.test_dir, '..', '.out_cv_results')
+        self._setUp(tmp)
         self._setUp(output)
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
 
@@ -195,6 +200,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertTrue([isinstance(val, npma.MaskedArray) for key, val in
                          cv_results.items() if key.startswith('param_')])
         del cls
+        self._tearDown(tmp)
         self._tearDown(output)
 
         
@@ -249,13 +255,15 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         np.testing.assert_array_equal(expected_result, actual_result)
 
     def test_can_pickle_classifier(self):
-        output = os.path.join(self.test_dir, '..', '.tmp_can_pickle')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_can_pickle')
+        output = os.path.join(self.test_dir, '..', '.out_can_pickle')
+        self._setUp(tmp)
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
-                                       tmp_folder=output,
+                                       tmp_folder=tmp,
                                        output_folder=output)
         automl.fit(X_train, Y_train)
 
@@ -314,14 +322,16 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self.assertAlmostEqual(np.mean(probs), 0.33, places=1)
 
     def test_binary(self):
+        tmp = os.path.join(self.test_dir, '..', '.out_binary_fit')
         output = os.path.join(self.test_dir, '..', '.tmp_binary_fit')
         self._setUp(output)
+        self._setUp(tmp)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset(
             'iris', make_binary=True)
         automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
-                                       tmp_folder=output,
+                                       tmp_folder=tmp,
                                        output_folder=output)
 
         automl.fit(X_train, Y_train, X_test=X_test, y_test=Y_test,
@@ -356,7 +366,9 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
 class AutoMLRegressorTest(Base, unittest.TestCase):
     def test_regression(self):
-        output = os.path.join(self.test_dir, '..', '.tmp_regression_fit')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_regression_fit')
+        output = os.path.join(self.test_dir, '..', '.out_regression_fit')
+        self._setUp(tmp)
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('boston')
