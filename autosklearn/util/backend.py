@@ -34,6 +34,7 @@ class BackendContext(object):
                  output_directory,
                  delete_tmp_folder_after_terminate,
                  delete_output_folder_after_terminate):
+
         # Check that the names of tmp_dir and output_dir is not the same.
         if temporary_directory == output_directory and type(temporary_directory) is not type(None):
             raise ValueError("The names of tmp dir and the output dir "
@@ -42,13 +43,11 @@ class BackendContext(object):
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
         # attributes to check that directories were created by autosklearn.
-        self._tmp_dir_created = True
-        self._output_dir_created = True
-
+        self._tmp_dir_created = False
+        self._output_dir_created = False
         self._prepare_directories(temporary_directory, output_directory)
         self._logger = logging.get_logger(__name__)
         self.create_directories()
-
 
     @property
     def output_directory(self):
@@ -73,17 +72,14 @@ class BackendContext(object):
             else '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
 
     def create_directories(self):
-        try:
-            os.makedirs(self.output_directory)
-        except OSError:
-            self._output_dir_created = False
-            pass
+        # Exception will be raised if self.temporary_directory already exists.
+        os.makedirs(self.temporary_directory)
+        self._tmp_dir_created = True
 
-        try:
-            os.makedirs(self.temporary_directory)
-        except OSError:
-            self._tmp_dir_created = False
-            pass
+        # Exception will be raised if self.output_directory already exists.
+        os.makedirs(self.output_directory)
+        self._output_dir_created = True
+
 
     def __del__(self):
         self.delete_directories(force=False)

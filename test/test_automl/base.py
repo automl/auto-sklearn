@@ -27,10 +27,11 @@ class Base(unittest.TestCase):
                     break
                 except OSError:
                     time.sleep(1)
-        try:
-            os.makedirs(output)
-        except OSError:
-            pass
+        # TODO: This part should be deleted because the output dir is created during call to AutoML.
+        #try:
+        #    os.makedirs(output)
+        #except OSError:
+        #    pass
 
 
     def _tearDown(self, output):
