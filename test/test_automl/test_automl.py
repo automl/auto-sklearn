@@ -45,6 +45,8 @@ class AutoMLTest(Base, unittest.TestCase):
     def test_refit_shuffle_on_fail(self):
         tmp = os.path.join(self.test_dir, '..', '.tmp._refit_shuffle_on_fail')
         output = os.path.join(self.test_dir, '..', '.out_refit_shuffle_on_fail')
+        self._setUp(tmp)
+        self._setUp(output)
         context = BackendContext(tmp, output, False, False)
         backend = Backend(context)
 
@@ -204,7 +206,7 @@ class AutoMLTest(Base, unittest.TestCase):
         self._setUp(tmp)
         name = '31_bac'
         dataset = os.path.join(self.test_dir, '..', '.data', name)
-        data_manager_file = os.path.join(output, '.auto-sklearn',
+        data_manager_file = os.path.join(tmp, '.auto-sklearn',
                                          'datamanager.pkl')
 
         backend_api = backend.create(tmp, output)
@@ -226,26 +228,26 @@ class AutoMLTest(Base, unittest.TestCase):
                    'start_time_100', 'datamanager.pkl',
                    'predictions_ensemble',
                    'ensembles', 'predictions_test', 'models']
-        self.assertEqual(sorted(os.listdir(os.path.join(output,
+        self.assertEqual(sorted(os.listdir(os.path.join(tmp,
                                                         '.auto-sklearn'))),
                          sorted(fixture))
 
         # At least one ensemble, one validation, one test prediction and one
         # model and one ensemble
-        fixture = os.listdir(os.path.join(output, '.auto-sklearn',
+        fixture = os.listdir(os.path.join(tmp, '.auto-sklearn',
                                           'predictions_ensemble'))
         self.assertIn('predictions_ensemble_100_1.npy', fixture)
 
-        fixture = os.listdir(os.path.join(output, '.auto-sklearn',
+        fixture = os.listdir(os.path.join(tmp, '.auto-sklearn',
                                           'models'))
         self.assertIn('100.1.model', fixture)
 
-        fixture = os.listdir(os.path.join(output, '.auto-sklearn',
+        fixture = os.listdir(os.path.join(tmp, '.auto-sklearn',
                                           'ensembles'))
         self.assertIn('100.0.ensemble', fixture)
 
         # Start time
-        start_time_file_path = os.path.join(output, '.auto-sklearn',
+        start_time_file_path = os.path.join(tmp, '.auto-sklearn',
                                             "start_time_100")
         with open(start_time_file_path, 'r') as fh:
             start_time = float(fh.read())
@@ -279,10 +281,12 @@ class AutoMLTest(Base, unittest.TestCase):
 
             # Ensure that the dummy predictions are not in the current working
             # directory, but in the output directory (under output)
+            # TODO: Shouldn't it be in the tmp directory?
+            # TODO: Refer to backend.py, line 145 (constructor of Backend object)
             self.assertFalse(os.path.exists(os.path.join(os.getcwd(),
                                                          '.auto-sklearn')))
             self.assertTrue(os.path.exists(os.path.join(
-                output, '.auto-sklearn', 'predictions_ensemble',
+                tmp, '.auto-sklearn', 'predictions_ensemble',
                 'predictions_ensemble_1_1.npy')))
 
             del auto

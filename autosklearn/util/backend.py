@@ -37,7 +37,7 @@ class BackendContext(object):
 
         # Check that the names of tmp_dir and output_dir is not the same.
         if temporary_directory == output_directory and type(temporary_directory) is not type(None):
-            raise ValueError("The names of tmp dir and the output dir "
+            raise ValueError("The names of tmp dir and output dir "
                             "must be different.")
 
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate

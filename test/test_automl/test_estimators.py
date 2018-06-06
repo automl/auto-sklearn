@@ -111,7 +111,7 @@ class EstimatorTest(Base, unittest.TestCase):
         # Create a 'dummy model' for the first run, which has an accuracy of
         # more than 99%; it should be in the final ensemble if the ensemble
         # building of the second AutoSklearn classifier works correct
-        true_targets_ensemble_path = os.path.join(output, '.auto-sklearn',
+        true_targets_ensemble_path = os.path.join(tmp, '.auto-sklearn',
                                                   'true_targets_ensemble.npy')
         with open(true_targets_ensemble_path, 'rb') as fh:
             true_targets_ensemble = np.load(fh)
@@ -122,7 +122,7 @@ class EstimatorTest(Base, unittest.TestCase):
         for i, value in enumerate(true_targets_ensemble):
             probas[i, value] = 1.0
         dummy_predictions_path = os.path.join(
-            output,
+            tmp,
             '.auto-sklearn',
             'predictions_ensemble',
             'predictions_ensemble_1_00030.npy',
@@ -135,7 +135,7 @@ class EstimatorTest(Base, unittest.TestCase):
             probas_test[i, value - 1] = 1.0
 
         dummy = ArrayReturningDummyPredictor(probas_test)
-        context = BackendContext(output, output, False, False)
+        context = BackendContext(tmp, output, False, False)
         backend = Backend(context)
         backend.save_model(dummy, 30, 1)
 
@@ -143,7 +143,7 @@ class EstimatorTest(Base, unittest.TestCase):
             time_left_for_this_task=20,
             per_run_time_limit=5,
             output_folder=output,
-            tmp_folder=output,
+            tmp_folder=tmp,
             shared_mode=True,
             seed=2,
             initial_configurations_via_metalearning=0,
@@ -160,7 +160,7 @@ class EstimatorTest(Base, unittest.TestCase):
         predictions = automl.predict(X_test)
         score = sklearn.metrics.accuracy_score(Y_test, predictions)
 
-        self.assertEqual(len(os.listdir(os.path.join(output, '.auto-sklearn',
+        self.assertEqual(len(os.listdir(os.path.join(tmp, '.auto-sklearn',
                                                      'ensembles'))), 1)
         self.assertGreaterEqual(score, 0.90)
         self.assertEqual(automl._automl._task, MULTICLASS_CLASSIFICATION)
