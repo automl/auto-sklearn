@@ -185,7 +185,7 @@ class EstimatorTest(Base, unittest.TestCase):
         cls = AutoSklearnClassifier(time_left_for_this_task=20,
                                     per_run_time_limit=5,
                                     output_folder=output,
-                                    tmp_folder=output,
+                                    tmp_folder=tmp,
                                     shared_mode=False,
                                     seed=1,
                                     initial_configurations_via_metalearning=0,
@@ -374,7 +374,7 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         X_train, Y_train, X_test, Y_test = putil.get_dataset('boston')
         automl = AutoSklearnRegressor(time_left_for_this_task=20,
                                       per_run_time_limit=5,
-                                      tmp_folder=output,
+                                      tmp_folder=tmp,
                                       output_folder=output)
 
         automl.fit(X_train, Y_train)
