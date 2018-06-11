@@ -18,10 +18,12 @@ __all__ = [
 def create(temporary_directory,
            output_directory,
            delete_tmp_folder_after_terminate=True,
-           delete_output_folder_after_terminate=True):
+           delete_output_folder_after_terminate=True,
+           shared_mode=False):
     context = BackendContext(temporary_directory, output_directory,
                              delete_tmp_folder_after_terminate,
-                             delete_output_folder_after_terminate)
+                             delete_output_folder_after_terminate,
+                             shared_mode)
     backend = Backend(context)
 
     return backend
@@ -79,13 +81,10 @@ class BackendContext(object):
             # by different instances of auto-sklearn.
             try:
                 os.makedirs(self.temporary_directory)
-
             except OSError:
                 pass
-
             try:
                 os.makedirs(self.output_directory)
-
             except OSError:
                 pass
 
