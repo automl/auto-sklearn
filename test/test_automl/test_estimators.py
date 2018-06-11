@@ -135,7 +135,7 @@ class EstimatorTest(Base, unittest.TestCase):
             probas_test[i, value - 1] = 1.0
 
         dummy = ArrayReturningDummyPredictor(probas_test)
-        context = BackendContext(tmp, output, False, False)
+        context = BackendContext(tmp, output, False, False, True)
         backend = Backend(context)
         backend.save_model(dummy, 30, 1)
 
