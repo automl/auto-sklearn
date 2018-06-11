@@ -33,7 +33,8 @@ class BackendContext(object):
                  temporary_directory,
                  output_directory,
                  delete_tmp_folder_after_terminate,
-                 delete_output_folder_after_terminate):
+                 delete_output_folder_after_terminate,
+                 shared_mode=False):
 
         # Check that the names of tmp_dir and output_dir is not the same.
         if temporary_directory == output_directory and type(temporary_directory) is not type(None):
@@ -42,6 +43,7 @@ class BackendContext(object):
 
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
+        self.shared_mode = shared_mode
         # attributes to check that directories were created by autosklearn.
         self._tmp_dir_created = False
         self._output_dir_created = False
@@ -72,13 +74,29 @@ class BackendContext(object):
             else '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
 
     def create_directories(self):
-        # Exception will be raised if self.temporary_directory already exists.
-        os.makedirs(self.temporary_directory)
-        self._tmp_dir_created = True
+        if self.shared_mode:
+            # If shared_mode == True, the tmp and output dir will be shared
+            # by different instances of auto-sklearn.
+            try:
+                os.makedirs(self.temporary_directory)
 
-        # Exception will be raised if self.output_directory already exists.
-        os.makedirs(self.output_directory)
-        self._output_dir_created = True
+            except OSError:
+                pass
+
+            try:
+                os.makedirs(self.output_directory)
+
+            except OSError:
+                pass
+
+        else:
+            # Exception will be raised if self.temporary_directory already exists.
+            os.makedirs(self.temporary_directory)
+            self._tmp_dir_created = True
+
+            # Exception will be raised if self.output_directory already exists.
+            os.makedirs(self.output_directory)
+            self._output_dir_created = True
 
 
     def __del__(self):
@@ -86,7 +104,7 @@ class BackendContext(object):
 
     def delete_directories(self, force=True):
         if self.delete_output_folder_after_terminate or force:
-            if self._output_dir_created is False:
+            if self._output_dir_created is False and self.shared_mode is False:
                 raise OSError("Failed to delete output dir: %s "
                               "because auto-sklearn did not create it. "
                               "Please make sure that the specified output dir does "
@@ -102,7 +120,7 @@ class BackendContext(object):
                           self.output_directory)
 
         if self.delete_tmp_folder_after_terminate or force:
-            if self._tmp_dir_created is False:
+            if self._tmp_dir_created is False and self.shared_mode is False:
                 raise OSError("Failed to delete tmp dir: % s "
                               "because auto-sklearn did not create it. "
                               "Please make sure that the specified tmp dir does "

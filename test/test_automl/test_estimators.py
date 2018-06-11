@@ -303,14 +303,16 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self.assertEqual(initial_accuracy, restored_accuracy)
 
     def test_multilabel(self):
-        output = os.path.join(self.test_dir, '..', '.tmp_multilabel_fit')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_multilabel_fit')
+        output = os.path.join(self.test_dir, '..', '.out_multilabel_fit')
+        self._setUp(tmp)
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset(
             'iris', make_multilabel=True)
         automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
-                                       tmp_folder=output,
+                                       tmp_folder=tmp,
                                        output_folder=output)
 
         automl.fit(X_train, Y_train)
