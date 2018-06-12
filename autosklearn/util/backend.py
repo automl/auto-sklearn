@@ -39,9 +39,10 @@ class BackendContext(object):
                  shared_mode=False):
 
         # Check that the names of tmp_dir and output_dir is not the same.
-        if temporary_directory == output_directory and type(temporary_directory) is not type(None):
+        if temporary_directory == output_directory \
+            and temporary_directory is not None:
             raise ValueError("The names of tmp dir and output dir "
-                            "must be different.")
+                             "must be different.")
 
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
         self.delete_output_folder_after_terminate = delete_output_folder_after_terminate
@@ -89,11 +90,11 @@ class BackendContext(object):
                 pass
 
         else:
-            # Exception will be raised if self.temporary_directory already exists.
+            # Exception is raised if self.temporary_directory already exists.
             os.makedirs(self.temporary_directory)
             self._tmp_dir_created = True
 
-            # Exception will be raised if self.output_directory already exists.
+            # Exception is raised if self.output_directory already exists.
             os.makedirs(self.output_directory)
             self._output_dir_created = True
 
@@ -106,8 +107,9 @@ class BackendContext(object):
             if self._output_dir_created is False and self.shared_mode is False:
                 raise OSError("Failed to delete output dir: %s "
                               "because auto-sklearn did not create it. "
-                              "Please make sure that the specified output dir does "
-                              "not exist when instantiating auto-sklearn." % self.output_directory)
+                              "Please make sure that the specified output "
+                              "dir does not exist when instantiating "
+                              "auto-sklearn." % self.output_directory)
             try:
                 shutil.rmtree(self.output_directory)
             except Exception:
@@ -122,8 +124,9 @@ class BackendContext(object):
             if self._tmp_dir_created is False and self.shared_mode is False:
                 raise OSError("Failed to delete tmp dir: % s "
                               "because auto-sklearn did not create it. "
-                              "Please make sure that the specified tmp dir does "
-                              "not exist when instantiating auto-sklearn." % self.temporary_directory)
+                              "Please make sure that the specified tmp "
+                              "dir does not exist when instantiating "
+                              "auto-sklearn." % self.temporary_directory)
             try:
                 shutil.rmtree(self.temporary_directory)
             except Exception:

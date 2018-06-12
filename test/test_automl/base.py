@@ -27,7 +27,8 @@ class Base(unittest.TestCase):
                     break
                 except OSError:
                     time.sleep(1)
-        # TODO: This part should be deleted because the output dir is created during call to AutoML.
+        # This part is no longer necessary as the directory creating
+        # mechanism has changed.
         #try:
         #    os.makedirs(output)
         #except OSError:
