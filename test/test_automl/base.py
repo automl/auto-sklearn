@@ -38,14 +38,15 @@ class Base(unittest.TestCase):
         backend = create(tmp, output)
         return backend
 
-    def _tearDown(self, backend):
+    def _tearDown(self, dir):
         """
         Delete the temporary and the output directories manually
         in case they are not deleted.
         """
-        for i in range(10):
-            try:
-                shutil.rmtree(backend.temporary_directory)
-                shutil.rmtree(backend.output_directory)
-            except OSError:
-                time.sleep(1)
+        if os.path.exists(dir):
+            for i in range(10):
+                try:
+                    shutil.rmtree(dir)
+                    break
+                except OSError:
+                    time.sleep(1)

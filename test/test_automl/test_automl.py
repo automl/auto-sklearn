@@ -62,7 +62,8 @@ class AutoMLTest(Base, unittest.TestCase):
         self.assertEqual(failing_model.fit.call_count, 3)
 
         del auto
-        self._tearDown(backend_api)
+        self._tearDown(backend_api.temporary_directory)
+        self._tearDown(backend_api.output_directory)
 
     def test_only_loads_ensemble_models(self):
         identifiers = [(1, 2), (3, 4)]
@@ -109,7 +110,8 @@ class AutoMLTest(Base, unittest.TestCase):
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
-        self._tearDown(backend_api)
+        self._tearDown(backend_api.temporary_directory)
+        self._tearDown(backend_api.output_directory)
 
     def test_fit_roar(self):
         def get_roar_object_callback(
@@ -146,7 +148,8 @@ class AutoMLTest(Base, unittest.TestCase):
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
-        self._tearDown(backend_api)
+        self._tearDown(backend_api.temporary_directory)
+        self._tearDown(backend_api.output_directory)
 
     def test_binary_score_and_include(self):
         """
@@ -176,7 +179,8 @@ class AutoMLTest(Base, unittest.TestCase):
         self.assertGreaterEqual(score, 0.4)
 
         del automl
-        self._tearDown(backend_api)
+        self._tearDown(backend_api.temporary_directory)
+        self._tearDown(backend_api.output_directory)
 
     def test_automl_outputs(self):
         backend_api = self._create_backend('test_automl_outputs')
@@ -230,7 +234,8 @@ class AutoMLTest(Base, unittest.TestCase):
         self.assertGreaterEqual(time.time() - start_time, 10)
 
         del auto
-        self._tearDown(backend_api)
+        self._tearDown(backend_api.temporary_directory)
+        self._tearDown(backend_api.output_directory)
 
     def test_do_dummy_prediction(self):
         for name in ['401_bac', '31_bac', 'adult', 'cadata']:
@@ -249,9 +254,7 @@ class AutoMLTest(Base, unittest.TestCase):
             auto._do_dummy_prediction(D, 1)
 
             # Ensure that the dummy predictions are not in the current working
-            # directory, but in the output directory (under output)
-            # TODO: Shouldn't it be in the tmp directory?
-            # TODO: Refer to backend.py, line 145 (constructor of Backend object)
+            # directory, but in the temporary directory.
             self.assertFalse(os.path.exists(os.path.join(os.getcwd(),
                                                          '.auto-sklearn')))
             self.assertTrue(os.path.exists(os.path.join(
@@ -259,7 +262,8 @@ class AutoMLTest(Base, unittest.TestCase):
                 'predictions_ensemble_1_1.npy')))
 
             del auto
-            self._tearDown(backend_api)
+            self._tearDown(backend_api.temporary_directory)
+            self._tearDown(backend_api.output_directory)
 
 
 if __name__=="__main__":
