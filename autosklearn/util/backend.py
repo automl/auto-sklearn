@@ -41,7 +41,7 @@ class BackendContext(object):
         # Check that the names of tmp_dir and output_dir is not the same.
         if temporary_directory == output_directory \
             and temporary_directory is not None:
-            raise ValueError("The names of tmp dir and output dir "
+            raise ValueError("The temporary and the output directory "
                              "must be different.")
 
         self.delete_tmp_folder_after_terminate = delete_tmp_folder_after_terminate
@@ -50,6 +50,7 @@ class BackendContext(object):
         # attributes to check that directories were created by autosklearn.
         self._tmp_dir_created = False
         self._output_dir_created = False
+
         self._prepare_directories(temporary_directory, output_directory)
         self._logger = logging.get_logger(__name__)
         self.create_directories()
@@ -57,12 +58,12 @@ class BackendContext(object):
     @property
     def output_directory(self):
         # make sure that tilde does not appear on the path.
-        return os.path.expanduser(self.__output_directory)
+        return os.path.expanduser(os.path.expandvars(self.__output_directory))
 
     @property
     def temporary_directory(self):
         # make sure that tilde does not appear on the path.
-        return os.path.expanduser(self.__temporary_directory)
+        return os.path.expanduser(os.path.expandvars(self.__temporary_directory))
 
     def _prepare_directories(self, temporary_directory, output_directory):
         random_number = random.randint(0, 10000)
@@ -105,7 +106,7 @@ class BackendContext(object):
     def delete_directories(self, force=True):
         if self.delete_output_folder_after_terminate or force:
             if self._output_dir_created is False and self.shared_mode is False:
-                raise OSError("Failed to delete output dir: %s "
+                raise ValueError("Failed to delete output dir: %s "
                               "because auto-sklearn did not create it. "
                               "Please make sure that the specified output "
                               "dir does not exist when instantiating "
@@ -122,7 +123,7 @@ class BackendContext(object):
 
         if self.delete_tmp_folder_after_terminate or force:
             if self._tmp_dir_created is False and self.shared_mode is False:
-                raise OSError("Failed to delete tmp dir: % s "
+                raise ValueError("Failed to delete tmp dir: % s "
                               "because auto-sklearn did not create it. "
                               "Please make sure that the specified tmp "
                               "dir does not exist when instantiating "

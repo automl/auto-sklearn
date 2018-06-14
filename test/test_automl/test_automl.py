@@ -43,17 +43,12 @@ class AutoMLTest(Base, unittest.TestCase):
         self.automl._delete_output_directories = lambda: 0
 
     def test_refit_shuffle_on_fail(self):
-        tmp = os.path.join(self.test_dir, '..', '.tmp._refit_shuffle_on_fail')
-        output = os.path.join(self.test_dir, '..', '.out_refit_shuffle_on_fail')
-        self._setUp(tmp)
-        self._setUp(output)
-        context = BackendContext(tmp, output, False, False)
-        backend = Backend(context)
+        backend_api = self._create_backend('test_refit_shuffle_on_fail')
 
         failing_model = unittest.mock.Mock()
         failing_model.fit.side_effect = [ValueError(), ValueError(), None]
 
-        auto = AutoML(backend, 20, 5)
+        auto = AutoML(backend_api, 20, 5)
         ensemble_mock = unittest.mock.Mock()
         auto.ensemble_ = ensemble_mock
         ensemble_mock.get_selected_model_identifiers.return_value = [1]
@@ -65,6 +60,9 @@ class AutoMLTest(Base, unittest.TestCase):
         auto.refit(X, y)
 
         self.assertEqual(failing_model.fit.call_count, 3)
+
+        del auto
+        self._tearDown(backend_api)
 
     def test_only_loads_ensemble_models(self):
         identifiers = [(1, 2), (3, 4)]
@@ -99,14 +97,9 @@ class AutoMLTest(Base, unittest.TestCase):
         self.automl._load_models()
 
     def test_fit(self):
-        tmp = os.path.join(self.test_dir, '..', '.tmp_test_fit')
-        output = os.path.join(self.test_dir, '..', '.out_test_fit')
-
-        self._setUp(output)
-        self._setUp(tmp)
+        backend_api = self._create_backend('test_fit')
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        backend_api = backend.create(tmp, output)
         automl = autosklearn.automl.AutoML(backend_api, 20, 5)
         automl.fit(
             X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
@@ -116,8 +109,7 @@ class AutoMLTest(Base, unittest.TestCase):
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
-        self._tearDown(tmp)
-        self._tearDown(output)
+        self._tearDown(backend_api)
 
     def test_fit_roar(self):
         def get_roar_object_callback(
@@ -136,13 +128,9 @@ class AutoMLTest(Base, unittest.TestCase):
                 tae_runner=ta,
             )
 
-        tmp = os.path.join(self.test_dir, '..', '.tmp_test_fit_roar')
-        output = os.path.join(self.test_dir, '..', '.out_test_fit_roar')
-        self._setUp(tmp)
-        self._setUp(output)
+        backend_api = self._create_backend('test_fit_roar')
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        backend_api = backend.create(tmp, output)
         automl = autosklearn.automl.AutoML(
             backend=backend_api,
             time_left_for_this_task=20,
@@ -158,19 +146,14 @@ class AutoMLTest(Base, unittest.TestCase):
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
 
         del automl
-        self._tearDown(tmp)
-        self._tearDown(output)
+        self._tearDown(backend_api)
 
     def test_binary_score_and_include(self):
         """
         Test fix for binary classification prediction
         taking the index 1 of second dimension in prediction matrix
         """
-
-        tmp = os.path.join(self.test_dir, '..', '.tmp_test_binary_score')
-        output = os.path.join(self.test_dir, '..', '.out_test_binary_score')
-        self._setUp(output)
-        self._setUp(tmp)
+        backend_api = self._create_backend('test_binary_score_and_include')
 
         data = sklearn.datasets.make_classification(
             n_samples=400, n_features=10, n_redundant=1, n_informative=3,
@@ -180,7 +163,6 @@ class AutoMLTest(Base, unittest.TestCase):
         X_test = data[0][200:]
         Y_test = data[1][200:]
 
-        backend_api = backend.create(tmp, output)
         automl = autosklearn.automl.AutoML(backend_api, 20, 5,
                                            include_estimators=['sgd'],
                                            include_preprocessors=['no_preprocessing'])
@@ -194,22 +176,16 @@ class AutoMLTest(Base, unittest.TestCase):
         self.assertGreaterEqual(score, 0.4)
 
         del automl
-        self._tearDown(tmp)
-        self._tearDown(output)
+        self._tearDown(backend_api)
 
     def test_automl_outputs(self):
-        tmp = os.path.join(self.test_dir, '..',
-                              '.tmp_test_automl_outputs')
-        output = os.path.join(self.test_dir, '..',
-                              '.out_test_automl_outputs')
-        self._setUp(output)
-        self._setUp(tmp)
+        backend_api = self._create_backend('test_automl_outputs')
+
         name = '31_bac'
         dataset = os.path.join(self.test_dir, '..', '.data', name)
-        data_manager_file = os.path.join(tmp, '.auto-sklearn',
+        data_manager_file = os.path.join(backend_api.temporary_directory, '.auto-sklearn',
                                          'datamanager.pkl')
 
-        backend_api = backend.create(tmp, output)
         auto = autosklearn.automl.AutoML(
             backend_api, 20, 5,
             initial_configurations_via_metalearning=0,
@@ -228,47 +204,40 @@ class AutoMLTest(Base, unittest.TestCase):
                    'start_time_100', 'datamanager.pkl',
                    'predictions_ensemble',
                    'ensembles', 'predictions_test', 'models']
-        self.assertEqual(sorted(os.listdir(os.path.join(tmp,
+        self.assertEqual(sorted(os.listdir(os.path.join(backend_api.temporary_directory,
                                                         '.auto-sklearn'))),
                          sorted(fixture))
 
         # At least one ensemble, one validation, one test prediction and one
         # model and one ensemble
-        fixture = os.listdir(os.path.join(tmp, '.auto-sklearn',
+        fixture = os.listdir(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
                                           'predictions_ensemble'))
         self.assertIn('predictions_ensemble_100_1.npy', fixture)
 
-        fixture = os.listdir(os.path.join(tmp, '.auto-sklearn',
+        fixture = os.listdir(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
                                           'models'))
         self.assertIn('100.1.model', fixture)
 
-        fixture = os.listdir(os.path.join(tmp, '.auto-sklearn',
+        fixture = os.listdir(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
                                           'ensembles'))
         self.assertIn('100.0.ensemble', fixture)
 
         # Start time
-        start_time_file_path = os.path.join(tmp, '.auto-sklearn',
+        start_time_file_path = os.path.join(backend_api.temporary_directory, '.auto-sklearn',
                                             "start_time_100")
         with open(start_time_file_path, 'r') as fh:
             start_time = float(fh.read())
         self.assertGreaterEqual(time.time() - start_time, 10)
 
         del auto
-        self._tearDown(tmp)
-        self._tearDown(output)
+        self._tearDown(backend_api)
 
     def test_do_dummy_prediction(self):
         for name in ['401_bac', '31_bac', 'adult', 'cadata']:
-            tmp = os.path.join(self.test_dir, '..',
-                                  '.tmp_test_do_dummy_prediction')
-            output = os.path.join(self.test_dir, '..',
-                                  '.out_test_do_dummy_prediction')
-            self._setUp(output)
-            self._setUp(tmp)
+            backend_api = self._create_backend('test_do_dummy_prediction')
 
             dataset = os.path.join(self.test_dir, '..', '.data', name)
 
-            backend_api = backend.create(tmp, output)
             auto = autosklearn.automl.AutoML(
                 backend_api, 20, 5,
                 initial_configurations_via_metalearning=25)
@@ -286,12 +255,11 @@ class AutoMLTest(Base, unittest.TestCase):
             self.assertFalse(os.path.exists(os.path.join(os.getcwd(),
                                                          '.auto-sklearn')))
             self.assertTrue(os.path.exists(os.path.join(
-                tmp, '.auto-sklearn', 'predictions_ensemble',
+                backend_api.temporary_directory, '.auto-sklearn', 'predictions_ensemble',
                 'predictions_ensemble_1_1.npy')))
 
             del auto
-            self._tearDown(tmp)
-            self._tearDown(output)
+            self._tearDown(backend_api)
 
 
 if __name__=="__main__":
