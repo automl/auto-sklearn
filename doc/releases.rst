@@ -18,7 +18,7 @@ Version 0.4.0
   ``predict_proba`` to no longer raise an `AttributeError`.
 * Improved documentation of the parallel example.
 * Classifiers are now tested to be idempotent as `required by scikit-learn
-<http://scikit-learn.org/stable/developers/contributing.html#estimated-attributes>`_.
+  <http://scikit-learn.org/stable/developers/contributing.html#estimated-attributes>`_.
 * Fixes the usage of the shrinkage parameter in LDA.
 * Fixes `#410 <https://github.com/automl/auto-sklearn/issues/410>`_ and changes
   the SGD hyperparameters
@@ -47,11 +47,11 @@ Version 0.4.0
 * Adds an operating system check at import and installation time to make sure
   to not accidentaly run on a Windows machine.
 * New examples gallery using sphinx gallery: `http://automl.github.io/auto-sklearn/stable/examples/index.html <http://automl.github.io/auto-sklearn/stable/examples/index.html>`_
-
-
+* Safeguard Auto-sklearn against deleting directories it did not create (Issue
+  `#317 <https://github.com/automl/auto-sklearn/issues/317>`_.
 
 Contributors
-~~~~~~~~~~~~
+************
 
 * Matthias Feurer
 * kaa
@@ -80,16 +80,13 @@ Version 0.3.0
   ``AutoSklearnRegressor``.
 
 Contributors
-~~~~~~~~~~~~
+************
 
 * Matthias Feurer
 * Jesper van Engelen
 
 Version 0.2.1
 =============
-
-Changes
-~~~~~~~
 
 * Allows the usage of scikit-learn 0.18.2.
 * Upgrade to latest SMAC version (``0.6.0``) and latest random forest version
@@ -102,7 +99,7 @@ Changes
 * New method to retrieve the models used in the final ensemble.
 
 Contributors
-~~~~~~~~~~~~
+************
 
 * Matthias Feurer
 * Katharina Eggensperger
@@ -115,9 +112,6 @@ Contributors
 Version 0.2.0
 =============
 
-Major changes
-~~~~~~~~~~~~~
-
 * **auto-sklearn supports custom metrics and all metrics included in
   scikit-learn**. Different metrics can now be passed to the ``fit()``-method
   estimator objects, for example
@@ -129,7 +123,7 @@ Major changes
   ``predict_proba``. By `Laurent Sorber <https://github.com/lsorber>`_.
 
 Contributors
-~~~~~~~~~~~~
+************
 
 * Matthias Feurer
 * Katharina Eggensperger
@@ -142,7 +136,7 @@ Version 0.1.x
 There are no release notes for auto-sklearn prior to version 0.2.0.
 
 Contributors
-~~~~~~~~~~~~
+************
 
 * Matthias Feurer
 * Katharina Eggensperger
