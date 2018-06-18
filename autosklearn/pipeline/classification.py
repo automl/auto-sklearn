@@ -17,7 +17,7 @@ from autosklearn.pipeline.components.data_preprocessing.balancing.balancing impo
 from autosklearn.pipeline.components.data_preprocessing.imputation.imputation \
     import Imputation
 from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding \
-     import OHEChoice
+    import OHEChoice
 from autosklearn.pipeline.components import feature_preprocessing as \
     feature_preprocessing_components
 from autosklearn.pipeline.components.data_preprocessing.variance_threshold.variance_threshold \
@@ -160,6 +160,8 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
         Returns
         -------
+        cs : ConfigSpace.configuration_space.Configuration
+            The configuration space describing the SimpleRegressionClassifier.
         """
         cs = ConfigurationSpace()
 
@@ -169,6 +171,10 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             dataset_properties['target_type'] = 'classification'
         if dataset_properties['target_type'] != 'classification':
             dataset_properties['target_type'] = 'classification'
+
+        if 'sparse' not in dataset_properties:
+            # This dataset is probaby dense
+            dataset_properties['sparse'] = False
 
         cs = self._get_base_search_space(
             cs=cs, dataset_properties=dataset_properties,
@@ -217,7 +223,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                         "gradient_boosting", "k_nearest_neighbors",
                         "libsvm_svc", "random_forest", "gaussian_nb",
                         "decision_tree", "xgradient_boosting"]
-        feature_learning = ["kitchen_sinks", "nystroem_sampler"]
+        feature_learning = ["kitchen_sinks", "kernel_pca", "nystroem_sampler"]
 
         for c, f in product(classifiers_, feature_learning):
             if c not in classifiers:

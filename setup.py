@@ -3,6 +3,25 @@ import setuptools
 from setuptools.extension import Extension
 import numpy as np
 from Cython.Build import cythonize
+import os
+import sys
+
+
+# Check if Auto-sklearn *could* run on the given system
+if os.name != 'posix':
+    raise ValueError(
+        'Detected unsupported operating system: %s. Please check '
+        'the compability information of auto-sklearn: http://automl.github.io'
+        '/auto-sklearn/stable/installation.html#windows-osx-compability' %
+        sys.platform
+    )
+
+if sys.version_info < (3, 5):
+    raise ValueError(
+        'Unsupported python version %s found. Auto-sklearn requires Python '
+        '3.5 or higher.' % sys.version_info
+    )
+
 
 extensions = cythonize(
     [Extension('autosklearn.data.competition_c_functions',
@@ -28,7 +47,8 @@ requirements = [
     "ConfigSpace>=0.4.0,<0.5",
     "pynisher>=0.4,<0.5",
     "pyrfr>=0.6.1,<0.8",
-    "smac>=0.8,<0.9"
+    "smac>=0.8,<0.9",
+    "xgboost==0.7.post3",
 ]
 
 with open("autosklearn/__version__.py") as fh:
@@ -48,4 +68,6 @@ setuptools.setup(
     license='BSD',
     platforms=['Linux'],
     classifiers=[],
-    url='https://automl.github.io/auto-sklearn')
+    python_requires='>=3.4.*',
+    url='https://automl.github.io/auto-sklearn',
+)

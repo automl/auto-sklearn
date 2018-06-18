@@ -15,13 +15,15 @@ Examples
 *auto-sklearn* comes with the following examples which demonstrate several
 aspects of its usage:
 
-* `Holdout <https://github.com/automl/auto-sklearn/blob/master/example/example_holdout.py>`_
-* `Cross-validation <https://github.com/automl/auto-sklearn/blob/master/example/example_crossvalidation.py>`_
-* `Parallel usage <https://github.com/automl/auto-sklearn/blob/master/example/example_parallel.py>`_
-* `Sequential usage <https://github.com/automl/auto-sklearn/blob/master/example/example_sequential.py>`_
-* `Regression <https://github.com/automl/auto-sklearn/blob/master/example/example_regression.py>`_
-* `Continuous and Categorical Data <https://github.com/automl/auto-sklearn/blob/master/example/example_feature_types.py>`_
-* `Using Custom metrics <https://github.com/automl/auto-sklearn/blob/master/example/example_metrics.py>`_
+* `Holdout <examples/example_holdout.html>`_
+* `Cross-validation <examples/example_crossvalidation.html>`_
+* `Parallel usage <examples/example_parallel.html>`_
+* `Sequential usage <examples/example_sequential.html>`_
+* `Regression <examples/example_regression.html>`_
+* `Continuous and categorical data <examples/example_feature_types.html>`_
+* `Using custom metrics <examples/example_metrics.html>`_
+* `Random search <examples/example_random_search.html>`_
+* `EIPS <examples/example_eips.html>`_
 
 
 Time and memory limits
@@ -44,7 +46,7 @@ time limit of one day, and a time limit of 30 minutes for a single run.
 Further guidelines can be found in
 `auto-sklearn/issues/142 <https://github.com/automl/auto-sklearn/issues/142>`_.
 
-Restricting the Searchspace
+Restricting the searchspace
 ===========================
 
 Instead of using all available estimators, it is possible to restrict
@@ -83,6 +85,25 @@ Resampling strategies
 =====================
 
 Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <https://github.com/automl/auto-sklearn/tree/master/example>`_
+
+Inspecting the results
+======================
+
+*auto-sklearn* allows users to inspect the training results and statistics. The following example shows how different 
+statistics can be printed for the inspection.
+
+>>> import autoskleran.classification
+>>> automl = autosklearn.classification.AutoSklearnClassifier()
+>>> automl.fit(X_train, y_train)
+>>> automl.cv_results_
+>>> automl.sprint_statistics()
+>>> automl.show_models()
+
+``cv_results_`` returns a dict with keys as column headers and values as columns, that can be imported into a pandas DataFrame.
+``sprint_statistics()`` is a method that prints the name of the  dataset, the metric used, and the best validation score
+obtained by running *auto-sklearn*. It additionally prints the number of both successful and unsuccessful
+algorithm runs.
+The results obtained from the final ensemble can be printed by calling ``show_models()``.
 
 Parallel computation
 ====================

@@ -1,33 +1,51 @@
-import numpy
+import numpy as np
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant, \
-    CategoricalHyperparameter
+    UniformIntegerHyperparameter, UnParametrizedHyperparameter, \
+    CategoricalHyperparameter, Constant
+from ConfigSpace.conditions import EqualsCondition
 
-from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
-
-
+from autosklearn.pipeline.components.base import (
+    AutoSklearnRegressionAlgorithm,
+    IterativeComponentWithSampleWeight,
+)
+from autosklearn.pipeline.implementations.xgb import \
+    CustomXGBRegressor
 from autosklearn.pipeline.constants import *
 
 
-class XGradientBoostingRegressor():#AutoSklearnRegressionAlgorithm):
-    def __init__(self, learning_rate, n_estimators, subsample,
-                 max_depth, colsample_bylevel, colsample_bytree, gamma,
-                 min_child_weight, max_delta_step, reg_alpha, reg_lambda,
-                 base_score, scale_pos_weight, nthread=1, init=None,
-                 random_state=None, verbose=0):
-        ## Do not exist
-        # self.loss = loss
-        # self.min_samples_split = min_samples_split
-        # self.min_samples_leaf = min_samples_leaf
-        # self.min_weight_fraction_leaf = min_weight_fraction_leaf
-        # self.max_leaf_nodes = max_leaf_nodes
+class XGradientBoostingRegressor(
+    IterativeComponentWithSampleWeight,
+    AutoSklearnRegressionAlgorithm,
+):
+    def __init__(self,
+                 # General Hyperparameters
+                 learning_rate, n_estimators, subsample, booster, max_depth,
+                 colsample_bylevel, colsample_bytree, reg_alpha, reg_lambda,
+                 # Inactive Hyperparameters
+                 gamma, min_child_weight, max_delta_step,
+                 base_score, scale_pos_weight, n_jobs=1, init=None,
+                 random_state=None, verbose=0,
+                 # (Conditional) DART Hyperparameters
+                 sample_type=None, normalize_type=None, rate_drop=None,
+                 ):
 
         self.learning_rate = learning_rate
         self.n_estimators = n_estimators
         self.subsample = subsample
         self.max_depth = max_depth
+        self.booster = booster
+
+        booster_args = {
+            'sample_type': sample_type,
+            'normalize_type': normalize_type,
+            'rate_drop': rate_drop,
+        }
+        if any(v is not None for v in booster_args.values()):
+            self.booster_args = booster_args
+        else:
+            self.booster_args = {}
 
         ## called differently
         # max_features: Subsample ratio of columns for each split, in each level.
@@ -45,7 +63,7 @@ class XGradientBoostingRegressor():#AutoSklearnRegressionAlgorithm):
 
         # Random number seed.
         if random_state is None:
-            self.seed = numpy.random.randint(1, 10000, size=1)[0]
+            self.seed = 1
         else:
             self.seed = random_state.randint(1, 10000, size=1)[0]
 
@@ -73,42 +91,57 @@ class XGradientBoostingRegressor():#AutoSklearnRegressionAlgorithm):
         self.base_score = base_score
 
         # Number of parallel threads used to run xgboost.
-        self.nthread = nthread
+        self.n_jobs = n_jobs
 
         ## Were there before, didn't touch
         self.init = init
         self.estimator = None
 
-    def fit(self, X, y, refit=False):
-        import xgboost as xgb
+    def iterative_fit(self, X, y, n_iter=2, refit=False, sample_weight=None):
 
-        self.learning_rate = float(self.learning_rate)
-        self.n_estimators = int(self.n_estimators)
-        self.subsample = float(self.subsample)
-        self.max_depth = int(self.max_depth)
+        import sklearn.model_selection
+        X_train, X_test, y_train, y_test = \
+            sklearn.model_selection.train_test_split(
+                X, y, random_state=1, test_size=0.1)
 
-        # (TODO) Gb used at most half of the features, here we use all
-        self.colsample_bylevel = float(self.colsample_bylevel)
+        if refit:
+            self.estimator = None
 
-        self.colsample_bytree = float(self.colsample_bytree)
-        self.gamma = float(self.gamma)
-        self.min_child_weight = int(self.min_child_weight)
-        self.max_delta_step = int(self.max_delta_step)
-        self.reg_alpha = float(self.reg_alpha)
-        self.reg_lambda = float(self.reg_lambda)
-        self.nthread = int(self.nthread)
-        self.base_score = float(self.base_score)
-        self.scale_pos_weight = float(self.scale_pos_weight)
+        if self.estimator is None:
+            self.learning_rate = float(self.learning_rate)
+            self.n_estimators = int(self.n_estimators)
+            self.subsample = float(self.subsample)
+            self.max_depth = int(self.max_depth)
 
-        self.objective = 'reg:linear'
+            # (TODO) Gb used at most half of the features, here we use all
+            self.colsample_bylevel = float(self.colsample_bylevel)
 
-        self.estimator = xgb.XGBRegressor(
+            self.colsample_bytree = float(self.colsample_bytree)
+            self.gamma = float(self.gamma)
+            self.min_child_weight = int(self.min_child_weight)
+            self.max_delta_step = int(self.max_delta_step)
+            self.reg_alpha = float(self.reg_alpha)
+            self.reg_lambda = float(self.reg_lambda)
+            self.n_jobs = int(self.n_jobs)
+            self.base_score = float(self.base_score)
+            self.scale_pos_weight = float(self.scale_pos_weight)
+            for key in self.booster_args:
+                try:
+                    self.booster_args[key] = float(self.booster_args[key])
+                except:
+                    pass
+
+            self.objective = 'reg:linear'
+            self.eval_metric = 'mae'
+
+            arguments = dict(
                 max_depth=self.max_depth,
                 learning_rate=self.learning_rate,
-                n_estimators=self.n_estimators,
+                n_estimators=n_iter,
                 silent=self.silent,
+                booster=self.booster,
                 objective=self.objective,
-                nthread=self.nthread,
+                n_jobs=self.n_jobs,
                 gamma=self.gamma,
                 scale_pos_weight=self.scale_pos_weight,
                 min_child_weight=self.min_child_weight,
@@ -119,12 +152,53 @@ class XGradientBoostingRegressor():#AutoSklearnRegressionAlgorithm):
                 reg_alpha=self.reg_alpha,
                 reg_lambda=self.reg_lambda,
                 base_score=self.base_score,
-                seed=self.seed
-                )
+                seed=self.seed,
+                random_state=self.seed,
+                **self.booster_args
+            )
 
-        self.estimator.fit(X, y)
+            self.estimator = CustomXGBRegressor(
+                tree_method='auto',
+                **arguments
+            )
+            self.estimator.fit(
+                X_train, y_train,
+                eval_set=[(X_test, y_test)],
+                eval_metric=self.eval_metric,
+                verbose=False,
+            )
+
+        elif not self.configuration_fully_fitted():
+            n_estimators_before_fit = self.estimator.n_estimators
+            self.estimator.n_estimators += n_iter
+            self.estimator.n_estimators = min(self.estimator.n_estimators,
+                                              self.n_estimators)
+            self.estimator.fit(
+                X_train, y_train,
+                xgb_model=self.estimator.get_booster(),
+                eval_set=[(X_train, y_train), (X_test, y_test)],
+                early_stopping_rounds=int(self.n_estimators / 10),
+                eval_metric=self.eval_metric,
+                verbose=False,
+            )
+            if (
+                        n_estimators_before_fit + n_iter
+                    > self.estimator.best_iteration + int(
+                        self.n_estimators / 10)
+            ) or (
+                    self.estimator.n_estimators >= self.n_estimators
+            ):
+                self.fully_fit_ = True
 
         return self
+
+    def configuration_fully_fitted(self):
+        if self.estimator is None:
+            return False
+        elif not hasattr(self, 'fully_fit_'):
+            return False
+        else:
+            return self.fully_fit_
 
     def predict(self, X):
         if self.estimator is None:
@@ -133,15 +207,17 @@ class XGradientBoostingRegressor():#AutoSklearnRegressionAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'XGB',
-                'name': 'XGradient Boosting Regressor',
-                'handles_regression': True,
-                'handles_classification': False,
-                'handles_multiclass': False,
-                'handles_multilabel': False,
-                'is_deterministic': True,
-                'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (PREDICTIONS,)}
+        return {
+            'shortname': 'XGB',
+            'name': 'XGradient Boosting Regressor',
+            'handles_regression': True,
+            'handles_classification': False,
+            'handles_multiclass': False,
+            'handles_multilabel': False,
+            'is_deterministic': True,
+            'input': (DENSE, SPARSE, UNSIGNED_DATA),
+            'output': (PREDICTIONS,)
+            }
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
@@ -149,36 +225,88 @@ class XGradientBoostingRegressor():#AutoSklearnRegressionAlgorithm):
 
         # Parameterized Hyperparameters
         max_depth = UniformIntegerHyperparameter(
-            name="max_depth", lower=1, upper=10, default_value=3)
+            name="max_depth", lower=1, upper=10, default_value=3
+        )
         learning_rate = UniformFloatHyperparameter(
-            name="learning_rate", lower=0.01, upper=1, default_value=0.1, log=True)
-        n_estimators = UniformIntegerHyperparameter("n_estimators", 50, 500, default_value=100)
+            name="learning_rate", lower=0.01, upper=1, default_value=0.1,
+            log=True
+        )
+        n_estimators = Constant("n_estimators", 512)
+        booster = CategoricalHyperparameter(
+            "booster", ["gbtree", "dart"]
+        )
         subsample = UniformFloatHyperparameter(
-            name="subsample", lower=0.01, upper=1.0, default_value=1.0, log=False)
+            name="subsample", lower=0.01, upper=1.0, default_value=1.0,
+            log=False
+        )
         min_child_weight = UniformIntegerHyperparameter(
-            name="min_child_weight", lower=1, upper=20, default_value=1, log=False)
+            name="min_child_weight", lower=1e-10,
+            upper=20, default_value=1, log=False
+        )
+        colsample_bytree = UniformFloatHyperparameter(
+            name="colsample_bytree", lower=0.1, upper=1.0, default_value=1,
+        )
+        colsample_bylevel = UniformFloatHyperparameter(
+            name="colsample_bylevel", lower=0.1, upper=1.0, default_value=1,
+        )
+        reg_alpha = UniformFloatHyperparameter(
+            name="reg_alpha", lower=1e-10, upper=1e-1, log=True,
+            default_value=1e-10)
+        reg_lambda = UniformFloatHyperparameter(
+            name="reg_lambda", lower=1e-10, upper=1e-1, log=True,
+            default_value=1e-10)
+
+        # DART Hyperparameters
+        sample_type = CategoricalHyperparameter(
+            'sample_type', ['uniform', 'weighted'], default_value='uniform',
+        )
+        normalize_type = CategoricalHyperparameter(
+            'normalize_type', ['tree', 'forest'], default_value='tree',
+        )
+        rate_drop = UniformFloatHyperparameter(
+            'rate_drop', 1e-10, 1 - (1e-10), default_value=0.5,
+        )
 
         # Unparameterized Hyperparameters
-        max_delta_step = UnParametrizedHyperparameter(
-            name="max_delta_step", value=0)
-        colsample_bytree = UnParametrizedHyperparameter(
-            name="colsample_bytree", value=1)
+        # https://xgboost.readthedocs.io/en/latest//parameter.html
+        # minimum loss reduction required to make a further partition on a
+        # leaf node of the tree
         gamma = UnParametrizedHyperparameter(
             name="gamma", value=0)
-        colsample_bylevel = UnParametrizedHyperparameter(
-            name="colsample_bylevel", value=1)
-        reg_alpha = UnParametrizedHyperparameter(
-            name="reg_alpha", value=0)
-        reg_lambda = UnParametrizedHyperparameter(
-            name="reg_lambda", value=1)
+        # absolute regularization (in contrast to eta), comparable to
+        # gradient clipping in deep learning - according to the internet this
+        #  is most important for unbalanced data
+        max_delta_step = UnParametrizedHyperparameter(
+            name="max_delta_step", value=0)
         base_score = UnParametrizedHyperparameter(
             name="base_score", value=0.5)
         scale_pos_weight = UnParametrizedHyperparameter(
             name="scale_pos_weight", value=1)
 
-        cs.add_hyperparameters([max_depth, learning_rate, n_estimators,
-                                subsample, min_child_weight, max_delta_step,
-                                colsample_bytree, gamma, colsample_bylevel,
-                                reg_alpha, reg_lambda, base_score, scale_pos_weight])
+        cs.add_hyperparameters([
+            # Active
+            max_depth, learning_rate, n_estimators, booster,
+            subsample, colsample_bytree, colsample_bylevel,
+            reg_alpha, reg_lambda,
+            # DART
+            sample_type, normalize_type, rate_drop,
+            # Inactive
+            min_child_weight, max_delta_step, gamma,
+            base_score, scale_pos_weight
+        ])
 
+        sample_type_condition = EqualsCondition(
+            sample_type, booster, 'dart',
+        )
+        normalize_type_condition = EqualsCondition(
+            normalize_type, booster, 'dart',
+        )
+        rate_drop_condition = EqualsCondition(
+            rate_drop, booster, 'dart',
+        )
+
+        cs.add_conditions([
+            sample_type_condition, normalize_type_condition,
+            rate_drop_condition,
+        ])
         return cs

@@ -1,3 +1,4 @@
+import importlib
 import pkg_resources
 import re
 from distutils.version import LooseVersion
@@ -24,8 +25,6 @@ def verify_packages(packages):
             operation = match.group('operation1')
             version = match.group('version1')
             _verify_package(name, operation, version)
-            operation2 = match.group('operation2')
-            version2 = match.group('version2')
         else:
             raise ValueError('Unable to read requirement: %s' % package)
 
@@ -33,14 +32,19 @@ def verify_packages(packages):
 def _verify_package(name, operation, version):
     try:
         module = pkg_resources.get_distribution(name)
+        installed_version = LooseVersion(module.version)
     except pkg_resources.DistributionNotFound:
-        raise MissingPackageError(name)
+        try:
+            module = importlib.import_module(name)
+            installed_version = LooseVersion(module.__version__)
+        except ImportError:
+            raise MissingPackageError(name)
 
     if not operation:
         return
 
     required_version = LooseVersion(version)
-    installed_version = LooseVersion(module.version)
+
 
     if operation == '==':
         check = required_version == installed_version
@@ -58,7 +62,7 @@ def _verify_package(name, operation, version):
 
 
 class MissingPackageError(Exception):
-    error_message = 'mandatory package \'{name}\' not found'
+    error_message = 'Mandatory package \'{name}\' not found!'
 
     def __init__(self, package_name):
         self.package_name = package_name

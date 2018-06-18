@@ -13,7 +13,7 @@ class SelectRates(AutoSklearnPreprocessingAlgorithm):
         import sklearn.feature_selection
 
         self.random_state = random_state  # We don't use this
-        self.alpha = float(alpha)
+        self.alpha = alpha
 
         if score_func == "chi2":
             self.score_func = sklearn.feature_selection.chi2
@@ -28,6 +28,8 @@ class SelectRates(AutoSklearnPreprocessingAlgorithm):
     def fit(self, X, y):
         import scipy.sparse
         import sklearn.feature_selection
+
+        self.alpha = float(self.alpha)
 
         self.preprocessor = sklearn.feature_selection.GenericUnivariateSelect(
             score_func=self.score_func, param=self.alpha, mode=self.mode)

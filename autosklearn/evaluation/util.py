@@ -2,11 +2,11 @@ import queue
 
 
 __all__ = [
-    'get_last_result'
+    'read_queue'
 ]
 
 
-def get_last_result(queue_):
+def read_queue(queue_):
     stack = []
     while True:
         try:
@@ -29,7 +29,7 @@ def get_last_result(queue_):
     if len(stack) == 0:
         raise queue.Empty
     else:
-        return stack.pop()
+        return stack
 
 
 def empty_queue(queue_):
@@ -41,3 +41,12 @@ def empty_queue(queue_):
 
     queue_.close()
 
+
+def extract_learning_curve(stack, key=None):
+    learning_curve = []
+    for entry in stack:
+        if key:
+            learning_curve.append(entry['additional_run_info'][key])
+        else:
+            learning_curve.append(entry['loss'])
+    return list(learning_curve)

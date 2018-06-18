@@ -77,16 +77,21 @@ class EnsembleSelection(AbstractEnsemble):
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
                 weighted_ensemble_prediction = (s / float(s + 1)) * \
                                                ensemble_prediction
+            fant_ensemble_prediction = np.zeros(weighted_ensemble_prediction.shape)
             for j, pred in enumerate(predictions):
-                fant_ensemble_prediction = weighted_ensemble_prediction + \
-                                           (1. / float(s + 1)) * pred
-                scores[j] = calculate_score(
+                # TODO: this could potentially be vectorized! - let's profile
+                # the script first!
+                fant_ensemble_prediction[:,:] = weighted_ensemble_prediction + \
+                                             (1. / float(s + 1)) * pred
+                scores[j] = 1 - calculate_score(
                     solution=labels,
                     prediction=fant_ensemble_prediction,
                     task_type=self.task_type,
                     metric=self.metric,
                     all_scoring_functions=False)
-            best = np.nanargmax(scores)
+
+            all_best = np.argwhere(scores == np.nanmin(scores)).flatten()
+            best = np.random.choice(all_best)
             ensemble.append(predictions[best])
             trajectory.append(scores[best])
             order.append(best)
@@ -130,14 +135,14 @@ class EnsembleSelection(AbstractEnsemble):
             for j, pred in enumerate(predictions):
                 ensemble.append(pred)
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-                scores[j] = calculate_score(
+                scores[j] = 1 - calculate_score(
                     solution=labels,
                     prediction=ensemble_prediction,
                     task_type=self.task_type,
                     metric=self.metric,
                     all_scoring_functions=False)
                 ensemble.pop()
-            best = np.nanargmax(scores)
+            best = np.nanargmin(scores)
             ensemble.append(predictions[best])
             trajectory.append(scores[best])
             order.append(best)
@@ -189,7 +194,8 @@ class EnsembleSelection(AbstractEnsemble):
         return np.array(order_of_each_bag)
 
     def predict(self, predictions):
-        for i, weight in enumerate(self.weights_):
+        non_null_weights = (weight for  weight in self.weights_ if weight > 0)
+        for i, weight in enumerate(non_null_weights):
             predictions[i] *= weight
         return np.sum(predictions, axis=0)
 
@@ -216,5 +222,17 @@ class EnsembleSelection(AbstractEnsemble):
 
         return output
 
-    def get_model_identifiers(self):
-        return self.identifiers_
+    def get_selected_model_identifiers(self):
+        output = []
+
+        for i, weight in enumerate(self.weights_):
+            identifier = self.identifiers_[i]
+            if weight > 0.0:
+                output.append(identifier)
+
+        output.sort(reverse=True, key=lambda t: t[0])
+
+        return output
+
+    def get_validation_performance(self):
+        return self.trajectory_[-1]

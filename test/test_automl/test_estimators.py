@@ -27,6 +27,7 @@ class ArrayReturningDummyPredictor(object):
     def predict_proba(self, X, *args, **kwargs):
         return self.arr
 
+
 class EstimatorTest(Base, unittest.TestCase):
     _multiprocess_can_split_ = True
 
@@ -85,72 +86,81 @@ class EstimatorTest(Base, unittest.TestCase):
                                 X=X, y=y, feat_type=['Car']*100)
 
     def test_fit_pSMAC(self):
-        output = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
+        output = os.path.join(self.test_dir, '..', '.out_estimator_fit_pSMAC')
+        self._setUp(tmp)
         self._setUp(output)
 
-        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('digits')
 
         # test parallel Classifier to predict classes, not only indexes
-        Y_train = Y_train + 1
-        Y_test = Y_test + 1
+        Y_train += 1
+        Y_test += 1
 
-        automl = AutoSklearnClassifier(time_left_for_this_task=20,
-                                       per_run_time_limit=5,
-                                       output_folder=output,
-                                       tmp_folder=output,
-                                       shared_mode=True,
-                                       seed=1,
-                                       initial_configurations_via_metalearning=0,
-                                       ensemble_size=0)
+        automl = AutoSklearnClassifier(
+            time_left_for_this_task=20,
+            per_run_time_limit=5,
+            output_folder=output,
+            tmp_folder=tmp,
+            shared_mode=True,
+            seed=1,
+            initial_configurations_via_metalearning=0,
+            ensemble_size=0,
+        )
         automl.fit(X_train, Y_train)
         # Create a 'dummy model' for the first run, which has an accuracy of
         # more than 99%; it should be in the final ensemble if the ensemble
         # building of the second AutoSklearn classifier works correct
-        true_targets_ensemble_path = os.path.join(output, '.auto-sklearn',
+        true_targets_ensemble_path = os.path.join(tmp, '.auto-sklearn',
                                                   'true_targets_ensemble.npy')
         with open(true_targets_ensemble_path, 'rb') as fh:
             true_targets_ensemble = np.load(fh)
         true_targets_ensemble[-1] = 1 if true_targets_ensemble[-1] != 1 else 0
         true_targets_ensemble = true_targets_ensemble.astype(int)
-        probas = np.zeros((len(true_targets_ensemble), 3), dtype=float)
+        probas = np.zeros((len(true_targets_ensemble), 10), dtype=float)
 
         for i, value in enumerate(true_targets_ensemble):
             probas[i, value] = 1.0
-        dummy_predictions_path = os.path.join(output, '.auto-sklearn',
-                                              'predictions_ensemble',
-                                              'predictions_ensemble_1_00030.npy')
+        dummy_predictions_path = os.path.join(
+            tmp,
+            '.auto-sklearn',
+            'predictions_ensemble',
+            'predictions_ensemble_1_00030.npy',
+        )
         with open(dummy_predictions_path, 'wb') as fh:
             np.save(fh, probas)
 
-        probas_test = np.zeros((len(Y_test), 3), dtype=float)
+        probas_test = np.zeros((len(Y_test), 10), dtype=float)
         for i, value in enumerate(Y_test):
             probas_test[i, value - 1] = 1.0
 
         dummy = ArrayReturningDummyPredictor(probas_test)
-        context = BackendContext(output, output, False, False)
+        context = BackendContext(tmp, output, False, False, True)
         backend = Backend(context)
         backend.save_model(dummy, 30, 1)
 
-        automl = AutoSklearnClassifier(time_left_for_this_task=20,
-                                       per_run_time_limit=5,
-                                       output_folder=output,
-                                       tmp_folder=output,
-                                       shared_mode=True,
-                                       seed=2,
-                                       initial_configurations_via_metalearning=0,
-                                       ensemble_size=0)
+        automl = AutoSklearnClassifier(
+            time_left_for_this_task=20,
+            per_run_time_limit=5,
+            output_folder=output,
+            tmp_folder=tmp,
+            shared_mode=True,
+            seed=2,
+            initial_configurations_via_metalearning=0,
+            ensemble_size=0,
+        )
         automl.fit_ensemble(Y_train, task=MULTICLASS_CLASSIFICATION,
                             metric=accuracy,
                             precision='32',
                             dataset_name='iris',
                             ensemble_size=20,
-                            ensemble_nbest=50)
-        #print(automl.show_models(), flush=True)
+                            ensemble_nbest=50,
+                            )
 
         predictions = automl.predict(X_test)
         score = sklearn.metrics.accuracy_score(Y_test, predictions)
 
-        self.assertEqual(len(os.listdir(os.path.join(output, '.auto-sklearn',
+        self.assertEqual(len(os.listdir(os.path.join(tmp, '.auto-sklearn',
                                                      'ensembles'))), 1)
         self.assertGreaterEqual(score, 0.90)
         self.assertEqual(automl._automl._task, MULTICLASS_CLASSIFICATION)
@@ -160,19 +170,22 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertIn(ArrayReturningDummyPredictor, classifier_types)
 
         del automl
+        self._tearDown(tmp)
         self._tearDown(output)
 
     def test_cv_results(self):
         # TODO restructure and actually use real SMAC output from a long run
         # to do this unittest!
-        output = os.path.join(self.test_dir, '..', '.tmp_cv_results')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_cv_results')
+        output = os.path.join(self.test_dir, '..', '.out_cv_results')
+        self._setUp(tmp)
         self._setUp(output)
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
 
         cls = AutoSklearnClassifier(time_left_for_this_task=20,
                                     per_run_time_limit=5,
                                     output_folder=output,
-                                    tmp_folder=output,
+                                    tmp_folder=tmp,
                                     shared_mode=False,
                                     seed=1,
                                     initial_configurations_via_metalearning=0,
@@ -187,6 +200,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertTrue([isinstance(val, npma.MaskedArray) for key, val in
                          cv_results.items() if key.startswith('param_')])
         del cls
+        self._tearDown(tmp)
         self._tearDown(output)
 
         
@@ -241,13 +255,15 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         np.testing.assert_array_equal(expected_result, actual_result)
 
     def test_can_pickle_classifier(self):
-        output = os.path.join(self.test_dir, '..', '.tmp_can_pickle')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_can_pickle')
+        output = os.path.join(self.test_dir, '..', '.out_can_pickle')
+        self._setUp(tmp)
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
         automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
-                                       tmp_folder=output,
+                                       tmp_folder=tmp,
                                        output_folder=output)
         automl.fit(X_train, Y_train)
 
@@ -287,14 +303,16 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self.assertEqual(initial_accuracy, restored_accuracy)
 
     def test_multilabel(self):
-        output = os.path.join(self.test_dir, '..', '.tmp_multilabel_fit')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_multilabel_fit')
+        output = os.path.join(self.test_dir, '..', '.out_multilabel_fit')
+        self._setUp(tmp)
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset(
             'iris', make_multilabel=True)
         automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
-                                       tmp_folder=output,
+                                       tmp_folder=tmp,
                                        output_folder=output)
 
         automl.fit(X_train, Y_train)
@@ -303,24 +321,30 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         score = f1_macro(Y_test, predictions)
         self.assertGreaterEqual(score, 0.9)
         probs = automl.predict_proba(X_train)
-        self.assertAlmostEqual(np.mean(probs), 0.33333333333333331)
+        self.assertAlmostEqual(np.mean(probs), 0.33, places=1)
 
     def test_binary(self):
+        tmp = os.path.join(self.test_dir, '..', '.out_binary_fit')
         output = os.path.join(self.test_dir, '..', '.tmp_binary_fit')
         self._setUp(output)
+        self._setUp(tmp)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset(
             'iris', make_binary=True)
         automl = AutoSklearnClassifier(time_left_for_this_task=20,
                                        per_run_time_limit=5,
-                                       tmp_folder=output,
+                                       tmp_folder=tmp,
                                        output_folder=output)
 
-        automl.fit(X_train, Y_train)
+        automl.fit(X_train, Y_train, X_test=X_test, y_test=Y_test,
+                   dataset_name='binary_test_dataset')
         predictions = automl.predict(X_test)
         self.assertEqual(predictions.shape, (50, ))
         score = accuracy(Y_test, predictions)
         self.assertGreaterEqual(score, 0.9)
+
+        output_files = os.listdir(output)
+        self.assertIn('binary_test_dataset_test_1.predict', output_files)
 
     @unittest.mock.patch.object(AutoML, 'fit')
     @unittest.mock.patch.object(AutoML, 'refit')
@@ -344,13 +368,15 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
 class AutoMLRegressorTest(Base, unittest.TestCase):
     def test_regression(self):
-        output = os.path.join(self.test_dir, '..', '.tmp_regression_fit')
+        tmp = os.path.join(self.test_dir, '..', '.tmp_regression_fit')
+        output = os.path.join(self.test_dir, '..', '.out_regression_fit')
+        self._setUp(tmp)
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('boston')
         automl = AutoSklearnRegressor(time_left_for_this_task=20,
                                       per_run_time_limit=5,
-                                      tmp_folder=output,
+                                      tmp_folder=tmp,
                                       output_folder=output)
 
         automl.fit(X_train, Y_train)
@@ -378,3 +404,45 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         automl.fit_ensemble(y)
         self.assertEqual(fit_ensemble.call_count, 1)
         self.assertIsInstance(fit_ensemble.call_args[0][0], np.ndarray)
+
+
+class AutoSklearnClassifierTest(unittest.TestCase):
+    # Currently this class only tests that the methods of AutoSklearnClassifier
+    # which should return self actually return self.
+    def test_classification_methods_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('iris')
+        automl = AutoSklearnClassifier(time_left_for_this_task=20,
+                                       per_run_time_limit=5,
+                                       ensemble_size=0)
+
+        automl_fitted = automl.fit(X_train, y_train)
+        self.assertIs(automl, automl_fitted)
+
+        automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
+        self.assertIs(automl, automl_ensemble_fitted)
+
+        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+        self.assertIs(automl, automl_refitted)
+
+
+class AutoSklearnRegressorTest(unittest.TestCase):
+    # Currently this class only tests that the methods of AutoSklearnRegressor
+    # that should return self actually return self.
+    def test_regression_methods_returns_self(self):
+        X_train, y_train, X_test, y_test = putil.get_dataset('boston')
+        automl = AutoSklearnRegressor(time_left_for_this_task=20,
+                                      per_run_time_limit=5,
+                                      ensemble_size=0)
+
+        automl_fitted = automl.fit(X_train, y_train)
+        self.assertIs(automl, automl_fitted)
+
+        automl_ensemble_fitted = automl.fit_ensemble(y_train, ensemble_size=5)
+        self.assertIs(automl, automl_ensemble_fitted)
+
+        automl_refitted = automl.refit(X_train.copy(), y_train.copy())
+        self.assertIs(automl, automl_refitted)
+
+
+if __name__=="__main__":
+    unittest.main()

@@ -15,16 +15,21 @@ from autosklearn.pipeline.constants import *
 class KernelPCA(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, n_components, kernel, degree=3, gamma=0.25, coef0=0.0,
                  random_state=None):
-        self.n_components = int(n_components)
+        self.n_components = n_components
         self.kernel = kernel
-        self.degree = int(degree)
-        self.gamma = float(gamma)
-        self.coef0 = float(coef0)
+        self.degree = degree
+        self.gamma = gamma
+        self.coef0 = coef0
         self.random_state = random_state
 
     def fit(self, X, Y=None):
         import scipy.sparse
         import sklearn.decomposition
+
+        self.n_components = int(self.n_components)
+        self.degree = int(self.degree)
+        self.gamma = float(self.gamma)
+        self.coef0 = float(self.coef0)
 
         self.preprocessor = sklearn.decomposition.KernelPCA(
             n_components=self.n_components, kernel=self.kernel,

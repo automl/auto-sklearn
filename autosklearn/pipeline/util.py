@@ -112,14 +112,29 @@ def _test_classifier(classifier, dataset='iris', sparse=False,
     classifier = classifier(random_state=np.random.RandomState(1),
                             **{hp_name: default[hp_name] for hp_name in
                                default if default[hp_name] is not None})
+    if hasattr(classifier, 'iterative_fit'):
+        class counter(object):
+            def __init__(self, func):
+                self.n_calls = 0
+                self.func = func
+
+            def __call__(self, *args, **kwargs):
+                self.n_calls += 1
+                return self.func(*args, **kwargs)
+        classifier.iterative_fit = counter(classifier.iterative_fit)
+
     predictor = classifier.fit(X_train, Y_train)
+
+    if hasattr(classifier, 'iterative_fit'):
+        n_calls = classifier.iterative_fit.n_calls
+    else:
+        n_calls = None
+
     predictions = predictor.predict(X_test)
-    return predictions, Y_test
+    return predictions, Y_test, n_calls
 
 
 def _test_classifier_iterative_fit(classifier, dataset='iris', sparse=False):
-    """Fit only for ten iterations. Usually, the result is much worse which
-    indicates that iterative_fit() works"""
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
                                                    make_sparse=sparse)
     configuration_space = classifier.get_hyperparameter_search_space(
@@ -128,10 +143,10 @@ def _test_classifier_iterative_fit(classifier, dataset='iris', sparse=False):
     classifier = classifier(random_state=np.random.RandomState(1),
                             **{hp_name: default[hp_name] for hp_name in
                                default if default[hp_name] is not None})
-    for i in range(10):
-        predictor = classifier.iterative_fit(X_train, Y_train)
-    predictions = predictor.predict(X_test)
-    return predictions, Y_test
+    while not classifier.configuration_fully_fitted():
+        classifier = classifier.iterative_fit(X_train, Y_train)
+    predictions = classifier.predict(X_test)
+    return predictions, Y_test, classifier
 
 
 def _test_classifier_predict_proba(classifier, dataset='iris', sparse=False,
@@ -239,13 +254,32 @@ def _test_regressor(Regressor, dataset='diabetes', sparse=False):
     X_train_hash = hash(str(X_train))
     X_test_hash = hash(str(X_test))
     Y_train_hash = hash(str(Y_train))
+
+    if hasattr(regressor, 'iterative_fit'):
+        class counter(object):
+            def __init__(self, func):
+                self.n_calls = 0
+                self.func = func
+
+            def __call__(self, *args, **kwargs):
+                self.n_calls += 1
+                return self.func(*args, **kwargs)
+
+        regressor.iterative_fit = counter(regressor.iterative_fit)
+
     predictor = regressor.fit(X_train, Y_train)
+
+    if hasattr(regressor, 'iterative_fit'):
+        n_calls = regressor.iterative_fit.n_calls
+    else:
+        n_calls = None
+
     predictions = predictor.predict(X_test)
     if X_train_hash != hash(str(X_train)) or \
                     X_test_hash != hash(str(X_test)) or \
                     Y_train_hash != hash(str(Y_train)):
         raise ValueError("Model modified data")
-    return predictions, Y_test
+    return predictions, Y_test, n_calls
 
 
 def _test_regressor_iterative_fit(Regressor, dataset='diabetes', sparse=False):
@@ -260,7 +294,7 @@ def _test_regressor_iterative_fit(Regressor, dataset='diabetes', sparse=False):
     while not regressor.configuration_fully_fitted():
         regressor = regressor.iterative_fit(X_train, Y_train)
     predictions = regressor.predict(X_test)
-    return predictions, Y_test
+    return predictions, Y_test, regressor
 
 
 if __name__ == "__main__":

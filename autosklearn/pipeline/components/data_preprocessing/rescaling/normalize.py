@@ -8,7 +8,7 @@ class NormalizerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
     def __init__(self, random_state):
         # Use custom implementation because sklearn implementation cannot
         # handle float32 input matrix
-        from autosklearn.pipeline.implementations.Normalizer import Normalizer
+        from sklearn.preprocessing import Normalizer
         self.preprocessor = Normalizer(copy=False)
 
     @staticmethod

@@ -49,7 +49,16 @@ class TestEvaluator(AbstractEvaluator):
     def fit_predict_and_loss(self):
         self._fit_and_suppress_warnings(self.model, self.X_train, self.Y_train)
         loss, Y_pred, _, _ =  self.predict_and_loss()
-        self.finish_up(loss, Y_pred, Y_pred, Y_pred, file_output=False)
+        self.finish_up(
+            loss=loss,
+            train_pred=None,
+            opt_pred=Y_pred,
+            valid_pred=None,
+            test_pred=None,
+            file_output=False,
+            final_call=True,
+            additional_run_info=None,
+        )
 
     def predict_and_loss(self, train=False):
 
@@ -77,7 +86,7 @@ class TestEvaluator(AbstractEvaluator):
         else:
             err = 1 - score
 
-        return err, Y_pred, Y_pred, Y_pred
+        return err, Y_pred, None, None
 
 
 # create closure for evaluating an algorithm

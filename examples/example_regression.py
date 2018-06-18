@@ -1,10 +1,17 @@
 # -*- encoding: utf-8 -*-
+"""
+==========
+Regression
+==========
+
+The following example shows how to fit a simple regression model with
+*auto-sklearn*.
+"""
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 
 import autosklearn.regression
-
 
 def main():
     X, y = sklearn.datasets.load_boston(return_X_y=True)

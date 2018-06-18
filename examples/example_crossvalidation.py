@@ -1,4 +1,18 @@
 # -*- encoding: utf-8 -*-
+
+
+"""
+================
+Cross-Validation
+================
+
+In *auto-sklearn* it is possible to use different resampling strategies
+by specifying the arguments ``resampling_strategy`` and
+``resampling_strategy_arguments``. The following example shows how to use
+cross-validation and how to set the folds when instantiating
+``AutoSklearnClassifier``.
+"""
+
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics

@@ -9,13 +9,14 @@ from autosklearn.pipeline.constants import *
 
 class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, target_dim, random_state=None):
-        self.target_dim = int(target_dim)
+        self.target_dim = target_dim
         self.random_state = random_state
         self.preprocessor = None
 
     def fit(self, X, Y):
         import sklearn.decomposition
 
+        self.target_dim = int(self.target_dim)
         target_dim = min(self.target_dim, X.shape[1] - 1)
         self.preprocessor = sklearn.decomposition.TruncatedSVD(
             target_dim, algorithm='randomized')
