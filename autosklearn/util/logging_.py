@@ -7,18 +7,25 @@ import sys
 import yaml
 
 
-def setup_logger(output_file=None):
-    with open(os.path.join(os.path.dirname(__file__), 'logging.yaml'),
-              'r') as fh:
-        config = yaml.load(fh)
-    if output_file is not None:
-        config['handlers']['file_handler']['filename'] = output_file
+def setup_logger(output_file=None, log_config=None):
+    # log_config must be a dictionary object specifying the configuration for
+    # the logger to be used in auto-sklearn.
+    if log_config is not None:
+        config = log_config
+        # TODO: output_file is never None. It is called only in automl, and the output file
+        # TODO: is always specified.
+        if output_file is not None:
+            config['handlers']['file_handler']['filename'] = output_file
+    else:
+        with open(os.path.join(os.path.dirname(__file__), 'logging.yaml'),
+                  'r') as fh:
+            config = yaml.load(fh)
+        if output_file is not None:
+            config['handlers']['file_handler']['filename'] = output_file
     logging.config.dictConfig(config)
 
 
 def _create_logger(name):
-    logging.basicConfig(format='[%(levelname)s] [%(asctime)s:%(name)s] %('
-                           'message)s', datefmt='%H:%M:%S')
     return logging.getLogger(name)
 
 
