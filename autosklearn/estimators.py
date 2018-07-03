@@ -3,6 +3,7 @@ from sklearn.base import BaseEstimator
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor
 from autosklearn.util.backend import create
+from sklearn.utils.multiclass import type_of_target
 
 
 class AutoSklearnEstimator(BaseEstimator):
@@ -456,6 +457,12 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         self
 
         """
+        # Before running anything else, first check that the
+        # type of data is compatible with auto-sklearn (currently
+        # not supporting multiclass-multioutput classification).
+        if type_of_target(y) == 'multiclass-multioutput':
+            raise ValueError("multiclass-multioutput classification"
+                             " is not supported.")
         super().fit(
             X=X,
             y=y,
@@ -559,6 +566,14 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         self
 
         """
+        # Before running anything else, first check that the
+        # type of data is compatible with auto-sklearn (currently
+        # not supporting multioutput regression).
+        if len(y.shape) == 1 or y.shape[1] == 1:
+            pass
+        else:
+            raise ValueError("multioutput regression is not supported.")
+
         # Fit is supposed to be idempotent!
         # But not if we use share_mode.
         super().fit(
