@@ -237,7 +237,8 @@ class AutoML(BaseEstimator):
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
-        setup_logger(os.path.join(self._backend.temporary_directory, '%s.log' % str(logger_name)), self.log_config)
+        setup_logger(os.path.join(self._backend.temporary_directory, '%s.log'
+                                  % str(logger_name)), self.log_config)
         return get_logger(logger_name)
 
     @staticmethod
