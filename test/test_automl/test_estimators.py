@@ -50,17 +50,19 @@ class EstimatorTest(Base, unittest.TestCase):
     #     self._tearDown(output)
 
     def test_pSMAC_wrong_arguments(self):
+        X = np.zeros((100, 100))
+        y = np.zeros((100, ))
         self.assertRaisesRegexp(ValueError,
                                 "If shared_mode == True tmp_folder must not "
                                 "be None.",
-                                lambda shared_mode: AutoSklearnClassifier(shared_mode=shared_mode).fit(None, None),
+                                lambda shared_mode: AutoSklearnClassifier(shared_mode=shared_mode).fit(X, y),
                                 shared_mode=True)
 
         self.assertRaisesRegexp(ValueError,
                                 "If shared_mode == True output_folder must not "
                                 "be None.",
                                 lambda shared_mode, tmp_folder:
-                                AutoSklearnClassifier(shared_mode=shared_mode, tmp_folder=tmp_folder).fit(None, None),
+                                AutoSklearnClassifier(shared_mode=shared_mode, tmp_folder=tmp_folder).fit(X, y),
                                 shared_mode=True,
                                 tmp_folder='/tmp/duitaredxtvbedb')
 
