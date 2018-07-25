@@ -2,6 +2,10 @@
 import os
 import sys
 
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
+
 from autosklearn.util import dependencies
 from autosklearn.__version__ import __version__
 
