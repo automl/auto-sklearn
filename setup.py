@@ -1,11 +1,10 @@
 # -*- encoding: utf-8 -*-
-import setuptools
-from setuptools.extension import Extension
-import numpy as np
-from Cython.Build import cythonize
 import os
 import sys
 
+import setuptools
+from setuptools.command.build_ext import build_ext as _build_ext
+from setuptools.extension import Extension
 
 # Check if Auto-sklearn *could* run on the given system
 if os.name != 'posix':
@@ -22,13 +21,21 @@ if sys.version_info < (3, 5):
         '3.5 or higher.' % sys.version_info
     )
 
+class build_ext(_build_ext):
+    def finalize_options(self):
+        _build_ext.finalize_options(self)
+        # Prevent numpy from thinking it is still in its setup process:
+        __builtins__.__NUMPY_SETUP__ = False
+        import numpy
+        self.include_dirs.append(numpy.get_include())
 
-extensions = cythonize(
-    [Extension('autosklearn.data.competition_c_functions',
-               sources=['autosklearn/data/competition_c_functions.pyx'],
-               language='c',
-               include_dirs=[np.get_include()])
-     ])
+extensions = [Extension('autosklearn.data.competition_c_functions',
+              sources=['autosklearn/data/competition_c_functions.pyx'])]
+
+setup_requirements = [
+    "Cython",
+    "numpy"
+]
 
 requirements = [
     "setuptools",
@@ -58,9 +65,11 @@ setuptools.setup(
     name='auto-sklearn',
     description='Automated machine learning.',
     version=version,
+    cmdclass={'build_ext': build_ext},
+    setup_requires=setup_requirements,
+    install_requires=requirements,
     ext_modules=extensions,
     packages=setuptools.find_packages(exclude=['test']),
-    install_requires=requirements,
     test_suite='nose.collector',
     include_package_data=True,
     author='Matthias Feurer',
