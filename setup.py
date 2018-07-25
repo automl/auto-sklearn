@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-import logging
 import os
 import sys
 
@@ -31,9 +30,7 @@ class build_ext(_build_ext):
         self.include_dirs.append(numpy.get_include())
 
 extensions = [Extension('autosklearn.data.competition_c_functions',
-               sources=['autosklearn/data/competition_c_functions.pyx'],
-               language='c',)
-     ]
+              sources=['autosklearn/data/competition_c_functions.pyx'])]
 
 setup_requirements = [
     "Cython",
@@ -68,7 +65,7 @@ setuptools.setup(
     name='auto-sklearn',
     description='Automated machine learning.',
     version=version,
-    cmdclass={'build_ext':build_ext},
+    cmdclass={'build_ext': build_ext},
     setup_requires=setup_requirements,
     install_requires=requirements,
     ext_modules=extensions,
