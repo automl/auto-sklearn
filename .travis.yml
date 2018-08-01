@@ -59,7 +59,7 @@ install:
   # Install general requirements the way setup.py suggests
   - pip install pep8 codecov
   # Temporarily pin the numpy version for travis-ci
-  - pip install numpy<1.15
+  - pip install "numpy<1.15"
   - cat requirements.txt | xargs -n 1 -L 1 pip install
   # Install openml dependency for metadata generation unittest
   - pip install xmltodict requests liac-arff
