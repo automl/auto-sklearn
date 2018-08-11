@@ -117,8 +117,8 @@ def find_active_choices(matches, node, node_idx, dataset_properties, \
 
     choices = []
     for c_idx, component in enumerate(available_components):
-        slices = [slice(None) if idx != node_idx else slice(c_idx, c_idx+1)
-                  for idx in range(len(matches.shape))]
+        slices = tuple(slice(None) if idx != node_idx else slice(c_idx, c_idx+1)
+                  for idx in range(len(matches.shape)))
 
         if np.sum(matches[slices]) > 0:
             choices.append(component)
@@ -200,10 +200,10 @@ def add_forbidden(conf_space, pipeline, matches, dataset_properties,
                 for product in itertools.product(*num_node_choices):
                     for node_idx, choice_idx in enumerate(product):
                         node_idx += start_idx
-                        slices_ = [
+                        slices_ = tuple(
                             slice(None) if idx != node_idx else
                             slice(choice_idx, choice_idx + 1) for idx in
-                            range(len(matches.shape))]
+                            range(len(matches.shape)))
 
                         if np.sum(matches[slices_]) == 0:
                             skip_array[product] = 1
@@ -212,13 +212,11 @@ def add_forbidden(conf_space, pipeline, matches, dataset_properties,
                     if skip_array[product]:
                         continue
 
-                    slices = []
-                    for idx in range(len(matches.shape)):
-                        if idx not in indices:
-                            slices.append(slice(None))
-                        else:
-                            slices.append(slice(product[idx - start_idx],
-                                                product[idx - start_idx] + 1))
+                    slices = tuple(
+                        slice(None) if idx not in indices else
+                        slice(product[idx - start_idx],
+                              product[idx - start_idx] + 1) for idx in
+                        range(len(matches.shape)))
 
                     # This prints the affected nodes
                     # print [node_choice_names[i][product[i]]
