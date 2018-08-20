@@ -48,7 +48,7 @@ requirements = [
     "pynisher>=0.4,<0.5",
     "pyrfr>=0.6.1,<0.8",
     "smac>=0.8,<0.9",
-    "xgboost==0.7.post3",
+    "xgboost>=0.80",
 ]
 
 with open("autosklearn/__version__.py") as fh:
