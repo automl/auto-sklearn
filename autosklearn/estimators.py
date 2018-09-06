@@ -29,7 +29,8 @@ class AutoSklearnEstimator(BaseEstimator):
                  disable_evaluator_output=False,
                  get_smac_object_callback=None,
                  smac_scenario_args=None,
-                 log_config=None):
+                 logging_config=None,
+                 ):
         """
         Parameters
         ----------
@@ -169,9 +170,10 @@ class AutoSklearnEstimator(BaseEstimator):
             This is an advanced feature. Use only if you are familiar with
             `SMAC <https://automl.github.io/SMAC3/stable/index.html>`_.
 
-        log_config : dict, optional (None)
+        logging_config : dict, optional (None)
             dictionary object specifying the logger configuration. If None,
-            the default logging.yaml file is used.
+            the default logging.yaml file is used, which can be found in
+            autosklearn/util/logging.yaml.
 
         Attributes
         ----------
@@ -204,7 +206,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.disable_evaluator_output = disable_evaluator_output
         self.get_smac_object_callback = get_smac_object_callback
         self.smac_scenario_args = smac_scenario_args
-        self.log_config = log_config
+        self.logging_config = logging_config
 
         self._automl = None
         super().__init__()
@@ -245,7 +247,7 @@ class AutoSklearnEstimator(BaseEstimator):
             get_smac_object_callback=self.get_smac_object_callback,
             disable_evaluator_output=self.disable_evaluator_output,
             smac_scenario_args=self.smac_scenario_args,
-            log_config=self.log_config
+            logging_config=self.logging_config,
         )
 
         return automl

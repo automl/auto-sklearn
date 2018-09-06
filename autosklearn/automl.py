@@ -82,7 +82,7 @@ class AutoML(BaseEstimator):
                  disable_evaluator_output=False,
                  get_smac_object_callback=None,
                  smac_scenario_args=None,
-                 log_config=None
+                 logging_config=None,
                  ):
         super(AutoML, self).__init__()
         self._backend = backend
@@ -111,7 +111,7 @@ class AutoML(BaseEstimator):
         self._disable_evaluator_output = disable_evaluator_output
         self._get_smac_object_callback = get_smac_object_callback
         self._smac_scenario_args = smac_scenario_args
-        self.log_config = log_config
+        self.logging_config = logging_config
 
         self._datamanager = None
         self._dataset_name = None
@@ -237,8 +237,10 @@ class AutoML(BaseEstimator):
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
-        setup_logger(os.path.join(self._backend.temporary_directory, '%s.log'
-                                  % str(logger_name)), self.log_config)
+        setup_logger(os.path.join(self._backend.temporary_directory,
+                                  '%s.log' % str(logger_name)),
+                     self.logging_config,
+                     )
         return get_logger(logger_name)
 
     @staticmethod
