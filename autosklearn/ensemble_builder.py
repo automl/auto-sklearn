@@ -171,11 +171,8 @@ class EnsembleBuilder(multiprocessing.Process):
         while True:
 
             #maximal number of iterations
-            if (
-                self.max_iterations is not None
-                and self.max_iterations > 0
-                and iteration >= self.max_iterations
-            ):
+            if (self.max_iterations is not None
+                    and 0 < self.max_iterations <= iteration):
                 self.logger.info("Terminate ensemble building because of max iterations: %d of %d",
                                  self.max_iterations,
                                  iteration)
@@ -300,7 +297,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     Y_TEST: None,
                     # Lazy keys so far:
                     # 0 - not loaded
-                    # 1 - loaded and ind memory
+                    # 1 - loaded and in memory
                     # 2 - loaded but dropped again
                     "loaded": 0
                 }
@@ -372,14 +369,18 @@ class EnsembleBuilder(multiprocessing.Process):
             ],
             key=lambda x: x[1],
         )))
-        # remove all that are at most as good as random, cannot assume a
-        # minimum number here because all kinds of metric can be used
-        sorted_keys = filter(lambda x: x[1] > 0.001, sorted_keys)
+        # remove all that are at most as good as random
+        # note: dummy model must have run_id=1 (there is not run_id=0)
+        dummy_score = list(filter(lambda x: x[2] == 1, sorted_keys))[0]
+        self.logger.debug("Use %f as dummy score" %
+                          dummy_score[1])
+        sorted_keys = filter(lambda x: x[1] > dummy_score[1], sorted_keys)
         # remove Dummy Classifier
         sorted_keys = list(filter(lambda x: x[2] > 1, sorted_keys))
         if not sorted_keys: 
-            # no model left; try to use dummy classifier (num_run==0)
-            self.logger.warning("No models better than random - using Dummy Classifier!")
+            # no model left; try to use dummy score (num_run==0)
+            self.logger.warning("No models better than random - "
+                                "using Dummy Score!")
             sorted_keys = [
                 (k, v["ens_score"], v["num_run"]) for k, v in self.read_preds.items()
                 if v["seed"] == self.seed and v["num_run"] == 1
