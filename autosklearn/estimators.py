@@ -172,8 +172,8 @@ class AutoSklearnEstimator(BaseEstimator):
 
         logging_config : dict, optional (None)
             dictionary object specifying the logger configuration. If None,
-            the default logging.yaml file is used, which can be found through
-            the path autosklearn/util/logging.yaml.
+            the default logging.yaml file is used, which can be found in
+            the directory ``util/logging.yaml`` relative to the installation.
 
         Attributes
         ----------
