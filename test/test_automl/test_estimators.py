@@ -88,28 +88,120 @@ class EstimatorTest(Base, unittest.TestCase):
                                 X=X, y=y, feat_type=['Car']*100)
 
     def test_type_of_target(self):
-        # Tests that the type of given target is not multiclass-multioutput
-        # in case of classification and not multioutput in case of regression.
-        cls = AutoSklearnClassifier()
-        X = np.array([[1, 2],[2, 3], [3, 4], [4, 5]])
-        y = np.array([[0, 1], [1, 3], [2, 2], [5, 3]])
+        # Test that classifier raises error for illegal target types.
+        cls = AutoSklearnClassifier(time_left_for_this_task=15)
+        X = np.array([[1, 2],
+                      [2, 3],
+                      [3, 4],
+                      [4, 5],
+                      ])
+        # Possible target types
+        y_binary = np.array([0, 0, 1, 1])
+        y_continuous = np.array([0.1, 1.3, 2.1, 4.0])
+        y_multiclass = np.array([0, 1, 2, 0])
+        y_multilabel = np.array([[0, 1],
+                                 [1, 1],
+                                 [1, 0],
+                                 [0, 0],
+                                 ])
+        y_multiclass_multioutput = np.array([[0, 1],
+                                             [1, 3],
+                                             [2, 2],
+                                             [5, 3],
+                                             ])
+        y_continuous_multioutput = np.array([[0.1, 1.5],
+                                             [1.2, 3.5],
+                                             [2.7, 2.7],
+                                             [5.5, 3.9],
+                                             ])
+
+        # Illegal target types for classification: continuous,
+        # multiclass-multioutput, continuous-multioutput.
         self.assertRaisesRegex(ValueError,
                                'multiclass-multioutput classification'
                                ' is not supported.',
                                cls.fit,
                                X=X,
-                               y=y,
+                               y=y_multiclass_multioutput,
                                )
 
-        reg = AutoSklearnRegressor()
-        y = np.array([[0.5, 0.6], [1.2, 5.4], [2.7, 1.5],[6.1, 0.3]])
+        self.assertRaisesRegex(ValueError,
+                               'Cannot work on data of type continuous',
+                               cls.fit,
+                               X=X,
+                               y=y_continuous,
+                               )
+
+        self.assertRaisesRegex(ValueError,
+                               'Cannot work on data of type '
+                               'continuous-multioutput',
+                               cls.fit,
+                               X=X,
+                               y=y_continuous_multioutput,
+                               )
+
+        # Legal target types for classification: binary, multiclass,
+        # multilabel-indicator.
+        try:
+            cls.fit(X, y_binary)
+        except ValueError:
+            self.fail("cls.fit() raised ValueError while fitting "
+                      "binary targets")
+
+        try:
+            cls.fit(X, y_multiclass)
+        except ValueError:
+            self.fail("cls.fit() raised ValueError while fitting "
+                      "multiclass targets")
+
+        try:
+            cls.fit(X, y_multilabel)
+        except ValueError:
+            self.fail("cls.fit() raised ValueError while fitting "
+                      "multilabel-indicator targets")
+
+        # Test that regressor raises error for illegal target types.
+        reg = AutoSklearnRegressor(time_left_for_this_task=15)
+        # Illegal target types for regression: multiclass-multioutput,
+        # multilabel-indicator, continuous-multioutput.
         self.assertRaisesRegex(ValueError,
                                'multioutput regression is not supported.',
                                reg.fit,
                                X=X,
-                               y=y,
+                               y=y_multiclass_multioutput,
                                )
 
+        self.assertRaisesRegex(ValueError,
+                               'multioutput regression is not supported.',
+                               reg.fit,
+                               X=X,
+                               y=y_multilabel,
+                               )
+
+        self.assertRaisesRegex(ValueError,
+                               'multioutput regression is not supported.',
+                               reg.fit,
+                               X=X,
+                               y=y_continuous_multioutput,
+                               )
+        # Legal target types: continuous, binary, multiclass
+        try:
+            reg.fit(X, y_continuous)
+        except ValueError:
+            self.fail("cls.fit() raised ValueError while fitting "
+                      "continuous targets")
+
+        try:
+            reg.fit(X, y_binary)
+        except ValueError:
+            self.fail("cls.fit() raised ValueError while fitting "
+                      "binary targets")
+
+        try:
+            reg.fit(X, y_multiclass)
+        except ValueError:
+            self.fail("cls.fit() raised ValueError while fitting "
+                      "multiclass targets")
 
     def test_fit_pSMAC(self):
         tmp = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
