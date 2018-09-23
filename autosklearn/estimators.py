@@ -569,7 +569,10 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         # Before running anything else, first check that the
         # type of data is compatible with auto-sklearn (currently
         # not supporting multioutput regression).
-        if type_of_target(y) not in ['continuous', 'multiclass', 'binary']:
+        if type_of_target(y) not in ['continuous',
+                                     'multiclass',
+                                     'binary',
+                                    ]:
             raise ValueError("multioutput regression is not supported.")
 
         # Fit is supposed to be idempotent!
