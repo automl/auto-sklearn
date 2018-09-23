@@ -87,6 +87,30 @@ class EstimatorTest(Base, unittest.TestCase):
                                 cls.fit,
                                 X=X, y=y, feat_type=['Car']*100)
 
+    def test_type_of_target(self):
+        # Tests that the type of given target is not multiclass-multioutput
+        # in case of classification and not multioutput in case of regression.
+        cls = AutoSklearnClassifier()
+        X = np.array([[1, 2],[2, 3], [3, 4], [4, 5]])
+        y = np.array([[0, 1], [1, 3], [2, 2], [5, 3]])
+        self.assertRaisesRegex(ValueError,
+                               'multiclass-multioutput classification'
+                               ' is not supported.',
+                               cls.fit,
+                               X=X,
+                               y=y,
+                               )
+
+        reg = AutoSklearnRegressor()
+        y = np.array([[0.5, 0.6], [1.2, 5.4], [2.7, 1.5],[6.1, 0.3]])
+        self.assertRaisesRegex(ValueError,
+                               'multioutput regression is not supported.',
+                               reg.fit,
+                               X=X,
+                               y=y,
+                               )
+
+
     def test_fit_pSMAC(self):
         tmp = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
         output = os.path.join(self.test_dir, '..', '.out_estimator_fit_pSMAC')
