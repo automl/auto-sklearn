@@ -17,7 +17,7 @@ def setup_logger(output_file=None, logging_config=None):
     else:
         with open(os.path.join(os.path.dirname(__file__), 'logging.yaml'),
                   'r') as fh:
-            logging_config = yaml.load(fh)
+            logging_config = yaml.safe_load(fh)
         if output_file is not None:
             logging_config['handlers']['file_handler']['filename'] = output_file
         logging.config.dictConfig(logging_config)
