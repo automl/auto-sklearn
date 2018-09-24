@@ -8,8 +8,8 @@ import yaml
 
 
 def setup_logger(output_file=None, logging_config=None):
-    # logging_config must be a dictionary object specifying the configuration for
-    # the loggers to be used in auto-sklearn.
+    # logging_config must be a dictionary object specifying the configuration
+    # for the loggers to be used in auto-sklearn.
     if logging_config is not None:
         if output_file is not None:
             logging_config['handlers']['file_handler']['filename'] = output_file
