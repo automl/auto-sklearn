@@ -13,5 +13,5 @@ Scores are stored at {working-directory}/{seed}/{task_id}/score_single_best.csv
 
 ### 2- Get overall performance of Auto-Sklearn (with ensemble)
 ```bash
-python score_ensemble.py --input-directory log_all/1/3/ -s 1 --output-file scores_ens.txt
+python score_ensemble.py --input-directory log_output/1/3/ -s 1 --output-file scores_ens.txt
 ```
