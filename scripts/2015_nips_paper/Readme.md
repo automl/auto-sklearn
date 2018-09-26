@@ -8,7 +8,7 @@ python score_auto_sklearn.py --working-directory log_output --time-limit 100 \
        --per-run-time-limit 30 \
        --task-id 3 -s 1 --nb_conf_metalearning 0
 ```
-Scores are stored at {working-directory}/{seed}/{task_id}/score_single_best.csv.
+Scores are stored at {working-directory}/{seed}/{task_id}/score_single_best.csv
 
 
 ### 2- Get overall performance of Auto-Sklearn (with ensemble)
