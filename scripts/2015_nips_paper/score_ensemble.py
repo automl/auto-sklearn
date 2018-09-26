@@ -28,7 +28,7 @@ def read_files(directory, seed=None, n_jobs=1):
                                 seed_pattern)
     files = sorted(glob.glob(glob_pattern))
     files = joblib.Parallel(n_jobs=n_jobs, verbose=10)(
-        joblib.delayed(_load_file) (f=f) for f in files)
+        joblib.delayed(_load_file)(f=f) for f in files)
 
     return files
 
@@ -44,11 +44,13 @@ def main(input_directories, output_file, seed, ensemble_size, n_jobs=1):
     for input_directory in input_directories:
         print('Loading files from input directory:', input_directory)
         validation_files_ = read_files(
-            os.path.join(input_directory, '.auto-sklearn/predictions_ensemble'),
+            os.path.join(input_directory,
+                         '.auto-sklearn/predictions_ensemble'),
             n_jobs=n_jobs)
         validation_files.extend(validation_files_)
         test_files_ = read_files(
-            os.path.join(input_directory, '.auto-sklearn/predictions_test'),
+            os.path.join(input_directory,
+                         '.auto-sklearn/predictions_test'),
             n_jobs=n_jobs)
         test_files.extend(test_files_)
 
@@ -88,10 +90,11 @@ def main(input_directories, output_file, seed, ensemble_size, n_jobs=1):
 
     backend = create(input_directory, input_directory + "_output",
                      delete_tmp_folder_after_terminate=False,
-                     delete_output_folder_after_terminate=False, shared_mode=True)
+                     delete_output_folder_after_terminate=False,
+                     shared_mode=True)
     valid_labels = backend.load_targets_ensemble()
     D = backend.load_datamanager()
-       
+
     score = balanced_accuracy
 
     for i in range(len(validation_files)):
@@ -114,15 +117,16 @@ def main(input_directories, output_file, seed, ensemble_size, n_jobs=1):
 
     print('Starting ensemble building!')
     output = joblib.Parallel(n_jobs=n_jobs, verbose=20)(
-        joblib.delayed(evaluate)(input_directory=input_directories[0],
-                                 validation_files=[validation_files[j] for
-                                                   j in range(len(validation_files))
-                                                   if j in top_models_at_step[i]],
-                                 test_files=[test_files[j] for
-                                             j in range(len(test_files))
-                                             if j in top_models_at_step[i]],
-                                 ensemble_size=ensemble_size)
-                                 for i in range(len(test_files)))
+        joblib.delayed(
+            evaluate)(input_directory=input_directories[0],
+                      validation_files=[validation_files[j] for
+                                        j in range(len(validation_files))
+                                        if j in top_models_at_step[i]],
+                      test_files=[test_files[j] for
+                                  j in range(len(test_files))
+                                  if j in top_models_at_step[i]],
+                      ensemble_size=ensemble_size)
+        for i in range(len(test_files)))
 
     # Create output csv file
     file_output_seed = -1 if seed is None else seed
@@ -140,12 +144,13 @@ def main(input_directories, output_file, seed, ensemble_size, n_jobs=1):
                              'Validation Configuration ID': 0})
 
         for i, o in enumerate(output):
-            csv_writer.writerow({'Time': o['ensemble_time'] +
-                                         o['time_function_evaluation'] -
-                                         starttime,
+            csv_writer.writerow({'Time': o['ensemble_time']
+                                 + o['time_function_evaluation']
+                                 - starttime,
                                  'Training (Empirical) Performance':
-                                     o['ensemble_error'],
-                                 'Test Set Performance': o['ensemble_test_error'],
+                                 o['ensemble_error'],
+                                 'Test Set Performance':
+                                 o['ensemble_test_error'],
                                  'AC Overhead Time': 0,
                                  'Validation Configuration ID': i})
 
@@ -154,7 +159,8 @@ def evaluate(input_directory, validation_files, test_files, ensemble_size=50):
 
     backend = create(input_directory, input_directory + "_output",
                      delete_tmp_folder_after_terminate=False,
-                     delete_output_folder_after_terminate=False, shared_mode=True)
+                     delete_output_folder_after_terminate=False,
+                     shared_mode=True)
 
     valid_labels = backend.load_targets_ensemble()
     D = backend.load_datamanager()
@@ -163,7 +169,8 @@ def evaluate(input_directory, validation_files, test_files, ensemble_size=50):
     dataset_name = D.name
     score = balanced_accuracy
 
-    # Read the modification time of the predictions file and compute the interval to the first prediction file.
+    # Read the modification time of the predictions file and
+    # compute the interval to the first prediction file.
     # This interval will be add to the time we needed to build the ensemble
     time_function_evaluation = validation_files[-1][-1]
 
@@ -175,8 +182,10 @@ def evaluate(input_directory, validation_files, test_files, ensemble_size=50):
 
     validation_predictions = np.array([v[0] for v in validation_files])
     test_predictions = np.array([t[0] for t in test_files])
-    ensemble_selection.fit(validation_predictions, valid_labels, identifiers=None)
-    y_hat_ensemble = ensemble_selection.predict(np.array(validation_predictions))
+    ensemble_selection.fit(validation_predictions, valid_labels,
+                           identifiers=None)
+    y_hat_ensemble = ensemble_selection.predict(np.array(
+        validation_predictions))
     y_hat_test = ensemble_selection.predict(np.array(test_predictions))
 
     # Compute validation error
@@ -197,7 +206,8 @@ def evaluate(input_directory, validation_files, test_files, ensemble_size=50):
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument('--input-directory', type=str, required=True, nargs='+')
+    parser.add_argument('--input-directory', type=str,
+                        required=True, nargs='+')
     parser.add_argument('-s', '--seed', type=int)
     parser.add_argument("--output-file", type=str, required=True)
     parser.add_argument("--ensemble-size", type=int, default=50)
