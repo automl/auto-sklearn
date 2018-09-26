@@ -1,14 +1,11 @@
 import argparse
-import json
-import logging
 import os
 import sys
 
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.metrics import balanced_accuracy
-
 sys.path.append('../')
-from update_metadata_util import load_task
+from update_metadata_util import load_task  # noqa
 
 
 parser = argparse.ArgumentParser()
@@ -38,8 +35,9 @@ nb_conf_metalearning = args.nb_conf_metalearning
 configuration_output_dir = os.path.join(working_directory, str(seed))
 try:
     os.makedirs(configuration_output_dir)
-except:
-    pass
+except _:
+    print("Direcotry {0} aleardy created.".format(configuraton_output_dir))
+
 tmp_dir = os.path.join(configuration_output_dir, str(task_id))
 
 automl_arguments = {
@@ -61,11 +59,15 @@ X_train, y_train, X_test, y_test, cat = load_task(task_id)
 
 automl = AutoSklearnClassifier(**automl_arguments)
 
-automl.fit(X_train, y_train, dataset_name=str(task_id), X_test=X_test, y_test=y_test, metric=balanced_accuracy)
+automl.fit(X_train, y_train,
+           dataset_name=str(task_id),
+           X_test=X_test, y_test=y_test,
+           metric=balanced_accuracy)
 
 with open(os.path.join(tmp_dir, "score_single_best.csv"), 'w') as fh:
     T = 0
     fh.write("Time,Test Performance\n")
-    for t, s in zip(automl.cv_results_['mean_fit_time'], automl.cv_results_["mean_test_score"]):
+    for t, s in zip(automl.cv_results_['mean_fit_time'],
+                    automl.cv_results_["mean_test_score"]):
         T += t
         fh.write("{0},{1}\n".format(T, s))
