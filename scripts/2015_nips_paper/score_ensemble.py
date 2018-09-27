@@ -129,7 +129,6 @@ def main(input_directories, output_file, seed, ensemble_size, n_jobs=1):
         for i in range(len(test_files)))
 
     # Create output csv file
-    file_output_seed = -1 if seed is None else seed
     with open(output_file, "w") as csv_file:
         fieldnames = ['Time', 'Training (Empirical) Performance',
                       'Test Set Performance', 'AC Overhead Time',
@@ -166,7 +165,6 @@ def evaluate(input_directory, validation_files, test_files, ensemble_size=50):
     D = backend.load_datamanager()
     test_labels = D.data["Y_test"]
 
-    dataset_name = D.name
     score = balanced_accuracy
 
     # Read the modification time of the predictions file and
