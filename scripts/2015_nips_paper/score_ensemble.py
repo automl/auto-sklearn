@@ -93,7 +93,6 @@ def main(input_directories, output_file, seed, ensemble_size, n_jobs=1):
                      delete_output_folder_after_terminate=False,
                      shared_mode=True)
     valid_labels = backend.load_targets_ensemble()
-    D = backend.load_datamanager()
 
     score = balanced_accuracy
 
