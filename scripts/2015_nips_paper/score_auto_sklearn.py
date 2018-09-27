@@ -35,8 +35,8 @@ nb_conf_metalearning = args.nb_conf_metalearning
 configuration_output_dir = os.path.join(working_directory, str(seed))
 try:
     os.makedirs(configuration_output_dir)
-except _:
-    print("Direcotry {0} aleardy created.".format(configuraton_output_dir))
+except Exception as _:
+    print("Direcotry {0} aleardy created.".format(configuration_output_dir))
 
 tmp_dir = os.path.join(configuration_output_dir, str(task_id))
 
