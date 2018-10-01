@@ -458,11 +458,17 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
 
         """
         # Before running anything else, first check that the
-        # type of data is compatible with auto-sklearn (currently
-        # not supporting multiclass-multioutput classification).
-        if type_of_target(y) == 'multiclass-multioutput':
-            raise ValueError("multiclass-multioutput classification"
-                             " is not supported.")
+        # type of data is compatible with auto-sklearn. Legal target
+        # types are: binary, multiclass, multilabel-indicator.
+        target_type = type_of_target(y)
+        if target_type in ['multiclass-multioutput',
+                           'continuous',
+                           'continuous-multioutput',
+                           'unknown',
+                           ]:
+            raise ValueError("classification with data of type %s is"
+                             " not supported" % target_type)
+
         super().fit(
             X=X,
             y=y,
@@ -567,13 +573,16 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
 
         """
         # Before running anything else, first check that the
-        # type of data is compatible with auto-sklearn (currently
-        # not supporting multioutput regression).
-        if type_of_target(y) not in ['continuous',
-                                     'multiclass',
-                                     'binary',
-                                    ]:
-            raise ValueError("multioutput regression is not supported.")
+        # type of data is compatible with auto-sklearn. Legal target
+        # types are: continuous, binary, multiclass.
+        target_type = type_of_target(y)
+        if target_type in ['multiclass-multioutput',
+                           'multilabel-indicator',
+                           'continuous-multioutput',
+                           'unknown',
+                           ]:
+            raise ValueError("regression with data of type %s is not"
+                             " supported" % target_type)
 
         # Fit is supposed to be idempotent!
         # But not if we use share_mode.
