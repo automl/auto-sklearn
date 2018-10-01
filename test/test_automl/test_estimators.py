@@ -55,14 +55,20 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertRaisesRegexp(ValueError,
                                 "If shared_mode == True tmp_folder must not "
                                 "be None.",
-                                lambda shared_mode: AutoSklearnClassifier(shared_mode=shared_mode).fit(X, y),
+                                lambda shared_mode:
+                                AutoSklearnClassifier(
+                                    shared_mode=shared_mode,
+                                ).fit(X, y),
                                 shared_mode=True)
 
         self.assertRaisesRegexp(ValueError,
                                 "If shared_mode == True output_folder must not "
                                 "be None.",
                                 lambda shared_mode, tmp_folder:
-                                AutoSklearnClassifier(shared_mode=shared_mode, tmp_folder=tmp_folder).fit(X, y),
+                                AutoSklearnClassifier(
+                                    shared_mode=shared_mode,
+                                    tmp_folder=tmp_folder,
+                                ).fit(X, y),
                                 shared_mode=True,
                                 tmp_folder='/tmp/duitaredxtvbedb')
 
@@ -87,9 +93,9 @@ class EstimatorTest(Base, unittest.TestCase):
                                 cls.fit,
                                 X=X, y=y, feat_type=['Car']*100)
 
-    def test_type_of_target(self):
+    @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.fit')
+    def test_type_of_target(self, mock_estimator):
         # Test that classifier raises error for illegal target types.
-        cls = AutoSklearnClassifier(time_left_for_this_task=15)
         X = np.array([[1, 2],
                       [2, 3],
                       [3, 4],
@@ -115,26 +121,28 @@ class EstimatorTest(Base, unittest.TestCase):
                                              [5.5, 3.9],
                                              ])
 
+        cls = AutoSklearnClassifier()
         # Illegal target types for classification: continuous,
         # multiclass-multioutput, continuous-multioutput.
         self.assertRaisesRegex(ValueError,
-                               'multiclass-multioutput classification'
-                               ' is not supported.',
+                               "classification with data of type"
+                               " multiclass-multioutput is not supported",
                                cls.fit,
                                X=X,
                                y=y_multiclass_multioutput,
                                )
 
         self.assertRaisesRegex(ValueError,
-                               'Cannot work on data of type continuous',
+                               "classification with data of type"
+                               " continuous is not supported",
                                cls.fit,
                                X=X,
                                y=y_continuous,
                                )
 
         self.assertRaisesRegex(ValueError,
-                               'Cannot work on data of type '
-                               'continuous-multioutput',
+                               "classification with data of type"
+                               " continuous-multioutput is not supported",
                                cls.fit,
                                X=X,
                                y=y_continuous_multioutput,
@@ -161,25 +169,28 @@ class EstimatorTest(Base, unittest.TestCase):
                       "multilabel-indicator targets")
 
         # Test that regressor raises error for illegal target types.
-        reg = AutoSklearnRegressor(time_left_for_this_task=15)
+        reg = AutoSklearnRegressor()
         # Illegal target types for regression: multiclass-multioutput,
         # multilabel-indicator, continuous-multioutput.
         self.assertRaisesRegex(ValueError,
-                               'multioutput regression is not supported.',
+                               "regression with data of type"
+                               " multiclass-multioutput is not supported",
                                reg.fit,
                                X=X,
                                y=y_multiclass_multioutput,
                                )
 
         self.assertRaisesRegex(ValueError,
-                               'multioutput regression is not supported.',
+                               "regression with data of type"
+                               " multilabel-indicator is not supported",
                                reg.fit,
                                X=X,
                                y=y_multilabel,
                                )
 
         self.assertRaisesRegex(ValueError,
-                               'multioutput regression is not supported.',
+                               "regression with data of type"
+                               " continuous-multioutput is not supported",
                                reg.fit,
                                X=X,
                                y=y_continuous_multioutput,
@@ -188,19 +199,19 @@ class EstimatorTest(Base, unittest.TestCase):
         try:
             reg.fit(X, y_continuous)
         except ValueError:
-            self.fail("cls.fit() raised ValueError while fitting "
+            self.fail("reg.fit() raised ValueError while fitting "
                       "continuous targets")
 
         try:
             reg.fit(X, y_binary)
         except ValueError:
-            self.fail("cls.fit() raised ValueError while fitting "
+            self.fail("reg.fit() raised ValueError while fitting "
                       "binary targets")
 
         try:
             reg.fit(X, y_multiclass)
         except ValueError:
-            self.fail("cls.fit() raised ValueError while fitting "
+            self.fail("reg.fit() raised ValueError while fitting "
                       "multiclass targets")
 
     def test_fit_pSMAC(self):
