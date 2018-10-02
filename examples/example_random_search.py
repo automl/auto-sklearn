@@ -68,7 +68,7 @@ def get_random_search_object_callback(
 
 
 def main():
-    X, y = sklearn.datasets.load_digits(return_X_y=True)
+    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
     X_train, X_test, y_train, y_test = \
         sklearn.model_selection.train_test_split(X, y, random_state=1)
 
@@ -79,7 +79,7 @@ def main():
         get_smac_object_callback=get_roar_object_callback,
         initial_configurations_via_metalearning=0,
     )
-    automl.fit(X_train, y_train, dataset_name='digits')
+    automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
     print('#' * 80)
     print('Results for ROAR.')
@@ -99,7 +99,7 @@ def main():
         get_smac_object_callback=get_random_search_object_callback,
         initial_configurations_via_metalearning=0,
     )
-    automl.fit(X_train, y_train, dataset_name='digits')
+    automl.fit(X_train, y_train, dataset_name='breast_cancer')
 
     print('#' * 80)
     print('Results for random search.')
