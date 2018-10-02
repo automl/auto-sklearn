@@ -14,12 +14,13 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
 import sklearn.metrics
 import autosklearn.classification
 import autosklearn.pipeline.components.classification
-import autosklearn.pipeline.components.base
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.components.base \
+    import AutoSklearnClassificationAlgorithm
+from autosklearn.pipeline.constants import DENSE, SIGNED_DATA, UNSIGNED_DATA
 
 
 # Create MLP classifier component for auto-sklearn.
-class MLPClassifier(autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm):
+class MLPClassifier(AutoSklearnClassificationAlgorithm):
     def __init__(self,
                  hidden_layer_depth,
                  num_nodes_per_layer,
