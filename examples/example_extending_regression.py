@@ -15,7 +15,8 @@ import sklearn.metrics
 import autosklearn.regression
 import autosklearn.pipeline.components.regression
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import SPARSE, DENSE, \
+    SIGNED_DATA, UNSIGNED_DATA
 
 
 # Implement kernel ridge regression component for auto-sklearn.

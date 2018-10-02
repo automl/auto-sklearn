@@ -16,8 +16,10 @@ import sklearn.metrics
 import autosklearn.classification
 import autosklearn.metrics
 import autosklearn.pipeline.components.feature_preprocessing
-from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.components.base \
+    import AutoSklearnPreprocessingAlgorithm
+from autosklearn.pipeline.constants import SPARSE, DENSE, SIGNED_DATA, \
+    UNSIGNED_DATA
 
 
 # Create LDA component for auto-sklearn.
