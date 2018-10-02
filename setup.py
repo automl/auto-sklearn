@@ -30,26 +30,8 @@ extensions = cythonize(
                include_dirs=[np.get_include()])
      ])
 
-requirements = [
-    "setuptools",
-    "nose",
-    "six",
-    "Cython",
-    "numpy>=1.9.0",
-    "scipy>=0.14.1",
-    "scikit-learn>=0.19,<0.20",
-    "lockfile",
-    "joblib",
-    "psutil",
-    "pyyaml",
-    "liac-arff",
-    "pandas",
-    "ConfigSpace>=0.4.0,<0.5",
-    "pynisher>=0.4,<0.5",
-    "pyrfr>=0.6.1,<0.8",
-    "smac>=0.8,<0.9",
-    "xgboost==0.7.post3",
-]
+with open("requirements.txt") as reqs:
+    requirements = reqs.read().replace("\r").split("\n")
 
 with open("autosklearn/__version__.py") as fh:
     version = fh.readlines()[-1].split()[-1].strip("\"'")
