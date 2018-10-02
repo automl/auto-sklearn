@@ -4,7 +4,7 @@ auto-sklearn is an automated machine learning toolkit and a drop-in replacement 
 
 Find the documentation [here](http://automl.github.io/auto-sklearn/)
 
-Status for master branch:
+Status for master branch
 
 [![Build Status](https://travis-ci.org/automl/auto-sklearn.svg?branch=master)](https://travis-ci.org/automl/auto-sklearn)
 [![Code Health](https://landscape.io/github/automl/auto-sklearn/master/landscape.png)](https://landscape.io/github/automl/auto-sklearn/master)
