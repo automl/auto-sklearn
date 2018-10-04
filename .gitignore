@@ -22,14 +22,16 @@ lib
 lib64
 __pycache__
 
-# Installer logs
+# Installer trash
 pip-log.txt
+autosklearn/data/competition_c_functions.c
 
 # Unit test / coverage reports
 htmlcov
 .coverage
 .tox
 nosetests.xml
+autosklearn.log
 
 # pycharm
 .idea
