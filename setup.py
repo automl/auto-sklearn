@@ -31,7 +31,7 @@ extensions = cythonize(
      ])
 
 with open("requirements.txt") as reqs:
-    requirements = reqs.read().replace("\r").split("\n")
+    requirements = reqs.read().replace("\r", "").split("\n")
 
 with open("autosklearn/__version__.py") as fh:
     version = fh.readlines()[-1].split()[-1].strip("\"'")
