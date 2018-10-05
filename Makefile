@@ -1,6 +1,7 @@
 # simple makefile to simplify repetitive build env management tasks under posix
 
 PYTHON ?= python
+PIP ?= pip
 CYTHON ?= cython
 NOSETESTS ?= nosetests
 CTAGS ?= ctags
@@ -29,4 +30,7 @@ test-coverage:
 	rm -rf coverage .coverage
 	$(NOSETESTS) -s -v --with-coverage test
 
-test: test-code test-sphinxext test-doc
+test-install:
+	$(PIP) install -r requirements_test.txt
+
+test: test-install test-code test-sphinxext test-doc
