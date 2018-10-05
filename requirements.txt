@@ -5,7 +5,7 @@ six
 Cython
 
 scikit-learn>=0.19,<0.20
-xgboost==0.80
+xgboost==0.7.post3
 
 lockfile
 joblib
