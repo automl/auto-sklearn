@@ -71,5 +71,14 @@ install:
   - python setup.py install
   
 script: bash ci_scripts/test.sh
-after_success: source ci_scripts/success.sh
+after_success: source ci_scripts/success.sh && source ci_scripts/create_doc.sh $TRAVIS_BRANCH
 
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN # set in the settings page of my repository as a secure variable
+  keep-hisotry: true
+  on:
+    all_branches: circle_drop
+    condition: $doc_result = "success"
+  local_dir: doc/$TRAVIS_BRANCH
