@@ -7,7 +7,7 @@ run_tests() {
 
     cwd=`pwd`
     examples_dir=$cwd/examples
-    test_dir=$cwd/../test/
+    test_dir=$cwd/test/
 
     cd $TEST_DIR
     if [[ "$COVERAGE" == "true" ]]; then
