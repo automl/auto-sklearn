@@ -16,7 +16,8 @@ import autosklearn.classification
 import autosklearn.pipeline.components.classification
 from autosklearn.pipeline.components.base \
     import AutoSklearnClassificationAlgorithm
-from autosklearn.pipeline.constants import DENSE, SIGNED_DATA, UNSIGNED_DATA
+from autosklearn.pipeline.constants import DENSE, SIGNED_DATA, UNSIGNED_DATA, \
+    PREDICTIONS
 
 
 # Create MLP classifier component for auto-sklearn.

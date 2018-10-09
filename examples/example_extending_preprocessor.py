@@ -18,7 +18,7 @@ import autosklearn.metrics
 import autosklearn.pipeline.components.feature_preprocessing
 from autosklearn.pipeline.components.base \
     import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import SPARSE, DENSE, SIGNED_DATA, \
+from autosklearn.pipeline.constants import DENSE, SIGNED_DATA, \
     UNSIGNED_DATA
 
 
