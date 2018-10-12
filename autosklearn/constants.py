@@ -22,3 +22,26 @@ STRING_TO_TASK_TYPES = \
      'multiclass.classification': MULTICLASS_CLASSIFICATION,
      'multilabel.classification': MULTILABEL_CLASSIFICATION,
      'regression': REGRESSION}
+
+HOLDOUT = 'holdout'
+HOLDOUT_ITERATIVE_FIT = 'holdout-iterative-fit'
+CV = 'cv'
+PARTIAL_CV = 'partial-cv'
+
+HOLDOUT_RESAMPLING_STRATEGIES = [HOLDOUT, HOLDOUT_ITERATIVE_FIT]
+
+CROSS_VAL_RESAMPLING_STRATEGIES = [CV, PARTIAL_CV]
+
+NEED_TO_REFIT_STRATEGIES = [CV, PARTIAL_CV]
+
+RESAMPLING_STRATEGIES_TO_STRING = \
+    {HOLDOUT: 'holdout',
+     HOLDOUT_ITERATIVE_FIT: 'holdout-iterative-fit',
+     CV: 'cv',
+     PARTIAL_CV: 'partial-cv'}
+
+STRING_TO_RESAMPLING_STRATEGIES = \
+    {'holdout': HOLDOUT,
+     'holdout-iterative-fit': HOLDOUT_ITERATIVE_FIT,
+     'cv': CV,
+     'partial-cv': PARTIAL_CV}
