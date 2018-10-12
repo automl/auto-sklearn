@@ -23,10 +23,10 @@ STRING_TO_TASK_TYPES = \
      'multilabel.classification': MULTILABEL_CLASSIFICATION,
      'regression': REGRESSION}
 
-HOLDOUT = 'holdout'
-HOLDOUT_ITERATIVE_FIT = 'holdout-iterative-fit'
-CV = 'cv'
-PARTIAL_CV = 'partial-cv'
+HOLDOUT = 1
+HOLDOUT_ITERATIVE_FIT = 2
+CV = 3
+PARTIAL_CV = 4
 
 HOLDOUT_RESAMPLING_STRATEGIES = [HOLDOUT, HOLDOUT_ITERATIVE_FIT]
 
