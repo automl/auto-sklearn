@@ -36,7 +36,7 @@ requirements = [
     "six",
     "Cython",
     "numpy>=1.9.0",
-    "scipy>=0.14.1",
+    "scipy==0.15.2",
     "scikit-learn>=0.19,<0.20",
     "lockfile",
     "joblib",
