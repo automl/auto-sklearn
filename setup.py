@@ -35,8 +35,7 @@ requirements = [
     "nose",
     "six",
     "Cython",
-    # Numpy version of higher than 1.14.5 causes libgcc_s.so.1 error.
-    "numpy==1.14.5",
+    "numpy==1.15.2",
     "scipy>=0.14.1",
     "scikit-learn>=0.19,<0.20",
     "lockfile",
