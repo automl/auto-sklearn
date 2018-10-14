@@ -54,6 +54,8 @@ before_install:
   - if [[ `which conda` ]]; then echo 'Conda installation successful'; else exit 1; fi
   - conda create -n testenv --yes python=$PYTHON_VERSION pip wheel nose gxx_linux-64 gcc_linux-64 swig
   - source activate testenv
+  # debugging
+  - conda install -c anaconda libgcc
 
 install:
   # Install general requirements the way setup.py suggests
