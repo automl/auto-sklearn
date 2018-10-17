@@ -46,8 +46,6 @@ env:
   # Directory where tests are run from
   - TEST_DIR=/tmp/test_dir/
   - MODULE=autosklearn
-  # Debugging
-  - LD_LIBRARY_PATH=/lib/x86_64-linux-gnu/
 
 before_install:
   - wget $MINICONDA_URL -O miniconda.sh
