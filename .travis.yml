@@ -56,18 +56,7 @@ before_install:
   - if [[ `which conda` ]]; then echo 'Conda installation successful'; else exit 1; fi
   - conda create -n testenv --yes python=$PYTHON_VERSION pip wheel nose gxx_linux-64 gcc_linux-64 swig
   - source activate testenv
-  - find ~/miniconda/envs/testenv/lib/python3.6/site-packages/ -name '*.so' | xargs -l -n 1 ldd | grep libgcc_s.so.1
-  -  for so in `find ~/miniconda/envs/testenv/ -name '*.so'`;
-  do
-       contains_libgcc=`ldd $so | grep libgcc_s.so.1`
-       if [ ! -z "$contains_libgcc" ]; then
-           echo $so
-           path=`ldd $so | grep libgcc_s.so.1`
-           echo $path
-           path=`echo $path | cut -d " " -f 3`
-           file $path
-       fi
-  done
+  - bash libgcc_check.sh
 
 
 install:
@@ -85,17 +74,7 @@ install:
   - pip freeze
   - python setup.py install
   - find ~/miniconda/envs/testenv/lib/python3.6/site-packages/ -name '*.so' | xargs -l -n 1 ldd | grep libgcc_s.so.1
-  -  for so in `find ~/miniconda/envs/testenv/ -name '*.so'`;
-  do
-       contains_libgcc=`ldd $so | grep libgcc_s.so.1`
-       if [ ! -z "$contains_libgcc" ]; then
-           echo $so
-           path=`ldd $so | grep libgcc_s.so.1`
-           echo $path
-           path=`echo $path | cut -d " " -f 3`
-           file $path
-       fi
-  done
+  - bash libgcc_check.sh
 
 script: bash ci_scripts/test.sh
 after_success: source ci_scripts/success.sh
