@@ -1,5 +1,3 @@
-find ~/miniconda/envs/testenv/lib/python3.6/site-packages/ -name '*.so' | xargs -l -n 1 ldd | grep libgcc_s.so.1
-find ~/miniconda/envs/testenv/lib/python3.5/site-packages/ -name '*.so' | xargs -l -n 1 ldd | grep libgcc_s.so.1
 for so in `find ~/miniconda/envs/testenv/ -name '*.so'`;
 do
     contains_libgcc=`ldd $so | grep libgcc_s.so.1`
