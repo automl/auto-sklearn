@@ -93,6 +93,7 @@ class EstimatorTest(Base, unittest.TestCase):
                                 cls.fit,
                                 X=X, y=y, feat_type=['Car']*100)
 
+    # Mock AutoSklearnEstimator.fit so the test doesn't actually run fit().
     @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.fit')
     def test_type_of_target(self, mock_estimator):
         # Test that classifier raises error for illegal target types.
