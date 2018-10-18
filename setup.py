@@ -35,7 +35,8 @@ requirements = [
     "nose",
     "six",
     "Cython",
-    "numpy==1.14.5",
+    # Debugging. numpy 1.14.5 seems to work. Try with 1.14.6 and see if error occurs.
+    "numpy==1.14.6",
     "scipy>=0.14.1",
     "scikit-learn>=0.19,<0.20",
     "lockfile",
