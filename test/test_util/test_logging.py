@@ -29,6 +29,3 @@ class LoggingTest(unittest.TestCase):
         # default config sets the root logger's level to DEBUG,
         # which corresponds to 10.
         self.assertEqual(logging.getLogger().getEffectiveLevel(), 10)
-
-
-
