@@ -87,7 +87,7 @@ def main():
     for i in range(4): # set this at roughly half of your cores
         p = multiprocessing.Process(
             target=spawn_classifier,
-            args=(i, 'breast_cancer')
+            args=(i, 'breast_cancer'),
         )
         p.start()
         processes.append(p)
