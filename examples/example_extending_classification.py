@@ -35,7 +35,7 @@ class MLPClassifier(AutoSklearnClassificationAlgorithm):
         self.alpha = alpha
         self.random_state = random_state
 
-    def fit(self, X, Y):
+    def fit(self, X, y):
         self.num_nodes_per_layer = int(self.num_nodes_per_layer)
         self.hidden_layer_depth = int(self.hidden_layer_depth)
         self.alpha = float(self.alpha)
@@ -49,7 +49,7 @@ class MLPClassifier(AutoSklearnClassificationAlgorithm):
                                        activation=self.activation,
                                        random_state=self.random_state,
                                        )
-        self.estimator.fit(X, Y)
+        self.estimator.fit(X, y)
         return self
 
     def predict(self, X):

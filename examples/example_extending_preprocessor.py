@@ -32,7 +32,7 @@ class LDA(AutoSklearnPreprocessingAlgorithm):
         self.random_state = random_state
         self.preprocessor = None
 
-    def fit(self, X, Y=None):
+    def fit(self, X, y=None):
         self.shrinkage = float(self.shrinkage)
         self.n_components = int(self.n_components)
         self.tol = float(self.tol)
@@ -45,7 +45,7 @@ class LDA(AutoSklearnPreprocessingAlgorithm):
                 n_components=self.n_components,
                 tol=self.tol,
             )
-        self.preprocessor.fit(X, Y)
+        self.preprocessor.fit(X, y)
         return self
 
     def transform(self, X):

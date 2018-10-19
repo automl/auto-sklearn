@@ -29,7 +29,7 @@ class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
         self.random_state = random_state
         self.estimator = None
 
-    def fit(self, X, Y):
+    def fit(self, X, y):
         self.alpha = float(self.alpha)
         self.gamma = float(self.gamma)
         self.degree = int(self.degree)
@@ -40,7 +40,7 @@ class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
                                                           gamma=self.gamma,
                                                           degree=self.degree,
                                                           )
-        self.estimator.fit(X, Y)
+        self.estimator.fit(X, y)
         return self
 
     def predict(self, X):
