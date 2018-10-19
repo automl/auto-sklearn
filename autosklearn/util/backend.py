@@ -407,9 +407,10 @@ class Backend(object):
         except Exception:
             pass
 
-        filepath = os.path.join(self.get_ensemble_dir(),
-                                '%s.%s.ensemble' % (str(seed),
-                                                    str(idx)))
+        filepath = os.path.join(
+            self.get_ensemble_dir(),
+            '%s.%s.ensemble' % (str(seed), str(idx).zfill(10))
+        )
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
             pickle.dump(ensemble, fh)
