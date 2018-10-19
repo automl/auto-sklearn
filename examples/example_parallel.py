@@ -85,7 +85,10 @@ def main():
     processes = []
     spawn_classifier = get_spawn_classifier(X_train, y_train)
     for i in range(4): # set this at roughly half of your cores
-        p = multiprocessing.Process(target=spawn_classifier, args=(i, 'breast_cancer'))
+        p = multiprocessing.Process(
+            target=spawn_classifier,
+            args=(i, 'breast_cancer')
+        )
         p.start()
         processes.append(p)
     for p in processes:
