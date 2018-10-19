@@ -69,7 +69,7 @@ install:
   # Debug output to know all exact package versions!
   - pip freeze
   - python setup.py install
-  
+
 script: bash ci_scripts/test.sh
 after_success: source ci_scripts/success.sh
 
