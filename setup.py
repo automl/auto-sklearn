@@ -69,6 +69,6 @@ setuptools.setup(
     license='BSD',
     platforms=['Linux'],
     classifiers=[],
-    python_requires='>=3.4.*',
+    python_requires='>=3.5.*',
     url='https://automl.github.io/auto-sklearn',
 )
