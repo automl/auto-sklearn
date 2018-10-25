@@ -27,12 +27,14 @@ class MLPClassifier(AutoSklearnClassificationAlgorithm):
                  num_nodes_per_layer,
                  activation,
                  alpha,
+                 solver,
                  random_state=None,
                  ):
         self.hidden_layer_depth = hidden_layer_depth
         self.num_nodes_per_layer = num_nodes_per_layer
         self.activation = activation
         self.alpha = alpha
+        self.solver = solver
         self.random_state = random_state
 
     def fit(self, X, y):
@@ -45,8 +47,9 @@ class MLPClassifier(AutoSklearnClassificationAlgorithm):
                                    for i in range(self.hidden_layer_depth))
 
         self.estimator = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes,
-                                       alpha=self.alpha,
                                        activation=self.activation,
+                                       alpha=self.alpha,
+                                       solver=self.solver,
                                        random_state=self.random_state,
                                        )
         self.estimator.fit(X, y)
@@ -92,10 +95,14 @@ class MLPClassifier(AutoSklearnClassificationAlgorithm):
         alpha = UniformFloatHyperparameter(
             name="alpha", lower=0.0001, upper=1.0, default_value=0.0001
         )
+        solver = CategoricalHyperparameter(
+            name="solver", choices=['lbfgs', 'sgd', 'adam'], default_value='adam'
+        )
         cs.add_hyperparameters([hidden_layer_depth,
                                 num_nodes_per_layer,
                                 activation,
                                 alpha,
+                                solver,
                                 ])
         return cs
 

@@ -99,7 +99,7 @@ print(cs)
 
 # Fit the model using LDA as preprocessor.
 clf = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=20,
+    time_left_for_this_task=30,
     include_preprocessors=['LDA'],
 )
 clf.fit(X_train, y_train)
