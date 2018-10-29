@@ -74,7 +74,7 @@ script: bash ci_scripts/test.sh
 after_success: source ci_scripts/success.sh && source ci_scripts/create_doc.sh $TRAVIS_BRANCH "doc_result"
 
 deploy:
-  provider: gh-pages
+  provider: pages
   skip-cleanup: true
   github-token: $GITHUB_TOKEN # set in the settings page of my repository
   keep-hisotry: true
