@@ -217,7 +217,8 @@ class AutoSklearnEstimator(BaseEstimator):
         backend = create(temporary_directory=self.tmp_folder,
                          output_directory=self.output_folder,
                          delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
-                         delete_output_folder_after_terminate=self.delete_output_folder_after_terminate)
+                         delete_output_folder_after_terminate=self.delete_output_folder_after_terminate,
+                         shared_mode = self.shared_mode)
         automl = self._get_automl_class()(
             backend=backend,
             time_left_for_this_task=self.time_left_for_this_task,

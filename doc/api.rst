@@ -35,8 +35,8 @@ Metrics
 Built-in Metrics
 ~~~~~~~~~~~~~~~~
 
-Classification
-~~~~~~~~~~~~~~
+Classification metrics
+~~~~~~~~~~~~~~~~~~~~~~
 Note: The default ``autosklearn.metrics.f1``, ``autosklearn.metrics.precision`` and ``autosklearn.metrics.recall``
 built-in metrics are applicable only for binary classification. In order to apply them on multilabel and multiclass
 classification, please use the corresponding metrics with an appropriate averaging mechanism, such as ``autosklearn.metrics.f1_macro``.
@@ -85,8 +85,8 @@ For more information about how these metrics are used, please read
 
 .. autoclass:: autosklearn.metrics.pac_score
 
-Regression
-~~~~~~~~~~
+Regression metrics
+~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: autosklearn.metrics.r2
 
