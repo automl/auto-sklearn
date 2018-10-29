@@ -16,7 +16,7 @@ if ! [[ -z ${DOCPUSH+x} ]]; then
         # Debugging. Echo the current branch name.
         echo $1
 
-        if ! { [ $1 = "master" ] || [ $1 = "develop" ]; }; then
+        if ! { [ $1 = "master" ] || [ $1 = "development" ]; }; then
             { echo "Not one of the allowed branches"; exit 0; }
         fi
 
