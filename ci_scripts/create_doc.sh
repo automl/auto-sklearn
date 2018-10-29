@@ -1,3 +1,5 @@
+# This script is mostly adopted from https://github.com/openml/openml-python/blob/develop/ci_scripts/create_doc.sh
+
 set -euo pipefail
 
 # Check if DOCPUSH is set

@@ -16,7 +16,7 @@ matrix:
   - os: linux
     env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
   - os: linux
-    env: DISTRIB="conda" PYTHON_VERSION="3.6", DOCPUSH="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+    env: DISTRIB="conda" PYTHON_VERSION="3.6" DOCPUSH="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
   - os: linux
     env: DISTRIB="conda" PYTHON_VERSION="3.6" EXAMPLES="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
 
@@ -78,7 +78,8 @@ deploy:
   skip-cleanup: true
   github-token: $GITHUB_TOKEN # set in the settings page of my repository
   keep-hisotry: true
+  commiter-from-gh: true
   on:
-    branch: circle_drop
+    all_branches: true
     condition: $doc_result = "success"
   local_dir: doc/$TRAVIS_BRANCH
