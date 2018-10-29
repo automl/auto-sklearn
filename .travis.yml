@@ -19,6 +19,11 @@ matrix:
     env: DISTRIB="conda" PYTHON_VERSION="3.6" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
   - os: linux
     env: DISTRIB="conda" PYTHON_VERSION="3.6" EXAMPLES="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+  - os: linux
+    env: DISTRIB="conda" PYTHON_VERSION="3.7" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+  - os: linux
+    env: DISTRIB="conda" PYTHON_VERSION="3.6" RUN_FLAKE8="true" SKIP_TESTS="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+
 
   # Temporarily disabling OSX builds because thy take too long
   # Set language to generic to not break travis-ci
@@ -59,13 +64,14 @@ install:
   # Install general requirements the way setup.py suggests
   - pip install pep8 codecov
   # Temporarily pin the numpy version for travis-ci
-  - pip install "numpy<1.15"
+  - pip install "numpy<=1.14.5"
   - cat requirements.txt | xargs -n 1 -L 1 pip install
   # Install openml dependency for metadata generation unittest
   - pip install xmltodict requests liac-arff
   - pip install git+https://github.com/openml/openml-python@0b9009b0436fda77d9f7c701bd116aff4158d5e1 --no-deps
   - mkdir ~/.openml
   - echo "apikey = 610344db6388d9ba34f6db45a3cf71de" > ~/.openml/config
+  - pip install flake8
   # Debug output to know all exact package versions!
   - pip freeze
   - python setup.py install
