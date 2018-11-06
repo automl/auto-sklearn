@@ -15,6 +15,7 @@ if ! [[ -z ${DOCPUSH+x} ]]; then
 
         # Debugging. Echo the current branch name.
         echo $1
+        # Set $1 to development to test that deployment works.
 
         if ! { [ $1 = "master" ] || [ $1 = "development" ]; }; then
             { echo "Not one of the allowed branches"; exit 0; }
