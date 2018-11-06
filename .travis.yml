@@ -89,4 +89,5 @@ deploy:
   on:
     all_branches: true
     condition: $doc_result = "success"
-  local_dir: doc/$TRAVIS_BRANCH
+  # Testing. use development as the argument.
+  local_dir: doc/development  #$TRAVIS_BRANCH
