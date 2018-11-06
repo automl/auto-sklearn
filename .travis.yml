@@ -77,8 +77,7 @@ install:
   - python setup.py install
 
 script: bash ci_scripts/test.sh
-# Testing. give development as the argument instead of $TRAVIS_BRANCH.
-after_success: source ci_scripts/success.sh && source ci_scripts/create_doc.sh "development" "doc_result" #$TRAVIS_BRANCH "doc_result"
+after_success: source ci_scripts/success.sh && source ci_scripts/create_doc.sh $TRAVIS_BRANCH "doc_result"
 
 deploy:
   provider: pages
@@ -89,5 +88,4 @@ deploy:
   on:
     all_branches: true
     condition: $doc_result = "success"
-  # Testing. use development as the argument.
-  local_dir: doc/development  #$TRAVIS_BRANCH
+  local_dir: doc/$TRAVIS_BRANCH
