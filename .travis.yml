@@ -16,7 +16,7 @@ matrix:
   - os: linux
     env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
   - os: linux
-    env: DISTRIB="conda" PYTHON_VERSION="3.6" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+    env: DISTRIB="conda" PYTHON_VERSION="3.6" DOCPUSH="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
   - os: linux
     env: DISTRIB="conda" PYTHON_VERSION="3.6" EXAMPLES="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
   - os: linux
@@ -77,5 +77,15 @@ install:
   - python setup.py install
 
 script: bash ci_scripts/test.sh
-after_success: source ci_scripts/success.sh
+after_success: source ci_scripts/success.sh && source ci_scripts/create_doc.sh $TRAVIS_BRANCH "doc_result"
 
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN # set in the settings page of my repository
+  keep-hisotry: true
+  commiter-from-gh: true
+  on:
+    all_branches: true
+    condition: $doc_result = "success"
+  local_dir: doc/$TRAVIS_BRANCH
