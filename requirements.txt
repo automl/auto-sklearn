@@ -1,7 +1,5 @@
 setuptools
 nose
-
-six
 Cython
 
 numpy>=1.9.0<=1.14.5
