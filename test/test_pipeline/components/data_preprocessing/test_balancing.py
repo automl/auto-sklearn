@@ -30,12 +30,13 @@ class BalancingComponentTest(unittest.TestCase):
         balancing = Balancing(strategy='weighting')
         init_params, fit_params = balancing.get_weights(
             Y, 'adaboost', None, None, None)
-        self.assertTrue(np.allclose(fit_params['classifier:sample_weight'],
-                                    np.array([0.4] * 80 + [1.6] * 20)))
-        #init_params, fit_params = balancing.get_weights(
-        #    Y, None, 'extra_trees_preproc_for_classification', None, None)
-        #self.assertTrue(np.allclose(fit_params['preprocessor:sample_weight'],
-        #                            np.array([0.4] * 80 + [1.6] * 20)))
+        self.assertAlmostEqual(
+            np.mean(fit_params['classifier:sample_weight']), 1,
+        )
+        np.testing.assert_allclose(
+            fit_params['classifier:sample_weight'],
+            np.array([0.625] * 80 + [2.5] * 20),
+        )
 
     def test_balancing_get_weights_treed_multilabel(self):
         Y = np.array([[0, 0, 0]] * 100 + [[1, 0, 0]] * 100 + [[0, 1, 0]] * 100 +
@@ -43,12 +44,14 @@ class BalancingComponentTest(unittest.TestCase):
         balancing = Balancing(strategy='weighting')
         init_params, fit_params = balancing.get_weights(
             Y, 'adaboost', None, None, None)
-        self.assertTrue(np.allclose(fit_params['classifier:sample_weight'],
-                                    np.array([0.4] * 500 + [4.0] * 10)))
-        #init_params, fit_params = balancing.get_weights(
-        #    Y, None, 'extra_trees_preproc_for_classification', None, None)
-        #self.assertTrue(np.allclose(fit_params['preprocessor:sample_weight'],
-        #                            np.array([0.4] * 500 + [4.0] * 10)))
+        print(fit_params['classifier:sample_weight'])
+        self.assertAlmostEqual(
+            np.mean(fit_params['classifier:sample_weight']), 1,
+        )
+        np.testing.assert_allclose(
+            fit_params['classifier:sample_weight'],
+            np.array([0.85] * 500 + [8.5] * 10),
+        )
 
     def test_balancing_get_weights_svm_sgd(self):
         Y = np.array([0] * 80 + [1] * 20)
@@ -77,8 +80,8 @@ class BalancingComponentTest(unittest.TestCase):
                  ('random_forest', RandomForest, 0.780, 0.789, 3),
                  ('libsvm_svc', LibSVM_SVC, 0.769, 0.72, 3),
                  ('liblinear_svc', LibLinear_SVC, 0.762, 0.735, 3),
-                 ('passive_aggressive', PassiveAggressive, 0.642, 0.449, 3),
-                 ('sgd', SGD, 0.818, 0.575, 2)
+                 ('passive_aggressive', PassiveAggressive, 0.642, 0.444, 3),
+                 ('sgd', SGD, 0.818, 0.567, 2)
                 ]:
             for strategy, acc in [
                 ('none', acc_no_weighting),
@@ -127,7 +130,7 @@ class BalancingComponentTest(unittest.TestCase):
                 [('extra_trees_preproc_for_classification',
                     ExtraTreesPreprocessorClassification, 0.810, 0.563),
                  ('liblinear_svc_preprocessor', LibLinear_Preprocessor,
-                    0.837, 0.567)]:
+                    0.837, 0.576)]:
             for strategy, acc in [('none', acc_no_weighting),
                                   ('weighting', acc_weighting)]:
                 data_ = copy.copy(data)

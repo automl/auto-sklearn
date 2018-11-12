@@ -62,10 +62,7 @@ class XGradientBoostingRegressor(
             self.silent = True
 
         # Random number seed.
-        if random_state is None:
-            self.seed = 1
-        else:
-            self.seed = random_state.randint(1, 10000, size=1)[0]
+        self.seed = random_state.randint(1, 10000, size=1)[0]
 
         ## new paramaters
         # Subsample ratio of columns when constructing each tree.
@@ -152,7 +149,6 @@ class XGradientBoostingRegressor(
                 reg_alpha=self.reg_alpha,
                 reg_lambda=self.reg_lambda,
                 base_score=self.base_score,
-                seed=self.seed,
                 random_state=self.seed,
                 **self.booster_args
             )
