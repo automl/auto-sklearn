@@ -18,8 +18,8 @@ if os.name != 'posix':
 
 if sys.version_info < (3, 5):
     raise ValueError(
-        'Unsupported python version %s found. Auto-sklearn requires Python '
-        '3.5 or higher.' % sys.version_info
+        'Unsupported Python version %d.%d.%d found. Auto-sklearn requires Python '
+        '3.5 or higher.' % (sys.version_info.major, sys.version_info.minor, sys.version_info.micro)
     )
 
 
@@ -35,7 +35,8 @@ requirements = [
     "nose",
     "six",
     "Cython",
-    "numpy>=1.9.0",
+    # Numpy version of higher than 1.14.5 causes libgcc_s.so.1 error.
+    "numpy>=1.9.0<=1.14.5",
     "scipy>=0.14.1",
     "scikit-learn>=0.19,<0.20",
     "lockfile",
@@ -68,6 +69,6 @@ setuptools.setup(
     license='BSD',
     platforms=['Linux'],
     classifiers=[],
-    python_requires='>=3.4.*',
+    python_requires='>=3.5.*',
     url='https://automl.github.io/auto-sklearn',
 )

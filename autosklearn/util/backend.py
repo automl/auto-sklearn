@@ -71,11 +71,17 @@ class BackendContext(object):
 
         self.__temporary_directory = temporary_directory \
             if temporary_directory \
-            else '/tmp/autosklearn_tmp_%d_%d' % (pid, random_number)
+            else os.path.join(
+                tempfile.gettempdir(),
+                'autosklearn_tmp_%d_%d' % (pid, random_number)
+            )
 
         self.__output_directory = output_directory \
             if output_directory \
-            else '/tmp/autosklearn_output_%d_%d' % (pid, random_number)
+            else os.path.join(
+                tempfile.gettempdir(),
+                'autosklearn_output_%d_%d' % (pid, random_number)
+            )
 
     def create_directories(self):
         if self.shared_mode:
@@ -401,9 +407,10 @@ class Backend(object):
         except Exception:
             pass
 
-        filepath = os.path.join(self.get_ensemble_dir(),
-                                '%s.%s.ensemble' % (str(seed),
-                                                    str(idx)))
+        filepath = os.path.join(
+            self.get_ensemble_dir(),
+            '%s.%s.ensemble' % (str(seed), str(idx).zfill(10))
+        )
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
             pickle.dump(ensemble, fh)

@@ -78,14 +78,17 @@ def get_spawn_classifier(X_train, y_train):
 
 def main():
 
-    X, y = sklearn.datasets.load_digits(return_X_y=True)
+    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
     X_train, X_test, y_train, y_test = \
         sklearn.model_selection.train_test_split(X, y, random_state=1)
 
     processes = []
     spawn_classifier = get_spawn_classifier(X_train, y_train)
     for i in range(4): # set this at roughly half of your cores
-        p = multiprocessing.Process(target=spawn_classifier, args=(i, 'digits'))
+        p = multiprocessing.Process(
+            target=spawn_classifier,
+            args=(i, 'breast_cancer'),
+        )
         p.start()
         processes.append(p)
     for p in processes:

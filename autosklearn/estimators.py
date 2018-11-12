@@ -3,6 +3,7 @@ from sklearn.base import BaseEstimator
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor
 from autosklearn.util.backend import create
+from sklearn.utils.multiclass import type_of_target
 
 
 class AutoSklearnEstimator(BaseEstimator):
@@ -28,7 +29,9 @@ class AutoSklearnEstimator(BaseEstimator):
                  shared_mode=False,
                  disable_evaluator_output=False,
                  get_smac_object_callback=None,
-                 smac_scenario_args=None):
+                 smac_scenario_args=None,
+                 logging_config=None,
+                 ):
         """
         Parameters
         ----------
@@ -168,6 +171,11 @@ class AutoSklearnEstimator(BaseEstimator):
             This is an advanced feature. Use only if you are familiar with
             `SMAC <https://automl.github.io/SMAC3/stable/index.html>`_.
 
+        logging_config : dict, optional (None)
+            dictionary object specifying the logger configuration. If None,
+            the default logging.yaml file is used, which can be found in
+            the directory ``util/logging.yaml`` relative to the installation.
+
         Attributes
         ----------
 
@@ -199,6 +207,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.disable_evaluator_output = disable_evaluator_output
         self.get_smac_object_callback = get_smac_object_callback
         self.smac_scenario_args = smac_scenario_args
+        self.logging_config = logging_config
 
         self._automl = None
         super().__init__()
@@ -238,7 +247,8 @@ class AutoSklearnEstimator(BaseEstimator):
             shared_mode=self.shared_mode,
             get_smac_object_callback=self.get_smac_object_callback,
             disable_evaluator_output=self.disable_evaluator_output,
-            smac_scenario_args=self.smac_scenario_args
+            smac_scenario_args=self.smac_scenario_args,
+            logging_config=self.logging_config,
         )
 
         return automl
@@ -456,6 +466,18 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         self
 
         """
+        # Before running anything else, first check that the
+        # type of data is compatible with auto-sklearn. Legal target
+        # types are: binary, multiclass, multilabel-indicator.
+        target_type = type_of_target(y)
+        if target_type in ['multiclass-multioutput',
+                           'continuous',
+                           'continuous-multioutput',
+                           'unknown',
+                           ]:
+            raise ValueError("classification with data of type %s is"
+                             " not supported" % target_type)
+
         super().fit(
             X=X,
             y=y,
@@ -559,6 +581,18 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         self
 
         """
+        # Before running anything else, first check that the
+        # type of data is compatible with auto-sklearn. Legal target
+        # types are: continuous, binary, multiclass.
+        target_type = type_of_target(y)
+        if target_type in ['multiclass-multioutput',
+                           'multilabel-indicator',
+                           'continuous-multioutput',
+                           'unknown',
+                           ]:
+            raise ValueError("regression with data of type %s is not"
+                             " supported" % target_type)
+
         # Fit is supposed to be idempotent!
         # But not if we use share_mode.
         super().fit(
