@@ -74,7 +74,12 @@ class EnsembleSelection(AbstractEnsemble):
             if s == 0:
                 weighted_ensemble_prediction = np.zeros(predictions[0].shape)
             else:
-                ensemble_prediction = np.mean(np.array(ensemble), axis=0)
+                # Memory-efficient averaging!
+                ensemble_prediction = np.zeros(ensemble[0].shape)
+                for pred in ensemble:
+                    ensemble_prediction += pred
+                ensemble_prediction /= s
+
                 weighted_ensemble_prediction = (s / float(s + 1)) * \
                                                ensemble_prediction
             fant_ensemble_prediction = np.zeros(weighted_ensemble_prediction.shape)
