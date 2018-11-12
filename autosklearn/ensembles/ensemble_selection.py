@@ -2,6 +2,7 @@ from collections import Counter
 import random
 
 import numpy as np
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.constants import *
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
@@ -10,14 +11,23 @@ from autosklearn.metrics import Scorer
 
 
 class EnsembleSelection(AbstractEnsemble):
-    def __init__(self, ensemble_size, task_type, metric,
-                 sorted_initialization=False, bagging=False, mode='fast'):
+    def __init__(
+        self,
+        ensemble_size: int,
+        task_type: int,
+        metric: Scorer,
+        sorted_initialization: bool=False,
+        bagging: bool=False,
+        mode: str='fast',
+        random_state: np.random.RandomState=None,
+    ):
         self.ensemble_size = ensemble_size
         self.task_type = task_type
         self.metric = metric
         self.sorted_initialization = sorted_initialization
         self.bagging = bagging
         self.mode = mode
+        self.random_state = random_state
 
     def fit(self, predictions, labels, identifiers):
         self.ensemble_size = int(self.ensemble_size)
@@ -96,7 +106,7 @@ class EnsembleSelection(AbstractEnsemble):
                     all_scoring_functions=False)
 
             all_best = np.argwhere(scores == np.nanmin(scores)).flatten()
-            best = np.random.choice(all_best)
+            best = self.random_state.choice(all_best)
             ensemble.append(predictions[best])
             trajectory.append(scores[best])
             order.append(best)

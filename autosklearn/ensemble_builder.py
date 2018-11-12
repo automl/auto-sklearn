@@ -6,13 +6,15 @@ import os
 import re
 import time
 import traceback
+from typing import Optional, Union
 
 import numpy as np
 import pynisher
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.util.backend import Backend
 from autosklearn.constants import BINARY_CLASSIFICATION
-from autosklearn.metrics import calculate_score
+from autosklearn.metrics import calculate_score, Scorer
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.util.logging_ import get_logger
@@ -28,7 +30,7 @@ class EnsembleBuilder(multiprocessing.Process):
             backend: Backend,
             dataset_name: str,
             task_type: int,
-            metric: str,
+            metric: Scorer,
             limit: int,
             ensemble_size: int=10,
             ensemble_nbest: int=100,
@@ -39,10 +41,11 @@ class EnsembleBuilder(multiprocessing.Process):
             sleep_duration: int=2,
             memory_limit: int=1000,
             read_at_most: int=5,
+            random_state: Optional[Union[int, np.random.RandomState]]=None,
     ):
         """
             Constructor
-            
+
             Parameters
             ----------
             backend: util.backend.Backend
@@ -68,12 +71,12 @@ class EnsembleBuilder(multiprocessing.Process):
                 maximal number of iterations to run this script
                 (default None --> deactivated)
             precision: ["16","32","64","128"]
-                precision of floats to read the predictions 
+                precision of floats to read the predictions
             sleep_duration: int
                 duration of sleeping time between two iterations of this script (in sec)
             memory_limit: int
                 memory limit in mb
-            read_at_most: int 
+            read_at_most: int
                 read at most n new prediction files in each iteration
         """
 
@@ -93,7 +96,8 @@ class EnsembleBuilder(multiprocessing.Process):
         self.sleep_duration = sleep_duration
         self.memory_limit = memory_limit
         self.read_at_most = read_at_most
-        
+        self.random_state = check_random_state(random_state)
+
         # part of the original training set
         # used to build the ensemble
         self.dir_ensemble = os.path.join(
@@ -120,7 +124,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
         self.start_time = 0
         self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy')
-        
+
         # already read prediction files
         # {"file name": {
         #    "ens_score": float
@@ -167,7 +171,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
         self.start_time = time.time()
         iteration = 0
-        
+
         while True:
 
             #maximal number of iterations
@@ -176,29 +180,29 @@ class EnsembleBuilder(multiprocessing.Process):
                 self.logger.info("Terminate ensemble building because of max iterations: %d of %d",
                                  self.max_iterations,
                                  iteration)
-                break 
-            
+                break
+
             used_time = time.time() - self.start_time
             self.logger.debug(
                 'Starting iteration %d, time left: %f',
                 iteration,
                 self.time_limit - used_time,
             )
-            
+
             # populates self.read_preds
             if not self.read_ensemble_preds():
                 time.sleep(self.sleep_duration)
                 continue
-                
+
             selected_models = self.get_n_best_preds()
             if not selected_models:  # nothing selected
                 continue
-            
+
             # populates predictions in self.read_preds
             # reduces selected models if file reading failed
             n_sel_valid, n_sel_test = self.\
                 get_valid_test_preds(selected_keys=selected_models)
-            
+
             selected_models_set = set(selected_models)
             if selected_models_set.intersection(n_sel_test):
                 selected_models = list(selected_models_set.intersection(n_sel_test))
@@ -207,12 +211,12 @@ class EnsembleBuilder(multiprocessing.Process):
             else:
                 # use selected_models only defined by ensemble data set
                 pass
-            
+
             # train ensemble
             ensemble = self.fit_ensemble(selected_keys=selected_models)
-            
+
             if ensemble is not None:
-                
+
                 self.predict(set_="valid",
                              ensemble=ensemble,
                              selected_keys=n_sel_valid,
@@ -220,22 +224,22 @@ class EnsembleBuilder(multiprocessing.Process):
                              index_run=iteration)
                 # TODO if predictions fails, build the model again during the
                 #  next iteration!
-                self.predict(set_="test", 
-                             ensemble=ensemble, 
-                             selected_keys=n_sel_test, 
-                             n_preds=len(selected_models), 
+                self.predict(set_="test",
+                             ensemble=ensemble,
+                             selected_keys=n_sel_test,
+                             n_preds=len(selected_models),
                              index_run=iteration)
                 iteration += 1
             else:
                 time.sleep(self.sleep_duration)
-            
+
     def read_ensemble_preds(self):
         """
-            reading predictions on ensemble building data set; 
+            reading predictions on ensemble building data set;
             populates self.read_preds
         """
         self.logger.debug("Read ensemble data set predictions")
-        
+
         if self.y_true_ensemble is None:
             try:
                 self.y_true_ensemble = self.backend.load_targets_ensemble()
@@ -245,12 +249,12 @@ class EnsembleBuilder(multiprocessing.Process):
                     traceback.format_exc(),
                 )
                 return False
-            
+
         # no validation predictions so far -- no dir
         if not os.path.isdir(self.dir_ensemble):
             self.logger.debug("No ensemble dataset prediction directory found")
             return False
-        
+
         if self.shared_mode is False:
             pred_path = os.path.join(
                     self.dir_ensemble,
@@ -267,23 +271,23 @@ class EnsembleBuilder(multiprocessing.Process):
             self.logger.debug("Found no prediction files on ensemble data set:"
                               " %s" % pred_path)
             return False
-        
+
         n_read_files = 0
         for y_ens_fn in y_ens_files:
-            
+
             if self.read_at_most and n_read_files >= self.read_at_most:
-                # limit the number of files that will be read 
+                # limit the number of files that will be read
                 # to limit memory consumption
                 break
-            
+
             if not y_ens_fn.endswith(".npy"):
                 self.logger.info('Error loading file (not .npy): %s', y_ens_fn)
                 continue
-            
+
             match = self.model_fn_re.search(y_ens_fn)
             _seed = int(match.group(1))
             _num_run = int(match.group(2))
-            
+
             if not self.read_preds.get(y_ens_fn):
                 self.read_preds[y_ens_fn] = {
                     "ens_score": -1,
@@ -301,7 +305,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     # 2 - loaded but dropped again
                     "loaded": 0
                 }
-                
+
             if self.read_preds[y_ens_fn]["mtime_ens"] == os.path.getmtime(y_ens_fn):
                 # same time stamp; nothing changed;
                 continue
@@ -351,13 +355,13 @@ class EnsembleBuilder(multiprocessing.Process):
             np.sum([pred["loaded"] > 0 for pred in self.read_preds.values()])
         )
         return True
-                
+
     def get_n_best_preds(self):
         """
             get best n predictions (i.e., keys of self.read_preds)
-            according to score on "ensemble set" 
+            according to score on "ensemble set"
             n: self.ensemble_nbest
-            
+
             Side effect: delete predictions of non-winning models
         """
 
@@ -377,7 +381,7 @@ class EnsembleBuilder(multiprocessing.Process):
         sorted_keys = filter(lambda x: x[1] > dummy_score[1], sorted_keys)
         # remove Dummy Classifier
         sorted_keys = list(filter(lambda x: x[2] > 1, sorted_keys))
-        if not sorted_keys: 
+        if not sorted_keys:
             # no model left; try to use dummy score (num_run==0)
             self.logger.warning("No models better than random - "
                                 "using Dummy Score!")
@@ -446,7 +450,7 @@ class EnsembleBuilder(multiprocessing.Process):
         """
         success_keys_valid = []
         success_keys_test = []
-        
+
         for k in selected_keys:
             valid_fn = glob.glob(
                 os.path.join(self.dir_valid, 'predictions_valid_%d_%d.npy'
@@ -456,7 +460,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 os.path.join(self.dir_test, 'predictions_test_%d_%d.npy' %
                                    (self.read_preds[k]["seed"],
                                     self.read_preds[k]["num_run"])))
-            
+
             # TODO don't read valid and test if not changed
             if len(valid_fn) == 0:
                 # self.logger.debug("Not found validation prediction file "
@@ -478,7 +482,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 except Exception as e:
                     self.logger.warning('Error loading %s: %s',
                                         valid_fn, traceback.format_exc())
-        
+
             if len(test_fn) == 0:
                 # self.logger.debug("Not found test prediction file (although "
                 #                   "ensemble predictions available):%s" %
@@ -500,18 +504,18 @@ class EnsembleBuilder(multiprocessing.Process):
                 except Exception as e:
                     self.logger.warning('Error loading %s: %s',
                                         test_fn, traceback.format_exc())
-                
+
         return success_keys_valid, success_keys_test
-        
+
     def fit_ensemble(self, selected_keys:list):
         """
-            fit ensemble 
-            
+            fit ensemble
+
             Parameters
             ---------
             selected_keys: list
                 list of selected keys of self.read_preds
-                
+
             Returns
             -------
             ensemble: EnsembleSelection
@@ -520,7 +524,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
         predictions_train = np.array([self.read_preds[k][Y_ENSEMBLE] for k in selected_keys])
         include_num_runs = [(self.read_preds[k]["seed"], self.read_preds[k]["num_run"]) for k in selected_keys]
-        
+
         # check hash if ensemble training data changed
         current_hash = hash(predictions_train.data.tobytes())
         if self.last_hash == current_hash:
@@ -531,11 +535,14 @@ class EnsembleBuilder(multiprocessing.Process):
             )
             return None
         self.last_hash = current_hash
-        
-        ensemble = EnsembleSelection(ensemble_size=self.ensemble_size,
-                                     task_type=self.task_type,
-                                     metric=self.metric)
-        
+
+        ensemble = EnsembleSelection(
+            ensemble_size=self.ensemble_size,
+            task_type=self.task_type,
+            metric=self.metric,
+            random_state=self.random_state,
+        )
+
         try:
             self.logger.debug(
                 "Fitting the ensemble on %d models.",
@@ -563,17 +570,17 @@ class EnsembleBuilder(multiprocessing.Process):
             self.logger.error('Caught IndexError: %s' + traceback.format_exc())
             time.sleep(self.sleep_duration)
             return None
-        
+
         return ensemble
-    
+
     def predict(self, set_: str,
                 ensemble: AbstractEnsemble,
-                selected_keys: list, 
-                n_preds:int, 
+                selected_keys: list,
+                n_preds:int,
                 index_run:int):
         """
             save preditions on ensemble, validation and test data on disc
-            
+
             Parameters
             ----------
             set_: ["valid","test"]
@@ -587,13 +594,13 @@ class EnsembleBuilder(multiprocessing.Process):
                 same number of predictions on valid and test are necessary
             index_run: int
                 n-th time that ensemble predictions are written to disc
-                
+
             Return
             ------
             y: np.ndarray
         """
         self.logger.debug("Predicting the %s set with the ensemble!", set_)
-        
+
         # Save the ensemble for later use in the main auto-sklearn module!
         if self.SAVE2DISC:
             self.backend.save_ensemble(ensemble, index_run, self.seed)
@@ -602,7 +609,7 @@ class EnsembleBuilder(multiprocessing.Process):
             self.read_preds[k][Y_VALID if set_ == 'valid' else Y_TEST]
             for k in selected_keys
         ])
-        
+
         if n_preds == predictions.shape[0]:
             y = ensemble.predict(predictions)
             if self.task_type == BINARY_CLASSIFICATION:
@@ -626,7 +633,7 @@ class EnsembleBuilder(multiprocessing.Process):
             )
             return None
         # TODO: ADD saving of predictions on "ensemble data"
-    
+
     def _read_np_fn(self, fp):
         if self.precision is "16":
             predictions = np.load(fp).astype(dtype=np.float16)

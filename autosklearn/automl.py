@@ -651,6 +651,7 @@ class AutoML(BaseEstimator):
             max_iterations=max_iterations,
             read_at_most=np.inf,
             memory_limit=self._ensemble_memory_limit,
+            random_state=self._seed,
         )
 
     def _load_models(self):
