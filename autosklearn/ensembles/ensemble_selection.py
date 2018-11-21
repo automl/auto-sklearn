@@ -197,10 +197,6 @@ class EnsembleSelection(AbstractEnsemble):
         #non_null_weights = (weight for weight in self.weights_ if weight > 0)
         #for i, weight in enumerate(non_null_weights):
         #    predictions[i] *= weight
-        # The previous implementaion above removes models with zero weights, but does not remove
-        # the correponding dimension in the predictions, meaning predictions.shape[0] == len(self.weights_).
-        # Therefore, we simply apply all weights, including zeros, to all predictions to get correct predictions.
-        # This may increase computational cost, though.
         for i, weight in enumerate(self.weights_):
             predictions[i] *= weight
         return np.sum(predictions, axis=0)
