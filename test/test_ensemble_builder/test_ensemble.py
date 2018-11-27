@@ -263,12 +263,6 @@ class EnsembleTest(unittest.TestCase):
         self.assertEqual(ensbuilder.ensemble_nbest,1)
 
 class EnsembleSelectionTest(unittest.TestCase):
-    def setUp(self):
-        self.backend = BackendMock()
-
-    def tearDown(self):
-        pass
-
     def testPrediction(self):
         # Test that ensemble prediction applies weights correctly to given predictions
         ensemble = EnsembleSelection(ensemble_size=3,
@@ -305,6 +299,3 @@ class EnsembleSelectionTest(unittest.TestCase):
         ans2 = np.array([[0.88, 0.12],
                         [0.38, 0.62]])
         self.assertTrue(np.allclose(pred2, ans2))
-
-
-
