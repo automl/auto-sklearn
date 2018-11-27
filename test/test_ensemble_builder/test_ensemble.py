@@ -11,8 +11,9 @@ import numpy as np
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 
+from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.ensemble_builder import EnsembleBuilder, Y_ENSEMBLE, Y_VALID, Y_TEST
-from autosklearn.metrics import roc_auc
+from autosklearn.metrics import roc_auc, accuracy
 
 
 class BackendMock(object):
@@ -260,3 +261,50 @@ class EnsembleTest(unittest.TestCase):
         
         # it should try to reduce ensemble_nbest until it also failed at 2
         self.assertEqual(ensbuilder.ensemble_nbest,1)
+
+class EnsembleSelectionTest(unittest.TestCase):
+    def setUp(self):
+        self.backend = BackendMock()
+
+    def tearDown(self):
+        pass
+
+    def testPrediction(self):
+        # Test that ensemble prediction applies weights correctly to given predictions
+        ensemble = EnsembleSelection(ensemble_size=3,
+                                       task_type=1,
+                                       metric=accuracy)
+        # Create (M, N, D) tensor containing predictions of individual models,
+        # where M = number of models, N = number of samples, D = sample feature dimension.
+        per_model_pred = np.array([ # An array of shape (3, 2, 2)
+            [[0.9, 0.1],
+             [0.4, 0.6]],
+            [[0.8, 0.2],
+             [0.3, 0.7]],
+            [[1.0, 0.0],
+             [0.1, 0.9]]
+        ])
+        # Weights of 3 hypothetical models
+        ensemble.weights_ = [0.7, 0.2, 0.1]
+        pred = ensemble.predict(per_model_pred)
+        ans = np.array([[0.89, 0.11], # This should be the answer
+                        [0.35, 0.65]])
+        self.assertTrue(np.allclose(pred, ans)) # for float comparison with rtol=1e-05, atol=1e-08. see numpy.allclose()
+
+        # Test that if a model has weight of zero, it does not influence the predictions.
+        per_model_pred = np.array([ # An array of shape (3, 2, 2)
+            [[0.9, 0.1],
+             [0.4, 0.6]],
+            [[0.8, 0.2],
+             [0.3, 0.7]],
+            [[1.0, 0.0],
+             [0.1, 0.9]]
+        ])
+        ensemble.weights_ = [0.8, 0.2, 0.0] # the weight of the last model is now zero.
+        pred2 = ensemble.predict(per_model_pred)
+        ans2 = np.array([[0.88, 0.12],
+                        [0.38, 0.62]])
+        self.assertTrue(np.allclose(pred2, ans2))
+
+
+
