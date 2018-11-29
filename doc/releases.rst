@@ -11,6 +11,38 @@
 Releases
 ========
 
+Version 0.4.1
+=============
+
+* Added documentation on `how to extend Auto-sklearn <https://github.com/automl/auto-sklearn/pull/510>`_
+  with custom classifier, regressor, and preprocessor.
+* Auto-sklearn now requires numpy version between 1.9.0 and 1.14.5, due to higher versions
+  causing travis failure.
+* Examples now use ``sklearn.datasets.load_breast_cancer()`` instead of ``sklearn.datasets.load_digits()``
+  to reduce memory usage for travis build.
+* Fixes future warnings on non-tuple sequence for indexing.
+* Fixes `#500 <https://github.com/automl/auto-sklearn/issues/500>`_: fixes
+  ensemble builder to correctly evaluate model score with any metrics.
+  See this `PR <https://github.com/automl/auto-sklearn/pull/522>`_.
+* Fixes `#482 <https://github.com/automl/auto-sklearn/issues/482>`_ and
+  `#491 <https://github.com/automl/auto-sklearn/issues/491>`_: Users can now set up
+  custom logger configuration by passing a dictionary created by a yaml file to
+  ``logging_config``.
+* Fixes `#566 <https://github.com/automl/auto-sklearn/issues/566>`_: ensembles are now sorted correctly.
+* Fixes `#293 <https://github.com/automl/auto-sklearn/issues/293>`_: Auto-sklearn checks if appropriate
+  target type was given for classification and regression before call to ``fit()``.
+* Travis-ci now runs flake8 to enforce pep8 style guide, and uses travis-ci instead of circle-ci
+  for deployment.
+
+Contributors
+************
+
+* Matthias Feurer
+* Manuel Streuhofer
+* Taneli Mielikäinen
+* Katharina Eggensperger
+* Jin Woo Ahn
+
 Version 0.4.0
 =============
 

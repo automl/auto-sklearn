@@ -66,6 +66,7 @@ class AutoML(BaseEstimator):
                  initial_configurations_via_metalearning=25,
                  ensemble_size=1,
                  ensemble_nbest=1,
+                 ensemble_memory_limit=1000,
                  seed=1,
                  ml_memory_limit=3072,
                  metadata_directory=None,
@@ -82,6 +83,7 @@ class AutoML(BaseEstimator):
                  disable_evaluator_output=False,
                  get_smac_object_callback=None,
                  smac_scenario_args=None,
+                 logging_config=None,
                  ):
         super(AutoML, self).__init__()
         self._backend = backend
@@ -93,6 +95,7 @@ class AutoML(BaseEstimator):
             initial_configurations_via_metalearning
         self._ensemble_size = ensemble_size
         self._ensemble_nbest = ensemble_nbest
+        self._ensemble_memory_limit = ensemble_memory_limit
         self._seed = seed
         self._ml_memory_limit = ml_memory_limit
         self._data_memory_limit = None
@@ -110,6 +113,7 @@ class AutoML(BaseEstimator):
         self._disable_evaluator_output = disable_evaluator_output
         self._get_smac_object_callback = get_smac_object_callback
         self._smac_scenario_args = smac_scenario_args
+        self.logging_config = logging_config
 
         self._datamanager = None
         self._dataset_name = None
@@ -235,7 +239,10 @@ class AutoML(BaseEstimator):
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
-        setup_logger(os.path.join(self._backend.temporary_directory, '%s.log' % str(logger_name)))
+        setup_logger(os.path.join(self._backend.temporary_directory,
+                                  '%s.log' % str(logger_name)),
+                     self.logging_config,
+                     )
         return get_logger(logger_name)
 
     @staticmethod
@@ -630,18 +637,22 @@ class AutoML(BaseEstimator):
         else:
             self._ensemble_size = ensemble_size
 
-        return EnsembleBuilder(backend=self._backend,
-                               dataset_name=dataset_name,
-                               task_type=task,
-                               metric=metric,
-                               limit=time_left_for_ensembles,
-                               ensemble_size=ensemble_size,
-                               ensemble_nbest=ensemble_nbest,
-                               seed=self._seed,
-                               shared_mode=self._shared_mode,
-                               precision=precision,
-                               max_iterations=max_iterations,
-                               read_at_most=np.inf)
+        return EnsembleBuilder(
+            backend=self._backend,
+            dataset_name=dataset_name,
+            task_type=task,
+            metric=metric,
+            limit=time_left_for_ensembles,
+            ensemble_size=ensemble_size,
+            ensemble_nbest=ensemble_nbest,
+            seed=self._seed,
+            shared_mode=self._shared_mode,
+            precision=precision,
+            max_iterations=max_iterations,
+            read_at_most=np.inf,
+            memory_limit=self._ensemble_memory_limit,
+            random_state=self._seed,
+        )
 
     def _load_models(self):
         if self._shared_mode:

@@ -2,8 +2,6 @@
 # Functions performing various data conversions for the ChaLearn AutoML
 # challenge
 
-from six.moves import range
-
 import numpy as np
 
 __all__ = [

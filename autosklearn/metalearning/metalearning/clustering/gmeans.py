@@ -69,7 +69,7 @@ class GMeans(object):
                     break
 
                 # Refinement
-                KMeans = sklearn.cluster.KMeans(n_clusters=1, n_init=1,
+                KMeans = sklearn.cluster.KMeans(n_clusters=len(cluster_centers), n_init=1,
                                                 init=np.array(cluster_centers),
                                                 random_state=self.random_state)
                 KMeans.fit(X)
