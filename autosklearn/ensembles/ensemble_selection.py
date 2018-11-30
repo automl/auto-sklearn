@@ -194,12 +194,7 @@ class EnsembleSelection(AbstractEnsemble):
         return np.array(order_of_each_bag)
 
     def predict(self, predictions):
-        #non_null_weights = (weight for weight in self.weights_ if weight > 0)
-        #for i, weight in enumerate(non_null_weights):
-        #    predictions[i] *= weight
-        for i, weight in enumerate(self.weights_):
-            predictions[i] *= weight
-        return np.sum(predictions, axis=0)
+        return np.average(predictions, axis=0, weights=self.weights_)
 
     def __str__(self):
         return 'Ensemble Selection:\n\tTrajectory: %s\n\tMembers: %s' \
