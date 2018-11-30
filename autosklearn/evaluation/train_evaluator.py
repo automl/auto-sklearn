@@ -1,6 +1,7 @@
 import copy
 import json
 
+from math import ceil, floor
 import numpy as np
 from smac.tae.execute_ta_run import TAEAbortException
 from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold, \
@@ -552,6 +553,11 @@ class TrainEvaluator(AbstractEvaluator):
 
             if self.resampling_strategy in ['holdout',
                                             'holdout-iterative-fit']:
+
+                n_samples = len(y)
+                test_size = ceil(float("%.4f" % (n_samples * test_size)))
+                train_size = floor(float("%.4f" % (n_samples * train_size)))
+
                 if shuffle:
                     try:
                         cv = StratifiedShuffleSplit(n_splits=1,
