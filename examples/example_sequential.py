@@ -17,7 +17,7 @@ import autosklearn.classification
 
 
 def main():
-    X, y = sklearn.datasets.load_digits(return_X_y=True)
+    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
     X_train, X_test, y_train, y_test = \
         sklearn.model_selection.train_test_split(X, y, random_state=1)
 
@@ -32,7 +32,7 @@ def main():
         ensemble_size=0,
         delete_tmp_folder_after_terminate=False,
     )
-    automl.fit(X_train, y_train, dataset_name='digits')
+    automl.fit(X_train, y_train, dataset_name='breast_cancer')
     # This call to fit_ensemble uses all models trained in the previous call
     # to fit to build an ensemble which can be used with automl.predict()
     automl.fit_ensemble(y_train, ensemble_size=50)

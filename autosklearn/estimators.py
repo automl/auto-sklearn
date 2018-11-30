@@ -4,6 +4,7 @@ import numpy as np
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor
 from autosklearn.util.backend import create
+from sklearn.utils.multiclass import type_of_target
 
 
 class AutoSklearnEstimator(BaseEstimator):
@@ -457,6 +458,18 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         self
 
         """
+        # Before running anything else, first check that the
+        # type of data is compatible with auto-sklearn. Legal target
+        # types are: binary, multiclass, multilabel-indicator.
+        target_type = type_of_target(y)
+        if target_type in ['multiclass-multioutput',
+                           'continuous',
+                           'continuous-multioutput',
+                           'unknown',
+                           ]:
+            raise ValueError("classification with data of type %s is"
+                             " not supported" % target_type)
+
         super().fit(
             X=X,
             y=y,
@@ -564,6 +577,18 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         self
 
         """
+        # Before running anything else, first check that the
+        # type of data is compatible with auto-sklearn. Legal target
+        # types are: continuous, binary, multiclass.
+        target_type = type_of_target(y)
+        if target_type in ['multiclass-multioutput',
+                           'multilabel-indicator',
+                           'continuous-multioutput',
+                           'unknown',
+                           ]:
+            raise ValueError("regression with data of type %s is not"
+                             " supported" % target_type)
+
         # Fit is supposed to be idempotent!
         # But not if we use share_mode.
         super().fit(

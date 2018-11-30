@@ -21,7 +21,7 @@ import autosklearn.classification
 
 
 def main():
-    X, y = sklearn.datasets.load_digits(return_X_y=True)
+    X, y = sklearn.datasets.load_breast_cancer(return_X_y=True)
     X_train, X_test, y_train, y_test = \
         sklearn.model_selection.train_test_split(X, y, random_state=1)
 
@@ -37,7 +37,7 @@ def main():
 
     # fit() changes the data in place, but refit needs the original data. We
     # therefore copy the data. In practice, one should reload the data
-    automl.fit(X_train.copy(), y_train.copy(), dataset_name='digits')
+    automl.fit(X_train.copy(), y_train.copy(), dataset_name='breast_cancer')
     # During fit(), models are fit on individual cross-validation folds. To use
     # all available data, we call refit() which trains all models in the
     # final ensemble on the whole dataset.
