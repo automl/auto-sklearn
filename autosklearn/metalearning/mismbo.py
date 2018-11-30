@@ -1,13 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-import os
 import time
-from six import StringIO
-
-import numpy as np
-from autosklearn.metalearning.metafeatures.metafeatures import \
-    calculate_all_metafeatures_with_labels, \
-    calculate_all_metafeatures_encoded_labels, subsets
 
 from autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner \
     import MetaLearningOptimizer

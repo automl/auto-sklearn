@@ -202,7 +202,7 @@ class BaseClassificationComponentTest(unittest.TestCase):
                 params.append(p)
 
                 if i > 0:
-                    self.assertEquals(
+                    self.assertEqual(
                         params[-1],
                         params[0],
                     )

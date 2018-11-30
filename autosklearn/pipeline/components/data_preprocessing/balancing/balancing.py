@@ -42,8 +42,10 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
                 Y_ = Y
 
             unique, counts = np.unique(Y_, return_counts=True)
-            cw = 1. / counts
-            cw = cw / np.mean(cw)
+            # This will result in an average weight of 1!
+            cw = 1 / (counts / np.sum(counts)) / 2
+            if len(Y.shape) == 2:
+                cw /= Y.shape[1]
 
             sample_weights = np.ones(Y_.shape)
 

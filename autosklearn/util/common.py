@@ -1,7 +1,6 @@
 # -*- encoding: utf-8 -*-
 
 import os
-from sklearn.externals import six
 import warnings
 
 __all__ = [
@@ -15,7 +14,7 @@ def warn_if_not_float(X, estimator='This algorithm'):
     Returns True if a warning was raised (i.e. the input is not float) and
     False otherwise, for easier input validation.
     """
-    if not isinstance(estimator, six.string_types):
+    if not isinstance(estimator, str):
         estimator = estimator.__class__.__name__
     if X.dtype.kind != 'f':
         warnings.warn("%s assumes floating point values as input, "

@@ -33,10 +33,9 @@ extensions = cythonize(
 requirements = [
     "setuptools",
     "nose",
-    "six",
     "Cython",
     # Numpy version of higher than 1.14.5 causes libgcc_s.so.1 error.
-    "numpy==1.14.5",
+    "numpy>=1.9.0<=1.14.5",
     "scipy>=0.14.1",
     "scikit-learn>=0.19,<0.20",
     "lockfile",
@@ -49,7 +48,7 @@ requirements = [
     "pynisher>=0.4,<0.5",
     "pyrfr>=0.6.1,<0.8",
     "smac>=0.8,<0.9",
-    "xgboost==0.7.post3",
+    "xgboost>=0.80",
 ]
 
 with open("autosklearn/__version__.py") as fh:
@@ -69,6 +68,6 @@ setuptools.setup(
     license='BSD',
     platforms=['Linux'],
     classifiers=[],
-    python_requires='>=3.4.*',
+    python_requires='>=3.5.*',
     url='https://automl.github.io/auto-sklearn',
 )

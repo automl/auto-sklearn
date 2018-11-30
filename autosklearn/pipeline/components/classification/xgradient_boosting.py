@@ -29,6 +29,7 @@ class XGradientBoostingClassifier(
         # (Conditional) DART Hyperparameters
         sample_type=None, normalize_type=None, rate_drop=None,
     ):
+        self.seed = random_state.randint(0, 10000)
 
         self.learning_rate = learning_rate
         self.n_estimators = n_estimators
@@ -59,12 +60,6 @@ class XGradientBoostingClassifier(
             self.silent = False
         else:
             self.silent = True
-
-        # Random number seed.
-        if random_state is None:
-            self.seed = 1
-        else:
-            self.seed = random_state.randint(1, 10000, size=1)[0]
 
         ## new paramaters
         # Subsample ratio of columns when constructing each tree.
@@ -158,7 +153,6 @@ class XGradientBoostingClassifier(
                 reg_alpha=self.reg_alpha,
                 reg_lambda=self.reg_lambda,
                 base_score=self.base_score,
-                seed=self.seed,
                 random_state=self.seed,
                 **self.booster_args
             )
