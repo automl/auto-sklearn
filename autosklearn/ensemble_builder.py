@@ -210,9 +210,9 @@ class EnsembleBuilder(multiprocessing.Process):
             
             # train ensemble
             ensemble = self.fit_ensemble(selected_keys=selected_models)
-
+            
             if ensemble is not None:
-
+                
                 self.predict(set_="valid",
                              ensemble=ensemble,
                              selected_keys=n_sel_valid,
@@ -220,7 +220,7 @@ class EnsembleBuilder(multiprocessing.Process):
                              index_run=iteration)
                 # TODO if predictions fails, build the model again during the
                 #  next iteration!
-                self.predict(set_="test",
+                self.predict(set_="test", 
                              ensemble=ensemble, 
                              selected_keys=n_sel_test, 
                              n_preds=len(selected_models), 
@@ -602,7 +602,7 @@ class EnsembleBuilder(multiprocessing.Process):
             self.read_preds[k][Y_VALID if set_ == 'valid' else Y_TEST]
             for k in selected_keys
         ])
-
+        
         if n_preds == predictions.shape[0]:
             y = ensemble.predict(predictions)
             if self.task_type == BINARY_CLASSIFICATION:
