@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from sklearn.base import BaseEstimator
+import numpy as np
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor
 from autosklearn.util.backend import create
@@ -497,8 +498,12 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             The predicted class probabilities.
 
         """
-        return super().predict_proba(
+        pred_proba = super().predict_proba(
             X, batch_size=batch_size, n_jobs=n_jobs)
+        assert np.allclose(np.sum(pred_proba, axis=1),
+                           np.ones_like(pred_proba[:, 0])),\
+        "prediction probability does not sum up to 1!"
+        return pred_proba
 
     def _get_automl_class(self):
         return AutoMLClassifier
