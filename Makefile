@@ -1,8 +1,7 @@
 # simple makefile to simplify repetitive build env management tasks under posix
-
-PYTHON ?= python
+PYTHON ?= python3
 CYTHON ?= cython
-NOSETESTS ?= nosetests
+NOSETESTS ?= nosetests3
 CTAGS ?= ctags
 
 all: clean inplace test
