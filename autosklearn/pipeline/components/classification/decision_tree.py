@@ -39,7 +39,7 @@ class DecisionTree(AutoSklearnClassificationAlgorithm):
         else:
             num_features = X.shape[1]
             self.max_depth_factor = int(self.max_depth_factor)
-            max_depth_factor = max(1, 
+            max_depth_factor = max(1,
 				int(np.round(self.max_depth_factor * num_features, 0)))
         self.min_samples_split = int(self.min_samples_split)
         self.min_samples_leaf = int(self.min_samples_leaf)
