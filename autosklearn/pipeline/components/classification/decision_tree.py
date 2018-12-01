@@ -51,7 +51,7 @@ class DecisionTree(AutoSklearnClassificationAlgorithm):
 
         self.estimator = DecisionTreeClassifier(
             criterion=self.criterion,
-            max_depth_factor=max_depth_factor,
+            max_depth=max_depth_factor,
             min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf,
             max_leaf_nodes=self.max_leaf_nodes,
