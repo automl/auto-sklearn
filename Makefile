@@ -1,4 +1,5 @@
 # simple makefile to simplify repetitive build env management tasks under posix
+
 PYTHON ?= python
 CYTHON ?= cython
 NOSETESTS ?= nosetests
