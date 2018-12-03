@@ -530,9 +530,13 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         """
         pred_proba = super().predict_proba(
             X, batch_size=batch_size, n_jobs=n_jobs)
-        assert np.allclose(np.sum(pred_proba, axis=1),
-                           np.ones_like(pred_proba[:, 0])),\
-        "prediction probability does not sum up to 1!"
+
+        assert(
+            np.allclose(
+                np.sum(pred_proba, axis=1),
+                np.zeros_like(pred_proba[:, 0]))
+        ), "prediction probability does not sum up to 1!"
+
         return pred_proba
 
     def _get_automl_class(self):
