@@ -293,9 +293,9 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertEqual(len(os.listdir(os.path.join(tmp, '.auto-sklearn',
                                                      'ensembles'))), 1)
         self.assertGreaterEqual(score, 0.90)
-        self.assertEqual(automl._automl._task, MULTICLASS_CLASSIFICATION)
+        self.assertEqual(automl._automl[0]._task, MULTICLASS_CLASSIFICATION)
 
-        models = automl._automl.models_
+        models = automl._automl[0].models_
         classifier_types = [type(c) for c in models.values()]
         self.assertIn(ArrayReturningDummyPredictor, classifier_types)
 
@@ -333,7 +333,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self._tearDown(tmp)
         self._tearDown(output)
 
-        
+
 class AutoMLClassifierTest(Base, unittest.TestCase):
     @unittest.mock.patch('autosklearn.automl.AutoML.predict')
     def test_multiclass_prediction(self, predict_mock):
