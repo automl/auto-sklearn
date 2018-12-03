@@ -15,7 +15,7 @@ from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
 from autosklearn.automl import AutoMLClassifier, AutoML
 from autosklearn.util.backend import Backend, BackendContext
-from autosklearn.constants import *
+from autosklearn.constants import MULTICLASS_CLASSIFICATION
 sys.path.append(os.path.dirname(__file__))
 from base import Base
 
@@ -574,5 +574,5 @@ class AutoSklearnRegressorTest(unittest.TestCase):
         self.assertIs(automl, automl_refitted)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()
