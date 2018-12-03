@@ -595,6 +595,8 @@ class TrainEvaluator(AbstractEvaluator):
                                             'holdout-iterative-fit']:
                 # TODO shuffle not taken into account for this
                 if shuffle:
+                    train_size *= D.data['Y_train'].shape[1]
+                    test_size *= D.data['Y_train'].shape[1]
                     cv = ShuffleSplit(n_splits=1, train_size=train_size,
                                       test_size=test_size, random_state=1)
                 else:

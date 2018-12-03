@@ -1,18 +1,3 @@
 [
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_cv",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_datasets",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_file_output",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_fit_predict_and_loss_additional_run_info",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_get_results",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_get_splitter",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_get_splitter_cv_object",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_holdout",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_iterative_holdout",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_iterative_holdout_interuption",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_iterative_holdout_not_iterative",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_iterative_partial_cv",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_partial_cv",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_predict_proba_binary_classification",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_subsample_indices_classification",
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_subsample_indices_regression"
+  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_holdout_split_size"
 ]

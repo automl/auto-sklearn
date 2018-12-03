@@ -1226,6 +1226,59 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         next(cv.split(D.data['Y_train'], D.data['Y_train']
                       , groups=evaluator.resampling_strategy_args['groups']))
 
+    @unittest.mock.patch.object(TrainEvaluator, "__init__")
+    def test_holdout_split_size(self, te_mock):
+        te_mock.return_value = None
+        D = unittest.mock.Mock(spec=AbstractDataManager)
+        D.feat_type = []
+
+        evaluator = TrainEvaluator()
+        evaluator.resampling_strategy = 'holdout'
+
+        # Exact Ratio
+        D.data = dict(Y_train=np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1]))
+        D.info = dict(task=BINARY_CLASSIFICATION)
+        evaluator.resampling_strategy_args = {'shuffle': True,
+                                              'train_size': 0.7}
+        cv = evaluator.get_splitter(D)
+
+        self.assertEqual(cv.get_n_splits(), 1)
+        train_samples, test_samples = next(cv.split(D.data['Y_train'], D.data['Y_train']))
+        self.assertEqual(len(train_samples), 7)
+        self.assertEqual(len(test_samples), 3)
+
+        # No Shuffle
+        evaluator.resampling_strategy_args = {'shuffle': False,
+                                              'train_size': 0.7}
+        cv = evaluator.get_splitter(D)
+
+        self.assertEqual(cv.get_n_splits(), 1)
+        train_samples, test_samples = next(cv.split(D.data['Y_train'], D.data['Y_train']))
+        self.assertEqual(len(train_samples), 7)
+        self.assertEqual(len(test_samples), 3)
+
+        #Rounded Ratio
+        D.data = dict(Y_train=np.array([0, 0, 0, 0, 0, 1, 1, 1, 1]))
+
+        evaluator.resampling_strategy_args = {'shuffle': True,
+                                              'train_size': 0.7}
+        cv = evaluator.get_splitter(D)
+
+        self.assertEqual(cv.get_n_splits(), 1)
+        train_samples, test_samples = next(cv.split(D.data['Y_train'], D.data['Y_train']))
+        self.assertEqual(len(train_samples), 6)
+        self.assertEqual(len(test_samples), 3)
+
+        # No Shuffle
+        evaluator.resampling_strategy_args = {'shuffle': False,
+                                              'train_size': 0.7}
+        cv = evaluator.get_splitter(D)
+
+        self.assertEqual(cv.get_n_splits(), 1)
+        train_samples, test_samples = next(cv.split(D.data['Y_train'], D.data['Y_train']))
+        self.assertEqual(len(train_samples), 6)
+        self.assertEqual(len(test_samples), 3)
+
 
 class FunctionsTest(unittest.TestCase):
     def setUp(self):
