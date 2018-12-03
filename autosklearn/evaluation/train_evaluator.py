@@ -548,15 +548,16 @@ class TrainEvaluator(AbstractEvaluator):
             train_size = self.resampling_strategy_args.get('train_size',
                                                            train_size)
         test_size = 1 - train_size
+
+        n_samples = y.shape[0]
+        test_size = ceil(float("%.4f" % (n_samples * test_size)))
+        train_size = floor(float("%.4f" % (n_samples * train_size)))
+
         if D.info['task'] in CLASSIFICATION_TASKS and \
                         D.info['task'] != MULTILABEL_CLASSIFICATION:
 
             if self.resampling_strategy in ['holdout',
                                             'holdout-iterative-fit']:
-
-                n_samples = len(y)
-                test_size = ceil(float("%.4f" % (n_samples * test_size)))
-                train_size = floor(float("%.4f" % (n_samples * train_size)))
 
                 if shuffle:
                     try:
@@ -573,7 +574,7 @@ class TrainEvaluator(AbstractEvaluator):
                         else:
                             raise e
                 else:
-                    tmp_train_size = int(np.floor(train_size * y.shape[0]))
+                    tmp_train_size = int(train_size)
                     test_fold = np.zeros(y.shape[0])
                     test_fold[:tmp_train_size] = -1
                     cv = PredefinedSplit(test_fold=test_fold)
@@ -597,7 +598,7 @@ class TrainEvaluator(AbstractEvaluator):
                     cv = ShuffleSplit(n_splits=1, train_size=train_size,
                                       test_size=test_size, random_state=1)
                 else:
-                    tmp_train_size = int(np.floor(train_size * y.shape[0]))
+                    tmp_train_size = int(train_size)
                     test_fold = np.zeros(y.shape[0])
                     test_fold[:tmp_train_size] = -1
                     cv = PredefinedSplit(test_fold=test_fold)
