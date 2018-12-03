@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from multiprocessing import Process
 from typing import Optional
 
 import numpy as np
@@ -7,6 +8,10 @@ from sklearn.utils.multiclass import type_of_target
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor
 from autosklearn.util.backend import create
+
+
+def _fit_automl(automl, args, kwargs):
+    return automl.fit(*args, **kwargs)
 
 
 class AutoSklearnEstimator(BaseEstimator):
@@ -238,10 +243,9 @@ class AutoSklearnEstimator(BaseEstimator):
         self._n_jobs = None
         super().__init__()
 
-    def build_automl(self, seed=None):
-        seed = self.seed if seed is None else seed
+    def build_automl(self, seed, shared_mode):
 
-        if self.shared_mode:
+        if shared_mode:
             self.delete_output_folder_after_terminate = False
             self.delete_tmp_folder_after_terminate = False
             if self.tmp_folder is None:
@@ -255,7 +259,7 @@ class AutoSklearnEstimator(BaseEstimator):
                          output_directory=self.output_folder,
                          delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
                          delete_output_folder_after_terminate=self.delete_output_folder_after_terminate,
-                         shared_mode=self.shared_mode)
+                         shared_mode=shared_mode)
         # TODO only start ensemble builder process for first automl!
         # TODO handle runtimes of later automl processes!
         # TODO load models only for first automl process!
@@ -277,7 +281,7 @@ class AutoSklearnEstimator(BaseEstimator):
             exclude_preprocessors=self.exclude_preprocessors,
             resampling_strategy=self.resampling_strategy,
             resampling_strategy_arguments=self.resampling_strategy_arguments,
-            shared_mode=self.shared_mode,
+            shared_mode=shared_mode,
             get_smac_object_callback=self.get_smac_object_callback,
             disable_evaluator_output=self.disable_evaluator_output,
             smac_scenario_args=self.smac_scenario_args,
@@ -294,21 +298,35 @@ class AutoSklearnEstimator(BaseEstimator):
                 'only one of them.'
             )
 
-        if self.n_jobs is None:
+        if self.n_jobs is None or self.n_jobs == 1:
             self._n_jobs = 1
+            shared_mode = self.shared_mode
+            seed = self.seed
+            automl = self.build_automl(seed=seed, shared_mode=shared_mode)
+            self._automl.append(automl)
+            self._automl[0].fit(*args, **kwargs)
         else:
             self._n_jobs = self.n_jobs
+            shared_mode = True
+            for i in range(self._n_jobs):
+                rs = np.random.RandomState(self.seed + i)
+                seed = int(rs.randint(0, 2 ** 32))
+                automl = self.build_automl(seed=seed, shared_mode=shared_mode)
+                self._automl.append(automl)
+            # Start all except for the first instances of Auto-sklearn in a
+            # new process!
+            processes = []
+            for i in range(1, self._n_jobs):
+                p = Process(
+                    target=_fit_automl,
+                    args=(self._automl[i], args, kwargs,),
+                )
+                processes.append(p)
+                p.start()
+            _fit_automl(self._automl[0], args=args, kwargs=kwargs)
+            for p in processes:
+                p.join()
 
-        for i in range(self._n_jobs):
-            if self._n_jobs == 1:
-                seed = self.seed
-            else:
-                rs = np.random.RandomState(self.seed)
-                seed = int(rs.randint(0, 2**32))
-
-            automl = self.build_automl(seed)
-            automl.fit(*args, **kwargs)
-            self._automl.append(automl)
         return self
 
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
@@ -358,7 +376,13 @@ class AutoSklearnEstimator(BaseEstimator):
 
         """
         if self._automl is None:
-            self._automl = [self.build_automl()]
+            if self.n_jobs is None or self.n_jobs == 1:
+                shared_mode = self.shared_mode
+            else:
+                shared_mode = True
+            self._automl = [
+                self.build_automl(seed=self.seed, shared_mode=shared_mode)
+            ]
         self._automl[0].fit_ensemble(
             y=y,
             task=task,

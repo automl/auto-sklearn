@@ -1,16 +1,20 @@
 # -*- encoding: utf-8 -*-
 """
-====================
-Parallel Usage
-====================
+===========================================
+Parallel Usage with manual process spawning
+===========================================
 
 *Auto-sklearn* uses *SMAC* to automatically optimize the hyperparameters of
 the training models. A variant of *SMAC*, called *pSMAC* (parallel SMAC),
 provides a means of running several instances of *auto-sklearn* in a parallel
-mode using several computational resources (detailed information of
-*pSMAC* can be found `here <https://automl.github.io/SMAC3/stable/psmac.html>`_).
-This example shows the necessary steps to configure *auto-sklearn* in
-parallel mode.
+mode using several computational resources (detailed information of *pSMAC*
+can be found `here <https://automl.github.io/SMAC3/stable/psmac.html>`_).
+
+This example shows how to spawn multiple instances of *Auto-sklearn* which
+share the same output directory and thereby run in parallel. Use this example
+as a starting point to parallelize *Auto-sklearn* across multiple machines.
+To run *Auto-sklearn* on a single machine check out the example
+`Parallel Usage on a single machine`_.
 """
 
 import multiprocessing
@@ -24,8 +28,8 @@ from autosklearn.metrics import accuracy
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.constants import *
 
-tmp_folder = '/tmp/autosklearn_parallel_example_tmp'
-output_folder = '/tmp/autosklearn_parallel_example_out'
+tmp_folder = '/tmp/autosklearn_parallel_2_example_tmp'
+output_folder = '/tmp/autosklearn_parallel_2_example_out'
 
 
 for dir in [tmp_folder, output_folder]:

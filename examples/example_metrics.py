@@ -68,7 +68,7 @@ def main():
     predictions = cls.predict(X_test)
     print("Accuracy score {:g} using {:s}".
           format(sklearn.metrics.accuracy_score(y_test, predictions),
-                 cls._automl._metric.name))
+                 cls._automl[0]._metric.name))
 
     # Second example: Use own accuracy metric
     print("#"*80)
