@@ -23,7 +23,7 @@ from autosklearn.evaluation.train_evaluator import TrainEvaluator, \
     eval_holdout, eval_iterative_holdout, eval_cv, eval_partial_cv
 from autosklearn.util import backend
 from autosklearn.util.pipeline import get_configuration_space
-from autosklearn.constants import *
+from autosklearn.constants import BINARY_CLASSIFICATION, MULTILABEL_CLASSIFICATION
 from autosklearn.metrics import accuracy, r2, f1_macro
 
 this_directory = os.path.dirname(__file__)
