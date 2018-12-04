@@ -1,7 +1,6 @@
 import copy
 import json
 
-from math import ceil, floor
 import numpy as np
 from smac.tae.execute_ta_run import TAEAbortException
 from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold, \
@@ -547,7 +546,7 @@ class TrainEvaluator(AbstractEvaluator):
         if self.resampling_strategy_args:
             train_size = self.resampling_strategy_args.get('train_size',
                                                            train_size)
-        test_size =  float("%.4f" % (1 - train_size))
+        test_size = float("%.4f" % (1 - train_size))
 
         if D.info['task'] in CLASSIFICATION_TASKS and \
                         D.info['task'] != MULTILABEL_CLASSIFICATION:

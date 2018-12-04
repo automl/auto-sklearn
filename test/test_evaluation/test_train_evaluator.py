@@ -1243,7 +1243,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         cv = evaluator.get_splitter(D)
 
         self.assertEqual(cv.get_n_splits(), 1)
-        train_samples, test_samples = next(cv.split(D.data['Y_train'], D.data['Y_train']))
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
         self.assertEqual(len(train_samples), 7)
         self.assertEqual(len(test_samples), 3)
 
@@ -1253,7 +1254,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         cv = evaluator.get_splitter(D)
 
         self.assertEqual(cv.get_n_splits(), 1)
-        train_samples, test_samples = next(cv.split(D.data['Y_train'], D.data['Y_train']))
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
         self.assertEqual(len(train_samples), 7)
         self.assertEqual(len(test_samples), 3)
 
@@ -1265,7 +1267,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         cv = evaluator.get_splitter(D)
 
         self.assertEqual(cv.get_n_splits(), 1)
-        train_samples, test_samples = next(cv.split(D.data['Y_train'], D.data['Y_train']))
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
         self.assertEqual(len(train_samples), 6)
         self.assertEqual(len(test_samples), 3)
 
@@ -1275,7 +1278,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         cv = evaluator.get_splitter(D)
 
         self.assertEqual(cv.get_n_splits(), 1)
-        train_samples, test_samples = next(cv.split(D.data['Y_train'], D.data['Y_train']))
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
         self.assertEqual(len(train_samples), 6)
         self.assertEqual(len(test_samples), 3)
 
@@ -1286,7 +1290,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data = dict(Y_train=np.zeros((900, 1)))
         cv = evaluator.get_splitter(D)
         self.assertEqual(cv.get_n_splits(), 1)
-        train_samples, test_samples = next(cv.split(D.data['Y_train'], D.data['Y_train']))
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
         self.assertEqual(len(train_samples), 630)
         self.assertEqual(len(test_samples), 270)
 
@@ -1294,20 +1299,23 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data = dict(Y_train=np.zeros((900, 1)))
         cv = evaluator.get_splitter(D)
         self.assertEqual(cv.get_n_splits(), 1)
-        train_samples, test_samples = next(cv.split(D.data['Y_train'], D.data['Y_train']))
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
         self.assertEqual(len(train_samples), 676)
         self.assertEqual(len(test_samples), 224)
 
         # Multilabel Exact Ratio
         D.data = dict(Y_train=np.array([[0, 0], [0, 1], [1, 1], [1, 0], [1, 1],
-                                        [1, 1], [1, 1], [1, 0], [1, 1], [1, 1]]))
+                                        [1, 1], [1, 1], [1, 0], [1, 1], [1, 1]]
+                                       ))
         D.info = dict(task=MULTILABEL_CLASSIFICATION)
         evaluator.resampling_strategy_args = {'shuffle': True,
                                               'train_size': 0.7}
         cv = evaluator.get_splitter(D)
 
         self.assertEqual(cv.get_n_splits(), 1)
-        train_samples, test_samples = next(cv.split(D.data['Y_train'], D.data['Y_train']))
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
         self.assertEqual(len(train_samples), 7)
         self.assertEqual(len(test_samples), 3)
 
@@ -1319,7 +1327,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         cv = evaluator.get_splitter(D)
 
         self.assertEqual(cv.get_n_splits(), 1)
-        train_samples, test_samples = next(cv.split(D.data['Y_train'], D.data['Y_train']))
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
         self.assertEqual(len(train_samples), 6)
         self.assertEqual(len(test_samples), 3)
 
