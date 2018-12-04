@@ -1,3 +1,0 @@
-[
-  "test/test_evaluation/test_train_evaluator.py::TestTrainEvaluator::test_holdout_split_size"
-]
