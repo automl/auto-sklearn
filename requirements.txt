@@ -2,7 +2,7 @@ setuptools
 nose
 Cython
 
-numpy>=1.9.0<=1.14.5
+numpy>=1.9.0,<=1.14.5
 scipy>=0.14.1
 
 scikit-learn>=0.19,<0.20
@@ -18,4 +18,4 @@ pandas
 ConfigSpace>=0.4.0,<0.5
 pynisher>=0.4
 pyrfr>=0.7,<0.8
-smac
+smac==0.8
