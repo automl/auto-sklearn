@@ -262,15 +262,25 @@ class EnsembleTest(unittest.TestCase):
         # it should try to reduce ensemble_nbest until it also failed at 2
         self.assertEqual(ensbuilder.ensemble_nbest,1)
 
+
 class EnsembleSelectionTest(unittest.TestCase):
-    def testPrediction(self):
-        # Test that ensemble prediction applies weights correctly to given predictions
+    def testPredict(self):
+        # Test that ensemble prediction applies weights correctly to given
+        # predictions. There are two possible cases:
+        # 1) predictions.shape[0] == len(self.weights_). In this case,
+        # predictions include those made by zero-weighted models. Therefore,
+        # we simply apply each weights to the corresponding model preds.
+        # 2) predictions.shape[0] < len(self.weights_). In this case,
+        # predictions exclude those made by zero-weighted models. Therefore,
+        # we first exclude all occurrences of zero in self.weights_, and then
+        # apply the weights.
+        # If none of the above is the case, predict() raises Error.
         ensemble = EnsembleSelection(ensemble_size=3,
-                                       task_type=1,
-                                       metric=accuracy)
-        # Create (M, N, D) tensor containing predictions of individual models,
-        # where M = number of models, N = number of samples, D = sample feature dimension.
-        per_model_pred = np.array([ # An array of shape (3, 2, 2)
+                                     task_type=1,
+                                     metric=accuracy,
+                                     )
+        # Test for case 1. Create (3, 2, 2) predictions.
+        per_model_pred = np.array([
             [[0.9, 0.1],
              [0.4, 0.6]],
             [[0.8, 0.2],
@@ -281,12 +291,12 @@ class EnsembleSelectionTest(unittest.TestCase):
         # Weights of 3 hypothetical models
         ensemble.weights_ = [0.7, 0.2, 0.1]
         pred = ensemble.predict(per_model_pred)
-        ans = np.array([[0.89, 0.11], # This should be the answer
+        truth = np.array([[0.89, 0.11],  # This should be the true prediction.
                         [0.35, 0.65]])
-        self.assertTrue(np.allclose(pred, ans)) # for float comparison with rtol=1e-05, atol=1e-08. see numpy.allclose()
+        self.assertTrue(np.allclose(pred, truth))
 
-        # Test that if a model has weight of zero, it does not influence the predictions.
-        per_model_pred = np.array([ # An array of shape (3, 2, 2)
+        # Test for case 2.
+        per_model_pred = np.array([
             [[0.9, 0.1],
              [0.4, 0.6]],
             [[0.8, 0.2],
@@ -294,8 +304,25 @@ class EnsembleSelectionTest(unittest.TestCase):
             [[1.0, 0.0],
              [0.1, 0.9]]
         ])
-        ensemble.weights_ = [0.8, 0.2, 0.0] # the weight of the last model is now zero.
-        pred2 = ensemble.predict(per_model_pred)
-        ans2 = np.array([[0.88, 0.12],
-                        [0.38, 0.62]])
-        self.assertTrue(np.allclose(pred2, ans2))
+        # The third model now has weight of zero.
+        ensemble.weights_ = [0.7, 0.2, 0.0, 0.1]
+        pred = ensemble.predict(per_model_pred)
+        truth = np.array([[0.89, 0.11],
+                        [0.35, 0.65]])
+        self.assertTrue(np.allclose(pred, truth))
+
+        # Test for error case.
+        per_model_pred = np.array([
+            [[0.9, 0.1],
+             [0.4, 0.6]],
+            [[0.8, 0.2],
+             [0.3, 0.7]],
+            [[1.0, 0.0],
+             [0.1, 0.9]]
+        ])
+        # Now the weights have 2 zero weights and 2 non-zero weights,
+        # which is incompatible.
+        ensemble.weights_ = [0.6, 0.0, 0.0, 0.4]
+
+        with self.assertRaises(ValueError):
+            pred = ensemble.predict(per_model_pred)
