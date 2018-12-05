@@ -209,7 +209,20 @@ class EnsembleSelection(AbstractEnsemble):
         return np.array(order_of_each_bag)
 
     def predict(self, predictions):
-        return np.average(predictions, axis=0, weights=self.weights_)
+        predictions = np.asarray(predictions)
+
+        # if predictions.shape[0] == len(self.weights_): called from automl.fit(X_test=x, y_test=y)
+        if predictions.shape[0] == len(self.weights_):
+            return np.average(predictions, axis=0, weights=self.weights_)
+
+        # if prediction model.dim == non_zero_weights length: called from automl.predict()
+        elif predictions.shape[0] == np.count_nonzero(self.weights_):
+            non_null_weights = [weight for weight in self.weights_ if weight > 0]
+            return np.average(predictions, axis=0, weights=non_null_weights)
+
+        # If none of the above applies, raise error
+        else:
+            raise ValueError("The dimensions of ensemble prediction and ensemble weights do not match!")
 
     def __str__(self):
         return 'Ensemble Selection:\n\tTrajectory: %s\n\tMembers: %s' \
