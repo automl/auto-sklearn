@@ -534,7 +534,7 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
         assert(
             np.allclose(
                 np.sum(pred_proba, axis=1),
-                np.ones_like(pred_proba[:, 0])),
+                np.ones_like(pred_proba[:, 0]))
         ), "prediction probability does not sum up to 1!"
 
         return pred_proba

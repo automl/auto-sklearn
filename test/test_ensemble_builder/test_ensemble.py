@@ -6,14 +6,13 @@ import time
 import unittest
 import unittest.mock
 
+from autosklearn.metrics import roc_auc, accuracy
+from autosklearn.ensembles.ensemble_selection import EnsembleSelection
+from autosklearn.ensemble_builder import EnsembleBuilder, Y_ENSEMBLE, Y_VALID, Y_TEST
 import numpy as np
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
-
-from autosklearn.ensembles.ensemble_selection import EnsembleSelection
-from autosklearn.ensemble_builder import EnsembleBuilder, Y_ENSEMBLE, Y_VALID, Y_TEST
-from autosklearn.metrics import roc_auc, accuracy
 
 
 class BackendMock(object):
@@ -292,7 +291,7 @@ class EnsembleSelectionTest(unittest.TestCase):
         ensemble.weights_ = [0.7, 0.2, 0.1]
         pred = ensemble.predict(per_model_pred)
         truth = np.array([[0.89, 0.11],  # This should be the true prediction.
-                        [0.35, 0.65]])
+                          [0.35, 0.65]])
         self.assertTrue(np.allclose(pred, truth))
 
         # Test for case 2.
@@ -308,7 +307,7 @@ class EnsembleSelectionTest(unittest.TestCase):
         ensemble.weights_ = [0.7, 0.2, 0.0, 0.1]
         pred = ensemble.predict(per_model_pred)
         truth = np.array([[0.89, 0.11],
-                        [0.35, 0.65]])
+                          [0.35, 0.65]])
         self.assertTrue(np.allclose(pred, truth))
 
         # Test for error case.
