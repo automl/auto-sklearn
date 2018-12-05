@@ -8,7 +8,7 @@ import unittest.mock
 
 from autosklearn.metrics import roc_auc, accuracy
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
-from autosklearn.ensemble_builder import EnsembleBuilder, Y_ENSEMBLE, Y_VALID, Y_TEST
+from autosklearn.ensemble_builder import EnsembleBuilder, Y_VALID, Y_TEST
 import numpy as np
 
 this_directory = os.path.dirname(__file__)
@@ -324,4 +324,4 @@ class EnsembleSelectionTest(unittest.TestCase):
         ensemble.weights_ = [0.6, 0.0, 0.0, 0.4]
 
         with self.assertRaises(ValueError):
-            pred = ensemble.predict(per_model_pred)
+            ensemble.predict(per_model_pred)
