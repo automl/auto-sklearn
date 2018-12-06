@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from sklearn.base import BaseEstimator
+import numpy as np
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor
 from autosklearn.util.backend import create
@@ -486,6 +487,9 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             raise ValueError("classification with data of type %s is"
                              " not supported" % target_type)
 
+        # remember target type for using in predict_proba later.
+        self.target_type = target_type
+
         super().fit(
             X=X,
             y=y,
@@ -527,8 +531,24 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             The predicted class probabilities.
 
         """
-        return super().predict_proba(
+        pred_proba = super().predict_proba(
             X, batch_size=batch_size, n_jobs=n_jobs)
+
+        # Check if all probabilities sum up to 1.
+        # Assert only if target type is not multilabel-indicator.
+        if self.target_type not in ['multilabel-indicator']:
+            assert(
+                np.allclose(
+                    np.sum(pred_proba, axis=1),
+                    np.ones_like(pred_proba[:, 0]))
+            ), "prediction probability does not sum up to 1!"
+
+        # Check that all probability values lie between 0 and 1.
+        assert(
+            (pred_proba >= 0).all() and (pred_proba <= 1).all()
+        ), "found prediction probability value outside of [0, 1]!"
+
+        return pred_proba
 
     def _get_automl_class(self):
         return AutoMLClassifier
