@@ -23,7 +23,10 @@ from autosklearn.evaluation.train_evaluator import TrainEvaluator, \
     eval_holdout, eval_iterative_holdout, eval_cv, eval_partial_cv
 from autosklearn.util import backend
 from autosklearn.util.pipeline import get_configuration_space
-from autosklearn.constants import *
+from autosklearn.constants import BINARY_CLASSIFICATION, \
+    MULTILABEL_CLASSIFICATION,\
+    MULTICLASS_CLASSIFICATION,\
+    REGRESSION
 from autosklearn.metrics import accuracy, r2, f1_macro
 
 this_directory = os.path.dirname(__file__)
@@ -1225,6 +1228,112 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsNone(cv.random_state)
         next(cv.split(D.data['Y_train'], D.data['Y_train']
                       , groups=evaluator.resampling_strategy_args['groups']))
+
+    @unittest.mock.patch.object(TrainEvaluator, "__init__")
+    def test_holdout_split_size(self, te_mock):
+        te_mock.return_value = None
+        D = unittest.mock.Mock(spec=AbstractDataManager)
+        D.feat_type = []
+
+        evaluator = TrainEvaluator()
+        evaluator.resampling_strategy = 'holdout'
+
+        # Exact Ratio
+        D.data = dict(Y_train=np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1]))
+        D.info = dict(task=BINARY_CLASSIFICATION)
+        evaluator.resampling_strategy_args = {'shuffle': True,
+                                              'train_size': 0.7}
+        cv = evaluator.get_splitter(D)
+
+        self.assertEqual(cv.get_n_splits(), 1)
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
+        self.assertEqual(len(train_samples), 7)
+        self.assertEqual(len(test_samples), 3)
+
+        # No Shuffle
+        evaluator.resampling_strategy_args = {'shuffle': False,
+                                              'train_size': 0.7}
+        cv = evaluator.get_splitter(D)
+
+        self.assertEqual(cv.get_n_splits(), 1)
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
+        self.assertEqual(len(train_samples), 7)
+        self.assertEqual(len(test_samples), 3)
+
+        # Rounded Ratio
+        D.data = dict(Y_train=np.array([0, 0, 0, 0, 0, 1, 1, 1, 1]))
+
+        evaluator.resampling_strategy_args = {'shuffle': True,
+                                              'train_size': 0.7}
+        cv = evaluator.get_splitter(D)
+
+        self.assertEqual(cv.get_n_splits(), 1)
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
+        self.assertEqual(len(train_samples), 6)
+        self.assertEqual(len(test_samples), 3)
+
+        # Rounded Ratio No Shuffle
+        evaluator.resampling_strategy_args = {'shuffle': False,
+                                              'train_size': 0.7}
+        cv = evaluator.get_splitter(D)
+
+        self.assertEqual(cv.get_n_splits(), 1)
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
+        self.assertEqual(len(train_samples), 6)
+        self.assertEqual(len(test_samples), 3)
+
+        # More data
+        evaluator.resampling_strategy_args = {'shuffle': True,
+                                              'train_size': 0.7}
+
+        D.data = dict(Y_train=np.zeros((900, 1)))
+        cv = evaluator.get_splitter(D)
+        self.assertEqual(cv.get_n_splits(), 1)
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
+        self.assertEqual(len(train_samples), 630)
+        self.assertEqual(len(test_samples), 270)
+
+        evaluator.resampling_strategy_args = {'train_size': 0.752}
+        D.data = dict(Y_train=np.zeros((900, 1)))
+        cv = evaluator.get_splitter(D)
+        self.assertEqual(cv.get_n_splits(), 1)
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
+        self.assertEqual(len(train_samples), 676)
+        self.assertEqual(len(test_samples), 224)
+
+        # Multilabel Exact Ratio
+        D.data = dict(Y_train=np.array([[0, 0], [0, 1], [1, 1], [1, 0], [1, 1],
+                                        [1, 1], [1, 1], [1, 0], [1, 1], [1, 1]]
+                                       ))
+        D.info = dict(task=MULTILABEL_CLASSIFICATION)
+        evaluator.resampling_strategy_args = {'shuffle': True,
+                                              'train_size': 0.7}
+        cv = evaluator.get_splitter(D)
+
+        self.assertEqual(cv.get_n_splits(), 1)
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
+        self.assertEqual(len(train_samples), 7)
+        self.assertEqual(len(test_samples), 3)
+
+        # Multilabel No Shuffle
+        D.data = dict(Y_train=np.array([[0, 0], [0, 1], [1, 1], [1, 0], [1, 1],
+                                        [1, 1], [1, 1], [1, 0], [1, 1]]))
+        evaluator.resampling_strategy_args = {'shuffle': False,
+                                              'train_size': 0.7}
+        cv = evaluator.get_splitter(D)
+
+        self.assertEqual(cv.get_n_splits(), 1)
+        train_samples, test_samples = next(cv.split(D.data['Y_train'],
+                                                    D.data['Y_train']))
+        self.assertEqual(len(train_samples), 6)
+        self.assertEqual(len(test_samples), 3)
 
 
 class FunctionsTest(unittest.TestCase):
