@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from itertools import product
-from six import StringIO
+from io import StringIO
 import subprocess
 
 

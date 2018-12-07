@@ -2,6 +2,7 @@ from collections import Counter
 import random
 
 import numpy as np
+from sklearn.utils.validation import check_random_state
 
 from autosklearn.constants import *
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
@@ -10,14 +11,23 @@ from autosklearn.metrics import Scorer
 
 
 class EnsembleSelection(AbstractEnsemble):
-    def __init__(self, ensemble_size, task_type, metric,
-                 sorted_initialization=False, bagging=False, mode='fast'):
+    def __init__(
+        self,
+        ensemble_size: int,
+        task_type: int,
+        metric: Scorer,
+        sorted_initialization: bool=False,
+        bagging: bool=False,
+        mode: str='fast',
+        random_state: np.random.RandomState=None,
+    ):
         self.ensemble_size = ensemble_size
         self.task_type = task_type
         self.metric = metric
         self.sorted_initialization = sorted_initialization
         self.bagging = bagging
         self.mode = mode
+        self.random_state = random_state
 
     def fit(self, predictions, labels, identifiers):
         self.ensemble_size = int(self.ensemble_size)
@@ -74,7 +84,12 @@ class EnsembleSelection(AbstractEnsemble):
             if s == 0:
                 weighted_ensemble_prediction = np.zeros(predictions[0].shape)
             else:
-                ensemble_prediction = np.mean(np.array(ensemble), axis=0)
+                # Memory-efficient averaging!
+                ensemble_prediction = np.zeros(ensemble[0].shape)
+                for pred in ensemble:
+                    ensemble_prediction += pred
+                ensemble_prediction /= s
+
                 weighted_ensemble_prediction = (s / float(s + 1)) * \
                                                ensemble_prediction
             fant_ensemble_prediction = np.zeros(weighted_ensemble_prediction.shape)
@@ -91,7 +106,7 @@ class EnsembleSelection(AbstractEnsemble):
                     all_scoring_functions=False)
 
             all_best = np.argwhere(scores == np.nanmin(scores)).flatten()
-            best = np.random.choice(all_best)
+            best = self.random_state.choice(all_best)
             ensemble.append(predictions[best])
             trajectory.append(scores[best])
             order.append(best)
@@ -194,10 +209,23 @@ class EnsembleSelection(AbstractEnsemble):
         return np.array(order_of_each_bag)
 
     def predict(self, predictions):
-        non_null_weights = (weight for  weight in self.weights_ if weight > 0)
-        for i, weight in enumerate(non_null_weights):
-            predictions[i] *= weight
-        return np.sum(predictions, axis=0)
+        predictions = np.asarray(predictions)
+
+        # if predictions.shape[0] == len(self.weights_),
+        # predictions include those of zero-weight models.
+        if predictions.shape[0] == len(self.weights_):
+            return np.average(predictions, axis=0, weights=self.weights_)
+
+        # if prediction model.shape[0] == len(non_null_weights),
+        # predictions do not include those of zero-weight models.
+        elif predictions.shape[0] == np.count_nonzero(self.weights_):
+            non_null_weights = [w for w in self.weights_ if w > 0]
+            return np.average(predictions, axis=0, weights=non_null_weights)
+
+        # If none of the above applies, then something must have gone wrong.
+        else:
+            raise ValueError("The dimensions of ensemble predictions"
+                             " and ensemble weights do not match!")
 
     def __str__(self):
         return 'Ensemble Selection:\n\tTrajectory: %s\n\tMembers: %s' \

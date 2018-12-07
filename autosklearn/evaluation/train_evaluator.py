@@ -540,30 +540,32 @@ class TrainEvaluator(AbstractEvaluator):
 
                 return cv
 
-        y = D.data['Y_train'].ravel()
+        y = D.data['Y_train']
         shuffle = self.resampling_strategy_args.get('shuffle', True)
         train_size = 0.67
         if self.resampling_strategy_args:
             train_size = self.resampling_strategy_args.get('train_size',
                                                            train_size)
-        test_size = 1 - train_size
+        test_size = float("%.4f" % (1 - train_size))
+
         if D.info['task'] in CLASSIFICATION_TASKS and \
                         D.info['task'] != MULTILABEL_CLASSIFICATION:
 
+            y = y.ravel()
             if self.resampling_strategy in ['holdout',
                                             'holdout-iterative-fit']:
+
                 if shuffle:
                     try:
                         cv = StratifiedShuffleSplit(n_splits=1,
-                                                    train_size=train_size,
                                                     test_size=test_size,
                                                     random_state=1)
                         test_cv = copy.deepcopy(cv)
                         next(test_cv.split(y, y))
                     except ValueError as e:
                         if 'The least populated class in y has only' in e.args[0]:
-                            cv = ShuffleSplit(n_splits=1, train_size=train_size,
-                                              test_size=test_size, random_state=1)
+                            cv = ShuffleSplit(n_splits=1, test_size=test_size,
+                                              random_state=1)
                         else:
                             raise e
                 else:
@@ -588,8 +590,8 @@ class TrainEvaluator(AbstractEvaluator):
                                             'holdout-iterative-fit']:
                 # TODO shuffle not taken into account for this
                 if shuffle:
-                    cv = ShuffleSplit(n_splits=1, train_size=train_size,
-                                      test_size=test_size, random_state=1)
+                    cv = ShuffleSplit(n_splits=1, test_size=test_size,
+                                      random_state=1)
                 else:
                     tmp_train_size = int(np.floor(train_size * y.shape[0]))
                     test_fold = np.zeros(y.shape[0])

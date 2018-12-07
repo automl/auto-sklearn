@@ -2,7 +2,6 @@
 
 import numpy as np
 from scipy import sparse
-import six
 
 from autosklearn.constants import *
 from autosklearn.data.abstract_data_manager import AbstractDataManager
@@ -13,7 +12,7 @@ class XYDataManager(AbstractDataManager):
     def __init__(self, X, y, X_test, y_test, task, feat_type, dataset_name):
         super(XYDataManager, self).__init__(dataset_name)
 
-        if isinstance(task, six.string_types):
+        if isinstance(task, str):
             task = STRING_TO_TASK_TYPES[task]
 
         self.info['task'] = task

@@ -13,7 +13,7 @@ class XGradientBoostingComponentTest(BaseClassificationComponentTest):
     res["default_iris"] = 0.94
     res["iris_n_calls"] = 6
     res["default_iris_iterative"] = 0.94
-    res["default_iris_proba"] = 0.1512353178486228
+    res["default_iris_proba"] = 0.15122245267033577
     res["default_iris_sparse"] = 0.74
     res["default_digits"] = 0.8160291438979964
     res["digits_n_calls"] = 7

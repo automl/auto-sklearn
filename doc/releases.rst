@@ -11,6 +11,33 @@
 Releases
 ========
 
+Version 0.4.2
+=============
+
+* Fixes #538: Remove rounding errors when giving a training set fraction for
+  holdout.
+* Fixes #558: Ensemble script now uses less memory and the memory limit can be
+  given to Auto-sklearn.
+* Fixes #585: Auto-sklearn's ensemble script produced wrong results when
+  called directly (and not via one of Auto-sklearn's estimator classes).
+* Fixes an error in the ensemble script which made it non-deterministic.
+* MAINT #569: Rename hyperparameter to have a different name than a
+  scikit-learn hyperparameter with different meaning.
+* MAINT #592: backwards compatible requirements.txt
+* MAINT #588: Fix SMAC version to 0.8.0
+* MAINT: remove dependency on the six package
+* MAINT: upgrade to XGBoost 0.80
+
+Contributors
+************
+
+* Taneli Mielikäinen
+* Matthias Feurer
+* Diogo Bastos
+* Zeyi Wen
+* Teresa Conceição
+* Jin Woo Ahn
+
 Version 0.4.1
 =============
 

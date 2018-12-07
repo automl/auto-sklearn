@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from sklearn.base import BaseEstimator
+import numpy as np
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor
 from autosklearn.util.backend import create
@@ -14,6 +15,7 @@ class AutoSklearnEstimator(BaseEstimator):
                  initial_configurations_via_metalearning=25,
                  ensemble_size=50,
                  ensemble_nbest=50,
+                 ensemble_memory_limit=1024,
                  seed=1,
                  ml_memory_limit=3072,
                  include_estimators=None,
@@ -62,6 +64,11 @@ class AutoSklearnEstimator(BaseEstimator):
             Only consider the ``ensemble_nbest`` models when building an
             ensemble. Implements `Model Library Pruning` from `Getting the
             most out of ensemble selection`.
+
+        ensemble_memory_limit : int, optional (1024)
+            Memory limit in MB for the ensemble building process.
+            `auto-sklearn` will reduce the number of considered models
+            (``ensemble_nbest``) if the memory limit is reached.
 
         seed : int, optional (default=1)
             Used to seed SMAC. Will determine the output file names.
@@ -157,16 +164,16 @@ class AutoSklearnEstimator(BaseEstimator):
               optimization/validation set, which would later on be used to build
               an ensemble.
             * ``'model'`` : do not save any model files
-              
+
         smac_scenario_args : dict, optional (None)
             Additional arguments inserted into the scenario of SMAC. See the
             `SMAC documentation <https://automl.github.io/SMAC3/stable/options.html?highlight=scenario#scenario>`_
             for a list of available arguments.
-            
+
         get_smac_object_callback : callable
             Callback function to create an object of class
             `smac.optimizer.smbo.SMBO <https://automl.github.io/SMAC3/stable/apidoc/smac.optimizer.smbo.html>`_.
-            The function must accept the arguments ``scenario_dict``, 
+            The function must accept the arguments ``scenario_dict``,
             ``instances``, ``num_params``, ``runhistory``, ``seed`` and ``ta``.
             This is an advanced feature. Use only if you are familiar with
             `SMAC <https://automl.github.io/SMAC3/stable/index.html>`_.
@@ -191,6 +198,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.initial_configurations_via_metalearning = initial_configurations_via_metalearning
         self.ensemble_size = ensemble_size
         self.ensemble_nbest = ensemble_nbest
+        self.ensemble_memory_limit = ensemble_memory_limit
         self.seed = seed
         self.ml_memory_limit = ml_memory_limit
         self.include_estimators = include_estimators
@@ -236,6 +244,7 @@ class AutoSklearnEstimator(BaseEstimator):
             self.initial_configurations_via_metalearning,
             ensemble_size=self.ensemble_size,
             ensemble_nbest=self.ensemble_nbest,
+            ensemble_memory_limit=self.ensemble_memory_limit,
             seed=self.seed,
             ml_memory_limit=self.ml_memory_limit,
             include_estimators=self.include_estimators,
@@ -478,6 +487,9 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             raise ValueError("classification with data of type %s is"
                              " not supported" % target_type)
 
+        # remember target type for using in predict_proba later.
+        self.target_type = target_type
+
         super().fit(
             X=X,
             y=y,
@@ -519,8 +531,24 @@ class AutoSklearnClassifier(AutoSklearnEstimator):
             The predicted class probabilities.
 
         """
-        return super().predict_proba(
+        pred_proba = super().predict_proba(
             X, batch_size=batch_size, n_jobs=n_jobs)
+
+        # Check if all probabilities sum up to 1.
+        # Assert only if target type is not multilabel-indicator.
+        if self.target_type not in ['multilabel-indicator']:
+            assert(
+                np.allclose(
+                    np.sum(pred_proba, axis=1),
+                    np.ones_like(pred_proba[:, 0]))
+            ), "prediction probability does not sum up to 1!"
+
+        # Check that all probability values lie between 0 and 1.
+        assert(
+            (pred_proba >= 0).all() and (pred_proba <= 1).all()
+        ), "found prediction probability value outside of [0, 1]!"
+
+        return pred_proba
 
     def _get_automl_class(self):
         return AutoMLClassifier

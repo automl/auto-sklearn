@@ -1,6 +1,6 @@
 import os
 import tempfile
-from six import StringIO
+from io import StringIO
 from unittest import TestCase
 import unittest
 

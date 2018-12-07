@@ -1,14 +1,12 @@
 setuptools
 nose
-
-six
 Cython
 
-numpy>=1.9.0<=1.14.5
+numpy>=1.9.0,<=1.14.5
 scipy>=0.14.1
 
 scikit-learn>=0.19,<0.20
-xgboost==0.7.post3
+xgboost>=0.80
 
 lockfile
 joblib
@@ -18,6 +16,6 @@ liac-arff
 pandas
 
 ConfigSpace>=0.4.0,<0.5
-pynisher>=0.4
+pynisher>=0.4.2
 pyrfr>=0.7,<0.8
-smac
+smac==0.8

@@ -11,12 +11,12 @@ from autosklearn.pipeline.constants import *
 from autosklearn.util.common import check_none
 
 class DecisionTree(AutoSklearnRegressionAlgorithm):
-    def __init__(self, criterion, max_features, max_depth,
+    def __init__(self, criterion, max_features, max_depth_factor,
                  min_samples_split, min_samples_leaf, min_weight_fraction_leaf,
                  max_leaf_nodes, min_impurity_decrease, random_state=None):
         self.criterion = criterion
         self.max_features = max_features
-        self.max_depth = max_depth
+        self.max_depth_factor = max_depth_factor
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
         self.max_leaf_nodes = max_leaf_nodes
@@ -29,12 +29,14 @@ class DecisionTree(AutoSklearnRegressionAlgorithm):
         from sklearn.tree import DecisionTreeRegressor
 
         self.max_features = float(self.max_features)
-        if check_none(self.max_depth):
-            max_depth = self.max_depth = None
+        if check_none(self.max_depth_factor):
+            max_depth_factor = self.max_depth_factor = None
         else:
             num_features = X.shape[1]
-            self.max_depth = int(self.max_depth)
-            max_depth = max(1, int(np.round(self.max_depth * num_features, 0)))
+            self.max_depth_factor = int(self.max_depth_factor)
+            max_depth_factor = max(
+                1,
+                int(np.round(self.max_depth_factor * num_features, 0)))
         self.min_samples_split = int(self.min_samples_split)
         self.min_samples_leaf = int(self.min_samples_leaf)
         if check_none(self.max_leaf_nodes):
@@ -46,7 +48,7 @@ class DecisionTree(AutoSklearnRegressionAlgorithm):
 
         self.estimator = DecisionTreeRegressor(
             criterion=self.criterion,
-            max_depth=max_depth,
+            max_depth=max_depth_factor,
             min_samples_split=self.min_samples_split,
             min_samples_leaf=self.min_samples_leaf,
             max_leaf_nodes=self.max_leaf_nodes,
@@ -80,8 +82,8 @@ class DecisionTree(AutoSklearnRegressionAlgorithm):
         criterion = CategoricalHyperparameter('criterion',
                                               ['mse', 'friedman_mse', 'mae'])
         max_features = Constant('max_features', 1.0)
-        max_depth = UniformFloatHyperparameter(
-            'max_depth', 0., 2., default_value=0.5)
+        max_depth_factor = UniformFloatHyperparameter(
+            'max_depth_factor', 0., 2., default_value=0.5)
         min_samples_split = UniformIntegerHyperparameter(
             "min_samples_split", 2, 20, default_value=2)
         min_samples_leaf = UniformIntegerHyperparameter(
@@ -91,7 +93,7 @@ class DecisionTree(AutoSklearnRegressionAlgorithm):
         min_impurity_decrease = UnParametrizedHyperparameter(
             'min_impurity_decrease', 0.0)
 
-        cs.add_hyperparameters([criterion, max_features, max_depth,
+        cs.add_hyperparameters([criterion, max_features, max_depth_factor,
                                 min_samples_split, min_samples_leaf,
                                 min_weight_fraction_leaf, max_leaf_nodes,
                                 min_impurity_decrease])
