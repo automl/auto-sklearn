@@ -17,6 +17,7 @@ def _load_file(f):
     split = f.split('_')
     as_seed = int(split[-2])
     ta_seed = int(split[-1].split('.')[0])
+    print("%s loaded, as seed: %i, ta seed: %i" % (f, as_seed, ta_seed))
     np_array = np.load(f)
     return np_array, (as_seed, ta_seed), os.path.getmtime(f)
 
@@ -59,12 +60,14 @@ def main(input_directories, output_file, seed, ensemble_size, n_jobs=1):
 
         print('Loaded %d files!' % len(validation_files_))
 
+        # if not specified, we get all files.
         seed_pattern = '*' if seed is None else str(seed)
         glob_pattern = os.path.join(input_directory,
                                     ".auto-sklearn",
                                     "start_time_%s" % seed_pattern)
         start_time_files = glob.glob(glob_pattern)
 
+        # find the earliest startime.
         for start_time_file in start_time_files:
             with open(start_time_file, "r") as fh:
                 starttime_candidate = float(fh.read())
@@ -93,6 +96,11 @@ def main(input_directories, output_file, seed, ensemble_size, n_jobs=1):
                      delete_output_folder_after_terminate=False,
                      shared_mode=True)
     valid_labels = backend.load_targets_ensemble()
+    print(valid_labels.shape)
+    print(validation_files[4][0].shape)
+    # validation_files[i]: validation prediction of i-th model
+    # validation_files[i][j]:
+    # validation files contain predictions of models
 
     score = balanced_accuracy
 
@@ -104,8 +112,10 @@ def main(input_directories, output_file, seed, ensemble_size, n_jobs=1):
 
     models_to_remove = set(list(range(len(validation_files))))
     for top_models_at_i in top_models_at_step:
+        #print("top models at %i" % top_models_at_i)
         for top_model in top_models_at_step[top_models_at_i]:
             if top_model in models_to_remove:
+                #print("top model to be removed: %s" % top_model)
                 models_to_remove.remove(top_model)
 
     print("Removing the following %d models from the library: %s"
@@ -126,6 +136,7 @@ def main(input_directories, output_file, seed, ensemble_size, n_jobs=1):
                                   if j in top_models_at_step[i]],
                       ensemble_size=ensemble_size)
         for i in range(len(test_files)))
+
 
     # Create output csv file
     with open(output_file, "w") as csv_file:
@@ -175,7 +186,8 @@ def evaluate(input_directory, validation_files, test_files, ensemble_size=50):
     start = time.time()
     ensemble_selection = EnsembleSelection(ensemble_size=ensemble_size,
                                            task_type=D.info['task'],
-                                           metric=score)
+                                           metric=score,
+                                           random_state=np.random.RandomState())
 
     validation_predictions = np.array([v[0] for v in validation_files])
     test_predictions = np.array([t[0] for t in test_files])

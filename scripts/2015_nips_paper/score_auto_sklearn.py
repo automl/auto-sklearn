@@ -17,7 +17,7 @@ parser.add_argument('-s', '--seed', type=int, required=True)
 
 parser.add_argument('--ensemble_size', type=int, default=0)
 parser.add_argument('--ensemble_nbest', type=int, default=50)
-parser.add_argument('--nb_conf_metalearning', type=int, required=True)
+parser.add_argument('--nb-conf-metalearning', type=int, required=True)
 
 args = parser.parse_args()
 
