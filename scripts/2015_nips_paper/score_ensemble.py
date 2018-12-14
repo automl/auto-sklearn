@@ -17,7 +17,6 @@ def _load_file(f):
     split = f.split('_')
     as_seed = int(split[-2])
     ta_seed = int(split[-1].split('.')[0])
-    print("%s loaded, as seed: %i, ta seed: %i" % (f, as_seed, ta_seed))
     np_array = np.load(f)
     return np_array, (as_seed, ta_seed), os.path.getmtime(f)
 
@@ -34,10 +33,21 @@ def read_files(directory, seed=None, n_jobs=1):
     return files
 
 
-def main(input_directories, output_file, seed, ensemble_size, n_jobs=1):
+def main(input_directories, output_file, task_id, seed, ensemble_size, n_jobs=1):
     seed = None if seed is None or seed < 0 else int(seed)
+
+
     if isinstance(input_directories, str):
+        # add seed and task id directories
+        input_directories += '/%i/%i' % (seed, task_id)
         input_directories = [input_directories]
+
+    else:
+        new_directories = []
+        for dir in input_directories:
+            dir += '/%i/%i' % (seed, task_id)
+            new_directories.append(dir)
+        input_directories = new_directories
 
     validation_files = []
     test_files = []
@@ -93,11 +103,11 @@ def main(input_directories, output_file, seed, ensemble_size, n_jobs=1):
 
     backend = create(input_directory, input_directory + "_output",
                      delete_tmp_folder_after_terminate=False,
-                     delete_output_folder_after_terminate=False,
+                     delete_output_folder_after_terminate=True,
                      shared_mode=True)
     valid_labels = backend.load_targets_ensemble()
     print(valid_labels.shape)
-    print(validation_files[4][0].shape)
+    print(validation_files[0][0].shape)
     # validation_files[i]: validation prediction of i-th model
     # validation_files[i][j]:
     # validation files contain predictions of models
@@ -139,18 +149,23 @@ def main(input_directories, output_file, seed, ensemble_size, n_jobs=1):
 
 
     # Create output csv file
-    with open(output_file, "w") as csv_file:
+    file_path = os.path.abspath("%s/%s" %(input_directory, output_file))
+    with open(file_path, "w") as csv_file:
+        #fieldnames = ['Time', 'Training (Empirical) Performance',
+        #              'Test Set Performance', 'AC Overhead Time',
+        #              'Validation Configuration ID']
         fieldnames = ['Time', 'Training (Empirical) Performance',
-                      'Test Set Performance', 'AC Overhead Time',
-                      'Validation Configuration ID']
+                      'Test Set Performance']
         csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         csv_writer.writeheader()
 
+        #csv_writer.writerow({'Time': 0,
+        #                     'Training (Empirical) Performance': 1.0,
+        #                     'Test Set Performance': 1.0,
+        #                     'AC Overhead Time': 0,
+        #                     'Validation Configuration ID': 0})
         csv_writer.writerow({'Time': 0,
-                             'Training (Empirical) Performance': 1.0,
-                             'Test Set Performance': 1.0,
-                             'AC Overhead Time': 0,
-                             'Validation Configuration ID': 0})
+                             'Test Set Performance': 1.0})
 
         for i, o in enumerate(output):
             csv_writer.writerow({'Time': o['ensemble_time']
@@ -159,9 +174,7 @@ def main(input_directories, output_file, seed, ensemble_size, n_jobs=1):
                                  'Training (Empirical) Performance':
                                  o['ensemble_error'],
                                  'Test Set Performance':
-                                 o['ensemble_test_error'],
-                                 'AC Overhead Time': 0,
-                                 'Validation Configuration ID': i})
+                                 o['ensemble_test_error']})
 
 
 def evaluate(input_directory, validation_files, test_files, ensemble_size=50):
@@ -217,16 +230,18 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--input-directory', type=str,
                         required=True, nargs='+')
+    parser.add_argument('--task-id', type=int, required=True)
     parser.add_argument('-s', '--seed', type=int)
-    parser.add_argument("--output-file", type=str, required=True)
+    parser.add_argument("--output-file", type=str, default='score_ensemble.csv')
     parser.add_argument("--ensemble-size", type=int, default=50)
     parser.add_argument("--n-jobs", type=int, default=1)
     args = parser.parse_args()
 
     input_directory = args.input_directory
     output_file = args.output_file
+    task_id = args.task_id
     seed = args.seed
     ensemble_size = args.ensemble_size
     n_jobs = args.n_jobs
 
-    main(input_directory, output_file, seed, ensemble_size, n_jobs)
+    main(input_directory, output_file, task_id, seed, ensemble_size)
