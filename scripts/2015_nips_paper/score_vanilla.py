@@ -33,6 +33,9 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     }
 
     X_train, y_train, X_test, y_test, cat = load_task(task_id)
+    print("X train: ", X_train)
+    print(X_train.shape)
+    print("y train", y_train)
 
     automl = AutoSklearnClassifier(**automl_arguments)
 
@@ -40,16 +43,17 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
                dataset_name=str(task_id),
                X_test=X_test, y_test=y_test,
                metric=balanced_accuracy)
-    print("automl cv results")
-    print(automl.cv_results_)
 
     with open(os.path.join(tmp_dir, "score_vanilla.csv"), 'w') as fh:
         T = 0
-        fh.write("Time,Test Performance\n")
-        for t, s in zip(automl.cv_results_['mean_fit_time'],
-                        automl.cv_results_["mean_test_score"]):
+        fh.write("Time,Train Performance,Test Performance\n")
+        # Add start time:0, Train Performance:1, Test Performance: 1
+        fh.write("{0},{1},{2}\n".format(T, 1, 1))
+        for t, dummy, s in zip(automl.cv_results_['mean_fit_time'],
+                               [1 for i in range(len(automl.cv_results_['mean_fit_time']))],
+                               1 - automl.cv_results_["mean_test_score"]):  # We compute rank based on error.
             T += t
-            fh.write("{0},{1}\n".format(T, s))
+            fh.write("{0},{1},{2}\n".format(T, dummy, s))
 
 
 if __name__=="__main__":

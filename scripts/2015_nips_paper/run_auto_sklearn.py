@@ -47,7 +47,7 @@ if __name__=="__main__":
     n_jobs = args.n_jobs
     model = args.model
     # Time to run experiment
-    time_limit = 40
-    per_run_time_limit = 10
+    time_limit = 50
+    per_run_time_limit = 17
 
     main(working_directory, output_file, task_id, seed, model, time_limit, per_run_time_limit)

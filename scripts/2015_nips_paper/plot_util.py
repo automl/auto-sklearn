@@ -88,11 +88,12 @@ def get_file_and_name_list(argument_list, match_file, len_name=1):
     file_list = list()
     len_desc = 0
     for i in range(len(argument_list)):
+        # This if statement basically says all elems in arg_list should be a file.
         if not match_file in argument_list[i] and len_desc == len_name:
             # We have all names, but next argument is not a file
             raise ValueError("You need at least one %s file per Experiment, %s has none" % (match_file, name_list[-1]))
         elif not match_file in argument_list[i] and len_desc < len_name:
-            # We start with a new name desc
+            # We start with a new name desc   desc=description?
             if len_name > 1 and len_desc == 0:
                 name_list.append(list([argument_list[i], ]))
             elif len_name > 1 and len_desc > 0:
@@ -107,7 +108,9 @@ def get_file_and_name_list(argument_list, match_file, len_name=1):
                 file_list.append(list())
             continue
         else:
+            print(argument_list[0])
             if os.path.exists(argument_list[i]):
+                print(file_list)
                 len_desc = 0
                 file_list[-1].append(os.path.abspath(argument_list[i]))
             else:

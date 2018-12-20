@@ -41,15 +41,15 @@ def plot_optimization_trace(time_list, performance_list, name_list, title=None,
     if title is not None:
         fig.suptitle(title, fontsize=int(properties["titlefontsize"]))
 
-    auto_y_min = sys.maxint
-    auto_y_max = -sys.maxint
-    auto_x_min = sys.maxint
-    auto_x_max = -sys.maxint
+    auto_y_min = sys.maxsize
+    auto_y_max = -sys.maxsize
+    auto_x_min = sys.maxsize
+    auto_x_max = -sys.maxsize
 
     for idx, performance in enumerate(performance_list):
-        color = properties["colors"].next()
-        marker = properties["markers"].next()
-        linestyle = properties["linestyles"].next()
+        color = next(properties["colors"])
+        marker = next(properties["markers"])
+        linestyle = next(properties["linestyles"])
 
         replaces = {'autosklearn': 'auto-sklearn',
                     'adaboost': 'AdaBoost',
@@ -136,7 +136,7 @@ def plot_optimization_trace(time_list, performance_list, name_list, title=None,
         ax1.set_ylim([y_min, auto_y_max + 0.01*abs(auto_y_max - y_min)])
     elif y_max is not None and y_min is None:
         ax1.set_ylim([auto_y_min - 0.01*abs(auto_y_max - y_min), y_max])
-    elif y_max > y_min and y_max is not None and y_min is not None:
+    elif y_max is not None and y_min is not None and y_max > y_min:
         ax1.set_ylim([y_min, y_max])
     else:
         ax1.set_ylim([auto_y_min - 0.01*abs(auto_y_max - auto_y_min), auto_y_max + 0.01*abs(auto_y_max - auto_y_min)])
@@ -145,7 +145,7 @@ def plot_optimization_trace(time_list, performance_list, name_list, title=None,
         ax1.set_xlim([x_min - 0.1*abs(x_min), auto_x_max + 0.1*abs(auto_x_max)])
     elif x_max is not None and x_min is None:
         ax1.set_xlim([auto_x_min - 0.1*abs(auto_x_min), x_max + 0.1*abs(x_max)])
-    elif x_max > x_min and x_max is not None and x_min is not None:
+    elif x_max is not None and x_min is not None and x_max > x_min:
         ax1.set_xlim([x_min, x_max])
     else:
         ax1.set_xlim([auto_x_min, auto_x_max + 0.1*abs(auto_x_min - auto_x_max)])
@@ -211,7 +211,10 @@ def main():
 
     # Get files and names
     file_list, name_list = plot_util.get_file_and_name_list(unknown, match_file='.csv')
+    print("ptpfc file_ist", file_list)
+    print("ptpfc name_ist", name_list)
     for idx in range(len(name_list)):
+        # Jinu comment: file_list[idx] should contain only one file!
         assert len(file_list[idx]) == 1, "%s" % str(file_list[idx])
         print("%20s contains %d file(s)" % (name_list[idx], len(file_list[idx])))
 
@@ -224,6 +227,8 @@ def main():
         fh = open(file_list[idx][0], 'r')
         reader = csv.reader(fh)
         for row in reader:
+            # Delete this
+            print("row: ", row)
             if t is None:
                 # first row
                 p = list([list() for i in range(len(row)-1)])
@@ -237,7 +242,7 @@ def main():
 
     # Sort names alphabetical as done here:
     # http://stackoverflow.com/questions/15610724/sorting-multiple-lists-in-python-based-on-sorting-of-a-single-list
-    sorted_lists = sorted(itertools.izip(name_list, times, performances), key=lambda x: x[0])
+    sorted_lists = sorted(zip(name_list, times, performances), key=lambda x: x[0])
     name_list, times, performances = [[x[i] for x in sorted_lists] for i in range(3)]
 
     prop = {}

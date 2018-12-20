@@ -109,9 +109,7 @@ def main():
     file_list, name_list = plot_util.get_file_and_name_list(unknown,
                                                             match_file='.csv',
                                                             len_name=2)
-    print(name_list)
-    print(len(name_list[0]))
-    print(file_list)
+
     for idx in range(len(name_list)):
         assert len(file_list[idx]) == 1, "%s: %s" % (name_list[idx],
                                                      file_list[idx])
@@ -120,6 +118,7 @@ def main():
     dataset_dict = OrderedDict()
     estimator_list = list()
     dataset_list = list()
+    print(name_list)
     for idx, desc in enumerate(name_list):
         dataset = desc[0]
         est = desc[1]
