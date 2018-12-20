@@ -13,37 +13,39 @@ def read_csv(file):
 
     return dataset_ids
 
-def get_tasks_ids(dataset_ids):
+def get_task_ids(dataset_ids):
     # return task ids of corresponding datset ids.
+    # active tasks
+    tasks_a = openml.tasks.list_tasks(task_type_id=1, status='active')
+    tasks_a = pd.DataFrame.from_dict(tasks_a, orient="index")
+    # query only those with NaN as evaluation_measures.
+    tasks_a = tasks_a.query("evaluation_measures != evaluation_measures")
+    # query only those with holdout as the resampling startegy.
+    tasks_a = tasks_a[(tasks_a.estimation_procedure == "33% Holdout set")]
+
+    # deactivated tasks
+    tasks_d = openml.tasks.list_tasks(task_type_id=1, status='deactivated')
+    tasks_d = pd.DataFrame.from_dict(tasks_d, orient="index")
+    tasks_d = tasks_d.query("evaluation_measures != evaluation_measures")
+    tasks_d = tasks_d[(tasks_d.estimation_procedure == "33% Holdout set")]
+
     task_ids = []
-
-    # Some datasets are deactivated. We remove them from the list first.
-    deactivated_list = openml.datasets.list_datasets(status='deactivated')
-    deactivated_list = list(deactivated_list.keys())
-    for idx in deactivated_list:
-        if idx in dataset_ids:
-            #print("datset id %i is deactivated. Removing from list" % idx)
-            dataset_ids.remove(idx)
-
-    # Get task ids.
-    tasks = openml.tasks.list_tasks(task_type_id=1)
-    tasks = pd.DataFrame.from_dict(tasks, orient="index")
-
     for did in dataset_ids:
-        task = tasks.query('did == {}'.format(did))  # find all tasks with given dataset id.
-        task = list(task.tid)
-        task_ids.append(task[0])  # append the first task id found.
+        task_a = list(tasks_a.query("did == {}".format(did)).tid)
+        task_d = list(tasks_d.query("did == {}".format(did)).tid)
+        task_ids += task_a + task_d
+    #print(len(task_ids)) there are only 22 tasks!
 
-    return task_ids
+    return task_ids  # return list of all task ids.
 
 def main():
     datasets = 'resources/datasets.csv'
     dataset_ids = read_csv(datasets)
-    task_ids = sorted(get_tasks_ids(dataset_ids))
+    task_ids = sorted(get_task_ids(dataset_ids))
     string_to_print = ''
     for tid in task_ids:
         string_to_print += str(tid) + ' '
-    print(string_to_print)
+    print(string_to_print)  # print the task ids for bash script.
 
 
 

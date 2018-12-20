@@ -106,12 +106,9 @@ def main(input_directories, output_file, task_id, seed, ensemble_size, n_jobs=1)
                      delete_output_folder_after_terminate=True,
                      shared_mode=True)
     valid_labels = backend.load_targets_ensemble()
-    print(valid_labels.shape)
-    print(validation_files[0][0].shape)
     # validation_files[i]: validation prediction of i-th model
     # validation_files[i][j]:
     # validation files contain predictions of models
-
     score = balanced_accuracy
 
     for i in range(len(validation_files)):
@@ -165,6 +162,7 @@ def main(input_directories, output_file, task_id, seed, ensemble_size, n_jobs=1)
         #                     'AC Overhead Time': 0,
         #                     'Validation Configuration ID': 0})
         csv_writer.writerow({'Time': 0,
+                             'Training (Empirical) Performance': 1.0,
                              'Test Set Performance': 1.0})
 
         for i, o in enumerate(output):
@@ -204,6 +202,7 @@ def evaluate(input_directory, validation_files, test_files, ensemble_size=50):
 
     validation_predictions = np.array([v[0] for v in validation_files])
     test_predictions = np.array([t[0] for t in test_files])
+
     ensemble_selection.fit(validation_predictions, valid_labels,
                            identifiers=None)
     y_hat_ensemble = ensemble_selection.predict(np.array(
