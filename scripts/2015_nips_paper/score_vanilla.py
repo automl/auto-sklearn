@@ -33,9 +33,6 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     }
 
     X_train, y_train, X_test, y_test, cat = load_task(task_id)
-    print("X train: ", X_train)
-    print(X_train.shape)
-    print("y train", y_train)
 
     automl = AutoSklearnClassifier(**automl_arguments)
 
