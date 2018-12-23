@@ -84,7 +84,7 @@ This can be turned off by setting
 Resampling strategies
 =====================
 
-Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <https://github.com/automl/auto-sklearn/tree/master/example>`_
+Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <https://github.com/automl/auto-sklearn/tree/master/examples>`_
 
 Inspecting the results
 ======================
