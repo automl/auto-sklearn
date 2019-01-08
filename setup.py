@@ -43,12 +43,6 @@ extensions = [
 ]
 
 
-def _parse_requirements(file_path):
-    with open(file_path) as fp:
-        reqs = [r.rstrip() for r in fp.readlines() if not r.startswith('#')]
-        return reqs
-
-
 HERE = os.path.abspath(os.path.dirname(__file__))
 setup_reqs = ['Cython', 'numpy']
 with open(os.path.join(HERE, 'requirements.txt')) as fp:
