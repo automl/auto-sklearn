@@ -11,7 +11,7 @@ run_tests() {
 
     cd $TEST_DIR
     if [[ "$COVERAGE" == "true" ]]; then
-        nosetests --no-path-adjustment -sv --with-coverage --cover-package=$MODULE $test_dir
+        nosetests --no-path-adjustment -sv --exe --with-doctest --with-coverage --cover-package=$MODULE $test_dir
     elif [[ "$EXAMPLES" == "true" ]]; then
         for example in `find $examples_dir -name '*.py'`
         do
