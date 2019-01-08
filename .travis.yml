@@ -10,6 +10,7 @@ env:
   # Directory where tests are run from
   - TEST_DIR=/tmp/test_dir/
   - MODULE=autosklearn
+  - MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
 
 matrix:
   allow_failures:
@@ -17,15 +18,15 @@ matrix:
   
   include:
   - os: linux
-    env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+    env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true"
   - os: linux
-    env: DISTRIB="conda" PYTHON_VERSION="3.6" DOCPUSH="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+    env: DISTRIB="conda" PYTHON_VERSION="3.6" DOCPUSH="true"
   - os: linux
-    env: DISTRIB="conda" PYTHON_VERSION="3.6" EXAMPLES="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+    env: DISTRIB="conda" PYTHON_VERSION="3.6" EXAMPLES="true"
   - os: linux
-    env: DISTRIB="conda" PYTHON_VERSION="3.7" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+    env: DISTRIB="conda" PYTHON_VERSION="3.7" COVERAGE="true"
   - os: linux
-    env: DISTRIB="conda" PYTHON_VERSION="3.6" RUN_FLAKE8="true" SKIP_TESTS="true" MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+    env: DISTRIB="conda" PYTHON_VERSION="3.6" RUN_FLAKE8="true" SKIP_TESTS="true"
   - os: linux
     env: DISTRIB="ubuntu" PYTHON_VERSION="3.5" COVERAGE="true"
   - os: linux
@@ -55,7 +56,7 @@ cache:
 git:
   depth: 5
 
-before_install: source  ci_scripts/install.sh
+before_install: bash  ci_scripts/install.sh
 
 install:
   # Install general requirements the way setup.py suggests
