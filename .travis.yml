@@ -18,20 +18,28 @@ matrix:
   
   include:
   - os: linux
+    python: 3.5
     env: DISTRIB="conda" PYTHON_VERSION="3.5" COVERAGE="true"
   - os: linux
+    python: 3.6
     env: DISTRIB="conda" PYTHON_VERSION="3.6" DOCPUSH="true"
   - os: linux
+    python: 3.6
     env: DISTRIB="conda" PYTHON_VERSION="3.6" EXAMPLES="true"
   - os: linux
+    python: 3.7
     env: DISTRIB="conda" PYTHON_VERSION="3.7" COVERAGE="true"
   - os: linux
+    python: 3.6
     env: DISTRIB="conda" PYTHON_VERSION="3.6" RUN_FLAKE8="true" SKIP_TESTS="true"
   - os: linux
+    python: 3.5
     env: DISTRIB="ubuntu" PYTHON_VERSION="3.5" COVERAGE="true"
   - os: linux
+    python: 3.6
     env: DISTRIB="ubuntu" PYTHON_VERSION="3.6" DOCPUSH="true"
   - os: linux
+    python: 3.7
     env: DISTRIB="ubuntu" PYTHON_VERSION="3.7" EXAMPLES="true"
 
 

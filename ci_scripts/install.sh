@@ -9,6 +9,7 @@ if [[ "$DISTRIB" = "conda" ]]; then
 
 else
 
+    sudo apt-get update
     sudo apt install -y swig
 
 fi
