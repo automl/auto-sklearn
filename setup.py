@@ -39,9 +39,7 @@ class BuildExt(build_ext):
 extensions = [
     Extension('autosklearn.data.competition_c_functions',
               sources=['autosklearn/data/competition_c_functions.pyx'],
-              language='c',
-              extra_compile_args=['-O3', '-ffast-math', '-fopenmp'],
-              extra_link_args=['-fopenmp'])
+              language='c')
 ]
 
 
@@ -62,6 +60,8 @@ with open("autosklearn/__version__.py") as fh:
 
 setup(
     name='auto-sklearn',
+    author='Matthias Feurer',
+    author_email='feurerm@informatik.uni-freiburg.de',
     description='Automated machine learning.',
     version=version,
     cmdclass={'build_ext': BuildExt},
@@ -71,11 +71,22 @@ setup(
     install_requires=install_reqs,
     test_suite='nose.collector',
     include_package_data=True,
-    author='Matthias Feurer',
-    author_email='feurerm@informatik.uni-freiburg.de',
     license='BSD',
     platforms=['Linux'],
-    classifiers=[],
+    classifiers=[
+        "Environment :: Console",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Education",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Information Technology",
+        "License :: OSI Approved :: BSD License",
+        "Natural Language :: English",
+        "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Scientific/Engineering :: Information Analysis",
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+    ],
     python_requires='>=3.5.*',
     url='https://automl.github.io/auto-sklearn',
 )
