@@ -2,6 +2,8 @@ language: python
 
 sudo: false
 
+dist: xenial
+
 env:
   global:
   - OPENBLAS_NUM_THREADS=1
