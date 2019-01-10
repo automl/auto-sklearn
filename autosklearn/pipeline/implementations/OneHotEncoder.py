@@ -111,16 +111,15 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
 
     >>> from sklearn.preprocessing import OneHotEncoder
     >>> enc = OneHotEncoder()
-    >>> enc.fit([[0, 0, 3], [1, 1, 0], [0, 2, 1], \
-[1, 0, 2]])  # doctest: +ELLIPSIS
-    OneHotEncoder(categorical_features='all', dtype=<... 'float'>,
-           sparse=True, minimum_fraction=None)
+    >>> enc.fit([[0, 0, 3], [1, 1, 0], [0, 2, 1], [1, 0, 2]])  # doctest: +ELLIPSIS
+    OneHotEncoder(categorical_features='all', dtype=<... 'float...'>,
+           ...sparse=True...)
     >>> enc.n_values_
     array([2, 3, 4])
     >>> enc.feature_indices_
     array([0, 2, 5, 9])
-    >>> enc.transform([[0, 1, 1]]).toarray()
-    array([[ 1.,  0.,  0.,  1.,  0.,  0.,  1.,  0.,  0.]])
+    >>> enc.transform([[0, 1, 1]]).list()
+    [[1., 0., 0., 1., 0., 0., 1., 0., 0.]]
 
     See also
     --------
