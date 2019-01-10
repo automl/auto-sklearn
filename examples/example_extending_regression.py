@@ -84,27 +84,28 @@ class KernelRidgeRegression(AutoSklearnRegressionAlgorithm):
         return cs
 
 
-# Add KRR component to auto-sklearn.
-autosklearn.pipeline.components.regression.add_regressor(KernelRidgeRegression)
-cs = KernelRidgeRegression.get_hyperparameter_search_space()
-print(cs)
+if __name__ == '__main__':
+    # Add KRR component to auto-sklearn.
+    autosklearn.pipeline.components.regression.add_regressor(KernelRidgeRegression)
+    cs = KernelRidgeRegression.get_hyperparameter_search_space()
+    print(cs)
 
-# Generate data.
-from sklearn.datasets import load_diabetes
-from sklearn.model_selection import train_test_split
-X, y = load_diabetes(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y)
+    # Generate data.
+    from sklearn.datasets import load_diabetes
+    from sklearn.model_selection import train_test_split
+    X, y = load_diabetes(return_X_y=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
 
-# Fit the model using KRR.
-reg = autosklearn.regression.AutoSklearnRegressor(
-    time_left_for_this_task=30,
-    per_run_time_limit=10,
-    include_estimators=['KernelRidgeRegression'],
-)
-reg.fit(X_train, y_train)
+    # Fit the model using KRR.
+    reg = autosklearn.regression.AutoSklearnRegressor(
+        time_left_for_this_task=30,
+        per_run_time_limit=10,
+        include_estimators=['KernelRidgeRegression'],
+    )
+    reg.fit(X_train, y_train)
 
-# Print prediction score and statistics.
-y_pred = reg.predict(X_test)
-print("r2 score: ", sklearn.metrics.r2_score(y_pred, y_test))
-print(reg.sprint_statistics())
-print(reg.show_models())
+    # Print prediction score and statistics.
+    y_pred = reg.predict(X_test)
+    print("r2 score: ", sklearn.metrics.r2_score(y_pred, y_test))
+    print(reg.sprint_statistics())
+    print(reg.show_models())

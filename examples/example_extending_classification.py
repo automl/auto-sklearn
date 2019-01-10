@@ -107,27 +107,28 @@ class MLPClassifier(AutoSklearnClassificationAlgorithm):
         return cs
 
 
-# Add MLP classifier component to auto-sklearn.
-autosklearn.pipeline.components.classification.add_classifier(MLPClassifier)
-cs = MLPClassifier.get_hyperparameter_search_space()
-print(cs)
+if __name__ == '__main__':
+    # Add MLP classifier component to auto-sklearn.
+    autosklearn.pipeline.components.classification.add_classifier(MLPClassifier)
+    cs = MLPClassifier.get_hyperparameter_search_space()
+    print(cs)
 
-# Generate data.
-from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import train_test_split
-X, y = load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y)
+    # Generate data.
+    from sklearn.datasets import load_breast_cancer
+    from sklearn.model_selection import train_test_split
+    X, y = load_breast_cancer(return_X_y=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
 
-# Fit MLP classifier to the data.
-clf = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=20,
-    per_run_time_limit=10,
-    include_estimators=['MLPClassifier'],
-)
-clf.fit(X_train, y_train)
+    # Fit MLP classifier to the data.
+    clf = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=20,
+        per_run_time_limit=10,
+        include_estimators=['MLPClassifier'],
+    )
+    clf.fit(X_train, y_train)
 
-# Print test accuracy and statistics.
-y_pred = clf.predict(X_test)
-print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-print(clf.sprint_statistics())
-print(clf.show_models())
+    # Print test accuracy and statistics.
+    y_pred = clf.predict(X_test)
+    print("accuracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
+    print(clf.sprint_statistics())
+    print(clf.show_models())

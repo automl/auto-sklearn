@@ -84,28 +84,29 @@ class LDA(AutoSklearnPreprocessingAlgorithm):
         return cs
 
 
-# Add LDA component to auto-sklearn.
-autosklearn.pipeline.components.feature_preprocessing.add_preprocessor(LDA)
+if __name__ == '__main__':
+    # Add LDA component to auto-sklearn.
+    autosklearn.pipeline.components.feature_preprocessing.add_preprocessor(LDA)
 
-# Create dataset.
-from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import train_test_split
-X, y = load_breast_cancer(return_X_y=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y)
+    # Create dataset.
+    from sklearn.datasets import load_breast_cancer
+    from sklearn.model_selection import train_test_split
+    X, y = load_breast_cancer(return_X_y=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
 
-# Configuration space.
-cs = LDA.get_hyperparameter_search_space()
-print(cs)
+    # Configuration space.
+    cs = LDA.get_hyperparameter_search_space()
+    print(cs)
 
-# Fit the model using LDA as preprocessor.
-clf = autosklearn.classification.AutoSklearnClassifier(
-    time_left_for_this_task=30,
-    include_preprocessors=['LDA'],
-)
-clf.fit(X_train, y_train)
+    # Fit the model using LDA as preprocessor.
+    clf = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=30,
+        include_preprocessors=['LDA'],
+    )
+    clf.fit(X_train, y_train)
 
-# Print prediction score and statistics.
-y_pred = clf.predict(X_test)
-print("accracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
-print(clf.sprint_statistics())
-print(clf.show_models())
+    # Print prediction score and statistics.
+    y_pred = clf.predict(X_test)
+    print("accracy: ", sklearn.metrics.accuracy_score(y_pred, y_test))
+    print(clf.sprint_statistics())
+    print(clf.show_models())
