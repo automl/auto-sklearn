@@ -14,10 +14,7 @@ psutil
 pyyaml
 liac-arff
 pandas
-matplotlib
-git+https://github.com/automl/HPOlib.git
 
-git+https://github.com/liamcli/pyMetaLearn.git
 ConfigSpace>=0.4.0,<0.5
 pynisher>=0.4.2
 pyrfr>=0.7,<0.8
