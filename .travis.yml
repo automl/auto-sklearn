@@ -81,7 +81,7 @@ install:
   # Debug output to know all exact package versions!
   - pip freeze
   - python setup.py check -m -s
-  - python setup.py install
+  - python setup.py build_ext --inplace
 
 script: bash ci_scripts/test.sh
 after_success: source ci_scripts/success.sh && source ci_scripts/create_doc.sh $TRAVIS_BRANCH "doc_result"
