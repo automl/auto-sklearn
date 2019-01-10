@@ -1,6 +1,6 @@
 from collections import OrderedDict
 import copy
-import cPickle
+import pickle
 import glob
 import itertools
 import matplotlib.pyplot as plt
@@ -23,7 +23,7 @@ def find_ground_truth(globstring):
         return None
 
     with open(glob_results[0]) as fh:
-        trials = cPickle.load(fh)
+        trials = pickle.load(fh)
 
     return trials
 
@@ -126,7 +126,7 @@ def get_summed_wins_of_optimizers(trial_list_per_dataset,
                                   name_list_per_dataset,
                                   cut=sys.maxint):
     with open(trial_list_per_dataset[0][0][0]) as fh:
-        probing_trial = cPickle.load(fh)
+        probing_trial = pickle.load(fh)
     cut = min(cut, len(probing_trial['trials']))
     # TODO remove this hack!
     cut = 50

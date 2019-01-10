@@ -19,7 +19,7 @@
 #!/usr/bin/env python
 
 import os
-import StringIO
+from io import StringIO
 
 import HPOlib.cv as cv
 import HPOlib.wrapping_util as wrapping_util

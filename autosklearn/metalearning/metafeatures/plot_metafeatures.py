@@ -1,8 +1,8 @@
 import argparse
-import cPickle
+import pickle
 import itertools
 import os
-import StringIO
+from io import StringIO
 import sys
 
 import matplotlib.pyplot as plt
@@ -25,7 +25,7 @@ import pyMetaLearn.data_repositories.openml.apiconnector
 def load_dataset(dataset, dataset_directory):
     dataset_dir = os.path.abspath(os.path.join(dataset_directory, dataset))
     fh = open(os.path.join(dataset_dir, dataset + ".pkl"))
-    ds = cPickle.load(fh)
+    ds = pickle.load(fh)
     fh.close()
     data_frame = ds.convert_arff_structure_to_pandas(ds
                                                      .get_unprocessed_files())

@@ -2,7 +2,7 @@ from collections import defaultdict
 import itertools
 import logging
 import os
-import Queue
+from multiprocessing import Queue
 import time
 
 import numpy as np
@@ -100,10 +100,10 @@ if __name__ == "__main__":
 
     rf = LearnedDistanceRF(**params)
     X, Y = rf._create_dataset(metafeatures, runs)
-    import cPickle
+    import pickle
 
     with open("test.pkl", "w") as fh:
-        cPickle.dump((X, Y, metafeatures), fh, -1)
+        pickle.dump((X, Y, metafeatures), fh, -1)
 
     print("Metafeatures", metafeatures.shape)
     print("X", X.shape, np.isfinite(X).all().all())
