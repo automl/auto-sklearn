@@ -6,19 +6,23 @@ run_tests() {
     mkdir -p $TEST_DIR
 
     cwd=`pwd`
-    examples_dir=$cwd/examples
+    examples_dir=$cwd/examples/
+    package_dir=$cwd/autosklearn/
     test_dir=$cwd/test/
 
     cd $TEST_DIR
+    nose_params=""
     if [[ "$COVERAGE" == "true" ]]; then
-        nosetests --no-path-adjustment -sv --exe --with-doctest --with-coverage --cover-package=$MODULE $test_dir
-    elif [[ "$EXAMPLES" == "true" ]]; then
+        nose_params="--with-coverage --cover-package=$MODULE"
+    fi
+
+    nosetests $package_dir $test_dir $examples_dir --no-path-adjustment -sv --exe --with-doctest $nose_params
+
+    if [[ "$EXAMPLES" == "true" ]]; then
         for example in `find $examples_dir -name '*.py'`
         do
             python $example
         done
-    else
-        nosetests --no-path-adjustment -sv $test_dir
     fi
 }
 
