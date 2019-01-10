@@ -11,12 +11,19 @@ from sklearn.utils import check_random_state
 def find_components(package, directory, base_class):
     components = OrderedDict()
 
-    for module_loader, module_name, ispkg in pkgutil.iter_modules(
-            [directory]):
+    for module_loader, module_name, ispkg in pkgutil.iter_modules([directory]):
         full_module_name = "%s.%s" % (package, module_name)
+        print (repr([module_loader, module_name, ispkg, full_module_name,
+                     full_module_name in sys.modules]))
         if full_module_name not in sys.modules and not ispkg:
             module = importlib.import_module(full_module_name)
 
+            #fixme
+            print('inspect.getmembers: %s' % repr([(module_name, member_name,
+                                                    inspect.isclass(obj),
+                                                    issubclass(obj, base_class) if inspect.isclass(obj) else None,
+                                                    obj != base_class)
+                                                   for member_name, obj in inspect.getmembers(module)]))
             for member_name, obj in inspect.getmembers(module):
                 if inspect.isclass(obj) and issubclass(obj, base_class) and \
                         obj != base_class:

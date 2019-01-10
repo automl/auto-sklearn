@@ -8,9 +8,8 @@ parent_directory = os.path.abspath(os.path.join(this_directory, '..'))
 sys.path.append(parent_directory)
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
-from dummy_components.dummy_component_1 import DummyComponent1
 
 
-class DummyComponent2(DummyComponent1):
+class DummyComponent2(AutoSklearnClassificationAlgorithm):
     pass
 

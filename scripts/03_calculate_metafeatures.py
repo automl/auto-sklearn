@@ -181,8 +181,7 @@ if __name__ == "__main__":
                                  ('repetition', 'NUMERIC')] + \
                                 [('%s' % name,
                                   ['ok', 'timeout', 'memout', 'presolved',
-                                   'crash',
-                                   'other'])
+                                   'crash', 'other'])
                                  for name in feature_steps]
     arff_object['relation'] = "FEATURE_RUNSTATUS"
     arff_object['description'] = ""

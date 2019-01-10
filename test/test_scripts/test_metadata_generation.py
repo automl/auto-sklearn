@@ -60,10 +60,11 @@ class TestMetadataGeneration(unittest.TestCase):
         # This tells the script to use the same memory limit for testing as
         # for training. In production, it would use twice as much!
         cmd = cmd.replace('-s 1', '-s 1 --unittest')
+        print('COMMAND: %s' % cmd)
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
-        print(rval.stdout, flush=True)
-        print(rval.stderr, flush=True)
+        print('STDOUT: %s' % repr(rval.stdout), flush=True)
+        print('STDERR: %s' % repr(rval.stderr), flush=True)
         expected_output_directory = os.path.join(self.working_directory,
                                                  'configuration',
                                                  'classification',
