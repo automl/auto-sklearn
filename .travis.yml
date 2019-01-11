@@ -63,7 +63,7 @@ cache:
 git:
   depth: 5
 
-before_install: bash  ci_scripts/install.sh
+before_install: bash  ci_scripts/install_env.sh
 
 install:
   - pip --version
@@ -81,7 +81,7 @@ install:
   - python setup.py build_ext --inplace
   - python setup.py install
 
-script: bash ci_scripts/test.sh
+script: source ci_scripts/test.sh
 after_success: source ci_scripts/success.sh && source ci_scripts/create_doc.sh $TRAVIS_BRANCH "doc_result"
 
 deploy:

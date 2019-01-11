@@ -12,14 +12,14 @@ if [[ "$DISTRIB" = "conda" ]]; then
 
 else
 
-    sudo ln -s /usr/bin/swig3.0 /usr/bin/swig
     sudo apt install -y python-dev python-pip
     pip install --upgrade setuptools
 
 fi
 
-    # install linux packages
-    sudo apt-get update
-    # https://github.com/automl/auto-sklearn/issues/314
-    sudo apt-get remove swig
-    sudo apt-get install swig3.0
+# install linux packages
+sudo apt-get update
+# https://github.com/automl/auto-sklearn/issues/314
+sudo apt-get remove swig
+sudo apt-get install swig3.0
+sudo ln -s /usr/bin/swig3.0 /usr/bin/swig
