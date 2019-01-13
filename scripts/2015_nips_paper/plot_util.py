@@ -108,9 +108,7 @@ def get_file_and_name_list(argument_list, match_file, len_name=1):
                 file_list.append(list())
             continue
         else:
-            print(argument_list[0])
             if os.path.exists(argument_list[i]):
-                print(file_list)
                 len_desc = 0
                 file_list[-1].append(os.path.abspath(argument_list[i]))
             else:

@@ -125,7 +125,6 @@ def main():
     for fl in file_list:
         _none, csv_data = plot_util.read_csv(fl, has_header=True)
         csv_data = np.array(csv_data)
-        print(csv_data.shape)
         # Replace too high values with args.maxsize
         if len(csv_data) == 0:
             print ("Empty array in %s" % fl)

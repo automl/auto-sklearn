@@ -118,7 +118,6 @@ def main():
     dataset_dict = OrderedDict()
     estimator_list = list()
     dataset_list = list()
-    print(name_list)
     for idx, desc in enumerate(name_list):
         dataset = desc[0]
         est = desc[1]
