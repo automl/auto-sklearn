@@ -6,9 +6,9 @@ from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.metrics import balanced_accuracy
 
 from remove_dataset_from_metadata import remove_dataset
-sys.path.append('../')
-from update_metadata_util import load_task  # noqa
-#from openml.tasks import get_task
+#sys.path.append('../')
+#from update_metadata_util import load_task  # noqa. use this when internet is available
+from load_task_offline import load_task # use this for running on cluster
 
 def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # Create new metadata directory not containing task_id.
