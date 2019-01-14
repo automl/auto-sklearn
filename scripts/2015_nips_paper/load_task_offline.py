@@ -1,13 +1,19 @@
+import io
 import os
+import openml
 import openml.tasks.functions as functions
 
 def load_task(task_id):
     # find the dataset from the file system
-    task_xml_path = "data/aad/openml/tasks/{}/task.xml"
-    task_xml_path = os.path.abspath(task_xml_path)
-    task = functions._create_task_from_xml(task_xml_path)
-    print("task: ",task)
+    xml_file = "data/aad/openml/tasks/{}/task.xml"
+    xml_file = os.path.abspath(xml_file)
+    task_xml = openml._api_calls._perform_api_call("task/%d" % task_id)
 
+    with io.open(xml_file, "w", encoding='utf8') as fh:
+        fh.write(task_xml)
+    print(task_xml)
+    task = functions._create_task_from_xml(task_xml)
+    print("task: ",task)
     X, y = task.get_X_and_y()
     print("X: ", X)
     print("y: ", y)
