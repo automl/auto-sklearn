@@ -46,7 +46,7 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     X_train, y_train, X_test, y_test, cat = load_task(task_id)
 
     automl = AutoSklearnClassifier(**automl_arguments)
-    print(automl._automl.metadata_directory)
+    print(automl._automl._metadata_directory)
     print("####")
     return
 

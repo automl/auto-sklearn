@@ -4,10 +4,10 @@ dir=log_output  # working directory
 test_dir=test_output
 #task_ids=$(python get_tasks.py)
 task_ids="167149 167150 167152 167153"
-seeds="1 2 3 4 5 6 7 8 9 10"
-#seeds="1 2 3"
-time_limit=100
-per_runtime_limit=30
+#seeds="1 2 3 4 5 6 7 8 9 10"
+seeds="1"
+time_limit=20
+per_runtime_limit=5
 
 rm -r test_commands.txt
 
@@ -15,7 +15,7 @@ rm -r test_commands.txt
 echo "creating test files..."
 for seed in $seeds; do
     for task_id in $task_ids; do
-        for model in vanilla ensemble metalearning; do # metalearning meta_ensemble; do
+        for model in vanilla; do #vanilla ensemble metalearning; do # meta_ensemble; do
             cmd="python run_auto_sklearn.py --working-directory $test_dir --task-id $task_id \
             -s $seed --output-file score_$model.csv --model $model --time-limit $time_limit \
             --per-runtime-limit $per_runtime_limit "
