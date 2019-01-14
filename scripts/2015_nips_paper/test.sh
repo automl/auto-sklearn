@@ -3,7 +3,7 @@
 dir=log_output  # working directory
 test_dir=test_output
 #task_ids=$(python get_tasks.py)
-task_ids="167149 167150 167152 167153"
+task_ids="233 236 242 244 246 75090 248 251 75124 253"
 #seeds="1 2 3 4 5 6 7 8 9 10"
 seeds="1"
 time_limit=20
