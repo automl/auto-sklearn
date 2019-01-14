@@ -1,34 +1,71 @@
 import io
 import os
+import xmltodict
+import numpy as np
+
 import openml
-import openml.tasks.functions as functions
+import openml.tasks.functions as t
+import openml.datasets.functions as d
+
+def get_dataset_offline(dataset_id):
+    # Workaround for offline
+    cache_path = os.path.join(os.path.expanduser("~"), "../../data/aad/openml")
+
+    # Description for dataset
+    description_file = os.path.join(cache_path, "datasets/{}/description.xml".format(dataset_id))
+    with io.open(description_file, encoding='utf8') as fh:
+        dataset_xml = fh.read()
+
+    # features for dataset
+    features_file = os.path.join(cache_path, "datasets/{}/features.xml".format(dataset_id))
+    with io.open(features_file, encoding='utf8') as fh:
+        features_xml = fh.read()
+
+    # qualities for dataset
+    qualities_file = os.path.join(cache_path, "datasets/{}/qualities.xml".format(dataset_id))
+    with io.open(qualities_file, encoding='utf8') as fh:
+        qualities_xml = fh.read()
+        
+    # Arff file for dataset
+    arff = os.path.join(cache_path, "datasets/{}/dataset.arff".format(dataset_id))
+    with io.open(arff, encoding='utf8'):
+        pass
+
+    description = xmltodict.parse(dataset_xml)["oml:data_set_description"]
+    features = xmltodict.parse(features_xml)["oml:data_features"]
+    qualities = xmltodict.parse(qualities_xml)["oml:data_qualities"]['oml:quality']
+    arff_file = arff
+    dataset = d._create_dataset_from_description(description, features, qualities, arff_file)
+
+    return dataset
+    
+def get_task_offline(task_id):
+    # Workaround for offline
+    cache_path = os.path.join(os.path.expanduser("~"), "../../data/aad/openml")
+    task_file = os.path.join(cache_path, "tasks/{}/task.xml".format(task_id))
+
+    with io.open(task_file, encoding='utf8') as fh:
+        task = t._create_task_from_xml(xml=fh.read())
+
+    return task
+
 
 def load_task(task_id):
-    # find the dataset from the file system
-    xml_file = "data/aad/openml/tasks/{}/task.xml"
-    xml_file = os.path.abspath(xml_file)
-    task_xml = openml._api_calls._perform_api_call("task/%d" % task_id)
+    # Create task and dataset object offline.
+    task = get_task_offline(task_id)
+    dataset = get_dataset_offline(task.dataset_id)
 
-    with io.open(xml_file, "w", encoding='utf8') as fh:
-        fh.write(task_xml)
-    print(task_xml)
-    task = functions._create_task_from_xml(task_xml)
-    print("task: ",task)
-    X, y = task.get_X_and_y()
-    print("X: ", X)
-    print("y: ", y)
+    # Get X and y.
+    X, y, cat = dataset.get_data(return_categorical_indicator=True,
+                             target=task.target_name)
+    cat = ['categorical' if c else 'numerical' for c in cat]
+
+    # Train test split.
     train_indices, test_indices = task.get_train_test_split_indices()
     X_train = X[train_indices]
     y_train = y[train_indices]
     X_test = X[test_indices]
     y_test = y[test_indices]
-    return
-    dataset = openml.datasets.get_dataset(task.dataset_id)
-    _, _, cat = dataset.get_data(return_categorical_indicator=True,
-                                 target=task.target_name)
-    del _
-    del dataset
-    cat = ['categorical' if c else 'numerical' for c in cat]
 
     unique = np.unique(y_train)
     mapping = {unique_value: i for i, unique_value in enumerate(unique)}
@@ -37,6 +74,4 @@ def load_task(task_id):
 
     return X_train, y_train, X_test, y_test, cat
 
-def load_task(task_id):
-    task = openml.tasks.get_task(task_id)
-
+load_task(3)
