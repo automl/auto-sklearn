@@ -111,16 +111,15 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
 
     >>> from sklearn.preprocessing import OneHotEncoder
     >>> enc = OneHotEncoder()
-    >>> enc.fit([[0, 0, 3], [1, 1, 0], [0, 2, 1], \
-[1, 0, 2]])  # doctest: +ELLIPSIS
-    OneHotEncoder(categorical_features='all', dtype=<... 'float'>,
-           sparse=True, minimum_fraction=None)
+    >>> enc.fit([[0, 0, 3], [1, 1, 0], [0, 2, 1], [1, 0, 2]])  # doctest: +ELLIPSIS
+    OneHotEncoder(categorical_features='all', dtype=...,
+           ...sparse=True...)
     >>> enc.n_values_
     array([2, 3, 4])
     >>> enc.feature_indices_
     array([0, 2, 5, 9])
-    >>> enc.transform([[0, 1, 1]]).toarray()
-    array([[ 1.,  0.,  0.,  1.,  0.,  0.,  1.,  0.,  0.]])
+    >>> enc.transform([[0, 1, 1]]).toarray()  # doctest: +NORMALIZE_WHITESPACE
+    array([[1., 0., 0., 1., 0., 0., 1., 0., 0.]])
 
     See also
     --------
@@ -291,8 +290,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
                     unique = np.unique(X[:, column])
 
                 for unique_value in unique:
-                    if unique_value not in self.do_not_replace_by_other_[
-                        column]:
+                    if unique_value not in self.do_not_replace_by_other_[column]:
                         if sparse.issparse(X):
                             indptr_start = X.indptr[column]
                             indptr_end = X.indptr[column + 1]

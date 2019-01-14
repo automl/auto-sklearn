@@ -106,10 +106,11 @@ for entry in trajectory:
         stats.start_timing()
         # To avoid the output "first run crashed"...
         stats.ta_runs += 1
+        memory_lim = memory_limit_factor * automl_arguments['ml_memory_limit']
         ta = ExecuteTaFuncWithQueue(backend=automl._automl._backend,
                                     autosklearn_seed=seed,
                                     resampling_strategy='test',
-                                    memory_limit=memory_limit_factor * automl_arguments['ml_memory_limit'],
+                                    memory_limit=memory_lim,
                                     disable_file_output=True,
                                     logger=logger,
                                     stats=stats,

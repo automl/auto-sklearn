@@ -47,7 +47,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 setup_reqs = ['Cython', 'numpy']
 with open(os.path.join(HERE, 'requirements.txt')) as fp:
     install_reqs = [r.rstrip() for r in fp.readlines()
-                    if not r.startswith('#')]
+                    if not r.startswith('#') and not r.startswith('git+')]
 
 with open("autosklearn/__version__.py") as fh:
     version = fh.readlines()[-1].split()[-1].strip("\"'")
