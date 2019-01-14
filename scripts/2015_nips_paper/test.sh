@@ -9,6 +9,11 @@ seeds="1"
 time_limit=20
 per_runtime_limit=5
 
+# If running on cluster, first copy the cached openml dataset to the home directory.
+# This is necessary because there are file handling operations which
+# seem to require root permission. Skip this if not running on cluster.
+cp -R /data/aad/openml/ $HOME/
+
 rm -r test_commands.txt
 
 # Create commands
