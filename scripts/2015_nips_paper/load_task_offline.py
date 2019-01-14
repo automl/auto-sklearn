@@ -9,7 +9,8 @@ import openml.datasets.functions as d
 
 def get_dataset_offline(dataset_id):
     # Workaround for offline
-    cache_path = os.path.join(os.path.expanduser("~"), "../../data/aad/openml")
+    #cache_path = os.path.join(os.path.expanduser("~"), "../../data/aad/openml")
+    cache_path = os.path.expanduser("~")
 
     # Description for dataset
     description_file = os.path.join(cache_path, "datasets/{}/description.xml".format(dataset_id))
@@ -41,7 +42,9 @@ def get_dataset_offline(dataset_id):
     
 def get_task_offline(task_id):
     # Workaround for offline
-    cache_path = os.path.join(os.path.expanduser("~"), "../../data/aad/openml")
+    #cache_path = os.path.join(os.path.expanduser("~"), "../../data/aad/openml")
+    cache_path = os.path.expanduser("~")
+
     task_file = os.path.join(cache_path, "tasks/{}/task.xml".format(task_id))
 
     with io.open(task_file, encoding='utf8') as fh:
