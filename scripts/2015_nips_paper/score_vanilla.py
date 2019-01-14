@@ -4,9 +4,9 @@ import sys
 
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.metrics import balanced_accuracy
-sys.path.append('../')
-from update_metadata_util import load_task  # noqa
-#from openml.tasks import get_task
+#sys.path.append('../')
+#from update_metadata_util import load_task  # noqa
+from load_task_offline import load_task
 
 
 def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
