@@ -1,6 +1,7 @@
 import os
 
 import arff
+from shutil import copyfile
 
 def remove_dataset_from_aslib_arff(input_file,
                                    output_file,
@@ -50,4 +51,18 @@ def remove_dataset(metadata_directory,
         features_values_file = os.path.join(subdir, fvf)
         output_file = os.path.join(output_subdir, fvf)
         remove_dataset_from_aslib_arff(features_values_file, output_file, id)
+
+        # This script seems to need more stuff. description.txt and configurations.csv files are missing.
+        # Not sure how to remove datasets from conigurations.csv as it does not remember task_id.
+        # For now I will just copy and paste
+        desc = "description.txt"
+        description_file = os.path.join(subdir, desc)
+        output_file = os.path.join(output_subdir, desc)
+        copyfile(description_file, output_file)
+
+        configs = "configurations.csv"
+        configs_file = os.path.join(subdir, configs)
+        output_file = os.path.join(output_subdir, configs)
+        copyfile(configs_file, output_file)
+
 
