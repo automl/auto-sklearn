@@ -14,14 +14,6 @@ def main(working_directory, output_file, task_id, seed, model, time_limit, per_r
                         task_id,
                         seed,
                         )
-    elif model == "ensemble":
-        # run ens as on given task id and seed and store results.
-        score_ensemble.main(working_directory,
-                            output_file,
-                            task_id,
-                            seed,
-                            ensemble_size=50,
-                            )
     elif model == "metalearning":
         # run meta as on given task id and seed and store results.
         score_metalearning.main(working_directory,
@@ -30,9 +22,15 @@ def main(working_directory, output_file, task_id, seed, model, time_limit, per_r
                                 task_id,
                                 seed,
                                 )
-    elif model == "meta_ensemble":
+    else:
+    #elif model == "meta_ensemble":
         # run metaens as on given task id and seed and store results.
-        pass
+        score_ensemble.main(working_directory,
+                            output_file,
+                            task_id,
+                            seed,
+                            ensemble_size=50,
+                            )
 
 
 if __name__=="__main__":

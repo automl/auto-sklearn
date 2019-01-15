@@ -4,19 +4,20 @@ import sys
 
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.metrics import balanced_accuracy
-#sys.path.append('../')
-#from update_metadata_util import load_task  # noqa
-from load_task_offline import load_task
+sys.path.append('../')
+from update_metadata_util import load_task  # noqa
+#from load_task_offline import load_task
 
 
 def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     configuration_output_dir = os.path.join(working_directory, str(seed))
     try:
-        os.makedirs(configuration_output_dir)
+        if not os.path.exists(configuration_output_dir):
+            os.makedirs(configuration_output_dir)
     except Exception as _:
         print("Direcotry {0} aleardy created.".format(configuration_output_dir))
 
-    tmp_dir = os.path.join(configuration_output_dir, str(task_id))
+    tmp_dir = os.path.join(configuration_output_dir,str(task_id))
 
     automl_arguments = {
         'time_left_for_this_task': time_limit,
