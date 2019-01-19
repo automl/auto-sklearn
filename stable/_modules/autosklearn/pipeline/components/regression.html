@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>autosklearn.pipeline.components.regression &#8212; AutoSklearn 0.4.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.4.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../../index.html">Start</a></li>
+                <li><a href="../../../../releases.html">Releases</a></li>
+                <li><a href="../../../../installation.html">Installation</a></li>
+                <li><a href="../../../../manual.html">Manual</a></li>
+                <li><a href="../../../../examples/index.html">Examples</a></li>
+                <li><a href="../../../../api.html">API</a></li>
+                <li><a href="../../../../extending.html">Extending</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <h1>Source code for autosklearn.pipeline.components.regression</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">AutoSklearnRegressionAlgorithm</span><span class="p">,</span> <span class="n">find_components</span><span class="p">,</span> \
+    <span class="n">ThirdPartyComponents</span><span class="p">,</span> <span class="n">AutoSklearnChoice</span>
+<span class="kn">from</span> <span class="nn">ConfigSpace.configuration_space</span> <span class="k">import</span> <span class="n">ConfigurationSpace</span>
+<span class="kn">from</span> <span class="nn">ConfigSpace.hyperparameters</span> <span class="k">import</span> <span class="n">CategoricalHyperparameter</span>
+<span class="kn">from</span> <span class="nn">ConfigSpace.conditions</span> <span class="k">import</span> <span class="n">EqualsCondition</span>
+
+<span class="n">regressor_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">_regressors</span> <span class="o">=</span> <span class="n">find_components</span><span class="p">(</span><span class="n">__package__</span><span class="p">,</span>
+                              <span class="n">regressor_directory</span><span class="p">,</span>
+                              <span class="n">AutoSklearnRegressionAlgorithm</span><span class="p">)</span>
+<span class="n">_addons</span> <span class="o">=</span> <span class="n">ThirdPartyComponents</span><span class="p">(</span><span class="n">AutoSklearnRegressionAlgorithm</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="add_regressor"><a class="viewcode-back" href="../../../../extending.html#autosklearn.pipeline.components.regression.add_regressor">[docs]</a><span class="k">def</span> <span class="nf">add_regressor</span><span class="p">(</span><span class="n">regressor</span><span class="p">):</span>
+    <span class="n">_addons</span><span class="o">.</span><span class="n">add_component</span><span class="p">(</span><span class="n">regressor</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">RegressorChoice</span><span class="p">(</span><span class="n">AutoSklearnChoice</span><span class="p">):</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_components</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="n">components</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_regressors</span><span class="p">)</span>
+        <span class="n">components</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_addons</span><span class="o">.</span><span class="n">components</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">components</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_available_components</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data_prop</span><span class="p">,</span>
+                                 <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                 <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">available_comp</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_components</span><span class="p">()</span>
+        <span class="n">components_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;The argument include and exclude cannot be used together.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">incl</span> <span class="ow">in</span> <span class="n">include</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">incl</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_comp</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Trying to include unknown component: &quot;</span>
+                                     <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">incl</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">available_comp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">include</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">entry</span> <span class="o">=</span> <span class="n">available_comp</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+            <span class="c1"># Avoid infinite loop</span>
+            <span class="k">if</span> <span class="n">entry</span> <span class="o">==</span> <span class="n">RegressorChoice</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="s1">&#39;handles_regression&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">components_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span>
+
+        <span class="k">return</span> <span class="n">components_dict</span>
+
+    <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_properties</span><span class="p">,</span>
+                                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                        <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                        <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The argument include and exclude cannot be used together.&quot;</span><span class="p">)</span>
+
+        <span class="n">cs</span> <span class="o">=</span> <span class="n">ConfigurationSpace</span><span class="p">()</span>
+
+        <span class="c1"># Compile a list of all estimator objects for this problem</span>
+        <span class="n">available_estimators</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_available_components</span><span class="p">(</span>
+            <span class="n">data_prop</span><span class="o">=</span><span class="n">dataset_properties</span><span class="p">,</span>
+            <span class="n">include</span><span class="o">=</span><span class="n">include</span><span class="p">,</span>
+            <span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">available_estimators</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No regressors found&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">defaults</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;random_forest&#39;</span><span class="p">,</span> <span class="s1">&#39;support_vector_regression&#39;</span><span class="p">]</span> <span class="o">+</span> \
+                <span class="nb">list</span><span class="p">(</span><span class="n">available_estimators</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">default_</span> <span class="ow">in</span> <span class="n">defaults</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">default_</span> <span class="ow">in</span> <span class="n">available_estimators</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">default_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">include</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">default_</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="n">default</span> <span class="o">=</span> <span class="n">default_</span>
+                    <span class="k">break</span>
+
+        <span class="n">estimator</span> <span class="o">=</span> <span class="n">CategoricalHyperparameter</span><span class="p">(</span><span class="s1">&#39;__choice__&#39;</span><span class="p">,</span>
+                                              <span class="nb">list</span><span class="p">(</span><span class="n">available_estimators</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                                              <span class="n">default_value</span><span class="o">=</span><span class="n">default</span><span class="p">)</span>
+        <span class="n">cs</span><span class="o">.</span><span class="n">add_hyperparameter</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">estimator_name</span> <span class="ow">in</span> <span class="n">available_estimators</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">estimator_configuration_space</span> <span class="o">=</span> <span class="n">available_estimators</span><span class="p">[</span><span class="n">estimator_name</span><span class="p">]</span><span class="o">.</span>\
+                <span class="n">get_hyperparameter_search_space</span><span class="p">(</span><span class="n">dataset_properties</span><span class="p">)</span>
+            <span class="n">parent_hyperparameter</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;parent&#39;</span><span class="p">:</span> <span class="n">estimator</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">estimator_name</span><span class="p">}</span>
+            <span class="n">cs</span><span class="o">.</span><span class="n">add_configuration_space</span><span class="p">(</span><span class="n">estimator_name</span><span class="p">,</span> <span class="n">estimator_configuration_space</span><span class="p">,</span>
+                                       <span class="n">parent_hyperparameter</span><span class="o">=</span><span class="n">parent_hyperparameter</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">configuration_space_</span> <span class="o">=</span> <span class="n">cs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_properties_</span> <span class="o">=</span> <span class="n">dataset_properties</span>
+        <span class="k">return</span> <span class="n">cs</span>
+
+    <span class="k">def</span> <span class="nf">estimator_supports_iterative_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">choice</span><span class="p">,</span> <span class="s1">&#39;iterative_fit&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">iterative_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fit_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fit_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">choice</span><span class="o">.</span><span class="n">iterative_fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="n">n_iter</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">configuration_fully_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">choice</span><span class="o">.</span><span class="n">configuration_fully_fitted</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2018, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

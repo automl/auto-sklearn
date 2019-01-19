@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Extending auto-sklearn &#8212; AutoSklearn 0.4.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.4.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="index.html">Start</a></li>
+                <li><a href="releases.html">Releases</a></li>
+                <li><a href="installation.html">Installation</a></li>
+                <li><a href="manual.html">Manual</a></li>
+                <li><a href="examples/index.html">Examples</a></li>
+                <li><a href="api.html">API</a></li>
+                <li><a href="#">Extending</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Extending auto-sklearn</a><ul>
+<li><a class="reference internal" href="#writing-a-component">Writing a component</a><ul>
+<li><a class="reference internal" href="#get-hyperparameter-search-space">get_hyperparameter_search_space()</a></li>
+<li><a class="reference internal" href="#get-properties">get_properties()</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#classification">Classification</a></li>
+<li><a class="reference internal" href="#regression">Regression</a></li>
+<li><a class="reference internal" href="#feature-preprocessing">Feature Preprocessing</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="extending-auto-sklearn">
+<span id="extending"></span><h1>Extending auto-sklearn<a class="headerlink" href="#extending-auto-sklearn" title="Permalink to this headline">¶</a></h1>
+<p>auto-sklearn can be easily extended with new classification, regression and
+feature preprocessing methods. In order to do so, a user has to implement a
+wrapper class and register it to auto-sklearn. This manual will walk you
+through the process.</p>
+<div class="section" id="writing-a-component">
+<h2>Writing a component<a class="headerlink" href="#writing-a-component" title="Permalink to this headline">¶</a></h2>
+<p>Depending on the purpose, the component has to be a subclass of one of the
+following base classes:</p>
+<ul class="simple">
+<li>classification: <a class="reference internal" href="api.html#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm" title="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm"><code class="xref py py-class docutils literal"><span class="pre">autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm</span></code></a></li>
+<li>regression: <a class="reference internal" href="api.html#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm" title="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm"><code class="xref py py-class docutils literal"><span class="pre">autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm</span></code></a></li>
+<li>preprocessing: <a class="reference internal" href="api.html#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm" title="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm"><code class="xref py py-class docutils literal"><span class="pre">autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm</span></code></a></li>
+</ul>
+<p>In general, these classes are wrappers around existing machine learning
+models and only add the functionality auto-sklearn needs. Of course you can
+also implement a machine learning algorithm directly inside a component.</p>
+<p>Each component has to implement a method which returns its configuration
+space, a method for querying properties of the component and methods like
+<cite>fit()</cite>, <cite>predict()</cite> or <cite>transform()</cite> based on the task of the component.
+These are described in the subsections
+<a class="reference internal" href="#get-hyperparameter-search-space"><span class="std std-ref">get_hyperparameter_search_space()</span></a> and <a class="reference internal" href="#get-properties"><span class="std std-ref">get_properties()</span></a></p>
+<p>After writing a component class, you have to tell auto-sklearn about its
+existence. You have to add it with the following function calls, depending on
+the type of component:</p>
+<dl class="function">
+<dt id="autosklearn.pipeline.components.classification.add_classifier">
+<code class="descclassname">autosklearn.pipeline.components.classification.</code><code class="descname">add_classifier</code><span class="sig-paren">(</span><em>classifier</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/classification.html#add_classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.classification.add_classifier" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="autosklearn.pipeline.components.regression.add_regressor">
+<code class="descclassname">autosklearn.pipeline.components.regression.</code><code class="descname">add_regressor</code><span class="sig-paren">(</span><em>regressor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/regression.html#add_regressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.regression.add_regressor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="autosklearn.pipeline.components.feature_preprocessing.add_preprocessor">
+<code class="descclassname">autosklearn.pipeline.components.feature_preprocessing.</code><code class="descname">add_preprocessor</code><span class="sig-paren">(</span><em>preprocessor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/feature_preprocessing.html#add_preprocessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.feature_preprocessing.add_preprocessor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="section" id="get-hyperparameter-search-space">
+<span id="id1"></span><h3>get_hyperparameter_search_space()<a class="headerlink" href="#get-hyperparameter-search-space" title="Permalink to this headline">¶</a></h3>
+<p>Return an instance of <code class="docutils literal"><span class="pre">HPOlibConfigSpace.configuration_space</span>
+<span class="pre">.ConfigurationSpace</span></code>.</p>
+<p>See also the abstract definitions:
+<code class="xref py py-meth docutils literal"><span class="pre">AutoSklearnClassificationAlgorithm.get_hyperparameter_search_space()</span></code>
+<code class="xref py py-meth docutils literal"><span class="pre">AutoSklearnRegressionAlgorithm.get_hyperparameter_search_space()</span></code>
+<code class="xref py py-meth docutils literal"><span class="pre">AutoSklearnPreprocessingAlgorithm.get_hyperparameter_search_space()</span></code></p>
+<p>To find out about how to create a <code class="docutils literal"><span class="pre">ConfigurationSpace</span></code>-object, please look
+at the source code on <a class="reference external" href="https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/classification">github.com</a>.</p>
+</div>
+<div class="section" id="get-properties">
+<span id="id2"></span><h3>get_properties()<a class="headerlink" href="#get-properties" title="Permalink to this headline">¶</a></h3>
+<p>Return a dictionary which defines how the component can be used when
+constructing a machine learning pipeline. The following fields must be
+specified:</p>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>shortname <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>an abbreviation of the component</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>the full name of the component</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>handles_regression <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>whether the component can handle regression data</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>handles_classification <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>whether the component can handle classification data</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>handles_multiclass <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>whether the component can handle multiclass classification data</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>handles_multilabel <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>whether the component can multilabel classification data</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>is_deterministic <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>whether the component gives the same result when using several times,
+but with the same random seed</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>input <span class="classifier-delimiter">:</span> <span class="classifier">tuple</span></dt>
+<dd>type of input data the component can handle, can have multiple values:<ul class="last">
+<li><dl class="first docutils">
+<dt><strong>autosklearn.constants.DENSE</strong></dt>
+<dd>dense data arrays, mutually exclusive with autosklearn.constants.SPARSE</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>autosklearn.constants.SPARSE</strong></dt>
+<dd>sparse data matrices, mutually exclusive with autosklearn.constants.DENSE</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>autosklearn.constants.UNSIGNED_DATA</strong></dt>
+<dd>unsigned data array, meaning only positive input, mutually exclusive
+with autosklearn.constants.SIGNED_DATA</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>autosklearn.constants.SIGNED_DATA</strong></dt>
+<dd>signed data array, meaning both positive and negative input values,
+mutually exclusive with autosklearn.constants.UNSIGNED_DATA</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>output <span class="classifier-delimiter">:</span> <span class="classifier">tuple</span></dt>
+<dd>type of output data the component produces<ul class="last">
+<li><dl class="first docutils">
+<dt><strong>autosklearn.constants.PREDICTIONS</strong></dt>
+<dd>predictions, for example by a classifier</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>autosklearn.constants.INPUT</strong></dt>
+<dd>data in the same form as the input</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>autosklearn.constants.DENSE</strong></dt>
+<dd>dense data arrays, mutually exclusive with autosklearn.constants.SPARSE.
+This implies that sparse data will be converted into a dense
+representation.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>autosklearn.constants.SPARSE</strong></dt>
+<dd>sparse data matrices, mutually exclusive with
+autosklearn.constants.DENSE. This implies that dense data will
+be converted into a sparse representation</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>autosklearn.constants.UNSIGNED_DATA</strong></dt>
+<dd>unsigned data array, meaning only positive input, mutually exclusive
+with autosklearn.constants.SIGNED_DATA. This allows for algorithms which
+can only work on positive data.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>autosklearn.constants.SIGNED_DATA</strong></dt>
+<dd>signed data array, meaning both positive and negative input values,
+mutually exclusive with autosklearn.constants.UNSIGNED_DATA</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="classification">
+<h2>Classification<a class="headerlink" href="#classification" title="Permalink to this headline">¶</a></h2>
+<p>In addition two <cite>get_properties()</cite> and <cite>get_hyperparameter_search_space()</cite>
+you have to implement
+<code class="xref py py-meth docutils literal"><span class="pre">AutoSklearnClassificationAlgorithm.fit()</span></code>
+and
+<a class="reference internal" href="api.html#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict" title="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict"><code class="xref py py-meth docutils literal"><span class="pre">AutoSklearnClassificationAlgorithm.predict()</span></code></a>
+. These are an implementation of the <a class="reference external" href="http://scikit-learn.org/stable/developers/index.html#apis-of-scikit-learn-objects">scikit-learn predictor API</a>.</p>
+</div>
+<div class="section" id="regression">
+<h2>Regression<a class="headerlink" href="#regression" title="Permalink to this headline">¶</a></h2>
+<p>In addition two <cite>get_properties()</cite> and <cite>get_hyperparameter_search_space()</cite>
+you have to implement
+<code class="xref py py-meth docutils literal"><span class="pre">AutoSklearnRegressionAlgorithm.fit()</span></code>
+and
+<a class="reference internal" href="api.html#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict" title="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict"><code class="xref py py-meth docutils literal"><span class="pre">AutoSklearnRegressionAlgorithm.predict()</span></code></a>
+. These are an implementation of the <a class="reference external" href="http://scikit-learn.org/stable/developers/index.html#apis-of-scikit-learn-objects">scikit-learn predictor API</a>.</p>
+</div>
+<div class="section" id="feature-preprocessing">
+<h2>Feature Preprocessing<a class="headerlink" href="#feature-preprocessing" title="Permalink to this headline">¶</a></h2>
+<p>In addition two <cite>get_properties()</cite> and <cite>get_hyperparameter_search_space()</cite>
+you have to implement
+<code class="xref py py-meth docutils literal"><span class="pre">AutoSklearnPreprocessingAlgorithm.fit()</span></code>
+and
+<a class="reference internal" href="api.html#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.transform" title="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.transform"><code class="xref py py-meth docutils literal"><span class="pre">AutoSklearnPreprocessingAlgorithm.transform()</span></code></a>
+. These are an implementation of the <a class="reference external" href="http://scikit-learn.org/stable/developers/index.html#apis-of-scikit-learn-objects">scikit-learn predictor API</a>.</p>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="_sources/extending.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2018, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

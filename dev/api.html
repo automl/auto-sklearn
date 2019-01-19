@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>APIs &#8212; AutoSklearn 0.4.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.4.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="index.html">Start</a></li>
+                <li><a href="releases.html">Releases</a></li>
+                <li><a href="installation.html">Installation</a></li>
+                <li><a href="manual.html">Manual</a></li>
+                <li><a href="examples/index.html">Examples</a></li>
+                <li><a href="#">API</a></li>
+                <li><a href="extending.html">Extending</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">APIs</a><ul>
+<li><a class="reference internal" href="#main-modules">Main modules</a><ul>
+<li><a class="reference internal" href="#classification">Classification</a></li>
+<li><a class="reference internal" href="#regression">Regression</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#metrics">Metrics</a><ul>
+<li><a class="reference internal" href="#built-in-metrics">Built-in Metrics</a><ul>
+<li><a class="reference internal" href="#classification-metrics">Classification metrics</a></li>
+<li><a class="reference internal" href="#regression-metrics">Regression metrics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#extension-interfaces">Extension Interfaces</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="apis">
+<span id="api"></span><h1>APIs<a class="headerlink" href="#apis" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="main-modules">
+<h2>Main modules<a class="headerlink" href="#main-modules" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="classification">
+<h3>Classification<a class="headerlink" href="#classification" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="autosklearn.classification.AutoSklearnClassifier">
+<em class="property">class </em><code class="descclassname">autosklearn.classification.</code><code class="descname">AutoSklearnClassifier</code><span class="sig-paren">(</span><em>time_left_for_this_task=3600</em>, <em>per_run_time_limit=360</em>, <em>initial_configurations_via_metalearning=25</em>, <em>ensemble_size=50</em>, <em>ensemble_nbest=50</em>, <em>seed=1</em>, <em>ml_memory_limit=3072</em>, <em>include_estimators=None</em>, <em>exclude_estimators=None</em>, <em>include_preprocessors=None</em>, <em>exclude_preprocessors=None</em>, <em>resampling_strategy='holdout'</em>, <em>resampling_strategy_arguments=None</em>, <em>tmp_folder=None</em>, <em>output_folder=None</em>, <em>delete_tmp_folder_after_terminate=True</em>, <em>delete_output_folder_after_terminate=True</em>, <em>shared_mode=False</em>, <em>disable_evaluator_output=False</em>, <em>get_smac_object_callback=None</em>, <em>smac_scenario_args=None</em>, <em>logging_config=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class implements the classification task.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>time_left_for_this_task</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional (default=3600)</span></dt>
+<dd><p class="first last">Time limit in seconds for the search of appropriate
+models. By increasing this value, <em>auto-sklearn</em> has a higher
+chance of finding better models.</p>
+</dd>
+<dt><strong>per_run_time_limit</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional (default=360)</span></dt>
+<dd><p class="first last">Time limit for a single call to the machine learning model.
+Model fitting will be terminated if the machine learning
+algorithm runs over the time limit. Set this value high enough so
+that typical machine learning algorithms can be fit on the
+training data.</p>
+</dd>
+<dt><strong>initial_configurations_via_metalearning</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional (default=25)</span></dt>
+<dd><p class="first last">Initialize the hyperparameter optimization algorithm with this
+many configurations which worked well on previously seen
+datasets. Disable if the hyperparameter optimization algorithm
+should start from scratch.</p>
+</dd>
+<dt><strong>ensemble_size</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional (default=50)</span></dt>
+<dd><p class="first last">Number of models added to the ensemble built by <em>Ensemble
+selection from libraries of models</em>. Models are drawn with
+replacement.</p>
+</dd>
+<dt><strong>ensemble_nbest</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional (default=50)</span></dt>
+<dd><p class="first last">Only consider the <code class="docutils literal"><span class="pre">ensemble_nbest</span></code> models when building an
+ensemble. Implements <cite>Model Library Pruning</cite> from <cite>Getting the
+most out of ensemble selection</cite>.</p>
+</dd>
+<dt><strong>seed</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional (default=1)</span></dt>
+<dd><p class="first last">Used to seed SMAC. Will determine the output file names.</p>
+</dd>
+<dt><strong>ml_memory_limit</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional (3072)</span></dt>
+<dd><p class="first last">Memory limit in MB for the machine learning algorithm.
+<cite>auto-sklearn</cite> will stop fitting the machine learning algorithm if
+it tries to allocate more than <cite>ml_memory_limit</cite> MB.</p>
+</dd>
+<dt><strong>include_estimators</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list, optional (None)</span></dt>
+<dd><p class="first last">If None, all possible estimators are used. Otherwise specifies
+set of estimators to use.</p>
+</dd>
+<dt><strong>exclude_estimators</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list, optional (None)</span></dt>
+<dd><p class="first last">If None, all possible estimators are used. Otherwise specifies
+set of estimators not to use. Incompatible with include_estimators.</p>
+</dd>
+<dt><strong>include_preprocessors</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list, optional (None)</span></dt>
+<dd><p class="first last">If None all possible preprocessors are used. Otherwise specifies set
+of preprocessors to use.</p>
+</dd>
+<dt><strong>exclude_preprocessors</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list, optional (None)</span></dt>
+<dd><p class="first last">If None all possible preprocessors are used. Otherwise specifies set
+of preprocessors not to use. Incompatible with
+include_preprocessors.</p>
+</dd>
+<dt><strong>resampling_strategy</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string or object, optional (&#8216;holdout&#8217;)</span></dt>
+<dd><p class="first">how to to handle overfitting, might need &#8216;resampling_strategy_arguments&#8217;</p>
+<ul class="last simple">
+<li>&#8216;holdout&#8217;: 67:33 (train:test) split</li>
+<li>&#8216;holdout-iterative-fit&#8217;:  67:33 (train:test) split, calls iterative
+fit where possible</li>
+<li>&#8216;cv&#8217;: crossvalidation, requires &#8216;folds&#8217;</li>
+<li>&#8216;partial-cv&#8217;: crossvalidation with intensification, requires
+&#8216;folds&#8217;</li>
+<li><dl class="first docutils">
+<dt>BaseCrossValidator object: any BaseCrossValidator class found</dt>
+<dd>in scikit-learn model_selection module</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>_RepeatedSplits object: any _RepeatedSplits class found</dt>
+<dd>in scikit-learn model_selection module</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>BaseShuffleSplit object: any BaseShuffleSplit class found</dt>
+<dd>in scikit-learn model_selection module</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt><strong>resampling_strategy_arguments</strong> <span class="classifier-delimiter">:</span> <span class="classifier">dict, optional if &#8216;holdout&#8217; (train_size default=0.67)</span></dt>
+<dd><p class="first">Additional arguments for resampling_strategy:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">train_size</span></code> should be between 0.0 and 1.0 and represent the
+proportion of the dataset to include in the train split.</li>
+<li><code class="docutils literal"><span class="pre">shuffle</span></code> determines whether the data is shuffled prior to
+splitting it into train and validation.</li>
+</ul>
+<p>Available arguments:</p>
+<ul class="last simple">
+<li>&#8216;holdout&#8217;: {&#8216;train_size&#8217;: float}</li>
+<li>&#8216;holdout-iterative-fit&#8217;:  {&#8216;train_size&#8217;: float}</li>
+<li>&#8216;cv&#8217;: {&#8216;folds&#8217;: int}</li>
+<li>&#8216;partial-cv&#8217;: {&#8216;folds&#8217;: int, &#8216;shuffle&#8217;: bool}</li>
+<li><dl class="first docutils">
+<dt>BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments</dt>
+<dd>required by chosen class as specified in scikit-learn documentation.
+If arguments are not provided, scikit-learn defaults are used.
+If no defaults are available, an exception is raised.
+Refer to the &#8216;n_splits&#8217; argument as &#8216;folds&#8217;.</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt><strong>tmp_folder</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string, optional (None)</span></dt>
+<dd><p class="first last">folder to store configuration output and log files, if <code class="docutils literal"><span class="pre">None</span></code>
+automatically use <code class="docutils literal"><span class="pre">/tmp/autosklearn_tmp_$pid_$random_number</span></code></p>
+</dd>
+<dt><strong>output_folder</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string, optional (None)</span></dt>
+<dd><p class="first last">folder to store predictions for optional test set, if <code class="docutils literal"><span class="pre">None</span></code>
+automatically use <code class="docutils literal"><span class="pre">/tmp/autosklearn_output_$pid_$random_number</span></code></p>
+</dd>
+<dt><strong>delete_tmp_folder_after_terminate: string, optional (True)</strong></dt>
+<dd><p class="first last">remove tmp_folder, when finished. If tmp_folder is None
+tmp_dir will always be deleted</p>
+</dd>
+<dt><strong>delete_output_folder_after_terminate: bool, optional (True)</strong></dt>
+<dd><p class="first last">remove output_folder, when finished. If output_folder is None
+output_dir will always be deleted</p>
+</dd>
+<dt><strong>shared_mode: bool, optional (False)</strong></dt>
+<dd><p class="first last">Run smac in shared-model-node. This only works if arguments
+<code class="docutils literal"><span class="pre">tmp_folder</span></code> and <code class="docutils literal"><span class="pre">output_folder</span></code> are given and both
+<code class="docutils literal"><span class="pre">delete_tmp_folder_after_terminate</span></code> and
+<code class="docutils literal"><span class="pre">delete_output_folder_after_terminate</span></code> are set to False.</p>
+</dd>
+<dt><strong>disable_evaluator_output: bool or list, optional (False)</strong></dt>
+<dd><p class="first">If True, disable model and prediction output. Cannot be used
+together with ensemble building. <code class="docutils literal"><span class="pre">predict()</span></code> cannot be used when
+setting this True. Can also be used as a list to pass more
+fine-grained information on what to save. Allowed elements in the
+list are:</p>
+<ul class="last simple">
+<li><code class="docutils literal"><span class="pre">'y_optimization'</span></code> : do not save the predictions for the
+optimization/validation set, which would later on be used to build
+an ensemble.</li>
+<li><code class="docutils literal"><span class="pre">'model'</span></code> : do not save any model files</li>
+</ul>
+</dd>
+<dt><strong>smac_scenario_args</strong> <span class="classifier-delimiter">:</span> <span class="classifier">dict, optional (None)</span></dt>
+<dd><p class="first last">Additional arguments inserted into the scenario of SMAC. See the
+<a class="reference external" href="https://automl.github.io/SMAC3/stable/options.html?highlight=scenario#scenario">SMAC documentation</a>
+for a list of available arguments.</p>
+</dd>
+<dt><strong>get_smac_object_callback</strong> <span class="classifier-delimiter">:</span> <span class="classifier">callable</span></dt>
+<dd><p class="first last">Callback function to create an object of class
+<a class="reference external" href="https://automl.github.io/SMAC3/stable/apidoc/smac.optimizer.smbo.html">smac.optimizer.smbo.SMBO</a>.
+The function must accept the arguments <code class="docutils literal"><span class="pre">scenario_dict</span></code>, 
+<code class="docutils literal"><span class="pre">instances</span></code>, <code class="docutils literal"><span class="pre">num_params</span></code>, <code class="docutils literal"><span class="pre">runhistory</span></code>, <code class="docutils literal"><span class="pre">seed</span></code> and <code class="docutils literal"><span class="pre">ta</span></code>.
+This is an advanced feature. Use only if you are familiar with
+<a class="reference external" href="https://automl.github.io/SMAC3/stable/index.html">SMAC</a>.</p>
+</dd>
+<dt><strong>logging_config</strong> <span class="classifier-delimiter">:</span> <span class="classifier">dict, optional (None)</span></dt>
+<dd><p class="first last">dictionary object specifying the logger configuration. If None,
+the default logging.yaml file is used, which can be found in
+the directory <code class="docutils literal"><span class="pre">util/logging.yaml</span></code> relative to the installation.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>cv_results_</strong> <span class="classifier-delimiter">:</span> <span class="classifier">dict of numpy (masked) ndarrays</span></dt>
+<dd><p class="first">A dict with keys as column headers and values as columns, that can be
+imported into a pandas <code class="docutils literal"><span class="pre">DataFrame</span></code>.</p>
+<p class="last">Not all keys returned by scikit-learn are supported yet.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>X_test=None</em>, <em>y_test=None</em>, <em>metric=None</em>, <em>feat_type=None</em>, <em>dataset_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit <em>auto-sklearn</em> to given training set (X, y).</p>
+<p>Fit both optimizes the machine learning models and builds an ensemble
+out of them. To disable ensembling, set <code class="docutils literal"><span class="pre">ensemble_size==0</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like or sparse matrix of shape = [n_samples, n_features]</span></dt>
+<dd><p class="first last">The training input samples.</p>
+</dd>
+<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like, shape = [n_samples] or [n_samples, n_outputs]</span></dt>
+<dd><p class="first last">The target classes.</p>
+</dd>
+<dt><strong>X_test</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like or sparse matrix of shape = [n_samples, n_features]</span></dt>
+<dd><p class="first last">Test data input samples. Will be used to save test predictions for
+all models. This allows to evaluate the performance of Auto-sklearn
+over time.</p>
+</dd>
+<dt><strong>y_test</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like, shape = [n_samples] or [n_samples, n_outputs]</span></dt>
+<dd><p class="first last">Test data target classes. Will be used to calculate the test error
+of all models. This allows to evaluate the performance of
+Auto-sklearn over time.</p>
+</dd>
+<dt><strong>metric</strong> <span class="classifier-delimiter">:</span> <span class="classifier">callable, optional (default=&#8217;autosklearn.metrics.accuracy&#8217;)</span></dt>
+<dd><p class="first last">An instance of <code class="xref py py-class docutils literal"><span class="pre">autosklearn.metrics.Scorer</span></code> as created by
+<a class="reference internal" href="#autosklearn.metrics.make_scorer" title="autosklearn.metrics.make_scorer"><code class="xref py py-meth docutils literal"><span class="pre">autosklearn.metrics.make_scorer()</span></code></a>. These are the <a class="reference internal" href="#built-in-metrics">Built-in
+Metrics</a>.</p>
+</dd>
+<dt><strong>feat_type</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list, optional (default=None)</span></dt>
+<dd><p class="first last">List of str of <cite>len(X.shape[1])</cite> describing the attribute type.
+Possible types are <cite>Categorical</cite> and <cite>Numerical</cite>. <cite>Categorical</cite>
+attributes will be automatically One-Hot encoded. The values
+used for a categorical attribute must be integers, obtained for
+example by <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.LabelEncoder.html">sklearn.preprocessing.LabelEncoder</a>.</p>
+</dd>
+<dt><strong>dataset_name</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str, optional (default=None)</span></dt>
+<dd><p class="first last">Create nicer output. If None, a string will be determined by the
+md5 hash of the dataset.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>self</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.fit_ensemble">
+<code class="descname">fit_ensemble</code><span class="sig-paren">(</span><em>y</em>, <em>task=None</em>, <em>metric=None</em>, <em>precision='32'</em>, <em>dataset_name=None</em>, <em>ensemble_nbest=None</em>, <em>ensemble_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.fit_ensemble" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit an ensemble to models trained during an optimization process.</p>
+<p>All parameters are <code class="docutils literal"><span class="pre">None</span></code> by default. If no other value is given,
+the default values which were set in a call to <code class="docutils literal"><span class="pre">fit()</span></code> are used.</p>
+<p>Calling this function is only necessary if <code class="docutils literal"><span class="pre">ensemble_size==0</span></code>, for
+example when executing <em>auto-sklearn</em> in parallel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like</span></dt>
+<dd><p class="first last">Target values.</p>
+</dd>
+<dt><strong>task</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">A constant from the module <code class="docutils literal"><span class="pre">autosklearn.constants</span></code>. Determines
+the task type (binary classification, multiclass classification,
+multilabel classification or regression).</p>
+</dd>
+<dt><strong>metric</strong> <span class="classifier-delimiter">:</span> <span class="classifier">callable, optional</span></dt>
+<dd><p class="first last">An instance of <code class="xref py py-class docutils literal"><span class="pre">autosklearn.metrics.Scorer</span></code> as created by
+<a class="reference internal" href="#autosklearn.metrics.make_scorer" title="autosklearn.metrics.make_scorer"><code class="xref py py-meth docutils literal"><span class="pre">autosklearn.metrics.make_scorer()</span></code></a>. These are the <a class="reference internal" href="#built-in-metrics">Built-in
+Metrics</a>.</p>
+</dd>
+<dt><strong>precision</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Numeric precision used when loading ensemble data. Can be either
+<code class="docutils literal"><span class="pre">'16'</span></code>, <code class="docutils literal"><span class="pre">'32'</span></code> or <code class="docutils literal"><span class="pre">'64'</span></code>.</p>
+</dd>
+<dt><strong>dataset_name</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Name of the current data set.</p>
+</dd>
+<dt><strong>ensemble_nbest</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">Determines how many models should be considered from the ensemble
+building. This is inspired by a concept called library pruning
+introduced in <cite>Getting Most out of Ensemble Selection</cite>.</p>
+</dd>
+<dt><strong>ensemble_size</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">Size of the ensemble built by <cite>Ensemble Selection</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>self</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.get_models_with_weights">
+<code class="descname">get_models_with_weights</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.get_models_with_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of the final ensemble found by auto-sklearn.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>[(weight_1, model_1), ..., (weight_n, model_n)]</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.get_params">
+<code class="descname">get_params</code><span class="sig-paren">(</span><em>deep=True</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.get_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get parameters for this estimator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>deep</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean, optional</span></dt>
+<dd><p class="first last">If True, will return the parameters for this estimator and
+contained subobjects that are estimators.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>params</strong> <span class="classifier-delimiter">:</span> <span class="classifier">mapping of string to any</span></dt>
+<dd><p class="first last">Parameter names mapped to their values.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em>, <em>batch_size=None</em>, <em>n_jobs=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict classes for X.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like or sparse matrix of shape = [n_samples, n_features]</span></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array of shape = [n_samples] or [n_samples, n_labels]</span></dt>
+<dd><p class="first last">The predicted classes.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.predict_proba">
+<code class="descname">predict_proba</code><span class="sig-paren">(</span><em>X</em>, <em>batch_size=None</em>, <em>n_jobs=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnClassifier.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.predict_proba" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict probabilities of classes for all samples X.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like or sparse matrix of shape = [n_samples, n_features]</span></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array of shape = [n_samples, n_classes] or [n_samples, n_labels]</span></dt>
+<dd><p class="first last">The predicted class probabilities.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.refit">
+<code class="descname">refit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.refit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refit all models found with fit to new data.</p>
+<p>Necessary when using cross-validation. During training, auto-sklearn
+fits each model k times on the dataset, but does not keep any trained
+model and can therefore not be used to predict for new data points.
+This methods fits all models found during a call to fit on the data
+given. This method may also be used together with holdout to avoid
+only using 66% of the training data to fit the final model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like or sparse matrix of shape = [n_samples, n_features]</span></dt>
+<dd><p class="first last">The training input samples.</p>
+</dd>
+<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like, shape = [n_samples] or [n_samples, n_outputs]</span></dt>
+<dd><p class="first last">The targets.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>self</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>**params</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.set_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the parameters of this estimator.</p>
+<p>The method works on simple estimators as well as on nested objects
+(such as pipelines). The latter have parameters of the form
+<code class="docutils literal"><span class="pre">&lt;component&gt;__&lt;parameter&gt;</span></code> so that it&#8217;s possible to update each
+component of a nested object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>self</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.show_models">
+<code class="descname">show_models</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.show_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a representation of the final ensemble found by auto-sklearn.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>str</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.classification.AutoSklearnClassifier.sprint_statistics">
+<code class="descname">sprint_statistics</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.classification.AutoSklearnClassifier.sprint_statistics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the following statistics of the training result:</p>
+<ul class="simple">
+<li>dataset name</li>
+<li>metric used</li>
+<li>best validation score</li>
+<li>number of target algorithm runs</li>
+<li>number of successful target algorithm runs</li>
+<li>number of crashed target algorithm runs</li>
+<li>number of target algorithm runs that exceeded the memory limit</li>
+<li>number of target algorithm runs that exceeded the time limit</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>str</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="regression">
+<h3>Regression<a class="headerlink" href="#regression" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="autosklearn.regression.AutoSklearnRegressor">
+<em class="property">class </em><code class="descclassname">autosklearn.regression.</code><code class="descname">AutoSklearnRegressor</code><span class="sig-paren">(</span><em>time_left_for_this_task=3600</em>, <em>per_run_time_limit=360</em>, <em>initial_configurations_via_metalearning=25</em>, <em>ensemble_size=50</em>, <em>ensemble_nbest=50</em>, <em>seed=1</em>, <em>ml_memory_limit=3072</em>, <em>include_estimators=None</em>, <em>exclude_estimators=None</em>, <em>include_preprocessors=None</em>, <em>exclude_preprocessors=None</em>, <em>resampling_strategy='holdout'</em>, <em>resampling_strategy_arguments=None</em>, <em>tmp_folder=None</em>, <em>output_folder=None</em>, <em>delete_tmp_folder_after_terminate=True</em>, <em>delete_output_folder_after_terminate=True</em>, <em>shared_mode=False</em>, <em>disable_evaluator_output=False</em>, <em>get_smac_object_callback=None</em>, <em>smac_scenario_args=None</em>, <em>logging_config=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnRegressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class implements the regression task.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>time_left_for_this_task</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional (default=3600)</span></dt>
+<dd><p class="first last">Time limit in seconds for the search of appropriate
+models. By increasing this value, <em>auto-sklearn</em> has a higher
+chance of finding better models.</p>
+</dd>
+<dt><strong>per_run_time_limit</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional (default=360)</span></dt>
+<dd><p class="first last">Time limit for a single call to the machine learning model.
+Model fitting will be terminated if the machine learning
+algorithm runs over the time limit. Set this value high enough so
+that typical machine learning algorithms can be fit on the
+training data.</p>
+</dd>
+<dt><strong>initial_configurations_via_metalearning</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional (default=25)</span></dt>
+<dd><p class="first last">Initialize the hyperparameter optimization algorithm with this
+many configurations which worked well on previously seen
+datasets. Disable if the hyperparameter optimization algorithm
+should start from scratch.</p>
+</dd>
+<dt><strong>ensemble_size</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional (default=50)</span></dt>
+<dd><p class="first last">Number of models added to the ensemble built by <em>Ensemble
+selection from libraries of models</em>. Models are drawn with
+replacement.</p>
+</dd>
+<dt><strong>ensemble_nbest</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional (default=50)</span></dt>
+<dd><p class="first last">Only consider the <code class="docutils literal"><span class="pre">ensemble_nbest</span></code> models when building an
+ensemble. Implements <cite>Model Library Pruning</cite> from <cite>Getting the
+most out of ensemble selection</cite>.</p>
+</dd>
+<dt><strong>seed</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional (default=1)</span></dt>
+<dd><p class="first last">Used to seed SMAC. Will determine the output file names.</p>
+</dd>
+<dt><strong>ml_memory_limit</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int, optional (3072)</span></dt>
+<dd><p class="first last">Memory limit in MB for the machine learning algorithm.
+<cite>auto-sklearn</cite> will stop fitting the machine learning algorithm if
+it tries to allocate more than <cite>ml_memory_limit</cite> MB.</p>
+</dd>
+<dt><strong>include_estimators</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list, optional (None)</span></dt>
+<dd><p class="first last">If None, all possible estimators are used. Otherwise specifies
+set of estimators to use.</p>
+</dd>
+<dt><strong>exclude_estimators</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list, optional (None)</span></dt>
+<dd><p class="first last">If None, all possible estimators are used. Otherwise specifies
+set of estimators not to use. Incompatible with include_estimators.</p>
+</dd>
+<dt><strong>include_preprocessors</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list, optional (None)</span></dt>
+<dd><p class="first last">If None all possible preprocessors are used. Otherwise specifies set
+of preprocessors to use.</p>
+</dd>
+<dt><strong>exclude_preprocessors</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list, optional (None)</span></dt>
+<dd><p class="first last">If None all possible preprocessors are used. Otherwise specifies set
+of preprocessors not to use. Incompatible with
+include_preprocessors.</p>
+</dd>
+<dt><strong>resampling_strategy</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string or object, optional (&#8216;holdout&#8217;)</span></dt>
+<dd><p class="first">how to to handle overfitting, might need &#8216;resampling_strategy_arguments&#8217;</p>
+<ul class="last simple">
+<li>&#8216;holdout&#8217;: 67:33 (train:test) split</li>
+<li>&#8216;holdout-iterative-fit&#8217;:  67:33 (train:test) split, calls iterative
+fit where possible</li>
+<li>&#8216;cv&#8217;: crossvalidation, requires &#8216;folds&#8217;</li>
+<li>&#8216;partial-cv&#8217;: crossvalidation with intensification, requires
+&#8216;folds&#8217;</li>
+<li><dl class="first docutils">
+<dt>BaseCrossValidator object: any BaseCrossValidator class found</dt>
+<dd>in scikit-learn model_selection module</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>_RepeatedSplits object: any _RepeatedSplits class found</dt>
+<dd>in scikit-learn model_selection module</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>BaseShuffleSplit object: any BaseShuffleSplit class found</dt>
+<dd>in scikit-learn model_selection module</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt><strong>resampling_strategy_arguments</strong> <span class="classifier-delimiter">:</span> <span class="classifier">dict, optional if &#8216;holdout&#8217; (train_size default=0.67)</span></dt>
+<dd><p class="first">Additional arguments for resampling_strategy:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">train_size</span></code> should be between 0.0 and 1.0 and represent the
+proportion of the dataset to include in the train split.</li>
+<li><code class="docutils literal"><span class="pre">shuffle</span></code> determines whether the data is shuffled prior to
+splitting it into train and validation.</li>
+</ul>
+<p>Available arguments:</p>
+<ul class="last simple">
+<li>&#8216;holdout&#8217;: {&#8216;train_size&#8217;: float}</li>
+<li>&#8216;holdout-iterative-fit&#8217;:  {&#8216;train_size&#8217;: float}</li>
+<li>&#8216;cv&#8217;: {&#8216;folds&#8217;: int}</li>
+<li>&#8216;partial-cv&#8217;: {&#8216;folds&#8217;: int, &#8216;shuffle&#8217;: bool}</li>
+<li><dl class="first docutils">
+<dt>BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments</dt>
+<dd>required by chosen class as specified in scikit-learn documentation.
+If arguments are not provided, scikit-learn defaults are used.
+If no defaults are available, an exception is raised.
+Refer to the &#8216;n_splits&#8217; argument as &#8216;folds&#8217;.</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt><strong>tmp_folder</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string, optional (None)</span></dt>
+<dd><p class="first last">folder to store configuration output and log files, if <code class="docutils literal"><span class="pre">None</span></code>
+automatically use <code class="docutils literal"><span class="pre">/tmp/autosklearn_tmp_$pid_$random_number</span></code></p>
+</dd>
+<dt><strong>output_folder</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string, optional (None)</span></dt>
+<dd><p class="first last">folder to store predictions for optional test set, if <code class="docutils literal"><span class="pre">None</span></code>
+automatically use <code class="docutils literal"><span class="pre">/tmp/autosklearn_output_$pid_$random_number</span></code></p>
+</dd>
+<dt><strong>delete_tmp_folder_after_terminate: string, optional (True)</strong></dt>
+<dd><p class="first last">remove tmp_folder, when finished. If tmp_folder is None
+tmp_dir will always be deleted</p>
+</dd>
+<dt><strong>delete_output_folder_after_terminate: bool, optional (True)</strong></dt>
+<dd><p class="first last">remove output_folder, when finished. If output_folder is None
+output_dir will always be deleted</p>
+</dd>
+<dt><strong>shared_mode: bool, optional (False)</strong></dt>
+<dd><p class="first last">Run smac in shared-model-node. This only works if arguments
+<code class="docutils literal"><span class="pre">tmp_folder</span></code> and <code class="docutils literal"><span class="pre">output_folder</span></code> are given and both
+<code class="docutils literal"><span class="pre">delete_tmp_folder_after_terminate</span></code> and
+<code class="docutils literal"><span class="pre">delete_output_folder_after_terminate</span></code> are set to False.</p>
+</dd>
+<dt><strong>disable_evaluator_output: bool or list, optional (False)</strong></dt>
+<dd><p class="first">If True, disable model and prediction output. Cannot be used
+together with ensemble building. <code class="docutils literal"><span class="pre">predict()</span></code> cannot be used when
+setting this True. Can also be used as a list to pass more
+fine-grained information on what to save. Allowed elements in the
+list are:</p>
+<ul class="last simple">
+<li><code class="docutils literal"><span class="pre">'y_optimization'</span></code> : do not save the predictions for the
+optimization/validation set, which would later on be used to build
+an ensemble.</li>
+<li><code class="docutils literal"><span class="pre">'model'</span></code> : do not save any model files</li>
+</ul>
+</dd>
+<dt><strong>smac_scenario_args</strong> <span class="classifier-delimiter">:</span> <span class="classifier">dict, optional (None)</span></dt>
+<dd><p class="first last">Additional arguments inserted into the scenario of SMAC. See the
+<a class="reference external" href="https://automl.github.io/SMAC3/stable/options.html?highlight=scenario#scenario">SMAC documentation</a>
+for a list of available arguments.</p>
+</dd>
+<dt><strong>get_smac_object_callback</strong> <span class="classifier-delimiter">:</span> <span class="classifier">callable</span></dt>
+<dd><p class="first last">Callback function to create an object of class
+<a class="reference external" href="https://automl.github.io/SMAC3/stable/apidoc/smac.optimizer.smbo.html">smac.optimizer.smbo.SMBO</a>.
+The function must accept the arguments <code class="docutils literal"><span class="pre">scenario_dict</span></code>, 
+<code class="docutils literal"><span class="pre">instances</span></code>, <code class="docutils literal"><span class="pre">num_params</span></code>, <code class="docutils literal"><span class="pre">runhistory</span></code>, <code class="docutils literal"><span class="pre">seed</span></code> and <code class="docutils literal"><span class="pre">ta</span></code>.
+This is an advanced feature. Use only if you are familiar with
+<a class="reference external" href="https://automl.github.io/SMAC3/stable/index.html">SMAC</a>.</p>
+</dd>
+<dt><strong>logging_config</strong> <span class="classifier-delimiter">:</span> <span class="classifier">dict, optional (None)</span></dt>
+<dd><p class="first last">dictionary object specifying the logger configuration. If None,
+the default logging.yaml file is used, which can be found in
+the directory <code class="docutils literal"><span class="pre">util/logging.yaml</span></code> relative to the installation.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Attributes:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>cv_results_</strong> <span class="classifier-delimiter">:</span> <span class="classifier">dict of numpy (masked) ndarrays</span></dt>
+<dd><p class="first">A dict with keys as column headers and values as columns, that can be
+imported into a pandas <code class="docutils literal"><span class="pre">DataFrame</span></code>.</p>
+<p class="last">Not all keys returned by scikit-learn are supported yet.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="autosklearn.regression.AutoSklearnRegressor.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>X_test=None</em>, <em>y_test=None</em>, <em>metric=None</em>, <em>feat_type=None</em>, <em>dataset_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnRegressor.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit <em>Auto-sklearn</em> to given training set (X, y).</p>
+<p>Fit both optimizes the machine learning models and builds an ensemble
+out of them. To disable ensembling, set <code class="docutils literal"><span class="pre">ensemble_size==0</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like or sparse matrix of shape = [n_samples, n_features]</span></dt>
+<dd><p class="first last">The training input samples.</p>
+</dd>
+<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like, shape = [n_samples]</span></dt>
+<dd><p class="first last">The regression target.</p>
+</dd>
+<dt><strong>X_test</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like or sparse matrix of shape = [n_samples, n_features]</span></dt>
+<dd><p class="first last">Test data input samples. Will be used to save test predictions for
+all models. This allows to evaluate the performance of Auto-sklearn
+over time.</p>
+</dd>
+<dt><strong>y_test</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like, shape = [n_samples]</span></dt>
+<dd><p class="first last">The regression target. Will be used to calculate the test error
+of all models. This allows to evaluate the performance of
+Auto-sklearn over time.</p>
+</dd>
+<dt><strong>metric</strong> <span class="classifier-delimiter">:</span> <span class="classifier">callable, optional (default=&#8217;autosklearn.metrics.r2&#8217;)</span></dt>
+<dd><p class="first last">An instance of <code class="xref py py-class docutils literal"><span class="pre">autosklearn.metrics.Scorer</span></code> as created by
+<a class="reference internal" href="#autosklearn.metrics.make_scorer" title="autosklearn.metrics.make_scorer"><code class="xref py py-meth docutils literal"><span class="pre">autosklearn.metrics.make_scorer()</span></code></a>. These are the <a class="reference internal" href="#built-in-metrics">Built-in
+Metrics</a>.</p>
+</dd>
+<dt><strong>feat_type</strong> <span class="classifier-delimiter">:</span> <span class="classifier">list, optional (default=None)</span></dt>
+<dd><p class="first last">List of str of <cite>len(X.shape[1])</cite> describing the attribute type.
+Possible types are <cite>Categorical</cite> and <cite>Numerical</cite>. <cite>Categorical</cite>
+attributes will be automatically One-Hot encoded.</p>
+</dd>
+<dt><strong>dataset_name</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str, optional (default=None)</span></dt>
+<dd><p class="first last">Create nicer output. If None, a string will be determined by the
+md5 hash of the dataset.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>self</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.regression.AutoSklearnRegressor.fit_ensemble">
+<code class="descname">fit_ensemble</code><span class="sig-paren">(</span><em>y</em>, <em>task=None</em>, <em>metric=None</em>, <em>precision='32'</em>, <em>dataset_name=None</em>, <em>ensemble_nbest=None</em>, <em>ensemble_size=None</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.fit_ensemble" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit an ensemble to models trained during an optimization process.</p>
+<p>All parameters are <code class="docutils literal"><span class="pre">None</span></code> by default. If no other value is given,
+the default values which were set in a call to <code class="docutils literal"><span class="pre">fit()</span></code> are used.</p>
+<p>Calling this function is only necessary if <code class="docutils literal"><span class="pre">ensemble_size==0</span></code>, for
+example when executing <em>auto-sklearn</em> in parallel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like</span></dt>
+<dd><p class="first last">Target values.</p>
+</dd>
+<dt><strong>task</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">A constant from the module <code class="docutils literal"><span class="pre">autosklearn.constants</span></code>. Determines
+the task type (binary classification, multiclass classification,
+multilabel classification or regression).</p>
+</dd>
+<dt><strong>metric</strong> <span class="classifier-delimiter">:</span> <span class="classifier">callable, optional</span></dt>
+<dd><p class="first last">An instance of <code class="xref py py-class docutils literal"><span class="pre">autosklearn.metrics.Scorer</span></code> as created by
+<a class="reference internal" href="#autosklearn.metrics.make_scorer" title="autosklearn.metrics.make_scorer"><code class="xref py py-meth docutils literal"><span class="pre">autosklearn.metrics.make_scorer()</span></code></a>. These are the <a class="reference internal" href="#built-in-metrics">Built-in
+Metrics</a>.</p>
+</dd>
+<dt><strong>precision</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Numeric precision used when loading ensemble data. Can be either
+<code class="docutils literal"><span class="pre">'16'</span></code>, <code class="docutils literal"><span class="pre">'32'</span></code> or <code class="docutils literal"><span class="pre">'64'</span></code>.</p>
+</dd>
+<dt><strong>dataset_name</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Name of the current data set.</p>
+</dd>
+<dt><strong>ensemble_nbest</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">Determines how many models should be considered from the ensemble
+building. This is inspired by a concept called library pruning
+introduced in <cite>Getting Most out of Ensemble Selection</cite>.</p>
+</dd>
+<dt><strong>ensemble_size</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">Size of the ensemble built by <cite>Ensemble Selection</cite>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>self</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.regression.AutoSklearnRegressor.get_models_with_weights">
+<code class="descname">get_models_with_weights</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.get_models_with_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of the final ensemble found by auto-sklearn.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>[(weight_1, model_1), ..., (weight_n, model_n)]</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.regression.AutoSklearnRegressor.get_params">
+<code class="descname">get_params</code><span class="sig-paren">(</span><em>deep=True</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.get_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get parameters for this estimator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>deep</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean, optional</span></dt>
+<dd><p class="first last">If True, will return the parameters for this estimator and
+contained subobjects that are estimators.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>params</strong> <span class="classifier-delimiter">:</span> <span class="classifier">mapping of string to any</span></dt>
+<dd><p class="first last">Parameter names mapped to their values.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.regression.AutoSklearnRegressor.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em>, <em>batch_size=None</em>, <em>n_jobs=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/estimators.html#AutoSklearnRegressor.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict regression target for X.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like or sparse matrix of shape = [n_samples, n_features]</span></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array of shape = [n_samples] or [n_samples, n_outputs]</span></dt>
+<dd><p class="first last">The predicted values.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.regression.AutoSklearnRegressor.refit">
+<code class="descname">refit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.refit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refit all models found with fit to new data.</p>
+<p>Necessary when using cross-validation. During training, auto-sklearn
+fits each model k times on the dataset, but does not keep any trained
+model and can therefore not be used to predict for new data points.
+This methods fits all models found during a call to fit on the data
+given. This method may also be used together with holdout to avoid
+only using 66% of the training data to fit the final model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like or sparse matrix of shape = [n_samples, n_features]</span></dt>
+<dd><p class="first last">The training input samples.</p>
+</dd>
+<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like, shape = [n_samples] or [n_samples, n_outputs]</span></dt>
+<dd><p class="first last">The targets.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>self</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.regression.AutoSklearnRegressor.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>**params</em><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.set_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the parameters of this estimator.</p>
+<p>The method works on simple estimators as well as on nested objects
+(such as pipelines). The latter have parameters of the form
+<code class="docutils literal"><span class="pre">&lt;component&gt;__&lt;parameter&gt;</span></code> so that it&#8217;s possible to update each
+component of a nested object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>self</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.regression.AutoSklearnRegressor.show_models">
+<code class="descname">show_models</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.show_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a representation of the final ensemble found by auto-sklearn.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>str</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.regression.AutoSklearnRegressor.sprint_statistics">
+<code class="descname">sprint_statistics</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#autosklearn.regression.AutoSklearnRegressor.sprint_statistics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the following statistics of the training result:</p>
+<ul class="simple">
+<li>dataset name</li>
+<li>metric used</li>
+<li>best validation score</li>
+<li>number of target algorithm runs</li>
+<li>number of successful target algorithm runs</li>
+<li>number of crashed target algorithm runs</li>
+<li>number of target algorithm runs that exceeded the memory limit</li>
+<li>number of target algorithm runs that exceeded the time limit</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>str</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="metrics">
+<h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="autosklearn.metrics.make_scorer">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">make_scorer</code><span class="sig-paren">(</span><em>name</em>, <em>score_func</em>, <em>optimum=1</em>, <em>greater_is_better=True</em>, <em>needs_proba=False</em>, <em>needs_threshold=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/metrics.html#make_scorer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.metrics.make_scorer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a scorer from a performance metric or loss function.</p>
+<p>Factory inspired by scikit-learn which wraps scikit-learn scoring functions
+to be used in auto-sklearn.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>score_func</strong> <span class="classifier-delimiter">:</span> <span class="classifier">callable</span></dt>
+<dd><p class="first last">Score function (or loss function) with signature
+<code class="docutils literal"><span class="pre">score_func(y,</span> <span class="pre">y_pred,</span> <span class="pre">**kwargs)</span></code>.</p>
+</dd>
+<dt><strong>optimum</strong> <span class="classifier-delimiter">:</span> <span class="classifier">int or float, default=1</span></dt>
+<dd><p class="first last">The best score achievable by the score function, i.e. maximum in case of
+scorer function and minimum in case of loss function.</p>
+</dd>
+<dt><strong>greater_is_better</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean, default=True</span></dt>
+<dd><p class="first last">Whether score_func is a score function (default), meaning high is good,
+or a loss function, meaning low is good. In the latter case, the
+scorer object will sign-flip the outcome of the score_func.</p>
+</dd>
+<dt><strong>needs_proba</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean, default=False</span></dt>
+<dd><p class="first last">Whether score_func requires predict_proba to get probability estimates
+out of a classifier.</p>
+</dd>
+<dt><strong>needs_threshold</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean, default=False</span></dt>
+<dd><p class="first last">Whether score_func takes a continuous decision certainty.
+This only works for binary classification.</p>
+</dd>
+<dt><strong>**kwargs</strong> <span class="classifier-delimiter">:</span> <span class="classifier">additional arguments</span></dt>
+<dd><p class="first last">Additional parameters to be passed to score_func.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>scorer</strong> <span class="classifier-delimiter">:</span> <span class="classifier">callable</span></dt>
+<dd><p class="first last">Callable object that returns a scalar score; greater is better.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="built-in-metrics">
+<h3>Built-in Metrics<a class="headerlink" href="#built-in-metrics" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="classification-metrics">
+<h4>Classification metrics<a class="headerlink" href="#classification-metrics" title="Permalink to this headline">¶</a></h4>
+<p>Note: The default <code class="docutils literal"><span class="pre">autosklearn.metrics.f1</span></code>, <code class="docutils literal"><span class="pre">autosklearn.metrics.precision</span></code> and <code class="docutils literal"><span class="pre">autosklearn.metrics.recall</span></code>
+built-in metrics are applicable only for binary classification. In order to apply them on multilabel and multiclass
+classification, please use the corresponding metrics with an appropriate averaging mechanism, such as <code class="docutils literal"><span class="pre">autosklearn.metrics.f1_macro</span></code>.
+For more information about how these metrics are used, please read
+<a class="reference external" href="http://scikit-learn.org/stable/modules/model_evaluation.html#precision-recall-and-f-measures">this scikit-learn documentation</a>.</p>
+<dl class="attribute">
+<dt id="autosklearn.metrics.accuracy">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">accuracy</code><a class="headerlink" href="#autosklearn.metrics.accuracy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.balanced_accuracy">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">balanced_accuracy</code><a class="headerlink" href="#autosklearn.metrics.balanced_accuracy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.f1">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">f1</code><a class="headerlink" href="#autosklearn.metrics.f1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.f1_macro">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">f1_macro</code><a class="headerlink" href="#autosklearn.metrics.f1_macro" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.f1_micro">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">f1_micro</code><a class="headerlink" href="#autosklearn.metrics.f1_micro" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.f1_samples">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">f1_samples</code><a class="headerlink" href="#autosklearn.metrics.f1_samples" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.f1_weighted">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">f1_weighted</code><a class="headerlink" href="#autosklearn.metrics.f1_weighted" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.roc_auc">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">roc_auc</code><a class="headerlink" href="#autosklearn.metrics.roc_auc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.precision">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">precision</code><a class="headerlink" href="#autosklearn.metrics.precision" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.precision_macro">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">precision_macro</code><a class="headerlink" href="#autosklearn.metrics.precision_macro" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.precision_micro">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">precision_micro</code><a class="headerlink" href="#autosklearn.metrics.precision_micro" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.precision_samples">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">precision_samples</code><a class="headerlink" href="#autosklearn.metrics.precision_samples" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.precision_weighted">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">precision_weighted</code><a class="headerlink" href="#autosklearn.metrics.precision_weighted" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.average_precision">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">average_precision</code><a class="headerlink" href="#autosklearn.metrics.average_precision" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.recall">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">recall</code><a class="headerlink" href="#autosklearn.metrics.recall" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.recall_macro">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">recall_macro</code><a class="headerlink" href="#autosklearn.metrics.recall_macro" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.recall_micro">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">recall_micro</code><a class="headerlink" href="#autosklearn.metrics.recall_micro" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.recall_samples">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">recall_samples</code><a class="headerlink" href="#autosklearn.metrics.recall_samples" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.recall_weighted">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">recall_weighted</code><a class="headerlink" href="#autosklearn.metrics.recall_weighted" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.log_loss">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">log_loss</code><a class="headerlink" href="#autosklearn.metrics.log_loss" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.pac_score">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">pac_score</code><a class="headerlink" href="#autosklearn.metrics.pac_score" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="regression-metrics">
+<h4>Regression metrics<a class="headerlink" href="#regression-metrics" title="Permalink to this headline">¶</a></h4>
+<dl class="attribute">
+<dt id="autosklearn.metrics.r2">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">r2</code><a class="headerlink" href="#autosklearn.metrics.r2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.mean_squared_error">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">mean_squared_error</code><a class="headerlink" href="#autosklearn.metrics.mean_squared_error" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.mean_absolute_error">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">mean_absolute_error</code><a class="headerlink" href="#autosklearn.metrics.mean_absolute_error" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="autosklearn.metrics.median_absolute_error">
+<code class="descclassname">autosklearn.metrics.</code><code class="descname">median_absolute_error</code><a class="headerlink" href="#autosklearn.metrics.median_absolute_error" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+<div class="section" id="extension-interfaces">
+<h2>Extension Interfaces<a class="headerlink" href="#extension-interfaces" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm">
+<em class="property">class </em><code class="descclassname">autosklearn.pipeline.components.base.</code><code class="descname">AutoSklearnClassificationAlgorithm</code><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide an abstract interface for classification algorithms in
+auto-sklearn.</p>
+<p>See <a class="reference internal" href="extending.html#extending"><span class="std std-ref">Extending auto-sklearn</span></a> for more information.</p>
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.get_estimator">
+<code class="descname">get_estimator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.get_estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.get_estimator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the underlying estimator object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>estimator</strong> <span class="classifier-delimiter">:</span> <span class="classifier">the underlying estimator object</span></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>The predict function calls the predict function of the
+underlying scikit-learn model and returns an array with the predictions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like, shape = (n_samples, n_features)</span></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>array, shape = (n_samples,) or shape = (n_samples, n_labels)</strong></dt>
+<dd><p class="first last">Returns the predicted values</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Please see the <a class="reference external" href="http://scikit-learn.org/dev/developers/index.html#apis-of-scikit-learn-objects">scikit-learn API documentation</a> for further information.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict_proba">
+<code class="descname">predict_proba</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnClassificationAlgorithm.predict_proba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict_proba" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict probabilities.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like, shape = (n_samples, n_features)</span></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm">
+<em class="property">class </em><code class="descclassname">autosklearn.pipeline.components.base.</code><code class="descname">AutoSklearnRegressionAlgorithm</code><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnRegressionAlgorithm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide an abstract interface for regression algorithms in
+auto-sklearn.</p>
+<p>Make a subclass of this and put it into the directory
+<cite>autosklearn/pipeline/components/regression</cite> to make it available.</p>
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.get_estimator">
+<code class="descname">get_estimator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnRegressionAlgorithm.get_estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.get_estimator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the underlying estimator object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>estimator</strong> <span class="classifier-delimiter">:</span> <span class="classifier">the underlying estimator object</span></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnRegressionAlgorithm.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>The predict function calls the predict function of the
+underlying scikit-learn model and returns an array with the predictions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like, shape = (n_samples, n_features)</span></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>array, shape = (n_samples,)</strong></dt>
+<dd><p class="first last">Returns the predicted values</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Please see the <a class="reference external" href="http://scikit-learn.org/dev/developers/index.html#apis-of-scikit-learn-objects">scikit-learn API documentation</a> for further information.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm">
+<em class="property">class </em><code class="descclassname">autosklearn.pipeline.components.base.</code><code class="descname">AutoSklearnPreprocessingAlgorithm</code><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnPreprocessingAlgorithm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide an abstract interface for preprocessing algorithms in
+auto-sklearn.</p>
+<p>See <a class="reference internal" href="extending.html#extending"><span class="std std-ref">Extending auto-sklearn</span></a> for more information.</p>
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.get_preprocessor">
+<code class="descname">get_preprocessor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnPreprocessingAlgorithm.get_preprocessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.get_preprocessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the underlying preprocessor object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>preprocessor</strong> <span class="classifier-delimiter">:</span> <span class="classifier">the underlying preprocessor object</span></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autosklearn/pipeline/components/base.html#AutoSklearnPreprocessingAlgorithm.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>The transform function calls the transform function of the
+underlying scikit-learn model and returns the transformed array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like, shape = (n_samples, n_features)</span></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd><p class="first last">Return the transformed training data</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Please see the <a class="reference external" href="http://scikit-learn.org/dev/developers/index.html#apis-of-scikit-learn-objects">scikit-learn API documentation</a> for further information.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="_sources/api.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2018, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

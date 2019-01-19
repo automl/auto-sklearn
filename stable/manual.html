@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Manual &#8212; AutoSklearn 0.4.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.4.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="index.html">Start</a></li>
+                <li><a href="releases.html">Releases</a></li>
+                <li><a href="installation.html">Installation</a></li>
+                <li><a href="#">Manual</a></li>
+                <li><a href="examples/index.html">Examples</a></li>
+                <li><a href="api.html">API</a></li>
+                <li><a href="extending.html">Extending</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Manual</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#time-and-memory-limits">Time and memory limits</a></li>
+<li><a class="reference internal" href="#restricting-the-searchspace">Restricting the searchspace</a><ul>
+<li><a class="reference internal" href="#turning-off-preprocessing">Turning off preprocessing</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#resampling-strategies">Resampling strategies</a></li>
+<li><a class="reference internal" href="#inspecting-the-results">Inspecting the results</a></li>
+<li><a class="reference internal" href="#parallel-computation">Parallel computation</a></li>
+<li><a class="reference internal" href="#model-persistence">Model persistence</a></li>
+<li><a class="reference internal" href="#vanilla-auto-sklearn">Vanilla auto-sklearn</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="manual">
+<span id="id1"></span><h1>Manual<a class="headerlink" href="#manual" title="Permalink to this headline">¶</a></h1>
+<p>This manual shows how to use several aspects of auto-sklearn. It either
+references the examples where possible or explains certain configurations.</p>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p><em>auto-sklearn</em> comes with the following examples which demonstrate several
+aspects of its usage:</p>
+<ul class="simple">
+<li><a class="reference external" href="examples/example_holdout.html">Holdout</a></li>
+<li><a class="reference external" href="examples/example_crossvalidation.html">Cross-validation</a></li>
+<li><a class="reference external" href="examples/example_parallel.html">Parallel usage</a></li>
+<li><a class="reference external" href="examples/example_sequential.html">Sequential usage</a></li>
+<li><a class="reference external" href="examples/example_regression.html">Regression</a></li>
+<li><a class="reference external" href="examples/example_feature_types.html">Continuous and categorical data</a></li>
+<li><a class="reference external" href="examples/example_metrics.html">Using custom metrics</a></li>
+<li><a class="reference external" href="examples/example_random_search.html">Random search</a></li>
+<li><a class="reference external" href="examples/example_eips.html">EIPS</a></li>
+</ul>
+</div>
+<div class="section" id="time-and-memory-limits">
+<h2>Time and memory limits<a class="headerlink" href="#time-and-memory-limits" title="Permalink to this headline">¶</a></h2>
+<p>A crucial feature of <em>auto-sklearn</em> is limiting the resources (memory and
+time) which the scikit-learn algorithms are allowed to use. Especially for
+large datasets, on which algorithms can take several hours and make the
+machine swap, it is important to stop the evaluations after some time in order
+to make progress in a reasonable amount of time. Setting the resource limits
+is therefore a tradeoff between optimization time and the number of models
+that can be tested.</p>
+<p>While <em>auto-sklearn</em> alleviates manual hyperparameter tuning, the user still
+has to set memory and time limits. For most datasets a memory limit of 3GB or
+6GB as found on most modern computers is sufficient. For the time limits it
+is harder to give clear guidelines. If possible, a good default is a total
+time limit of one day, and a time limit of 30 minutes for a single run.</p>
+<p>Further guidelines can be found in
+<a class="reference external" href="https://github.com/automl/auto-sklearn/issues/142">auto-sklearn/issues/142</a>.</p>
+</div>
+<div class="section" id="restricting-the-searchspace">
+<h2>Restricting the searchspace<a class="headerlink" href="#restricting-the-searchspace" title="Permalink to this headline">¶</a></h2>
+<p>Instead of using all available estimators, it is possible to restrict
+<em>auto-sklearn</em>&#8216;s searchspace. The following shows an example of how to exclude
+all preprocessing methods and restrict the configuration space to only
+random forests.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">include_estimators</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;random_forest&quot;</span><span class="p">,</span> <span class="p">],</span> <span class="n">exclude_estimators</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">include_preprocessors</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;no_preprocessing&quot;</span><span class="p">,</span> <span class="p">],</span> <span class="n">exclude_preprocessors</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">predictions</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Note:</strong> The strings used to identify estimators and preprocessors are the filenames without <em>.py</em>.</p>
+<p>For a full list please have a look at the source code (in <cite>autosklearn/pipeline/components/</cite>):</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/classification">Classifiers</a></li>
+<li><a class="reference external" href="https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/regression">Regressors</a></li>
+<li><a class="reference external" href="https://github.com/automl/auto-sklearn/tree/master/autosklearn/pipeline/components/feature_preprocessing">Preprocessors</a></li>
+</ul>
+</div></blockquote>
+<div class="section" id="turning-off-preprocessing">
+<h3>Turning off preprocessing<a class="headerlink" href="#turning-off-preprocessing" title="Permalink to this headline">¶</a></h3>
+<p>Preprocessing in <em>auto-sklearn</em> is divided into data preprocessing and
+feature preprocessing. Data preprocessing includes One-Hot encoding of
+categorical features, imputation of missing values and the normalization of
+features or samples. These steps currently cannot be turned off. Feature
+preprocessing is a single transformer which implements for example feature
+selection or transformation of features into a different space (i.e. PCA).
+This can be turned off by setting
+<code class="docutils literal"><span class="pre">include_preprocessors=[&quot;no_preprocessing&quot;]</span></code> as shown in the example above.</p>
+</div>
+</div>
+<div class="section" id="resampling-strategies">
+<h2>Resampling strategies<a class="headerlink" href="#resampling-strategies" title="Permalink to this headline">¶</a></h2>
+<p>Examples for using holdout and cross-validation can be found in <a class="reference external" href="https://github.com/automl/auto-sklearn/tree/master/example">auto-sklearn/examples/</a></p>
+</div>
+<div class="section" id="inspecting-the-results">
+<h2>Inspecting the results<a class="headerlink" href="#inspecting-the-results" title="Permalink to this headline">¶</a></h2>
+<p><em>auto-sklearn</em> allows users to inspect the training results and statistics. The following example shows how different
+statistics can be printed for the inspection.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">autoskleran.classification</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">cv_results_</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">sprint_statistics</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">show_models</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><code class="docutils literal"><span class="pre">cv_results_</span></code> returns a dict with keys as column headers and values as columns, that can be imported into a pandas DataFrame.
+<code class="docutils literal"><span class="pre">sprint_statistics()</span></code> is a method that prints the name of the  dataset, the metric used, and the best validation score
+obtained by running <em>auto-sklearn</em>. It additionally prints the number of both successful and unsuccessful
+algorithm runs.
+The results obtained from the final ensemble can be printed by calling <code class="docutils literal"><span class="pre">show_models()</span></code>.</p>
+</div>
+<div class="section" id="parallel-computation">
+<h2>Parallel computation<a class="headerlink" href="#parallel-computation" title="Permalink to this headline">¶</a></h2>
+<p><em>auto-sklearn</em> supports parallel execution by data sharing on a shared file
+system. In this mode, the SMAC algorithm shares the training data for it&#8217;s
+model by writing it to disk after every iteration. At the beginning of each
+iteration, SMAC loads all newly found data points. An example can be found in
+the example directory.</p>
+<p>In it&#8217;s default mode, <em>auto-sklearn</em> already uses two cores. The first one is
+used for model building, the second for building an ensemble every time a new
+machine learning model has finished training. The file <cite>example_sequential
+.py</cite> in the example directory describes how to run these tasks sequentially
+to use only a single core at a time.</p>
+<p>Furthermore, depending on the installation of scikit-learn and numpy,
+the model building procedure may use up to all cores. Such behaviour is
+unintended by <em>auto-sklearn</em> and is most likely due to numpy being installed
+from <cite>pypi</cite> as a binary wheel (<a class="reference external" href="http://scikit-learn-general.narkive.com/44ywvAHA/binary-wheel-packages-for-linux-are-coming">see here</a>). Executing
+<code class="docutils literal"><span class="pre">export</span> <span class="pre">OPENBLAS_NUM_THREADS=1</span></code> should disable such behaviours and make numpy
+only use a single core at a time.</p>
+</div>
+<div class="section" id="model-persistence">
+<h2>Model persistence<a class="headerlink" href="#model-persistence" title="Permalink to this headline">¶</a></h2>
+<p><em>auto-sklearn</em> is mostly a wrapper around scikit-learn. Therefore, it is
+possible to follow the <a class="reference external" href="http://scikit-learn.org/stable/modules/model_persistence.html#persistence-example">persistence example</a>
+from scikit-learn.</p>
+</div>
+<div class="section" id="vanilla-auto-sklearn">
+<h2>Vanilla auto-sklearn<a class="headerlink" href="#vanilla-auto-sklearn" title="Permalink to this headline">¶</a></h2>
+<p>In order to obtain <em>vanilla auto-sklearn</em> as used in <a class="reference external" href="https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning">Efficient and Robust Automated Machine Learning</a>
+set <code class="docutils literal"><span class="pre">ensemble_size=1</span></code> and <code class="docutils literal"><span class="pre">initial_configurations_via_metalearning=0</span></code>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">ensemble_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">initial_configurations_via_metalearning</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>An ensemble of size one will result in always choosing the current best model
+according to its performance on the validation set. Setting the initial
+configurations found by meta-learning to zero makes <em>auto-sklearn</em> use the
+regular SMAC algorithm for suggesting new hyperparameter configurations.</p>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="_sources/manual.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2018, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

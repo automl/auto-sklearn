@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &#8212; AutoSklearn 0.4.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.4.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="index.html">Start</a></li>
+                <li><a href="releases.html">Releases</a></li>
+                <li><a href="#">Installation</a></li>
+                <li><a href="manual.html">Manual</a></li>
+                <li><a href="examples/index.html">Examples</a></li>
+                <li><a href="api.html">API</a></li>
+                <li><a href="extending.html">Extending</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#system-requirements">System requirements</a></li>
+<li><a class="reference internal" href="#installing-auto-sklearn">Installing auto-sklearn</a></li>
+<li><a class="reference internal" href="#ubuntu-installation">Ubuntu installation</a></li>
+<li><a class="reference internal" href="#anaconda-installation">Anaconda installation</a></li>
+<li><a class="reference internal" href="#windows-osx-compatibility">Windows/OSX compatibility</a><ul>
+<li><a class="reference internal" href="#windows">Windows</a></li>
+<li><a class="reference internal" href="#mac-osx">Mac OSX</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="installation">
+<span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="system-requirements">
+<h2>System requirements<a class="headerlink" href="#system-requirements" title="Permalink to this headline">¶</a></h2>
+<p>auto-sklearn has the following system requirements:</p>
+<ul class="simple">
+<li>Linux operating system (for example Ubuntu),</li>
+<li>Python (&gt;=3.5).</li>
+<li>C++ compiler (with C++11 supports) and SWIG (version 3.0 or later)</li>
+</ul>
+<p>For an explanation of missing Microsoft Windows and MAC OSX support please
+check the Section <a class="reference internal" href="#windows-osx-compatibility">Windows/OSX compatibility</a>.</p>
+</div>
+<div class="section" id="installing-auto-sklearn">
+<h2>Installing auto-sklearn<a class="headerlink" href="#installing-auto-sklearn" title="Permalink to this headline">¶</a></h2>
+<p>Please install all dependencies manually with:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">automl</span><span class="o">/</span><span class="n">auto</span><span class="o">-</span><span class="n">sklearn</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span> <span class="o">|</span> <span class="n">xargs</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">L</span> <span class="mi">1</span> <span class="n">pip</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>Then install <em>auto-sklearn</em>:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">auto</span><span class="o">-</span><span class="n">sklearn</span>
+</pre></div>
+</div>
+<p>We recommend installing <em>auto-sklearn</em> into a <a class="reference external" href="http://docs.python-guide.org/en/latest/dev/virtualenvs/">virtual environment</a> or an <a class="reference external" href="https://conda.io/docs/using/envs.html">Anaconda
+environment</a>.</p>
+</div>
+<div class="section" id="ubuntu-installation">
+<h2>Ubuntu installation<a class="headerlink" href="#ubuntu-installation" title="Permalink to this headline">¶</a></h2>
+<p>To provide a C++11 building environment and the lateste SWIG version on Ubuntu,
+run:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">build</span><span class="o">-</span><span class="n">essential</span> <span class="n">swig</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="anaconda-installation">
+<h2>Anaconda installation<a class="headerlink" href="#anaconda-installation" title="Permalink to this headline">¶</a></h2>
+<p>Anaconda does not ship <em>auto-sklearn</em>, and there are no conda packages for
+<em>auto-sklearn</em>. Thus, it is easiest to install <em>auto-sklearn</em> as detailed in
+the Section <a class="reference internal" href="#installing-auto-sklearn">Installing auto-sklearn</a>.</p>
+<p>A common installation problem under recent Linux distribution is the
+incompatibility of the compiler version used to compile the Python binary
+shipped by AnaConda and the compiler installed by the distribution. This can
+be solved by installing the <em>gcc</em> compiler shipped with AnaConda (as well as
+<em>swig</em>):</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="n">gxx_linux</span><span class="o">-</span><span class="mi">64</span> <span class="n">gcc_linux</span><span class="o">-</span><span class="mi">64</span> <span class="n">swig</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="windows-osx-compatibility">
+<h2>Windows/OSX compatibility<a class="headerlink" href="#windows-osx-compatibility" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
+<p><em>auto-sklearn</em> relies heavily on the Python module <code class="docutils literal"><span class="pre">resource</span></code>. <code class="docutils literal"><span class="pre">resource</span></code>
+is part of Python&#8217;s <a class="reference external" href="https://docs.python.org/3/library/unix.html">Unix Specific Services</a>
+and not available on a Windows machine. Therefore, it is not possible to run
+<em>auto-sklearn</em> on a Windows machine.</p>
+<p>Possible solutions (not tested):</p>
+<ul class="simple">
+<li>Windows 10 bash shell</li>
+<li>virtual machine</li>
+<li>docker image</li>
+</ul>
+</div>
+<div class="section" id="mac-osx">
+<h3>Mac OSX<a class="headerlink" href="#mac-osx" title="Permalink to this headline">¶</a></h3>
+<p>We currently do not know if <em>auto-sklearn</em> works on OSX. There are at least two
+issues holding us back from actively supporting OSX:</p>
+<ul class="simple">
+<li>The <code class="docutils literal"><span class="pre">resource</span></code> module cannot enforce a memory limit on a Python process
+(see <a class="reference external" href="https://github.com/automl/SMAC3/issues/115">SMAC3/issues/115</a>).</li>
+<li>OSX machines on <a class="reference external" href="https://travis-ci.org/">travis-ci</a> take more than 30
+minutes to spawn. This makes it impossible for us to run unit tests for
+<em>auto-sklearn</em> and its dependencies <a class="reference external" href="https://github.com/automl/SMAC3">SMAC3</a>
+and <a class="reference external" href="https://github.com/automl/ConfigSpace">ConfigSpace</a>.</li>
+</ul>
+<p>In case you&#8217;re having issues installing the <a class="reference external" href="https://github.com/automl/random_forest_run">pyrfr package</a>, check out
+<a class="reference external" href="https://github.com/automl/auto-sklearn/issues/360#issuecomment-335150470">this installation suggestion on github</a>.</p>
+<p>Possible other solutions (not tested):</p>
+<ul class="simple">
+<li>virtual machine</li>
+<li>docker image</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="_sources/installation.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2018, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

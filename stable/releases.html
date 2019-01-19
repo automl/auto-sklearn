@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Releases &#8212; AutoSklearn 0.4.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.4.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="index.html">Start</a></li>
+                <li><a href="#">Releases</a></li>
+                <li><a href="installation.html">Installation</a></li>
+                <li><a href="manual.html">Manual</a></li>
+                <li><a href="examples/index.html">Examples</a></li>
+                <li><a href="api.html">API</a></li>
+                <li><a href="extending.html">Extending</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Releases</a><ul>
+<li><a class="reference internal" href="#version-0-4-0">Version 0.4.0</a><ul>
+<li><a class="reference internal" href="#contributors">Contributors</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-3-0">Version 0.3.0</a><ul>
+<li><a class="reference internal" href="#id11">Contributors</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-2-1">Version 0.2.1</a><ul>
+<li><a class="reference internal" href="#id12">Contributors</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-2-0">Version 0.2.0</a><ul>
+<li><a class="reference internal" href="#id13">Contributors</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-0-1-x">Version 0.1.x</a><ul>
+<li><a class="reference internal" href="#id14">Contributors</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <span class="target" id="releases"></span><div class="section" id="id1">
+<h1>Releases<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-0-4-0">
+<h2>Version 0.4.0<a class="headerlink" href="#version-0-4-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/409">#409</a>: fixes
+<code class="docutils literal"><span class="pre">predict_proba</span></code> to no longer raise an <cite>AttributeError</cite>.</li>
+<li>Improved documentation of the parallel example.</li>
+<li>Classifiers are now tested to be idempotent as <a class="reference external" href="http://scikit-learn.org/stable/developers/contributing.html#estimated-attributes">required by scikit-learn</a>.</li>
+<li>Fixes the usage of the shrinkage parameter in LDA.</li>
+<li>Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/410">#410</a> and changes
+the SGD hyperparameters</li>
+<li>Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/425">#425</a> which
+caused the non-linear support vector machine to always crash on OSX.</li>
+<li>Implements <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/149">#149</a>: it
+is now possible to pass a custom cross-validation split following
+scikit-learn&#8217;s <code class="docutils literal"><span class="pre">model_selection</span></code> module.</li>
+<li>It is now possible to decide whether or not to shuffle the data in
+Auto-sklearn by passing a bool <cite>shuffle</cite> in the dictionary of
+<code class="docutils literal"><span class="pre">resampling_strategy_arguments</span></code>.</li>
+<li>Added functionality to track the test performance over time.</li>
+<li>Re-factored the ensemble building to be faster, read less data from the
+hard drive and perform random tie breaking in case of equally
+well-performing models.</li>
+<li>Implements <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/438">#438</a>: To
+be consistent with the output of SMAC (which minimizes the loss of a target
+function), the output of the ensemble builder is now also the output of a
+minimization problem.</li>
+<li>Implements <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/271">#271</a>:
+XGBoost is available again, even configuring the new dropout functionality.</li>
+<li>New documentation section <a class="reference external" href="http://automl.github.io/auto-sklearn/stable/manual.html#inspecting-the-results">inspecting the results</a>.</li>
+<li>Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/444">#444</a>:
+Auto-sklearn now only loads models for refit which are actually relevant
+for the ensemble.</li>
+<li>Adds an operating system check at import and installation time to make sure
+to not accidentaly run on a Windows machine.</li>
+<li>New examples gallery using sphinx gallery: <a class="reference external" href="http://automl.github.io/auto-sklearn/stable/examples/index.html">http://automl.github.io/auto-sklearn/stable/examples/index.html</a></li>
+<li>Safeguard Auto-sklearn against deleting directories it did not create (Issue
+<a class="reference external" href="https://github.com/automl/auto-sklearn/issues/317">#317</a>.</li>
+</ul>
+<div class="section" id="contributors">
+<h3>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Matthias Feurer</li>
+<li>kaa</li>
+<li>Josh Mabry</li>
+<li>Katharina Eggensperger</li>
+<li>Vladimir Glazachev</li>
+<li>Jesper van Engelen</li>
+<li>Jin Woo Ahn</li>
+<li>Enrico Testa</li>
+<li>Marius Lindauer</li>
+<li>Yassine Morakakam</li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-3-0">
+<h2>Version 0.3.0<a class="headerlink" href="#version-0-3-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Upgrade to scikit-learn 0.19.1.</li>
+<li>Do not use the <code class="docutils literal"><span class="pre">DummyClassifier</span></code> or <code class="docutils literal"><span class="pre">DummyRegressor</span></code> as part of an
+ensemble. Fixes <a class="reference external" href="https://github.com/automl/auto-sklearn/issues/140">#140</a>.</li>
+<li>Fixes #295 by loading the data in the subprocess instead of the main process.</li>
+<li>Fixes #326: refitting could result in a type error. This is now fixed by
+better type checking in the classification components.</li>
+<li>Updated search space for <code class="docutils literal"><span class="pre">RandomForestClassifier</span></code>, <code class="docutils literal"><span class="pre">ExtraTreesClassifier</span></code>
+and <code class="docutils literal"><span class="pre">GradientBoostingClassifier</span></code> (fixes #358).</li>
+<li>Removal of constant features is now a part of the pipeline.</li>
+<li>Allow passing an SMBO object into the <code class="docutils literal"><span class="pre">AutoSklearnClassifier</span></code> and
+<code class="docutils literal"><span class="pre">AutoSklearnRegressor</span></code>.</li>
+</ul>
+<div class="section" id="id11">
+<h3>Contributors<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Matthias Feurer</li>
+<li>Jesper van Engelen</li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-2-1">
+<h2>Version 0.2.1<a class="headerlink" href="#version-0-2-1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Allows the usage of scikit-learn 0.18.2.</li>
+<li>Upgrade to latest SMAC version (<code class="docutils literal"><span class="pre">0.6.0</span></code>) and latest random forest version
+(<code class="docutils literal"><span class="pre">0.6.1</span></code>).</li>
+<li>Added a Dockerfile.</li>
+<li>Added the possibility to change the size of the holdout set when
+using holdout resampling strategy.</li>
+<li>Fixed a bug in QDA&#8217;s hyperparameters.</li>
+<li>Typo fixes in print statements.</li>
+<li>New method to retrieve the models used in the final ensemble.</li>
+</ul>
+<div class="section" id="id12">
+<h3>Contributors<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Matthias Feurer</li>
+<li>Katharina Eggensperger</li>
+<li>Felix Leung</li>
+<li>caoyi0905</li>
+<li>Young Ryul Bae</li>
+<li>Vicente Alencar</li>
+<li>Lukas Großberger</li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-2-0">
+<h2>Version 0.2.0<a class="headerlink" href="#version-0-2-0" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><strong>auto-sklearn supports custom metrics and all metrics included in
+scikit-learn</strong>. Different metrics can now be passed to the <code class="docutils literal"><span class="pre">fit()</span></code>-method
+estimator objects, for example
+<code class="docutils literal"><span class="pre">AutoSklearnClassifier.fit(metric='roc_auc')</span></code>.</li>
+<li>Upgrade to scikit-learn 0.18.1.</li>
+<li>Drop XGBoost as the latest release (0.6a2) does not work when spawned by
+the pyninsher.</li>
+<li><em>auto-sklearn</em> can use multiprocessing in calls to <code class="docutils literal"><span class="pre">predict()</span></code> and
+<code class="docutils literal"><span class="pre">predict_proba</span></code>. By <a class="reference external" href="https://github.com/lsorber">Laurent Sorber</a>.</li>
+</ul>
+<div class="section" id="id13">
+<h3>Contributors<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Matthias Feurer</li>
+<li>Katharina Eggensperger</li>
+<li>Laurent Sorber</li>
+<li>Rafael Calsaverini</li>
+</ul>
+</div>
+</div>
+<div class="section" id="version-0-1-x">
+<h2>Version 0.1.x<a class="headerlink" href="#version-0-1-x" title="Permalink to this headline">¶</a></h2>
+<p>There are no release notes for auto-sklearn prior to version 0.2.0.</p>
+<div class="section" id="id14">
+<h3>Contributors<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Matthias Feurer</li>
+<li>Katharina Eggensperger</li>
+<li>Aaron Klein</li>
+<li>Jost Tobias Springenberg</li>
+<li>Anatolii Domashnev</li>
+<li>Stefan Falkner</li>
+<li>Alexander Sapronov</li>
+<li>Manuel Blum</li>
+<li>Diego Kobylkin</li>
+<li>Jaidev Deshpande</li>
+<li>Jongheon Jeong</li>
+<li>Hector Mendoza</li>
+<li>Timothy J Laurent</li>
+<li>Marius Lindauer</li>
+<li>_329_</li>
+<li>Iver Jordal</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="_sources/releases.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2018, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

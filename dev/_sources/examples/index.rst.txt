@@ -1,0 +1,281 @@
+:orphan:
+
+:orphan:
+
+.. _examples:
+
+========
+Examples
+========
+
+General introductory examples for *auto-sklearn* can be found here.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to fit a simple regression model with *auto-sklearn*. ">
+
+.. only:: html
+
+    .. figure:: /examples/images/thumb/sphx_glr_example_regression_thumb.png
+
+        :ref:`sphx_glr_examples_example_regression.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_regression
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="By default, *auto-sklearn* fits the machine learning models and build their ensembles in parall...">
+
+.. only:: html
+
+    .. figure:: /examples/images/thumb/sphx_glr_example_sequential_thumb.png
+
+        :ref:`sphx_glr_examples_example_sequential.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_sequential
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In *auto-sklearn* it is possible to use different resampling strategies by specifying the argum...">
+
+.. only:: html
+
+    .. figure:: /examples/images/thumb/sphx_glr_example_crossvalidation_thumb.png
+
+        :ref:`sphx_glr_examples_example_crossvalidation.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_crossvalidation
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In *auto-sklearn* it is possible to use different resampling strategies by specifying the argum...">
+
+.. only:: html
+
+    .. figure:: /examples/images/thumb/sphx_glr_example_holdout_thumb.png
+
+        :ref:`sphx_glr_examples_example_holdout.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_holdout
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In *auto-sklearn* it is possible to specify the feature types of a dataset when calling the met...">
+
+.. only:: html
+
+    .. figure:: /examples/images/thumb/sphx_glr_example_feature_types_thumb.png
+
+        :ref:`sphx_glr_examples_example_feature_types.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_feature_types
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates the usage of a different acquisition function inside SMAC, namely `Ex...">
+
+.. only:: html
+
+    .. figure:: /examples/images/thumb/sphx_glr_example_eips_thumb.png
+
+        :ref:`sphx_glr_examples_example_eips.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_eips
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A crucial feature of *auto-sklearn* is automatically optimizing the hyperparameters through SMA...">
+
+.. only:: html
+
+    .. figure:: /examples/images/thumb/sphx_glr_example_random_search_thumb.png
+
+        :ref:`sphx_glr_examples_example_random_search.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_random_search
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to create a wrapper around the linear discriminant analy...">
+
+.. only:: html
+
+    .. figure:: /examples/images/thumb/sphx_glr_example_extending_preprocessor_thumb.png
+
+        :ref:`sphx_glr_examples_example_extending_preprocessor.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_extending_preprocessor
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to create a new regression component for using in auto-s...">
+
+.. only:: html
+
+    .. figure:: /examples/images/thumb/sphx_glr_example_extending_regression_thumb.png
+
+        :ref:`sphx_glr_examples_example_extending_regression.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_extending_regression
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* uses *SMAC* to automatically optimize the hyperparameters of the training models...">
+
+.. only:: html
+
+    .. figure:: /examples/images/thumb/sphx_glr_example_parallel_thumb.png
+
+        :ref:`sphx_glr_examples_example_parallel.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_parallel
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example demonstrates how to create a new classification component for using in au...">
+
+.. only:: html
+
+    .. figure:: /examples/images/thumb/sphx_glr_example_extending_classification_thumb.png
+
+        :ref:`sphx_glr_examples_example_extending_classification.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_extending_classification
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="*Auto-sklearn* supports various built-in metrics, which can be found in the :ref:`metrics secti...">
+
+.. only:: html
+
+    .. figure:: /examples/images/thumb/sphx_glr_example_metrics_thumb.png
+
+        :ref:`sphx_glr_examples_example_metrics.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/example_metrics
+.. raw:: html
+
+    <div style='clear:both'></div>
+
+
+
+.. only :: html
+
+ .. container:: sphx-glr-footer
+    :class: sphx-glr-footer-gallery
+
+
+  .. container:: sphx-glr-download
+
+    :download:`Download all examples in Python source code: examples_python.zip <//home/ubuntu/auto-sklearn/doc/examples/examples_python.zip>`
+
+
+
+  .. container:: sphx-glr-download
+
+    :download:`Download all examples in Jupyter notebooks: examples_jupyter.zip <//home/ubuntu/auto-sklearn/doc/examples/examples_jupyter.zip>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.readthedocs.io>`_

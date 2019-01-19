@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>autosklearn.pipeline.components.base &#8212; AutoSklearn 0.4.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.4.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../../index.html">Start</a></li>
+                <li><a href="../../../../releases.html">Releases</a></li>
+                <li><a href="../../../../installation.html">Installation</a></li>
+                <li><a href="../../../../manual.html">Manual</a></li>
+                <li><a href="../../../../examples/index.html">Examples</a></li>
+                <li><a href="../../../../api.html">API</a></li>
+                <li><a href="../../../../extending.html">Extending</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <h1>Source code for autosklearn.pipeline.components.base</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">pkgutil</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="k">import</span> <span class="n">BaseEstimator</span>
+<span class="kn">from</span> <span class="nn">sklearn.utils</span> <span class="k">import</span> <span class="n">check_random_state</span>
+
+
+<span class="k">def</span> <span class="nf">find_components</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">base_class</span><span class="p">):</span>
+    <span class="n">components</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">module_loader</span><span class="p">,</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">ispkg</span> <span class="ow">in</span> <span class="n">pkgutil</span><span class="o">.</span><span class="n">iter_modules</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">directory</span><span class="p">]):</span>
+        <span class="n">full_module_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">module_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">full_module_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ispkg</span><span class="p">:</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">full_module_name</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">member_name</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">base_class</span><span class="p">)</span> <span class="ow">and</span> \
+                        <span class="n">obj</span> <span class="o">!=</span> <span class="n">base_class</span><span class="p">:</span>
+                    <span class="c1"># TODO test if the obj implements the interface</span>
+                    <span class="c1"># Keep in mind that this only instantiates the ensemble_wrapper,</span>
+                    <span class="c1"># but not the real target classifier</span>
+                    <span class="n">classifier</span> <span class="o">=</span> <span class="n">obj</span>
+                    <span class="n">components</span><span class="p">[</span><span class="n">module_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">classifier</span>
+
+    <span class="k">return</span> <span class="n">components</span>
+
+
+<span class="k">class</span> <span class="nc">ThirdPartyComponents</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_class</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_class</span> <span class="o">=</span> <span class="n">base_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">components</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">add_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_class</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="n">classifier</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;add_component works only with a subclass of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_class</span><span class="p">))</span>
+
+        <span class="n">properties</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">classifier</span><span class="o">.</span><span class="n">get_properties</span><span class="p">())</span>
+        <span class="n">should_be_there</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;shortname&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;handles_regression&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;handles_classification&#39;</span><span class="p">,</span> <span class="s1">&#39;handles_multiclass&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;handles_multilabel&#39;</span><span class="p">,</span> <span class="s1">&#39;is_deterministic&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="s1">&#39;output&#39;</span><span class="p">}</span>
+        <span class="k">for</span> <span class="nb">property</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">property</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">should_be_there</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Property </span><span class="si">%s</span><span class="s1"> must not be specified for &#39;</span>
+                                 <span class="s1">&#39;algorithm </span><span class="si">%s</span><span class="s1">. Only the following properties &#39;</span>
+                                 <span class="s1">&#39;can be specified: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                                 <span class="p">(</span><span class="nb">property</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">should_be_there</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="nb">property</span> <span class="ow">in</span> <span class="n">should_be_there</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">property</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Property </span><span class="si">%s</span><span class="s1"> not specified for algorithm </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">classifier</span>
+
+
+<span class="k">class</span> <span class="nc">AutoSklearnComponent</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_properties</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the properties of the underlying algorithm.</span>
+
+<span class="sd">        Find more information at :ref:`get_properties`</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        dataset_properties : dict, optional (default=None)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span><span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the configuration space of this classification algorithm.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        dataset_properties : dict, optional (default=None)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Configspace.configuration_space.ConfigurationSpace</span>
+<span class="sd">            The configuration space of this classification algorithm.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The fit function calls the fit function of the underlying</span>
+<span class="sd">        scikit-learn model and returns `self`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like, shape = (n_samples, n_features)</span>
+<span class="sd">            Training data</span>
+
+<span class="sd">        y : array-like, shape = (n_samples,) or shape = (n_sample, n_labels)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : returns an instance of self.</span>
+<span class="sd">            Targets</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Please see the `scikit-learn API documentation</span>
+<span class="sd">        &lt;http://scikit-learn.org/dev/developers/index.html#apis-of-scikit</span>
+<span class="sd">        -learn-objects&gt;`_ for further information.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">set_hyperparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration</span><span class="p">,</span> <span class="n">init_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">configuration</span><span class="o">.</span><span class="n">get_dictionary</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot set hyperparameter </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1"> because &#39;</span>
+                                 <span class="s1">&#39;the hyperparameter does not exist.&#39;</span> <span class="o">%</span>
+                                 <span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">init_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">init_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot set init param </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1"> because &#39;</span>
+                                     <span class="s1">&#39;the init param does not exist.&#39;</span> <span class="o">%</span>
+                                     <span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_properties</span><span class="p">()[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="s2">&quot;autosklearn.pipeline </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">name</span>
+
+
+<span class="k">class</span> <span class="nc">IterativeComponent</span><span class="p">(</span><span class="n">AutoSklearnComponent</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iterative_fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">iteration</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration_fully_fitted</span><span class="p">():</span>
+            <span class="n">n_iter</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">iteration</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">iterative_fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="n">n_iter</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">iteration</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+
+<span class="k">class</span> <span class="nc">IterativeComponentWithSampleWeight</span><span class="p">(</span><span class="n">AutoSklearnComponent</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iterative_fit</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span>
+        <span class="p">)</span>
+        <span class="n">iteration</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">configuration_fully_fitted</span><span class="p">():</span>
+            <span class="n">n_iter</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">iteration</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">iterative_fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="n">n_iter</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">)</span>
+            <span class="n">iteration</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+
+<div class="viewcode-block" id="AutoSklearnClassificationAlgorithm"><a class="viewcode-back" href="../../../../api.html#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearnClassificationAlgorithm</span><span class="p">(</span><span class="n">AutoSklearnComponent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Provide an abstract interface for classification algorithms in</span>
+<span class="sd">    auto-sklearn.</span>
+
+<span class="sd">    See :ref:`extending` for more information.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="AutoSklearnClassificationAlgorithm.predict"><a class="viewcode-back" href="../../../../api.html#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The predict function calls the predict function of the</span>
+<span class="sd">        underlying scikit-learn model and returns an array with the predictions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like, shape = (n_samples, n_features)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        array, shape = (n_samples,) or shape = (n_samples, n_labels)</span>
+<span class="sd">            Returns the predicted values</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Please see the `scikit-learn API documentation</span>
+<span class="sd">        &lt;http://scikit-learn.org/dev/developers/index.html#apis-of-scikit</span>
+<span class="sd">        -learn-objects&gt;`_ for further information.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AutoSklearnClassificationAlgorithm.predict_proba"><a class="viewcode-back" href="../../../../api.html#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Predict probabilities.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like, shape = (n_samples, n_features)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        array, shape=(n_samples,) if n_classes == 2 else (n_samples, n_classes)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AutoSklearnClassificationAlgorithm.get_estimator"><a class="viewcode-back" href="../../../../api.html#autosklearn.pipeline.components.base.AutoSklearnClassificationAlgorithm.get_estimator">[docs]</a>    <span class="k">def</span> <span class="nf">get_estimator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the underlying estimator object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        estimator : the underlying estimator object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span></div></div>
+
+
+<div class="viewcode-block" id="AutoSklearnPreprocessingAlgorithm"><a class="viewcode-back" href="../../../../api.html#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearnPreprocessingAlgorithm</span><span class="p">(</span><span class="n">AutoSklearnComponent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Provide an abstract interface for preprocessing algorithms in</span>
+<span class="sd">    auto-sklearn.</span>
+
+<span class="sd">    See :ref:`extending` for more information.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="AutoSklearnPreprocessingAlgorithm.transform"><a class="viewcode-back" href="../../../../api.html#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The transform function calls the transform function of the</span>
+<span class="sd">        underlying scikit-learn model and returns the transformed array.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like, shape = (n_samples, n_features)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        X : array</span>
+<span class="sd">            Return the transformed training data</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Please see the `scikit-learn API documentation</span>
+<span class="sd">        &lt;http://scikit-learn.org/dev/developers/index.html#apis-of-scikit</span>
+<span class="sd">        -learn-objects&gt;`_ for further information.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AutoSklearnPreprocessingAlgorithm.get_preprocessor"><a class="viewcode-back" href="../../../../api.html#autosklearn.pipeline.components.base.AutoSklearnPreprocessingAlgorithm.get_preprocessor">[docs]</a>    <span class="k">def</span> <span class="nf">get_preprocessor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the underlying preprocessor object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        preprocessor : the underlying preprocessor object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span></div></div>
+
+
+<div class="viewcode-block" id="AutoSklearnRegressionAlgorithm"><a class="viewcode-back" href="../../../../api.html#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm">[docs]</a><span class="k">class</span> <span class="nc">AutoSklearnRegressionAlgorithm</span><span class="p">(</span><span class="n">AutoSklearnComponent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Provide an abstract interface for regression algorithms in</span>
+<span class="sd">    auto-sklearn.</span>
+
+<span class="sd">    Make a subclass of this and put it into the directory</span>
+<span class="sd">    `autosklearn/pipeline/components/regression` to make it available.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="AutoSklearnRegressionAlgorithm.predict"><a class="viewcode-back" href="../../../../api.html#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The predict function calls the predict function of the</span>
+<span class="sd">        underlying scikit-learn model and returns an array with the predictions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like, shape = (n_samples, n_features)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        array, shape = (n_samples,)</span>
+<span class="sd">            Returns the predicted values</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Please see the `scikit-learn API documentation</span>
+<span class="sd">        &lt;http://scikit-learn.org/dev/developers/index.html#apis-of-scikit</span>
+<span class="sd">        -learn-objects&gt;`_ for further information.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AutoSklearnRegressionAlgorithm.get_estimator"><a class="viewcode-back" href="../../../../api.html#autosklearn.pipeline.components.base.AutoSklearnRegressionAlgorithm.get_estimator">[docs]</a>    <span class="k">def</span> <span class="nf">get_estimator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the underlying estimator object.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        estimator : the underlying estimator object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">AutoSklearnChoice</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_properties</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dataset_properties : dict</span>
+<span class="sd">            Describes the dataset to work on, this can change the</span>
+<span class="sd">            configuration space constructed by auto-sklearn. Mandatory</span>
+<span class="sd">            properties are:</span>
+<span class="sd">            * target_type: classification or regression</span>
+
+
+<span class="sd">            Optional properties are:</span>
+<span class="sd">            * multiclass: whether the dataset is a multiclass classification</span>
+<span class="sd">              dataset.</span>
+<span class="sd">            * multilabel: whether the dataset is a multilabel classification</span>
+<span class="sd">              dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Since all calls to get_hyperparameter_search_space will be done by the</span>
+        <span class="c1"># pipeline on construction, it is not necessary to construct a</span>
+        <span class="c1"># configuration space at this location!</span>
+        <span class="c1"># self.configuration = self.get_hyperparameter_search_space(</span>
+        <span class="c1">#     dataset_properties).get_default_configuration()</span>
+
+        <span class="k">if</span> <span class="n">random_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">check_random_state</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">check_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
+
+        <span class="c1"># Since the pipeline will initialize the hyperparameters, it is not</span>
+        <span class="c1"># necessary to do this upon the construction of this object</span>
+        <span class="c1"># self.set_hyperparameters(self.configuration)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">choice</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">get_components</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_available_components</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                 <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                 <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dataset_properties</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dataset_properties</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;The argument include and exclude cannot be used together.&quot;</span><span class="p">)</span>
+
+        <span class="n">available_comp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_components</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">incl</span> <span class="ow">in</span> <span class="n">include</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">incl</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_comp</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Trying to include unknown component: &quot;</span>
+                                     <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">incl</span><span class="p">)</span>
+
+        <span class="n">components_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">available_comp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">include</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># TODO maybe check for sparse?</span>
+
+            <span class="n">components_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">available_comp</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">components_dict</span>
+
+    <span class="k">def</span> <span class="nf">set_hyperparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configuration</span><span class="p">,</span> <span class="n">init_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">new_params</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="n">configuration</span><span class="o">.</span><span class="n">get_dictionary</span><span class="p">()</span>
+        <span class="n">choice</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;__choice__&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;__choice__&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">choice</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">new_params</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">if</span> <span class="n">init_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">init_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">param</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">choice</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">new_params</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="n">new_params</span><span class="p">[</span><span class="s1">&#39;random_state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_params</span> <span class="o">=</span> <span class="n">new_params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">choice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_components</span><span class="p">()[</span><span class="n">choice</span><span class="p">](</span><span class="o">**</span><span class="n">new_params</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">get_hyperparameter_search_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                        <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                        <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">choice</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">choice</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2018, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

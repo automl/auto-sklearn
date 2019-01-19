@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>autosklearn.metrics &#8212; AutoSklearn 0.4.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.4.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.4.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../index.html">Start</a></li>
+                <li><a href="../../releases.html">Releases</a></li>
+                <li><a href="../../installation.html">Installation</a></li>
+                <li><a href="../../manual.html">Manual</a></li>
+                <li><a href="../../examples/index.html">Examples</a></li>
+                <li><a href="../../api.html">API</a></li>
+                <li><a href="../../extending.html">Extending</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <h1>Source code for autosklearn.metrics</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span> <span class="nn">sklearn.metrics</span>
+<span class="kn">from</span> <span class="nn">sklearn.utils.multiclass</span> <span class="k">import</span> <span class="n">type_of_target</span>
+
+<span class="kn">from</span> <span class="nn">autosklearn.constants</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">classification_metrics</span>
+<span class="kn">from</span> <span class="nn">.util</span> <span class="k">import</span> <span class="o">*</span>
+
+
+<span class="k">class</span> <span class="nc">Scorer</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span> <span class="o">=</span> <span class="n">score_func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_optimum</span> <span class="o">=</span> <span class="n">optimum</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">=</span> <span class="n">sign</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+
+<span class="k">class</span> <span class="nc">_PredictScorer</span><span class="p">(</span><span class="n">Scorer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluate predicted target values for X relative to y_true.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        y_true : array-like</span>
+<span class="sd">            Gold standard target values for X.</span>
+
+<span class="sd">        y_pred : array-like, [n_samples x n_classes]</span>
+<span class="sd">            Model predictions</span>
+
+<span class="sd">        sample_weight : array-like, optional (default=None)</span>
+<span class="sd">            Sample weights.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        score : float</span>
+<span class="sd">            Score function applied to prediction of estimator on X.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">type_true</span> <span class="o">=</span> <span class="n">type_of_target</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> \
+                <span class="n">type_true</span> <span class="o">==</span> <span class="s1">&#39;continuous&#39;</span><span class="p">:</span>
+            <span class="c1"># must be regression, all other task types would return at least</span>
+            <span class="c1"># two probabilities</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">type_true</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span> <span class="s1">&#39;multiclass&#39;</span><span class="p">]:</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">type_true</span> <span class="o">==</span> <span class="s1">&#39;multilabel-indicator&#39;</span><span class="p">:</span>
+            <span class="n">y_pred</span><span class="p">[</span><span class="n">y_pred</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="n">y_pred</span><span class="p">[</span><span class="n">y_pred</span> <span class="o">&lt;=</span> <span class="mf">0.5</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">type_true</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span>
+                                                 <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span>
+                                                 <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span>
+                                                 <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_ProbaScorer</span><span class="p">(</span><span class="n">Scorer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluate predicted probabilities for X relative to y_true.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        y_true : array-like</span>
+<span class="sd">            Gold standard target values for X. These must be class labels,</span>
+<span class="sd">            not probabilities.</span>
+
+<span class="sd">        y_pred : array-like, [n_samples x n_classes]</span>
+<span class="sd">            Model predictions</span>
+
+<span class="sd">        sample_weight : array-like, optional (default=None)</span>
+<span class="sd">            Sample weights.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        score : float</span>
+<span class="sd">            Score function applied to prediction of estimator on X.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span>
+                                                 <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span>
+                                                 <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_ThresholdScorer</span><span class="p">(</span><span class="n">Scorer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluate decision function output for X relative to y_true.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        y_true : array-like</span>
+<span class="sd">            Gold standard target values for X. These must be class labels,</span>
+<span class="sd">            not probabilities.</span>
+
+<span class="sd">        y_pred : array-like, [n_samples x n_classes]</span>
+<span class="sd">            Model predictions</span>
+
+<span class="sd">        sample_weight : array-like, optional (default=None)</span>
+<span class="sd">            Sample weights.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        score : float</span>
+<span class="sd">            Score function applied to prediction of estimator on X.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">y_type</span> <span class="o">=</span> <span class="n">type_of_target</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">y_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;binary&quot;</span><span class="p">,</span> <span class="s2">&quot;multilabel-indicator&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> format is not supported&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">y_type</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">y_type</span> <span class="o">==</span> <span class="s2">&quot;binary&quot;</span><span class="p">:</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="n">y_pred</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">p</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">y_pred</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span>
+                                                 <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span>
+                                                 <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sign</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_score_func</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="make_scorer"><a class="viewcode-back" href="../../api.html#autosklearn.metrics.make_scorer">[docs]</a><span class="k">def</span> <span class="nf">make_scorer</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">needs_proba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Make a scorer from a performance metric or loss function.</span>
+
+<span class="sd">    Factory inspired by scikit-learn which wraps scikit-learn scoring functions</span>
+<span class="sd">    to be used in auto-sklearn.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    score_func : callable</span>
+<span class="sd">        Score function (or loss function) with signature</span>
+<span class="sd">        ``score_func(y, y_pred, **kwargs)``.</span>
+
+<span class="sd">    optimum : int or float, default=1</span>
+<span class="sd">        The best score achievable by the score function, i.e. maximum in case of</span>
+<span class="sd">        scorer function and minimum in case of loss function.</span>
+
+<span class="sd">    greater_is_better : boolean, default=True</span>
+<span class="sd">        Whether score_func is a score function (default), meaning high is good,</span>
+<span class="sd">        or a loss function, meaning low is good. In the latter case, the</span>
+<span class="sd">        scorer object will sign-flip the outcome of the score_func.</span>
+
+<span class="sd">    needs_proba : boolean, default=False</span>
+<span class="sd">        Whether score_func requires predict_proba to get probability estimates</span>
+<span class="sd">        out of a classifier.</span>
+
+<span class="sd">    needs_threshold : boolean, default=False</span>
+<span class="sd">        Whether score_func takes a continuous decision certainty.</span>
+<span class="sd">        This only works for binary classification.</span>
+
+<span class="sd">    **kwargs : additional arguments</span>
+<span class="sd">        Additional parameters to be passed to score_func.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    scorer : callable</span>
+<span class="sd">        Callable object that returns a scalar score; greater is better.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">greater_is_better</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">if</span> <span class="n">needs_proba</span><span class="p">:</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">_ProbaScorer</span>
+    <span class="k">elif</span> <span class="n">needs_threshold</span><span class="p">:</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">_ThresholdScorer</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">_PredictScorer</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">score_func</span><span class="p">,</span> <span class="n">optimum</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<span class="c1"># Standard regression scores</span>
+<span class="n">r2</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;r2&#39;</span><span class="p">,</span>
+                 <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">)</span>
+<span class="n">mean_squared_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;mean_squared_error&#39;</span><span class="p">,</span>
+                                 <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_squared_error</span><span class="p">,</span>
+                                 <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                 <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">mean_absolute_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;mean_absolute_error&#39;</span><span class="p">,</span>
+                                  <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">mean_absolute_error</span><span class="p">,</span>
+                                  <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                  <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">median_absolute_error</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;median_absolute_error&#39;</span><span class="p">,</span>
+                                    <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">median_absolute_error</span><span class="p">,</span>
+                                    <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                    <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Standard Classification Scores</span>
+<span class="n">accuracy</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span>
+                       <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">)</span>
+<span class="n">balanced_accuracy</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;balanced_accuracy&#39;</span><span class="p">,</span>
+                                <span class="n">classification_metrics</span><span class="o">.</span><span class="n">balanced_accuracy</span><span class="p">)</span>
+<span class="n">f1</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;f1&#39;</span><span class="p">,</span>
+                 <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">f1_score</span><span class="p">)</span>
+
+<span class="c1"># Score functions that need decision values</span>
+<span class="n">roc_auc</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;roc_auc&#39;</span><span class="p">,</span>
+                      <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">roc_auc_score</span><span class="p">,</span>
+                      <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                      <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">average_precision</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;average_precision&#39;</span><span class="p">,</span>
+                                <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">average_precision_score</span><span class="p">,</span>
+                                <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">precision</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;precision&#39;</span><span class="p">,</span>
+                        <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">precision_score</span><span class="p">)</span>
+<span class="n">recall</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;recall&#39;</span><span class="p">,</span>
+                     <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">recall_score</span><span class="p">)</span>
+
+<span class="c1"># Score function for probabilistic classification</span>
+<span class="n">log_loss</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;log_loss&#39;</span><span class="p">,</span>
+                       <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">log_loss</span><span class="p">,</span>
+                       <span class="n">optimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                       <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                       <span class="n">needs_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pac_score</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="s1">&#39;pac_score&#39;</span><span class="p">,</span>
+                        <span class="n">classification_metrics</span><span class="o">.</span><span class="n">pac_score</span><span class="p">,</span>
+                        <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">needs_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># TODO what about mathews correlation coefficient etc?</span>
+
+
+<span class="n">REGRESSION_METRICS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">scorer</span> <span class="ow">in</span> <span class="p">[</span><span class="n">r2</span><span class="p">,</span> <span class="n">mean_squared_error</span><span class="p">,</span> <span class="n">mean_absolute_error</span><span class="p">,</span>
+               <span class="n">median_absolute_error</span><span class="p">]:</span>
+    <span class="n">REGRESSION_METRICS</span><span class="p">[</span><span class="n">scorer</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">scorer</span>
+
+<span class="n">CLASSIFICATION_METRICS</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">scorer</span> <span class="ow">in</span> <span class="p">[</span><span class="n">accuracy</span><span class="p">,</span> <span class="n">balanced_accuracy</span><span class="p">,</span> <span class="n">roc_auc</span><span class="p">,</span> <span class="n">average_precision</span><span class="p">,</span>
+               <span class="n">log_loss</span><span class="p">,</span> <span class="n">pac_score</span><span class="p">]:</span>
+    <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="n">scorer</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">scorer</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">metric</span> <span class="ow">in</span> <span class="p">[(</span><span class="s1">&#39;precision&#39;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">precision_score</span><span class="p">),</span>
+                     <span class="p">(</span><span class="s1">&#39;recall&#39;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">recall_score</span><span class="p">),</span>
+                     <span class="p">(</span><span class="s1">&#39;f1&#39;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">f1_score</span><span class="p">)]:</span>
+    <span class="nb">globals</span><span class="p">()[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+    <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">average</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;macro&#39;</span><span class="p">,</span> <span class="s1">&#39;micro&#39;</span><span class="p">,</span> <span class="s1">&#39;samples&#39;</span><span class="p">,</span> <span class="s1">&#39;weighted&#39;</span><span class="p">]:</span>
+        <span class="n">qualified_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">average</span><span class="p">)</span>
+        <span class="nb">globals</span><span class="p">()[</span><span class="n">qualified_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">qualified_name</span><span class="p">,</span>
+                                                <span class="n">partial</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span>
+                                                        <span class="n">pos_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                                        <span class="n">average</span><span class="o">=</span><span class="n">average</span><span class="p">))</span>
+        <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="n">qualified_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">qualified_name</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">calculate_score</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">task_type</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span>
+                    <span class="n">all_scoring_functions</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">task_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">TASK_TYPES</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">task_type</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">all_scoring_functions</span><span class="p">:</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">task_type</span> <span class="ow">in</span> <span class="n">REGRESSION_TASKS</span><span class="p">:</span>
+            <span class="c1"># TODO put this into the regression metric itself</span>
+            <span class="n">cprediction</span> <span class="o">=</span> <span class="n">sanitize_array</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
+            <span class="n">metric_dict</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">REGRESSION_METRICS</span><span class="p">)</span>
+            <span class="n">metric_dict</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric</span>
+            <span class="k">for</span> <span class="n">metric_</span> <span class="ow">in</span> <span class="n">REGRESSION_METRICS</span><span class="p">:</span>
+                <span class="n">func</span> <span class="o">=</span> <span class="n">REGRESSION_METRICS</span><span class="p">[</span><span class="n">metric_</span><span class="p">]</span>
+                <span class="n">score</span><span class="p">[</span><span class="n">func</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">cprediction</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">metric_dict</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">CLASSIFICATION_METRICS</span><span class="p">)</span>
+            <span class="n">metric_dict</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric</span>
+            <span class="k">for</span> <span class="n">metric_</span> <span class="ow">in</span> <span class="n">metric_dict</span><span class="p">:</span>
+                <span class="n">func</span> <span class="o">=</span> <span class="n">CLASSIFICATION_METRICS</span><span class="p">[</span><span class="n">metric_</span><span class="p">]</span>
+
+                <span class="c1"># TODO maybe annotate metrics to define which cases they can</span>
+                <span class="c1"># handle?</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">score</span><span class="p">[</span><span class="n">func</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">prediction</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;multiclass format is not supported&#39;</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">elif</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Sample-based precision, recall, &#39;</span> \
+                                      <span class="s1">&#39;fscore is not meaningful outside &#39;</span> \
+                                      <span class="s1">&#39;multilabel classification. See the &#39;</span> \
+                                      <span class="s1">&#39;accuracy_score instead.&#39;</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">elif</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Target is multiclass but &quot;</span> \
+                                      <span class="s2">&quot;average=&#39;binary&#39;. Please choose another &quot;</span> \
+                                      <span class="s2">&quot;average setting.&quot;</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">e</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">task_type</span> <span class="ow">in</span> <span class="n">REGRESSION_TASKS</span><span class="p">:</span>
+            <span class="c1"># TODO put this into the regression metric itself</span>
+            <span class="n">cprediction</span> <span class="o">=</span> <span class="n">sanitize_array</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">cprediction</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span> <span class="n">prediction</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">score</span>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2018, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

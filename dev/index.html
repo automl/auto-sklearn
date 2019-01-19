@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>auto-sklearn &#8212; AutoSklearn 0.4.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+  
+  <a href="https://github.com/automl/auto-sklearn"
+     class="visible-desktop hidden-xs"><img
+    id="gh-banner"
+    style="position: absolute; top: 50px; right: 0; border: 0;"
+    src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png"
+    alt="Fork me on GitHub"></a>
+  <script>
+    // Adjust banner height.
+    $(function () {
+      var navHeight = $(".navbar .container").css("height");
+      $("#gh-banner").css("top", navHeight);
+    });
+  </script>
+
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">
+          auto-sklearn</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.4.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="#">Start</a></li>
+                <li><a href="releases.html">Releases</a></li>
+                <li><a href="installation.html">Installation</a></li>
+                <li><a href="manual.html">Manual</a></li>
+                <li><a href="examples/index.html">Examples</a></li>
+                <li><a href="api.html">API</a></li>
+                <li><a href="extending.html">Extending</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">auto-sklearn</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+<li><a class="reference internal" href="#manual">Manual</a></li>
+<li><a class="reference internal" href="#license">License</a></li>
+<li><a class="reference internal" href="#citing-auto-sklearn">Citing auto-sklearn</a></li>
+<li><a class="reference internal" href="#contributing">Contributing</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="auto-sklearn">
+<h1>auto-sklearn<a class="headerlink" href="#auto-sklearn" title="Permalink to this headline">¶</a></h1>
+<p><em>auto-sklearn</em> is an automated machine learning toolkit and a drop-in
+replacement for a scikit-learn estimator:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">cls</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="bp">cls</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">predictions</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><em>auto-sklearn</em> frees a machine learning user from algorithm selection and
+hyperparameter tuning. It leverages recent advantages in <em>Bayesian
+optimization</em>, <em>meta-learning</em> and <em>ensemble construction</em>. Learn more about
+the technology behind <em>auto-sklearn</em> by reading our paper published at
+<a class="reference external" href="http://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning.pdf">NIPS 2015</a>
+.</p>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">autosklearn.classification</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">sklearn.model_selection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">sklearn.datasets</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">sklearn.metrics</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">load_digits</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> \
+<span class="go">        sklearn.model_selection.train_test_split(X, y, random_state=1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span> <span class="o">=</span> <span class="n">autosklearn</span><span class="o">.</span><span class="n">classification</span><span class="o">.</span><span class="n">AutoSklearnClassifier</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automl</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y_hat</span> <span class="o">=</span> <span class="n">automl</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Accuracy score&quot;</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_hat</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>This will run for one hour and should result in an accuracy above 0.98.</p>
+</div>
+<div class="section" id="manual">
+<h2>Manual<a class="headerlink" href="#manual" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="installation.html#installation"><span class="std std-ref">Installation</span></a></li>
+<li><a class="reference internal" href="manual.html#manual"><span class="std std-ref">Manual</span></a></li>
+<li><a class="reference internal" href="api.html#api"><span class="std std-ref">APIs</span></a></li>
+<li><a class="reference internal" href="extending.html#extending"><span class="std std-ref">Extending auto-sklearn</span></a></li>
+</ul>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p><em>auto-sklearn</em> is licensed the same way as <em>scikit-learn</em>,
+namely the 3-clause BSD license.</p>
+</div>
+<div class="section" id="citing-auto-sklearn">
+<h2>Citing auto-sklearn<a class="headerlink" href="#citing-auto-sklearn" title="Permalink to this headline">¶</a></h2>
+<p>If you use auto-sklearn in a scientific publication, we would appreciate a
+reference to the following paper:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://papers.nips.cc/paper/5872-efficient-and-robust-automated-machine-learning">Efficient and Robust Automated Machine Learning</a>,
+Feurer <em>et al.</em>, Advances in Neural Information Processing Systems 28 (NIPS 2015).</p>
+<p>Bibtex entry:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nd">@incollection</span><span class="p">{</span><span class="n">NIPS2015_5872</span><span class="p">,</span>
+   <span class="n">title</span> <span class="o">=</span> <span class="p">{</span><span class="n">Efficient</span> <span class="ow">and</span> <span class="n">Robust</span> <span class="n">Automated</span> <span class="n">Machine</span> <span class="n">Learning</span><span class="p">},</span>
+   <span class="n">author</span> <span class="o">=</span> <span class="p">{</span><span class="n">Feurer</span><span class="p">,</span> <span class="n">Matthias</span> <span class="ow">and</span> <span class="n">Klein</span><span class="p">,</span> <span class="n">Aaron</span> <span class="ow">and</span> <span class="n">Eggensperger</span><span class="p">,</span> <span class="n">Katharina</span> <span class="ow">and</span>
+             <span class="n">Springenberg</span><span class="p">,</span> <span class="n">Jost</span> <span class="ow">and</span> <span class="n">Blum</span><span class="p">,</span> <span class="n">Manuel</span> <span class="ow">and</span> <span class="n">Hutter</span><span class="p">,</span> <span class="n">Frank</span><span class="p">},</span>
+   <span class="n">booktitle</span> <span class="o">=</span> <span class="p">{</span><span class="n">Advances</span> <span class="ow">in</span> <span class="n">Neural</span> <span class="n">Information</span> <span class="n">Processing</span> <span class="n">Systems</span> <span class="mi">28</span><span class="p">},</span>
+   <span class="n">editor</span> <span class="o">=</span> <span class="p">{</span><span class="n">C</span><span class="o">.</span> <span class="n">Cortes</span> <span class="ow">and</span> <span class="n">N</span><span class="o">.</span> <span class="n">D</span><span class="o">.</span> <span class="n">Lawrence</span> <span class="ow">and</span> <span class="n">D</span><span class="o">.</span> <span class="n">D</span><span class="o">.</span> <span class="n">Lee</span> <span class="ow">and</span> <span class="n">M</span><span class="o">.</span> <span class="n">Sugiyama</span> <span class="ow">and</span> <span class="n">R</span><span class="o">.</span> <span class="n">Garnett</span><span class="p">},</span>
+   <span class="n">pages</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2962</span><span class="o">--</span><span class="mi">2970</span><span class="p">},</span>
+   <span class="n">year</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2015</span><span class="p">},</span>
+   <span class="n">publisher</span> <span class="o">=</span> <span class="p">{</span><span class="n">Curran</span> <span class="n">Associates</span><span class="p">,</span> <span class="n">Inc</span><span class="o">.</span><span class="p">},</span>
+   <span class="n">url</span> <span class="o">=</span> <span class="p">{</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">papers</span><span class="o">.</span><span class="n">nips</span><span class="o">.</span><span class="n">cc</span><span class="o">/</span><span class="n">paper</span><span class="o">/</span><span class="mi">5872</span><span class="o">-</span><span class="n">efficient</span><span class="o">-</span><span class="ow">and</span><span class="o">-</span><span class="n">robust</span><span class="o">-</span><span class="n">automated</span><span class="o">-</span><span class="n">machine</span><span class="o">-</span><span class="n">learning</span><span class="o">.</span><span class="n">pdf</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h2>
+<p>We appreciate all contribution to auto-sklearn, from bug reports and
+documentation to new features. If you want to contribute to the code, you can
+pick an issue from the <a class="reference external" href="https://github.com/automl/auto-sklearn/issues">issue tracker</a>
+which is marked with <cite>Needs contributer</cite>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">To avoid spending time on duplicate work or features that are unlikely to
+get merged, it is highly advised that you contact the developers
+by opening a <a class="reference external" href="https://github.com/automl/auto-sklearn/issues">github issue</a> before starting to work.</p>
+</div>
+<p>When developing new features, please create a new branch from the development
+branch. When to submitting a pull request, make sure that all tests are
+still passing.</p>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="_sources/index.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014-2018, Machine Learning Professorship Freiburg.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
