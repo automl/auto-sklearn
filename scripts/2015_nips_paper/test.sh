@@ -10,11 +10,11 @@
 
 dir=log_output  # working directory
 #task_ids=$(python get_tasks.py)
-task_ids="233" #236 242 244 246 75090 248 251 75124 253"
+task_ids="233 236 242 244 246 75090" #248 251 75124 253"
 #seeds="1 2 3 4 5 6 7 8 9 10"
-seeds="0 1"
-time_limit=15
-per_runtime_limit=5
+seeds="0 1 2 3 4"
+time_limit=100
+per_runtime_limit=33
 
 # If running on cluster, first copy the cached openml dataset to the home directory.
 # This is necessary because there are file handling operations which
@@ -89,6 +89,5 @@ for model in vanilla ensemble metalearning meta_ensemble; do
     done
 done
 # plot ranks from csv.
-echo $cmd
 eval $cmd
 

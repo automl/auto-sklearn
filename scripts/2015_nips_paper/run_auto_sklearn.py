@@ -7,7 +7,6 @@ import score_metalearning
 def main(working_directory, output_file, task_id, seed, model, time_limit, per_run_time_limit):
     # calls one of score_vanilla, score_ens, score_meta, score_ensmeta with given task-id, seed.
     if model == "vanilla":
-        # run vanilla as on given task id and seed and store results.
         score_vanilla.main(working_directory,
                         time_limit,
                         per_run_time_limit,
@@ -15,7 +14,6 @@ def main(working_directory, output_file, task_id, seed, model, time_limit, per_r
                         seed,
                         )
     elif model == "metalearning":
-        # run meta as on given task id and seed and store results.
         score_metalearning.main(working_directory,
                                 time_limit,
                                 per_run_time_limit,
@@ -23,15 +21,13 @@ def main(working_directory, output_file, task_id, seed, model, time_limit, per_r
                                 seed,
                                 )
     else:
-    #elif model == "meta_ensemble":
-        # run metaens as on given task id and seed and store results.
+        # create ensemble of vanilla or metalearning
         score_ensemble.main(working_directory,
                             output_file,
                             task_id,
                             seed,
                             ensemble_size=50,
                             )
-
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
@@ -49,7 +45,6 @@ if __name__=="__main__":
     task_id = args.task_id
     seed = args.seed
     model = args.model
-    # Time to run experiment
     time_limit = args.time_limit
     per_run_time_limit = args.per_runtime_limit
 

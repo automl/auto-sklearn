@@ -6,10 +6,11 @@ from sklearn.utils.multiclass import type_of_target
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.metrics import balanced_accuracy
 
-from remove_dataset_from_metadata import remove_dataset
+import openml
+openml.config.cache_directory = os.path.join(os.path.expanduser("~"), 'openml') # Home directory. change this later accordingly
 sys.path.append('../')
-from update_metadata_util import load_task  # noqa. use this when internet is available
-#from load_task_offline import load_task # use this for running on cluster
+from update_metadata_util import load_task  # noqa
+from remove_dataset_from_metadata import remove_dataset
 
 def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # Load data and other info.
@@ -65,7 +66,7 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     }
 
     automl = AutoSklearnClassifier(**automl_arguments)
-    # automl._automl._metadata_directory does not work cause clf._automl is not
+    # automl._automl._metadata_directory does not work cause automl._automl is not
     # created until fit is called. Therefore, we need to manually create
     # automl._automl and specify metadata_directory there.
     automl._automl = automl.build_automl()
