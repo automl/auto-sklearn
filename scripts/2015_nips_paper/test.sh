@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #SBATCH -p ml_cpu-ivy # partition (queue)
 #SBATCH --mem 4000 # memory pool for all cores (4GB)
 #SBATCH -t 0-00:01 # time (D-HH:MM)
