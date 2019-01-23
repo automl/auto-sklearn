@@ -3,14 +3,12 @@ import os
 import xmltodict
 import numpy as np
 
-import openml
 import openml.tasks.functions as t
 import openml.datasets.functions as d
 
 def get_dataset_offline(dataset_id):
     # Workaround for offline
     cache_path = os.path.join(os.path.expanduser("~"), "openml")
-    #cache_path = os.path.expanduser("~")
 
     # Description for dataset
     description_file = os.path.join(cache_path, "datasets/{}/description.xml".format(dataset_id))
@@ -43,7 +41,6 @@ def get_dataset_offline(dataset_id):
 def get_task_offline(task_id):
     # Workaround for offline
     cache_path = os.path.join(os.path.expanduser("~"), "openml")
-    #cache_path = os.path.expanduser("~")
 
     task_file = os.path.join(cache_path, "tasks/{}/task.xml".format(task_id))
 
@@ -60,7 +57,7 @@ def load_task(task_id):
 
     # Get X and y.
     X, y, cat = dataset.get_data(return_categorical_indicator=True,
-                             target=task.target_name)
+                                 target=task.target_name)
     cat = ['categorical' if c else 'numerical' for c in cat]
 
     # Train test split.
