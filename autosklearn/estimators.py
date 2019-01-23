@@ -204,8 +204,9 @@ class AutoSklearnEstimator(BaseEstimator):
             the default logging.yaml file is used, which can be found in
             the directory ``util/logging.yaml`` relative to the installation.
 
-        metadata_directory : dict, optional (None)
-            TODO: Add description
+        metadata_directory : str, optional (None)
+            path to the metadata directory. If None, the default directory
+            (autosklearn.metalearning.files) is used.
 
         Attributes
         ----------
