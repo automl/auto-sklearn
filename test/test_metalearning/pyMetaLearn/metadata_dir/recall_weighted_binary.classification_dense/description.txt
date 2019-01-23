@@ -1,0 +1,68 @@
+features_cutoff_time: 3600
+features_cutoff_memory: 3072
+number_of_feature_steps: 52
+feature_step NumberOfInstances: NumberOfInstances, LogNumberOfInstances
+feature_step LogNumberOfInstances: LogNumberOfInstances
+feature_step NumberOfClasses: NumberOfClasses
+feature_step NumberOfFeatures: NumberOfFeatures, LogNumberOfFeatures
+feature_step LogNumberOfFeatures: LogNumberOfFeatures
+feature_step MissingValues: NumberOfInstancesWithMissingValues, NumberOfFeaturesWithMissingValues, NumberOfMissingValues
+feature_step NumberOfInstancesWithMissingValues: NumberOfInstancesWithMissingValues, PercentageOfInstancesWithMissingValues
+feature_step PercentageOfInstancesWithMissingValues: PercentageOfInstancesWithMissingValues
+feature_step NumberOfFeaturesWithMissingValues: NumberOfFeaturesWithMissingValues, PercentageOfFeaturesWithMissingValues
+feature_step PercentageOfFeaturesWithMissingValues: PercentageOfFeaturesWithMissingValues
+feature_step NumberOfMissingValues: NumberOfMissingValues, PercentageOfMissingValues
+feature_step PercentageOfMissingValues: PercentageOfMissingValues
+feature_step NumberOfNumericFeatures: NumberOfNumericFeatures
+feature_step NumberOfCategoricalFeatures: NumberOfCategoricalFeatures
+feature_step RatioNumericalToNominal: RatioNumericalToNominal
+feature_step RatioNominalToNumerical: RatioNominalToNumerical
+feature_step DatasetRatio: DatasetRatio, LogDatasetRatio
+feature_step LogDatasetRatio: LogDatasetRatio
+feature_step InverseDatasetRatio: InverseDatasetRatio, LogInverseDatasetRatio
+feature_step LogInverseDatasetRatio: LogInverseDatasetRatio
+feature_step ClassOccurences: ClassProbabilityMin, ClassProbabilityMax, ClassProbabilityMean, ClassProbabilitySTD
+feature_step ClassProbabilityMin: ClassProbabilityMin
+feature_step ClassProbabilityMax: ClassProbabilityMax
+feature_step ClassProbabilityMean: ClassProbabilityMean
+feature_step ClassProbabilitySTD: ClassProbabilitySTD
+feature_step NumSymbols: SymbolsMin, SymbolsMax, SymbolsMean, SymbolsSTD, SymbolsSum
+feature_step SymbolsMin: SymbolsMin
+feature_step SymbolsMax: SymbolsMax
+feature_step SymbolsMean: SymbolsMean
+feature_step SymbolsSTD: SymbolsSTD
+feature_step SymbolsSum: SymbolsSum
+feature_step Kurtosisses: KurtosisMin, KurtosisMax, KurtosisMean, KurtosisSTD
+feature_step KurtosisMin: KurtosisMin
+feature_step KurtosisMax: KurtosisMax
+feature_step KurtosisMean: KurtosisMean
+feature_step KurtosisSTD: KurtosisSTD
+feature_step Skewnesses: SkewnessMin, SkewnessMax, SkewnessMean, SkewnessSTD
+feature_step SkewnessMin: SkewnessMin
+feature_step SkewnessMax: SkewnessMax
+feature_step SkewnessMean: SkewnessMean
+feature_step SkewnessSTD: SkewnessSTD
+feature_step ClassEntropy: ClassEntropy
+feature_step LandmarkLDA: LandmarkLDA
+feature_step LandmarkNaiveBayes: LandmarkNaiveBayes
+feature_step LandmarkDecisionTree: LandmarkDecisionTree
+feature_step LandmarkDecisionNodeLearner: LandmarkDecisionNodeLearner
+feature_step LandmarkRandomNodeLearner: LandmarkRandomNodeLearner
+feature_step Landmark1NN: Landmark1NN
+feature_step PCA: PCAFractionOfComponentsFor95PercentVariance, PCAKurtosisFirstPC, PCASkewnessFirstPC
+feature_step PCAFractionOfComponentsFor95PercentVariance: PCAFractionOfComponentsFor95PercentVariance
+feature_step PCAKurtosisFirstPC: PCAKurtosisFirstPC
+feature_step PCASkewnessFirstPC: PCASkewnessFirstPC
+features_deterministic: NumberOfInstances, LogNumberOfInstances, NumberOfClasses, NumberOfFeatures, LogNumberOfFeatures, NumberOfInstancesWithMissingValues, PercentageOfInstancesWithMissingValues, NumberOfFeaturesWithMissingValues, PercentageOfFeaturesWithMissingValues, NumberOfMissingValues, PercentageOfMissingValues, NumberOfNumericFeatures, NumberOfCategoricalFeatures, RatioNumericalToNominal, RatioNominalToNumerical, DatasetRatio, LogDatasetRatio, InverseDatasetRatio, LogInverseDatasetRatio, ClassProbabilityMin, ClassProbabilityMax, ClassProbabilityMean, ClassProbabilitySTD, SymbolsMin, SymbolsMax, SymbolsMean, SymbolsSTD, SymbolsSum, KurtosisMin, KurtosisMax, KurtosisMean, KurtosisSTD, SkewnessMin, SkewnessMax, SkewnessMean, SkewnessSTD, ClassEntropy, LandmarkLDA, LandmarkNaiveBayes, LandmarkDecisionTree, LandmarkDecisionNodeLearner, LandmarkRandomNodeLearner, Landmark1NN, PCAFractionOfComponentsFor95PercentVariance, PCAKurtosisFirstPC, PCASkewnessFirstPC
+features_stochastic: 
+default_steps: NumberOfInstances, LogNumberOfInstances, NumberOfClasses, NumberOfFeatures, LogNumberOfFeatures, MissingValues, NumberOfInstancesWithMissingValues, PercentageOfInstancesWithMissingValues, NumberOfFeaturesWithMissingValues, PercentageOfFeaturesWithMissingValues, NumberOfMissingValues, PercentageOfMissingValues, NumberOfNumericFeatures, NumberOfCategoricalFeatures, RatioNumericalToNominal, RatioNominalToNumerical, DatasetRatio, LogDatasetRatio, InverseDatasetRatio, LogInverseDatasetRatio, ClassOccurences, ClassProbabilityMin, ClassProbabilityMax, ClassProbabilityMean, ClassProbabilitySTD, NumSymbols, SymbolsMin, SymbolsMax, SymbolsMean, SymbolsSTD, SymbolsSum, Kurtosisses, KurtosisMin, KurtosisMax, KurtosisMean, KurtosisSTD, Skewnesses, SkewnessMin, SkewnessMax, SkewnessMean, SkewnessSTD, ClassEntropy, LandmarkLDA, LandmarkNaiveBayes, LandmarkDecisionTree, LandmarkDecisionNodeLearner, LandmarkRandomNodeLearner, Landmark1NN, PCA, PCAFractionOfComponentsFor95PercentVariance, PCAKurtosisFirstPC, PCASkewnessFirstPC
+
+algorithms_deterministic: 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129
+algorithms_stochastic: 
+performance_measures: recall_weighted
+performance_type: solution_quality
+
+scenario_id: auto-sklearn
+maximize: false
+algorithm_cutoff_time: 1800
+algorithm_cutoff_memory: 3072
