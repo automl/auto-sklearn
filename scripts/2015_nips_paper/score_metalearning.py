@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import numpy as np
 
 from sklearn.utils.multiclass import type_of_target
 from autosklearn.classification import AutoSklearnClassifier
@@ -15,6 +16,12 @@ from remove_dataset_from_metadata import remove_dataset
 def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # Load data and other info.
     X_train, y_train, X_test, y_test, cat = load_task(task_id)
+
+    # Check if data is dense or sparse.
+    if isinstance(X_train, np.ndarray):
+        sparse_or_dense = "dense"
+    else:
+        sparse_or_dense = "sparse"
 
     # path to the metadata directory. Is there ar better way to get this?
     metadata_directory = os.path.abspath(os.path.dirname(__file__))
@@ -40,7 +47,9 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     task_type = type_of_target(y_train)
     metadata_for_this_task = os.path.abspath(
         os.path.join(working_directory,
-                     "metadata_%i/balanced_accuracy_%s_sparse" % (task_id, TASK_TYPES_TO_STRING[task_type])))
+                     "metadata_%i/balanced_accuracy_%s_%s" % (task_id,
+                                                              TASK_TYPES_TO_STRING[task_type],
+                                                              sparse_or_dense)))
     # how to check if data is sparse before running?
 
     configuration_output_dir = os.path.join(working_directory, str(seed))
