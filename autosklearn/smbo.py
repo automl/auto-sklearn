@@ -521,6 +521,7 @@ class AutoMLSMBO(object):
         # we start by evaluating the defaults on the full dataset again
         # and add the suggestions from metalearning behind it
         if self.num_metalearning_cfgs > 0:
+            # If metadata directory is None, use default
             if self.metadata_directory is None:
                 metalearning_directory = os.path.dirname(
                     autosklearn.metalearning.__file__)
@@ -534,6 +535,25 @@ class AutoMLSMBO(object):
                     '%s_%s_%s' % (self.metric, TASK_TYPES_TO_STRING[meta_task],
                                   'sparse' if self.datamanager.info['is_sparse']
                                   else 'dense'))
+                self.metadata_directory = metadata_directory
+
+            # If metadata directory is specified by user,
+            # then verify that it exists.
+            else:
+                if not os.path.exists(self.metadata_directory):
+                    raise ValueError('The specified metadata directory \'%s\' '
+                                     'does not exist!' % self.metadata_directory)
+                else:
+                    # There is no multilabel data in OpenML
+                    if self.task == MULTILABEL_CLASSIFICATION:
+                        meta_task = BINARY_CLASSIFICATION
+                    else:
+                        meta_task = self.task
+                        metadata_directory = os.path.join(
+                            self.metadata_directory,
+                            '%s_%s_%s' % (self.metric, TASK_TYPES_TO_STRING[meta_task],
+                                          'sparse' if self.datamanager.info['is_sparse']
+                                          else 'dense'))
                 self.metadata_directory = metadata_directory
 
             if os.path.exists(self.metadata_directory):

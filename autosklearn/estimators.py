@@ -204,6 +204,9 @@ class AutoSklearnEstimator(BaseEstimator):
             the default logging.yaml file is used, which can be found in
             the directory ``util/logging.yaml`` relative to the installation.
 
+        metadata_directory : dict, optional (None)
+            TODO: Add description
+
         Attributes
         ----------
 
@@ -238,6 +241,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.get_smac_object_callback = get_smac_object_callback
         self.smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
+        self.metadata_directory = metadata_directory
 
         self._automl = None  # type: Optional[List[BaseAutoML]]
         # n_jobs after conversion to a number (b/c default is None)
@@ -296,6 +300,7 @@ class AutoSklearnEstimator(BaseEstimator):
             disable_evaluator_output=self.disable_evaluator_output,
             smac_scenario_args=smac_scenario_args,
             logging_config=self.logging_config,
+            metadata_directory=self.metadata_directory,
         )
 
         return automl
