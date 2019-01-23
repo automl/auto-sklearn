@@ -84,7 +84,7 @@ This can be turned off by setting
 Resampling strategies
 =====================
 
-Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <https://github.com/automl/auto-sklearn/tree/master/example>`_
+Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <https://github.com/automl/auto-sklearn/tree/master/examples>`_
 
 Inspecting the results
 ======================
@@ -92,7 +92,7 @@ Inspecting the results
 *auto-sklearn* allows users to inspect the training results and statistics. The following example shows how different 
 statistics can be printed for the inspection.
 
->>> import autoskleran.classification
+>>> import autosklearn.classification
 >>> automl = autosklearn.classification.AutoSklearnClassifier()
 >>> automl.fit(X_train, y_train)
 >>> automl.cv_results_

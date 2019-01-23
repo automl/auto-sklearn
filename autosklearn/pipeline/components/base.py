@@ -11,8 +11,7 @@ from sklearn.utils import check_random_state
 def find_components(package, directory, base_class):
     components = OrderedDict()
 
-    for module_loader, module_name, ispkg in pkgutil.iter_modules(
-            [directory]):
+    for module_loader, module_name, ispkg in pkgutil.iter_modules([directory]):
         full_module_name = "%s.%s" % (package, module_name)
         if full_module_name not in sys.modules and not ispkg:
             module = importlib.import_module(full_module_name)
