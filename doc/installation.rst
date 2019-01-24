@@ -36,7 +36,7 @@ Then install *auto-sklearn*:
 
 We recommend installing *auto-sklearn* into a `virtual environment
 <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or an `Anaconda
-environment <https://conda.io/docs/using/envs.html>`_.
+environment https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html`_.
 
 If the ``pip`` installation command fails, make sure you have the `System requirements`_ installed correctly.
 
