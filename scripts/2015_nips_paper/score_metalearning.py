@@ -8,7 +8,7 @@ from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.metrics import balanced_accuracy
 
 import openml
-openml.config.cache_directory = os.path.join(os.path.expanduser("~"), 'openml') # Home directory. change this later accordingly
+#openml.config.cache_directory = os.path.join(os.path.expanduser("~"), 'openml') # Home directory. change this later accordingly
 from remove_dataset_from_metadata import remove_dataset
 
 def load_task(task_id):
@@ -36,9 +36,11 @@ def load_task(task_id):
     return X_train, y_train, X_test, y_test, cat
 
 def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
+    # Set to local dataset cache
+    openml.config.cache_directory = os.path.join(working_directory, "cache")
+
     # Load data and other info.
     X_train, y_train, X_test, y_test, cat = load_task(task_id)
-
     # Check if data is dense or sparse.
     if isinstance(X_train, np.ndarray):
         sparse_or_dense = "dense"
