@@ -115,8 +115,6 @@ class Test(unittest.TestCase):
         automl1._automl = automl1.build_automl()
         self.assertEqual(automl1._automl._metadata_directory,
                          "pyMetaLearn/metadata_dir")
-        metalearning_directory = os.path.dirname(
-            autosklearn.metalearning.__file__)
 
         automl2 = AutoSklearnClassifier(  # default metadata_dir
             time_left_for_this_task=15,
@@ -134,7 +132,5 @@ class Test(unittest.TestCase):
         X, y = load_breast_cancer(return_X_y=True)
         automl3._automl = automl3.build_automl()
         self.assertRaisesRegex(ValueError, "The specified metadata directory "
-                                "\'%s\' does not exist!" % nonexistent_dir,
+                               "\'%s\' does not exist!" % nonexistent_dir,
                                automl3.fit, X=X, y=y)
-
-

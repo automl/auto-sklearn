@@ -17,7 +17,8 @@ from smac.optimizer import pSMAC
 
 
 import autosklearn.metalearning
-from autosklearn.constants import *
+from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
+    BINARY_CLASSIFICATION, TASK_TYPES_TO_STRING
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
