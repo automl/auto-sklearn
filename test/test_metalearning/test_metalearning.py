@@ -1,8 +1,6 @@
 # -*- encoding: utf-8 -*-
-import os
 import unittest
 
-import autosklearn.metalearning
 from autosklearn.pipeline.util import get_dataset
 from autosklearn.classification import AutoSklearnClassifier
 
