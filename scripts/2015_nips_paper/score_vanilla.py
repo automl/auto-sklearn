@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import numpy as np
 
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.metrics import balanced_accuracy
@@ -10,7 +11,6 @@ import openml
 def load_task(task_id):
     """Function used in score_vanilla and score_metalearning
     for loading data."""
-    print(openml.config.cache_directory)
     task = openml.tasks.get_task(task_id)
     X, y = task.get_X_and_y()
     train_indices, test_indices = task.get_train_test_split_indices()
@@ -34,7 +34,7 @@ def load_task(task_id):
 
 def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # set to local dataset cache
-    openml.config.cache_directory = os.path.join(working_directory, "cache")
+    openml.config.cache_directory = os.path.join(working_directory, "../cache")
 
     configuration_output_dir = os.path.join(working_directory, str(seed))
     try:

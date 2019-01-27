@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-bash create_commands.sh
-rm -r test_folder
+#bash create_commands.sh
+rm -r test2_folder
 
 python slurm_helper.py commands.txt \
-    --cores 5 --timelimit 7200 --queue mlstudents_cpu-ivy --array_min 1 --array_max 20 \
-    --output test_folder --logfiles test_folder
+    --cores 1 --timelimit 30000 --queue ml_cpu-ivy --array_min 1 --array_max 620 \
+    --output test2_folder --logfiles test2_folder
 
