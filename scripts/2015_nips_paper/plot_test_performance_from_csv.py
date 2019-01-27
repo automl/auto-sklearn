@@ -9,6 +9,7 @@ import sys
 import matplotlib
 from matplotlib.pyplot import tight_layout, figure, subplots_adjust, subplot, savefig, show
 import matplotlib.gridspec
+matplotlib.pyplot.switch_backend('agg') # For error invalid DISPLAY variable
 import numpy as np
 
 import plot_util

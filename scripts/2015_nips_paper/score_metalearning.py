@@ -37,7 +37,7 @@ def load_task(task_id):
 
 def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # Set to local dataset cache
-    openml.config.cache_directory = os.path.join(working_directory, "cache")
+    openml.config.cache_directory = os.path.join(working_directory, "../cache")
 
     # Load data and other info.
     X_train, y_train, X_test, y_test, cat = load_task(task_id)
