@@ -168,9 +168,10 @@ def get_smac_object(
     backend,
     metalearning_configurations,
     runhistory,
-    run_id,
 ):
-    scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
+    scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob(
+        smac_run_id=seed if not scenario_dict['shared-model'] else '*',
+    )
     scenario = Scenario(scenario_dict)
     if len(metalearning_configurations) > 0:
         default_config = scenario.cs.get_default_configuration()
@@ -197,7 +198,7 @@ def get_smac_object(
         tae_runner=ta,
         initial_configurations=initial_configurations,
         runhistory=runhistory,
-        run_id=run_id,
+        run_id=seed,
     )
 
 
@@ -370,7 +371,7 @@ class AutoMLSMBO(object):
 
         # == first things first: load the datamanager
         self.reset_data_manager()
-        
+
         # == Initialize non-SMBO stuff
         # first create a scenario
         seed = self.seed
@@ -491,7 +492,6 @@ class AutoMLSMBO(object):
             'backend': self.backend,
             'metalearning_configurations': metalearning_configurations,
             'runhistory': runhistory,
-            'run_id': seed,
         }
         if self.get_smac_object_callback is not None:
             smac = self.get_smac_object_callback(**smac_args)

@@ -243,7 +243,13 @@ class AutoSklearnEstimator(BaseEstimator):
         self._n_jobs = None
         super().__init__()
 
-    def build_automl(self, seed, shared_mode):
+    def build_automl(
+        self,
+        seed: int,
+        shared_mode: bool,
+        ensemble_size: int,
+        initial_configurations_via_metalearning: bool,
+    ):
 
         if shared_mode:
             self.delete_output_folder_after_terminate = False
@@ -269,8 +275,8 @@ class AutoSklearnEstimator(BaseEstimator):
             time_left_for_this_task=self.time_left_for_this_task,
             per_run_time_limit=self.per_run_time_limit,
             initial_configurations_via_metalearning=
-            self.initial_configurations_via_metalearning,
-            ensemble_size=self.ensemble_size,
+            initial_configurations_via_metalearning,
+            ensemble_size=ensemble_size,
             ensemble_nbest=self.ensemble_nbest,
             ensemble_memory_limit=self.ensemble_memory_limit,
             seed=seed,
@@ -302,7 +308,13 @@ class AutoSklearnEstimator(BaseEstimator):
             self._n_jobs = 1
             shared_mode = self.shared_mode
             seed = self.seed
-            automl = self.build_automl(seed=seed, shared_mode=shared_mode)
+            automl = self.build_automl(
+                seed=seed,
+                shared_mode=shared_mode,
+                ensemble_size=self.ensemble_size,
+                initial_configurations_via_metalearning=
+                self.initial_configurations_via_metalearning
+            )
             self._automl.append(automl)
             self._automl[0].fit(*args, **kwargs)
         else:
@@ -311,7 +323,19 @@ class AutoSklearnEstimator(BaseEstimator):
             for i in range(self._n_jobs):
                 rs = np.random.RandomState(self.seed + i)
                 seed = int(rs.randint(0, 2 ** 32))
-                automl = self.build_automl(seed=seed, shared_mode=shared_mode)
+                automl = self.build_automl(
+                    seed=seed,
+                    shared_mode=shared_mode,
+                    # Start the ensemble process only for the first AutoML
+                    # process (the first AutoML will be executed in the
+                    # current process, too)
+                    ensemble_size=self.ensemble_size if i == 0 else 0,
+                    initial_configurations_via_metalearning=(
+                        self.initial_configurations_via_metalearning
+                        if i == 0
+                        else 0
+                    ),
+                )
                 self._automl.append(automl)
             # Start all except for the first instances of Auto-sklearn in a
             # new process!
@@ -380,6 +404,7 @@ class AutoSklearnEstimator(BaseEstimator):
                 shared_mode = self.shared_mode
             else:
                 shared_mode = True
+            # Build a dummy automl object to call fit_ensemble
             self._automl = [
                 self.build_automl(seed=self.seed, shared_mode=shared_mode)
             ]

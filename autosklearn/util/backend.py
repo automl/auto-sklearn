@@ -225,8 +225,12 @@ class Backend(object):
             'run_%d' % seed
         )
 
-    def get_smac_output_glob(self):
-        return os.path.join(self.temporary_directory, 'smac3-output', 'run_1')
+    def get_smac_output_glob(self, smac_run_id=1):
+        return os.path.join(
+            self.temporary_directory,
+            'smac3-output',
+            'run_%s' % str(smac_run_id),
+        )
 
     def _get_targets_ensemble_filename(self):
         return os.path.join(self.internals_directory,
