@@ -391,7 +391,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertEqual(len(cls._automl), 5)
         for i in range(1, 6):
             self.assertEqual(len(build_automl_patch.call_args_list[i][0]), 0)
-            self.assertEqual(len(build_automl_patch.call_args_list[i][1]), 6)
+            self.assertEqual(len(build_automl_patch.call_args_list[i][1]), 7)
             # Thee seed is a magic mock so there is nothing to compare here...
             self.assertIn('seed', build_automl_patch.call_args_list[i][1])
             self.assertEqual(
@@ -408,6 +408,12 @@ class EstimatorTest(Base, unittest.TestCase):
                 ],
                 25 if i == 1 else 0,
             )
+            if i > 1:
+                self.assertEqual(
+                    build_automl_patch.call_args_list[i][1][
+                        'smac_scenario_args']['initial_incumbent'],
+                    'RANDOM',
+                )
 
         self.assertEqual(Process_patch.start.call_count, 4)
         for i in range(2, 6):
@@ -455,7 +461,8 @@ class EstimatorTest(Base, unittest.TestCase):
             'ensemble'
         )
         predictions = os.listdir(predictions_dir)
-        self.assertEqual(n_runs, len(predictions), msg=str(predictions))
+        # two instances of the dummy
+        self.assertEqual(n_runs, len(predictions) - 2, msg=str(predictions))
 
         seeds = set()
         for predictions_file in predictions:
@@ -463,12 +470,12 @@ class EstimatorTest(Base, unittest.TestCase):
 
         self.assertEqual(len(seeds), 2)
 
-        ensemble_dir = automl._automl[0]._backend.get_ensemble_dir
+        ensemble_dir = automl._automl[0]._backend.get_ensemble_dir()
         ensembles = os.listdir(ensemble_dir)
 
         seeds = set()
         for ensemble_file in ensembles:
-            seeds.add(int(predictions_file.split('.')[0].split('_')[20]))
+            seeds.add(int(ensemble_file.split('.')[0].split('_')[0]))
 
         self.assertEqual(len(seeds), 1)
 

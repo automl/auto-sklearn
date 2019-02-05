@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
+import copy
 import multiprocessing
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 import numpy as np
 from sklearn.base import BaseEstimator
@@ -251,6 +252,7 @@ class AutoSklearnEstimator(BaseEstimator):
         initial_configurations_via_metalearning: int,
         tmp_folder: str,
         output_folder: str,
+        smac_scenario_args: Optional[Dict] = None,
     ):
 
         if shared_mode:
@@ -268,10 +270,10 @@ class AutoSklearnEstimator(BaseEstimator):
                          delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
                          delete_output_folder_after_terminate=self.delete_output_folder_after_terminate,
                          shared_mode=shared_mode)
-        # TODO only start ensemble builder process for first automl!
-        # TODO handle runtimes of later automl processes!
-        # TODO load models only for first automl process!
-        # TODO fix cv_results for multiple automl processes!
+
+        if smac_scenario_args is None:
+            smac_scenario_args = self.smac_scenario_args
+
         automl = self._get_automl_class()(
             backend=backend,
             time_left_for_this_task=self.time_left_for_this_task,
@@ -292,7 +294,7 @@ class AutoSklearnEstimator(BaseEstimator):
             shared_mode=shared_mode,
             get_smac_object_callback=self.get_smac_object_callback,
             disable_evaluator_output=self.disable_evaluator_output,
-            smac_scenario_args=self.smac_scenario_args,
+            smac_scenario_args=smac_scenario_args,
             logging_config=self.logging_config,
         )
 
@@ -330,9 +332,25 @@ class AutoSklearnEstimator(BaseEstimator):
 
             self._n_jobs = self.n_jobs
             shared_mode = True
+            seeds = set()
             for i in range(self._n_jobs):
                 rs = np.random.RandomState(self.seed + i)
-                seed = int(rs.randint(0, 2 ** 32))
+                while True:
+                    seed = int(rs.randint(0, 2 ** 32))
+                    if seed in seeds:
+                        continue
+                    else:
+                        break
+
+                if i != 0:
+                    smac_scenario_args = copy.deepcopy(self.smac_scenario_args)
+                    if smac_scenario_args is None:
+                        smac_scenario_args = dict()
+                    if 'initial_incumbent' not in smac_scenario_args:
+                        smac_scenario_args['initial_incumbent'] = 'RANDOM'
+                else:
+                    smac_scenario_args = self.smac_scenario_args
+
                 automl = self.build_automl(
                     seed=seed,
                     shared_mode=shared_mode,
@@ -347,6 +365,7 @@ class AutoSklearnEstimator(BaseEstimator):
                     ),
                     tmp_folder=tmp_folder,
                     output_folder=output_folder,
+                    smac_scenario_args=smac_scenario_args,
                 )
                 self._automl.append(automl)
             # Start all except for the first instances of Auto-sklearn in a
