@@ -60,10 +60,10 @@ cache:
 git:
   depth: 5
 
-before_install: bash  ci_scripts/install_env.sh
+before_install:
+  - source ci_scripts/install_env.sh
 
 install:
-  - source activate testenv
   - pip --version
   # Install general requirements the way setup.py suggests
   - pip install nose pep8 codecov coverage flake8
