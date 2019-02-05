@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import pickle
 import sys
@@ -10,6 +11,7 @@ import numpy as np
 import numpy.ma as npma
 
 import autosklearn.pipeline.util as putil
+from autosklearn.estimators import AutoSklearnEstimator
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
@@ -332,6 +334,68 @@ class EstimatorTest(Base, unittest.TestCase):
         del cls
         self._tearDown(tmp)
         self._tearDown(output)
+
+    @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
+    @unittest.mock.patch('multiprocessing.Process', autospec=True)
+    @unittest.mock.patch('autosklearn.estimators._fit_automl')
+    def test_fit_n_jobs(self, _fit_automl_patch, Process_patch, build_automl_patch):
+        # Return the process patch on call to __init__
+        Process_patch.return_value = Process_patch
+
+        cls = AutoSklearnEstimator()
+        cls.fit()
+        self.assertEqual(build_automl_patch.call_count, 1)
+        self.assertEqual(len(build_automl_patch.call_args[0]), 0)
+        self.assertEqual(
+            build_automl_patch.call_args[1],
+            {
+                'seed': 1,
+                'shared_mode': False,
+                'ensemble_size': 50,
+                'initial_configurations_via_metalearning': 25,
+            },
+        )
+        self.assertEqual(Process_patch.call_count, 0)
+
+        cls = AutoSklearnEstimator(n_jobs=5)
+        cls.fit()
+        # Plus the one from the first call
+        self.assertEqual(build_automl_patch.call_count, 6)
+        self.assertEqual(len(cls._automl), 5)
+        for i in range(1, 6):
+            self.assertEqual(len(build_automl_patch.call_args_list[i][0]), 0)
+            self.assertEqual(len(build_automl_patch.call_args_list[i][1]), 4)
+            # Thee seed is a magic mock so there is nothing to compare here...
+            self.assertIn('seed', build_automl_patch.call_args_list[i][1])
+            self.assertEqual(
+                build_automl_patch.call_args_list[i][1]['shared_mode'],
+                True,
+            )
+            self.assertEqual(
+                build_automl_patch.call_args_list[i][1]['ensemble_size'],
+                50 if i == 1 else 0,
+            )
+            self.assertEqual(
+                build_automl_patch.call_args_list[i][1][
+                    'initial_configurations_via_metalearning'
+                ],
+                25 if i == 1 else 0,
+            )
+
+        self.assertEqual(Process_patch.start.call_count, 4)
+        for i in range(2, 6):
+            self.assertEqual(
+                len(Process_patch.call_args_list[i - 2][1]['kwargs']), 3,
+            )
+            self.assertFalse(
+                Process_patch.call_args_list[i - 2][1]['kwargs']['load_models']
+            )
+        self.assertEqual(Process_patch.join.call_count, 4)
+
+        self.assertEqual(_fit_automl_patch.call_count, 1)
+        self.assertEqual(len(_fit_automl_patch.call_args[0]), 0)
+        self.assertEqual(len(_fit_automl_patch.call_args[1]), 3)
+        self.assertTrue(_fit_automl_patch.call_args[1]['load_models'])
 
 
 class AutoMLClassifierTest(Base, unittest.TestCase):

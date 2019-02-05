@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from multiprocessing import Process
+import multiprocessing
 from typing import Optional, List
 
 import numpy as np
@@ -341,9 +341,13 @@ class AutoSklearnEstimator(BaseEstimator):
             # new process!
             processes = []
             for i in range(1, self._n_jobs):
-                p = Process(
+                p = multiprocessing.Process(
                     target=_fit_automl,
-                    args=(self._automl[i], kwargs, False),
+                    kwargs=dict(
+                        automl=self._automl[i],
+                        kwargs=kwargs,
+                        load_models=False,
+                    ),
                 )
                 processes.append(p)
                 p.start()
