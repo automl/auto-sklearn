@@ -7,7 +7,7 @@ from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, BaseAutoML
-from autosklearn.util.backend import create
+from autosklearn.util.backend import create, get_randomized_directory_names
 
 
 def _fit_automl(automl, kwargs, load_models):
@@ -249,20 +249,22 @@ class AutoSklearnEstimator(BaseEstimator):
         shared_mode: bool,
         ensemble_size: int,
         initial_configurations_via_metalearning: bool,
+        tmp_folder: str,
+        output_folder: str,
     ):
 
         if shared_mode:
             self.delete_output_folder_after_terminate = False
             self.delete_tmp_folder_after_terminate = False
-            if self.tmp_folder is None:
+            if tmp_folder is None:
                 raise ValueError("If shared_mode == True tmp_folder must not "
                                  "be None.")
-            if self.output_folder is None:
+            if output_folder is None:
                 raise ValueError("If shared_mode == True output_folder must "
                                  "not be None.")
 
-        backend = create(temporary_directory=self.tmp_folder,
-                         output_directory=self.output_folder,
+        backend = create(temporary_directory=tmp_folder,
+                         output_directory=output_folder,
                          delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
                          delete_output_folder_after_terminate=self.delete_output_folder_after_terminate,
                          shared_mode=shared_mode)
@@ -315,10 +317,17 @@ class AutoSklearnEstimator(BaseEstimator):
                 initial_configurations_via_metalearning=(
                     self.initial_configurations_via_metalearning
                 ),
+                tmp_folder=self.tmp_folder,
+                output_folder=self.output_folder,
             )
             self._automl.append(automl)
             self._automl[0].fit(**kwargs)
         else:
+            tmp_folder, output_folder = get_randomized_directory_names(
+                temporary_directory=self.tmp_folder,
+                output_directory=self.output_folder,
+            )
+
             self._n_jobs = self.n_jobs
             shared_mode = True
             for i in range(self._n_jobs):
@@ -336,6 +345,8 @@ class AutoSklearnEstimator(BaseEstimator):
                         if i == 0
                         else 0
                     ),
+                    tmp_folder=tmp_folder,
+                    output_folder=output_folder,
                 )
                 self._automl.append(automl)
             # Start all except for the first instances of Auto-sklearn in a

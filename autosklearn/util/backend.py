@@ -31,6 +31,34 @@ def create(temporary_directory,
     return backend
 
 
+def get_randomized_directory_names(
+    temporary_directory=None,
+    output_directory=None,
+):
+    random_number = random.randint(0, 10000)
+    pid = os.getpid()
+
+    temporary_directory = (
+        temporary_directory
+        if temporary_directory
+        else os.path.join(
+            tempfile.gettempdir(),
+            'autosklearn_tmp_%d_%d' % (pid, random_number),
+        )
+    )
+
+    output_directory = (
+        output_directory
+        if output_directory
+        else os.path.join(
+            tempfile.gettempdir(),
+            'autosklearn_output_%d_%d' % (pid, random_number),
+        )
+    )
+
+    return temporary_directory, output_directory
+
+
 class BackendContext(object):
 
     def __init__(self,
@@ -53,7 +81,12 @@ class BackendContext(object):
         self._tmp_dir_created = False
         self._output_dir_created = False
 
-        self._prepare_directories(temporary_directory, output_directory)
+        self.__temporary_directory, self.__output_directory = (
+            get_randomized_directory_names(
+                temporary_directory=temporary_directory,
+                output_directory=output_directory,
+            )
+        )
         self._logger = logging.get_logger(__name__)
         self.create_directories()
 
@@ -66,24 +99,6 @@ class BackendContext(object):
     def temporary_directory(self):
         # make sure that tilde does not appear on the path.
         return os.path.expanduser(os.path.expandvars(self.__temporary_directory))
-
-    def _prepare_directories(self, temporary_directory, output_directory):
-        random_number = random.randint(0, 10000)
-        pid = os.getpid()
-
-        self.__temporary_directory = temporary_directory \
-            if temporary_directory \
-            else os.path.join(
-                tempfile.gettempdir(),
-                'autosklearn_tmp_%d_%d' % (pid, random_number)
-            )
-
-        self.__output_directory = output_directory \
-            if output_directory \
-            else os.path.join(
-                tempfile.gettempdir(),
-                'autosklearn_output_%d_%d' % (pid, random_number)
-            )
 
     def create_directories(self):
         if self.shared_mode:
