@@ -7,6 +7,8 @@ import lockfile
 import numpy as np
 import pickle
 import shutil
+from typing import Union
+
 from autosklearn.util import logging_ as logging
 
 
@@ -225,7 +227,7 @@ class Backend(object):
             'run_%d' % seed
         )
 
-    def get_smac_output_glob(self, smac_run_id=1):
+    def get_smac_output_glob(self, smac_run_id: Union[str, int] = 1) -> str:
         return os.path.join(
             self.temporary_directory,
             'smac3-output',

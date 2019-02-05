@@ -13,6 +13,7 @@ from smac.runhistory.runhistory import RunHistory
 from smac.runhistory.runhistory2epm import RunHistory2EPM4Cost
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_ta_run import StatusType
+from smac.optimizer import pSMAC
 
 
 import autosklearn.metalearning
@@ -500,11 +501,20 @@ class AutoMLSMBO(object):
 
         smac.optimize()
 
+        # Patch SMAC to read in data from parallel runs after the last
+        # function evaluation
+        if self.shared_mode:
+            pSMAC.read(
+                run_history=smac.solver.runhistory,
+                output_dirs=smac.solver.scenario.input_psmac_dirs,
+                configuration_space=smac.solver.config_space,
+                logger=smac.solver.logger,
+            )
+
         self.runhistory = smac.solver.runhistory
         self.trajectory = smac.solver.intensifier.traj_logger.trajectory
 
         return self.runhistory, self.trajectory
-
 
     def get_metalearning_suggestions(self):
         # == METALEARNING suggestions

@@ -1,17 +1,22 @@
 # -*- encoding: utf-8 -*-
+import json
 from multiprocessing import Process
 from typing import Optional
 
 import numpy as np
+import numpy.ma as ma
+import scipy.stats
 from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
+from smac.tae.execute_ta_run import StatusType
+from smac.runhistory.runhistory import RunHistory
 
-from autosklearn.automl import AutoMLClassifier, AutoMLRegressor
+from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, BaseAutoML
 from autosklearn.util.backend import create
 
 
-def _fit_automl(automl, args, kwargs):
-    return automl.fit(*args, **kwargs)
+def _fit_automl(automl, kwargs, load_models):
+    return automl.fit(load_models=load_models, **kwargs)
 
 
 class AutoSklearnEstimator(BaseEstimator):
@@ -238,7 +243,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
 
-        self._automl = None
+        self._automl = None  # type: Optional[List[BaseAutoML]]
         # n_jobs after conversion to a number (b/c default is None)
         self._n_jobs = None
         super().__init__()
@@ -296,7 +301,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
         return automl
 
-    def fit(self, *args, **kwargs):
+    def fit(self, **kwargs):
         self._automl = []
         if self.shared_mode and self.n_jobs:
             raise ValueError(
@@ -316,7 +321,7 @@ class AutoSklearnEstimator(BaseEstimator):
                 self.initial_configurations_via_metalearning
             )
             self._automl.append(automl)
-            self._automl[0].fit(*args, **kwargs)
+            self._automl[0].fit(**kwargs)
         else:
             self._n_jobs = self.n_jobs
             shared_mode = True
@@ -343,11 +348,15 @@ class AutoSklearnEstimator(BaseEstimator):
             for i in range(1, self._n_jobs):
                 p = Process(
                     target=_fit_automl,
-                    args=(self._automl[i], args, kwargs,),
+                    args=(self._automl[i], kwargs, False),
                 )
                 processes.append(p)
                 p.start()
-            _fit_automl(self._automl[0], args=args, kwargs=kwargs)
+            _fit_automl(
+                automl=self._automl[0],
+                kwargs=kwargs,
+                load_models=True,
+            )
             for p in processes:
                 p.join()
 
@@ -484,10 +493,14 @@ class AutoSklearnEstimator(BaseEstimator):
 
     @property
     def trajectory_(self):
+        if len(self._automl) > 1:
+            raise NotImplementedError()
         return self._automl[0].trajectory_
 
     @property
     def fANOVA_input_(self):
+        if len(self._automl) > 1:
+            raise NotImplementedError()
         return self._automl[0].fANOVA_input_
 
     def sprint_statistics(self):

@@ -35,7 +35,7 @@ output_folder = '/tmp/autosklearn_parallel_2_example_out'
 for dir_ in [tmp_folder, output_folder]:
     try:
         shutil.rmtree(dir_)
-    except OSError as e:
+    except OSError:
         pass
 
 
@@ -64,15 +64,20 @@ def get_spawn_classifier(X_train, y_train):
         # models.
         # 3. all instances of the AutoSklearnClassifier must have a different seed!
         automl = AutoSklearnClassifier(
-            time_left_for_this_task=60,  # sec., how long should this seed fit process run
-            per_run_time_limit=15,  # sec., each model may only take this long before it's killed
-            ml_memory_limit=1024,  # MB, memory limit imposed on each call to a ML algorithm
+            time_left_for_this_task=60,
+            # sec., how long should this seed fit process run
+            per_run_time_limit=15,
+            # sec., each model may only take this long before it's killed
+            ml_memory_limit=1024,
+            # MB, memory limit imposed on each call to a ML algorithm
             shared_mode=True,  # tmp folder will be shared between seeds
             tmp_folder=tmp_folder,
             output_folder=output_folder,
             delete_tmp_folder_after_terminate=False,
-            ensemble_size=0,  # ensembles will be built when all optimization runs are finished
-            initial_configurations_via_metalearning=initial_configurations_via_metalearning,
+            ensemble_size=0,
+            # ensembles will be built when all optimization runs are finished
+            initial_configurations_via_metalearning=
+            initial_configurations_via_metalearning,
             seed=seed,
             smac_scenario_args=smac_scenario_args,
         )
