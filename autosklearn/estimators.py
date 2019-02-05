@@ -418,8 +418,11 @@ class AutoSklearnEstimator(BaseEstimator):
                 self.build_automl(
                     seed=self.seed,
                     shared_mode=shared_mode,
-                    ensemble_size=
-                    ensemble_size if ensemble_size is not None else self.ensemble_size,
+                    ensemble_size=(
+                        ensemble_size
+                        if ensemble_size is not None else
+                        self.ensemble_size,
+                    ),
                     initial_configurations_via_metalearning=0,
                 )
             ]

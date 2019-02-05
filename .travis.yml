@@ -63,7 +63,7 @@ git:
 before_install: bash  ci_scripts/install_env.sh
 
 install:
-  - if [[ "$DISTRIB" == "conda" ]]; then source activate testenv; fi
+  - source activate testenv
   - pip --version
   # Install general requirements the way setup.py suggests
   - pip install nose pep8 codecov coverage flake8
