@@ -378,6 +378,8 @@ class EstimatorTest(Base, unittest.TestCase):
                 'shared_mode': False,
                 'ensemble_size': 50,
                 'initial_configurations_via_metalearning': 25,
+                'output_folder': None,
+                'tmp_folder': None
             },
         )
         self.assertEqual(Process_patch.call_count, 0)
@@ -389,7 +391,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertEqual(len(cls._automl), 5)
         for i in range(1, 6):
             self.assertEqual(len(build_automl_patch.call_args_list[i][0]), 0)
-            self.assertEqual(len(build_automl_patch.call_args_list[i][1]), 4)
+            self.assertEqual(len(build_automl_patch.call_args_list[i][1]), 6)
             # Thee seed is a magic mock so there is nothing to compare here...
             self.assertIn('seed', build_automl_patch.call_args_list[i][1])
             self.assertEqual(

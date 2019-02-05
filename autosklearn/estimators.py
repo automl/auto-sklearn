@@ -21,7 +21,7 @@ class AutoSklearnEstimator(BaseEstimator):
         time_left_for_this_task=3600,
         per_run_time_limit=360,
         initial_configurations_via_metalearning=25,
-        ensemble_size=50,
+        ensemble_size: int = 50,
         ensemble_nbest=50,
         ensemble_memory_limit=1024,
         seed=1,
@@ -248,7 +248,7 @@ class AutoSklearnEstimator(BaseEstimator):
         seed: int,
         shared_mode: bool,
         ensemble_size: int,
-        initial_configurations_via_metalearning: bool,
+        initial_configurations_via_metalearning: int,
         tmp_folder: str,
         output_folder: str,
     ):
@@ -432,9 +432,11 @@ class AutoSklearnEstimator(BaseEstimator):
                     ensemble_size=(
                         ensemble_size
                         if ensemble_size is not None else
-                        self.ensemble_size,
+                        self.ensemble_size
                     ),
                     initial_configurations_via_metalearning=0,
+                    tmp_folder=self.tmp_folder,
+                    output_folder=self.output_folder,
                 )
             ]
         self._automl[0].fit_ensemble(
