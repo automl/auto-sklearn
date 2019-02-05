@@ -1,15 +1,10 @@
 # -*- encoding: utf-8 -*-
-import json
 from multiprocessing import Process
-from typing import Optional
+from typing import Optional, List
 
 import numpy as np
-import numpy.ma as ma
-import scipy.stats
 from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
-from smac.tae.execute_ta_run import StatusType
-from smac.runhistory.runhistory import RunHistory
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, BaseAutoML
 from autosklearn.util.backend import create

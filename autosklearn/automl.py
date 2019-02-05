@@ -312,7 +312,8 @@ class AutoML(BaseEstimator):
 
         return ta.num_run
 
-    def _fit(self,
+    def _fit(
+        self,
         datamanager: AbstractDataManager,
         metric: Scorer,
         load_models: bool,

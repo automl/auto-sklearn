@@ -17,7 +17,7 @@ env:
 matrix:
   allow_failures:
   - os: osx
-  
+
   include:
   - os: linux
     python: 3.5
@@ -69,7 +69,8 @@ install:
   - pip --version
   # Install general requirements the way setup.py suggests
   - pip install nose pep8 codecov coverage flake8
-  - pip install -r requirements.txt
+  # Install the packages in the correct order specified by the requirements.txt file
+  - cat requirements.txt | xargs -n 1 -L 1 pip install
   # Install openml dependency for metadata generation unittest
   - pip install xmltodict requests liac-arff
   - pip install git+https://github.com/openml/openml-python@0b9009b0436fda77d9f7c701bd116aff4158d5e1 --no-deps
