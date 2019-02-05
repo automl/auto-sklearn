@@ -414,7 +414,13 @@ class AutoSklearnEstimator(BaseEstimator):
                 shared_mode = True
             # Build a dummy automl object to call fit_ensemble
             self._automl = [
-                self.build_automl(seed=self.seed, shared_mode=shared_mode)
+                self.build_automl(
+                    seed=self.seed,
+                    shared_mode=shared_mode,
+                    ensemble_size=
+                    ensemble_size if ensemble_size is not None else self.ensemble_size,
+                    initial_configurations_via_metalearning=0,
+                )
             ]
         self._automl[0].fit_ensemble(
             y=y,

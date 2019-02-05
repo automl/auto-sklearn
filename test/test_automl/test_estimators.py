@@ -1,4 +1,3 @@
-import multiprocessing
 import os
 import pickle
 import sys
@@ -17,7 +16,7 @@ from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
 from autosklearn.automl import AutoMLClassifier, AutoML
 from autosklearn.util.backend import Backend, BackendContext
-from autosklearn.constants import MULTICLASS_CLASSIFICATION
+from autosklearn.constants import BINARY_CLASSIFICATION
 sys.path.append(os.path.dirname(__file__))
 from base import Base
 
@@ -223,14 +222,14 @@ class EstimatorTest(Base, unittest.TestCase):
         self._setUp(tmp)
         self._setUp(output)
 
-        X_train, Y_train, X_test, Y_test = putil.get_dataset('digits')
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('breast_cancer')
 
-        # test parallel Classifier to predict classes, not only indexes
+        # test parallel Classifier to predict classes, not only indices
         Y_train += 1
         Y_test += 1
 
         automl = AutoSklearnClassifier(
-            time_left_for_this_task=20,
+            time_left_for_this_task=15,
             per_run_time_limit=5,
             output_folder=output,
             tmp_folder=tmp,
@@ -240,6 +239,28 @@ class EstimatorTest(Base, unittest.TestCase):
             ensemble_size=0,
         )
         automl.fit(X_train, Y_train)
+        n_models_fit = len(automl.cv_results_['mean_test_score'])
+        cv_results = automl.cv_results_['mean_test_score']
+
+        automl = AutoSklearnClassifier(
+            time_left_for_this_task=15,
+            per_run_time_limit=5,
+            output_folder=output,
+            tmp_folder=tmp,
+            shared_mode=True,
+            seed=2,
+            initial_configurations_via_metalearning=0,
+            ensemble_size=0,
+        )
+        automl.fit(X_train, Y_train)
+        n_models_fit_2 = len(automl.cv_results_['mean_test_score'])
+
+        # Check that the results from the first run were actually read by the
+        # second run
+        self.assertGreater(n_models_fit_2, n_models_fit)
+        for score in automl.cv_results_['mean_test_score']:
+            self.assertIn(score, cv_results)
+
         # Create a 'dummy model' for the first run, which has an accuracy of
         # more than 99%; it should be in the final ensemble if the ensemble
         # building of the second AutoSklearn classifier works correct
@@ -249,7 +270,7 @@ class EstimatorTest(Base, unittest.TestCase):
             true_targets_ensemble = np.load(fh)
         true_targets_ensemble[-1] = 1 if true_targets_ensemble[-1] != 1 else 0
         true_targets_ensemble = true_targets_ensemble.astype(int)
-        probas = np.zeros((len(true_targets_ensemble), 10), dtype=float)
+        probas = np.zeros((len(true_targets_ensemble), 2), dtype=float)
 
         for i, value in enumerate(true_targets_ensemble):
             probas[i, value] = 1.0
@@ -262,7 +283,7 @@ class EstimatorTest(Base, unittest.TestCase):
         with open(dummy_predictions_path, 'wb') as fh:
             np.save(fh, probas)
 
-        probas_test = np.zeros((len(Y_test), 10), dtype=float)
+        probas_test = np.zeros((len(Y_test), 2), dtype=float)
         for i, value in enumerate(Y_test):
             probas_test[i, value - 1] = 1.0
 
@@ -272,19 +293,19 @@ class EstimatorTest(Base, unittest.TestCase):
         backend.save_model(dummy, 30, 1)
 
         automl = AutoSklearnClassifier(
-            time_left_for_this_task=20,
+            time_left_for_this_task=15,
             per_run_time_limit=5,
             output_folder=output,
             tmp_folder=tmp,
             shared_mode=True,
-            seed=2,
+            seed=3,
             initial_configurations_via_metalearning=0,
             ensemble_size=0,
         )
-        automl.fit_ensemble(Y_train, task=MULTICLASS_CLASSIFICATION,
+        automl.fit_ensemble(Y_train, task=BINARY_CLASSIFICATION,
                             metric=accuracy,
                             precision='32',
-                            dataset_name='iris',
+                            dataset_name='breast_cancer',
                             ensemble_size=20,
                             ensemble_nbest=50,
                             )
@@ -295,7 +316,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertEqual(len(os.listdir(os.path.join(tmp, '.auto-sklearn',
                                                      'ensembles'))), 1)
         self.assertGreaterEqual(score, 0.90)
-        self.assertEqual(automl._automl[0]._task, MULTICLASS_CLASSIFICATION)
+        self.assertEqual(automl._automl[0]._task, BINARY_CLASSIFICATION)
 
         models = automl._automl[0].models_
         classifier_types = [type(c) for c in models.values()]
