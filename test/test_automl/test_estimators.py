@@ -455,7 +455,7 @@ class EstimatorTest(Base, unittest.TestCase):
             'ensemble'
         )
         predictions = os.listdir(predictions_dir)
-        self.assertEqual(n_runs, len(predictions))
+        self.assertEqual(n_runs, len(predictions), msg=str(predictions))
 
         seeds = set()
         for predictions_file in predictions:
