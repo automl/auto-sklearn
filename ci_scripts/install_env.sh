@@ -1,13 +1,13 @@
 python --version
 
-if [[ "$DISTRIB" = "conda" ]]; then
+if [[ "$DISTRIB" == "conda" ]]; then
 
     wget $MINICONDA_URL -O miniconda.sh
     bash miniconda.sh -b -p $HOME/miniconda
     export PATH="$HOME/miniconda/bin:$PATH"
     # check if Conda was installed
     if [[ `which conda` ]]; then echo 'Conda installation successful'; else exit 1; fi
-    conda create -n testenv --yes pip wheel gxx_linux-64 gcc_linux-64 swig
+    conda create -n testenv --yes pip wheel gxx_linux-64 gcc_linux-64 swig python="$PYTHON"
     source activate testenv
 
 else

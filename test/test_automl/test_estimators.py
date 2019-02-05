@@ -258,8 +258,12 @@ class EstimatorTest(Base, unittest.TestCase):
         # Check that the results from the first run were actually read by the
         # second run
         self.assertGreater(n_models_fit_2, n_models_fit)
-        for score in automl.cv_results_['mean_test_score']:
-            self.assertIn(score, cv_results)
+        for score in cv_results:
+            self.assertIn(
+                score,
+                automl.cv_results_['mean_test_score'],
+                msg=str((automl.cv_results_['mean_test_score'], cv_results)),
+            )
 
         # Create a 'dummy model' for the first run, which has an accuracy of
         # more than 99%; it should be in the final ensemble if the ensemble
@@ -417,6 +421,54 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertEqual(len(_fit_automl_patch.call_args[0]), 0)
         self.assertEqual(len(_fit_automl_patch.call_args[1]), 3)
         self.assertTrue(_fit_automl_patch.call_args[1]['load_models'])
+
+    def test_fit_n_jobs_2(self):
+        tmp = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
+        output = os.path.join(self.test_dir, '..', '.out_estimator_fit_pSMAC')
+        self._setUp(tmp)
+        self._setUp(output)
+
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('breast_cancer')
+
+        # test parallel Classifier to predict classes, not only indices
+        Y_train += 1
+        Y_test += 1
+
+        automl = AutoSklearnClassifier(
+            time_left_for_this_task=15,
+            per_run_time_limit=5,
+            output_folder=output,
+            tmp_folder=tmp,
+            seed=1,
+            initial_configurations_via_metalearning=0,
+            ensemble_size=5,
+            n_jobs=2,
+            include_estimators=['sgd'],
+            include_preprocessors=['no_preprocessing'],
+        )
+        automl.fit(X_train, Y_train)
+        n_runs = len(automl.cv_results_['mean_test_score'])
+
+        predictions_dir = automl._automl[0]._backend._get_prediction_output_dir(
+            'ensemble'
+        )
+        predictions = os.listdir(predictions_dir)
+        self.assertEqual(n_runs, len(predictions))
+
+        seeds = set()
+        for predictions_file in predictions:
+            seeds.add(int(predictions_file.split('.')[0].split('_')[2]))
+
+        self.assertEqual(len(seeds), 2)
+
+        ensemble_dir = automl._automl[0]._backend.get_ensemble_dir
+        ensembles = os.listdir(ensemble_dir)
+
+        seeds = set()
+        for ensemble_file in ensembles:
+            seeds.add(int(predictions_file.split('.')[0].split('_')[20]))
+
+        self.assertEqual(len(seeds), 1)
 
 
 class AutoMLClassifierTest(Base, unittest.TestCase):

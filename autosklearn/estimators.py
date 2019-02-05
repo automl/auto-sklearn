@@ -312,8 +312,9 @@ class AutoSklearnEstimator(BaseEstimator):
                 seed=seed,
                 shared_mode=shared_mode,
                 ensemble_size=self.ensemble_size,
-                initial_configurations_via_metalearning=
-                self.initial_configurations_via_metalearning
+                initial_configurations_via_metalearning=(
+                    self.initial_configurations_via_metalearning
+                ),
             )
             self._automl.append(automl)
             self._automl[0].fit(**kwargs)
