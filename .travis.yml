@@ -29,8 +29,6 @@ matrix:
     python: 3.7
     env: DISTRIB="ubuntu"
   - os: linux
-    env: DISTRIB="ubuntu" RUN_FLAKE8="true" SKIP_TESTS="true"
-  - os: linux
     env: DISTRIB="conda" PYTHON="3.5"
   - os: linux
     env: DISTRIB="conda" PYTHON="3.6"
@@ -38,6 +36,8 @@ matrix:
     env: DISTRIB="conda" COVERAGE="true" DOCPUSH="true"  PYTHON="3.7"
   - os: linux
     env: DISTRIB="conda" EXAMPLES="true" PYTHON=3.7"
+  - os: linux
+    env: DISTRIB="conda" RUN_FLAKE8="true" SKIP_TESTS="true"
 
 
   # Temporarily disabling OSX builds because thy take too long
