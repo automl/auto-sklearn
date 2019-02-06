@@ -76,8 +76,9 @@ def get_spawn_classifier(X_train, y_train):
             delete_tmp_folder_after_terminate=False,
             ensemble_size=0,
             # ensembles will be built when all optimization runs are finished
-            initial_configurations_via_metalearning=
-            initial_configurations_via_metalearning,
+            initial_configurations_via_metalearning=(
+                initial_configurations_via_metalearning
+            ),
             seed=seed,
             smac_scenario_args=smac_scenario_args,
         )

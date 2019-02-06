@@ -30,7 +30,6 @@ def get_eips_object_callback(
         backend,
         metalearning_configurations,
         runhistory,
-        run_id,
 ):
     scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
     scenario = Scenario(scenario_dict)
@@ -64,7 +63,7 @@ def get_eips_object_callback(
         runhistory2epm=rh2EPM,
         model=model,
         acquisition_function=acquisition_function,
-        run_id=run_id,
+        run_id=seed,
     )
 
 
