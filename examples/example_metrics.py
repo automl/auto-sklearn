@@ -21,10 +21,10 @@ import autosklearn.classification
 import autosklearn.metrics
 
 
-
 def accuracy(solution, prediction):
     # custom function defining accuracy
     return np.mean(solution == prediction)
+
 
 def error(solution, prediction):
     # custom function defining error
@@ -35,6 +35,7 @@ def accuracy_wk(solution, prediction, dummy):
     # custom function defining accuracy and accepting an additional argument
     assert dummy is None
     return np.mean(solution == prediction)
+
 
 def error_wk(solution, prediction, dummy):
     # custom function defining error and accepting an additional argument
@@ -68,7 +69,7 @@ def main():
     predictions = cls.predict(X_test)
     print("Accuracy score {:g} using {:s}".
           format(sklearn.metrics.accuracy_score(y_test, predictions),
-                 cls._automl._metric.name))
+                 cls._automl[0]._metric.name))
 
     # Second example: Use own accuracy metric
     print("#"*80)
@@ -91,7 +92,7 @@ def main():
     predictions = cls.predict(X_test)
     print("Accuracy score {:g} using {:s}".
           format(sklearn.metrics.accuracy_score(y_test, predictions),
-                 cls._automl._metric.name))
+                 cls._automl[0]._metric.name))
 
     print("#"*80)
     print("Use self defined error metric")
@@ -113,7 +114,7 @@ def main():
     cls.predictions = cls.predict(X_test)
     print("Error rate {:g} using {:s}".
           format(error_rate(y_test, predictions),
-                 cls._automl._metric.name))
+                 cls._automl[0]._metric.name))
 
     # Third example: Use own accuracy metric with additional argument
     print("#"*80)
@@ -138,7 +139,7 @@ def main():
     print(
         "Accuracy score {:g} using {:s}".format(
             sklearn.metrics.accuracy_score(y_test, predictions),
-            cls._automl._metric.name
+            cls._automl[0]._metric.name
         )
     )
 
@@ -164,9 +165,10 @@ def main():
     print(
         "Error rate {:g} using {:s}".format(
             error_rate(y_test, predictions),
-            cls._automl._metric.name
+            cls._automl[0]._metric.name
         )
     )
+
 
 if __name__ == "__main__":
     main()

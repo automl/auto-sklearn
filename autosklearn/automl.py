@@ -2,6 +2,7 @@
 import io
 import json
 import os
+from typing import Optional, List
 import unittest.mock
 import warnings
 
@@ -19,8 +20,8 @@ import sklearn.utils
 import scipy.sparse
 from sklearn.metrics.classification import type_of_target
 
-from autosklearn.constants import *
 from autosklearn.metrics import Scorer
+from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
@@ -140,14 +141,17 @@ class AutoML(BaseEstimator):
         #self._backend = Backend(self._output_dir, self._tmp_dir)
 
     def fit(
-        self, X, y,
-        task,
-        metric,
-        X_test=None,
-        y_test=None,
-        feat_type=None,
-        dataset_name=None,
-        only_return_configuration_space=False,
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        task: int,
+        metric: Scorer,
+        X_test: Optional[np.ndarray] = None,
+        y_test: Optional[np.ndarray] = None,
+        feat_type: Optional[List[bool]] = None,
+        dataset_name: Optional[str] = None,
+        only_return_configuration_space: Optional[bool] = False,
+        load_models: bool = True,
     ):
         if self._shared_mode:
             # If this fails, it's likely that this is the first call to get
@@ -198,13 +202,14 @@ class AutoML(BaseEstimator):
         )
 
         return self._fit(
-            loaded_data_manager,
-            metric,
-            only_return_configuration_space,
+            datamanager=loaded_data_manager,
+            metric=metric,
+            load_models=load_models,
+            only_return_configuration_space=only_return_configuration_space,
         )
 
     # TODO this is very old code which can be dropped!
-    def fit_automl_dataset(self, dataset, metric):
+    def fit_automl_dataset(self, dataset, metric, load_models=True):
         self._stopwatch = StopWatch()
         self._backend.save_start_time(self._seed)
 
@@ -223,9 +228,13 @@ class AutoML(BaseEstimator):
         for part in loaded_data_manager_str:
             self._logger.debug(part)
 
-        return self._fit(loaded_data_manager, metric)
+        return self._fit(
+            datamanager=loaded_data_manager,
+            metric=metric,
+            load_models=load_models,
+        )
 
-    def fit_on_datamanager(self, datamanager, metric):
+    def fit_on_datamanager(self, datamanager, metric, load_models=True):
         self._stopwatch = StopWatch()
         self._backend.save_start_time(self._seed)
 
@@ -235,7 +244,11 @@ class AutoML(BaseEstimator):
         self._dataset_name = name
 
         self._logger = self._get_logger(name)
-        self._fit(datamanager, metric)
+        self._fit(
+            datamanager=datamanager,
+            metric=metric,
+            load_models=load_models,
+        )
 
     def _get_logger(self, name):
         logger_name = 'AutoML(%d):%s' % (self._seed, name)
@@ -299,7 +312,13 @@ class AutoML(BaseEstimator):
 
         return ta.num_run
 
-    def _fit(self, datamanager, metric, only_return_configuration_space=False):
+    def _fit(
+        self,
+        datamanager: AbstractDataManager,
+        metric: Scorer,
+        load_models: bool,
+        only_return_configuration_space: bool = False,
+    ):
         # Reset learnt stuff
         self.models_ = None
         self.ensemble_ = None
@@ -481,7 +500,8 @@ class AutoML(BaseEstimator):
             self._proc_ensemble.join()
 
         self._proc_ensemble = None
-        self._load_models()
+        if load_models:
+            self._load_models()
 
         return self
 
@@ -912,13 +932,16 @@ class AutoMLClassifier(BaseAutoML):
                               'binary': BINARY_CLASSIFICATION}
 
     def fit(
-        self, X, y,
-        X_test=None,
-        y_test=None,
-        metric=None,
-        feat_type=None,
-        dataset_name=None,
-        only_return_configuration_space=False,
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        X_test: Optional[np.ndarray] = None,
+        y_test: Optional[np.ndarray] = None,
+        metric: Optional[Scorer] = None,
+        feat_type: Optional[List[bool]] = None,
+        dataset_name: Optional[str] = None,
+        only_return_configuration_space: bool = False,
+        load_models: bool = True,
     ):
         X, y = self._perform_input_checks(X, y)
         if X_test is not None:
@@ -963,6 +986,7 @@ class AutoMLClassifier(BaseAutoML):
             feat_type=feat_type,
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
+            load_models=load_models,
         )
 
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
@@ -1027,13 +1051,16 @@ class AutoMLClassifier(BaseAutoML):
 
 class AutoMLRegressor(BaseAutoML):
     def fit(
-        self, X, y,
-        X_test=None,
-        y_test=None,
-        metric=None,
-        feat_type=None,
-        dataset_name=None,
-        only_return_configuration_space=False,
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+        X_test: Optional[np.ndarray] = None,
+        y_test: Optional[np.ndarray] = None,
+        metric: Optional[Scorer] = None,
+        feat_type: Optional[List[bool]] = None,
+        dataset_name: Optional[str] = None,
+        only_return_configuration_space: bool = False,
+        load_models: bool = True,
     ):
         X, y = super()._perform_input_checks(X, y)
         _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
@@ -1051,6 +1078,7 @@ class AutoMLRegressor(BaseAutoML):
             feat_type=feat_type,
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
+            load_models=load_models,
         )
 
     def fit_ensemble(self, y, task=None, metric=None, precision='32',

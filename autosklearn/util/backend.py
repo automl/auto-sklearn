@@ -7,6 +7,8 @@ import lockfile
 import numpy as np
 import pickle
 import shutil
+from typing import Union
+
 from autosklearn.util import logging_ as logging
 
 
@@ -27,6 +29,34 @@ def create(temporary_directory,
     backend = Backend(context)
 
     return backend
+
+
+def get_randomized_directory_names(
+    temporary_directory=None,
+    output_directory=None,
+):
+    random_number = random.randint(0, 10000)
+    pid = os.getpid()
+
+    temporary_directory = (
+        temporary_directory
+        if temporary_directory
+        else os.path.join(
+            tempfile.gettempdir(),
+            'autosklearn_tmp_%d_%d' % (pid, random_number),
+        )
+    )
+
+    output_directory = (
+        output_directory
+        if output_directory
+        else os.path.join(
+            tempfile.gettempdir(),
+            'autosklearn_output_%d_%d' % (pid, random_number),
+        )
+    )
+
+    return temporary_directory, output_directory
 
 
 class BackendContext(object):
@@ -51,7 +81,12 @@ class BackendContext(object):
         self._tmp_dir_created = False
         self._output_dir_created = False
 
-        self._prepare_directories(temporary_directory, output_directory)
+        self.__temporary_directory, self.__output_directory = (
+            get_randomized_directory_names(
+                temporary_directory=temporary_directory,
+                output_directory=output_directory,
+            )
+        )
         self._logger = logging.get_logger(__name__)
         self.create_directories()
 
@@ -64,24 +99,6 @@ class BackendContext(object):
     def temporary_directory(self):
         # make sure that tilde does not appear on the path.
         return os.path.expanduser(os.path.expandvars(self.__temporary_directory))
-
-    def _prepare_directories(self, temporary_directory, output_directory):
-        random_number = random.randint(0, 10000)
-        pid = os.getpid()
-
-        self.__temporary_directory = temporary_directory \
-            if temporary_directory \
-            else os.path.join(
-                tempfile.gettempdir(),
-                'autosklearn_tmp_%d_%d' % (pid, random_number)
-            )
-
-        self.__output_directory = output_directory \
-            if output_directory \
-            else os.path.join(
-                tempfile.gettempdir(),
-                'autosklearn_output_%d_%d' % (pid, random_number)
-            )
 
     def create_directories(self):
         if self.shared_mode:
@@ -225,8 +242,12 @@ class Backend(object):
             'run_%d' % seed
         )
 
-    def get_smac_output_glob(self):
-        return os.path.join(self.temporary_directory, 'smac3-output', 'run_1')
+    def get_smac_output_glob(self, smac_run_id: Union[str, int] = 1) -> str:
+        return os.path.join(
+            self.temporary_directory,
+            'smac3-output',
+            'run_%s' % str(smac_run_id),
+        )
 
     def _get_targets_ensemble_filename(self):
         return os.path.join(self.internals_directory,

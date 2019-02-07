@@ -17,29 +17,27 @@ env:
 matrix:
   allow_failures:
   - os: osx
-  
+
   include:
   - os: linux
     python: 3.5
-    env: DISTRIB="ubuntu" COVERAGE="true"
+    env: DISTRIB="ubuntu"
   - os: linux
     python: 3.6
-    env: DISTRIB="ubuntu" DOCPUSH="true"
+    env: DISTRIB="ubuntu"
   - os: linux
     python: 3.7
-    env: DISTRIB="ubuntu" EXAMPLES="true"
+    env: DISTRIB="ubuntu"
   - os: linux
-    python: 3.6
-    env: DISTRIB="ubuntu" RUN_FLAKE8="true" SKIP_TESTS="true"
+    env: DISTRIB="conda" PYTHON="3.5"
   - os: linux
-    python: 3.5
-    env: DISTRIB="conda" COVERAGE="true"
+    env: DISTRIB="conda" COVERAGE="true" DOCPUSH="true" PYTHON="3.6"
   - os: linux
-    python: 3.6
-    env: DISTRIB="conda" DOCPUSH="true"
+    env: DISTRIB="conda" PYTHON="3.7"
   - os: linux
-    python: 3.7
-    env: DISTRIB="conda" EXAMPLES="true"
+    env: DISTRIB="conda" EXAMPLES="true" PYTHON=3.7"
+  - os: linux
+    env: DISTRIB="conda" RUN_FLAKE8="true" SKIP_TESTS="true"
 
 
   # Temporarily disabling OSX builds because thy take too long
@@ -63,13 +61,15 @@ cache:
 git:
   depth: 5
 
-before_install: bash  ci_scripts/install_env.sh
+before_install:
+  - source ci_scripts/install_env.sh
 
 install:
   - pip --version
   # Install general requirements the way setup.py suggests
   - pip install nose pep8 codecov coverage flake8
-  - pip install -r requirements.txt
+  # Install the packages in the correct order specified by the requirements.txt file
+  - cat requirements.txt | xargs -n 1 -L 1 pip install
   # Install openml dependency for metadata generation unittest
   - pip install xmltodict requests liac-arff
   - pip install git+https://github.com/openml/openml-python@0b9009b0436fda77d9f7c701bd116aff4158d5e1 --no-deps
