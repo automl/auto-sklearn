@@ -555,8 +555,8 @@ class AutoMLSMBO(object):
                     metadata_directory = os.path.join(
                         self.metadata_directory,
                         '%s_%s_%s' % (self.metric, TASK_TYPES_TO_STRING[meta_task],
-                                        'sparse' if self.datamanager.info['is_sparse']
-                                        else 'dense'))
+                                      'sparse' if self.datamanager.info['is_sparse']
+                                      else 'dense'))
                 self.metadata_directory = metadata_directory
 
             if os.path.exists(self.metadata_directory):
