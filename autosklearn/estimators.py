@@ -38,7 +38,6 @@ class AutoSklearnEstimator(BaseEstimator):
         delete_tmp_folder_after_terminate=True,
         delete_output_folder_after_terminate=True,
         shared_mode=False,
-        n_jobs: Optional[int] = None,
         disable_evaluator_output=False,
         get_smac_object_callback=None,
         smac_scenario_args=None,
