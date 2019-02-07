@@ -10,12 +10,13 @@ import numpy as np
 import numpy.ma as npma
 
 import autosklearn.pipeline.util as putil
+from autosklearn.estimators import AutoSklearnEstimator
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
 from autosklearn.automl import AutoMLClassifier, AutoML
 from autosklearn.util.backend import Backend, BackendContext
-from autosklearn.constants import *
+from autosklearn.constants import BINARY_CLASSIFICATION
 sys.path.append(os.path.dirname(__file__))
 from base import Base
 
@@ -221,14 +222,14 @@ class EstimatorTest(Base, unittest.TestCase):
         self._setUp(tmp)
         self._setUp(output)
 
-        X_train, Y_train, X_test, Y_test = putil.get_dataset('digits')
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('breast_cancer')
 
-        # test parallel Classifier to predict classes, not only indexes
+        # test parallel Classifier to predict classes, not only indices
         Y_train += 1
         Y_test += 1
 
         automl = AutoSklearnClassifier(
-            time_left_for_this_task=20,
+            time_left_for_this_task=15,
             per_run_time_limit=5,
             output_folder=output,
             tmp_folder=tmp,
@@ -238,6 +239,32 @@ class EstimatorTest(Base, unittest.TestCase):
             ensemble_size=0,
         )
         automl.fit(X_train, Y_train)
+        n_models_fit = len(automl.cv_results_['mean_test_score'])
+        cv_results = automl.cv_results_['mean_test_score']
+
+        automl = AutoSklearnClassifier(
+            time_left_for_this_task=15,
+            per_run_time_limit=5,
+            output_folder=output,
+            tmp_folder=tmp,
+            shared_mode=True,
+            seed=2,
+            initial_configurations_via_metalearning=0,
+            ensemble_size=0,
+        )
+        automl.fit(X_train, Y_train)
+        n_models_fit_2 = len(automl.cv_results_['mean_test_score'])
+
+        # Check that the results from the first run were actually read by the
+        # second run
+        self.assertGreater(n_models_fit_2, n_models_fit)
+        for score in cv_results:
+            self.assertIn(
+                score,
+                automl.cv_results_['mean_test_score'],
+                msg=str((automl.cv_results_['mean_test_score'], cv_results)),
+            )
+
         # Create a 'dummy model' for the first run, which has an accuracy of
         # more than 99%; it should be in the final ensemble if the ensemble
         # building of the second AutoSklearn classifier works correct
@@ -247,7 +274,7 @@ class EstimatorTest(Base, unittest.TestCase):
             true_targets_ensemble = np.load(fh)
         true_targets_ensemble[-1] = 1 if true_targets_ensemble[-1] != 1 else 0
         true_targets_ensemble = true_targets_ensemble.astype(int)
-        probas = np.zeros((len(true_targets_ensemble), 10), dtype=float)
+        probas = np.zeros((len(true_targets_ensemble), 2), dtype=float)
 
         for i, value in enumerate(true_targets_ensemble):
             probas[i, value] = 1.0
@@ -260,7 +287,7 @@ class EstimatorTest(Base, unittest.TestCase):
         with open(dummy_predictions_path, 'wb') as fh:
             np.save(fh, probas)
 
-        probas_test = np.zeros((len(Y_test), 10), dtype=float)
+        probas_test = np.zeros((len(Y_test), 2), dtype=float)
         for i, value in enumerate(Y_test):
             probas_test[i, value - 1] = 1.0
 
@@ -270,19 +297,19 @@ class EstimatorTest(Base, unittest.TestCase):
         backend.save_model(dummy, 30, 1)
 
         automl = AutoSklearnClassifier(
-            time_left_for_this_task=20,
+            time_left_for_this_task=15,
             per_run_time_limit=5,
             output_folder=output,
             tmp_folder=tmp,
             shared_mode=True,
-            seed=2,
+            seed=3,
             initial_configurations_via_metalearning=0,
             ensemble_size=0,
         )
-        automl.fit_ensemble(Y_train, task=MULTICLASS_CLASSIFICATION,
+        automl.fit_ensemble(Y_train, task=BINARY_CLASSIFICATION,
                             metric=accuracy,
                             precision='32',
-                            dataset_name='iris',
+                            dataset_name='breast_cancer',
                             ensemble_size=20,
                             ensemble_nbest=50,
                             )
@@ -293,9 +320,9 @@ class EstimatorTest(Base, unittest.TestCase):
         self.assertEqual(len(os.listdir(os.path.join(tmp, '.auto-sklearn',
                                                      'ensembles'))), 1)
         self.assertGreaterEqual(score, 0.90)
-        self.assertEqual(automl._automl._task, MULTICLASS_CLASSIFICATION)
+        self.assertEqual(automl._automl[0]._task, BINARY_CLASSIFICATION)
 
-        models = automl._automl.models_
+        models = automl._automl[0].models_
         classifier_types = [type(c) for c in models.values()]
         self.assertIn(ArrayReturningDummyPredictor, classifier_types)
 
@@ -333,7 +360,126 @@ class EstimatorTest(Base, unittest.TestCase):
         self._tearDown(tmp)
         self._tearDown(output)
 
-        
+    @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
+    @unittest.mock.patch('multiprocessing.Process', autospec=True)
+    @unittest.mock.patch('autosklearn.estimators._fit_automl')
+    def test_fit_n_jobs(self, _fit_automl_patch, Process_patch, build_automl_patch):
+        # Return the process patch on call to __init__
+        Process_patch.return_value = Process_patch
+
+        cls = AutoSklearnEstimator()
+        cls.fit()
+        self.assertEqual(build_automl_patch.call_count, 1)
+        self.assertEqual(len(build_automl_patch.call_args[0]), 0)
+        self.assertEqual(
+            build_automl_patch.call_args[1],
+            {
+                'seed': 1,
+                'shared_mode': False,
+                'ensemble_size': 50,
+                'initial_configurations_via_metalearning': 25,
+                'output_folder': None,
+                'tmp_folder': None
+            },
+        )
+        self.assertEqual(Process_patch.call_count, 0)
+
+        cls = AutoSklearnEstimator(n_jobs=5)
+        cls.fit()
+        # Plus the one from the first call
+        self.assertEqual(build_automl_patch.call_count, 6)
+        self.assertEqual(len(cls._automl), 5)
+        for i in range(1, 6):
+            self.assertEqual(len(build_automl_patch.call_args_list[i][0]), 0)
+            self.assertEqual(len(build_automl_patch.call_args_list[i][1]), 7)
+            # Thee seed is a magic mock so there is nothing to compare here...
+            self.assertIn('seed', build_automl_patch.call_args_list[i][1])
+            self.assertEqual(
+                build_automl_patch.call_args_list[i][1]['shared_mode'],
+                True,
+            )
+            self.assertEqual(
+                build_automl_patch.call_args_list[i][1]['ensemble_size'],
+                50 if i == 1 else 0,
+            )
+            self.assertEqual(
+                build_automl_patch.call_args_list[i][1][
+                    'initial_configurations_via_metalearning'
+                ],
+                25 if i == 1 else 0,
+            )
+            if i > 1:
+                self.assertEqual(
+                    build_automl_patch.call_args_list[i][1][
+                        'smac_scenario_args']['initial_incumbent'],
+                    'RANDOM',
+                )
+
+        self.assertEqual(Process_patch.start.call_count, 4)
+        for i in range(2, 6):
+            self.assertEqual(
+                len(Process_patch.call_args_list[i - 2][1]['kwargs']), 3,
+            )
+            self.assertFalse(
+                Process_patch.call_args_list[i - 2][1]['kwargs']['load_models']
+            )
+        self.assertEqual(Process_patch.join.call_count, 4)
+
+        self.assertEqual(_fit_automl_patch.call_count, 1)
+        self.assertEqual(len(_fit_automl_patch.call_args[0]), 0)
+        self.assertEqual(len(_fit_automl_patch.call_args[1]), 3)
+        self.assertTrue(_fit_automl_patch.call_args[1]['load_models'])
+
+    def test_fit_n_jobs_2(self):
+        tmp = os.path.join(self.test_dir, '..', '.tmp_estimator_fit_pSMAC')
+        output = os.path.join(self.test_dir, '..', '.out_estimator_fit_pSMAC')
+        self._setUp(tmp)
+        self._setUp(output)
+
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('breast_cancer')
+
+        # test parallel Classifier to predict classes, not only indices
+        Y_train += 1
+        Y_test += 1
+
+        automl = AutoSklearnClassifier(
+            time_left_for_this_task=15,
+            per_run_time_limit=5,
+            output_folder=output,
+            tmp_folder=tmp,
+            seed=1,
+            initial_configurations_via_metalearning=0,
+            ensemble_size=5,
+            n_jobs=2,
+            include_estimators=['sgd'],
+            include_preprocessors=['no_preprocessing'],
+        )
+        automl.fit(X_train, Y_train)
+        n_runs = len(automl.cv_results_['mean_test_score'])
+
+        predictions_dir = automl._automl[0]._backend._get_prediction_output_dir(
+            'ensemble'
+        )
+        predictions = os.listdir(predictions_dir)
+        # two instances of the dummy
+        self.assertEqual(n_runs, len(predictions) - 2, msg=str(predictions))
+
+        seeds = set()
+        for predictions_file in predictions:
+            seeds.add(int(predictions_file.split('.')[0].split('_')[2]))
+
+        self.assertEqual(len(seeds), 2)
+
+        ensemble_dir = automl._automl[0]._backend.get_ensemble_dir()
+        ensembles = os.listdir(ensemble_dir)
+
+        seeds = set()
+        for ensemble_file in ensembles:
+            seeds.add(int(ensemble_file.split('.')[0].split('_')[0]))
+
+        self.assertEqual(len(seeds), 1)
+
+
 class AutoMLClassifierTest(Base, unittest.TestCase):
     @unittest.mock.patch('autosklearn.automl.AutoML.predict')
     def test_multiclass_prediction(self, predict_mock):
@@ -574,5 +720,5 @@ class AutoSklearnRegressorTest(unittest.TestCase):
         self.assertIs(automl, automl_refitted)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()

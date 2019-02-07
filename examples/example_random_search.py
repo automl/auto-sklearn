@@ -30,7 +30,6 @@ def get_roar_object_callback(
     backend,
     metalearning_configurations,
     runhistory,
-    run_id,
 ):
     """Random online adaptive racing."""
     scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
@@ -40,7 +39,7 @@ def get_roar_object_callback(
         rng=seed,
         tae_runner=ta,
         runhistory=runhistory,
-        run_id=run_id,
+        run_id=seed,
     )
 
 
@@ -51,7 +50,6 @@ def get_random_search_object_callback(
         backend,
         metalearning_configurations,
         runhistory,
-        run_id,
 ):
     """Random search."""
     scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
@@ -63,7 +61,7 @@ def get_random_search_object_callback(
         rng=seed,
         tae_runner=ta,
         runhistory=runhistory,
-        run_id=run_id,
+        run_id=seed,
     )
 
 
