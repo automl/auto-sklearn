@@ -545,6 +545,7 @@ class AutoMLSMBO(object):
                 if not os.path.exists(self.metadata_directory):
                     raise ValueError('The specified metadata directory \'%s\' '
                                      'does not exist!' % self.metadata_directory)
+
                 else:
                     # There is no multilabel data in OpenML
                     if self.task == MULTILABEL_CLASSIFICATION:
@@ -557,6 +558,12 @@ class AutoMLSMBO(object):
                         '%s_%s_%s' % (self.metric, TASK_TYPES_TO_STRING[meta_task],
                                       'sparse' if self.datamanager.info['is_sparse']
                                       else 'dense'))
+                    # Check that the metadata directory has the correct
+                    # subdirectory needed for this dataset.
+                    if metadata_directory not in os.listdir(self.metadata_directory):
+                        raise ValueError('The specified metadata directory '
+                                         '\'%s\' does not have the correct '
+                                         'subdirectory!' % self.metadata_directory)
                 self.metadata_directory = metadata_directory
 
             if os.path.exists(self.metadata_directory):
