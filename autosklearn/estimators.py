@@ -43,6 +43,7 @@ class AutoSklearnEstimator(BaseEstimator):
         get_smac_object_callback=None,
         smac_scenario_args=None,
         logging_config=None,
+        metadata_directory=None,
     ):
         """
         Parameters
