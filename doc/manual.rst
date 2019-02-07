@@ -17,13 +17,17 @@ aspects of its usage:
 
 * `Holdout <examples/example_holdout.html>`_
 * `Cross-validation <examples/example_crossvalidation.html>`_
-* `Parallel usage <examples/example_parallel.html>`_
+* `Parallel usage (n_jobs) <examples/example_parallel_n_jobs.html>`_
+* `Parallel usage (manual) <examples/example_parallel_manual_spawning.html>`_
 * `Sequential usage <examples/example_sequential.html>`_
 * `Regression <examples/example_regression.html>`_
 * `Continuous and categorical data <examples/example_feature_types.html>`_
 * `Using custom metrics <examples/example_metrics.html>`_
 * `Random search <examples/example_random_search.html>`_
 * `EIPS <examples/example_eips.html>`_
+* `Extending with a new classifier <examples/example_extending_classification.html>`_
+* `Extending with a new regressor <examples/example_extending_regression.html>`_
+* `Extending with a new preprocessor <examples/example_extending_preprocessor.html>`_
 
 
 Time and memory limits
@@ -84,15 +88,15 @@ This can be turned off by setting
 Resampling strategies
 =====================
 
-Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <https://github.com/automl/auto-sklearn/tree/master/example>`_
+Examples for using holdout and cross-validation can be found in `auto-sklearn/examples/ <examples/>`_
 
 Inspecting the results
 ======================
 
-*auto-sklearn* allows users to inspect the training results and statistics. The following example shows how different 
+*auto-sklearn* allows users to inspect the training results and statistics. The following example shows how different
 statistics can be printed for the inspection.
 
->>> import autoskleran.classification
+>>> import autosklearn.classification
 >>> automl = autosklearn.classification.AutoSklearnClassifier()
 >>> automl.fit(X_train, y_train)
 >>> automl.cv_results_
@@ -111,14 +115,19 @@ Parallel computation
 *auto-sklearn* supports parallel execution by data sharing on a shared file
 system. In this mode, the SMAC algorithm shares the training data for it's
 model by writing it to disk after every iteration. At the beginning of each
-iteration, SMAC loads all newly found data points. An example can be found in
-the example directory.
+iteration, SMAC loads all newly found data points. We provide an example
+implementing
+`scikit-learn's n_jobs functionality <examples/example_parallel_n_jobs.html>`_
+and an example on how
+to
+`manually start multiple instances of auto-sklearn <examples/example_parallel_manual_spawning.html>`_
+.
 
 In it's default mode, *auto-sklearn* already uses two cores. The first one is
 used for model building, the second for building an ensemble every time a new
-machine learning model has finished training. The file `example_sequential
-.py` in the example directory describes how to run these tasks sequentially
-to use only a single core at a time.
+machine learning model has finished training. The
+`sequential example <examples/example_sequential.html>`_
+shows how to run these tasks sequentially to use only a single core at a time.
 
 Furthermore, depending on the installation of scikit-learn and numpy,
 the model building procedure may use up to all cores. Such behaviour is

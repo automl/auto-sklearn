@@ -72,13 +72,13 @@ else:
 
 automl.fit(X_train, y_train, dataset_name=str(task_id), metric=metric,
            feat_type=cat)
-data = automl._automl._backend.load_datamanager()
+data = automl._automl[0]._backend.load_datamanager()
 # Data manager can't be replaced with save_datamanager, it has to be deleted
 # first
-os.remove(automl._automl._backend._get_datamanager_pickle_filename())
+os.remove(automl._automl[0]._backend._get_datamanager_pickle_filename())
 data.data['X_test'] = X_test
 data.data['Y_test'] = y_test
-automl._automl._backend.save_datamanager(data)
+automl._automl[0]._backend.save_datamanager(data)
 trajectory = automl.trajectory_
 
 incumbent_id_to_model = {}
@@ -106,10 +106,11 @@ for entry in trajectory:
         stats.start_timing()
         # To avoid the output "first run crashed"...
         stats.ta_runs += 1
-        ta = ExecuteTaFuncWithQueue(backend=automl._automl._backend,
+        memory_lim = memory_limit_factor * automl_arguments['ml_memory_limit']
+        ta = ExecuteTaFuncWithQueue(backend=automl._automl[0]._backend,
                                     autosklearn_seed=seed,
                                     resampling_strategy='test',
-                                    memory_limit=memory_limit_factor * automl_arguments['ml_memory_limit'],
+                                    memory_limit=memory_lim,
                                     disable_file_output=True,
                                     logger=logger,
                                     stats=stats,

@@ -11,9 +11,10 @@ System requirements
 
 auto-sklearn has the following system requirements:
 
-* Linux operating system (for example Ubuntu),
-* Python (>=3.5).
-* C++ compiler (with C++11 supports) and SWIG (version 3.0 or later) 
+* Linux operating system (for example Ubuntu) `(get Linux here) <https://www.wikihow.com/Install-Linux>`_,
+* Python (>=3.5) `(get Python here) <https://www.python.org/downloads/>`_.
+* C++ compiler (with C++11 supports) `(get GCC here) <https://www.tutorialspoint.com/How-to-Install-Cplusplus-Compiler-on-Linux>`_ and
+* SWIG (version 3.0 or later) `(get SWIG here) <http://www.swig.org/survey.html>`_.
 
 For an explanation of missing Microsoft Windows and MAC OSX support please
 check the Section `Windows/OSX compatibility`_.
@@ -33,9 +34,12 @@ Then install *auto-sklearn*:
 
     pip install auto-sklearn
 
-We recommend installing *auto-sklearn* into a `virtual environment
-<http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or an `Anaconda
-environment <https://conda.io/docs/using/envs.html>`_.
+We recommend installing *auto-sklearn* into a
+`virtual environment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_
+or an
+`Anaconda environment <https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_.
+
+If the ``pip`` installation command fails, make sure you have the `System requirements`_ installed correctly.
 
 Ubuntu installation
 ===================

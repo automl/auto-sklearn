@@ -11,6 +11,26 @@
 Releases
 ========
 
+Version 0.5.0
+=============
+
+* ADD #593: Auto-sklearn supports the ``n_jobs`` argument for parallel
+  computing on a single machine.
+* DOC #618: Added links to several system requirements.
+* Fixes #611: Improved installation from pip.
+* TEST #614: Test installation with clean Ubuntu on travis-ci.
+* MAINT: Fixed broken link and typo in the documentation.
+
+Contributors
+************
+
+* Mohd Shahril
+* Adrian
+* Matthias Feurer
+* Jirka Borovec
+* Pradeep Reddy Raamana
+
+
 Version 0.4.2
 =============
 

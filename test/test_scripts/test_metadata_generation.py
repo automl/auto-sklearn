@@ -60,10 +60,11 @@ class TestMetadataGeneration(unittest.TestCase):
         # This tells the script to use the same memory limit for testing as
         # for training. In production, it would use twice as much!
         cmd = cmd.replace('-s 1', '-s 1 --unittest')
+        print('COMMAND: %s' % cmd)
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
-        print(rval.stdout, flush=True)
-        print(rval.stderr, flush=True)
+        print('STDOUT: %s' % repr(rval.stdout), flush=True)
+        print('STDERR: %s' % repr(rval.stderr), flush=True)
         expected_output_directory = os.path.join(self.working_directory,
                                                  'configuration',
                                                  'classification',
@@ -96,21 +97,27 @@ class TestMetadataGeneration(unittest.TestCase):
             script_filename, self.working_directory, task_type)
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
-        # print(rval.stdout, flush=True)
-        # print(rval.stderr, flush=True)
         self.assertEqual(rval.returncode, 0, msg=str(rval))
 
         for file in ['algorithm_runs.arff', 'configurations.csv',
                      'description.results.txt']:
             for metric in ['accuracy', 'balanced_accuracy', 'log_loss']:
-                self.assertTrue(os.path.exists(os.path.join(self.working_directory,
-                                                            'configuration_results',
-                                                            '%s_binary.classification_dense' % metric,
-                                                            file)), msg=str((metric, file)))
-            self.assertFalse(os.path.exists(os.path.join(self.working_directory,
-                                                         'configuration_results',
-                                                         'roc_auc_binary.classification_dense',
-                                                         file)), msg=file)
+                path = os.path.join(
+                    self.working_directory,
+                    'configuration_results',
+                    '%s_binary.classification_dense' % metric,
+                    file,
+                )
+                self.assertTrue(os.path.exists(path), msg=path)
+            # 253 is a multiclass classification dataset, therefore,
+            # roc_auc wasn't calculated -> cannot derive roc_auc_binary!
+            path = os.path.join(
+                self.working_directory,
+                'configuration_results',
+                'roc_auc_binary.classification_dense',
+                file,
+            )
+            self.assertFalse(os.path.exists(path), msg=path)
 
         # 6. Calculate metafeatures
         script_filename = os.path.join(scripts_directory, '03_calculate_metafeatures.py')
