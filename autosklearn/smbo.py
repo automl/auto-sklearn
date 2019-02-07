@@ -551,11 +551,12 @@ class AutoMLSMBO(object):
                         meta_task = BINARY_CLASSIFICATION
                     else:
                         meta_task = self.task
-                        metadata_directory = os.path.join(
-                            self.metadata_directory,
-                            '%s_%s_%s' % (self.metric, TASK_TYPES_TO_STRING[meta_task],
-                                          'sparse' if self.datamanager.info['is_sparse']
-                                          else 'dense'))
+
+                    metadata_directory = os.path.join(
+                        self.metadata_directory,
+                        '%s_%s_%s' % (self.metric, TASK_TYPES_TO_STRING[meta_task],
+                                        'sparse' if self.datamanager.info['is_sparse']
+                                        else 'dense'))
                 self.metadata_directory = metadata_directory
 
             if os.path.exists(self.metadata_directory):
@@ -563,11 +564,6 @@ class AutoMLSMBO(object):
                 self.logger.info('Metadata directory: %s',
                                  self.metadata_directory)
                 meta_base = MetaBase(self.config_space, self.metadata_directory)
-
-                try:
-                    meta_base.remove_dataset(self.dataset_name)
-                except:
-                    pass
 
                 metafeature_calculation_time_limit = int(
                     self.total_walltime_limit / 4)
