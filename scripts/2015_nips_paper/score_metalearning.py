@@ -9,7 +9,6 @@ from autosklearn.metrics import balanced_accuracy
 
 import openml
 #openml.config.cache_directory = os.path.join(os.path.expanduser("~"), 'openml') # Home directory. change this later accordingly
-from remove_dataset_from_metadata import remove_dataset
 
 def load_task(task_id):
     """Function used in score_vanilla and score_metalearning
@@ -57,7 +56,6 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
 
     try:
         os.makedirs(new_metadata_directory)
-        remove_dataset(metadata_directory, new_metadata_directory, task_id)
     except:
         pass # pass because new metadata is created for this task.
 
