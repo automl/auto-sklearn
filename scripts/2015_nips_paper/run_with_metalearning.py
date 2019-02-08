@@ -35,8 +35,8 @@ def load_task(task_id):
     return X_train, y_train, X_test, y_test, cat
 
 def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
-    # Set to local dataset cache
-    openml.config.cache_directory = os.path.join(working_directory, "../cache")
+    # Set this to local dataset cache
+    #openml.config.cache_directory = os.path.join(working_directory, "../cache")
 
     # Load data and other info.
     X_train, y_train, X_test, y_test, cat = load_task(task_id)
@@ -100,11 +100,11 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # automl._automl._metadata_directory does not work cause automl._automl is not
     # created until fit is called. Therefore, we need to manually create
     # automl._automl and specify metadata_directory there.
-    automl._automl = automl.build_automl()
-    automl._automl._metadata_directory = metadata_for_this_task
+    #automl.metadata_directory = metadata_for_this_task
+    #TODO: Cannot use local metadata directory until PR merged!
 
     # Fit.
-    automl._automl.fit(X_train,
+    automl.fit(X_train,
                     y_train,
                     dataset_name=str(task_id),
                     X_test=X_test,
@@ -112,16 +112,16 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
                     metric=balanced_accuracy,
                     )
 
-    with open(os.path.join(tmp_dir, "score_metalearning.csv"), 'w') as fh:
-        T = 0
-        fh.write("Time,Train Performance,Test Performance\n")
-        # Add start time:0, Train Performance:1, Test Performance: 1
-        fh.write("{0},{1},{2}\n".format(T, 1, 1))
-        for t, dummy, s in zip(automl.cv_results_['mean_fit_time'],
-                               [1 for i in range(len(automl.cv_results_['mean_fit_time']))],
-                               1 - automl.cv_results_["mean_test_score"]):  # We compute rank based on error.
-            T += t
-            fh.write("{0},{1},{2}\n".format(T, dummy, s))
+    #with open(os.path.join(tmp_dir, "score_metalearning.csv"), 'w') as fh:
+    #    T = 0
+    #    fh.write("Time,Train Performance,Test Performance\n")
+    #    # Add start time:0, Train Performance:1, Test Performance: 1
+    #    fh.write("{0},{1},{2}\n".format(T, 1, 1))
+    #    for t, dummy, s in zip(automl.cv_results_['mean_fit_time'],
+    #                           [1 for i in range(len(automl.cv_results_['mean_fit_time']))],
+    #                           1 - automl.cv_results_["mean_test_score"]):  # We compute rank based on error.
+    #        T += t
+    #        fh.write("{0},{1},{2}\n".format(T, dummy, s))
 
 
 if __name__=="__main__":
