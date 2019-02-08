@@ -33,8 +33,8 @@ def load_task(task_id):
     return X_train, y_train, X_test, y_test, cat
 
 def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
-    # set to local dataset cache
-    openml.config.cache_directory = os.path.join(working_directory, "../cache")
+    # set this to local dataset cache
+    #openml.config.cache_directory = os.path.join(working_directory, "../cache")
 
     configuration_output_dir = os.path.join(working_directory, str(seed))
     try:
@@ -68,16 +68,16 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
                X_test=X_test, y_test=y_test,
                metric=balanced_accuracy)
 
-    with open(os.path.join(tmp_dir, "score_vanilla.csv"), 'w') as fh:
-        T = 0
-        fh.write("Time,Train Performance,Test Performance\n")
-        # Add start time:0, Train Performance:1, Test Performance: 1
-        fh.write("{0},{1},{2}\n".format(T, 1, 1))
-        for t, dummy, s in zip(automl.cv_results_['mean_fit_time'],
-                               [1 for i in range(len(automl.cv_results_['mean_fit_time']))],
-                               1 - automl.cv_results_["mean_test_score"]):  # We compute rank based on error.
-            T += t
-            fh.write("{0},{1},{2}\n".format(T, dummy, s))
+    #with open(os.path.join(tmp_dir, "score_vanilla.csv"), 'w') as fh:
+    #    T = 0
+    #    fh.write("Time,Train Performance,Test Performance\n")
+    #    # Add start time:0, Train Performance:1, Test Performance: 1
+    #    fh.write("{0},{1},{2}\n".format(T, 1, 1))
+    #    for t, dummy, s in zip(automl.cv_results_['mean_fit_time'],
+    #                           [1 for i in range(len(automl.cv_results_['mean_fit_time']))],
+    #                           1 - automl.cv_results_["mean_test_score"]):  # We compute rank based on error.
+    #        T += t
+    #        fh.write("{0},{1},{2}\n".format(T, dummy, s))
 
 
 if __name__=="__main__":
