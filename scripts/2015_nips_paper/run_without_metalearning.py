@@ -34,7 +34,7 @@ def load_task(task_id):
 
 def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # set this to local dataset cache
-    #openml.config.cache_directory = os.path.join(working_directory, "../cache")
+    openml.config.cache_directory = os.path.join(working_directory, "../cache")
 
     configuration_output_dir = os.path.join(working_directory, str(seed))
     try:
