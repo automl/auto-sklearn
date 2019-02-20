@@ -563,7 +563,10 @@ class AutoMLSMBO(object):
                     if metadata_directory not in os.listdir(self.metadata_directory):
                         raise ValueError('The specified metadata directory '
                                          '\'%s\' does not have the correct '
-                                         'subdirectory!' % self.metadata_directory)
+                                         'subdirectory \'%s\'' %
+                                         (self.metadata_directory,
+                                          metadata_directory,
+                                         ))
                 self.metadata_directory = metadata_directory
 
             if os.path.exists(self.metadata_directory):
