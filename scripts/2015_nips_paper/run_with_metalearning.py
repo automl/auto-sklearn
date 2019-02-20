@@ -8,7 +8,7 @@ from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.metrics import balanced_accuracy
 
 import openml
-#openml.config.cache_directory = os.path.join(os.path.expanduser("~"), 'openml') # Home directory. change this later accordingly
+from remove_dataset_from_metadata import remove_dataset
 
 def load_task(task_id):
     """Function used in score_vanilla and score_metalearning
@@ -40,6 +40,7 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
 
     # Load data and other info.
     X_train, y_train, X_test, y_test, cat = load_task(task_id)
+
     # Check if data is dense or sparse.
     if isinstance(X_train, np.ndarray):
         sparse_or_dense = "dense"
@@ -49,7 +50,6 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # path to the metadata directory. Is there ar better way to get this?
     metadata_directory = os.path.abspath(os.path.dirname(__file__))
     metadata_directory = os.path.join(metadata_directory, "../../autosklearn/metalearning/files/")
-    #metadata_directory = os.path.dirname(autosklearn.metalearning.files.__file__)
 
     # Create new metadata directory not containing task_id.
     new_metadata_directory = os.path.abspath(os.path.join(working_directory, "metadata_%i" % task_id))
@@ -58,6 +58,9 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
         os.makedirs(new_metadata_directory)
     except:
         pass # pass because new metadata is created for this task.
+
+    # remove the given task id from metadata directory.
+    remove_dataset(metadata_directory, new_metadata_directory, task_id)
 
     # We need to get task type, metric, is_sparse_or_dense information to
     # construct the path to the specific metadata directory. For details see
@@ -125,18 +128,25 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
 
 
 if __name__=="__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--working-directory', type=str, required=True)
-    parser.add_argument('--time-limit', type=int, required=True)
-    parser.add_argument('--per-run-time-limit', type=int, required=True)
-    parser.add_argument('--task-id', type=int, required=True)
-    parser.add_argument('-s', '--seed', type=int, required=True)
+    #parser = argparse.ArgumentParser()
+    #parser.add_argument('--working-directory', type=str, required=True)
+    #parser.add_argument('--time-limit', type=int, required=True)
+    #parser.add_argument('--per-run-time-limit', type=int, required=True)
+    #parser.add_argument('--task-id', type=int, required=True)
+    #parser.add_argument('-s', '--seed', type=int, required=True)
 
-    args = parser.parse_args()
-    working_directory = args.working_directory
-    time_limit = args.time_limit
-    per_run_time_limit = args.per_run_time_limit
-    task_id = args.task_id
-    seed = args.seed
+    #args = parser.parse_args()
+    #working_directory = args.working_directory
+    #time_limit = args.time_limit
+    #per_run_time_limit = args.per_run_time_limit
+    #task_id = args.task_id
+    #seed = args.seed
+
+    # Testing
+    working_directory = "./"
+    time_limit = 15
+    per_run_time_limit = 5
+    task_id = 2120
+    seed = 2
 
     main(working_directory, time_limit, per_run_time_limit, task_id, seed)
