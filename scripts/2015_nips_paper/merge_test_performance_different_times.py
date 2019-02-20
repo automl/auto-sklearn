@@ -7,7 +7,8 @@ import sys
 import numpy as np
 
 import plot_util
-
+import pandas as pd
+#TODO: replace fill_trajectory with pandas! But only after some more experiments
 
 def fill_trajectory(performance_list, time_list):
     # Fill times
