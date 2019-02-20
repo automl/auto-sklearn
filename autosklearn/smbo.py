@@ -565,8 +565,8 @@ class AutoMLSMBO(object):
                                          '\'%s\' does not have the correct '
                                          'subdirectory \'%s\'' %
                                          (self.metadata_directory,
-                                          metadata_directory,
-                                         ))
+                                          metadata_directory)
+                                         )
                 self.metadata_directory = metadata_directory
 
             if os.path.exists(self.metadata_directory):
