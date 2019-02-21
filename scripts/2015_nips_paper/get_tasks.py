@@ -17,11 +17,10 @@ def read_csv(file):
 
 def get_task_ids(dataset_ids):
     # return task ids of corresponding datset ids.
+
     # active tasks
     tasks_a = openml.tasks.list_tasks(task_type_id=1, status='active')
     tasks_a = pd.DataFrame.from_dict(tasks_a, orient="index")
-
-    task = tasks_a[(tasks_a.did == 679)]
     # query only those with NaN as evaluation_measures.
     #tasks_a = tasks_a.query("evaluation_measures != evaluation_measures")
     # query only those with holdout as the resampling startegy.
