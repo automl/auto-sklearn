@@ -38,23 +38,15 @@ def main():
     parser = ArgumentParser(description=description, prog=prog)
 
     # General Options
-    #parser.add_argument("--train", action='store_true',
-    #                    help='Read training instead of test data.')
-    #parser.add_argument("--maxvalue", dest="maxvalue", type=float,
-    #                    default=sys.maxsize,
-    #                    help="Replace all values higher than this?")
-    #parser.add_argument("--save", dest="saveTo", type=str,
-    #                    required=True, help="Where to save the csv?")
-    parser.add_argument("--train", action='store_true', default=False,
+    parser.add_argument("--train", action='store_true',
                         help='Read training instead of test data.')
     parser.add_argument("--maxvalue", dest="maxvalue", type=float,
                         default=sys.maxsize,
                         help="Replace all values higher than this?")
-    parser.add_argument("--save", dest="saveTo", type=str, default="merged.csv",
-                        help="Where to save the csv?")
+    parser.add_argument("--save", dest="saveTo", type=str,
+                        required=True, help="Where to save the csv?")
 
     args, unknown = parser.parse_known_args()
-    unknown = ["score_ensemble1.csv", "score_ensemble2.csv"]
 
     sys.stdout.write("\nFound " + str(len(unknown)) + " arguments\n")
 
@@ -89,9 +81,6 @@ def main():
         if len(csv_data) == 0:
             print("Empty array in %s" % fl)
             continue
-        # First column of csv_data: time
-        # second column: train performance (vanilla won't have it)
-        # third column: test performance
         if args.train:
             data = [min([args.maxvalue, float(i.strip())]) for i in
                         csv_data[:, 1]]

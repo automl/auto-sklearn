@@ -6,7 +6,6 @@ import scipy.stats
 import sys
 
 import numpy as np
-import itertools
 
 import plot_util
 import merge_test_performance_different_times as merge

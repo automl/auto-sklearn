@@ -3,6 +3,7 @@ import openml
 import pandas as pd
 from pprint import pprint
 
+
 def read_csv(file):
     # reads the given csv file and returns a list containing all dataset ids used for experiment.
     dataset_ids = []
@@ -13,15 +14,14 @@ def read_csv(file):
 
     return dataset_ids
 
+
 def get_task_ids(dataset_ids):
     # return task ids of corresponding datset ids.
     # active tasks
     tasks_a = openml.tasks.list_tasks(task_type_id=1, status='active')
     tasks_a = pd.DataFrame.from_dict(tasks_a, orient="index")
+
     task = tasks_a[(tasks_a.did == 679)]
-    print(task.estimation_procedure)
-    print(task.did)
-    print(task.tid)
     # query only those with NaN as evaluation_measures.
     #tasks_a = tasks_a.query("evaluation_measures != evaluation_measures")
     # query only those with holdout as the resampling startegy.
@@ -42,13 +42,12 @@ def get_task_ids(dataset_ids):
         if len(task_d) > 1:  # if there are more than one task, take the first one.
             task_d = task_d[:1]
         task_ids += list(task_a + task_d)
-        if len(task_a + task_d) == 0:
-            print(did)
 
     return task_ids  # return list of all task ids.
 
+
 def main():
-    datasets = 'resources/datasets.csv'
+    datasets = 'datasets.csv'
     dataset_ids = read_csv(datasets)
     task_ids = sorted(get_task_ids(dataset_ids))
     string_to_print = ''
@@ -56,7 +55,6 @@ def main():
         string_to_print += str(tid) + ' '
     print(len(task_ids))
     print(string_to_print)  # print the task ids for bash script.
-
 
 
 if __name__=="__main__":

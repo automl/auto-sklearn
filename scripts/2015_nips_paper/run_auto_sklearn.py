@@ -5,14 +5,15 @@ import score_ensemble
 
 
 def main(working_directory, output_file, task_id, seed, model, time_limit, per_run_time_limit):
-    # calls one of score_vanilla, score_ens, score_meta, score_ensmeta with given task-id, seed.
+    # vanilla and metalearning must be called first before ensemble and
+    # meta_ensemble can be called
     if model == "vanilla":
         run_without_metalearning.main(working_directory,
-                                    time_limit,
-                                    per_run_time_limit,
-                                    task_id,
-                                    seed,
-                                    )
+                                      time_limit,
+                                      per_run_time_limit,
+                                      task_id,
+                                      seed,
+                                      )
         score_ensemble.main(working_directory,
                             output_file,
                             task_id,
@@ -21,11 +22,11 @@ def main(working_directory, output_file, task_id, seed, model, time_limit, per_r
                             )
     elif model == "metalearning":
         run_with_metalearning.main(working_directory,
-                                time_limit,
-                                per_run_time_limit,
-                                task_id,
-                                seed,
-                                )
+                                   time_limit,
+                                   per_run_time_limit,
+                                   task_id,
+                                   seed,
+                                   )
         score_ensemble.main(working_directory,
                             output_file,
                             task_id,
@@ -39,6 +40,7 @@ def main(working_directory, output_file, task_id, seed, model, time_limit, per_r
                             seed,
                             ensemble_size=50,
                             )
+
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
