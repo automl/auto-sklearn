@@ -47,7 +47,7 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     else:
         sparse_or_dense = "sparse"
 
-    # path to the metadata directory. Is there ar better way to get this?
+    # path to the metadata directory.
     metadata_directory = os.path.abspath(os.path.dirname(__file__))
     metadata_directory = os.path.join(metadata_directory, "../../autosklearn/metalearning/files/")
 
@@ -75,7 +75,6 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
                      "metadata_%i/balanced_accuracy_%s_%s" % (task_id,
                                                               TASK_TYPES_TO_STRING[task_type],
                                                               sparse_or_dense)))
-    # how to check if data is sparse before running?
 
     configuration_output_dir = os.path.join(working_directory, str(seed))
     tmp_dir = os.path.join(configuration_output_dir, str(task_id))
