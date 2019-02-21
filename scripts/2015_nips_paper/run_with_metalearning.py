@@ -62,27 +62,15 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # remove the given task id from metadata directory.
     remove_dataset(metadata_directory, new_metadata_directory, task_id)
 
-    # We need to get task type, metric, is_sparse_or_dense information to
-    # construct the path to the specific metadata directory. For details see
-    # get_metalearning_suggestion() in smbo.py.
-    TASK_TYPES_TO_STRING = {  # Mimic the same dict in autosklearn.constants
-        'binary': 'binary.classification',
-        'multiclass': 'multiclass.classification',
-    }
-    task_type = type_of_target(y_train)
-    metadata_for_this_task = os.path.abspath(
-        os.path.join(working_directory,
-                     "metadata_%i/balanced_accuracy_%s_%s" % (task_id,
-                                                              TASK_TYPES_TO_STRING[task_type],
-                                                              sparse_or_dense)))
-
     configuration_output_dir = os.path.join(working_directory, str(seed))
+
+    # This is where score_metalearning will be saved.
     tmp_dir = os.path.join(configuration_output_dir, str(task_id))
     try:
         if not os.path.exists(configuration_output_dir):
             os.makedirs(configuration_output_dir)
     except Exception as _:
-        print("Direcotry {0} aleardy created.".format(configuration_output_dir))
+        print("Directory {0} aleardy created.".format(configuration_output_dir))
 
     automl_arguments = {
         'time_left_for_this_task': time_limit,
@@ -96,14 +84,11 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
         'tmp_folder': tmp_dir,
         'delete_tmp_folder_after_terminate': False,
         'disable_evaluator_output': False,
+        # Metadata should be fixed
+        'metadata_directory': new_metadata_directory
     }
 
     automl = AutoSklearnClassifier(**automl_arguments)
-    # automl._automl._metadata_directory does not work cause automl._automl is not
-    # created until fit is called. Therefore, we need to manually create
-    # automl._automl and specify metadata_directory there.
-    #automl.metadata_directory = metadata_for_this_task
-    #TODO: Cannot use local metadata directory until PR merged!
 
     # Fit.
     automl.fit(X_train,
@@ -114,38 +99,31 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
                     metric=balanced_accuracy,
                     )
 
-    #with open(os.path.join(tmp_dir, "score_metalearning.csv"), 'w') as fh:
-    #    T = 0
-    #    fh.write("Time,Train Performance,Test Performance\n")
-    #    # Add start time:0, Train Performance:1, Test Performance: 1
-    #    fh.write("{0},{1},{2}\n".format(T, 1, 1))
-    #    for t, dummy, s in zip(automl.cv_results_['mean_fit_time'],
-    #                           [1 for i in range(len(automl.cv_results_['mean_fit_time']))],
-    #                           1 - automl.cv_results_["mean_test_score"]):  # We compute rank based on error.
-    #        T += t
-    #        fh.write("{0},{1},{2}\n".format(T, dummy, s))
+    with open(os.path.join(tmp_dir, "score_metalearning.csv"), 'w') as fh:
+        T = 0
+        fh.write("Time,Train Performance,Test Performance\n")
+        # Add start time:0, Train Performance:1, Test Performance: 1
+        fh.write("{0},{1},{2}\n".format(T, 1, 1))
+        for t, dummy, s in zip(automl.cv_results_['mean_fit_time'],
+                               [1 for i in range(len(automl.cv_results_['mean_fit_time']))],
+                               1 - automl.cv_results_["mean_test_score"]):  # We compute rank based on error.
+            T += t
+            fh.write("{0},{1},{2}\n".format(T, dummy, s))
 
 
 if __name__=="__main__":
-    #parser = argparse.ArgumentParser()
-    #parser.add_argument('--working-directory', type=str, required=True)
-    #parser.add_argument('--time-limit', type=int, required=True)
-    #parser.add_argument('--per-run-time-limit', type=int, required=True)
-    #parser.add_argument('--task-id', type=int, required=True)
-    #parser.add_argument('-s', '--seed', type=int, required=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--working-directory', type=str, required=True)
+    parser.add_argument('--time-limit', type=int, required=True)
+    parser.add_argument('--per-run-time-limit', type=int, required=True)
+    parser.add_argument('--task-id', type=int, required=True)
+    parser.add_argument('-s', '--seed', type=int, required=True)
 
-    #args = parser.parse_args()
-    #working_directory = args.working_directory
-    #time_limit = args.time_limit
-    #per_run_time_limit = args.per_run_time_limit
-    #task_id = args.task_id
-    #seed = args.seed
-
-    # Testing
-    working_directory = "./"
-    time_limit = 15
-    per_run_time_limit = 5
-    task_id = 2120
-    seed = 2
+    args = parser.parse_args()
+    working_directory = args.working_directory
+    time_limit = args.time_limit
+    per_run_time_limit = args.per_run_time_limit
+    task_id = args.task_id
+    seed = args.seed
 
     main(working_directory, time_limit, per_run_time_limit, task_id, seed)
