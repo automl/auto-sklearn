@@ -804,10 +804,11 @@ class AutoML(BaseEstimator):
         sio.write('auto-sklearn results:\n')
         sio.write('  Dataset name: %s\n' % self._dataset_name)
         sio.write('  Metric: %s\n' % self._metric)
+        idx_success = np.where(np.array(model.cv_results_['status'])=='Success')
         if not self._metric._optimum:
-            idx_best_run = np.argmin(cv_results['mean_test_score'])
+            idx_best_run = np.argmin(cv_results['mean_test_score'][idx_success])
         else:
-            idx_best_run = np.argmax(cv_results['mean_test_score'])
+            idx_best_run = np.argmax(cv_results['mean_test_score'][idx_success])
         best_score = cv_results['mean_test_score'][idx_best_run]
         sio.write('  Best validation score: %f\n' % best_score)
         num_runs = len(cv_results['status'])
