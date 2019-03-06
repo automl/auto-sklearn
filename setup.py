@@ -80,6 +80,7 @@ setup(
         "Topic :: Scientific/Engineering :: Information Analysis",
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
     python_requires='>=3.5.*',
     url='https://automl.github.io/auto-sklearn',
