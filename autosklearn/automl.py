@@ -756,7 +756,8 @@ class AutoML(BaseEstimator):
 
             param_dict = config.get_dictionary()
             params.append(param_dict)
-            mean_test_score.append(self._metric._optimum - (self._metric._sign * run_value.cost))
+            mean_test_score.append(self._metric._optimum - 
+                                   (self._metric._sign * run_value.cost))
             mean_fit_time.append(run_value.time)
             s = run_value.status
             if s == StatusType.SUCCESS:
