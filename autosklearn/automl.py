@@ -756,7 +756,8 @@ class AutoML(BaseEstimator):
 
             param_dict = config.get_dictionary()
             params.append(param_dict)
-            mean_test_score.append(1 - run_value.cost)
+            mean_test_score.append(self._metric._optimum - \
+                                  (self._metric._sign * run_value.cost))
             mean_fit_time.append(run_value.time)
             s = run_value.status
             if s == StatusType.SUCCESS:
@@ -803,8 +804,12 @@ class AutoML(BaseEstimator):
         sio.write('auto-sklearn results:\n')
         sio.write('  Dataset name: %s\n' % self._dataset_name)
         sio.write('  Metric: %s\n' % self._metric)
-        idx_best_run = np.argmax(cv_results['mean_test_score'])
-        best_score = cv_results['mean_test_score'][idx_best_run]
+        idx_success = np.where(np.array(cv_results['status']) == 'Success')
+        if not self._metric._optimum:
+            idx_best_run = np.argmin(cv_results['mean_test_score'][idx_success])
+        else:
+            idx_best_run = np.argmax(cv_results['mean_test_score'][idx_success])
+        best_score = cv_results['mean_test_score'][idx_success][idx_best_run]
         sio.write('  Best validation score: %f\n' % best_score)
         num_runs = len(cv_results['status'])
         sio.write('  Number of target algorithm runs: %d\n' % num_runs)
