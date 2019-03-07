@@ -106,8 +106,8 @@ class Test(unittest.TestCase):
         # Auto-sklearn should check that the directory exists. If not, it
         # should use the default directory.
         automl1 = AutoSklearnClassifier(
-            time_left_for_this_task=15,
-            per_run_time_limit=5,
+            time_left_for_this_task=60,
+            per_run_time_limit=10,
             metadata_directory="pyMetaLearn/metadata_dir",  # user specified metadata_dir
         )
         self.assertEqual(automl1.metadata_directory,
