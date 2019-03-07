@@ -22,10 +22,6 @@ def fill_trajectory(performance_list, time_list):
     # Fill missing performance values (NaNs) with last non-NaN value.
     series = series.fillna(method='ffill')
 
-    # Remove all but first time steps with the same value (sometimes the
-    # incumbent does not change over time).
-    series = series.drop_duplicates(keep='first')
-
     # Returns performance (Numpy array), time steps (list)
     return series.values, list(series.index)
 
