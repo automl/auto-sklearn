@@ -560,12 +560,13 @@ class AutoMLSMBO(object):
                                       else 'dense'))
                     # Check that the metadata directory has the correct
                     # subdirectory needed for this dataset.
-                    if metadata_directory not in os.listdir(self.metadata_directory):
+                    if os.path.basename(metadata_directory) not in \
+                            os.listdir(self.metadata_directory):
                         raise ValueError('The specified metadata directory '
                                          '\'%s\' does not have the correct '
                                          'subdirectory \'%s\'' %
                                          (self.metadata_directory,
-                                          metadata_directory)
+                                          os.path.basename(metadata_directory))
                                          )
                 self.metadata_directory = metadata_directory
 
