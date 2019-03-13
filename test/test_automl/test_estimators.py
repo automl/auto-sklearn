@@ -229,8 +229,8 @@ class EstimatorTest(Base, unittest.TestCase):
         Y_test += 1
 
         automl = AutoSklearnClassifier(
-            time_left_for_this_task=60,
-            per_run_time_limit=10,
+            time_left_for_this_task=30,
+            per_run_time_limit=5,
             output_folder=output,
             tmp_folder=tmp,
             shared_mode=True,
@@ -339,8 +339,8 @@ class EstimatorTest(Base, unittest.TestCase):
         self._setUp(output)
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
 
-        cls = AutoSklearnClassifier(time_left_for_this_task=60,
-                                    per_run_time_limit=10,
+        cls = AutoSklearnClassifier(time_left_for_this_task=30,
+                                    per_run_time_limit=5,
                                     output_folder=output,
                                     tmp_folder=tmp,
                                     shared_mode=False,
@@ -443,8 +443,8 @@ class EstimatorTest(Base, unittest.TestCase):
         Y_test += 1
 
         automl = AutoSklearnClassifier(
-            time_left_for_this_task=60,
-            per_run_time_limit=10,
+            time_left_for_this_task=30,
+            per_run_time_limit=5,
             output_folder=output,
             tmp_folder=tmp,
             seed=1,
@@ -537,8 +537,8 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=60,
-                                       per_run_time_limit=10,
+        automl = AutoSklearnClassifier(time_left_for_this_task=30,
+                                       per_run_time_limit=5,
                                        tmp_folder=tmp,
                                        output_folder=output)
         automl.fit(X_train, Y_train)
@@ -586,8 +586,8 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset(
             'iris', make_multilabel=True)
-        automl = AutoSklearnClassifier(time_left_for_this_task=60,
-                                       per_run_time_limit=10,
+        automl = AutoSklearnClassifier(time_left_for_this_task=30,
+                                       per_run_time_limit=5,
                                        tmp_folder=tmp,
                                        output_folder=output)
 
@@ -607,8 +607,8 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset(
             'iris', make_binary=True)
-        automl = AutoSklearnClassifier(time_left_for_this_task=60,
-                                       per_run_time_limit=10,
+        automl = AutoSklearnClassifier(time_left_for_this_task=30,
+                                       per_run_time_limit=5,
                                        tmp_folder=tmp,
                                        output_folder=output)
 
@@ -650,8 +650,8 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('boston')
-        automl = AutoSklearnRegressor(time_left_for_this_task=60,
-                                      per_run_time_limit=10,
+        automl = AutoSklearnRegressor(time_left_for_this_task=30,
+                                      per_run_time_limit=5,
                                       tmp_folder=tmp,
                                       output_folder=output)
 
@@ -706,8 +706,8 @@ class AutoSklearnRegressorTest(unittest.TestCase):
     # that should return self actually return self.
     def test_regression_methods_returns_self(self):
         X_train, y_train, X_test, y_test = putil.get_dataset('boston')
-        automl = AutoSklearnRegressor(time_left_for_this_task=60,
-                                      per_run_time_limit=10,
+        automl = AutoSklearnRegressor(time_left_for_this_task=30,
+                                      per_run_time_limit=5,
                                       ensemble_size=0)
 
         automl_fitted = automl.fit(X_train, y_train)
