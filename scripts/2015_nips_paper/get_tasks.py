@@ -1,11 +1,11 @@
 # get tasks from openml
 import openml
 import pandas as pd
-from pprint import pprint
 
 
 def read_csv(file):
-    # reads the given csv file and returns a list containing all dataset ids used for experiment.
+    # reads the given csv file and returns a list containing all dataset ids
+    # used for experiment.
     dataset_ids = []
     with open(file) as f:
         for line in f:
@@ -23,7 +23,7 @@ def get_task_ids(dataset_ids):
     tasks_a = pd.DataFrame.from_dict(tasks_a, orient="index")
 
     # query only those with NaN as evaluation_measures.
-    #tasks_a = tasks_a.query("evaluation_measures != evaluation_measures")
+    # tasks_a = tasks_a.query("evaluation_measures != evaluation_measures")
 
     # query only those with holdout as the resampling startegy.
     tasks_a = tasks_a[(tasks_a.estimation_procedure == "33% Holdout set")]
@@ -33,7 +33,7 @@ def get_task_ids(dataset_ids):
     tasks_d = pd.DataFrame.from_dict(tasks_d, orient="index")
 
     # query only those with NaN as evaluation_measures.
-    #tasks_d = tasks_d.query("evaluation_measures != evaluation_measures")
+    # tasks_d = tasks_d.query("evaluation_measures != evaluation_measures")
 
     # query only those with holdout as the resampling startegy.
     tasks_d = tasks_d[(tasks_d.estimation_procedure == "33% Holdout set")]
@@ -61,6 +61,5 @@ def main():
     print(string_to_print)  # print the task ids for bash script.
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
-

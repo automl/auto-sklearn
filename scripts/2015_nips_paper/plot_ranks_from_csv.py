@@ -29,8 +29,8 @@ def calculate_ranking(performances, estimators, bootstrap_samples=500):
 
     # Initializes ranking array
     # Not sure whether we need this
-    #for j, est in enumerate(estimators):
-    #    ranking[0][j] = np.mean(range(1, len(estimators) + 1))
+    # for j, est in enumerate(estimators):
+    #     ranking[0][j] = np.mean(range(1, len(estimators) + 1))
 
     for i in range(ranking.shape[0]):
         num_products = 0
@@ -38,7 +38,9 @@ def calculate_ranking(performances, estimators, bootstrap_samples=500):
         for combination in combinations:
             ranks = scipy.stats.rankdata(
                 [np.round(
-                    performances[estimators[idx]]["performances"][number][i], 5)
+                    performances[estimators[idx]]["performances"][number][i],
+                    5,
+                )
                  for idx, number in enumerate(combination)])
             num_products += 1
             for j, est in enumerate(estimators):
@@ -82,7 +84,8 @@ def main():
     parser.add_argument("-v", "--verbose", dest="verbose", action="store_true",
                         default=False, help="print number of runs on plot")
     parser.add_argument("--samples", dest="samples", type=int,
-                        default=1000, help="Number of bootstrap samples to plot")
+                        default=1000,
+                        help="Number of bootstrap samples to plot")
     parser.add_argument("--figsize", nargs=2, type=float,
                         help="Set matplotlib argument figsize.")
     parser.add_argument("--sort", action="store_true",
@@ -112,7 +115,8 @@ def main():
     for idx in range(len(name_list)):
         assert len(file_list[idx]) == 1, "%s: %s" % (name_list[idx],
                                                      file_list[idx])
-        print("%20s contains %d file(s)" % (name_list[idx], len(file_list[idx])))
+        print("%20s contains %d file(s)" %
+              (name_list[idx], len(file_list[idx])))
 
     dataset_dict = OrderedDict()
     estimator_list = list()
@@ -194,10 +198,13 @@ def main():
     time_list = list()
     for dataset in dataset_list:
         ranking, e_list = calculate_ranking(performances=dataset_dict[dataset],
-                                            estimators=estimator_list, bootstrap_samples=args.samples)
+                                            estimators=estimator_list,
+                                            bootstrap_samples=args.samples,
+                                            )
         ranking_list.extend(ranking)
         assert len(e_list) == len(estimator_list)
-        time_list.extend([dataset_dict[dataset]["time"] for i in range(len(e_list))])
+        time_list.extend([dataset_dict[dataset]["time"]
+                          for i in range(len(e_list))])
 
     # Fill trajectories as ranks are calculated on different time steps
     # sanity check
@@ -215,13 +222,11 @@ def main():
         for ide, est in enumerate(estimator_list):
             performance_list[ide].append(p[idd*(len(estimator_list))+ide])
 
-
     prop = {}
     args_dict = vars(args)
     for key in defaults:
         prop[key] = args_dict[key]
-    #prop['linestyles'] = itertools.cycle(["-", ":"])
-
+    # prop['linestyles'] = itertools.cycle(["-", ":"])
 
     plot_test_performance_from_csv.\
         plot_optimization_trace(time_list=time_list,
@@ -233,7 +238,9 @@ def main():
                                 ylabel="average rank",
                                 scale_std=0, properties=prop,
                                 figsize=tuple(args.figsize) if args.figsize
-                                        else None)
+                                else None,
+                                )
+
 
 if __name__ == "__main__":
     main()

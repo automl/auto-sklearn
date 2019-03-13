@@ -58,7 +58,9 @@ def main():
     del arg_list
 
     for time_idx in range(len(name_list)):
-        print("%20s contains %d file(s)" % (name_list[time_idx], len(file_list[time_idx])))
+        print("%20s contains %d file(s)" %
+              (name_list[time_idx], len(file_list[time_idx])))
+
     if len(file_list) > 1:
         sys.stderr.write("Cannot handle more than one experiment")
         parser.print_help()
@@ -79,10 +81,10 @@ def main():
             continue
         if args.train:
             data = [min([args.maxvalue, float(i.strip())]) for i in
-                        csv_data[:, 1]]
+                    csv_data[:, 1]]
         else:
             data = [min([args.maxvalue, float(i.strip())]) for i in
-                        csv_data[:, 2]]
+                    csv_data[:, 2]]
 
         time_steps = [float(i.strip()) for i in csv_data[:, 0]]
         assert time_steps[0] == 0
@@ -92,7 +94,10 @@ def main():
 
     # performance : Numpy array (n_values, n_runs)
     # time_: list
-    performance, time_ = fill_trajectory(performance_list=performance_list, time_list=time_list)
+    performance, time_ = fill_trajectory(
+        performance_list=performance_list,
+        time_list=time_list,
+    )
 
     fh = open(args.saveTo, 'w')
     writer = csv.writer(fh)

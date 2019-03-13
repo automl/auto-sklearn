@@ -4,7 +4,13 @@ import run_with_metalearning
 import score_ensemble
 
 
-def main(working_directory, output_file, task_id, seed, model, time_limit, per_run_time_limit):
+def main(working_directory,
+         output_file,
+         task_id,
+         seed,
+         model,
+         time_limit,
+         per_run_time_limit):
     # vanilla and metalearning must be called first before ensemble and
     # meta_ensemble can be called
     if model == "vanilla":
@@ -42,7 +48,7 @@ def main(working_directory, output_file, task_id, seed, model, time_limit, per_r
                             )
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--working-directory', type=str, required=True)
     parser.add_argument("--output-file", type=str, required=True)
@@ -50,10 +56,10 @@ if __name__=="__main__":
     parser.add_argument("--per-runtime-limit", type=int, required=True)
     parser.add_argument('--task-id', type=int, required=True)
     parser.add_argument('-s', '--seed', type=int)
-    parser.add_argument("--model", type=str, required=True) ## one of (vanilla, ensemble, metalearning, meta_ensemble)
+    parser.add_argument("--model", type=str, required=True)
 
     args = parser.parse_args()
-    working_directory = args.working_directory # logdir/vanilla or logdir/metalearning
+    working_directory = args.working_directory  # logdir/vanilla or logdir/metalearning
     output_file = args.output_file
     task_id = args.task_id
     seed = args.seed
@@ -61,4 +67,11 @@ if __name__=="__main__":
     time_limit = args.time_limit
     per_run_time_limit = args.per_runtime_limit
 
-    main(working_directory, output_file, task_id, seed, model, time_limit, per_run_time_limit)
+    main(working_directory,
+         output_file,
+         task_id,
+         seed,
+         model,
+         time_limit,
+         per_run_time_limit,
+         )

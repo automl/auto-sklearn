@@ -3,6 +3,7 @@ import numpy as np
 import plot_util
 from argparse import ArgumentParser
 
+
 def main():
     parser = ArgumentParser()
     parser.add_argument("--input-file", type=str)

@@ -3,6 +3,7 @@ import os
 import arff
 from shutil import copyfile
 
+
 def remove_dataset_from_aslib_arff(input_file,
                                    output_file,
                                    id,
@@ -29,7 +30,7 @@ def remove_dataset(metadata_directory,
         output_subdir = os.path.join(output_directory, metadata_sub_directory)
         try:
             os.makedirs(output_subdir)
-        except:
+        except OSError:
             pass
 
         arf = "algorithm_runs.arff"
@@ -61,5 +62,3 @@ def remove_dataset(metadata_directory,
         configs_file = os.path.join(subdir, configs)
         output_file = os.path.join(output_subdir, configs)
         copyfile(configs_file, output_file)
-
-

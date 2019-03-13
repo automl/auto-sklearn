@@ -7,13 +7,12 @@ import itertools
 import sys
 
 import matplotlib
-from matplotlib.pyplot import tight_layout, figure, subplots_adjust, subplot, savefig, show
+from matplotlib.pyplot import tight_layout, figure, subplot, savefig, show
 import matplotlib.gridspec
-matplotlib.pyplot.switch_backend('agg') # For error invalid DISPLAY variable
 import numpy as np
-
 import plot_util
 
+matplotlib.pyplot.switch_backend('agg')  # For error invalid DISPLAY variable
 matplotlib.rcParams['pdf.fonttype'] = 42
 
 
@@ -28,7 +27,6 @@ def plot_optimization_trace(time_list, performance_list, name_list, title=None,
     properties['markers'] = itertools.cycle(['o', 's', '^', '*'])
     properties = plot_util.fill_with_defaults(properties)
 
-    size = 1
     # Set up figure
     ratio = 5
     if figsize is None:
@@ -64,7 +62,8 @@ def plot_optimization_trace(time_list, performance_list, name_list, title=None,
                     'multinomial_nb': u'multinomial naïve bayes',
                     'qda': 'QDA',
                     'sgd': 'SGD',
-                    'extra_trees_preproc_for_classification': 'extreml. rand. trees prepr.',
+                    'extra_trees_preproc_for_classification':
+                        'extreml. rand. trees prepr.',
                     'fast_ica': 'fast ICA',
                     'kernel_pca': 'kernel PCA',
                     'kitchen_sinks': 'rand. kitchen sinks',
@@ -94,7 +93,6 @@ def plot_optimization_trace(time_list, performance_list, name_list, title=None,
             lower = line - std
         else:
             raise ValueError()
-
 
         # Plot mean and std
         if scale_std >= 0:
@@ -128,7 +126,7 @@ def plot_optimization_trace(time_list, performance_list, name_list, title=None,
     else:
         ax1.set_xlabel("time [sec]")
 
-    leg = ax1.legend(loc='best', #loc=(0.01, 0.47),
+    leg = ax1.legend(loc='best',  # loc=(0.01, 0.47),
                      fancybox=True, prop={'size': int(properties["legendsize"])})
     leg.get_frame().set_alpha(0.8)
 
@@ -140,7 +138,8 @@ def plot_optimization_trace(time_list, performance_list, name_list, title=None,
     elif y_max is not None and y_min is not None and y_max > y_min:
         ax1.set_ylim([y_min, y_max])
     else:
-        ax1.set_ylim([auto_y_min - 0.01*abs(auto_y_max - auto_y_min), auto_y_max + 0.01*abs(auto_y_max - auto_y_min)])
+        ax1.set_ylim([auto_y_min - 0.01*abs(auto_y_max - auto_y_min),
+                      auto_y_max + 0.01*abs(auto_y_max - auto_y_min)])
 
     if x_max is None and x_min is not None:
         ax1.set_xlim([x_min - 0.1*abs(x_min), auto_x_max + 0.1*abs(auto_x_max)])
@@ -153,7 +152,7 @@ def plot_optimization_trace(time_list, performance_list, name_list, title=None,
 
     # Save or show
     tight_layout()
-    #subplots_adjust(top=0.85)
+    # subplots_adjust(top=0.85)
     if save != "":
         print("Save plot to %s" % save)
         savefig(save, dpi=int(properties['dpi']), facecolor='w', edgecolor='w',
@@ -192,8 +191,8 @@ def main():
                         default=sys.maxsize, help="Replace all values higher than this?")
     parser.add_argument("--ylabel", dest="ylabel",
                         default="Minfunction value", help="y label")
-    parser.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False,
-                        help="print number of runs on plot")
+    parser.add_argument("-v", "--verbose", dest="verbose", action="store_true",
+                        default=False, help="print number of runs on plot")
 
     # Properties
     # We need this to show defaults for -h

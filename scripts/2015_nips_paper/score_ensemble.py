@@ -36,7 +36,6 @@ def read_files(directory, seed=None, n_jobs=1):
 def main(input_directories, output_file, task_id, seed, ensemble_size, n_jobs=1):
     seed = None if seed is None or seed < 0 else int(seed)
 
-
     if isinstance(input_directories, str):
         # add seed and task id directories
         input_directories += '/%i/%i' % (seed, task_id)
@@ -119,10 +118,10 @@ def main(input_directories, output_file, task_id, seed, ensemble_size, n_jobs=1)
 
     models_to_remove = set(list(range(len(validation_files))))
     for top_models_at_i in top_models_at_step:
-        #print("top models at %i" % top_models_at_i)
+        # print("top models at %i" % top_models_at_i)
         for top_model in top_models_at_step[top_models_at_i]:
             if top_model in models_to_remove:
-                #print("top model to be removed: %s" % top_model)
+                # print("top model to be removed: %s" % top_model)
                 models_to_remove.remove(top_model)
 
     print("Removing the following %d models from the library: %s"
@@ -144,23 +143,14 @@ def main(input_directories, output_file, task_id, seed, ensemble_size, n_jobs=1)
                       ensemble_size=ensemble_size)
         for i in range(len(test_files)))
 
-
     # Create output csv file
-    file_path = os.path.abspath("%s/%s" %(input_directory, output_file))
+    file_path = os.path.abspath("%s/%s" % (input_directory, output_file))
     with open(file_path, "w") as csv_file:
-        #fieldnames = ['Time', 'Training (Empirical) Performance',
-        #              'Test Set Performance', 'AC Overhead Time',
-        #              'Validation Configuration ID']
         fieldnames = ['Time', 'Training (Empirical) Performance',
                       'Test Set Performance']
         csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         csv_writer.writeheader()
 
-        #csv_writer.writerow({'Time': 0,
-        #                     'Training (Empirical) Performance': 1.0,
-        #                     'Test Set Performance': 1.0,
-        #                     'AC Overhead Time': 0,
-        #                     'Validation Configuration ID': 0})
         csv_writer.writerow({'Time': 0,
                              'Training (Empirical) Performance': 1.0,
                              'Test Set Performance': 1.0})

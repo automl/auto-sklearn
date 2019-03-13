@@ -1,6 +1,5 @@
 import argparse
 import os
-import sys
 import numpy as np
 
 from autosklearn.classification import AutoSklearnClassifier
@@ -34,13 +33,13 @@ def load_task(task_id):
 
 def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # set this to local dataset cache
-    #openml.config.cache_directory = os.path.join(working_directory, "../cache")
+    # openml.config.cache_directory = os.path.join(working_directory, "../cache")
 
     configuration_output_dir = os.path.join(working_directory, str(seed))
     try:
         if not os.path.exists(configuration_output_dir):
             os.makedirs(configuration_output_dir)
-    except Exception as _:
+    except Exception:
         print("Directory {0} aleardy created.".format(configuration_output_dir))
 
     tmp_dir = os.path.join(configuration_output_dir, str(task_id))
@@ -74,13 +73,14 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
         # Add start time:0, Train Performance:1, Test Performance: 1
         fh.write("{0},{1},{2}\n".format(T, 1, 1))
         for t, dummy, s in zip(automl.cv_results_['mean_fit_time'],
-                               [1 for i in range(len(automl.cv_results_['mean_fit_time']))],
-                               1 - automl.cv_results_["mean_test_score"]):  # We compute rank based on error.
+                               [1 for i in
+                                range(len(automl.cv_results_['mean_fit_time']))],
+                               1 - automl.cv_results_["mean_test_score"]):
             T += t
             fh.write("{0},{1},{2}\n".format(T, dummy, s))
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--working-directory', type=str, required=True)
     parser.add_argument('--time-limit', type=int, required=True)
