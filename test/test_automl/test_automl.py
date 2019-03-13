@@ -251,7 +251,7 @@ class AutoMLTest(Base, unittest.TestCase):
             auto._backend._make_internals_directory()
             D = load_data(dataset, backend_api)
             auto._backend.save_datamanager(D)
-            auto._do_dummy_prediction(D, 1)
+            a = auto._do_dummy_prediction(D, 1)
 
             # Ensure that the dummy predictions are not in the current working
             # directory, but in the temporary directory.
@@ -265,6 +265,8 @@ class AutoMLTest(Base, unittest.TestCase):
             self._tearDown(backend_api.temporary_directory)
             self._tearDown(backend_api.output_directory)
 
+    def test_fail_if_dummy_prediction_fails(self):
+        pass
 
 if __name__=="__main__":
     unittest.main()
