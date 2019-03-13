@@ -243,7 +243,7 @@ class EstimatorTest(Base, unittest.TestCase):
         cv_results = automl.cv_results_['mean_test_score']
 
         automl = AutoSklearnClassifier(
-            time_left_for_this_task=15,
+            time_left_for_this_task=30,
             per_run_time_limit=5,
             output_folder=output,
             tmp_folder=tmp,
@@ -297,7 +297,7 @@ class EstimatorTest(Base, unittest.TestCase):
         backend.save_model(dummy, 30, 1)
 
         automl = AutoSklearnClassifier(
-            time_left_for_this_task=15,
+            time_left_for_this_task=30,
             per_run_time_limit=5,
             output_folder=output,
             tmp_folder=tmp,
