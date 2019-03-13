@@ -11,16 +11,16 @@ per_runtime_limit=360
 
 # If running on cluster, first copy the cached openml dataset to the home directory.
 # This is necessary because there are file handling operations which
-# seem to require root permission. Skip this if not running on cluster.
+# require root permission. Skip this if not running on cluster.
 #mkdir -p $dir/cache/org/openml/www/
 #cp -R /data/aad/openml/* $dir/cache/org/openml/www
 
 # Create commands
-echo "creating commands.txt file..."
+echo "creating commands.txt..."
 for seed in $seeds; do
     for task_id in $task_ids; do
         for model in vanilla metalearning; do
-            # put vanilla and ensemble in one folder and meta and meta_ens in another.
+            # store vanilla and ensemble in one folder and meta and meta_ens in another.
             if [ "$model" == "vanilla" ]; then
                 cmd="python run_auto_sklearn.py --working-directory $dir/$model --task-id $task_id \
                 -s $seed --output-file score_$model.csv --model $model --time-limit $time_limit \

@@ -6,11 +6,10 @@ import numpy as np
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.metrics import balanced_accuracy
 import openml
-#openml.config.cache_directory = os.path.join(os.path.expanduser("~"), 'openml') # Home directory. change this later accordingly
+
 
 def load_task(task_id):
-    """Function used in score_vanilla and score_metalearning
-    for loading data."""
+    """Function used for loading data."""
     task = openml.tasks.get_task(task_id)
     X, y = task.get_X_and_y()
     train_indices, test_indices = task.get_train_test_split_indices()
@@ -32,18 +31,19 @@ def load_task(task_id):
 
     return X_train, y_train, X_test, y_test, cat
 
+
 def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # set this to local dataset cache
-    openml.config.cache_directory = os.path.join(working_directory, "../cache")
+    #openml.config.cache_directory = os.path.join(working_directory, "../cache")
 
     configuration_output_dir = os.path.join(working_directory, str(seed))
     try:
         if not os.path.exists(configuration_output_dir):
             os.makedirs(configuration_output_dir)
     except Exception as _:
-        print("Direcotry {0} aleardy created.".format(configuration_output_dir))
+        print("Directory {0} aleardy created.".format(configuration_output_dir))
 
-    tmp_dir = os.path.join(configuration_output_dir,str(task_id))
+    tmp_dir = os.path.join(configuration_output_dir, str(task_id))
 
     automl_arguments = {
         'time_left_for_this_task': time_limit,
@@ -68,16 +68,16 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
                X_test=X_test, y_test=y_test,
                metric=balanced_accuracy)
 
-    #with open(os.path.join(tmp_dir, "score_vanilla.csv"), 'w') as fh:
-    #    T = 0
-    #    fh.write("Time,Train Performance,Test Performance\n")
-    #    # Add start time:0, Train Performance:1, Test Performance: 1
-    #    fh.write("{0},{1},{2}\n".format(T, 1, 1))
-    #    for t, dummy, s in zip(automl.cv_results_['mean_fit_time'],
-    #                           [1 for i in range(len(automl.cv_results_['mean_fit_time']))],
-    #                           1 - automl.cv_results_["mean_test_score"]):  # We compute rank based on error.
-    #        T += t
-    #        fh.write("{0},{1},{2}\n".format(T, dummy, s))
+    with open(os.path.join(tmp_dir, "score_vanilla.csv"), 'w') as fh:
+        T = 0
+        fh.write("Time,Train Performance,Test Performance\n")
+        # Add start time:0, Train Performance:1, Test Performance: 1
+        fh.write("{0},{1},{2}\n".format(T, 1, 1))
+        for t, dummy, s in zip(automl.cv_results_['mean_fit_time'],
+                               [1 for i in range(len(automl.cv_results_['mean_fit_time']))],
+                               1 - automl.cv_results_["mean_test_score"]):  # We compute rank based on error.
+            T += t
+            fh.write("{0},{1},{2}\n".format(T, dummy, s))
 
 
 if __name__=="__main__":

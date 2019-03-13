@@ -10,9 +10,9 @@ from autosklearn.metrics import balanced_accuracy
 import openml
 from remove_dataset_from_metadata import remove_dataset
 
+
 def load_task(task_id):
-    """Function used in score_vanilla and score_metalearning
-    for loading data."""
+    """Function used for loading data."""
     task = openml.tasks.get_task(task_id)
     X, y = task.get_X_and_y()
     train_indices, test_indices = task.get_train_test_split_indices()
@@ -34,18 +34,13 @@ def load_task(task_id):
 
     return X_train, y_train, X_test, y_test, cat
 
+
 def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # Set this to local dataset cache
-    openml.config.cache_directory = os.path.join(working_directory, "../cache")
+    #openml.config.cache_directory = os.path.join(working_directory, "../cache")
 
     # Load data and other info.
     X_train, y_train, X_test, y_test, cat = load_task(task_id)
-
-    # Check if data is dense or sparse.
-    if isinstance(X_train, np.ndarray):
-        sparse_or_dense = "dense"
-    else:
-        sparse_or_dense = "sparse"
 
     # path to the metadata directory.
     metadata_directory = os.path.abspath(os.path.dirname(__file__))
@@ -62,10 +57,10 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # remove the given task id from metadata directory.
     remove_dataset(metadata_directory, new_metadata_directory, task_id)
 
+    # Create folder for each seed. All runs per task will be stored here.
     configuration_output_dir = os.path.join(working_directory, str(seed))
-
-    # This is where score_metalearning will be saved.
     tmp_dir = os.path.join(configuration_output_dir, str(task_id))
+
     try:
         if not os.path.exists(configuration_output_dir):
             os.makedirs(configuration_output_dir)

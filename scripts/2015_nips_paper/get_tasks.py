@@ -21,15 +21,21 @@ def get_task_ids(dataset_ids):
     # active tasks
     tasks_a = openml.tasks.list_tasks(task_type_id=1, status='active')
     tasks_a = pd.DataFrame.from_dict(tasks_a, orient="index")
+
     # query only those with NaN as evaluation_measures.
     #tasks_a = tasks_a.query("evaluation_measures != evaluation_measures")
+
     # query only those with holdout as the resampling startegy.
     tasks_a = tasks_a[(tasks_a.estimation_procedure == "33% Holdout set")]
 
     # deactivated tasks
     tasks_d = openml.tasks.list_tasks(task_type_id=1, status='deactivated')
     tasks_d = pd.DataFrame.from_dict(tasks_d, orient="index")
+
+    # query only those with NaN as evaluation_measures.
     #tasks_d = tasks_d.query("evaluation_measures != evaluation_measures")
+
+    # query only those with holdout as the resampling startegy.
     tasks_d = tasks_d[(tasks_d.estimation_procedure == "33% Holdout set")]
 
     task_ids = []
@@ -52,7 +58,6 @@ def main():
     string_to_print = ''
     for tid in task_ids:
         string_to_print += str(tid) + ' '
-    print(len(task_ids))
     print(string_to_print)  # print the task ids for bash script.
 
 
