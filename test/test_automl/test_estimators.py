@@ -229,7 +229,7 @@ class EstimatorTest(Base, unittest.TestCase):
         Y_test += 1
 
         automl = AutoSklearnClassifier(
-            time_left_for_this_task=15,
+            time_left_for_this_task=30,
             per_run_time_limit=5,
             output_folder=output,
             tmp_folder=tmp,
@@ -243,7 +243,7 @@ class EstimatorTest(Base, unittest.TestCase):
         cv_results = automl.cv_results_['mean_test_score']
 
         automl = AutoSklearnClassifier(
-            time_left_for_this_task=15,
+            time_left_for_this_task=30,
             per_run_time_limit=5,
             output_folder=output,
             tmp_folder=tmp,
@@ -297,7 +297,7 @@ class EstimatorTest(Base, unittest.TestCase):
         backend.save_model(dummy, 30, 1)
 
         automl = AutoSklearnClassifier(
-            time_left_for_this_task=15,
+            time_left_for_this_task=30,
             per_run_time_limit=5,
             output_folder=output,
             tmp_folder=tmp,
@@ -339,7 +339,7 @@ class EstimatorTest(Base, unittest.TestCase):
         self._setUp(output)
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
 
-        cls = AutoSklearnClassifier(time_left_for_this_task=20,
+        cls = AutoSklearnClassifier(time_left_for_this_task=30,
                                     per_run_time_limit=5,
                                     output_folder=output,
                                     tmp_folder=tmp,
@@ -443,7 +443,7 @@ class EstimatorTest(Base, unittest.TestCase):
         Y_test += 1
 
         automl = AutoSklearnClassifier(
-            time_left_for_this_task=15,
+            time_left_for_this_task=30,
             per_run_time_limit=5,
             output_folder=output,
             tmp_folder=tmp,
@@ -537,7 +537,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=20,
+        automl = AutoSklearnClassifier(time_left_for_this_task=30,
                                        per_run_time_limit=5,
                                        tmp_folder=tmp,
                                        output_folder=output)
@@ -586,7 +586,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset(
             'iris', make_multilabel=True)
-        automl = AutoSklearnClassifier(time_left_for_this_task=20,
+        automl = AutoSklearnClassifier(time_left_for_this_task=30,
                                        per_run_time_limit=5,
                                        tmp_folder=tmp,
                                        output_folder=output)
@@ -607,7 +607,7 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset(
             'iris', make_binary=True)
-        automl = AutoSklearnClassifier(time_left_for_this_task=20,
+        automl = AutoSklearnClassifier(time_left_for_this_task=30,
                                        per_run_time_limit=5,
                                        tmp_folder=tmp,
                                        output_folder=output)
@@ -650,7 +650,7 @@ class AutoMLRegressorTest(Base, unittest.TestCase):
         self._setUp(output)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('boston')
-        automl = AutoSklearnRegressor(time_left_for_this_task=20,
+        automl = AutoSklearnRegressor(time_left_for_this_task=30,
                                       per_run_time_limit=5,
                                       tmp_folder=tmp,
                                       output_folder=output)
@@ -687,8 +687,8 @@ class AutoSklearnClassifierTest(unittest.TestCase):
     # which should return self actually return self.
     def test_classification_methods_returns_self(self):
         X_train, y_train, X_test, y_test = putil.get_dataset('iris')
-        automl = AutoSklearnClassifier(time_left_for_this_task=20,
-                                       per_run_time_limit=5,
+        automl = AutoSklearnClassifier(time_left_for_this_task=60,
+                                       per_run_time_limit=10,
                                        ensemble_size=0)
 
         automl_fitted = automl.fit(X_train, y_train)
@@ -706,7 +706,7 @@ class AutoSklearnRegressorTest(unittest.TestCase):
     # that should return self actually return self.
     def test_regression_methods_returns_self(self):
         X_train, y_train, X_test, y_test = putil.get_dataset('boston')
-        automl = AutoSklearnRegressor(time_left_for_this_task=20,
+        automl = AutoSklearnRegressor(time_left_for_this_task=30,
                                       per_run_time_limit=5,
                                       ensemble_size=0)
 

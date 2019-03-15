@@ -121,7 +121,7 @@ if __name__ == '__main__':
 
     # Fit MLP classifier to the data.
     clf = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=20,
+        time_left_for_this_task=30,
         per_run_time_limit=10,
         include_estimators=['MLPClassifier'],
     )

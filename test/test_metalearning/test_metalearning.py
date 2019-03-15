@@ -106,7 +106,7 @@ class Test(unittest.TestCase):
         # Auto-sklearn should check that the directory exists. If not, it
         # should use the default directory.
         automl1 = AutoSklearnClassifier(
-            time_left_for_this_task=15,
+            time_left_for_this_task=30,
             per_run_time_limit=5,
             metadata_directory="pyMetaLearn/metadata_dir",  # user specified metadata_dir
         )
@@ -114,14 +114,14 @@ class Test(unittest.TestCase):
                          "pyMetaLearn/metadata_dir")
 
         automl2 = AutoSklearnClassifier(  # default metadata_dir
-            time_left_for_this_task=15,
+            time_left_for_this_task=30,
             per_run_time_limit=5,
         )
         self.assertIsNone(automl2.metadata_directory)
 
         nonexistent_dir = "nonexistent_dir"
         automl3 = AutoSklearnClassifier(
-            time_left_for_this_task=15,
+            time_left_for_this_task=30,
             per_run_time_limit=5,
             metadata_directory=nonexistent_dir,  # user specified metadata_dir
         )

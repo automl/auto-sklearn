@@ -106,7 +106,7 @@ def main():
 
     print('Starting to build an ensemble!')
     automl = AutoSklearnClassifier(
-        time_left_for_this_task=15,
+        time_left_for_this_task=30,
         per_run_time_limit=15,
         ml_memory_limit=1024,
         shared_mode=True,
