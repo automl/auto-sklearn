@@ -252,7 +252,7 @@ class AutoMLTest(Base, unittest.TestCase):
             auto._backend._make_internals_directory()
             D = load_data(dataset, backend_api)
             auto._backend.save_datamanager(D)
-            a = auto._do_dummy_prediction(D, 1)
+            auto._do_dummy_prediction(D, 1)
 
             # Ensure that the dummy predictions are not in the current working
             # directory, but in the temporary directory.
