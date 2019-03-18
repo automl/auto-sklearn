@@ -296,7 +296,7 @@ class AutoMLTest(Base, unittest.TestCase):
         raised = False
         try:
             auto._do_dummy_prediction(D, 1)
-        except:
+        except ValueError:
             raised = True
         self.assertFalse(raised, 'Exception raised')
 
