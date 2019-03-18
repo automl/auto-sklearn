@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-##SBATCH -p ml_cpu-ivy # partition (queue)
-#SBATCH --mem 4000 # memory pool for all cores (4GB)
-#SBATCH -t 0-05:00 # time (D-HH:MM)
-#SBATCH -c 1 # number of cores
-#SBATCH -o plot.out # STDOUT  (the folder log has to exist) %A will be replaced by the SLURM_ARRAY_JOB_ID value, whilst %a will be replaced by the SLURM_ARRAY_TASK_ID
-#SBATCH -e plot.err # STDERR  (the folder log has to exist) %A will be replaced by the SLURM_ARRAY_JOB_ID value, whilst %a will be replaced by the SLURM_ARRAY_TASK_ID
+##SBATCH -p ml_cpu-ivy
+#SBATCH --mem 4000
+#SBATCH -t 0-05:00
+#SBATCH -c 1
+#SBATCH -o plot.out # STDOUT
+#SBATCH -e plot.err # STDERR
 
 dir=log_output  # working directory
 #task_ids=$(python get_tasks.py)
