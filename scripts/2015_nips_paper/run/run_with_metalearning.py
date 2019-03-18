@@ -43,7 +43,7 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # path to the metadata directory.
     metadata_directory = os.path.abspath(os.path.dirname(__file__))
     metadata_directory = os.path.join(metadata_directory,
-                                      "../../autosklearn/metalearning/files/")
+                                      "../../../autosklearn/metalearning/files/")
 
     # Create new metadata directory not containing task_id.
     new_metadata_directory = os.path.abspath(os.path.join(working_directory,
@@ -94,17 +94,17 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
                metric=balanced_accuracy,
                )
 
-    with open(os.path.join(tmp_dir, "score_metalearning.csv"), 'w') as fh:
-        T = 0
-        fh.write("Time,Train Performance,Test Performance\n")
-        # Add start time:0, Train Performance:1, Test Performance: 1
-        fh.write("{0},{1},{2}\n".format(T, 1, 1))
-        for t, dummy, s in zip(automl.cv_results_['mean_fit_time'],
-                               [1 for i in
-                                range(len(automl.cv_results_['mean_fit_time']))],
-                               1 - automl.cv_results_["mean_test_score"]):
-            T += t
-            fh.write("{0},{1},{2}\n".format(T, dummy, s))
+    #with open(os.path.join(tmp_dir, "score_metalearning.csv"), 'w') as fh:
+    #    T = 0
+    #    fh.write("Time,Train Performance,Test Performance\n")
+    #    # Add start time:0, Train Performance:1, Test Performance: 1
+    #    fh.write("{0},{1},{2}\n".format(T, 1, 1))
+    #    for t, dummy, s in zip(automl.cv_results_['mean_fit_time'],
+    #                           [1 for i in
+    #                            range(len(automl.cv_results_['mean_fit_time']))],
+    #                           1 - automl.cv_results_["mean_test_score"]):
+    #        T += t
+    #        fh.write("{0},{1},{2}\n".format(T, dummy, s))
 
 
 if __name__ == "__main__":

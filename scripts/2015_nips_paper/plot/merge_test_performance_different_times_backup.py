@@ -55,6 +55,10 @@ def main():
     arg_list = list(["dummy", ])
     arg_list.extend(unknown)
     file_list, name_list = plot_util.get_file_and_name_list(arg_list, match_file='.csv')
+    print(file_list)
+    print(name_list)
+    print(len(file_list))
+    print(len(name_list))
     del arg_list
 
     for time_idx in range(len(name_list)):

@@ -3,6 +3,7 @@
 from argparse import ArgumentParser
 import csv
 import sys
+import os
 
 import numpy as np
 
@@ -27,32 +28,43 @@ def fill_trajectory(performance_list, time_list):
 
 
 def main():
-    #TODO: this code now knows which files to take in (using glob)
-    # Therefore, we dont need commandline parser anymore.
-    # TODO: Unify the names of files that are created!
-    prog = "python merge_performance_different_times.py <WhatIsThis> " \
-           "one/or/many/*ClassicValidationResults*.csv"
-    description = "Merge results to one csv"
+    # path= ../$work_dir/vanilla/#seed/$task_id/score_vanilla.csv
+    working_directory = "../log_output"
 
-    parser = ArgumentParser(description=description, prog=prog)
+    vanilla_seed_dir = os.path.join(working_directory, 'vanilla')
+    seed_list = [seed for seed in os.listdir(vanilla_seed_dir)]
+    #print(seed_list)
 
-    # General Options
-    parser.add_argument("--train", action='store_true',
-                        help='Read training instead of test data.')
-    parser.add_argument("--maxvalue", dest="maxvalue", type=float,
-                        default=sys.maxsize,
-                        help="Replace all values higher than this?")
-    parser.add_argument("--save", dest="saveTo", type=str,
-                        required=True, help="Where to save the csv?")
+    vanilla_task_dir = os.path.join(vanilla_seed_dir, seed_list[0])
+    task_list = [task_id for task_id in os.listdir(vanilla_task_dir)]
 
-    args, unknown = parser.parse_known_args()
+    for model in ['vanilla', 'ensemble', 'metalearning', 'meta_ens']:
+        for task_id in task_list:
+            csv_files = []
 
-    sys.stdout.write("\nFound " + str(len(unknown)) + " arguments\n")
+            for seed in seed_list:
+                # Handling the two cases separately here because they are located in different folders.
+                if model in ['vanilla', 'ensemble']:
+                    # no metalearning (vanilla, ensemble)
+                    csv_file = os.path.join(working_directory,
+                                            'vanilla',
+                                            seed,
+                                            task_id,
+                                            "score_{}.csv".format(model)
+                                            )
+                    csv_files.append(csv_file)
 
-    if len(unknown) < 1:
-        print("To less arguments given")
-        parser.print_help()
-        sys.exit(1)
+                elif model in ['metalearning', 'meta_ens']:
+                    # Metalearning (metalearning, meta_ensemble)
+                    csv_file = os.path.join(working_directory,
+                                            'metalearning',
+                                            seed,
+                                        task_id,
+                                        "score_{}.csv".format(model)
+                                        )
+                csv_files.append(csv_file)
+
+
 
     # Get files and names
     arg_list = list(["dummy", ])
