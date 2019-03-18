@@ -299,35 +299,35 @@ class AutoMLTest(Base, unittest.TestCase):
         # Case 2. Check that if statustype returned by ta.run() != success,
         # the function raises error.
         ta_run_mock.return_value = StatusType.CRASHED, None, None, "test"
-        self.assertRaisesRegexp(ValueError,
-                                'Dummy prediction failed: test',
-                                auto._do_dummy_prediction,
-                                D, 1,
-                                )
+        self.assertRaisesRegex(ValueError,
+                               'Dummy prediction failed: test',
+                               auto._do_dummy_prediction,
+                               D, 1,
+                               )
         ta_run_mock.return_value = StatusType.ABORT, None, None, "test"
-        self.assertRaisesRegexp(ValueError,
-                                'Dummy prediction failed: test',
-                                auto._do_dummy_prediction,
-                                D, 1,
-                                )
+        self.assertRaisesRegex(ValueError,
+                               'Dummy prediction failed: test',
+                               auto._do_dummy_prediction,
+                               D, 1,
+                               )
         ta_run_mock.return_value = StatusType.TIMEOUT, None, None, "test"
-        self.assertRaisesRegexp(ValueError,
-                                'Dummy prediction failed: test',
-                                auto._do_dummy_prediction,
-                                D, 1,
-                                )
+        self.assertRaisesRegex(ValueError,
+                               'Dummy prediction failed: test',
+                               auto._do_dummy_prediction,
+                               D, 1,
+                               )
         ta_run_mock.return_value = StatusType.MEMOUT, None, None, "test"
-        self.assertRaisesRegexp(ValueError,
-                                'Dummy prediction failed: test',
-                                auto._do_dummy_prediction,
-                                D, 1,
-                                )
+        self.assertRaisesRegex(ValueError,
+                               'Dummy prediction failed: test',
+                               auto._do_dummy_prediction,
+                               D, 1,
+                               )
         ta_run_mock.return_value = StatusType.CAPPED, None, None, "test"
-        self.assertRaisesRegexp(ValueError,
-                                'Dummy prediction failed: test',
-                                auto._do_dummy_prediction,
-                                D, 1,
-                                )
+        self.assertRaisesRegex(ValueError,
+                               'Dummy prediction failed: test',
+                               auto._do_dummy_prediction,
+                               D, 1,
+                               )
 
         self._tearDown(backend_api.temporary_directory)
         self._tearDown(backend_api.output_directory)
