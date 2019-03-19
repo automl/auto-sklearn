@@ -19,6 +19,7 @@ import autosklearn.pipeline.util as putil
 from autosklearn.util import setup_logger, get_logger, backend
 from autosklearn.constants import *
 from autosklearn.smbo import load_data
+from smac.tae.execute_ta_run import StatusType
 
 sys.path.append(os.path.dirname(__file__))
 from base import Base
@@ -264,6 +265,76 @@ class AutoMLTest(Base, unittest.TestCase):
             del auto
             self._tearDown(backend_api.temporary_directory)
             self._tearDown(backend_api.output_directory)
+
+    @unittest.mock.patch('autosklearn.evaluation.ExecuteTaFuncWithQueue.run')
+    def test_fail_if_dummy_prediction_fails(self, ta_run_mock):
+        backend_api = self._create_backend('test_fail_if_dummy_prediction_fails')
+
+        dataset = os.path.join(self.test_dir, '..', '.data', '401_bac')
+
+        time_for_this_task = 30
+        per_run_time = 10
+        auto = autosklearn.automl.AutoML(backend_api,
+                                         time_for_this_task,
+                                         per_run_time,
+                                         initial_configurations_via_metalearning=25,
+                                         )
+        setup_logger()
+        auto._logger = get_logger('test_fail_if_dummy_prediction_fails')
+        auto._backend._make_internals_directory()
+        D = load_data(dataset, backend_api)
+        auto._backend.save_datamanager(D)
+
+        # First of all, check that ta.run() is actually called.
+        ta_run_mock.return_value = StatusType.SUCCESS, None, None, "test"
+        auto._do_dummy_prediction(D, 1)
+        ta_run_mock.assert_called_once_with(1, cutoff=time_for_this_task)
+
+        # Case 1. Check that function raises no error when statustype == success.
+        # ta.run() returns status, cost, runtime, and additional info.
+        ta_run_mock.return_value = StatusType.SUCCESS, None, None, "test"
+        raised = False
+        try:
+            auto._do_dummy_prediction(D, 1)
+        except ValueError:
+            raised = True
+        self.assertFalse(raised, 'Exception raised')
+
+        # Case 2. Check that if statustype returned by ta.run() != success,
+        # the function raises error.
+        ta_run_mock.return_value = StatusType.CRASHED, None, None, "test"
+        self.assertRaisesRegex(ValueError,
+                               'Dummy prediction failed: test',
+                               auto._do_dummy_prediction,
+                               D, 1,
+                               )
+        ta_run_mock.return_value = StatusType.ABORT, None, None, "test"
+        self.assertRaisesRegex(ValueError,
+                               'Dummy prediction failed: test',
+                               auto._do_dummy_prediction,
+                               D, 1,
+                               )
+        ta_run_mock.return_value = StatusType.TIMEOUT, None, None, "test"
+        self.assertRaisesRegex(ValueError,
+                               'Dummy prediction failed: test',
+                               auto._do_dummy_prediction,
+                               D, 1,
+                               )
+        ta_run_mock.return_value = StatusType.MEMOUT, None, None, "test"
+        self.assertRaisesRegex(ValueError,
+                               'Dummy prediction failed: test',
+                               auto._do_dummy_prediction,
+                               D, 1,
+                               )
+        ta_run_mock.return_value = StatusType.CAPPED, None, None, "test"
+        self.assertRaisesRegex(ValueError,
+                               'Dummy prediction failed: test',
+                               auto._do_dummy_prediction,
+                               D, 1,
+                               )
+
+        self._tearDown(backend_api.temporary_directory)
+        self._tearDown(backend_api.output_directory)
 
 
 if __name__=="__main__":

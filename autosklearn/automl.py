@@ -309,6 +309,8 @@ class AutoML(BaseEstimator):
         else:
             self._logger.error('Error creating dummy predictions: %s ',
                                str(additional_info))
+            # Fail if dummy prediction fails.
+            raise ValueError("Dummy prediction failed: %s " % str(additional_info))
 
         return ta.num_run
 
