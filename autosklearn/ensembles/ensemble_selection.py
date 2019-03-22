@@ -258,8 +258,6 @@ class EnsembleSelection(AbstractEnsemble):
             if weight > 0.0:
                 output.append(identifier)
 
-        output.sort(reverse=True, key=lambda t: t[0])
-
         return output
 
     def get_validation_performance(self):
