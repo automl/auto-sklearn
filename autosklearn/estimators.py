@@ -43,6 +43,7 @@ class AutoSklearnEstimator(BaseEstimator):
         get_smac_object_callback=None,
         smac_scenario_args=None,
         logging_config=None,
+        metadata_directory=None,
     ):
         """
         Parameters
@@ -204,6 +205,10 @@ class AutoSklearnEstimator(BaseEstimator):
             the default logging.yaml file is used, which can be found in
             the directory ``util/logging.yaml`` relative to the installation.
 
+        metadata_directory : str, optional (None)
+            path to the metadata directory. If None, the default directory
+            (autosklearn.metalearning.files) is used.
+
         Attributes
         ----------
 
@@ -214,6 +219,10 @@ class AutoSklearnEstimator(BaseEstimator):
             Not all keys returned by scikit-learn are supported yet.
 
         """
+        # Raise error if the given total time budget is less than 60 seconds.
+        if time_left_for_this_task < 30:
+            raise ValueError("Time left for this task must be at least "
+                             "30 seconds. ")
         self.time_left_for_this_task = time_left_for_this_task
         self.per_run_time_limit = per_run_time_limit
         self.initial_configurations_via_metalearning = initial_configurations_via_metalearning
@@ -238,6 +247,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.get_smac_object_callback = get_smac_object_callback
         self.smac_scenario_args = smac_scenario_args
         self.logging_config = logging_config
+        self.metadata_directory = metadata_directory
 
         self._automl = None  # type: Optional[List[BaseAutoML]]
         # n_jobs after conversion to a number (b/c default is None)
@@ -296,6 +306,7 @@ class AutoSklearnEstimator(BaseEstimator):
             disable_evaluator_output=self.disable_evaluator_output,
             smac_scenario_args=smac_scenario_args,
             logging_config=self.logging_config,
+            metadata_directory=self.metadata_directory,
         )
 
         return automl

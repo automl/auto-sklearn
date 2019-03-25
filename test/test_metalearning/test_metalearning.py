@@ -1,13 +1,14 @@
 # -*- encoding: utf-8 -*-
-
 import unittest
 
 from autosklearn.pipeline.util import get_dataset
+from autosklearn.classification import AutoSklearnClassifier
 
 from autosklearn.constants import *
 from autosklearn.metalearning.mismbo import \
     suggest_via_metalearning
 from autosklearn.util.pipeline import get_configuration_space
+from sklearn.datasets import load_breast_cancer
 
 
 class MetafeatureValueDummy(object):
@@ -99,3 +100,32 @@ class Test(unittest.TestCase):
                 print(initial_configuration_strings_for_smac[0])
                 self.assertTrue(initial_configuration_strings_for_smac[
                                     0].startswith(initial_challengers[metric]))
+
+    def test_metadata_directory(self):
+        # Test that metadata directory is set correctly (if user specifies,
+        # Auto-sklearn should check that the directory exists. If not, it
+        # should use the default directory.
+        automl1 = AutoSklearnClassifier(
+            time_left_for_this_task=30,
+            per_run_time_limit=5,
+            metadata_directory="pyMetaLearn/metadata_dir",  # user specified metadata_dir
+        )
+        self.assertEqual(automl1.metadata_directory,
+                         "pyMetaLearn/metadata_dir")
+
+        automl2 = AutoSklearnClassifier(  # default metadata_dir
+            time_left_for_this_task=30,
+            per_run_time_limit=5,
+        )
+        self.assertIsNone(automl2.metadata_directory)
+
+        nonexistent_dir = "nonexistent_dir"
+        automl3 = AutoSklearnClassifier(
+            time_left_for_this_task=30,
+            per_run_time_limit=5,
+            metadata_directory=nonexistent_dir,  # user specified metadata_dir
+        )
+        X, y = load_breast_cancer(return_X_y=True)
+        self.assertRaisesRegex(ValueError, "The specified metadata directory "
+                               "\'%s\' does not exist!" % nonexistent_dir,
+                               automl3.fit, X=X, y=y)

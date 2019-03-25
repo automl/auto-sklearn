@@ -11,6 +11,26 @@
 Releases
 ========
 
+Version 0.5.1
+=============
+
+* ADD #650: Auto-sklearn will immediately stop if prediction using scikit-learn's dummy predictor
+  fail.
+* ADD #537: Auto-sklearn will no longer start for time limits less than 30 seconds.
+* FIX #655: Fixes an issue where predictions using models from parallel Auto-sklearn runs could
+  be wrong.
+* FIX #648: Fixes an issue with custom meta-data directories.
+* FIX #626: Fixes an issue where losses were not minimized, but maximized.
+* MAINT #646: Do no longer restrict the numpy version to be less than 1.14.5.
+
+Contributors
+************
+
+* Jin Woo Ahn
+* Taneli Mielikäinen
+* Matthias Feurer
+* jianswang
+
 Version 0.5.0
 =============
 

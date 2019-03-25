@@ -2,7 +2,7 @@ setuptools
 nose
 Cython
 
-numpy>=1.9.0,<=1.14.5
+numpy>=1.9.0
 scipy>=0.14.1
 
 scikit-learn>=0.19,<0.20

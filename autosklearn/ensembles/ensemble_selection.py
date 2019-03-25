@@ -98,7 +98,7 @@ class EnsembleSelection(AbstractEnsemble):
                 # the script first!
                 fant_ensemble_prediction[:,:] = weighted_ensemble_prediction + \
                                              (1. / float(s + 1)) * pred
-                scores[j] = 1 - calculate_score(
+                scores[j] = self.metric._optimum - calculate_score(
                     solution=labels,
                     prediction=fant_ensemble_prediction,
                     task_type=self.task_type,
@@ -150,7 +150,7 @@ class EnsembleSelection(AbstractEnsemble):
             for j, pred in enumerate(predictions):
                 ensemble.append(pred)
                 ensemble_prediction = np.mean(np.array(ensemble), axis=0)
-                scores[j] = 1 - calculate_score(
+                scores[j] = self.metric._optimum - calculate_score(
                     solution=labels,
                     prediction=ensemble_prediction,
                     task_type=self.task_type,
@@ -257,8 +257,6 @@ class EnsembleSelection(AbstractEnsemble):
             identifier = self.identifiers_[i]
             if weight > 0.0:
                 output.append(identifier)
-
-        output.sort(reverse=True, key=lambda t: t[0])
 
         return output
 

@@ -63,11 +63,6 @@ class MetaBase(object):
         for metric in self.algorithm_runs.keys():
             self.algorithm_runs[metric].append(runs)
 
-    def remove_dataset(self, name):
-        self.metafeatures.drop(name, inplace=True)
-        for key in self.algorithm_runs:
-            self.algorithm_runs[key].drop(name, inplace=True)
-
     def get_runs(self, dataset_name, performance_measure=None):
         """Return a list of all runs for a dataset."""
         if performance_measure is None:
