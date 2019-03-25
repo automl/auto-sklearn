@@ -12,14 +12,12 @@ if [[ "$TEST_DIST" == "true" ]]; then
     python setup.py sdist
     # Find file which was modified last as done in https://stackoverflow.com/a/4561987
     dist=`find dist -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" "`
+    echo "Installing $dist"
     pip install "$dist"
 else
     python setup.py check -m -s
-    python setup.py build_ext --inplace
     python setup.py install
 fi
-
-python -c 'import autosklearn; print("Auto-sklearn imported from: %s" % autosklearn.__file__)'
 
 # Install openml dependency for metadata generation unittest
 pip install openml

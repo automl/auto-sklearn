@@ -10,6 +10,9 @@ run_tests() {
     test_dir=$cwd/test/
 
     cd $TEST_DIR
+
+    python -c 'import autosklearn; print("Auto-sklearn imported from: %s" % autosklearn.__file__)'
+
     nose_params=""
     if [[ "$COVERAGE" == "true" ]]; then
         nose_params="--with-coverage --cover-package=$MODULE"
@@ -23,6 +26,8 @@ run_tests() {
             python $example
         done
     fi
+
+    cd $cwd
 }
 
 if [[ "$RUN_FLAKE8" ]]; then
