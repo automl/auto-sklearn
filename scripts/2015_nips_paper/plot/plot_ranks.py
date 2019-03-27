@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from argparse import ArgumentParser
 import csv
 import sys
 import os
@@ -72,7 +71,8 @@ def main():
             csv_files = []
 
             for seed in seed_list:
-                # collect all csv files of different seeds for current model and current task.
+                # collect all csv files of different seeds for current model and
+                # current task.
                 if model in ['vanilla', 'ensemble']:
                     csv_file = os.path.join(working_directory,
                                             'vanilla',
@@ -85,9 +85,9 @@ def main():
                     csv_file = os.path.join(working_directory,
                                             'metalearning',
                                             seed,
-                                        task_id,
-                                        "score_{}.csv".format(model)
-                                        )
+                                            task_id,
+                                            "score_{}.csv".format(model),
+                                            )
                 csv_files.append(csv_file)
 
             performance_list = []
@@ -99,7 +99,7 @@ def main():
                 csv_data = np.array(csv_data)
                 # Replace too high values with args.maxsize
                 data = [min([sys.maxsize, float(i.strip())]) for i in
-                        csv_data[:, 2]]  # test trajectories are stored in the third column
+                        csv_data[:, 2]]  # test trajectories are stored in third column
 
                 time_steps = [float(i.strip()) for i in csv_data[:, 0]]
                 assert time_steps[0] == 0
@@ -115,13 +115,14 @@ def main():
         # list[list[pd.Series]]
         trajectories_all_models.append(trajectories)
 
-    # Step 2. Compute average ranks of the trajectories.
-    #####################################################################################
-    # Maps from task_id to model to pd.Series object containing trajectories across different seeds.
+    # Maps from task_id to model to pd.Series object
+    # containing trajectories across different seeds.
     trajectories_by_task = {t: {m: trajectories_all_models[i][j]
                                 for i, m in enumerate(model_list)}
                             for j, t in enumerate(task_list)}
 
+    # Step 2. Compute average ranks of the trajectories.
+    #####################################################################################
     all_trajectories = []
     for model in model_list:
         trajectories = [
@@ -151,8 +152,7 @@ def main():
         for ranking in all_rankings:
             ranks_for_model.append(ranking.loc[:, model])
         ranks_for_model = pd.DataFrame(ranks_for_model)
-        ranks_for_model = ranks_for_model.fillna(method='ffill',
-                                                         axis=1)
+        ranks_for_model = ranks_for_model.fillna(method='ffill', axis=1)
         final_ranks.append(ranks_for_model.mean(skipna=True))
 
     # Step 3. Plot the average ranks over time.
