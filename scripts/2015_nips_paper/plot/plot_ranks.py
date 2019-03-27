@@ -15,10 +15,6 @@ def read_csv(fn, has_header=True, data_type=str):
     """
     Function which reads the csv files containing trajectories
     of the auto-sklearn runs.
-    :param fn: csv file name
-    :param has_header: if True, ignores the first line
-    :param data_type: string
-    :return:
     """
     data = list()
     header = None
