@@ -40,7 +40,7 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     # Load data and other info.
     X_train, y_train, X_test, y_test, cat = load_task(task_id)
 
-    # path to the metadata directory.
+    # path to the original metadata directory.
     metadata_directory = os.path.abspath(os.path.dirname(__file__))
     metadata_directory = os.path.join(metadata_directory,
                                       "../../../autosklearn/metalearning/files/")
@@ -58,14 +58,14 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
     remove_dataset(metadata_directory, new_metadata_directory, task_id)
 
     # Create folder for each seed. All runs per task will be stored here.
-    configuration_output_dir = os.path.join(working_directory, str(seed))
-    tmp_dir = os.path.join(configuration_output_dir, str(task_id))
+    seed_dir = os.path.join(working_directory, str(seed))
+    tmp_dir = os.path.join(seed_dir, str(task_id))
 
     try:
-        if not os.path.exists(configuration_output_dir):
-            os.makedirs(configuration_output_dir)
+        if not os.path.exists(seed_dir):
+            os.makedirs(seed_dir)
     except OSError:
-        print("Directory {0} aleardy created.".format(configuration_output_dir))
+        print("Directory {0} already created.".format(seed_dir))
 
     automl_arguments = {
         'time_left_for_this_task': time_limit,
@@ -79,7 +79,6 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
         'tmp_folder': tmp_dir,
         'delete_tmp_folder_after_terminate': False,
         'disable_evaluator_output': False,
-        # Metadata should be fixed
         'metadata_directory': new_metadata_directory
     }
 
@@ -93,18 +92,6 @@ def main(working_directory, time_limit, per_run_time_limit, task_id, seed):
                y_test=y_test,
                metric=balanced_accuracy,
                )
-
-    #with open(os.path.join(tmp_dir, "score_metalearning.csv"), 'w') as fh:
-    #    T = 0
-    #    fh.write("Time,Train Performance,Test Performance\n")
-    #    # Add start time:0, Train Performance:1, Test Performance: 1
-    #    fh.write("{0},{1},{2}\n".format(T, 1, 1))
-    #    for t, dummy, s in zip(automl.cv_results_['mean_fit_time'],
-    #                           [1 for i in
-    #                            range(len(automl.cv_results_['mean_fit_time']))],
-    #                           1 - automl.cv_results_["mean_test_score"]):
-    #        T += t
-    #        fh.write("{0},{1},{2}\n".format(T, dummy, s))
 
 
 if __name__ == "__main__":
