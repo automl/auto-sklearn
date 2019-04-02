@@ -35,4 +35,4 @@ class PowerTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
         if sparse.isspmatrix(X):
             self.preprocessor.set_params(standardize=False)
 
-        return super(PowerTransfomerComponent, self).fit(X, y)
+        return super(PowerTransformerComponent, self).fit(X, y)
