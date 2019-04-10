@@ -51,6 +51,8 @@ def main(input_directories, output_file, task_id, seed, ensemble_size, n_jobs=1)
     validation_files = []
     test_files = []
     starttime = np.inf
+
+    # Get the prediction files.
     for input_directory in input_directories:
         print('Loading files from input directory:', input_directory)
         validation_files_ = read_files(
@@ -105,11 +107,9 @@ def main(input_directories, output_file, task_id, seed, ensemble_size, n_jobs=1)
                      delete_output_folder_after_terminate=True,
                      shared_mode=True)
     valid_labels = backend.load_targets_ensemble()
-    # validation_files[i]: validation prediction of i-th model
-    # validation_files[i][j]:
-    # validation files contain predictions of models
     score = balanced_accuracy
 
+    # Compute losses and remember best model at each time step.
     for i in range(len(validation_files)):
         loss = 1 - score(valid_labels, validation_files[i][0])
         losses.append(loss)
@@ -118,10 +118,8 @@ def main(input_directories, output_file, task_id, seed, ensemble_size, n_jobs=1)
 
     models_to_remove = set(list(range(len(validation_files))))
     for top_models_at_i in top_models_at_step:
-        # print("top models at %i" % top_models_at_i)
         for top_model in top_models_at_step[top_models_at_i]:
             if top_model in models_to_remove:
-                # print("top model to be removed: %s" % top_model)
                 models_to_remove.remove(top_model)
 
     print("Removing the following %d models from the library: %s"
@@ -151,6 +149,7 @@ def main(input_directories, output_file, task_id, seed, ensemble_size, n_jobs=1)
         csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         csv_writer.writeheader()
 
+        # First time step
         csv_writer.writerow({'Time': 0,
                              'Training (Empirical) Performance': 1.0,
                              'Test Set Performance': 1.0})
@@ -226,7 +225,7 @@ if __name__ == '__main__':
     parser.add_argument("--n-jobs", type=int, default=1)
     args = parser.parse_args()
 
-    input_directory = args.input_directory
+    input_directory = args.input_directory  # logdir/vanilla or logdir/metalearning
     output_file = args.output_file
     task_id = args.task_id
     seed = args.seed
@@ -234,3 +233,4 @@ if __name__ == '__main__':
     n_jobs = args.n_jobs
 
     main(input_directory, output_file, task_id, seed, ensemble_size)
+

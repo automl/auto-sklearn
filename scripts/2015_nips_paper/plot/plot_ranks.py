@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import csv
 import sys
@@ -47,7 +47,7 @@ def main():
     # name of the file where the plot is stored
     saveto = "../plot.png"
     # runtime of each experiment
-    max_runtime = 60
+    max_runtime = 3600
     # folder where all trajectories are stored.
     working_directory = "../log_output"
 
@@ -64,7 +64,8 @@ def main():
 
     # Step 1. Merge all trajectories into one Dataframe object.
     #####################################################################################
-    trajectories_all_models = []
+    all_trajectories = []
+
     for model in model_list:
         trajectories = []
         for task_id in task_list:
@@ -113,30 +114,18 @@ def main():
             trajectories.append(trajectory)
 
         # list[list[pd.Series]]
-        trajectories_all_models.append(trajectories)
-
-    # Maps from task_id to model to pd.Series object
-    # containing trajectories across different seeds.
-    trajectories_by_task = {t: {m: trajectories_all_models[i][j]
-                                for i, m in enumerate(model_list)}
-                            for j, t in enumerate(task_list)}
+        all_trajectories.append(trajectories)
 
     # Step 2. Compute average ranks of the trajectories.
     #####################################################################################
-    all_trajectories = []
-    for model in model_list:
-        trajectories = [
-            trajectories_by_task[task][model] for task in
-            trajectories_by_task
-        ]
-        all_trajectories.append(trajectories)
-
     all_rankings = []
     n_iter = 500  # number of bootstrap samples to use for estimating the ranks.
-    n_tasks = len(trajectories_by_task)
+    n_tasks = len(task_list)
+
     for i in range(n_iter):
         pick = np.random.choice(all_trajectories[0][0].shape[1],
-                                size=(len(model_list, )))
+                                size=(len(model_list)))
+
         for j in range(n_tasks):
             all_trajectories_tmp = pd.DataFrame(
                 {model_list[k]: at[j].iloc[:, pick[k]] for
