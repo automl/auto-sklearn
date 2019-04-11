@@ -233,4 +233,3 @@ if __name__ == '__main__':
     n_jobs = args.n_jobs
 
     main(input_directory, output_file, task_id, seed, ensemble_size)
-
