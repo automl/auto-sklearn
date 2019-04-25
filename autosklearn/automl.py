@@ -1057,6 +1057,9 @@ class AutoMLClassifier(BaseAutoML):
 
 
 class AutoMLRegressor(BaseAutoML):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
     def fit(
         self,
         X: np.ndarray,
