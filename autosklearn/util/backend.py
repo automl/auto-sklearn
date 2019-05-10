@@ -265,7 +265,7 @@ class Backend(object):
         # number of times where we erronously keep a lock on the ensemble
         # targets file although the process already was killed
         try:
-            existing_targets = np.load(filepath)
+            existing_targets = np.load(filepath, allow_pickle=True)
             if existing_targets.shape[0] > targets.shape[0] or \
                     (existing_targets.shape == targets.shape and
                          np.allclose(existing_targets, targets)):
@@ -278,7 +278,7 @@ class Backend(object):
         with lockfile.LockFile(lock_path):
             if os.path.exists(filepath):
                 with open(filepath, 'rb') as fh:
-                    existing_targets = np.load(fh)
+                    existing_targets = np.load(fh, allow_pickle=True)
                     if existing_targets.shape[0] > targets.shape[0] or \
                             (existing_targets.shape == targets.shape and
                              np.allclose(existing_targets, targets)):
@@ -299,7 +299,7 @@ class Backend(object):
         lock_path = filepath + '.lock'
         with lockfile.LockFile(lock_path):
             with open(filepath, 'rb') as fh:
-                targets = np.load(fh)
+                targets = np.load(fh, allow_pickle=True)
 
         return targets
 
