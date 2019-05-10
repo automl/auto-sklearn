@@ -33,7 +33,7 @@ matrix:
   - os: linux
     env: DISTRIB="conda" COVERAGE="true" DOCPUSH="true" PYTHON="3.6"
   - os: linux
-    env: DISTRIB="conda" $TEST_DIST="true" PYTHON="3.7"
+    env: DISTRIB="conda" TEST_DIST="true" PYTHON="3.7"
   - os: linux
     env: DISTRIB="conda" EXAMPLES="true" PYTHON=3.7"
   - os: linux
