@@ -4,6 +4,7 @@ docs/build/*
 *.py[cod]
 
 # C extensions
+*.c
 *.so
 
 # Packages
@@ -46,3 +47,5 @@ download
 *.pkl
 num_run
 number_submission
+.pypirc
+dmypy.json
