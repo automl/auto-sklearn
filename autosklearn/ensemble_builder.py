@@ -636,11 +636,11 @@ class EnsembleBuilder(multiprocessing.Process):
 
     def _read_np_fn(self, fp):
         if self.precision is "16":
-            predictions = np.load(fp).astype(dtype=np.float16)
+            predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float16)
         elif self.precision is "32":
-            predictions = np.load(fp).astype(dtype=np.float32)
+            predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float32)
         elif self.precision is "64":
-            predictions = np.load(fp).astype(dtype=np.float64)
+            predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float64)
         else:
-            predictions = np.load(fp)
+            predictions = np.load(fp, allow_pickle=True)
         return predictions
