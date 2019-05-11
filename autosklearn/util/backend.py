@@ -244,7 +244,7 @@ class Backend(object):
 
     def get_smac_output_glob(self, smac_run_id: Union[str, int] = 1) -> str:
         return os.path.join(
-            self.temporary_directory,
+            glob.escape(self.temporary_directory),
             'smac3-output',
             'run_%s' % str(smac_run_id),
         )
@@ -265,7 +265,7 @@ class Backend(object):
         # number of times where we erronously keep a lock on the ensemble
         # targets file although the process already was killed
         try:
-            existing_targets = np.load(filepath)
+            existing_targets = np.load(filepath, allow_pickle=True)
             if existing_targets.shape[0] > targets.shape[0] or \
                     (existing_targets.shape == targets.shape and
                          np.allclose(existing_targets, targets)):
@@ -278,7 +278,7 @@ class Backend(object):
         with lockfile.LockFile(lock_path):
             if os.path.exists(filepath):
                 with open(filepath, 'rb') as fh:
-                    existing_targets = np.load(fh)
+                    existing_targets = np.load(fh, allow_pickle=True)
                     if existing_targets.shape[0] > targets.shape[0] or \
                             (existing_targets.shape == targets.shape and
                              np.allclose(existing_targets, targets)):
@@ -299,7 +299,7 @@ class Backend(object):
         lock_path = filepath + '.lock'
         with lockfile.LockFile(lock_path):
             with open(filepath, 'rb') as fh:
-                targets = np.load(fh)
+                targets = np.load(fh, allow_pickle=True)
 
         return targets
 
@@ -346,8 +346,9 @@ class Backend(object):
     def list_all_models(self, seed):
         model_directory = self.get_model_dir()
         if seed >= 0:
-            model_files = glob.glob(os.path.join(model_directory,
-                                                 '%s.*.model' % seed))
+            model_files = glob.glob(
+                os.path.join(glob.escape(model_directory), '%s.*.model' % seed)
+            )
         else:
             model_files = os.listdir(model_directory)
             model_files = [os.path.join(model_directory, mf)
@@ -408,9 +409,11 @@ class Backend(object):
             self.logger.warning('Directory %s does not exist' % ensemble_dir)
             return None
 
+        print(seed)
         if seed >= 0:
-            indices_files = glob.glob(os.path.join(ensemble_dir,
-                                                   '%s.*.ensemble' % seed))
+            indices_files = glob.glob(
+                os.path.join(glob.escape(ensemble_dir), '%s.*.ensemble' % seed)
+            )
             indices_files.sort()
         else:
             indices_files = os.listdir(ensemble_dir)
@@ -419,6 +422,7 @@ class Backend(object):
 
         with open(indices_files[-1], 'rb') as fh:
             ensemble_members_run_numbers = pickle.load(fh)
+        print(indices_files)
 
         return ensemble_members_run_numbers
 

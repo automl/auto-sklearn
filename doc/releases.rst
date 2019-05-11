@@ -11,6 +11,22 @@
 Releases
 ========
 
+Version 0.5.2
+=============
+
+* FIX #669: Correctly handle arguments to the ``AutoMLRegressor``
+* FIX #667: Auto-sklearn works with numpy 1.16.3 again.
+* ADD #676: Allow brackets [ ] inside the temporary and output directory paths.
+* ADD #424: (Experimental) scripts to reproduce the results from the original Auto-sklearn paper.
+
+Contributors
+************
+
+* Jin Woo Ahn
+* Herilalaina Rakotoarison
+* Matthias Feurer
+* yazanobeidi
+
 Version 0.5.1
 =============
 
