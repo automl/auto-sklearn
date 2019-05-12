@@ -45,13 +45,13 @@ __baseCrossValidator_defaults__ = {'GroupKFold': {'n_splits': 3},
                                                     'random_state': None}
                                    }
 
-
 def _get_y_array(y, task_type):
     if task_type in CLASSIFICATION_TASKS and task_type != \
             MULTILABEL_CLASSIFICATION:
         return y.ravel()
     else:
         return y
+
 
 
 class TrainEvaluator(AbstractEvaluator):
