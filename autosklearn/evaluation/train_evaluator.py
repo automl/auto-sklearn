@@ -10,6 +10,7 @@ from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.constants import *
 
+
 __all__ = ['TrainEvaluator', 'eval_holdout', 'eval_iterative_holdout',
            'eval_cv', 'eval_partial_cv', 'eval_partial_cv_iterative']
 
@@ -136,7 +137,6 @@ class TrainEvaluator(AbstractEvaluator):
             train_splits = [None] * self.cv_folds
 
             y = _get_y_array(self.Y_train, self.task_type)
-
             # TODO: mention that no additional run info is possible in this
             # case! -> maybe remove full CV from the train evaluator anyway and
             # make the user implement this!
