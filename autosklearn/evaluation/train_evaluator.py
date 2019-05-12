@@ -10,7 +10,6 @@ from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.constants import *
 
-
 __all__ = ['TrainEvaluator', 'eval_holdout', 'eval_iterative_holdout',
            'eval_cv', 'eval_partial_cv', 'eval_partial_cv_iterative']
 
@@ -45,13 +44,13 @@ __baseCrossValidator_defaults__ = {'GroupKFold': {'n_splits': 3},
                                                     'random_state': None}
                                    }
 
+
 def _get_y_array(y, task_type):
     if task_type in CLASSIFICATION_TASKS and task_type != \
             MULTILABEL_CLASSIFICATION:
         return y.ravel()
     else:
         return y
-
 
 
 class TrainEvaluator(AbstractEvaluator):
@@ -137,6 +136,7 @@ class TrainEvaluator(AbstractEvaluator):
             train_splits = [None] * self.cv_folds
 
             y = _get_y_array(self.Y_train, self.task_type)
+
             # TODO: mention that no additional run info is possible in this
             # case! -> maybe remove full CV from the train evaluator anyway and
             # make the user implement this!
@@ -194,7 +194,33 @@ class TrainEvaluator(AbstractEvaluator):
                 if Y_train_pred[i] is None:
                     continue
                 Y_train_pred_full[i][train_splits[i]] = Y_train_pred[i]
+
+            #TODO: remove this!
             Y_train_pred = np.nanmean(Y_train_pred_full, axis=0)
+
+            # New computation of training score (loss)
+            train_losses = []  # stores all train losses of each fold.
+            fold_weights = []  # used as weights when averaging train losses.
+
+            # For each fold, compute the train loss independently.
+            for i in range(self.cv_folds):
+                i_th_Y_train_pred = Y_train_pred_full[i][train_splits[i]]
+
+                #TODO: 1. check if y is really what we want. Check if y is the train target.
+                #TODO: 2. check how loss is computed. old and new lossees diverge over time!
+                i_th_train_loss = self._loss(
+                    self.Y_train_targets[train_splits[i]],
+                    i_th_Y_train_pred,
+                )
+                train_losses.append(i_th_train_loss)
+                # append number of data of current fold divided by the total
+                # number of train data (weight of current fold).
+                fold_weights.append(len(train_splits[i]))
+
+            fold_weights = [weight / sum(fold_weights) for weight in fold_weights]
+            train_loss = np.average(train_losses, weights=fold_weights)
+            #print("new train loss: ", train_loss)
+
             if self.cv_folds == 1:
                 Y_train_pred = Y_train_pred[
                     # if the first column is np.NaN, all other columns have
@@ -241,6 +267,7 @@ class TrainEvaluator(AbstractEvaluator):
 
             self.finish_up(
                 loss=loss,
+                # TODO: pass only the score , not pred
                 train_pred=Y_train_pred,
                 opt_pred=Y_optimization_pred,
                 valid_pred=Y_valid_pred,
@@ -282,6 +309,9 @@ class TrainEvaluator(AbstractEvaluator):
                     iterative=iterative,
                 )
             )
+            # TODO: here we compute loss (score). We need to make sure that
+            # score is computed independently for each fold, and 
+            # averaged in the end.
             loss = self._loss(self.Y_targets[fold], opt_pred)
 
             if self.cv_folds > 1:
