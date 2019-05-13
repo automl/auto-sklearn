@@ -137,6 +137,10 @@ class TrainEvaluator(AbstractEvaluator):
             train_splits = [None] * self.cv_folds
 
             y = _get_y_array(self.Y_train, self.task_type)
+
+            train_losses = []  # stores train loss of each fold.
+            fold_weights = []  # used as weights when averaging train losses.
+
             # TODO: mention that no additional run info is possible in this
             # case! -> maybe remove full CV from the train evaluator anyway and
             # make the user implement this!
@@ -179,55 +183,20 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_test_pred[i] = test_pred
                 train_splits[i] = train_split
 
+                # Compute train loss of this fold.
+                train_loss = self._loss(
+                    self.Y_train_targets[train_split],
+                    train_pred,
+                )
+                train_losses.append(train_loss)
+                # number of data points for this fold. Used for weighting the average.
+                fold_weights.append(len(train_split))
+
+            fold_weights = [w / sum(fold_weights) for w in fold_weights]
+            train_loss = np.average(train_losses, weights=fold_weights)
+
             Y_targets = self.Y_targets
             Y_train_targets = self.Y_train_targets
-
-            Y_train_pred_full = np.array(
-                [
-                    np.ones(
-                        (self.Y_train.shape[0], Y_train_pred[i].shape[1])
-                    ) * np.NaN
-                    for _ in range(self.cv_folds) if Y_train_pred[i] is not None
-                 ]
-            )
-            for i in range(self.cv_folds):
-                if Y_train_pred[i] is None:
-                    continue
-                Y_train_pred_full[i][train_splits[i]] = Y_train_pred[i]
-
-            #TODO: remove this!
-            Y_train_pred = np.nanmean(Y_train_pred_full, axis=0)
-
-            # New computation of training score (loss)
-            train_losses = []  # stores all train losses of each fold.
-            fold_weights = []  # used as weights when averaging train losses.
-
-            # For each fold, compute the train loss independently.
-            for i in range(self.cv_folds):
-                i_th_Y_train_pred = Y_train_pred_full[i][train_splits[i]]
-
-                #TODO: 1. check if y is really what we want. Check if y is the train target.
-                #TODO: 2. check how loss is computed. old and new lossees diverge over time!
-                i_th_train_loss = self._loss(
-                    self.Y_train_targets[train_splits[i]],
-                    i_th_Y_train_pred,
-                )
-                train_losses.append(i_th_train_loss)
-                # append number of data of current fold divided by the total
-                # number of train data (weight of current fold).
-                fold_weights.append(len(train_splits[i]))
-
-            fold_weights = [weight / sum(fold_weights) for weight in fold_weights]
-            train_loss = np.average(train_losses, weights=fold_weights)
-            #print("new train loss: ", train_loss)
-
-            if self.cv_folds == 1:
-                Y_train_pred = Y_train_pred[
-                    # if the first column is np.NaN, all other columns have
-                    # to be np.NaN as well
-                    np.isfinite(Y_train_pred[:, 0])
-                ]
-
 
             Y_optimization_pred = np.concatenate(
                 [Y_optimization_pred[i] for i in range(self.cv_folds)
@@ -268,7 +237,7 @@ class TrainEvaluator(AbstractEvaluator):
             self.finish_up(
                 loss=loss,
                 # TODO: pass only the score , not pred
-                train_pred=Y_train_pred,
+                train_loss=train_loss,
                 opt_pred=Y_optimization_pred,
                 valid_pred=Y_valid_pred,
                 test_pred=Y_test_pred,
