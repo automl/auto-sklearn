@@ -236,7 +236,6 @@ class TrainEvaluator(AbstractEvaluator):
 
             self.finish_up(
                 loss=loss,
-                # TODO: pass only the score , not pred
                 train_loss=train_loss,
                 opt_pred=Y_optimization_pred,
                 valid_pred=Y_valid_pred,
@@ -278,9 +277,7 @@ class TrainEvaluator(AbstractEvaluator):
                     iterative=iterative,
                 )
             )
-            # TODO: here we compute loss (score). We need to make sure that
-            # score is computed independently for each fold, and 
-            # averaged in the end.
+            train_loss = self._loss(self.Y_actual_train, train_pred)
             loss = self._loss(self.Y_targets[fold], opt_pred)
 
             if self.cv_folds > 1:
@@ -291,7 +288,7 @@ class TrainEvaluator(AbstractEvaluator):
 
             self.finish_up(
                 loss=loss,
-                train_pred=train_pred,
+                train_loss=train_loss,
                 opt_pred=opt_pred,
                 valid_pred=valid_pred,
                 test_pred=test_pred,
@@ -344,6 +341,9 @@ class TrainEvaluator(AbstractEvaluator):
                     if self.cv_folds == 1:
                         self.model = model
 
+                    train_loss = self._loss(self.Y_train[train_indices],
+                                            Y_train_pred,
+                                            )
                     loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
                     additional_run_info = model.get_additional_run_info()
 
@@ -353,7 +353,7 @@ class TrainEvaluator(AbstractEvaluator):
                         final_call = False
                     self.finish_up(
                         loss=loss,
-                        train_pred=Y_train_pred,
+                        train_loss=train_loss,
                         opt_pred=Y_optimization_pred,
                         valid_pred=Y_valid_pred,
                         test_pred=Y_test_pred,
@@ -385,11 +385,14 @@ class TrainEvaluator(AbstractEvaluator):
                     train_indices=train_indices,
                     test_indices=test_indices
                 )
+                train_loss = self._loss(self.Y_train[train_indices],
+                                        Y_train_pred,
+                                        )
                 loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
                 additional_run_info = model.get_additional_run_info()
                 self.finish_up(
                     loss=loss,
-                    train_pred=Y_train_pred,
+                    train_loss=train_loss,
                     opt_pred=Y_optimization_pred,
                     valid_pred=Y_valid_pred,
                     test_pred=Y_test_pred,
