@@ -183,7 +183,8 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_test_pred[i] = test_pred
                 train_splits[i] = train_split
 
-                # Compute train loss of this fold.
+                # Compute train loss of this fold. train_loss could either be a scalar or
+                # a dict of scalars with metrics as keys.
                 train_loss = self._loss(
                     self.Y_train_targets[train_split],
                     train_pred,
@@ -193,7 +194,17 @@ class TrainEvaluator(AbstractEvaluator):
                 fold_weights.append(len(train_split))
 
             fold_weights = [w / sum(fold_weights) for w in fold_weights]
-            train_loss = np.average(train_losses, weights=fold_weights)
+            # train_losses is a list of either scalars of dicts. If it contains
+            # dicts, then train_loss is a dict as well.
+            if all(isinstance(elem, dict) for elem in train_losses):
+                train_loss = {}
+                for metric in train_losses[0].keys():
+                    train_loss[metric] = np.average([train_losses[i][metric]
+                                                     for i in range(self.cv_folds)],
+                                                    weights=fold_weights,
+                                                    )
+            else:
+                train_loss = np.average(train_losses, weights=fold_weights)
 
             Y_targets = self.Y_targets
             Y_train_targets = self.Y_train_targets
