@@ -195,14 +195,13 @@ class TrainEvaluator(AbstractEvaluator):
 
             fold_weights = [w / sum(fold_weights) for w in fold_weights]
             # train_losses is a list of either scalars of dicts. If it contains
-            # dicts, then train_loss is a dict as well.
+            # dicts, then the train_loss is computed using the
+            # target metric (self.metric).
             if all(isinstance(elem, dict) for elem in train_losses):
-                train_loss = {}
-                for metric in train_losses[0].keys():
-                    train_loss[metric] = np.average([train_losses[i][metric]
-                                                     for i in range(self.cv_folds)],
-                                                    weights=fold_weights,
-                                                    )
+                train_loss = np.average([train_losses[i][str(self.metric)]
+                                        for i in range(self.cv_folds)],
+                                        weights=fold_weights,
+                                        )
             else:
                 train_loss = np.average(train_losses, weights=fold_weights)
 

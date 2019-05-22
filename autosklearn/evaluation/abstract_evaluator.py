@@ -16,10 +16,11 @@ from autosklearn.constants import (
 from autosklearn.pipeline.implementations.util import (
     convert_multioutput_multiclass_to_multilabel
 )
-from autosklearn.metrics import calculate_score
+from autosklearn.metrics import calculate_score, CLASSIFICATION_METRICS
 from autosklearn.util.logging_ import get_logger
 
 from ConfigSpace import Configuration
+
 
 
 __all__ = [
@@ -213,7 +214,11 @@ class AbstractEvaluator(object):
             all_scoring_functions=all_scoring_functions)
 
         if hasattr(score, '__len__'):
-            err = {key: self.metric._optimum - score[key] for key in score}
+            # TODO: instead of using self.metric, it should use all metrics given by key.
+            # But now this throws error...
+
+            err = {key: metric._optimum - score[key] for key, metric in
+                   CLASSIFICATION_METRICS.items() if key in score}
         else:
             err = self.metric._optimum - score
 
@@ -326,6 +331,7 @@ class AbstractEvaluator(object):
             )
 
         for y, s in [
+            # Y_train_pred deleted here. Fix unittest accordingly.
             [Y_optimization_pred, 'optimization'],
             [Y_valid_pred, 'validation'],
             [Y_test_pred, 'test']

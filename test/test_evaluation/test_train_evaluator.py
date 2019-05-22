@@ -250,10 +250,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # eight calls because of train, holdout, the validation and the test set
         # and a total of two calls each because of two iterations of fitting
         self.assertEqual(evaluator.model.predict_proba.call_count, 8)
-        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 46)
-        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], 23)
-        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_valid'].shape[0])
-        self.assertEqual(evaluator.file_output.call_args[0][3].shape[0], D.data['Y_test'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 23)
+        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], D.data['Y_valid'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_test'].shape[0])
         self.assertEqual(evaluator.file_output.call_count, 2)
         self.assertEqual(evaluator.model.fit.call_count, 0)
 
@@ -531,7 +530,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                 1.0,
                 {
                     'error':
-                     'Model predictions for train set contains NaNs.'
+                     'Model predictions for optimization set contains NaNs.'
                  },
             )
         )
@@ -667,7 +666,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             metric=accuracy,
         )
         evaluator.Y_targets[0] = np.array([1] * 23)
-        evaluator.Y_train_targets = np.array([1] * 46)
+        evaluator.Y_train_targets = np.array([1] * 69)  # Y_train_target is train_train + train_opt (train part of train_test_split)
         evaluator.fit_predict_and_loss(iterative=False)
 
         class SideEffect(object):
@@ -1405,8 +1404,7 @@ class FunctionsTest(unittest.TestCase):
             'num_run': 1,
             'validation_loss': 0.0,
             'test_loss': 0.04,
-            # Why is this here? Train loss was never computed before..
-            #'train_loss': 0.0,
+            'train_loss': 0.0,
         }
 
         additional_run_info = rval[0]['additional_run_info']
