@@ -398,8 +398,13 @@ class AutoSklearnEstimator(BaseEstimator):
                 kwargs=kwargs,
                 load_models=True,
             )
-            for p in processes:
-                p.join()
+
+            try:
+                for p in processes:
+                    p.join()
+            except KeyboardInterrupt:
+                # To handle the process for _fit_automl is keyboardInterrupted
+                p.terminate()
 
         return self
 
