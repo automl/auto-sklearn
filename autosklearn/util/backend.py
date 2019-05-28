@@ -409,7 +409,6 @@ class Backend(object):
             self.logger.warning('Directory %s does not exist' % ensemble_dir)
             return None
 
-        print(seed)
         if seed >= 0:
             indices_files = glob.glob(
                 os.path.join(glob.escape(ensemble_dir), '%s.*.ensemble' % seed)
@@ -422,7 +421,6 @@ class Backend(object):
 
         with open(indices_files[-1], 'rb') as fh:
             ensemble_members_run_numbers = pickle.load(fh)
-        print(indices_files)
 
         return ensemble_members_run_numbers
 
