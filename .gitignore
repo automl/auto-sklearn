@@ -4,7 +4,6 @@ docs/build/*
 *.py[cod]
 
 # C extensions
-*.c
 *.so
 
 # Packages
