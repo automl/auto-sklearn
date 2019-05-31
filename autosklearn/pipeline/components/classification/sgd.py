@@ -97,7 +97,8 @@ class SGD(
                 intercept_init=None
             )
 
-        if self.estimator._max_iter >= 512 or n_iter > self.estimator.n_iter_:
+        #_max_iter thing
+        if self.estimator.max_iter >= 512 or n_iter > self.estimator.n_iter_:
             self.fully_fit_ = True
 
         return self

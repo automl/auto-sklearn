@@ -50,7 +50,7 @@ requirements = [
     # Numpy version of higher than 1.14.5 causes libgcc_s.so.1 error.
     "numpy>=1.9.0,<=1.14.5",
     "scipy>=0.14.1",
-    "scikit-learn>=0.19",
+    "scikit-learn=0.21",
     "lockfile",
     "joblib",
     "psutil",
@@ -61,7 +61,6 @@ requirements = [
     "pynisher>=0.4.2",
     "pyrfr>=0.6.1,<0.8",
     "smac>=0.8,<0.9",
-    "xgboost>=0.80",
 ]
 
 

@@ -10,8 +10,7 @@ class Imputation(AutoSklearnPreprocessingAlgorithm):
         self.strategy = strategy
 
     def fit(self, X, y=None):
-        # Imputation does not support fit_transform (as of 0.19.1)!
-        import sklearn.preprocessing
+        import sklearn.impute
 
         self.preprocessor = sklearn.impute.SimpleImputer(
             strategy=self.strategy, copy=False)
