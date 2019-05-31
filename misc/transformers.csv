@@ -69,7 +69,7 @@ class,added,comment
 <class 'sklearn.preprocessing.data.QuantileTransformer'>,TRUE,
 <class 'sklearn.preprocessing.data.RobustScaler'>,TRUE,
 <class 'sklearn.preprocessing.data.StandardScaler'>,TRUE,
-<class 'sklearn.preprocessing.imputation.Imputer'>,TRUE,
+<class 'sklearn.impute.SimpleImputer'>,TRUE,
 <class 'sklearn.preprocessing.label.LabelBinarizer'>,FALSE,"Right now, we have 1HotEncoding"
 <class 'sklearn.preprocessing.label.LabelEncoder'>,FALSE,This should be done before passing data to scikit-learn and thus not configured.
 <class 'sklearn.preprocessing.label.MultiLabelBinarizer'>,FALSE,…

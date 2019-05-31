@@ -43,6 +43,28 @@ extensions = [
 ]
 
 
+requirements = [
+    "setuptools",
+    "nose",
+    "Cython",
+    # Numpy version of higher than 1.14.5 causes libgcc_s.so.1 error.
+    "numpy>=1.9.0,<=1.14.5",
+    "scipy>=0.14.1",
+    "scikit-learn>=0.19",
+    "lockfile",
+    "joblib",
+    "psutil",
+    "pyyaml",
+    "liac-arff",
+    "pandas",
+    "ConfigSpace>=0.4.0,<0.5",
+    "pynisher>=0.4.2",
+    "pyrfr>=0.6.1,<0.8",
+    "smac>=0.8,<0.9",
+    "xgboost>=0.80",
+]
+
+
 HERE = os.path.abspath(os.path.dirname(__file__))
 setup_reqs = ['Cython', 'numpy']
 with open(os.path.join(HERE, 'requirements.txt')) as fp:

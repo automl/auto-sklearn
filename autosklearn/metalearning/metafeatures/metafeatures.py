@@ -13,7 +13,7 @@ import sklearn.model_selection
 from sklearn.utils import check_array
 from sklearn.multiclass import OneVsRestClassifier
 
-from sklearn.preprocessing import Imputer
+from sklearn.impute import SimpleImputer
 from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 
@@ -952,7 +952,7 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name,
                     X_transformed = ohe.fit_transform(X)
                 else:
                     X_transformed = X
-                imputer = Imputer(strategy='mean', copy=False)
+                imputer = SimpleImputer(strategy='mean', copy=False)
                 X_transformed = imputer.fit_transform(X_transformed)
                 center = not scipy.sparse.isspmatrix(X_transformed)
                 standard_scaler = StandardScaler(copy=False, with_mean=center)
