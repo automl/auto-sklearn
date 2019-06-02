@@ -139,7 +139,9 @@ class TrainEvaluator(AbstractEvaluator):
             y = _get_y_array(self.Y_train, self.task_type)
 
             train_losses = []  # stores train loss of each fold.
-            fold_weights = []  # used as weights when averaging train losses.
+            train_fold_weights = []  # used as weights when averaging train losses.
+            opt_losses = []  # stores opt (validation) loss of each fold.
+            opt_fold_weights = []  # weights for opt_losses.
 
             # TODO: mention that no additional run info is possible in this
             # case! -> maybe remove full CV from the train evaluator anyway and
@@ -183,27 +185,50 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_test_pred[i] = test_pred
                 train_splits[i] = train_split
 
-                # Compute train loss of this fold. train_loss could either be a scalar or
-                # a dict of scalars with metrics as keys.
+                # Compute train loss of this fold and store it. train_loss could
+                # either be a scalar or a dict of scalars with metrics as keys.
                 train_loss = self._loss(
                     self.Y_train_targets[train_split],
                     train_pred,
                 )
                 train_losses.append(train_loss)
-                # number of data points for this fold. Used for weighting the average.
-                fold_weights.append(len(train_split))
+                # number of training data points for this fold. Used for weighting
+                # the average.
+                train_fold_weights.append(len(train_split))
 
-            fold_weights = [w / sum(fold_weights) for w in fold_weights]
-            # train_losses is a list of either scalars of dicts. If it contains
-            # dicts, then the train_loss is computed using the
+                # Compute validation loss of this fold and store it.
+                optimization_loss = self._loss(
+                    self.Y_targets[i],
+                    opt_pred,
+                )
+                opt_losses.append(optimization_loss)
+                # number of optimization data points for this fold. Used for weighting
+                # the average.
+                opt_fold_weights.append(len(test_split))
+
+            # Compute weights of each fold based on the number of samples in each
+            # fold.
+            train_fold_weights = [w / sum(train_fold_weights) for w in train_fold_weights]
+            opt_fold_weights = [w / sum(opt_fold_weights) for w in opt_fold_weights]
+
+            # train_ and opt_losses are lists of either scalars of dicts. If they contain
+            # dicts, then the train_ and opt_loss are computed using the
             # target metric (self.metric).
             if all(isinstance(elem, dict) for elem in train_losses):
                 train_loss = np.average([train_losses[i][str(self.metric)]
-                                        for i in range(self.cv_folds)],
-                                        weights=fold_weights,
+                                         for i in range(self.cv_folds)],
+                                        weights=train_fold_weights,
                                         )
             else:
-                train_loss = np.average(train_losses, weights=fold_weights)
+                train_loss = np.average(train_losses, weights=train_fold_weights)
+
+            if all(isinstance(elem, dict) for elem in opt_losses):
+                opt_loss = np.average([opt_losses[i][str(self.metric)]
+                                       for i in range(self.cv_folds)],
+                                      weights=opt_fold_weights,
+                                      )
+            else:
+                opt_loss = np.average(opt_losses, weights=opt_fold_weights)
 
             Y_targets = self.Y_targets
             Y_train_targets = self.Y_train_targets
@@ -235,7 +260,6 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_test_pred = None
 
             self.Y_optimization = Y_targets
-            loss = self._loss(Y_targets, Y_optimization_pred)
             self.Y_actual_train = Y_train_targets
 
             if self.cv_folds > 1:
@@ -245,7 +269,7 @@ class TrainEvaluator(AbstractEvaluator):
                 self._added_empty_model = True
 
             self.finish_up(
-                loss=loss,
+                loss=opt_loss,
                 train_loss=train_loss,
                 opt_pred=Y_optimization_pred,
                 valid_pred=Y_valid_pred,
