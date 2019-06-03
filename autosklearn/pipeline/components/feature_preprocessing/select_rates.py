@@ -9,19 +9,29 @@ from autosklearn.pipeline.constants import SIGNED_DATA, UNSIGNED_DATA, SPARSE, D
 
 class SelectRates(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, alpha, mode='fpr',
-                 score_func="chi2", random_state=None):
+                 score_func="chi2", task="classification", random_state=None):
         import sklearn.feature_selection
 
         self.random_state = random_state  # We don't use this
         self.alpha = alpha
+        self.task = task
 
-        if score_func == "chi2":
+        if score_func == "chi2" and task == "classification":
             self.score_func = sklearn.feature_selection.chi2
-        elif score_func == "f_classif":
+        elif score_func == "f_classif" and task == "classification":
             self.score_func = sklearn.feature_selection.f_classif
+        elif score_func == "mutual_info_classif" and task == "classification":
+            self.score_func = sklearn.feature_selection.mutual_info_classif
+        elif score_func == "f_regression" and task == "regression":
+            self.score_func = sklearn.feature_selection.f_regression
+        elif score_func == "mutual_info_regression" and task == "regression":
+            self.score_func = sklearn.feature_selection.mutual_info_regression
         else:
-            raise ValueError("score_func must be in ('chi2, 'f_classif', 'mutual_info'), "
-                             "but is: %s" % score_func)
+            raise ValueError("score_func must be in ('chi2, 'f_classif', 'mutual_info_classif') "
+                             "for task='classification', "
+                             "or in ('f_regression, 'mutual_info_regression') "
+                             "for task='regression', "
+                             "but is: %s for task='%s'" % (score_func, task))
 
         self.mode = mode
 
@@ -83,11 +93,19 @@ class SelectRates(AutoSklearnPreprocessingAlgorithm):
             if signed is not None:
                 data_type = SIGNED_DATA if signed is True else UNSIGNED_DATA
 
+        if dataset_properties is not None and \
+            'target_type' in dataset_properties and \
+                dataset_properties['target_type'] == 'regression':
+
+            task = 'regression'
+        else:
+            task = 'classification'
+
         return {'shortname': 'SR',
                 'name': 'Univariate Feature Selection based on rates',
-                'handles_regression': False,
-                'handles_classification': True,
-                'handles_multiclass': True,
+                'handles_regression': (task == 'regression'),
+                'handles_classification': (task == 'classification'),
+                'handles_multiclass': (task == 'classification'),
                 'handles_multilabel': False,
                 'handles_multioutput': False,
                 'is_deterministic': True,
@@ -99,13 +117,25 @@ class SelectRates(AutoSklearnPreprocessingAlgorithm):
         alpha = UniformFloatHyperparameter(
             name="alpha", lower=0.01, upper=0.5, default_value=0.1)
 
-        score_func = CategoricalHyperparameter(
-            name="score_func",
-            choices=["chi2", "f_classif"],
-            default_value="chi2")
+        if dataset_properties is not None and \
+            'target_type' in dataset_properties and \
+                dataset_properties['target_type'] == 'regression':
+
+            score_func = Constant(
+                    name="score_func", value="f_regression")
+        else:
+            score_func = CategoricalHyperparameter(
+                name="score_func",
+                choices=["chi2", "f_classif"],
+                default_value="chi2")
+
         if dataset_properties is not None:
             # Chi2 can handle sparse data, so we respect this
-            if 'sparse' in dataset_properties and dataset_properties['sparse']:
+            if 'sparse' in dataset_properties and \
+                    dataset_properties['sparse'] and \
+                ('target_type' not in dataset_properties or \
+                    dataset_properties['target_type'] == 'classification'):
+
                 score_func = Constant(
                     name="score_func", value="chi2")
 

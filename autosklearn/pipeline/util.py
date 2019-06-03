@@ -168,18 +168,29 @@ def _test_classifier_predict_proba(classifier, dataset='iris', sparse=False,
     return predictions, Y_test
 
 
-def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False,
+def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False, task=None,
                         train_size_maximum=150):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
                                                    make_sparse=make_sparse,
                                                    train_size_maximum=train_size_maximum)
     original_X_train = X_train.copy()
-    configuration_space = Preprocessor.get_hyperparameter_search_space()
+
+    if task is not None:
+        dataset_properties = {'target_type': task}
+    else:
+        dataset_properties = None
+
+    configuration_space = Preprocessor.get_hyperparameter_search_space(dataset_properties)
     default = configuration_space.get_default_configuration()
 
+    kwargs = {hp_name: default[hp_name] for hp_name in
+                                   default if default[hp_name] is not None}
+
+    if task is not None:
+        kwargs['task'] = task
+
     preprocessor = Preprocessor(random_state=np.random.RandomState(1),
-                                **{hp_name: default[hp_name] for hp_name in
-                                   default if default[hp_name] is not None})
+                                **kwargs)
 
     transformer = preprocessor.fit(X_train, Y_train)
     return transformer.transform(X_train), original_X_train
