@@ -151,12 +151,16 @@ class AutoSklearnEstimator(BaseEstimator):
             automatically use ``/tmp/autosklearn_output_$pid_$random_number``
 
         delete_tmp_folder_after_terminate: string, optional (True)
-            remove tmp_folder, when finished. If tmp_folder is None
-            tmp_dir will always be deleted
+            remove tmp_folder, when finished. Currently, tmp_folder won't
+            be deleted if auto-sklearn is run in parallel (i.e. n_jobs
+            different than 1 or ``None``). If not running in parallel and 
+            tmp_folder is None, then tmp_dir will always be deleted.
 
         delete_output_folder_after_terminate: bool, optional (True)
-            remove output_folder, when finished. If output_folder is None
-            output_dir will always be deleted
+            remove output_folder, when finished. Currently, output_folder won't
+            be deleted if auto-sklearn is run in parallel (i.e. n_jobs
+            different than 1 or ``None``). If not running in parallel and 
+            output_folder is None, then output_folder will always be deleted.
 
         shared_mode : bool, optional (False)
             Run smac in shared-model-node. This only works if arguments
