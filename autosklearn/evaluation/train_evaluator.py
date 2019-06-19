@@ -211,9 +211,8 @@ class TrainEvaluator(AbstractEvaluator):
             train_fold_weights = [w / sum(train_fold_weights) for w in train_fold_weights]
             opt_fold_weights = [w / sum(opt_fold_weights) for w in opt_fold_weights]
 
-            # train_ and opt_losses are lists of either scalars of dicts. If they contain
-            # dicts, then the train_ and opt_loss are computed using the
-            # target metric (self.metric).
+            # train_losses is a list of either scalars or dicts. If it contains dicts,
+            # then train_loss is computed using the target metric (self.metric).
             if all(isinstance(elem, dict) for elem in train_losses):
                 train_loss = np.average([train_losses[i][str(self.metric)]
                                          for i in range(self.cv_folds)],
@@ -222,11 +221,15 @@ class TrainEvaluator(AbstractEvaluator):
             else:
                 train_loss = np.average(train_losses, weights=train_fold_weights)
 
-            if all(isinstance(elem, dict) for elem in opt_losses):
-                opt_loss = np.average([opt_losses[i][str(self.metric)]
-                                       for i in range(self.cv_folds)],
-                                      weights=opt_fold_weights,
-                                      )
+            # if all_scoring_function is true, return a dict of opt_loss. Otherwise,
+            # return a scalar.
+            if self.all_scoring_functions is True:
+                opt_loss = {}
+                for metric in opt_losses[0].keys():
+                    opt_loss[metric] = np.average([opt_losses[i][metric]
+                                                   for i in range(self.cv_folds)],
+                                                  weights=opt_fold_weights,
+                                                  )
             else:
                 opt_loss = np.average(opt_losses, weights=opt_fold_weights)
 
@@ -260,6 +263,7 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_test_pred = None
 
             self.Y_optimization = Y_targets
+            loss = self._loss(Y_targets, Y_optimization_pred)
             self.Y_actual_train = Y_train_targets
 
             if self.cv_folds > 1:

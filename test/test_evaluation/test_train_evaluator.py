@@ -335,7 +335,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(evaluator.file_output.call_count, 1)
-        self.assertEqual(result, 0.46376811594202894)
+        self.assertEqual(result, 0.463768115942029)
         self.assertEqual(pipeline_mock.fit.call_count, 5)
         # Fifteen calls because of the training, holdout, validation and
         # test set (4 sets x 5 folds = 20)
@@ -1393,7 +1393,7 @@ class FunctionsTest(unittest.TestCase):
             'f1_macro': 0.032036613272311221,
             'f1_micro': 0.030303030303030276,
             'f1_weighted': 0.030441716940572849,
-            'log_loss': 1.0635047098903945,
+            'log_loss': 0.0635047098903945,
             'pac_score': 0.09242315351515851,
             'precision_macro': 0.02777777777777779,
             'precision_micro': 0.030303030303030276,
@@ -1504,16 +1504,16 @@ class FunctionsTest(unittest.TestCase):
 
         fixture = {
             'accuracy': 0.06,
-            'balanced_accuracy': 0.063508064516129004,
-            'f1_macro': 0.063508064516129004,
+            'balanced_accuracy': 0.06315151515151515,
+            'f1_macro': 0.06369358178053833,
             'f1_micro': 0.06,
-            'f1_weighted': 0.06,
-            'log_loss': 1.1408473360538482,
-            'pac_score': 0.1973689470076717,
-            'precision_macro': 0.063508064516129004,
+            'f1_weighted': 0.0600621118012,
+            'log_loss': 0.1408473360538482,
+            'pac_score': 0.19586655485411472,
+            'precision_macro': 0.0624444444444,
             'precision_micro': 0.06,
-            'precision_weighted': 0.06,
-            'recall_macro': 0.063508064516129004,
+            'precision_weighted': 0.05842424242424235,
+            'recall_macro': 0.06315151515151515,
             'recall_micro': 0.06,
             'recall_weighted': 0.06,
             'num_run': 1,
