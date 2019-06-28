@@ -23,6 +23,7 @@ class RandomForestComponentTest(BaseClassificationComponentTest):
     res["default_digits_binary"] = 0.9884638737097754
     res["default_digits_multilabel"] = 0.9965409490589346
     res["default_digits_multilabel_proba"] = 0.9922896819782431
+    res["default_digits_multilabel_proba_places"] = 2
 
     sk_mod = sklearn.ensemble.RandomForestClassifier
     module = RandomForest

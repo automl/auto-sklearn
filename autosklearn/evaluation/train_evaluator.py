@@ -194,6 +194,7 @@ class TrainEvaluator(AbstractEvaluator):
                 if Y_train_pred[i] is None:
                     continue
                 Y_train_pred_full[i][train_splits[i]] = Y_train_pred[i]
+            #TODO: something to avoid so many warnings?
             Y_train_pred = np.nanmean(Y_train_pred_full, axis=0)
             if self.cv_folds == 1:
                 Y_train_pred = Y_train_pred[

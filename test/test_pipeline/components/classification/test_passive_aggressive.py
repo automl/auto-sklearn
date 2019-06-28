@@ -20,6 +20,7 @@ class PassiveAggressiveComponentTest(BaseClassificationComponentTest):
     res["digits_n_calls"] = 4
     res["default_digits_iterative"] = 0.9174256223436551
     res["default_digits_binary"] = 0.9902853673345476
+    res["default_digits_binary_places"] = 2
     res["default_digits_multilabel"] = 0.93818765184149111
     res["default_digits_multilabel_proba"] = 1.0
     res['ignore_hps'] = ['max_iter']

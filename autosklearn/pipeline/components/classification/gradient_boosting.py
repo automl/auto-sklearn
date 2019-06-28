@@ -16,10 +16,11 @@ from autosklearn.pipeline.constants import *
 from autosklearn.util.common import check_none
 
 
-class GradientBoostingClassifier(IterativeComponentWithSampleWeight,
-                                 AutoSklearnClassificationAlgorithm):
-    
-    
+#class GradientBoostingClassifier(IterativeComponentWithSampleWeight,
+#                                 AutoSklearnClassificationAlgorithm):
+
+class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):    
+
     #def __init__(self, loss, learning_rate, n_estimators, subsample,
     #             min_samples_split, min_samples_leaf,
     #             min_weight_fraction_leaf, max_depth, criterion, max_features,
@@ -63,8 +64,6 @@ class GradientBoostingClassifier(IterativeComponentWithSampleWeight,
         else:
             self.max_depth = int(self.max_depth)
         self.verbose = int(self.verbose)
-
-        base_estimator = sklearn.tree.DecisionTreeClassifier(max_depth=self.max_depth)
 
         estimator = sklearn.ensemble.HistGradientBoostingClassifier(
             #loss=self.loss,

@@ -17,7 +17,9 @@ class SGDComponentTest(BaseClassificationComponentTest):
     res["default_digits"] = 0.9113539769277474
     res["digits_n_calls"] = 7
     res["default_digits_iterative"] = 0.920461445051609
+    res["default_digits_iterative_places"] = 2
     res["default_digits_binary"] = 0.99514268366727388
+    res["default_digits_binary_places"] = 2
     res["default_digits_multilabel"] = -1
     res["default_digits_multilabel_proba"] = -1
     res['ignore_hps'] = ['max_iter']

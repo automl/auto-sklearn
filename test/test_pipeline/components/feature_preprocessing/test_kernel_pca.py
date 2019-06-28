@@ -40,7 +40,7 @@ class KernelPCAComponentTest(PreprocessingTestCase):
             predictor = classifier.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
             accuracy = sklearn.metrics.accuracy_score(predictions, Y_test)
-            self.assertAlmostEqual(accuracy, 0.096539162112932606)
+            self.assertAlmostEqual(accuracy, 0.096539162112932606, places=2)
 
     @unittest.skip("Always returns float64")
     def test_preprocessing_dtype(self):

@@ -19,6 +19,7 @@ class LDAComponentTest(BaseClassificationComponentTest):
     res["default_digits_binary"] = 0.9811778992106861
     res["default_digits_multilabel"] = 0.82204896441795205
     res["default_digits_multilabel_proba"] = 0.98272829811985163
+    res["default_digits_multilabel_proba_places"] = 2
 
     sk_mod = sklearn.discriminant_analysis.LinearDiscriminantAnalysis
     module = LDA
