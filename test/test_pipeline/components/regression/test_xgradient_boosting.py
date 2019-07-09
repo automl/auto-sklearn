@@ -11,8 +11,10 @@ class XGradientBoostingComponentTest(BaseRegressionComponentTest):
 
     res = dict()
     res["default_boston"] = 0.7950690273856177
+    res["default_boston_places"] = 4
     res["boston_n_calls"] = 7
     res["default_boston_iterative"] = 0.7950690350340658
+    res["default_boston_iterative_places"] = 4
     res["default_boston_sparse"] = 0.4089636428137894
     res["default_boston_iterative_sparse"] = 0.40896364129803287
     res["default_diabetes"] = 0.3252009519763832

@@ -13,6 +13,7 @@ class SGDComponentTest(BaseClassificationComponentTest):
     res["iris_n_calls"] = 9
     res["default_iris_iterative"] = 0.74
     res["default_iris_proba"] = 0.6035274042822965
+    res["default_iris_proba_places"] = 2
     res["default_iris_sparse"] = 0.54
     res["default_digits"] = 0.9113539769277474
     res["digits_n_calls"] = 7
