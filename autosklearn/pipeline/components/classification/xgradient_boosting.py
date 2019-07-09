@@ -10,10 +10,6 @@ from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
     IterativeComponentWithSampleWeight,
 )
-
-#from sklearn.experimental import enable_hist_gradient_boosting
-#from sklearn.ensemble import HistGradientBoostingClassifier
-
 from autosklearn.pipeline.implementations.xgb import CustomXGBClassifier
 from autosklearn.pipeline.constants import *
 
