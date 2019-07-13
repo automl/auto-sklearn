@@ -11,18 +11,14 @@ class GradientBoostingComponentTest(BaseRegressionComponentTest):
     __test__ = True
 
     res = dict()
-    res["default_boston"] = 0.83773015801058082
-    res["default_boston_places"] = 4
+    res["default_boston"] = 0.8377141058954396
     res["boston_n_calls"] = 7
-    res["default_boston_iterative"] = 0.83773015801058082
-    res["default_boston_iterative_places"] = 4
+    res["default_boston_iterative"] = 0.8377141058954396
     res["default_boston_sparse"] = None
     res["default_boston_iterative_sparse"] = None
-    res["default_diabetes"] = 0.33574377250653153
-    res["default_diabetes_places"] = 2
+    res["default_diabetes"] = 0.33468007022597324
     res["diabetes_n_calls"] = 7
-    res["default_diabetes_iterative"] = 0.33574377250653153
-    res["default_diabetes_iterative_places"] = 2
+    res["default_diabetes_iterative"] = 0.33468007022597324
     res["default_diabetes_sparse"] = None
     res["default_diabetes_iterative_sparse"] = None
 
