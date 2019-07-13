@@ -1,5 +1,3 @@
-import numpy as np
-
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
@@ -37,15 +35,7 @@ class LDA(AutoSklearnClassificationAlgorithm):
         else:
             raise ValueError(self.shrinkage)
 
-        # Testing rotine is using a value of n_components higher than allowed.
-        #TODO: should we a clip here or just raise an exception 
-        # (as it will be case starting with sklearn v0.23)?
-        #n_classes = len(np.unique(Y))
-        #n_features = X.shape[1] if len(X.shape) == 2 else 1
-        #max_n_components = min(n_classes - 1, n_features)
-        #self.n_components = int(self.n_components) if \
-        #    self.n_components <= max_n_components else int(max_n_components)
-
+        self.n_components = int(self.n_components)
         self.tol = float(self.tol)
 
         estimator = sklearn.discriminant_analysis.LinearDiscriminantAnalysis(
