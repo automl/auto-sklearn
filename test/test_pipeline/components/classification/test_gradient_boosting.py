@@ -15,7 +15,7 @@ class GradientBoostingComponentTest(BaseClassificationComponentTest):
     res["default_iris_iterative"] = 0.92
     res["default_iris_proba"] = 0.48109031836615801
     res["default_iris_sparse"] = -1
-    res["default_digits"] = 0.80206435944140864
+    res["default_digits"] = 0.8299939283545841
     res["default_digits_iterative"] = 0.80206435944140864
     res["default_digits_binary"] = 0.98178506375227692
     res["default_digits_multilabel"] = -1

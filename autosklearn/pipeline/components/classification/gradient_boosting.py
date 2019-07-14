@@ -7,28 +7,27 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant, \
     CategoricalHyperparameter
 
-from autosklearn.pipeline.components.base import (
-    AutoSklearnClassificationAlgorithm,
-    IterativeComponentWithSampleWeight,
-)
+from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.util.common import check_none
 
 
 class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):    
     def __init__(self, learning_rate, min_samples_leaf, max_iter, max_depth, 
-                 max_leaf_nodes, random_state=None, verbose=0):
+                 max_leaf_nodes, max_bins, l2_regularization, random_state=None, verbose=0):
         self.learning_rate = learning_rate
         self.max_iter = max_iter
         self.min_samples_leaf = min_samples_leaf
         self.max_depth = max_depth
         self.max_leaf_nodes = max_leaf_nodes
+        self.max_bins = max_bins
+        self.l2_regularization = l2_regularization
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
         self.fully_fit_ = False
 
-    def fit(self, X, Y, sample_weight=None, n_iter=1, refit=False):
+    def fit(self, X, Y):
         import sklearn.ensemble
         import sklearn.tree
 
@@ -43,6 +42,8 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             self.max_depth = None
         else:
             self.max_depth = int(self.max_depth)
+        self.max_bins = int(self.max_bins)
+        self.l2_regularization = float(self.l2_regularization)
         self.verbose = int(self.verbose)
 
         estimator = sklearn.ensemble.HistGradientBoostingClassifier(
@@ -52,7 +53,9 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             min_samples_leaf=self.min_samples_leaf,
             verbose=self.verbose,
             random_state=self.random_state,
-            max_iter=n_iter,
+            max_iter=self.max_iter,
+            max_bins = self.max_bins,
+            l2_regularization=self.l2_regularization,
         )
         estimator.fit(X, Y)
         self.estimator = estimator
@@ -61,7 +64,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
     def configuration_fully_fitted(self):
         if self.estimator is None:
             return False
-        return not len(self.estimator.n_iter_) < self.max_iter
+        return not (self.estimator.n_iter_ < self.max_iter)
 
     def predict(self, X):
         if self.estimator is None:
@@ -99,9 +102,14 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             name="max_leaf_nodes", value="None")
         max_iter = UniformIntegerHyperparameter(
             "max_iter", 50, 500, default_value=100)
+        max_bins = UniformIntegerHyperparameter(
+            name="max_bins", lower=2, upper=256, default_value=256, log=False)
+        l2_regularization = UniformFloatHyperparameter(
+            name="l2_regularization", lower=0., upper=1., default_value=0., log=False)
 
         cs.add_hyperparameters([learning_rate, max_iter, max_depth, 
-                                min_samples_leaf, max_leaf_nodes])
+                                min_samples_leaf, max_leaf_nodes, max_bins, 
+                                l2_regularization])
 
         return cs
 
