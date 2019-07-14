@@ -13,8 +13,9 @@ from autosklearn.util.common import check_none
 
 
 class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):    
-    def __init__(self, learning_rate, min_samples_leaf, max_iter, max_depth, 
+    def __init__(self, loss, learning_rate, min_samples_leaf, max_iter, max_depth, 
                  max_leaf_nodes, max_bins, l2_regularization, random_state=None, verbose=0):
+        self.loss = loss
         self.learning_rate = learning_rate
         self.max_iter = max_iter
         self.min_samples_leaf = min_samples_leaf
@@ -47,6 +48,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.verbose = int(self.verbose)
 
         estimator = sklearn.ensemble.HistGradientBoostingClassifier(
+            loss=self.loss,
             learning_rate=self.learning_rate,
             max_leaf_nodes=self.max_leaf_nodes,
             max_depth=self.max_depth,
@@ -91,7 +93,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
-
+        loss = Constant("loss", "auto")
         learning_rate = UniformFloatHyperparameter(
             name="learning_rate", lower=0.01, upper=1, default_value=0.1, log=True)
         max_depth = UniformIntegerHyperparameter(
@@ -107,7 +109,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         l2_regularization = UniformFloatHyperparameter(
             name="l2_regularization", lower=0., upper=1., default_value=0., log=False)
 
-        cs.add_hyperparameters([learning_rate, max_iter, max_depth, 
+        cs.add_hyperparameters([loss, learning_rate, max_iter, max_depth, 
                                 min_samples_leaf, max_leaf_nodes, max_bins, 
                                 l2_regularization])
 
