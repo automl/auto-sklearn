@@ -66,7 +66,6 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
 
         return self
 
-
     def configuration_fully_fitted(self):
         if self.estimator is None:
             return False
@@ -99,19 +98,18 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
             name="learning_rate", lower=0.01, upper=1, default_value=0.1, log=True)
         max_iter = UniformIntegerHyperparameter(
             "max_iter", 50, 500, default_value=100)
-        max_depth = UniformIntegerHyperparameter(
-            name="max_depth", lower=1, upper=10, default_value=3)
         min_samples_leaf = UniformIntegerHyperparameter(
             name="min_samples_leaf", lower=1, upper=20, default_value=1, log=False)
+        max_depth = UniformIntegerHyperparameter(
+            name="max_depth", lower=1, upper=10, default_value=3)
         max_leaf_nodes = UnParametrizedHyperparameter(
             name="max_leaf_nodes", value="None")
-        max_bins = UniformIntegerHyperparameter(
-            name="max_bins", lower=2, upper=256, default_value=256, log=False)
+        max_bins = Constant("max_bins", 256)
         l2_regularization = UniformFloatHyperparameter(
             name="l2_regularization", lower=0., upper=1., default_value=0., log=False)
 
-        cs.add_hyperparameters([loss, learning_rate, max_iter, max_depth, 
-                                min_samples_leaf, max_leaf_nodes, max_bins, 
+        cs.add_hyperparameters([loss, learning_rate, max_iter, min_samples_leaf,
+                                max_depth, max_leaf_nodes, max_bins, 
                                 l2_regularization])
 
         return cs

@@ -13,7 +13,7 @@ from autosklearn.util.common import check_none
 
 
 class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):    
-    def __init__(self, loss, learning_rate, min_samples_leaf, max_iter, max_depth, 
+    def __init__(self, loss, learning_rate, max_iter, min_samples_leaf, max_depth, 
                  max_leaf_nodes, max_bins, l2_regularization, random_state=None, verbose=0):
         self.loss = loss
         self.learning_rate = learning_rate
@@ -35,14 +35,14 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.learning_rate = float(self.learning_rate)
         self.max_iter = int(self.max_iter)
         self.min_samples_leaf = int(self.min_samples_leaf)
-        if check_none(self.max_leaf_nodes):
-            self.max_leaf_nodes = None
-        else:
-            self.max_leaf_nodes = int(self.max_leaf_nodes)
         if check_none(self.max_depth):
             self.max_depth = None
         else:
             self.max_depth = int(self.max_depth)
+        if check_none(self.max_leaf_nodes):
+            self.max_leaf_nodes = None
+        else:
+            self.max_leaf_nodes = int(self.max_leaf_nodes)
         self.max_bins = int(self.max_bins)
         self.l2_regularization = float(self.l2_regularization)
         self.verbose = int(self.verbose)
@@ -50,14 +50,14 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         estimator = sklearn.ensemble.HistGradientBoostingClassifier(
             loss=self.loss,
             learning_rate=self.learning_rate,
-            max_leaf_nodes=self.max_leaf_nodes,
-            max_depth=self.max_depth,
-            min_samples_leaf=self.min_samples_leaf,
-            verbose=self.verbose,
-            random_state=self.random_state,
             max_iter=self.max_iter,
+            min_samples_leaf=self.min_samples_leaf,
+            max_depth=self.max_depth,
+            max_leaf_nodes=self.max_leaf_nodes,
             max_bins = self.max_bins,
             l2_regularization=self.l2_regularization,
+            verbose=self.verbose,
+            random_state=self.random_state,
         )
         estimator.fit(X, Y)
         self.estimator = estimator
@@ -96,22 +96,20 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         loss = Constant("loss", "auto")
         learning_rate = UniformFloatHyperparameter(
             name="learning_rate", lower=0.01, upper=1, default_value=0.1, log=True)
-        max_depth = UniformIntegerHyperparameter(
-            name="max_depth", lower=2, upper=10, default_value=3)
-        min_samples_leaf = UniformIntegerHyperparameter(
-            name="min_samples_leaf", lower=1, upper=20, default_value=1)
-        max_leaf_nodes = UnParametrizedHyperparameter(
-            name="max_leaf_nodes", value="None")
         max_iter = UniformIntegerHyperparameter(
             "max_iter", 50, 500, default_value=100)
-        max_bins = UniformIntegerHyperparameter(
-            name="max_bins", lower=2, upper=256, default_value=256, log=False)
+        min_samples_leaf = UniformIntegerHyperparameter(
+            name="min_samples_leaf", lower=1, upper=20, default_value=1)
+        max_depth = UniformIntegerHyperparameter(
+            name="max_depth", lower=2, upper=10, default_value=3)
+        max_leaf_nodes = UnParametrizedHyperparameter(
+            name="max_leaf_nodes", value="None")
+        max_bins = Constant("max_bins", 256)
         l2_regularization = UniformFloatHyperparameter(
             name="l2_regularization", lower=0., upper=1., default_value=0., log=False)
-
-        cs.add_hyperparameters([loss, learning_rate, max_iter, max_depth, 
-                                min_samples_leaf, max_leaf_nodes, max_bins, 
-                                l2_regularization])
-
+        
+        cs.add_hyperparameters([loss, learning_rate, max_iter, min_samples_leaf,
+                                max_depth, max_leaf_nodes, max_bins, l2_regularization])
+        
         return cs
 
