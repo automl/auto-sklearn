@@ -13,7 +13,7 @@ class GradientBoostingComponentTest(BaseClassificationComponentTest):
     res = dict()
     res["default_iris"] = 0.92
     res["default_iris_iterative"] = 0.92
-    res["default_iris_proba"] = 0.48109031836615801
+    res["default_iris_proba"] = 0.575930352581776
     res["default_iris_sparse"] = -1
     res["default_digits"] = 0.8299939283545841
     res["default_digits_iterative"] = 0.80206435944140864
