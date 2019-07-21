@@ -206,7 +206,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             dataset_properties={'sparse': False},
             include={
                 'preprocessor': ['no_preprocessing'],
-                'classifier': ['sgd', 'gradient_boosting']
+                'classifier': ['sgd', 'adaboost']
             }
         ).get_hyperparameter_search_space()
 
@@ -287,7 +287,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'preprocessor:nystroem_sampler:n_components': 50,
                             'preprocessor:feature_agglomeration:n_clusters': 2,
                             'classifier:gradient_boosting:max_depth': 2,
-                            'classifier:gradient_boosting:n_estimators': 50}
+                            'classifier:gradient_boosting:max_iter': 50}
 
             for restrict_parameter in restrictions:
                 restrict_to = restrictions[restrict_parameter]
@@ -312,7 +312,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                                init_params=init_params_,)
             cls.set_hyperparameters(config, init_params=init_params_)
             try:
-                cls.fit(X_train, Y_train, )
+                cls.fit(X_train, Y_train)
                 predictions = cls.predict(X_test.copy())
                 predictions = cls.predict_proba(X_test)
             except MemoryError as e:
