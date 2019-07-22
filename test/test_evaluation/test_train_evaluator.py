@@ -1196,7 +1196,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv, StratifiedShuffleSplit)
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 10)
-        self.assertEqual(cv.test_size, 'default')
+        self.assertIsNone(cv.test_size)
         self.assertIsNone(cv.random_state)
         next(cv.split(D.data['Y_train'], D.data['Y_train']
                       , groups=evaluator.resampling_strategy_args['groups']))
@@ -1225,7 +1225,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv, ShuffleSplit)
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 10)
-        self.assertEqual(cv.test_size, 'default')
+        self.assertIsNone(cv.test_size)
         self.assertIsNone(cv.random_state)
         next(cv.split(D.data['Y_train'], D.data['Y_train']
                       , groups=evaluator.resampling_strategy_args['groups']))
