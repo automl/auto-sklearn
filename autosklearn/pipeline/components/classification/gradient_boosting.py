@@ -15,7 +15,7 @@ from autosklearn.util.common import check_none
 
 class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):    
     def __init__(self, loss, learning_rate, max_iter, min_samples_leaf, max_depth, 
-                 max_leaf_nodes, max_bins, l2_regularization, early_stop, tol,
+                 max_leaf_nodes, max_bins, l2_regularization, early_stop, tol, scoring,
                  n_iter_no_change=0, validation_fraction=None, random_state=None, 
                  verbose=0):
         self.loss = loss
@@ -27,6 +27,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.max_bins = max_bins
         self.l2_regularization = l2_regularization
         self.tol = tol
+        self.scoring = scoring,
         self.n_iter_no_change = n_iter_no_change
         self.validation_fraction = validation_fraction
         self.random_state = random_state
@@ -67,6 +68,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             max_bins = self.max_bins,
             l2_regularization=self.l2_regularization,
             tol=self.tol,
+            scoring=self.scoring,
             n_iter_no_change=self.n_iter_no_change,
             validation_fraction=self.validation_fraction,
             verbose=self.verbose,
@@ -124,6 +126,8 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             name="early_stop", choices=["off", "train", "valid"], default_value="off")
         tol = UnParametrizedHyperparameter(
             name="tol", value=1e-7)
+        scoring = UnParametrizedHyperparameter(
+            name="scoring", value="loss")
         n_iter_no_change = UniformIntegerHyperparameter(
             name="n_iter_no_change", lower=1, upper=20, default_value=10)
         validation_fraction = UniformFloatHyperparameter(
@@ -131,8 +135,8 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         
         cs.add_hyperparameters([loss, learning_rate, max_iter, min_samples_leaf,
                                 max_depth, max_leaf_nodes, max_bins, l2_regularization,
-                                tol, n_iter_no_change, validation_fraction, early_stop, 
-                                ])
+                                early_stop, tol, scoring, n_iter_no_change, 
+                                validation_fraction])
         
         n_iter_no_change_cond = NotEqualsCondition(n_iter_no_change, early_stop, "off")
         validation_fraction_cond = EqualsCondition(validation_fraction, early_stop, "valid")

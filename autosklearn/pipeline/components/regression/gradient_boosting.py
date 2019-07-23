@@ -4,16 +4,17 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, Constant, \
     UnParametrizedHyperparameter
-from ConfigSpace.conditions import InCondition
+from ConfigSpace.conditions import EqualsCondition, NotEqualsCondition
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
 from autosklearn.util.common import check_none, check_for_bool
 
 class GradientBoosting(AutoSklearnRegressionAlgorithm):
-    def __init__(self, loss, learning_rate, max_iter, min_samples_leaf, 
-                max_depth, max_leaf_nodes, max_bins, l2_regularization,
-                random_state=None, verbose=0):        
+    def __init__(self, loss, learning_rate, max_iter, min_samples_leaf, max_depth,
+                 max_leaf_nodes, max_bins, l2_regularization, early_stop, tol, scoring,
+                 n_iter_no_change=0, validation_fraction=None, random_state=None,
+                 verbose=0):        
         self.loss = loss
         self.learning_rate = learning_rate
         self.max_iter = max_iter
@@ -22,6 +23,10 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
         self.max_leaf_nodes = max_leaf_nodes
         self.max_bins = max_bins
         self.l2_regularization = l2_regularization
+        self.tol = tol
+        self.scoring = scoring,
+        self.n_iter_no_change = n_iter_no_change
+        self.validation_fraction = validation_fraction
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
@@ -47,6 +52,10 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
             self.max_leaf_nodes = int(self.max_leaf_nodes)
         self.max_bins = int(self.max_bins)
         self.l2_regularization = float(self.l2_regularization)
+        self.tol = float(self.tol)
+        self.n_iter_no_change = int(self.n_iter_no_change)
+        if self.validation_fraction is not None:
+            self.validation_fraction = float(self.validation_fraction)        
         self.verbose = int(self.verbose)
 
         self.estimator = sklearn.ensemble.HistGradientBoostingRegressor(
@@ -58,6 +67,10 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
             max_leaf_nodes=self.max_leaf_nodes,
             max_bins=self.max_bins,
             l2_regularization=self.l2_regularization,
+            tol=self.tol,
+            scoring=self.scoring,
+            n_iter_no_change=self.n_iter_no_change,
+            validation_fraction=self.validation_fraction,
             random_state=self.random_state,
             verbose=self.verbose,
         )
@@ -107,9 +120,25 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
         max_bins = Constant("max_bins", 256)
         l2_regularization = UniformFloatHyperparameter(
             name="l2_regularization", lower=0., upper=1., default_value=0., log=False)
+        early_stop = CategoricalHyperparameter(
+            name="early_stop", choices=["off", "train", "valid"], default_value="off")
+        tol = UnParametrizedHyperparameter(
+            name="tol", value=1e-7)
+        scoring = UnParametrizedHyperparameter(
+            name="scoring", value="loss")
+        n_iter_no_change = UniformIntegerHyperparameter(
+            name="n_iter_no_change", lower=1, upper=20, default_value=10)
+        validation_fraction = UniformFloatHyperparameter(
+            name="validation_fraction", lower=0.01, upper=0.4, default_value=0.1)
 
         cs.add_hyperparameters([loss, learning_rate, max_iter, min_samples_leaf,
-                                max_depth, max_leaf_nodes, max_bins, 
-                                l2_regularization])
+                                max_depth, max_leaf_nodes, max_bins, l2_regularization,
+                                early_stop, tol, scoring, n_iter_no_change, 
+                                validation_fraction])
+        
+        n_iter_no_change_cond = NotEqualsCondition(n_iter_no_change, early_stop, "off")
+        validation_fraction_cond = EqualsCondition(validation_fraction, early_stop, "valid")
+        
+        cs.add_conditions([n_iter_no_change_cond, validation_fraction_cond])
 
         return cs
