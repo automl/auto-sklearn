@@ -26,6 +26,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.max_leaf_nodes = max_leaf_nodes
         self.max_bins = max_bins
         self.l2_regularization = l2_regularization
+        self.early_stop = early_stop
         self.tol = tol
         self.scoring = scoring,
         self.n_iter_no_change = n_iter_no_change
@@ -53,9 +54,17 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.max_bins = int(self.max_bins)
         self.l2_regularization = float(self.l2_regularization)
         self.tol = float(self.tol)
-        self.n_iter_no_change = int(self.n_iter_no_change)
-        if self.validation_fraction is not None:
-            self.validation_fraction = float(self.validation_fraction)        
+        if self.early_stop == "off":
+            self.n_iter_no_change = 0
+            self.validation_fraction = None
+        elif early_stop == "train":
+            self.n_iter_no_change = int(self.n_iter_no_change)
+            self.validation_fraction = None
+        elif early_stop == "valid":
+            self.n_iter_no_change = int(self.n_iter_no_change)
+            self.validation_fraction = float(self.validation_fraction) 
+        else:
+            raise ValueError("early_stop should be either off, train or valid")
         self.verbose = int(self.verbose)
 
         estimator = sklearn.ensemble.HistGradientBoostingClassifier(
@@ -77,11 +86,6 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         estimator.fit(X, Y)
         self.estimator = estimator
         return self
-
-    def configuration_fully_fitted(self):
-        if self.estimator is None:
-            return False
-        return not (self.estimator.n_iter_ < self.max_iter)
 
     def predict(self, X):
         if self.estimator is None:
