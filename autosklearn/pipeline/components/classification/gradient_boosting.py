@@ -6,7 +6,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, UnParametrizedHyperparameter, Constant, \
     CategoricalHyperparameter
-from ConfigSpace.conditions import EqualsCondition, NotEqualsCondition
+from ConfigSpace.conditions import EqualsCondition, InCondition
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import *
@@ -57,10 +57,10 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         if self.early_stop == "off":
             self.n_iter_no_change = 0
             self.validation_fraction = None
-        elif early_stop == "train":
+        elif self.early_stop == "train":
             self.n_iter_no_change = int(self.n_iter_no_change)
             self.validation_fraction = None
-        elif early_stop == "valid":
+        elif self.early_stop == "valid":
             self.n_iter_no_change = int(self.n_iter_no_change)
             self.validation_fraction = float(self.validation_fraction) 
         else:
@@ -142,7 +142,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
                                 early_stop, tol, scoring, n_iter_no_change, 
                                 validation_fraction])
         
-        n_iter_no_change_cond = NotEqualsCondition(n_iter_no_change, early_stop, "off")
+        n_iter_no_change_cond = InCondition(n_iter_no_change, early_stop, ["valid", "train"])
         validation_fraction_cond = EqualsCondition(validation_fraction, early_stop, "valid")
         
         cs.add_conditions([n_iter_no_change_cond, validation_fraction_cond])
