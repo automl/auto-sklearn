@@ -28,13 +28,12 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.l2_regularization = l2_regularization
         self.early_stop = early_stop
         self.tol = tol
-        self.scoring = scoring,
+        self.scoring = scoring
         self.n_iter_no_change = n_iter_no_change
         self.validation_fraction = validation_fraction
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
-        self.fully_fit_ = False
 
     def fit(self, X, Y):
         import sklearn.ensemble
@@ -54,37 +53,44 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         self.max_bins = int(self.max_bins)
         self.l2_regularization = float(self.l2_regularization)
         self.tol = float(self.tol)
+        if check_none(self.scoring):
+            self.scoring = None
         if self.early_stop == "off":
             self.n_iter_no_change = 0
-            self.validation_fraction = None
+            self.validation_fraction_ = None
         elif self.early_stop == "train":
             self.n_iter_no_change = int(self.n_iter_no_change)
-            self.validation_fraction = None
+            self.validation_fraction_ = None
         elif self.early_stop == "valid":
             self.n_iter_no_change = int(self.n_iter_no_change)
-            self.validation_fraction = float(self.validation_fraction) 
+            self.validation_fraction = float(self.validation_fraction)
+            train_samples, n_classes = X.shape[0], X.shape[1]
+            if int(train_samples * self.validation_fraction) < n_classes:
+                self.validation_fraction_ = n_classes
+            else:
+                self.validation_fraction_ = self.validation_fraction 
         else:
             raise ValueError("early_stop should be either off, train or valid")
         self.verbose = int(self.verbose)
 
-        estimator = sklearn.ensemble.HistGradientBoostingClassifier(
+        self.estimator = sklearn.ensemble.HistGradientBoostingClassifier(
             loss=self.loss,
             learning_rate=self.learning_rate,
             max_iter=self.max_iter,
             min_samples_leaf=self.min_samples_leaf,
             max_depth=self.max_depth,
             max_leaf_nodes=self.max_leaf_nodes,
-            max_bins = self.max_bins,
+            max_bins=self.max_bins,
             l2_regularization=self.l2_regularization,
             tol=self.tol,
             scoring=self.scoring,
             n_iter_no_change=self.n_iter_no_change,
-            validation_fraction=self.validation_fraction,
+            validation_fraction=self.validation_fraction_,
             verbose=self.verbose,
             random_state=self.random_state,
         )
-        estimator.fit(X, Y)
-        self.estimator = estimator
+
+        self.estimator.fit(X, Y)
         return self
 
     def predict(self, X):
@@ -116,7 +122,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         learning_rate = UniformFloatHyperparameter(
             name="learning_rate", lower=0.01, upper=1, default_value=0.1, log=True)
         max_iter = UniformIntegerHyperparameter(
-            "max_iter", 64, 512, default_value=100)
+            "max_iter", 32, 512, default_value=100)
         min_samples_leaf = UniformIntegerHyperparameter(
             name="min_samples_leaf", lower=1, upper=200, default_value=20, log=True)
         max_depth = UnParametrizedHyperparameter(

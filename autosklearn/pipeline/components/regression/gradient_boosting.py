@@ -4,7 +4,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter, Constant, \
     UnParametrizedHyperparameter
-from ConfigSpace.conditions import EqualsCondition, NotEqualsCondition, InCondition
+from ConfigSpace.conditions import EqualsCondition, InCondition
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
 from autosklearn.pipeline.constants import *
@@ -25,7 +25,7 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
         self.l2_regularization = l2_regularization
         self.early_stop = early_stop
         self.tol = tol
-        self.scoring = scoring,
+        self.scoring = scoring
         self.n_iter_no_change = n_iter_no_change
         self.validation_fraction = validation_fraction
         self.random_state = random_state
@@ -54,6 +54,8 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
         self.max_bins = int(self.max_bins)
         self.l2_regularization = float(self.l2_regularization)
         self.tol = float(self.tol)
+        if check_none(self.scoring):
+            self.scoring = None
         if self.early_stop == "off":
             self.n_iter_no_change = 0
             self.validation_fraction = None
@@ -80,12 +82,11 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
             scoring=self.scoring,
             n_iter_no_change=self.n_iter_no_change,
             validation_fraction=self.validation_fraction,
-            random_state=self.random_state,
             verbose=self.verbose,
+            random_state=self.random_state,
         )
 
         self.estimator.fit(X, y)
-
         return self
 
     def predict(self, X):
@@ -114,16 +115,16 @@ class GradientBoosting(AutoSklearnRegressionAlgorithm):
         learning_rate = UniformFloatHyperparameter(
             name="learning_rate", lower=0.01, upper=1, default_value=0.1, log=True)
         max_iter = UniformIntegerHyperparameter(
-            "max_iter", 50, 500, default_value=100)
+            "max_iter", 32, 512, default_value=100)
         min_samples_leaf = UniformIntegerHyperparameter(
-            name="min_samples_leaf", lower=1, upper=20, default_value=1, log=False)
-        max_depth = UniformIntegerHyperparameter(
-            name="max_depth", lower=1, upper=10, default_value=3)
-        max_leaf_nodes = UnParametrizedHyperparameter(
-            name="max_leaf_nodes", value="None")
+            name="min_samples_leaf", lower=1, upper=200, default_value=20, log=True)
+        max_depth = UnParametrizedHyperparameter(
+            name="max_depth", value="None")
+        max_leaf_nodes = UniformIntegerHyperparameter(
+            name="max_leaf_nodes", lower=3, upper=2047, default_value=31, log=True)
         max_bins = Constant("max_bins", 256)
         l2_regularization = UniformFloatHyperparameter(
-            name="l2_regularization", lower=0., upper=1., default_value=0., log=False)
+            name="l2_regularization", lower=1E-10, upper=1., default_value=1E-10, log=True)
         early_stop = CategoricalHyperparameter(
             name="early_stop", choices=["off", "train", "valid"], default_value="off")
         tol = UnParametrizedHyperparameter(

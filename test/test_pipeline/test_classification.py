@@ -286,7 +286,6 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'classifier:lda:n_components': 10,
                             'preprocessor:nystroem_sampler:n_components': 50,
                             'preprocessor:feature_agglomeration:n_clusters': 2,
-                            'classifier:gradient_boosting:max_depth': 2,
                             'classifier:gradient_boosting:max_iter': 50}
 
             for restrict_parameter in restrictions:
