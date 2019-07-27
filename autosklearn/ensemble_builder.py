@@ -4,6 +4,7 @@ import multiprocessing
 import glob
 import os
 import re
+import sys
 import time
 import traceback
 from typing import Optional, Union
@@ -105,7 +106,11 @@ class EnsembleBuilder(multiprocessing.Process):
             '.auto-sklearn',
             'predictions_ensemble',
         )
-
+        self.dir_model = os.path.join(
+            self.backend.temporary_directory,
+            '.auto-sklearn',
+            'models',
+        )
         # validation set (public test set) -- y_true not known
         self.dir_valid = os.path.join(
             self.backend.temporary_directory,
@@ -124,7 +129,9 @@ class EnsembleBuilder(multiprocessing.Process):
 
         self.start_time = 0
         self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy')
-
+        self.num_run = 0
+        self.best_model_index = []
+        self.removed_model = []
         # already read prediction files
         # {"file name": {
         #    "ens_score": float
@@ -195,6 +202,22 @@ class EnsembleBuilder(multiprocessing.Process):
                 continue
 
             selected_models = self.get_n_best_preds()
+            total_models = list(range(self.num_run))
+            to_be_removed_list = set(total_models) - set(self.best_model_index) - set(self.removed_model)
+
+            for file in to_be_removed_list:
+                # not sure about having zero as a constant
+                filename = self.dir_model + '/0.' + str(file) + '.model'
+                try:
+                    os.remove(filename)
+                except OSError:
+                    self.logger.warning(
+                        "Unable to remove redundant model: %s" % filename)
+                    continue
+
+            self.removed_model += list(to_be_removed_list)
+
+            sys.stdout.flush()
             if not selected_models:  # nothing selected
                 continue
 
@@ -238,6 +261,7 @@ class EnsembleBuilder(multiprocessing.Process):
             reading predictions on ensemble building data set;
             populates self.read_preds
         """
+
         self.logger.debug("Read ensemble data set predictions")
 
         if self.y_true_ensemble is None:
@@ -289,7 +313,7 @@ class EnsembleBuilder(multiprocessing.Process):
             match = self.model_fn_re.search(y_ens_fn)
             _seed = int(match.group(1))
             _num_run = int(match.group(2))
-
+            self.num_run = max(self.num_run, _num_run)
             if not self.read_preds.get(y_ens_fn):
                 self.read_preds[y_ens_fn] = {
                     "ens_score": -1,
@@ -425,6 +449,7 @@ class EnsembleBuilder(multiprocessing.Process):
             ensemble_n_best = self.ensemble_nbest
 
         # reduce to keys
+        self.best_model_index = list(map(lambda x: x[2], sorted_keys))
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
 
         # remove loaded predictions for non-winning models
