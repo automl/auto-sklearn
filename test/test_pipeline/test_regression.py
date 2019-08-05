@@ -111,6 +111,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                             'preprocessor:kitchen_sinks:n_components': 50,
                             'regressor:libsvm_svc:degree': 2,
                             'regressor:libsvm_svr:degree': 2,
+                            'regressor:libsvm_svr:C': 1.,
                             'preprocessor:truncatedSVD:target_dim': 10,
                             'preprocessor:polynomial:degree': 2,
                             'regressor:lda:n_components': 10}
@@ -193,7 +194,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             predictions = auto.predict(copy.deepcopy(X_test))
             # The lower the worse
             r2_score = sklearn.metrics.r2_score(Y_test, predictions)
-            self.assertAlmostEqual(0.339, r2_score, places=3)
+            self.assertAlmostEqual(0.339, r2_score, places=2)
             model_score = auto.score(copy.deepcopy(X_test), Y_test)
             self.assertAlmostEqual(model_score, r2_score, places=5)
 
@@ -218,7 +219,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         self.assertIsInstance(cs, ConfigurationSpace)
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(158, len(hyperparameters))
+        self.assertEqual(142, len(hyperparameters))
         self.assertEqual(len(hyperparameters) - 5, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):

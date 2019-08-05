@@ -11,16 +11,16 @@ class PassiveAggressiveComponentTest(BaseClassificationComponentTest):
     __test__ = True
 
     res = dict()
-    res["default_iris"] = 0.78
-    res["iris_n_calls"] = 4
-    res["default_iris_iterative"] = 0.98
-    res["default_iris_proba"] = 0.4471909030527266
-    res["default_iris_sparse"] = 0.36
-    res["default_digits"] = 0.9253187613843351
-    res["digits_n_calls"] = 4
+    res["default_iris"] = 0.92
+    res["iris_n_calls"] = 5
+    res["default_iris_iterative"] = 0.96
+    res["default_iris_proba"] = 0.29271032477461295
+    res["default_iris_sparse"] = 0.4
+    res["default_digits"] = 0.9156041287188829
+    res["digits_n_calls"] = 6
     res["default_digits_iterative"] = 0.9174256223436551
-    res["default_digits_binary"] = 0.9902853673345476
-    res["default_digits_multilabel"] = 0.93818765184149111
+    res["default_digits_binary"] = 0.9927140255009107
+    res["default_digits_multilabel"] = 0.90997912489192
     res["default_digits_multilabel_proba"] = 1.0
     res['ignore_hps'] = ['max_iter']
 

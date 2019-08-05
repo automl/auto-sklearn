@@ -18,7 +18,7 @@ class MultinomialNBComponentTest(BaseClassificationComponentTest):
     res["default_iris"] = 0.97999999999999998
     res["iris_n_calls"] = 1
     res["default_iris_iterative"] = 0.97999999999999998
-    res["default_iris_proba"] = 0.5879188799085624
+    res["default_iris_proba"] = 0.5865733413579101
     res["default_iris_sparse"] = 0.54
     res["default_digits"] = 0.89496053430479661
     res["digits_n_calls"] = 1

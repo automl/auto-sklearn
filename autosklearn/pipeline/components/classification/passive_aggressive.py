@@ -94,7 +94,7 @@ class PassiveAggressive(
                     intercept_init=None
                 )
                 if (
-                    self.estimator._max_iter >= 1000
+                    self.estimator.max_iter >= 1000
                     or n_iter > self.estimator.n_iter_
                 ):
                     self.fully_fit_ = True

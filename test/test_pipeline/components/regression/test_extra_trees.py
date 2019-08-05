@@ -10,9 +10,9 @@ class ExtraTreesComponentTest(BaseRegressionComponentTest):
     __test__ = True
 
     res = dict()
-    res["default_boston"] = 0.8457371539486308
+    res["default_boston"] = 0.8457463981374789
     res["boston_n_calls"] = 7
-    res["default_boston_iterative"] = 0.84600084385083418
+    res["default_boston_iterative"] = 0.8460054319822927
     res["default_boston_sparse"] = 0.4022606040314697
     res["default_boston_iterative_sparse"] = 0.4241336980285072
     res["default_diabetes"] = 0.38268255933451

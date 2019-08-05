@@ -576,19 +576,18 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         # Corner cases
         evaluator.subsample = 0
-        self.assertRaisesRegex(ValueError, 'The train_size = 0 should be '
-                                           'greater or equal to the number '
-                                           'of classes = 2',
-                               evaluator.subsample_indices, train_indices)
+        self.assertRaisesRegex(
+            ValueError, 'train_size=0 should be either positive and smaller than the '
+            r'number of samples 69 or a float in the \(0, 1\) range',
+            evaluator.subsample_indices, train_indices)
         # With equal or greater it should return a non-shuffled array of indices
         evaluator.subsample = 69
         train_indices5 = evaluator.subsample_indices(train_indices)
         self.assertTrue(np.all(train_indices5 == train_indices))
         evaluator.subsample = 68
-        self.assertRaisesRegex(ValueError, 'The test_size = 1 should be greater'
-                                           ' or equal to the number of '
-                                           'classes = 2',
-                               evaluator.subsample_indices, train_indices)
+        self.assertRaisesRegex(
+            ValueError, 'The test_size = 1 should be greater or equal to the number of '
+            'classes = 2', evaluator.subsample_indices, train_indices)
 
     @unittest.mock.patch('autosklearn.util.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
@@ -612,8 +611,10 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         # Corner cases
         evaluator.subsample = 0
-        train_indices5 = evaluator.subsample_indices(train_indices)
-        np.testing.assert_allclose(train_indices5, np.array([]))
+        self.assertRaisesRegex(
+            ValueError, 'train_size=0 should be either positive and smaller than the '
+            r'number of samples 69 or a float in the \(0, 1\) range',
+            evaluator.subsample_indices, train_indices)
         # With equal or greater it should return a non-shuffled array of indices
         evaluator.subsample = 69
         train_indices6 = evaluator.subsample_indices(train_indices)
@@ -1195,7 +1196,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv, StratifiedShuffleSplit)
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 10)
-        self.assertEqual(cv.test_size, 'default')
+        self.assertIsNone(cv.test_size)
         self.assertIsNone(cv.random_state)
         next(cv.split(D.data['Y_train'], D.data['Y_train']
                       , groups=evaluator.resampling_strategy_args['groups']))
@@ -1224,7 +1225,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertIsInstance(cv, ShuffleSplit)
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 10)
-        self.assertEqual(cv.test_size, 'default')
+        self.assertIsNone(cv.test_size)
         self.assertIsNone(cv.random_state)
         next(cv.split(D.data['Y_train'], D.data['Y_train']
                       , groups=evaluator.resampling_strategy_args['groups']))
@@ -1487,7 +1488,7 @@ class FunctionsTest(unittest.TestCase):
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
-        self.assertAlmostEqual(rval[0]['loss'], 0.06)
+        self.assertAlmostEqual(rval[0]['loss'], 0.04)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
         self.assertNotIn('bac_metric', rval[0]['additional_run_info'])
 
@@ -1512,19 +1513,19 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(len(rval), 1)
 
         fixture = {
-            'accuracy': 0.06,
-            'balanced_accuracy': 0.063508064516129004,
-            'f1_macro': 0.063508064516129004,
-            'f1_micro': 0.06,
-            'f1_weighted': 0.06,
-            'log_loss': 1.1408473360538482,
-            'pac_score': 0.1973689470076717,
-            'precision_macro': 0.063508064516129004,
-            'precision_micro': 0.06,
-            'precision_weighted': 0.06,
-            'recall_macro': 0.063508064516129004,
-            'recall_micro': 0.06,
-            'recall_weighted': 0.06,
+            'accuracy': 0.04,
+            'balanced_accuracy': 0.042002688172043,
+            'f1_macro': 0.04233870967741937,
+            'f1_micro': 0.04,
+            'f1_weighted': 0.0400201612903226,
+            'log_loss': 1.1189509032852947,
+            'pac_score': 0.16848055656514405,
+            'precision_macro': 0.04141414141414135,
+            'precision_micro': 0.04,
+            'precision_weighted': 0.0388484848484848,
+            'recall_macro': 0.042002688172043,
+            'recall_micro': 0.04,
+            'recall_weighted': 0.04,
             'num_run': 1,
             'validation_loss': 0.04,
             'test_loss': 0.04,
@@ -1538,7 +1539,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(len(additional_run_info), len(fixture) + 1,
                          msg=sorted(additional_run_info.items()))
 
-        self.assertAlmostEqual(rval[0]['loss'], 0.06)
+        self.assertAlmostEqual(rval[0]['loss'], 0.04)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
 
     # def test_eval_cv_on_subset(self):
@@ -1553,8 +1554,8 @@ class FunctionsTest(unittest.TestCase):
     #     self.assertEqual(info[2], 1)
 
     def test_eval_partial_cv(self):
-        results = [0.090909090909090939,
-                   0.047619047619047672,
+        results = [0.045454545454545414,
+                   0.09523809523809523,
                    0.052631578947368474,
                    0.10526315789473684,
                    0.0]

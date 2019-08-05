@@ -41,8 +41,7 @@ def load_task(task_id):
     X_test = X[test_indices]
     y_test = y[test_indices]
     dataset = openml.datasets.get_dataset(task.dataset_id)
-    _, _, cat = dataset.get_data(return_categorical_indicator=True,
-                                 target=task.target_name)
+    _, _, cat, _ = dataset.get_data(target=task.target_name)
     del _
     del dataset
     cat = ['categorical' if c else 'numerical' for c in cat]

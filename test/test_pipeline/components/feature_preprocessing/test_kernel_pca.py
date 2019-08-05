@@ -25,7 +25,8 @@ class KernelPCAComponentTest(PreprocessingTestCase):
     def test_default_configuration_classify(self):
         for i in range(5):
             X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits',
-                                                           make_sparse=False)
+                                                           make_sparse=False,
+                                                           train_size_maximum=1000)
             configuration_space = KernelPCA.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
             preprocessor = KernelPCA(random_state=1,
@@ -36,11 +37,11 @@ class KernelPCAComponentTest(PreprocessingTestCase):
             X_test_trans = preprocessor.transform(X_test)
 
             # fit a classifier on top
-            classifier = RidgeClassifier()
+            classifier = RidgeClassifier(random_state=1)
             predictor = classifier.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
             accuracy = sklearn.metrics.accuracy_score(predictions, Y_test)
-            self.assertAlmostEqual(accuracy, 0.096539162112932606)
+            self.assertAlmostEqual(accuracy, 0.0903387703889586)
 
     @unittest.skip("Always returns float64")
     def test_preprocessing_dtype(self):
