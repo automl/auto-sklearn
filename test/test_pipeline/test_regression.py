@@ -99,7 +99,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         configurations_space.seed(1)
-
+        
         for i in range(10):
             config = configurations_space.sample_configuration()
             config._populate_values()
@@ -111,6 +111,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                             'preprocessor:kitchen_sinks:n_components': 50,
                             'regressor:libsvm_svc:degree': 2,
                             'regressor:libsvm_svr:degree': 2,
+                            'regressor:libsvm_svr:C': 1.,
                             'preprocessor:truncatedSVD:target_dim': 10,
                             'preprocessor:polynomial:degree': 2,
                             'regressor:lda:n_components': 10}
