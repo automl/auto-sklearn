@@ -42,6 +42,7 @@ extensions = [
               language='c')
 ]
 
+
 HERE = os.path.abspath(os.path.dirname(__file__))
 setup_reqs = ['Cython', 'numpy']
 with open(os.path.join(HERE, 'requirements.txt')) as fp:
