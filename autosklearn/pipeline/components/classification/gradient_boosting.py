@@ -1,6 +1,4 @@
 import numpy as np
-import sklearn.ensemble
-from sklearn.experimental import enable_hist_gradient_boosting
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
@@ -13,10 +11,10 @@ from autosklearn.pipeline.constants import *
 from autosklearn.util.common import check_none
 
 
-class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):    
-    def __init__(self, loss, learning_rate, max_iter, min_samples_leaf, max_depth, 
+class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
+    def __init__(self, loss, learning_rate, max_iter, min_samples_leaf, max_depth,
                  max_leaf_nodes, max_bins, l2_regularization, early_stop, tol, scoring,
-                 n_iter_no_change=0, validation_fraction=None, random_state=None, 
+                 n_iter_no_change=0, validation_fraction=None, random_state=None,
                  verbose=0):
         self.loss = loss
         self.learning_rate = learning_rate
@@ -37,8 +35,8 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
 
     def fit(self, X, Y):
         import sklearn.ensemble
-        import sklearn.tree
-
+        from sklearn.experimental import enable_hist_gradient_boosting  # noqa
+        
         self.learning_rate = float(self.learning_rate)
         self.max_iter = int(self.max_iter)
         self.min_samples_leaf = int(self.min_samples_leaf)
@@ -68,7 +66,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             if int(train_samples * self.validation_fraction) < n_classes:
                 self.validation_fraction_ = n_classes
             else:
-                self.validation_fraction_ = self.validation_fraction 
+                self.validation_fraction_ = self.validation_fraction
         else:
             raise ValueError("early_stop should be either off, train or valid")
         self.verbose = int(self.verbose)
@@ -131,7 +129,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             name="max_leaf_nodes", lower=3, upper=2047, default_value=31, log=True)
         max_bins = Constant("max_bins", 256)
         l2_regularization = UniformFloatHyperparameter(
-            name="l2_regularization", lower=1E-10, upper=1., default_value=1E-10, log=True)
+            name="l2_regularization", lower=1E-10, upper=1, default_value=1E-10, log=True)
         early_stop = CategoricalHyperparameter(
             name="early_stop", choices=["off", "train", "valid"], default_value="off")
         tol = UnParametrizedHyperparameter(
@@ -142,16 +140,18 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             name="n_iter_no_change", lower=1, upper=20, default_value=10)
         validation_fraction = UniformFloatHyperparameter(
             name="validation_fraction", lower=0.01, upper=0.4, default_value=0.1)
-        
+
         cs.add_hyperparameters([loss, learning_rate, max_iter, min_samples_leaf,
                                 max_depth, max_leaf_nodes, max_bins, l2_regularization,
-                                early_stop, tol, scoring, n_iter_no_change, 
+                                early_stop, tol, scoring, n_iter_no_change,
                                 validation_fraction])
-        
-        n_iter_no_change_cond = InCondition(n_iter_no_change, early_stop, ["valid", "train"])
-        validation_fraction_cond = EqualsCondition(validation_fraction, early_stop, "valid")
-        
+
+        n_iter_no_change_cond = InCondition(
+            n_iter_no_change, early_stop, ["valid", "train"])
+        validation_fraction_cond = EqualsCondition(
+            validation_fraction, early_stop, "valid")
+
         cs.add_conditions([n_iter_no_change_cond, validation_fraction_cond])
-        
+
         return cs
 

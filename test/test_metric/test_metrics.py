@@ -303,7 +303,7 @@ class TestMetricsDoNotAlterInput(unittest.TestCase):
                                                      err_msg=metric)
             except ValueError as e:
                 if e.args[0] == 'Samplewise metrics are not available outside' \
-                    ' of multilabel classification.':
+                        ' of multilabel classification.':
                     pass
                 else:
                     raise e

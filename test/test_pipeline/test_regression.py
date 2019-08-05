@@ -99,7 +99,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
         configurations_space.seed(1)
-        
+
         for i in range(10):
             config = configurations_space.sample_configuration()
             config._populate_values()
