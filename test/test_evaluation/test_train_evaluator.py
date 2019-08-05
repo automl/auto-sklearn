@@ -578,7 +578,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.subsample = 0
         self.assertRaisesRegex(
             ValueError, 'train_size=0 should be either positive and smaller than the '
-            'number of samples 69 or a float in the \(0, 1\) range',
+            r'number of samples 69 or a float in the \(0, 1\) range',
             evaluator.subsample_indices, train_indices)
         # With equal or greater it should return a non-shuffled array of indices
         evaluator.subsample = 69
@@ -613,7 +613,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.subsample = 0
         self.assertRaisesRegex(
             ValueError, 'train_size=0 should be either positive and smaller than the '
-            'number of samples 69 or a float in the \(0, 1\) range',
+            r'number of samples 69 or a float in the \(0, 1\) range',
             evaluator.subsample_indices, train_indices)
         # With equal or greater it should return a non-shuffled array of indices
         evaluator.subsample = 69
