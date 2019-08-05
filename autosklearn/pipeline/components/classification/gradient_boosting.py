@@ -36,7 +36,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
     def fit(self, X, Y):
         import sklearn.ensemble
         from sklearn.experimental import enable_hist_gradient_boosting  # noqa
-        
+
         self.learning_rate = float(self.learning_rate)
         self.max_iter = int(self.max_iter)
         self.min_samples_leaf = int(self.min_samples_leaf)

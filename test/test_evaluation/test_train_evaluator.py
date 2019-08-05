@@ -576,18 +576,18 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         # Corner cases
         evaluator.subsample = 0
-        self.assertRaisesRegex(ValueError, 'train_size=0 should be either positive and '
-            'smaller  than the number of samples 69 or a float in the \(0, 1\) range',
+        self.assertRaisesRegex(
+            ValueError, 'train_size=0 should be either positive and smaller than the '
+            'number of samples 69 or a float in the \(0, 1\) range',
             evaluator.subsample_indices, train_indices)
         # With equal or greater it should return a non-shuffled array of indices
         evaluator.subsample = 69
         train_indices5 = evaluator.subsample_indices(train_indices)
         self.assertTrue(np.all(train_indices5 == train_indices))
         evaluator.subsample = 68
-        self.assertRaisesRegex(ValueError, 'The test_size = 1 should be greater'
-                                           ' or equal to the number of '
-                                           'classes = 2',
-                               evaluator.subsample_indices, train_indices)
+        self.assertRaisesRegex(
+            ValueError, 'The test_size = 1 should be greater or equal to the number of '
+            'classes = 2', evaluator.subsample_indices, train_indices)
 
     @unittest.mock.patch('autosklearn.util.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
@@ -611,8 +611,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         # Corner cases
         evaluator.subsample = 0
-        self.assertRaisesRegex(ValueError, 'train_size=0 should be either positive and '
-            'smaller than the number of samples 69 or a float in the \(0, 1\) range',
+        self.assertRaisesRegex(
+            ValueError, 'train_size=0 should be either positive and smaller than the '
+            'number of samples 69 or a float in the \(0, 1\) range',
             evaluator.subsample_indices, train_indices)
         # With equal or greater it should return a non-shuffled array of indices
         evaluator.subsample = 69
