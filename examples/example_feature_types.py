@@ -42,8 +42,7 @@ def main():
     y_test = y[test_indices]
 
     dataset = task.get_dataset()
-    _, _, categorical_indicator = dataset.\
-        get_data(target=task.target_name, return_categorical_indicator=True)
+    _, _, categorical_indicator, _ = dataset.get_data(target=task.target_name)
 
     # Create feature type list from openml.org indicator and run autosklearn
     feat_type = ['Categorical' if ci else 'Numerical'
