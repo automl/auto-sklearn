@@ -39,6 +39,9 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
 
         validation_trajectory_file = os.path.join(ped, 'smac3-output', 'run_1',
                                                   'validation_trajectory.json')
+        if not os.path.exists(validation_trajectory_file):
+            print('Could not find output file', validation_trajectory_file)
+            continue
         with open(validation_trajectory_file) as fh:
             validation_trajectory = json.load(fh)
 
