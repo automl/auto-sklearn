@@ -62,8 +62,8 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         elif self.early_stop == "valid":
             self.n_iter_no_change = int(self.n_iter_no_change)
             self.validation_fraction = float(self.validation_fraction)
-            train_samples, n_classes = X.shape[0], X.shape[1]
-            if int(train_samples * self.validation_fraction) < n_classes:
+            n_classes = len(np.unique(Y))
+            if self.validation_fraction * X.shape[0] < n_classes:
                 self.validation_fraction_ = n_classes
             else:
                 self.validation_fraction_ = self.validation_fraction

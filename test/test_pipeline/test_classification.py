@@ -286,7 +286,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'classifier:lda:n_components': 10,
                             'preprocessor:nystroem_sampler:n_components': 50,
                             'preprocessor:feature_agglomeration:n_clusters': 2,
-                            'classifier:gradient_boosting:max_iter': 50}
+                            'classifier:gradient_boosting:max_iter': 50,
+                            'classifier:gradient_boosting:max_leaf_nodes': 64}
 
             for restrict_parameter in restrictions:
                 restrict_to = restrictions[restrict_parameter]
@@ -338,11 +339,15 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             except RuntimeWarning as e:
                 if "invalid value encountered in sqrt" in e.args[0]:
                     continue
+                elif "invalid value encountered in multiply" in e.args[0]:
+                    continue
                 elif "divide by zero encountered in" in e.args[0]:
                     continue
                 elif "invalid value encountered in divide" in e.args[0]:
                     continue
                 elif "invalid value encountered in true_divide" in e.args[0]:
+                    continue
+                elif "invalid value encountered in multiply" in e.args[0]:
                     continue
                 else:
                     print(traceback.format_exc())

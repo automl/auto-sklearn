@@ -689,7 +689,8 @@ class AutoSklearnClassifierTest(unittest.TestCase):
         X_train, y_train, X_test, y_test = putil.get_dataset('iris')
         automl = AutoSklearnClassifier(time_left_for_this_task=60,
                                        per_run_time_limit=10,
-                                       ensemble_size=0)
+                                       ensemble_size=0,
+                                       exclude_preprocessors=['fast_ica'])
 
         automl_fitted = automl.fit(X_train, y_train)
         self.assertIs(automl, automl_fitted)

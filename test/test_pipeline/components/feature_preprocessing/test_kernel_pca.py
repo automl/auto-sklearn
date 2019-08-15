@@ -11,7 +11,8 @@ import sklearn.metrics
 class KernelPCAComponentTest(PreprocessingTestCase):
     def test_default_configuration(self):
         transformation, original = _test_preprocessing(KernelPCA,
-                                                       dataset='digits')
+                                                       dataset='digits',
+                                                       train_size_maximum=1000)
         self.assertEqual(transformation.shape[0], original.shape[0])
         self.assertFalse((transformation == 0).all())
 

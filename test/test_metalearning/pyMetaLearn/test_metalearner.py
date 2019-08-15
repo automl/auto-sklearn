@@ -28,28 +28,27 @@ class MetaLearnerTest(unittest.TestCase):
 
         meta_base = MetaBase(self.cs, data_dir)
         self.meta_optimizer = metalearner.MetaLearningOptimizer(
-            '38_acc', self.cs, meta_base)
+            '233', self.cs, meta_base)
 
     def tearDown(self):
         os.chdir(self.cwd)
 
     def test_metalearning_suggest_all(self):
         ret = self.meta_optimizer.metalearning_suggest_all()
-        self.assertEqual(17, len(ret))
+        self.assertEqual(119, len(ret))
         # Reduced to 17 as we changed QDA searchspace
         self.assertEqual('gradient_boosting', ret[0]['classifier:__choice__'])
-        self.assertEqual('random_forest', ret[1]['classifier:__choice__'])
+        self.assertEqual('adaboost', ret[1]['classifier:__choice__'])
         # There is no test for exclude_double_configuration as it's not present
         # in the test data
 
     def test_metalearning_suggest_all_nan_metafeatures(self):
-        self.meta_optimizer.meta_base.metafeatures.loc["38_acc"].iloc[:10] = \
-            np.NaN
+        self.meta_optimizer.meta_base.metafeatures.loc["233"].iloc[:10] = np.NaN
         ret = self.meta_optimizer.metalearning_suggest_all()
-        self.assertEqual(17, len(ret))
+        self.assertEqual(119, len(ret))
         # Reduced to 17 as we changed QDA searchspace
         self.assertEqual('gradient_boosting', ret[0]['classifier:__choice__'])
-        self.assertEqual('random_forest', ret[1]['classifier:__choice__'])
+        self.assertEqual('gradient_boosting', ret[1]['classifier:__choice__'])
 
     def test_metalearning_suggest(self):
         ret = self.meta_optimizer.metalearning_suggest([])
@@ -58,7 +57,7 @@ class MetaLearnerTest(unittest.TestCase):
 
         ret2 = self.meta_optimizer.metalearning_suggest([ret])
         self.assertIsInstance(ret2, Configuration)
-        self.assertEqual('random_forest', ret2['classifier:__choice__'])
+        self.assertEqual('adaboost', ret2['classifier:__choice__'])
 
     def test_learn(self):
         # Test only some special cases which are probably not yet handled
@@ -72,7 +71,7 @@ class MetaLearnerTest(unittest.TestCase):
         self.assertIsInstance(ds_metafeatures, pd.Series)
         self.assertEqual(ds_metafeatures.shape, (46,))
         self.assertIsInstance(other_metafeatures, pd.DataFrame)
-        self.assertEqual(other_metafeatures.shape, (139, 46))
+        self.assertEqual(other_metafeatures.shape, (131, 46))
 
 
 if __name__ == "__main__":

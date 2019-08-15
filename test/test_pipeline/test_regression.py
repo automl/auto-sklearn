@@ -167,6 +167,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                     continue
                 elif "invalid value encountered in true_divide" in e.args[0]:
                     continue
+                elif "invalid value encountered in multiply" in e.args[0]:
+                    continue
                 else:
                     print(config)
                     traceback.print_tb(sys.exc_info()[2])
