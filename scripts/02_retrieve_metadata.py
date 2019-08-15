@@ -48,6 +48,11 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
         best_value = np.inf
         best_configuration = None
         for entry in validation_trajectory:
+            # There's no reason to keep the default configuration (even if it's better) because
+            # it is run anyway
+            if validation_trajectory[0][2] == entry[2]:
+                continue
+
             config = entry[2]
             task_name = entry[-2]
             score = entry[-1].get(str(metric), np.inf)
