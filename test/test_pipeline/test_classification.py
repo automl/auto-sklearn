@@ -267,7 +267,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         print(configurations_space)
 
-        for i in range(10):
+        for i in range(1000):
             config = configurations_space.sample_configuration()
             config._populate_values()
 
@@ -338,6 +338,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     raise e
             except RuntimeWarning as e:
                 if "invalid value encountered in sqrt" in e.args[0]:
+                    continue
+                elif "invalid value encountered in multiply" in e.args[0]:
                     continue
                 elif "divide by zero encountered in" in e.args[0]:
                     continue

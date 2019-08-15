@@ -94,8 +94,11 @@ class TestMetadataGeneration(unittest.TestCase):
         script_filename = os.path.join(scripts_directory, '02_retrieve_metadata.py')
         cmd = 'python3 %s --working-directory %s --task-type %s' % (
             script_filename, self.working_directory, task_type)
+        print('COMMAND: %s' % cmd)
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
+        print('STDOUT: %s' % repr(rval.stdout), flush=True)
+        print('STDERR: %s' % repr(rval.stderr), flush=True)
         self.assertEqual(rval.returncode, 0, msg=str(rval))
 
         for file in ['algorithm_runs.arff', 'configurations.csv',
