@@ -62,6 +62,11 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
         elif self.early_stop == "valid":
             self.n_iter_no_change = int(self.n_iter_no_change)
             self.validation_fraction = float(self.validation_fraction)
+            n_classes = len(np.unique(Y))
+            if self.validation_fraction * X.shape[0] < n_classes:
+                self.validation_fraction_ = n_classes
+            else:
+                self.validation_fraction_ = self.validation_fraction
         else:
             raise ValueError("early_stop should be either off, train or valid")
         self.verbose = int(self.verbose)
@@ -78,7 +83,7 @@ class GradientBoostingClassifier(AutoSklearnClassificationAlgorithm):
             tol=self.tol,
             scoring=self.scoring,
             n_iter_no_change=self.n_iter_no_change,
-            validation_fraction=self.validation_fraction,
+            validation_fraction=self.validation_fraction_,
             verbose=self.verbose,
             random_state=self.random_state,
         )
