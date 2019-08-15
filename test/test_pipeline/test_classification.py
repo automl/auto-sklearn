@@ -347,6 +347,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                     continue
                 elif "invalid value encountered in true_divide" in e.args[0]:
                     continue
+                elif "invalid value encountered in multiply" in e.args[0]:
+                    continue
                 else:
                     print(traceback.format_exc())
                     print(config)
