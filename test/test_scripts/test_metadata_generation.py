@@ -64,6 +64,12 @@ class TestMetadataGeneration(unittest.TestCase):
                               stderr=subprocess.PIPE)
         print('STDOUT: %s' % repr(rval.stdout), flush=True)
         print('STDERR: %s' % repr(rval.stderr), flush=True)
+
+        # Print the files which are there
+        print('Existing files:')
+        for dirpath, dirnames, filenames in os.walk(self.working_directory):
+            print(dirpath, dirnames, filenames)
+
         expected_output_directory = os.path.join(self.working_directory,
                                                  'configuration',
                                                  'classification',
@@ -87,6 +93,8 @@ class TestMetadataGeneration(unittest.TestCase):
             with open(trajectory) as fh_trajectory:
                 traj = json.load(fh_trajectory)
                 valid_traj = json.load(fh_validation)
+                print('Validation trajectory:')
+                print(valid_traj)
                 self.assertGreater(len(traj), 0)
                 self.assertEqual(len(traj), len(valid_traj))
 
