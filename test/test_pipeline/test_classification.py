@@ -267,7 +267,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         print(configurations_space)
 
-        for i in range(1000):
+        for i in range(10):
             config = configurations_space.sample_configuration()
             config._populate_values()
 
