@@ -54,7 +54,7 @@ class TestMetadataGeneration(unittest.TestCase):
 
         self.assertIn('time-limit 86400', cmd)
         self.assertIn('per-run-time-limit 1800', cmd)
-        cmd = cmd.replace('time-limit 86400', 'time-limit 30').replace(
+        cmd = cmd.replace('time-limit 86400', 'time-limit 60').replace(
             'per-run-time-limit 1800', 'per-run-time-limit 7')
         # This tells the script to use the same memory limit for testing as
         # for training. In production, it would use twice as much!
