@@ -15,7 +15,7 @@ from sklearn.model_selection._split import _RepeatedSplits, \
     BaseShuffleSplit, BaseCrossValidator
 from smac.tae.execute_ta_run import StatusType
 from smac.stats.stats import Stats
-from sklearn.externals import joblib
+import joblib
 import sklearn.utils
 import scipy.sparse
 from sklearn.metrics.classification import type_of_target
@@ -1059,7 +1059,7 @@ class AutoMLClassifier(BaseAutoML):
 class AutoMLRegressor(BaseAutoML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
     def fit(
         self,
         X: np.ndarray,
