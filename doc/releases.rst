@@ -11,6 +11,19 @@
 Releases
 ========
 
+Version 0.60
+=============
+
+* MAINT: move from scikit-learn 0.19.X to 0.21.X
+* MAINT #688: allow for pyrfr version 0.8.X
+* FIX #680: Remove unnecessary print statement
+
+Contributors
+************
+
+* Guilherme Miotto
+* Matthias Feurer
+
 Version 0.5.2
 =============
 
