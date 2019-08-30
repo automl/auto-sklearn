@@ -35,13 +35,13 @@ __baseCrossValidator_defaults__ = {'GroupKFold': {'n_splits': 3},
                                    'TimeSeriesSplit': {'n_splits': 3,
                                                        'max_train_size': None},
                                    'GroupShuffleSplit': {'n_splits': 5,
-                                                         'test_size': 'default',
+                                                         'test_size': None,
                                                          'random_state': None},
                                    'StratifiedShuffleSplit': {'n_splits': 10,
-                                                              'test_size': 'default',
+                                                              'test_size': None,
                                                               'random_state': None},
                                    'ShuffleSplit': {'n_splits': 10,
-                                                    'test_size': 'default',
+                                                    'test_size': None,
                                                     'random_state': None}
                                    }
 

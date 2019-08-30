@@ -9,6 +9,8 @@ import numpy as np
 
 
 class BaseClassificationComponentTest(unittest.TestCase):
+    # Magic command to not run tests on base class
+    __test__ = False
 
     res = None
 
@@ -16,9 +18,6 @@ class BaseClassificationComponentTest(unittest.TestCase):
     sk_module = None
     # Hyperparameter which is increased by iterative_fit
     step_hyperparameter = None
-
-    # Magic command to not run tests on base class
-    __test__ = False
 
     def test_default_iris(self):
         for i in range(2):

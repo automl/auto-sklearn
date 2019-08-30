@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(__file__))
 import arff
 import numpy as np
 from scipy import sparse
-from sklearn.preprocessing.imputation import Imputer
+from sklearn.impute import SimpleImputer
 
 from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
@@ -52,7 +52,7 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest,
         ohe = OneHotEncoder(self.categorical)
         X_transformed = X_sparse.copy()
         X_transformed = ohe.fit_transform(X_transformed)
-        imp = Imputer(copy=False)
+        imp = SimpleImputer(copy=False)
         X_transformed = imp.fit_transform(X_transformed)
         standard_scaler = StandardScaler(with_mean=False)
         X_transformed = standard_scaler.fit_transform(X_transformed)

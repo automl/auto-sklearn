@@ -257,13 +257,15 @@ class EnsembleBuilder(multiprocessing.Process):
 
         if self.shared_mode is False:
             pred_path = os.path.join(
-                    self.dir_ensemble,
-                    'predictions_ensemble_%s_*.npy' % self.seed)
+                glob.escape(self.dir_ensemble),
+                'predictions_ensemble_%s_*.npy' % self.seed,
+            )
         # pSMAC
         else:
             pred_path = os.path.join(
-                    self.dir_ensemble,
-                    'predictions_ensemble_*_*.npy')
+                glob.escape(self.dir_ensemble),
+                'predictions_ensemble_*_*.npy',
+            )
 
         y_ens_files = glob.glob(pred_path)
         # no validation predictions so far -- no files
@@ -453,13 +455,21 @@ class EnsembleBuilder(multiprocessing.Process):
 
         for k in selected_keys:
             valid_fn = glob.glob(
-                os.path.join(self.dir_valid, 'predictions_valid_%d_%d.npy'
-                                    % (self.read_preds[k]["seed"],
-                                       self.read_preds[k]["num_run"])))
+                os.path.join(
+                    glob.escape(self.dir_valid),
+                    'predictions_valid_%d_%d.npy' % (
+                        self.read_preds[k]["seed"],
+                        self.read_preds[k]["num_run"])
+                )
+            )
             test_fn = glob.glob(
-                os.path.join(self.dir_test, 'predictions_test_%d_%d.npy' %
-                                   (self.read_preds[k]["seed"],
-                                    self.read_preds[k]["num_run"])))
+                os.path.join(
+                    glob.escape(self.dir_test),
+                    'predictions_test_%d_%d.npy' % (
+                        self.read_preds[k]["seed"],
+                        self.read_preds[k]["num_run"])
+                )
+            )
 
             # TODO don't read valid and test if not changed
             if len(valid_fn) == 0:
@@ -636,11 +646,11 @@ class EnsembleBuilder(multiprocessing.Process):
 
     def _read_np_fn(self, fp):
         if self.precision is "16":
-            predictions = np.load(fp).astype(dtype=np.float16)
+            predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float16)
         elif self.precision is "32":
-            predictions = np.load(fp).astype(dtype=np.float32)
+            predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float32)
         elif self.precision is "64":
-            predictions = np.load(fp).astype(dtype=np.float64)
+            predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float64)
         else:
-            predictions = np.load(fp)
+            predictions = np.load(fp, allow_pickle=True)
         return predictions

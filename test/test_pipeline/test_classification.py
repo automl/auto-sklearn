@@ -206,7 +206,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             dataset_properties={'sparse': False},
             include={
                 'preprocessor': ['no_preprocessing'],
-                'classifier': ['sgd', 'gradient_boosting']
+                'classifier': ['sgd', 'adaboost']
             }
         ).get_hyperparameter_search_space()
 
@@ -286,8 +286,8 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'classifier:lda:n_components': 10,
                             'preprocessor:nystroem_sampler:n_components': 50,
                             'preprocessor:feature_agglomeration:n_clusters': 2,
-                            'classifier:gradient_boosting:max_depth': 2,
-                            'classifier:gradient_boosting:n_estimators': 50}
+                            'classifier:gradient_boosting:max_iter': 50,
+                            'classifier:gradient_boosting:max_leaf_nodes': 64}
 
             for restrict_parameter in restrictions:
                 restrict_to = restrictions[restrict_parameter]
@@ -312,7 +312,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                                init_params=init_params_,)
             cls.set_hyperparameters(config, init_params=init_params_)
             try:
-                cls.fit(X_train, Y_train, )
+                cls.fit(X_train, Y_train)
                 predictions = cls.predict(X_test.copy())
                 predictions = cls.predict_proba(X_test)
             except MemoryError as e:
@@ -339,11 +339,15 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             except RuntimeWarning as e:
                 if "invalid value encountered in sqrt" in e.args[0]:
                     continue
+                elif "invalid value encountered in multiply" in e.args[0]:
+                    continue
                 elif "divide by zero encountered in" in e.args[0]:
                     continue
                 elif "invalid value encountered in divide" in e.args[0]:
                     continue
                 elif "invalid value encountered in true_divide" in e.args[0]:
+                    continue
+                elif "invalid value encountered in multiply" in e.args[0]:
                     continue
                 else:
                     print(traceback.format_exc())
@@ -372,12 +376,12 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertEqual(len(cs.get_hyperparameter(
             'rescaling:__choice__').choices), 6)
         self.assertEqual(len(cs.get_hyperparameter(
-            'classifier:__choice__').choices), 16)
+            'classifier:__choice__').choices), 15)
         self.assertEqual(len(cs.get_hyperparameter(
             'preprocessor:__choice__').choices), 13)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(172, len(hyperparameters))
+        self.assertEqual(156, len(hyperparameters))
 
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp

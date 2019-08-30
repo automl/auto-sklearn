@@ -168,9 +168,11 @@ def _test_classifier_predict_proba(classifier, dataset='iris', sparse=False,
     return predictions, Y_test
 
 
-def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False):
+def _test_preprocessing(Preprocessor, dataset='iris', make_sparse=False,
+                        train_size_maximum=150):
     X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
-                                                   make_sparse=make_sparse)
+                                                   make_sparse=make_sparse,
+                                                   train_size_maximum=train_size_maximum)
     original_X_train = X_train.copy()
     configuration_space = Preprocessor.get_hyperparameter_search_space()
     default = configuration_space.get_default_configuration()

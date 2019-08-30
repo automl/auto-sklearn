@@ -12,7 +12,7 @@ class RandomTreesEmbeddingComponentTest(unittest.TestCase):
     def test_default_configuration(self):
         transformation, original = _test_preprocessing(RandomTreesEmbedding)
         self.assertEqual(transformation.shape[0], original.shape[0])
-        self.assertEqual(transformation.shape[1], 215)
+        self.assertEqual(transformation.shape[1], 216)
         self.assertIsInstance(original, np.ndarray)
         self.assertTrue(scipy.sparse.issparse(transformation))
         self.assertTrue(all(transformation.data == 1))

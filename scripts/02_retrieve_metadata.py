@@ -39,12 +39,20 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
 
         validation_trajectory_file = os.path.join(ped, 'smac3-output', 'run_1',
                                                   'validation_trajectory.json')
+        if not os.path.exists(validation_trajectory_file):
+            print('Could not find output file', validation_trajectory_file)
+            continue
         with open(validation_trajectory_file) as fh:
             validation_trajectory = json.load(fh)
 
         best_value = np.inf
         best_configuration = None
         for entry in validation_trajectory:
+            # There's no reason to keep the default configuration
+            # (even if it's better) because it is run anyway
+            if validation_trajectory[0][2] == entry[2]:
+                continue
+
             config = entry[2]
             task_name = entry[-2]
             score = entry[-1].get(str(metric), np.inf)

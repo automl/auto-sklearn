@@ -302,9 +302,8 @@ class TestMetricsDoNotAlterInput(unittest.TestCase):
                 np.testing.assert_array_almost_equal(y_pred, y_pred_2,
                                                      err_msg=metric)
             except ValueError as e:
-                if e.args[0] == 'Sample-based precision, recall, fscore is ' \
-                                'not meaningful outside multilabel ' \
-                                'classification. See the accuracy_score instead.':
+                if e.args[0] == 'Samplewise metrics are not available outside' \
+                        ' of multilabel classification.':
                     pass
                 else:
                     raise e

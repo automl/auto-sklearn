@@ -287,14 +287,12 @@ def calculate_score(solution, prediction, task_type, metric,
                 except ValueError as e:
                     if e.args[0] == 'multiclass format is not supported':
                         continue
-                    elif e.args[0] == 'Sample-based precision, recall, ' \
-                                      'fscore is not meaningful outside ' \
-                                      'multilabel classification. See the ' \
-                                      'accuracy_score instead.':
+                    elif e.args[0] == "Samplewise metrics are not available "\
+                            "outside of multilabel classification.":
                         continue
-                    elif e.args[0] == "Target is multiclass but " \
-                                      "average='binary'. Please choose another " \
-                                      "average setting.":
+                    elif e.args[0] == "Target is multiclass but "\
+                            "average='binary'. Please choose another average "\
+                            "setting, one of [None, 'micro', 'macro', 'weighted'].":
                         continue
                     else:
                         raise e

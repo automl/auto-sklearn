@@ -271,7 +271,7 @@ class EstimatorTest(Base, unittest.TestCase):
         true_targets_ensemble_path = os.path.join(tmp, '.auto-sklearn',
                                                   'true_targets_ensemble.npy')
         with open(true_targets_ensemble_path, 'rb') as fh:
-            true_targets_ensemble = np.load(fh)
+            true_targets_ensemble = np.load(fh, allow_pickle=True)
         true_targets_ensemble[-1] = 1 if true_targets_ensemble[-1] != 1 else 0
         true_targets_ensemble = true_targets_ensemble.astype(int)
         probas = np.zeros((len(true_targets_ensemble), 2), dtype=float)
@@ -689,7 +689,8 @@ class AutoSklearnClassifierTest(unittest.TestCase):
         X_train, y_train, X_test, y_test = putil.get_dataset('iris')
         automl = AutoSklearnClassifier(time_left_for_this_task=60,
                                        per_run_time_limit=10,
-                                       ensemble_size=0)
+                                       ensemble_size=0,
+                                       exclude_preprocessors=['fast_ica'])
 
         automl_fitted = automl.fit(X_train, y_train)
         self.assertIs(automl, automl_fitted)

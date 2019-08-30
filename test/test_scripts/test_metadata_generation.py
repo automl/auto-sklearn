@@ -16,8 +16,7 @@ class TestMetadataGeneration(unittest.TestCase):
         self.working_directory = '/tmp/autosklearn-unittest-tmp-dir-%s-%d-%d' % (
             socket.gethostname(), os.getpid(), random.randint(0, 1000000))
 
-    @unittest.skipIf(sys.version_info < (3, 5), 'subprocess.run() not '
-                                                'available in python3.4.')
+    @unittest.skipIf(sys.version_info < (3, 6), 'This test requires up-to-date python')
     def test_metadata_generation(self):
         current_directory = __file__
         scripts_directory = os.path.abspath(os.path.join(current_directory,
@@ -55,7 +54,7 @@ class TestMetadataGeneration(unittest.TestCase):
 
         self.assertIn('time-limit 86400', cmd)
         self.assertIn('per-run-time-limit 1800', cmd)
-        cmd = cmd.replace('time-limit 86400', 'time-limit 30').replace(
+        cmd = cmd.replace('time-limit 86400', 'time-limit 60').replace(
             'per-run-time-limit 1800', 'per-run-time-limit 7')
         # This tells the script to use the same memory limit for testing as
         # for training. In production, it would use twice as much!
@@ -65,6 +64,12 @@ class TestMetadataGeneration(unittest.TestCase):
                               stderr=subprocess.PIPE)
         print('STDOUT: %s' % repr(rval.stdout), flush=True)
         print('STDERR: %s' % repr(rval.stderr), flush=True)
+
+        # Print the files which are there
+        print('Existing files:')
+        for dirpath, dirnames, filenames in os.walk(self.working_directory):
+            print(dirpath, dirnames, filenames)
+
         expected_output_directory = os.path.join(self.working_directory,
                                                  'configuration',
                                                  'classification',
@@ -88,6 +93,8 @@ class TestMetadataGeneration(unittest.TestCase):
             with open(trajectory) as fh_trajectory:
                 traj = json.load(fh_trajectory)
                 valid_traj = json.load(fh_validation)
+                print('Validation trajectory:')
+                print(valid_traj)
                 self.assertGreater(len(traj), 0)
                 self.assertEqual(len(traj), len(valid_traj))
 
@@ -95,8 +102,11 @@ class TestMetadataGeneration(unittest.TestCase):
         script_filename = os.path.join(scripts_directory, '02_retrieve_metadata.py')
         cmd = 'python3 %s --working-directory %s --task-type %s' % (
             script_filename, self.working_directory, task_type)
+        print('COMMAND: %s' % cmd)
         rval = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
+        print('STDOUT: %s' % repr(rval.stdout), flush=True)
+        print('STDERR: %s' % repr(rval.stderr), flush=True)
         self.assertEqual(rval.returncode, 0, msg=str(rval))
 
         for file in ['algorithm_runs.arff', 'configurations.csv',

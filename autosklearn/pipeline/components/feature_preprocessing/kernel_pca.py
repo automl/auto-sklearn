@@ -34,7 +34,7 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
         self.preprocessor = sklearn.decomposition.KernelPCA(
             n_components=self.n_components, kernel=self.kernel,
             degree=self.degree, gamma=self.gamma, coef0=self.coef0,
-            remove_zero_eig=True)
+            remove_zero_eig=True, random_state=self.random_state)
         if scipy.sparse.issparse(X):
             X = X.astype(np.float64)
         with warnings.catch_warnings():
