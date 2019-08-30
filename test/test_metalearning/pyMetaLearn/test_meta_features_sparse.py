@@ -6,16 +6,16 @@ import unittest
 # Make the super class importable
 sys.path.append(os.path.dirname(__file__))
 
-import arff
-import numpy as np
-from scipy import sparse
-from sklearn.impute import SimpleImputer
+import arff  # noqa: E402
+import numpy as np  # noqa: E402
+from scipy import sparse  # noqa: E402
+from sklearn.impute import SimpleImputer  # noqa: E402
 
-from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
-from sklearn.preprocessing import StandardScaler
+from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder  # noqa: E402
+from sklearn.preprocessing import StandardScaler  # noqa: E402
 
-import autosklearn.metalearning.metafeatures.metafeatures as meta_features
-import test_meta_features
+import autosklearn.metalearning.metafeatures.metafeatures as meta_features  # noqa: E402
+import test_meta_features  # noqa: E402
 
 
 class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest,
