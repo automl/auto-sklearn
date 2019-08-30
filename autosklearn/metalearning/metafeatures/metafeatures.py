@@ -13,7 +13,7 @@ import sklearn.model_selection
 from sklearn.utils import check_array
 from sklearn.multiclass import OneVsRestClassifier
 
-from sklearn.preprocessing import Imputer
+from sklearn.impute import SimpleImputer
 from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 
@@ -124,7 +124,7 @@ class MetafeatureFunctions(object):
             self.dependencies[name] = dependency
             return instance
         return wrapper
-    
+
 metafeatures = MetafeatureFunctions()
 helper_functions = HelperFunctions()
 
@@ -609,9 +609,9 @@ class LandmarkLDA(MetaFeature):
     def _calculate(self, X, y, categorical):
         import sklearn.discriminant_analysis
         if len(y.shape) == 1 or y.shape[1] == 1:
-            kf = sklearn.model_selection.StratifiedKFold(n_splits=10)
+            kf = sklearn.model_selection.StratifiedKFold(n_splits=5)
         else:
-            kf = sklearn.model_selection.KFold(n_splits=10)
+            kf = sklearn.model_selection.KFold(n_splits=5)
 
         accuracy = 0.
         try:
@@ -644,9 +644,9 @@ class LandmarkNaiveBayes(MetaFeature):
         import sklearn.naive_bayes
 
         if len(y.shape) == 1 or y.shape[1] == 1:
-            kf = sklearn.model_selection.StratifiedKFold(n_splits=10)
+            kf = sklearn.model_selection.StratifiedKFold(n_splits=5)
         else:
-            kf = sklearn.model_selection.KFold(n_splits=10)
+            kf = sklearn.model_selection.KFold(n_splits=5)
 
         accuracy = 0.
         for train, test in kf.split(X, y):
@@ -672,9 +672,9 @@ class LandmarkDecisionTree(MetaFeature):
         import sklearn.tree
 
         if len(y.shape) == 1 or y.shape[1] == 1:
-            kf = sklearn.model_selection.StratifiedKFold(n_splits=10)
+            kf = sklearn.model_selection.StratifiedKFold(n_splits=5)
         else:
-            kf = sklearn.model_selection.KFold(n_splits=10)
+            kf = sklearn.model_selection.KFold(n_splits=5)
 
         accuracy = 0.
         for train, test in kf.split(X, y):
@@ -706,9 +706,9 @@ class LandmarkDecisionNodeLearner(MetaFeature):
         import sklearn.tree
 
         if len(y.shape) == 1 or y.shape[1] == 1:
-            kf = sklearn.model_selection.StratifiedKFold(n_splits=10)
+            kf = sklearn.model_selection.StratifiedKFold(n_splits=5)
         else:
-            kf = sklearn.model_selection.KFold(n_splits=10)
+            kf = sklearn.model_selection.KFold(n_splits=5)
 
         accuracy = 0.
         for train, test in kf.split(X, y):
@@ -734,9 +734,9 @@ class LandmarkRandomNodeLearner(MetaFeature):
         import sklearn.tree
 
         if len(y.shape) == 1 or y.shape[1] == 1:
-            kf = sklearn.model_selection.StratifiedKFold(n_splits=10)
+            kf = sklearn.model_selection.StratifiedKFold(n_splits=5)
         else:
-            kf = sklearn.model_selection.KFold(n_splits=10)
+            kf = sklearn.model_selection.KFold(n_splits=5)
         accuracy = 0.
 
         for train, test in kf.split(X, y):
@@ -762,7 +762,7 @@ def landmark_worst_node_learner(X, y):
     import sklearn.tree
     performances = []
     for attribute_idx in range(X.shape[1]):
-        kf = sklearn.model_selection.StratifiedKFold(y, n_folds=10)
+        kf = sklearn.model_selection.StratifiedKFold(y, n_folds=5)
         accuracy = 0.
         for train, test in kf:
             node = sklearn.tree.DecisionTreeClassifier(criterion="entropy",
@@ -784,9 +784,9 @@ class Landmark1NN(MetaFeature):
         import sklearn.neighbors
 
         if len(y.shape) == 1 or y.shape[1] == 1:
-            kf = sklearn.model_selection.StratifiedKFold(n_splits=10)
+            kf = sklearn.model_selection.StratifiedKFold(n_splits=5)
         else:
-            kf = sklearn.model_selection.KFold(n_splits=10)
+            kf = sklearn.model_selection.KFold(n_splits=5)
 
         accuracy = 0.
         for train, test in kf.split(X, y):
@@ -952,7 +952,7 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name,
                     X_transformed = ohe.fit_transform(X)
                 else:
                     X_transformed = X
-                imputer = Imputer(strategy='mean', copy=False)
+                imputer = SimpleImputer(strategy='mean', copy=False)
                 X_transformed = imputer.fit_transform(X_transformed)
                 center = not scipy.sparse.isspmatrix(X_transformed)
                 standard_scaler = StandardScaler(copy=False, with_mean=center)

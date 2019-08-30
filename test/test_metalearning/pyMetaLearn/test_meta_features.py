@@ -5,11 +5,11 @@ from unittest import TestCase
 import unittest
 
 import arff
+from joblib import Memory
 import numpy as np
 import scipy.sparse
-from sklearn.preprocessing.imputation import Imputer
+from sklearn.impute import SimpleImputer
 from sklearn.datasets import make_multilabel_classification
-from sklearn.externals.joblib import Memory
 
 from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
@@ -43,7 +43,7 @@ class MetaFeaturesTest(TestCase):
 
         ohe = OneHotEncoder(self.categorical)
         X_transformed = ohe.fit_transform(X)
-        imp = Imputer(copy=False)
+        imp = SimpleImputer(copy=False)
         X_transformed = imp.fit_transform(X_transformed)
         center = not scipy.sparse.isspmatrix((X_transformed))
         standard_scaler = StandardScaler(with_mean=center)
@@ -83,7 +83,7 @@ class MetaFeaturesTest(TestCase):
         os.chdir(self.cwd)
 
     def get_multilabel(self):
-        cache = Memory(cachedir=tempfile.gettempdir())
+        cache = Memory(location=tempfile.gettempdir())
         cached_func = cache.cache(make_multilabel_classification)
         return cached_func(
             n_samples=100,

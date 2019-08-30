@@ -15,7 +15,7 @@ class LibSVM_SVCComponentTest(BaseClassificationComponentTest):
     res = dict()
     res["default_iris"] = 0.96
     res["default_iris_iterative"] = -1
-    res["default_iris_proba"] = 0.32242983456012941
+    res["default_iris_proba"] = 0.36298338197586716
     res["default_iris_sparse"] = 0.64
     res["default_digits"] = 0.096539162112932606
     res["default_digits_iterative"] = -1
@@ -32,14 +32,14 @@ class LibSVM_SVCComponentTest(BaseClassificationComponentTest):
             predictions, targets = _test_classifier_predict_proba(
                 LibSVM_SVC, sparse=True, dataset='digits',
                 train_size_maximum=500)
-            self.assertAlmostEqual(5.4706296711768925,
+            self.assertAlmostEqual(5.273502056835706,
                                    sklearn.metrics.log_loss(targets,
                                                             predictions))
 
         for i in range(2):
             predictions, targets = _test_classifier_predict_proba(
                 LibSVM_SVC, sparse=True, dataset='iris')
-            self.assertAlmostEqual(0.84336416900751887,
+            self.assertAlmostEqual(0.8408320837510618,
                                    sklearn.metrics.log_loss(targets,
                                                             predictions))
 
@@ -64,4 +64,4 @@ class LibSVM_SVCComponentTest(BaseClassificationComponentTest):
             cls = cls.fit(X_train, Y_train)
             prediction = cls.predict_proba(X_test)
             self.assertAlmostEqual(sklearn.metrics.log_loss(Y_test, prediction),
-                                   0.6932, places=4)
+                                   0.6927962762794081, places=4)

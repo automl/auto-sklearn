@@ -16,10 +16,11 @@ from autosklearn.constants import (
 from autosklearn.pipeline.implementations.util import (
     convert_multioutput_multiclass_to_multilabel
 )
-from autosklearn.metrics import calculate_score
+from autosklearn.metrics import calculate_score, CLASSIFICATION_METRICS
 from autosklearn.util.logging_ import get_logger
 
 from ConfigSpace import Configuration
+
 
 
 __all__ = [
@@ -213,13 +214,17 @@ class AbstractEvaluator(object):
             all_scoring_functions=all_scoring_functions)
 
         if hasattr(score, '__len__'):
-            err = {key: self.metric._optimum - score[key] for key in score}
+            # TODO: instead of using self.metric, it should use all metrics given by key.
+            # But now this throws error...
+
+            err = {key: metric._optimum - score[key] for key, metric in
+                   CLASSIFICATION_METRICS.items() if key in score}
         else:
             err = self.metric._optimum - score
 
         return err
 
-    def finish_up(self, loss, train_pred, opt_pred, valid_pred, test_pred,
+    def finish_up(self, loss, train_loss,  opt_pred, valid_pred, test_pred,
                   additional_run_info, file_output, final_call):
         """This function does everything necessary after the fitting is done:
 
@@ -233,14 +238,14 @@ class AbstractEvaluator(object):
 
         if file_output:
             loss_, additional_run_info_ = self.file_output(
-                train_pred, opt_pred, valid_pred, test_pred,
+                opt_pred, valid_pred, test_pred,
             )
         else:
             loss_ = None
             additional_run_info_ = {}
 
-        train_loss, validation_loss, test_loss = self.calculate_auxiliary_losses(
-            train_pred, valid_pred, test_pred,
+        validation_loss, test_loss = self.calculate_auxiliary_losses(
+            valid_pred, test_pred,
         )
 
         if loss_ is not None:
@@ -276,42 +281,9 @@ class AbstractEvaluator(object):
 
     def calculate_auxiliary_losses(
         self,
-        Y_train_pred,
         Y_valid_pred,
         Y_test_pred
     ):
-        # Second check makes unit tests easier as it is not necessary to
-        # actually inject data to compare against for calculating a loss
-        if Y_train_pred is not None and self.Y_actual_train is not None:
-            if len(self.Y_actual_train.shape) > 1:
-                assert (
-                    np.sum(np.isfinite(self.Y_actual_train[:, 0]))
-                    == Y_train_pred.shape[0]
-                ), (
-                    np.sum(np.isfinite(self.Y_actual_train[:, 0])),
-                    Y_train_pred.shape[0],
-                )
-            else:
-                assert (
-                    np.sum(np.isfinite(self.Y_actual_train))
-                    == Y_train_pred.shape[0]
-                ), (
-                    np.sum(np.isfinite(self.Y_actual_train)),
-                    Y_train_pred.shape[0],
-                )
-            Y_true_tmp = self.Y_actual_train
-            if len(Y_true_tmp.shape) == 1:
-                Y_true_tmp = Y_true_tmp[np.isfinite(self.Y_actual_train)]
-            else:
-                Y_true_tmp = Y_true_tmp[np.isfinite(self.Y_actual_train[:, 0])]
-            train_loss = self._loss(
-                Y_true_tmp,
-                Y_train_pred,
-                all_scoring_functions=False,
-            )
-        else:
-            train_loss = None
-
         if Y_valid_pred is not None:
             if self.y_valid is not None:
                 validation_loss = self._loss(self.y_valid, Y_valid_pred)
@@ -332,11 +304,10 @@ class AbstractEvaluator(object):
         else:
             test_loss = None
 
-        return train_loss, validation_loss, test_loss
+        return validation_loss, test_loss
 
     def file_output(
             self,
-            Y_train_pred,
             Y_optimization_pred,
             Y_valid_pred,
             Y_test_pred
@@ -360,7 +331,7 @@ class AbstractEvaluator(object):
             )
 
         for y, s in [
-            [Y_train_pred, 'train'],
+            # Y_train_pred deleted here. Fix unittest accordingly.
             [Y_optimization_pred, 'optimization'],
             [Y_valid_pred, 'validation'],
             [Y_test_pred, 'test']

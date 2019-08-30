@@ -35,6 +35,9 @@ nosetests.xml
 # pycharm
 .idea
 
+# VS code
+.vscode/
+
 # Others
 *~
 *.dat
@@ -49,3 +52,4 @@ num_run
 number_submission
 .pypirc
 dmypy.json
+*.log

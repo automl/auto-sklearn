@@ -22,6 +22,7 @@ class QDA(AutoSklearnClassificationAlgorithm):
             QuadraticDiscriminantAnalysis(reg_param=self.reg_param)
 
         if len(Y.shape) == 2 and Y.shape[1] > 1:
+            import sklearn.multiclass
             self.estimator = sklearn.multiclass.OneVsRestClassifier(estimator, n_jobs=1)
         else:
             self.estimator = estimator
