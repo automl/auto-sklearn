@@ -39,7 +39,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
         predictions_ensemble[5, 2] = np.NaN
         _, loss, _, additional_run_info = ae.finish_up(
             loss=0.1,
-            train_pred=predictions_train,
+            train_loss=0.1,
             opt_pred=predictions_ensemble,
             valid_pred=predictions_valid,
             test_pred=predictions_test,
@@ -57,7 +57,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
         predictions_valid[5, 2] = np.NaN
         _, loss, _, additional_run_info = ae.finish_up(
             loss=0.1,
-            train_pred=predictions_train,
+            train_loss=0.1,
             opt_pred=predictions_ensemble,
             valid_pred=predictions_valid,
             test_pred=predictions_test,
@@ -75,7 +75,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
         predictions_test[5, 2] = np.NaN
         _, loss, _, additional_run_info = ae.finish_up(
             loss=0.1,
-            train_pred=predictions_train,
+            train_loss=0.1,
             opt_pred=predictions_ensemble,
             valid_pred=predictions_valid,
             test_pred=predictions_test,
@@ -114,7 +114,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         loss_, additional_run_info_ = (
             ae.file_output(
-                predictions_train,
                 predictions_ensemble,
                 predictions_valid,
                 predictions_test,
@@ -138,7 +137,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         loss_, additional_run_info_ = (
             ae.file_output(
-                predictions_train,
                 predictions_ensemble,
                 predictions_valid,
                 predictions_test,
@@ -164,7 +162,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         loss_, additional_run_info_ = (
             ae.file_output(
-                predictions_train,
                 predictions_ensemble,
                 predictions_valid,
                 predictions_test,

@@ -92,10 +92,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # four calls because of train, holdout, validation and test set
         self.assertEqual(pipeline_mock.predict_proba.call_count, 4)
         self.assertEqual(evaluator.file_output.call_count, 1)
-        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 45)
-        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], 24)
-        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_valid'].shape[0])
-        self.assertEqual(evaluator.file_output.call_args[0][3].shape[0], D.data['Y_test'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 24)
+        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0],
+                         D.data['Y_valid'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0],
+                         D.data['Y_test'].shape[0])
         self.assertEqual(evaluator.model.fit.call_count, 1)
 
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
@@ -169,12 +170,12 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # 20 calls because of train, holdout, validation and test set
         # and a total of five calls because of five iterations of fitting
         self.assertEqual(evaluator.model.predict_proba.call_count, 20)
-        # 2/3 of 69
-        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 46)
         # 1/3 of 69
-        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], 23)
-        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_valid'].shape[0])
-        self.assertEqual(evaluator.file_output.call_args[0][3].shape[0], D.data['Y_test'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 23)
+        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0],
+                         D.data['Y_valid'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0],
+                         D.data['Y_test'].shape[0])
         self.assertEqual(evaluator.file_output.call_count, 5)
         self.assertEqual(evaluator.model.fit.call_count, 0)
 
@@ -253,10 +254,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # eight calls because of train, holdout, the validation and the test set
         # and a total of two calls each because of two iterations of fitting
         self.assertEqual(evaluator.model.predict_proba.call_count, 8)
-        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 46)
-        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], 23)
-        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_valid'].shape[0])
-        self.assertEqual(evaluator.file_output.call_args[0][3].shape[0], D.data['Y_test'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 23)
+        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0],
+                         D.data['Y_valid'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0],
+                         D.data['Y_test'].shape[0])
         self.assertEqual(evaluator.file_output.call_count, 2)
         self.assertEqual(evaluator.model.fit.call_count, 0)
 
@@ -299,10 +301,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(pipeline_mock.iterative_fit.call_count, 0)
         # four calls for train, opt, valid and test
         self.assertEqual(evaluator.model.predict_proba.call_count, 4)
-        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 46)
-        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], 23)
-        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_valid'].shape[0])
-        self.assertEqual(evaluator.file_output.call_args[0][3].shape[0], D.data['Y_test'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 23)
+        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0],
+                         D.data['Y_valid'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0],
+                         D.data['Y_test'].shape[0])
         self.assertEqual(evaluator.file_output.call_count, 1)
         self.assertEqual(evaluator.model.fit.call_count, 1)
 
@@ -340,15 +343,17 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(evaluator.file_output.call_count, 1)
-        self.assertEqual(result, 0.46376811594202894)
+        self.assertEqual(result, 0.463768115942029)
         self.assertEqual(pipeline_mock.fit.call_count, 5)
         # Fifteen calls because of the training, holdout, validation and
         # test set (4 sets x 5 folds = 20)
         self.assertEqual(pipeline_mock.predict_proba.call_count, 20)
-        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], D.data['Y_train'].shape[0])
-        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0], D.data['Y_train'].shape[0])
-        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0], D.data['Y_valid'].shape[0])
-        self.assertEqual(evaluator.file_output.call_args[0][3].shape[0], D.data['Y_test'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][0].shape[0],
+                         D.data['Y_train'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][1].shape[0],
+                         D.data['Y_valid'].shape[0])
+        self.assertEqual(evaluator.file_output.call_args[0][2].shape[0],
+                         D.data['Y_test'].shape[0])
         # The model prior to fitting is saved, this cannot be directly tested
         # because of the way the mock module is used. Instead, we test whether
         # the if block in which model assignment is done is accessed
@@ -496,7 +501,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.Y_optimization = D.data['Y_train']
         rval = evaluator.file_output(
             D.data['Y_train'],
-            D.data['Y_train'],
             D.data['Y_valid'],
             D.data['Y_test'],
         )
@@ -511,7 +515,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # for unseen data
         D.data['Y_valid'][0] = np.NaN
         rval = evaluator.file_output(
-            D.data['Y_train'],
             D.data['Y_train'],
             D.data['Y_valid'],
             D.data['Y_test'],
@@ -529,7 +532,6 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data['Y_train'][0] = np.NaN
         rval = evaluator.file_output(
             D.data['Y_train'],
-            D.data['Y_train'],
             D.data['Y_valid'],
             D.data['Y_test'],
         )
@@ -539,7 +541,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                 1.0,
                 {
                     'error':
-                     'Model predictions for train set contains NaNs.'
+                    'Model predictions for optimization set contains NaNs.'
                  },
             )
         )
@@ -676,7 +678,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             metric=accuracy,
         )
         evaluator.Y_targets[0] = np.array([1] * 23)
-        evaluator.Y_train_targets = np.array([1] * 46)
+        evaluator.Y_train_targets = np.array([1] * 69)
         evaluator.fit_predict_and_loss(iterative=False)
 
         class SideEffect(object):
@@ -686,7 +688,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                 if self.n_call == 0:
                     self.n_call += 1
                     return (
-                        np.array([[0.1, 0.9]] * 35),
+                        np.array([[0.1, 0.9]] * 34),
                         np.array([[0.1, 0.9]] * 35),
                         np.array([[0.1, 0.9]] * 25),
                         np.array([[0.1, 0.9]] * 6),
@@ -711,6 +713,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         )
         evaluator.Y_targets[0] = np.array([1] * 35)
         evaluator.Y_targets[1] = np.array([1] * 34)
+        evaluator.Y_train_targets = np.array([1] * 69)
 
         self.assertRaises(
             TAEAbortException,
@@ -1403,7 +1406,7 @@ class FunctionsTest(unittest.TestCase):
             'f1_macro': 0.032036613272311221,
             'f1_micro': 0.030303030303030276,
             'f1_weighted': 0.030441716940572849,
-            'log_loss': 1.0635047098903945,
+            'log_loss': 0.0635047098903945,
             'pac_score': 0.09242315351515851,
             'precision_macro': 0.02777777777777779,
             'precision_micro': 0.030303030303030276,

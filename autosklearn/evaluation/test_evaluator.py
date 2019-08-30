@@ -51,7 +51,7 @@ class TestEvaluator(AbstractEvaluator):
         loss, Y_pred, _, _ =  self.predict_and_loss()
         self.finish_up(
             loss=loss,
-            train_pred=None,
+            train_loss=None,
             opt_pred=Y_pred,
             valid_pred=None,
             test_pred=None,
