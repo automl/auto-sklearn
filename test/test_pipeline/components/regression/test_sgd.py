@@ -7,7 +7,7 @@ from .test_base import BaseRegressionComponentTest
 class SGDComponentTest(BaseRegressionComponentTest):
     __test__ = True
 
-    # Values are extremly bad because the invscaling does not drop the
+    # Values are extremely bad because the invscaling does not drop the
     # learning rate aggressively enough!
     res = dict()
     res["default_boston"] = -1.1406255966671184e+28

@@ -173,7 +173,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             dataset_properties['target_type'] = 'classification'
 
         if 'sparse' not in dataset_properties:
-            # This dataset is probaby dense
+            # This dataset is probably dense
             dataset_properties['sparse'] = False
 
         cs = self._get_base_search_space(
