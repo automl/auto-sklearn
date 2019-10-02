@@ -10,12 +10,14 @@ from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 from autosklearn.pipeline.components import classification as \
     classification_components
+from autosklearn.pipeline.components.data_preprocessing.balancing.balancing import \
+    Balancing
 from autosklearn.pipeline.components import feature_preprocessing as \
     feature_preprocessing_components
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
 
-from autosklearn.pipeline.numeric_data_preprocessing import NumericPreprocessingPipeline
+from autosklearn.pipeline.data_preprocessing_numeric import NumericPreprocessingPipeline
 
 
 class NumericClassificationPipeline(ClassifierMixin, BasePipeline):
@@ -283,8 +285,11 @@ class NumericClassificationPipeline(ClassifierMixin, BasePipeline):
         default_dataset_properties = {'target_type': 'classification'}
 
         # Add the always active preprocessing components
-        steps.append(["data_preprocessing", NumericPreprocessingPipeline(
-            dataset_properties=default_dataset_properties)])
+        steps.extend([
+            ["data_preprocessing", NumericPreprocessingPipeline(
+                dataset_properties=default_dataset_properties)],
+            ["balancing", Balancing()]
+            ])
 
         # Add the preprocessing component
         steps.append(['preprocessor',
