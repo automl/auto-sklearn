@@ -1,8 +1,6 @@
 import numpy as np
 import scipy.sparse
 
-
-#from sklearn.preprocessing import OneHotEncoder
 import sklearn.preprocessing
 
 from ConfigSpace.configuration_space import ConfigurationSpace
@@ -16,7 +14,7 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
         pass
 
     def _fit(self, X, y=None):
-        self.preprocessor = sklearn.preprocessing.OneHotEncoder(sparse=True)
+        self.preprocessor = sklearn.preprocessing.OneHotEncoder(sparse=True, categories='auto')
         return self.preprocessor.fit_transform(X)
 
     def fit(self, X, y=None):
