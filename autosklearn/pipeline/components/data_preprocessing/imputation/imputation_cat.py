@@ -6,7 +6,7 @@ from autosklearn.pipeline.constants import *
 
 
 class Imputation(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, strategy='mean', fill_value=None, random_state=None):
+    def __init__(self, strategy='constant', fill_value=None, random_state=None):
         self.strategy = strategy
         self.fill_value = fill_value
 
@@ -48,7 +48,7 @@ class Imputation(AutoSklearnPreprocessingAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         # TODO add replace by zero!
         strategy = CategoricalHyperparameter(
-            "strategy", ["mean", "median", "most_frequent"], default_value="mean")
+            "strategy", ["constant"], default_value="constant")
         cs = ConfigurationSpace()
         cs.add_hyperparameter(strategy)
         return cs

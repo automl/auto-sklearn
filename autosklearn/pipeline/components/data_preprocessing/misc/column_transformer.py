@@ -16,10 +16,16 @@ from autosklearn.pipeline.constants import *
 from autosklearn.util.common import check_for_bool, check_none
 
 
-#class ColumnTransformer(BasePipeline):
 class ColumnTransformer(AutoSklearnComponent):
-
     def __init__(self, transformers):
+        """[summary]
+        
+        Parameters
+        ----------
+        transformers : [list]
+            List of (name, transformer, column(s)) tuples specifying the transformer 
+            objects to be applied to subsets of the data.
+        """
         self.transformers = transformers
         
 
@@ -101,7 +107,8 @@ class ColumnTransformer(AutoSklearnComponent):
     def get_hyperparameter_search_space(self, dataset_properties=None):
         self.dataset_properties_ = dataset_properties
         cs = ConfigurationSpace()
-        cs = ColumnTransformer._get_hyperparameter_search_space_recursevely(dataset_properties, cs, self.transformers)
+        cs = ColumnTransformer._get_hyperparameter_search_space_recursevely(
+            dataset_properties, cs, self.transformers)
         return cs
 
     @staticmethod
@@ -112,7 +119,8 @@ class ColumnTransformer(AutoSklearnComponent):
                 cs.add_configuration_space(st_name,
                     st_operation.get_hyperparameter_search_space(dataset_properties))
             else:
-                return ColumnTransformer._get_hyperparameter_search_space_recursevely(dataset_properties, cs, st_operation)
+                return ColumnTransformer._get_hyperparameter_search_space_recursevely(
+                    dataset_properties, cs, st_operation)
         return cs
 
 

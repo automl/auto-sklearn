@@ -306,8 +306,8 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         NPP = NumericPreprocessingPipeline()
         CPP = CategoricalPreprocessingPipeline()
         preprocessing_ct = ColumnTransformer([
-            ("numerical_pipeline", NPP, num_feat),
             ("categorical_pipeline", CPP, cat_feat),
+            ("numerical_pipeline", NPP, num_feat),
             ])
 
         steps.extend([

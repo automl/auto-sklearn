@@ -8,7 +8,7 @@ from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.classification_new import SimpleClassificationPipeline as SimpleClassificationPipeline2
 from autosklearn.pipeline.numeric_classification import NumericClassificationPipeline
 
-def create_data_set_2(instances=500, n_feats=10, n_categ_feats=4,
+def create_data_set_2(instances=1000, n_feats=10, n_categ_feats=4,
     categs_per_feat=5, missing_share=.3, n_classes=3):
     np.random.seed(0)
     
@@ -53,7 +53,7 @@ predictions = NCP.predict(X_test)
 print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 """
 
-X, y, feat_type = create_data_set_2()
+X, y, feat_type = create_data_set_2(n_categ_feats=4)
 X_train, X_test, y_train, y_test = \
     sklearn.model_selection.train_test_split(X, y, random_state=1)
 cat_features = [ind for ind, val in enumerate(feat_type) if val == "categorical"]
@@ -67,5 +67,9 @@ print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
 SCP = SimpleClassificationPipeline2(feat_type=feat_type, random_state=1)
 SCP.fit(X_train, y_train)
-predictions = SCP.predict(X_test)
-print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
+predictions2 = SCP.predict(X_test)
+print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions2))
+
+#print(predictions == predictions2)
+print(np.all(predictions == predictions2))
+

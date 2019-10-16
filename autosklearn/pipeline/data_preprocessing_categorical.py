@@ -10,7 +10,7 @@ from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 from autosklearn.pipeline.components.data_preprocessing.misc.category_shift \
     import CategoryShift
-from autosklearn.pipeline.components.data_preprocessing.imputation.imputation \
+from autosklearn.pipeline.components.data_preprocessing.imputation.imputation_cat \
     import Imputation
 from autosklearn.pipeline.components.data_preprocessing.misc.minority_coalescer \
     import MinorityCoalescer
@@ -140,6 +140,16 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         cs = self._get_base_search_space(
             cs=cs, dataset_properties=dataset_properties,
             exclude=exclude, include=include, pipeline=self.steps)
+        
+        #print(cs)
+        #print(cs.get_hyperparameter('imputation:strategy'))
+
+        # Imputation of categorical features shouldn't be done by mean or median
+        #for strategy in ["mean", "median"]:
+        #    cs.add_forbidden_clause(
+        #        ForbiddenEqualsClause(
+        #            cs.get_hyperparameter('imputation:strategy'), strategy
+        #            ))
 
         self.configuration_space_ = cs
         self.dataset_properties_ = dataset_properties
