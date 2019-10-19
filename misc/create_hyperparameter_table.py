@@ -5,7 +5,7 @@ import shlex
 import subprocess
 
 import ConfigSpace.hyperparameters
-import autosklearn.pipeline.classification_new
+import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
 
 # Some macros
@@ -59,7 +59,7 @@ def get_dict(task_type="classifier", **kwargs):
     assert task_type in ("classifier", "regressor")
 
     if task_type == "classifier":
-        cs = autosklearn.pipeline.classification_new.SimpleClassificationPipeline\
+        cs = autosklearn.pipeline.classification.SimpleClassificationPipeline\
             .get_hyperparameter_search_space(dataset_properties=kwargs)
     elif task_type == "regressor":
         cs = autosklearn.pipeline.regression.SimpleRegressionPipeline\

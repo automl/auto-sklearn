@@ -5,7 +5,7 @@ import sklearn.datasets
 import sklearn.metrics
 
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
-from autosklearn.pipeline.classification_new import SimpleClassificationPipeline as SimpleClassificationPipeline2
+from autosklearn.pipeline.classification import SimpleClassificationPipeline as SimpleClassificationPipeline2
 from autosklearn.pipeline.numeric_classification import NumericClassificationPipeline
 
 def create_data_set_2(instances=1000, n_feats=10, n_categ_feats=4,

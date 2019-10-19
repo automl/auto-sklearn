@@ -8,6 +8,10 @@ from sklearn.base import ClassifierMixin
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
+from autosklearn.pipeline.components.data_preprocessing.misc.column_transformer import ColumnTransformer
+from autosklearn.pipeline.data_preprocessing_categorical import CategoricalPreprocessingPipeline
+from autosklearn.pipeline.data_preprocessing_numeric import NumericPreprocessingPipeline
+
 from autosklearn.pipeline.components import classification as \
     classification_components
 from autosklearn.pipeline.components.data_preprocessing import rescaling as \
@@ -81,6 +85,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         super().__init__(
             config, pipeline, dataset_properties, include, exclude,
             random_state, init_params)
+        
 
     def fit_transformer(self, X, y, fit_params=None):
 
@@ -91,7 +96,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             balancing = Balancing(strategy='weighting')
             _init_params, _fit_params = balancing.get_weights(
                 y, self.configuration['classifier:__choice__'],
-                self.configuration['preprocessor:__choice__'],
+                self.configuration['feature_preprocessor:__choice__'],
                 {}, {})
             _init_params.update(self._init_params)
             self.set_hyperparameters(configuration=self.configuration,
@@ -181,7 +186,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             exclude=exclude, include=include, pipeline=self.steps)
 
         classifiers = cs.get_hyperparameter('classifier:__choice__').choices
-        preprocessors = cs.get_hyperparameter('preprocessor:__choice__').choices
+        preprocessors = cs.get_hyperparameter('feature_preprocessor:__choice__').choices
         available_classifiers = self._final_estimator.get_available_components(
             dataset_properties)
 
@@ -204,7 +209,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                                             'classifier:__choice__'), key),
                                     ForbiddenEqualsClause(
                                         cs.get_hyperparameter(
-                                            'preprocessor:__choice__'), 'densifier')
+                                            'feature_preprocessor:__choice__'), 'densifier')
                                 ))
                             # Success
                             break
@@ -236,7 +241,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                         ForbiddenEqualsClause(cs.get_hyperparameter(
                             "classifier:__choice__"), c),
                         ForbiddenEqualsClause(cs.get_hyperparameter(
-                            "preprocessor:__choice__"), f)))
+                            "feature_preprocessor:__choice__"), f)))
                     break
                 except KeyError:
                     break
@@ -265,7 +270,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                 try:
                     cs.add_forbidden_clause(ForbiddenAndConjunction(
                         ForbiddenEqualsClause(cs.get_hyperparameter(
-                            "preprocessor:__choice__"), f),
+                            "feature_preprocessing:__choice__"), f),
                         ForbiddenEqualsClause(cs.get_hyperparameter(
                             "classifier:__choice__"), c)))
                     break
@@ -292,23 +297,21 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
         # Add the always active preprocessing components
 
-        steps.extend(
-            [["categorical_encoding", OHEChoice(default_dataset_properties)],
-             ["imputation", Imputation()],
-             ["variance_threshold", VarianceThreshold()],
-             ["rescaling",
-              rescaling_components.RescalingChoice(default_dataset_properties)],
-             ["balancing", Balancing()]])
+        preprocessing_ct = ColumnTransformer(
+            CategoricalPreprocessingPipeline(),
+            NumericPreprocessingPipeline())
 
-        # Add the preprocessing component
-        steps.append(['preprocessor',
-                      feature_preprocessing_components.FeaturePreprocessorChoice(
-                          default_dataset_properties)])
-
-        # Add the classification component
-        steps.append(['classifier',
+        steps.extend([
+            ["preprocessing_columntransformer", preprocessing_ct],
+            ["balancing", Balancing()],
+            ["feature_preprocessor", 
+                feature_preprocessing_components.FeaturePreprocessorChoice(
+                    default_dataset_properties)],
+            ['classifier',
                       classification_components.ClassifierChoice(
-                          default_dataset_properties)])
+                          default_dataset_properties)]
+        ])
+
         return steps
 
     def _get_estimator_hyperparameter_name(self):

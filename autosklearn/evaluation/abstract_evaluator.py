@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.dummy import DummyClassifier, DummyRegressor
 from smac.tae.execute_ta_run import StatusType
 
-import autosklearn.pipeline.classification_new
+import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
 from autosklearn.constants import (
     REGRESSION_TASKS,
@@ -141,7 +141,7 @@ class AbstractEvaluator(object):
                 self.model_class = MyDummyClassifier
             else:
                 self.model_class = (
-                    autosklearn.pipeline.classification_new.
+                    autosklearn.pipeline.classification.
                         SimpleClassificationPipeline
                 )
             self.predict_function = self._predict_proba
