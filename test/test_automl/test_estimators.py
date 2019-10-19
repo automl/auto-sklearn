@@ -10,7 +10,8 @@ import numpy as np
 import numpy.ma as npma
 
 import autosklearn.pipeline.util as putil
-from autosklearn.estimators import AutoSklearnEstimator
+import autosklearn.estimators
+from autosklearn.estimators import AutoSklearnEstimator, get_number_of_available_cores
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
@@ -478,6 +479,36 @@ class EstimatorTest(Base, unittest.TestCase):
             seeds.add(int(ensemble_file.split('.')[0].split('_')[0]))
 
         self.assertEqual(len(seeds), 1)
+
+    @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
+    def test_fit_n_jobs_negative(self, build_automl_patch):
+        n_cores = get_number_of_available_cores()
+        cls = AutoSklearnEstimator(n_jobs=-1)
+        cls.fit()
+        self.assertEqual(len(cls._automl), n_cores)
+
+    def test_get_number_of_available_cores(self):
+        n_cores = get_number_of_available_cores()
+        self.assertGreaterEqual(n_cores, 1)
+
+    @unittest.mock.patch('autosklearn.estimators.os.sched_getaffinity')
+    def test_get_number_of_available_cores_overwrite_function(self, mocked):
+        mocked.return_value = {1, 2, 3, 4}
+        self.assertEqual(get_number_of_available_cores(), 4)
+
+    @unittest.mock.patch('autosklearn.estimators.os')
+    def test_get_number_of_available_cores_no_linux(self, mocked_os):
+        delattr(mocked_os, 'sched_getaffinity')
+        mocked_os.cpu_count.return_value = -1
+        self.assertEqual(autosklearn.estimators.os.cpu_count(), -1)
+        self.assertEqual(get_number_of_available_cores(), -1)
+
+    @unittest.mock.patch('autosklearn.estimators.os')
+    def test_get_number_of_available_cores_undefined(self, mocked_os):
+        delattr(mocked_os, 'sched_getaffinity')
+        mocked_os.cpu_count.return_value = None
+        self.assertEqual(autosklearn.estimators.os.cpu_count(), None)
+        self.assertEqual(get_number_of_available_cores(), 1)
 
 
 class AutoMLClassifierTest(Base, unittest.TestCase):

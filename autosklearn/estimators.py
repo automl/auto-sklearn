@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import os
 import copy
 import multiprocessing
 from typing import Optional, List, Dict
@@ -341,7 +342,11 @@ class AutoSklearnEstimator(BaseEstimator):
                 output_directory=self.output_folder,
             )
 
-            self._n_jobs = self.n_jobs
+            if self.n_jobs == -1:
+                self._n_jobs = get_number_of_available_cores()
+            else:
+                self._n_jobs = self.n_jobs
+
             shared_mode = True
             seeds = set()
             for i in range(self._n_jobs):
@@ -821,3 +826,20 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
 
     def _get_automl_class(self):
         return AutoMLRegressor
+
+
+def get_number_of_available_cores():
+    """
+    Returns the number of available logical cores on the system
+    First tries to use os.sched_getaffinity, if it is not available use os.cpu_count
+    :return: Number of cores, int
+    """
+
+    try:
+        n = len(os.sched_getaffinity(0))
+    except AttributeError:
+        n = os.cpu_count()
+
+    if n is None:
+        return 1
+    return n
