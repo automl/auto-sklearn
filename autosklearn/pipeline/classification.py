@@ -86,7 +86,6 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
             config, pipeline, dataset_properties, include, exclude,
             random_state, init_params)
         
-
     def fit_transformer(self, X, y, fit_params=None):
 
         if fit_params is None:
@@ -270,7 +269,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                 try:
                     cs.add_forbidden_clause(ForbiddenAndConjunction(
                         ForbiddenEqualsClause(cs.get_hyperparameter(
-                            "feature_preprocessing:__choice__"), f),
+                            "feature_preprocessor:__choice__"), f),
                         ForbiddenEqualsClause(cs.get_hyperparameter(
                             "classifier:__choice__"), c)))
                     break
