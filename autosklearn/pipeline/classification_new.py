@@ -80,12 +80,17 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
     def __init__(self, config=None, pipeline=None, dataset_properties=None,
                  include=None, exclude=None, random_state=None,
-                 init_params=None, feat_type=None):
+                 init_params=None):
         self._output_dtype = np.int32
-        self.feat_type = feat_type
+        #self.feat_type = feat_type
+
+        print(init_params)
+
         super().__init__(
             config, pipeline, dataset_properties, include, exclude,
             random_state, init_params)
+
+        
 
     def fit_transformer(self, X, y, fit_params=None):
 
@@ -296,12 +301,28 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         default_dataset_properties = {'target_type': 'classification'}
 
         # Add the always active preprocessing components
+        """
         num_feat, cat_feat = [], []
         for ind, ft in enumerate(self.feat_type):
             if str.lower(ft) == "numerical":
                 num_feat.append(ind)
             else:
-                cat_feat.append(ind)
+                cat_feat.append(ind)"""
+
+        print(self._init_params)
+
+        all_feat_ind = np.arange(10)
+        if 'categorical_features' in self._init_params.keys():
+            cat_feat_ind = all_feat_ind[self._init_params['categorical_features']]
+            num_feat_ind = np.remove(all_feat_ind, cat_feat_ind)
+        else:
+            cat_feat_ind = np.array([])
+            num_feat_ind = np.copy(all_feat_ind)
+
+        
+        print(cat_feat_ind)
+
+        num_feat, cat_feat = [], list(range(10))
         
         NPP = NumericPreprocessingPipeline()
         CPP = CategoricalPreprocessingPipeline()
