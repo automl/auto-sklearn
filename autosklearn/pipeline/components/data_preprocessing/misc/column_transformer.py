@@ -17,20 +17,17 @@ from autosklearn.util.common import check_for_bool, check_none
 
 
 class ColumnTransformer(AutoSklearnComponent):
-    def __init__(self, transformers):
-        """[summary]
-        
-        Parameters
-        ----------
-        transformers : [list]
-            List of (name, transformer, column(s)) tuples specifying the transformer 
-            objects to be applied to subsets of the data.
-        """
-        self.transformers = transformers
-        
+    def __init__(self, categorical_transformer, numerical_transformer):
+        self._transformers = [
+            ("categorical_branch", categorical_transformer, list()),
+            ("numerical_branch", numerical_transformer, list()),
+        ]
 
     def _fit(self, X, y=None):
-        self.column_transformer = sklearn.compose.ColumnTransformer(self.transformers)
+        all_feat_ind = np.arange(X.shape[1])
+        self._transformers[0][2] = all_feat_ind[self.categorical_features]
+        self._transformers[1][2] = all_feat_ind[not self.categorical_features]
+        self.column_transformer = sklearn.compose.ColumnTransformer(self._transformers)
         return self.column_transformer.fit_transform(X)
 
     def fit(self, X, y=None):
@@ -59,17 +56,17 @@ class ColumnTransformer(AutoSklearnComponent):
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (INPUT,),}
 
-    #def set_hyperparameters(self, configuration, init_params=None):
-    #    for transf in self.transformers:
-    #        #transf_name, transf_operation = transf[0], transf[1]
-    #        transf[1].set_hyperparameters(configuration, init_params)
-    #    return self
-
 
     def set_hyperparameters(self, configuration, init_params=None):
+
+        if init_params is not None and 'categorical_features' in init_params.keys():
+            self.categorical_features = init_params['categorical_features']
+        else:
+            self.categorical_features = []
+
         self.configuration = configuration
 
-        for transf in self.transformers:
+        for transf in self._transformers:
             transf_name, transf_operation = transf[0], transf[1]
 
             sub_configuration_space = transf_operation.get_hyperparameter_search_space(
@@ -103,12 +100,11 @@ class ColumnTransformer(AutoSklearnComponent):
 
         return self
 
-
     def get_hyperparameter_search_space(self, dataset_properties=None):
         self.dataset_properties_ = dataset_properties
         cs = ConfigurationSpace()
         cs = ColumnTransformer._get_hyperparameter_search_space_recursevely(
-            dataset_properties, cs, self.transformers)
+            dataset_properties, cs, self._transformers)
         return cs
 
     @staticmethod

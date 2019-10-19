@@ -156,7 +156,7 @@ class AbstractEvaluator(object):
                 raise ValueError(feat)
         if np.sum(categorical_mask) > 0:
             self._init_params = {
-                'categorical_features':
+                'preprocessing_columntransformer:categorical_features':
                     categorical_mask
             }
         else:
