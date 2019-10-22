@@ -19,14 +19,19 @@ from autosklearn.util.common import check_for_bool, check_none
 class ColumnTransformer(AutoSklearnComponent):
     def __init__(self, categorical_transformer, numerical_transformer):
         self._transformers = [
-            ("categorical_branch", categorical_transformer, list()),
-            ("numerical_branch", numerical_transformer, list()),
+            ["categorical_branch", categorical_transformer, list()],
+            ["numerical_branch", numerical_transformer, list()],
         ]
 
     def _fit(self, X, y=None):
         all_feat_ind = np.arange(X.shape[1])
-        self._transformers[0][2] = all_feat_ind[self.categorical_features]
-        self._transformers[1][2] = all_feat_ind[not self.categorical_features]
+        if self.categorical_features is not None and len(self.categorical_features) > 0:
+            self._transformers[0][2] = all_feat_ind[self.categorical_features]
+            self._transformers[1][2] = all_feat_ind[np.logical_not(self.categorical_features)]
+        else:
+            self._transformers[0][2] = np.array([])  # categorical features
+            self._transformers[1][2] = all_feat_ind[:]  #numerical features
+        
         self.column_transformer = sklearn.compose.ColumnTransformer(self._transformers)
         return self.column_transformer.fit_transform(X)
 

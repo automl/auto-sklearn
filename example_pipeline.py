@@ -4,9 +4,8 @@ import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
 
-from autosklearn.pipeline.classification import SimpleClassificationPipeline
+from autosklearn.pipeline.classification_old import SimpleClassificationPipeline
 from autosklearn.pipeline.classification import SimpleClassificationPipeline as SimpleClassificationPipeline2
-from autosklearn.pipeline.numeric_classification import NumericClassificationPipeline
 
 def create_data_set_2(instances=1000, n_feats=10, n_categ_feats=4,
     categs_per_feat=5, missing_share=.3, n_classes=3):
@@ -16,6 +15,7 @@ def create_data_set_2(instances=1000, n_feats=10, n_categ_feats=4,
     size = (instances, n_feats)
     data = np.random.uniform(size=size)
     # Overwrite some features to make them categorical
+    #categ_flag = np.arange(n_categ_feats)
     categ_flag = np.random.choice(n_feats, n_categ_feats, replace=False)
     numer_flag = list(set(range(n_feats)) - set(categ_flag))
     categ_data = np.random.randint(0, categs_per_feat, size=(instances, n_categ_feats))
@@ -59,13 +59,15 @@ X_train, X_test, y_train, y_test = \
 cat_features = [ind for ind, val in enumerate(feat_type) if val == "categorical"]
 
 
+
 SCP = SimpleClassificationPipeline(random_state=1)
 SCP.steps[0][1].choice.categorical_features = cat_features
 SCP.fit(X_train, y_train)
 predictions = SCP.predict(X_test)
 print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
-SCP = SimpleClassificationPipeline2(feat_type=feat_type, random_state=1)
+SCP = SimpleClassificationPipeline2(random_state=1)
+SCP.steps[0][1].categorical_features = (np.array(feat_type) == 'categorical').tolist()
 SCP.fit(X_train, y_train)
 predictions2 = SCP.predict(X_test)
 print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions2))
