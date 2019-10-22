@@ -6,15 +6,14 @@ from autosklearn.pipeline.constants import *
 
 
 class Imputation(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, strategy='mean', fill_value=None, random_state=None):
+    def __init__(self, strategy='mean', random_state=None):
         self.strategy = strategy
-        self.fill_value = fill_value
 
     def fit(self, X, y=None):
         import sklearn.impute
 
         self.preprocessor = sklearn.impute.SimpleImputer(
-            strategy=self.strategy, fill_value=self.fill_value, copy=False)
+            strategy=self.strategy, copy=False)
         self.preprocessor = self.preprocessor.fit(X)
         return self
 

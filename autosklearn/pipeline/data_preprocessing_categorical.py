@@ -141,16 +141,6 @@ class CategoricalPreprocessingPipeline(BasePipeline):
             cs=cs, dataset_properties=dataset_properties,
             exclude=exclude, include=include, pipeline=self.steps)
         
-        #print(cs)
-        #print(cs.get_hyperparameter('imputation:strategy'))
-
-        # Imputation of categorical features shouldn't be done by mean or median
-        #for strategy in ["mean", "median"]:
-        #    cs.add_forbidden_clause(
-        #        ForbiddenEqualsClause(
-        #            cs.get_hyperparameter('imputation:strategy'), strategy
-        #            ))
-
         self.configuration_space_ = cs
         self.dataset_properties_ = dataset_properties
         return cs

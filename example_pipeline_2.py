@@ -33,20 +33,21 @@ def create_data_set_2(instances=1000, n_feats=10, n_categ_feats=4,
     return data, labels, feat_type.tolist()
 
 
-X, y, feat_type = create_data_set_2(n_categ_feats=4)
+X, y, feat_type = create_data_set_2(n_categ_feats=0)
 X_train, X_test, y_train, y_test = \
     sklearn.model_selection.train_test_split(X, y, random_state=1)
 cat_features = [ind for ind, val in enumerate(feat_type) if val == "categorical"]
 
 
+
 SCP = SimpleClassificationPipeline(random_state=1)
-SCP.steps[0][1].choice.categorical_features = cat_features
+#SCP.steps[0][1].choice.categorical_features = cat_features
 SCP.fit(X_train, y_train)
 predictions = SCP.predict(X_test)
 print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions))
 
 SCP = SimpleClassificationPipeline2(random_state=1)
-SCP.steps[0][1].categorical_features = (np.array(feat_type) == 'categorical').tolist()
+#SCP.steps[0][1].categorical_features = (np.array(feat_type) == 'categorical').tolist()
 SCP.fit(X_train, y_train)
 predictions2 = SCP.predict(X_test)
 print("Accuracy score", sklearn.metrics.accuracy_score(y_test, predictions2))

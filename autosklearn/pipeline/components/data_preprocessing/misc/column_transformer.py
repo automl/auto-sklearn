@@ -18,21 +18,32 @@ from autosklearn.util.common import check_for_bool, check_none
 
 class ColumnTransformer(AutoSklearnComponent):
     def __init__(self, categorical_transformer, numerical_transformer):
-        self._transformers = [
-            ["categorical_branch", categorical_transformer, list()],
-            ["numerical_branch", numerical_transformer, list()],
+        self._branches = [
+            ["categorical_branch", categorical_transformer],
+            ["numerical_branch", numerical_transformer],
         ]
+        self.categorical_features = None
 
     def _fit(self, X, y=None):
-        all_feat_ind = np.arange(X.shape[1])
-        if self.categorical_features is not None and len(self.categorical_features) > 0:
-            self._transformers[0][2] = all_feat_ind[self.categorical_features]
-            self._transformers[1][2] = all_feat_ind[np.logical_not(self.categorical_features)]
+        n_feats = X.shape[1]
+        # If categorical_features is none or an array with just False booleans, then
+        # just the numerical branch is used
+        if self.categorical_features is None or np.all(np.logical_not(self.categorical_features)):
+            transformers = [
+                [self._branches[1][0], self._branches[1][1], [True] * n_feats]
+            ]
+        # If all features are categorical, then just just the categorical branch is used 
+        elif np.all(self.categorical_features):
+            transformers = [
+                [self._branches[0][0], self._branches[0][1], [True] * n_feats]
+            ]
+        # For the other cases, both branches are used
         else:
-            self._transformers[0][2] = np.array([])  # categorical features
-            self._transformers[1][2] = all_feat_ind[:]  #numerical features
-        
-        self.column_transformer = sklearn.compose.ColumnTransformer(self._transformers)
+            transformers = [
+                [self._branches[0][0], self._branches[0][1], self.categorical_features],
+                [self._branches[1][0], self._branches[1][1], np.logical_not(self.categorical_features)]
+            ]
+        self.column_transformer = sklearn.compose.ColumnTransformer(transformers)
         return self.column_transformer.fit_transform(X)
 
     def fit(self, X, y=None):
@@ -66,22 +77,19 @@ class ColumnTransformer(AutoSklearnComponent):
 
         if init_params is not None and 'categorical_features' in init_params.keys():
             self.categorical_features = init_params['categorical_features']
-        else:
-            self.categorical_features = []
 
         self.configuration = configuration
 
-        for transf in self._transformers:
-            transf_name, transf_operation = transf[0], transf[1]
+        for branch_name, branch_transformer in self._branches:
 
-            sub_configuration_space = transf_operation.get_hyperparameter_search_space(
+            sub_configuration_space = branch_transformer.get_hyperparameter_search_space(
                 dataset_properties=self.dataset_properties_
             )
             sub_config_dict = {}
             for param in configuration:
-                if param.startswith('%s:' % transf_name):
+                if param.startswith('%s:' % branch_name):
                     value = configuration[param]
-                    new_name = param.replace('%s:' % transf_name, '', 1)
+                    new_name = param.replace('%s:' % branch_name, '', 1)
                     sub_config_dict[new_name] = value
 
             sub_configuration = Configuration(sub_configuration_space,
@@ -90,15 +98,15 @@ class ColumnTransformer(AutoSklearnComponent):
             if init_params is not None:
                 sub_init_params_dict = {}
                 for param in init_params:
-                    if param.startswith('%s:' % transf_name):
+                    if param.startswith('%s:' % branch_name):
                         value = init_params[param]
-                        new_name = param.replace('%s:' % transf_name, '', 1)
+                        new_name = param.replace('%s:' % branch_name, '', 1)
                         sub_init_params_dict[new_name] = value
             else:
                 sub_init_params_dict = None
 
-            if isinstance(transf_operation, (AutoSklearnChoice, AutoSklearnComponent, BasePipeline)):
-                transf_operation.set_hyperparameters(configuration=sub_configuration,
+            if isinstance(branch_transformer, (AutoSklearnChoice, AutoSklearnComponent, BasePipeline)):
+                branch_transformer.set_hyperparameters(configuration=sub_configuration,
                                          init_params=sub_init_params_dict)
             else:
                 raise NotImplementedError('Not supported yet!')
@@ -109,13 +117,12 @@ class ColumnTransformer(AutoSklearnComponent):
         self.dataset_properties_ = dataset_properties
         cs = ConfigurationSpace()
         cs = ColumnTransformer._get_hyperparameter_search_space_recursevely(
-            dataset_properties, cs, self._transformers)
+            dataset_properties, cs, self._branches)
         return cs
 
     @staticmethod
     def _get_hyperparameter_search_space_recursevely(dataset_properties, cs, transformer):
-        for sub_transf in transformer:
-            st_name, st_operation = sub_transf[0], sub_transf[1]
+        for st_name, st_operation in transformer:
             if hasattr(st_operation, "get_hyperparameter_search_space"):
                 cs.add_configuration_space(st_name,
                     st_operation.get_hyperparameter_search_space(dataset_properties))

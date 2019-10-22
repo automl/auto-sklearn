@@ -85,7 +85,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         super().__init__(
             config, pipeline, dataset_properties, include, exclude,
             random_state, init_params)
-        
+
     def fit_transformer(self, X, y, fit_params=None):
 
         if fit_params is None:
