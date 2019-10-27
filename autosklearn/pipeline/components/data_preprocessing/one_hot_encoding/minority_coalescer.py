@@ -10,10 +10,13 @@ from ConfigSpace.conditions import EqualsCondition
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
-from autosklearn.util.common import check_for_bool, check_none
+from autosklearn.util.common import check_for_bool
 
 
 class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
+    """ Group together categories which occurence is less than a specified mininum fraction.
+    """
+
     def __init__(self, use_minimum_fraction=True, minimum_fraction=0.01):
         self.use_minimum_fraction = use_minimum_fraction
         self.minimum_fraction = minimum_fraction

@@ -1,12 +1,6 @@
-import copy
-from itertools import product
-
 import numpy as np
 
-from sklearn.base import ClassifierMixin
-
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.category_shift \
     import CategoryShift
@@ -17,47 +11,26 @@ from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.one_hot
 from autosklearn.pipeline.components.data_preprocessing.imputation.categorical_imputation \
     import CategoricalImputation
 
-
 from autosklearn.pipeline.base import BasePipeline
-from autosklearn.pipeline.constants import *
 
 
 class CategoricalPreprocessingPipeline(BasePipeline):
-    """This class implements the classification task.
-
-    It implements a pipeline, which includes one preprocessing step and one
-    classification algorithm. It can render a search space including all known
-    classification and preprocessing algorithms.
-
-    Contrary to the sklearn API it is not possible to enumerate the
-    possible parameters in the __init__ function because we only know the
-    available classifiers at runtime. For this reason the user must
-    specifiy the parameters by passing an instance of
-    ConfigSpace.configuration_space.Configuration.
+    """This class implements a pipeline for data preprocessing of categorical features.
+    It assumes that the data to be transformed is made only of categorical features.
+    The steps of this pipeline are:
+        1 - Category Shift : Make sure that there are no categories with values 
+            0, 1 and 2 in the dataset. These are special values, and they are used in 
+            the next steps.
+        2 - Imputation : Assign category 2 to missing values (NaN)
+        3 - Minority coalescence: Assign category 1 to all categories whose occurence 
+            don't sum-up to a certain minimum fraction
+        4 - One hot encoding: traditional sklearn one hot encoding
 
     Parameters
     ----------
-    configuration : ConfigSpace.configuration_space.Configuration
-        The configuration to evaluate.
-
-    random_state : int, RandomState instance or None, optional (default=None)
-        If int, random_state is the seed used by the random number generator;
-        If RandomState instance, random_state is the random number generator;
-        If None, the random number generator is the RandomState instance
-        used by `np.random`.
 
     Attributes
     ----------
-    _estimator : The underlying scikit-learn classification model. This
-        variable is assigned after a call to the
-        :meth:`autosklearn.pipeline.classification.SimpleClassificationPipeline
-        .fit` method.
-
-    _preprocessor : The underlying scikit-learn preprocessing algorithm. This
-        variable is only assigned if a preprocessor is specified and
-        after a call to the
-        :meth:`autosklearn.pipeline.classification.SimpleClassificationPipeline
-        .fit` method.
 
     See also
     --------
@@ -102,7 +75,6 @@ class CategoricalPreprocessingPipeline(BasePipeline):
 
 
     def fit_transformer(self, X, y, fit_params=None):
-
         if fit_params is None:
             fit_params = {}
 
@@ -118,7 +90,6 @@ class CategoricalPreprocessingPipeline(BasePipeline):
 
         Parameters
         ----------
-        include : dict (optional, default=None)
 
         Returns
         -------
@@ -129,14 +100,6 @@ class CategoricalPreprocessingPipeline(BasePipeline):
 
         if dataset_properties is None or not isinstance(dataset_properties, dict):
             dataset_properties = dict()
-        if not 'target_type' in dataset_properties:
-            dataset_properties['target_type'] = 'classification'
-        if dataset_properties['target_type'] != 'classification':
-            dataset_properties['target_type'] = 'classification'
-
-        if 'sparse' not in dataset_properties:
-            # This dataset is probably dense
-            dataset_properties['sparse'] = False
 
         cs = self._get_base_search_space(
             cs=cs, dataset_properties=dataset_properties,
@@ -149,17 +112,15 @@ class CategoricalPreprocessingPipeline(BasePipeline):
     def _get_pipeline(self):
         steps = []
 
-        # Add the always active preprocessing components
-
         steps.extend(
             [["category_shift", CategoryShift()],
              ["imputation", CategoricalImputation(strategy="constant", fill_value=2)],
-             ["feature_coalescence", MinorityCoalescer()],
+             ["category_coalescence", MinorityCoalescer()],
              ["one_hot_encoding", OneHotEncoder()]
              ])
 
         return steps
 
     def _get_estimator_hyperparameter_name(self):
-        return "data preprocessing"
+        return "categorical data preprocessing"
 

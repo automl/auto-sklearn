@@ -1,8 +1,10 @@
 import numpy as np
 from scipy import sparse
-from sklearn.utils import check_array
 
 class MinorityCoalescer:
+    """ Group together categories which occurence is less than a specified minimum fraction.
+    """
+    
     def __init__(self, minimum_fraction=None):
         self.minimum_fraction = minimum_fraction
 

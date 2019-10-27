@@ -10,6 +10,11 @@ from autosklearn.pipeline.constants import *
 
 
 class CategoryShift(AutoSklearnPreprocessingAlgorithm):
+    """ A transformer to be used as first step on data preprocessing of categorical 
+    features. It makes integer categories greater or equal to three. Categories one 
+    and two are reserved for special purposes (imputation and coalescence)
+    """
+    
     def _fit(self, X, y=None):
         self.preprocessor = autosklearn.pipeline.implementations.CategoryShift\
             .CategoryShift()

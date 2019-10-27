@@ -1,11 +1,25 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
 
 
 class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
+    """ Imputation of categorical features. By default, replace missing values by the 
+    integer 2.
+
+    Parameters
+    ----------
+    strategy : str, optional
+        Substitution strategy. Shoudl be either ''constant' or 'most_frequent', 
+        by default 'constant'
+    fill_value : int, optional
+        Substitution value in case strategy='constant', by default 2
+    random_state : [type], optional
+        [description], by default None
+    
+    """
+
     def __init__(self, strategy='constant', fill_value=2, random_state=None):
         self.strategy = strategy
         self.fill_value = fill_value

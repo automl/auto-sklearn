@@ -1,12 +1,6 @@
-import copy
-from itertools import product
-
 import numpy as np
 
-from sklearn.base import ClassifierMixin
-
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 from autosklearn.pipeline.components.data_preprocessing import rescaling as \
     rescaling_components
@@ -16,45 +10,22 @@ from autosklearn.pipeline.components.data_preprocessing.variance_threshold.varia
     import VarianceThreshold
 
 from autosklearn.pipeline.base import BasePipeline
-from autosklearn.pipeline.constants import *
 
 
 class NumericalPreprocessingPipeline(BasePipeline):
-    """This class implements the classification task.
-
-    It implements a pipeline, which includes one preprocessing step and one
-    classification algorithm. It can render a search space including all known
-    classification and preprocessing algorithms.
-
-    Contrary to the sklearn API it is not possible to enumerate the
-    possible parameters in the __init__ function because we only know the
-    available classifiers at runtime. For this reason the user must
-    specifiy the parameters by passing an instance of
-    ConfigSpace.configuration_space.Configuration.
+    """This class implements a pipeline for data preprocessing of numerical features.
+    It assumes that the data to be transformed is made only of numerical features.
+    The steps of this pipeline are:
+        1 - Imputation: Substitution of missing values (NaN)
+        2 - VarianceThreshold: Removes low-variance features
+        3 - Rescaling: rescale features according to a certain rule (e.g. normalization,
+            standartization or min-max)
 
     Parameters
     ----------
-    configuration : ConfigSpace.configuration_space.Configuration
-        The configuration to evaluate.
-
-    random_state : int, RandomState instance or None, optional (default=None)
-        If int, random_state is the seed used by the random number generator;
-        If RandomState instance, random_state is the random number generator;
-        If None, the random number generator is the RandomState instance
-        used by `np.random`.
 
     Attributes
     ----------
-    _estimator : The underlying scikit-learn classification model. This
-        variable is assigned after a call to the
-        :meth:`autosklearn.pipeline.classification.SimpleClassificationPipeline
-        .fit` method.
-
-    _preprocessor : The underlying scikit-learn preprocessing algorithm. This
-        variable is only assigned if a preprocessor is specified and
-        after a call to the
-        :meth:`autosklearn.pipeline.classification.SimpleClassificationPipeline
-        .fit` method.
 
     See also
     --------
@@ -99,7 +70,6 @@ class NumericalPreprocessingPipeline(BasePipeline):
 
 
     def fit_transformer(self, X, y, fit_params=None):
-
         if fit_params is None:
             fit_params = {}
 
@@ -115,7 +85,6 @@ class NumericalPreprocessingPipeline(BasePipeline):
 
         Parameters
         ----------
-        include : dict (optional, default=None)
 
         Returns
         -------
@@ -126,14 +95,6 @@ class NumericalPreprocessingPipeline(BasePipeline):
 
         if dataset_properties is None or not isinstance(dataset_properties, dict):
             dataset_properties = dict()
-        if not 'target_type' in dataset_properties:
-            dataset_properties['target_type'] = 'classification'
-        if dataset_properties['target_type'] != 'classification':
-            dataset_properties['target_type'] = 'classification'
-
-        if 'sparse' not in dataset_properties:
-            # This dataset is probably dense
-            dataset_properties['sparse'] = False
 
         cs = self._get_base_search_space(
             cs=cs, dataset_properties=dataset_properties,
@@ -148,8 +109,6 @@ class NumericalPreprocessingPipeline(BasePipeline):
 
         default_dataset_properties = {'target_type': 'classification'}
 
-        # Add the always active preprocessing components
-
         steps.extend(
             [["imputation", NumericalImputation()],
              ["variance_threshold", VarianceThreshold()],
@@ -160,5 +119,5 @@ class NumericalPreprocessingPipeline(BasePipeline):
         return steps
 
     def _get_estimator_hyperparameter_name(self):
-        return "data preprocessing"
+        return "numerical data preprocessing"
 
