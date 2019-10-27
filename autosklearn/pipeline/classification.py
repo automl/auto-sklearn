@@ -8,20 +8,15 @@ from sklearn.base import ClassifierMixin
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
-from autosklearn.pipeline.components.data_preprocessing.misc.column_transformer import ColumnTransformer
-from autosklearn.pipeline.data_preprocessing_categorical import CategoricalPreprocessingPipeline
-from autosklearn.pipeline.data_preprocessing_numeric import NumericPreprocessingPipeline
+from autosklearn.pipeline.components.data_preprocessing.feature_type_splitter import FeatureTypeSplitter
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categorical import CategoricalPreprocessingPipeline
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_numerical import NumericalPreprocessingPipeline
 
 from autosklearn.pipeline.components import classification as \
     classification_components
-from autosklearn.pipeline.components.data_preprocessing import rescaling as \
-    rescaling_components
 from autosklearn.pipeline.components.data_preprocessing.balancing.balancing import \
     Balancing
-from autosklearn.pipeline.components.data_preprocessing.imputation.imputation \
-    import Imputation
-from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding \
-    import OHEChoice
+
 from autosklearn.pipeline.components import feature_preprocessing as \
     feature_preprocessing_components
 from autosklearn.pipeline.components.data_preprocessing.variance_threshold.variance_threshold \
@@ -296,12 +291,12 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
         # Add the always active preprocessing components
 
-        preprocessing_ct = ColumnTransformer(
+        data_preprocessing = FeatureTypeSplitter(
             CategoricalPreprocessingPipeline(),
-            NumericPreprocessingPipeline())
+            NumericalPreprocessingPipeline())
 
         steps.extend([
-            ["preprocessing_columntransformer", preprocessing_ct],
+            ["data_preprocessing", data_preprocessing],
             ["balancing", Balancing()],
             ["feature_preprocessor", 
                 feature_preprocessing_components.FeaturePreprocessorChoice(

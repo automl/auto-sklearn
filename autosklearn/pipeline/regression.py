@@ -11,8 +11,8 @@ from autosklearn.pipeline.components import regression as \
     regression_components
 from autosklearn.pipeline.components.data_preprocessing import rescaling as \
     rescaling_components
-from autosklearn.pipeline.components.data_preprocessing.imputation.imputation \
-    import Imputation
+from autosklearn.pipeline.components.data_preprocessing.imputation.numerical_imputation \
+    import NumericalImputation 
 from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding \
     import OHEChoice
 from autosklearn.pipeline.components import feature_preprocessing as \
@@ -262,7 +262,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
         steps.extend(
             [["categorical_encoding", OHEChoice(default_dataset_properties)],
-             ["imputation", Imputation()],
+             ["imputation", NumericalImputation()],
              ["variance_threshold", VarianceThreshold()],
              ["rescaling", rescaling_components.RescalingChoice(
                  default_dataset_properties)]])
