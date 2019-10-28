@@ -17,13 +17,11 @@ class CategoricalPreprocessingPipeline(BasePipeline):
     """This class implements a pipeline for data preprocessing of categorical features.
     It assumes that the data to be transformed is made only of categorical features.
     The steps of this pipeline are:
-        1 - Category Shift : Make sure that there are no categories with values 
-            0, 1 and 2 in the dataset. These are special values, and they are used in 
-            the next steps.
-        2 - Imputation : Assign category 2 to missing values (NaN)
-        3 - Minority coalescence: Assign category 1 to all categories whose occurence 
+        1 - Imputation: Make sure that categories are integers no smaller than three, and
+            assign category 2 to missing values (NaN).
+        2 - Minority coalescence: Assign category 1 to all categories whose occurence 
             don't sum-up to a certain minimum fraction
-        4 - One hot encoding: traditional sklearn one hot encoding
+        3 - One hot encoding: usual sklearn one hot encoding
 
     Parameters
     ----------

@@ -9,7 +9,7 @@ from autosklearn.pipeline.constants import *
 
 class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
     """ Imputation of categorical features. It should be used as a first step on a data 
-    preprocessing pipeline of categorical.features. It makes sure categories are all
+    preprocessing pipeline of categorical features. It makes sure categories are all
     integers greater or equal to three. Then missing values are substitued (imputed) by 
     the two. 
     
