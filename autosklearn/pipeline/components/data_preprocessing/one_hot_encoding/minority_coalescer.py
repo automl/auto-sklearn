@@ -14,7 +14,7 @@ from autosklearn.util.common import check_for_bool
 
 
 class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
-    """ Group together categories which occurence is less than a specified mininum fraction.
+    """ Group together categories which occurence is less than a specified minimum fraction.
     """
 
     def __init__(self, use_minimum_fraction=True, minimum_fraction=0.01):

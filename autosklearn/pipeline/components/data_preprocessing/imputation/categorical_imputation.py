@@ -1,41 +1,44 @@
-from ConfigSpace.configuration_space import ConfigurationSpace
+import numpy as np
+from scipy import sparse
+from sklearn.utils import check_array
 
+from ConfigSpace.configuration_space import ConfigurationSpace
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
 
 
 class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
-    """ Imputation of categorical features. By default, replace missing values by the 
-    integer 2.
-
-    Parameters
-    ----------
-    strategy : str, optional
-        Substitution strategy. Shoudl be either ''constant' or 'most_frequent', 
-        by default 'constant'
-    fill_value : int, optional
-        Substitution value in case strategy='constant', by default 2
-    random_state : [type], optional
-        [description], by default None
+    """ Imputation of categorical features. It should be used as a first step on a data 
+    preprocessing pipeline of categorical.features. It makes sure categories are all
+    integers greater or equal to three. Then missing values are substitued (imputed) by 
+    the two. 
     
     """
 
-    def __init__(self, strategy='constant', fill_value=2, random_state=None):
-        self.strategy = strategy
-        self.fill_value = fill_value
+    def __init__(self, random_state=None):
+        self.random_stated = random_state
 
     def fit(self, X, y=None):
-        import sklearn.impute
-
-        self.preprocessor = sklearn.impute.SimpleImputer(
-            strategy=self.strategy, fill_value=self.fill_value, copy=False)
-        self.preprocessor = self.preprocessor.fit(X)
         return self
 
     def transform(self, X):
-        if self.preprocessor is None:
-            raise NotImplementedError()
-        return self.preprocessor.transform(X)
+        # Increment everything by three to account for the fact that
+        # np.NaN will get an index of two, and coalesced values will get index of
+        # one, index of zero is not assigned to also work with sparse data
+        if sparse.issparse(X):
+            X.data += 3
+            X.data[~np.isfinite(X.data)] = 2
+        else:
+            X += 3
+            X[~np.isfinite(X)] = 2
+
+        X = check_array(X, accept_sparse='csc', force_all_finite=False,
+                        dtype=np.int32)
+
+        if X.min() < 0:
+            raise ValueError("X needs to contain only non-negative integers.")
+
+        return X
 
     @staticmethod
     def get_properties(dataset_properties=None):
