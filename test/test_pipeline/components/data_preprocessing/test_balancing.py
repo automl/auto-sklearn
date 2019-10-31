@@ -62,7 +62,7 @@ class BalancingComponentTest(unittest.TestCase):
                          list(init_params.items())[0])
         init_params, fit_params = balancing.get_weights(
             Y, None, 'liblinear_svc_preprocessor', None, None)
-        self.assertEqual(("preprocessor:class_weight", "balanced"),
+        self.assertEqual(("feature_preprocessor:class_weight", "balanced"),
                          list(init_params.items())[0])
 
     def test_weighting_effect(self):
@@ -93,7 +93,7 @@ class BalancingComponentTest(unittest.TestCase):
                 Y_test = data_[1][100:]
 
                 include = {'classifier': [name],
-                           'preprocessor': ['no_preprocessing']}
+                           'feature_preprocessor': ['no_preprocessing']}
                 classifier = SimpleClassificationPipeline(
                     random_state=1, include=include)
                 cs = classifier.get_hyperparameter_search_space()
@@ -137,7 +137,7 @@ class BalancingComponentTest(unittest.TestCase):
                 X_test = data_[0][100:]
                 Y_test = data_[1][100:]
 
-                include = {'classifier': ['sgd'], 'preprocessor': [name]}
+                include = {'classifier': ['sgd'], 'feature_preprocessor': [name]}
 
                 classifier = SimpleClassificationPipeline(
                     random_state=1, include=include)

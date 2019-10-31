@@ -10,8 +10,8 @@ from autosklearn.pipeline.constants import *
 
 
 class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self):
-        pass
+    def __init__(self, random_state=None):
+        self.random_state = random_state
 
     def _fit(self, X, y=None):
         self.preprocessor = sklearn.preprocessing.OneHotEncoder(sparse=True, categories='auto')
