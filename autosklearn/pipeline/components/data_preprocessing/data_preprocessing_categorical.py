@@ -2,6 +2,8 @@ import numpy as np
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
+from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.category_shift \
+    import CategoryShift
 from autosklearn.pipeline.components.data_preprocessing.imputation.categorical_imputation \
     import CategoricalImputation
 from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.minority_coalescer \
@@ -110,7 +112,8 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         steps = []
 
         steps.extend(
-            [["imputation", CategoricalImputation()],
+            [["category_shift", CategoryShift()],
+             ["imputation", CategoricalImputation()],
              ["category_coalescence", MinorityCoalescer()],
              ["one_hot_encoding", OneHotEncoder()]
              ])

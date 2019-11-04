@@ -7,9 +7,12 @@ from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorit
 from autosklearn.pipeline.constants import *
 
 
-class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
-    """
-    Substitute missing values by 2
+class CategoryShift(AutoSklearnPreprocessingAlgorithm):
+    """ Imputation of categorical features. It should be used as a first step on a data 
+    preprocessing pipeline of categorical features. It makes sure categories are all
+    integers greater or equal to three. Then missing values are substitued (imputed) by 
+    the two. 
+    
     """
 
     def __init__(self, random_state=None):
@@ -18,25 +21,22 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
     def fit(self, X, y=None):
         return self
 
-    def fit(self, X, y=None):
-        import sklearn.impute
-
-        self.preprocessor = sklearn.impute.SimpleImputer(
-            strategy='constant', fill_value=2, copy=False)
-        self.preprocessor = self.preprocessor.fit(X)
-        return self
-
     def transform(self, X):
-        if self.preprocessor is None:
-            raise NotImplementedError()
-        X = self.preprocessor.transform(X)
-        X = check_array(X, accept_sparse='csc', dtype=np.int32)
+        # Increment everything by three to account for the fact that
+        # np.NaN will get an index of two, and coalesced values will get index of
+        # one, index of zero is not assigned to also work with sparse data
+        
+        X_data = X.data if sparse.issparse(X) else X
+        if np.nanmin(X_data) < 0:
+            raise ValueError("X needs to contain only non-negative integers.")
+        X_data += 3
+
         return X
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'CategImputation',
-                'name': 'Categorical Imputation',
+        return {'shortname': 'CategShift',
+                'name': 'Category Shift',
                 'handles_missing_values': True,
                 'handles_nominal_values': True,
                 'handles_numerical_features': True,
