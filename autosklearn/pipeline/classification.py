@@ -41,7 +41,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
     Parameters
     ----------
-    configuration : ConfigSpace.configuration_space.Configuration
+    config : ConfigSpace.configuration_space.Configuration
         The configuration to evaluate.
 
     random_state : int, RandomState instance or None, optional (default=None)
