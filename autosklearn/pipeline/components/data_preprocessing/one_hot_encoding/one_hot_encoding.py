@@ -14,7 +14,7 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
         self.random_state = random_state
 
     def fit(self, X, y=None):
-        self.preprocessor = sklearn.preprocessing.OneHotEncoder(sparse=True, categories='auto')
+        self.preprocessor = sklearn.preprocessing.OneHotEncoder(sparse=False, categories='auto')
         self.preprocessor.fit(X, y)
         return self
 

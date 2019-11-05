@@ -9,49 +9,16 @@ from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.one_hot
 from autosklearn.pipeline.util import _test_preprocessing
 
 
+def create_X(instances=1000, n_feats=10, categs_per_feat=5, random_state=0):
+    np.random.seed(random_state)
+    size = (instances, n_feats)
+    X = np.random.randint(0, categs_per_feat, size=size)
+    return X
+
 class OneHotEncoderTest(unittest.TestCase):
+
     def setUp(self):
-        self.categorical = [True,
-                            True,
-                            True,
-                            False,
-                            False,
-                            True,
-                            True,
-                            True,
-                            False,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            False,
-                            False,
-                            False,
-                            True,
-                            True,
-                            True,
-                            True]
-        this_directory = os.path.dirname(__file__)
-        self.X_train = np.loadtxt(os.path.join(this_directory, "dataset.pkl"))
+        self.X_train = create_X()
 
     def test_default_configuration(self):
         transformations = []
@@ -60,8 +27,7 @@ class OneHotEncoderTest(unittest.TestCase):
             default = configuration_space.get_default_configuration()
 
             preprocessor = OneHotEncoder(random_state=1,
-                                         categorical_features=self.categorical,
-                                        **{hp_name: default[hp_name] for hp_name in
+                                         **{hp_name: default[hp_name] for hp_name in
                                            default if default[hp_name] is not None})
 
             transformer = preprocessor.fit(self.X_train.copy())
@@ -93,7 +59,6 @@ class OneHotEncoderTest(unittest.TestCase):
             default = configuration_space.get_default_configuration()
 
             preprocessor = OneHotEncoder(random_state=1,
-                                         categorical_features=self.categorical,
                                          **{hp_name: default[hp_name] for
                                             hp_name in
                                             default if
