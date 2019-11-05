@@ -30,7 +30,7 @@ class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
 
         self.preprocessor = autosklearn.pipeline.implementations.MinorityCoalescer\
             .MinorityCoalescer(minimum_fraction=self.minimum_fraction)
-
+        self.preprocessor.fit(X, y)
         return self
     
     def transform(self, X):
