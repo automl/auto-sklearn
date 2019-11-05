@@ -13,35 +13,15 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, random_state=None):
         self.random_state = random_state
 
-    def _fit(self, X, y=None):
-        self.preprocessor = sklearn.preprocessing.OneHotEncoder(sparse=True, categories='auto')
-        return self.preprocessor.fit_transform(X)
-
     def fit(self, X, y=None):
-        self._fit(X, y)
+        self.preprocessor = sklearn.preprocessing.OneHotEncoder(sparse=True, categories='auto')
+        self.preprocessor.fit(X, y)
         return self
 
-    def fit_transform(self, X, y=None):
-        is_sparse = scipy.sparse.issparse(X)
-        X = self._fit(X)
-        if is_sparse:
-            return X
-        elif isinstance(X, np.ndarray):
-            return X
-        else:
-            return X.toarray()
-
     def transform(self, X):
-        is_sparse = scipy.sparse.issparse(X)
         if self.preprocessor is None:
             raise NotImplementedError()
-        X = self.preprocessor.transform(X)
-        if is_sparse:
-            return X
-        elif isinstance(X, np.ndarray):
-            return X
-        else:
-            return X.toarray()
+        return self.preprocessor.transform(X)
 
     @staticmethod
     def get_properties(dataset_properties=None):

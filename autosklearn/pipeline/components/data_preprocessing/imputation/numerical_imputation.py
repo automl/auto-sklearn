@@ -6,16 +6,6 @@ from autosklearn.pipeline.constants import *
 
 
 class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
-    """ Imputation of numerical features. By default, replace missing values by the 
-    mean of the others.
-
-    Parameters
-    ----------
-    strategy : str, optional
-        Substitution strategy. Should be either 'mean' or 'median', by default 'mean'
-    random_state : [type], optional
-        [description], by default None
-    """
 
     def __init__(self, strategy='mean', random_state=None):
         self.strategy = strategy
@@ -35,7 +25,7 @@ class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'NumerImputation',
+        return {'shortname': 'NumericalImputation',
                 'name': 'Numerical Imputation',
                 'handles_missing_values': True,
                 'handles_nominal_values': True,

@@ -35,7 +35,7 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'CategImputation',
+        return {'shortname': 'CategoricalImputation',
                 'name': 'Categorical Imputation',
                 'handles_missing_values': True,
                 'handles_nominal_values': True,

@@ -20,9 +20,8 @@ class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, use_minimum_fraction=True, minimum_fraction=0.01, random_state=None):
         self.use_minimum_fraction = use_minimum_fraction
         self.minimum_fraction = minimum_fraction
-        
 
-    def _fit(self, X, y=None):
+    def fit(self, X, y=None):
         self.use_minimum_fraction = check_for_bool(self.use_minimum_fraction)
         if self.use_minimum_fraction is False:
             self.minimum_fraction = None
@@ -32,15 +31,8 @@ class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
         self.preprocessor = autosklearn.pipeline.implementations.MinorityCoalescer\
             .MinorityCoalescer(minimum_fraction=self.minimum_fraction)
 
-        return self.preprocessor.fit_transform(X)
-
-    def fit(self, X, y=None):
-        self._fit(X, y)
         return self
-
-    def fit_transform(self, X, y=None):
-        return self._fit(X)
-
+    
     def transform(self, X):
         if self.preprocessor is None:
             raise NotImplementedError()

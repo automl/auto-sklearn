@@ -8,11 +8,10 @@ from autosklearn.pipeline.constants import *
 
 
 class CategoryShift(AutoSklearnPreprocessingAlgorithm):
-    """ Imputation of categorical features. It should be used as a first step on a data 
-    preprocessing pipeline of categorical features. It makes sure categories are all
-    integers greater or equal to three. Then missing values are substitued (imputed) by 
-    the two. 
-    
+    """ Add 3 to every category.
+    Down in the pipeline, category 2 will be attribute to missing values,
+    category 1 will be assigned to low occurence categories, and category 0
+    is not used, so to provide compatibility with sparse matrices.
     """
 
     def __init__(self, random_state=None):

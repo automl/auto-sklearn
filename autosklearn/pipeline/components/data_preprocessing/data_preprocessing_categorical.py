@@ -19,27 +19,22 @@ class CategoricalPreprocessingPipeline(BasePipeline):
     """This class implements a pipeline for data preprocessing of categorical features.
     It assumes that the data to be transformed is made only of categorical features.
     The steps of this pipeline are:
-        1 - Imputation: Make sure that categories are integers no smaller than three, and
-            assign category 2 to missing values (NaN).
-        2 - Minority coalescence: Assign category 1 to all categories whose occurence 
+        1 - Category shift: Adds 3 to every category value
+        2 - Imputation: Assign category 2 to missing values (NaN).
+        3 - Minority coalescence: Assign category 1 to all categories whose occurence 
             don't sum-up to a certain minimum fraction
-        3 - One hot encoding: usual sklearn one hot encoding
+        4 - One hot encoding: usual sklearn one hot encoding
 
     Parameters
     ----------
+    config : ConfigSpace.configuration_space.Configuration
+        The configuration to evaluate.
 
-    Attributes
-    ----------
-
-    See also
-    --------
-
-    References
-    ----------
-
-    Examples
-    --------
-
+    random_state : int, RandomState instance or None, optional (default=None)
+        If int, random_state is the seed used by the random number generator;
+        If RandomState instance, random_state is the random number generator;
+        If None, the random number generator is the RandomState instance
+        used by `np.random`.
     """
 
     def __init__(self, config=None, pipeline=None, dataset_properties=None,
