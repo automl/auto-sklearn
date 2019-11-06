@@ -5,6 +5,7 @@ import sklearn.preprocessing
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
+import autosklearn.pipeline.implementations.SparseOneHotEncoder
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
 
@@ -14,7 +15,12 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
         self.random_state = random_state
 
     def fit(self, X, y=None):
-        self.preprocessor = sklearn.preprocessing.OneHotEncoder(sparse=False, categories='auto')
+        if scipy.sparse.issparse(X):
+            self.preprocessor = autosklearn.pipeline.implementations.SparseOneHotEncoder\
+                .SparseOneHotEncoder()
+        else:
+            self.preprocessor = sklearn.preprocessing\
+                .OneHotEncoder(sparse=False, categories='auto')
         self.preprocessor.fit(X, y)
         return self
 

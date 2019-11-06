@@ -290,8 +290,10 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         default_dataset_properties = {'target_type': 'classification'}
 
         data_preprocessing = FeatureTypeSplitter(
-            CategoricalPreprocessingPipeline(),
-            NumericalPreprocessingPipeline())
+            CategoricalPreprocessingPipeline(
+                dataset_properties=default_dataset_properties),
+            NumericalPreprocessingPipeline(
+                dataset_properties=default_dataset_properties))
 
         steps.extend([
             ["data_preprocessing", data_preprocessing],

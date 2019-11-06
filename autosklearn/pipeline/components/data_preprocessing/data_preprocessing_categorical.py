@@ -2,15 +2,14 @@ import numpy as np
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
-from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.category_shift \
+from autosklearn.pipeline.components.data_preprocessing.category_shift.category_shift \
     import CategoryShift
 from autosklearn.pipeline.components.data_preprocessing.imputation.categorical_imputation \
     import CategoricalImputation
-from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.minority_coalescer \
+from autosklearn.pipeline.components.data_preprocessing.minority_coalescer.minority_coalescer \
     import MinorityCoalescer
-from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.one_hot_encoding \
-    import OneHotEncoder
-
+from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding \
+    import OHEChoice
 
 from autosklearn.pipeline.base import BasePipeline
 
@@ -110,7 +109,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
             [["category_shift", CategoryShift()],
              ["imputation", CategoricalImputation()],
              ["category_coalescence", MinorityCoalescer()],
-             ["one_hot_encoding", OneHotEncoder()]
+             ["one_hot_encoding", OHEChoice(self.dataset_properties_)]
              ])
 
         return steps

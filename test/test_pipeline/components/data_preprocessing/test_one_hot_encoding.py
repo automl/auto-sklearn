@@ -6,6 +6,8 @@ from scipy import sparse
 
 from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.one_hot_encoding \
     import OneHotEncoder
+from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.no_encoding \
+    import NoEncoding
 from autosklearn.pipeline.util import _test_preprocessing
 
 
@@ -40,7 +42,7 @@ class OneHotEncoderTest(unittest.TestCase):
     def test_default_configuration_no_encoding(self):
         transformations = []
         for i in range(2):
-            transformation, original = _test_preprocessing(OneHotEncoder)
+            transformation, original = _test_preprocessing(NoEncoding)
             self.assertEqual(transformation.shape, original.shape)
             self.assertTrue((transformation == original).all())
             transformations.append(transformation)
@@ -76,7 +78,7 @@ class OneHotEncoderTest(unittest.TestCase):
         transformations = []
 
         for i in range(2):
-            transformation, original = _test_preprocessing(OneHotEncoder,
+            transformation, original = _test_preprocessing(NoEncoding,
                                                            make_sparse=True)
             self.assertEqual(transformation.shape, original.shape)
             self.assertTrue((transformation.todense() == original.todense()).all())
