@@ -6,8 +6,8 @@ from autosklearn.pipeline.components.data_preprocessing.category_shift.category_
     import CategoryShift
 from autosklearn.pipeline.components.data_preprocessing.imputation.categorical_imputation \
     import CategoricalImputation
-from autosklearn.pipeline.components.data_preprocessing.minority_coalescer.minority_coalescer \
-    import MinorityCoalescer
+from autosklearn.pipeline.components.data_preprocessing.minority_coalescer \
+    import CoalescerChoice
 from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding \
     import OHEChoice
 
@@ -108,7 +108,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         steps.extend(
             [["category_shift", CategoryShift()],
              ["imputation", CategoricalImputation()],
-             ["category_coalescence", MinorityCoalescer()],
+             ["category_coalescence", CoalescerChoice(self.dataset_properties_)],
              ["one_hot_encoding", OHEChoice(self.dataset_properties_)]
              ])
 

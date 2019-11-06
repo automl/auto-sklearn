@@ -4,9 +4,7 @@ import scipy.sparse
 import autosklearn.pipeline.implementations.MinorityCoalescer
 
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
-    UniformFloatHyperparameter
-from ConfigSpace.conditions import EqualsCondition
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
@@ -17,16 +15,11 @@ class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
     """ Group together categories which occurence is less than a specified minimum fraction.
     """
 
-    def __init__(self, use_minimum_fraction=True, minimum_fraction=0.01, random_state=None):
-        self.use_minimum_fraction = use_minimum_fraction
+    def __init__(self, minimum_fraction=0.01, random_state=None):
         self.minimum_fraction = minimum_fraction
 
     def fit(self, X, y=None):
-        self.use_minimum_fraction = check_for_bool(self.use_minimum_fraction)
-        if self.use_minimum_fraction is False:
-            self.minimum_fraction = None
-        else:
-            self.minimum_fraction = float(self.minimum_fraction)
+        self.minimum_fraction = float(self.minimum_fraction)
 
         self.preprocessor = autosklearn.pipeline.implementations.MinorityCoalescer\
             .MinorityCoalescer(minimum_fraction=self.minimum_fraction)
@@ -55,11 +48,7 @@ class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
-        use_minimum_fraction = CategoricalHyperparameter(
-            "use_minimum_fraction", ["True", "False"], default_value="True")
         minimum_fraction = UniformFloatHyperparameter(
             "minimum_fraction", lower=.0001, upper=0.5, default_value=0.01, log=True)
-        cs.add_hyperparameters([use_minimum_fraction, minimum_fraction])
-        cs.add_condition(EqualsCondition(minimum_fraction,
-                                         use_minimum_fraction, 'True'))
+        cs.add_hyperparameter(minimum_fraction)
         return cs
