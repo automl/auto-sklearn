@@ -17,10 +17,10 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
     def fit(self, X, y=None):
         if scipy.sparse.issparse(X):
             self.preprocessor = autosklearn.pipeline.implementations.SparseOneHotEncoder\
-                .SparseOneHotEncoder()
+                .SparseOneHotEncoder(sparse=True)
         else:
             self.preprocessor = sklearn.preprocessing\
-                .OneHotEncoder(sparse=False, categories='auto')
+                .OneHotEncoder(sparse=True, categories='auto')
         self.preprocessor.fit(X, y)
         return self
 

@@ -1,7 +1,5 @@
 import numpy as np
 
-import autosklearn.pipeline.implementations.OneHotEncoder
-
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
     UniformFloatHyperparameter

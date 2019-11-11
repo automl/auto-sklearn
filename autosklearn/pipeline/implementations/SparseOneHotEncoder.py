@@ -8,10 +8,9 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
     The input to this transformer should be a SPARSE matrix of integers. 
     """
 
-    #def __init__(self, dtype=np.float, sparse=True):
     def __init__(self, dtype=np.float, sparse=True):
         self.dtype = dtype
-        #self.sparse = sparse
+        self.sparse = sparse
 
     def fit(self, X, y=None):
         return self
@@ -44,5 +43,5 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
         active_features = np.where(mask)[0]
         out = out[:, active_features]
         self.active_features_ = active_features
-        #return out.tocsr() if self.sparse else out.toarray()
-        return out.tocsr()
+        
+        return out.tocsr() if self.sparse else out.toarray()
