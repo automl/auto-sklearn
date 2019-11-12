@@ -6,19 +6,17 @@ import numpy as np
 from sklearn.base import RegressorMixin
 
 from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
+
+
+from autosklearn.pipeline.components.data_preprocessing.feature_type_splitter import FeatureTypeSplitter
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categorical import CategoricalPreprocessingPipeline
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_numerical import NumericalPreprocessingPipeline
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from autosklearn.pipeline.components import regression as \
     regression_components
-from autosklearn.pipeline.components.data_preprocessing import rescaling as \
-    rescaling_components
-from autosklearn.pipeline.components.data_preprocessing.imputation.numerical_imputation \
-    import NumericalImputation 
-from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding \
-    import OHEChoice
 from autosklearn.pipeline.components import feature_preprocessing as \
     feature_preprocessing_components
-from autosklearn.pipeline.components.data_preprocessing.variance_threshold.variance_threshold \
-    import VarianceThreshold
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
 
@@ -170,7 +168,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
             exclude=exclude, include=include, pipeline=self.steps)
 
         regressors = cs.get_hyperparameter('regressor:__choice__').choices
-        preprocessors = cs.get_hyperparameter('preprocessor:__choice__').choices
+        preprocessors = cs.get_hyperparameter('feature_preprocessor:__choice__').choices
         available_regressors = self._final_estimator.get_available_components(
             dataset_properties)
 
@@ -194,7 +192,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                                             'regressor:__choice__'), key),
                                     ForbiddenEqualsClause(
                                         cs.get_hyperparameter(
-                                            'preprocessor:__choice__'), 'densifier')
+                                            'feature_preprocessor:__choice__'), 'densifier')
                                 ))
                             # Success
                             break
@@ -226,7 +224,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                         ForbiddenEqualsClause(cs.get_hyperparameter(
                             "regressor:__choice__"), r),
                         ForbiddenEqualsClause(cs.get_hyperparameter(
-                            "preprocessor:__choice__"), f)))
+                            "feature_preprocessor:__choice__"), f)))
                     break
                 except KeyError:
                     break
@@ -252,30 +250,22 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
         default_dataset_properties = {'target_type': 'regression'}
 
-        # Add the always active preprocessing components
-        if init_params is not None and 'one_hot_encoding' in init_params:
-            ohe_init_params = init_params['one_hot_encoding']
-            if 'categorical_features' in ohe_init_params:
-                categorical_features = ohe_init_params['categorical_features']
-        else:
-            categorical_features = None
+        data_preprocessing = FeatureTypeSplitter(
+            CategoricalPreprocessingPipeline(
+                dataset_properties=default_dataset_properties),
+            NumericalPreprocessingPipeline(
+                dataset_properties=default_dataset_properties))
 
-        steps.extend(
-            [["categorical_encoding", OHEChoice(default_dataset_properties)],
-             ["imputation", NumericalImputation()],
-             ["variance_threshold", VarianceThreshold()],
-             ["rescaling", rescaling_components.RescalingChoice(
-                 default_dataset_properties)]])
-
-        # Add the preprocessing component
-        steps.append(['preprocessor',
-                      feature_preprocessing_components.FeaturePreprocessorChoice(
-                          default_dataset_properties)])
-
-        # Add the classification component
-        steps.append(['regressor',
+        steps.extend([
+            ["data_preprocessing", data_preprocessing],
+            ["feature_preprocessor", 
+                feature_preprocessing_components.FeaturePreprocessorChoice(
+                    default_dataset_properties)],
+            ['regressor',
                       regression_components.RegressorChoice(
-                          default_dataset_properties)])
+                          default_dataset_properties)]
+        ])
+
         return steps
 
     def _get_estimator_hyperparameter_name(self):
