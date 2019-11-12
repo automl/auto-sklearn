@@ -36,8 +36,8 @@ class OneHotEncoderTest(unittest.TestCase):
             Xt = transformer.transform(self.X_train.copy())
             transformations.append(Xt)
             if len(transformations) > 1:
-                self.assertFalse(
-                    (transformations[-1] != transformations[-2]).count_nonzero() > 0)
+                self.assertEqual(
+                    (transformations[-1] != transformations[-2]).count_nonzero(), 0)
 
     def test_default_configuration_no_encoding(self):
         transformations = []

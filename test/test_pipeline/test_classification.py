@@ -234,28 +234,29 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                   data=data, init_params=init_params)
 
     @unittest.mock.patch('autosklearn.pipeline.components.data_preprocessing'
-                         '.one_hot_encoding.OHEChoice.set_hyperparameters')
+                         '.feature_type_splitter.FeatureTypeSplitter.set_hyperparameters')
     def test_categorical_passed_to_one_hot_encoder(self, ohe_mock):
         cls = SimpleClassificationPipeline(
             init_params={
-                'categorical_encoding:one_hot_encoding:categorical_features':
+                'data_preprocessing:categorical_features':
                     [True, False]
             }
         )
+
         self.assertEqual(
             ohe_mock.call_args[1]['init_params'],
-            {'one_hot_encoding:categorical_features': [True, False]}
+            {'categorical_features': [True, False]}
         )
         default = cls.get_hyperparameter_search_space().get_default_configuration()
         cls.set_hyperparameters(configuration=default,
             init_params={
-                'categorical_encoding:one_hot_encoding:categorical_features':
+                'data_preprocessing:categorical_features':
                     [True, True, False]
             }
         )
         self.assertEqual(
             ohe_mock.call_args[1]['init_params'],
-            {'one_hot_encoding:categorical_features': [True, True, False]}
+            {'categorical_features': [True, True, False]}
         )
 
     def _test_configurations(self, configurations_space, make_sparse=False,
@@ -388,7 +389,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         # The four parameters which are always active are classifier,
         # preprocessor, imputation strategy and scaling strategy
-        self.assertEqual(len(hyperparameters) - 6, len(conditions))
+        self.assertEqual(len(hyperparameters) - 7, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
         cs = SimpleClassificationPipeline(include={'classifier': ['libsvm_svc']})\
