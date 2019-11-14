@@ -39,6 +39,10 @@ class FeatureTypeSplitter(AutoSklearnComponent):
         self.categorical_features = None
 
     def _fit(self, X, y=None):
+        # ColumnTransformer doesn't accept sparse matrices as input
+        if scipy.sparse.issparse(X):
+            X = X.todense()
+
         n_feats = X.shape[1]
         # If categorical_features is none or an array made just of False booleans, then
         # only the numerical transformer is used
@@ -65,11 +69,14 @@ class FeatureTypeSplitter(AutoSklearnComponent):
         return self
 
     def fit_transform(self, X, y=None):
-        return self._fit(X)
+        self._fit(X)
+        return self.transform(X)
 
     def transform(self, X):
         if self.column_transformer is None:
             raise NotImplementedError()
+        if scipy.sparse.issparse(X):
+            X = X.todense()
         return self.column_transformer.transform(X)
 
     @staticmethod
