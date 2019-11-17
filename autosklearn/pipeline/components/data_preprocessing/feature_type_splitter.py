@@ -39,27 +39,25 @@ class FeatureTypeSplitter(AutoSklearnComponent):
         self.categorical_features = None
 
     def _fit(self, X, y=None):
-        # ColumnTransformer doesn't accept sparse matrices as input
-        if scipy.sparse.issparse(X):
-            X = X.todense()
-
         n_feats = X.shape[1]
         # If categorical_features is none or an array made just of False booleans, then
         # only the numerical transformer is used
         if self.categorical_features is None or np.all(np.logical_not(self.categorical_features)):
             sklearn_transf_spec = [
-                [self._transformers[1][0], self._transformers[1][1], [True] * n_feats]
+                [self._transformers[1][0], self._transformers[1][1], list(range(n_feats))]
             ]
         # If all features are categorical, then just the categorical transformer is used 
         elif np.all(self.categorical_features):
             sklearn_transf_spec = [
-                [self._transformers[0][0], self._transformers[0][1], [True] * n_feats]
+                [self._transformers[0][0], self._transformers[0][1], list(range(n_feats))]
             ]
         # For the other cases, both transformers are used
         else:
+            cat_feats = np.where(self.categorical_features)[0]
+            num_feats = np.where(np.logical_not(self.categorical_features))[0]
             sklearn_transf_spec = [
-                [self._transformers[0][0], self._transformers[0][1], self.categorical_features],
-                [self._transformers[1][0], self._transformers[1][1], np.logical_not(self.categorical_features)]
+                [self._transformers[0][0], self._transformers[0][1], cat_feats],
+                [self._transformers[1][0], self._transformers[1][1], num_feats]
             ]
         self.column_transformer = sklearn.compose.ColumnTransformer(sklearn_transf_spec)
         return self.column_transformer.fit_transform(X)
@@ -75,8 +73,6 @@ class FeatureTypeSplitter(AutoSklearnComponent):
     def transform(self, X):
         if self.column_transformer is None:
             raise NotImplementedError()
-        if scipy.sparse.issparse(X):
-            X = X.todense()
         return self.column_transformer.transform(X)
 
     @staticmethod
