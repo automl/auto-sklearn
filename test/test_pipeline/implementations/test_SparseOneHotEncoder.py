@@ -1,0 +1,112 @@
+import unittest
+
+import numpy as np
+import scipy.sparse
+from sklearn.utils.testing import assert_array_almost_equal
+import sklearn.tree
+import sklearn.datasets
+import sklearn.model_selection
+import sklearn.pipeline
+import sklearn.impute
+import openml
+
+from autosklearn.pipeline.implementations.SparseOneHotEncoder import SparseOneHotEncoder
+from autosklearn.pipeline.implementations.CategoryShift import CategoryShift
+
+
+# All NaN slice
+sparse1 = scipy.sparse.csc_matrix(([3, 2, 1, 1, 2, 3],
+                                   ((1, 4, 5, 2, 3, 5),
+                                    (0, 0, 0, 1, 1, 1))), shape=(6, 2))
+sparse1_1h = scipy.sparse.csc_matrix(([1, 1, 1, 1, 1, 1],
+                                      ((5, 4, 1, 2, 3, 5),
+                                       (0, 1, 2, 3, 4, 5))), shape=(6, 6))
+
+# All zeros slice
+sparse2 = scipy.sparse.csc_matrix(([2, 1, 0, 0, 0, 0],
+                                   ((1, 4, 5, 2, 3, 5),
+                                    (0, 0, 0, 1, 1, 1))), shape=(6, 2))
+sparse2_1h = scipy.sparse.csc_matrix(([1, 1, 1, 1, 1, 1],
+                                      ((5, 4, 1, 2, 3, 5),
+                                       (0, 1, 2, 3, 3, 3))), shape=(6, 4))
+
+sparse2_csr = scipy.sparse.csr_matrix(([2, 1, 0, 0, 0, 0],
+                                      ((1, 4, 5, 2, 3, 5),
+                                       (0, 0, 0, 1, 1, 1))), shape=(6, 2))
+sparse2_csr_1h = scipy.sparse.csr_matrix(([1, 1, 1, 1, 1, 1],
+                                         ((5, 4, 1, 2, 3, 5),
+                                          (0, 1, 2, 3, 3, 3))), shape=(6, 4))
+
+
+class TestSparseOneHotEncoder(unittest.TestCase):
+    def test_sparse1(self):
+        self._fit_then_transform(sparse1_1h.todense(), sparse1)
+
+    def test_sparse2(self):
+        self._fit_then_transform(sparse2_1h.todense(), sparse2)
+
+    def test_sparse2_csr(self):
+        self._fit_then_transform(sparse2_csr_1h.todense(), sparse2_csr)
+
+    def _fit_then_transform(self, expected, input):
+        # Test fit_transform
+        input_copy = input.copy()
+        ohe = SparseOneHotEncoder()
+        transformation = ohe.fit_transform(input)
+        self.assertIsInstance(transformation, scipy.sparse.csr_matrix)
+        assert_array_almost_equal(expected.astype(float),
+                                  transformation.todense())
+        self._check_arrays_equal(input, input_copy)
+
+        # Test fit, and afterwards transform
+        ohe2 = SparseOneHotEncoder()
+        ohe2.fit(input)
+        transformation = ohe2.transform(input)
+        self.assertIsInstance(transformation, scipy.sparse.csr_matrix)
+        assert_array_almost_equal(expected, transformation.todense())
+        self._check_arrays_equal(input, input_copy)
+
+    def _check_arrays_equal(self, a1, a2):
+        if scipy.sparse.issparse(a1):
+            a1 = a1.toarray()
+        if scipy.sparse.issparse(a2):
+            a2 = a2.toarray()
+        assert_array_almost_equal(a1, a2)
+
+    def test_transform_with_unknown_value(self):
+        input = np.array(((0, 1, 2, 3, 4, 5), (0, 1, 2, 3, 4, 5))).transpose()
+        ips = scipy.sparse.csr_matrix(input)
+        ohe = SparseOneHotEncoder()
+        ohe.fit(ips)
+        test_data = np.array(((0, 1, 2, 6), (0, 1, 6, 7))).transpose()
+        tds = scipy.sparse.csr_matrix(test_data)
+        output = ohe.transform(tds).todense()
+        self.assertEqual(3, np.sum(output))
+
+    def test_classification_workflow(self):
+        task = openml.tasks.get_task(254)
+        X, y = task.get_X_and_y()
+        
+        imputation = sklearn.impute.SimpleImputer(strategy='constant', fill_value=2)
+        ohe = SparseOneHotEncoder()
+        tree = sklearn.tree.DecisionTreeClassifier(random_state=1)
+        
+        pipeline = sklearn.pipeline.Pipeline((
+            ('imput', imputation),
+            ('ohe', ohe),
+            ('tree', tree)))
+
+        X = CategoryShift().transform(X)
+        X_train, X_test, y_train, y_test = \
+            sklearn.model_selection.train_test_split(X, y, random_state=3,
+                                                     train_size=0.5,
+                                                     test_size=0.5)
+        
+        X_train = scipy.sparse.csc_matrix(X_train)
+        X_test = scipy.sparse.csc_matrix(X_test)
+        
+        pipeline.fit(X_train, y_train)
+        self.assertEqual(np.mean(y_train == pipeline.predict(X_train)), 1)
+        # With an incorrect copy operation the OneHotEncoder would rearrange
+        # the data in such a way that the accuracy would drop to 66%
+        self.assertEqual(np.mean(y_test == pipeline.predict(X_test)), 1)
