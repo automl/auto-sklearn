@@ -16,9 +16,6 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
         self.random_stated = random_state
 
     def fit(self, X, y=None):
-        return self
-
-    def fit(self, X, y=None):
         import sklearn.impute
 
         self.preprocessor = sklearn.impute.SimpleImputer(
@@ -32,6 +29,9 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
         X = self.preprocessor.transform(X)
         X = check_array(X, accept_sparse='csc', dtype=np.int32)
         return X
+    
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X)
 
     @staticmethod
     def get_properties(dataset_properties=None):

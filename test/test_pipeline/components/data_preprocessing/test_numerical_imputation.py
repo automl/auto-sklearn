@@ -7,7 +7,7 @@ from autosklearn.pipeline.components.data_preprocessing.imputation.numerical_imp
 from autosklearn.pipeline.util import _test_preprocessing, PreprocessingTestCase
 
 
-class ImputationTest(PreprocessingTestCase):
+class NumericalImputationTest(PreprocessingTestCase):
     def test_default_configuration(self):
         transformations = []
         for i in range(2):
@@ -29,5 +29,5 @@ class ImputationTest(PreprocessingTestCase):
         transformations.append(transformation)
 
     def test_preprocessing_dtype(self):
-        super(ImputationTest, self)._test_preprocessing_dtype(NumericalImputation,
+        super(NumericalImputationTest, self)._test_preprocessing_dtype(NumericalImputation,
                                                               add_NaNs=True)
