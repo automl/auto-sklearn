@@ -3,15 +3,24 @@ from scipy import sparse
 
 class MinorityCoalescer:
     """ Group together categories which occurence is less than a specified minimum fraction.
+    Coalesced categories get index of one.
     """
     
     def __init__(self, minimum_fraction=None):
         self.minimum_fraction = minimum_fraction
 
+    def check_X(self, X):
+        X_data = X.data if sparse.issparse(X) else X
+        if np.nanmin(X_data) < 2:
+            raise ValueError("X needs to contain only integers greater than two.")
+
     def fit(self, X, y=None):
+        self.check_X(X)
         return self 
 
     def transform(self, X):
+        self.check_X(X)
+        
         if self.minimum_fraction is None:
             return X
 
