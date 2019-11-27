@@ -7,12 +7,11 @@ class CategoryShift:
     """
     
     def _convert_and_check_X(self, X, copy):
-        X = check_array(X, accept_sparse='csc', force_all_finite=False, copy=copy,
-            dtype=np.int32)
         X_data = X.data if sparse.issparse(X) else X
         if np.nanmin(X_data) < 0:
             raise ValueError("X needs to contain only non-negative integers.")
-    
+        X = check_array(X, accept_sparse='csc', force_all_finite=False, copy=copy)
+        return X
     
     def fit(self, X, y=None):
         self._convert_and_check_X(X, copy=True)
