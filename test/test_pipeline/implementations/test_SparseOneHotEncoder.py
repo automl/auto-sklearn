@@ -2,17 +2,17 @@ import unittest
 
 import numpy as np
 import scipy.sparse
-from sklearn.utils.testing import assert_array_almost_equal
+import openml
 import sklearn.tree
 import sklearn.datasets
 import sklearn.model_selection
 import sklearn.pipeline
-import sklearn.impute
-import openml
+from sklearn.impute import SimpleImputer
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.utils.testing import assert_array_almost_equal
 
 from autosklearn.pipeline.implementations.SparseOneHotEncoder import SparseOneHotEncoder
 from autosklearn.pipeline.implementations.CategoryShift import CategoryShift
-
 
 # All NaN slice
 sparse1 = scipy.sparse.csc_matrix(([3, 2, 1, 1, 2, 3],
@@ -86,17 +86,7 @@ class TestSparseOneHotEncoder(unittest.TestCase):
     def test_classification_workflow(self):
         task = openml.tasks.get_task(254)
         X, y = task.get_X_and_y()
-        
-        imputation = sklearn.impute.SimpleImputer(strategy='constant', fill_value=2)
-        ohe = SparseOneHotEncoder()
-        tree = sklearn.tree.DecisionTreeClassifier(random_state=1)
-        
-        pipeline = sklearn.pipeline.Pipeline((
-            ('imput', imputation),
-            ('ohe', ohe),
-            ('tree', tree)))
 
-        X = CategoryShift().transform(X)
         X_train, X_test, y_train, y_test = \
             sklearn.model_selection.train_test_split(X, y, random_state=3,
                                                      train_size=0.5,
@@ -105,8 +95,17 @@ class TestSparseOneHotEncoder(unittest.TestCase):
         X_train = scipy.sparse.csc_matrix(X_train)
         X_test = scipy.sparse.csc_matrix(X_test)
         
+        pipeline = sklearn.pipeline.Pipeline((
+            ('shift', CategoryShift()),
+            ('imput', SimpleImputer(strategy='constant', fill_value=2)),
+            ('ohe', SparseOneHotEncoder()),
+            ('tree', DecisionTreeClassifier(random_state=1)),
+            ))
+
         pipeline.fit(X_train, y_train)
-        self.assertEqual(np.mean(y_train == pipeline.predict(X_train)), 1)
+        pred_train = pipeline.predict(X_train)
+        self.assertTrue((pred_train==y_train).all())
         # With an incorrect copy operation the OneHotEncoder would rearrange
         # the data in such a way that the accuracy would drop to 66%
-        self.assertEqual(np.mean(y_test == pipeline.predict(X_test)), 1)
+        pred_test = pipeline.predict(X_test)
+        self.assertTrue((pred_test == y_test).all())
