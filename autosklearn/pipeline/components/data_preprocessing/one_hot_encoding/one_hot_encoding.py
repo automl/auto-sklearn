@@ -11,16 +11,17 @@ from autosklearn.pipeline.constants import *
 
 
 class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state=None):
+    def __init__(self, sparse=True, random_state=None):
         self.random_state = random_state
+        self.sparse = sparse
 
     def fit(self, X, y=None):
         if scipy.sparse.issparse(X):
             self.preprocessor = autosklearn.pipeline.implementations.SparseOneHotEncoder\
-                .SparseOneHotEncoder(sparse=True)
+                .SparseOneHotEncoder(sparse=self.sparse)
         else:
             self.preprocessor = sklearn.preprocessing\
-                .OneHotEncoder(sparse=True, categories='auto')
+                .OneHotEncoder(sparse=self.sparse, categories='auto')
         self.preprocessor.fit(X, y)
         return self
 

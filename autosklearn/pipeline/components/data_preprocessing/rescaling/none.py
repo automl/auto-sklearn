@@ -5,7 +5,7 @@ from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorit
 
 
 class NoRescalingComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state):
+    def __init__(self, random_state=None):
         pass
 
     def fit(self, X, y=None):

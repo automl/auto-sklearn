@@ -14,7 +14,7 @@ from sklearn.utils import check_array
 from sklearn.multiclass import OneVsRestClassifier
 
 from sklearn.impute import SimpleImputer
-from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
+from autosklearn.util.data_preprocessing import DataPreprocessing
 from sklearn.preprocessing import StandardScaler
 
 from autosklearn.util.logging_ import get_logger
@@ -948,7 +948,7 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name,
                 # sparse matrices because of wrong sparse format)
                 sparse = scipy.sparse.issparse(X)
                 if any(categorical):
-                    ohe = OneHotEncoder(categorical_features=categorical, sparse=True)
+                    ohe = DataPreprocessing(categorical_features=categorical, sparse=True)
                     X_transformed = ohe.fit_transform(X)
                 else:
                     X_transformed = X
