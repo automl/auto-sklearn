@@ -234,7 +234,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                   data=data, init_params=init_params)
 
     @unittest.mock.patch('autosklearn.pipeline.components.data_preprocessing'
-                         '.feature_type_splitter.FeatureTypeSplitter.set_hyperparameters')
+                         '.data_preprocessing.DataPreprocessor.set_hyperparameters')
     def test_categorical_passed_to_one_hot_encoder(self, ohe_mock):
         cls = SimpleClassificationPipeline(
             init_params={

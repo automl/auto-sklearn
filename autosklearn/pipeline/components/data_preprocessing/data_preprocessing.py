@@ -11,12 +11,14 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
 from ConfigSpace.conditions import EqualsCondition
 
 from autosklearn.pipeline.base import BasePipeline
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categorical import CategoricalPreprocessingPipeline
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_numerical import NumericalPreprocessingPipeline
 from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklearnChoice
 from autosklearn.pipeline.constants import *
 from autosklearn.util.common import check_for_bool, check_none
 
 
-class FeatureTypeSplitter(AutoSklearnComponent):
+class DataPreprocessor(AutoSklearnComponent):
     """ This component is used to apply distinct transformations to categorical and
     numerical features of a dataset. It is built on top of sklearn's ColumnTransformer.
     
@@ -31,10 +33,19 @@ class FeatureTypeSplitter(AutoSklearnComponent):
     """
 
 
-    def __init__(self, categorical_transformer, numerical_transformer):
+    def __init__(self, config=None, pipeline=None, 
+                 dataset_properties=None, include=None, exclude=None, random_state=None,
+                 init_params=None):
+
+        self.categ_ppl = CategoricalPreprocessingPipeline(
+            config, pipeline, dataset_properties, include, exclude, 
+            random_state, init_params)
+        self.numer_ppl = NumericalPreprocessingPipeline(
+            config, pipeline, dataset_properties, include, exclude, 
+            random_state, init_params)
         self._transformers = [
-            ["categorical_transformer", categorical_transformer],
-            ["numerical_transformer", numerical_transformer],
+            ["categorical_transformer", self.categ_ppl],
+            ["numerical_transformer", self.numer_ppl],
         ]
         self.categorical_features = None
 
@@ -44,20 +55,20 @@ class FeatureTypeSplitter(AutoSklearnComponent):
         # only the numerical transformer is used
         if self.categorical_features is None or np.all(np.logical_not(self.categorical_features)):
             sklearn_transf_spec = [
-                [self._transformers[1][0], self._transformers[1][1], list(range(n_feats))]
+                ["numerical_transformer", self.numer_ppl, list(range(n_feats))]
             ]
         # If all features are categorical, then just the categorical transformer is used 
         elif np.all(self.categorical_features):
             sklearn_transf_spec = [
-                [self._transformers[0][0], self._transformers[0][1], list(range(n_feats))]
+                ["categorical_transformer", self.categ_ppl, list(range(n_feats))]
             ]
         # For the other cases, both transformers are used
         else:
             cat_feats = np.where(self.categorical_features)[0]
             num_feats = np.where(np.logical_not(self.categorical_features))[0]
             sklearn_transf_spec = [
-                [self._transformers[0][0], self._transformers[0][1], cat_feats],
-                [self._transformers[1][0], self._transformers[1][1], num_feats]
+                ["categorical_transformer", self.categ_ppl, cat_feats],
+                ["numerical_transformer", self.numer_ppl, num_feats]
             ]
         self.column_transformer = sklearn.compose.ColumnTransformer(sklearn_transf_spec)
         return self.column_transformer.fit_transform(X)
@@ -131,7 +142,7 @@ class FeatureTypeSplitter(AutoSklearnComponent):
     def get_hyperparameter_search_space(self, dataset_properties=None):
         self.dataset_properties_ = dataset_properties
         cs = ConfigurationSpace()
-        cs = FeatureTypeSplitter._get_hyperparameter_search_space_recursevely(
+        cs = DataPreprocessor._get_hyperparameter_search_space_recursevely(
             dataset_properties, cs, self._transformers)
         return cs
 
@@ -142,7 +153,7 @@ class FeatureTypeSplitter(AutoSklearnComponent):
                 cs.add_configuration_space(st_name,
                     st_operation.get_hyperparameter_search_space(dataset_properties))
             else:
-                return FeatureTypeSplitter._get_hyperparameter_search_space_recursevely(
+                return DataPreprocessor._get_hyperparameter_search_space_recursevely(
                     dataset_properties, cs, st_operation)
         return cs
 

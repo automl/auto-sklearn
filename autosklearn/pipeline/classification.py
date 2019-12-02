@@ -8,10 +8,7 @@ from sklearn.base import ClassifierMixin
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
-from autosklearn.pipeline.components.data_preprocessing.feature_type_splitter import FeatureTypeSplitter
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categorical import CategoricalPreprocessingPipeline
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_numerical import NumericalPreprocessingPipeline
-
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing import DataPreprocessor
 from autosklearn.pipeline.components import classification as \
     classification_components
 from autosklearn.pipeline.components.data_preprocessing.balancing.balancing import \
@@ -289,14 +286,8 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
         default_dataset_properties = {'target_type': 'classification'}
 
-        data_preprocessing = FeatureTypeSplitter(
-            CategoricalPreprocessingPipeline(
-                dataset_properties=default_dataset_properties),
-            NumericalPreprocessingPipeline(
-                dataset_properties=default_dataset_properties))
-
         steps.extend([
-            ["data_preprocessing", data_preprocessing],
+            ["data_preprocessing", DataPreprocessor(dataset_properties=default_dataset_properties)],
             ["balancing", Balancing()],
             ["feature_preprocessor", 
                 feature_preprocessing_components.FeaturePreprocessorChoice(

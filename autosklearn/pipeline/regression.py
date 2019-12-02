@@ -8,9 +8,7 @@ from sklearn.base import RegressorMixin
 from ConfigSpace.forbidden import ForbiddenEqualsClause, ForbiddenAndConjunction
 
 
-from autosklearn.pipeline.components.data_preprocessing.feature_type_splitter import FeatureTypeSplitter
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categorical import CategoricalPreprocessingPipeline
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_numerical import NumericalPreprocessingPipeline
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing import DataPreprocessor
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from autosklearn.pipeline.components import regression as \
@@ -250,14 +248,8 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
         default_dataset_properties = {'target_type': 'regression'}
 
-        data_preprocessing = FeatureTypeSplitter(
-            CategoricalPreprocessingPipeline(
-                dataset_properties=default_dataset_properties),
-            NumericalPreprocessingPipeline(
-                dataset_properties=default_dataset_properties))
-
         steps.extend([
-            ["data_preprocessing", data_preprocessing],
+            ["data_preprocessing", DataPreprocessor(dataset_properties=default_dataset_properties)],
             ["feature_preprocessor", 
                 feature_preprocessing_components.FeaturePreprocessorChoice(
                     default_dataset_properties)],
