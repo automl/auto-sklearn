@@ -8,7 +8,7 @@ from autosklearn.pipeline.components.data_preprocessing.imputation.categorical_i
     import CategoricalImputation
 from autosklearn.pipeline.components.data_preprocessing.minority_coalescense \
     import CoalescenseChoice
-from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding \
+from autosklearn.pipeline.components.data_preprocessing.categorical_encoding \
     import OHEChoice
 
 from autosklearn.pipeline.base import BasePipeline

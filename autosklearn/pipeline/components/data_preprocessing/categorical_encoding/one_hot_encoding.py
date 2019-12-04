@@ -1,11 +1,11 @@
 import numpy as np
 import scipy.sparse
 
-import sklearn.preprocessing
+from sklearn.preprocessing import OneHotEncoder
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
-import autosklearn.pipeline.implementations.SparseOneHotEncoder
+from autosklearn.pipeline.implementations.SparseOneHotEncoder import SparseOneHotEncoder
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import *
 
@@ -17,11 +17,9 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
 
     def fit(self, X, y=None):
         if scipy.sparse.issparse(X):
-            self.preprocessor = autosklearn.pipeline.implementations.SparseOneHotEncoder\
-                .SparseOneHotEncoder(sparse=self.sparse)
+            self.preprocessor = SparseOneHotEncoder(sparse=self.sparse)
         else:
-            self.preprocessor = sklearn.preprocessing\
-                .OneHotEncoder(sparse=self.sparse, categories='auto')
+            self.preprocessor = OneHotEncoder(sparse=self.sparse, categories='auto')
         self.preprocessor.fit(X, y)
         return self
 

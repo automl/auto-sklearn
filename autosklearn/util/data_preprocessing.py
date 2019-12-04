@@ -2,13 +2,19 @@ import numpy as np
 from scipy import sparse
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import check_array
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
 
 from autosklearn.pipeline.components.data_preprocessing.category_shift.category_shift \
     import CategoryShift
-from autosklearn.pipeline.components.data_preprocessing.imputation.categorical_imputation import CategoricalImputation
-from autosklearn.pipeline.components.data_preprocessing.minority_coalescense.minority_coalescer import MinorityCoalescer
-from autosklearn.pipeline.components.data_preprocessing.one_hot_encoding.one_hot_encoding import OneHotEncoder
-from autosklearn.pipeline.components.data_preprocessing.rescaling.none import NoRescalingComponent
+from autosklearn.pipeline.components.data_preprocessing.imputation.categorical_imputation \
+    import CategoricalImputation
+from autosklearn.pipeline.components.data_preprocessing.minority_coalescense.minority_coalescer \
+    import MinorityCoalescer
+from autosklearn.pipeline.components.data_preprocessing.categorical_encoding.one_hot_encoding \
+    import OneHotEncoder
+from autosklearn.pipeline.components.data_preprocessing.rescaling.none \
+    import NoRescalingComponent
 from autosklearn.pipeline.components.data_preprocessing.imputation.numerical_imputation \
     import NumericalImputation
 from autosklearn.pipeline.components.data_preprocessing.variance_threshold.variance_threshold \
@@ -23,19 +29,19 @@ class DataPreprocessing(BaseEstimator, TransformerMixin):
         self.categorical_features = categorical_features
 
     def fit(self, X, y=None):
-        cat_ppl = sklearn.pipeline.Pipeline(
-            steps=(
-                'categ_shift', CategoryShift(),
-                'imputation', CategoricalImputation(),
-                'coalescense', MinorityCoalescer(),
-                'OHE', OneHotEncoder(sparse=sparse),
-            ))
-        num_ppl = sklearn.pipeline.Pipeline(
-            steps=(
-                'imputation', NumericalImputation(),
-                'var_thre', VarianceThreshold(),
-                'rescaling', NoRescalingComponent(),
-            ))
+        cat_ppl = Pipeline(
+            steps=[
+                ('categ_shift', CategoryShift()),
+                ('imputation', CategoricalImputation()),
+                ('coalescense', MinorityCoalescer()),
+                ('OHE', OneHotEncoder(sparse=sparse)),
+            ])
+        num_ppl = Pipeline(
+            steps=[
+                ('imputation', NumericalImputation()),
+                ('var_thre', VarianceThreshold()),
+                ('rescaling', NoRescalingComponent()),
+            ])
 
         n_feats = X.shape[1]
         # If categorical_features is none or an array made just of False booleans, then
@@ -57,10 +63,10 @@ class DataPreprocessing(BaseEstimator, TransformerMixin):
                 ["categorical_transformer", cat_ppl, cat_feats],
                 ["numerical_transformer", num_ppl, num_feats]
             ]
-        self.encoder = sklearn.compose.ColumnTransformer(sklearn_transf_spec)
-        self.encoder.fit(X)
+        self.encoder = ColumnTransformer(sklearn_transf_spec)
+        self.encoder.fit(X, y)
         return self
 
-    def transform(self, X, y=None):
-        return self.encoder.transform(X, y)
+    def transform(self, X):
+        return self.encoder.transform(X)
 

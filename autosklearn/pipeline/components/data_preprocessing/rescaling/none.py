@@ -16,8 +16,8 @@ class NoRescalingComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'MinMaxScaler',
-                'name': 'MinMaxScaler',
+        return {'shortname': 'NoRescaling',
+                'name': 'NoRescaling',
                 'handles_missing_values': False,
                 'handles_nominal_values': False,
                 'handles_numerical_features': True,
