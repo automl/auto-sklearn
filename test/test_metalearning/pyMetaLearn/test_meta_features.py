@@ -11,9 +11,9 @@ import scipy.sparse
 from sklearn.impute import SimpleImputer
 from sklearn.datasets import make_multilabel_classification
 
-from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 
+from autosklearn.util.data_preprocessing import DataPreprocessing
 from autosklearn.metalearning.metafeatures.metafeature import MetaFeatureValue
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features
 
@@ -41,7 +41,7 @@ class MetaFeaturesTest(TestCase):
         X = data[:,:-1]
         y = data[:,-1].reshape((-1,))
 
-        ohe = OneHotEncoder(self.categorical)
+        ohe = DataPreprocessing(categorical_features=self.categorical)
         X_transformed = ohe.fit_transform(X)
         imp = SimpleImputer(copy=False)
         X_transformed = imp.fit_transform(X_transformed)
