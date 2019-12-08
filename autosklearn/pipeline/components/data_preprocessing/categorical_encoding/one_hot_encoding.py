@@ -19,7 +19,8 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
         if scipy.sparse.issparse(X):
             self.preprocessor = SparseOneHotEncoder(sparse=self.sparse)
         else:
-            self.preprocessor = DenseOneHotEncoder(sparse=self.sparse, categories='auto')
+            self.preprocessor = DenseOneHotEncoder(
+                sparse=self.sparse, categories='auto', handle_unknown='ignore')
         self.preprocessor.fit(X, y)
         return self
 
