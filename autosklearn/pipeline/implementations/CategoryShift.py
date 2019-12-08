@@ -3,6 +3,7 @@ from scipy import sparse
 from sklearn.utils import check_array
 from sklearn.base import BaseEstimator, TransformerMixin
 
+
 class CategoryShift(BaseEstimator, TransformerMixin):
     """ Add 3 to every category.
     """

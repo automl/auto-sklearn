@@ -237,10 +237,12 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
 
         cs = SimpleRegressionPipeline(include={'feature_preprocessor': ['pca']}).\
             get_hyperparameter_search_space()
-        self.assertEqual(cs.get_hyperparameter('feature_preprocessor:__choice__'),
+        self.assertEqual(cs.get_hyperparameter(
+            'feature_preprocessor:__choice__'),
             CategoricalHyperparameter('feature_preprocessor:__choice__', ['pca']))
 
-        cs = SimpleRegressionPipeline(exclude={'feature_preprocessor': ['no_preprocessing']}).\
+        cs = SimpleRegressionPipeline(
+            exclude={'feature_preprocessor': ['no_preprocessing']}).\
             get_hyperparameter_search_space()
         self.assertNotIn('no_preprocessing', str(cs))
 
@@ -254,7 +256,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             'gradient_boosting'
         )
 
-        cs = SimpleRegressionPipeline(include={'feature_preprocessor': ['nystroem_sampler']}).\
+        cs = SimpleRegressionPipeline(
+            include={'feature_preprocessor': ['nystroem_sampler']}).\
             get_hyperparameter_search_space()
         self.assertEqual(
             cs.get_hyperparameter('regressor:__choice__').default_value,

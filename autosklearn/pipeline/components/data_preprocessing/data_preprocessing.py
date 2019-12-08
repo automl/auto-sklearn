@@ -1,21 +1,17 @@
 import numpy as np
-import scipy.sparse
 
 import sklearn.compose
-from sklearn.pipeline import Pipeline
 
 from ConfigSpace import Configuration
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
-    UniformFloatHyperparameter
-from ConfigSpace.conditions import EqualsCondition
 
 from autosklearn.pipeline.base import BasePipeline
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categorical import CategoricalPreprocessingPipeline
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_numerical import NumericalPreprocessingPipeline
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categorical \
+    import CategoricalPreprocessingPipeline
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_numerical \
+    import NumericalPreprocessingPipeline
 from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklearnChoice
 from autosklearn.pipeline.constants import *
-from autosklearn.util.common import check_for_bool, check_none
 
 
 class DataPreprocessor(AutoSklearnComponent):
@@ -51,22 +47,27 @@ class DataPreprocessor(AutoSklearnComponent):
         self.sparse = sparse
 
     def _fit(self, X, y=None):
+        #TODO: we are converting the categorical_features array from boolean flags 
+        # to integer indices to work around a sklern bug. It should be fixed in sklearn
+        # v0.22. Then we will be able to use the boolean array directly.
+
         n_feats = X.shape[1]
         # If categorical_features is none or an array made just of False booleans, then
         # only the numerical transformer is used
-        if self.categorical_features is None or np.all(np.logical_not(self.categorical_features)): 
+        numerical_features = np.logical_not(self.categorical_features)
+        if self.categorical_features is None or np.all(numerical_features): 
             sklearn_transf_spec = [
-                ["numerical_transformer", self.numer_ppl, list(range(n_feats))] #TODO: use boolean feature flags after sklearn bug has been solved
+                ["numerical_transformer", self.numer_ppl, list(range(n_feats))] 
             ]
         # If all features are categorical, then just the categorical transformer is used 
         elif np.all(self.categorical_features):
             sklearn_transf_spec = [
-                ["categorical_transformer", self.categ_ppl, list(range(n_feats))] #TODO: use boolean feature flags after sklearn bug has been solved
+                ["categorical_transformer", self.categ_ppl, list(range(n_feats))]
             ]
         # For the other cases, both transformers are used
         else:
-            cat_feats = np.where(self.categorical_features)[0]  #TODO: use boolean feature flags after sklearn bug has been solved
-            num_feats = np.where(np.logical_not(self.categorical_features))[0] #TODO: use boolean feature flags after sklearn bug has been solved
+            cat_feats = np.where(self.categorical_features)[0]
+            num_feats = np.where(numerical_features)[0]
             sklearn_transf_spec = [
                 ["categorical_transformer", self.categ_ppl, cat_feats],
                 ["numerical_transformer", self.numer_ppl, num_feats]
@@ -135,7 +136,8 @@ class DataPreprocessor(AutoSklearnComponent):
             else:
                 sub_init_params_dict = None
 
-            if isinstance(transf_op, (AutoSklearnChoice, AutoSklearnComponent, BasePipeline)):
+            if isinstance(
+                transf_op,(AutoSklearnChoice, AutoSklearnComponent, BasePipeline)):
                 transf_op.set_hyperparameters(configuration=sub_configuration,
                                          init_params=sub_init_params_dict)
             else:
@@ -154,11 +156,10 @@ class DataPreprocessor(AutoSklearnComponent):
     def _get_hyperparameter_search_space_recursevely(dataset_properties, cs, transformer):
         for st_name, st_operation in transformer:
             if hasattr(st_operation, "get_hyperparameter_search_space"):
-                cs.add_configuration_space(st_name,
+                cs.add_configuration_space(
+                    st_name,
                     st_operation.get_hyperparameter_search_space(dataset_properties))
             else:
                 return DataPreprocessor._get_hyperparameter_search_space_recursevely(
                     dataset_properties, cs, st_operation)
         return cs
-
-

@@ -6,9 +6,8 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 mc_directory = os.path.split(__file__)[0]
-_mcs = find_components(__package__,
-                        mc_directory,
-                        AutoSklearnPreprocessingAlgorithm)
+_mcs = find_components(
+    __package__, mc_directory, AutoSklearnPreprocessingAlgorithm)
 _addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
 
 
@@ -49,10 +48,8 @@ class CoalescenseChoice(AutoSklearnChoice):
                     default = default_
                     break
 
-        preprocessor = CategoricalHyperparameter('__choice__',
-                                                 list(
-                                                     available_preprocessors.keys()),
-                                                 default_value=default)
+        preprocessor = CategoricalHyperparameter(
+            '__choice__', list(available_preprocessors.keys()), default_value=default)
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors:
             preprocessor_configuration_space = available_preprocessors[name]. \
@@ -95,3 +92,4 @@ class CoalescenseChoice(AutoSklearnChoice):
 
     def transform(self, X):
         return self.choice.transform(X)
+    

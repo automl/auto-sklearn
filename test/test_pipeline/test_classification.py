@@ -237,10 +237,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                          '.data_preprocessing.DataPreprocessor.set_hyperparameters')
     def test_categorical_passed_to_one_hot_encoder(self, ohe_mock):
         cls = SimpleClassificationPipeline(
-            init_params={
-                'data_preprocessing:categorical_features':
-                    [True, False]
-            }
+            init_params={'data_preprocessing:categorical_features': [True, False]}
         )
 
         self.assertEqual(
@@ -415,14 +412,16 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(self):
         cs = SimpleClassificationPipeline(
-            include={'feature_preprocessor': ['densifier']}, dataset_properties={'sparse': True}).\
+            include={'feature_preprocessor': ['densifier']}, 
+            dataset_properties={'sparse': True}).\
             get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter(
             'classifier:__choice__').default_value,
             'qda'
         )
 
-        cs = SimpleClassificationPipeline(include={'feature_preprocessor': ['nystroem_sampler']}).\
+        cs = SimpleClassificationPipeline(
+            include={'feature_preprocessor': ['nystroem_sampler']}).\
             get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter(
             'classifier:__choice__').default_value,

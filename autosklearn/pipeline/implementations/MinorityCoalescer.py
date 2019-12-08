@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import sparse
 
+
 class MinorityCoalescer:
     """ Group together categories which occurence is less than a specified minimum fraction.
     Coalesced categories get index of one.
@@ -58,4 +59,5 @@ class MinorityCoalescer:
         return X
 
     def fit_transform(self, X, y=None):
-        return self.fit(X,y).transform(X)
+        return self.fit(X, y).transform(X)
+    

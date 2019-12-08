@@ -4,8 +4,8 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 
 from autosklearn.pipeline.components.data_preprocessing.category_shift.category_shift \
     import CategoryShift
-from autosklearn.pipeline.components.data_preprocessing.imputation.categorical_imputation \
-    import CategoricalImputation
+from autosklearn.pipeline.components.data_preprocessing.imputation.\
+    categorical_imputation import CategoricalImputation
 from autosklearn.pipeline.components.data_preprocessing.minority_coalescense \
     import CoalescenseChoice
 from autosklearn.pipeline.components.data_preprocessing.categorical_encoding \
@@ -65,8 +65,6 @@ class CategoricalPreprocessingPipeline(BasePipeline):
                 'output': (INPUT,),
                 'preferred_dtype': None}
 
-
-
     def fit_transformer(self, X, y, fit_params=None):
         if fit_params is None:
             fit_params = {}
@@ -75,7 +73,6 @@ class CategoricalPreprocessingPipeline(BasePipeline):
             X, y, fit_params=fit_params)
 
         return X, fit_params
-
 
     def _get_hyperparameter_search_space(self, include=None, exclude=None,
                                          dataset_properties=None):
@@ -109,8 +106,8 @@ class CategoricalPreprocessingPipeline(BasePipeline):
             [["category_shift", CategoryShift()],
              ["imputation", CategoricalImputation()],
              ["category_coalescence", CoalescenseChoice(self.dataset_properties_)],
-             ["categorical_encoding", OHEChoice(self.dataset_properties_)]
-             ])
+             ["categorical_encoding", OHEChoice(self.dataset_properties_)],
+            ])
 
         return steps
 

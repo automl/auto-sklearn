@@ -6,8 +6,8 @@ from autosklearn.pipeline.components.data_preprocessing import rescaling as \
     rescaling_components
 from autosklearn.pipeline.components.data_preprocessing.imputation.numerical_imputation \
     import NumericalImputation
-from autosklearn.pipeline.components.data_preprocessing.variance_threshold.variance_threshold \
-    import VarianceThreshold
+from autosklearn.pipeline.components.data_preprocessing.variance_threshold\
+    .variance_threshold import VarianceThreshold
 
 from autosklearn.pipeline.base import BasePipeline
 
@@ -63,8 +63,6 @@ class NumericalPreprocessingPipeline(BasePipeline):
                 'output': (INPUT,),
                 'preferred_dtype': None}
 
-
-
     def fit_transformer(self, X, y, fit_params=None):
         if fit_params is None:
             fit_params = {}
@@ -73,7 +71,6 @@ class NumericalPreprocessingPipeline(BasePipeline):
             X, y, fit_params=fit_params)
 
         return X, fit_params
-
 
     def _get_hyperparameter_search_space(self, include=None, exclude=None,
                                          dataset_properties=None):
@@ -109,7 +106,7 @@ class NumericalPreprocessingPipeline(BasePipeline):
             [["imputation", NumericalImputation()],
              ["variance_threshold", VarianceThreshold()],
              ["rescaling",
-              rescaling_components.RescalingChoice(default_dataset_properties)]
+                rescaling_components.RescalingChoice(default_dataset_properties)],
             ])
 
         return steps

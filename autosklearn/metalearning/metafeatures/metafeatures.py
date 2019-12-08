@@ -15,7 +15,8 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing import DataPreprocessor
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
+    import DataPreprocessor
 from autosklearn.util.logging_ import get_logger
 from .metafeature import MetaFeature, HelperFunction, DatasetMetafeatures, \
     MetaFeatureValue

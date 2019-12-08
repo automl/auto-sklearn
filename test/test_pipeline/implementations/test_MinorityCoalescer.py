@@ -16,11 +16,11 @@ class MinorityCoalescerTest(unittest.TestCase):
             np.ones((30, 10)) * 3,
             np.ones((30, 10)) * 4,
             np.ones((30, 10)) * 5,
-            np.ones(( 5, 10)) * 6,
-            np.ones(( 5, 10)) * 7,
+            np.ones((5, 10)) * 6,
+            np.ones((5, 10)) * 7,
         ))
         for col in range(X.shape[1]):
-            np.random.shuffle(X[:,col])
+            np.random.shuffle(X[:, col])
         
         return X
         
@@ -43,12 +43,12 @@ class MinorityCoalescerTest(unittest.TestCase):
 
     def test_coalesce_10_percent_sparse(self):
         X = scipy.sparse.csc_matrix(self.X)
-        Y = MinorityCoalescer(minimum_fraction= .1).fit_transform(X)
+        Y = MinorityCoalescer(minimum_fraction=.1).fit_transform(X)
         # Assert no copies were made
         self.assertEqual(id(X), id(Y))
         Y = Y.todense()
         for col in range(X.shape[1]):
-            hist = np.histogram(Y[:,col], bins=np.arange(1, 7))
+            hist = np.histogram(Y[:, col], bins=np.arange(1, 7))
             assert_array_almost_equal(hist[0], [10, 0, 30, 30, 30])
 
     def test_invalid_X(self):

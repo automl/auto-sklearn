@@ -1,6 +1,5 @@
 import numpy as np
 from scipy import sparse
-from sklearn.utils import check_array
 
 import autosklearn.pipeline.implementations.CategoryShift
 

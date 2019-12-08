@@ -200,7 +200,8 @@ def main():
     preproc_table = build_table(preproc_dict)
 
     est_table = table_str % (caption_str % (args.task_type, str(props)), est_table)
-    preproc_table = table_str % (caption_str % ("feature_preprocessor", str(props)), preproc_table)
+    preproc_table = table_str % (caption_str % (
+        "feature_preprocessor", str(props)), preproc_table)
 
     tex_doc = template_string % "\n".join([est_table, preproc_table])
     if args.save is None:

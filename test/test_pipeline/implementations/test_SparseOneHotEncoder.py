@@ -104,7 +104,7 @@ class TestSparseOneHotEncoder(unittest.TestCase):
 
         pipeline.fit(X_train, y_train)
         pred_train = pipeline.predict(X_train)
-        self.assertTrue((pred_train==y_train).all())
+        self.assertTrue((pred_train == y_train).all())
         # With an incorrect copy operation the OneHotEncoder would rearrange
         # the data in such a way that the accuracy would drop to 66%
         pred_test = pipeline.predict(X_test)

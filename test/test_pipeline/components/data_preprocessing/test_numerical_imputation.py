@@ -29,5 +29,5 @@ class NumericalImputationTest(PreprocessingTestCase):
         transformations.append(transformation)
 
     def test_preprocessing_dtype(self):
-        super(NumericalImputationTest, self)._test_preprocessing_dtype(NumericalImputation,
-                                                              add_NaNs=True)
+        super(NumericalImputationTest, self)._test_preprocessing_dtype(
+            NumericalImputation, add_NaNs=True)
