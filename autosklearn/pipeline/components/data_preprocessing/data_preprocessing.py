@@ -35,7 +35,7 @@ class DataPreprocessor(AutoSklearnComponent):
 
     def __init__(self, config=None, pipeline=None, 
                  dataset_properties=None, include=None, exclude=None, random_state=None,
-                 init_params=None):
+                 init_params=None, categorical_features=None, sparse=True):
 
         self.categ_ppl = CategoricalPreprocessingPipeline(
             config, pipeline, dataset_properties, include, exclude, 
@@ -47,30 +47,34 @@ class DataPreprocessor(AutoSklearnComponent):
             ["categorical_transformer", self.categ_ppl],
             ["numerical_transformer", self.numer_ppl],
         ]
-        self.categorical_features = None
+        self.categorical_features = categorical_features
+        self.sparse = sparse
 
     def _fit(self, X, y=None):
         n_feats = X.shape[1]
         # If categorical_features is none or an array made just of False booleans, then
         # only the numerical transformer is used
-        if self.categorical_features is None or np.all(np.logical_not(self.categorical_features)):
+        if self.categorical_features is None or np.all(np.logical_not(self.categorical_features)): 
             sklearn_transf_spec = [
-                ["numerical_transformer", self.numer_ppl, list(range(n_feats))]
+                ["numerical_transformer", self.numer_ppl, list(range(n_feats))] #TODO: use boolean feature flags after sklearn bug has been solved
             ]
         # If all features are categorical, then just the categorical transformer is used 
         elif np.all(self.categorical_features):
             sklearn_transf_spec = [
-                ["categorical_transformer", self.categ_ppl, list(range(n_feats))]
+                ["categorical_transformer", self.categ_ppl, list(range(n_feats))] #TODO: use boolean feature flags after sklearn bug has been solved
             ]
         # For the other cases, both transformers are used
         else:
-            cat_feats = np.where(self.categorical_features)[0]
-            num_feats = np.where(np.logical_not(self.categorical_features))[0]
+            cat_feats = np.where(self.categorical_features)[0]  #TODO: use boolean feature flags after sklearn bug has been solved
+            num_feats = np.where(np.logical_not(self.categorical_features))[0] #TODO: use boolean feature flags after sklearn bug has been solved
             sklearn_transf_spec = [
                 ["categorical_transformer", self.categ_ppl, cat_feats],
                 ["numerical_transformer", self.numer_ppl, num_feats]
             ]
-        self.column_transformer = sklearn.compose.ColumnTransformer(sklearn_transf_spec)
+        self.column_transformer = sklearn.compose.ColumnTransformer(
+            transformers=sklearn_transf_spec,
+            sparse_threshold=float(self.sparse),
+            )
         return self.column_transformer.fit_transform(X)
 
     def fit(self, X, y=None):

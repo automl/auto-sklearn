@@ -12,11 +12,10 @@ import sklearn.metrics
 import sklearn.model_selection
 from sklearn.utils import check_array
 from sklearn.multiclass import OneVsRestClassifier
-
 from sklearn.impute import SimpleImputer
-from autosklearn.util.data_preprocessing import DataPreprocessing
 from sklearn.preprocessing import StandardScaler
 
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing import DataPreprocessor
 from autosklearn.util.logging_ import get_logger
 from .metafeature import MetaFeature, HelperFunction, DatasetMetafeatures, \
     MetaFeatureValue
@@ -948,7 +947,7 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name,
                 # sparse matrices because of wrong sparse format)
                 sparse = scipy.sparse.issparse(X)
                 if any(categorical):
-                    ohe = DataPreprocessing(categorical_features=categorical, sparse=True)
+                    ohe = DataPreprocessor(categorical_features=categorical, sparse=True)
                     X_transformed = ohe.fit_transform(X)
                 else:
                     X_transformed = X

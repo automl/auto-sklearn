@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse
 
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder as DenseOneHotEncoder
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
@@ -19,7 +19,7 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
         if scipy.sparse.issparse(X):
             self.preprocessor = SparseOneHotEncoder(sparse=self.sparse)
         else:
-            self.preprocessor = OneHotEncoder(sparse=self.sparse, categories='auto')
+            self.preprocessor = DenseOneHotEncoder(sparse=self.sparse, categories='auto')
         self.preprocessor.fit(X, y)
         return self
 

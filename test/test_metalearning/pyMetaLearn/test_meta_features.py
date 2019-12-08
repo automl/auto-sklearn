@@ -13,7 +13,7 @@ from sklearn.datasets import make_multilabel_classification
 
 from sklearn.preprocessing import StandardScaler
 
-from autosklearn.util.data_preprocessing import DataPreprocessing
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing import DataPreprocessor
 from autosklearn.metalearning.metafeatures.metafeature import MetaFeatureValue
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features
 
@@ -41,7 +41,7 @@ class MetaFeaturesTest(TestCase):
         X = data[:,:-1]
         y = data[:,-1].reshape((-1,))
 
-        ohe = DataPreprocessing(categorical_features=self.categorical)
+        ohe = DataPreprocessor(categorical_features=self.categorical)
         X_transformed = ohe.fit_transform(X)
         imp = SimpleImputer(copy=False)
         X_transformed = imp.fit_transform(X_transformed)
@@ -443,7 +443,7 @@ class MetaFeaturesTest(TestCase):
 
     def test_pca_95percent(self):
         mf = self.mf["PCAFractionOfComponentsFor95PercentVariance"](self.X_transformed, self.y)
-        self.assertAlmostEqual(0.44047619047619047, mf.value)
+        self.assertAlmostEqual(0.41975308641975306, mf.value)
 
     def test_pca_kurtosis_first_pc(self):
         mf = self.mf["PCAKurtosisFirstPC"](self.X_transformed, self.y)

@@ -75,15 +75,15 @@ class CompetitionDataManagerTest(unittest.TestCase):
         self.assertIsInstance(self.D.data['X_valid'], np.ndarray)
         self.assertIsInstance(self.D.data['X_test'], np.ndarray)
         # Check if the dimensions are correct
-        self.assertEqual((3, 8), self.D.data['X_train'].shape)
-        self.assertEqual((3, 8), self.D.data['X_valid'].shape)
-        self.assertEqual((3, 8), self.D.data['X_test'].shape)
+        self.assertEqual((3, 7), self.D.data['X_train'].shape) # one column is droped by the variancethreshold
+        self.assertEqual((3, 7), self.D.data['X_valid'].shape)
+        self.assertEqual((3, 7), self.D.data['X_test'].shape)
         # Some tests if encoding works
         self.assertEqual(self.D.data['X_train'][:, :4].max(), 1)
         self.assertEqual(self.D.data['X_valid'][:, :4].min(), 0)
         self.assertEqual(self.D.data['X_test'][:, :4].min(), 0)
         # Test that other stuff is not encoded
-        self.assertEqual(self.D.data['X_train'][0, 4], 2.5)
+        self.assertEqual(self.D.data['X_train'][0, 4], 1.3887301496588276) # It was 2.5, but after rescaling it became 1.38
 
     def test_perform1HotEncoding_binary_data_with_missing_values(self):
         # self.D.feat_type = [N, N, N, N, B, B]
