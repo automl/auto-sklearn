@@ -17,7 +17,7 @@ from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 class DataPreprocessor(AutoSklearnComponent):
     """ This component is used to apply distinct transformations to categorical and
     numerical features of a dataset. It is built on top of sklearn's ColumnTransformer.
-    
+
     Parameters
     ----------
     categorical_transformer : [AutoSklearnComponent or BasePipeline]
@@ -25,8 +25,7 @@ class DataPreprocessor(AutoSklearnComponent):
         that should be applied to the categorical features (i.e. columns) of the dataset
     numerical_transformer : [AutoSklearnComponent or BasePipeline]]
         A transformer (either a AutoSklearnComponent or an auto-sklearn Basepipeline)
-        that should be applied to the numerical features (i.e. columns) of the dataset
-    """
+        that should be applied to the numerical features (i.e. columns) of the dataset """
 
     def __init__(self, config=None, pipeline=None, dataset_properties=None, include=None,
                  exclude=None, random_state=None, init_params=None, 
@@ -46,7 +45,7 @@ class DataPreprocessor(AutoSklearnComponent):
         self.sparse = sparse
 
     def _fit(self, X, y=None):
-        # TODO: we are converting the categorical_features array from boolean flags 
+        # TODO: we are converting the categorical_features array from boolean flags
         # to integer indices to work around a sklern bug. It should be fixed in sklearn
         # v0.22. Then we will be able to use the boolean array directly.
 
@@ -58,7 +57,7 @@ class DataPreprocessor(AutoSklearnComponent):
             sklearn_transf_spec = [
                 ["numerical_transformer", self.numer_ppl, list(range(n_feats))] 
             ]
-        # If all features are categorical, then just the categorical transformer is used 
+        # If all features are categorical, then just the categorical transformer is used
         elif np.all(self.categorical_features):
             sklearn_transf_spec = [
                 ["categorical_transformer", self.categ_ppl, list(range(n_feats))]
@@ -135,10 +134,10 @@ class DataPreprocessor(AutoSklearnComponent):
             else:
                 sub_init_params_dict = None
 
-            if isinstance(
-                transf_op, (AutoSklearnChoice, AutoSklearnComponent, BasePipeline)):
-                    transf_op.set_hyperparameters(
-                        configuration=sub_configuration, init_params=sub_init_params_dict)
+            if isinstance(transf_op, (
+                AutoSklearnChoice, AutoSklearnComponent, BasePipeline)):
+                transf_op.set_hyperparameters(
+                    configuration=sub_configuration, init_params=sub_init_params_dict)
             else:
                 raise NotImplementedError('Not supported yet!')
 

@@ -1,11 +1,9 @@
-import unittest
-
 import numpy as np
 from scipy import sparse
 
 from autosklearn.pipeline.components.data_preprocessing.imputation.categorical_imputation\
     import CategoricalImputation
-from autosklearn.pipeline.util import _test_preprocessing, PreprocessingTestCase
+from autosklearn.pipeline.util import PreprocessingTestCase
 
 
 class CategoricalImputationTest(PreprocessingTestCase):

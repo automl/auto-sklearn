@@ -401,9 +401,10 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cs = SimpleClassificationPipeline(
             include={'feature_preprocessor': ['select_percentile_classification']}).\
             get_hyperparameter_search_space()
-        self.assertEqual(cs.get_hyperparameter('feature_preprocessor:__choice__'),
-            CategoricalHyperparameter(
-                'feature_preprocessor:__choice__', ['select_percentile_classification']))
+        fpp1 = cs.get_hyperparameter('feature_preprocessor:__choice__')
+        fpp2 = CategoricalHyperparameter(
+            'feature_preprocessor:__choice__', ['select_percentile_classification']))
+        self.assertEqual(fpp1, fpp2)
 
         cs = SimpleClassificationPipeline(
             exclude={'feature_preprocessor': ['select_percentile_classification']}
@@ -412,7 +413,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(self):
         cs = SimpleClassificationPipeline(
-            include={'feature_preprocessor': ['densifier']},
+            include={'feature_preprocessor': ['densifier']}, 
             dataset_properties={'sparse': True}).\
             get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter(

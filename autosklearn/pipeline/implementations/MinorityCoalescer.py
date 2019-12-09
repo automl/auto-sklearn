@@ -3,10 +3,10 @@ from scipy import sparse
 
 
 class MinorityCoalescer:
-    """ Group together categories which occurence is less than a specified 
+    """ Group together categories which occurence is less than a specified
     minimum fraction. Coalesced categories get index of one.
     """
-    
+
     def __init__(self, minimum_fraction=None):
         self.minimum_fraction = minimum_fraction
 

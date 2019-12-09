@@ -1,10 +1,9 @@
 import numpy as np
-from scipy import sparse
 from sklearn.utils import check_array
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
 class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):

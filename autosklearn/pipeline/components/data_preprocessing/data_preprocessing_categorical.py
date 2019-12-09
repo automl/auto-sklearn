@@ -12,6 +12,7 @@ from autosklearn.pipeline.components.data_preprocessing.categorical_encoding \
     import OHEChoice
 
 from autosklearn.pipeline.base import BasePipeline
+from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
 class CategoricalPreprocessingPipeline(BasePipeline):
@@ -33,8 +34,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance
-        used by `np.random`.
-    """
+        used by `np.random`. """
 
     def __init__(self, config=None, pipeline=None, dataset_properties=None,
                  include=None, exclude=None, random_state=None,

@@ -1,6 +1,3 @@
-import numpy as np
-import scipy.sparse
-
 import autosklearn.pipeline.implementations.MinorityCoalescer
 
 from ConfigSpace.configuration_space import ConfigurationSpace
@@ -8,7 +5,6 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
-from autosklearn.util.common import check_for_bool
 
 
 class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):

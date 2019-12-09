@@ -10,6 +10,7 @@ from autosklearn.pipeline.components.data_preprocessing.variance_threshold\
     .variance_threshold import VarianceThreshold
 
 from autosklearn.pipeline.base import BasePipeline
+from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
 class NumericalPreprocessingPipeline(BasePipeline):

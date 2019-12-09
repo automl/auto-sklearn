@@ -1,5 +1,3 @@
-import unittest
-
 from scipy import sparse
 
 from autosklearn.pipeline.components.data_preprocessing.imputation.numerical_imputation\

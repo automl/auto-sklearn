@@ -1,4 +1,3 @@
-import numpy as np
 import scipy.sparse
 
 from sklearn.preprocessing import OneHotEncoder as DenseOneHotEncoder
