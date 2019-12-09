@@ -110,8 +110,8 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
                 if (n_value_check - 1) >= self.n_values_[i]:
                     indptr_start = X.indptr[i]
                     indptr_end = X.indptr[i+1]
-                    X.data[indptr_start:indptr_end][X.data
-                        [indptr_start:indptr_end] >= self.n_values_[i]] = 0
+                    zeros_mask = X.data[indptr_start:indptr_end] >= self.n_values_[i]
+                    X.data[indptr_start:indptr_end][zeros_mask] = 0
 
         row_indices = X.indices
         column_indices = []

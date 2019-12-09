@@ -13,7 +13,8 @@ from sklearn.datasets import make_multilabel_classification
 
 from sklearn.preprocessing import StandardScaler
 
-from autosklearn.pipeline.components.data_preprocessing.data_preprocessing import DataPreprocessor
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
+    import DataPreprocessor
 from autosklearn.metalearning.metafeatures.metafeature import MetaFeatureValue
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features
 

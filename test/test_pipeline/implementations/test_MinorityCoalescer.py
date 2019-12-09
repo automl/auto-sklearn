@@ -34,9 +34,9 @@ class MinorityCoalescerTest(unittest.TestCase):
 
     def test_coalesce_10_percent(self):
         X = self.X
-        Y = MinorityCoalescer(minimum_fraction= .1).fit_transform(X)
+        Y = MinorityCoalescer(minimum_fraction=.1).fit_transform(X)
         for col in range(X.shape[1]):
-            hist = np.histogram(Y[:,col], bins=np.arange(1, 7))
+            hist = np.histogram(Y[:, col], bins=np.arange(1, 7))
             assert_array_almost_equal(hist[0], [10, 0, 30, 30, 30])
         # Assert no copies were made
         self.assertEqual(id(X), id(Y))

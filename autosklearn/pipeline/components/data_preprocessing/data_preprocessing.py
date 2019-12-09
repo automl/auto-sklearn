@@ -11,7 +11,7 @@ from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categ
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_numerical \
     import NumericalPreprocessingPipeline
 from autosklearn.pipeline.components.base import AutoSklearnComponent, AutoSklearnChoice
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
 class DataPreprocessor(AutoSklearnComponent):
@@ -28,10 +28,9 @@ class DataPreprocessor(AutoSklearnComponent):
         that should be applied to the numerical features (i.e. columns) of the dataset
     """
 
-
-    def __init__(self, config=None, pipeline=None, 
-                 dataset_properties=None, include=None, exclude=None, random_state=None,
-                 init_params=None, categorical_features=None, sparse=True):
+    def __init__(self, config=None, pipeline=None, dataset_properties=None, include=None,
+                 exclude=None, random_state=None, init_params=None, 
+                 categorical_features=None, sparse=True):
 
         self.categ_ppl = CategoricalPreprocessingPipeline(
             config, pipeline, dataset_properties, include, exclude, 
@@ -47,7 +46,7 @@ class DataPreprocessor(AutoSklearnComponent):
         self.sparse = sparse
 
     def _fit(self, X, y=None):
-        #TODO: we are converting the categorical_features array from boolean flags 
+        # TODO: we are converting the categorical_features array from boolean flags 
         # to integer indices to work around a sklern bug. It should be fixed in sklearn
         # v0.22. Then we will be able to use the boolean array directly.
 
@@ -103,7 +102,7 @@ class DataPreprocessor(AutoSklearnComponent):
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (INPUT,),}
+                'output': (INPUT,), }
 
 
     def set_hyperparameters(self, configuration, init_params=None):
@@ -137,9 +136,9 @@ class DataPreprocessor(AutoSklearnComponent):
                 sub_init_params_dict = None
 
             if isinstance(
-                transf_op,(AutoSklearnChoice, AutoSklearnComponent, BasePipeline)):
-                transf_op.set_hyperparameters(configuration=sub_configuration,
-                                         init_params=sub_init_params_dict)
+                transf_op, (AutoSklearnChoice, AutoSklearnComponent, BasePipeline)):
+                    transf_op.set_hyperparameters(
+                        configuration=sub_configuration, init_params=sub_init_params_dict)
             else:
                 raise NotImplementedError('Not supported yet!')
 

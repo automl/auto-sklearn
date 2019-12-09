@@ -8,7 +8,7 @@ from autosklearn.pipeline.implementations.CategoryShift import CategoryShift
 class CategoryShiftTest(unittest.TestCase):
 
     def test_dense(self):
-        X = np.random.randint(0, 255, (3,4))
+        X = np.random.randint(0, 255, (3, 4))
         Y = CategoryShift().fit_transform(X)
         self.assertTrue((Y == X + 3).all())
     

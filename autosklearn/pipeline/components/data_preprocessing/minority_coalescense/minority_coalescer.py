@@ -7,7 +7,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 from autosklearn.util.common import check_for_bool
 
 
@@ -43,7 +43,7 @@ class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
-                'output': (INPUT,),}
+                'output': (INPUT,), }
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):

@@ -17,8 +17,8 @@ from autosklearn.pipeline.components.data_preprocessing.balancing.balancing impo
 
 from autosklearn.pipeline.components import feature_preprocessing as \
     feature_preprocessing_components
-from autosklearn.pipeline.components.data_preprocessing.variance_threshold.variance_threshold \
-    import VarianceThreshold
+from autosklearn.pipeline.components.data_preprocessing.variance_threshold.\
+    variance_threshold import VarianceThreshold
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
 
@@ -194,15 +194,12 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                 if 'densifier' in preprocessors:
                     while True:
                         try:
+                            forb_cls = ForbiddenEqualsClause(
+                                cs.get_hyperparameter('classifier:__choice__'), key)
+                            forb_fpp = ForbiddenEqualsClause(cs.get_hyperparameter(
+                                'feature_preprocessor:__choice__'), 'densifier')
                             cs.add_forbidden_clause(
-                                ForbiddenAndConjunction(
-                                    ForbiddenEqualsClause(
-                                        cs.get_hyperparameter(
-                                            'classifier:__choice__'), key),
-                                    ForbiddenEqualsClause(
-                                        cs.get_hyperparameter(
-                                            'feature_preprocessor:__choice__'), 'densifier')
-                                ))
+                                ForbiddenAndConjunction(forb_cls, forb_fpp))
                             # Success
                             break
                         except ValueError:
@@ -210,7 +207,8 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                             try:
                                 default = possible_default_classifier.pop()
                             except IndexError:
-                                raise ValueError("Cannot find a legal default configuration.")
+                                raise ValueError(
+                                    "Cannot find a legal default configuration.")
                             cs.get_hyperparameter(
                                 'classifier:__choice__').default_value = default
 
@@ -304,4 +302,3 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
     def _get_estimator_hyperparameter_name(self):
         return "classifier"
-

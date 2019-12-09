@@ -100,13 +100,12 @@ class NumericalPreprocessingPipeline(BasePipeline):
     def _get_pipeline(self):
         steps = []
 
-        default_dataset_properties = {'target_type': 'classification'}
+        default_dataset_props = {'target_type': 'classification'}
 
-        steps.extend(
-            [["imputation", NumericalImputation()],
-             ["variance_threshold", VarianceThreshold()],
-             ["rescaling",
-                rescaling_components.RescalingChoice(default_dataset_properties)],
+        steps.extend([
+            ["imputation", NumericalImputation()],
+            ["variance_threshold", VarianceThreshold()],
+            ["rescaling", rescaling_components.RescalingChoice(default_dataset_props)],
             ])
 
         return steps

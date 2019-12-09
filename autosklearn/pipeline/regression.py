@@ -183,15 +183,12 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
                 if 'densifier' in preprocessors:
                     while True:
                         try:
+                            forb_reg = ForbiddenEqualsClause(
+                                cs.get_hyperparameter('regressor:__choice__'), key)
+                            forb_fpp = ForbiddenEqualsClause(cs.get_hyperparameter(
+                                'feature_preprocessor:__choice__'), 'densifier')
                             cs.add_forbidden_clause(
-                                ForbiddenAndConjunction(
-                                    ForbiddenEqualsClause(
-                                        cs.get_hyperparameter(
-                                            'regressor:__choice__'), key),
-                                    ForbiddenEqualsClause(
-                                        cs.get_hyperparameter(
-                                            'feature_preprocessor:__choice__'), 'densifier')
-                                ))
+                                ForbiddenAndConjunction(forb_reg, forb_fpp))
                             # Success
                             break
                         except ValueError:

@@ -102,11 +102,11 @@ class CategoricalPreprocessingPipeline(BasePipeline):
     def _get_pipeline(self):
         steps = []
 
-        steps.extend(
-            [["category_shift", CategoryShift()],
-             ["imputation", CategoricalImputation()],
-             ["category_coalescence", CoalescenseChoice(self.dataset_properties_)],
-             ["categorical_encoding", OHEChoice(self.dataset_properties_)],
+        steps.extend([
+            ["category_shift", CategoryShift()],
+            ["imputation", CategoricalImputation()],
+            ["category_coalescence", CoalescenseChoice(self.dataset_properties_)],
+            ["categorical_encoding", OHEChoice(self.dataset_properties_)],
             ])
 
         return steps
