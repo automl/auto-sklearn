@@ -403,7 +403,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             get_hyperparameter_search_space()
         fpp1 = cs.get_hyperparameter('feature_preprocessor:__choice__')
         fpp2 = CategoricalHyperparameter(
-            'feature_preprocessor:__choice__', ['select_percentile_classification']))
+            'feature_preprocessor:__choice__', ['select_percentile_classification'])
         self.assertEqual(fpp1, fpp2)
 
         cs = SimpleClassificationPipeline(

@@ -25,6 +25,9 @@ class CategoryShift(AutoSklearnPreprocessingAlgorithm):
         if self.preprocessor is None:
             raise NotImplementedError()
         return self.preprocessor.transform(X)
+    
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X)
 
     @staticmethod
     def get_properties(dataset_properties=None):
