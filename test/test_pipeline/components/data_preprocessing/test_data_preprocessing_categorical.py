@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+from scipy import sparse
 
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categorical \
     import CategoricalPreprocessingPipeline
@@ -16,7 +17,12 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
             [1, 0, 0, 0, 1, 0, 0, 1],
             [0, 0, 1, 1, 0, 0, 0, 1],
             [0, 1, 0, 0, 0, 1, 1, 0]])
+        # dense input
         Yt = CategoricalPreprocessingPipeline().fit_transform(X)
+        self.assertTrue((Yt.todense() == Y).all())
+        # sparse input
+        X_sparse = sparse.csc_matrix(X+1)
+        Yt = CategoricalPreprocessingPipeline().fit_transform(X_sparse)
         self.assertTrue((Yt.todense() == Y).all())
 
     def test_transform(self):
@@ -36,7 +42,6 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
             [0, 1, 0, 0, 1, 0, 0, 0],
             [0, 0, 1, 1, 0, 0, 0, 1],
             [0, 1, 0, 0, 0, 0, 1, 0]])
-
         # "fit"
         CPPL = CategoricalPreprocessingPipeline()
         CPPL.fit_transform(X1)
