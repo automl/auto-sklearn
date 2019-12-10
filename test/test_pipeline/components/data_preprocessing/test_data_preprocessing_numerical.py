@@ -12,8 +12,8 @@ class NumericalPreprocessingPipelineTest(unittest.TestCase):
 
     def test_fit_transform(self):
         X = np.array([
-            [3.14, 1.,     1.],   # noqa : matrix legibility
-            [3.14, 2., np.nan],   # noqa : matrix legibility
+            [3.14, 1.,     1.],
+            [3.14, 2., np.nan],
             [3.14, 3.,     3.]])  # noqa : matrix legibility
         # 1st column should be droped due to low variance
         # The 2nd should be be standardized (default rescaling algorithm)
@@ -21,7 +21,7 @@ class NumericalPreprocessingPipelineTest(unittest.TestCase):
         # here will have the same effect as on the the 2nd column
         sdev = (2 / 3) ** .5
         Y1 = np.array([
-            [-1/sdev, -1/sdev],   # noqa : matrix legibility
+            [-1/sdev, -1/sdev],
             [     0.,      0.],   # noqa : matrix legibility
             [ 1/sdev,  1/sdev]])  # noqa : matrix legibility
         # dense input
@@ -31,15 +31,15 @@ class NumericalPreprocessingPipelineTest(unittest.TestCase):
         Y2 = np.array([
             [1., 1.],
             [2., 2.],
-            [3,  3.]]) / sdev
+            [3., 3.]]) / sdev
         X_sparse = sparse.csc_matrix(X)
         Yt = NumericalPreprocessingPipeline().fit_transform(X_sparse)
         assert_array_almost_equal(Yt.todense(), Y2)
 
     def test_transform(self):
         X1 = np.array([
-            [3.14, 1.,     1.],   # noqa : matrix legibility
-            [3.14, 2., np.nan],   # noqa : matrix legibility
+            [3.14, 1.,     1.],
+            [3.14, 2., np.nan],
             [3.14, 3.,     3.]])  # noqa : matrix legibility
         sdev = (2 / 3) ** .5
         # fit
@@ -47,14 +47,14 @@ class NumericalPreprocessingPipelineTest(unittest.TestCase):
         NPP.fit_transform(X1)
         # transform
         X2 = np.array([
-            [1., 5., 8.,],
-            [2., 6., 9.,],
+            [1., 5., 8.],
+            [2., 6., 9.],
             [3., 7., np.nan]])
         Yt = NPP.transform(X2)
         # imputation, variance_threshold and rescaling are done using the data already
         # fitted, therefore:
         Y2 = np.array([
-            [3/sdev, 6/sdev],   # noqa : matrix legibility
-            [4/sdev, 7/sdev],   # noqa : matrix legibility
+            [3/sdev, 6/sdev],
+            [4/sdev, 7/sdev],
             [5/sdev,     0.]])  # noqa : matrix legibility
         assert_array_almost_equal(Yt, Y2)
