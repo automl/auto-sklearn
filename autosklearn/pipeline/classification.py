@@ -14,11 +14,8 @@ from autosklearn.pipeline.components import classification as \
     classification_components
 from autosklearn.pipeline.components.data_preprocessing.balancing.balancing import \
     Balancing
-
 from autosklearn.pipeline.components import feature_preprocessing as \
     feature_preprocessing_components
-from autosklearn.pipeline.components.data_preprocessing.variance_threshold.\
-    variance_threshold import VarianceThreshold
 from autosklearn.pipeline.base import BasePipeline
 from autosklearn.pipeline.constants import SPARSE
 

@@ -3,10 +3,10 @@ import numpy as np
 import scipy.sparse
 from sklearn.utils.testing import assert_array_almost_equal
 
-from autosklearn.pipeline.components.data_preprocessing.minority_coalescense.minority_coalescer \
-    import MinorityCoalescer
-from autosklearn.pipeline.components.data_preprocessing.minority_coalescense.no_coalescense \
-    import NoCoalescence
+from autosklearn.pipeline.components.data_preprocessing.minority_coalescense\
+    .minority_coalescer import MinorityCoalescer
+from autosklearn.pipeline.components.data_preprocessing.minority_coalescense\
+    .no_coalescense import NoCoalescence
 
 
 class MinorityCoalescerTest(unittest.TestCase):
@@ -24,7 +24,6 @@ class MinorityCoalescerTest(unittest.TestCase):
         ))
         for col in range(X.shape[1]):
             np.random.shuffle(X[:, col])
-        
         return X
 
     def test_no_coalescence(self):
@@ -65,4 +64,3 @@ class MinorityCoalescerTest(unittest.TestCase):
         X = self.X - 2
         with self.assertRaises(ValueError):
             MinorityCoalescer().fit_transform(X)
-

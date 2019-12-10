@@ -2,8 +2,8 @@ import numpy as np
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 
-from autosklearn.pipeline.components.data_preprocessing.category_shift.category_shift \
-    import CategoryShift
+from autosklearn.pipeline.components.data_preprocessing.category_shift.\
+    category_shift import CategoryShift
 from autosklearn.pipeline.components.data_preprocessing.imputation.\
     categorical_imputation import CategoricalImputation
 from autosklearn.pipeline.components.data_preprocessing.minority_coalescense \
@@ -21,7 +21,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
     The steps of this pipeline are:
         1 - Category shift: Adds 3 to every category value
         2 - Imputation: Assign category 2 to missing values (NaN).
-        3 - Minority coalescence: Assign category 1 to all categories whose occurence 
+        3 - Minority coalescence: Assign category 1 to all categories whose occurence
             don't sum-up to a certain minimum fraction
         4 - One hot encoding: usual sklearn one hot encoding
 
@@ -34,7 +34,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         If int, random_state is the seed used by the random number generator;
         If RandomState instance, random_state is the random number generator;
         If None, the random number generator is the RandomState instance
-        used by `np.random`. """
+        used by `np.random`."""
 
     def __init__(self, config=None, pipeline=None, dataset_properties=None,
                  include=None, exclude=None, random_state=None,
@@ -94,7 +94,7 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         cs = self._get_base_search_space(
             cs=cs, dataset_properties=dataset_properties,
             exclude=exclude, include=include, pipeline=self.steps)
-        
+
         self.configuration_space_ = cs
         self.dataset_properties_ = dataset_properties
         return cs
@@ -113,4 +113,3 @@ class CategoricalPreprocessingPipeline(BasePipeline):
 
     def _get_estimator_hyperparameter_name(self):
         return "categorical data preprocessing"
-

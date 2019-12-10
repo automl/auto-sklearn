@@ -16,7 +16,7 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
         Y = np.array([
             [1, 0, 0, 0, 1, 0, 0, 1],
             [0, 0, 1, 1, 0, 0, 0, 1],
-            [0, 1, 0, 0, 0, 1, 1, 0]]) 
+            [0, 1, 0, 0, 0, 1, 1, 0]])
         Yt = CategoricalPreprocessingPipeline().fit_transform(X)
         self.assertTrue((Yt.todense() == Y).all())
 
@@ -28,7 +28,7 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
         Y1 = np.array([
             [1, 0, 0, 0, 1, 0, 0, 1],
             [0, 0, 1, 1, 0, 0, 0, 1],
-            [0, 1, 0, 0, 0, 1, 1, 0]]) 
+            [0, 1, 0, 0, 0, 1, 1, 0]])
         X2 = np.array([
             [2, 2, 1],
             [3, 0, 0],
@@ -36,7 +36,7 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
         Y2 = np.array([
             [0, 1, 0, 0, 1, 0, 0, 0],
             [0, 0, 1, 1, 0, 0, 0, 1],
-            [0, 1, 0, 0, 0, 0, 1, 0]]) 
+            [0, 1, 0, 0, 0, 0, 1, 0]])
 
         # "fit"
         CPPL = CategoricalPreprocessingPipeline()
@@ -60,7 +60,7 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
         ))
         for col in range(X.shape[1]):
             np.random.shuffle(X[:, col])
-        
+
         Yt = CategoricalPreprocessingPipeline().fit_transform(X)
         # From the 5 original categories, 2 are coalesced, remaining 4.
         # Dataset has 10 cols, therefore Y must have 40 (i.e. 4 x 10) cols

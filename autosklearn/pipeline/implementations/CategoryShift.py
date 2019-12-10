@@ -7,17 +7,17 @@ from sklearn.base import BaseEstimator, TransformerMixin
 class CategoryShift(BaseEstimator, TransformerMixin):
     """ Add 3 to every category.
     """
-    
+
     def _convert_and_check_X(self, X):
         X_data = X.data if sparse.issparse(X) else X
         if np.nanmin(X_data) < 0:
             raise ValueError("X needs to contain only non-negative integers.")
         X = check_array(X, accept_sparse='csc', force_all_finite=False, copy=True)
         return X
-    
+
     def fit(self, X, y=None):
         self._convert_and_check_X(X)
-        return self 
+        return self
 
     def transform(self, X):
         X = self._convert_and_check_X(X)

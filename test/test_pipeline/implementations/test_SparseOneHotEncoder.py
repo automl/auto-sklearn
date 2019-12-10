@@ -91,10 +91,10 @@ class TestSparseOneHotEncoder(unittest.TestCase):
             sklearn.model_selection.train_test_split(X, y, random_state=3,
                                                      train_size=0.5,
                                                      test_size=0.5)
-        
+
         X_train = scipy.sparse.csc_matrix(X_train)
         X_test = scipy.sparse.csc_matrix(X_test)
-        
+
         pipeline = sklearn.pipeline.Pipeline((
             ('shift', CategoryShift()),
             ('imput', SimpleImputer(strategy='constant', fill_value=2)),

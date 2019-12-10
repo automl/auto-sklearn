@@ -59,7 +59,7 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
                         dtype=np.int32)
         if X.min() < 0:
             raise ValueError("X needs to contain only non-negative integers.")
-        
+
         return X
 
     def fit_transform(self, X, y=None):
@@ -93,7 +93,7 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         X = self._check_X(X)
-        
+
         n_samples, n_features = X.shape
         indices = self.feature_indices_
         if n_features != indices.shape[0] - 1:
@@ -121,7 +121,7 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
             column_indices_ += X.data[X.indptr[i]:X.indptr[i + 1]]
             column_indices.extend(column_indices_)
         data = np.ones(X.data.size)
-        
+
         out = sparse.coo_matrix((data, (row_indices, column_indices)),
                                 shape=(n_samples, indices[-1]),
                                 dtype=np.int32).tocsc()

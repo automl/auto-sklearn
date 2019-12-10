@@ -28,7 +28,7 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
         X = self.preprocessor.transform(X)
         X = check_array(X, accept_sparse='csc', dtype=np.int32)
         return X
-    
+
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X)
 

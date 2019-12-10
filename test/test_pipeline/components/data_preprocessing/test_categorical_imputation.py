@@ -13,7 +13,7 @@ class CategoricalImputationTest(PreprocessingTestCase):
         mask = np.logical_not(np.random.randint(0, 5, size=size), dtype=bool)
         X[mask] = np.nan
         return X, mask
-        
+
     def test_default(self):
         X, mask = self._get_dataset()
         Y = CategoricalImputation().fit_transform(X)

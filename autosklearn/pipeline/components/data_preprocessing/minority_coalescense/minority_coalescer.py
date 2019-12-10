@@ -21,12 +21,12 @@ class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
             .MinorityCoalescer(minimum_fraction=self.minimum_fraction)
         self.preprocessor.fit(X, y)
         return self
-    
+
     def transform(self, X):
         if self.preprocessor is None:
             raise NotImplementedError()
         return self.preprocessor.transform(X)
-    
+
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X)
 

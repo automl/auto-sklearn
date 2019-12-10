@@ -17,11 +17,11 @@ class MinorityCoalescer:
 
     def fit(self, X, y=None):
         self.check_X(X)
-        return self 
+        return self
 
     def transform(self, X):
         self.check_X(X)
-        
+
         if self.minimum_fraction is None:
             return X
 
@@ -60,4 +60,3 @@ class MinorityCoalescer:
 
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X)
-    

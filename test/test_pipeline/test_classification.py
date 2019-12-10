@@ -413,7 +413,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
     def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(self):
         cs = SimpleClassificationPipeline(
-            include={'feature_preprocessor': ['densifier']}, 
+            include={'feature_preprocessor': ['densifier']},
             dataset_properties={'sparse': True}).\
             get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter(
@@ -594,4 +594,3 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
         self.assertIn('DummyPreprocessor', str(cs))
         del preprocessing_components._addons.components['DummyPreprocessor']
-

@@ -21,9 +21,8 @@ class MinorityCoalescerTest(unittest.TestCase):
         ))
         for col in range(X.shape[1]):
             np.random.shuffle(X[:, col])
-        
         return X
-        
+
     def test_default(self):
         X = self.X
         X_copy = np.copy(X)

@@ -28,14 +28,14 @@ class DataPreprocessor(AutoSklearnComponent):
         that should be applied to the numerical features (i.e. columns) of the dataset """
 
     def __init__(self, config=None, pipeline=None, dataset_properties=None, include=None,
-                 exclude=None, random_state=None, init_params=None, 
+                 exclude=None, random_state=None, init_params=None,
                  categorical_features=None, sparse=True):
 
         self.categ_ppl = CategoricalPreprocessingPipeline(
-            config, pipeline, dataset_properties, include, exclude, 
+            config, pipeline, dataset_properties, include, exclude,
             random_state, init_params)
         self.numer_ppl = NumericalPreprocessingPipeline(
-            config, pipeline, dataset_properties, include, exclude, 
+            config, pipeline, dataset_properties, include, exclude,
             random_state, init_params)
         self._transformers = [
             ["categorical_transformer", self.categ_ppl],
@@ -53,9 +53,9 @@ class DataPreprocessor(AutoSklearnComponent):
         # If categorical_features is none or an array made just of False booleans, then
         # only the numerical transformer is used
         numerical_features = np.logical_not(self.categorical_features)
-        if self.categorical_features is None or np.all(numerical_features): 
+        if self.categorical_features is None or np.all(numerical_features):
             sklearn_transf_spec = [
-                ["numerical_transformer", self.numer_ppl, list(range(n_feats))] 
+                ["numerical_transformer", self.numer_ppl, list(range(n_feats))]
             ]
         # If all features are categorical, then just the categorical transformer is used
         elif np.all(self.categorical_features):
@@ -103,7 +103,6 @@ class DataPreprocessor(AutoSklearnComponent):
                 'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (INPUT,), }
 
-
     def set_hyperparameters(self, configuration, init_params=None):
         if init_params is not None and 'categorical_features' in init_params.keys():
             self.categorical_features = init_params['categorical_features']
@@ -135,7 +134,7 @@ class DataPreprocessor(AutoSklearnComponent):
                 sub_init_params_dict = None
 
             if isinstance(transf_op, (
-                AutoSklearnChoice, AutoSklearnComponent, BasePipeline)):
+                    AutoSklearnChoice, AutoSklearnComponent, BasePipeline)):
                 transf_op.set_hyperparameters(
                     configuration=sub_configuration, init_params=sub_init_params_dict)
             else:
