@@ -1,6 +1,5 @@
 import unittest
 import numpy as np
-from scipy import sparse
 
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
     import DataPreprocessor
@@ -8,7 +7,7 @@ from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
 
 class PreprocessingPipelineTest(unittest.TestCase):
 
-    def do_a_fit_transform(self, sparse):
+    def do_a_fit_transform(self, sparse_output):
         # Numerical dataset (as used in NumericalPreprocessingPipelineTest)
         X_num = np.array([
             [3.14, 1.,     1.],   # noqa : matrix legibility
@@ -36,17 +35,17 @@ class PreprocessingPipelineTest(unittest.TestCase):
         categ_feat = categ_feat[random_order]
         # fit_transform
         Y_comb = DataPreprocessor(
-            categorical_features=categ_feat, sparse=sparse).fit_transform(X_comb)
-        Y_comb = Y_comb.todense() if sparse else Y_comb
+            categorical_features=categ_feat, sparse=sparse_output).fit_transform(X_comb)
+        Y_comb = Y_comb.todense() if sparse_output else Y_comb
         # check shape
         self.assertEquals(Y_comb.shape, (3, 10))
         # check content. Categorical columns appear first in Y.
         for row in range(3):
-            self.assertAlmostEqual(np.sum(Y_cat[row]), np.sum(Y_comb[row,:8]))
-            self.assertAlmostEqual(np.sum(Y_num[row]), np.sum(Y_comb[row,8:]))
+            self.assertAlmostEqual(np.sum(Y_cat[row]), np.sum(Y_comb[row, :8]))
+            self.assertAlmostEqual(np.sum(Y_num[row]), np.sum(Y_comb[row, 8:]))
 
     def test_fit_transform(self):
-        self.do_a_fit_transform(sparse=False)
+        self.do_a_fit_transform(sparse_output=False)
 
     def test_fit_transform_sparse(self):
-        self.do_a_fit_transform(sparse=True)
+        self.do_a_fit_transform(sparse_output=True)
