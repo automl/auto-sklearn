@@ -92,4 +92,3 @@ class CoalescenseChoice(AutoSklearnChoice):
 
     def transform(self, X):
         return self.choice.transform(X)
-    

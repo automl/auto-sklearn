@@ -113,4 +113,3 @@ class NumericalPreprocessingPipeline(BasePipeline):
 
     def _get_estimator_hyperparameter_name(self):
         return "numerical data preprocessing"
-

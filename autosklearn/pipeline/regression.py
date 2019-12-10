@@ -246,9 +246,9 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
         default_dataset_properties = {'target_type': 'regression'}
 
         steps.extend([
-            ['data_preprocessing', 
+            ['data_preprocessing',
                 DataPreprocessor(dataset_properties=default_dataset_properties)],
-            ['feature_preprocessor', 
+            ['feature_preprocessor',
                 feature_preprocessing_components.FeaturePreprocessorChoice(
                     default_dataset_properties)],
             ['regressor',

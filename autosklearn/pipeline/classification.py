@@ -283,7 +283,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         default_dataset_properties = {'target_type': 'classification'}
 
         steps.extend([
-            ["data_preprocessing", 
+            ["data_preprocessing",
                 DataPreprocessor(dataset_properties=default_dataset_properties)],
             ["balancing",
                 Balancing()],
