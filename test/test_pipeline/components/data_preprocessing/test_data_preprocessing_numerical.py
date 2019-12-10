@@ -12,17 +12,17 @@ class NumericalPreprocessingPipelineTest(unittest.TestCase):
 
     def test_fit_transform(self):
         X = np.array([
-            [3.14, 1.,     1.],
-            [3.14, 2., np.nan],
+            [3.14, 1.,     1.],   # noqa : matrix legibility
+            [3.14, 2., np.nan],   # noqa : matrix legibility
             [3.14, 3.,     3.]])  # noqa : matrix legibility
-        # First column should be droped due to low variance
+        # 1st column should be droped due to low variance
         # The 2nd should be be standardized (default rescaling algorithm)
         # The 3rd will get a value imputed by the mean (2.), therefore the transformation
         # here will have the same effect as on the the 2nd column
         sdev = (2 / 3) ** .5
         Y1 = np.array([
-            [-1/sdev, -1/sdev],
-            [     0.,      0.],
+            [-1/sdev, -1/sdev],   # noqa : matrix legibility
+            [     0.,      0.],   # noqa : matrix legibility
             [ 1/sdev,  1/sdev]])  # noqa : matrix legibility
         # dense input
         Yt = NumericalPreprocessingPipeline().fit_transform(X)
@@ -38,8 +38,8 @@ class NumericalPreprocessingPipelineTest(unittest.TestCase):
 
     def test_transform(self):
         X1 = np.array([
-            [3.14, 1.,     1.],
-            [3.14, 2., np.nan],
+            [3.14, 1.,     1.],   # noqa : matrix legibility
+            [3.14, 2., np.nan],   # noqa : matrix legibility
             [3.14, 3.,     3.]])  # noqa : matrix legibility
         sdev = (2 / 3) ** .5
         # fit
@@ -54,7 +54,7 @@ class NumericalPreprocessingPipelineTest(unittest.TestCase):
         # imputation, variance_threshold and rescaling are done using the data already
         # fitted, therefore:
         Y2 = np.array([
-            [3/sdev, 6/sdev],
-            [4/sdev, 7/sdev],
+            [3/sdev, 6/sdev],   # noqa : matrix legibility
+            [4/sdev, 7/sdev],   # noqa : matrix legibility
             [5/sdev,     0.]])  # noqa : matrix legibility
         assert_array_almost_equal(Yt, Y2)
