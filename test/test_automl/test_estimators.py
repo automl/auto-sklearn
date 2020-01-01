@@ -9,6 +9,8 @@ import sklearn
 import numpy as np
 import numpy.ma as npma
 
+from joblib import cpu_count
+
 import autosklearn.pipeline.util as putil
 import autosklearn.estimators
 from autosklearn.estimators import AutoSklearnEstimator
@@ -18,9 +20,9 @@ from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
 from autosklearn.automl import AutoMLClassifier, AutoML
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import BINARY_CLASSIFICATION
-sys.path.append(os.path.dirname(__file__))
 from base import Base
-from joblib import cpu_count
+
+sys.path.append(os.path.dirname(__file__))
 
 class ArrayReturningDummyPredictor(object):
     def __init__(self, test):

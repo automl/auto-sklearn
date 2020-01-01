@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-import os
 import copy
 import multiprocessing
 from typing import Optional, List, Dict
@@ -514,7 +513,6 @@ class AutoSklearnEstimator(BaseEstimator):
         self._automl[0].refit(X, y)
         return self
 
-
     def predict(self, X, batch_size=None, n_jobs=1):
         return self._automl[0].predict(X, batch_size=batch_size, n_jobs=n_jobs)
 
@@ -827,5 +825,3 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
 
     def _get_automl_class(self):
         return AutoMLRegressor
-
-
