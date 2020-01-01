@@ -11,7 +11,7 @@ import numpy.ma as npma
 
 import autosklearn.pipeline.util as putil
 import autosklearn.estimators
-from autosklearn.estimators import AutoSklearnEstimator, get_number_of_available_cores
+from autosklearn.estimators import AutoSklearnEstimator
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
 from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
@@ -20,7 +20,7 @@ from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import BINARY_CLASSIFICATION
 sys.path.append(os.path.dirname(__file__))
 from base import Base
-
+from joblib import cpu_count
 
 class ArrayReturningDummyPredictor(object):
     def __init__(self, test):
@@ -482,33 +482,14 @@ class EstimatorTest(Base, unittest.TestCase):
 
     @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
     def test_fit_n_jobs_negative(self, build_automl_patch):
-        n_cores = get_number_of_available_cores()
+        n_cores = cpu_count()
         cls = AutoSklearnEstimator(n_jobs=-1)
         cls.fit()
         self.assertEqual(len(cls._automl), n_cores)
 
     def test_get_number_of_available_cores(self):
-        n_cores = get_number_of_available_cores()
+        n_cores = cpu_count()
         self.assertGreaterEqual(n_cores, 1)
-
-    @unittest.mock.patch('autosklearn.estimators.os.sched_getaffinity')
-    def test_get_number_of_available_cores_overwrite_function(self, mocked):
-        mocked.return_value = {1, 2, 3, 4}
-        self.assertEqual(get_number_of_available_cores(), 4)
-
-    @unittest.mock.patch('autosklearn.estimators.os')
-    def test_get_number_of_available_cores_no_linux(self, mocked_os):
-        delattr(mocked_os, 'sched_getaffinity')
-        mocked_os.cpu_count.return_value = -1
-        self.assertEqual(autosklearn.estimators.os.cpu_count(), -1)
-        self.assertEqual(get_number_of_available_cores(), -1)
-
-    @unittest.mock.patch('autosklearn.estimators.os')
-    def test_get_number_of_available_cores_undefined(self, mocked_os):
-        delattr(mocked_os, 'sched_getaffinity')
-        mocked_os.cpu_count.return_value = None
-        self.assertEqual(autosklearn.estimators.os.cpu_count(), None)
-        self.assertEqual(get_number_of_available_cores(), 1)
 
 
 class AutoMLClassifierTest(Base, unittest.TestCase):

@@ -7,6 +7,7 @@ from typing import Optional, List, Dict
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
+import joblib
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, BaseAutoML
 from autosklearn.util.backend import create, get_randomized_directory_names
@@ -343,7 +344,7 @@ class AutoSklearnEstimator(BaseEstimator):
             )
 
             if self.n_jobs == -1:
-                self._n_jobs = get_number_of_available_cores()
+                self._n_jobs = joblib.cpu_count()
             else:
                 self._n_jobs = self.n_jobs
 
@@ -828,18 +829,3 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         return AutoMLRegressor
 
 
-def get_number_of_available_cores():
-    """
-    Returns the number of available logical cores on the system
-    First tries to use os.sched_getaffinity, if it is not available use os.cpu_count
-    :return: Number of cores, int
-    """
-
-    try:
-        n = len(os.sched_getaffinity(0))
-    except AttributeError:
-        n = os.cpu_count()
-
-    if n is None:
-        return 1
-    return n
