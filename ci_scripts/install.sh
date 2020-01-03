@@ -9,11 +9,13 @@ cat requirements.txt | xargs -n 1 -L 1 pip install
     pip freeze
 
 if [[ "$TEST_DIST" == "true" ]]; then
+    pip install twine
     python setup.py sdist
     # Find file which was modified last as done in https://stackoverflow.com/a/4561987
     dist=`find dist -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" "`
     echo "Installing $dist"
     pip install "$dist"
+    twine check "$dist"
 else
     python setup.py check -m -s
     python setup.py install
