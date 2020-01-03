@@ -52,11 +52,18 @@ with open(os.path.join(HERE, 'requirements.txt')) as fp:
 with open("autosklearn/__version__.py") as fh:
     version = fh.readlines()[-1].split()[-1].strip("\"'")
 
+
+with open('README.md') as fh:
+    long_description = fh.read()
+
+
 setup(
     name='auto-sklearn',
     author='Matthias Feurer',
     author_email='feurerm@informatik.uni-freiburg.de',
     description='Automated machine learning.',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     version=version,
     cmdclass={'build_ext': BuildExt},
     ext_modules=extensions,

@@ -15,7 +15,13 @@ if [[ "$TEST_DIST" == "true" ]]; then
     dist=`find dist -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" "`
     echo "Installing $dist"
     pip install "$dist"
-    twine check "$dist"
+    twine_output=`twine check "$dist"`
+    if [[ "$twine_output" != "Checking $dist: PASSED" ]]; then
+        echo $twine_output
+        exit 1
+    else
+        echo "Check with Twine: OK: $twine_output"
+    fi
 else
     python setup.py check -m -s
     python setup.py install
