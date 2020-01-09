@@ -385,8 +385,6 @@ class EnsembleBuilder(multiprocessing.Process):
         sorted_keys = list(filter(lambda x: x[2] > 1, sorted_keys))
         if not sorted_keys:
             # no model left; try to use dummy score (num_run==0)
-            self.logger.warning("No models better than random - "
-                                "using Dummy Score!")
             sorted_keys = [
                 (k, v["ens_score"], v["num_run"]) for k, v in self.read_preds.items()
                 if v["seed"] == self.seed and v["num_run"] == 1
