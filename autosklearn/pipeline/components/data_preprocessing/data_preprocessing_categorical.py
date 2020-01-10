@@ -65,15 +65,6 @@ class CategoricalPreprocessingPipeline(BasePipeline):
                 'output': (INPUT,),
                 'preferred_dtype': None}
 
-    def fit_transformer(self, X, y, fit_params=None):
-        if fit_params is None:
-            fit_params = {}
-
-        X, fit_params = super().fit_transformer(
-            X, y, fit_params=fit_params)
-
-        return X, fit_params
-
     def _get_hyperparameter_search_space(self, include=None, exclude=None,
                                          dataset_properties=None):
         """Create the hyperparameter configuration space.
