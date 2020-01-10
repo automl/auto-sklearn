@@ -17,13 +17,9 @@ class MinorityCoalescer:
 
     def fit(self, X, y=None):
         self.check_X(X)
-        return self
-
-    def transform(self, X):
-        self.check_X(X)
 
         if self.minimum_fraction is None:
-            return X
+            return self
 
         # Remember which values should not be coalesced
         do_not_coalesce = list()
@@ -45,8 +41,25 @@ class MinorityCoalescer:
                 if fraction >= self.minimum_fraction:
                     do_not_coalesce[-1].add(unique_value)
 
+        self.do_not_coalesce_ = do_not_coalesce
+        return self
+
+    def transform(self, X):
+        self.check_X(X)
+
+        if self.minimum_fraction is None:
+            return X
+
+        for column in range(X.shape[1]):
+            if sparse.issparse(X):
+                indptr_start = X.indptr[column]
+                indptr_end = X.indptr[column + 1]
+                unique = np.unique(X.data[indptr_start:indptr_end])
+            else:
+                unique = np.unique(X[:, column])
+
             for unique_value in unique:
-                if unique_value not in do_not_coalesce[-1]:
+                if unique_value not in self.do_not_coalesce_[-1]:
                     if sparse.issparse(X):
                         indptr_start = X.indptr[column]
                         indptr_end = X.indptr[column + 1]
@@ -55,7 +68,6 @@ class MinorityCoalescer:
                     else:
                         X[:, column][X[:, column] == unique_value] = 1
 
-        self.do_not_coalesce_ = do_not_coalesce
         return X
 
     def fit_transform(self, X, y=None):

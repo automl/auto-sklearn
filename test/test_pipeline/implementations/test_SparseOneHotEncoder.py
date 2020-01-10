@@ -14,7 +14,6 @@ from sklearn.utils.testing import assert_array_almost_equal
 from autosklearn.pipeline.implementations.SparseOneHotEncoder import SparseOneHotEncoder
 from autosklearn.pipeline.implementations.CategoryShift import CategoryShift
 
-# All NaN slice
 sparse1 = scipy.sparse.csc_matrix(([3, 2, 1, 1, 2, 3],
                                    ((1, 4, 5, 2, 3, 5),
                                     (0, 0, 0, 1, 1, 1))), shape=(6, 2))
@@ -22,7 +21,6 @@ sparse1_1h = scipy.sparse.csc_matrix(([1, 1, 1, 1, 1, 1],
                                       ((5, 4, 1, 2, 3, 5),
                                        (0, 1, 2, 3, 4, 5))), shape=(6, 6))
 
-# All zeros slice
 sparse2 = scipy.sparse.csc_matrix(([2, 1, 0, 0, 0, 0],
                                    ((1, 4, 5, 2, 3, 5),
                                     (0, 0, 0, 1, 1, 1))), shape=(6, 2))
@@ -74,12 +72,15 @@ class TestSparseOneHotEncoder(unittest.TestCase):
         assert_array_almost_equal(a1, a2)
 
     def test_transform_with_unknown_value(self):
-        input = np.array(((0, 1, 2, 3, 4, 5), (0, 1, 2, 3, 4, 5))).transpose()
-        ips = scipy.sparse.csr_matrix(input)
+        # fit_data: this is going to be used to fit
+        fit_data = np.array(((0, 1, 2, 3, 4, 5), (0, 1, 2, 3, 4, 5))).transpose()
+        fds = scipy.sparse.csr_matrix(fit_data)
         ohe = SparseOneHotEncoder()
-        ohe.fit(ips)
-        test_data = np.array(((0, 1, 2, 6), (0, 1, 6, 7))).transpose()
-        tds = scipy.sparse.csr_matrix(test_data)
+        ohe.fit(fds)
+        # transf_data: this is going to be used in a transform call
+        # note that transf_data has categories not seen at the fit
+        transf_data = np.array(((0, 1, 2, 6), (0, 1, 6, 7))).transpose()
+        tds = scipy.sparse.csr_matrix(transf_data)
         output = ohe.transform(tds).todense()
         self.assertEqual(3, np.sum(output))
 
