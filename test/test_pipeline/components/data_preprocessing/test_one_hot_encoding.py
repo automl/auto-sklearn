@@ -11,10 +11,10 @@ from autosklearn.pipeline.components.data_preprocessing.categorical_encoding.\
 from autosklearn.pipeline.util import _test_preprocessing
 
 
-def create_X(instances=1000, n_feats=10, categs_per_feat=5, random_state=0):
-    np.random.seed(random_state)
+def create_X(instances=1000, n_feats=10, categs_per_feat=5, seed=0):
+    rs = np.random.RandomState(seed)
     size = (instances, n_feats)
-    X = np.random.randint(0, categs_per_feat, size=size)
+    X = rs.randint(0, categs_per_feat, size=size)
     return X
 
 class OneHotEncoderTest(unittest.TestCase):

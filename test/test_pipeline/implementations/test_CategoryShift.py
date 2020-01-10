@@ -23,10 +23,3 @@ class CategoryShiftTest(unittest.TestCase):
         X = np.array([[-1, 2], [3, 4]])
         with self.assertRaises(ValueError):
             CategoryShift().fit_transform(X)
-
-    """
-    def test_string(self):
-        X = np.array([['blue', 'flat'], ['red', 'convex']])
-        with self.assertRaises(ValueError):
-            CategoryShift().fit_transform(X)
-    """

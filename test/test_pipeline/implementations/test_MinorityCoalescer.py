@@ -22,7 +22,7 @@ class MinorityCoalescerTest(unittest.TestCase):
         for col in range(X.shape[1]):
             np.random.shuffle(X[:, col])
         return X
-    
+
     @property
     def X2(self):
         # Generates an array with categories 3, 4, 5, 6, 7 and occurences of 5%,

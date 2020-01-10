@@ -17,23 +17,19 @@ from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 class DataPreprocessor(AutoSklearnComponent):
     """ This component is used to apply distinct transformations to categorical and
     numerical features of a dataset. It is built on top of sklearn's ColumnTransformer.
-
-    Parameters
-    ----------
-    categorical_transformer : [AutoSklearnComponent or BasePipeline]
-        A transformer (either a AutoSklearnComponent or an auto-sklearn Basepipeline)
-        that should be applied to the categorical features (i.e. columns) of the dataset
-    numerical_transformer : [AutoSklearnComponent or BasePipeline]]
-        A transformer (either a AutoSklearnComponent or an auto-sklearn Basepipeline)
-        that should be applied to the numerical features (i.e. columns) of the dataset """
+    """
 
     def __init__(self, config=None, pipeline=None, dataset_properties=None, include=None,
                  exclude=None, random_state=None, init_params=None,
                  categorical_features=None, sparse=True):
 
+        # The pipeline that will be applied to the categorical features (i.e. columns)
+        # of the dataset
         self.categ_ppl = CategoricalPreprocessingPipeline(
             config, pipeline, dataset_properties, include, exclude,
             random_state, init_params)
+        # The pipeline that will be applied to the numerical features (i.e. columns)
+        # of the dataset
         self.numer_ppl = NumericalPreprocessingPipeline(
             config, pipeline, dataset_properties, include, exclude,
             random_state, init_params)
