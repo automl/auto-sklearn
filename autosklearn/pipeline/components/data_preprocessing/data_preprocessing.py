@@ -40,7 +40,7 @@ class DataPreprocessor(AutoSklearnComponent):
         self.categorical_features = categorical_features
         self.sparse = sparse
 
-    def _fit(self, X, y=None):
+    def fit(self, X, y=None):
         # TODO: we are converting the categorical_features array from boolean flags
         # to integer indices to work around a sklearn bug. It should be fixed in sklearn
         # v0.22. Then we will be able to use the boolean array directly.
@@ -70,20 +70,16 @@ class DataPreprocessor(AutoSklearnComponent):
             transformers=sklearn_transf_spec,
             sparse_threshold=float(self.sparse),
             )
-        return self.column_transformer.fit_transform(X)
-
-    def fit(self, X, y=None):
-        self._fit(X, y)
+        self.column_transformer.fit(X)
         return self
-
-    def fit_transform(self, X, y=None):
-        self._fit(X)
-        return self.transform(X)
 
     def transform(self, X):
         if self.column_transformer is None:
             raise NotImplementedError()
         return self.column_transformer.transform(X)
+
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X)
 
     @staticmethod
     def get_properties(dataset_properties=None):
