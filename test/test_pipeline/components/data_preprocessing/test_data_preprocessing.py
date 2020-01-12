@@ -13,7 +13,7 @@ class PreprocessingPipelineTest(unittest.TestCase):
             [3.14, 1.,     1.],   # noqa : matrix legibility
             [3.14, 2., np.nan],   # noqa : matrix legibility
             [3.14, 3.,     3.]])  # noqa : matrix legibility
-        sdev = (2 / 3) ** .5
+        sdev = np.sqrt(2 / 3)
         Y_num = np.array([
             [-1/sdev, -1/sdev],   # noqa : matrix legibility
             [     0.,      0.],   # noqa : matrix legibility

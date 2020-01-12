@@ -10,8 +10,8 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
 
     def test_fit_transform(self):
         X = np.array([
-            [1, 2, 0],
-            [3, 0, 0],
+            [1, 2, 1],
+            [3, 1, 1],
             [2, 9, np.nan]])
         Y = np.array([
             [1, 0, 0, 0, 1, 0, 0, 1],
@@ -19,11 +19,17 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
             [0, 1, 0, 0, 0, 1, 1, 0]])
         # dense input
         Yt = CategoricalPreprocessingPipeline().fit_transform(X)
-        self.assertTrue((Yt.todense() == Y).all())
+        Yt = Yt.todense()
+        self.assertTrue(Yt.shape == Y.shape)
+        if Yt.shape == Y.shape:
+            self.assertTrue((Yt == Y).all())
         # sparse input
-        X_sparse = sparse.csc_matrix(X+1)
+        X_sparse = sparse.csc_matrix(X)
         Yt = CategoricalPreprocessingPipeline().fit_transform(X_sparse)
-        self.assertTrue((Yt.todense() == Y).all())
+        Yt = Yt.todense()
+        self.assertTrue(Yt.shape == Y.shape)
+        if Yt.shape == Y.shape:
+            self.assertTrue((Yt == Y).all())
 
     def test_transform(self):
         X1 = np.array([

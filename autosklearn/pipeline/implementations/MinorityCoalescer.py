@@ -59,7 +59,7 @@ class MinorityCoalescer:
                 unique = np.unique(X[:, column])
 
             for unique_value in unique:
-                if unique_value not in self.do_not_coalesce_[-1]:
+                if unique_value not in self.do_not_coalesce_[column]:
                     if sparse.issparse(X):
                         indptr_start = X.indptr[column]
                         indptr_end = X.indptr[column + 1]

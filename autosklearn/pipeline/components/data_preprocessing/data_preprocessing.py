@@ -42,7 +42,7 @@ class DataPreprocessor(AutoSklearnComponent):
 
     def _fit(self, X, y=None):
         # TODO: we are converting the categorical_features array from boolean flags
-        # to integer indices to work around a sklern bug. It should be fixed in sklearn
+        # to integer indices to work around a sklearn bug. It should be fixed in sklearn
         # v0.22. Then we will be able to use the boolean array directly.
 
         n_feats = X.shape[1]

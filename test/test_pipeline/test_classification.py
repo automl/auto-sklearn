@@ -385,7 +385,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         #    print hp
 
         # The four parameters which are always active are classifier,
-        # preprocessor, imputation strategy and scaling strategy
+        # feature preprocessor, balancing and data preprocessing pipeline.
         self.assertEqual(len(hyperparameters) - 7, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):

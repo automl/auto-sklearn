@@ -19,7 +19,7 @@ class NumericalPreprocessingPipelineTest(unittest.TestCase):
         # The 2nd should be be standardized (default rescaling algorithm)
         # The 3rd will get a value imputed by the mean (2.), therefore the transformation
         # here will have the same effect as on the the 2nd column
-        sdev = (2 / 3) ** .5
+        sdev = np.sqrt(2 / 3)
         Y1 = np.array([
             [-1/sdev, -1/sdev],
             [     0.,      0.],   # noqa : matrix legibility
@@ -41,7 +41,7 @@ class NumericalPreprocessingPipelineTest(unittest.TestCase):
             [3.14, 1.,     1.],
             [3.14, 2., np.nan],
             [3.14, 3.,     3.]])  # noqa : matrix legibility
-        sdev = (2 / 3) ** .5
+        sdev = np.sqrt(2 / 3)
         # fit
         NPP = NumericalPreprocessingPipeline()
         NPP.fit_transform(X1)

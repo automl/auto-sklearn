@@ -19,7 +19,7 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
 
         self.preprocessor = sklearn.impute.SimpleImputer(
             strategy='constant', fill_value=2, copy=False)
-        self.preprocessor = self.preprocessor.fit(X)
+        self.preprocessor.fit(X)
         return self
 
     def transform(self, X):
