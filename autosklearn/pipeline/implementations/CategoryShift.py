@@ -10,8 +10,16 @@ class CategoryShift(BaseEstimator, TransformerMixin):
 
     def _convert_and_check_X(self, X):
         X_data = X.data if sparse.issparse(X) else X
-        if np.nanmin(X_data) < 0:
-            raise ValueError("X needs to contain only non-negative integers.")
+
+        # Check if data is numeric and positive
+        if not X_data.dtype.kind in set('buif') or \
+            np.nanmin(X_data) < 0:
+            raise ValueError('Categories should be non-negative numbers. NOTE: floats '
+                'will be casted to integers.')
+
+        # Use check_array to make sure we are using the right kind of sparse array
+        # Notice that we cannot convert the array to integer right now. That would get
+        # rid of the np.nans and we need them later on for the imputation.
         X = check_array(X, accept_sparse='csc', force_all_finite=False, copy=True)
         return X
 

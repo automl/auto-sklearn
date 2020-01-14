@@ -15,7 +15,7 @@ class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
 
         self.preprocessor = sklearn.impute.SimpleImputer(
             strategy=self.strategy, copy=False)
-        self.preprocessor = self.preprocessor.fit(X)
+        self.preprocessor.fit(X)
         return self
 
     def transform(self, X):

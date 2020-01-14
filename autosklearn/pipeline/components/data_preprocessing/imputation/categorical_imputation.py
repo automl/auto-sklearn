@@ -25,8 +25,7 @@ class CategoricalImputation(AutoSklearnPreprocessingAlgorithm):
     def transform(self, X):
         if self.preprocessor is None:
             raise NotImplementedError()
-        X = self.preprocessor.transform(X)
-        X = check_array(X, accept_sparse='csc', dtype=np.int32)
+        X = self.preprocessor.transform(X).astype(int)
         return X
 
     def fit_transform(self, X, y=None):

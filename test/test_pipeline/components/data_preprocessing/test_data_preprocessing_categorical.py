@@ -48,6 +48,14 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
             [0, 1, 0, 0, 1, 0, 0, 0],
             [0, 0, 1, 1, 0, 0, 0, 1],
             [0, 1, 0, 0, 0, 0, 1, 0]])
+        X3 = np.array([
+            [3, np.nan, 0],
+            [3, 9, np.nan],
+            [2, 2, 5]])
+        Y3 = np.array([
+            [0, 0, 1, 0, 0, 0, 0, 1],
+            [0, 0, 1, 0, 0, 1, 1, 0],
+            [0, 1, 0, 0, 1, 0, 0, 0]])
         # "fit"
         CPPL = CategoricalPreprocessingPipeline()
         CPPL.fit_transform(X1)
@@ -57,6 +65,9 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
         # Transform a new dataset with categories not seen during fit
         Y2t = CPPL.transform(X2)
         self.assertTrue((Y2t.todense() == Y2).all())
+        # And again with yet a different dataset
+        Y3t = CPPL.transform(X3)
+        self.assertTrue((Y3t.todense() == Y3).all())
 
     def test_transform_with_coalescence(self):
         # Generates an array with categories 0, 20, 5, 6, 10, and occurences of 60%,
