@@ -23,6 +23,16 @@ class DataPreprocessor(AutoSklearnComponent):
                  exclude=None, random_state=None, init_params=None,
                  categorical_features=None, sparse=True):
 
+        if pipeline is not None:
+            raise ValueError ("DataPreprocessor's argument 'pipeline' should be None")
+
+        if categorical_features is not None:
+            categorical_features = np.array(categorical_features)
+            if categorical_features.dtype != 'bool':
+                raise ValueError('Parameter categorical_features must'
+                    ' only contain booleans.')
+        self.categorical_features = categorical_features
+
         # The pipeline that will be applied to the categorical features (i.e. columns)
         # of the dataset
         self.categ_ppl = CategoricalPreprocessingPipeline(
@@ -37,7 +47,6 @@ class DataPreprocessor(AutoSklearnComponent):
             ["categorical_transformer", self.categ_ppl],
             ["numerical_transformer", self.numer_ppl],
         ]
-        self.categorical_features = categorical_features
         self.sparse = sparse
 
     def fit(self, X, y=None):

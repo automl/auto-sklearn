@@ -72,16 +72,20 @@ class TestSparseOneHotEncoder(unittest.TestCase):
         assert_array_almost_equal(a1, a2)
 
     def test_transform_with_unknown_value(self):
-        # fit_data: this is going to be used to fit
+        # fit_data: this is going to be used to fit.
+        # note that 0 is no category because the data here is sparse.
         fit_data = np.array(((0, 1, 2, 3, 4, 5), (0, 1, 2, 3, 4, 5))).transpose()
         fds = scipy.sparse.csr_matrix(fit_data)
         ohe = SparseOneHotEncoder()
         ohe.fit(fds)
-        # transf_data: this is going to be used in a transform call
-        # note that transf_data has categories not seen at the fit
+        # transf_data: this is going to be used in a transform call.
+        # Note that transf_data has categories not seen at the fit.
+        # Unseen categories are ignored (encoded just with zeros).
         transf_data = np.array(((0, 1, 2, 6), (0, 1, 6, 7))).transpose()
         tds = scipy.sparse.csr_matrix(transf_data)
         output = ohe.transform(tds).todense()
+        # From tds, just 3 categories (1 and 2 in the 1st feature and 1 in the 2nd
+        # feature) have been seen during fit, therefore:
         self.assertEqual(3, np.sum(output))
 
     def test_classification_workflow(self):

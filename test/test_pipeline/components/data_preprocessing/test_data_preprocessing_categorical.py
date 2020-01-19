@@ -20,16 +20,12 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
         # dense input
         Yt = CategoricalPreprocessingPipeline().fit_transform(X)
         Yt = Yt.todense()
-        self.assertTrue(Yt.shape == Y.shape)
-        if Yt.shape == Y.shape:
-            self.assertTrue((Yt == Y).all())
+        np.testing.assert_array_equal(Yt, Y)
         # sparse input
         X_sparse = sparse.csc_matrix(X)
         Yt = CategoricalPreprocessingPipeline().fit_transform(X_sparse)
         Yt = Yt.todense()
-        self.assertTrue(Yt.shape == Y.shape)
-        if Yt.shape == Y.shape:
-            self.assertTrue((Yt == Y).all())
+        np.testing.assert_array_equal(Yt, Y)
 
     def test_transform(self):
         X1 = np.array([
@@ -82,7 +78,11 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
         for col in range(X.shape[1]):
             np.random.shuffle(X[:, col])
 
-        Yt = CategoricalPreprocessingPipeline().fit_transform(X)
+        CPPL = CategoricalPreprocessingPipeline()
+        Y1t = CPPL.fit_transform(X)
         # From the 5 original categories, 2 are coalesced, remaining 4.
         # Dataset has 10 cols, therefore Y must have 40 (i.e. 4 x 10) cols
-        self.assertEqual(Yt.shape, (200, 40))
+        self.assertEqual(Y1t.shape, (200, 40))
+        # Consistency check:
+        Y2t = CPPL.transform(X)
+        self.assertTrue((Y1t.todense() == Y2t.todense()).all())

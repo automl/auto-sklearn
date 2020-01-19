@@ -18,6 +18,10 @@ class CategoryShiftTest(unittest.TestCase):
         Y = CategoryShift().fit_transform(X)
         X.data += 3
         self.assertTrue((Y.todense() == X.todense()).all())
+        # Check if the sparsity stays the same before and after the transformation
+        self.assertEqual(X.data.shape, Y.data.shape)
+        self.assertTrue((X.indices == Y.indices).all())
+        self.assertTrue((X.indptr == Y.indptr).all())
 
     def test_negative(self):
         X = np.array([[-1, 2], [3, 4]])

@@ -384,7 +384,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
 
-        # The four parameters which are always active are classifier,
+        # The four components which are always active are classifier,
         # feature preprocessor, balancing and data preprocessing pipeline.
         self.assertEqual(len(hyperparameters) - 7, len(conditions))
 

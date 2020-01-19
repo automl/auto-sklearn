@@ -39,6 +39,9 @@ class CategoricalPreprocessingPipeline(BasePipeline):
     def __init__(self, config=None, pipeline=None, dataset_properties=None,
                  include=None, exclude=None, random_state=None,
                  init_params=None):
+        if pipeline is not None:
+            raise ValueError(
+                "CategoricalPreprocessingPipeline's argument 'pipeline' should be None")
         self._output_dtype = np.int32
         super().__init__(
             config, pipeline, dataset_properties, include, exclude,
@@ -68,9 +71,6 @@ class CategoricalPreprocessingPipeline(BasePipeline):
     def _get_hyperparameter_search_space(self, include=None, exclude=None,
                                          dataset_properties=None):
         """Create the hyperparameter configuration space.
-
-        Parameters
-        ----------
 
         Returns
         -------

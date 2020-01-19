@@ -38,6 +38,9 @@ class NumericalPreprocessingPipeline(BasePipeline):
     def __init__(self, config=None, pipeline=None, dataset_properties=None,
                  include=None, exclude=None, random_state=None,
                  init_params=None):
+        if pipeline is not None:
+            raise ValueError(
+                "NumericalPreprocessingPipeline's argument 'pipeline' should be None")
         self._output_dtype = np.int32
         super().__init__(
             config, pipeline, dataset_properties, include, exclude,

@@ -103,7 +103,9 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
 
         n_values_check = X.max(axis=0).toarray().flatten() + 1
 
-        # Replace all indicators which are out of bounds by 'other' (index 0)
+        # Ignore all indicators which are out of bounds (i.e. assign index 0)
+        # This strategy is analogous with using handle_unkwon='ignore' on a sklearn's
+        # one hot encoder.
         if (n_values_check > self.n_values_).any():
             # raise ValueError("Feature out of bounds. Try setting n_values.")
             for i, n_value_check in enumerate(n_values_check):
