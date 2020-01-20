@@ -8,88 +8,79 @@ from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
 class PreprocessingPipelineTest(unittest.TestCase):
 
     def do_a_fit_transform(self, sparse_output):
-        # Numerical dataset (as used in NumericalPreprocessingPipelineTest)
-        X_num = np.array([
-            [3.14, 1.,     1.],   # noqa : matrix legibility
-            [3.14, 2., np.nan],   # noqa : matrix legibility
-            [3.14, 3.,     3.]])  # noqa : matrix legibility
-        # After the preprocessing of X_num, we expect that:
-        # Feature 1 get dropped due to lack of variance
-        # The missing value on feature 3 gets imputed by the mean (2.)
-        # All features get normalized by subtracting the mean and dividing by the
-        # standard deviation.
-        # Therefore, Y_num is what we should get after data preprocessing X_num:
+        # X will be the input and Y is what we expect after transform. categ_feat stores
+        # indicators of feature type (True if categorical, False if numerical)
+        X, Y, categ_feat = [], [], []
+        # Feature 1 (numerical):
+        # This feature should be dropped due to lack of variance.
+        categ_feat.append(False)
+        X.append(np.array([3.14, 3.14, 3.14]).reshape(3,1))
+        Y.append(np.array([]).reshape(3, 0))
+        # Feature 2 (numerical):
+        # This feature should be normalized by having its mean subtracted of all elements
+        # and by then divided by the standard deviation.
+        categ_feat.append(False)
         sdev = np.sqrt(2 / 3)
-        Y_num = np.array([
-            [-1/sdev, -1/sdev],   # noqa : matrix legibility
-            [     0.,      0.],   # noqa : matrix legibility
-            [ 1/sdev,  1/sdev]])  # noqa : matrix legibility
-        # Categorical dataset (as used in CategoricalPreprocessingPipelineTest)
-        X_cat = np.array([
-            [1, 2, 0],
-            [3, 0, 0],
-            [2, 9, np.nan]])
-        # After the preprocessing of X_cat, we expect that:
-        # The missing value in feature 3 gets imputed as category on its own.
-        # Features get encoded by one hot encoding.
-        # Therefore, Y_cat is what we should get after data preprocessing X_cat:
-        Y_cat = np.array([
-            [1, 0, 0, 0, 1, 0, 0, 1],
-            [0, 0, 1, 1, 0, 0, 0, 1],
-            [0, 1, 0, 0, 0, 1, 1, 0]])
+        X.append(np.array([1., 2., 3.]).reshape(3,1))
+        Y.append(np.array([-1/sdev, 0., 1/sdev]).reshape(3,1))
+        # Feature 3 (numerical):
+        # This feature has a missing value that should be imputed by the mean of the other
+        # values. This feature should also be normalized as in the previous feature
+        categ_feat.append(False)
+        sdev = np.sqrt(2 / 3)
+        X.append(np.array([1., np.nan, 3.]).reshape(3,1))
+        Y.append(np.array([-1/sdev, 0., 1/sdev]).reshape(3,1))
+        # Feature 4 (categorical)
+        # This feature should be one hot encoded.
+        categ_feat.append(True)
+        X.append(np.array([1, 3, 2]).reshape(3,1))
+        Y.append(np.array([
+            [1, 0, 0],
+            [0, 0, 1],
+            [0, 1, 0]]))
+        # Feature 5 (categorical)
+        # This feature should be one hot encoded. A discontinuous category set or
+        # a category 0 shouldn't be problems.
+        categ_feat.append(True)
+        X.append(np.array([2, 0, 9]).reshape(3,1))
+        Y.append(np.array([
+            [0, 1, 0],
+            [1, 0, 0],
+            [0, 0, 1]]))
+        # Feature 6 (categorical)
+        # This feature should be one hot encoded. The missing value gets imputed as
+        # a category on its own.
+        categ_feat.append(True)
+        X.append(np.array([0, 0, np.nan]).reshape(3,1))
+        Y.append(np.array([
+            [0, 1],
+            [0, 1],
+            [1, 0]]))
         # Combine datasets and shuffle columns:
-        X_comb = np.hstack((X_num, X_cat))
-        categ_feat = np.array([False] * 3 + [True] * 3)
-        random_order = np.random.choice(np.arange(6), size=6, replace=False)
-        X_comb = X_comb[:, random_order]
-        categ_feat = categ_feat[random_order]
+        n_feats = len(categ_feat)
+        random_order = np.random.choice(np.arange(n_feats), size=n_feats, replace=False)
+        # Shuffle cat_feat according to random_order
+        categ_feat = np.array(categ_feat)[random_order]
+        # Shuffle X according to random_order
+        X = np.array(X)[random_order]
+        X_comb = np.hstack(X)
+        # Shuffle Y according to random_order and reorder it as the PreprocessingPipeline
+        # does (i.e. categorical features come first in Y).
+        num_feat = np.logical_not(categ_feat)
+        y_order = random_order[np.argsort(num_feat)]
+        Y = [Y[n] for n in y_order]
+        Y_comb = np.hstack(Y)
         # Data preprocessing
         DPP = DataPreprocessor(categorical_features=categ_feat, sparse=sparse_output)
-        Y_comb = DPP.fit_transform(X_comb)
-        Y_comb = Y_comb.todense() if sparse_output else Y_comb
-        # check shape
-        self.assertEquals(Y_comb.shape, (3, 10))
-        # check content. Categorical columns appear first in Y.
-        for row in range(3):
-            self.assertAlmostEqual(np.sum(Y_cat[row]), np.sum(Y_comb[row, :8]))
-            self.assertAlmostEqual(np.sum(Y_num[row]), np.sum(Y_comb[row, 8:]))
-        #
-        # Now we do everything again, but using a different dataset and the already
-        # fitted data preprocessor
-        #
-
-        # Numerical dataset
-        X_num = np.array([
-            [1., 5.,     1.],   # noqa : matrix legibility
-            [2., np.nan, 0.],   # noqa : matrix legibility
-            [3., 1.,     3.]])  # noqa : matrix legibility
-        # Y_num is what we should get after data preprocessing X_num
-        Y_num = np.array([
-            [ 3/sdev, -1/sdev],   # noqa : matrix legibility
-            [     0., -2/sdev],   # noqa : matrix legibility
-            [-1/sdev,  1/sdev]])  # noqa : matrix legibility
-        # Categorical dataset
-        X_cat = np.array([
-            [1, 2,      1],
-            [3, 0,      np.nan],
-            [2, np.nan, 0]])
-        # Y_cat is what we should get after data preprocessing X_cat
-        Y_cat = np.array([
-            [1, 0, 0, 0, 1, 0, 0, 0],
-            [0, 0, 1, 1, 0, 0, 1, 0],
-            [0, 1, 0, 0, 0, 0, 0, 1]])
-        # Combine datasetd and shuffle columns:
-        X_comb = np.hstack((X_num, X_cat))
-        X_comb = X_comb[:, random_order]
-        # Data preprocessing with already fitted transformer
-        Y_comb = DPP.transform(X_comb)
-        Y_comb = Y_comb.todense() if sparse_output else Y_comb
-        # check shape
-        self.assertEquals(Y_comb.shape, (3, 10))
-        # check content. Categorical columns appear first in Y.
-        for row in range(3):
-            self.assertAlmostEqual(np.sum(Y_cat[row]), np.sum(Y_comb[row, :8]))
-            self.assertAlmostEqual(np.sum(Y_num[row]), np.sum(Y_comb[row, 8:]))
+        Y_comb_out_1 = DPP.fit_transform(X_comb)
+        Y_comb_out_1 = Y_comb_out_1.todense() if sparse_output else Y_comb_out_1
+        # Check if Y_comb_out is what we expect it to be:
+        np.testing.assert_array_almost_equal(Y_comb_out_1, Y_comb)
+        # Do it again, but using the already fitted pipeline
+        Y_comb_out_2 = DPP.transform(X_comb)
+        Y_comb_out_2 = Y_comb_out_2.todense() if sparse_output else Y_comb_out_2
+        # Consistency check
+        np.testing.assert_array_equal(Y_comb_out_1, Y_comb_out_2)
 
     def test_fit_transform(self):
         self.do_a_fit_transform(sparse_output=False)
