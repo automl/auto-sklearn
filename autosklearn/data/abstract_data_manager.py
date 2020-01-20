@@ -16,7 +16,8 @@ def perform_one_hot_encoding(sparse, categorical, data):
 
     rvals = []
     if any(categorical):
-        encoder = DataPreprocessor(categorical_features=categorical, sparse=sparse)
+        encoder = DataPreprocessor(
+            categorical_features=categorical, force_sparse_output=sparse)
         rvals.append(encoder.fit_transform(data[0]))
         for d in data[1:]:
             rvals.append(encoder.transform(d))

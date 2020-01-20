@@ -8,6 +8,16 @@ from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_categ
 
 class CategoricalPreprocessingPipelineTest(unittest.TestCase):
 
+    def test_data_type_consistency(self):
+        X = np.random.randint(3, 6, (3, 4))
+        Y = CategoricalPreprocessingPipeline().fit_transform(X)
+        self.assertFalse(sparse.issparse(Y))
+
+        X = sparse.csc_matrix(
+            ([3, 6, 4, 5], ([0, 1, 2, 1], [3, 2, 1, 0])), shape=(3, 4))
+        Y = CategoricalPreprocessingPipeline().fit_transform(X)
+        self.assertTrue(sparse.issparse(Y))
+
     def test_fit_transform(self):
         X = np.array([
             [1, 2, 1],
@@ -19,7 +29,6 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
             [0, 1, 0, 0, 0, 1, 1, 0]])
         # dense input
         Yt = CategoricalPreprocessingPipeline().fit_transform(X)
-        Yt = Yt.todense()
         np.testing.assert_array_equal(Yt, Y)
         # sparse input
         X_sparse = sparse.csc_matrix(X)
@@ -57,13 +66,13 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
         CPPL.fit_transform(X1)
         # Transform what was fitted
         Y1t = CPPL.transform(X1)
-        self.assertTrue((Y1t.todense() == Y1).all())
+        np.testing.assert_array_equal(Y1t, Y1)
         # Transform a new dataset with categories not seen during fit
         Y2t = CPPL.transform(X2)
-        self.assertTrue((Y2t.todense() == Y2).all())
+        np.testing.assert_array_equal(Y2t, Y2)
         # And again with yet a different dataset
         Y3t = CPPL.transform(X3)
-        self.assertTrue((Y3t.todense() == Y3).all())
+        np.testing.assert_array_equal(Y3t, Y3)
 
     def test_transform_with_coalescence(self):
         # Generates an array with categories 0, 20, 5, 6, 10, and occurences of 60%,
@@ -85,4 +94,4 @@ class CategoricalPreprocessingPipelineTest(unittest.TestCase):
         self.assertEqual(Y1t.shape, (200, 40))
         # Consistency check:
         Y2t = CPPL.transform(X)
-        self.assertTrue((Y1t.todense() == Y2t.todense()).all())
+        np.testing.assert_array_equal(Y1t, Y2t)

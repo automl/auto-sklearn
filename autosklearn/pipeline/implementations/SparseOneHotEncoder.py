@@ -13,14 +13,6 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
     feature. It is assumed that input features take on values in the range
     [0, n_values).
 
-    Parameters
-    ----------
-    dtype : number type, default=np.float
-        Desired dtype of output.
-
-    sparse : boolean, default=True
-        Will return sparse matrix if set True else will return an array.
-
     Attributes
     ----------
     `feature_indices_` : array of shape (n_features,)
@@ -32,10 +24,6 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
     `n_values_` : array of shape (n_features,)
         Maximum number of values per feature.
     """
-
-    def __init__(self, dtype=np.float, sparse=True):
-        self.dtype = dtype
-        self.sparse = sparse
 
     def fit(self, X, y=None):
         """Fit OneHotEncoder to X.
@@ -89,7 +77,7 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
         active_features = np.where(mask)[0]
         out = out[:, active_features]
         self.active_features_ = active_features
-        return out.tocsr() if self.sparse else out.toarray()
+        return out.tocsr()
 
     def transform(self, X):
         X = self._check_X(X)
@@ -129,4 +117,4 @@ class SparseOneHotEncoder(BaseEstimator, TransformerMixin):
                                 dtype=np.int32).tocsc()
 
         out = out[:, self.active_features_]
-        return out.tocsr() if self.sparse else out.toarray()
+        return out.tocsr()

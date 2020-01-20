@@ -42,14 +42,8 @@ class MetaFeaturesTest(TestCase):
         X = data[:,:-1]
         y = data[:,-1].reshape((-1,))
 
-        ohe = DataPreprocessor(categorical_features=self.categorical)
-        X_transformed = ohe.fit_transform(X)
-        imp = SimpleImputer(copy=False)
-        X_transformed = imp.fit_transform(X_transformed)
-        center = not scipy.sparse.isspmatrix((X_transformed))
-        standard_scaler = StandardScaler(with_mean=center)
-        X_transformed = standard_scaler.fit_transform(X_transformed)
-        X_transformed = X_transformed.todense()
+        DPP = DataPreprocessor(categorical_features=self.categorical)
+        X_transformed = DPP.fit_transform(X)
 
         # Transform the array which indicates the categorical metafeatures
         number_numerical = np.sum(~np.array(self.categorical))

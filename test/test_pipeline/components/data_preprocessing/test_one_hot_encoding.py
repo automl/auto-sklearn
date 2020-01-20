@@ -22,6 +22,16 @@ class OneHotEncoderTest(unittest.TestCase):
     def setUp(self):
         self.X_train = create_X()
 
+    def test_data_type_consistency(self):
+        X = np.random.randint(3, 6, (3, 4))
+        Y = OneHotEncoder().fit_transform(X)
+        self.assertFalse(sparse.issparse(Y))
+
+        X = sparse.csc_matrix(
+            ([3, 6, 4, 5], ([0, 1, 2, 1], [3, 2, 1, 0])), shape=(3, 4))
+        Y = OneHotEncoder().fit_transform(X)
+        self.assertTrue(sparse.issparse(Y))
+
     def test_default_configuration(self):
         transformations = []
         for i in range(2):
@@ -36,8 +46,7 @@ class OneHotEncoderTest(unittest.TestCase):
             Xt = transformer.transform(self.X_train.copy())
             transformations.append(Xt)
             if len(transformations) > 1:
-                self.assertEqual(
-                    (transformations[-1] != transformations[-2]).count_nonzero(), 0)
+                np.testing.assert_array_equal(transformations[-1], transformations[-2])
 
     def test_default_configuration_no_encoding(self):
         transformations = []

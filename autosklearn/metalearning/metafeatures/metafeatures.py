@@ -947,16 +947,9 @@ def calculate_all_metafeatures(X, y, categorical, dataset_name,
                 # TODO make sure this is done as efficient as possible (no copy for
                 # sparse matrices because of wrong sparse format)
                 sparse = scipy.sparse.issparse(X)
-                if any(categorical):
-                    ohe = DataPreprocessor(categorical_features=categorical, sparse=True)
-                    X_transformed = ohe.fit_transform(X)
-                else:
-                    X_transformed = X
-                imputer = SimpleImputer(strategy='mean', copy=False)
-                X_transformed = imputer.fit_transform(X_transformed)
-                center = not scipy.sparse.isspmatrix(X_transformed)
-                standard_scaler = StandardScaler(copy=False, with_mean=center)
-                X_transformed = standard_scaler.fit_transform(X_transformed)
+                DPP = DataPreprocessor(
+                    categorical_features=categorical, force_sparse_output=True)
+                X_transformed = DPP.fit_transform(X)
                 categorical_transformed = [False] * X_transformed.shape[1]
 
                 # Densify the transformed matrix

@@ -27,3 +27,8 @@ class CategoryShiftTest(unittest.TestCase):
         X = np.array([[-1, 2], [3, 4]])
         with self.assertRaises(ValueError):
             CategoryShift().fit_transform(X)
+
+    def test_string(self):
+        X = np.array([['a', 'b'], ['c', 'd']])
+        with self.assertRaises(ValueError):
+            CategoryShift().fit_transform(X)

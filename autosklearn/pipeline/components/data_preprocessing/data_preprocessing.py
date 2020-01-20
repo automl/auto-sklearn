@@ -1,6 +1,7 @@
 import numpy as np
 
 import sklearn.compose
+from scipy import sparse
 
 from ConfigSpace import Configuration
 from ConfigSpace.configuration_space import ConfigurationSpace
@@ -21,7 +22,7 @@ class DataPreprocessor(AutoSklearnComponent):
 
     def __init__(self, config=None, pipeline=None, dataset_properties=None, include=None,
                  exclude=None, random_state=None, init_params=None,
-                 categorical_features=None, sparse=True):
+                 categorical_features=None, force_sparse_output=False):
 
         if pipeline is not None:
             raise ValueError("DataPreprocessor's argument 'pipeline' should be None")
@@ -47,7 +48,7 @@ class DataPreprocessor(AutoSklearnComponent):
             ["categorical_transformer", self.categ_ppl],
             ["numerical_transformer", self.numer_ppl],
         ]
-        self.sparse = sparse
+        self.force_sparse = force_sparse_output
 
     def fit(self, X, y=None):
         # TODO: we are converting the categorical_features array from boolean flags
@@ -75,9 +76,11 @@ class DataPreprocessor(AutoSklearnComponent):
                 ["categorical_transformer", self.categ_ppl, cat_feats],
                 ["numerical_transformer", self.numer_ppl, num_feats]
             ]
+
+        self.sparse_ = sparse.issparse(X) or self.force_sparse
         self.column_transformer = sklearn.compose.ColumnTransformer(
             transformers=sklearn_transf_spec,
-            sparse_threshold=float(self.sparse),
+            sparse_threshold=float(self.sparse_),
             )
         self.column_transformer.fit(X)
         return self

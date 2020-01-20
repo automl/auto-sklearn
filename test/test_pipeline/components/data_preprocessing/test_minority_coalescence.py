@@ -11,56 +11,19 @@ from autosklearn.pipeline.components.data_preprocessing.minority_coalescense\
 
 class MinorityCoalescerTest(unittest.TestCase):
 
-    @property
-    def X(self):
-        # Generates an array with categories 3, 4, 5, 6, 7 and occurences of 30%,
-        # 30%, 30%, 5% and 5% respectively
-        X = np.vstack((
-            np.ones((30, 10)) * 3,
-            np.ones((30, 10)) * 4,
-            np.ones((30, 10)) * 5,
-            np.ones((5, 10)) * 6,
-            np.ones((5, 10)) * 7,
-        ))
-        for col in range(X.shape[1]):
-            np.random.shuffle(X[:, col])
-        return X
+    def test_data_type_consistency(self):
+        X = np.random.randint(3, 6, (3, 4))
+        Y = MinorityCoalescer().fit_transform(X)
+        self.assertFalse(scipy.sparse.issparse(Y))
+
+        X = scipy.sparse.csc_matrix(
+            ([3, 6, 4, 5], ([0, 1, 2, 1], [3, 2, 1, 0])), shape=(3, 4))
+        Y = MinorityCoalescer().fit_transform(X)
+        self.assertTrue(scipy.sparse.issparse(Y))
 
     def test_no_coalescence(self):
-        X = self.X
+        X = np.random.randint(0, 255, (3, 4))
         Y = NoCoalescence().fit_transform(X)
         assert_array_almost_equal(Y, X)
         # Assert no copies were made
         self.assertEqual(id(X), id(Y))
-
-    def test_default(self):
-        X = self.X
-        X_copy = np.copy(X)
-        Y = MinorityCoalescer().fit_transform(X)
-        assert_array_almost_equal(Y, X_copy)
-        # Assert no copies were made
-        self.assertEqual(id(X), id(Y))
-
-    def test_coalesce_10_percent(self):
-        X = self.X
-        Y = MinorityCoalescer(minimum_fraction=.1).fit_transform(X)
-        for col in range(Y.shape[1]):
-            hist = np.histogram(Y[:, col], bins=np.arange(1, 7))
-            assert_array_almost_equal(hist[0], [10, 0, 30, 30, 30])
-        # Assert no copies were made
-        self.assertEqual(id(X), id(Y))
-
-    def test_coalesce_10_percent_sparse(self):
-        X = scipy.sparse.csc_matrix(self.X)
-        Y = MinorityCoalescer(minimum_fraction=.1).fit_transform(X)
-        # Assert no copies were made
-        self.assertEqual(id(X), id(Y))
-        Y = Y.todense()
-        for col in range(Y.shape[1]):
-            hist = np.histogram(Y[:, col], bins=np.arange(1, 7))
-            assert_array_almost_equal(hist[0], [10, 0, 30, 30, 30])
-
-    def test_invalid_X(self):
-        X = self.X - 2
-        with self.assertRaises(ValueError):
-            MinorityCoalescer().fit_transform(X)

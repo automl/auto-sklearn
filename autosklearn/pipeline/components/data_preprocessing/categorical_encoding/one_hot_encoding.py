@@ -10,16 +10,15 @@ from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
 class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, sparse=True, random_state=None):
+    def __init__(self, random_state=None):
         self.random_state = random_state
-        self.sparse = sparse
 
     def fit(self, X, y=None):
         if scipy.sparse.issparse(X):
-            self.preprocessor = SparseOneHotEncoder(sparse=self.sparse)
+            self.preprocessor = SparseOneHotEncoder()
         else:
             self.preprocessor = DenseOneHotEncoder(
-                sparse=self.sparse, categories='auto', handle_unknown='ignore')
+                sparse=False, categories='auto', handle_unknown='ignore')
         self.preprocessor.fit(X, y)
         return self
 
@@ -27,6 +26,9 @@ class OneHotEncoder(AutoSklearnPreprocessingAlgorithm):
         if self.preprocessor is None:
             raise NotImplementedError()
         return self.preprocessor.transform(X)
+
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X)
 
     @staticmethod
     def get_properties(dataset_properties=None):

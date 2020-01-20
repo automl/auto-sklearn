@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+from scipy import sparse
 
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
     import DataPreprocessor
@@ -7,7 +8,7 @@ from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
 
 class PreprocessingPipelineTest(unittest.TestCase):
 
-    def do_a_fit_transform(self, sparse_output):
+    def do_a_fit_transform(self, sparse_input):
         # X will be the input and Y is what we expect after transform. categ_feat stores
         # indicators of feature type (True if categorical, False if numerical)
         X, Y, categ_feat = [], [], []
@@ -17,18 +18,21 @@ class PreprocessingPipelineTest(unittest.TestCase):
         X.append(np.array([3.14, 3.14, 3.14]).reshape(3, 1))
         Y.append(np.array([]).reshape(3, 0))
         # Feature 2 (numerical):
-        # This feature should be normalized by having its mean subtracted from all elements
-        # and by having them divided by the standard deviation.
+        # This feature should be normalized by having its mean subtracted from all
+        # elements and by having them divided by the standard deviation.
         categ_feat.append(False)
+        nf = np.array([1., 2., 3.]).reshape(3, 1)  # mean = 2.
         sdev = np.sqrt(2. / 3.)
-        X.append(np.array([1., 2., 3.]).reshape(3, 1))
-        Y.append(np.array([-1./sdev, 0., 1./sdev]).reshape(3, 1))
+        shift = 0 if sparse_input else 2.  # if sparse_input, there is no mean subtraction
+        nft = (nf - shift) /sdev
+        X.append(nf)
+        Y.append(nft)
         # Feature 3 (numerical):
         # This feature has a missing value that should be imputed by the mean of the other
         # values (2.). This feature should also be normalized as in the previous feature.
         categ_feat.append(False)
         X.append(np.array([1., np.nan, 3.]).reshape(3, 1))
-        Y.append(np.array([-1/sdev, 0., 1/sdev]).reshape(3, 1))
+        Y.append(nft.copy())
         # Feature 4 (categorical)
         # This feature should be one hot encoded.
         categ_feat.append(True)
@@ -41,7 +45,7 @@ class PreprocessingPipelineTest(unittest.TestCase):
         # This feature should be one hot encoded. (A discontinuous category set or
         # a category 0 shouldn't be problems.)
         categ_feat.append(True)
-        X.append(np.array([2, 0, 9]).reshape(3, 1))
+        X.append(np.array([2, 1, 9]).reshape(3, 1))
         Y.append(np.array([
             [0, 1, 0],
             [1, 0, 0],
@@ -50,7 +54,7 @@ class PreprocessingPipelineTest(unittest.TestCase):
         # This feature should be one hot encoded. The missing value gets imputed as
         # a category on its own.
         categ_feat.append(True)
-        X.append(np.array([0, 0, np.nan]).reshape(3, 1))
+        X.append(np.array([1, 1, np.nan]).reshape(3, 1))
         Y.append(np.array([
             [0, 1],
             [0, 1],
@@ -70,22 +74,25 @@ class PreprocessingPipelineTest(unittest.TestCase):
         Y = [Y[n] for n in y_order]
         Y_comb = np.hstack(Y)
         # Data preprocessing
-        DPP = DataPreprocessor(categorical_features=categ_feat, sparse=sparse_output)
+        DPP = DataPreprocessor(categorical_features=categ_feat)
+        X_comb = sparse.csc_matrix(X_comb) if sparse_input else X_comb
         Y_comb_out_1 = DPP.fit_transform(X_comb)
-        Y_comb_out_1 = Y_comb_out_1.todense() if sparse_output else Y_comb_out_1
         # Check if Y_comb_out is what we expect it to be:
+        self.assertEqual(sparse_input, sparse.issparse(Y_comb_out_1))
+        Y_comb_out_1 = Y_comb_out_1.todense() if sparse_input else Y_comb_out_1
         np.testing.assert_array_almost_equal(Y_comb_out_1, Y_comb)
         # Do it again, but using the already fitted pipeline
         Y_comb_out_2 = DPP.transform(X_comb)
-        Y_comb_out_2 = Y_comb_out_2.todense() if sparse_output else Y_comb_out_2
         # Consistency check
+        self.assertEqual(sparse_input, sparse.issparse(Y_comb_out_2))
+        Y_comb_out_2 = Y_comb_out_2.todense() if sparse_input else Y_comb_out_2
         np.testing.assert_array_equal(Y_comb_out_1, Y_comb_out_2)
 
     def test_fit_transform(self):
-        self.do_a_fit_transform(sparse_output=False)
+        self.do_a_fit_transform(sparse_input=False)
 
     def test_fit_transform_sparse(self):
-        self.do_a_fit_transform(sparse_output=True)
+        self.do_a_fit_transform(sparse_input=True)
 
     def test_string_categories(self):
         # Numerical dataset (as used in NumericalPreprocessingPipelineTest)

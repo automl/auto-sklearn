@@ -10,6 +10,16 @@ from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_numer
 
 class NumericalPreprocessingPipelineTest(unittest.TestCase):
 
+    def test_data_type_consistency(self):
+        X = np.random.rand(3, 4)
+        Y = NumericalPreprocessingPipeline().fit_transform(X)
+        self.assertFalse(sparse.issparse(Y))
+
+        X = sparse.csc_matrix(
+            ([3., 6., 4., 5.], ([0, 1, 2, 1], [3, 2, 1, 0])), shape=(3, 4))
+        Y = NumericalPreprocessingPipeline().fit_transform(X)
+        self.assertTrue(sparse.issparse(Y))
+
     def test_fit_transform(self):
         X = np.array([
             [3.14, 1.,     1.],
