@@ -14,35 +14,34 @@ class PreprocessingPipelineTest(unittest.TestCase):
         # Feature 1 (numerical):
         # This feature should be dropped due to lack of variance.
         categ_feat.append(False)
-        X.append(np.array([3.14, 3.14, 3.14]).reshape(3,1))
+        X.append(np.array([3.14, 3.14, 3.14]).reshape(3, 1))
         Y.append(np.array([]).reshape(3, 0))
         # Feature 2 (numerical):
-        # This feature should be normalized by having its mean subtracted of all elements
-        # and by then divided by the standard deviation.
+        # This feature should be normalized by having its mean subtracted from all elements
+        # and by having them divided by the standard deviation.
         categ_feat.append(False)
-        sdev = np.sqrt(2 / 3)
-        X.append(np.array([1., 2., 3.]).reshape(3,1))
-        Y.append(np.array([-1/sdev, 0., 1/sdev]).reshape(3,1))
+        sdev = np.sqrt(2. / 3.)
+        X.append(np.array([1., 2., 3.]).reshape(3, 1))
+        Y.append(np.array([-1./sdev, 0., 1./sdev]).reshape(3, 1))
         # Feature 3 (numerical):
         # This feature has a missing value that should be imputed by the mean of the other
-        # values. This feature should also be normalized as in the previous feature
+        # values (2.). This feature should also be normalized as in the previous feature.
         categ_feat.append(False)
-        sdev = np.sqrt(2 / 3)
-        X.append(np.array([1., np.nan, 3.]).reshape(3,1))
-        Y.append(np.array([-1/sdev, 0., 1/sdev]).reshape(3,1))
+        X.append(np.array([1., np.nan, 3.]).reshape(3, 1))
+        Y.append(np.array([-1/sdev, 0., 1/sdev]).reshape(3, 1))
         # Feature 4 (categorical)
         # This feature should be one hot encoded.
         categ_feat.append(True)
-        X.append(np.array([1, 3, 2]).reshape(3,1))
+        X.append(np.array([1, 3, 2]).reshape(3, 1))
         Y.append(np.array([
             [1, 0, 0],
             [0, 0, 1],
             [0, 1, 0]]))
         # Feature 5 (categorical)
-        # This feature should be one hot encoded. A discontinuous category set or
-        # a category 0 shouldn't be problems.
+        # This feature should be one hot encoded. (A discontinuous category set or
+        # a category 0 shouldn't be problems.)
         categ_feat.append(True)
-        X.append(np.array([2, 0, 9]).reshape(3,1))
+        X.append(np.array([2, 0, 9]).reshape(3, 1))
         Y.append(np.array([
             [0, 1, 0],
             [1, 0, 0],
@@ -51,7 +50,7 @@ class PreprocessingPipelineTest(unittest.TestCase):
         # This feature should be one hot encoded. The missing value gets imputed as
         # a category on its own.
         categ_feat.append(True)
-        X.append(np.array([0, 0, np.nan]).reshape(3,1))
+        X.append(np.array([0, 0, np.nan]).reshape(3, 1))
         Y.append(np.array([
             [0, 1],
             [0, 1],
