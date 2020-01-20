@@ -103,7 +103,6 @@ class PreprocessingPipelineTest(unittest.TestCase):
             [3.14, 1.,     1.],   # noqa : matrix legibility
             [3.14, 2., np.nan],   # noqa : matrix legibility
             [3.14, 3.,     3.]])  # noqa : matrix legibility
-        sdev = np.sqrt(2 / 3)
         # Categorical string dataset
         X_cat = np.array([
             ['red', 'medium', 'small'],
