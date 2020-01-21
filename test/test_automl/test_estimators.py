@@ -12,7 +12,7 @@ import numpy.ma as npma
 from joblib import cpu_count
 
 import autosklearn.pipeline.util as putil
-import autosklearn.estimators
+import autosklearn.estimators  # noqa F401
 from autosklearn.estimators import AutoSklearnEstimator
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
