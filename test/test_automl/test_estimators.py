@@ -9,7 +9,10 @@ import sklearn
 import numpy as np
 import numpy.ma as npma
 
+from joblib import cpu_count
+
 import autosklearn.pipeline.util as putil
+import autosklearn.estimators  # noqa F401
 from autosklearn.estimators import AutoSklearnEstimator
 from autosklearn.classification import AutoSklearnClassifier
 from autosklearn.regression import AutoSklearnRegressor
@@ -17,9 +20,9 @@ from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
 from autosklearn.automl import AutoMLClassifier, AutoML
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import BINARY_CLASSIFICATION
-sys.path.append(os.path.dirname(__file__))
 from base import Base
 
+sys.path.append(os.path.dirname(__file__))
 
 class ArrayReturningDummyPredictor(object):
     def __init__(self, test):
@@ -478,6 +481,17 @@ class EstimatorTest(Base, unittest.TestCase):
             seeds.add(int(ensemble_file.split('.')[0].split('_')[0]))
 
         self.assertEqual(len(seeds), 1)
+
+    @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.build_automl')
+    def test_fit_n_jobs_negative(self, build_automl_patch):
+        n_cores = cpu_count()
+        cls = AutoSklearnEstimator(n_jobs=-1)
+        cls.fit()
+        self.assertEqual(len(cls._automl), n_cores)
+
+    def test_get_number_of_available_cores(self):
+        n_cores = cpu_count()
+        self.assertGreaterEqual(n_cores, 1)
 
 
 class AutoMLClassifierTest(Base, unittest.TestCase):
