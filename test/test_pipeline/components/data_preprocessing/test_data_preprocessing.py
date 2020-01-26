@@ -24,7 +24,7 @@ class PreprocessingPipelineTest(unittest.TestCase):
         nf = np.array([1., 2., 3.]).reshape(3, 1)  # mean = 2.
         sdev = np.sqrt(2. / 3.)
         shift = 0 if sparse_input else 2.  # if sparse_input, there is no mean subtraction
-        nft = (nf - shift) /sdev
+        nft = (nf - shift) / sdev
         X.append(nf)
         Y.append(nft)
         # Feature 3 (numerical):

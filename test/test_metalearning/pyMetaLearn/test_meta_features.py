@@ -438,7 +438,7 @@ class MetaFeaturesTest(TestCase):
 
     def test_pca_95percent(self):
         mf = self.mf["PCAFractionOfComponentsFor95PercentVariance"](self.X_transformed, self.y)
-        self.assertAlmostEqual(0.41975308641975306, mf.value)
+        self.assertAlmostEqual(0.2716049382716049, mf.value)
 
     def test_pca_kurtosis_first_pc(self):
         mf = self.mf["PCAKurtosisFirstPC"](self.X_transformed, self.y)
