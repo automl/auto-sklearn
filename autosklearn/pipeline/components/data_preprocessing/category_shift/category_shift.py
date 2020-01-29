@@ -1,20 +1,24 @@
+import autosklearn.pipeline.implementations.CategoryShift
+
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import CategoricalHyperparameter
-
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
-class Imputation(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, strategy='median', random_state=None):
-        self.strategy = strategy
+class CategoryShift(AutoSklearnPreprocessingAlgorithm):
+    """ Add 3 to every category.
+    Down in the pipeline, category 2 will be attribute to missing values,
+    category 1 will be assigned to low occurence categories, and category 0
+    is not used, so to provide compatibility with sparse matrices.
+    """
+
+    def __init__(self, random_state=None):
+        pass
 
     def fit(self, X, y=None):
-        import sklearn.impute
-
-        self.preprocessor = sklearn.impute.SimpleImputer(
-            strategy=self.strategy, copy=False)
-        self.preprocessor = self.preprocessor.fit(X)
+        self.preprocessor = autosklearn.pipeline.implementations.CategoryShift\
+            .CategoryShift()
+        self.preprocessor.fit(X, y)
         return self
 
     def transform(self, X):
@@ -22,10 +26,13 @@ class Imputation(AutoSklearnPreprocessingAlgorithm):
             raise NotImplementedError()
         return self.preprocessor.transform(X)
 
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X)
+
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'Imputation',
-                'name': 'Imputation',
+        return {'shortname': 'CategShift',
+                'name': 'Category Shift',
                 'handles_missing_values': True,
                 'handles_nominal_values': True,
                 'handles_numerical_features': True,
@@ -45,9 +52,4 @@ class Imputation(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        # TODO add replace by zero!
-        strategy = CategoricalHyperparameter(
-            "strategy", ["mean", "median", "most_frequent"], default_value="mean")
-        cs = ConfigurationSpace()
-        cs.add_hyperparameter(strategy)
-        return cs
+        return ConfigurationSpace()

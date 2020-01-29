@@ -193,7 +193,7 @@ class BasePipeline(Pipeline):
             else:
                 sub_init_params_dict = None
 
-            if isinstance(node, (AutoSklearnChoice, AutoSklearnComponent)):
+            if isinstance(node, (AutoSklearnChoice, AutoSklearnComponent, BasePipeline)):
                 node.set_hyperparameters(configuration=sub_configuration,
                                          init_params=sub_init_params_dict)
             else:
@@ -201,7 +201,7 @@ class BasePipeline(Pipeline):
 
         return self
 
-    def get_hyperparameter_search_space(self):
+    def get_hyperparameter_search_space(self, dataset_properties=None):
         """Return the configuration space for the CASH problem.
 
         Returns

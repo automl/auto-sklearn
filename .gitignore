@@ -53,3 +53,4 @@ number_submission
 .pypirc
 dmypy.json
 *.log
+.noseids

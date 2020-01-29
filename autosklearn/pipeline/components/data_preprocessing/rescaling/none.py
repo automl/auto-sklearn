@@ -5,7 +5,7 @@ from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorit
 
 
 class NoRescalingComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state):
+    def __init__(self, random_state=None):
         pass
 
     def fit(self, X, y=None):
@@ -16,8 +16,8 @@ class NoRescalingComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'MinMaxScaler',
-                'name': 'MinMaxScaler',
+        return {'shortname': 'NoRescaling',
+                'name': 'NoRescaling',
                 'handles_missing_values': False,
                 'handles_nominal_values': False,
                 'handles_numerical_features': True,

@@ -35,7 +35,7 @@ class MetaLearnerTest(unittest.TestCase):
 
     def test_metalearning_suggest_all(self):
         ret = self.meta_optimizer.metalearning_suggest_all()
-        self.assertEqual(119, len(ret))
+        self.assertEqual(117, len(ret))
         # Reduced to 17 as we changed QDA searchspace
         self.assertEqual('gradient_boosting', ret[0]['classifier:__choice__'])
         self.assertEqual('adaboost', ret[1]['classifier:__choice__'])
@@ -45,7 +45,7 @@ class MetaLearnerTest(unittest.TestCase):
     def test_metalearning_suggest_all_nan_metafeatures(self):
         self.meta_optimizer.meta_base.metafeatures.loc["233"].iloc[:10] = np.NaN
         ret = self.meta_optimizer.metalearning_suggest_all()
-        self.assertEqual(119, len(ret))
+        self.assertEqual(117, len(ret))
         # Reduced to 17 as we changed QDA searchspace
         self.assertEqual('gradient_boosting', ret[0]['classifier:__choice__'])
         self.assertEqual('gradient_boosting', ret[1]['classifier:__choice__'])

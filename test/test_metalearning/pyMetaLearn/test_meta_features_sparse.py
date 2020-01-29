@@ -11,9 +11,10 @@ import numpy as np
 from scipy import sparse
 from sklearn.impute import SimpleImputer
 
-from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 
+from autosklearn.pipeline.components.data_preprocessing.\
+    data_preprocessing import DataPreprocessor  # noqa: E402
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features
 import test_meta_features
 
@@ -49,7 +50,7 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest,
         X_sparse[NaNs] = 0
         X_sparse = sparse.csr_matrix(X_sparse)
 
-        ohe = OneHotEncoder(self.categorical)
+        ohe = DataPreprocessor(categorical_features=self.categorical)
         X_transformed = X_sparse.copy()
         X_transformed = ohe.fit_transform(X_transformed)
         imp = SimpleImputer(copy=False)

@@ -55,7 +55,7 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
             if classifier in clf_:
                 fit_params['classifier:sample_weight'] = sample_weights
             if preprocessor in pre_:
-                fit_params['preprocessor:sample_weight'] = sample_weights
+                fit_params['feature_preprocessor:sample_weight'] = sample_weights
 
         # Classifiers which can adjust sample weights themselves via the
         # argument `class_weight`
@@ -66,7 +66,7 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
         if classifier in clf_:
             init_params['classifier:class_weight'] = 'balanced'
         if preprocessor in pre_:
-            init_params['preprocessor:class_weight'] = 'balanced'
+            init_params['feature_preprocessor:class_weight'] = 'balanced'
 
         clf_ = ['ridge']
         if classifier in clf_:

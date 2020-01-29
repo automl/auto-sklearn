@@ -407,9 +407,9 @@ class AutoMLSMBO(object):
             raise ValueError('Cannot specify include_preprocessors and '
                              'exclude_preprocessors.')
         elif self.include_preprocessors is not None:
-            include['preprocessor'] = self.include_preprocessors
+            include['feature_preprocessor'] = self.include_preprocessors
         elif self.exclude_preprocessors is not None:
-            exclude['preprocessor'] = self.exclude_preprocessors
+            exclude['feature_preprocessor'] = self.exclude_preprocessors
 
         if self.include_estimators is not None and \
                         self.exclude_estimators is not None:

@@ -5,21 +5,20 @@ from ...base import AutoSklearnPreprocessingAlgorithm, find_components, \
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
-ohe_directory = os.path.split(__file__)[0]
-_ohes = find_components(__package__,
-                        ohe_directory,
-                        AutoSklearnPreprocessingAlgorithm)
+mc_directory = os.path.split(__file__)[0]
+_mcs = find_components(
+    __package__, mc_directory, AutoSklearnPreprocessingAlgorithm)
 _addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
 
 
-def add_ohe(ohe):
-    _addons.add_component(ohe)
+def add_mc(mc):
+    _addons.add_component(mc)
 
 
-class OHEChoice(AutoSklearnChoice):
+class CoalescenseChoice(AutoSklearnChoice):
     def get_components(self):
         components = OrderedDict()
-        components.update(_ohes)
+        components.update(_mcs)
         components.update(_addons.components)
         return components
 
@@ -39,20 +38,18 @@ class OHEChoice(AutoSklearnChoice):
 
         if len(available_preprocessors) == 0:
             raise ValueError(
-                "No ohe hot encoders found, please add any one hot encoder "
+                "No minority coalescers found, please add any one minority coalescer"
                 "component.")
 
         if default is None:
-            defaults = ['one_hot_encoding', 'no_encoding']
+            defaults = ['minority_coalescer', 'no_coalescense']
             for default_ in defaults:
                 if default_ in available_preprocessors:
                     default = default_
                     break
 
-        preprocessor = CategoricalHyperparameter('__choice__',
-                                                 list(
-                                                     available_preprocessors.keys()),
-                                                 default_value=default)
+        preprocessor = CategoricalHyperparameter(
+            '__choice__', list(available_preprocessors.keys()), default_value=default)
         cs.add_hyperparameter(preprocessor)
         for name in available_preprocessors:
             preprocessor_configuration_space = available_preprocessors[name]. \

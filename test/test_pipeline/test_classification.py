@@ -139,7 +139,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
     def test_default_configuration_iterative_fit(self):
         classifier = SimpleClassificationPipeline(
             include={'classifier': ['random_forest'],
-                     'preprocessor': ['no_preprocessing']})
+                     'feature_preprocessor': ['no_preprocessing']})
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='iris')
         XT = classifier.fit_transformer(X_train, Y_train)
         for i in range(1, 11):
@@ -205,7 +205,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cs = SimpleClassificationPipeline(
             dataset_properties={'sparse': False},
             include={
-                'preprocessor': ['no_preprocessing'],
+                'feature_preprocessor': ['no_preprocessing'],
                 'classifier': ['sgd', 'adaboost']
             }
         ).get_hyperparameter_search_space()
@@ -234,28 +234,26 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                   data=data, init_params=init_params)
 
     @unittest.mock.patch('autosklearn.pipeline.components.data_preprocessing'
-                         '.one_hot_encoding.OHEChoice.set_hyperparameters')
+                         '.data_preprocessing.DataPreprocessor.set_hyperparameters')
     def test_categorical_passed_to_one_hot_encoder(self, ohe_mock):
         cls = SimpleClassificationPipeline(
-            init_params={
-                'categorical_encoding:one_hot_encoding:categorical_features':
-                    [True, False]
-            }
+            init_params={'data_preprocessing:categorical_features': [True, False]}
         )
+
         self.assertEqual(
             ohe_mock.call_args[1]['init_params'],
-            {'one_hot_encoding:categorical_features': [True, False]}
+            {'categorical_features': [True, False]}
         )
         default = cls.get_hyperparameter_search_space().get_default_configuration()
         cls.set_hyperparameters(configuration=default,
             init_params={
-                'categorical_encoding:one_hot_encoding:categorical_features':
+                'data_preprocessing:categorical_features':
                     [True, True, False]
             }
         )
         self.assertEqual(
             ohe_mock.call_args[1]['init_params'],
-            {'one_hot_encoding:categorical_features': [True, True, False]}
+            {'categorical_features': [True, True, False]}
         )
 
     def _test_configurations(self, configurations_space, make_sparse=False,
@@ -276,16 +274,16 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                             'classifier:sgd:n_iter': 5,
                             'classifier:adaboost:n_estimators': 50,
                             'classifier:adaboost:max_depth': 1,
-                            'preprocessor:kernel_pca:n_components': 10,
-                            'preprocessor:kitchen_sinks:n_components': 50,
+                            'feature_preprocessor:kernel_pca:n_components': 10,
+                            'feature_preprocessor:kitchen_sinks:n_components': 50,
                             'classifier:proj_logit:max_epochs': 1,
                             'classifier:libsvm_svc:degree': 2,
                             'regressor:libsvm_svr:degree': 2,
-                            'preprocessor:truncatedSVD:target_dim': 10,
-                            'preprocessor:polynomial:degree': 2,
+                            'feature_preprocessor:truncatedSVD:target_dim': 10,
+                            'feature_preprocessor:polynomial:degree': 2,
                             'classifier:lda:n_components': 10,
-                            'preprocessor:nystroem_sampler:n_components': 50,
-                            'preprocessor:feature_agglomeration:n_clusters': 2,
+                            'feature_preprocessor:nystroem_sampler:n_components': 50,
+                            'feature_preprocessor:feature_agglomeration:n_clusters': 2,
                             'classifier:gradient_boosting:max_iter': 50,
                             'classifier:gradient_boosting:max_leaf_nodes': 64}
 
@@ -374,11 +372,11 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         conditions = cs.get_conditions()
 
         self.assertEqual(len(cs.get_hyperparameter(
-            'rescaling:__choice__').choices), 6)
+            'data_preprocessing:numerical_transformer:rescaling:__choice__').choices), 6)
         self.assertEqual(len(cs.get_hyperparameter(
             'classifier:__choice__').choices), 15)
         self.assertEqual(len(cs.get_hyperparameter(
-            'preprocessor:__choice__').choices), 13)
+            'feature_preprocessor:__choice__').choices), 13)
 
         hyperparameters = cs.get_hyperparameters()
         self.assertEqual(156, len(hyperparameters))
@@ -386,9 +384,9 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
 
-        # The four parameters which are always active are classifier,
-        # preprocessor, imputation strategy and scaling strategy
-        self.assertEqual(len(hyperparameters) - 6, len(conditions))
+        # The four components which are always active are classifier,
+        # feature preprocessor, balancing and data preprocessing pipeline.
+        self.assertEqual(len(hyperparameters) - 7, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
         cs = SimpleClassificationPipeline(include={'classifier': ['libsvm_svc']})\
@@ -401,27 +399,30 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertNotIn('libsvm_svc', str(cs))
 
         cs = SimpleClassificationPipeline(
-            include={'preprocessor': ['select_percentile_classification']}).\
+            include={'feature_preprocessor': ['select_percentile_classification']}).\
             get_hyperparameter_search_space()
-        self.assertEqual(cs.get_hyperparameter('preprocessor:__choice__'),
-            CategoricalHyperparameter('preprocessor:__choice__',
-                                      ['select_percentile_classification']))
+        fpp1 = cs.get_hyperparameter('feature_preprocessor:__choice__')
+        fpp2 = CategoricalHyperparameter(
+            'feature_preprocessor:__choice__', ['select_percentile_classification'])
+        self.assertEqual(fpp1, fpp2)
 
         cs = SimpleClassificationPipeline(
-            exclude={'preprocessor': ['select_percentile_classification']}
+            exclude={'feature_preprocessor': ['select_percentile_classification']}
         ).get_hyperparameter_search_space()
         self.assertNotIn('select_percentile_classification', str(cs))
 
     def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(self):
         cs = SimpleClassificationPipeline(
-            include={'preprocessor': ['densifier']}, dataset_properties={'sparse': True}).\
+            include={'feature_preprocessor': ['densifier']},
+            dataset_properties={'sparse': True}).\
             get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter(
             'classifier:__choice__').default_value,
             'qda'
         )
 
-        cs = SimpleClassificationPipeline(include={'preprocessor': ['nystroem_sampler']}).\
+        cs = SimpleClassificationPipeline(
+            include={'feature_preprocessor': ['nystroem_sampler']}).\
             get_hyperparameter_search_space()
         self.assertEqual(cs.get_hyperparameter(
             'classifier:__choice__').default_value,
@@ -432,7 +433,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         self.assertRaisesRegexp(AssertionError, "No valid pipeline found.",
                                 SimpleClassificationPipeline,
                                 include={'classifier': ['multinomial_nb'],
-                                         'preprocessor': ['pca']},
+                                         'feature_preprocessor': ['pca']},
                                 dataset_properties={'sparse': True})
 
         # It must also be catched that no classifiers which can handle sparse
@@ -441,7 +442,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
                                             "configuration.",
                                 SimpleClassificationPipeline,
                                 include={'classifier': ['liblinear_svc'],
-                                         'preprocessor': ['densifier']},
+                                         'feature_preprocessor': ['densifier']},
                                 dataset_properties={'sparse': True})
 
     @unittest.skip("Wait until ConfigSpace is fixed.")
@@ -593,4 +594,3 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         cs = SimpleClassificationPipeline().get_hyperparameter_search_space()
         self.assertIn('DummyPreprocessor', str(cs))
         del preprocessing_components._addons.components['DummyPreprocessor']
-

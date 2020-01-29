@@ -148,7 +148,7 @@ class AutoML(BaseEstimator):
         metric: Scorer,
         X_test: Optional[np.ndarray] = None,
         y_test: Optional[np.ndarray] = None,
-        feat_type: Optional[List[bool]] = None,
+        feat_type: Optional[List[str]] = None,
         dataset_name: Optional[str] = None,
         only_return_configuration_space: Optional[bool] = False,
         load_models: bool = True,
