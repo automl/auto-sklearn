@@ -9,7 +9,7 @@ from autosklearn.pipeline.util import _test_preprocessing, \
 import sklearn.metrics
 
 
-class ExtreTreesRegressionComponentTest(PreprocessingTestCase):
+class ExtraTreesRegressionComponentTest(PreprocessingTestCase):
     def test_default_configuration(self):
         transformation, original = _test_preprocessing(
                 ExtraTreesPreprocessorRegression)
@@ -59,5 +59,5 @@ class ExtreTreesRegressionComponentTest(PreprocessingTestCase):
             self.assertAlmostEqual(accuracy, 62.485374939528718, places=2)
 
     def test_preprocessing_dtype(self):
-        super(ExtreTreesRegressionComponentTest, self).\
+        super(ExtraTreesRegressionComponentTest, self).\
             _test_preprocessing_dtype(ExtraTreesPreprocessorRegression)

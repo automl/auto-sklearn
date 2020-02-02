@@ -51,27 +51,23 @@ class DataPreprocessor(AutoSklearnComponent):
         self.force_sparse = force_sparse_output
 
     def fit(self, X, y=None):
-        # TODO: we are converting the categorical_features array from boolean flags
-        # to integer indices to work around a sklearn bug. It should be fixed in sklearn
-        # v0.22. Then we will be able to use the boolean array directly.
-
         n_feats = X.shape[1]
         # If categorical_features is none or an array made just of False booleans, then
         # only the numerical transformer is used
         numerical_features = np.logical_not(self.categorical_features)
         if self.categorical_features is None or np.all(numerical_features):
             sklearn_transf_spec = [
-                ["numerical_transformer", self.numer_ppl, list(range(n_feats))]
+                ["numerical_transformer", self.numer_ppl, [True] * n_feats]
             ]
         # If all features are categorical, then just the categorical transformer is used
         elif np.all(self.categorical_features):
             sklearn_transf_spec = [
-                ["categorical_transformer", self.categ_ppl, list(range(n_feats))]
+                ["categorical_transformer", self.categ_ppl, [True] * n_feats]
             ]
         # For the other cases, both transformers are used
         else:
-            cat_feats = np.where(self.categorical_features)[0]
-            num_feats = np.where(numerical_features)[0]
+            cat_feats = self.categorical_features
+            num_feats = np.logical_not(self.categorical_features)
             sklearn_transf_spec = [
                 ["categorical_transformer", self.categ_ppl, cat_feats],
                 ["numerical_transformer", self.numer_ppl, num_feats]
