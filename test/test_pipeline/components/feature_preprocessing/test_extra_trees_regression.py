@@ -34,8 +34,8 @@ class ExtraTreesRegressionComponentTest(PreprocessingTestCase):
             regressor = ExtraTreesRegressor(random_state=1)
             predictor = regressor.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
-            accuracy = sklearn.metrics.mean_squared_error(predictions, Y_test)
-            self.assertAlmostEqual(accuracy, 17.93480710955056, places=2)
+            error = sklearn.metrics.mean_squared_error(predictions, Y_test)
+            self.assertAlmostEqual(error, 17.93480710955056, places=2)
 
     def test_default_configuration_classify_sparse(self):
         for i in range(2):
@@ -55,8 +55,8 @@ class ExtraTreesRegressionComponentTest(PreprocessingTestCase):
             regressor = ExtraTreesRegressor(random_state=1)
             predictor = regressor.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
-            accuracy = sklearn.metrics.mean_squared_error(predictions, Y_test)
-            self.assertAlmostEqual(accuracy, 55.53118052350573, places=2)
+            error = sklearn.metrics.mean_squared_error(predictions, Y_test)
+            self.assertAlmostEqual(error, 55.53118052350573, places=2)
 
     def test_preprocessing_dtype(self):
         super(ExtraTreesRegressionComponentTest, self).\
