@@ -37,7 +37,7 @@ run_examples() {
     # Get into a temp directory to run test from the installed scikit learn and
     # check if we do not leave artifacts
     mkdir -p $EXAMP_DIR
-    cd $TEST_DIR
+    cd $EXAMP_DIR
 
     python -c 'import autosklearn; print("Auto-sklearn imported from: %s" % autosklearn.__file__)'
     for example in `find $examples_dir -name '*.py'`
