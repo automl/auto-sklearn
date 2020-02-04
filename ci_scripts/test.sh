@@ -1,13 +1,14 @@
 set -e
 
 run_tests() {
+    # Get into a temp directory to run test from the installed scikit learn and
+    # check if we do not leave artifacts
+    mkdir -p $TEST_DIR
+
     cwd=`pwd`
     examples_dir=$cwd/examples/
     test_dir=$cwd/test/
 
-    # Get into a temp directory to run test from the installed scikit learn and
-    # check if we do not leave artifacts
-    mkdir -p $TEST_DIR
     cd $TEST_DIR
 
     python -c 'import autosklearn; print("Auto-sklearn imported from: %s" % autosklearn.__file__)'
@@ -56,7 +57,7 @@ if [[ "$SKIP_TESTS" != "true" ]]; then
 fi
 
 if [[ "$EXAMPLES" ]]; then
-    run_tests
+    run_examples
 fi
 
 
