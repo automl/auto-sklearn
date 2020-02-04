@@ -18,13 +18,13 @@ run_tests() {
         nose_params="--with-coverage --cover-package=$MODULE"
     fi
 
-    nosetests $test_dir $examples_dir --no-path-adjustment -sv --exe --with-doctest $nose_params
-
     if [[ "$EXAMPLES" == "true" ]]; then
         for example in `find $examples_dir -name '*.py'`
         do
             python $example
         done
+    else
+        nosetests $test_dir $examples_dir --no-path-adjustment -sv --exe --with-doctest $nose_params
     fi
 
     cd $cwd
