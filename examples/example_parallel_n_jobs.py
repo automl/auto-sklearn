@@ -12,7 +12,7 @@ can be found `here <https://automl.github.io/SMAC3/stable/psmac.html>`_).
 
 This example shows how to start *Auto-sklearn* to use multiple cores on a
 single machine. To run *Auto-sklearn* on multiple machines check the example
-`Parallel Usage with manual process spawning`_.
+`Parallel Usage with manual process spawning <example_parallel_manual_spawning.html>`_.
 """
 
 import sklearn.model_selection
