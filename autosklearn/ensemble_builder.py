@@ -393,7 +393,10 @@ class EnsembleBuilder(multiprocessing.Process):
             # log warning when there are other models but not better than dummy model
             if num_keys > num_dummy:
                 self.logger.warning("No models better than random - "
-                                    "using Dummy Score!")
+                                    "using Dummy Score!"
+                                    "Number of models besides current dummy model: %d. Number of dummy models: %d",
+                                    num_keys - 1,
+                                    num_dummy)
             sorted_keys = [
                 (k, v["ens_score"], v["num_run"]) for k, v in self.read_preds.items()
                 if v["seed"] == self.seed and v["num_run"] == 1
