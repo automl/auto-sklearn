@@ -1,9 +1,9 @@
-# -*- encoding: utf-8 -*-
 import abc
 import numpy as np
 import scipy.sparse
 
-from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
+    import DataPreprocessor
 from autosklearn.util import predict_RAM_usage
 
 
@@ -16,9 +16,8 @@ def perform_one_hot_encoding(sparse, categorical, data):
 
     rvals = []
     if any(categorical):
-        encoder = OneHotEncoder(categorical_features=categorical,
-                                dtype=np.float32,
-                                sparse=sparse)
+        encoder = DataPreprocessor(
+            categorical_features=categorical, force_sparse_output=sparse)
         rvals.append(encoder.fit_transform(data[0]))
         for d in data[1:]:
             rvals.append(encoder.transform(d))

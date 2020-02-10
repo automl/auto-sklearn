@@ -5,6 +5,7 @@ import unittest
 import unittest.mock
 
 import sklearn
+import joblib
 
 import numpy as np
 import numpy.ma as npma
@@ -567,9 +568,9 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         # Test joblib
         dump_file = os.path.join(output, 'automl.dump.joblib')
 
-        sklearn.externals.joblib.dump(automl, dump_file)
+        joblib.dump(automl, dump_file)
 
-        restored_automl = sklearn.externals.joblib.load(dump_file)
+        restored_automl = joblib.load(dump_file)
 
         restored_predictions = restored_automl.predict(X_test)
         restored_accuracy = sklearn.metrics.accuracy_score(Y_test,

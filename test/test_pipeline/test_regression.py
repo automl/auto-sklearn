@@ -107,13 +107,13 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             # Restrict configurations which could take too long on travis-ci
             restrictions = {'regressor:adaboost:n_estimators': 50,
                             'regressor:adaboost:max_depth': 1,
-                            'preprocessor:kernel_pca:n_components': 10,
-                            'preprocessor:kitchen_sinks:n_components': 50,
+                            'feature_preprocessor:kernel_pca:n_components': 10,
+                            'feature_preprocessor:kitchen_sinks:n_components': 50,
                             'regressor:libsvm_svc:degree': 2,
                             'regressor:libsvm_svr:degree': 2,
                             'regressor:libsvm_svr:C': 1.,
-                            'preprocessor:truncatedSVD:target_dim': 10,
-                            'preprocessor:polynomial:degree': 2,
+                            'feature_preprocessor:truncatedSVD:target_dim': 10,
+                            'feature_preprocessor:polynomial:degree': 2,
                             'regressor:lda:n_components': 10}
 
             for restrict_parameter in restrictions:
@@ -203,7 +203,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     def test_default_configuration_iterative_fit(self):
         regressor = SimpleRegressionPipeline(
             include={'regressor': ['random_forest'],
-                     'preprocessor': ['no_preprocessing']})
+                     'feature_preprocessor': ['no_preprocessing']})
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
         XT = regressor.fit_transformer(X_train, Y_train)
         for i in range(1, 11):
@@ -222,7 +222,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         conditions = cs.get_conditions()
         hyperparameters = cs.get_hyperparameters()
         self.assertEqual(142, len(hyperparameters))
-        self.assertEqual(len(hyperparameters) - 5, len(conditions))
+        self.assertEqual(len(hyperparameters) - 6, len(conditions))
 
     def test_get_hyperparameter_search_space_include_exclude_models(self):
         cs = SimpleRegressionPipeline(
@@ -235,18 +235,20 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             get_hyperparameter_search_space()
         self.assertNotIn('random_forest', str(cs))
 
-        cs = SimpleRegressionPipeline(include={'preprocessor': ['pca']}).\
+        cs = SimpleRegressionPipeline(include={'feature_preprocessor': ['pca']}).\
             get_hyperparameter_search_space()
-        self.assertEqual(cs.get_hyperparameter('preprocessor:__choice__'),
-            CategoricalHyperparameter('preprocessor:__choice__', ['pca']))
+        self.assertEqual(cs.get_hyperparameter(
+            'feature_preprocessor:__choice__'),
+            CategoricalHyperparameter('feature_preprocessor:__choice__', ['pca']))
 
-        cs = SimpleRegressionPipeline(exclude={'preprocessor': ['no_preprocessing']}).\
+        cs = SimpleRegressionPipeline(
+            exclude={'feature_preprocessor': ['no_preprocessing']}).\
             get_hyperparameter_search_space()
         self.assertNotIn('no_preprocessing', str(cs))
 
     def test_get_hyperparameter_search_space_preprocessor_contradicts_default_classifier(
             self):
-        cs = SimpleRegressionPipeline(include={'preprocessor': ['densifier']},
+        cs = SimpleRegressionPipeline(include={'feature_preprocessor': ['densifier']},
                                       dataset_properties={'sparse': True}).\
             get_hyperparameter_search_space()
         self.assertEqual(
@@ -254,7 +256,8 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             'gradient_boosting'
         )
 
-        cs = SimpleRegressionPipeline(include={'preprocessor': ['nystroem_sampler']}).\
+        cs = SimpleRegressionPipeline(
+            include={'feature_preprocessor': ['nystroem_sampler']}).\
             get_hyperparameter_search_space()
         self.assertEqual(
             cs.get_hyperparameter('regressor:__choice__').default_value,
@@ -266,7 +269,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                                             "configuration.",
                                 SimpleRegressionPipeline,
                                 include={'regressor': ['random_forest'],
-                                         'preprocessor': ['kitchen_sinks']})
+                                         'feature_preprocessor': ['kitchen_sinks']})
 
         # It must also be catched that no classifiers which can handle sparse
         # data are located behind the densifier
@@ -274,7 +277,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                                             "configuration",
                                 SimpleRegressionPipeline,
                                 include={'regressor': ['ridge_regression'],
-                                         'preprocessor': ['densifier']},
+                                         'feature_preprocessor': ['densifier']},
                                 dataset_properties={'sparse': True})
 
     @unittest.skip("test_get_hyperparameter_search_space_dataset_properties" +

@@ -1,18 +1,10 @@
-import numpy as np
-
-import autosklearn.pipeline.implementations.OneHotEncoder
-
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
-    UniformFloatHyperparameter
-from ConfigSpace.conditions import EqualsCondition
-
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 
 
-class NoEncoding(AutoSklearnPreprocessingAlgorithm):
+class NoCoalescence(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, random_state=None):
         pass
 
@@ -22,10 +14,13 @@ class NoEncoding(AutoSklearnPreprocessingAlgorithm):
     def transform(self, X):
         return X
 
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X)
+
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'no encoding',
-                'name': 'No categorical variable encoding',
+        return {'shortname': 'no coalescence',
+                'name': 'No categorical variable coalescence',
                 'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,
