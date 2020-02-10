@@ -6,12 +6,12 @@ import unittest
 # Make the super class importable
 sys.path.append(os.path.dirname(__file__))
 
-import arff
-import numpy as np
-from scipy import sparse
-from sklearn.impute import SimpleImputer
+import arff  # noqa: E402
+import numpy as np  # noqa: E402
+from scipy import sparse  # noqa: E402
+from sklearn.impute import SimpleImputer  # noqa: E402
 
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler  # noqa: E402
 
 from autosklearn.pipeline.components.data_preprocessing.\
     data_preprocessing import DataPreprocessor  # noqa: E402

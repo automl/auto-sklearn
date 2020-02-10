@@ -375,9 +375,14 @@ class EnsembleBuilder(multiprocessing.Process):
             ],
             key=lambda x: x[1],
         )))
+        # number of models available
+        num_keys = len(sorted_keys)
         # remove all that are at most as good as random
         # note: dummy model must have run_id=1 (there is not run_id=0)
-        dummy_score = list(filter(lambda x: x[2] == 1, sorted_keys))[0]
+        dummy_scores = list(filter(lambda x: x[2] == 1, sorted_keys))
+        # number of dummy models
+        num_dummy = len(dummy_scores)
+        dummy_score = dummy_scores[0]
         self.logger.debug("Use %f as dummy score" %
                           dummy_score[1])
         sorted_keys = filter(lambda x: x[1] > dummy_score[1], sorted_keys)
@@ -385,8 +390,13 @@ class EnsembleBuilder(multiprocessing.Process):
         sorted_keys = list(filter(lambda x: x[2] > 1, sorted_keys))
         if not sorted_keys:
             # no model left; try to use dummy score (num_run==0)
-            self.logger.warning("No models better than random - "
-                                "using Dummy Score!")
+            # log warning when there are other models but not better than dummy model
+            if num_keys > num_dummy:
+                self.logger.warning("No models better than random - "
+                                    "using Dummy Score!"
+                                    "Number of models besides current dummy model: %d. Number of dummy models: %d",
+                                    num_keys - 1,
+                                    num_dummy)
             sorted_keys = [
                 (k, v["ens_score"], v["num_run"]) for k, v in self.read_preds.items()
                 if v["seed"] == self.seed and v["num_run"] == 1
