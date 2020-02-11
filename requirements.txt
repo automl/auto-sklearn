@@ -12,7 +12,7 @@ joblib
 psutil
 pyyaml
 liac-arff
-pandas<1.0
+pandas
 
 ConfigSpace>=0.4.0,<0.5
 pynisher>=0.4.2
