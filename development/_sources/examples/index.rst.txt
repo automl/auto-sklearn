@@ -138,7 +138,7 @@ General introductory examples for *auto-sklearn* can be found here.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates the usage of a different acquisition function inside SMAC, namely Exp...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates the usage of a different acquisition function inside SMAC, namely `Ex...">
 
 .. only:: html
 
