@@ -19,12 +19,12 @@ class Test(unittest.TestCase):
 
         # Wall Overhead
         start = time.time()
-        cpu_start = time.clock()
+        cpu_start = time.process_time()
         watch = StopWatch()
         for i in range(1, 1000):
             watch.start_task('task_%d' % i)
             watch.stop_task('task_%d' % i)
-        cpu_stop = time.clock()
+        cpu_stop = time.process_time()
         stop = time.time()
         dur = stop - start
         cpu_dur = cpu_stop - cpu_start
