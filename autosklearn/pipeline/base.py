@@ -284,7 +284,7 @@ class BasePipeline(Pipeline):
                                  'of %s' % (key, keys))
 
         if 'sparse' not in dataset_properties:
-            # This dataset is probaby dense
+            # This dataset is probably dense
             dataset_properties['sparse'] = False
         if 'signed' not in dataset_properties:
             # This dataset probably contains unsigned data
@@ -309,11 +309,11 @@ class BasePipeline(Pipeline):
             is_choice = isinstance(node, AutoSklearnChoice)
 
             # if the node isn't a choice we can add it immediately because it
-            #  must be active (if it wouldn't, np.sum(matches) would be zero
+            #  must be active (if it wasn't, np.sum(matches) would be zero
             if not is_choice:
                 cs.add_configuration_space(node_name,
                     node.get_hyperparameter_search_space(dataset_properties))
-            # If the node isn't a choice, we have to figure out which of it's
+            # If the node is a choice, we have to figure out which of its
             #  choices are actually legal choices
             else:
                 choices_list = autosklearn.pipeline.create_searchspace_util.\

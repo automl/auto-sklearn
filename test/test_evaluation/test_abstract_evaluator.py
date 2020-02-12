@@ -122,7 +122,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         self.assertIsNone(loss_)
         self.assertEqual(additional_run_info_, {})
-        # This function is not guarded by a an if statement
+        # This function is not guarded by an if statement
         self.assertEqual(backend_mock.save_predictions_as_npy.call_count, 0)
         self.assertEqual(backend_mock.save_model.call_count, 0)
 
@@ -145,7 +145,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         self.assertIsNone(loss_)
         self.assertEqual(additional_run_info_, {})
-        # This function is not guarded by a an if statement
+        # This function is not guarded by an if statement
         self.assertEqual(backend_mock.save_predictions_as_npy.call_count, 3)
         self.assertEqual(backend_mock.save_model.call_count, 0)
 
@@ -170,6 +170,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         self.assertIsNone(loss_)
         self.assertEqual(additional_run_info_, {})
-        # This function is not guarded by a an if statement
+        # This function is not guarded by an if statement
         self.assertEqual(backend_mock.save_predictions_as_npy.call_count, 5)
         self.assertEqual(backend_mock.save_model.call_count, 1)
