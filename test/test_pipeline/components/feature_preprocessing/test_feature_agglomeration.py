@@ -31,7 +31,7 @@ class FeatureAgglomerationComponentTest(PreprocessingTestCase):
             predictor = classifier.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
             accuracy = sklearn.metrics.accuracy_score(predictions, Y_test)
-            self.assertAlmostEqual(accuracy, 0.8099574984820886)
+            self.assertAlmostEqual(accuracy, 0.8761384335154827)
 
     def test_preprocessing_dtype(self):
         super(FeatureAgglomerationComponentTest,

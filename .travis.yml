@@ -11,6 +11,7 @@ env:
   - MKL_NUM_THREADS=1
   # Directory where tests are run from
   - TEST_DIR=/tmp/test_dir/
+  - EXAMP_DIR=/tmp/examp_dir/
   - MODULE=autosklearn
   - MINICONDA_URL="https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh"
 
@@ -20,7 +21,7 @@ matrix:
 
   include:
   - os: linux
-    env: DISTRIB="conda" EXAMPLES="true" PYTHON=3.7"
+    env: DISTRIB="conda" EXAMPLES="true" PYTHON=3.7" SKIP_TESTS="true"
   - os: linux
     env: DISTRIB="conda" RUN_FLAKE8="true" SKIP_TESTS="true"
   - os: linux

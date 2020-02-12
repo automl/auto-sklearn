@@ -9,7 +9,7 @@ from autosklearn.pipeline.util import _test_preprocessing, \
 import sklearn.metrics
 
 
-class ExtreTreesRegressionComponentTest(PreprocessingTestCase):
+class ExtraTreesRegressionComponentTest(PreprocessingTestCase):
     def test_default_configuration(self):
         transformation, original = _test_preprocessing(
                 ExtraTreesPreprocessorRegression)
@@ -34,8 +34,8 @@ class ExtreTreesRegressionComponentTest(PreprocessingTestCase):
             regressor = ExtraTreesRegressor(random_state=1)
             predictor = regressor.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
-            accuracy = sklearn.metrics.mean_squared_error(predictions, Y_test)
-            self.assertAlmostEqual(accuracy, 20.193400000000004, places=2)
+            error = sklearn.metrics.mean_squared_error(predictions, Y_test)
+            self.assertAlmostEqual(error, 17.93480710955056, places=2)
 
     def test_default_configuration_classify_sparse(self):
         for i in range(2):
@@ -55,9 +55,9 @@ class ExtreTreesRegressionComponentTest(PreprocessingTestCase):
             regressor = ExtraTreesRegressor(random_state=1)
             predictor = regressor.fit(X_train_trans, Y_train)
             predictions = predictor.predict(X_test_trans)
-            accuracy = sklearn.metrics.mean_squared_error(predictions, Y_test)
-            self.assertAlmostEqual(accuracy, 62.485374939528718, places=2)
+            error = sklearn.metrics.mean_squared_error(predictions, Y_test)
+            self.assertAlmostEqual(error, 55.53118052350573, places=2)
 
     def test_preprocessing_dtype(self):
-        super(ExtreTreesRegressionComponentTest, self).\
+        super(ExtraTreesRegressionComponentTest, self).\
             _test_preprocessing_dtype(ExtraTreesPreprocessorRegression)

@@ -30,12 +30,34 @@ run_tests() {
     cd $cwd
 }
 
+run_examples() {
+    cwd=`pwd`
+    examples_dir=$cwd/examples/
+
+    # Get into a temp directory to run test from the installed scikit learn and
+    # check if we do not leave artifacts
+    mkdir -p $EXAMP_DIR
+    cd $EXAMP_DIR
+
+    python -c 'import autosklearn; print("Auto-sklearn imported from: %s" % autosklearn.__file__)'
+    for example in `find $examples_dir -name '*.py'`
+    do
+        python $example
+    done
+
+    cd $cwd
+}
+
 if [[ "$RUN_FLAKE8" ]]; then
     source ci_scripts/flake8_diff.sh
 fi
 
 if [[ "$SKIP_TESTS" != "true" ]]; then
     run_tests
+fi
+
+if [[ "$EXAMPLES" ]]; then
+    run_examples
 fi
 
 

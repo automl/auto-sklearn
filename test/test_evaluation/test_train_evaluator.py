@@ -393,7 +393,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(evaluator.file_output.call_count, 0)
-        self.assertEqual(rval['loss'], 0.46666666666666667)
+        self.assertEqual(rval['loss'], 0.5)
         self.assertEqual(pipeline_mock.fit.call_count, 1)
         self.assertEqual(pipeline_mock.predict_proba.call_count, 4)
         # The model prior to fitting is saved, this cannot be directly tested
@@ -1491,7 +1491,7 @@ class FunctionsTest(unittest.TestCase):
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
-        self.assertAlmostEqual(rval[0]['loss'], 0.04)
+        self.assertAlmostEqual(rval[0]['loss'], 0.04999999999999997)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
         self.assertNotIn('bac_metric', rval[0]['additional_run_info'])
 
@@ -1516,19 +1516,19 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(len(rval), 1)
 
         fixture = {
-            'accuracy': 0.04,
-            'balanced_accuracy': 0.041272727272727246,
-            'f1_macro': 0.04232141949075587,
-            'f1_micro': 0.04,
-            'f1_weighted': 0.040136675681298126,
-            'log_loss': 0.11895090328529478,
-            'pac_score': 0.16721692366352697,
-            'precision_macro': 0.03775252525252522,
-            'precision_micro': 0.04,
-            'precision_weighted': 0.03492424242424244,
-            'recall_macro': 0.041272727272727246,
-            'recall_micro': 0.04,
-            'recall_weighted': 0.04,
+            'accuracy': 0.04999999999999997,
+            'balanced_accuracy': 0.05130303030303027,
+            'f1_macro': 0.052793650793650775,
+            'f1_micro': 0.04999999999999997,
+            'f1_weighted': 0.050090909090909096,
+            'log_loss': 0.1178447942249477,
+            'pac_score': 0.16685284204030987,
+            'precision_macro': 0.04963636363636359,
+            'precision_micro': 0.04999999999999997,
+            'precision_weighted': 0.045757575757575664,
+            'recall_macro': 0.05130303030303027,
+            'recall_micro': 0.04999999999999997,
+            'recall_weighted': 0.04999999999999997,
             'num_run': 1,
             'validation_loss': 0.04,
             'test_loss': 0.04,
@@ -1542,7 +1542,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(len(additional_run_info), len(fixture) + 1,
                          msg=sorted(additional_run_info.items()))
 
-        self.assertAlmostEqual(rval[0]['loss'], 0.04)
+        self.assertAlmostEqual(rval[0]['loss'], 0.04999999999999997)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
 
     # def test_eval_cv_on_subset(self):
@@ -1557,11 +1557,11 @@ class FunctionsTest(unittest.TestCase):
     #     self.assertEqual(info[2], 1)
 
     def test_eval_partial_cv(self):
-        results = [0.045454545454545414,
-                   0.09523809523809523,
-                   0.052631578947368474,
-                   0.10526315789473684,
-                   0.0]
+        results = [0.09999999999999998,
+                   0.0,
+                   0.09999999999999998,
+                   0.09999999999999998,
+                   0.050000000000000044]
         for fold in range(5):
             instance = json.dumps({'task_id': 'data', 'fold': fold})
             eval_partial_cv(
