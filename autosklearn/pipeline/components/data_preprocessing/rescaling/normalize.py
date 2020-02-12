@@ -25,7 +25,7 @@ class NormalizerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                # TODO find out of this is right!
+                # TODO find out if this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (SPARSE, DENSE, UNSIGNED_DATA),
