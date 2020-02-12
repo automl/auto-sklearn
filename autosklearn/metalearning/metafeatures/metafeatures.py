@@ -626,7 +626,7 @@ class LandmarkLDA(MetaFeature):
 
                 predictions = lda.predict(X[test])
                 accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
-            return accuracy / 10
+            return accuracy / 5
         except scipy.linalg.LinAlgError as e:
             self.logger.warning("LDA failed: %s Returned 0 instead!" % e)
             return np.NaN
@@ -660,7 +660,7 @@ class LandmarkNaiveBayes(MetaFeature):
 
             predictions = nb.predict(X[test])
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
-        return accuracy / 10
+        return accuracy / 5
 
     def _calculate_sparse(self, X, y, categorical):
         return np.NaN
@@ -689,7 +689,7 @@ class LandmarkDecisionTree(MetaFeature):
 
             predictions = tree.predict(X[test])
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
-        return accuracy / 10
+        return accuracy / 5
 
     def _calculate_sparse(self, X, y, categorical):
         return np.NaN
@@ -723,7 +723,7 @@ class LandmarkDecisionNodeLearner(MetaFeature):
                 node.fit(X[train], y[train])
             predictions = node.predict(X[test])
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
-        return accuracy / 10
+        return accuracy / 5
 
     def _calculate_sparse(self, X, y, categorical):
         return np.NaN
@@ -747,8 +747,7 @@ class LandmarkRandomNodeLearner(MetaFeature):
             node.fit(X[train], y[train])
             predictions = node.predict(X[test])
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
-        return accuracy / 10
-
+        return accuracy / 5
     def _calculate_sparse(self, X, y, categorical):
         return np.NaN
 
@@ -798,7 +797,7 @@ class Landmark1NN(MetaFeature):
                 kNN.fit(X[train], y[train])
             predictions = kNN.predict(X[test])
             accuracy += sklearn.metrics.accuracy_score(predictions, y[test])
-        return accuracy / 10
+        return accuracy / 5
 
 ################################################################################
 # Bardenet 2013 - Collaborative Hyperparameter Tuning
