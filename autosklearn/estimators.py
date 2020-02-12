@@ -6,6 +6,7 @@ from typing import Optional, List, Dict
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
+import joblib
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, BaseAutoML
 from autosklearn.util.backend import create, get_randomized_directory_names
@@ -341,7 +342,11 @@ class AutoSklearnEstimator(BaseEstimator):
                 output_directory=self.output_folder,
             )
 
-            self._n_jobs = self.n_jobs
+            if self.n_jobs == -1:
+                self._n_jobs = joblib.cpu_count()
+            else:
+                self._n_jobs = self.n_jobs
+
             shared_mode = True
             seeds = set()
             for i in range(self._n_jobs):
@@ -507,7 +512,6 @@ class AutoSklearnEstimator(BaseEstimator):
         """
         self._automl[0].refit(X, y)
         return self
-
 
     def predict(self, X, batch_size=None, n_jobs=1):
         return self._automl[0].predict(X, batch_size=batch_size, n_jobs=n_jobs)

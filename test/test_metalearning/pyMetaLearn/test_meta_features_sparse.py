@@ -15,8 +15,8 @@ from sklearn.preprocessing import StandardScaler  # noqa: E402
 
 from autosklearn.pipeline.components.data_preprocessing.\
     data_preprocessing import DataPreprocessor  # noqa: E402
-import autosklearn.metalearning.metafeatures.metafeatures as meta_features
-import test_meta_features
+import autosklearn.metalearning.metafeatures.metafeatures as meta_features  # noqa: E402
+import test_meta_features  # noqa: E402
 
 
 class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest,
