@@ -21,7 +21,7 @@ matrix:
 
   include:
   - os: linux
-    env: DISTRIB="conda" EXAMPLES="true" PYTHON=3.7" SKIP_TESTS="true"
+    env: DISTRIB="conda" EXAMPLES="true" PYTHON="3.7" SKIP_TESTS="true"
   - os: linux
     env: DISTRIB="conda" RUN_FLAKE8="true" SKIP_TESTS="true"
   - os: linux
