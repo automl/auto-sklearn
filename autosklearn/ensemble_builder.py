@@ -130,8 +130,8 @@ class EnsembleBuilder(multiprocessing.Process):
         self.start_time = 0
         self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy')
         self.num_run = 0
-        self.best_model_index = []
-        self.removed_model = []
+        self.best_models_idx = []
+        self.worst_models_idx = []
         # already read prediction files
         # {"file name": {
         #    "ens_score": float
@@ -202,20 +202,21 @@ class EnsembleBuilder(multiprocessing.Process):
                 continue
 
             selected_models = self.get_n_best_preds()
-            total_models = list(range(self.num_run))
-            to_be_removed_list = set(total_models) - set(self.best_model_index) - set(self.removed_model)
+            all_models_idx = list(range(self.num_run))
+            models_to_remove_idx = set(all_models_idx) -
+                set(self.best_models_idx) - set(self.worst_models_idx)
 
-            for file in to_be_removed_list:
+            for idx in models_to_remove_idx:
                 # not sure about having zero as a constant
-                filename = self.dir_model + '/0.' + str(file) + '.model'
+                filename = self.dir_model + '/0.' + str(idx) + '.model'
                 try:
                     os.remove(filename)
                 except OSError:
                     self.logger.warning(
-                        "Unable to remove redundant model: %s" % filename)
+                        "Unable to remove non-winning model: %s" % filename)
                     continue
 
-            self.removed_model += list(to_be_removed_list)
+            self.worst_models_idx += list(models_to_remove_idx)
 
             sys.stdout.flush()
             if not selected_models:  # nothing selected
@@ -449,7 +450,7 @@ class EnsembleBuilder(multiprocessing.Process):
             ensemble_n_best = self.ensemble_nbest
 
         # reduce to keys
-        self.best_model_index = list(map(lambda x: x[2], sorted_keys))
+        self.best_models_idx = list(map(lambda x: x[2], sorted_keys))
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
 
         # remove loaded predictions for non-winning models
