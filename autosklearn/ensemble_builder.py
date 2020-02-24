@@ -116,11 +116,6 @@ class EnsembleBuilder(multiprocessing.Process):
             '.auto-sklearn',
             'predictions_ensemble',
         )
-        self.dir_model = os.path.join(
-            self.backend.temporary_directory,
-            '.auto-sklearn',
-            'models',
-        )
         # validation set (public test set) -- y_true not known
         self.dir_valid = os.path.join(
             self.backend.temporary_directory,
@@ -133,6 +128,12 @@ class EnsembleBuilder(multiprocessing.Process):
             '.auto-sklearn',
             'predictions_test',
         )
+        self.model_query = os.path.join(
+            self.backend.temporary_directory,
+            '.auto-sklearn',
+            'models',
+            str(self.seed) + '.*.model'
+        )
 
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
         self.logger = get_logger(logger_name)
@@ -141,7 +142,6 @@ class EnsembleBuilder(multiprocessing.Process):
         self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy')
         self.num_run = 0
         self.best_models_idx = []
-        self.worst_models_idx = []
         # already read prediction files
         # {"file name": {
         #    "ens_score": float
@@ -218,15 +218,11 @@ class EnsembleBuilder(multiprocessing.Process):
 
             # Delete files of non-winning models
             if self.keep_just_nbest_model_files:
-                all_models_idx = list(range(1, self.num_run + 1))
-                models_to_remove_idx = set(all_models_idx) - \
-                    set(self.best_models_idx) - set(self.worst_models_idx)
-                for idx in models_to_remove_idx:
-                    model_file = str(self.seed) + '.' + str(idx) + '.model'
-                    model_path = os.path.join(self.dir_model, model_file)
-                    self.logger.info("Removing file of non-winning model %s" % model_file)
-                    os.remove(model_path)
-                self.worst_models_idx += list(models_to_remove_idx)
+                for m_file in glob.glob(self.model_query):
+                    model_idx = int(m_file.split('.')[-2])
+                    if model_idx not in self.best_models_idx:
+                        self.logger.info("Removing file of non-winning model %s" % m_file)
+                        os.remove(m_file)
 
             # populates predictions in self.read_preds
             # reduces selected models if file reading failed

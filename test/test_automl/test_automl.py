@@ -116,11 +116,12 @@ class AutoMLTest(Base, unittest.TestCase):
         self._tearDown(backend_api.output_directory)
 
     def test_delete_non_winning_models(self):
-        backend_api = self._create_backend('test_fit', False)
+        backend_api = self._create_backend(
+            'test_fit', delete_tmp_folder_after_terminate=False)
 
         X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = autosklearn.automl.AutoML(backend_api, 
-            time_left_for_this_task=50, 
+        automl = autosklearn.automl.AutoML(backend_api,
+            time_left_for_this_task=50,
             per_run_time_limit=10,
             ensemble_size=3,
             ensemble_nbest=3,
@@ -129,13 +130,12 @@ class AutoMLTest(Base, unittest.TestCase):
         automl.fit(
             X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
         )
-        score = automl.score(X_test, Y_test)
-        self.assertGreaterEqual(score, 0.8)
-        self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
+
+
 
         del automl
-        #self._tearDown(backend_api.temporary_directory)
-        #self._tearDown(backend_api.output_directory)
+        self._tearDown(backend_api.temporary_directory)
+        self._tearDown(backend_api.output_directory)
 
 
     def test_fit_roar(self):
