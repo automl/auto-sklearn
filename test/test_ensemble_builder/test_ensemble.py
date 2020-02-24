@@ -231,8 +231,9 @@ class EnsembleTest(unittest.TestCase):
                                     limit=-1, # not used,
                                     seed=0, # important to find the test files
                                     ensemble_nbest=2,
-                                    max_iterations=1 # prevents infinite loop
-                                    )
+                                    max_iterations=1, # prevents infinite loop
+                                    keep_just_nbest_model_files=False,  # Because of the
+                                    )                                   # BackendMock
         ensbuilder.SAVE2DISC = False
 
         ensbuilder.main()

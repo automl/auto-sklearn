@@ -35,6 +35,7 @@ class EnsembleBuilder(multiprocessing.Process):
             limit: int,
             ensemble_size: int=10,
             ensemble_nbest: int=100,
+            keep_just_nbest_model_files: bool=True,
             seed: int=1,
             shared_mode: bool=False,
             max_iterations: int=None,
@@ -63,6 +64,10 @@ class EnsembleBuilder(multiprocessing.Process):
                 maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
             ensemble_nbest: int
                 consider only the n best prediction (wrt validation predictions)
+            keep_just_nbest_model_files: bool
+                As new models are created, keeps the files the n-best models, and
+                delete the others (the ones not used by the ensemble). Currently, this
+                functionality cannot be used together with shared mode.
             seed: int
                 random seed
                 if set to -1, read files with any seed (e.g., for shared model mode)
@@ -81,6 +86,10 @@ class EnsembleBuilder(multiprocessing.Process):
                 read at most n new prediction files in each iteration
         """
 
+        if keep_just_nbest_model_files and shared_mode:
+            raise ValueError("Currently, shared_mode can't be used together with"
+                "keep_just_nbest_model_files")
+
         super(EnsembleBuilder, self).__init__()
 
         self.backend = backend  # communication with filesystem
@@ -90,6 +99,7 @@ class EnsembleBuilder(multiprocessing.Process):
         self.time_limit = limit  # time limit
         self.ensemble_size = ensemble_size
         self.ensemble_nbest = ensemble_nbest  # max number of members that will be used for building the ensemble
+        self.keep_just_nbest_model_files = keep_just_nbest_model_files
         self.seed = seed
         self.shared_mode = shared_mode  # pSMAC?
         self.max_iterations = max_iterations
@@ -207,15 +217,16 @@ class EnsembleBuilder(multiprocessing.Process):
                 continue
 
             # Delete files of non-winning models
-            all_models_idx = list(range(1, self.num_run + 1))
-            models_to_remove_idx = set(all_models_idx) - \
-                set(self.best_models_idx) - set(self.worst_models_idx)
-            for idx in models_to_remove_idx:
-                model_file = str(self.seed) + '.' + str(idx) + '.model'
-                model_path = os.path.join(self.dir_model, model_file)
-                self.logger.info("Removing file of non-winning model %s" % model_file)
-                os.remove(model_path)
-            self.worst_models_idx += list(models_to_remove_idx)
+            if self.keep_just_nbest_model_files:
+                all_models_idx = list(range(1, self.num_run + 1))
+                models_to_remove_idx = set(all_models_idx) - \
+                    set(self.best_models_idx) - set(self.worst_models_idx)
+                for idx in models_to_remove_idx:
+                    model_file = str(self.seed) + '.' + str(idx) + '.model'
+                    model_path = os.path.join(self.dir_model, model_file)
+                    self.logger.info("Removing file of non-winning model %s" % model_file)
+                    os.remove(model_path)
+                self.worst_models_idx += list(models_to_remove_idx)
 
             # populates predictions in self.read_preds
             # reduces selected models if file reading failed

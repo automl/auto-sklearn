@@ -3,6 +3,7 @@ import os
 import pickle
 import sys
 import time
+import glob
 import unittest
 import unittest.mock
 
@@ -242,9 +243,9 @@ class AutoMLTest(Base, unittest.TestCase):
                                           'predictions_ensemble'))
         self.assertIn('predictions_ensemble_100_1.npy', fixture)
 
-        fixture = os.listdir(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                          'models'))
-        self.assertIn('100.1.model', fixture)
+        fixture = glob.glob(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
+                                          'models', '100.*.model'))
+        self.assertGreater(len(fixture), 0)
 
         fixture = os.listdir(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
                                           'ensembles'))
