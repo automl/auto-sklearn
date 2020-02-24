@@ -202,25 +202,20 @@ class EnsembleBuilder(multiprocessing.Process):
                 continue
 
             selected_models = self.get_n_best_preds()
-            all_models_idx = list(range(self.num_run))
-            models_to_remove_idx = set(all_models_idx) -
-                set(self.best_models_idx) - set(self.worst_models_idx)
-
-            for idx in models_to_remove_idx:
-                # not sure about having zero as a constant
-                filename = self.dir_model + '/0.' + str(idx) + '.model'
-                try:
-                    os.remove(filename)
-                except OSError:
-                    self.logger.warning(
-                        "Unable to remove non-winning model: %s" % filename)
-                    continue
-
-            self.worst_models_idx += list(models_to_remove_idx)
-
             sys.stdout.flush()
             if not selected_models:  # nothing selected
                 continue
+
+            # Delete files of non-winning models
+            all_models_idx = list(range(1, self.num_run + 1))
+            models_to_remove_idx = set(all_models_idx) - \
+                set(self.best_models_idx) - set(self.worst_models_idx)
+            for idx in models_to_remove_idx:
+                model_file = str(self.seed) + '.' + str(idx) + '.model'
+                model_path = os.path.join(self.dir_model, model_file)
+                self.logger.info("Removing file of non-winning model %s" % model_file)
+                os.remove(model_path)
+            self.worst_models_idx += list(models_to_remove_idx)
 
             # populates predictions in self.read_preds
             # reduces selected models if file reading failed
@@ -403,7 +398,7 @@ class EnsembleBuilder(multiprocessing.Process):
         # number of models available
         num_keys = len(sorted_keys)
         # remove all that are at most as good as random
-        # note: dummy model must have run_id=1 (there is not run_id=0)
+        # note: dummy model must have run_id=1 (there is no run_id=0)
         dummy_scores = list(filter(lambda x: x[2] == 1, sorted_keys))
         # number of dummy models
         num_dummy = len(dummy_scores)
@@ -450,7 +445,7 @@ class EnsembleBuilder(multiprocessing.Process):
             ensemble_n_best = self.ensemble_nbest
 
         # reduce to keys
-        self.best_models_idx = list(map(lambda x: x[2], sorted_keys))
+        self.best_models_idx = list(map(lambda x: x[2], sorted_keys))[:ensemble_n_best]
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
 
         # remove loaded predictions for non-winning models

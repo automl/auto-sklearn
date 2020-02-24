@@ -137,7 +137,7 @@ class AutoML(BaseEstimator):
             raise ValueError("per_run_time_limit not of type integer, but %s" %
                              str(type(self._per_run_time_limit)))
 
-        # After assignging and checking variables...
+        # After assigning and checking variables...
         #self._backend = Backend(self._output_dir, self._tmp_dir)
 
     def fit(
@@ -626,7 +626,7 @@ class AutoML(BaseEstimator):
 
     def _get_ensemble_process(self, time_left_for_ensembles,
                               task=None, metric=None, precision=None,
-                              dataset_name=None, max_iterations=-1,
+                              dataset_name=None, max_iterations=None,
                               ensemble_nbest=None, ensemble_size=None):
 
         if task is None:
