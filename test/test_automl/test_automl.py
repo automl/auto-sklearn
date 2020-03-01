@@ -146,7 +146,6 @@ class AutoMLTest(Base, unittest.TestCase):
         self._tearDown(backend_api.temporary_directory)
         self._tearDown(backend_api.output_directory)
 
-
     def test_fit_roar(self):
         def get_roar_object_callback(
                 scenario_dict,

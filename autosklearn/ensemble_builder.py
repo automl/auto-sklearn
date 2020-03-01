@@ -139,6 +139,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
         self.start_time = 0
         self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy')
+
         # already read prediction files
         # {"file name": {
         #    "ens_score": float
