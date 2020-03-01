@@ -117,21 +117,23 @@ class AutoMLTest(Base, unittest.TestCase):
 
     def test_delete_non_winning_models(self):
         backend_api = self._create_backend(
-            'test_fit', delete_tmp_folder_after_terminate=False)
+            'test_delete', delete_tmp_folder_after_terminate=False)
 
-        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-        automl = autosklearn.automl.AutoML(backend_api,
-            time_left_for_this_task=50,
-            per_run_time_limit=10,
-            ensemble_size=3,
-            ensemble_nbest=3,
-            debug_mode=True,
+        n_best = 3
+        X_train, Y_train, _, _ = putil.get_dataset('iris')
+        automl = autosklearn.automl.AutoML(
+            backend_api,
+            time_left_for_this_task=20,
+            per_run_time_limit=5,
+            ensemble_nbest=n_best,
         )
         automl.fit(
             X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
         )
 
-
+        model_files = glob.glob(os.path.join(
+            backend_api.temporary_directory, '.auto-sklearn', 'models', '*.model'))
+        self.assertEqual(len(model_files), n_best)
 
         del automl
         self._tearDown(backend_api.temporary_directory)

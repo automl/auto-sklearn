@@ -35,7 +35,7 @@ class EnsembleBuilder(multiprocessing.Process):
             limit: int,
             ensemble_size: int=10,
             ensemble_nbest: int=100,
-            keep_just_nbest_model_files: bool=True,
+            keep_just_nbest_model_files: bool = True,
             seed: int=1,
             shared_mode: bool=False,
             max_iterations: int=None,
@@ -87,8 +87,8 @@ class EnsembleBuilder(multiprocessing.Process):
         """
 
         if keep_just_nbest_model_files and shared_mode:
-            raise ValueError("Currently, shared_mode can't be used together with"
-                "keep_just_nbest_model_files")
+            raise ValueError("Currently, shared_mode can't be used together with "
+                             "keep_just_nbest_model_files")
 
         super(EnsembleBuilder, self).__init__()
 
