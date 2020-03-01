@@ -79,8 +79,8 @@ class AutoSklearnEstimator(BaseEstimator):
             most out of ensemble selection`.
 
         keep_just_nbest_models : bool, optional (default=True)
-            As new models are created, keeps the files the n-best models, and
-            delete the others (the ones not used by the ensemble). Currently, this
+            As new models are created, keep the files the n-best models, and
+            delete the others, i.e. the ones not used by the ensemble. Currently, this
             functionality cannot be used together with shared mode.
 
         ensemble_memory_limit : int, optional (1024)
