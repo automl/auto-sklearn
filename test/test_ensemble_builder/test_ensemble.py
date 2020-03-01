@@ -233,7 +233,7 @@ class EnsembleTest(unittest.TestCase):
             seed=0,  # important to find the test files
             ensemble_nbest=2,
             max_iterations=1,  # prevents infinite loop
-            keep_just_nbest_models=False,  # Because BackendMock creates no file
+            keep_just_nbest_models=False,  # Because BackendMock creates no files
             )
         ensbuilder.SAVE2DISC = False
 
