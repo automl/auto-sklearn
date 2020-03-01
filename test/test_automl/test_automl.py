@@ -246,7 +246,7 @@ class AutoMLTest(Base, unittest.TestCase):
         self.assertIn('predictions_ensemble_100_1.npy', fixture)
 
         fixture = glob.glob(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                          'models', '100.*.model'))
+                                         'models', '100.*.model'))
         self.assertGreater(len(fixture), 0)
 
         fixture = os.listdir(os.path.join(backend_api.temporary_directory, '.auto-sklearn',

@@ -67,7 +67,7 @@ class AutoML(BaseEstimator):
                  initial_configurations_via_metalearning=25,
                  ensemble_size=1,
                  ensemble_nbest=1,
-                 keep_just_nbest_model_files=True,
+                 keep_just_nbest_models=True,
                  ensemble_memory_limit=1000,
                  seed=1,
                  ml_memory_limit=3072,
@@ -97,7 +97,7 @@ class AutoML(BaseEstimator):
             initial_configurations_via_metalearning
         self._ensemble_size = ensemble_size
         self._ensemble_nbest = ensemble_nbest
-        self._keep_just_nbest_model_files = keep_just_nbest_model_files,
+        self._keep_just_nbest_models = keep_just_nbest_models
         self._ensemble_memory_limit = ensemble_memory_limit
         self._seed = seed
         self._ml_memory_limit = ml_memory_limit
@@ -669,7 +669,7 @@ class AutoML(BaseEstimator):
             limit=time_left_for_ensembles,
             ensemble_size=ensemble_size,
             ensemble_nbest=ensemble_nbest,
-            keep_just_nbest_model_files=self._keep_just_nbest_model_files,
+            keep_just_nbest_models=self._keep_just_nbest_models,
             seed=self._seed,
             shared_mode=self._shared_mode,
             precision=precision,

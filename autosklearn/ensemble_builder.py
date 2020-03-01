@@ -35,7 +35,7 @@ class EnsembleBuilder(multiprocessing.Process):
             limit: int,
             ensemble_size: int=10,
             ensemble_nbest: int=100,
-            keep_just_nbest_model_files: bool = True,
+            keep_just_nbest_models: bool = True,
             seed: int=1,
             shared_mode: bool=False,
             max_iterations: int=None,
@@ -64,7 +64,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
             ensemble_nbest: int
                 consider only the n best prediction (wrt validation predictions)
-            keep_just_nbest_model_files: bool
+            keep_just_nbest_models: bool
                 As new models are created, keeps the files the n-best models, and
                 delete the others (the ones not used by the ensemble). Currently, this
                 functionality cannot be used together with shared mode.
@@ -86,9 +86,9 @@ class EnsembleBuilder(multiprocessing.Process):
                 read at most n new prediction files in each iteration
         """
 
-        if keep_just_nbest_model_files and shared_mode:
+        if keep_just_nbest_models and shared_mode:
             raise ValueError("Currently, shared_mode can't be used together with "
-                             "keep_just_nbest_model_files")
+                             "keep_just_nbest_models")
 
         super(EnsembleBuilder, self).__init__()
 
@@ -99,7 +99,7 @@ class EnsembleBuilder(multiprocessing.Process):
         self.time_limit = limit  # time limit
         self.ensemble_size = ensemble_size
         self.ensemble_nbest = ensemble_nbest  # max number of members that will be used for building the ensemble
-        self.keep_just_nbest_model_files = keep_just_nbest_model_files
+        self.keep_just_nbest_models = keep_just_nbest_models
         self.seed = seed
         self.shared_mode = shared_mode  # pSMAC?
         self.max_iterations = max_iterations
@@ -217,7 +217,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 continue
 
             # Delete files of non-winning models
-            if self.keep_just_nbest_model_files:
+            if self.keep_just_nbest_models:
                 for m_file in glob.glob(self.model_query):
                     model_idx = int(m_file.split('.')[-2])
                     if model_idx not in self.best_models_idx:
