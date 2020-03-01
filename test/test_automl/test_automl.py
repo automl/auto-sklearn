@@ -133,7 +133,14 @@ class AutoMLTest(Base, unittest.TestCase):
 
         model_files = glob.glob(os.path.join(
             backend_api.temporary_directory, '.auto-sklearn', 'models', '*.model'))
+
+        # Assert that just n_best files remained in the models directory
         self.assertEqual(len(model_files), n_best)
+
+        # Assert that these files correspond to the models used by the ensemble
+        ensemble_members_idx = [idx[1] for idx in automl.ensemble_.identifiers_]
+        model_files_idx = [int(m_file.split('.')[-2]) for m_file in model_files]
+        self.assertSetEqual(set(ensemble_members_idx), set(model_files_idx))
 
         del automl
         self._tearDown(backend_api.temporary_directory)

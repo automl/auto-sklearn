@@ -140,8 +140,6 @@ class EnsembleBuilder(multiprocessing.Process):
 
         self.start_time = 0
         self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy')
-        self.num_run = 0
-        self.best_models_idx = []
         # already read prediction files
         # {"file name": {
         #    "ens_score": float
@@ -218,9 +216,10 @@ class EnsembleBuilder(multiprocessing.Process):
 
             # Delete files of non-winning models
             if self.keep_just_nbest_models:
+                pred_idx = [p.replace('_', '.').split('.')[-2] for p in selected_models]
                 for m_file in glob.glob(self.model_query):
-                    model_idx = int(m_file.split('.')[-2])
-                    if model_idx not in self.best_models_idx:
+                    model_idx = m_file.split('.')[-2]
+                    if model_idx not in pred_idx:
                         self.logger.info("Removing file of non-winning model %s" % m_file)
                         os.remove(m_file)
 
@@ -316,7 +315,6 @@ class EnsembleBuilder(multiprocessing.Process):
             match = self.model_fn_re.search(y_ens_fn)
             _seed = int(match.group(1))
             _num_run = int(match.group(2))
-            self.num_run = max(self.num_run, _num_run)
             if not self.read_preds.get(y_ens_fn):
                 self.read_preds[y_ens_fn] = {
                     "ens_score": -1,
@@ -452,7 +450,6 @@ class EnsembleBuilder(multiprocessing.Process):
             ensemble_n_best = self.ensemble_nbest
 
         # reduce to keys
-        self.best_models_idx = list(map(lambda x: x[2], sorted_keys))[:ensemble_n_best]
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
 
         # remove loaded predictions for non-winning models
