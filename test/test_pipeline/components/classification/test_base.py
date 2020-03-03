@@ -20,6 +20,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
     step_hyperparameter = None
 
     def test_default_iris(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         for i in range(2):
             predictions, targets, n_calls = \
                 _test_classifier(dataset="iris",
@@ -34,6 +38,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                 self.assertEqual(self.res["iris_n_calls"], n_calls)
 
     def test_default_iris_iterative_fit(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         if not hasattr(self.module, 'iterative_fit'):
             return
 
@@ -53,8 +61,11 @@ class BaseClassificationComponentTest(unittest.TestCase):
                     self.step_hyperparameter['value']
                 )
 
-
     def test_default_iris_predict_proba(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         for i in range(2):
             predictions, targets = \
                 _test_classifier_predict_proba(dataset="iris",
@@ -65,6 +76,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                            "default_iris_proba_places", 7))
 
     def test_default_iris_sparse(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         if SPARSE not in self.module.get_properties()["input"]:
             return
 
@@ -80,6 +95,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                            "default_iris_sparse_places", 7))
 
     def test_default_digits_binary(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         for i in range(2):
             predictions, targets, _ = \
                 _test_classifier(classifier=self.module,
@@ -92,6 +111,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                            "default_digits_binary_places", 7))
 
     def test_default_digits(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         for i in range(2):
             predictions, targets, n_calls = \
                 _test_classifier(dataset="digits",
@@ -106,6 +129,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                 self.assertEqual(self.res["digits_n_calls"], n_calls)
 
     def test_default_digits_iterative_fit(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         if not hasattr(self.module, 'iterative_fit'):
             return
 
@@ -126,6 +153,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                 )
 
     def test_default_digits_multilabel(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         if not self.module.get_properties()["handles_multilabel"]:
             return
 
@@ -141,6 +172,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                            "default_digits_multilabel_places", 7))
 
     def test_default_digits_multilabel_predict_proba(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         if not self.module.get_properties()["handles_multilabel"]:
             return
 
@@ -156,6 +191,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                            "default_digits_multilabel_proba_places", 7))
 
     def test_target_algorithm_multioutput_multiclass_support(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         if not self.module.get_properties()["handles_multiclass"]:
             return
         elif self.sk_module is not None:
@@ -168,6 +207,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
             return
 
     def test_module_idempotent(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         def check_classifier(cls):
             X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
             y = np.array([0, 1, 1, 0])

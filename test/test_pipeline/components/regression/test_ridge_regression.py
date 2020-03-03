@@ -12,7 +12,7 @@ class RidgeComponentTest(BaseRegressionComponentTest):
     res["default_boston"] = 0.7035465377559671
     res["default_boston_iterative"] = None
     res["default_boston_sparse"] = 0.1163004000785135
-    res["default_boston_sparse_places"] = 5
+    res["default_boston_sparse_places"] = 4
     res["default_boston_iterative_sparse"] = None
     res["default_diabetes"] = 0.32614416980439365
     res["default_diabetes_iterative"] = None

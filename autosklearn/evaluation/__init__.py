@@ -172,6 +172,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
     def run(self, config, instance=None,
             cutoff=None,
             seed=12345,
+            budget=0.0,
             instance_specific=None):
 
         queue = multiprocessing.Queue()
