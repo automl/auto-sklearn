@@ -13,12 +13,11 @@ import sklearn.metrics
 
 from smac.epm.uncorrelated_mo_rf_with_instances import \
     UncorrelatedMultiObjectiveRandomForestWithInstances
-from smac.utils.util_funcs import get_types
-from smac.facade.smac_facade import SMAC
+from smac.epm.util_funcs import get_types
+from smac.facade.smac_ac_facade import SMAC4AC
 from smac.optimizer.acquisition import EIPS
 from smac.runhistory.runhistory2epm import RunHistory2EPM4EIPS
 from smac.scenario.scenario import Scenario
-from smac.tae.execute_ta_run import StatusType
 
 import autosklearn.classification
 
@@ -27,42 +26,31 @@ def get_eips_object_callback(
         scenario_dict,
         seed,
         ta,
+        ta_kwargs,
         backend,
         metalearning_configurations,
-        runhistory,
 ):
     scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
     scenario = Scenario(scenario_dict)
-    rh2EPM = RunHistory2EPM4EIPS(
-        num_params=len(scenario.cs.get_hyperparameters()),
-        scenario=scenario,
-        success_states=[
-            StatusType.SUCCESS,
-            StatusType.MEMOUT,
-            StatusType.TIMEOUT,
-            StatusType.CRASHED
-        ],
-        impute_censored_data=False,
-        impute_state=None
-    )
     types, bounds = get_types(scenario.cs,
                               scenario.feature_array)
-    model = UncorrelatedMultiObjectiveRandomForestWithInstances(
-        ['cost', 'runtime'],
+    model_kwargs = dict(
+        target_names=['cost', 'runtime'],
         types=types,
         bounds=bounds,
         instance_features=scenario.feature_array,
-        rf_kwargs={'seed': 1,},
+        rf_kwargs={'seed': 1, },
     )
-    acquisition_function = EIPS(model)
-    return SMAC(
-        runhistory=runhistory,
+    return SMAC4AC(
         scenario=scenario,
         rng=seed,
         tae_runner=ta,
-        runhistory2epm=rh2EPM,
-        model=model,
-        acquisition_function=acquisition_function,
+        tae_runner_kwargs=ta_kwargs,
+        runhistory2epm=RunHistory2EPM4EIPS,
+        runhistory2epm_kwargs={},
+        model=UncorrelatedMultiObjectiveRandomForestWithInstances,
+        model_kwargs=model_kwargs,
+        acquisition_function=EIPS,
         run_id=seed,
     )
 
