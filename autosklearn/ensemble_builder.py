@@ -227,6 +227,9 @@ class EnsembleBuilder(multiprocessing.Process):
                 # use selected_models only defined by ensemble data set
                 pass
 
+            # train ensemble
+            ensemble = self.fit_ensemble(selected_keys=selected_models)
+
             # Delete files of not selected models
             if self.keep_just_nbest_models:
                 pred_idx = [p.replace('_', '.').split('.')[-2] for p in selected_models]
@@ -236,8 +239,6 @@ class EnsembleBuilder(multiprocessing.Process):
                         self.logger.info("Removing file of non-winning model %s" % m_file)
                         os.remove(m_file)
 
-            # train ensemble
-            ensemble = self.fit_ensemble(selected_keys=selected_models)
 
             if ensemble is not None:
 
