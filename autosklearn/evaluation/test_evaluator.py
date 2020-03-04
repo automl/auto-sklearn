@@ -30,7 +30,6 @@ class TestEvaluator(AbstractEvaluator):
             seed=seed,
             output_y_hat_optimization=False,
             num_run=-1,
-            subsample=None,
             include=include,
             exclude=exclude,
             disable_file_output= disable_file_output,
