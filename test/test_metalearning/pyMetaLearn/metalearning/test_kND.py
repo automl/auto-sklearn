@@ -78,7 +78,7 @@ class kNDTest(unittest.TestCase):
             neighbors,
         )
         neighbors = kND.kBestSuggestions(self.anneal, -1)
-        self.assertEqual(
+        np.testing.assert_array_almost_equal(
             [(233, 1.8229893712531495, 1), (234, 2.2679197196559415, 2)],
             neighbors,
         )
