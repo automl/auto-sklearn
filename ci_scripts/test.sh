@@ -11,7 +11,6 @@ run_tests() {
     cd $TEST_DIR
 
     python -c 'import autosklearn; print("Auto-sklearn imported from: %s" % autosklearn.__file__)'
-    python -c 'import autosklearn.data.competition_c_functions; print("SO imported from: %s" % autosklearn.data.competition_c_functions.__file__)'
 
     test_params=""
     if [[ "$COVERAGE" == "true" ]]; then
