@@ -66,12 +66,12 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     --------
 
     """
-    def __init__(self, config=None, pipeline=None, dataset_properties=None,
+    def __init__(self, config=None, steps=None, dataset_properties=None,
                  include=None, exclude=None, random_state=None,
                  init_params=None):
         self._output_dtype = np.float32
         super().__init__(
-            config=config, pipeline=pipeline,
+            config=config, steps=steps,
             dataset_properties=dataset_properties,
             include=include, exclude=exclude, random_state=random_state,
             init_params=init_params)
@@ -240,7 +240,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
     def _get_estimator_components(self):
         return regression_components._regressors
 
-    def _get_pipeline(self, init_params=None):
+    def _get_pipeline_steps(self, init_params=None):
         steps = []
 
         default_dataset_properties = {'target_type': 'regression'}

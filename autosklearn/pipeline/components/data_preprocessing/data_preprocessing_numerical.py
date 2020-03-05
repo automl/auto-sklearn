@@ -35,15 +35,12 @@ class NumericalPreprocessingPipeline(BasePipeline):
 
     """
 
-    def __init__(self, config=None, pipeline=None, dataset_properties=None,
+    def __init__(self, config=None, steps=None, dataset_properties=None,
                  include=None, exclude=None, random_state=None,
                  init_params=None):
-        if pipeline is not None:
-            raise ValueError(
-                "NumericalPreprocessingPipeline's argument 'pipeline' should be None")
         self._output_dtype = np.int32
         super().__init__(
-            config, pipeline, dataset_properties, include, exclude,
+            config, steps, dataset_properties, include, exclude,
             random_state, init_params)
 
     @staticmethod
@@ -92,7 +89,7 @@ class NumericalPreprocessingPipeline(BasePipeline):
         self.dataset_properties_ = dataset_properties
         return cs
 
-    def _get_pipeline(self):
+    def _get_pipeline_steps(self):
         steps = []
 
         default_dataset_props = {'target_type': 'classification'}

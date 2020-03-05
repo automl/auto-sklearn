@@ -1,7 +1,7 @@
 import numpy as np
 import scipy as sp
 
-from sklearn.metrics.classification import _check_targets, type_of_target
+from sklearn.metrics._classification import _check_targets, type_of_target
 
 
 def balanced_accuracy(solution, prediction):

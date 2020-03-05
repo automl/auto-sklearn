@@ -18,7 +18,7 @@ from smac.stats.stats import Stats
 import joblib
 import sklearn.utils
 import scipy.sparse
-from sklearn.metrics.classification import type_of_target
+from sklearn.metrics._classification import type_of_target
 
 from autosklearn.metrics import Scorer
 from autosklearn.data.abstract_data_manager import AbstractDataManager
