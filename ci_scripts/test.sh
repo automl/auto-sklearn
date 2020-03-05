@@ -17,7 +17,7 @@ run_tests() {
         test_params="--with-coverage --cover-package=$MODULE"
     fi
 
-    python -m $test_dir -v $test_params
+    python -m pytest $test_dir -v $test_params
 
     cd $cwd
 }
