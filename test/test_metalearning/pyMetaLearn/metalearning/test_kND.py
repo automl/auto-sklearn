@@ -68,16 +68,20 @@ class kNDTest(unittest.TestCase):
         kND.fit(pd.DataFrame([self.krvskp, self.labor]),
                 self.runs.loc[:,[233, 234]])
         neighbor = kND.kBestSuggestions(self.anneal, 1)
-        self.assertEqual([(233, 1.8229893712531495, 1)],
-                         neighbor)
+        np.testing.assert_array_almost_equal(
+            [(233, 1.8229893712531495, 1)],
+            neighbor,
+        )
         neighbors = kND.kBestSuggestions(self.anneal, 2)
-        self.assertEqual([(233, 1.8229893712531495, 1),
-                          (234, 2.2679197196559415, 2)],
-                         neighbors)
+        np.testing.assert_array_almost_equal(
+            [(233, 1.8229893712531495, 1), (234, 2.2679197196559415, 2)],
+            neighbors,
+        )
         neighbors = kND.kBestSuggestions(self.anneal, -1)
-        self.assertEqual([(233, 1.8229893712531495, 1),
-                          (234, 2.2679197196559415, 2)],
-                         neighbors)
+        np.testing.assert_array_almost_equal(
+            [(233, 1.8229893712531495, 1), (234, 2.2679197196559415, 2)],
+            neighbors,
+        )
 
         self.assertRaises(ValueError, kND.kBestSuggestions, self.anneal, 0)
         self.assertRaises(ValueError, kND.kBestSuggestions, self.anneal, -2)

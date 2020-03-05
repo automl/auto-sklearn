@@ -17,7 +17,6 @@ from evaluation_util import get_dataset_getters, BaseEvaluatorTest, \
     get_multiclass_classification_datamanager
 from autosklearn.constants import *
 from autosklearn.evaluation.test_evaluator import TestEvaluator, eval_t
-# Otherwise nosetests thinks this is a test to run...
 from autosklearn.evaluation.util import read_queue
 from autosklearn.util.pipeline import get_configuration_space
 from autosklearn.util import Backend

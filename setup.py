@@ -70,7 +70,6 @@ setup(
     packages=find_packages(exclude=['test', 'scripts', 'examples']),
     setup_requires=setup_reqs,
     install_requires=install_reqs,
-    test_suite='nose.collector',
     include_package_data=True,
     license='BSD',
     platforms=['Linux'],

@@ -6,26 +6,18 @@ run_tests() {
     mkdir -p $TEST_DIR
 
     cwd=`pwd`
-    examples_dir=$cwd/examples/
     test_dir=$cwd/test/
 
     cd $TEST_DIR
 
     python -c 'import autosklearn; print("Auto-sklearn imported from: %s" % autosklearn.__file__)'
 
-    nose_params=""
+    test_params=""
     if [[ "$COVERAGE" == "true" ]]; then
-        nose_params="--with-coverage --cover-package=$MODULE"
+        test_params="--cov=$MODULE"
     fi
 
-    nosetests $test_dir $examples_dir --no-path-adjustment -sv --exe --with-doctest $nose_params
-
-    if [[ "$EXAMPLES" == "true" ]]; then
-        for example in `find $examples_dir -name '*.py'`
-        do
-            python $example
-        done
-    fi
+    python -m pytest $test_dir -v $test_params
 
     cd $cwd
 }
@@ -42,6 +34,8 @@ run_examples() {
     python -c 'import autosklearn; print("Auto-sklearn imported from: %s" % autosklearn.__file__)'
     for example in `find $examples_dir -name '*.py'`
     do
+        echo '***********************************************************'
+        echo "Running example $example"
         python $example
     done
 
@@ -49,14 +43,26 @@ run_examples() {
 }
 
 if [[ "$RUN_FLAKE8" ]]; then
+    echo '***********************************************************'
+    echo '***********************************************************'
+    echo 'Running flake8'
+    echo '***********************************************************'
     source ci_scripts/flake8_diff.sh
 fi
 
 if [[ "$SKIP_TESTS" != "true" ]]; then
+    echo '***********************************************************'
+    echo '***********************************************************'
+    echo 'Running unittests'
+    echo '***********************************************************'
     run_tests
 fi
 
 if [[ "$EXAMPLES" ]]; then
+    echo '***********************************************************'
+    echo '***********************************************************'
+    echo 'Running examples'
+    echo '***********************************************************'
     run_examples
 fi
 

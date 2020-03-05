@@ -30,7 +30,6 @@ pip-log.txt
 htmlcov
 .coverage
 .tox
-nosetests.xml
 
 # pycharm
 .idea
@@ -53,4 +52,3 @@ number_submission
 .pypirc
 dmypy.json
 *.log
-.noseids
