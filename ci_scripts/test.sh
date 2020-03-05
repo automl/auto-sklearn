@@ -14,7 +14,7 @@ run_tests() {
 
     test_params=""
     if [[ "$COVERAGE" == "true" ]]; then
-        test_params="--with-coverage --cover-package=$MODULE"
+        test_params="--cov=$MODULE"
     fi
 
     python -m pytest $test_dir -v $test_params
