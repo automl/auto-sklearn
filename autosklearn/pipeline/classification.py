@@ -68,12 +68,12 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
     """
 
-    def __init__(self, config=None, pipeline=None, dataset_properties=None,
+    def __init__(self, config=None, steps=None, dataset_properties=None,
                  include=None, exclude=None, random_state=None,
                  init_params=None):
         self._output_dtype = np.int32
         super().__init__(
-            config, pipeline, dataset_properties, include, exclude,
+            config, steps, dataset_properties, include, exclude,
             random_state, init_params)
 
     def fit_transformer(self, X, y, fit_params=None):
@@ -87,7 +87,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                 y, self.configuration['classifier:__choice__'],
                 self.configuration['feature_preprocessor:__choice__'],
                 {}, {})
-            _init_params.update(self._init_params)
+            _init_params.update(self.init_params)
             self.set_hyperparameters(configuration=self.configuration,
                                      init_params=_init_params)
 
@@ -277,7 +277,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
         self.dataset_properties_ = dataset_properties
         return cs
 
-    def _get_pipeline(self):
+    def _get_pipeline_steps(self):
         steps = []
 
         default_dataset_properties = {'target_type': 'classification'}

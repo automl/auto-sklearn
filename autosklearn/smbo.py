@@ -7,10 +7,9 @@ import warnings
 import numpy as np
 import pynisher
 
-from smac.facade.smac_facade import SMAC
-from smac.optimizer.objective import average_cost
+from smac.facade.smac_ac_facade import SMAC4AC
 from smac.runhistory.runhistory import RunHistory
-from smac.runhistory.runhistory2epm import RunHistory2EPM4Cost
+from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_ta_run import StatusType
 from smac.optimizer import pSMAC
@@ -168,9 +167,9 @@ def get_smac_object(
     scenario_dict,
     seed,
     ta,
+    ta_kwargs,
     backend,
     metalearning_configurations,
-    runhistory,
 ):
     scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob(
         smac_run_id=seed if not scenario_dict['shared-model'] else '*',
@@ -181,26 +180,14 @@ def get_smac_object(
         initial_configurations = [default_config] + metalearning_configurations
     else:
         initial_configurations = None
-    rh2EPM = RunHistory2EPM4Cost(
-        num_params=len(scenario.cs.get_hyperparameters()),
-        scenario=scenario,
-        success_states=[
-            StatusType.SUCCESS,
-            StatusType.MEMOUT,
-            StatusType.TIMEOUT,
-            # As long as we don't have a model for crashes yet!
-            StatusType.CRASHED,
-        ],
-        impute_censored_data=False,
-        impute_state=None,
-    )
-    return SMAC(
+    rh2EPM = RunHistory2EPM4LogCost
+    return SMAC4AC(
         scenario=scenario,
         rng=seed,
         runhistory2epm=rh2EPM,
         tae_runner=ta,
+        tae_runner_kwargs=ta_kwargs,
         initial_configurations=initial_configurations,
-        runhistory=runhistory,
         run_id=seed,
     )
 
@@ -430,17 +417,20 @@ class AutoMLSMBO(object):
             else:
                 raise ValueError(self.task)
 
-        ta = ExecuteTaFuncWithQueue(backend=self.backend,
-                                    autosklearn_seed=seed,
-                                    resampling_strategy=self.resampling_strategy,
-                                    initial_num_run=num_run,
-                                    logger=self.logger,
-                                    include=include,
-                                    exclude=exclude,
-                                    metric=self.metric,
-                                    memory_limit=self.memory_limit,
-                                    disable_file_output=self.disable_file_output,
-                                    **self.resampling_strategy_args)
+        ta = ExecuteTaFuncWithQueue
+        ta_kwargs = dict(
+            backend=self.backend,
+            autosklearn_seed=seed,
+            resampling_strategy=self.resampling_strategy,
+            initial_num_run=num_run,
+            logger=self.logger,
+            include=include,
+            exclude=exclude,
+            metric=self.metric,
+            memory_limit=self.memory_limit,
+            disable_file_output=self.disable_file_output,
+            **self.resampling_strategy_args
+        )
 
         startup_time = self.watcher.wall_elapsed(self.dataset_name)
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
@@ -451,8 +441,7 @@ class AutoMLSMBO(object):
             'deterministic': 'true',
             'instances': instances,
             'memory_limit': self.memory_limit,
-            'output-dir':
-                self.backend.get_smac_output_directory(),
+            'output-dir': self.backend.get_smac_output_directory(),
             'run_obj': 'quality',
             'shared-model': self.shared_mode,
             'wallclock_limit': total_walltime_limit,
@@ -487,14 +476,13 @@ class AutoMLSMBO(object):
                     )
             scenario_dict.update(self.smac_scenario_args)
 
-        runhistory = RunHistory(aggregate_func=average_cost)
         smac_args = {
             'scenario_dict': scenario_dict,
             'seed': seed,
             'ta': ta,
+            'ta_kwargs': ta_kwargs,
             'backend': self.backend,
             'metalearning_configurations': metalearning_configurations,
-            'runhistory': runhistory,
         }
         if self.get_smac_object_callback is not None:
             smac = self.get_smac_object_callback(**smac_args)

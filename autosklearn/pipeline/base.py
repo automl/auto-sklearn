@@ -18,25 +18,25 @@ class BasePipeline(Pipeline):
     This class should not be instantiated, only subclassed."""
     __metaclass__ = ABCMeta
 
-    def __init__(self, config=None, pipeline=None, dataset_properties=None,
+    def __init__(self, config=None, steps=None, dataset_properties=None,
                  include=None, exclude=None, random_state=None,
                  init_params=None):
 
-        self._init_params = init_params if init_params is not None else {}
-        self.include_ = include if include is not None else {}
-        self.exclude_ = exclude if exclude is not None else {}
-        self.dataset_properties_ = dataset_properties if \
+        self.init_params = init_params if init_params is not None else {}
+        self.include = include if include is not None else {}
+        self.exclude = exclude if exclude is not None else {}
+        self.dataset_properties = dataset_properties if \
             dataset_properties is not None else {}
 
-        if pipeline is None:
-            self.steps = self._get_pipeline()
+        if steps is None:
+            self.steps = self._get_pipeline_steps()
         else:
-            self.steps = pipeline
+            self.steps = steps
 
         self.config_space = self.get_hyperparameter_search_space()
 
         if config is None:
-            self.configuration_ = self.config_space.get_default_configuration()
+            self.config = self.config_space.get_default_configuration()
         else:
             if isinstance(config, dict):
                 config = Configuration(self.config_space, config)
@@ -51,9 +51,9 @@ class BasePipeline(Pipeline):
                 raise ValueError('Configuration passed does not come from the '
                                  'same configuration space. Differences are: '
                                  '%s' % diff)
-            self.configuration_ = config
+            self.config = config
 
-        self.set_hyperparameters(self.configuration_, init_params=init_params)
+        self.set_hyperparameters(self.config, init_params=init_params)
 
         if random_state is None:
             self.random_state = check_random_state(1)
@@ -171,7 +171,7 @@ class BasePipeline(Pipeline):
             node_name, node = n_
 
             sub_configuration_space = node.get_hyperparameter_search_space(
-                dataset_properties=self.dataset_properties_
+                dataset_properties=self.dataset_properties
             )
             sub_config_dict = {}
             for param in configuration:
@@ -212,8 +212,8 @@ class BasePipeline(Pipeline):
         """
         if not hasattr(self, 'config_space') or self.config_space is None:
             self.config_space = self._get_hyperparameter_search_space(
-                include=self.include_, exclude=self.exclude_,
-                dataset_properties=self.dataset_properties_)
+                include=self.include, exclude=self.exclude,
+                dataset_properties=self.dataset_properties)
         return self.config_space
 
     def _get_hyperparameter_search_space(self, include=None, exclude=None,
@@ -260,10 +260,10 @@ class BasePipeline(Pipeline):
     def _get_base_search_space(self, cs, dataset_properties, exclude,
                                include, pipeline):
         if include is None:
-            if self.include_ is None:
+            if self.include is None:
                 include = {}
             else:
-                include = self.include_
+                include = self.include
 
         keys = [pair[0] for pair in pipeline]
         for key in include:
@@ -272,10 +272,10 @@ class BasePipeline(Pipeline):
                                  'of %s' % (key, keys))
 
         if exclude is None:
-            if self.exclude_ is None:
+            if self.exclude is None:
                 exclude = {}
             else:
-                exclude = self.exclude_
+                exclude = self.exclude
 
         keys = [pair[0] for pair in pipeline]
         for key in exclude:
@@ -339,10 +339,10 @@ class BasePipeline(Pipeline):
         class_name = self.__class__.__name__
 
         configuration = {}
-        self.configuration_._populate_values()
-        for hp_name in self.configuration_:
-            if self.configuration_[hp_name] is not None:
-                configuration[hp_name] = self.configuration_[hp_name]
+        self.config._populate_values()
+        for hp_name in self.config:
+            if self.config[hp_name] is not None:
+                configuration[hp_name] = self.config[hp_name]
 
         configuration_string = ''.join(
             ['configuration={\n  ',
@@ -350,10 +350,10 @@ class BasePipeline(Pipeline):
                                          for hp_name in sorted(configuration)]),
              '}'])
 
-        if len(self.dataset_properties_) > 0:
+        if len(self.dataset_properties) > 0:
             dataset_properties_string = []
             dataset_properties_string.append('dataset_properties={')
-            for i, item in enumerate(self.dataset_properties_.items()):
+            for i, item in enumerate(self.dataset_properties.items()):
                 if i != 0:
                     dataset_properties_string.append(',\n  ')
                 else:
@@ -375,7 +375,7 @@ class BasePipeline(Pipeline):
 
         return rval
 
-    def _get_pipeline(self):
+    def _get_pipeline_steps(self):
         raise NotImplementedError()
 
     def _get_estimator_hyperparameter_name(self):

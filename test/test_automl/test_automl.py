@@ -119,6 +119,7 @@ class AutoMLTest(Base, unittest.TestCase):
                 scenario_dict,
                 seed,
                 ta,
+                ta_kwargs,
                 **kwargs
         ):
             """Random online adaptive racing.
@@ -129,6 +130,7 @@ class AutoMLTest(Base, unittest.TestCase):
                 scenario=scenario,
                 rng=seed,
                 tae_runner=ta,
+                tae_runner_kwargs=ta_kwargs,
             )
 
         backend_api = self._create_backend('test_fit_roar')

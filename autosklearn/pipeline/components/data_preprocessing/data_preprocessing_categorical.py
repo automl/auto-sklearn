@@ -36,15 +36,12 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         If None, the random number generator is the RandomState instance
         used by `np.random`."""
 
-    def __init__(self, config=None, pipeline=None, dataset_properties=None,
+    def __init__(self, config=None, steps=None, dataset_properties=None,
                  include=None, exclude=None, random_state=None,
                  init_params=None):
-        if pipeline is not None:
-            raise ValueError(
-                "CategoricalPreprocessingPipeline's argument 'pipeline' should be None")
         self._output_dtype = np.int32
         super().__init__(
-            config, pipeline, dataset_properties, include, exclude,
+            config, steps, dataset_properties, include, exclude,
             random_state, init_params)
 
     @staticmethod
@@ -90,14 +87,14 @@ class CategoricalPreprocessingPipeline(BasePipeline):
         self.dataset_properties_ = dataset_properties
         return cs
 
-    def _get_pipeline(self):
+    def _get_pipeline_steps(self):
         steps = []
 
         steps.extend([
             ["category_shift", CategoryShift()],
             ["imputation", CategoricalImputation()],
-            ["category_coalescence", CoalescenseChoice(self.dataset_properties_)],
-            ["categorical_encoding", OHEChoice(self.dataset_properties_)],
+            ["category_coalescence", CoalescenseChoice(self.dataset_properties)],
+            ["categorical_encoding", OHEChoice(self.dataset_properties)],
             ])
 
         return steps

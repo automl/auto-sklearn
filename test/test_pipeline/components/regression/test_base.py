@@ -21,6 +21,10 @@ class BaseRegressionComponentTest(unittest.TestCase):
     __test__ = False
 
     def test_default_boston(self):
+
+        if self.__class__ == BaseRegressionComponentTest:
+            return
+
         for i in range(2):
             predictions, targets, n_calls = \
                 _test_regressor(dataset="boston",
@@ -52,6 +56,10 @@ class BaseRegressionComponentTest(unittest.TestCase):
                 self.assertEqual(self.res["boston_n_calls"], n_calls)
 
     def test_default_boston_iterative_fit(self):
+
+        if self.__class__ == BaseRegressionComponentTest:
+            return
+
         if not hasattr(self.module, 'iterative_fit'):
             return
 
@@ -79,8 +87,13 @@ class BaseRegressionComponentTest(unittest.TestCase):
                 )
 
     def test_default_boston_iterative_sparse_fit(self):
+
+        if self.__class__ == BaseRegressionComponentTest:
+            return
+
         if not hasattr(self.module, 'iterative_fit'):
             return
+
         if SPARSE not in self.module.get_properties()["input"]:
             return
 
@@ -96,6 +109,10 @@ class BaseRegressionComponentTest(unittest.TestCase):
                                            "default_boston_iterative_sparse_places", 7))
 
     def test_default_boston_sparse(self):
+
+        if self.__class__ == BaseRegressionComponentTest:
+            return
+
         if SPARSE not in self.module.get_properties()["input"]:
             return
 
@@ -111,6 +128,10 @@ class BaseRegressionComponentTest(unittest.TestCase):
                                            "default_boston_sparse_places", 7))
 
     def test_default_diabetes(self):
+
+        if self.__class__ == BaseRegressionComponentTest:
+            return
+
         for i in range(2):
             predictions, targets, n_calls = \
                 _test_regressor(dataset="diabetes",
@@ -126,6 +147,10 @@ class BaseRegressionComponentTest(unittest.TestCase):
                 self.assertEqual(self.res["diabetes_n_calls"], n_calls)
 
     def test_default_diabetes_iterative_fit(self):
+
+        if self.__class__ == BaseRegressionComponentTest:
+            return
+
         if not hasattr(self.module, 'iterative_fit'):
             return
 
@@ -140,8 +165,13 @@ class BaseRegressionComponentTest(unittest.TestCase):
                                            "default_diabetes_iterative_places", 7))
 
     def test_default_diabetes_iterative_sparse_fit(self):
+
+        if self.__class__ == BaseRegressionComponentTest:
+            return
+
         if not hasattr(self.module, 'iterative_fit'):
             return
+
         if SPARSE not in self.module.get_properties()["input"]:
             return
 
@@ -163,6 +193,10 @@ class BaseRegressionComponentTest(unittest.TestCase):
                 )
 
     def test_default_diabetes_sparse(self):
+
+        if self.__class__ == BaseRegressionComponentTest:
+            return
+
         if SPARSE not in self.module.get_properties()["input"]:
             return
 
