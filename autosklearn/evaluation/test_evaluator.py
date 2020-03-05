@@ -90,7 +90,7 @@ class TestEvaluator(AbstractEvaluator):
 
 
 # create closure for evaluating an algorithm
-# Has a stupid name so nosetests doesn't regard it as a test
+# Has a stupid name so pytest doesn't regard it as a test
 def eval_t(queue, config, backend, metric, seed, num_run, instance,
            all_scoring_functions, output_y_hat_optimization, include,
            exclude, disable_file_output, init_params=None):

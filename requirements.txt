@@ -1,5 +1,5 @@
 setuptools
-nose
+pytest
 Cython
 
 numpy>=1.9.0
