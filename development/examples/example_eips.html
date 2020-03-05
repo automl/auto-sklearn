@@ -123,12 +123,11 @@
 
 <span class="kn">from</span> <span class="nn">smac.epm.uncorrelated_mo_rf_with_instances</span> <span class="kn">import</span> \
     <span class="n">UncorrelatedMultiObjectiveRandomForestWithInstances</span>
-<span class="kn">from</span> <span class="nn">smac.utils.util_funcs</span> <span class="kn">import</span> <span class="n">get_types</span>
-<span class="kn">from</span> <span class="nn">smac.facade.smac_facade</span> <span class="kn">import</span> <span class="n">SMAC</span>
+<span class="kn">from</span> <span class="nn">smac.epm.util_funcs</span> <span class="kn">import</span> <span class="n">get_types</span>
+<span class="kn">from</span> <span class="nn">smac.facade.smac_ac_facade</span> <span class="kn">import</span> <span class="n">SMAC4AC</span>
 <span class="kn">from</span> <span class="nn">smac.optimizer.acquisition</span> <span class="kn">import</span> <span class="n">EIPS</span>
 <span class="kn">from</span> <span class="nn">smac.runhistory.runhistory2epm</span> <span class="kn">import</span> <span class="n">RunHistory2EPM4EIPS</span>
 <span class="kn">from</span> <span class="nn">smac.scenario.scenario</span> <span class="kn">import</span> <span class="n">Scenario</span>
-<span class="kn">from</span> <span class="nn">smac.tae.execute_ta_run</span> <span class="kn">import</span> <span class="n">StatusType</span>
 
 <span class="kn">import</span> <span class="nn">autosklearn.classification</span>
 
@@ -137,42 +136,31 @@
         <span class="n">scenario_dict</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">,</span>
         <span class="n">ta</span><span class="p">,</span>
+        <span class="n">ta_kwargs</span><span class="p">,</span>
         <span class="n">backend</span><span class="p">,</span>
         <span class="n">metalearning_configurations</span><span class="p">,</span>
-        <span class="n">runhistory</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="n">scenario_dict</span><span class="p">[</span><span class="s1">&#39;input_psmac_dirs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">get_smac_output_glob</span><span class="p">()</span>
     <span class="n">scenario</span> <span class="o">=</span> <span class="n">Scenario</span><span class="p">(</span><span class="n">scenario_dict</span><span class="p">)</span>
-    <span class="n">rh2EPM</span> <span class="o">=</span> <span class="n">RunHistory2EPM4EIPS</span><span class="p">(</span>
-        <span class="n">num_params</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="o">.</span><span class="n">get_hyperparameters</span><span class="p">()),</span>
-        <span class="n">scenario</span><span class="o">=</span><span class="n">scenario</span><span class="p">,</span>
-        <span class="n">success_states</span><span class="o">=</span><span class="p">[</span>
-            <span class="n">StatusType</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">,</span>
-            <span class="n">StatusType</span><span class="o">.</span><span class="n">MEMOUT</span><span class="p">,</span>
-            <span class="n">StatusType</span><span class="o">.</span><span class="n">TIMEOUT</span><span class="p">,</span>
-            <span class="n">StatusType</span><span class="o">.</span><span class="n">CRASHED</span>
-        <span class="p">],</span>
-        <span class="n">impute_censored_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">impute_state</span><span class="o">=</span><span class="kc">None</span>
-    <span class="p">)</span>
     <span class="n">types</span><span class="p">,</span> <span class="n">bounds</span> <span class="o">=</span> <span class="n">get_types</span><span class="p">(</span><span class="n">scenario</span><span class="o">.</span><span class="n">cs</span><span class="p">,</span>
                               <span class="n">scenario</span><span class="o">.</span><span class="n">feature_array</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">UncorrelatedMultiObjectiveRandomForestWithInstances</span><span class="p">(</span>
-        <span class="p">[</span><span class="s1">&#39;cost&#39;</span><span class="p">,</span> <span class="s1">&#39;runtime&#39;</span><span class="p">],</span>
+    <span class="n">model_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">target_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;cost&#39;</span><span class="p">,</span> <span class="s1">&#39;runtime&#39;</span><span class="p">],</span>
         <span class="n">types</span><span class="o">=</span><span class="n">types</span><span class="p">,</span>
         <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span>
         <span class="n">instance_features</span><span class="o">=</span><span class="n">scenario</span><span class="o">.</span><span class="n">feature_array</span><span class="p">,</span>
-        <span class="n">rf_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;seed&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,},</span>
+        <span class="n">rf_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;seed&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="p">},</span>
     <span class="p">)</span>
-    <span class="n">acquisition_function</span> <span class="o">=</span> <span class="n">EIPS</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">SMAC</span><span class="p">(</span>
-        <span class="n">runhistory</span><span class="o">=</span><span class="n">runhistory</span><span class="p">,</span>
+    <span class="k">return</span> <span class="n">SMAC4AC</span><span class="p">(</span>
         <span class="n">scenario</span><span class="o">=</span><span class="n">scenario</span><span class="p">,</span>
         <span class="n">rng</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
         <span class="n">tae_runner</span><span class="o">=</span><span class="n">ta</span><span class="p">,</span>
-        <span class="n">runhistory2epm</span><span class="o">=</span><span class="n">rh2EPM</span><span class="p">,</span>
-        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-        <span class="n">acquisition_function</span><span class="o">=</span><span class="n">acquisition_function</span><span class="p">,</span>
+        <span class="n">tae_runner_kwargs</span><span class="o">=</span><span class="n">ta_kwargs</span><span class="p">,</span>
+        <span class="n">runhistory2epm</span><span class="o">=</span><span class="n">RunHistory2EPM4EIPS</span><span class="p">,</span>
+        <span class="n">runhistory2epm_kwargs</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">UncorrelatedMultiObjectiveRandomForestWithInstances</span><span class="p">,</span>
+        <span class="n">model_kwargs</span><span class="o">=</span><span class="n">model_kwargs</span><span class="p">,</span>
+        <span class="n">acquisition_function</span><span class="o">=</span><span class="n">EIPS</span><span class="p">,</span>
         <span class="n">run_id</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
     <span class="p">)</span>
 

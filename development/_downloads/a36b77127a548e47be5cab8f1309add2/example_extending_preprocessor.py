@@ -11,20 +11,21 @@ in auto-sklearn.
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
+from ConfigSpace.conditions import InCondition
 
 import sklearn.metrics
 import autosklearn.classification
-import autosklearn.metrics
 import autosklearn.pipeline.components.feature_preprocessing
 from autosklearn.pipeline.components.base \
     import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SIGNED_DATA, \
     UNSIGNED_DATA
+from autosklearn.util.common import check_none
 
 
 # Create LDA component for auto-sklearn.
 class LDA(AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, shrinkage, solver, n_components, tol, random_state=None):
+    def __init__(self, solver, n_components, tol, shrinkage=None, random_state=None):
         self.solver = solver
         self.shrinkage = shrinkage
         self.n_components = n_components
@@ -33,7 +34,10 @@ class LDA(AutoSklearnPreprocessingAlgorithm):
         self.preprocessor = None
 
     def fit(self, X, y=None):
-        self.shrinkage = float(self.shrinkage)
+        if check_none(self.shrinkage):
+            self.shrinkage = None
+        else:
+            self.shrinkage = float(self.shrinkage)
         self.n_components = int(self.n_components)
         self.tol = float(self.tol)
 
@@ -69,7 +73,7 @@ class LDA(AutoSklearnPreprocessingAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
         solver = CategoricalHyperparameter(
-            name="solver", choices=['svd','lsqr','eigen'], default_value='svd'
+            name="solver", choices=['svd', 'lsqr', 'eigen'], default_value='svd'
         )
         shrinkage = UniformFloatHyperparameter(
             name="shrinkage", lower=0.0, upper=1.0, default_value=0.5
@@ -81,6 +85,8 @@ class LDA(AutoSklearnPreprocessingAlgorithm):
             name="tol", lower=0.0001, upper=1, default_value=0.0001
         )
         cs.add_hyperparameters([solver, shrinkage, n_components, tol])
+        shrinkage_condition = InCondition(shrinkage, solver, ['lsqr', 'eigen'])
+        cs.add_condition(shrinkage_condition)
         return cs
 
 

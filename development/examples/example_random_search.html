@@ -137,9 +137,9 @@ Both examples are intended to show how the optimization strategy in <em>auto-skl
     <span class="n">scenario_dict</span><span class="p">,</span>
     <span class="n">seed</span><span class="p">,</span>
     <span class="n">ta</span><span class="p">,</span>
+    <span class="n">ta_kwargs</span><span class="p">,</span>
     <span class="n">backend</span><span class="p">,</span>
     <span class="n">metalearning_configurations</span><span class="p">,</span>
-    <span class="n">runhistory</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Random online adaptive racing.&quot;&quot;&quot;</span>
     <span class="n">scenario_dict</span><span class="p">[</span><span class="s1">&#39;input_psmac_dirs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">get_smac_output_glob</span><span class="p">()</span>
@@ -148,7 +148,7 @@ Both examples are intended to show how the optimization strategy in <em>auto-skl
         <span class="n">scenario</span><span class="o">=</span><span class="n">scenario</span><span class="p">,</span>
         <span class="n">rng</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
         <span class="n">tae_runner</span><span class="o">=</span><span class="n">ta</span><span class="p">,</span>
-        <span class="n">runhistory</span><span class="o">=</span><span class="n">runhistory</span><span class="p">,</span>
+        <span class="n">tae_runner_kwargs</span><span class="o">=</span><span class="n">ta_kwargs</span><span class="p">,</span>
         <span class="n">run_id</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -157,9 +157,9 @@ Both examples are intended to show how the optimization strategy in <em>auto-skl
         <span class="n">scenario_dict</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">,</span>
         <span class="n">ta</span><span class="p">,</span>
+        <span class="n">ta_kwargs</span><span class="p">,</span>
         <span class="n">backend</span><span class="p">,</span>
         <span class="n">metalearning_configurations</span><span class="p">,</span>
-        <span class="n">runhistory</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Random search.&quot;&quot;&quot;</span>
     <span class="n">scenario_dict</span><span class="p">[</span><span class="s1">&#39;input_psmac_dirs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">get_smac_output_glob</span><span class="p">()</span>
@@ -170,7 +170,7 @@ Both examples are intended to show how the optimization strategy in <em>auto-skl
         <span class="n">scenario</span><span class="o">=</span><span class="n">scenario</span><span class="p">,</span>
         <span class="n">rng</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
         <span class="n">tae_runner</span><span class="o">=</span><span class="n">ta</span><span class="p">,</span>
-        <span class="n">runhistory</span><span class="o">=</span><span class="n">runhistory</span><span class="p">,</span>
+        <span class="n">tae_runner_kwargs</span><span class="o">=</span><span class="n">ta_kwargs</span><span class="p">,</span>
         <span class="n">run_id</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
     <span class="p">)</span>
 

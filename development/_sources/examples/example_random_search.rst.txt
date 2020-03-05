@@ -38,9 +38,9 @@ Both examples are intended to show how the optimization strategy in *auto-sklear
         scenario_dict,
         seed,
         ta,
+        ta_kwargs,
         backend,
         metalearning_configurations,
-        runhistory,
     ):
         """Random online adaptive racing."""
         scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
@@ -49,7 +49,7 @@ Both examples are intended to show how the optimization strategy in *auto-sklear
             scenario=scenario,
             rng=seed,
             tae_runner=ta,
-            runhistory=runhistory,
+            tae_runner_kwargs=ta_kwargs,
             run_id=seed,
         )
 
@@ -58,9 +58,9 @@ Both examples are intended to show how the optimization strategy in *auto-sklear
             scenario_dict,
             seed,
             ta,
+            ta_kwargs,
             backend,
             metalearning_configurations,
-            runhistory,
     ):
         """Random search."""
         scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
@@ -71,7 +71,7 @@ Both examples are intended to show how the optimization strategy in *auto-sklear
             scenario=scenario,
             rng=seed,
             tae_runner=ta,
-            runhistory=runhistory,
+            tae_runner_kwargs=ta_kwargs,
             run_id=seed,
         )
 
