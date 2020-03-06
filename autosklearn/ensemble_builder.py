@@ -230,16 +230,6 @@ class EnsembleBuilder(multiprocessing.Process):
             # train ensemble
             ensemble = self.fit_ensemble(selected_keys=selected_models)
 
-            # Delete files of not selected models
-            if self.keep_just_nbest_models:
-                pred_idx = [p.replace('_', '.').split('.')[-2] for p in selected_models]
-                for m_file in glob.glob(self.model_query):
-                    model_idx = m_file.split('.')[-2]
-                    if model_idx not in pred_idx:
-                        self.logger.info("Removing file of non-winning model %s" % m_file)
-                        os.remove(m_file)
-
-
             if ensemble is not None:
 
                 self.predict(set_="valid",
@@ -255,6 +245,16 @@ class EnsembleBuilder(multiprocessing.Process):
                              n_preds=len(selected_models),
                              index_run=iteration)
                 iteration += 1
+
+                # Delete files of not selected models
+                if self.keep_just_nbest_models:
+                    pred_idx = [p.replace('_', '.').split('.')[-2] for p in selected_models]
+                    for m_file in self.read_preds.keys():
+                        model_idx = m_file.split('.')[-2]
+                        self.logger.info('conjunto ' + str(pred_idx))
+                        if model_idx not in pred_idx:
+                            self.logger.info("Removing file of non-winning model %s" % m_file)
+                            os.remove(m_file)
             else:
                 time.sleep(self.sleep_duration)
 
