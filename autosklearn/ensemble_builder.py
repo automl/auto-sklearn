@@ -127,12 +127,6 @@ class EnsembleBuilder(multiprocessing.Process):
             '.auto-sklearn',
             'predictions_test',
         )
-        self.model_query = os.path.join(
-            self.backend.temporary_directory,
-            '.auto-sklearn',
-            'models',
-            str(self.seed) + '.*.model'
-        )
 
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
         self.logger = get_logger(logger_name)
@@ -151,6 +145,7 @@ class EnsembleBuilder(multiprocessing.Process):
         #    Y_ENSEMBLE: np.ndarray
         #    Y_VALID: np.ndarray
         #    Y_TEST: np.ndarray
+        #    }
         # }
         self.read_preds = {}
         self.last_hash = None  # hash of ensemble training data
@@ -246,14 +241,13 @@ class EnsembleBuilder(multiprocessing.Process):
                              index_run=iteration)
                 iteration += 1
 
-                # Delete files of not selected models
+                # Delete files of non-candidate models
                 if self.keep_just_nbest_models:
-                    pred_idx = [p.replace('_', '.').split('.')[-2] for p in selected_models]
+                    preds = [p.replace('_', '.').split('.')[-2] for p in selected_models]
                     for m_file in self.read_preds.keys():
                         model_idx = m_file.split('.')[-2]
-                        self.logger.info('conjunto ' + str(pred_idx))
-                        if model_idx not in pred_idx:
-                            self.logger.info("Removing file of non-winning model %s" % m_file)
+                        if model_idx not in preds:
+                            self.logger.info("Deleting non-candidate model %s" % m_file)
                             os.remove(m_file)
             else:
                 time.sleep(self.sleep_duration)
