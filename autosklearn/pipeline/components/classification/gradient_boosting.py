@@ -40,10 +40,10 @@ class GradientBoostingClassifier(
         self.estimator = None
         self.fully_fit_ = False
 
-    def iterative_fit(self, X, y, n_iter=2, refit=False)
+    def iterative_fit(self, X, y, n_iter=2, refit=False):
 
         """
-        Set n_iter=2 for the same reason as for SGD 
+        Set n_iter=2 for the same reason as for SGD
         """
         import sklearn.ensemble
         from sklearn.experimental import enable_hist_gradient_boosting  # noqa
