@@ -243,21 +243,21 @@ class AutoMLTest(Base, unittest.TestCase):
 
         # At least one ensemble, one validation, one test prediction and one
         # model and one ensemble
-        fixture = os.listdir(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                          'predictions_ensemble'))
+        fixture = os.listdir(os.path.join(backend_api.temporary_directory,
+                                          '.auto-sklearn', 'predictions_ensemble'))
         self.assertGreater(len(fixture), 0)
 
         fixture = glob.glob(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
                                          'models', '100.*.model'))
         self.assertGreater(len(fixture), 0)
 
-        fixture = os.listdir(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                          'ensembles'))
+        fixture = os.listdir(os.path.join(backend_api.temporary_directory,
+                                          '.auto-sklearn', 'ensembles'))
         self.assertIn('100.0000000000.ensemble', fixture)
 
         # Start time
-        start_time_file_path = os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                            "start_time_100")
+        start_time_file_path = os.path.join(backend_api.temporary_directory,
+                                            '.auto-sklearn', "start_time_100")
         with open(start_time_file_path, 'r') as fh:
             start_time = float(fh.read())
         self.assertGreaterEqual(time.time() - start_time, 10)
