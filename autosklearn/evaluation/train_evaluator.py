@@ -108,13 +108,15 @@ class TrainEvaluator(AbstractEvaluator):
         self.partial = True
         self.keep_models = keep_models
 
-        if subsample is not None and budget not in (0.0, 100.0):
+        if budget == 0:
+            budget = 100
+        if subsample is not None and budget != 100.0:
             raise ValueError()
-        elif subsample is not None and budget in (0.0, 100.0):
+        elif subsample is not None and budget == 100.0:
             self.subsample = subsample
-        elif subsample is None and budget in (0.0, 100.0):
+        elif subsample is None and budget == 100.0:
             self.subsample = None
-        elif subsample is None and budget not in (0.0, 100.0):
+        elif subsample is None and budget != 100.0:
             self.subsample = budget / 100.
         else:
             raise ValueError((self.subsample, budget))
@@ -916,6 +918,7 @@ def eval_iterative_holdout(
         exclude,
         disable_file_output,
         init_params=None,
+        budget=100.0,
 ):
     return eval_holdout(
         queue=queue,
@@ -933,7 +936,8 @@ def eval_iterative_holdout(
         instance=instance,
         disable_file_output=disable_file_output,
         iterative=True,
-        init_params=init_params
+        init_params=init_params,
+        budget=budget,
     )
 
 
