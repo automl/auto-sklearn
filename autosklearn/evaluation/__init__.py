@@ -124,6 +124,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
               instance: Optional[str],
               cutoff: float = None,
               seed: int = 12345,
+              budget: float = 0.0,
               instance_specific: Optional[str]=None,
               capped: bool = False):
         """
@@ -140,6 +141,9 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 runtime cutoff
             seed : int
                 random seed
+            budget : float
+                A positive, real-valued number representing an arbitrary limit to the target
+                algorithm. Handled by the target algorithm internally
             instance_specific: str
                 instance specific information (e.g., domain file or solution)
             capped: bool
@@ -167,7 +171,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         return super().start(config=config, instance=instance, cutoff=cutoff,
                              seed=seed, instance_specific=instance_specific,
-                             capped=capped)
+                             capped=capped, budget=budget)
 
     def run(self, config, instance=None,
             cutoff=None,
@@ -202,6 +206,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             disable_file_output=self.disable_file_output,
             instance=instance,
             init_params=init_params,
+            budget=budget,
         )
 
         if self.resampling_strategy != 'test':

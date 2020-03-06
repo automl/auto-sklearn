@@ -181,6 +181,9 @@ def get_smac_object(
     else:
         initial_configurations = None
     rh2EPM = RunHistory2EPM4LogCost
+
+    #from smac.intensification.successive_halving import SuccessiveHalving
+
     return SMAC4AC(
         scenario=scenario,
         rng=seed,
@@ -189,6 +192,8 @@ def get_smac_object(
         tae_runner_kwargs=ta_kwargs,
         initial_configurations=initial_configurations,
         run_id=seed,
+        #intensifier=SuccessiveHalving,
+        #intensifier_kwargs={'initial_budget': 10.0, 'max_budget': 100, 'eta': 2, 'min_chall': 1},
     )
 
 

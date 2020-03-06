@@ -53,7 +53,6 @@ def _get_y_array(y, task_type):
         return y
 
 
-
 class TrainEvaluator(AbstractEvaluator):
     def __init__(self, backend, queue, metric,
                  configuration=None,
@@ -69,7 +68,7 @@ class TrainEvaluator(AbstractEvaluator):
                  include=None,
                  exclude=None,
                  disable_file_output=False,
-                 init_params=None):
+                 init_params=None,):
         super().__init__(
             backend=backend,
             queue=queue,
@@ -109,8 +108,16 @@ class TrainEvaluator(AbstractEvaluator):
         self.partial = True
         self.keep_models = keep_models
 
-        self.subsample = subsample
-        self.budget = budget
+        if subsample is not None and budget not in (0.0, 100.0):
+            raise ValueError()
+        elif subsample is not None and budget in (0.0, 100.0):
+            self.subsample = subsample
+        elif subsample is None and budget in (0.0, 100.0):
+            self.subsample = None
+        elif subsample is None and budget not in (0.0, 100.0):
+            self.subsample = budget / 100.
+        else:
+            raise ValueError((self.subsample, budget))
 
     def fit_predict_and_loss(self, iterative=False):
         if iterative:
@@ -868,6 +875,7 @@ def eval_holdout(
         disable_file_output,
         init_params=None,
         iterative=False,
+        budget=100.0,
 ):
     instance = json.loads(instance) if instance is not None else {}
     subsample = instance.get('subsample')
@@ -886,7 +894,8 @@ def eval_holdout(
         include=include,
         exclude=exclude,
         disable_file_output=disable_file_output,
-        init_params=init_params
+        init_params=init_params,
+        budget=budget,
     )
     evaluator.fit_predict_and_loss(iterative=iterative)
 
@@ -926,48 +935,6 @@ def eval_iterative_holdout(
         iterative=True,
         init_params=init_params
     )
-
-
-def eval_holdout_budget(
-        queue,
-        config,
-        backend,
-        resampling_strategy,
-        resampling_strategy_args,
-        metric,
-        seed,
-        num_run,
-        instance,
-        budget,
-        all_scoring_functions,
-        output_y_hat_optimization,
-        include,
-        exclude,
-        disable_file_output,
-        iterative=False,
-        init_params=None,
-):
-    instance = json.loads(instance) if instance is not None else {}
-    subsample = instance.get('subsample')
-    evaluator = TrainEvaluator(
-        backend=backend,
-        queue=queue,
-        resampling_strategy=resampling_strategy,
-        resampling_strategy_args=resampling_strategy_args,
-        metric=metric,
-        configuration=config,
-        seed=seed,
-        num_run=num_run,
-        subsample=subsample,
-        budget=budget,
-        all_scoring_functions=all_scoring_functions,
-        output_y_hat_optimization=output_y_hat_optimization,
-        include=include,
-        exclude=exclude,
-        disable_file_output=disable_file_output,
-        init_params=init_params
-    )
-    evaluator.fit_predict_and_loss_with_budget(iterative=iterative)
 
 
 def eval_partial_cv(
