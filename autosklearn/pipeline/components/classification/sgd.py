@@ -34,7 +34,9 @@ class SGD(
         self.power_t = power_t
         self.random_state = random_state
         self.average = average
+
         self.estimator = None
+        self.n_iter_ = None
 
     def iterative_fit(self, X, y, n_iter=2, refit=False, sample_weight=None):
         from sklearn.linear_model.stochastic_gradient import SGDClassifier
@@ -48,6 +50,7 @@ class SGD(
 
         if refit:
             self.estimator = None
+            self.n_iter_ = None
 
         if self.estimator is None:
             self.fully_fit_ = False
@@ -80,6 +83,7 @@ class SGD(
                                            random_state=self.random_state,
                                            warm_start=True)
             self.estimator.fit(X, y, sample_weight=sample_weight)
+            self.n_iter_ = self.estimator.n_iter_
         else:
             self.estimator.max_iter += n_iter
             self.estimator.max_iter = min(self.estimator.max_iter, 512)
@@ -96,8 +100,9 @@ class SGD(
                 coef_init=None,
                 intercept_init=None
             )
+            self.n_iter_ += self.estimator.n_iter_
 
-        if self.estimator.max_iter >= 512 or n_iter > self.estimator.n_iter_:
+        if self.estimator.max_iter >= 512 or self.estimator.max_iter > self.n_iter_:
             self.fully_fit_ = True
 
         return self

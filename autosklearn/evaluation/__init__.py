@@ -53,7 +53,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                  run_obj='quality', par_factor=1, all_scoring_functions=False,
                  output_y_hat_optimization=True, include=None, exclude=None,
                  memory_limit=None, disable_file_output=False, init_params=None,
-                 **resampling_strategy_args):
+                 budget_type=None, **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
             eval_function = autosklearn.evaluation.train_evaluator.eval_holdout
@@ -104,6 +104,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.exclude = exclude
         self.disable_file_output = disable_file_output
         self.init_params = init_params
+        self.budget_type = budget_type
         self.logger = logger
 
         if memory_limit is not None:
@@ -160,6 +161,18 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             additional_info: dict
                 all further additional run information
         """
+
+        if budget == 0:
+            budget = 100
+        elif budget <= 0 or budget > 100:
+            raise ValueError('Illegal value for budget, must be >0 and <=100, but is %f' % budget)
+        if self.budget_type is None:
+            if budget != 100:
+                raise ValueError('If budget_type is None, budget must be 100.0, but is %f' % budget)
+        elif self.budget_type not in ('subsample', 'iterations'):
+            raise ValueError("Illegal value for budget type, must be one of "
+                             "('subsample', 'iterations'), but is : %s" % self.budget_type)
+
         remaining_time = self.stats.get_remaing_time_budget()
 
         if remaining_time - 5 < cutoff:
@@ -207,6 +220,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             instance=instance,
             init_params=init_params,
             budget=budget,
+            budget_type=self.budget_type,
         )
 
         if self.resampling_strategy != 'test':

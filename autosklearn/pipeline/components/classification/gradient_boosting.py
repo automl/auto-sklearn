@@ -85,12 +85,13 @@ class GradientBoostingClassifier(
             else:
                 raise ValueError("early_stop should be either off, train or valid")
             self.verbose = int(self.verbose)
+            n_iter = int(np.ceil(n_iter))
 
             # initial fit of only increment trees
             self.estimator = sklearn.ensemble.HistGradientBoostingClassifier(
                 loss=self.loss,
                 learning_rate=self.learning_rate,
-                max_iter=self.max_iter,
+                max_iter=n_iter,
                 min_samples_leaf=self.min_samples_leaf,
                 max_depth=self.max_depth,
                 max_leaf_nodes=self.max_leaf_nodes,
@@ -111,7 +112,7 @@ class GradientBoostingClassifier(
 
         self.estimator.fit(X, y)
 
-        if self.estimator.max_iter >= self.max_iter or n_iter > self.estimator.n_iter_:
+        if self.estimator.max_iter >= self.max_iter or self.estimator.max_iter > self.estimator.n_iter_:
             self.fully_fit_ = True
 
         return self
