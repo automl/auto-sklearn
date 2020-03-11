@@ -128,11 +128,18 @@ class AutoMLTest(Base, unittest.TestCase):
             ensemble_nbest=3,
             seed=seed
         )
+
         automl.fit(
             X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
         )
 
-        # Assert that the files of the models used by the ensemble are available
+        # Assert at least one model file has been deleted
+        log_file_path = glob.glob(os.path.join(
+            backend_api.temporary_directory, 'AutoML(' + str(seed) + '):*.log'))
+        with open(log_file_path[0]) as log_file:
+            self.assertIn('Deleted file of non-candidate model', log_file.read())
+
+        # Assert that the files of the models used by the ensemble weren't deleted
         model_files = backend_api.list_all_models(seed=seed)
         model_files_idx = set([int(m_file.split('.')[-2]) for m_file in model_files])
         ensemble_members_idx = set([idx[1] for idx in automl.ensemble_.identifiers_])

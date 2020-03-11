@@ -245,14 +245,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
                 # Delete files of non-candidate models
                 if self.keep_just_nbest_models:
-                    cand_ids = [cand.replace('_', '.').split('.')[-2]
-                                for cand in candidate_models]
-                    for model_file in self.read_preds.keys():
-                        model_file_id = model_file.split('.')[-2]
-                        if model_file_id not in cand_ids:
-                            self.logger.info(
-                                "Deleting file of the non-candidate model %s", model_file)
-                            os.remove(model_file)
+                    self._delete_non_candidate_models(candidate_models)
             else:
                 time.sleep(self.sleep_duration)
 
@@ -676,6 +669,14 @@ class EnsembleBuilder(multiprocessing.Process):
             )
             return None
         # TODO: ADD saving of predictions on "ensemble data"
+
+    def _delete_non_candidate_models(self, candidates):
+        cand_ids = [cand.replace('_', '.').split('.')[-2] for cand in candidates]
+        for model_file in self.read_preds.keys():
+            model_file_id = model_file.split('.')[-2]
+            if model_file_id not in cand_ids:
+                os.remove(model_file)
+                self.logger.info("Deleted file of non-candidate model %s", model_file)
 
     def _read_np_fn(self, fp):
         if self.precision is "16":
