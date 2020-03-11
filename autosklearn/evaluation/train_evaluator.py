@@ -894,8 +894,9 @@ def eval_cv(
         exclude,
         disable_file_output,
         init_params=None,
+        budget=None,
+        budget_type=None
 ):
-    instance = json.loads(instance) if instance is not None else {}
     evaluator = TrainEvaluator(
         backend=backend,
         queue=queue,
@@ -911,6 +912,8 @@ def eval_cv(
         exclude=exclude,
         disable_file_output=disable_file_output,
         init_params=init_params,
+        budget=budget,
+        budget_type=budget_type,
     )
 
     evaluator.fit_predict_and_loss()

@@ -161,17 +161,17 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             additional_info: dict
                 all further additional run information
         """
-
-        if budget == 0:
-            budget = 100
-        elif budget <= 0 or budget > 100:
-            raise ValueError('Illegal value for budget, must be >0 and <=100, but is %f' % budget)
         if self.budget_type is None:
-            if budget != 100:
-                raise ValueError('If budget_type is None, budget must be 100.0, but is %f' % budget)
-        elif self.budget_type not in ('subsample', 'iterations', 'mixed'):
-            raise ValueError("Illegal value for budget type, must be one of "
-                             "('subsample', 'iterations'), but is : %s" % self.budget_type)
+            if budget != 0:
+                raise ValueError('If budget_type is None, budget must be.0, but is %f' % budget)
+        else:
+            if budget == 0:
+                budget = 100
+            elif budget <= 0 or budget > 100:
+                raise ValueError('Illegal value for budget, must be >0 and <=100, but is %f' % budget)
+            if self.budget_type not in ('subsample', 'iterations', 'mixed'):
+                raise ValueError("Illegal value for budget type, must be one of "
+                                 "('subsample', 'iterations'), but is : %s" % self.budget_type)
 
         remaining_time = self.stats.get_remaing_time_budget()
 
