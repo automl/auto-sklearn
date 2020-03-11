@@ -52,6 +52,8 @@ class GradientBoostingClassifier(
             self.estimator = None
 
         if self.estimator is None:
+            self.fully_fit_ = False
+
             self.learning_rate = float(self.learning_rate)
             self.max_iter = int(self.max_iter)
             self.min_samples_leaf = int(self.min_samples_leaf)

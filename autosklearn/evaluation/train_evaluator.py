@@ -356,8 +356,7 @@ class TrainEvaluator(AbstractEvaluator):
                 additional_run_info=None,
             )
 
-
-def _partial_fit_and_predict_iterative(self, fold, train_indices, test_indices):
+    def _partial_fit_and_predict_iterative(self, fold, train_indices, test_indices):
         model = self._get_model()
 
         self.indices[fold] = ((train_indices, test_indices))
@@ -453,7 +452,6 @@ def _partial_fit_and_predict_iterative(self, fold, train_indices, test_indices):
             )
             return
 
-
     def _partial_fit_and_predict_standard(self, fold, train_indices, test_indices):
         model = self._get_model()
 
@@ -490,8 +488,11 @@ def _partial_fit_and_predict_iterative(self, fold, train_indices, test_indices):
 
         self.indices[fold] = ((train_indices, test_indices))
 
-        if self.budget_type == 'iterations':
-
+        if (
+            self.budget_type == 'iterations'
+            or self.budget_type == 'mixed' and model.estimator_supports_iterative_fit()
+        ):
+            print('iterations', self.budget_type, self.budget)
             if model.estimator_supports_iterative_fit():
                 #budget_factor = model.get_budget_factor
                 budget_factor = 512
@@ -507,19 +508,24 @@ def _partial_fit_and_predict_iterative(self, fold, train_indices, test_indices):
                                                 self.X_train[train_indices],
                                                 self.Y_train[train_indices])
 
-        elif self.budget_type == 'subsample':
+        elif (
+            self.budget_type == 'subsample'
+            or self.budget_type == 'mixed' and not model.estimator_supports_iterative_fit()
+        ):
 
             # Do this prior to subsampling the training data to have the full training targets
             # for prediction
             self.Y_targets[fold] = self.Y_train[test_indices]
             self.Y_train_targets[train_indices] = self.Y_train[train_indices]
 
-            subsample = int(np.ceil(self.budget / 100 * len(train_indices)))
+            subsample = self.budget / 100
+            print('subsample', self.budget_type, self.budget, subsample)
             train_indices_subset = self.subsample_indices(train_indices, subsample)
             print(self.budget, self.budget_type, len(self.X_train[train_indices_subset]))
             self._fit_and_suppress_warnings(model,
                                             self.X_train[train_indices_subset],
                                             self.Y_train[train_indices_subset])
+
         else:
             raise ValueError(self.budget_type)
 
@@ -542,7 +548,13 @@ def _partial_fit_and_predict_iterative(self, fold, train_indices, test_indices):
         )
 
     def subsample_indices(self, train_indices, subsample):
-        if subsample is not None:
+
+        if not isinstance(subsample, float):
+            raise ValueError('Subsample must be of type float, but is of type %s' % type(subsample))
+        elif subsample > 1:
+            raise ValueError('Subsample must not be larger than 1, but is %f' % subsample)
+
+        if subsample is not None and subsample < 1:
             # Only subsample if there are more indices given to this method than
             # required to subsample because otherwise scikit-learn will complain
 
@@ -552,17 +564,16 @@ def _partial_fit_and_predict_iterative(self, fold, train_indices, test_indices):
             else:
                 stratify = None
 
-            if len(train_indices) > subsample:
-                indices = np.arange(len(train_indices))
-                cv_indices_train, _ = train_test_split(
-                    indices,
-                    stratify=stratify,
-                    train_size=subsample,
-                    random_state=1,
-                    shuffle=True,
-                )
-                train_indices = train_indices[cv_indices_train]
-                return train_indices
+            indices = np.arange(len(train_indices))
+            cv_indices_train, _ = train_test_split(
+                indices,
+                stratify=stratify,
+                train_size=subsample,
+                random_state=1,
+                shuffle=True,
+            )
+            train_indices = train_indices[cv_indices_train]
+            return train_indices
 
         return train_indices
 

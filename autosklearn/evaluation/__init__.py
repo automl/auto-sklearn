@@ -169,7 +169,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         if self.budget_type is None:
             if budget != 100:
                 raise ValueError('If budget_type is None, budget must be 100.0, but is %f' % budget)
-        elif self.budget_type not in ('subsample', 'iterations'):
+        elif self.budget_type not in ('subsample', 'iterations', 'mixed'):
             raise ValueError("Illegal value for budget type, must be one of "
                              "('subsample', 'iterations'), but is : %s" % self.budget_type)
 

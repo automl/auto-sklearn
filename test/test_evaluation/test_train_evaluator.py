@@ -74,7 +74,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    all_scoring_functions=False,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
-                                   subsample=50)
+                                   )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -558,16 +558,15 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 10},
-                                   subsample=10,
                                    metric=accuracy)
         train_indices = np.arange(69, dtype=int)
-        train_indices1 = evaluator.subsample_indices(train_indices)
+        train_indices1 = evaluator.subsample_indices(train_indices, 0.1449)
         evaluator.subsample = 20
-        train_indices2 = evaluator.subsample_indices(train_indices)
+        train_indices2 = evaluator.subsample_indices(train_indices, 0.2898)
         evaluator.subsample = 30
-        train_indices3 = evaluator.subsample_indices(train_indices)
+        train_indices3 = evaluator.subsample_indices(train_indices, 0.4347)
         evaluator.subsample = 67
-        train_indices4 = evaluator.subsample_indices(train_indices)
+        train_indices4 = evaluator.subsample_indices(train_indices, 0.971)
         # Common cases
         for ti in train_indices1:
             self.assertIn(ti, train_indices2)
@@ -577,19 +576,17 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             self.assertIn(ti, train_indices4)
 
         # Corner cases
-        evaluator.subsample = 0
         self.assertRaisesRegex(
-            ValueError, 'train_size=0 should be either positive and smaller than the '
+            ValueError, 'train_size=0.0 should be either positive and smaller than the '
             r'number of samples 69 or a float in the \(0, 1\) range',
-            evaluator.subsample_indices, train_indices)
+            evaluator.subsample_indices, train_indices, 0.0)
         # With equal or greater it should return a non-shuffled array of indices
-        evaluator.subsample = 69
-        train_indices5 = evaluator.subsample_indices(train_indices)
+        train_indices5 = evaluator.subsample_indices(train_indices, 1.0)
         self.assertTrue(np.all(train_indices5 == train_indices))
         evaluator.subsample = 68
         self.assertRaisesRegex(
             ValueError, 'The test_size = 1 should be greater or equal to the number of '
-            'classes = 2', evaluator.subsample_indices, train_indices)
+            'classes = 2', evaluator.subsample_indices, train_indices, 0.9999)
 
     @unittest.mock.patch('autosklearn.util.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
@@ -601,25 +598,25 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 10},
-                                   subsample=30,
                                    metric=accuracy)
         train_indices = np.arange(69, dtype=int)
-        train_indices3 = evaluator.subsample_indices(train_indices)
+        train_indices3 = evaluator.subsample_indices(train_indices, subsample=0.4347)
         evaluator.subsample = 67
-        train_indices4 = evaluator.subsample_indices(train_indices)
+        train_indices4 = evaluator.subsample_indices(train_indices, subsample=0.4347)
         # Common cases
         for ti in train_indices3:
             self.assertIn(ti, train_indices4)
 
         # Corner cases
-        evaluator.subsample = 0
         self.assertRaisesRegex(
-            ValueError, 'train_size=0 should be either positive and smaller than the '
+            ValueError, 'train_size=0.0 should be either positive and smaller than the '
             r'number of samples 69 or a float in the \(0, 1\) range',
-            evaluator.subsample_indices, train_indices)
+            evaluator.subsample_indices, train_indices, 0.0)
+        self.assertRaisesRegex(
+            ValueError, 'Subsample must not be larger than 1, but is 1.000100',
+            evaluator.subsample_indices, train_indices, 1.0001)
         # With equal or greater it should return a non-shuffled array of indices
-        evaluator.subsample = 69
-        train_indices6 = evaluator.subsample_indices(train_indices)
+        train_indices6 = evaluator.subsample_indices(train_indices, 1.0)
         np.testing.assert_allclose(train_indices6, train_indices)
 
     @unittest.mock.patch('autosklearn.util.backend.Backend')
@@ -648,7 +645,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             self.assertEqual(0.9, Y_optimization_pred[i][1])
 
     @unittest.mock.patch.object(TrainEvaluator, 'file_output')
-    @unittest.mock.patch.object(TrainEvaluator, '_partial_fit_and_predict')
+    @unittest.mock.patch.object(TrainEvaluator, '_partial_fit_and_predict_standard')
     @unittest.mock.patch('autosklearn.util.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_fit_predict_and_loss_additional_run_info(
@@ -679,7 +676,9 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         )
         evaluator.Y_targets[0] = np.array([1] * 23)
         evaluator.Y_train_targets = np.array([1] * 69)
-        evaluator.fit_predict_and_loss(iterative=False)
+        rval = evaluator.fit_predict_and_loss(iterative=False)
+        self.assertIsNone(rval)
+        self.assertEqual(queue_.get()['status'], StatusType.SUCCESS)
 
         class SideEffect(object):
             def __init__(self):
@@ -715,8 +714,10 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.Y_targets[1] = np.array([1] * 34)
         evaluator.Y_train_targets = np.array([1] * 69)
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             TAEAbortException,
+            'Found additional run info "{\'a\': 5}" in fold 1, '
+            'but cannot handle additional run info if fold >= 1.',
             evaluator.fit_predict_and_loss,
             iterative=False
         )

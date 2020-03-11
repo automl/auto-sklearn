@@ -233,6 +233,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                         continue
                     else:
                         raise e
+                except UnboundLocalError as e:
+                    if "local variable 'raw_predictions_val' referenced before assignment" in \
+                            e.args[0]:
+                        continue
 
                 p = classifier.estimator.get_params()
                 if 'random_state' in p:
