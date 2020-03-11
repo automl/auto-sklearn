@@ -478,7 +478,6 @@ class TrainEvaluator(AbstractEvaluator):
             self.budget_type == 'iterations'
             or self.budget_type == 'mixed' and model.estimator_supports_iterative_fit()
         ):
-            print('iterations', self.budget_type, self.budget)
             if model.estimator_supports_iterative_fit():
                 #budget_factor = model.get_budget_factor
                 budget_factor = 512
@@ -505,9 +504,7 @@ class TrainEvaluator(AbstractEvaluator):
             self.Y_train_targets[train_indices] = self.Y_train[train_indices]
 
             subsample = self.budget / 100
-            print('subsample', self.budget_type, self.budget, subsample)
             train_indices_subset = self.subsample_indices(train_indices, subsample)
-            print(self.budget, self.budget_type, len(self.X_train[train_indices_subset]))
             self._fit_and_suppress_warnings(model,
                                             self.X_train[train_indices_subset],
                                             self.Y_train[train_indices_subset])
