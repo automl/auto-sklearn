@@ -115,7 +115,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             auto = SimpleClassificationPipeline()
             auto = auto.fit(X_train, Y_train)
             predictions = auto.predict(X_test)
-            self.assertAlmostEqual(0.94,
+            self.assertAlmostEqual(0.96,
                 sklearn.metrics.accuracy_score(predictions, Y_test))
             scores = auto.predict_proba(X_test)
 
@@ -131,7 +131,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             classifier.set_hyperparameters(default)
             classifier = classifier.fit(X_train, Y_train)
             predictions = classifier.predict(X_test)
-            self.assertAlmostEqual(0.94,
+            self.assertAlmostEqual(0.96,
                                    sklearn.metrics.accuracy_score(predictions,
                                                                   Y_test))
             scores = classifier.predict_proba(X_test)
@@ -378,7 +378,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
             'feature_preprocessor:__choice__').choices), 13)
 
         hyperparameters = cs.get_hyperparameters()
-        self.assertEqual(156, len(hyperparameters))
+        self.assertEqual(153, len(hyperparameters))
 
         #for hp in sorted([str(h) for h in hyperparameters]):
         #    print hp
