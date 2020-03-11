@@ -10,20 +10,20 @@ class ExtraTreesComponentTest(BaseRegressionComponentTest):
     __test__ = True
 
     res = dict()
-    res["default_boston"] = 0.8457463981374789
-    res["boston_n_calls"] = 7
-    res["default_boston_iterative"] = 0.8460054319822927
-    res["default_boston_sparse"] = 0.4022606040314697
-    res["default_boston_iterative_sparse"] = 0.4241336980285072
-    res["default_diabetes"] = 0.38268255933451
-    res["diabetes_n_calls"] = 7
-    res["default_diabetes_iterative"] = 0.38869684680884398
-    res["default_diabetes_sparse"] = 0.2436985361045233
-    res["default_diabetes_iterative_sparse"] = 0.25345808769763623
+    res["default_boston"] = 0.8552491508927406
+    res["boston_n_calls"] = 9
+    res["default_boston_iterative"] = 0.8539080454228811
+    res["default_boston_sparse"] = 0.4177781339904245
+    res["default_boston_iterative_sparse"] = 0.4188803940560917
+    res["default_diabetes"] = 0.39073511653135706
+    res["diabetes_n_calls"] = 9
+    res["default_diabetes_iterative"] = 0.3900924379086915
+    res["default_diabetes_sparse"] = 0.24547114408164694
+    res["default_diabetes_iterative_sparse"] = 0.25129575820882655
 
     sk_mod = sklearn.ensemble.ExtraTreesRegressor
     module = ExtraTreesRegressor
     step_hyperparameter = {
         'name': 'n_estimators',
-        'value': 100,
+        'value': module.get_max_iter(),
     }

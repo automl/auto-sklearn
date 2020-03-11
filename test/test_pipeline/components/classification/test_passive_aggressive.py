@@ -26,3 +26,8 @@ class PassiveAggressiveComponentTest(BaseClassificationComponentTest):
 
     sk_mod = sklearn.linear_model.PassiveAggressiveClassifier
     module = PassiveAggressive
+
+    step_hyperparameter = {
+        'name': 'max_iter',
+        'value': module.get_max_iter(),
+    }

@@ -25,5 +25,5 @@ class GradientBoostingComponentTest(BaseClassificationComponentTest):
     module = GradientBoostingClassifier
     step_hyperparameter = {
         'name': 'max_iter',
-        'value': 512,
+        'value': module.get_max_iter(),
     }

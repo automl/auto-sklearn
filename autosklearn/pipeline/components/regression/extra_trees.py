@@ -16,13 +16,12 @@ class ExtraTreesRegressor(
     IterativeComponent,
     AutoSklearnRegressionAlgorithm,
 ):
-    def __init__(self, n_estimators, criterion, min_samples_leaf,
+    def __init__(self, criterion, min_samples_leaf,
                  min_samples_split, max_features, bootstrap, max_leaf_nodes,
                  max_depth, min_impurity_decrease, oob_score=False, n_jobs=1,
                  random_state=None, verbose=0):
 
-        self.n_estimators = n_estimators
-        self.estimator_increment = 10
+        self.n_estimators = self.get_max_iter()
         self.criterion = criterion
         self.max_depth = max_depth
         self.max_leaf_nodes = max_leaf_nodes
@@ -36,6 +35,10 @@ class ExtraTreesRegressor(
         self.random_state = random_state
         self.verbose = verbose
         self.estimator = None
+
+    @staticmethod
+    def get_max_iter():
+        return 512
 
     def iterative_fit(self, X, y, n_iter=1, refit=False):
         from sklearn.ensemble import ExtraTreesRegressor as ETR
@@ -123,7 +126,6 @@ class ExtraTreesRegressor(
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        n_estimators = Constant("n_estimators", 100)
         criterion = CategoricalHyperparameter("criterion",
                                               ['mse', 'friedman_mse', 'mae'])
         max_features = UniformFloatHyperparameter(
@@ -143,7 +145,7 @@ class ExtraTreesRegressor(
         bootstrap = CategoricalHyperparameter(
             "bootstrap", ["True", "False"], default_value="False")
 
-        cs.add_hyperparameters([n_estimators, criterion, max_features,
+        cs.add_hyperparameters([criterion, max_features,
                                 max_depth, max_leaf_nodes, min_samples_split,
                                 min_samples_leaf, min_impurity_decrease,
                                 bootstrap])

@@ -17,12 +17,12 @@ class RandomForest(
     IterativeComponentWithSampleWeight,
     AutoSklearnClassificationAlgorithm,
 ):
-    def __init__(self, n_estimators, criterion, max_features,
+    def __init__(self, criterion, max_features,
                  max_depth, min_samples_split, min_samples_leaf,
                  min_weight_fraction_leaf, bootstrap, max_leaf_nodes,
                  min_impurity_decrease, random_state=None, n_jobs=1,
                  class_weight=None):
-        self.n_estimators = n_estimators
+        self.n_estimators = self.get_max_iter()
         self.criterion = criterion
         self.max_features = max_features
         self.max_depth = max_depth
@@ -36,6 +36,10 @@ class RandomForest(
         self.n_jobs = n_jobs
         self.class_weight = class_weight
         self.estimator = None
+
+    @staticmethod
+    def get_max_iter():
+        return 512
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
         from sklearn.ensemble import RandomForestClassifier
@@ -85,7 +89,6 @@ class RandomForest(
                 class_weight=self.class_weight,
                 warm_start=True)
         else:
-
             self.estimator.n_estimators += n_iter
             self.estimator.n_estimators = min(self.estimator.n_estimators,
                                               self.n_estimators)
@@ -126,7 +129,6 @@ class RandomForest(
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
-        n_estimators = Constant("n_estimators", 100)
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default_value="gini")
 
@@ -147,7 +149,7 @@ class RandomForest(
         min_impurity_decrease = UnParametrizedHyperparameter('min_impurity_decrease', 0.0)
         bootstrap = CategoricalHyperparameter(
             "bootstrap", ["True", "False"], default_value="True")
-        cs.add_hyperparameters([n_estimators, criterion, max_features,
+        cs.add_hyperparameters([criterion, max_features,
                                 max_depth, min_samples_split, min_samples_leaf,
                                 min_weight_fraction_leaf, max_leaf_nodes,
                                 bootstrap, min_impurity_decrease])
