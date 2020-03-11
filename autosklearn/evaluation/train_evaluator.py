@@ -117,7 +117,7 @@ class TrainEvaluator(AbstractEvaluator):
 
         if iterative:
             if self.num_cv_folds > 1:
-                raise ValueError('Cannot use partial fitting together with full'
+                raise ValueError('Cannot use iterative fitting together with full'
                                  'cross-validation!')
             elif self.budget_type is not None:
                 raise ValueError('Cannot use a budget together with iterative optimization.')
@@ -185,7 +185,6 @@ class TrainEvaluator(AbstractEvaluator):
                             i, train_indices=train_split, test_indices=test_split
                         )
                     )
-                assert len(opt_pred) == len(test_split), (len(opt_pred), len(test_split))
 
                 if (
                     additional_run_info is not None
@@ -417,29 +416,16 @@ class TrainEvaluator(AbstractEvaluator):
 
             return
         else:
-            self._fit_and_suppress_warnings(model,
-                                            self.X_train[train_indices],
-                                            self.Y_train[train_indices])
 
-            if self.num_cv_folds == 1:
-                self.model = model
-
-            train_indices, test_indices = self.indices[fold]
-            self.Y_targets[fold] = self.Y_train[test_indices]
-            self.Y_train_targets[train_indices] = self.Y_train[train_indices]
             (
                 Y_train_pred,
                 Y_optimization_pred,
                 Y_valid_pred,
-                Y_test_pred
-            ) = self._predict(
-                model=model,
-                train_indices=train_indices,
-                test_indices=test_indices
-            )
+                Y_test_pred,
+                additional_run_info
+            ) = self._partial_fit_and_predict_standard(fold, train_indices, test_indices)
             train_loss = self._loss(self.Y_train[train_indices], Y_train_pred)
             loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
-            additional_run_info = model.get_additional_run_info()
             self.finish_up(
                 loss=loss,
                 train_loss=train_loss,
@@ -501,7 +487,7 @@ class TrainEvaluator(AbstractEvaluator):
 
                 self.Y_targets[fold] = self.Y_train[test_indices]
                 self.Y_train_targets[train_indices] = self.Y_train[train_indices]
-                n_iter = np.ceil(self.budget / 100 * budget_factor)
+                n_iter = int(np.ceil(self.budget / 100 * budget_factor))
                 model.iterative_fit(Xt, self.Y_train[train_indices], n_iter=n_iter, **fit_params)
             else:
                 self._fit_and_suppress_warnings(model,

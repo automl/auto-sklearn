@@ -648,7 +648,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     @unittest.mock.patch.object(TrainEvaluator, '_partial_fit_and_predict_standard')
     @unittest.mock.patch('autosklearn.util.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
-    def test_fit_predict_and_loss_additional_run_info(
+    def test_fit_predict_and_loss_standard_additional_run_info(
         self, mock, backend_mock, _partial_fit_and_predict_mock,
             file_output_mock,
     ):
@@ -678,7 +678,10 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.Y_train_targets = np.array([1] * 69)
         rval = evaluator.fit_predict_and_loss(iterative=False)
         self.assertIsNone(rval)
-        self.assertEqual(queue_.get()['status'], StatusType.SUCCESS)
+        element = queue_.get()
+        self.assertEqual(element['status'], StatusType.SUCCESS)
+        self.assertEqual(element['additional_run_info']['a'], 5)
+        self.assertEqual(_partial_fit_and_predict_mock.call_count, 1)
 
         class SideEffect(object):
             def __init__(self):
@@ -721,6 +724,160 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             evaluator.fit_predict_and_loss,
             iterative=False
         )
+
+    @unittest.mock.patch.object(TrainEvaluator, '_loss')
+    @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
+    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_fit_predict_and_loss_iterative_additional_run_info(
+            self, mock, backend_mock, finish_up_mock, loss_mock,
+    ):
+        class Counter:
+            counter = 0
+            def __call__(self):
+                self.counter += 1
+                return False if self.counter <= 1 else True
+        mock.estimator_supports_iterative_fit.return_value = True
+        mock.fit_transformer.return_value = ('Xt', {})
+        mock.configuration_fully_fitted.side_effect = Counter()
+        mock.get_additional_run_info.return_value = 14678
+        loss_mock.return_value = 0.5
+
+        D = get_binary_classification_datamanager()
+        backend_mock.load_datamanager.return_value = D
+        mock.side_effect = lambda **kwargs: mock
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        queue_ = multiprocessing.Queue()
+
+        evaluator = TrainEvaluator(
+            backend_mock, queue_,
+            configuration=configuration,
+            resampling_strategy='holdout',
+            output_y_hat_optimization=False,
+            metric=accuracy,
+        )
+        evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
+        evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
+        rval = evaluator.fit_predict_and_loss(iterative=True)
+        self.assertIsNone(rval)
+        self.assertEqual(finish_up_mock.call_count, 1)
+        self.assertEqual(finish_up_mock.call_args[1]['additional_run_info'], 14678)
+
+    @unittest.mock.patch.object(TrainEvaluator, '_loss')
+    @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
+    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_fit_predict_and_loss_iterative_noniterativemodel_additional_run_info(
+            self, mock, backend_mock, finish_up_mock, loss_mock,
+    ):
+        mock.estimator_supports_iterative_fit.return_value = False
+        mock.fit_transformer.return_value = ('Xt', {})
+        mock.get_additional_run_info.return_value = 14678
+        loss_mock.return_value = 0.5
+
+        D = get_binary_classification_datamanager()
+        backend_mock.load_datamanager.return_value = D
+        mock.side_effect = lambda **kwargs: mock
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        queue_ = multiprocessing.Queue()
+
+        evaluator = TrainEvaluator(
+            backend_mock, queue_,
+            configuration=configuration,
+            resampling_strategy='holdout',
+            output_y_hat_optimization=False,
+            metric=accuracy,
+        )
+        evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
+        evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
+        rval = evaluator.fit_predict_and_loss(iterative=True)
+        self.assertIsNone(rval)
+        self.assertEqual(finish_up_mock.call_count, 1)
+        self.assertEqual(finish_up_mock.call_args[1]['additional_run_info'], 14678)
+
+    @unittest.mock.patch.object(TrainEvaluator, '_loss')
+    @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
+    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_fit_predict_and_loss_budget_additional_run_info(
+            self, mock, backend_mock, finish_up_mock, loss_mock,
+    ):
+        class Counter:
+            counter = 0
+            def __call__(self):
+                self.counter += 1
+                return False if self.counter <= 1 else True
+        mock.configuration_fully_fitted.side_effect = Counter()
+        mock.estimator_supports_iterative_fit.return_value = True
+        mock.fit_transformer.return_value = ('Xt', {})
+        mock.get_additional_run_info.return_value = {'val': 14678}
+        loss_mock.return_value = 0.5
+
+        D = get_binary_classification_datamanager()
+        backend_mock.load_datamanager.return_value = D
+        mock.side_effect = lambda **kwargs: mock
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        queue_ = multiprocessing.Queue()
+
+        evaluator = TrainEvaluator(
+            backend_mock, queue_,
+            configuration=configuration,
+            resampling_strategy='holdout',
+            output_y_hat_optimization=False,
+            metric=accuracy,
+            budget_type='iterations',
+            budget=50,
+        )
+        evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
+        evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
+        rval = evaluator.fit_predict_and_loss(iterative=False)
+        self.assertIsNone(rval)
+        self.assertEqual(finish_up_mock.call_count, 1)
+        self.assertEqual(finish_up_mock.call_args[1]['additional_run_info'], {'val': 14678})
+
+    @unittest.mock.patch.object(TrainEvaluator, '_loss')
+    @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
+    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_fit_predict_and_loss_budget_2_additional_run_info(
+            self, mock, backend_mock, finish_up_mock, loss_mock,
+    ):
+        class Counter:
+            counter = 0
+            def __call__(self):
+                self.counter += 1
+                return False if self.counter <= 1 else True
+        mock.configuration_fully_fitted.side_effect = Counter()
+        mock.estimator_supports_iterative_fit.return_value = True
+        mock.fit_transformer.return_value = ('Xt', {})
+        mock.get_additional_run_info.return_value = {'val': 14678}
+        loss_mock.return_value = 0.5
+
+        D = get_binary_classification_datamanager()
+        backend_mock.load_datamanager.return_value = D
+        mock.side_effect = lambda **kwargs: mock
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        queue_ = multiprocessing.Queue()
+
+        evaluator = TrainEvaluator(
+            backend_mock, queue_,
+            configuration=configuration,
+            resampling_strategy='holdout',
+            output_y_hat_optimization=False,
+            metric=accuracy,
+            budget_type='subsample',
+            budget=50,
+        )
+        evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
+        evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
+        rval = evaluator.fit_predict_and_loss(iterative=False)
+        self.assertIsNone(rval)
+        self.assertEqual(finish_up_mock.call_count, 1)
+        self.assertEqual(finish_up_mock.call_args[1]['additional_run_info'], {'val': 14678})
 
     def test_get_results(self):
         backend_mock = unittest.mock.Mock(spec=backend.Backend)
@@ -1432,15 +1589,6 @@ class FunctionsTest(unittest.TestCase):
         self.assertAlmostEqual(rval[0]['loss'], 0.030303030303030276, places=3)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
 
-    # def test_eval_holdout_on_subset(self):
-    #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)
-    #     eval_holdout(self.queue, self.configuration, self.data,
-    #                  backend_api, 1, 1, 43, True, False, True, None, None,
-    #                  False)
-    #     info = self.queue.get()
-    #     self.assertAlmostEqual(info[1], 0.1)
-    #     self.assertEqual(info[2], 1)
-
     def test_eval_holdout_iterative_fit_no_timeout(self):
         eval_iterative_holdout(
             queue=self.queue,
@@ -1463,15 +1611,110 @@ class FunctionsTest(unittest.TestCase):
         self.assertAlmostEqual(rval[-1]['loss'], 0.030303030303030276)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
 
-    # def test_eval_holdout_iterative_fit_on_subset_no_timeout(self):
-    #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)
-    #     eval_iterative_holdout(self.queue, self.configuration,
-    #                            self.data, backend_api, 1, 1, 43, True, False,
-    #                            True, None, None, False)
-    #
-    #     info = self.queue.get()
-    #     self.assertAlmostEqual(info[1], 0.1)
-    #     self.assertEqual(info[2], 1)
+    def test_eval_holdout_budget_iterations(self):
+        eval_holdout(
+            queue=self.queue,
+            config=self.configuration,
+            backend=self.backend,
+            resampling_strategy='holdout',
+            resampling_strategy_args=None,
+            seed=1,
+            num_run=1,
+            all_scoring_functions=False,
+            output_y_hat_optimization=True,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name,
+            metric=accuracy,
+            budget=1,
+            budget_type='iterations'
+        )
+        info = read_queue(self.queue)
+        self.assertEqual(len(info), 1)
+        self.assertAlmostEqual(info[0]['loss'], 0.06060606060606055, places=3)
+        self.assertEqual(info[0]['status'], StatusType.SUCCESS)
+        self.assertNotIn('bac_metric', info[0]['additional_run_info'])
+
+    def test_eval_holdout_budget_subsample(self):
+        eval_holdout(
+            queue=self.queue,
+            config=self.configuration,
+            backend=self.backend,
+            resampling_strategy='holdout',
+            resampling_strategy_args=None,
+            seed=1,
+            num_run=1,
+            all_scoring_functions=False,
+            output_y_hat_optimization=True,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name,
+            metric=accuracy,
+            budget=30,
+            budget_type='subsample'
+        )
+        info = read_queue(self.queue)
+        self.assertEqual(len(info), 1)
+        self.assertAlmostEqual(info[0]['loss'], 0.0)
+        self.assertEqual(info[0]['status'], StatusType.SUCCESS)
+        self.assertNotIn('bac_metric', info[0]['additional_run_info'])
+
+    def test_eval_holdout_budget_mixed_iterations(self):
+        eval_holdout(
+            queue=self.queue,
+            config=self.configuration,
+            backend=self.backend,
+            resampling_strategy='holdout',
+            resampling_strategy_args=None,
+            seed=1,
+            num_run=1,
+            all_scoring_functions=False,
+            output_y_hat_optimization=True,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name,
+            metric=accuracy,
+            budget=1,
+            budget_type='mixed'
+        )
+        info = read_queue(self.queue)
+        self.assertEqual(len(info), 1)
+        self.assertAlmostEqual(info[0]['loss'], 0.06060606060606055)
+        self.assertEqual(info[0]['status'], StatusType.SUCCESS)
+        self.assertNotIn('bac_metric', info[0]['additional_run_info'])
+
+    def test_eval_holdout_budget_mixed_subsample(self):
+        configuration = get_configuration_space(
+            exclude_estimators=['random_forest'],
+            info={'task': MULTICLASS_CLASSIFICATION, 'is_sparse': False},
+        ).get_default_configuration()
+        self.assertEqual(configuration['classifier:__choice__'], 'liblinear_svc')
+        eval_holdout(
+            queue=self.queue,
+            config=configuration,
+            backend=self.backend,
+            resampling_strategy='holdout',
+            resampling_strategy_args=None,
+            seed=1,
+            num_run=1,
+            all_scoring_functions=False,
+            output_y_hat_optimization=True,
+            include=None,
+            exclude={'classifier': ['random_forest']},
+            disable_file_output=False,
+            instance=self.dataset_name,
+            metric=accuracy,
+            budget=40,
+            budget_type='mixed'
+        )
+        info = read_queue(self.queue)
+        self.assertEqual(len(info), 1)
+        self.assertAlmostEqual(info[0]['loss'], 0.06060606060606055)
+        self.assertEqual(info[0]['status'], StatusType.SUCCESS)
+        self.assertNotIn('bac_metric', info[0]['additional_run_info'])
 
     def test_eval_cv(self):
         eval_cv(
