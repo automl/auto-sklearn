@@ -204,51 +204,55 @@ class EnsembleBuilder(multiprocessing.Process):
                 time.sleep(self.sleep_duration)
                 continue
 
-            selected_models = self.get_n_best_preds()
-            if not selected_models:  # nothing selected
+            # Only the models with the n_best predictions are candidates
+            # to be in the ensemble
+            candidate_models = self.get_n_best_preds()
+            if not candidate_models:  # no candidates yet
                 continue
 
             # populates predictions in self.read_preds
             # reduces selected models if file reading failed
             n_sel_valid, n_sel_test = self.\
-                get_valid_test_preds(selected_keys=selected_models)
+                get_valid_test_preds(selected_keys=candidate_models)
 
-            selected_models_set = set(selected_models)
-            if selected_models_set.intersection(n_sel_test):
-                selected_models = list(selected_models_set.intersection(n_sel_test))
-            elif selected_models_set.intersection(n_sel_valid):
-                selected_models = list(selected_models_set.intersection(n_sel_valid))
+            candidate_models_set = set(candidate_models)
+            if candidate_models_set.intersection(n_sel_test):
+                candidate_models = list(candidate_models_set.intersection(n_sel_test))
+            elif candidate_models_set.intersection(n_sel_valid):
+                candidate_models = list(candidate_models_set.intersection(n_sel_valid))
             else:
-                # use selected_models only defined by ensemble data set
+                # use candidate_models only defined by ensemble data set
                 pass
 
             # train ensemble
-            ensemble = self.fit_ensemble(selected_keys=selected_models)
+            ensemble = self.fit_ensemble(selected_keys=candidate_models)
 
             if ensemble is not None:
 
                 self.predict(set_="valid",
                              ensemble=ensemble,
                              selected_keys=n_sel_valid,
-                             n_preds=len(selected_models),
+                             n_preds=len(candidate_models),
                              index_run=iteration)
                 # TODO if predictions fails, build the model again during the
                 #  next iteration!
                 self.predict(set_="test",
                              ensemble=ensemble,
                              selected_keys=n_sel_test,
-                             n_preds=len(selected_models),
+                             n_preds=len(candidate_models),
                              index_run=iteration)
                 iteration += 1
 
                 # Delete files of non-candidate models
                 if self.keep_just_nbest_models:
-                    preds = [p.replace('_', '.').split('.')[-2] for p in selected_models]
-                    for m_file in self.read_preds.keys():
-                        model_idx = m_file.split('.')[-2]
-                        if model_idx not in preds:
-                            self.logger.info("Deleting non-candidate model %s" % m_file)
-                            os.remove(m_file)
+                    cand_ids = [cand.replace('_', '.').split('.')[-2]
+                                for cand in candidate_models]
+                    for model_file in self.read_preds.keys():
+                        model_file_id = model_file.split('.')[-2]
+                        if model_file_id not in cand_ids:
+                            self.logger.info(
+                                "Deleting file of the non-candidate model %s", model_file)
+                            os.remove(model_file)
             else:
                 time.sleep(self.sleep_duration)
 

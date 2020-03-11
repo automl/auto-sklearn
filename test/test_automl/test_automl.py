@@ -119,24 +119,24 @@ class AutoMLTest(Base, unittest.TestCase):
         backend_api = self._create_backend(
             'test_delete', delete_tmp_folder_after_terminate=False)
 
+        seed = 555
         X_train, Y_train, _, _ = putil.get_dataset('iris')
         automl = autosklearn.automl.AutoML(
             backend_api,
             time_left_for_this_task=20,
             per_run_time_limit=5,
             ensemble_nbest=3,
+            seed=seed
         )
         automl.fit(
             X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
         )
 
-        model_files = glob.glob(os.path.join(
-            backend_api.temporary_directory, '.auto-sklearn', 'models', '*.model'))
-
         # Assert that the files of the models used by the ensemble are available
-        ensemble_members = set([idx[1] for idx in automl.ensemble_.identifiers_])
-        model_files = set([int(m_file.split('.')[-2]) for m_file in model_files])
-        self.assertSetEqual(ensemble_members & model_files, ensemble_members)
+        model_files = backend_api.list_all_models(seed=seed)
+        model_files_idx = set([int(m_file.split('.')[-2]) for m_file in model_files])
+        ensemble_members_idx = set([idx[1] for idx in automl.ensemble_.identifiers_])
+        self.assertTrue(ensemble_members_idx.issubset(model_files_idx))
 
         del automl
         self._tearDown(backend_api.temporary_directory)
