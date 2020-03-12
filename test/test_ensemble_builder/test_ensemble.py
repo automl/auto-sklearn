@@ -224,15 +224,17 @@ class EnsembleTest(unittest.TestCase):
 
     def testMain(self):
 
-        ensbuilder = EnsembleBuilder(backend=self.backend,
-                                    dataset_name="TEST",
-                                    task_type=1,  #Binary Classification
-                                    metric=roc_auc,
-                                    limit=-1, # not used,
-                                    seed=0, # important to find the test files
-                                    ensemble_nbest=2,
-                                    max_iterations=1 # prevents infinite loop
-                                    )
+        ensbuilder = EnsembleBuilder(
+            backend=self.backend,
+            dataset_name="TEST",
+            task_type=1,  # Binary Classification
+            metric=roc_auc,
+            limit=-1,  # not used,
+            seed=0,  # important to find the test files
+            ensemble_nbest=2,
+            max_iterations=1,  # prevents infinite loop
+            keep_just_nbest_models=False,  # Because BackendMock creates no files
+            )
         ensbuilder.SAVE2DISC = False
 
         ensbuilder.main()

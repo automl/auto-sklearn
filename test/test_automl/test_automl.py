@@ -3,6 +3,7 @@ import os
 import pickle
 import sys
 import time
+import glob
 import unittest
 import unittest.mock
 
@@ -17,7 +18,7 @@ import autosklearn.automl
 from autosklearn.metrics import accuracy
 import autosklearn.pipeline.util as putil
 from autosklearn.util import setup_logger, get_logger, backend
-from autosklearn.constants import *
+from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION
 from autosklearn.smbo import load_data
 from smac.tae.execute_ta_run import StatusType
 
@@ -109,6 +110,40 @@ class AutoMLTest(Base, unittest.TestCase):
         score = automl.score(X_test, Y_test)
         self.assertGreaterEqual(score, 0.8)
         self.assertEqual(automl._task, MULTICLASS_CLASSIFICATION)
+
+        del automl
+        self._tearDown(backend_api.temporary_directory)
+        self._tearDown(backend_api.output_directory)
+
+    def test_delete_non_winning_models(self):
+        backend_api = self._create_backend(
+            'test_delete', delete_tmp_folder_after_terminate=False)
+
+        seed = 555
+        X_train, Y_train, _, _ = putil.get_dataset('iris')
+        automl = autosklearn.automl.AutoML(
+            backend_api,
+            time_left_for_this_task=20,
+            per_run_time_limit=5,
+            ensemble_nbest=3,
+            seed=seed
+        )
+
+        automl.fit(
+            X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
+        )
+
+        # Assert at least one model file has been deleted
+        log_file_path = glob.glob(os.path.join(
+            backend_api.temporary_directory, 'AutoML(' + str(seed) + '):*.log'))
+        with open(log_file_path[0]) as log_file:
+            self.assertIn('Deleted file of non-candidate model', log_file.read())
+
+        # Assert that the files of the models used by the ensemble weren't deleted
+        model_files = backend_api.list_all_models(seed=seed)
+        model_files_idx = set([int(m_file.split('.')[-2]) for m_file in model_files])
+        ensemble_members_idx = set([idx[1] for idx in automl.ensemble_.identifiers_])
+        self.assertTrue(ensemble_members_idx.issubset(model_files_idx))
 
         del automl
         self._tearDown(backend_api.temporary_directory)
@@ -217,21 +252,21 @@ class AutoMLTest(Base, unittest.TestCase):
 
         # At least one ensemble, one validation, one test prediction and one
         # model and one ensemble
-        fixture = os.listdir(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                          'predictions_ensemble'))
-        self.assertIn('predictions_ensemble_100_1.npy', fixture)
+        fixture = os.listdir(os.path.join(backend_api.temporary_directory,
+                                          '.auto-sklearn', 'predictions_ensemble'))
+        self.assertGreater(len(fixture), 0)
 
-        fixture = os.listdir(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                          'models'))
-        self.assertIn('100.1.model', fixture)
+        fixture = glob.glob(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
+                                         'models', '100.*.model'))
+        self.assertGreater(len(fixture), 0)
 
-        fixture = os.listdir(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                          'ensembles'))
+        fixture = os.listdir(os.path.join(backend_api.temporary_directory,
+                                          '.auto-sklearn', 'ensembles'))
         self.assertIn('100.0000000000.ensemble', fixture)
 
         # Start time
-        start_time_file_path = os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                            "start_time_100")
+        start_time_file_path = os.path.join(backend_api.temporary_directory,
+                                            '.auto-sklearn', "start_time_100")
         with open(start_time_file_path, 'r') as fh:
             start_time = float(fh.read())
         self.assertGreaterEqual(time.time() - start_time, 10)

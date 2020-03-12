@@ -39,6 +39,7 @@ def main():
         resampling_strategy='holdout',
         resampling_strategy_arguments={'train_size': 0.67},
         n_jobs=4,
+        keep_just_nbest_models=False,
         seed=5,
         delete_output_folder_after_terminate=False,
         delete_tmp_folder_after_terminate=False,

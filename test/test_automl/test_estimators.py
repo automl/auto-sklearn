@@ -21,9 +21,10 @@ from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
 from autosklearn.automl import AutoMLClassifier, AutoML
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import BINARY_CLASSIFICATION
-from base import Base
 
 sys.path.append(os.path.dirname(__file__))
+from base import Base  # noqa: E402
+
 
 class ArrayReturningDummyPredictor(object):
     def __init__(self, test):
@@ -238,6 +239,7 @@ class EstimatorTest(Base, unittest.TestCase):
             output_folder=output,
             tmp_folder=tmp,
             shared_mode=True,
+            keep_just_nbest_models=False,
             seed=1,
             initial_configurations_via_metalearning=0,
             ensemble_size=0,
@@ -252,6 +254,7 @@ class EstimatorTest(Base, unittest.TestCase):
             output_folder=output,
             tmp_folder=tmp,
             shared_mode=True,
+            keep_just_nbest_models=False,
             seed=2,
             initial_configurations_via_metalearning=0,
             ensemble_size=0,
@@ -306,6 +309,7 @@ class EstimatorTest(Base, unittest.TestCase):
             output_folder=output,
             tmp_folder=tmp,
             shared_mode=True,
+            keep_just_nbest_models=False,
             seed=3,
             initial_configurations_via_metalearning=0,
             ensemble_size=0,
@@ -454,6 +458,7 @@ class EstimatorTest(Base, unittest.TestCase):
             seed=1,
             initial_configurations_via_metalearning=0,
             ensemble_size=5,
+            keep_just_nbest_models=False,
             n_jobs=2,
             include_estimators=['sgd'],
             include_preprocessors=['no_preprocessing'],

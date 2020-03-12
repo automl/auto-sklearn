@@ -29,13 +29,19 @@ class Base(unittest.TestCase):
                 except OSError:
                     time.sleep(1)
 
-    def _create_backend(self, test_name):
+    def _create_backend(self, test_name, delete_tmp_folder_after_terminate=True,
+                        delete_output_folder_after_terminate=True):
         tmp = os.path.join(self.test_dir, '..', '.tmp._%s' % test_name)
         output = os.path.join(self.test_dir, '..', '.output._%s' % test_name)
         # Make sure the folders we wanna create do not already exist.
         self._setUp(tmp)
         self._setUp(output)
-        backend = create(tmp, output)
+        backend = create(
+            tmp,
+            output,
+            delete_tmp_folder_after_terminate=delete_tmp_folder_after_terminate,
+            delete_output_folder_after_terminate=delete_output_folder_after_terminate,
+            )
         return backend
 
     def _tearDown(self, dir):

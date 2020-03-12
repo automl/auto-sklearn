@@ -25,6 +25,7 @@ class AutoSklearnEstimator(BaseEstimator):
         initial_configurations_via_metalearning=25,
         ensemble_size: int = 50,
         ensemble_nbest=50,
+        keep_just_nbest_models=True,
         ensemble_memory_limit=1024,
         seed=1,
         ml_memory_limit=3072,
@@ -76,6 +77,11 @@ class AutoSklearnEstimator(BaseEstimator):
             Only consider the ``ensemble_nbest`` models when building an
             ensemble. Implements `Model Library Pruning` from `Getting the
             most out of ensemble selection`.
+
+        keep_just_nbest_models : bool, optional (default=True)
+            As new models are created, keep the files the n-best models, and
+            delete the others, i.e. the ones not used by the ensemble. Currently, this
+            functionality cannot be used together with shared mode.
 
         ensemble_memory_limit : int, optional (1024)
             Memory limit in MB for the ensemble building process.
@@ -229,6 +235,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.initial_configurations_via_metalearning = initial_configurations_via_metalearning
         self.ensemble_size = ensemble_size
         self.ensemble_nbest = ensemble_nbest
+        self.keep_just_nbest_models = keep_just_nbest_models
         self.ensemble_memory_limit = ensemble_memory_limit
         self.seed = seed
         self.ml_memory_limit = ml_memory_limit
@@ -293,6 +300,7 @@ class AutoSklearnEstimator(BaseEstimator):
             initial_configurations_via_metalearning,
             ensemble_size=ensemble_size,
             ensemble_nbest=self.ensemble_nbest,
+            keep_just_nbest_models=self.keep_just_nbest_models,
             ensemble_memory_limit=self.ensemble_memory_limit,
             seed=seed,
             ml_memory_limit=self.ml_memory_limit,

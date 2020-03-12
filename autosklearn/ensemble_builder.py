@@ -34,6 +34,7 @@ class EnsembleBuilder(multiprocessing.Process):
             limit: int,
             ensemble_size: int=10,
             ensemble_nbest: int=100,
+            keep_just_nbest_models: bool = True,
             seed: int=1,
             shared_mode: bool=False,
             max_iterations: int=None,
@@ -62,6 +63,10 @@ class EnsembleBuilder(multiprocessing.Process):
                 maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
             ensemble_nbest: int
                 consider only the n best prediction (wrt validation predictions)
+            keep_just_nbest_models: bool
+                As new models are created, keep the files the n-best models, and
+                delete the others, i.e. the ones not used by the ensemble. Currently, this
+                functionality cannot be used together with shared mode.
             seed: int
                 random seed
                 if set to -1, read files with any seed (e.g., for shared model mode)
@@ -80,6 +85,10 @@ class EnsembleBuilder(multiprocessing.Process):
                 read at most n new prediction files in each iteration
         """
 
+        if keep_just_nbest_models and shared_mode:
+            raise ValueError("Currently, shared_mode can't be used together with "
+                             "keep_just_nbest_models")
+
         super(EnsembleBuilder, self).__init__()
 
         self.backend = backend  # communication with filesystem
@@ -89,6 +98,7 @@ class EnsembleBuilder(multiprocessing.Process):
         self.time_limit = limit  # time limit
         self.ensemble_size = ensemble_size
         self.ensemble_nbest = ensemble_nbest  # max number of members that will be used for building the ensemble
+        self.keep_just_nbest_models = keep_just_nbest_models
         self.seed = seed
         self.shared_mode = shared_mode  # pSMAC?
         self.max_iterations = max_iterations
@@ -105,7 +115,6 @@ class EnsembleBuilder(multiprocessing.Process):
             '.auto-sklearn',
             'predictions_ensemble',
         )
-
         # validation set (public test set) -- y_true not known
         self.dir_valid = os.path.join(
             self.backend.temporary_directory,
@@ -136,6 +145,7 @@ class EnsembleBuilder(multiprocessing.Process):
         #    Y_ENSEMBLE: np.ndarray
         #    Y_VALID: np.ndarray
         #    Y_TEST: np.ndarray
+        #    }
         # }
         self.read_preds = {}
         self.last_hash = None  # hash of ensemble training data
@@ -194,42 +204,48 @@ class EnsembleBuilder(multiprocessing.Process):
                 time.sleep(self.sleep_duration)
                 continue
 
-            selected_models = self.get_n_best_preds()
-            if not selected_models:  # nothing selected
+            # Only the models with the n_best predictions are candidates
+            # to be in the ensemble
+            candidate_models = self.get_n_best_preds()
+            if not candidate_models:  # no candidates yet
                 continue
 
             # populates predictions in self.read_preds
             # reduces selected models if file reading failed
             n_sel_valid, n_sel_test = self.\
-                get_valid_test_preds(selected_keys=selected_models)
+                get_valid_test_preds(selected_keys=candidate_models)
 
-            selected_models_set = set(selected_models)
-            if selected_models_set.intersection(n_sel_test):
-                selected_models = list(selected_models_set.intersection(n_sel_test))
-            elif selected_models_set.intersection(n_sel_valid):
-                selected_models = list(selected_models_set.intersection(n_sel_valid))
+            candidate_models_set = set(candidate_models)
+            if candidate_models_set.intersection(n_sel_test):
+                candidate_models = list(candidate_models_set.intersection(n_sel_test))
+            elif candidate_models_set.intersection(n_sel_valid):
+                candidate_models = list(candidate_models_set.intersection(n_sel_valid))
             else:
-                # use selected_models only defined by ensemble data set
+                # use candidate_models only defined by ensemble data set
                 pass
 
             # train ensemble
-            ensemble = self.fit_ensemble(selected_keys=selected_models)
+            ensemble = self.fit_ensemble(selected_keys=candidate_models)
 
             if ensemble is not None:
 
                 self.predict(set_="valid",
                              ensemble=ensemble,
                              selected_keys=n_sel_valid,
-                             n_preds=len(selected_models),
+                             n_preds=len(candidate_models),
                              index_run=iteration)
                 # TODO if predictions fails, build the model again during the
                 #  next iteration!
                 self.predict(set_="test",
                              ensemble=ensemble,
                              selected_keys=n_sel_test,
-                             n_preds=len(selected_models),
+                             n_preds=len(candidate_models),
                              index_run=iteration)
                 iteration += 1
+
+                # Delete files of non-candidate models
+                if self.keep_just_nbest_models:
+                    self._delete_non_candidate_models(candidate_models)
             else:
                 time.sleep(self.sleep_duration)
 
@@ -238,6 +254,7 @@ class EnsembleBuilder(multiprocessing.Process):
             reading predictions on ensemble building data set;
             populates self.read_preds
         """
+
         self.logger.debug("Read ensemble data set predictions")
 
         if self.y_true_ensemble is None:
@@ -289,7 +306,6 @@ class EnsembleBuilder(multiprocessing.Process):
             match = self.model_fn_re.search(y_ens_fn)
             _seed = int(match.group(1))
             _num_run = int(match.group(2))
-
             if not self.read_preds.get(y_ens_fn):
                 self.read_preds[y_ens_fn] = {
                     "ens_score": -1,
@@ -378,7 +394,7 @@ class EnsembleBuilder(multiprocessing.Process):
         # number of models available
         num_keys = len(sorted_keys)
         # remove all that are at most as good as random
-        # note: dummy model must have run_id=1 (there is not run_id=0)
+        # note: dummy model must have run_id=1 (there is no run_id=0)
         dummy_scores = list(filter(lambda x: x[2] == 1, sorted_keys))
         # number of dummy models
         num_dummy = len(dummy_scores)
@@ -653,6 +669,14 @@ class EnsembleBuilder(multiprocessing.Process):
             )
             return None
         # TODO: ADD saving of predictions on "ensemble data"
+
+    def _delete_non_candidate_models(self, candidates):
+        cand_ids = [cand.replace('_', '.').split('.')[-2] for cand in candidates]
+        for model_file in self.read_preds.keys():
+            model_file_id = model_file.split('.')[-2]
+            if model_file_id not in cand_ids:
+                os.remove(model_file)
+                self.logger.info("Deleted file of non-candidate model %s", model_file)
 
     def _read_np_fn(self, fp):
         if self.precision is "16":

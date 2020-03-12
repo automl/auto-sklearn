@@ -67,6 +67,7 @@ class AutoML(BaseEstimator):
                  initial_configurations_via_metalearning=25,
                  ensemble_size=1,
                  ensemble_nbest=1,
+                 keep_just_nbest_models=True,
                  ensemble_memory_limit=1000,
                  seed=1,
                  ml_memory_limit=3072,
@@ -96,6 +97,7 @@ class AutoML(BaseEstimator):
             initial_configurations_via_metalearning
         self._ensemble_size = ensemble_size
         self._ensemble_nbest = ensemble_nbest
+        self._keep_just_nbest_models = keep_just_nbest_models
         self._ensemble_memory_limit = ensemble_memory_limit
         self._seed = seed
         self._ml_memory_limit = ml_memory_limit
@@ -137,7 +139,7 @@ class AutoML(BaseEstimator):
             raise ValueError("per_run_time_limit not of type integer, but %s" %
                              str(type(self._per_run_time_limit)))
 
-        # After assignging and checking variables...
+        # After assigning and checking variables...
         #self._backend = Backend(self._output_dir, self._tmp_dir)
 
     def fit(
@@ -626,7 +628,7 @@ class AutoML(BaseEstimator):
 
     def _get_ensemble_process(self, time_left_for_ensembles,
                               task=None, metric=None, precision=None,
-                              dataset_name=None, max_iterations=-1,
+                              dataset_name=None, max_iterations=None,
                               ensemble_nbest=None, ensemble_size=None):
 
         if task is None:
@@ -667,6 +669,7 @@ class AutoML(BaseEstimator):
             limit=time_left_for_ensembles,
             ensemble_size=ensemble_size,
             ensemble_nbest=ensemble_nbest,
+            keep_just_nbest_models=self._keep_just_nbest_models,
             seed=self._seed,
             shared_mode=self._shared_mode,
             precision=precision,
