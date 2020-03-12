@@ -1564,8 +1564,8 @@ class FunctionsTest(unittest.TestCase):
             'f1_macro': 0.032036613272311221,
             'f1_micro': 0.030303030303030276,
             'f1_weighted': 0.030441716940572849,
-            'log_loss': 0.0635047098903945,
-            'pac_score': 0.09242315351515851,
+            'log_loss': 0.06731761928478425,
+            'pac_score': 0.09778778048902437,
             'precision_macro': 0.02777777777777779,
             'precision_micro': 0.030303030303030276,
             'precision_weighted': 0.027777777777777901,
@@ -1607,7 +1607,7 @@ class FunctionsTest(unittest.TestCase):
             metric=accuracy,
         )
         rval = read_queue(self.queue)
-        self.assertEqual(len(rval), 7)
+        self.assertEqual(len(rval), 9)
         self.assertAlmostEqual(rval[-1]['loss'], 0.030303030303030276)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
 
@@ -1765,8 +1765,8 @@ class FunctionsTest(unittest.TestCase):
             'f1_macro': 0.052793650793650775,
             'f1_micro': 0.04999999999999997,
             'f1_weighted': 0.050090909090909096,
-            'log_loss': 0.1178447942249477,
-            'pac_score': 0.16685284204030987,
+            'log_loss': 0.12033827614970506,
+            'pac_score': 0.17013484996433997,
             'precision_macro': 0.04963636363636359,
             'precision_micro': 0.04999999999999997,
             'precision_weighted': 0.045757575757575664,
@@ -1801,7 +1801,7 @@ class FunctionsTest(unittest.TestCase):
     #     self.assertEqual(info[2], 1)
 
     def test_eval_partial_cv(self):
-        results = [0.09999999999999998,
+        results = [0.050000000000000044,
                    0.0,
                    0.09999999999999998,
                    0.09999999999999998,

@@ -12,20 +12,20 @@ class ExtraTreesComponentTest(BaseClassificationComponentTest):
 
     res = dict()
     res["default_iris"] = 0.96
-    res["iris_n_calls"] = 7
+    res["iris_n_calls"] = 9
     res["default_iris_iterative"] = 0.96
-    res["default_iris_proba"] = 0.11193378733757438
+    res["default_iris_proba"] = 0.10456064854241846
     res["default_iris_sparse"] = 0.74
-    res["default_digits"] = 0.9137826350941105
-    res["digits_n_calls"] = 7
-    res["default_digits_iterative"] = 0.914996964177292
-    res["default_digits_binary"] = 0.9939283545840923
-    res["default_digits_multilabel"] = 1.0
-    res["default_digits_multilabel_proba"] = 0.9942832130730052
+    res["default_digits"] = 0.9156041287188829
+    res["digits_n_calls"] = 9
+    res["default_digits_iterative"] = 0.9174256223436551
+    res["default_digits_binary"] = 0.994535519125683
+    res["default_digits_multilabel"] = 0.9983251633986928
+    res["default_digits_multilabel_proba"] = 0.997710730679746
 
     sk_mod = sklearn.ensemble.ExtraTreesClassifier
     module = ExtraTreesClassifier
     step_hyperparameter = {
         'name': 'n_estimators',
-        'value': 100,
+        'value': module.get_max_iter(),
     }

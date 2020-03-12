@@ -37,6 +37,15 @@ class BaseClassificationComponentTest(unittest.TestCase):
             if self.res.get("iris_n_calls"):
                 self.assertEqual(self.res["iris_n_calls"], n_calls)
 
+    def test_get_max_iter(self):
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
+        if not hasattr(self.module, 'iterative_fit'):
+            return
+
+        self.module.get_max_iter()
+
     def test_default_iris_iterative_fit(self):
 
         if self.__class__ == BaseClassificationComponentTest:

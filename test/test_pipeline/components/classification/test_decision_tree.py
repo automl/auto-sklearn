@@ -6,7 +6,7 @@ from autosklearn.pipeline.components.classification.decision_tree import \
 from .test_base import BaseClassificationComponentTest
 
 
-class DecisionTreetComponentTest(BaseClassificationComponentTest):
+class DecisionTreeComponentTest(BaseClassificationComponentTest):
 
     __test__ = True
 
