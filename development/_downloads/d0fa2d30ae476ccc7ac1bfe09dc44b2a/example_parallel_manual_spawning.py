@@ -71,6 +71,7 @@ def get_spawn_classifier(X_train, y_train):
             ml_memory_limit=1024,
             # MB, memory limit imposed on each call to a ML algorithm
             shared_mode=True,  # tmp folder will be shared between seeds
+            keep_just_nbest_models=False,
             tmp_folder=tmp_folder,
             output_folder=output_folder,
             delete_tmp_folder_after_terminate=False,
@@ -110,6 +111,7 @@ def main():
         per_run_time_limit=15,
         ml_memory_limit=1024,
         shared_mode=True,
+        keep_just_nbest_models=False,
         ensemble_size=50,
         ensemble_nbest=200,
         tmp_folder=tmp_folder,
