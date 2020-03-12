@@ -38,7 +38,7 @@ class SGD(
 
     @staticmethod
     def get_max_iter():
-        return 512
+        return 1024
 
     def iterative_fit(self, X, y, n_iter=2, refit=False):
         from sklearn.linear_model.stochastic_gradient import SGDRegressor

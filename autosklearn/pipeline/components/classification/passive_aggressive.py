@@ -28,7 +28,7 @@ class PassiveAggressive(
 
     @staticmethod
     def get_max_iter():
-        return 1000
+        return 1024
 
     def iterative_fit(self, X, y, n_iter=2, refit=False, sample_weight=None):
         from sklearn.linear_model.passive_aggressive import \
