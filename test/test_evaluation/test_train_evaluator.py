@@ -813,6 +813,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         mock.estimator_supports_iterative_fit.return_value = True
         mock.fit_transformer.return_value = ('Xt', {})
         mock.get_additional_run_info.return_value = {'val': 14678}
+        mock.get_max_iter.return_value = 512
         loss_mock.return_value = 0.5
 
         D = get_binary_classification_datamanager()

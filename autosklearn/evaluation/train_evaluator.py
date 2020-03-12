@@ -479,8 +479,7 @@ class TrainEvaluator(AbstractEvaluator):
             or self.budget_type == 'mixed' and model.estimator_supports_iterative_fit()
         ):
             if model.estimator_supports_iterative_fit():
-                #budget_factor = model.get_budget_factor
-                budget_factor = 512
+                budget_factor = model.get_max_iter()
                 Xt, fit_params = model.fit_transformer(self.X_train[train_indices],
                                                        self.Y_train[train_indices])
 
