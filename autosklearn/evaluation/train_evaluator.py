@@ -814,7 +814,9 @@ def eval_partial_cv(
         exclude,
         disable_file_output,
         init_params=None,
-        iterative=False
+        iterative=False,
+        budget=None,
+        budget_type=None,
 ):
     instance = json.loads(instance) if instance is not None else {}
     fold = instance['fold']
@@ -834,6 +836,8 @@ def eval_partial_cv(
         exclude=exclude,
         disable_file_output=disable_file_output,
         init_params=init_params,
+        budget=budget,
+        budget_type=budget_type,
     )
 
     evaluator.partial_fit_predict_and_loss(fold=fold, iterative=iterative)
