@@ -30,7 +30,6 @@ class TestEvaluator(AbstractEvaluator):
             seed=seed,
             output_y_hat_optimization=False,
             num_run=-1,
-            subsample=None,
             include=include,
             exclude=exclude,
             disable_file_output= disable_file_output,
@@ -93,7 +92,8 @@ class TestEvaluator(AbstractEvaluator):
 # Has a stupid name so pytest doesn't regard it as a test
 def eval_t(queue, config, backend, metric, seed, num_run, instance,
            all_scoring_functions, output_y_hat_optimization, include,
-           exclude, disable_file_output, init_params=None):
+           exclude, disable_file_output, init_params=None, budget_type=None,
+           budget=None):
     evaluator = TestEvaluator(configuration=config,
                               backend=backend, metric=metric, seed=seed,
                               queue=queue,

@@ -74,7 +74,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    all_scoring_functions=False,
                                    output_y_hat_optimization=True,
                                    metric=accuracy,
-                                   subsample=50)
+                                   )
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -558,16 +558,15 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 10},
-                                   subsample=10,
                                    metric=accuracy)
         train_indices = np.arange(69, dtype=int)
-        train_indices1 = evaluator.subsample_indices(train_indices)
+        train_indices1 = evaluator.subsample_indices(train_indices, 0.1449)
         evaluator.subsample = 20
-        train_indices2 = evaluator.subsample_indices(train_indices)
+        train_indices2 = evaluator.subsample_indices(train_indices, 0.2898)
         evaluator.subsample = 30
-        train_indices3 = evaluator.subsample_indices(train_indices)
+        train_indices3 = evaluator.subsample_indices(train_indices, 0.4347)
         evaluator.subsample = 67
-        train_indices4 = evaluator.subsample_indices(train_indices)
+        train_indices4 = evaluator.subsample_indices(train_indices, 0.971)
         # Common cases
         for ti in train_indices1:
             self.assertIn(ti, train_indices2)
@@ -577,19 +576,17 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             self.assertIn(ti, train_indices4)
 
         # Corner cases
-        evaluator.subsample = 0
         self.assertRaisesRegex(
-            ValueError, 'train_size=0 should be either positive and smaller than the '
+            ValueError, 'train_size=0.0 should be either positive and smaller than the '
             r'number of samples 69 or a float in the \(0, 1\) range',
-            evaluator.subsample_indices, train_indices)
+            evaluator.subsample_indices, train_indices, 0.0)
         # With equal or greater it should return a non-shuffled array of indices
-        evaluator.subsample = 69
-        train_indices5 = evaluator.subsample_indices(train_indices)
+        train_indices5 = evaluator.subsample_indices(train_indices, 1.0)
         self.assertTrue(np.all(train_indices5 == train_indices))
         evaluator.subsample = 68
         self.assertRaisesRegex(
             ValueError, 'The test_size = 1 should be greater or equal to the number of '
-            'classes = 2', evaluator.subsample_indices, train_indices)
+            'classes = 2', evaluator.subsample_indices, train_indices, 0.9999)
 
     @unittest.mock.patch('autosklearn.util.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
@@ -601,25 +598,25 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 10},
-                                   subsample=30,
                                    metric=accuracy)
         train_indices = np.arange(69, dtype=int)
-        train_indices3 = evaluator.subsample_indices(train_indices)
+        train_indices3 = evaluator.subsample_indices(train_indices, subsample=0.4347)
         evaluator.subsample = 67
-        train_indices4 = evaluator.subsample_indices(train_indices)
+        train_indices4 = evaluator.subsample_indices(train_indices, subsample=0.4347)
         # Common cases
         for ti in train_indices3:
             self.assertIn(ti, train_indices4)
 
         # Corner cases
-        evaluator.subsample = 0
         self.assertRaisesRegex(
-            ValueError, 'train_size=0 should be either positive and smaller than the '
+            ValueError, 'train_size=0.0 should be either positive and smaller than the '
             r'number of samples 69 or a float in the \(0, 1\) range',
-            evaluator.subsample_indices, train_indices)
+            evaluator.subsample_indices, train_indices, 0.0)
+        self.assertRaisesRegex(
+            ValueError, 'Subsample must not be larger than 1, but is 1.000100',
+            evaluator.subsample_indices, train_indices, 1.0001)
         # With equal or greater it should return a non-shuffled array of indices
-        evaluator.subsample = 69
-        train_indices6 = evaluator.subsample_indices(train_indices)
+        train_indices6 = evaluator.subsample_indices(train_indices, 1.0)
         np.testing.assert_allclose(train_indices6, train_indices)
 
     @unittest.mock.patch('autosklearn.util.backend.Backend')
@@ -648,10 +645,10 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             self.assertEqual(0.9, Y_optimization_pred[i][1])
 
     @unittest.mock.patch.object(TrainEvaluator, 'file_output')
-    @unittest.mock.patch.object(TrainEvaluator, '_partial_fit_and_predict')
+    @unittest.mock.patch.object(TrainEvaluator, '_partial_fit_and_predict_standard')
     @unittest.mock.patch('autosklearn.util.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
-    def test_fit_predict_and_loss_additional_run_info(
+    def test_fit_predict_and_loss_standard_additional_run_info(
         self, mock, backend_mock, _partial_fit_and_predict_mock,
             file_output_mock,
     ):
@@ -679,7 +676,12 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         )
         evaluator.Y_targets[0] = np.array([1] * 23)
         evaluator.Y_train_targets = np.array([1] * 69)
-        evaluator.fit_predict_and_loss(iterative=False)
+        rval = evaluator.fit_predict_and_loss(iterative=False)
+        self.assertIsNone(rval)
+        element = queue_.get()
+        self.assertEqual(element['status'], StatusType.SUCCESS)
+        self.assertEqual(element['additional_run_info']['a'], 5)
+        self.assertEqual(_partial_fit_and_predict_mock.call_count, 1)
 
         class SideEffect(object):
             def __init__(self):
@@ -715,11 +717,168 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.Y_targets[1] = np.array([1] * 34)
         evaluator.Y_train_targets = np.array([1] * 69)
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             TAEAbortException,
+            'Found additional run info "{\'a\': 5}" in fold 1, '
+            'but cannot handle additional run info if fold >= 1.',
             evaluator.fit_predict_and_loss,
             iterative=False
         )
+
+    @unittest.mock.patch.object(TrainEvaluator, '_loss')
+    @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
+    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_fit_predict_and_loss_iterative_additional_run_info(
+            self, mock, backend_mock, finish_up_mock, loss_mock,
+    ):
+        class Counter:
+            counter = 0
+            def __call__(self):
+                self.counter += 1
+                return False if self.counter <= 1 else True
+        mock.estimator_supports_iterative_fit.return_value = True
+        mock.fit_transformer.return_value = ('Xt', {})
+        mock.configuration_fully_fitted.side_effect = Counter()
+        mock.get_additional_run_info.return_value = 14678
+        loss_mock.return_value = 0.5
+
+        D = get_binary_classification_datamanager()
+        backend_mock.load_datamanager.return_value = D
+        mock.side_effect = lambda **kwargs: mock
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        queue_ = multiprocessing.Queue()
+
+        evaluator = TrainEvaluator(
+            backend_mock, queue_,
+            configuration=configuration,
+            resampling_strategy='holdout',
+            output_y_hat_optimization=False,
+            metric=accuracy,
+        )
+        evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
+        evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
+        rval = evaluator.fit_predict_and_loss(iterative=True)
+        self.assertIsNone(rval)
+        self.assertEqual(finish_up_mock.call_count, 1)
+        self.assertEqual(finish_up_mock.call_args[1]['additional_run_info'], 14678)
+
+    @unittest.mock.patch.object(TrainEvaluator, '_loss')
+    @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
+    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_fit_predict_and_loss_iterative_noniterativemodel_additional_run_info(
+            self, mock, backend_mock, finish_up_mock, loss_mock,
+    ):
+        mock.estimator_supports_iterative_fit.return_value = False
+        mock.fit_transformer.return_value = ('Xt', {})
+        mock.get_additional_run_info.return_value = 14678
+        loss_mock.return_value = 0.5
+
+        D = get_binary_classification_datamanager()
+        backend_mock.load_datamanager.return_value = D
+        mock.side_effect = lambda **kwargs: mock
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        queue_ = multiprocessing.Queue()
+
+        evaluator = TrainEvaluator(
+            backend_mock, queue_,
+            configuration=configuration,
+            resampling_strategy='holdout',
+            output_y_hat_optimization=False,
+            metric=accuracy,
+        )
+        evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
+        evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
+        rval = evaluator.fit_predict_and_loss(iterative=True)
+        self.assertIsNone(rval)
+        self.assertEqual(finish_up_mock.call_count, 1)
+        self.assertEqual(finish_up_mock.call_args[1]['additional_run_info'], 14678)
+
+    @unittest.mock.patch.object(TrainEvaluator, '_loss')
+    @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
+    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_fit_predict_and_loss_budget_additional_run_info(
+            self, mock, backend_mock, finish_up_mock, loss_mock,
+    ):
+        class Counter:
+            counter = 0
+            def __call__(self):
+                self.counter += 1
+                return False if self.counter <= 1 else True
+        mock.configuration_fully_fitted.side_effect = Counter()
+        mock.estimator_supports_iterative_fit.return_value = True
+        mock.fit_transformer.return_value = ('Xt', {})
+        mock.get_additional_run_info.return_value = {'val': 14678}
+        mock.get_max_iter.return_value = 512
+        loss_mock.return_value = 0.5
+
+        D = get_binary_classification_datamanager()
+        backend_mock.load_datamanager.return_value = D
+        mock.side_effect = lambda **kwargs: mock
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        queue_ = multiprocessing.Queue()
+
+        evaluator = TrainEvaluator(
+            backend_mock, queue_,
+            configuration=configuration,
+            resampling_strategy='holdout',
+            output_y_hat_optimization=False,
+            metric=accuracy,
+            budget_type='iterations',
+            budget=50,
+        )
+        evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
+        evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
+        rval = evaluator.fit_predict_and_loss(iterative=False)
+        self.assertIsNone(rval)
+        self.assertEqual(finish_up_mock.call_count, 1)
+        self.assertEqual(finish_up_mock.call_args[1]['additional_run_info'], {'val': 14678})
+
+    @unittest.mock.patch.object(TrainEvaluator, '_loss')
+    @unittest.mock.patch.object(TrainEvaluator, 'finish_up')
+    @unittest.mock.patch('autosklearn.util.backend.Backend')
+    @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
+    def test_fit_predict_and_loss_budget_2_additional_run_info(
+            self, mock, backend_mock, finish_up_mock, loss_mock,
+    ):
+        class Counter:
+            counter = 0
+            def __call__(self):
+                self.counter += 1
+                return False if self.counter <= 1 else True
+        mock.configuration_fully_fitted.side_effect = Counter()
+        mock.estimator_supports_iterative_fit.return_value = True
+        mock.fit_transformer.return_value = ('Xt', {})
+        mock.get_additional_run_info.return_value = {'val': 14678}
+        loss_mock.return_value = 0.5
+
+        D = get_binary_classification_datamanager()
+        backend_mock.load_datamanager.return_value = D
+        mock.side_effect = lambda **kwargs: mock
+
+        configuration = unittest.mock.Mock(spec=Configuration)
+        queue_ = multiprocessing.Queue()
+
+        evaluator = TrainEvaluator(
+            backend_mock, queue_,
+            configuration=configuration,
+            resampling_strategy='holdout',
+            output_y_hat_optimization=False,
+            metric=accuracy,
+            budget_type='subsample',
+            budget=50,
+        )
+        evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
+        evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
+        rval = evaluator.fit_predict_and_loss(iterative=False)
+        self.assertIsNone(rval)
+        self.assertEqual(finish_up_mock.call_count, 1)
+        self.assertEqual(finish_up_mock.call_args[1]['additional_run_info'], {'val': 14678})
 
     def test_get_results(self):
         backend_mock = unittest.mock.Mock(spec=backend.Backend)
@@ -1406,8 +1565,8 @@ class FunctionsTest(unittest.TestCase):
             'f1_macro': 0.032036613272311221,
             'f1_micro': 0.030303030303030276,
             'f1_weighted': 0.030441716940572849,
-            'log_loss': 0.0635047098903945,
-            'pac_score': 0.09242315351515851,
+            'log_loss': 0.06731761928478425,
+            'pac_score': 0.09778778048902437,
             'precision_macro': 0.02777777777777779,
             'precision_micro': 0.030303030303030276,
             'precision_weighted': 0.027777777777777901,
@@ -1431,15 +1590,6 @@ class FunctionsTest(unittest.TestCase):
         self.assertAlmostEqual(rval[0]['loss'], 0.030303030303030276, places=3)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
 
-    # def test_eval_holdout_on_subset(self):
-    #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)
-    #     eval_holdout(self.queue, self.configuration, self.data,
-    #                  backend_api, 1, 1, 43, True, False, True, None, None,
-    #                  False)
-    #     info = self.queue.get()
-    #     self.assertAlmostEqual(info[1], 0.1)
-    #     self.assertEqual(info[2], 1)
-
     def test_eval_holdout_iterative_fit_no_timeout(self):
         eval_iterative_holdout(
             queue=self.queue,
@@ -1458,19 +1608,114 @@ class FunctionsTest(unittest.TestCase):
             metric=accuracy,
         )
         rval = read_queue(self.queue)
-        self.assertEqual(len(rval), 7)
+        self.assertEqual(len(rval), 9)
         self.assertAlmostEqual(rval[-1]['loss'], 0.030303030303030276)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
 
-    # def test_eval_holdout_iterative_fit_on_subset_no_timeout(self):
-    #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)
-    #     eval_iterative_holdout(self.queue, self.configuration,
-    #                            self.data, backend_api, 1, 1, 43, True, False,
-    #                            True, None, None, False)
-    #
-    #     info = self.queue.get()
-    #     self.assertAlmostEqual(info[1], 0.1)
-    #     self.assertEqual(info[2], 1)
+    def test_eval_holdout_budget_iterations(self):
+        eval_holdout(
+            queue=self.queue,
+            config=self.configuration,
+            backend=self.backend,
+            resampling_strategy='holdout',
+            resampling_strategy_args=None,
+            seed=1,
+            num_run=1,
+            all_scoring_functions=False,
+            output_y_hat_optimization=True,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name,
+            metric=accuracy,
+            budget=1,
+            budget_type='iterations'
+        )
+        info = read_queue(self.queue)
+        self.assertEqual(len(info), 1)
+        self.assertAlmostEqual(info[0]['loss'], 0.06060606060606055, places=3)
+        self.assertEqual(info[0]['status'], StatusType.SUCCESS)
+        self.assertNotIn('bac_metric', info[0]['additional_run_info'])
+
+    def test_eval_holdout_budget_subsample(self):
+        eval_holdout(
+            queue=self.queue,
+            config=self.configuration,
+            backend=self.backend,
+            resampling_strategy='holdout',
+            resampling_strategy_args=None,
+            seed=1,
+            num_run=1,
+            all_scoring_functions=False,
+            output_y_hat_optimization=True,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name,
+            metric=accuracy,
+            budget=30,
+            budget_type='subsample'
+        )
+        info = read_queue(self.queue)
+        self.assertEqual(len(info), 1)
+        self.assertAlmostEqual(info[0]['loss'], 0.0)
+        self.assertEqual(info[0]['status'], StatusType.SUCCESS)
+        self.assertNotIn('bac_metric', info[0]['additional_run_info'])
+
+    def test_eval_holdout_budget_mixed_iterations(self):
+        eval_holdout(
+            queue=self.queue,
+            config=self.configuration,
+            backend=self.backend,
+            resampling_strategy='holdout',
+            resampling_strategy_args=None,
+            seed=1,
+            num_run=1,
+            all_scoring_functions=False,
+            output_y_hat_optimization=True,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name,
+            metric=accuracy,
+            budget=1,
+            budget_type='mixed'
+        )
+        info = read_queue(self.queue)
+        self.assertEqual(len(info), 1)
+        self.assertAlmostEqual(info[0]['loss'], 0.06060606060606055)
+        self.assertEqual(info[0]['status'], StatusType.SUCCESS)
+        self.assertNotIn('bac_metric', info[0]['additional_run_info'])
+
+    def test_eval_holdout_budget_mixed_subsample(self):
+        configuration = get_configuration_space(
+            exclude_estimators=['random_forest'],
+            info={'task': MULTICLASS_CLASSIFICATION, 'is_sparse': False},
+        ).get_default_configuration()
+        self.assertEqual(configuration['classifier:__choice__'], 'liblinear_svc')
+        eval_holdout(
+            queue=self.queue,
+            config=configuration,
+            backend=self.backend,
+            resampling_strategy='holdout',
+            resampling_strategy_args=None,
+            seed=1,
+            num_run=1,
+            all_scoring_functions=False,
+            output_y_hat_optimization=True,
+            include=None,
+            exclude={'classifier': ['random_forest']},
+            disable_file_output=False,
+            instance=self.dataset_name,
+            metric=accuracy,
+            budget=40,
+            budget_type='mixed'
+        )
+        info = read_queue(self.queue)
+        self.assertEqual(len(info), 1)
+        self.assertAlmostEqual(info[0]['loss'], 0.06060606060606055)
+        self.assertEqual(info[0]['status'], StatusType.SUCCESS)
+        self.assertNotIn('bac_metric', info[0]['additional_run_info'])
 
     def test_eval_cv(self):
         eval_cv(
@@ -1521,8 +1766,8 @@ class FunctionsTest(unittest.TestCase):
             'f1_macro': 0.052793650793650775,
             'f1_micro': 0.04999999999999997,
             'f1_weighted': 0.050090909090909096,
-            'log_loss': 0.1178447942249477,
-            'pac_score': 0.16685284204030987,
+            'log_loss': 0.12033827614970506,
+            'pac_score': 0.17013484996433997,
             'precision_macro': 0.04963636363636359,
             'precision_micro': 0.04999999999999997,
             'precision_weighted': 0.045757575757575664,
@@ -1557,7 +1802,7 @@ class FunctionsTest(unittest.TestCase):
     #     self.assertEqual(info[2], 1)
 
     def test_eval_partial_cv(self):
-        results = [0.09999999999999998,
+        results = [0.050000000000000044,
                    0.0,
                    0.09999999999999998,
                    0.09999999999999998,

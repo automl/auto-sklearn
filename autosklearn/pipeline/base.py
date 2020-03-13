@@ -117,6 +117,12 @@ class BasePipeline(Pipeline):
     def estimator_supports_iterative_fit(self):
         return self._final_estimator.estimator_supports_iterative_fit()
 
+    def get_max_iter(self):
+        if self.estimator_supports_iterative_fit():
+            return self._final_estimator.get_max_iter()
+        else:
+            raise NotImplementedError()
+
     def configuration_fully_fitted(self):
         return self._final_estimator.configuration_fully_fitted()
 

@@ -100,7 +100,7 @@ class FunctionsTest(unittest.TestCase):
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
-        self.assertAlmostEqual(rval[0]['loss'], 0.08)
+        self.assertAlmostEqual(rval[0]['loss'], 0.040000000000000036)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
         self.assertNotIn('bac_metric', rval[0]['additional_run_info'])
 
@@ -121,19 +121,20 @@ class FunctionsTest(unittest.TestCase):
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
 
-        fixture = {'accuracy': 0.08,
-                   'balanced_accuracy': 0.05555555555555547,
-                   'f1_macro': 0.06734006734006737,
-                   'f1_micro': 0.08,
-                   'f1_weighted': 0.07919191919191915,
-                   'log_loss': 1.128776115477085,
-                   'pac_score': 0.187005982641133,
-                   'precision_macro': 0.06666666666666676,
-                   'precision_micro': 0.08,
-                   'precision_weighted': 0.064,
-                   'recall_macro': 0.05555555555555547,
-                   'recall_micro': 0.08,
-                   'recall_weighted': 0.08,
+        # Note: All metric here should be minimized
+        fixture = {'accuracy': 0.040000000000000036,
+                   'balanced_accuracy': 0.02777777777777779,
+                   'f1_macro': 0.0341005967604433,
+                   'f1_micro': 0.040000000000000036,
+                   'f1_weighted': 0.039693094629155934,
+                   'log_loss': 1.148586485311389,
+                   'pac_score': 0.21369631163072578,
+                   'precision_macro': 0.03703703703703709,
+                   'precision_micro': 0.040000000000000036,
+                   'precision_weighted': 0.03555555555555556,
+                   'recall_macro': 0.02777777777777779,
+                   'recall_micro': 0.040000000000000036,
+                   'recall_weighted': 0.040000000000000036,
                    'num_run': -1}
 
         additional_run_info = rval[0]['additional_run_info']
@@ -142,5 +143,5 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(len(additional_run_info), len(fixture) + 1,
                          msg=sorted(additional_run_info.items()))
         self.assertIn('duration', additional_run_info)
-        self.assertAlmostEqual(rval[0]['loss'], 0.08)
+        self.assertAlmostEqual(rval[0]['loss'], 0.040000000000000036)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)

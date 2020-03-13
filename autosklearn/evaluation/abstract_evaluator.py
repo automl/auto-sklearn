@@ -100,7 +100,6 @@ class AbstractEvaluator(object):
                  seed=1,
                  output_y_hat_optimization=True,
                  num_run=None,
-                 subsample=None,
                  include=None,
                  exclude=None,
                  disable_file_output=False,
@@ -167,8 +166,6 @@ class AbstractEvaluator(object):
         if num_run is None:
             num_run = 0
         self.num_run = num_run
-
-        self.subsample = subsample
 
         logger_name = '%s(%d):%s' % (self.__class__.__name__.split('.')[-1],
                                      self.seed, self.datamanager.name)

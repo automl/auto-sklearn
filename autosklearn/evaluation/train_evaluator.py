@@ -53,7 +53,6 @@ def _get_y_array(y, task_type):
         return y
 
 
-
 class TrainEvaluator(AbstractEvaluator):
     def __init__(self, backend, queue, metric,
                  configuration=None,
@@ -63,12 +62,13 @@ class TrainEvaluator(AbstractEvaluator):
                  resampling_strategy=None,
                  resampling_strategy_args=None,
                  num_run=None,
-                 subsample=None,
+                 budget=None,
+                 budget_type=None,
                  keep_models=False,
                  include=None,
                  exclude=None,
                  disable_file_output=False,
-                 init_params=None):
+                 init_params=None,):
         super().__init__(
             backend=backend,
             queue=queue,
@@ -78,7 +78,6 @@ class TrainEvaluator(AbstractEvaluator):
             seed=seed,
             output_y_hat_optimization=output_y_hat_optimization,
             num_run=num_run,
-            subsample=subsample,
             include=include,
             exclude=exclude,
             disable_file_output=disable_file_output,
@@ -90,17 +89,17 @@ class TrainEvaluator(AbstractEvaluator):
             self.resampling_strategy_args = {}
         else:
             self.resampling_strategy_args = resampling_strategy_args
-        self.cv = self.get_splitter(self.datamanager)
-        self.cv_folds = self.cv.get_n_splits(
+        self.splitter = self.get_splitter(self.datamanager)
+        self.num_cv_folds = self.splitter.get_n_splits(
             groups=self.resampling_strategy_args.get('groups')
         )
         self.X_train = self.datamanager.data['X_train']
         self.Y_train = self.datamanager.data['Y_train']
         self.Y_optimization = None
-        self.Y_targets = [None] * self.cv_folds
+        self.Y_targets = [None] * self.num_cv_folds
         self.Y_train_targets = np.ones(self.Y_train.shape) * np.NaN
-        self.models = [None] * self.cv_folds
-        self.indices = [None] * self.cv_folds
+        self.models = [None] * self.num_cv_folds
+        self.indices = [None] * self.num_cv_folds
 
         # Necessary for full CV. Makes full CV not write predictions if only
         # a subset of folds is evaluated but time is up. Complicated, because
@@ -109,32 +108,39 @@ class TrainEvaluator(AbstractEvaluator):
         self.partial = True
         self.keep_models = keep_models
 
-    def fit_predict_and_loss(self, iterative=False):
-        if iterative:
-            if self.cv_folds > 1:
-                raise ValueError('Cannot use partial fitting together with full'
-                                 'cross-validation!')
+        self.budget = budget
+        self.budget_type = budget_type
 
-            for train_split, test_split in self.cv.split(
+    def fit_predict_and_loss(self, iterative=False):
+        """Fit, predict and compute the loss for cross-validation and
+        holdout (both iterative and non-iterative)"""
+
+        if iterative:
+            if self.num_cv_folds > 1:
+                raise ValueError('Cannot use iterative fitting together with full'
+                                 'cross-validation!')
+            elif self.budget_type is not None:
+                raise ValueError('Cannot use a budget together with iterative optimization.')
+
+            for train_split, test_split in self.splitter.split(
                 self.X_train, self.Y_train,
                 groups=self.resampling_strategy_args.get('groups')
             ):
                 self.Y_optimization = self.Y_train[test_split]
                 self.Y_actual_train = self.Y_train[train_split]
-                self._partial_fit_and_predict(0, train_indices=train_split,
-                                              test_indices=test_split,
-                                              iterative=True)
+                self._partial_fit_and_predict_iterative(0, train_indices=train_split,
+                                                        test_indices=test_split,)
 
         else:
 
             self.partial = False
 
-            Y_train_pred = [None] * self.cv_folds
-            Y_optimization_pred = [None] * self.cv_folds
-            Y_valid_pred = [None] * self.cv_folds
-            Y_test_pred = [None] * self.cv_folds
+            Y_train_pred = [None] * self.num_cv_folds
+            Y_optimization_pred = [None] * self.num_cv_folds
+            Y_valid_pred = [None] * self.num_cv_folds
+            Y_test_pred = [None] * self.num_cv_folds
             additional_run_info = None
-            train_splits = [None] * self.cv_folds
+            train_splits = [None] * self.num_cv_folds
 
             y = _get_y_array(self.Y_train, self.task_type)
 
@@ -146,7 +152,7 @@ class TrainEvaluator(AbstractEvaluator):
             # TODO: mention that no additional run info is possible in this
             # case! -> maybe remove full CV from the train evaluator anyway and
             # make the user implement this!
-            for i, (train_split, test_split) in enumerate(self.cv.split(
+            for i, (train_split, test_split) in enumerate(self.splitter.split(
                     self.X_train, y,
                     groups=self.resampling_strategy_args.get('groups')
             )):
@@ -155,18 +161,30 @@ class TrainEvaluator(AbstractEvaluator):
                 # not a boolean array (to allow indexed assignement of
                 # training data later).
 
-                (
-                    train_pred,
-                    opt_pred,
-                    valid_pred,
-                    test_pred,
-                    additional_run_info,
-                )= (
-                    self._partial_fit_and_predict(
-                       i, train_indices=train_split, test_indices=test_split
+                if self.budget_type is None:
+                    (
+                        train_pred,
+                        opt_pred,
+                        valid_pred,
+                        test_pred,
+                        additional_run_info,
+                    )= (
+                        self._partial_fit_and_predict_standard(
+                           i, train_indices=train_split, test_indices=test_split
+                        )
                     )
-                )
-                assert len(opt_pred) == len(test_split), (len(opt_pred), len(test_split))
+                else:
+                    (
+                        train_pred,
+                        opt_pred,
+                        valid_pred,
+                        test_pred,
+                        additional_run_info,
+                    ) = (
+                        self._partial_fit_and_predict_budget(
+                            i, train_indices=train_split, test_indices=test_split
+                        )
+                    )
 
                 if (
                     additional_run_info is not None
@@ -215,7 +233,7 @@ class TrainEvaluator(AbstractEvaluator):
             # then train_loss is computed using the target metric (self.metric).
             if all(isinstance(elem, dict) for elem in train_losses):
                 train_loss = np.average([train_losses[i][str(self.metric)]
-                                         for i in range(self.cv_folds)],
+                                         for i in range(self.num_cv_folds)],
                                         weights=train_fold_weights,
                                         )
             else:
@@ -227,7 +245,7 @@ class TrainEvaluator(AbstractEvaluator):
                 opt_loss = {}
                 for metric in opt_losses[0].keys():
                     opt_loss[metric] = np.average([opt_losses[i][metric]
-                                                   for i in range(self.cv_folds)],
+                                                   for i in range(self.num_cv_folds)],
                                                   weights=opt_fold_weights,
                                                   )
             else:
@@ -237,14 +255,14 @@ class TrainEvaluator(AbstractEvaluator):
             Y_train_targets = self.Y_train_targets
 
             Y_optimization_pred = np.concatenate(
-                [Y_optimization_pred[i] for i in range(self.cv_folds)
+                [Y_optimization_pred[i] for i in range(self.num_cv_folds)
                  if Y_optimization_pred[i] is not None])
-            Y_targets = np.concatenate([Y_targets[i] for i in range(self.cv_folds)
+            Y_targets = np.concatenate([Y_targets[i] for i in range(self.num_cv_folds)
                                         if Y_targets[i] is not None])
 
             if self.X_valid is not None:
                 Y_valid_pred = np.array([Y_valid_pred[i]
-                                         for i in range(self.cv_folds)
+                                         for i in range(self.num_cv_folds)
                                          if Y_valid_pred[i] is not None])
                 # Average the predictions of several models
                 if len(Y_valid_pred.shape) == 3:
@@ -254,7 +272,7 @@ class TrainEvaluator(AbstractEvaluator):
 
             if self.X_test is not None:
                 Y_test_pred = np.array([Y_test_pred[i]
-                                        for i in range(self.cv_folds)
+                                        for i in range(self.num_cv_folds)
                                         if Y_test_pred[i] is not None])
                 # Average the predictions of several models
                 if len(Y_test_pred.shape) == 3:
@@ -266,7 +284,7 @@ class TrainEvaluator(AbstractEvaluator):
             loss = self._loss(Y_targets, Y_optimization_pred)
             self.Y_actual_train = Y_train_targets
 
-            if self.cv_folds > 1:
+            if self.num_cv_folds > 1:
                 self.model = self._get_model()
                 # Bad style, but necessary for unit testing that self.model is
                 # actually a new model
@@ -284,12 +302,14 @@ class TrainEvaluator(AbstractEvaluator):
             )
 
     def partial_fit_predict_and_loss(self, fold, iterative=False):
-        if fold > self.cv_folds:
+        """Fit, predict and compute the loss for eval_partial_cv (both iterative and normal)"""
+
+        if fold > self.num_cv_folds:
             raise ValueError('Cannot evaluate a fold %d which is higher than '
-                             'the number of folds %d.' % (fold, self.cv_folds))
+                             'the number of folds %d.' % (fold, self.num_cv_folds))
 
         y = _get_y_array(self.Y_train, self.task_type)
-        for i, (train_split, test_split) in enumerate(self.cv.split(
+        for i, (train_split, test_split) in enumerate(self.splitter.split(
                 self.X_train, y,
                 groups=self.resampling_strategy_args.get('groups')
         )):
@@ -298,27 +318,27 @@ class TrainEvaluator(AbstractEvaluator):
             else:
                 break
 
-        if self.cv_folds > 1:
+        if self.num_cv_folds > 1:
             self.Y_optimization = self.Y_train[test_split]
             self.Y_actual_train = self.Y_train[train_split]
 
         if iterative:
-            self._partial_fit_and_predict(
-                fold, train_indices=train_split, test_indices=test_split,
-                iterative=iterative)
+            self._partial_fit_and_predict_iterative(
+                fold, train_indices=train_split, test_indices=test_split,)
+        elif self.budget_type is not None:
+            raise NotImplementedError()
         else:
             train_pred, opt_pred, valid_pred, test_pred, additional_run_info = (
-                self._partial_fit_and_predict(
+                self._partial_fit_and_predict_standard(
                     fold,
                     train_indices=train_split,
                     test_indices=test_split,
-                    iterative=iterative,
                 )
             )
             train_loss = self._loss(self.Y_actual_train, train_pred)
             loss = self._loss(self.Y_targets[fold], opt_pred)
 
-            if self.cv_folds > 1:
+            if self.num_cv_folds > 1:
                 self.model = self._get_model()
                 # Bad style, but necessary for unit testing that self.model is
                 # actually a new model
@@ -335,99 +355,53 @@ class TrainEvaluator(AbstractEvaluator):
                 additional_run_info=None,
             )
 
-    def _partial_fit_and_predict(self, fold, train_indices, test_indices,
-                                 iterative=False):
+    def _partial_fit_and_predict_iterative(self, fold, train_indices, test_indices):
         model = self._get_model()
-
-        train_indices = self.subsample_indices(train_indices)
 
         self.indices[fold] = ((train_indices, test_indices))
 
-        if iterative:
+        # Do only output the files in the case of iterative holdout,
+        # In case of iterative partial cv, no file output is needed
+        # because ensembles cannot be built
+        file_output = True if self.num_cv_folds == 1 else False
 
-            # Do only output the files in the case of iterative holdout,
-            # In case of iterative partial cv, no file output is needed
-            # because ensembles cannot be built
-            file_output = True if self.cv_folds == 1 else False
+        if model.estimator_supports_iterative_fit():
+            Xt, fit_params = model.fit_transformer(self.X_train[train_indices],
+                                                   self.Y_train[train_indices])
 
-            if model.estimator_supports_iterative_fit():
-                Xt, fit_params = model.fit_transformer(self.X_train[train_indices],
-                                                       self.Y_train[train_indices])
+            self.Y_train_targets[train_indices] = self.Y_train[train_indices]
 
-                self.Y_train_targets[train_indices] = self.Y_train[train_indices]
-
-                iteration = 1
-                total_n_iteration = 0
-                while (
-                    not model.configuration_fully_fitted()
-                ):
-                    n_iter = int(2**iteration/2) if iteration > 1 else 2
-                    total_n_iteration += n_iter
-                    model.iterative_fit(Xt, self.Y_train[train_indices],
-                                        n_iter=n_iter, **fit_params)
-                    (
-                        Y_train_pred,
-                        Y_optimization_pred,
-                        Y_valid_pred,
-                        Y_test_pred
-                    ) = self._predict(
-                        model,
-                        train_indices=train_indices,
-                        test_indices=test_indices,
-                    )
-
-                    if self.cv_folds == 1:
-                        self.model = model
-
-                    train_loss = self._loss(self.Y_train[train_indices],
-                                            Y_train_pred,
-                                            )
-                    loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
-                    additional_run_info = model.get_additional_run_info()
-
-                    if model.configuration_fully_fitted():
-                        final_call = True
-                    else:
-                        final_call = False
-                    self.finish_up(
-                        loss=loss,
-                        train_loss=train_loss,
-                        opt_pred=Y_optimization_pred,
-                        valid_pred=Y_valid_pred,
-                        test_pred=Y_test_pred,
-                        additional_run_info=additional_run_info,
-                        file_output=file_output,
-                        final_call=final_call,
-                    )
-                    iteration += 1
-
-                return
-            else:
-                self._fit_and_suppress_warnings(model,
-                                                self.X_train[train_indices],
-                                                self.Y_train[train_indices])
-
-                if self.cv_folds == 1:
-                    self.model = model
-
-                train_indices, test_indices = self.indices[fold]
-                self.Y_targets[fold] = self.Y_train[test_indices]
-                self.Y_train_targets[train_indices] = self.Y_train[train_indices]
+            iteration = 1
+            total_n_iteration = 0
+            while (
+                not model.configuration_fully_fitted()
+            ):
+                n_iter = int(2**iteration/2) if iteration > 1 else 2
+                total_n_iteration += n_iter
+                model.iterative_fit(Xt, self.Y_train[train_indices],
+                                    n_iter=n_iter, **fit_params)
                 (
                     Y_train_pred,
                     Y_optimization_pred,
                     Y_valid_pred,
                     Y_test_pred
                 ) = self._predict(
-                    model=model,
+                    model,
                     train_indices=train_indices,
-                    test_indices=test_indices
+                    test_indices=test_indices,
                 )
-                train_loss = self._loss(self.Y_train[train_indices],
-                                        Y_train_pred,
-                                        )
+
+                if self.num_cv_folds == 1:
+                    self.model = model
+
+                train_loss = self._loss(self.Y_train[train_indices], Y_train_pred)
                 loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
                 additional_run_info = model.get_additional_run_info()
+
+                if model.configuration_fully_fitted():
+                    final_call = True
+                else:
+                    final_call = False
                 self.finish_up(
                     loss=loss,
                     train_loss=train_loss,
@@ -436,38 +410,133 @@ class TrainEvaluator(AbstractEvaluator):
                     test_pred=Y_test_pred,
                     additional_run_info=additional_run_info,
                     file_output=file_output,
-                    final_call=True
+                    final_call=final_call,
                 )
-                return
+                iteration += 1
 
+            return
         else:
-            self._fit_and_suppress_warnings(model,
-                                            self.X_train[train_indices],
-                                            self.Y_train[train_indices])
 
-            if self.cv_folds == 1:
-                self.model = model
+            (
+                Y_train_pred,
+                Y_optimization_pred,
+                Y_valid_pred,
+                Y_test_pred,
+                additional_run_info
+            ) = self._partial_fit_and_predict_standard(fold, train_indices, test_indices)
+            train_loss = self._loss(self.Y_train[train_indices], Y_train_pred)
+            loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
+            self.finish_up(
+                loss=loss,
+                train_loss=train_loss,
+                opt_pred=Y_optimization_pred,
+                valid_pred=Y_valid_pred,
+                test_pred=Y_test_pred,
+                additional_run_info=additional_run_info,
+                file_output=file_output,
+                final_call=True
+            )
+            return
 
-            train_indices, test_indices = self.indices[fold]
+    def _partial_fit_and_predict_standard(self, fold, train_indices, test_indices):
+        model = self._get_model()
+
+        self.indices[fold] = ((train_indices, test_indices))
+
+        self._fit_and_suppress_warnings(model,
+                                        self.X_train[train_indices],
+                                        self.Y_train[train_indices])
+
+        if self.num_cv_folds == 1:
+            self.model = model
+
+        train_indices, test_indices = self.indices[fold]
+        self.Y_targets[fold] = self.Y_train[test_indices]
+        self.Y_train_targets[train_indices] = self.Y_train[train_indices]
+
+        train_pred, opt_pred, valid_pred, test_pred = self._predict(
+            model=model,
+            train_indices=train_indices,
+            test_indices=test_indices,
+        )
+        additional_run_info = model.get_additional_run_info()
+        return (
+            train_pred,
+            opt_pred,
+            valid_pred,
+            test_pred,
+            additional_run_info,
+        )
+
+    def _partial_fit_and_predict_budget(self, fold, train_indices, test_indices,):
+
+        model = self._get_model()
+
+        self.indices[fold] = ((train_indices, test_indices))
+
+        if (
+            self.budget_type == 'iterations'
+            or self.budget_type == 'mixed' and model.estimator_supports_iterative_fit()
+        ):
+            if model.estimator_supports_iterative_fit():
+                budget_factor = model.get_max_iter()
+                Xt, fit_params = model.fit_transformer(self.X_train[train_indices],
+                                                       self.Y_train[train_indices])
+
+                self.Y_targets[fold] = self.Y_train[test_indices]
+                self.Y_train_targets[train_indices] = self.Y_train[train_indices]
+                n_iter = int(np.ceil(self.budget / 100 * budget_factor))
+                model.iterative_fit(Xt, self.Y_train[train_indices], n_iter=n_iter, **fit_params)
+            else:
+                self._fit_and_suppress_warnings(model,
+                                                self.X_train[train_indices],
+                                                self.Y_train[train_indices])
+
+        elif (
+            self.budget_type == 'subsample'
+            or self.budget_type == 'mixed' and not model.estimator_supports_iterative_fit()
+        ):
+
+            # Do this prior to subsampling the training data to have the full training targets
+            # for prediction
             self.Y_targets[fold] = self.Y_train[test_indices]
             self.Y_train_targets[train_indices] = self.Y_train[train_indices]
 
-            train_pred, opt_pred, valid_pred, test_pred = self._predict(
-                model=model,
-                train_indices=train_indices,
-                test_indices=test_indices,
-            )
-            additional_run_info = model.get_additional_run_info()
-            return (
-                train_pred,
-                opt_pred,
-                valid_pred,
-                test_pred,
-                additional_run_info,
-            )
+            subsample = self.budget / 100
+            train_indices_subset = self.subsample_indices(train_indices, subsample)
+            self._fit_and_suppress_warnings(model,
+                                            self.X_train[train_indices_subset],
+                                            self.Y_train[train_indices_subset])
 
-    def subsample_indices(self, train_indices):
-        if self.subsample is not None:
+        else:
+            raise ValueError(self.budget_type)
+
+        train_pred, opt_pred, valid_pred, test_pred = self._predict(
+            model,
+            train_indices=train_indices,
+            test_indices=test_indices,
+        )
+
+        if self.num_cv_folds == 1:
+            self.model = model
+
+        additional_run_info = model.get_additional_run_info()
+        return (
+            train_pred,
+            opt_pred,
+            valid_pred,
+            test_pred,
+            additional_run_info,
+        )
+
+    def subsample_indices(self, train_indices, subsample):
+
+        if not isinstance(subsample, float):
+            raise ValueError('Subsample must be of type float, but is of type %s' % type(subsample))
+        elif subsample > 1:
+            raise ValueError('Subsample must not be larger than 1, but is %f' % subsample)
+
+        if subsample is not None and subsample < 1:
             # Only subsample if there are more indices given to this method than
             # required to subsample because otherwise scikit-learn will complain
 
@@ -477,17 +546,16 @@ class TrainEvaluator(AbstractEvaluator):
             else:
                 stratify = None
 
-            if len(train_indices) > self.subsample:
-                indices = np.arange(len(train_indices))
-                cv_indices_train, _ = train_test_split(
-                    indices,
-                    stratify=stratify,
-                    train_size=self.subsample,
-                    random_state=1,
-                    shuffle=True,
-                )
-                train_indices = train_indices[cv_indices_train]
-                return train_indices
+            indices = np.arange(len(train_indices))
+            cv_indices_train, _ = train_test_split(
+                indices,
+                stratify=stratify,
+                train_size=subsample,
+                random_state=1,
+                shuffle=True,
+            )
+            train_indices = train_indices[cv_indices_train]
+            return train_indices
 
         return train_indices
 
@@ -665,9 +733,9 @@ def eval_holdout(
         disable_file_output,
         init_params=None,
         iterative=False,
+        budget=100.0,
+        budget_type=None,
 ):
-    instance = json.loads(instance) if instance is not None else {}
-    subsample = instance.get('subsample')
     evaluator = TrainEvaluator(
         backend=backend,
         queue=queue,
@@ -677,13 +745,14 @@ def eval_holdout(
         configuration=config,
         seed=seed,
         num_run=num_run,
-        subsample=subsample,
         all_scoring_functions=all_scoring_functions,
         output_y_hat_optimization=output_y_hat_optimization,
         include=include,
         exclude=exclude,
         disable_file_output=disable_file_output,
-        init_params=init_params
+        init_params=init_params,
+        budget=budget,
+        budget_type=budget_type,
     )
     evaluator.fit_predict_and_loss(iterative=iterative)
 
@@ -704,6 +773,8 @@ def eval_iterative_holdout(
         exclude,
         disable_file_output,
         init_params=None,
+        budget=100.0,
+        budget_type=None,
 ):
     return eval_holdout(
         queue=queue,
@@ -721,7 +792,9 @@ def eval_iterative_holdout(
         instance=instance,
         disable_file_output=disable_file_output,
         iterative=True,
-        init_params=init_params
+        init_params=init_params,
+        budget=budget,
+        budget_type=budget_type
     )
 
 
@@ -741,10 +814,11 @@ def eval_partial_cv(
         exclude,
         disable_file_output,
         init_params=None,
-        iterative=False
+        iterative=False,
+        budget=None,
+        budget_type=None,
 ):
     instance = json.loads(instance) if instance is not None else {}
-    subsample = instance.get('subsample')
     fold = instance['fold']
 
     evaluator = TrainEvaluator(
@@ -756,13 +830,14 @@ def eval_partial_cv(
         resampling_strategy_args=resampling_strategy_args,
         seed=seed,
         num_run=num_run,
-        subsample=subsample,
         all_scoring_functions=all_scoring_functions,
         output_y_hat_optimization=False,
         include=include,
         exclude=exclude,
         disable_file_output=disable_file_output,
         init_params=init_params,
+        budget=budget,
+        budget_type=budget_type,
     )
 
     evaluator.partial_fit_predict_and_loss(fold=fold, iterative=iterative)
@@ -822,9 +897,9 @@ def eval_cv(
         exclude,
         disable_file_output,
         init_params=None,
+        budget=None,
+        budget_type=None
 ):
-    instance = json.loads(instance) if instance is not None else {}
-    subsample = instance.get('subsample')
     evaluator = TrainEvaluator(
         backend=backend,
         queue=queue,
@@ -834,13 +909,14 @@ def eval_cv(
         num_run=num_run,
         resampling_strategy=resampling_strategy,
         resampling_strategy_args=resampling_strategy_args,
-        subsample=subsample,
         all_scoring_functions=all_scoring_functions,
         output_y_hat_optimization=output_y_hat_optimization,
         include=include,
         exclude=exclude,
         disable_file_output=disable_file_output,
         init_params=init_params,
+        budget=budget,
+        budget_type=budget_type,
     )
 
     evaluator.fit_predict_and_loss()

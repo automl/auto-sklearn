@@ -128,13 +128,13 @@ class EvaluationTest(unittest.TestCase):
                                     memory_limit=3072,
                                     metric=accuracy)
 
-        self.assertRaisesRegex(FirstRunCrashedException,
-                               "First run crashed, abort. Please check your "
-                               "setup -- we assume that your "
-                               "defaultconfiguration does not crashes. \(To "
-                               "deactivate this exception, use the SMAC "
-                               "scenario option 'abort_on_first_run_crash'\)",
-                               ta.start, config=None, instance=None, cutoff=30)
+        # The following should not fail because abort on first config crashed is false
+        info = ta.start(config=None, instance=None, cutoff=60)
+        self.assertEqual(info[0], StatusType.CRASHED)
+        self.assertEqual(info[1], 1.0)
+        self.assertIsInstance(info[2], float)
+        self.assertEqual(info[3], {'configuration_origin': 'UNKNOWN',
+                                   'error': "Result queue is empty"})
 
         self.stats.ta_runs += 1
         info = ta.start(config=None, instance=None, cutoff=30)

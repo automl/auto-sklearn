@@ -24,7 +24,11 @@ class PassiveAggressive(
         self.loss = loss
         self.random_state = random_state
         self.estimator = None
+        self.max_iter = self.get_max_iter()
 
+    @staticmethod
+    def get_max_iter():
+        return 1024
 
     def iterative_fit(self, X, y, n_iter=2, refit=False, sample_weight=None):
         from sklearn.linear_model.passive_aggressive import \
@@ -77,8 +81,7 @@ class PassiveAggressive(
                 self.estimator.fit(X, y)
             else:
                 self.estimator.max_iter += n_iter
-                self.estimator.max_iter = min(self.estimator.max_iter,
-                                              1000)
+                self.estimator.max_iter = min(self.estimator.max_iter, self.max_iter)
                 self.estimator._validate_params()
                 lr = "pa1" if self.estimator.loss == "hinge" else "pa2"
                 self.estimator._partial_fit(
@@ -94,8 +97,7 @@ class PassiveAggressive(
                     intercept_init=None
                 )
                 if (
-                    self.estimator.max_iter >= 1000
-                    or n_iter > self.estimator.n_iter_
+                    self.estimator.max_iter >= self.max_iter or n_iter > self.estimator.n_iter_
                 ):
                     self.fully_fit_ = True
 

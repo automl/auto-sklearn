@@ -16,12 +16,12 @@ class MultinomialNBComponentTest(BaseClassificationComponentTest):
 
     res = dict()
     res["default_iris"] = 0.97999999999999998
-    res["iris_n_calls"] = 1
+    res["iris_n_calls"] = None
     res["default_iris_iterative"] = 0.97999999999999998
     res["default_iris_proba"] = 0.5865733413579101
     res["default_iris_sparse"] = 0.54
     res["default_digits"] = 0.89496053430479661
-    res["digits_n_calls"] = 1
+    res["digits_n_calls"] = None
     res["default_digits_iterative"] = 0.89496053430479661
     res["default_digits_binary"] = 0.98967820279295693
     res["default_digits_multilabel"] = 0.70484946987667163

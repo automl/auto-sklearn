@@ -53,7 +53,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                  run_obj='quality', par_factor=1, all_scoring_functions=False,
                  output_y_hat_optimization=True, include=None, exclude=None,
                  memory_limit=None, disable_file_output=False, init_params=None,
-                 **resampling_strategy_args):
+                 budget_type=None, **resampling_strategy_args):
 
         if resampling_strategy == 'holdout':
             eval_function = autosklearn.evaluation.train_evaluator.eval_holdout
@@ -104,6 +104,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         self.exclude = exclude
         self.disable_file_output = disable_file_output
         self.init_params = init_params
+        self.budget_type = budget_type
         self.logger = logger
 
         if memory_limit is not None:
@@ -124,6 +125,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
               instance: Optional[str],
               cutoff: float = None,
               seed: int = 12345,
+              budget: float = 0.0,
               instance_specific: Optional[str]=None,
               capped: bool = False):
         """
@@ -140,6 +142,9 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 runtime cutoff
             seed : int
                 random seed
+            budget : float
+                A positive, real-valued number representing an arbitrary limit to the target
+                algorithm. Handled by the target algorithm internally
             instance_specific: str
                 instance specific information (e.g., domain file or solution)
             capped: bool
@@ -156,6 +161,19 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             additional_info: dict
                 all further additional run information
         """
+        if self.budget_type is None:
+            if budget != 0:
+                raise ValueError('If budget_type is None, budget must be.0, but is %f' % budget)
+        else:
+            if budget == 0:
+                budget = 100
+            elif budget <= 0 or budget > 100:
+                raise ValueError('Illegal value for budget, must be >0 and <=100, but is %f' % budget)
+            if self.budget_type not in ('subsample', 'iterations', 'mixed'):
+                raise ValueError("Illegal value for budget type, must be one of "
+                                 "('subsample', 'iterations', 'mixed'), but is : %s" %
+                                 self.budget_type)
+
         remaining_time = self.stats.get_remaing_time_budget()
 
         if remaining_time - 5 < cutoff:
@@ -167,7 +185,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
 
         return super().start(config=config, instance=instance, cutoff=cutoff,
                              seed=seed, instance_specific=instance_specific,
-                             capped=capped)
+                             capped=capped, budget=budget)
 
     def run(self, config, instance=None,
             cutoff=None,
@@ -202,6 +220,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             disable_file_output=self.disable_file_output,
             instance=instance,
             init_params=init_params,
+            budget=budget,
+            budget_type=self.budget_type,
         )
 
         if self.resampling_strategy != 'test':

@@ -18,13 +18,13 @@ class GradientBoostingClassifier(
     IterativeComponent,
     AutoSklearnClassificationAlgorithm
 ):
-    def __init__(self, loss, learning_rate, max_iter, min_samples_leaf, max_depth,
+    def __init__(self, loss, learning_rate, min_samples_leaf, max_depth,
                  max_leaf_nodes, max_bins, l2_regularization, early_stop, tol, scoring,
                  n_iter_no_change=0, validation_fraction=None, random_state=None,
                  verbose=0):
         self.loss = loss
         self.learning_rate = learning_rate
-        self.max_iter = max_iter
+        self.max_iter = self.get_max_iter()
         self.min_samples_leaf = min_samples_leaf
         self.max_depth = max_depth
         self.max_leaf_nodes = max_leaf_nodes
@@ -40,6 +40,10 @@ class GradientBoostingClassifier(
         self.estimator = None
         self.fully_fit_ = False
 
+    @staticmethod
+    def get_max_iter():
+        return 512
+
     def iterative_fit(self, X, y, n_iter=2, refit=False):
 
         """
@@ -52,6 +56,8 @@ class GradientBoostingClassifier(
             self.estimator = None
 
         if self.estimator is None:
+            self.fully_fit_ = False
+
             self.learning_rate = float(self.learning_rate)
             self.max_iter = int(self.max_iter)
             self.min_samples_leaf = int(self.min_samples_leaf)
@@ -85,12 +91,13 @@ class GradientBoostingClassifier(
             else:
                 raise ValueError("early_stop should be either off, train or valid")
             self.verbose = int(self.verbose)
+            n_iter = int(np.ceil(n_iter))
 
             # initial fit of only increment trees
             self.estimator = sklearn.ensemble.HistGradientBoostingClassifier(
                 loss=self.loss,
                 learning_rate=self.learning_rate,
-                max_iter=self.max_iter,
+                max_iter=n_iter,
                 min_samples_leaf=self.min_samples_leaf,
                 max_depth=self.max_depth,
                 max_leaf_nodes=self.max_leaf_nodes,
@@ -111,7 +118,7 @@ class GradientBoostingClassifier(
 
         self.estimator.fit(X, y)
 
-        if self.estimator.max_iter >= self.max_iter or n_iter > self.estimator.n_iter_:
+        if self.estimator.max_iter >= self.max_iter or self.estimator.max_iter > self.estimator.n_iter_:
             self.fully_fit_ = True
 
         return self
@@ -152,7 +159,6 @@ class GradientBoostingClassifier(
         loss = Constant("loss", "auto")
         learning_rate = UniformFloatHyperparameter(
             name="learning_rate", lower=0.01, upper=1, default_value=0.1, log=True)
-        max_iter = Constant("max_iter", 512)
         min_samples_leaf = UniformIntegerHyperparameter(
             name="min_samples_leaf", lower=1, upper=200, default_value=20, log=True)
         max_depth = UnParametrizedHyperparameter(
@@ -173,7 +179,7 @@ class GradientBoostingClassifier(
         validation_fraction = UniformFloatHyperparameter(
             name="validation_fraction", lower=0.01, upper=0.4, default_value=0.1)
 
-        cs.add_hyperparameters([loss, learning_rate, max_iter, min_samples_leaf,
+        cs.add_hyperparameters([loss, learning_rate, min_samples_leaf,
                                 max_depth, max_leaf_nodes, max_bins, l2_regularization,
                                 early_stop, tol, scoring, n_iter_no_change,
                                 validation_fraction])
