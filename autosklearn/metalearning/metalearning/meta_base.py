@@ -59,6 +59,8 @@ class MetaBase(object):
                       metafeatures.metafeature_values.values()})
         if name in self.metafeatures.index:
             new_name = name + '_ASKL-metadata'
+            self.logger.warning('Dataset %s already in meta-data. Renaming old occurence of the '
+                                'dataset to %s.', name, new_name)
             self.metafeatures.loc[new_name] = self.metafeatures.loc[name]
             self.metafeatures.drop(name, inplace=True)
         self.metafeatures = self.metafeatures.append(metafeatures)
