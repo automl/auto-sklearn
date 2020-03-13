@@ -57,6 +57,10 @@ class MetaBase(object):
             metafeatures = pd.Series(name=name,
                 data={mf.name: mf.value for mf in
                       metafeatures.metafeature_values.values()})
+        if name in self.metafeatures.index:
+            new_name = name + '_ASKL-metadata'
+            self.metafeatures.loc[new_name] = self.metafeatures.loc[name]
+            self.metafeatures.drop(name, inplace=True)
         self.metafeatures = self.metafeatures.append(metafeatures)
 
         runs = pd.Series([], name=name)
