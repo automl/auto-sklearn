@@ -171,7 +171,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 raise ValueError('Illegal value for budget, must be >0 and <=100, but is %f' % budget)
             if self.budget_type not in ('subsample', 'iterations', 'mixed'):
                 raise ValueError("Illegal value for budget type, must be one of "
-                                 "('subsample', 'iterations'), but is : %s" % self.budget_type)
+                                 "('subsample', 'iterations', 'mixed'), but is : %s" %
+                                 self.budget_type)
 
         remaining_time = self.stats.get_remaing_time_budget()
 

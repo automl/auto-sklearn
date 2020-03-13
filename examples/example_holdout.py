@@ -32,7 +32,7 @@ def main():
         # for AutoSklearnClassifier. It is explicitly specified in this example
         # for demonstrational purpose.
         resampling_strategy='holdout',
-        resampling_strategy_arguments={'train_size': 0.67},
+        resampling_strategy_arguments={'train_size': 0.67}
     )
     automl.fit(X_train, y_train, dataset_name='breast_cancer')
 

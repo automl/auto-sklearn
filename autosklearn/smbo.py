@@ -181,9 +181,6 @@ def get_smac_object(
     else:
         initial_configurations = None
     rh2EPM = RunHistory2EPM4LogCost
-
-    #from smac.intensification.successive_halving import SuccessiveHalving
-
     return SMAC4AC(
         scenario=scenario,
         rng=seed,
