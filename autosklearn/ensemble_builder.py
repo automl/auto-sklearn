@@ -688,10 +688,10 @@ class EnsembleBuilder(multiprocessing.Process):
                         os.remove(pred_file)
                     self.deleted_preds.append(pred_file)
                     self.logger.info("Deleted prediction file of non-candidate "
-                        "model %s", pred_file)
-                except:
+                                     "model %s", pred_file)
+                except OSError:
                     self.logger.error("Error while deleting prediction file of "
-                        "non-candidate model %s", pred_file)
+                                      "non-candidate model %s", pred_file)
                 # Delete model file
                 pred_tokens = pred_file.replace('_', '.').split('.')
                 seed, model_id = pred_tokens[-3], pred_tokens[-2]
@@ -702,7 +702,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     with lockfile.LockFile(model_lock):
                         os.remove(model_file)
                     self.logger.info("Deleted file of non-candidate model %s", model_file)
-                except:
+                except OSError:
                     self.logger.error("Error while deleting file of non-candidate "
                                       "model %s", model_file)
 

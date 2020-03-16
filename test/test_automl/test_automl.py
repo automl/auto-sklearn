@@ -115,7 +115,7 @@ class AutoMLTest(Base, unittest.TestCase):
         self._tearDown(backend_api.temporary_directory)
         self._tearDown(backend_api.output_directory)
 
-    def test_delete_non_winning_models(self):
+    def test_delete_non_candidate_models(self):
         backend_api = self._create_backend(
             'test_delete', delete_tmp_folder_after_terminate=False)
 
