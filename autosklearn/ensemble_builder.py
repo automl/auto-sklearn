@@ -115,6 +115,12 @@ class EnsembleBuilder(multiprocessing.Process):
             '.auto-sklearn',
             'predictions_ensemble',
         )
+        # Folder where model files are stored
+        self.dir_models = os.path.join(
+            self.backend.temporary_directory,
+            '.auto-sklearn',
+            'models',
+        )
         # validation set (public test set) -- y_true not known
         self.dir_valid = os.path.join(
             self.backend.temporary_directory,
@@ -148,6 +154,7 @@ class EnsembleBuilder(multiprocessing.Process):
         #    }
         # }
         self.read_preds = {}
+        self.deleted_preds = []
         self.last_hash = None  # hash of ensemble training data
         self.y_true_ensemble = None
         self.SAVE2DISC = True
@@ -671,12 +678,28 @@ class EnsembleBuilder(multiprocessing.Process):
         # TODO: ADD saving of predictions on "ensemble data"
 
     def _delete_non_candidate_models(self, candidates):
-        cand_ids = [cand.replace('_', '.').split('.')[-2] for cand in candidates]
-        for model_file in self.read_preds.keys():
-            model_file_id = model_file.split('.')[-2]
-            if model_file_id not in cand_ids:
-                os.remove(model_file)
-                self.logger.info("Deleted file of non-candidate model %s", model_file)
+        for pred_file in self.read_preds.keys():
+            if pred_file not in candidates and pred_file not in self.deleted_preds:
+                # Delete prediction file
+                try:
+                    os.remove(pred_file)
+                    self.deleted_preds.append(pred_file)
+                    self.logger.info("Deleted prediction file of non-candidate "
+                        "model %s", pred_file)
+                except:
+                    self.logger.error("Error while deleting prediction file of "
+                        "non-candidate model %s", pred_file)
+                # Delete model file
+                pred_tokens = pred_file.replace('_', '.').split('.')
+                seed, model_id = pred_tokens[-3], pred_tokens[-2]
+                model_name = seed + '.' + model_id + '.model'
+                model_file = os.path.join(self.dir_models, model_name)
+                try:
+                    os.remove(model_file)
+                    self.logger.info("Deleted file of non-candidate model %s", model_file)
+                except:
+                    self.logger.error("Error while deleting file of non-candidate "
+                                      "model %s", model_file)
 
     def _read_np_fn(self, fp):
         if self.precision is "16":

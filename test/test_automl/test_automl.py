@@ -133,11 +133,18 @@ class AutoMLTest(Base, unittest.TestCase):
             X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
         )
 
-        # Assert at least one model file has been deleted
+        # Assert at least one model file has been deleted and that there were no
+        # deletion errors
         log_file_path = glob.glob(os.path.join(
             backend_api.temporary_directory, 'AutoML(' + str(seed) + '):*.log'))
         with open(log_file_path[0]) as log_file:
-            self.assertIn('Deleted file of non-candidate model', log_file.read())
+            log_content = log_file.read()
+            self.assertIn('Deleted file of non-candidate model', log_content)
+            self.assertIn('Deleted prediction file of non-candidate model', log_content)
+            self.assertNotIn("Error while deleting file of non-candidate model",
+                             log_content)
+            self.assertNotIn("Error while deleting prediction file of non-candidate "
+                             "model", log_content)
 
         # Assert that the files of the models used by the ensemble weren't deleted
         model_files = backend_api.list_all_models(seed=seed)
