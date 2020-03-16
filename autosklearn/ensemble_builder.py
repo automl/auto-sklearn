@@ -10,6 +10,7 @@ from typing import Optional, Union
 
 import numpy as np
 import pynisher
+import lockfile
 from sklearn.utils.validation import check_random_state
 
 from autosklearn.util.backend import Backend
@@ -682,7 +683,9 @@ class EnsembleBuilder(multiprocessing.Process):
             if pred_file not in candidates and pred_file not in self.deleted_preds:
                 # Delete prediction file
                 try:
-                    os.remove(pred_file)
+                    pred_lock = pred_file + '.lock'
+                    with lockfile.LockFile(pred_lock):
+                        os.remove(pred_file)
                     self.deleted_preds.append(pred_file)
                     self.logger.info("Deleted prediction file of non-candidate "
                         "model %s", pred_file)
@@ -695,7 +698,9 @@ class EnsembleBuilder(multiprocessing.Process):
                 model_name = seed + '.' + model_id + '.model'
                 model_file = os.path.join(self.dir_models, model_name)
                 try:
-                    os.remove(model_file)
+                    model_lock = model_file + '.lock'
+                    with lockfile.LockFile(model_lock):
+                        os.remove(model_file)
                     self.logger.info("Deleted file of non-candidate model %s", model_file)
                 except:
                     self.logger.error("Error while deleting file of non-candidate "
