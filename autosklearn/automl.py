@@ -1096,7 +1096,7 @@ class AutoMLRegressor(BaseAutoML):
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
-        ):
+    ):
         
         X, y = super()._perform_input_checks(X, y)
         _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
