@@ -528,10 +528,6 @@ class AutoML(BaseEstimator):
         random_state = np.random.RandomState(self._seed)
         for identifier in self.models_:
             if identifier in self.ensemble_.get_selected_model_identifiers():
-                # TODO
-                # 1. get budget_type from the TAE
-                # 2. add a function to the train evaluator to train a model on a budget given the
-                # budget specification and the training data
                 model = self.models_[identifier]
                 # this updates the model inplace, it can then later be used in
                 # predict method

@@ -704,11 +704,11 @@ class EnsembleBuilder(multiprocessing.Process):
             if model_file not in candidates:
                 try:
                     os.remove(model_path)
+                    self.logger.info("Deleted file of non-candidate model %s", model_path)
+                    self.read_preds[model_path]['deleted'] = True
                 except Exception as e:
                     self.logger.error('Failed to delete non-candidate model %s due to error %s',
                                       model_path, e)
-                self.logger.info("Deleted file of non-candidate model %s", model_path)
-                self.read_preds[model_path]['deleted'] = True
 
     def _read_np_fn(self, fp):
         if self.precision is "16":

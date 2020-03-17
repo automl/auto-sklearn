@@ -7,8 +7,14 @@ from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold,
     StratifiedKFold, train_test_split, BaseCrossValidator, PredefinedSplit
 from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit
 
-from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator, _fit_and_suppress_warnings
-from autosklearn.constants import *
+from autosklearn.evaluation.abstract_evaluator import (
+    AbstractEvaluator,
+    _fit_and_suppress_warnings,
+)
+from autosklearn.constants import (
+    CLASSIFICATION_TASKS,
+    MULTILABEL_CLASSIFICATION,
+)
 
 
 __all__ = ['TrainEvaluator', 'eval_holdout', 'eval_iterative_holdout',
@@ -56,9 +62,15 @@ def _get_y_array(y, task_type):
 def subsample_indices(train_indices, subsample, task_type, Y_train):
 
     if not isinstance(subsample, float):
-        raise ValueError('Subsample must be of type float, but is of type %s' % type(subsample))
+        raise ValueError(
+            'Subsample must be of type float, but is of type %s'
+            % type(subsample)
+        )
     elif subsample > 1:
-        raise ValueError('Subsample must not be larger than 1, but is %f' % subsample)
+        raise ValueError(
+            'Subsample must not be larger than 1, but is %f'
+            % subsample
+        )
 
     if subsample is not None and subsample < 1:
         # Only subsample if there are more indices given to this method than
@@ -111,7 +123,9 @@ def _fit_with_budget(X_train, Y_train, budget, budget_type, logger, model, train
     ):
 
         subsample = budget / 100
-        train_indices_subset = subsample_indices(train_indices, subsample, task_type, Y_train)
+        train_indices_subset = subsample_indices(
+            train_indices, subsample, task_type, Y_train,
+        )
         _fit_and_suppress_warnings(
             logger,
             model,
@@ -547,14 +561,16 @@ class TrainEvaluator(AbstractEvaluator):
         self.Y_targets[fold] = self.Y_train[test_indices]
         self.Y_train_targets[train_indices] = self.Y_train[train_indices]
 
-        budget = self.budget
-        budget_type = self.budget_type
-        logger = self.logger
-        X_train = self.X_train
-        Y_train = self.Y_train
-
-        _fit_with_budget(X_train, Y_train, budget, budget_type, logger, model, train_indices,
-                         self.task_type)
+        _fit_with_budget(
+            X_train=self.X_train,
+            Y_train=self.Y_train,
+            budget=self.budget,
+            budget_type=self.budget_type,
+            logger=self.logger,
+            model=model,
+            train_indices=train_indices,
+            task_type=self.task_type,
+        )
 
         train_pred, opt_pred, valid_pred, test_pred = self._predict(
             model,

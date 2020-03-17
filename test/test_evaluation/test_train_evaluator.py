@@ -560,13 +560,17 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy_args={'folds': 10},
                                    metric=accuracy)
         train_indices = np.arange(69, dtype=int)
-        train_indices1 = subsample_indices(train_indices, 0.1449, evaluator.task_type, evaluator.Y_train)
+        train_indices1 = subsample_indices(
+            train_indices, 0.1449, evaluator.task_type, evaluator.Y_train)
         evaluator.subsample = 20
-        train_indices2 = subsample_indices(train_indices, 0.2898, evaluator.task_type, evaluator.Y_train)
+        train_indices2 = subsample_indices(
+            train_indices, 0.2898, evaluator.task_type, evaluator.Y_train)
         evaluator.subsample = 30
-        train_indices3 = subsample_indices(train_indices, 0.4347, evaluator.task_type, evaluator.Y_train)
+        train_indices3 = subsample_indices(
+            train_indices, 0.4347, evaluator.task_type, evaluator.Y_train)
         evaluator.subsample = 67
-        train_indices4 = subsample_indices(train_indices, 0.971, evaluator.task_type, evaluator.Y_train)
+        train_indices4 = subsample_indices(
+            train_indices, 0.971, evaluator.task_type, evaluator.Y_train)
         # Common cases
         for ti in train_indices1:
             self.assertIn(ti, train_indices2)

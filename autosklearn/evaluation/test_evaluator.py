@@ -1,7 +1,10 @@
 # -*- encoding: utf-8 -*-
 from smac.tae.execute_ta_run import StatusType
 
-from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator, _fit_and_suppress_warnings
+from autosklearn.evaluation.abstract_evaluator import (
+    AbstractEvaluator,
+    _fit_and_suppress_warnings,
+)
 from autosklearn.metrics import calculate_score
 
 

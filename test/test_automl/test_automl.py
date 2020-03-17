@@ -49,19 +49,24 @@ class AutoMLTest(Base, unittest.TestCase):
 
         failing_model = unittest.mock.Mock()
         failing_model.fit.side_effect = [ValueError(), ValueError(), None]
+        failing_model.fit_transformer.side_effect = [ValueError(), ValueError(), (None, {})]
+        failing_model.get_max_iter.return_value = 100
 
         auto = AutoML(backend_api, 20, 5)
         ensemble_mock = unittest.mock.Mock()
+        ensemble_mock.get_selected_model_identifiers.return_value = [(1, 1, 50.0)]
         auto.ensemble_ = ensemble_mock
-        ensemble_mock.get_selected_model_identifiers.return_value = [1]
+        for budget_type in [None, 'iterations']:
+            auto._budget_type = budget_type
 
-        auto.models_ = {1: failing_model}
+            auto.models_ = {(1, 1, 50.0): failing_model}
 
-        X = np.array([1, 2, 3])
-        y = np.array([1, 2, 3])
-        auto.refit(X, y)
+            X = np.array([1, 2, 3])
+            y = np.array([1, 2, 3])
+            auto.refit(X, y)
 
-        self.assertEqual(failing_model.fit.call_count, 3)
+            self.assertEqual(failing_model.fit.call_count, 3)
+        self.assertEqual(failing_model.fit_transformer.call_count, 3)
 
         del auto
         self._tearDown(backend_api.temporary_directory)

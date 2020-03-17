@@ -96,8 +96,8 @@ class MyDummyRegressor(DummyRegressor):
 def _fit_and_suppress_warnings(logger, model, X, y):
     def send_warnings_to_log(message, category, filename, lineno,
                              file=None, line=None):
-        logger.debug('%s:%s: %s:%s' %
-            (filename, lineno, category.__name__, message))
+        logger.debug('%s:%s: %s:%s',
+                     filename, lineno, category.__name__, message)
         return
 
     with warnings.catch_warnings():
