@@ -142,6 +142,7 @@ class EnsembleBuilder(multiprocessing.Process):
         #    "mtime_test": str,
         #    "seed": int,
         #    "num_run": int,
+        #    "deleted": bool,
         #    Y_ENSEMBLE: np.ndarray
         #    Y_VALID: np.ndarray
         #    Y_TEST: np.ndarray
@@ -243,9 +244,6 @@ class EnsembleBuilder(multiprocessing.Process):
                              index_run=iteration)
                 iteration += 1
 
-                # Delete files of non-candidate models
-                if self.keep_just_nbest_models:
-                    self._delete_non_candidate_models(candidate_models)
             else:
                 time.sleep(self.sleep_duration)
 
@@ -316,6 +314,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     "seed": _seed,
                     "num_run": _num_run,
                     "budget": _budget,
+                    "deleted": False,
                     Y_ENSEMBLE: None,
                     Y_VALID: None,
                     Y_TEST: None,
@@ -581,6 +580,11 @@ class EnsembleBuilder(multiprocessing.Process):
                 "-- current performance: %f",
                 self.validation_performance_,
             )
+
+            # Delete files of non-candidate models
+            if self.keep_just_nbest_models:
+                self._delete_non_candidate_models(selected_keys)
+
             return None
         self.last_hash = current_hash
 
@@ -618,6 +622,10 @@ class EnsembleBuilder(multiprocessing.Process):
             self.logger.error('Caught IndexError: %s' + traceback.format_exc())
             time.sleep(self.sleep_duration)
             return None
+
+        # Delete files of non-candidate models
+        if self.keep_just_nbest_models:
+            self._delete_non_candidate_models(selected_keys)
 
         return ensemble
 
@@ -685,10 +693,17 @@ class EnsembleBuilder(multiprocessing.Process):
     def _delete_non_candidate_models(self, candidates):
         candidates = [os.path.split(cand)[1] for cand in candidates]
         for model_path in self.read_preds.keys():
+            if self.read_preds[model_path]['deleted']:
+                continue
             model_file = os.path.split(model_path)[1]
             if model_file not in candidates:
-                os.remove(model_path)
+                try:
+                    os.remove(model_path)
+                except Exception as e:
+                    self.logger.error('Failed to delete non-candidate model %s due to error %s',
+                                      model_path, e)
                 self.logger.info("Deleted file of non-candidate model %s", model_path)
+                self.read_preds[model_path]['deleted'] = True
 
     def _read_np_fn(self, fp):
         if self.precision is "16":

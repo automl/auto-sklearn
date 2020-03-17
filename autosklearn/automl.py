@@ -530,6 +530,11 @@ class AutoML(BaseEstimator):
         random_state = np.random.RandomState(self._seed)
         for identifier in self.models_:
             if identifier in self.ensemble_.get_selected_model_identifiers():
+                # TODO
+                # 1. get budget_type from the TAE
+                # 2. add a function to the train evaluator to train a model on a budget given the
+                # budget specification and the training data
+                print(identifier)
                 model = self.models_[identifier]
                 # this updates the model inplace, it can then later be used in
                 # predict method
@@ -754,6 +759,7 @@ class AutoML(BaseEstimator):
         mean_fit_time = []
         params = []
         status = []
+        budgets = []
         for run_key in self.runhistory_.data:
             run_value = self.runhistory_.data[run_key]
             config_id = run_key.config_id
@@ -764,6 +770,8 @@ class AutoML(BaseEstimator):
             mean_test_score.append(self._metric._optimum - \
                                   (self._metric._sign * run_value.cost))
             mean_fit_time.append(run_value.time)
+            budgets.append(run_key.budget)
+
             s = run_value.status
             if s == StatusType.SUCCESS:
                 status.append('Success')
@@ -795,6 +803,7 @@ class AutoML(BaseEstimator):
         results['rank_test_scores'] = scipy.stats.rankdata(1 - results['mean_test_score'],
                                                            method='min')
         results['status'] = status
+        results['budgets'] = budgets
 
         for hp_name in hp_names:
             masked_array = ma.MaskedArray(parameter_dictionaries[hp_name],
