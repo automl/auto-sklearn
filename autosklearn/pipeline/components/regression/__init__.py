@@ -28,8 +28,11 @@ class RegressorChoice(AutoSklearnChoice):
 
     @classmethod
     def get_available_components(cls, data_prop,
+                                 dataset_properties=None,
                                  include=None,
                                  exclude=None):
+        if dataset_properties is None:
+            dataset_properties = {}
         available_comp = cls.get_components()
         components_dict = OrderedDict()
 
