@@ -7,7 +7,7 @@ from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold,
     StratifiedKFold, train_test_split, BaseCrossValidator, PredefinedSplit
 from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit
 
-from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
+from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator, _fit_and_suppress_warnings
 from autosklearn.constants import *
 
 
@@ -51,6 +51,76 @@ def _get_y_array(y, task_type):
         return y.ravel()
     else:
         return y
+
+
+def subsample_indices(train_indices, subsample, task_type, Y_train):
+
+    if not isinstance(subsample, float):
+        raise ValueError('Subsample must be of type float, but is of type %s' % type(subsample))
+    elif subsample > 1:
+        raise ValueError('Subsample must not be larger than 1, but is %f' % subsample)
+
+    if subsample is not None and subsample < 1:
+        # Only subsample if there are more indices given to this method than
+        # required to subsample because otherwise scikit-learn will complain
+
+        if task_type in CLASSIFICATION_TASKS and task_type != MULTILABEL_CLASSIFICATION:
+            stratify = Y_train[train_indices]
+        else:
+            stratify = None
+
+        indices = np.arange(len(train_indices))
+        cv_indices_train, _ = train_test_split(
+            indices,
+            stratify=stratify,
+            train_size=subsample,
+            random_state=1,
+            shuffle=True,
+        )
+        train_indices = train_indices[cv_indices_train]
+        return train_indices
+
+    return train_indices
+
+
+def _fit_with_budget(X_train, Y_train, budget, budget_type, logger, model, train_indices,
+                     task_type):
+    if (
+            budget_type == 'iterations'
+            or budget_type == 'mixed' and model.estimator_supports_iterative_fit()
+    ):
+        if model.estimator_supports_iterative_fit():
+            budget_factor = model.get_max_iter()
+            Xt, fit_params = model.fit_transformer(X_train[train_indices],
+                                                   Y_train[train_indices])
+
+            n_iter = int(np.ceil(budget / 100 * budget_factor))
+            model.iterative_fit(Xt, Y_train[train_indices], n_iter=n_iter, refit=True,
+                                **fit_params)
+        else:
+            _fit_and_suppress_warnings(
+                logger,
+                model,
+                X_train[train_indices],
+                Y_train[train_indices],
+            )
+
+    elif (
+            budget_type == 'subsample'
+            or budget_type == 'mixed' and not model.estimator_supports_iterative_fit()
+    ):
+
+        subsample = budget / 100
+        train_indices_subset = subsample_indices(train_indices, subsample, task_type, Y_train)
+        _fit_and_suppress_warnings(
+            logger,
+            model,
+            X_train[train_indices_subset],
+            Y_train[train_indices_subset],
+        )
+
+    else:
+        raise ValueError(budget_type)
 
 
 class TrainEvaluator(AbstractEvaluator):
@@ -442,9 +512,12 @@ class TrainEvaluator(AbstractEvaluator):
 
         self.indices[fold] = ((train_indices, test_indices))
 
-        self._fit_and_suppress_warnings(model,
-                                        self.X_train[train_indices],
-                                        self.Y_train[train_indices])
+        _fit_and_suppress_warnings(
+            self.logger,
+            model,
+            self.X_train[train_indices],
+            self.Y_train[train_indices],
+        )
 
         if self.num_cv_folds == 1:
             self.model = model
@@ -470,45 +543,18 @@ class TrainEvaluator(AbstractEvaluator):
     def _partial_fit_and_predict_budget(self, fold, train_indices, test_indices,):
 
         model = self._get_model()
-
         self.indices[fold] = ((train_indices, test_indices))
+        self.Y_targets[fold] = self.Y_train[test_indices]
+        self.Y_train_targets[train_indices] = self.Y_train[train_indices]
 
-        if (
-            self.budget_type == 'iterations'
-            or self.budget_type == 'mixed' and model.estimator_supports_iterative_fit()
-        ):
-            if model.estimator_supports_iterative_fit():
-                budget_factor = model.get_max_iter()
-                Xt, fit_params = model.fit_transformer(self.X_train[train_indices],
-                                                       self.Y_train[train_indices])
+        budget = self.budget
+        budget_type = self.budget_type
+        logger = self.logger
+        X_train = self.X_train
+        Y_train = self.Y_train
 
-                self.Y_targets[fold] = self.Y_train[test_indices]
-                self.Y_train_targets[train_indices] = self.Y_train[train_indices]
-                n_iter = int(np.ceil(self.budget / 100 * budget_factor))
-                model.iterative_fit(Xt, self.Y_train[train_indices], n_iter=n_iter, **fit_params)
-            else:
-                self._fit_and_suppress_warnings(model,
-                                                self.X_train[train_indices],
-                                                self.Y_train[train_indices])
-
-        elif (
-            self.budget_type == 'subsample'
-            or self.budget_type == 'mixed' and not model.estimator_supports_iterative_fit()
-        ):
-
-            # Do this prior to subsampling the training data to have the full training targets
-            # for prediction
-            self.Y_targets[fold] = self.Y_train[test_indices]
-            self.Y_train_targets[train_indices] = self.Y_train[train_indices]
-
-            subsample = self.budget / 100
-            train_indices_subset = self.subsample_indices(train_indices, subsample)
-            self._fit_and_suppress_warnings(model,
-                                            self.X_train[train_indices_subset],
-                                            self.Y_train[train_indices_subset])
-
-        else:
-            raise ValueError(self.budget_type)
+        _fit_with_budget(X_train, Y_train, budget, budget_type, logger, model, train_indices,
+                         self.task_type)
 
         train_pred, opt_pred, valid_pred, test_pred = self._predict(
             model,
@@ -527,36 +573,6 @@ class TrainEvaluator(AbstractEvaluator):
             test_pred,
             additional_run_info,
         )
-
-    def subsample_indices(self, train_indices, subsample):
-
-        if not isinstance(subsample, float):
-            raise ValueError('Subsample must be of type float, but is of type %s' % type(subsample))
-        elif subsample > 1:
-            raise ValueError('Subsample must not be larger than 1, but is %f' % subsample)
-
-        if subsample is not None and subsample < 1:
-            # Only subsample if there are more indices given to this method than
-            # required to subsample because otherwise scikit-learn will complain
-
-            if self.task_type in CLASSIFICATION_TASKS and \
-                    self.task_type != MULTILABEL_CLASSIFICATION:
-                stratify = self.Y_train[train_indices]
-            else:
-                stratify = None
-
-            indices = np.arange(len(train_indices))
-            cv_indices_train, _ = train_test_split(
-                indices,
-                stratify=stratify,
-                train_size=subsample,
-                random_state=1,
-                shuffle=True,
-            )
-            train_indices = train_indices[cv_indices_train]
-            return train_indices
-
-        return train_indices
 
     def _predict(self, model, test_indices, train_indices):
         train_pred = self.predict_function(self.X_train[train_indices],

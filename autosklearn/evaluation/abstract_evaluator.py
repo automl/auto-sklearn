@@ -93,6 +93,20 @@ class MyDummyRegressor(DummyRegressor):
         return None
 
 
+def _fit_and_suppress_warnings(logger, model, X, y):
+    def send_warnings_to_log(message, category, filename, lineno,
+                             file=None, line=None):
+        logger.debug('%s:%s: %s:%s' %
+            (filename, lineno, category.__name__, message))
+        return
+
+    with warnings.catch_warnings():
+        warnings.showwarning = send_warnings_to_log
+        model.fit(X, y)
+
+    return model
+
+
 class AbstractEvaluator(object):
     def __init__(self, backend, queue, metric,
                  configuration=None,
@@ -441,17 +455,3 @@ class AbstractEvaluator(object):
             return new_predictions
 
         return prediction
-
-    def _fit_and_suppress_warnings(self, model, X, y):
-        def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None, line=None):
-            self.logger.debug('%s:%s: %s:%s' %
-                (filename, lineno, category.__name__, message))
-            return
-
-        with warnings.catch_warnings():
-            warnings.showwarning = send_warnings_to_log
-            model.fit(X, y)
-
-        return model
-

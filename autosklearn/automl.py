@@ -25,6 +25,8 @@ from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.data.xy_data_manager import XYDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
+from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
+from autosklearn.evaluation.train_evaluator import _fit_with_budget
 from autosklearn.metrics import calculate_score
 from autosklearn.util import StopWatch, get_logger, setup_logger, \
     pipeline
@@ -451,6 +453,7 @@ class AutoML(BaseEstimator):
             self._logger.warning("Not starting SMAC because there is no time "
                                  "left.")
             _proc_smac = None
+            self._budget_type = None
         else:
             if self._per_run_time_limit is None or \
                     self._per_run_time_limit > time_left_for_smac:
@@ -487,7 +490,7 @@ class AutoML(BaseEstimator):
                 get_smac_object_callback=self._get_smac_object_callback,
                 smac_scenario_args=self._smac_scenario_args,
             )
-            self.runhistory_, self.trajectory_ = \
+            self.runhistory_, self.trajectory_, self._budget_type = \
                 _proc_smac.run_smbo()
             trajectory_filename = os.path.join(
                 self._backend.get_smac_output_directory_for_run(self._seed),
@@ -510,11 +513,6 @@ class AutoML(BaseEstimator):
         return self
 
     def refit(self, X, y):
-        def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None, line=None):
-            self._logger.debug('%s:%s: %s:%s' %
-                               (filename, lineno, category.__name__, message))
-            return
 
         if self._keep_models is not True:
             raise ValueError(
@@ -534,7 +532,6 @@ class AutoML(BaseEstimator):
                 # 1. get budget_type from the TAE
                 # 2. add a function to the train evaluator to train a model on a budget given the
                 # budget specification and the training data
-                print(identifier)
                 model = self.models_[identifier]
                 # this updates the model inplace, it can then later be used in
                 # predict method
@@ -544,9 +541,19 @@ class AutoML(BaseEstimator):
                 # the ordering of the data.
                 for i in range(10):
                     try:
-                        with warnings.catch_warnings():
-                            warnings.showwarning = send_warnings_to_log
-                            model.fit(X.copy(), y.copy())
+                        if self._budget_type is None:
+                            _fit_and_suppress_warnings(self._logger, model, X, y)
+                        else:
+                            _fit_with_budget(
+                                X_train=X,
+                                Y_train=y,
+                                budget=identifier[2],
+                                budget_type=self._budget_type,
+                                logger=self._logger,
+                                model=model,
+                                train_indices=np.arange(len(X), dtype=int),
+                                task_type=self._task,
+                            )
                         break
                     except ValueError as e:
                         indices = list(range(X.shape[0]))
