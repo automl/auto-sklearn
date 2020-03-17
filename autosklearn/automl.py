@@ -1073,6 +1073,7 @@ class AutoMLRegressor(BaseAutoML):
         only_return_configuration_space: bool = False,
         load_models: bool = True,
         ):
+        
         X, y = super()._perform_input_checks(X, y)
         
         if X_test is not None:
