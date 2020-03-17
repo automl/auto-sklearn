@@ -1084,6 +1084,7 @@ class AutoMLClassifier(BaseAutoML):
 class AutoMLRegressor(BaseAutoML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._task_mapping = {'continuous-multioutput': MULTIOUTPUT_REGRESSION}
 
     def fit(
         self,
@@ -1095,7 +1096,7 @@ class AutoMLRegressor(BaseAutoML):
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
-    ):
+        )
         X, y = super()._perform_input_checks(X, y)
         _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
         if _n_outputs > 1:
@@ -1120,3 +1121,26 @@ class AutoMLRegressor(BaseAutoML):
         y = super()._check_y(y)
         return super().fit_ensemble(y, task, precision, dataset_name,
                                     ensemble_nbest, ensemble_size)
+
+    def _process_targets(self, y):
+        y = super()._check_y(y)
+        self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
+
+        y = np.copy(y)
+
+        _target = []
+        _n_targets = []
+
+        if self._n_outputs == 1:
+            target_k, y = np.unique(y, return_inverse=True)
+            _target.append(target_k)
+            _n_targets.append(target_k.shape[0])
+        else:
+            for k in range(self._n_outputs):
+                target_k, y[:, k] = np.unique(y[:, k], return_inverse=True)
+                _target.append(target_k)
+                _n_targets.append(target_k.shape[0])
+
+        _n_targets = np.array(_n_targets, dtype=np.int)
+
+        return y, _target, _n_targets

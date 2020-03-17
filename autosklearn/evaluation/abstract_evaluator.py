@@ -13,8 +13,10 @@ import autosklearn.pipeline.regression
 from autosklearn.constants import (
     CLASSIFICATION_TASKS,
     REGRESSION_TASKS,
+    MULTILABEL_REGRESSION,
     MULTILABEL_CLASSIFICATION,
     MULTICLASS_CLASSIFICATION,
+    MULTIOUTPUT_REGRESSION
 )
 from autosklearn.pipeline.implementations.util import (
     convert_multioutput_multiclass_to_multilabel
@@ -204,12 +206,22 @@ class AbstractEvaluator(object):
                                      random_state=self.seed,
                                      init_params=self._init_params)
         else:
-            dataset_properties = {
-                'task': self.task_type,
-                'sparse': self.datamanager.info['is_sparse'] == 1,
-                'multilabel': self.task_type == MULTILABEL_CLASSIFICATION,
-                'multiclass': self.task_type == MULTICLASS_CLASSIFICATION,
-            }
+            if self.task_type in REGRESSION_TASK:
+                
+                dataset_properties = {
+                    'task': self.task_type,
+                    'sparse': self.datamanager.info['is_sparse'] == 1,
+                    'multioutput': self.task_type == MULTIOUTPUT_REGRESSION,
+                }
+            else:    
+                dataset_properties = {
+                    'task': self.task_type,
+                    'sparse': self.datamanager.info['is_sparse'] == 1,
+                    'multilabel': self.task_type == MULTILABEL_CLASSIFICATION,
+                    'multiclass': self.task_type == MULTICLASS_CLASSIFICATION,
+                }
+
+
             model = self.model_class(config=self.configuration,
                                      dataset_properties=dataset_properties,
                                      random_state=self.seed,
@@ -521,19 +533,20 @@ class AbstractEvaluator(object):
 
         if len(Y_pred.shape) == 1:
             Y_pred = Y_pred.reshape((-1, 1))
-
+        Y_pred = self._ensure_prediction_array_sizes(Y_pred, Y_train)
         return Y_pred
 
     def _ensure_prediction_array_sizes(self, prediction, Y_train):
         num_classes = self.datamanager.info['label_num']
 
-        if self.task_type == MULTICLASS_CLASSIFICATION and \
-                prediction.shape[1] < num_classes:
+        if (self.task_type == MULTICLASS_CLASSIFICATION or \
+           self.task_type == MULTIOUTPUT_REGRESSION) and \
+                prediction.shape[1] < num_classes: 
             if Y_train is None:
                 raise ValueError('Y_train must not be None!')
             classes = list(np.unique(Y_train))
-
             mapping = dict()
+
             for class_number in range(num_classes):
                 if class_number in classes:
                     index = classes.index(class_number)

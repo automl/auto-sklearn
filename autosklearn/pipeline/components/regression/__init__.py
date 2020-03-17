@@ -57,6 +57,9 @@ class RegressorChoice(AutoSklearnChoice):
 
             if entry.get_properties()['handles_regression'] is False:
                 continue
+            if dataset_properties.get('multioutput') is True and available_comp[name]. \
+                    get_properties()['handles_multilabel'] is False:
+                continue
             components_dict[name] = entry
 
         return components_dict

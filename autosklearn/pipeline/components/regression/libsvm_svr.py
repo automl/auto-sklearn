@@ -109,6 +109,7 @@ class LibSVM_SVR(AutoSklearnRegressionAlgorithm):
                 'handles_classification': False,
                 'handles_multiclass': False,
                 'handles_multilabel': False,
+                'handles_multioutput': False,
                 'prefers_data_normalized': True,
                 'is_deterministic': True,
                 'input': (SPARSE, DENSE, UNSIGNED_DATA),
