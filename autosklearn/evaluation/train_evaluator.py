@@ -82,6 +82,8 @@ class TrainEvaluator(AbstractEvaluator):
             exclude=exclude,
             disable_file_output=disable_file_output,
             init_params=init_params,
+            budget=budget,
+            budget_type=budget_type,
         )
 
         self.resampling_strategy = resampling_strategy
@@ -107,9 +109,6 @@ class TrainEvaluator(AbstractEvaluator):
         # opposite.
         self.partial = True
         self.keep_models = keep_models
-
-        self.budget = budget
-        self.budget_type = budget_type
 
     def fit_predict_and_loss(self, iterative=False):
         """Fit, predict and compute the loss for cross-validation and

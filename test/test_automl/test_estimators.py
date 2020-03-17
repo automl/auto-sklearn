@@ -289,7 +289,7 @@ class EstimatorTest(Base, unittest.TestCase):
             tmp,
             '.auto-sklearn',
             'predictions_ensemble',
-            'predictions_ensemble_1_00030.npy',
+            'predictions_ensemble_0_999_0.0.npy',
         )
         with open(dummy_predictions_path, 'wb') as fh:
             np.save(fh, probas)
@@ -301,7 +301,7 @@ class EstimatorTest(Base, unittest.TestCase):
         dummy = ArrayReturningDummyPredictor(probas_test)
         context = BackendContext(tmp, output, False, False, True)
         backend = Backend(context)
-        backend.save_model(dummy, 30, 1)
+        backend.save_model(model=dummy, seed=0, idx=999, budget=0.0)
 
         automl = AutoSklearnClassifier(
             time_left_for_this_task=30,

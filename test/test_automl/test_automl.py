@@ -141,8 +141,12 @@ class AutoMLTest(Base, unittest.TestCase):
 
         # Assert that the files of the models used by the ensemble weren't deleted
         model_files = backend_api.list_all_models(seed=seed)
-        model_files_idx = set([int(m_file.split('.')[-2]) for m_file in model_files])
-        ensemble_members_idx = set([idx[1] for idx in automl.ensemble_.identifiers_])
+        model_files_idx = set()
+        for m_file in model_files:
+            # Extract the model identifiers from the filename
+            m_file = os.path.split(m_file)[1].replace('.model', '').split('.', 2)
+            model_files_idx.add((int(m_file[0]), int(m_file[1]), float(m_file[2])))
+        ensemble_members_idx = set(automl.ensemble_.identifiers_)
         self.assertTrue(ensemble_members_idx.issubset(model_files_idx))
 
         del automl
@@ -297,7 +301,7 @@ class AutoMLTest(Base, unittest.TestCase):
                                                          '.auto-sklearn')))
             self.assertTrue(os.path.exists(os.path.join(
                 backend_api.temporary_directory, '.auto-sklearn', 'predictions_ensemble',
-                'predictions_ensemble_1_1.npy')))
+                'predictions_ensemble_1_1_0.0.npy')))
 
             del auto
             self._tearDown(backend_api.temporary_directory)

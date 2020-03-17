@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-pytest -n 4 --durations=20 --timeout=600 --timeout-method=thread -v $1
+pytest -n 8 --durations=300 --timeout=1800 --timeout-method=thread -v $1
