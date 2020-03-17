@@ -17,7 +17,7 @@ TASK_TYPES_TO_STRING = \
      MULTICLASS_CLASSIFICATION: "multiclass.classification",
      MULTILABEL_CLASSIFICATION: "multilabel.classification",
      REGRESSION: "regression",
-     MULTIOUTPUT_REGRESSION:"multioutput.regression"}
+     MULTIOUTPUT_REGRESSION: "multioutput.regression"}
 
 STRING_TO_TASK_TYPES = \
     {"binary.classification": BINARY_CLASSIFICATION,
