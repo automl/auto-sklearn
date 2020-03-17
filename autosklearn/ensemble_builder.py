@@ -695,6 +695,11 @@ class EnsembleBuilder(multiprocessing.Process):
         for model_path in self.read_preds.keys():
             if self.read_preds[model_path]['deleted']:
                 continue
+            match = self.model_fn_re.search(model_path)
+            _num_run = int(match.group(2))
+            # Do not remove the dummy prediction!
+            if _num_run == 1:
+                continue
             model_file = os.path.split(model_path)[1]
             if model_file not in candidates:
                 try:
