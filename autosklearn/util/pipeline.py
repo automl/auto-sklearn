@@ -59,8 +59,6 @@ def _get_regression_configuration_space(info, include, exclude):
 
     if task_type == MULTIOUTPUT_REGRESSION:
         multioutput = True
-    if task_type == CLASSIFICATION:
-        raise NotImplementedError()
     if info['is_sparse'] == 1:
         sparse = True
 
@@ -71,8 +69,7 @@ def _get_regression_configuration_space(info, include, exclude):
 
     return SimpleRegressionPipeline(
        dataset_properties=dataset_properties,
-       include=include, exclude=exclude).\
-               get_hyperparameter_search_space()
+       include=include, exclude=exclude).get_hyperparameter_search_space()
 
 def _get_classification_configuration_space(info, include, exclude):
     task_type = info['task']

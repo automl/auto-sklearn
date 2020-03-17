@@ -211,7 +211,7 @@ class AbstractEvaluator(object):
                     'sparse': self.datamanager.info['is_sparse'] == 1,
                     'multioutput': self.task_type == MULTIOUTPUT_REGRESSION,
                 }
-            else: 
+            else:
                 dataset_properties = {
                     'task': self.task_type,
                     'sparse': self.datamanager.info['is_sparse'] == 1,
@@ -536,10 +536,8 @@ class AbstractEvaluator(object):
 
     def _ensure_prediction_array_sizes(self, prediction, Y_train):
         num_classes = self.datamanager.info['label_num']
-
-        if (self.task_type == MULTICLASS_CLASSIFICATION or \
-                self.task_type == MULTIOUTPUT_REGRESSION) and \
-                prediction.shape[1] < num_classes:
+        multi_type = [MULTICLASS_CLASSIFICATION, MULTIOUTPUT_REGRESSION]
+        if self.task_type in multi_type and prediction.shape[1] < num_classes:
             if Y_train is None:
                 raise ValueError('Y_train must not be None!')
             classes = list(np.unique(Y_train))
