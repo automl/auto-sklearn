@@ -1059,6 +1059,7 @@ class AutoMLClassifier(BaseAutoML):
 class AutoMLRegressor(BaseAutoML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._task_mapping = {'continuous-multioutput': MULTIOUTPUT_REGRESSION}
 
     def fit(
         self,
@@ -1071,12 +1072,21 @@ class AutoMLRegressor(BaseAutoML):
         dataset_name: Optional[str] = None,
         only_return_configuration_space: bool = False,
         load_models: bool = True,
-    ):
+        )
         X, y = super()._perform_input_checks(X, y)
-        _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
-        if _n_outputs > 1:
-            raise NotImplementedError(
-                'Multi-output regression is not implemented.')
+        
+        if X_test is not None:
+            X_test, y_test = self._perform_input_checks(X_test, y_test)
+            if len(y.shape) != len(y_test.shape):
+                raise ValueError('Target value shapes do not match: %s vs %s'
+                                 % (y.shape, y_test.shape))
+
+        y_task = type_of_target(y)
+        task = self._task_mapping.get(y_task)
+
+        if task is None:
+            raise ValueError('Cannot work on data of type %s' % y_task)
+
         if metric is None:
             metric = r2
         return super().fit(
@@ -1090,10 +1100,37 @@ class AutoMLRegressor(BaseAutoML):
             only_return_configuration_space=only_return_configuration_space,
             load_models=load_models,
         )
-
     def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
-        y = super()._check_y(y)
+        y, _target, _n_targets = self._process_targets(y)
+        if not hasattr(self, '_target'):
+            self._target = _target
+        if not hasattr(self, '_n_targets'):
+            self._n_targets = _n_targets
+
         return super().fit_ensemble(y, task, metric, precision, dataset_name,
                                     ensemble_nbest, ensemble_size)
+
+    def _process_targets(self, y):
+        y = super()._check_y(y)
+        self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
+
+        y = np.copy(y)
+
+        _target = []
+        _n_targets = []
+
+        if self._n_outputs == 1:
+            target_k, y = np.unique(y, return_inverse=True)
+            _target.append(target_k)
+            _n_targets.append(target_k.shape[0])
+        else:
+            for k in range(self._n_outputs):
+                target_k, y[:, k] = np.unique(y[:, k], return_inverse=True)
+                _target.append(target_k)
+                _n_targets.append(target_k.shape[0])
+
+        _n_targets = np.array(_n_targets, dtype=np.int)
+
+        return y, _target, _n_targets
