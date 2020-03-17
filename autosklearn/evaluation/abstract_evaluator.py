@@ -13,7 +13,6 @@ import autosklearn.pipeline.regression
 from autosklearn.constants import (
     CLASSIFICATION_TASKS,
     REGRESSION_TASKS,
-    MULTILABEL_REGRESSION,
     MULTILABEL_CLASSIFICATION,
     MULTICLASS_CLASSIFICATION,
     MULTIOUTPUT_REGRESSION
