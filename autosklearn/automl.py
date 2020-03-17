@@ -32,7 +32,6 @@ from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
-from autosklearn.constants import MULTIOUTPUT_REGRESSION
 from autosklearn.constants import *
 
 
