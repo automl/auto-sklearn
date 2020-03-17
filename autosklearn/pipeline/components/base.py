@@ -44,7 +44,7 @@ class ThirdPartyComponents(object):
         properties = set(classifier.get_properties())
         should_be_there = {'shortname', 'name', 'handles_regression',
                            'handles_classification', 'handles_multiclass',
-                           'handles_multilabel', 'is_deterministic',
+                           'handles_multilabel', '','is_deterministic',
                            'input', 'output'}
         for property in properties:
             if property not in should_be_there:
@@ -278,7 +278,7 @@ class AutoSklearnRegressionAlgorithm(AutoSklearnComponent):
 
         Returns
         -------
-        array, shape = (n_samples,)
+        array, shape = (n_samples, ) or shape = (n_samples, n_targets)
             Returns the predicted values
 
         Notes

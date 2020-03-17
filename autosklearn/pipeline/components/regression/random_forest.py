@@ -96,6 +96,7 @@ class RandomForest(
                 'handles_regression': True,
                 'handles_classification': False,
                 'handles_multiclass': False,
+                'handles_multioutput': True,
                 'handles_multilabel': False,
                 'prefers_data_normalized': False,
                 'is_deterministic': True,
