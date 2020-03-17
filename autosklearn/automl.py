@@ -32,6 +32,7 @@ from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
+from autosklearn.constants import MULTIOUTPUT_REGRESSION
 from autosklearn.constants import *
 
 
@@ -1060,7 +1061,7 @@ class AutoMLRegressor(BaseAutoML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._task_mapping = {'continuous-multioutput': MULTIOUTPUT_REGRESSION}
-
+        
     def fit(
         self,
         X: np.ndarray,
@@ -1073,7 +1074,6 @@ class AutoMLRegressor(BaseAutoML):
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ):
-        
         X, y = super()._perform_input_checks(X, y)
         if X_test is not None:
             X_test, y_test = self._perform_input_checks(X_test, y_test)
@@ -1093,7 +1093,7 @@ class AutoMLRegressor(BaseAutoML):
             X, y,
             X_test=X_test,
             y_test=y_test,
-            task=REGRESSION,
+            task=task,
             metric=metric,
             feat_type=feat_type,
             dataset_name=dataset_name,
