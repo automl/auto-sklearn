@@ -35,8 +35,8 @@ from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix
 from autosklearn.metrics import f1_macro, accuracy, r2
-from autosklearn.constants import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, \
-    REGRESSION_TASKS, REGRESSION, BINARY_CLASSIFICATION
+from autosklearn.constants import MULTIOUTPUT_REGRESSION
+from autosklearn.constants import *
 
 
 def _model_predict(model, X, batch_size, logger, task):
@@ -1085,7 +1085,7 @@ class AutoMLRegressor(BaseAutoML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._task_mapping = {'continuous-multioutput': MULTIOUTPUT_REGRESSION}
-
+        
     def fit(
         self,
         X: np.ndarray,
@@ -1097,7 +1097,6 @@ class AutoMLRegressor(BaseAutoML):
         only_return_configuration_space: bool = False,
         load_models: bool = True,
     ):
-        
         X, y = super()._perform_input_checks(X, y)
         _n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
         if _n_outputs > 1:
@@ -1109,7 +1108,8 @@ class AutoMLRegressor(BaseAutoML):
             X, y,
             X_test=X_test,
             y_test=y_test,
-            task=REGRESSION,
+            task=task,
+            metric=metric,
             feat_type=feat_type,
             dataset_name=dataset_name,
             only_return_configuration_space=only_return_configuration_space,
