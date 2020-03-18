@@ -38,7 +38,7 @@ class BaseTest(unittest.TestCase):
 
         # for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #     print(clause)
-        self.assertEqual(134, len(cs.forbidden_clauses))
+        self.assertEqual(148, len(cs.forbidden_clauses))
 
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification', 'signed': True}
