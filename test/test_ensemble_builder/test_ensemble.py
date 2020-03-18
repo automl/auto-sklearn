@@ -94,7 +94,7 @@ class EnsembleTest(unittest.TestCase):
 
         fixture = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
+            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_100.0.npy"
         )
         self.assertEquals(sel_keys[0], fixture)
 
@@ -151,26 +151,32 @@ class EnsembleTest(unittest.TestCase):
 
         ensbuilder.read_ensemble_preds()
 
+        d1 = os.path.join(
+            self.backend.temporary_directory,
+            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_1_0.0.npy"
+        )
         d2 = os.path.join(
             self.backend.temporary_directory,
             ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
         )
-        d1 = os.path.join(
+        d3 = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_1_0.0.npy"
+            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_100.0.npy"
         )
 
         sel_keys = ensbuilder.get_n_best_preds()
 
         ensbuilder.get_valid_test_preds(selected_keys=sel_keys)
 
-        # selected --> read valid and test predictions
-        self.assertIsNotNone(ensbuilder.read_preds[d2][Y_VALID])
-        self.assertIsNotNone(ensbuilder.read_preds[d2][Y_TEST])
-
         # not selected --> should still be None
         self.assertIsNone(ensbuilder.read_preds[d1][Y_VALID])
         self.assertIsNone(ensbuilder.read_preds[d1][Y_TEST])
+        self.assertIsNone(ensbuilder.read_preds[d2][Y_VALID])
+        self.assertIsNone(ensbuilder.read_preds[d2][Y_TEST])
+
+        # selected --> read valid and test predictions
+        self.assertIsNotNone(ensbuilder.read_preds[d3][Y_VALID])
+        self.assertIsNotNone(ensbuilder.read_preds[d3][Y_TEST])
 
     def testEntireEnsembleBuilder(self):
 

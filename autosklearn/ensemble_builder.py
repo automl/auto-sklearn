@@ -290,7 +290,7 @@ class EnsembleBuilder(multiprocessing.Process):
             return False
 
         n_read_files = 0
-        for y_ens_fn in y_ens_files:
+        for y_ens_fn in sorted(y_ens_files):
 
             if self.read_at_most and n_read_files >= self.read_at_most:
                 # limit the number of files that will be read
