@@ -331,10 +331,10 @@ class Backend(object):
     def get_model_dir(self):
         return os.path.join(self.internals_directory, 'models')
 
-    def save_model(self, model, idx, seed):
+    def save_model(self, model, idx, seed, budget):
         # This should fail if no models directory exists
         filepath = os.path.join(self.get_model_dir(),
-                                '%s.%s.model' % (seed, idx))
+                                '%s.%s.%s.model' % (seed, idx, budget))
 
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
@@ -347,12 +347,12 @@ class Backend(object):
         model_directory = self.get_model_dir()
         if seed >= 0:
             model_files = glob.glob(
-                os.path.join(glob.escape(model_directory), '%s.*.model' % seed)
+                os.path.join(glob.escape(model_directory), '%s.*.*.model' % seed)
             )
         else:
             model_files = os.listdir(model_directory)
-            model_files = [os.path.join(model_directory, mf)
-                           for mf in model_files]
+            model_files = [os.path.join(model_directory, model_file)
+                           for model_file in model_files]
 
         return model_files
 
@@ -365,7 +365,7 @@ class Backend(object):
         models = dict()
 
         for model_file in model_file_names:
-            # File names are like: {seed}.{index}.model
+            # File names are like: {seed}.{index}.{budget}.model
             if model_file.endswith('/'):
                 model_file = model_file[:-1]
             if not model_file.endswith('.model') and \
@@ -377,8 +377,10 @@ class Backend(object):
             basename_parts = basename.split('.')
             seed = int(basename_parts[0])
             idx = int(basename_parts[1])
+            budget = float(basename_parts[2])
 
-            models[(seed, idx)] = self.load_model_by_seed_and_id(seed, idx)
+            models[(seed, idx, budget)] = self.load_model_by_seed_and_id_and_budget(
+                seed, idx, budget)
 
         return models
 
@@ -386,15 +388,16 @@ class Backend(object):
         models = dict()
 
         for identifier in identifiers:
-            seed, idx = identifier
-            models[identifier] = self.load_model_by_seed_and_id(seed, idx)
+            seed, idx, budget = identifier
+            models[identifier] = self.load_model_by_seed_and_id_and_budget(
+                seed, idx, budget)
 
         return models
 
-    def load_model_by_seed_and_id(self, seed, idx):
+    def load_model_by_seed_and_id_and_budget(self, seed, idx, budget):
         model_directory = self.get_model_dir()
 
-        model_file_name = '%s.%s.model' % (seed, idx)
+        model_file_name = '%s.%s.%s.model' % (seed, idx, budget)
         model_file_path = os.path.join(model_directory, model_file_name)
         with open(model_file_path, 'rb') as fh:
             return pickle.load(fh)
@@ -444,14 +447,14 @@ class Backend(object):
         return os.path.join(self.internals_directory,
                             'predictions_%s' % subset)
 
-    def save_predictions_as_npy(self, predictions, subset, automl_seed, idx):
+    def save_predictions_as_npy(self, predictions, subset, automl_seed, idx, budget):
         output_dir = self._get_prediction_output_dir(subset)
         # Make sure an output directory exists
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        filepath = os.path.join(output_dir, 'predictions_%s_%s_%s.npy' %
-                                            (subset, automl_seed, str(idx)))
+        filepath = os.path.join(output_dir, 'predictions_%s_%s_%s_%s.npy' %
+                                            (subset, automl_seed, str(idx), budget))
 
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
@@ -459,8 +462,7 @@ class Backend(object):
             tempname = fh.name
         os.rename(tempname, filepath)
 
-    def save_predictions_as_txt(self, predictions, subset, idx, precision,
-                                prefix=None):
+    def save_predictions_as_txt(self, predictions, subset, idx, precision, prefix=None):
         # Write prediction scores in prescribed format
         filepath = os.path.join(self.output_directory,
                                 ('%s_' % prefix if prefix else '') +

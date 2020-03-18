@@ -503,8 +503,9 @@ class AutoMLSMBO(object):
 
         self.runhistory = smac.solver.runhistory
         self.trajectory = smac.solver.intensifier.traj_logger.trajectory
+        self._budget_type = smac.solver.intensifier.tae_runner.budget_type
 
-        return self.runhistory, self.trajectory
+        return self.runhistory, self.trajectory, self._budget_type
 
     def get_metalearning_suggestions(self):
         # == METALEARNING suggestions

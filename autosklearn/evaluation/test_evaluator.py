@@ -1,7 +1,10 @@
 # -*- encoding: utf-8 -*-
 from smac.tae.execute_ta_run import StatusType
 
-from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
+from autosklearn.evaluation.abstract_evaluator import (
+    AbstractEvaluator,
+    _fit_and_suppress_warnings,
+)
 from autosklearn.metrics import calculate_score
 
 
@@ -46,7 +49,7 @@ class TestEvaluator(AbstractEvaluator):
         self.model = self._get_model()
 
     def fit_predict_and_loss(self):
-        self._fit_and_suppress_warnings(self.model, self.X_train, self.Y_train)
+        _fit_and_suppress_warnings(self.logger, self.model, self.X_train, self.Y_train)
         loss, Y_pred, _, _ =  self.predict_and_loss()
         self.finish_up(
             loss=loss,

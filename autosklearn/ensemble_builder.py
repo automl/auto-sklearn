@@ -132,7 +132,7 @@ class EnsembleBuilder(multiprocessing.Process):
         self.logger = get_logger(logger_name)
 
         self.start_time = 0
-        self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy')
+        self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy')
 
         # already read prediction files
         # {"file name": {
@@ -142,6 +142,7 @@ class EnsembleBuilder(multiprocessing.Process):
         #    "mtime_test": str,
         #    "seed": int,
         #    "num_run": int,
+        #    "deleted": bool,
         #    Y_ENSEMBLE: np.ndarray
         #    Y_VALID: np.ndarray
         #    Y_TEST: np.ndarray
@@ -243,9 +244,6 @@ class EnsembleBuilder(multiprocessing.Process):
                              index_run=iteration)
                 iteration += 1
 
-                # Delete files of non-candidate models
-                if self.keep_just_nbest_models:
-                    self._delete_non_candidate_models(candidate_models)
             else:
                 time.sleep(self.sleep_duration)
 
@@ -275,13 +273,13 @@ class EnsembleBuilder(multiprocessing.Process):
         if self.shared_mode is False:
             pred_path = os.path.join(
                 glob.escape(self.dir_ensemble),
-                'predictions_ensemble_%s_*.npy' % self.seed,
+                'predictions_ensemble_%s_*_*.npy' % self.seed,
             )
         # pSMAC
         else:
             pred_path = os.path.join(
                 glob.escape(self.dir_ensemble),
-                'predictions_ensemble_*_*.npy',
+                'predictions_ensemble_*_*_*.npy',
             )
 
         y_ens_files = glob.glob(pred_path)
@@ -292,7 +290,7 @@ class EnsembleBuilder(multiprocessing.Process):
             return False
 
         n_read_files = 0
-        for y_ens_fn in y_ens_files:
+        for y_ens_fn in sorted(y_ens_files):
 
             if self.read_at_most and n_read_files >= self.read_at_most:
                 # limit the number of files that will be read
@@ -306,6 +304,7 @@ class EnsembleBuilder(multiprocessing.Process):
             match = self.model_fn_re.search(y_ens_fn)
             _seed = int(match.group(1))
             _num_run = int(match.group(2))
+            _budget = float(match.group(3))
             if not self.read_preds.get(y_ens_fn):
                 self.read_preds[y_ens_fn] = {
                     "ens_score": -1,
@@ -314,6 +313,8 @@ class EnsembleBuilder(multiprocessing.Process):
                     "mtime_test": 0,
                     "seed": _seed,
                     "num_run": _num_run,
+                    "budget": _budget,
+                    "deleted": False,
                     Y_ENSEMBLE: None,
                     Y_VALID: None,
                     Y_TEST: None,
@@ -483,17 +484,21 @@ class EnsembleBuilder(multiprocessing.Process):
             valid_fn = glob.glob(
                 os.path.join(
                     glob.escape(self.dir_valid),
-                    'predictions_valid_%d_%d.npy' % (
+                    'predictions_valid_%d_%d_%s.npy' % (
                         self.read_preds[k]["seed"],
-                        self.read_preds[k]["num_run"])
+                        self.read_preds[k]["num_run"],
+                        self.read_preds[k]["budget"],
+                    )
                 )
             )
             test_fn = glob.glob(
                 os.path.join(
                     glob.escape(self.dir_test),
-                    'predictions_test_%d_%d.npy' % (
+                    'predictions_test_%d_%d_%s.npy' % (
                         self.read_preds[k]["seed"],
-                        self.read_preds[k]["num_run"])
+                        self.read_preds[k]["num_run"],
+                        self.read_preds[k]["budget"]
+                    )
                 )
             )
 
@@ -559,7 +564,13 @@ class EnsembleBuilder(multiprocessing.Process):
         """
 
         predictions_train = np.array([self.read_preds[k][Y_ENSEMBLE] for k in selected_keys])
-        include_num_runs = [(self.read_preds[k]["seed"], self.read_preds[k]["num_run"]) for k in selected_keys]
+        include_num_runs = [
+            (
+                self.read_preds[k]["seed"],
+                self.read_preds[k]["num_run"],
+                self.read_preds[k]["budget"],
+            )
+            for k in selected_keys]
 
         # check hash if ensemble training data changed
         current_hash = hash(predictions_train.data.tobytes())
@@ -569,6 +580,11 @@ class EnsembleBuilder(multiprocessing.Process):
                 "-- current performance: %f",
                 self.validation_performance_,
             )
+
+            # Delete files of non-candidate models
+            if self.keep_just_nbest_models:
+                self._delete_non_candidate_models(selected_keys)
+
             return None
         self.last_hash = current_hash
 
@@ -606,6 +622,10 @@ class EnsembleBuilder(multiprocessing.Process):
             self.logger.error('Caught IndexError: %s' + traceback.format_exc())
             time.sleep(self.sleep_duration)
             return None
+
+        # Delete files of non-candidate models
+        if self.keep_just_nbest_models:
+            self._delete_non_candidate_models(selected_keys)
 
         return ensemble
 
@@ -671,12 +691,25 @@ class EnsembleBuilder(multiprocessing.Process):
         # TODO: ADD saving of predictions on "ensemble data"
 
     def _delete_non_candidate_models(self, candidates):
-        cand_ids = [cand.replace('_', '.').split('.')[-2] for cand in candidates]
-        for model_file in self.read_preds.keys():
-            model_file_id = model_file.split('.')[-2]
-            if model_file_id not in cand_ids:
-                os.remove(model_file)
-                self.logger.info("Deleted file of non-candidate model %s", model_file)
+        candidates = [os.path.split(cand)[1] for cand in candidates]
+        for model_path in self.read_preds.keys():
+            if self.read_preds[model_path]['deleted']:
+                continue
+            match = self.model_fn_re.search(model_path)
+            _num_run = int(match.group(2))
+            # Do not remove the dummy prediction!
+            if _num_run == 1:
+                continue
+            model_file = os.path.split(model_path)[1]
+            if model_file not in candidates:
+                try:
+                    os.remove(model_path)
+                    self.logger.info("Deleted file of non-candidate model %s", model_path)
+                    self.read_preds[model_path]['deleted'] = True
+                except Exception as e:
+                    self.logger.error(
+                        'Failed to delete non-candidate model %s due to error %s',
+                        model_path, e)
 
     def _read_np_fn(self, fp):
         if self.precision is "16":

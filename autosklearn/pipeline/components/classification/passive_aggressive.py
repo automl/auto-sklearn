@@ -31,8 +31,7 @@ class PassiveAggressive(
         return 1024
 
     def iterative_fit(self, X, y, n_iter=2, refit=False, sample_weight=None):
-        from sklearn.linear_model.passive_aggressive import \
-            PassiveAggressiveClassifier
+        from sklearn.linear_model import PassiveAggressiveClassifier
 
         # Need to fit at least two iterations, otherwise early stopping will not
         # work because we cannot determine whether the algorithm actually

@@ -20,7 +20,7 @@ from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
 from autosklearn.evaluation.util import read_queue
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, \
-    eval_holdout, eval_iterative_holdout, eval_cv, eval_partial_cv
+    eval_holdout, eval_iterative_holdout, eval_cv, eval_partial_cv, subsample_indices
 from autosklearn.util import backend
 from autosklearn.util.pipeline import get_configuration_space
 from autosklearn.constants import BINARY_CLASSIFICATION, \
@@ -560,13 +560,17 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy_args={'folds': 10},
                                    metric=accuracy)
         train_indices = np.arange(69, dtype=int)
-        train_indices1 = evaluator.subsample_indices(train_indices, 0.1449)
+        train_indices1 = subsample_indices(
+            train_indices, 0.1449, evaluator.task_type, evaluator.Y_train)
         evaluator.subsample = 20
-        train_indices2 = evaluator.subsample_indices(train_indices, 0.2898)
+        train_indices2 = subsample_indices(
+            train_indices, 0.2898, evaluator.task_type, evaluator.Y_train)
         evaluator.subsample = 30
-        train_indices3 = evaluator.subsample_indices(train_indices, 0.4347)
+        train_indices3 = subsample_indices(
+            train_indices, 0.4347, evaluator.task_type, evaluator.Y_train)
         evaluator.subsample = 67
-        train_indices4 = evaluator.subsample_indices(train_indices, 0.971)
+        train_indices4 = subsample_indices(
+            train_indices, 0.971, evaluator.task_type, evaluator.Y_train)
         # Common cases
         for ti in train_indices1:
             self.assertIn(ti, train_indices2)
@@ -579,14 +583,16 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertRaisesRegex(
             ValueError, 'train_size=0.0 should be either positive and smaller than the '
             r'number of samples 69 or a float in the \(0, 1\) range',
-            evaluator.subsample_indices, train_indices, 0.0)
+            subsample_indices, train_indices, 0.0, evaluator.task_type, evaluator.Y_train)
         # With equal or greater it should return a non-shuffled array of indices
-        train_indices5 = evaluator.subsample_indices(train_indices, 1.0)
+        train_indices5 = subsample_indices(
+            train_indices, 1.0, evaluator.task_type, evaluator.Y_train)
         self.assertTrue(np.all(train_indices5 == train_indices))
         evaluator.subsample = 68
         self.assertRaisesRegex(
             ValueError, 'The test_size = 1 should be greater or equal to the number of '
-            'classes = 2', evaluator.subsample_indices, train_indices, 0.9999)
+            'classes = 2', subsample_indices, train_indices, 0.9999, evaluator.task_type,
+            evaluator.Y_train)
 
     @unittest.mock.patch('autosklearn.util.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
@@ -600,9 +606,13 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy_args={'folds': 10},
                                    metric=accuracy)
         train_indices = np.arange(69, dtype=int)
-        train_indices3 = evaluator.subsample_indices(train_indices, subsample=0.4347)
+        train_indices3 = subsample_indices(train_indices, subsample=0.4347,
+                                           task_type=evaluator.task_type,
+                                           Y_train=evaluator.Y_train)
         evaluator.subsample = 67
-        train_indices4 = evaluator.subsample_indices(train_indices, subsample=0.4347)
+        train_indices4 = subsample_indices(train_indices, subsample=0.4347,
+                                           task_type=evaluator.task_type,
+                                           Y_train=evaluator.Y_train)
         # Common cases
         for ti in train_indices3:
             self.assertIn(ti, train_indices4)
@@ -611,12 +621,15 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertRaisesRegex(
             ValueError, 'train_size=0.0 should be either positive and smaller than the '
             r'number of samples 69 or a float in the \(0, 1\) range',
-            evaluator.subsample_indices, train_indices, 0.0)
+            subsample_indices, train_indices, 0.0,
+            evaluator.task_type, evaluator.Y_train)
         self.assertRaisesRegex(
             ValueError, 'Subsample must not be larger than 1, but is 1.000100',
-            evaluator.subsample_indices, train_indices, 1.0001)
+            subsample_indices, train_indices, 1.0001,
+            evaluator.task_type, evaluator.Y_train)
         # With equal or greater it should return a non-shuffled array of indices
-        train_indices6 = evaluator.subsample_indices(train_indices, 1.0)
+        train_indices6 = subsample_indices(train_indices, 1.0, evaluator.task_type,
+                                           evaluator.Y_train)
         np.testing.assert_allclose(train_indices6, train_indices)
 
     @unittest.mock.patch('autosklearn.util.backend.Backend')

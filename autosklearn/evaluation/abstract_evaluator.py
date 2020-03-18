@@ -93,6 +93,20 @@ class MyDummyRegressor(DummyRegressor):
         return None
 
 
+def _fit_and_suppress_warnings(logger, model, X, y):
+    def send_warnings_to_log(message, category, filename, lineno,
+                             file=None, line=None):
+        logger.debug('%s:%s: %s:%s',
+                     filename, lineno, category.__name__, message)
+        return
+
+    with warnings.catch_warnings():
+        warnings.showwarning = send_warnings_to_log
+        model.fit(X, y)
+
+    return model
+
+
 class AbstractEvaluator(object):
     def __init__(self, backend, queue, metric,
                  configuration=None,
@@ -103,7 +117,9 @@ class AbstractEvaluator(object):
                  include=None,
                  exclude=None,
                  disable_file_output=False,
-                 init_params=None):
+                 init_params=None,
+                 budget=None,
+                 budget_type=None):
 
         self.starttime = time.time()
 
@@ -173,6 +189,9 @@ class AbstractEvaluator(object):
 
         self.Y_optimization = None
         self.Y_actual_train = None
+
+        self.budget = budget
+        self.budget_type = budget_type
 
     def _get_model(self):
         if not isinstance(self.configuration, Configuration):
@@ -351,7 +370,7 @@ class AbstractEvaluator(object):
             )
         ):
             if os.path.exists(self.backend.get_model_dir()):
-                self.backend.save_model(self.model, self.num_run, seed)
+                self.backend.save_model(self.model, self.num_run, seed, self.budget)
 
         if (
             self.disable_file_output != True and (
@@ -367,18 +386,18 @@ class AbstractEvaluator(object):
                 self.backend.save_targets_ensemble(self.Y_optimization)
 
             self.backend.save_predictions_as_npy(
-                Y_optimization_pred, 'ensemble', seed, num_run
+                Y_optimization_pred, 'ensemble', seed, num_run, self.budget,
             )
 
         if Y_valid_pred is not None:
             if self.disable_file_output != True:
                 self.backend.save_predictions_as_npy(Y_valid_pred, 'valid',
-                                                     seed, num_run)
+                                                     seed, num_run, self.budget)
 
         if Y_test_pred is not None:
             if self.disable_file_output != True:
                 self.backend.save_predictions_as_npy(Y_test_pred, 'test',
-                                                     seed, num_run)
+                                                     seed, num_run, self.budget)
 
         return None, {}
 
@@ -436,17 +455,3 @@ class AbstractEvaluator(object):
             return new_predictions
 
         return prediction
-
-    def _fit_and_suppress_warnings(self, model, X, y):
-        def send_warnings_to_log(message, category, filename, lineno,
-                                 file=None, line=None):
-            self.logger.debug('%s:%s: %s:%s' %
-                (filename, lineno, category.__name__, message))
-            return
-
-        with warnings.catch_warnings():
-            warnings.showwarning = send_warnings_to_log
-            model.fit(X, y)
-
-        return model
-
