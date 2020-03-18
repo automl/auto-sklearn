@@ -69,7 +69,7 @@ class BackendModelsTest(unittest.TestCase):
         budget = 50.0
         expected_model = self._setup_load_model_mocks(
             openMock, pickleLoadMock, seed, idx, budget)
-        expected_dict = { (seed, idx, budget): expected_model }
+        expected_dict = {(seed, idx, budget): expected_model}
 
         actual_dict = self.backend.load_models_by_identifiers([(seed, idx, budget)])
 
