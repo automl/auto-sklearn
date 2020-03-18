@@ -26,11 +26,15 @@ class BackendModelsTest(unittest.TestCase):
         self.backend.load_model_by_seed_and_id_and_budget.side_effect = lambda *args: args
         rval = self.backend.load_models_by_file_names(['1.2.0.0.model',
                                                        '1.3.50.0.model',
-                                                       '1.4.100.0models',])
+                                                       '1.4.100.0models',
+                                                       ])
         self.assertEqual(rval, {(1, 2, 0.0): (1, 2, 0.0),
                                 (1, 3, 50.0): (1, 3, 50.0)})
 
-        with self.assertRaisesRegex(ValueError, "could not convert string to float: 'model'"):
+        with self.assertRaisesRegex(
+            ValueError,
+            "could not convert string to float: 'model'",
+        ):
             self.backend.load_models_by_file_names(['1.5.model'])
 
     @unittest.mock.patch('pickle.load')
@@ -38,7 +42,11 @@ class BackendModelsTest(unittest.TestCase):
     def test_load_model_by_seed_and_id(self, exists_mock, pickleLoadMock):
         exists_mock.return_value = False
         open_mock = unittest.mock.mock_open(read_data='Data')
-        with unittest.mock.patch('autosklearn.util.backend.open', open_mock, create=True):
+        with unittest.mock.patch(
+            'autosklearn.util.backend.open',
+            open_mock,
+            create=True,
+        ):
             seed = 13
             idx = 17
             budget = 50.0
@@ -46,7 +54,8 @@ class BackendModelsTest(unittest.TestCase):
                                                           pickleLoadMock,
                                                           seed, idx, budget)
 
-            actual_model = self.backend.load_model_by_seed_and_id_and_budget(seed, idx, budget)
+            actual_model = self.backend.load_model_by_seed_and_id_and_budget(
+                seed, idx, budget)
 
             self.assertEqual(expected_model, actual_model)
 
@@ -58,7 +67,8 @@ class BackendModelsTest(unittest.TestCase):
         seed = 13
         idx = 17
         budget = 50.0
-        expected_model = self._setup_load_model_mocks(openMock, pickleLoadMock, seed, idx, budget)
+        expected_model = self._setup_load_model_mocks(
+            openMock, pickleLoadMock, seed, idx, budget)
         expected_dict = { (seed, idx, budget): expected_model }
 
         actual_dict = self.backend.load_models_by_identifiers([(seed, idx, budget)])

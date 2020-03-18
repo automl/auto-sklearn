@@ -379,7 +379,8 @@ class Backend(object):
             idx = int(basename_parts[1])
             budget = float(basename_parts[2])
 
-            models[(seed, idx, budget)] = self.load_model_by_seed_and_id_and_budget(seed, idx, budget)
+            models[(seed, idx, budget)] = self.load_model_by_seed_and_id_and_budget(
+                seed, idx, budget)
 
         return models
 
@@ -388,7 +389,8 @@ class Backend(object):
 
         for identifier in identifiers:
             seed, idx, budget = identifier
-            models[identifier] = self.load_model_by_seed_and_id_and_budget(seed, idx, budget)
+            models[identifier] = self.load_model_by_seed_and_id_and_budget(
+                seed, idx, budget)
 
         return models
 

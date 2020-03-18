@@ -49,7 +49,8 @@ class AutoMLTest(Base, unittest.TestCase):
 
         failing_model = unittest.mock.Mock()
         failing_model.fit.side_effect = [ValueError(), ValueError(), None]
-        failing_model.fit_transformer.side_effect = [ValueError(), ValueError(), (None, {})]
+        failing_model.fit_transformer.side_effect = [
+            ValueError(), ValueError(), (None, {})]
         failing_model.get_max_iter.return_value = 100
 
         auto = AutoML(backend_api, 20, 5)
