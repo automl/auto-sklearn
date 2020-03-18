@@ -9,6 +9,7 @@ class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
 
     def __init__(self, strategy='mean', random_state=None):
         self.strategy = strategy
+        self.random_state = random_state
 
     def fit(self, X, y=None):
         import sklearn.impute
