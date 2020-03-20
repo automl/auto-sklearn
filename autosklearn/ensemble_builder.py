@@ -101,7 +101,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
         if isinstance(max_keep_best, numbers.Integral) and max_keep_best < 1:
             raise ValueError("Integer keep_best has to be larger 1: %s" % max_keep_best)
-        if 0 > max_keep_best > 1:
+        if 0 >= max_keep_best > 1:
             raise ValueError("Float keep best has to be >0 and <= 1: %" % max_keep_best)
         self.max_keep_best = max_keep_best  # max number of members that will be used for building the ensemble
         self.keep_just_nbest_models = keep_just_nbest_models
@@ -435,7 +435,7 @@ class EnsembleBuilder(multiprocessing.Process):
             keep_nbest = max(1, min(len(sorted_keys), int(len(sorted_keys) * self.max_keep_best)))
         else:
             keep_nbest = self.max_keep_best
-
+        self.logger.debug("Cut model selection library down to %d (out of %d) models" % (keep_nbest, len(sorted_keys)))
         for k, _, _ in sorted_keys[:keep_nbest]:
             if self.read_preds[k][Y_ENSEMBLE] is None:
                 self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(fp=k)

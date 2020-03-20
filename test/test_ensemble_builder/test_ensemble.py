@@ -76,27 +76,27 @@ class EnsembleTest(unittest.TestCase):
         self.assertEqual(ensbuilder.read_preds[filename]["ens_score"], 1.0)
 
     def testNBest(self):
+        for max_keep_best, exp in ((1, 1), (1.0, 2), (0.1, 1), (0.9, 1)):
+            ensbuilder = EnsembleBuilder(
+                backend=self.backend,
+                dataset_name="TEST",
+                task_type=1,  #Binary Classification
+                metric=roc_auc,
+                limit=-1, # not used,
+                seed=0, # important to find the test files
+                max_keep_best=max_keep_best,
+            )
 
-        ensbuilder = EnsembleBuilder(
-            backend=self.backend,
-            dataset_name="TEST",
-            task_type=1,  #Binary Classification
-            metric=roc_auc,
-            limit=-1, # not used,
-            seed=0, # important to find the test files
-            max_keep_best=1,
-        )
+            ensbuilder.read_ensemble_preds()
+            sel_keys = ensbuilder.get_n_best_preds()
 
-        ensbuilder.read_ensemble_preds()
-        sel_keys = ensbuilder.get_n_best_preds()
+            self.assertEqual(len(sel_keys), exp)
 
-        self.assertEqual(len(sel_keys), 1)
-
-        fixture = os.path.join(
-            self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_100.0.npy"
-        )
-        self.assertEqual(sel_keys[0], fixture)
+            fixture = os.path.join(
+                self.backend.temporary_directory,
+                ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_100.0.npy"
+            )
+            self.assertEqual(sel_keys[0], fixture)
 
     def testFallBackNBest(self):
 
