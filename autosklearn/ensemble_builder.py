@@ -103,8 +103,6 @@ class EnsembleBuilder(multiprocessing.Process):
             raise ValueError("Integer keep_best has to be larger 1: %s" % max_keep_best)
         if 0 > max_keep_best > 1:
             raise ValueError("Float keep best has to be >0 and <= 1: %" % max_keep_best)
-        if max_keep_best == 1:
-            self.logger.debug("max_keep_best=%s: Behaviour changes whether this is int or float." % max_keep_best)
         self.max_keep_best = max_keep_best  # max number of members that will be used for building the ensemble
         self.keep_just_nbest_models = keep_just_nbest_models
         self.seed = seed
@@ -138,6 +136,8 @@ class EnsembleBuilder(multiprocessing.Process):
 
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
         self.logger = get_logger(logger_name)
+        if max_keep_best == 1:
+            self.logger.debug("max_keep_best=%s: Behaviour changes whether this is int or float." % max_keep_best)
 
         self.start_time = 0
         self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy')
