@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-
+import numbers
 import multiprocessing
 import glob
 import os
@@ -33,7 +33,7 @@ class EnsembleBuilder(multiprocessing.Process):
             metric: Scorer,
             limit: int,
             ensemble_size: int=10,
-            keep_best_fraction: int=100,
+            max_keep_best: int=100,
             keep_just_nbest_models: bool = True,
             seed: int=1,
             shared_mode: bool=False,
@@ -61,9 +61,9 @@ class EnsembleBuilder(multiprocessing.Process):
                 time limit in sec
             ensemble_size: int
                 maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
-            keep_best_fraction: int/float
-                if int & >= 1: consider only the n best prediction (wrt validation predictions)
-                if float & <1 >0: consider only this fraction of the best models (wrt to validation predictions)
+            max_keep_best: int/float
+                if int: consider only the n best prediction (wrt validation predictions)
+                if float: consider only this fraction of the best models (wrt to validation predictions)
             keep_just_nbest_models: bool
                 As new models are created, keep the files the n-best models, and
                 delete the others, i.e. the ones not used by the ensemble. Currently, this
@@ -99,11 +99,11 @@ class EnsembleBuilder(multiprocessing.Process):
         self.time_limit = limit  # time limit
         self.ensemble_size = ensemble_size
 
-        if keep_best_fraction < 0:
-            raise ValueError("keep_best_fraction has to be larger 0")
-        if 1 <= keep_best_fraction != int(keep_best_fraction):
-            raise ValueError("If keep_best_fraction >= 1, it has to be an integer")
-        self.keep_best_fraction = keep_best_fraction  # max number of members that will be used for building the ensemble
+        if isinstance(max_keep_best, numbers.Integral) and max_keep_best < 1:
+            raise ValueError("Integer keep_best has to be larger 1: %s" % max_keep_best)
+        if 0 > max_keep_best > 1:
+            raise ValueError("Float keep best has to be >0 and <= 1: %" % max_keep_best)
+        self.max_keep_best = max_keep_best  # max number of members that will be used for building the ensemble
         self.keep_just_nbest_models = keep_just_nbest_models
         self.seed = seed
         self.shared_mode = shared_mode  # pSMAC?
@@ -174,14 +174,14 @@ class EnsembleBuilder(multiprocessing.Process):
             if safe_ensemble_script.exit_status is pynisher.MemorylimitException:
                 # if ensemble script died because of memory error,
                 # reduce nbest to reduce memory consumption and try it again
-                if self.keep_best_fraction == 1:
+                if isinstance(self.max_keep_best, numbers.Integral) and self.max_keep_best == 1:
                     self.logger.critical("Memory Exception -- Unable to escape from memory exception")
                 else:
-                    if self.keep_best_fraction > 1:
-                        self.keep_best_fraction = int(self.keep_best_fraction / 2)
+                    if isinstance(self.max_keep_best, numbers.Integral):
+                        self.max_keep_best = int(self.max_keep_best / 2)
                     else:
-                        self.keep_best_fraction = self.keep_best_fraction / 2
-                    self.logger.warning("Memory Exception -- restart with less ensemle_nbest: %d" % (self.keep_best_fraction))
+                        self.max_keep_best = self.max_keep_best
+                    self.logger.warning("Memory Exception -- restart with less ensemle_nbest: %d" % (self.max_keep_best))
                     # ATTENTION: main will start from scratch;
                     # all data structures are empty again
                     continue
@@ -428,11 +428,11 @@ class EnsembleBuilder(multiprocessing.Process):
             ]
         # reload predictions if scores changed over time and a model is
         # considered to be in the top models again!
-        if self.keep_best_fraction < 1:
-            # it's a float, keep percentage
-            keep_nbest = max(1, min(len(sorted_keys), int(len(sorted_keys) * self.keep_best_fraction)))
+        if not isinstance(self.max_keep_best, numbers.Integral):
+            # Transform to number of models to keep. Keep at least one
+            keep_nbest = max(1, min(len(sorted_keys), int(len(sorted_keys) * self.max_keep_best)))
         else:
-            keep_nbest = self.keep_best_fraction
+            keep_nbest = self.max_keep_best
 
         for k, _, _ in sorted_keys[:keep_nbest]:
             if self.read_preds[k][Y_ENSEMBLE] is None:

@@ -676,7 +676,7 @@ class AutoML(BaseEstimator):
             metric=metric,
             limit=time_left_for_ensembles,
             ensemble_size=ensemble_size,
-            keep_best_fraction=ensemble_nbest,
+            max_keep_best=ensemble_nbest,
             keep_just_nbest_models=self._keep_just_nbest_models,
             seed=self._seed,
             shared_mode=self._shared_mode,

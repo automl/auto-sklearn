@@ -84,19 +84,19 @@ class EnsembleTest(unittest.TestCase):
             metric=roc_auc,
             limit=-1, # not used,
             seed=0, # important to find the test files
-            keep_best_fraction=1,
+            max_keep_best=1,
         )
 
         ensbuilder.read_ensemble_preds()
         sel_keys = ensbuilder.get_n_best_preds()
 
-        self.assertEquals(len(sel_keys), 1)
+        self.assertEqual(len(sel_keys), 1)
 
         fixture = os.path.join(
             self.backend.temporary_directory,
             ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_100.0.npy"
         )
-        self.assertEquals(sel_keys[0], fixture)
+        self.assertEqual(sel_keys[0], fixture)
 
     def testFallBackNBest(self):
 
@@ -106,7 +106,7 @@ class EnsembleTest(unittest.TestCase):
                                      metric=roc_auc,
                                      limit=-1,  # not used,
                                      seed=0,  # important to find the test files
-                                     keep_best_fraction=1
+                                     max_keep_best=1
                                      )
 
         ensbuilder.read_ensemble_preds()
@@ -146,7 +146,7 @@ class EnsembleTest(unittest.TestCase):
                                      metric=roc_auc,
                                      limit=-1,  # not used,
                                      seed=0,  # important to find the test files
-                                     keep_best_fraction=1
+                                     max_keep_best=1
                                      )
 
         ensbuilder.read_ensemble_preds()
@@ -187,7 +187,7 @@ class EnsembleTest(unittest.TestCase):
             metric=roc_auc,
             limit=-1, # not used,
             seed=0, # important to find the test files
-            keep_best_fraction=2,
+            max_keep_best=2,
         )
         ensbuilder.SAVE2DISC = False
 
@@ -244,7 +244,7 @@ class EnsembleTest(unittest.TestCase):
             metric=roc_auc,
             limit=-1,  # not used,
             seed=0,  # important to find the test files
-            keep_best_fraction=2,
+            max_keep_best=2,
             max_iterations=1,  # prevents infinite loop
             keep_just_nbest_models=False,  # Because BackendMock creates no files
             )
@@ -265,7 +265,7 @@ class EnsembleTest(unittest.TestCase):
                                             metric=roc_auc,
                                             limit=1000, # not used,
                                             seed=0, # important to find the test files
-                                            ensemble_nbest=10,
+                                            max_keep_best=10,
                                             max_iterations=1, # prevents infinite loop
                                             memory_limit=10 # small memory limit to trigger MemoryException
                                             )
@@ -274,7 +274,7 @@ class EnsembleTest(unittest.TestCase):
         ensbuilder.run()
 
         # it should try to reduce ensemble_nbest until it also failed at 2
-        self.assertEqual(ensbuilder.keep_best_fraction, 1)
+        self.assertEqual(ensbuilder.max_keep_best, 1)
 
 
 class EnsembleSelectionTest(unittest.TestCase):
