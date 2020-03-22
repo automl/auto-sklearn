@@ -708,8 +708,8 @@ class EnsembleBuilder(multiprocessing.Process):
                 continue
             pred_file = os.path.split(pred_path)[1]
             if pred_file not in candidates:
-                # Messages logged bellow should match what is used
-                # in test_delete_non_candidate_models()
+                # Messages logged bellow should match what is asserted
+                # in test_delete_non_candidate_models(). Please, ensure consistency.
 
                 # Delete prediction file
                 try:
@@ -724,14 +724,42 @@ class EnsembleBuilder(multiprocessing.Process):
 
                 # Delete model file
                 model_name = '%s.%s.%s.model' % (_seed, _num_run, _budget)
-                model_file = os.path.join(self.dir_models, model_name)
+                model_path = os.path.join(self.dir_models, model_name)
                 try:
-                    os.remove(model_file)
-                    self.logger.info('Deleted file of non-candidate model %s', model_file)
+                    os.remove(model_path)
+                    self.logger.info('Deleted file of non-candidate model %s', model_path)
                 except Exception as e:
                     self.logger.error(
                         'Failed to delete file of non-candidate model %s due to error %s',
-                        pred_path, e)
+                        model_path, e)
+
+                # Delete validation prediction file
+                pred_valid_name = 'predictions_valid' + match.group(0)
+                pred_valid_path = os.path.join(self.dir_valid, pred_valid_name)
+                if os.path.exists(pred_valid_path):
+                    try:
+                        os.remove(pred_valid_path)
+                        self.logger.info(
+                            'Deleted validation prediction file of non-candidate '
+                             'model %s', pred_valid_path)
+                    except Exception as e:
+                        self.logger.error(
+                            'Failed to delete validation prediction file of non-candidate'
+                            ' model %s due to error %s', pred_valid_path, e)
+
+                # Delete test prediction file
+                pred_test_name = 'predictions_test' + match.group(0)
+                pred_test_path = os.path.join(self.dir_test, pred_test_name)
+                if os.path.exists(pred_test_path):
+                    try:
+                        os.remove(pred_test_path)
+                        self.logger.info(
+                            'Deleted test prediction file of non-candidate model %s',
+                            pred_test_path)
+                    except Exception as e:
+                        self.logger.error(
+                            'Failed to delete test prediction file of non-candidate '
+                            'model %s due to error %s', pred_test_path, e)
 
     def _read_np_fn(self, fp):
         if self.precision is "16":

@@ -126,30 +126,38 @@ class AutoMLTest(Base, unittest.TestCase):
             'test_delete', delete_tmp_folder_after_terminate=False)
 
         seed = 555
-        X_train, Y_train, _, _ = putil.get_dataset('iris')
+        X, Y, _, _ = putil.get_dataset('iris')
         automl = autosklearn.automl.AutoML(
             backend_api,
-            time_left_for_this_task=20,
-            per_run_time_limit=5,
+            time_left_for_this_task=30,
+            per_run_time_limit=7,
             ensemble_nbest=3,
             seed=seed
         )
 
-        automl.fit(
-            X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
-        )
+        automl.fit(X, Y, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
+                   X_test=X, y_test=Y)
 
-        # Assert at least one model file has been deleted
+        # Assert at least one model file has been deleted and that there were no
+        # deletion errors
         log_file_path = glob.glob(os.path.join(
             backend_api.temporary_directory, 'AutoML(' + str(seed) + '):*.log'))
         with open(log_file_path[0]) as log_file:
             log_content = log_file.read()
             self.assertIn('Deleted file of non-candidate model', log_content)
             self.assertIn('Deleted prediction file of non-candidate model', log_content)
+            #self.assertIn('Deleted validation prediction file of non-candidate model',
+            #              log_content)
+            self.assertIn('Deleted test prediction file of non-candidate model',
+                          log_content)
             self.assertNotIn('Failed to delete file of non-candidate model',
                              log_content)
             self.assertNotIn('Failed to delete prediction file of non-candidate model',
                              log_content)
+            self.assertNotIn('Failed to delete validation prediction file of '
+                             'non-candidate model', log_content)
+            self.assertNotIn('Failed to delete test prediction file of '
+                             'non-candidate model', log_content)
 
         # Assert that the files of the models used by the ensemble weren't deleted
         model_files = backend_api.list_all_models(seed=seed)
