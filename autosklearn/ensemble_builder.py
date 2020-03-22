@@ -127,7 +127,11 @@ class EnsembleBuilder(multiprocessing.Process):
             '.auto-sklearn',
             'predictions_test',
         )
-
+        self.dir_models = os.path.join(
+            self.backend.temporary_directory,
+            '.auto-sklearn',
+            'models',
+        )
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
         self.logger = get_logger(logger_name)
 
@@ -692,24 +696,42 @@ class EnsembleBuilder(multiprocessing.Process):
 
     def _delete_non_candidate_models(self, candidates):
         candidates = [os.path.split(cand)[1] for cand in candidates]
-        for model_path in self.read_preds.keys():
-            if self.read_preds[model_path]['deleted']:
+        for pred_path in self.read_preds.keys():
+            if self.read_preds[pred_path]['deleted']:
                 continue
-            match = self.model_fn_re.search(model_path)
-            _num_run = int(match.group(2))
+            match = self.model_fn_re.search(pred_path)
+            _seed = match.group(1)
+            _num_run = match.group(2)
+            _budget = match.group(3)
             # Do not remove the dummy prediction!
-            if _num_run == 1:
+            if int(_num_run) == 1:
                 continue
-            model_file = os.path.split(model_path)[1]
-            if model_file not in candidates:
+            pred_file = os.path.split(pred_path)[1]
+            if pred_file not in candidates:
+                # Messages logged bellow should match what is used
+                # in test_delete_non_candidate_models()
+
+                # Delete prediction file
                 try:
-                    os.remove(model_path)
-                    self.logger.info("Deleted file of non-candidate model %s", model_path)
-                    self.read_preds[model_path]['deleted'] = True
+                    os.remove(pred_path)
+                    self.logger.info(
+                        'Deleted prediction file of non-candidate model %s', pred_path)
+                    self.read_preds[pred_path]['deleted'] = True
                 except Exception as e:
                     self.logger.error(
-                        'Failed to delete non-candidate model %s due to error %s',
-                        model_path, e)
+                        'Failed to delete prediction file of non-candidate model %s due'
+                        'to error %s', pred_path, e)
+
+                # Delete model file
+                model_name = '%s.%s.%s.model' % (_seed, _num_run, _budget)
+                model_file = os.path.join(self.dir_models, model_name)
+                try:
+                    os.remove(model_file)
+                    self.logger.info('Deleted file of non-candidate model %s', model_file)
+                except Exception as e:
+                    self.logger.error(
+                        'Failed to delete file of non-candidate model %s due to error %s',
+                        pred_path, e)
 
     def _read_np_fn(self, fp):
         if self.precision is "16":

@@ -121,7 +121,7 @@ class AutoMLTest(Base, unittest.TestCase):
         self._tearDown(backend_api.temporary_directory)
         self._tearDown(backend_api.output_directory)
 
-    def test_delete_non_winning_models(self):
+    def test_delete_non_candidate_models(self):
         backend_api = self._create_backend(
             'test_delete', delete_tmp_folder_after_terminate=False)
 
@@ -143,7 +143,13 @@ class AutoMLTest(Base, unittest.TestCase):
         log_file_path = glob.glob(os.path.join(
             backend_api.temporary_directory, 'AutoML(' + str(seed) + '):*.log'))
         with open(log_file_path[0]) as log_file:
-            self.assertIn('Deleted file of non-candidate model', log_file.read())
+            log_content = log_file.read()
+            self.assertIn('Deleted file of non-candidate model', log_content)
+            self.assertIn('Deleted prediction file of non-candidate model', log_content)
+            self.assertNotIn('Failed to delete file of non-candidate model',
+                             log_content)
+            self.assertNotIn('Failed to delete prediction file of non-candidate model',
+                             log_content)
 
         # Assert that the files of the models used by the ensemble weren't deleted
         model_files = backend_api.list_all_models(seed=seed)
