@@ -98,6 +98,53 @@ class EnsembleTest(unittest.TestCase):
             )
             self.assertEqual(sel_keys[0], fixture)
 
+    def testPerformanceRangeThreshold(self):
+        for performance_range_threshold, exp in ((0.0, 4), (0.1, 4), (0.3, 3), (0.5, 2), (0.6, 2), (0.8, 1), (1, 1)):
+            ensbuilder = EnsembleBuilder(
+                backend=self.backend,
+                dataset_name="TEST",
+                task_type=1,  #Binary Classification
+                metric=roc_auc,
+                limit=-1, # not used,
+                seed=0, # important to find the test files
+                max_keep_best=100,
+                performance_range_threshold=performance_range_threshold
+            )
+            print(performance_range_threshold, exp)
+            ensbuilder.read_preds = {'A': {'ens_score': 1, 'num_run': 1, 0: True, 'loaded': -1, "seed": 1},
+                                     'B': {'ens_score': 2, 'num_run': 2, 0: True, 'loaded': -1, "seed": 1},
+                                     'C': {'ens_score': 3, 'num_run': 3, 0: True, 'loaded': -1, "seed": 1},
+                                     'D': {'ens_score': 4, 'num_run': 4, 0: True, 'loaded': -1, "seed": 1},
+                                     'E': {'ens_score': 5, 'num_run': 5, 0: True, 'loaded': -1, "seed": 1},
+                                     }
+            sel_keys = ensbuilder.get_n_best_preds()
+
+            self.assertEqual(len(sel_keys), exp)
+
+    def testPerformanceRangeThresholdMaxBest(self):
+        for performance_range_threshold, max_keep_best, exp in ((0.0, 1, 1), (0.0, 1.0, 4), (0.1, 2, 2), (0.3, 4, 3),
+                                                                (0.5, 1, 1), (0.6, 10, 2), (0.8, 0.5, 1), (1, 1.0, 1)):
+            ensbuilder = EnsembleBuilder(
+                backend=self.backend,
+                dataset_name="TEST",
+                task_type=1,  #Binary Classification
+                metric=roc_auc,
+                limit=-1, # not used,
+                seed=0, # important to find the test files
+                max_keep_best=max_keep_best,
+                performance_range_threshold=performance_range_threshold
+            )
+            print(performance_range_threshold, max_keep_best, exp)
+            ensbuilder.read_preds = {'A': {'ens_score': 1, 'num_run': 1, 0: True, 'loaded': -1, "seed": 1},
+                                     'B': {'ens_score': 2, 'num_run': 2, 0: True, 'loaded': -1, "seed": 1},
+                                     'C': {'ens_score': 3, 'num_run': 3, 0: True, 'loaded': -1, "seed": 1},
+                                     'D': {'ens_score': 4, 'num_run': 4, 0: True, 'loaded': -1, "seed": 1},
+                                     'E': {'ens_score': 5, 'num_run': 5, 0: True, 'loaded': -1, "seed": 1},
+                                     }
+            sel_keys = ensbuilder.get_n_best_preds()
+
+            self.assertEqual(len(sel_keys), exp)
+
     def testFallBackNBest(self):
 
         ensbuilder = EnsembleBuilder(backend=self.backend,
@@ -246,7 +293,7 @@ class EnsembleTest(unittest.TestCase):
             seed=0,  # important to find the test files
             max_keep_best=2,
             max_iterations=1,  # prevents infinite loop
-            keep_just_nbest_models=False,  # Because BackendMock creates no files
+            remove_bad_model_files=False,  # Because BackendMock creates no files
             )
         ensbuilder.SAVE2DISC = False
 

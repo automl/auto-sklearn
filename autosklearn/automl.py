@@ -677,7 +677,7 @@ class AutoML(BaseEstimator):
             limit=time_left_for_ensembles,
             ensemble_size=ensemble_size,
             max_keep_best=ensemble_nbest,
-            keep_just_nbest_models=self._keep_just_nbest_models,
+            remove_bad_model_files=self._keep_just_nbest_models,
             seed=self._seed,
             shared_mode=self._shared_mode,
             precision=precision,

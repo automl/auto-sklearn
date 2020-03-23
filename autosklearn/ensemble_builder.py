@@ -34,7 +34,8 @@ class EnsembleBuilder(multiprocessing.Process):
             limit: int,
             ensemble_size: int=10,
             max_keep_best: int=100,
-            keep_just_nbest_models: bool = True,
+            remove_bad_model_files: bool = True,
+            performance_range_threshold: float = 0,
             seed: int=1,
             shared_mode: bool=False,
             max_iterations: int=None,
@@ -64,10 +65,13 @@ class EnsembleBuilder(multiprocessing.Process):
             max_keep_best: int/float
                 if int: consider only the n best prediction (wrt validation predictions)
                 if float: consider only this fraction of the best models (wrt to validation predictions)
-            keep_just_nbest_models: bool
+            remove_bad_model_files: bool
                 As new models are created, keep the files the n-best models, and
                 delete the others, i.e. the ones not used by the ensemble. Currently, this
                 functionality cannot be used together with shared mode.
+            performance_range_threshold: float
+                Keep only models that are better than dummy + (best - dummy)*performance_range_threshold
+                E.g dummy=2, best=4, thresh=0.5 means only consider models with a score better than 3
             seed: int
                 random seed
                 if set to -1, read files with any seed (e.g., for shared model mode)
@@ -86,7 +90,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 read at most n new prediction files in each iteration
         """
 
-        if keep_just_nbest_models and shared_mode:
+        if remove_bad_model_files and shared_mode:
             raise ValueError("Currently, shared_mode can't be used together with "
                              "keep_just_nbest_models")
 
@@ -98,13 +102,14 @@ class EnsembleBuilder(multiprocessing.Process):
         self.metric = metric
         self.time_limit = limit  # time limit
         self.ensemble_size = ensemble_size
+        self.performance_range_threshold = performance_range_threshold
 
         if isinstance(max_keep_best, numbers.Integral) and max_keep_best < 1:
             raise ValueError("Integer keep_best has to be larger 1: %s" % max_keep_best)
         if 0 >= max_keep_best > 1:
-            raise ValueError("Float keep best has to be >0 and <= 1: %" % max_keep_best)
+            raise ValueError("Float keep best has to be >0 and <= 1: %s" % max_keep_best)
         self.max_keep_best = max_keep_best  # max number of members that will be used for building the ensemble
-        self.keep_just_nbest_models = keep_just_nbest_models
+        self.keep_just_nbest_models = remove_bad_model_files
         self.seed = seed
         self.shared_mode = shared_mode  # pSMAC?
         self.max_iterations = max_iterations
@@ -434,8 +439,10 @@ class EnsembleBuilder(multiprocessing.Process):
             # Transform to number of models to keep. Keep at least one
             keep_nbest = max(1, min(len(sorted_keys), int(len(sorted_keys) * self.max_keep_best)))
         else:
-            keep_nbest = self.max_keep_best
+            # Keep only at most max_keep_best
+            keep_nbest = min(self.max_keep_best, len(sorted_keys))
         self.logger.debug("Cut model selection library down to %d (out of %d) models" % (keep_nbest, len(sorted_keys)))
+
         for k, _, _ in sorted_keys[:keep_nbest]:
             if self.read_preds[k][Y_ENSEMBLE] is None:
                 self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(fp=k)
@@ -443,19 +450,20 @@ class EnsembleBuilder(multiprocessing.Process):
                 #  only if the model ends up in the ensemble
             self.read_preds[k]['loaded'] = 1
 
-        # Hack ensemble_nbest to only consider models which are not
-        # significantly worse than the best(and better than random)
-        ensemble_n_best = None
-        # TODO generalize this and re-add
-        # best_loss = 1 - (sorted_keys[0][1] * 2 - 1)
-        # for i in range(1, min(self.ensemble_nbest, len(sorted_keys))):
-        #     current_loss = 1 - (sorted_keys[i][1] * 2 - 1)
-        #     if best_loss * 1.3 < current_loss:
-        #         ensemble_n_best = i
-        #         self.logger.info('Reduce ensemble_nbest to %d!', ensemble_n_best)
-        #         break
-        if ensemble_n_best is None:
-            ensemble_n_best = keep_nbest
+        # consider performance_range_threshold
+        if self.performance_range_threshold > 0:
+            best_score = sorted_keys[0][1]
+            threshold = dummy_score[1] + (best_score - dummy_score[1]) * self.performance_range_threshold
+            if sorted_keys[keep_nbest-1][1] < threshold:
+                # We can further reduce number of models since worst model is worse than thresh
+                for i in range(0, keep_nbest):
+                    # Look at most at keep_nbest models, but always keep at least one model
+                    current_score = sorted_keys[i][1]
+                    if current_score <= threshold:
+                        self.logger.debug("Further reduce from %d to %d models" % (keep_nbest, max(1, i)))
+                        keep_nbest = max(1, i)
+                        break
+        ensemble_n_best = keep_nbest
 
         # reduce to keys
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
