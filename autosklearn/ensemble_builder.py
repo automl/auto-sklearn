@@ -741,7 +741,7 @@ class EnsembleBuilder(multiprocessing.Process):
                         os.remove(pred_valid_path)
                         self.logger.info(
                             'Deleted validation prediction file of non-candidate '
-                             'model %s', pred_valid_path)
+                            'model %s', pred_valid_path)
                     except Exception as e:
                         self.logger.error(
                             'Failed to delete validation prediction file of non-candidate'
