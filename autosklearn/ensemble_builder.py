@@ -63,8 +63,10 @@ class EnsembleBuilder(multiprocessing.Process):
             ensemble_size: int
                 maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
             max_keep_best: int/float
-                if int: consider only the n best prediction (wrt validation predictions)
-                if float: consider only this fraction of the best models (wrt to validation predictions)
+                if int: consider only the n best prediction
+                if float: consider only this fraction of the best models
+                Both wrt to validation predictions
+                If performance_range_threshold > 0, might return less models
             remove_bad_model_files: bool
                 As new models are created, keep the files the n-best models, and
                 delete the others, i.e. the ones not used by the ensemble. Currently, this
@@ -72,6 +74,7 @@ class EnsembleBuilder(multiprocessing.Process):
             performance_range_threshold: float
                 Keep only models that are better than dummy + (best - dummy)*performance_range_threshold
                 E.g dummy=2, best=4, thresh=0.5 means only consider models with a score better than 3
+                Will at most return max_keep_best models, might return less
             seed: int
                 random seed
                 if set to -1, read files with any seed (e.g., for shared model mode)
@@ -181,14 +184,17 @@ class EnsembleBuilder(multiprocessing.Process):
             if safe_ensemble_script.exit_status is pynisher.MemorylimitException:
                 # if ensemble script died because of memory error,
                 # reduce nbest to reduce memory consumption and try it again
-                if isinstance(self.max_keep_best, numbers.Integral) and self.max_keep_best == 1:
-                    self.logger.critical("Memory Exception -- Unable to escape from memory exception")
+                if isinstance(self.max_keep_best, numbers.Integral) and \
+                        self.max_keep_best == 1:
+                    self.logger.critical("Memory Exception --"
+                                         " Unable to escape from memory exception")
                 else:
                     if isinstance(self.max_keep_best, numbers.Integral):
                         self.max_keep_best = int(self.max_keep_best / 2)
                     else:
                         self.max_keep_best = self.max_keep_best
-                    self.logger.warning("Memory Exception -- restart with less max_keep_best: %d" % self.max_keep_best)
+                    self.logger.warning("Memory Exception -- restart with "
+                                        "less max_keep_best: %d" % self.max_keep_best)
                     # ATTENTION: main will start from scratch;
                     # all data structures are empty again
                     continue
@@ -424,8 +430,7 @@ class EnsembleBuilder(multiprocessing.Process):
             # no model left; try to use dummy score (num_run==0)
             # log warning when there are other models but not better than dummy model
             if num_keys > num_dummy:
-                self.logger.warning("No models better than random - "
-                                    "using Dummy Score!"
+                self.logger.warning("No models better than random - using Dummy Score!"
                                     "Number of models besides current dummy model: %d. Number of dummy models: %d",
                                     num_keys - 1,
                                     num_dummy)
@@ -437,11 +442,13 @@ class EnsembleBuilder(multiprocessing.Process):
         # considered to be in the top models again!
         if not isinstance(self.max_keep_best, numbers.Integral):
             # Transform to number of models to keep. Keep at least one
-            keep_nbest = max(1, min(len(sorted_keys), int(len(sorted_keys) * self.max_keep_best)))
+            keep_nbest = max(1, min(len(sorted_keys),
+                                    int(len(sorted_keys) * self.max_keep_best)))
         else:
             # Keep only at most max_keep_best
             keep_nbest = min(self.max_keep_best, len(sorted_keys))
-        self.logger.debug("Cut model selection library down to %d (out of %d) models" % (keep_nbest, len(sorted_keys)))
+        self.logger.debug("Cut model selection library down "
+                          "to %d (out of %d) models" % (keep_nbest, len(sorted_keys)))
 
         for k, _, _ in sorted_keys[:keep_nbest]:
             if self.read_preds[k][Y_ENSEMBLE] is None:
@@ -453,13 +460,16 @@ class EnsembleBuilder(multiprocessing.Process):
         # consider performance_range_threshold
         if self.performance_range_threshold > 0:
             best_score = sorted_keys[0][1]
-            threshold = dummy_score[1] + (best_score - dummy_score[1]) * self.performance_range_threshold
-            if sorted_keys[keep_nbest-1][1] < threshold:
-                # We can further reduce number of models since worst model is worse than thresh
+            min_score = dummy_score[1]
+            min_score += (best_score - dummy_score[1]) * self.performance_range_threshold
+            if sorted_keys[keep_nbest-1][1] < min_score:
+                # We can further reduce number of models
+                # since worst model is worse than thresh
                 for i in range(0, keep_nbest):
-                    # Look at most at keep_nbest models, but always keep at least one model
+                    # Look at most at keep_nbest models,
+                    # but always keep at least one model
                     current_score = sorted_keys[i][1]
-                    if current_score <= threshold:
+                    if current_score <= min_score:
                         self.logger.debug("Further reduce from %d to %d models" % (keep_nbest, max(1, i)))
                         keep_nbest = max(1, i)
                         break
