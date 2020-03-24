@@ -304,8 +304,6 @@ class EnsembleTest(unittest.TestCase):
         self.assertIsNotNone(ensbuilder.y_true_ensemble)
 
     def testLimit(self):
-
-
         ensbuilder = EnsembleBuilderMemMock(backend=self.backend,
                                             dataset_name="TEST",
                                             task_type=1,  # Binary Classification
@@ -314,7 +312,8 @@ class EnsembleTest(unittest.TestCase):
                                             seed=0,  # important to find the test files
                                             max_keep_best=10,
                                             max_iterations=1,  # prevents infinite loop
-                                            memory_limit=10  # small memory limit to trigger MemoryException
+                                            # small to trigger MemoryException
+                                            memory_limit=10
                                             )
         ensbuilder.SAVE2DISC = False
 

@@ -32,18 +32,18 @@ class EnsembleBuilder(multiprocessing.Process):
             task_type: int,
             metric: Scorer,
             limit: int,
-            ensemble_size: int=10,
-            max_keep_best: int=100,
+            ensemble_size: int = 10,
+            max_keep_best: int = 100,
             remove_bad_model_files: bool = True,
             performance_range_threshold: float = 0,
-            seed: int=1,
-            shared_mode: bool=False,
-            max_iterations: int=None,
-            precision: str="32",
-            sleep_duration: int=2,
-            memory_limit: int=1000,
-            read_at_most: int=5,
-            random_state: Optional[Union[int, np.random.RandomState]]=None,
+            seed: int = 1,
+            shared_mode: bool = False,
+            max_iterations: int = None,
+            precision: str = "32",
+            sleep_duration: int = 2,
+            memory_limit: int = 1000,
+            read_at_most: int = 5,
+            random_state: Optional[Union[int, np.random.RandomState]] = None,
     ):
         """
             Constructor
@@ -72,8 +72,9 @@ class EnsembleBuilder(multiprocessing.Process):
                 delete the others, i.e. the ones not used by the ensemble. Currently, this
                 functionality cannot be used together with shared mode.
             performance_range_threshold: float
-                Keep only models that are better than dummy + (best - dummy)*performance_range_threshold
-                E.g dummy=2, best=4, thresh=0.5 means only consider models with a score better than 3
+                Keep only models that are better than:
+                    dummy + (best - dummy)*performance_range_threshold
+                E.g dummy=2, best=4, thresh=0.5 --> only consider models with score > 3
                 Will at most return max_keep_best models, might return less
             seed: int
                 random seed
@@ -111,7 +112,7 @@ class EnsembleBuilder(multiprocessing.Process):
             raise ValueError("Integer keep_best has to be larger 1: %s" % max_keep_best)
         if 0 >= max_keep_best > 1:
             raise ValueError("Float keep best has to be >0 and <= 1: %s" % max_keep_best)
-        self.max_keep_best = max_keep_best  # max number of members that will be used for building the ensemble
+        self.max_keep_best = max_keep_best
         self.keep_just_nbest_models = remove_bad_model_files
         self.seed = seed
         self.shared_mode = shared_mode  # pSMAC?
@@ -145,7 +146,8 @@ class EnsembleBuilder(multiprocessing.Process):
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
         self.logger = get_logger(logger_name)
         if max_keep_best == 1:
-            self.logger.debug("max_keep_best=%s: Behaviour changes whether this is int or float." % max_keep_best)
+            self.logger.debug("Behaviour depends on int/float: %s (max_keep_best)" %
+                              max_keep_best)
 
         self.start_time = 0
         self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy')
@@ -207,7 +209,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
         while True:
 
-            #maximal number of iterations
+            # maximal number of iterations
             if (self.max_iterations is not None
                     and 0 < self.max_iterations <= iteration):
                 self.logger.info("Terminate ensemble building because of max iterations: %d of %d",
@@ -235,7 +237,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
             # populates predictions in self.read_preds
             # reduces selected models if file reading failed
-            n_sel_valid, n_sel_test = self.\
+            n_sel_valid, n_sel_test = self. \
                 get_valid_test_preds(selected_keys=candidate_models)
 
             candidate_models_set = set(candidate_models)
@@ -355,7 +357,8 @@ class EnsembleBuilder(multiprocessing.Process):
             try:
                 with open(y_ens_fn, 'rb') as fp:
                     y_ensemble = self._read_np_fn(fp=fp)
-                    score = calculate_score(solution=self.y_true_ensemble,  # y_ensemble = y_true for ensemble set
+                    score = calculate_score(solution=self.y_true_ensemble,
+                                            # y_ensemble = y_true for ensemble set
                                             prediction=y_ensemble,
                                             task_type=self.task_type,
                                             metric=self.metric,
@@ -431,7 +434,8 @@ class EnsembleBuilder(multiprocessing.Process):
             # log warning when there are other models but not better than dummy model
             if num_keys > num_dummy:
                 self.logger.warning("No models better than random - using Dummy Score!"
-                                    "Number of models besides current dummy model: %d. Number of dummy models: %d",
+                                    "Number of models besides current dummy model: %d. "
+                                    "Number of dummy models: %d",
                                     num_keys - 1,
                                     num_dummy)
             sorted_keys = [
@@ -462,7 +466,7 @@ class EnsembleBuilder(multiprocessing.Process):
             best_score = sorted_keys[0][1]
             min_score = dummy_score[1]
             min_score += (best_score - dummy_score[1]) * self.performance_range_threshold
-            if sorted_keys[keep_nbest-1][1] < min_score:
+            if sorted_keys[keep_nbest - 1][1] < min_score:
                 # We can further reduce number of models
                 # since worst model is worse than thresh
                 for i in range(0, keep_nbest):
@@ -470,7 +474,8 @@ class EnsembleBuilder(multiprocessing.Process):
                     # but always keep at least one model
                     current_score = sorted_keys[i][1]
                     if current_score <= min_score:
-                        self.logger.debug("Further reduce from %d to %d models" % (keep_nbest, max(1, i)))
+                        self.logger.debug("Further reduce from %d to %d models" %
+                                          (keep_nbest, max(1, i)))
                         keep_nbest = max(1, i)
                         break
         ensemble_n_best = keep_nbest
@@ -582,7 +587,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
         return success_keys_valid, success_keys_test
 
-    def fit_ensemble(self, selected_keys:list):
+    def fit_ensemble(self, selected_keys: list):
         """
             fit ensemble
 
@@ -666,8 +671,8 @@ class EnsembleBuilder(multiprocessing.Process):
     def predict(self, set_: str,
                 ensemble: AbstractEnsemble,
                 selected_keys: list,
-                n_preds:int,
-                index_run:int):
+                n_preds: int,
+                index_run: int):
         """
             save preditions on ensemble, validation and test data on disc
 
@@ -703,7 +708,7 @@ class EnsembleBuilder(multiprocessing.Process):
         if n_preds == predictions.shape[0]:
             y = ensemble.predict(predictions)
             if self.task_type == BINARY_CLASSIFICATION:
-                y = y[:,1]
+                y = y[:, 1]
             if self.SAVE2DISC:
                 self.backend.save_predictions_as_txt(
                     predictions=y,
