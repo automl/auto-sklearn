@@ -385,7 +385,7 @@ class EnsembleBuilder(multiprocessing.Process):
             according to score on "ensemble set"
             n: self.ensemble_nbest
 
-            Side effect: delete predictions of non-winning models
+            Side effect: delete predictions of non-candidate models
         """
 
         # Sort by score - higher is better!
@@ -448,7 +448,7 @@ class EnsembleBuilder(multiprocessing.Process):
         # reduce to keys
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
 
-        # remove loaded predictions for non-winning models
+        # remove loaded predictions for non-candidate models
         for k in sorted_keys[ensemble_n_best:]:
             self.read_preds[k][Y_ENSEMBLE] = None
             self.read_preds[k][Y_VALID] = None

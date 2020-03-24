@@ -146,16 +146,12 @@ class AutoMLTest(Base, unittest.TestCase):
             log_content = log_file.read()
             self.assertIn('Deleted file of non-candidate model', log_content)
             self.assertIn('Deleted prediction file of non-candidate model', log_content)
-            #self.assertIn('Deleted validation prediction file of non-candidate model',
-            #              log_content)
             self.assertIn('Deleted test prediction file of non-candidate model',
                           log_content)
             self.assertNotIn('Failed to delete file of non-candidate model',
                              log_content)
             self.assertNotIn('Failed to delete prediction file of non-candidate model',
                              log_content)
-            self.assertNotIn('Failed to delete validation prediction file of '
-                             'non-candidate model', log_content)
             self.assertNotIn('Failed to delete test prediction file of '
                              'non-candidate model', log_content)
 
