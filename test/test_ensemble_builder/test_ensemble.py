@@ -27,14 +27,15 @@ class BackendMock(object):
             ".auto-sklearn",
             "predictions_ensemble",
             "predictions_ensemble_true.npy"
-        ),"rb") as fp:
+        ), "rb") as fp:
             y = np.load(fp, allow_pickle=True)
         return y
 
+
 class EnsembleBuilderMemMock(EnsembleBuilder):
 
-    def fit_ensemble(self,selected_keys):
-        np.ones([10000000,1000000])
+    def fit_ensemble(self, selected_keys):
+        np.ones([10000000, 1000000])
 
 
 class EnsembleTest(unittest.TestCase):
@@ -88,11 +89,17 @@ class EnsembleTest(unittest.TestCase):
 
             self.assertEqual(len(sel_keys), exp)
 
-            fixture = os.path.join(
+            fixture = [os.path.join(
                 self.backend.temporary_directory,
-                ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_100.0.npy"
-            )
-            self.assertEqual(sel_keys[0], fixture)
+                ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
+            ), ]
+            if exp == 2:
+                fixture.append(os.path.join(
+                    self.backend.temporary_directory,
+                    ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_100.0.npy"
+                ))
+
+            self.assertSetEqual(set(sel_keys), set(fixture))
 
     def testPerformanceRangeThreshold(self):
         to_test = ((0.0, 4), (0.1, 4), (0.3, 3), (0.5, 2), (0.6, 2), (0.8, 1), (1, 1))
@@ -145,6 +152,7 @@ class EnsembleTest(unittest.TestCase):
 
             self.assertEqual(len(sel_keys), exp)
 
+    @unittest.skipIf(sys.version_info <= (3, 5), "Does only work with Python 3.6 and higher")
     def testFallBackNBest(self):
 
         ensbuilder = EnsembleBuilder(backend=self.backend,
@@ -185,6 +193,7 @@ class EnsembleTest(unittest.TestCase):
         self.assertEqual(len(sel_keys), 1)
         self.assertEqual(sel_keys[0], fixture)
 
+    @unittest.skipIf(sys.version_info <= (3, 5), "Does only work with Python 3.6 and higher")
     def testGetValidTestPreds(self):
 
         ensbuilder = EnsembleBuilder(backend=self.backend,
@@ -212,9 +221,9 @@ class EnsembleTest(unittest.TestCase):
         )
 
         sel_keys = ensbuilder.get_n_best_preds()
-
+        self.assertEqual(len(sel_keys), 1)
         ensbuilder.get_valid_test_preds(selected_keys=sel_keys)
-
+        print(ensbuilder.read_preds[d1])
         # not selected --> should still be None
         self.assertIsNone(ensbuilder.read_preds[d1][Y_VALID])
         self.assertIsNone(ensbuilder.read_preds[d1][Y_TEST])
