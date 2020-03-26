@@ -1,9 +1,5 @@
 import os
-import logging
-import shutil
 import sys
-import time
-import unittest
 import unittest.mock
 
 from autosklearn.metrics import roc_auc, accuracy
@@ -31,14 +27,15 @@ class BackendMock(object):
             ".auto-sklearn",
             "predictions_ensemble",
             "predictions_ensemble_true.npy"
-        ),"rb") as fp:
+        ), "rb") as fp:
             y = np.load(fp, allow_pickle=True)
         return y
 
+
 class EnsembleBuilderMemMock(EnsembleBuilder):
 
-    def fit_ensemble(self,selected_keys):
-        np.ones([10000000,1000000])
+    def fit_ensemble(self, selected_keys):
+        np.ones([10000000, 1000000])
 
 
 class EnsembleTest(unittest.TestCase):
@@ -75,39 +72,93 @@ class EnsembleTest(unittest.TestCase):
         )
         self.assertEqual(ensbuilder.read_preds[filename]["ens_score"], 1.0)
 
+    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testNBest(self):
+        for max_keep_best, exp in ((1, 1), (1.0, 2), (0.1, 1), (0.9, 1)):
+            ensbuilder = EnsembleBuilder(
+                backend=self.backend,
+                dataset_name="TEST",
+                task_type=1,  # Binary Classification
+                metric=roc_auc,
+                limit=-1,  # not used,
+                seed=0,  # important to find the test files
+                max_keep_best=max_keep_best,
+            )
 
-        ensbuilder = EnsembleBuilder(
-            backend=self.backend,
-            dataset_name="TEST",
-            task_type=1,  #Binary Classification
-            metric=roc_auc,
-            limit=-1, # not used,
-            seed=0, # important to find the test files
-            ensemble_nbest=1,
-        )
+            ensbuilder.read_ensemble_preds()
+            sel_keys = ensbuilder.get_n_best_preds()
 
-        ensbuilder.read_ensemble_preds()
-        sel_keys = ensbuilder.get_n_best_preds()
+            self.assertEqual(len(sel_keys), exp)
 
-        self.assertEquals(len(sel_keys), 1)
+            fixture = os.path.join(
+                self.backend.temporary_directory,
+                ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_100.0.npy"
+            )
+            self.assertEqual(sel_keys[0], fixture)
 
-        fixture = os.path.join(
-            self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_100.0.npy"
-        )
-        self.assertEquals(sel_keys[0], fixture)
+    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
+    def testPerformanceRangeThreshold(self):
+        to_test = ((0.0, 4), (0.1, 4), (0.3, 3), (0.5, 2), (0.6, 2), (0.8, 1),
+                   (1.0, 1), (1, 1))
+        for performance_range_threshold, exp in to_test:
+            ensbuilder = EnsembleBuilder(
+                backend=self.backend,
+                dataset_name="TEST",
+                task_type=1,  # Binary Classification
+                metric=roc_auc,
+                limit=-1,  # not used,
+                seed=0,  # important to find the test files
+                max_keep_best=100,
+                performance_range_threshold=performance_range_threshold
+            )
+            ensbuilder.read_preds = {
+                'A': {'ens_score': 1, 'num_run': 1, 0: True, 'loaded': -1, "seed": 1},
+                'B': {'ens_score': 2, 'num_run': 2, 0: True, 'loaded': -1, "seed": 1},
+                'C': {'ens_score': 3, 'num_run': 3, 0: True, 'loaded': -1, "seed": 1},
+                'D': {'ens_score': 4, 'num_run': 4, 0: True, 'loaded': -1, "seed": 1},
+                'E': {'ens_score': 5, 'num_run': 5, 0: True, 'loaded': -1, "seed": 1},
+            }
+            sel_keys = ensbuilder.get_n_best_preds()
 
+            self.assertEqual(len(sel_keys), exp)
+
+    def testPerformanceRangeThresholdMaxBest(self):
+        to_test = ((0.0, 1, 1), (0.0, 1.0, 4), (0.1, 2, 2), (0.3, 4, 3),
+                   (0.5, 1, 1), (0.6, 10, 2), (0.8, 0.5, 1), (1, 1.0, 1))
+        for performance_range_threshold, max_keep_best, exp in to_test:
+            ensbuilder = EnsembleBuilder(
+                backend=self.backend,
+                dataset_name="TEST",
+                task_type=1,  # Binary Classification
+                metric=roc_auc,
+                limit=-1,  # not used,
+                seed=0,  # important to find the test files
+                max_keep_best=max_keep_best,
+                performance_range_threshold=performance_range_threshold
+            )
+            print(performance_range_threshold, max_keep_best, exp)
+            ensbuilder.read_preds = {
+                'A': {'ens_score': 1, 'num_run': 1, 0: True, 'loaded': -1, "seed": 1},
+                'B': {'ens_score': 2, 'num_run': 2, 0: True, 'loaded': -1, "seed": 1},
+                'C': {'ens_score': 3, 'num_run': 3, 0: True, 'loaded': -1, "seed": 1},
+                'D': {'ens_score': 4, 'num_run': 4, 0: True, 'loaded': -1, "seed": 1},
+                'E': {'ens_score': 5, 'num_run': 5, 0: True, 'loaded': -1, "seed": 1},
+            }
+            sel_keys = ensbuilder.get_n_best_preds()
+
+            self.assertEqual(len(sel_keys), exp)
+
+    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testFallBackNBest(self):
 
         ensbuilder = EnsembleBuilder(backend=self.backend,
-                                    dataset_name="TEST",
-                                    task_type=1,  #Binary Classification
-                                    metric=roc_auc,
-                                    limit=-1, # not used,
-                                    seed=0, # important to find the test files
-                                    ensemble_nbest=1
-                                    )
+                                     dataset_name="TEST",
+                                     task_type=1,  # Binary Classification
+                                     metric=roc_auc,
+                                     limit=-1,  # not used,
+                                     seed=0,  # important to find the test files
+                                     max_keep_best=1
+                                     )
 
         ensbuilder.read_ensemble_preds()
 
@@ -138,16 +189,17 @@ class EnsembleTest(unittest.TestCase):
         self.assertEqual(len(sel_keys), 1)
         self.assertEqual(sel_keys[0], fixture)
 
+    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testGetValidTestPreds(self):
 
         ensbuilder = EnsembleBuilder(backend=self.backend,
-                                    dataset_name="TEST",
-                                    task_type=1,  #Binary Classification
-                                    metric=roc_auc,
-                                    limit=-1, # not used,
-                                    seed=0, # important to find the test files
-                                    ensemble_nbest=1
-                                    )
+                                     dataset_name="TEST",
+                                     task_type=1,  # Binary Classification
+                                     metric=roc_auc,
+                                     limit=-1,  # not used,
+                                     seed=0,  # important to find the test files
+                                     max_keep_best=1
+                                     )
 
         ensbuilder.read_ensemble_preds()
 
@@ -165,9 +217,9 @@ class EnsembleTest(unittest.TestCase):
         )
 
         sel_keys = ensbuilder.get_n_best_preds()
-
+        self.assertEqual(len(sel_keys), 1)
         ensbuilder.get_valid_test_preds(selected_keys=sel_keys)
-
+        print(ensbuilder.read_preds[d1])
         # not selected --> should still be None
         self.assertIsNone(ensbuilder.read_preds[d1][Y_VALID])
         self.assertIsNone(ensbuilder.read_preds[d1][Y_TEST])
@@ -183,11 +235,11 @@ class EnsembleTest(unittest.TestCase):
         ensbuilder = EnsembleBuilder(
             backend=self.backend,
             dataset_name="TEST",
-            task_type=1,  #Binary Classification
+            task_type=1,  # Binary Classification
             metric=roc_auc,
-            limit=-1, # not used,
-            seed=0, # important to find the test files
-            ensemble_nbest=2,
+            limit=-1,  # not used,
+            seed=0,  # important to find the test files
+            max_keep_best=2,
         )
         ensbuilder.SAVE2DISC = False
 
@@ -244,9 +296,9 @@ class EnsembleTest(unittest.TestCase):
             metric=roc_auc,
             limit=-1,  # not used,
             seed=0,  # important to find the test files
-            ensemble_nbest=2,
+            max_keep_best=2,
             max_iterations=1,  # prevents infinite loop
-            keep_just_nbest_models=False,  # Because BackendMock creates no files
+            remove_bad_model_files=False,  # Because BackendMock creates no files
             )
         ensbuilder.SAVE2DISC = False
 
@@ -257,24 +309,23 @@ class EnsembleTest(unittest.TestCase):
         self.assertIsNotNone(ensbuilder.y_true_ensemble)
 
     def testLimit(self):
-
-
         ensbuilder = EnsembleBuilderMemMock(backend=self.backend,
                                             dataset_name="TEST",
-                                            task_type=1,  #Binary Classification
+                                            task_type=1,  # Binary Classification
                                             metric=roc_auc,
-                                            limit=1000, # not used,
-                                            seed=0, # important to find the test files
-                                            ensemble_nbest=10,
-                                            max_iterations=1, # prevents infinite loop
-                                            memory_limit=10 # small memory limit to trigger MemoryException
+                                            limit=1000,  # not used,
+                                            seed=0,  # important to find the test files
+                                            max_keep_best=10,
+                                            max_iterations=1,  # prevents infinite loop
+                                            # small to trigger MemoryException
+                                            memory_limit=10
                                             )
         ensbuilder.SAVE2DISC = False
 
         ensbuilder.run()
 
         # it should try to reduce ensemble_nbest until it also failed at 2
-        self.assertEqual(ensbuilder.ensemble_nbest,1)
+        self.assertEqual(ensbuilder.max_keep_best, 1)
 
 
 class EnsembleSelectionTest(unittest.TestCase):
