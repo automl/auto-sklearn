@@ -465,7 +465,7 @@ class EnsembleBuilder(multiprocessing.Process):
         if self.performance_range_threshold > 0:
             best_score = sorted_keys[0][1]
             min_score = dummy_score[1]
-            min_score += (best_score - dummy_score[1]) * self.performance_range_threshold
+            min_score += (best_score - min_score) * self.performance_range_threshold
             if sorted_keys[keep_nbest - 1][1] < min_score:
                 # We can further reduce number of models
                 # since worst model is worse than thresh
