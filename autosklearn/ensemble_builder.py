@@ -109,10 +109,12 @@ class EnsembleBuilder(multiprocessing.Process):
         self.performance_range_threshold = performance_range_threshold
 
         if isinstance(max_keep_best, numbers.Integral) and max_keep_best < 1:
-            raise ValueError("Integer max_keep_best has to be larger 1: %s" % max_keep_best)
+            raise ValueError("Integer max_keep_best has to be larger 1: %s" %
+                             max_keep_best)
         elif not isinstance(max_keep_best, numbers.Integral) \
                 and (max_keep_best < 0 or max_keep_best > 1):
-            raise ValueError("Float max_keep_best best has to be >= 0 and <= 1: %s" % max_keep_best)
+            raise ValueError("Float max_keep_best best has to be >= 0 and <= 1: %s" %
+                             max_keep_best)
         self.max_keep_best = max_keep_best
         self.keep_just_nbest_models = remove_bad_model_files
         self.seed = seed

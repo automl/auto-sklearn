@@ -72,7 +72,7 @@ class EnsembleTest(unittest.TestCase):
         )
         self.assertEqual(ensbuilder.read_preds[filename]["ens_score"], 1.0)
 
-    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python 3.6 and higher")
+    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testNBest(self):
         for max_keep_best, exp in ((1, 1), (1.0, 2), (0.1, 1), (0.9, 1)):
             ensbuilder = EnsembleBuilder(
@@ -96,9 +96,10 @@ class EnsembleTest(unittest.TestCase):
             )
             self.assertEqual(sel_keys[0], fixture)
 
-    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python 3.6 and higher")
+    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testPerformanceRangeThreshold(self):
-        to_test = ((0.0, 4), (0.1, 4), (0.3, 3), (0.5, 2), (0.6, 2), (0.8, 1), (1.0, 1), (1, 1))
+        to_test = ((0.0, 4), (0.1, 4), (0.3, 3), (0.5, 2), (0.6, 2), (0.8, 1),
+                   (1.0, 1), (1, 1))
         for performance_range_threshold, exp in to_test:
             ensbuilder = EnsembleBuilder(
                 backend=self.backend,
@@ -147,7 +148,7 @@ class EnsembleTest(unittest.TestCase):
 
             self.assertEqual(len(sel_keys), exp)
 
-    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python 3.6 and higher")
+    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testFallBackNBest(self):
 
         ensbuilder = EnsembleBuilder(backend=self.backend,
@@ -188,7 +189,7 @@ class EnsembleTest(unittest.TestCase):
         self.assertEqual(len(sel_keys), 1)
         self.assertEqual(sel_keys[0], fixture)
 
-    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python 3.6 and higher")
+    @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testGetValidTestPreds(self):
 
         ensbuilder = EnsembleBuilder(backend=self.backend,
