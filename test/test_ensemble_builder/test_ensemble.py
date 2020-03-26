@@ -98,7 +98,7 @@ class EnsembleTest(unittest.TestCase):
 
     @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python 3.6 and higher")
     def testPerformanceRangeThreshold(self):
-        to_test = ((0.0, 4), (0.1, 4), (0.3, 3), (0.5, 2), (0.6, 2), (0.8, 1), (1, 1))
+        to_test = ((0.0, 4), (0.1, 4), (0.3, 3), (0.5, 2), (0.6, 2), (0.8, 1), (1.0, 1), (1, 1))
         for performance_range_threshold, exp in to_test:
             ensbuilder = EnsembleBuilder(
                 backend=self.backend,
@@ -110,7 +110,6 @@ class EnsembleTest(unittest.TestCase):
                 max_keep_best=100,
                 performance_range_threshold=performance_range_threshold
             )
-            print(performance_range_threshold, exp)
             ensbuilder.read_preds = {
                 'A': {'ens_score': 1, 'num_run': 1, 0: True, 'loaded': -1, "seed": 1},
                 'B': {'ens_score': 2, 'num_run': 2, 0: True, 'loaded': -1, "seed": 1},

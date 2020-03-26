@@ -109,9 +109,10 @@ class EnsembleBuilder(multiprocessing.Process):
         self.performance_range_threshold = performance_range_threshold
 
         if isinstance(max_keep_best, numbers.Integral) and max_keep_best < 1:
-            raise ValueError("Integer keep_best has to be larger 1: %s" % max_keep_best)
-        if 0 >= max_keep_best > 1:
-            raise ValueError("Float keep best has to be >0 and <= 1: %s" % max_keep_best)
+            raise ValueError("Integer max_keep_best has to be larger 1: %s" % max_keep_best)
+        elif not isinstance(max_keep_best, numbers.Integral) \
+                and (max_keep_best < 0 or max_keep_best > 1):
+            raise ValueError("Float max_keep_best best has to be >= 0 and < 1: %s" % max_keep_best)
         self.max_keep_best = max_keep_best
         self.keep_just_nbest_models = remove_bad_model_files
         self.seed = seed
@@ -146,8 +147,8 @@ class EnsembleBuilder(multiprocessing.Process):
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
         self.logger = get_logger(logger_name)
         if max_keep_best == 1:
-            self.logger.debug("Behaviour depends on int/float: %s (max_keep_best)" %
-                              max_keep_best)
+            self.logger.debug("Behaviour depends on int/float: %s, %s (max_keep_best, type)" %
+                              (max_keep_best, type(max_keep_best)))
 
         self.start_time = 0
         self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy')
@@ -194,7 +195,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     if isinstance(self.max_keep_best, numbers.Integral):
                         self.max_keep_best = int(self.max_keep_best / 2)
                     else:
-                        self.max_keep_best = self.max_keep_best
+                        self.max_keep_best = self.max_keep_best / 2
                     self.logger.warning("Memory Exception -- restart with "
                                         "less max_keep_best: %d" % self.max_keep_best)
                     # ATTENTION: main will start from scratch;
@@ -203,7 +204,6 @@ class EnsembleBuilder(multiprocessing.Process):
             break
 
     def main(self):
-
         self.start_time = time.time()
         iteration = 0
 
