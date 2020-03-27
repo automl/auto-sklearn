@@ -55,19 +55,18 @@ class MinorityCoalescer:
                 indptr_start = X.indptr[column]
                 indptr_end = X.indptr[column + 1]
                 unique = np.unique(X.data[indptr_start:indptr_end])
-            else:
-                unique = np.unique(X[:, column])
-
-            for unique_value in unique:
-                if unique_value not in self.do_not_coalesce_[column]:
-                    if sparse.issparse(X):
+                for unique_value in unique:
+                    if unique_value not in self.do_not_coalesce_[column]:
                         indptr_start = X.indptr[column]
                         indptr_end = X.indptr[column + 1]
                         X.data[indptr_start:indptr_end][
                             X.data[indptr_start:indptr_end] == unique_value] = 1
-                    else:
-                        X[:, column][X[:, column] == unique_value] = 1
-
+            else:
+                unique = np.unique(X[:, column])
+                unique_values = [unique_value for unique_value in unique
+                                 if unique_value not in self.do_not_coalesce_[column]]
+                mask = np.isin(X[:, column], unique_values)
+                X[mask, column] = 1
         return X
 
     def fit_transform(self, X, y=None):
