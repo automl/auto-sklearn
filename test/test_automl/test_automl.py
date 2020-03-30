@@ -144,16 +144,9 @@ class AutoMLTest(Base, unittest.TestCase):
             backend_api.temporary_directory, 'AutoML(' + str(seed) + '):*.log'))
         with open(log_file_path[0]) as log_file:
             log_content = log_file.read()
-            self.assertIn('Deleted file of non-candidate model', log_content)
-            self.assertIn('Deleted prediction file of non-candidate model', log_content)
-            self.assertIn('Deleted test prediction file of non-candidate model',
-                          log_content)
-            self.assertNotIn('Failed to delete file of non-candidate model',
-                             log_content)
-            self.assertNotIn('Failed to delete prediction file of non-candidate model',
-                             log_content)
-            self.assertNotIn('Failed to delete test prediction file of '
-                             'non-candidate model', log_content)
+            self.assertIn('Deleted files of non-candidate model', log_content)
+            self.assertNotIn('Failed to delete files of non-candidate model', log_content)
+            self.assertNotIn('Failed to lock model due to error', log_content)
 
         # Assert that the files of the models used by the ensemble weren't deleted
         model_files = backend_api.list_all_models(seed=seed)

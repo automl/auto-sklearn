@@ -10,6 +10,7 @@ from typing import Optional, Union
 
 import numpy as np
 import pynisher
+import lockfile
 from sklearn.utils.validation import check_random_state
 
 from autosklearn.util.backend import Backend
@@ -286,15 +287,15 @@ class EnsembleBuilder(multiprocessing.Process):
                 'predictions_ensemble_*_*_*.npy',
             )
 
-        y_ens_files = glob.glob(pred_path)
+        self.y_ens_files = glob.glob(pred_path)
         # no validation predictions so far -- no files
-        if len(y_ens_files) == 0:
+        if len(self.y_ens_files) == 0:
             self.logger.debug("Found no prediction files on ensemble data set:"
                               " %s" % pred_path)
             return False
 
         n_read_files = 0
-        for y_ens_fn in sorted(y_ens_files):
+        for y_ens_fn in sorted(self.y_ens_files):
 
             if self.read_at_most and n_read_files >= self.read_at_most:
                 # limit the number of files that will be read
@@ -318,7 +319,8 @@ class EnsembleBuilder(multiprocessing.Process):
                     "seed": _seed,
                     "num_run": _num_run,
                     "budget": _budget,
-                    "deleted": False,
+                    "is_new": True,
+                    "modified": os.path.getmtime(y_ens_fn),
                     Y_ENSEMBLE: None,
                     Y_VALID: None,
                     Y_TEST: None,
@@ -695,71 +697,81 @@ class EnsembleBuilder(multiprocessing.Process):
         # TODO: ADD saving of predictions on "ensemble data"
 
     def _delete_non_candidate_models(self, candidates):
-        candidates = [os.path.split(cand)[1] for cand in candidates]
-        for pred_path in self.read_preds.keys():
-            if self.read_preds[pred_path]['deleted']:
+
+        # Loop through the files currently in the directory
+        for pred_path in self.y_ens_files:
+
+            # Do not delete candidates
+            if pred_path in candidates:
                 continue
+
             match = self.model_fn_re.search(pred_path)
+            _full_name = match.group(0)
             _seed = match.group(1)
             _num_run = match.group(2)
             _budget = match.group(3)
-            # Do not remove the dummy prediction!
+
+            # Do not delete the dummy prediction
             if int(_num_run) == 1:
                 continue
-            pred_file = os.path.split(pred_path)[1]
-            if pred_file not in candidates:
-                # Messages logged bellow should match what is asserted
-                # in test_delete_non_candidate_models(). Please, ensure consistency.
 
-                # Delete prediction file
+            # Besides the prediction, we have to take care of three other files: model,
+            # validation and test.
+            model_name = '%s.%s.%s.model' % (_seed, _num_run, _budget)
+            model_path = os.path.join(self.dir_models, model_name)
+            pred_test_name = 'predictions_test' + _full_name
+            pred_test_path = os.path.join(self.dir_test, pred_test_name)
+            pred_valid_name = 'predictions_valid' + _full_name
+            pred_valid_path = os.path.join(self.dir_valid, pred_valid_name)
+
+            # Lets lock all the files "at once" to avoid weird race conditions. This is
+            # not 100% fail safe, but very unlikely to fail. Also, we either delete all
+            # files of a model (model, prediction, validation and test), or delete none.
+            # This makes easier to keep track of what models have indeed been correctly
+            # removed.
+            locks = {pred_path : lockfile.LockFile(pred_path + '.lock'),
+                     model_path : lockfile.LockFile(model_path + '.lock')}
+            if os.path.exists(pred_valid_path):
+                locks[pred_valid_path] = lockfile.LockFile(pred_valid_path + '.lock')
+            if os.path.exists(pred_test_path):
+                locks[pred_test_path] = lockfile.LockFile(pred_test_path + '.lock')
+
+            try:
+                for lock in locks.values():
+                    lock.acquire()
+            except Exception as e:
+                for lock in locks.values():
+                    if lock.i_am_locking():
+                        lock.release()
+                # If file(s) already locked, we deal with them later. Not a big deal.
+                # Other exceptions, however, should not occur.
+                if e is not lockfile.AlreadyLocked:
+                    # The message bellow is asserted in test_delete_non_candidate_models()
+                    self.logger.error('Failed to lock model due to error %s', e)
+                continue
+
+            # Delete files if model is not a candidate AND prediction is old. We check if
+            # the prediction is old to avoid deleting a model that hasn't been appreciated
+            # by self.get_n_best_preds() yet.
+            old_timestamp = self.read_preds[pred_path]['modified']
+            current_timestamp = os.path.getmtime(pred_path)
+            if current_timestamp == old_timestamp:
                 try:
-                    os.remove(pred_path)
+                    for path in locks.keys():
+                        os.remove(path)
+                    # The message bellow is asserted in test_delete_non_candidate_models()
                     self.logger.info(
-                        'Deleted prediction file of non-candidate model %s', pred_path)
-                    self.read_preds[pred_path]['deleted'] = True
+                        "Deleted files of non-candidate model %s", model_name)
                 except Exception as e:
+                    # The message bellow is asserted in test_delete_non_candidate_models()
                     self.logger.error(
-                        'Failed to delete prediction file of non-candidate model %s due'
-                        'to error %s', pred_path, e)
+                        "Failed to delete files of non-candidate model %s due"
+                        " to error %s", model_path, e)
 
-                # Delete model file
-                model_name = '%s.%s.%s.model' % (_seed, _num_run, _budget)
-                model_path = os.path.join(self.dir_models, model_name)
-                try:
-                    os.remove(model_path)
-                    self.logger.info('Deleted file of non-candidate model %s', model_path)
-                except Exception as e:
-                    self.logger.error(
-                        'Failed to delete file of non-candidate model %s due to error %s',
-                        model_path, e)
-
-                # Delete validation prediction file
-                pred_valid_name = 'predictions_valid' + match.group(0)
-                pred_valid_path = os.path.join(self.dir_valid, pred_valid_name)
-                if os.path.exists(pred_valid_path):
-                    try:
-                        os.remove(pred_valid_path)
-                        self.logger.info(
-                            'Deleted validation prediction file of non-candidate '
-                            'model %s', pred_valid_path)
-                    except Exception as e:
-                        self.logger.error(
-                            'Failed to delete validation prediction file of non-candidate'
-                            ' model %s due to error %s', pred_valid_path, e)
-
-                # Delete test prediction file
-                pred_test_name = 'predictions_test' + match.group(0)
-                pred_test_path = os.path.join(self.dir_test, pred_test_name)
-                if os.path.exists(pred_test_path):
-                    try:
-                        os.remove(pred_test_path)
-                        self.logger.info(
-                            'Deleted test prediction file of non-candidate model %s',
-                            pred_test_path)
-                    except Exception as e:
-                        self.logger.error(
-                            'Failed to delete test prediction file of non-candidate '
-                            'model %s due to error %s', pred_test_path, e)
+            # If we reached this point, all locks were done by this thread. So no need
+            # for "if lock.i_am_locking()" here.
+            for lock in locks.values():
+                lock.release()
 
     def _read_np_fn(self, fp):
         if self.precision is "16":
