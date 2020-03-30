@@ -6,14 +6,13 @@ import unittest.mock
 
 import numpy as np
 
-
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 from evaluation_util import get_multiclass_classification_datamanager, \
     get_regression_datamanager
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.metrics import accuracy, r2, mean_squared_error
-from smac.tae.execute_ta_run import StatusType
+from smac.tae.execute_ta_run import StatusType  # noqa E402
 
 
 class AbstractEvaluatorTest(unittest.TestCase):

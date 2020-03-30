@@ -116,7 +116,7 @@ class RegressorChoice(AutoSklearnChoice):
             return self.choice.get_max_iter()
         else:
             raise NotImplementedError()
-        
+
     def get_current_iter(self):
         if self.estimator_supports_iterative_fit():
             return self.choice.get_current_iter()

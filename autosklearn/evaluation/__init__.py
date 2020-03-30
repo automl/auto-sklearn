@@ -295,7 +295,10 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 status = StatusType.CRASHED
                 cost = WORST_POSSIBLE_RESULT
 
-        if (self.budget_type is None or self.budget == 0) and status == StatusType.DONOTADVANCE:
+        if (
+            (self.budget_type is None or self.budget == 0)
+            and status == StatusType.DONOTADVANCE
+        ):
             status = StatusType.SUCCESS
 
         if not isinstance(additional_run_info, dict):

@@ -29,7 +29,7 @@ class PassiveAggressive(
     @staticmethod
     def get_max_iter():
         return 1024
-    
+
     def get_current_iter(self):
         return self.estimator.n_iter_
 

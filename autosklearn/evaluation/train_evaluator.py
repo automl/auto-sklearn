@@ -378,7 +378,8 @@ class TrainEvaluator(AbstractEvaluator):
                 status = StatusType.SUCCESS
             elif (
                 self.budget_type == 'iterations'
-                or self.budget_type == 'mixed' and self.model.estimator_supports_iterative_fit()
+                or self.budget_type == 'mixed'
+                and self.model.estimator_supports_iterative_fit()
             ):
                 budget_factor = self.model.get_max_iter()
                 n_iter = int(np.ceil(self.budget / 100 * budget_factor))

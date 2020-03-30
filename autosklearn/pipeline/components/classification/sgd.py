@@ -42,7 +42,7 @@ class SGD(
     @staticmethod
     def get_max_iter():
         return 1024
-    
+
     def get_current_iter(self):
         return self.n_iter_
 

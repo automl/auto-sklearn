@@ -836,8 +836,10 @@ class AutoML(BaseEstimator):
             sio.write('  Best validation score: %f\n' % best_score)
         num_runs = len(cv_results['status'])
         sio.write('  Number of target algorithm runs: %d\n' % num_runs)
-        num_success = sum([s in ['Success', 'Success (but do not advance to higher budget)']
-                           for s in cv_results['status']])
+        num_success = sum(
+            [s in ['Success', 'Success (but do not advance to higher budget)']
+            for s in cv_results['status']]
+        )
         sio.write('  Number of successful target algorithm runs: %d\n' % num_success)
         num_crash = sum([s == 'Crash' for s in cv_results['status']])
         sio.write('  Number of crashed target algorithm runs: %d\n' % num_crash)

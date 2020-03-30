@@ -56,7 +56,7 @@ class ExtraTreesClassifier(
     @staticmethod
     def get_max_iter():
         return 512
-    
+
     def get_current_iter(self):
         return self.estimator.n_estimators
 
