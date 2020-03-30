@@ -146,7 +146,7 @@ class AutoMLTest(Base, unittest.TestCase):
             log_content = log_file.read()
             self.assertIn('Deleted files of non-candidate model', log_content)
             self.assertNotIn('Failed to delete files of non-candidate model', log_content)
-            self.assertNotIn('Failed to lock model due to error', log_content)
+            self.assertNotIn('Failed to lock model', log_content)
 
         # Assert that the files of the models used by the ensemble weren't deleted
         model_files = backend_api.list_all_models(seed=seed)

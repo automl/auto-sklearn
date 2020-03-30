@@ -697,7 +697,6 @@ class EnsembleBuilder(multiprocessing.Process):
         # TODO: ADD saving of predictions on "ensemble data"
 
     def _delete_non_candidate_models(self, candidates):
-
         # Loop through the files currently in the directory
         for pred_path in self.y_ens_files:
 
