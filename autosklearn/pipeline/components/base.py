@@ -154,6 +154,9 @@ class IterativeComponent(AutoSklearnComponent):
     @staticmethod
     def get_max_iter():
         raise NotImplementedError()
+    
+    def get_current_iter(self):
+        raise NotImplementedError()
 
 
 class IterativeComponentWithSampleWeight(AutoSklearnComponent):
@@ -170,6 +173,9 @@ class IterativeComponentWithSampleWeight(AutoSklearnComponent):
 
     @staticmethod
     def get_max_iter():
+        raise NotImplementedError()
+    
+    def get_current_iter(self):
         raise NotImplementedError()
 
 

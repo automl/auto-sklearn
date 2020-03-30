@@ -126,6 +126,9 @@ class BasePipeline(Pipeline):
     def configuration_fully_fitted(self):
         return self._final_estimator.configuration_fully_fitted()
 
+    def get_current_iter(self):
+        return self._final_estimator.get_current_iter()
+
     def predict(self, X, batch_size=None):
         """Predict the classes using the selected model.
 

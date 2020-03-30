@@ -60,6 +60,7 @@ class TestEvaluator(AbstractEvaluator):
             file_output=False,
             final_call=True,
             additional_run_info=None,
+            status=StatusType.SUCCESS,
         )
 
     def predict_and_loss(self, train=False):

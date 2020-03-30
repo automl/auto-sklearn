@@ -56,6 +56,9 @@ class ExtraTreesClassifier(
     @staticmethod
     def get_max_iter():
         return 512
+    
+    def get_current_iter(self):
+        return self.estimator.n_estimators
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
         from sklearn.ensemble import ExtraTreesClassifier as ETC

@@ -73,6 +73,7 @@ def main():
         resampling_strategy='holdout',
         resampling_strategy_arguments={'train_size': 0.67},
         include_estimators=['extra_trees', 'gradient_boosting', 'random_forest', 'sgd', 'passive_aggressive'],
+        include_preprocessors=['no_preprocessing'],
         get_smac_object_callback=get_smac_object_callback('iterations'),
     )
     automl.fit(X_train, y_train, dataset_name='breast_cancer')
