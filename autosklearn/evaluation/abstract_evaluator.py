@@ -142,7 +142,11 @@ class AbstractEvaluator(object):
 
         self.output_y_hat_optimization = output_y_hat_optimization
         self.all_scoring_functions = all_scoring_functions
-        self.disable_file_output = disable_file_output
+
+        if isinstance(disable_file_output, (bool, list)):
+            self.disable_file_output = disable_file_output
+        else:
+            raise ValueError('disable_file_output should be either a bool or a list')
 
         if self.task_type in REGRESSION_TASKS:
             if not isinstance(self.configuration, Configuration):
@@ -332,10 +336,14 @@ class AbstractEvaluator(object):
         # for one specific data set - optimization, validation or test!
         seed = self.seed
 
+        # Abort if self.Y_optimization is None
         # self.Y_optimization can be None if we use partial-cv, then,
         # obviously no output should be saved.
-        if self.Y_optimization is not None and \
-                self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
+        if self.Y_optimization is None:
+            return None, {}
+
+        # Abort in case of shape misalignment
+        if self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
             return (
                 1.0,
                 {
@@ -346,6 +354,7 @@ class AbstractEvaluator(object):
                  },
             )
 
+        # Abort if predictions contain NaNs
         for y, s in [
             # Y_train_pred deleted here. Fix unittest accordingly.
             [Y_optimization_pred, 'optimization'],
@@ -361,23 +370,22 @@ class AbstractEvaluator(object):
                     },
                 )
 
-        num_run = str(self.num_run)
+        # Abort if we don't want to output anything
+        # note: since disable_file_output can be a list, we have to explicitly
+        # compare it against True
+        if self.disable_file_output == True:
+            return None, {}
 
-        if (
-            self.disable_file_output != True and (
-                not isinstance(self.disable_file_output, list)
-                or 'model' not in self.disable_file_output
-            )
-        ):
+        num_run = str(self.num_run)
+        write_everything = not isinstance(self.disable_file_output, list)
+
+        # File 1 of 4: model
+        if (write_everything or 'model' not in self.disable_file_output):
             if os.path.exists(self.backend.get_model_dir()):
                 self.backend.save_model(self.model, self.num_run, seed, self.budget)
 
-        if (
-            self.disable_file_output != True and (
-                not isinstance(self.disable_file_output, list)
-                or 'y_optimization' not in self.disable_file_output
-            )
-        ):
+        # File 2 of 4: predictions
+        if (write_everything or 'y_optimization' not in self.disable_file_output):
             if self.output_y_hat_optimization:
                 try:
                     os.makedirs(self.backend.output_directory)
@@ -389,15 +397,15 @@ class AbstractEvaluator(object):
                 Y_optimization_pred, 'ensemble', seed, num_run, self.budget,
             )
 
+        # File 3 of 4: validation predictions
         if Y_valid_pred is not None:
-            if self.disable_file_output != True:
-                self.backend.save_predictions_as_npy(Y_valid_pred, 'valid',
-                                                     seed, num_run, self.budget)
+            self.backend.save_predictions_as_npy(
+                Y_valid_pred, 'valid', seed, num_run, self.budget)
 
+        # File 4 of 4: Test predictions
         if Y_test_pred is not None:
-            if self.disable_file_output != True:
-                self.backend.save_predictions_as_npy(Y_test_pred, 'test',
-                                                     seed, num_run, self.budget)
+            self.backend.save_predictions_as_npy(
+                Y_test_pred, 'test', seed, num_run, self.budget)
 
         return None, {}
 
