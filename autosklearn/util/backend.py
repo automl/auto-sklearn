@@ -274,8 +274,7 @@ class Backend(object):
         except Exception:
             pass
 
-        lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path):
+        with lockfile.LockFile(filepath):
             if os.path.exists(filepath):
                 with open(filepath, 'rb') as fh:
                     existing_targets = np.load(fh, allow_pickle=True)
@@ -296,8 +295,7 @@ class Backend(object):
     def load_targets_ensemble(self):
         filepath = self._get_targets_ensemble_filename()
 
-        lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path):
+        with lockfile.LockFile(filepath):
             with open(filepath, 'rb') as fh:
                 targets = np.load(fh, allow_pickle=True)
 
@@ -310,8 +308,7 @@ class Backend(object):
         self._make_internals_directory()
         filepath = self._get_datamanager_pickle_filename()
 
-        lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path):
+        with lockfile.LockFile(filepath):
             if not os.path.exists(filepath):
                 with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                         filepath), delete=False) as fh:
@@ -323,8 +320,7 @@ class Backend(object):
 
     def load_datamanager(self):
         filepath = self._get_datamanager_pickle_filename()
-        lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path):
+        with lockfile.LockFile(filepath):
             with open(filepath, 'rb') as fh:
                 return pickle.load(fh)
 
@@ -483,9 +479,8 @@ class Backend(object):
         os.rename(tempname, filepath)
 
     def write_txt_file(self, filepath, data, name):
-        lock_file = filepath + '.lock'
-        with lockfile.LockFile(lock_file):
-            if not os.path.exists(lock_file):
+        with lockfile.LockFile(filepath):
+            if not os.path.exists(filepath):
                 with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
                         filepath), delete=False) as fh:
                     fh.write(data)

@@ -369,13 +369,14 @@ class AbstractEvaluator(object):
                     },
                 )
 
-        # Abort if we don't want to output anything
-        # Note: since disable_file_output can also be a list, we have to explicitly
+        # Abort if we don't want to output anything.
+        # Since disable_file_output can also be a list, we have to explicitly
         # compare it against True.
         if self.disable_file_output == True:
             return None, {}
 
-        # Note: disable_file_output==False and disable_file_output==[] means the same
+        # Notice that disable_file_output==False and disable_file_output==[]
+        # means the same thing here.
         if self.disable_file_output == False:
             self.disable_file_output = []
 
@@ -400,7 +401,7 @@ class AbstractEvaluator(object):
                     self.seed, self.num_run, self.budget)
                 write_tasks.append(
                     WriteTask(
-                        lock=lockfile.LockFile(file_path + '.lock'),
+                        lock=lockfile.LockFile(file_path),
                         writer=self.backend.save_model,
                         args=(self.model, file_path)
                         ))
@@ -411,7 +412,7 @@ class AbstractEvaluator(object):
                 'ensemble', self.seed, self.num_run, self.budget)
             write_tasks.append(
                 WriteTask(
-                    lock=lockfile.LockFile(file_path + '.lock'),
+                    lock=lockfile.LockFile(file_path),
                     writer=self.backend.save_predictions_as_npy,
                     args=(Y_optimization_pred, file_path)
                     ))
@@ -422,7 +423,7 @@ class AbstractEvaluator(object):
                 'valid', self.seed, self.num_run, self.budget)
             write_tasks.append(
                 WriteTask(
-                    lock=lockfile.LockFile(file_path + '.lock'),
+                    lock=lockfile.LockFile(file_path),
                     writer=self.backend.save_predictions_as_npy,
                     args=(Y_valid_pred, file_path)
                     ))
@@ -433,7 +434,7 @@ class AbstractEvaluator(object):
                 'test', self.seed, self.num_run, self.budget)
             write_tasks.append(
                 WriteTask(
-                    lock=lockfile.LockFile(file_path + '.lock'),
+                    lock=lockfile.LockFile(file_path),
                     writer=self.backend.save_predictions_as_npy,
                     args=(Y_test_pred, file_path)
                     ))

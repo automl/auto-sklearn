@@ -727,12 +727,11 @@ class EnsembleBuilder(multiprocessing.Process):
             if os.path.exists(pred_test_path):
                 paths.append(pred_test_path)
 
-            # Lets lock all the files "at once" to avoid weird race conditions. This is
-            # not 100% fail safe, but very unlikely to fail. Also, we either delete all
-            # files of a model (model, prediction, validation and test), or delete none.
-            # This makes easier to keep track of which models have indeed been correctly
-            # removed.
-            locks = [lockfile.LockFile(path + '.lock') for path in paths]
+            # Lets lock all the files "at once" to avoid weird race conditions. Also,
+            # we either delete all files of a model (model, prediction, validation
+            # and test), or delete none. This makes it easier to keep track of which
+            # models have indeed been correctly removed.
+            locks = [lockfile.LockFile(path) for path in paths]
             try:
                 for lock in locks:
                     lock.acquire()
