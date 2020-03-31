@@ -117,6 +117,12 @@ class RegressorChoice(AutoSklearnChoice):
         else:
             raise NotImplementedError()
 
+    def get_current_iter(self):
+        if self.estimator_supports_iterative_fit():
+            return self.choice.get_current_iter()
+        else:
+            raise NotImplementedError()
+
     def iterative_fit(self, X, y, n_iter=1, **fit_params):
         if fit_params is None:
             fit_params = {}

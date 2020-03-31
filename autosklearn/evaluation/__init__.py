@@ -29,9 +29,8 @@ def fit_predict_try_except_decorator(ta, queue, **kwargs):
     try:
         return ta(queue=queue, **kwargs)
     except Exception as e:
-        if isinstance(e, MemoryError):
-            # Re-raise the memory error to let the pynisher handle that
-            # correctly
+        if isinstance(e, (MemoryError, pynisher.TimeoutException)):
+            # Re-raise the memory error to let the pynisher handle that correctly
             raise e
 
         exception_traceback = traceback.format_exc()
@@ -247,7 +246,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 elif obj.exit_status is pynisher.MemorylimitException:
                     additional_run_info['info'] = 'Run stopped because of memout.'
 
-                if status == StatusType.SUCCESS:
+                if status in [StatusType.SUCCESS, StatusType.DONOTADVANCE]:
                     cost = result
                 else:
                     cost = WORST_POSSIBLE_RESULT
@@ -295,6 +294,12 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 additional_run_info = {'error': 'Result queue is empty'}
                 status = StatusType.CRASHED
                 cost = WORST_POSSIBLE_RESULT
+
+        if (
+            (self.budget_type is None or budget == 0)
+            and status == StatusType.DONOTADVANCE
+        ):
+            status = StatusType.SUCCESS
 
         if not isinstance(additional_run_info, dict):
             additional_run_info = {'message': additional_run_info}

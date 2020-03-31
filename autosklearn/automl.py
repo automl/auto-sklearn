@@ -778,6 +778,8 @@ class AutoML(BaseEstimator):
             s = run_value.status
             if s == StatusType.SUCCESS:
                 status.append('Success')
+            elif s == StatusType.DONOTADVANCE:
+                status.append('Success (but do not advance to higher budget)')
             elif s == StatusType.TIMEOUT:
                 status.append('Timeout')
             elif s == StatusType.CRASHED:
@@ -821,16 +823,23 @@ class AutoML(BaseEstimator):
         sio.write('auto-sklearn results:\n')
         sio.write('  Dataset name: %s\n' % self._dataset_name)
         sio.write('  Metric: %s\n' % self._metric)
-        idx_success = np.where(np.array(cv_results['status']) == 'Success')
-        if not self._metric._optimum:
-            idx_best_run = np.argmin(cv_results['mean_test_score'][idx_success])
-        else:
-            idx_best_run = np.argmax(cv_results['mean_test_score'][idx_success])
-        best_score = cv_results['mean_test_score'][idx_success][idx_best_run]
-        sio.write('  Best validation score: %f\n' % best_score)
+        idx_success = np.where(np.array(
+            [status in ['Success', 'Success (but do not advance to higher budget)']
+             for status in cv_results['status']]
+        ))
+        if len(cv_results['mean_test_score']) > 0:
+            if not self._metric._optimum:
+                idx_best_run = np.argmin(cv_results['mean_test_score'][idx_success])
+            else:
+                idx_best_run = np.argmax(cv_results['mean_test_score'][idx_success])
+            best_score = cv_results['mean_test_score'][idx_success][idx_best_run]
+            sio.write('  Best validation score: %f\n' % best_score)
         num_runs = len(cv_results['status'])
         sio.write('  Number of target algorithm runs: %d\n' % num_runs)
-        num_success = sum([s == 'Success' for s in cv_results['status']])
+        num_success = sum([
+            s in ['Success', 'Success (but do not advance to higher budget)']
+            for s in cv_results['status']
+        ])
         sio.write('  Number of successful target algorithm runs: %d\n' % num_success)
         num_crash = sum([s == 'Crash' for s in cv_results['status']])
         sio.write('  Number of crashed target algorithm runs: %d\n' % num_crash)

@@ -241,7 +241,7 @@ class AbstractEvaluator(object):
         return err
 
     def finish_up(self, loss, train_loss,  opt_pred, valid_pred, test_pred,
-                  additional_run_info, file_output, final_call):
+                  additional_run_info, file_output, final_call, status):
         """This function does everything necessary after the fitting is done:
 
         * predicting
@@ -289,7 +289,7 @@ class AbstractEvaluator(object):
 
         rval_dict = {'loss': loss,
                      'additional_run_info': additional_run_info,
-                     'status': StatusType.SUCCESS}
+                     'status': status}
         if final_call:
             rval_dict['final_queue_element'] = True
 

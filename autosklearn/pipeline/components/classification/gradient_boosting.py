@@ -44,6 +44,9 @@ class GradientBoostingClassifier(
     def get_max_iter():
         return 512
 
+    def get_current_iter(self):
+        return self.estimator.n_iter_
+
     def iterative_fit(self, X, y, n_iter=2, refit=False):
 
         """

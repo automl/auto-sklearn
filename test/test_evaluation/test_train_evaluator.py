@@ -59,6 +59,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
+        pipeline_mock.get_max_iter.return_value = 1
+        pipeline_mock.get_current_iter.return_value = 1
         tmp_dir = os.path.join(os.getcwd(), '.out_test_holdout')
         output_dir = os.path.join(os.getcwd(), '.tmp_test_holdout')
 
@@ -114,7 +116,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                 # Is called twice as often as call to fit because we also check
                 # if we need to add a special indicator to show that this is the
                 # final call to iterative fit
-                return self.fully_fitted_call_count > 10
+                return self.fully_fitted_call_count > 18
 
         Xt_fixture = 'Xt_fixture'
         pipeline_mock.estimator_supports_iterative_fit.return_value = True
@@ -123,6 +125,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
+        pipeline_mock.get_max_iter.return_value = 512
+        pipeline_mock.get_current_iter.side_effect = (2, 4, 8, 16, 32, 64, 128, 256, 512)
         tmp_dir = os.path.join(os.getcwd(), '.tmp_test_iterative_holdout')
         output_dir = os.path.join(os.getcwd(), '.out_test_iterative_holdout')
 
@@ -142,11 +146,15 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         class LossSideEffect(object):
             def __init__(self):
-                self.losses = [0.8, 0.8, 0.8, 0.8,
+                self.losses = [1.0, 1.0, 1.0, 1.0,
+                               0.9, 0.9, 0.9, 0.9,
+                               0.8, 0.8, 0.8, 0.8,
+                               0.7, 0.7, 0.7, 0.7,
                                0.6, 0.6, 0.6, 0.6,
+                               0.5, 0.5, 0.5, 0.5,
                                0.4, 0.4, 0.4, 0.4,
-                               0.2, 0.2, 0.2, 0.2,
-                               0.0, 0.0, 0.0, 0.0]
+                               0.3, 0.3, 0.3, 0.3,
+                               0.2, 0.2, 0.2, 0.2]
                 self.iteration = 0
 
             def side_effect(self, *args, **kwargs):
@@ -156,27 +164,34 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator._loss.side_effect = LossSideEffect().side_effect
 
         evaluator.fit_predict_and_loss(iterative=True)
-        self.assertEqual(evaluator.file_output.call_count, 5)
+        self.assertEqual(evaluator.file_output.call_count, 9)
 
-        for i in range(1, 6):
+        for i in range(1, 10):
             rval = evaluator.queue.get(timeout=1)
             result = rval['loss']
             self.assertEqual(len(rval), 3)
-            self.assertAlmostEqual(result, 1.0 - (0.2 * i))
+            self.assertAlmostEqual(result, 1.0 - (0.1 * (i - 1)))
+            if i < 9:
+                self.assertEqual(rval['status'], StatusType.DONOTADVANCE)
+            else:
+                self.assertEqual(rval['status'], StatusType.SUCCESS)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
-        self.assertEqual(pipeline_mock.iterative_fit.call_count, 5)
-        self.assertEqual([cal[1]['n_iter'] for cal in pipeline_mock.iterative_fit.call_args_list], [2, 2, 4, 8, 16])
+        self.assertEqual(pipeline_mock.iterative_fit.call_count, 9)
+        self.assertEqual(
+            [cal[1]['n_iter'] for cal in pipeline_mock.iterative_fit.call_args_list],
+            [2, 2, 4, 8, 16, 32, 64, 128, 256]
+        )
         # 20 calls because of train, holdout, validation and test set
         # and a total of five calls because of five iterations of fitting
-        self.assertEqual(evaluator.model.predict_proba.call_count, 20)
+        self.assertEqual(evaluator.model.predict_proba.call_count, 36)
         # 1/3 of 69
         self.assertEqual(evaluator.file_output.call_args[0][0].shape[0], 23)
         self.assertEqual(evaluator.file_output.call_args[0][1].shape[0],
                          D.data['Y_valid'].shape[0])
         self.assertEqual(evaluator.file_output.call_args[0][2].shape[0],
                          D.data['Y_test'].shape[0])
-        self.assertEqual(evaluator.file_output.call_count, 5)
+        self.assertEqual(evaluator.file_output.call_count, 9)
         self.assertEqual(evaluator.model.fit.call_count, 0)
 
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
@@ -205,6 +220,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
+        pipeline_mock.get_max_iter.return_value = 1
+        pipeline_mock.get_current_iter.return_value = 1
         tmp_dir = os.path.join(os.getcwd(), '.tmp_test_iterative_holdout_interuption')
         output_dir = os.path.join(os.getcwd(), '.out_test_iterative_holdout_interuption')
 
@@ -366,6 +383,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
+        pipeline_mock.get_max_iter.return_value = 1
+        pipeline_mock.get_current_iter.return_value = 1
         tmp_dir = os.path.join(os.getcwd(), '.tmp_test_partial_cv')
         output_dir = os.path.join(os.getcwd(), '.out_test_partial_cv')
         D = get_binary_classification_datamanager()
@@ -399,7 +418,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # The model prior to fitting is saved, this cannot be directly tested
         # because of the way the mock module is used. Instead, we test whether
         # the if block in which model assignment is done is accessed
-        self.assertTrue(evaluator._added_empty_model)
+        self.assertTrue(hasattr(evaluator, 'model'))
 
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_iterative_partial_cv(self, pipeline_mock):
@@ -416,7 +435,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                 # Is called twice as often as call to fit because we also check
                 # if we need to add a special indicator to show that this is the
                 # final call to iterative fit
-                return self.fully_fitted_call_count > 10
+                return self.fully_fitted_call_count > 18
 
         Xt_fixture = 'Xt_fixture'
         pipeline_mock.estimator_supports_iterative_fit.return_value = True
@@ -425,6 +444,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
+        pipeline_mock.get_max_iter.return_value = 512
+        pipeline_mock.get_current_iter.side_effect = (2, 4, 8, 16, 32, 64, 128, 256, 512)
         tmp_dir = os.path.join(os.getcwd(), '.tmp_test_iterative_partial_cv')
         output_dir = os.path.join(os.getcwd(), '.out_test_iterative_partial_cv')
 
@@ -445,11 +466,15 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         class LossSideEffect(object):
             def __init__(self):
-                self.losses = [0.8, 0.8, 0.8, 0.8,
+                self.losses = [1.0, 1.0, 1.0, 1.0,
+                               0.9, 0.9, 0.9, 0.9,
+                               0.8, 0.8, 0.8, 0.8,
+                               0.7, 0.7, 0.7, 0.7,
                                0.6, 0.6, 0.6, 0.6,
+                               0.5, 0.5, 0.5, 0.5,
                                0.4, 0.4, 0.4, 0.4,
-                               0.2, 0.2, 0.2, 0.2,
-                               0.0, 0.0, 0.0, 0.0]
+                               0.3, 0.3, 0.3, 0.3,
+                               0.2, 0.2, 0.2, 0.2]
                 self.iteration = 0
 
             def side_effect(self, *args, **kwargs):
@@ -462,20 +487,27 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # No file output here!
         self.assertEqual(evaluator.file_output.call_count, 0)
 
-        for i in range(1, 6):
+        for i in range(1, 10):
             rval = evaluator.queue.get(timeout=1)
-            self.assertAlmostEqual(rval['loss'], 1.0 - (0.2 * i))
+            self.assertAlmostEqual(rval['loss'], 1.0 - (0.1 * (i - 1)))
+            if i < 9:
+                self.assertEqual(rval['status'], StatusType.DONOTADVANCE)
+            else:
+                self.assertEqual(rval['status'], StatusType.SUCCESS)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
-        self.assertEqual(pipeline_mock.iterative_fit.call_count, 5)
-        self.assertEqual([cal[1]['n_iter'] for cal in pipeline_mock.iterative_fit.call_args_list], [2, 2, 4, 8, 16])
+        self.assertEqual(pipeline_mock.iterative_fit.call_count, 9)
+        self.assertEqual(
+            [cal[1]['n_iter'] for cal in pipeline_mock.iterative_fit.call_args_list],
+            [2, 2, 4, 8, 16, 32, 64, 128, 256]
+        )
         # fifteen calls because of the holdout, the validation and the test set
         # and a total of five calls because of five iterations of fitting
-        self.assertFalse(hasattr(evaluator, 'model'))
-        self.assertEqual(pipeline_mock.iterative_fit.call_count, 5)
+        self.assertTrue(hasattr(evaluator, 'model'))
+        self.assertEqual(pipeline_mock.iterative_fit.call_count, 9)
         # 20 calls because of train, holdout, the validation and the test set
         # and a total of five calls because of five iterations of fitting
-        self.assertEqual(pipeline_mock.predict_proba.call_count, 20)
+        self.assertEqual(pipeline_mock.predict_proba.call_count, 36)
 
     @unittest.mock.patch('autosklearn.util.backend.Backend')
     @unittest.mock.patch('os.makedirs')
@@ -687,6 +719,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             output_y_hat_optimization=False,
             metric=accuracy,
         )
+        evaluator.model = unittest.mock.Mock()
+        evaluator.model.estimator_supports_iterative_fit.return_value = False
         evaluator.Y_targets[0] = np.array([1] * 23)
         evaluator.Y_train_targets = np.array([1] * 69)
         rval = evaluator.fit_predict_and_loss(iterative=False)
@@ -753,6 +787,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         mock.estimator_supports_iterative_fit.return_value = True
         mock.fit_transformer.return_value = ('Xt', {})
         mock.configuration_fully_fitted.side_effect = Counter()
+        mock.get_current_iter.side_effect = Counter()
+        mock.get_max_iter.return_value = 1
         mock.get_additional_run_info.return_value = 14678
         loss_mock.return_value = 0.5
 
@@ -823,6 +859,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                 self.counter += 1
                 return False if self.counter <= 1 else True
         mock.configuration_fully_fitted.side_effect = Counter()
+        mock.get_current_iter.side_effect = Counter()
+        mock.get_max_iter.return_value = 1
         mock.estimator_supports_iterative_fit.return_value = True
         mock.fit_transformer.return_value = ('Xt', {})
         mock.get_additional_run_info.return_value = {'val': 14678}
@@ -859,13 +897,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     def test_fit_predict_and_loss_budget_2_additional_run_info(
             self, mock, backend_mock, finish_up_mock, loss_mock,
     ):
-        class Counter:
-            counter = 0
-            def __call__(self):
-                self.counter += 1
-                return False if self.counter <= 1 else True
-        mock.configuration_fully_fitted.side_effect = Counter()
-        mock.estimator_supports_iterative_fit.return_value = True
+        mock.estimator_supports_iterative_fit.return_value = False
         mock.fit_transformer.return_value = ('Xt', {})
         mock.get_additional_run_info.return_value = {'val': 14678}
         loss_mock.return_value = 0.5
@@ -1623,7 +1655,8 @@ class FunctionsTest(unittest.TestCase):
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 9)
         self.assertAlmostEqual(rval[-1]['loss'], 0.030303030303030276)
-        self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
+        self.assertEqual(rval[0]['status'], StatusType.DONOTADVANCE)
+        self.assertEqual(rval[-1]['status'], StatusType.SUCCESS)
 
     def test_eval_holdout_budget_iterations(self):
         eval_holdout(
@@ -1648,6 +1681,35 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(len(info), 1)
         self.assertAlmostEqual(info[0]['loss'], 0.06060606060606055, places=3)
         self.assertEqual(info[0]['status'], StatusType.SUCCESS)
+        self.assertNotIn('bac_metric', info[0]['additional_run_info'])
+
+    def test_eval_holdout_budget_iterations_converged(self):
+        configuration = get_configuration_space(
+            exclude_estimators=['random_forest', 'liblinear_svc'],
+            info={'task': MULTICLASS_CLASSIFICATION, 'is_sparse': False},
+        ).get_default_configuration()
+        eval_holdout(
+            queue=self.queue,
+            config=configuration,
+            backend=self.backend,
+            resampling_strategy='holdout',
+            resampling_strategy_args=None,
+            seed=1,
+            num_run=1,
+            all_scoring_functions=False,
+            output_y_hat_optimization=True,
+            include=None,
+            exclude={'classifier': ['random_forest', 'liblinear_svc']},
+            disable_file_output=False,
+            instance=self.dataset_name,
+            metric=accuracy,
+            budget=80,
+            budget_type='iterations'
+        )
+        info = read_queue(self.queue)
+        self.assertEqual(len(info), 1)
+        self.assertAlmostEqual(info[0]['loss'], 0.18181818181818177, places=3)
+        self.assertEqual(info[0]['status'], StatusType.DONOTADVANCE)
         self.assertNotIn('bac_metric', info[0]['additional_run_info'])
 
     def test_eval_holdout_budget_subsample(self):
@@ -1676,6 +1738,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertNotIn('bac_metric', info[0]['additional_run_info'])
 
     def test_eval_holdout_budget_mixed_iterations(self):
+        print(self.configuration)
         eval_holdout(
             queue=self.queue,
             config=self.configuration,
@@ -1842,43 +1905,3 @@ class FunctionsTest(unittest.TestCase):
             self.assertEqual(len(rval), 1)
             self.assertAlmostEqual(rval[0]['loss'], results[fold])
             self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
-
-    # def test_eval_partial_cv_on_subset_no_timeout(self):
-    #     backend_api = backend.create(self.tmp_dir, self.tmp_dir)
-    #
-    #     results = [0.071428571428571508,
-    #                0.15476190476190488,
-    #                0.08333333333333337,
-    #                0.16666666666666674,
-    #                0.0]
-    #     for fold in range(5):
-    #         eval_partial_cv(queue=self.queue, config=self.configuration,
-    #                         data=self.data, backend=backend_api,
-    #                         seed=1, num_run=1, instance=fold, folds=5,
-    #                         subsample=80, with_predictions=True,
-    #                         all_scoring_functions=False, output_y_hat_optimization=True,
-    #                         include=None, exclude=None,
-    #                         disable_file_output=False)
-    #
-    #         info = self.queue.get()
-    #         self.assertAlmostEqual(info[1], results[fold])
-    #         self.assertEqual(info[2], 1)
-    #
-    #     results = [0.071428571428571508,
-    #                0.15476190476190488,
-    #                0.16666666666666674,
-    #                0.0,
-    #                0.0]
-    #     for fold in range(5):
-    #         eval_partial_cv(queue=self.queue, config=self.configuration,
-    #                         data=self.data, backend=backend_api,
-    #                         seed=1, num_run=1, instance=fold, folds=5,
-    #                         subsample=43, with_predictions=True,
-    #                         all_scoring_functions=False, output_y_hat_optimization=True,
-    #                         include=None, exclude=None,
-    #                         disable_file_output=False)
-    #
-    #         info = self.queue.get()
-    #         self.assertAlmostEqual(info[1], results[fold])
-    #         self.assertEqual(info[2], 1)
-

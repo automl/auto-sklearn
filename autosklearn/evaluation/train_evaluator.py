@@ -2,7 +2,7 @@ import copy
 import json
 
 import numpy as np
-from smac.tae.execute_ta_run import TAEAbortException
+from smac.tae.execute_ta_run import TAEAbortException, StatusType
 from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit, KFold, \
     StratifiedKFold, train_test_split, BaseCrossValidator, PredefinedSplit
 from sklearn.model_selection._split import _RepeatedSplits, BaseShuffleSplit
@@ -212,7 +212,8 @@ class TrainEvaluator(AbstractEvaluator):
                 self.Y_optimization = self.Y_train[test_split]
                 self.Y_actual_train = self.Y_train[train_split]
                 self._partial_fit_and_predict_iterative(0, train_indices=train_split,
-                                                        test_indices=test_split,)
+                                                        test_indices=test_split,
+                                                        add_model_to_self=True)
 
         else:
 
@@ -253,7 +254,8 @@ class TrainEvaluator(AbstractEvaluator):
                         additional_run_info,
                     )= (
                         self._partial_fit_and_predict_standard(
-                           i, train_indices=train_split, test_indices=test_split
+                            i, train_indices=train_split, test_indices=test_split,
+                            add_model_to_self=self.num_cv_folds == 1,
                         )
                     )
                 else:
@@ -265,7 +267,8 @@ class TrainEvaluator(AbstractEvaluator):
                         additional_run_info,
                     ) = (
                         self._partial_fit_and_predict_budget(
-                            i, train_indices=train_split, test_indices=test_split
+                            i, train_indices=train_split, test_indices=test_split,
+                            add_model_to_self=self.num_cv_folds == 1,
                         )
                     )
 
@@ -372,6 +375,31 @@ class TrainEvaluator(AbstractEvaluator):
                 # Bad style, but necessary for unit testing that self.model is
                 # actually a new model
                 self._added_empty_model = True
+                status = StatusType.SUCCESS
+            elif (
+                self.budget_type == 'iterations'
+                or self.budget_type == 'mixed'
+                and self.model.estimator_supports_iterative_fit()
+            ):
+                budget_factor = self.model.get_max_iter()
+                n_iter = int(np.ceil(self.budget / 100 * budget_factor))
+                model_current_iter = self.model.get_current_iter()
+                if model_current_iter < n_iter:
+                    status = StatusType.DONOTADVANCE
+                else:
+                    status = StatusType.SUCCESS
+                print(model_current_iter, n_iter, status)
+            else:
+                if self.model.estimator_supports_iterative_fit():
+                    model_max_iter = self.model.get_max_iter()
+                    model_current_iter = self.model.get_current_iter()
+                    if model_current_iter < model_max_iter:
+                        status = StatusType.DONOTADVANCE
+                    else:
+                        status = StatusType.SUCCESS
+                    print(model_current_iter, model_max_iter, status)
+                else:
+                    status = StatusType.SUCCESS
 
             self.finish_up(
                 loss=opt_loss,
@@ -381,7 +409,8 @@ class TrainEvaluator(AbstractEvaluator):
                 test_pred=Y_test_pred,
                 additional_run_info=additional_run_info,
                 file_output=True,
-                final_call=True
+                final_call=True,
+                status=status,
             )
 
     def partial_fit_predict_and_loss(self, fold, iterative=False):
@@ -390,6 +419,8 @@ class TrainEvaluator(AbstractEvaluator):
         if fold > self.num_cv_folds:
             raise ValueError('Cannot evaluate a fold %d which is higher than '
                              'the number of folds %d.' % (fold, self.num_cv_folds))
+        if self.budget_type is not None:
+            raise NotImplementedError()
 
         y = _get_y_array(self.Y_train, self.task_type)
         for i, (train_split, test_split) in enumerate(self.splitter.split(
@@ -407,7 +438,8 @@ class TrainEvaluator(AbstractEvaluator):
 
         if iterative:
             self._partial_fit_and_predict_iterative(
-                fold, train_indices=train_split, test_indices=test_split,)
+                fold, train_indices=train_split, test_indices=test_split,
+                add_model_to_self=True)
         elif self.budget_type is not None:
             raise NotImplementedError()
         else:
@@ -416,16 +448,22 @@ class TrainEvaluator(AbstractEvaluator):
                     fold,
                     train_indices=train_split,
                     test_indices=test_split,
+                    add_model_to_self=True,
                 )
             )
             train_loss = self._loss(self.Y_actual_train, train_pred)
             loss = self._loss(self.Y_targets[fold], opt_pred)
 
-            if self.num_cv_folds > 1:
-                self.model = self._get_model()
-                # Bad style, but necessary for unit testing that self.model is
-                # actually a new model
-                self._added_empty_model = True
+            if self.model.estimator_supports_iterative_fit():
+                model_max_iter = self.model.get_max_iter()
+                model_current_iter = self.model.get_current_iter()
+                if model_current_iter < model_max_iter:
+                    status = StatusType.DONOTADVANCE
+                else:
+                    status = StatusType.SUCCESS
+                print(model_current_iter, model_max_iter, status)
+            else:
+                status = StatusType.SUCCESS
 
             self.finish_up(
                 loss=loss,
@@ -436,9 +474,11 @@ class TrainEvaluator(AbstractEvaluator):
                 file_output=False,
                 final_call=True,
                 additional_run_info=None,
+                status=status
             )
 
-    def _partial_fit_and_predict_iterative(self, fold, train_indices, test_indices):
+    def _partial_fit_and_predict_iterative(self, fold, train_indices, test_indices,
+                                           add_model_to_self):
         model = self._get_model()
 
         self.indices[fold] = ((train_indices, test_indices))
@@ -456,6 +496,7 @@ class TrainEvaluator(AbstractEvaluator):
 
             iteration = 1
             total_n_iteration = 0
+            model_max_iter = model.get_max_iter()
             while (
                 not model.configuration_fully_fitted()
             ):
@@ -474,12 +515,19 @@ class TrainEvaluator(AbstractEvaluator):
                     test_indices=test_indices,
                 )
 
-                if self.num_cv_folds == 1:
+                if add_model_to_self:
                     self.model = model
 
                 train_loss = self._loss(self.Y_train[train_indices], Y_train_pred)
                 loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
                 additional_run_info = model.get_additional_run_info()
+
+                model_current_iter = model.get_current_iter()
+                if model_current_iter < model_max_iter:
+                    status = StatusType.DONOTADVANCE
+                else:
+                    status = StatusType.SUCCESS
+                print(model_current_iter, model_max_iter, status)
 
                 if model.configuration_fully_fitted():
                     final_call = True
@@ -494,6 +542,7 @@ class TrainEvaluator(AbstractEvaluator):
                     additional_run_info=additional_run_info,
                     file_output=file_output,
                     final_call=final_call,
+                    status=status,
                 )
                 iteration += 1
 
@@ -506,9 +555,20 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_valid_pred,
                 Y_test_pred,
                 additional_run_info
-            ) = self._partial_fit_and_predict_standard(fold, train_indices, test_indices)
+            ) = self._partial_fit_and_predict_standard(fold, train_indices, test_indices,
+                                                       add_model_to_self)
             train_loss = self._loss(self.Y_train[train_indices], Y_train_pred)
             loss = self._loss(self.Y_train[test_indices], Y_optimization_pred)
+            if self.model.estimator_supports_iterative_fit():
+                model_max_iter = self.model.get_max_iter()
+                model_current_iter = self.model.get_current_iter()
+                if model_current_iter < model_max_iter:
+                    status = StatusType.DONOTADVANCE
+                else:
+                    status = StatusType.SUCCESS
+                print(model_current_iter, model_max_iter, status)
+            else:
+                status = StatusType.SUCCESS
             self.finish_up(
                 loss=loss,
                 train_loss=train_loss,
@@ -517,11 +577,13 @@ class TrainEvaluator(AbstractEvaluator):
                 test_pred=Y_test_pred,
                 additional_run_info=additional_run_info,
                 file_output=file_output,
-                final_call=True
+                final_call=True,
+                status=status,
             )
             return
 
-    def _partial_fit_and_predict_standard(self, fold, train_indices, test_indices):
+    def _partial_fit_and_predict_standard(self, fold, train_indices, test_indices,
+                                          add_model_to_self=False):
         model = self._get_model()
 
         self.indices[fold] = ((train_indices, test_indices))
@@ -533,7 +595,7 @@ class TrainEvaluator(AbstractEvaluator):
             self.Y_train[train_indices],
         )
 
-        if self.num_cv_folds == 1:
+        if add_model_to_self:
             self.model = model
 
         train_indices, test_indices = self.indices[fold]
@@ -554,7 +616,8 @@ class TrainEvaluator(AbstractEvaluator):
             additional_run_info,
         )
 
-    def _partial_fit_and_predict_budget(self, fold, train_indices, test_indices,):
+    def _partial_fit_and_predict_budget(self, fold, train_indices, test_indices,
+                                        add_model_to_self=False):
 
         model = self._get_model()
         self.indices[fold] = ((train_indices, test_indices))
@@ -578,7 +641,7 @@ class TrainEvaluator(AbstractEvaluator):
             test_indices=test_indices,
         )
 
-        if self.num_cv_folds == 1:
+        if add_model_to_self:
             self.model = model
 
         additional_run_info = model.get_additional_run_info()
@@ -849,6 +912,8 @@ def eval_partial_cv(
         budget=None,
         budget_type=None,
 ):
+    if budget_type is not None:
+        raise NotImplementedError()
     instance = json.loads(instance) if instance is not None else {}
     fold = instance['fold']
 
@@ -890,7 +955,11 @@ def eval_partial_cv_iterative(
         exclude,
         disable_file_output,
         init_params=None,
+        budget=None,
+        budget_type=None
 ):
+    if budget_type is not None:
+        raise NotImplementedError()
     return eval_partial_cv(
         queue=queue,
         config=config,
@@ -931,6 +1000,8 @@ def eval_cv(
         budget=None,
         budget_type=None
 ):
+    if budget_type is not None:
+        raise NotImplementedError()
     evaluator = TrainEvaluator(
         backend=backend,
         queue=queue,
