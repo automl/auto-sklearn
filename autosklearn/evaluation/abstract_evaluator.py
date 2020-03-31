@@ -441,9 +441,9 @@ class AbstractEvaluator(object):
 
         # We then acquire the locks one by one in a stubborn fashion, i.e. if a file is
         # already locked, we keep probing it until it is unlocked. This will NOT create
-        # race condition with _delete_non_candidate_models() since this function don't
+        # race condition with _delete_non_candidate_models() since this function doesn't
         # acquire the locks in this stubborn way. The delete function releases all the
-        # locks and aborts the acquision process, as soon as it finds a locked file.
+        # locks and aborts the acquision process as soon as it finds a locked file.
         for wt in write_tasks:
             while True:
                 try:
