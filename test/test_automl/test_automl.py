@@ -159,7 +159,7 @@ class AutoMLTest(Base, unittest.TestCase):
         self.assertTrue(ensemble_members_idx.issubset(model_files_idx))
 
         del automl
-        self._tearDown(backend_api.temporary_directory)
+        #self._tearDown(backend_api.temporary_directory)
         self._tearDown(backend_api.output_directory)
 
     def test_fit_roar(self):

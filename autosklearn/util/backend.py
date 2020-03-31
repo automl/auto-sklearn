@@ -331,11 +331,12 @@ class Backend(object):
     def get_model_dir(self):
         return os.path.join(self.internals_directory, 'models')
 
-    def save_model(self, model, idx, seed, budget):
+    def get_model_path(self, seed, idx, budget):
         # This should fail if no models directory exists
-        filepath = os.path.join(self.get_model_dir(),
-                                '%s.%s.%s.model' % (seed, idx, budget))
+        return os.path.join(self.get_model_dir(),
+                            '%s.%s.%s.model' % (seed, idx, budget))
 
+    def save_model(self, model, filepath):
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
             pickle.dump(model, fh, -1)
@@ -447,14 +448,16 @@ class Backend(object):
         return os.path.join(self.internals_directory,
                             'predictions_%s' % subset)
 
-    def save_predictions_as_npy(self, predictions, subset, automl_seed, idx, budget):
+    def get_prediction_output_path(self, subset, automl_seed, idx, budget):
         output_dir = self._get_prediction_output_dir(subset)
+        return os.path.join(output_dir, 'predictions_%s_%s_%s_%s.npy' %
+                            (subset, automl_seed, idx, budget))
+
+    def save_predictions_as_npy(self, predictions, filepath):
+        output_dir = os.path.dirname(filepath)
         # Make sure an output directory exists
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-
-        filepath = os.path.join(output_dir, 'predictions_%s_%s_%s_%s.npy' %
-                                            (subset, automl_seed, str(idx), budget))
 
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
