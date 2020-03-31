@@ -202,12 +202,6 @@ class TrainEvaluator(AbstractEvaluator):
             if self.num_cv_folds > 1:
                 raise ValueError('Cannot use iterative fitting together with full'
                                  'cross-validation!')
-            elif (
-                self.budget_type is not None
-                and self.budget_type not in ['iterations', 'mixed']
-            ):
-                raise ValueError('budget_type must be None or "iterations", but is %s'
-                                 % self.budget_type)
 
             for train_split, test_split in self.splitter.split(
                 self.X_train, self.Y_train,
@@ -499,9 +493,11 @@ class TrainEvaluator(AbstractEvaluator):
             total_n_iteration = 0
             model_max_iter = model.get_max_iter()
 
-            budget_factor = model.get_max_iter()
-            max_n_iter_budget = int(np.ceil(self.budget / 100 * budget_factor))
-            max_iter = min(model_max_iter, max_n_iter_budget)
+            if self.budget > 0:
+                max_n_iter_budget = int(np.ceil(self.budget / 100 * model_max_iter))
+                max_iter = min(model_max_iter, max_n_iter_budget)
+            else:
+                max_iter = model_max_iter
             model_current_iter = 0
 
             while (
