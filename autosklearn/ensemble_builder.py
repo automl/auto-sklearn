@@ -738,11 +738,8 @@ class EnsembleBuilder(multiprocessing.Process):
             try:
                 for lock in locks:
                     lock.acquire()
-            except Exception as exc:
-                for lock in locks:
-                    if lock.i_am_locking():
-                        lock.release()
-                if exc is lockfile.AlreadyLocked:
+            except Exception as e:
+                if isinstance(e, lockfile.AlreadyLocked):
                     # If the file is already locked, we deal with it later. Not a big deal
                     self.logger.info(
                         'Model %s is already locked. Skipping it for now.', model_name)
@@ -751,6 +748,9 @@ class EnsembleBuilder(multiprocessing.Process):
                     # The message bellow is asserted in test_delete_non_candidate_models()
                     self.logger.error(
                         'Failed to lock model %s files due to error %s', model_name, e)
+                for lock in locks:
+                    if lock.i_am_locking():
+                        lock.release()
                 continue
 
             # Delete files if model is not a candidate AND prediction is old. We check if
