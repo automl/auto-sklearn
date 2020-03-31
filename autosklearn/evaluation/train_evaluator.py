@@ -202,7 +202,10 @@ class TrainEvaluator(AbstractEvaluator):
             if self.num_cv_folds > 1:
                 raise ValueError('Cannot use iterative fitting together with full'
                                  'cross-validation!')
-            elif self.budget_type is not None and self.budget_type != 'iterations':
+            elif (
+                self.budget_type is not None
+                and self.budget_type not in ['iterations', 'mixed']
+            ):
                 raise ValueError('budget_type must be None or "iterations", but is %s'
                                  % self.budget_type)
 
