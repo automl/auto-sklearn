@@ -826,8 +826,8 @@ class AutoML(BaseEstimator):
         idx_success = np.where(np.array(
             [status in ['Success', 'Success (but do not advance to higher budget)']
              for status in cv_results['status']]
-        ))
-        if len(cv_results['mean_test_score']) > 0:
+        ))[0]
+        if len(idx_success) > 0:
             if not self._metric._optimum:
                 idx_best_run = np.argmin(cv_results['mean_test_score'][idx_success])
             else:

@@ -202,8 +202,9 @@ class TrainEvaluator(AbstractEvaluator):
             if self.num_cv_folds > 1:
                 raise ValueError('Cannot use iterative fitting together with full'
                                  'cross-validation!')
-            elif self.budget_type is not None:
-                raise ValueError('Cannot use a budget together with iterative optimization.')
+            elif self.budget_type is not None and self.budget_type != 'iterations':
+                raise ValueError('budget_type must be None or "iterations", but is %s'
+                                 % self.budget_type)
 
             for train_split, test_split in self.splitter.split(
                 self.X_train, self.Y_train,
@@ -497,8 +498,14 @@ class TrainEvaluator(AbstractEvaluator):
             iteration = 1
             total_n_iteration = 0
             model_max_iter = model.get_max_iter()
+
+            budget_factor = model.get_max_iter()
+            max_n_iter_budget = int(np.ceil(self.budget / 100 * budget_factor))
+            max_iter = min(model_max_iter, max_n_iter_budget)
+            model_current_iter = 0
+
             while (
-                not model.configuration_fully_fitted()
+                not model.configuration_fully_fitted() and model_current_iter < max_iter
             ):
                 n_iter = int(2**iteration/2) if iteration > 1 else 2
                 total_n_iteration += n_iter
@@ -523,16 +530,17 @@ class TrainEvaluator(AbstractEvaluator):
                 additional_run_info = model.get_additional_run_info()
 
                 model_current_iter = model.get_current_iter()
-                if model_current_iter < model_max_iter:
+                print(model_current_iter, max_iter, max_n_iter_budget, model_max_iter)
+                if model_current_iter < max_iter:
                     status = StatusType.DONOTADVANCE
                 else:
                     status = StatusType.SUCCESS
-                print(model_current_iter, model_max_iter, status)
 
-                if model.configuration_fully_fitted():
+                if model.configuration_fully_fitted() or model_current_iter >= max_iter:
                     final_call = True
                 else:
                     final_call = False
+
                 self.finish_up(
                     loss=loss,
                     train_loss=train_loss,
