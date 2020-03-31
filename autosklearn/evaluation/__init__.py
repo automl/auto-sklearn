@@ -296,7 +296,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 cost = WORST_POSSIBLE_RESULT
 
         if (
-            (self.budget_type is None or self.budget == 0)
+            (self.budget_type is None or budget == 0)
             and status == StatusType.DONOTADVANCE
         ):
             status = StatusType.SUCCESS
