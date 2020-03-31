@@ -439,7 +439,7 @@ class AbstractEvaluator(object):
                     ))
 
         # We then acquire the locks one by one in a stubborn fashion, i.e. if a file is
-        # already locked, we keep probing it until it is not anymore. This will NOT create
+        # already locked, we keep probing it until it is unlocked. This will NOT create
         # race condition with _delete_non_candidate_models() since this function don't
         # acquire the locks in this stubborn way. The delete function releases all the
         # locks and aborts the acquision process, as soon as it finds a locked file.
@@ -452,7 +452,7 @@ class AbstractEvaluator(object):
                     time.sleep(.1)
                     continue
                 except Exception as e:
-                    raise RuntimeError('Failed to lock %s for writing' % wt.lock)
+                    raise RuntimeError('Failed to lock %s due to %s' % (wt.lock, e))
 
         # At this point we are good to write the files
         for wt in write_tasks:

@@ -450,15 +450,14 @@ class Backend(object):
 
     def get_prediction_output_path(self, subset, automl_seed, idx, budget):
         output_dir = self._get_prediction_output_dir(subset)
-        return os.path.join(output_dir, 'predictions_%s_%s_%s_%s.npy' %
-                            (subset, automl_seed, idx, budget))
-
-    def save_predictions_as_npy(self, predictions, filepath):
-        output_dir = os.path.dirname(filepath)
         # Make sure an output directory exists
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
+        return os.path.join(output_dir, 'predictions_%s_%s_%s_%s.npy' %
+                            (subset, automl_seed, idx, budget))
+
+    def save_predictions_as_npy(self, predictions, filepath):
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
             pickle.dump(predictions.astype(np.float32), fh, -1)

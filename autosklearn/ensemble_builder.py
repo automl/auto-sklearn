@@ -319,8 +319,6 @@ class EnsembleBuilder(multiprocessing.Process):
                     "seed": _seed,
                     "num_run": _num_run,
                     "budget": _budget,
-                    "is_new": True,
-                    "modified": os.path.getmtime(y_ens_fn),
                     Y_ENSEMBLE: None,
                     Y_VALID: None,
                     Y_TEST: None,
@@ -756,7 +754,7 @@ class EnsembleBuilder(multiprocessing.Process):
             # Delete files if model is not a candidate AND prediction is old. We check if
             # the prediction is old to avoid deleting a model that hasn't been appreciated
             # by self.get_n_best_preds() yet.
-            original_timestamp = self.read_preds[pred_path]['modified']
+            original_timestamp = self.read_preds[pred_path]['mtime_ens']
             current_timestamp = os.path.getmtime(pred_path)
             if current_timestamp == original_timestamp:
                 # The messages logged here are asserted in
