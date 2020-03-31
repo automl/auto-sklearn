@@ -130,7 +130,7 @@ class AutoMLTest(Base, unittest.TestCase):
         automl = autosklearn.automl.AutoML(
             backend_api,
             time_left_for_this_task=30,
-            per_run_time_limit=7,
+            per_run_time_limit=5,
             ensemble_nbest=3,
             seed=seed
         )

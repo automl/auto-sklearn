@@ -723,31 +723,34 @@ class EnsembleBuilder(multiprocessing.Process):
             pred_test_name = 'predictions_test' + _full_name
             pred_test_path = os.path.join(self.dir_test, pred_test_name)
 
+            paths = [model_path, pred_path]
+            if os.path.exists(pred_valid_path):
+                paths.append(pred_valid_path)
+            if os.path.exists(pred_test_path):
+                paths.append(pred_test_path)
+
             # Lets lock all the files "at once" to avoid weird race conditions. This is
             # not 100% fail safe, but very unlikely to fail. Also, we either delete all
             # files of a model (model, prediction, validation and test), or delete none.
             # This makes easier to keep track of which models have indeed been correctly
             # removed.
-            locks = {pred_path: lockfile.LockFile(pred_path + '.lock'),
-                     model_path: lockfile.LockFile(model_path + '.lock')}
-            if os.path.exists(pred_valid_path):
-                locks[pred_valid_path] = lockfile.LockFile(pred_valid_path + '.lock')
-            if os.path.exists(pred_test_path):
-                locks[pred_test_path] = lockfile.LockFile(pred_test_path + '.lock')
-
+            locks = [lockfile.LockFile(path + '.lock') for path in paths]
             try:
-                for lock in locks.values():
+                for lock in locks:
                     lock.acquire()
-            except lockfile.AlreadyLocked:
-                # If the file is already locked, we deal with it later. Not a big deal.
-                self.logger.info(
-                    'Model %s is already locked. Skipping it for now.', model_name)
-                continue
-            except Exception as e:
-                # Other exceptions, however, should not occur.
-                # The message bellow is asserted in test_delete_non_candidate_models()
-                self.logger.error(
-                    'Failed to lock model %s files due to error %s', model_path, e)
+            except Exception as exc:
+                for lock in locks:
+                    if lock.i_am_locking():
+                        lock.release()
+                if exc is lockfile.AlreadyLocked:
+                    # If the file is already locked, we deal with it later. Not a big deal
+                    self.logger.info(
+                        'Model %s is already locked. Skipping it for now.', model_name)
+                else:
+                    # Other exceptions, however, should not occur.
+                    # The message bellow is asserted in test_delete_non_candidate_models()
+                    self.logger.error(
+                        'Failed to lock model %s files due to error %s', model_name, e)
                 continue
 
             # Delete files if model is not a candidate AND prediction is old. We check if
@@ -756,21 +759,21 @@ class EnsembleBuilder(multiprocessing.Process):
             original_timestamp = self.read_preds[pred_path]['modified']
             current_timestamp = os.path.getmtime(pred_path)
             if current_timestamp == original_timestamp:
+                # The messages logged here are asserted in
+                # test_delete_non_candidate_models(). Edit with care.
                 try:
-                    for path in locks.keys():
+                    for path in paths:
                         os.remove(path)
-                    # The message bellow is asserted in test_delete_non_candidate_models()
                     self.logger.info(
                         "Deleted files of non-candidate model %s", model_name)
                 except Exception as e:
-                    # The message bellow is asserted in test_delete_non_candidate_models()
                     self.logger.error(
                         "Failed to delete files of non-candidate model %s due"
-                        " to error %s", model_path, e)
+                        " to error %s", model_name, e)
 
             # If we reached this point, all locks were done by this thread. So no need
             # to check "lock.i_am_locking()" here.
-            for lock in locks.values():
+            for lock in locks:
                 lock.release()
 
     def _read_np_fn(self, fp):
