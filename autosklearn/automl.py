@@ -413,9 +413,6 @@ class AutoML(BaseEstimator):
         self._stopwatch.start_task(ensemble_task_name)
         time_left_for_ensembles = max(0,self._time_for_task \
                                       - self._stopwatch.wall_elapsed(self._dataset_name))
-        if self._logger:
-            self._logger.info(
-                'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
         if time_left_for_ensembles <= 0:
             self._proc_ensemble = None
             # Fit only raises error when ensemble_size is not zero but
@@ -424,13 +421,16 @@ class AutoML(BaseEstimator):
                 raise ValueError("Not starting ensemble builder because there "
                                  "is no time left. Try increasing the value "
                                  "of time_left_for_this_task.")
+        elif self._ensemble_size <= 0:
+            self._proc_ensemble = None
+            self._logger.info('Not starting ensemble builder because '
+                              'ensemble size is <= 0.')
         else:
+            self._logger.info(
+                'Start Ensemble with %5.2fsec time left' % time_left_for_ensembles)
             self._proc_ensemble = self._get_ensemble_process(time_left_for_ensembles)
-            if self._ensemble_size > 0:
-                self._proc_ensemble.start()
-            else:
-                self._logger.info('Not starting ensemble builder because '
-                                  'ensemble size is <= 0.')
+            self._proc_ensemble.start()
+
         self._stopwatch.stop_task(ensemble_task_name)
 
         # kill the datamanager as it will be re-loaded anyways from sub processes

@@ -450,11 +450,15 @@ class EnsembleBuilder(multiprocessing.Process):
             # Transform to number of models to keep. Keep at least one
             keep_nbest = max(1, min(len(sorted_keys),
                                     int(len(sorted_keys) * self.max_keep_best)))
+            self.logger.debug(
+                "Library pruning: keeping only top %f percent of the models (%d out of %d)",
+                self.max_keep_best * 100, keep_nbest, len(sorted_keys)
+            )
         else:
             # Keep only at most max_keep_best
             keep_nbest = min(self.max_keep_best, len(sorted_keys))
-        self.logger.debug("Cut model selection library down "
-                          "to %d (out of %d) models" % (keep_nbest, len(sorted_keys)))
+            self.logger.debug("Library pruning: cutting down "
+                              "to %d (out of %d) models" % (keep_nbest, len(sorted_keys)))
 
         for k, _, _ in sorted_keys[:keep_nbest]:
             if self.read_preds[k][Y_ENSEMBLE] is None:
@@ -476,8 +480,8 @@ class EnsembleBuilder(multiprocessing.Process):
                     # but always keep at least one model
                     current_score = sorted_keys[i][1]
                     if current_score <= min_score:
-                        self.logger.debug("Further reduce from %d to %d models" %
-                                          (keep_nbest, max(1, i)))
+                        self.logger.debug("Dynamic library pruning: Further reduce from %d to %d "
+                                          "models", keep_nbest, max(1, i))
                         keep_nbest = max(1, i)
                         break
         ensemble_n_best = keep_nbest

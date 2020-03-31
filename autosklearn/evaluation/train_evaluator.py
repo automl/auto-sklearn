@@ -389,7 +389,6 @@ class TrainEvaluator(AbstractEvaluator):
                     status = StatusType.DONOTADVANCE
                 else:
                     status = StatusType.SUCCESS
-                print(model_current_iter, n_iter, status)
             else:
                 if self.model.estimator_supports_iterative_fit():
                     model_max_iter = self.model.get_max_iter()
@@ -398,7 +397,6 @@ class TrainEvaluator(AbstractEvaluator):
                         status = StatusType.DONOTADVANCE
                     else:
                         status = StatusType.SUCCESS
-                    print(model_current_iter, model_max_iter, status)
                 else:
                     status = StatusType.SUCCESS
 
@@ -462,7 +460,6 @@ class TrainEvaluator(AbstractEvaluator):
                     status = StatusType.DONOTADVANCE
                 else:
                     status = StatusType.SUCCESS
-                print(model_current_iter, model_max_iter, status)
             else:
                 status = StatusType.SUCCESS
 
@@ -530,7 +527,6 @@ class TrainEvaluator(AbstractEvaluator):
                 additional_run_info = model.get_additional_run_info()
 
                 model_current_iter = model.get_current_iter()
-                print(model_current_iter, max_iter, max_n_iter_budget, model_max_iter)
                 if model_current_iter < max_iter:
                     status = StatusType.DONOTADVANCE
                 else:
@@ -574,7 +570,6 @@ class TrainEvaluator(AbstractEvaluator):
                     status = StatusType.DONOTADVANCE
                 else:
                     status = StatusType.SUCCESS
-                print(model_current_iter, model_max_iter, status)
             else:
                 status = StatusType.SUCCESS
             self.finish_up(
