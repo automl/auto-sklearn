@@ -140,7 +140,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy='holdout',
                                    all_scoring_functions=False,
                                    output_y_hat_optimization=True,
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   budget=0.0)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -169,12 +170,13 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         for i in range(1, 10):
             rval = evaluator.queue.get(timeout=1)
             result = rval['loss']
-            self.assertEqual(len(rval), 3)
             self.assertAlmostEqual(result, 1.0 - (0.1 * (i - 1)))
             if i < 9:
                 self.assertEqual(rval['status'], StatusType.DONOTADVANCE)
+                self.assertEqual(len(rval), 3)
             else:
                 self.assertEqual(rval['status'], StatusType.SUCCESS)
+                self.assertEqual(len(rval), 4)
         self.assertRaises(queue.Empty, evaluator.queue.get, timeout=1)
 
         self.assertEqual(pipeline_mock.iterative_fit.call_count, 9)
@@ -220,8 +222,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
-        pipeline_mock.get_max_iter.return_value = 1
-        pipeline_mock.get_current_iter.return_value = 1
+        pipeline_mock.get_max_iter.return_value = 512
+        pipeline_mock.get_current_iter.side_effect = (2, 4, 8, 16, 32, 64, 128, 256, 512)
         tmp_dir = os.path.join(os.getcwd(), '.tmp_test_iterative_holdout_interuption')
         output_dir = os.path.join(os.getcwd(), '.out_test_iterative_holdout_interuption')
 
@@ -235,7 +237,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy='holdout-iterative-fit',
                                    all_scoring_functions=False,
                                    output_y_hat_optimization=True,
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   budget=0.0)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -460,7 +463,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    resampling_strategy_args={'folds': 5},
                                    all_scoring_functions=False,
                                    output_y_hat_optimization=True,
-                                   metric=accuracy)
+                                   metric=accuracy,
+                                   budget=0.0)
         evaluator.file_output = unittest.mock.Mock(spec=evaluator.file_output)
         evaluator.file_output.return_value = (None, {})
 
@@ -805,6 +809,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             resampling_strategy='holdout',
             output_y_hat_optimization=False,
             metric=accuracy,
+            budget=0.0
         )
         evaluator.Y_targets[0] = np.array([1] * 23).reshape((-1, 1))
         evaluator.Y_train_targets = np.array([1] * 69).reshape((-1, 1))
