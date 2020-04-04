@@ -212,8 +212,8 @@ class TrainEvaluator(AbstractEvaluator):
                                                             add_model_to_self=True)
             else:
 
-                # Test if the model allows for an iterative fit, if not, call this method again
-                # without the iterative argument
+                # Test if the model allows for an iterative fit, if not,
+                # call this method again without the iterative argument
                 model = self._get_model()
                 if not model.estimator_supports_iterative_fit():
                     self.fit_predict_and_loss(iterative=False)
@@ -238,7 +238,8 @@ class TrainEvaluator(AbstractEvaluator):
                 model_max_iter = [model.get_max_iter() for model in models]
 
                 if self.budget > 0:
-                    max_n_iter_budget = int(np.ceil(self.budget / 100 * model_max_iter[0]))
+                    max_n_iter_budget = int(
+                        np.ceil(self.budget / 100 * model_max_iter[0]))
                     max_iter = min(model_max_iter[0], max_n_iter_budget)
                 else:
                     max_iter = model_max_iter[0]
@@ -250,10 +251,14 @@ class TrainEvaluator(AbstractEvaluator):
 
                 y = _get_y_array(self.Y_train, self.task_type)
 
-                train_losses = [np.NaN] * self.num_cv_folds  # stores train loss of each fold.
-                train_fold_weights = [np.NaN] * self.num_cv_folds  # used as weights when averaging train losses.
-                opt_losses = [np.NaN] * self.num_cv_folds  # stores opt (validation) loss of each fold.
-                opt_fold_weights = [np.NaN] * self.num_cv_folds  # weights for opt_losses.
+                # stores train loss of each fold.
+                train_losses = [np.NaN] * self.num_cv_folds
+                # used as weights when averaging train losses.
+                train_fold_weights = [np.NaN] * self.num_cv_folds
+                # stores opt (validation) loss of each fold.
+                opt_losses = [np.NaN] * self.num_cv_folds
+                # weights for opt_losses.
+                opt_fold_weights = [np.NaN] * self.num_cv_folds
 
                 while not all(converged):
 
@@ -269,11 +274,13 @@ class TrainEvaluator(AbstractEvaluator):
                         model = models[i]
 
                         if iterations[i] == 1:
-                            self.Y_train_targets[train_indices] = self.Y_train[train_indices]
+                            self.Y_train_targets[train_indices] = \
+                                self.Y_train[train_indices]
                             self.Y_targets[i] = self.Y_train[test_indices]
 
-                            Xt, fit_params = model.fit_transformer(self.X_train[train_indices],
-                                                                   self.Y_train[train_indices])
+                            Xt, fit_params = model.fit_transformer(
+                                self.X_train[train_indices],
+                                self.Y_train[train_indices])
                             Xt_array[i] = Xt
                             fit_params_array[i] = fit_params
                         n_iter = int(2 ** iterations[i] / 2) if iterations[i] > 1 else 2
@@ -322,7 +329,10 @@ class TrainEvaluator(AbstractEvaluator):
 
                         models_current_iters[i] = model.get_current_iter()
 
-                        if model.configuration_fully_fitted() or models_current_iters[i] >= max_iter:
+                        if (
+                            model.configuration_fully_fitted()
+                            or models_current_iters[i] >= max_iter
+                        ):
                             converged[i] = True
 
                         iterations[i] = iterations[i] + 1
@@ -392,7 +402,6 @@ class TrainEvaluator(AbstractEvaluator):
                     if any([model_current_iter == max_iter
                             for model_current_iter in models_current_iters]):
                         status = StatusType.SUCCESS
-                    print(self.budget, models_current_iters, iterations)
                     self.finish_up(
                         loss=opt_loss,
                         train_loss=train_loss,
