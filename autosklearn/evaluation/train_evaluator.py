@@ -323,8 +323,8 @@ class TrainEvaluator(AbstractEvaluator):
                             opt_pred,
                         )
                         opt_losses[i] = optimization_loss
-                        # number of optimization data points for this fold. Used for weighting
-                        # the average.
+                        # number of optimization data points for this fold.
+                        # Used for weighting the average.
                         opt_fold_weights[i] = len(test_indices)
 
                         models_current_iters[i] = model.get_current_iter()
@@ -339,11 +339,14 @@ class TrainEvaluator(AbstractEvaluator):
 
                     # Compute weights of each fold based on the number of samples in each
                     # fold.
-                    train_fold_weights = [w / sum(train_fold_weights) for w in train_fold_weights]
-                    opt_fold_weights = [w / sum(opt_fold_weights) for w in opt_fold_weights]
+                    train_fold_weights = [w / sum(train_fold_weights)
+                                          for w in train_fold_weights]
+                    opt_fold_weights = [w / sum(opt_fold_weights)
+                                        for w in opt_fold_weights]
 
-                    # train_losses is a list of either scalars or dicts. If it contains dicts,
-                    # then train_loss is computed using the target metric (self.metric).
+                    # train_losses is a list of either scalars or dicts. If it contains
+                    # dicts, then train_loss is computed using the target metric
+                    # (self.metric).
                     if all(isinstance(elem, dict) for elem in train_losses):
                         train_loss = np.average([train_losses[i][str(self.metric)]
                                                  for i in range(self.num_cv_folds)],
@@ -352,15 +355,18 @@ class TrainEvaluator(AbstractEvaluator):
                     else:
                         train_loss = np.average(train_losses, weights=train_fold_weights)
 
-                    # if all_scoring_function is true, return a dict of opt_loss. Otherwise,
-                    # return a scalar.
+                    # if all_scoring_function is true, return a dict of opt_loss.
+                    # Otherwise, return a scalar.
                     if self.all_scoring_functions is True:
                         opt_loss = {}
                         for metric in opt_losses[0].keys():
-                            opt_loss[metric] = np.average([opt_losses[i][metric]
-                                                           for i in range(self.num_cv_folds)],
-                                                          weights=opt_fold_weights,
-                                                          )
+                            opt_loss[metric] = np.average(
+                                [
+                                    opt_losses[i][metric]
+                                    for i in range(self.num_cv_folds)
+                                ],
+                                weights=opt_fold_weights,
+                            )
                     else:
                         opt_loss = np.average(opt_losses, weights=opt_fold_weights)
 
@@ -370,8 +376,10 @@ class TrainEvaluator(AbstractEvaluator):
                     Y_optimization_preds = np.concatenate(
                         [Y_optimization_pred[i] for i in range(self.num_cv_folds)
                          if Y_optimization_pred[i] is not None])
-                    Y_targets = np.concatenate([Y_targets[i] for i in range(self.num_cv_folds)
-                                                if Y_targets[i] is not None])
+                    Y_targets = np.concatenate([
+                        Y_targets[i] for i in range(self.num_cv_folds)
+                        if Y_targets[i] is not None
+                    ])
 
                     if self.X_valid is not None:
                         Y_valid_preds = np.array([Y_valid_pred[i]
