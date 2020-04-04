@@ -120,6 +120,7 @@ class AutoSklearnEstimator(BaseEstimator):
             * 'holdout-iterative-fit':  67:33 (train:test) split, calls iterative
               fit where possible
             * 'cv': crossvalidation, requires 'folds'
+            * 'cv-iterative-fit': crossvalidation, calls iterative fit where possible
             * 'partial-cv': crossvalidation with intensification, requires
               'folds'
             * BaseCrossValidator object: any BaseCrossValidator class found
@@ -142,6 +143,7 @@ class AutoSklearnEstimator(BaseEstimator):
             * 'holdout': {'train_size': float}
             * 'holdout-iterative-fit':  {'train_size': float}
             * 'cv': {'folds': int}
+            * 'cv-iterative-fit': {'folds': int}
             * 'partial-cv': {'folds': int, 'shuffle': bool}
             * BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments
                 required by chosen class as specified in scikit-learn documentation.

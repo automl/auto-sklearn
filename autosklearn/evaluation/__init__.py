@@ -58,6 +58,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             eval_function = autosklearn.evaluation.train_evaluator.eval_holdout
         elif resampling_strategy == 'holdout-iterative-fit':
             eval_function = autosklearn.evaluation.train_evaluator.eval_iterative_holdout
+        elif resampling_strategy == 'cv-iterative-fit':
+            eval_function = autosklearn.evaluation.train_evaluator.eval_iterative_cv
         elif resampling_strategy == 'cv' or \
         (
             isinstance(resampling_strategy, type) and (
@@ -304,8 +306,11 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         if not isinstance(additional_run_info, dict):
             additional_run_info = {'message': additional_run_info}
 
-        if info is not None and self.resampling_strategy == \
-                'holdout-iterative-fit' and status != StatusType.CRASHED:
+        if (
+            info is not None
+            and self.resampling_strategy in ('holdout-iterative-fit', 'cv-iterative-fit')
+            and status != StatusType.CRASHED
+        ):
             learning_curve = util.extract_learning_curve(info)
             learning_curve_runtime = util.extract_learning_curve(
                 info, 'duration'
@@ -339,7 +344,6 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                     additional_run_info['test_learning_curve'] = test_learning_curve
                     additional_run_info[
                         'learning_curve_runtime'] = learning_curve_runtime
-
 
         if isinstance(config, int):
             origin = 'DUMMY'

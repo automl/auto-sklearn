@@ -342,7 +342,7 @@ class AutoML(BaseEstimator):
                                      "of " + str(allowed_elements))
         if self._resampling_strategy not in [
              'holdout', 'holdout-iterative-fit',
-             'cv', 'partial-cv',
+             'cv', 'cv-iterative-fit', 'partial-cv',
              'partial-cv-iterative-fit'] \
              and not issubclass(self._resampling_strategy, BaseCrossValidator)\
              and not issubclass(self._resampling_strategy, _RepeatedSplits)\
@@ -353,7 +353,7 @@ class AutoML(BaseEstimator):
                 and self._ensemble_size != 0:
             raise ValueError("Resampling strategy %s cannot be used "
                              "together with ensembles." % self._resampling_strategy)
-        if self._resampling_strategy in ['partial-cv', 'cv',
+        if self._resampling_strategy in ['partial-cv', 'cv', 'cv-iterative-fit',
                                          'partial-cv-iterative-fit'] and \
                 not 'folds' in self._resampling_strategy_arguments:
             self._resampling_strategy_arguments['folds'] = 5
