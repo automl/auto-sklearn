@@ -103,7 +103,8 @@ class PassiveAggressive(
                 )
                 self.n_iter_ += self.estimator.n_iter_
                 if (
-                    self.estimator.max_iter >= self.max_iter or self.estimator.max_iter > self.n_iter_
+                    self.estimator.max_iter >= self.max_iter
+                        or self.estimator.max_iter > self.n_iter_
                 ):
                     self.fully_fit_ = True
 
