@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import sklearn.metrics
 
-import autosklearn.metrics.classification_metrics
+import autosklearn.metrics
 
 
 class TestScorer(unittest.TestCase):
@@ -27,7 +27,7 @@ class TestScorer(unittest.TestCase):
         self.assertAlmostEqual(score, 0.5)
 
         scorer = autosklearn.metrics._PredictScorer(
-            'bac', autosklearn.metrics.classification_metrics.balanced_accuracy,
+            'bac', sklearn.metrics.balanced_accuracy_score,
             1, 1, {})
 
         score = scorer(y_true, y_pred)
@@ -59,7 +59,7 @@ class TestScorer(unittest.TestCase):
         self.assertAlmostEqual(score, 0.333333333)
 
         scorer = autosklearn.metrics._PredictScorer(
-            'bac', autosklearn.metrics.classification_metrics.balanced_accuracy,
+            'bac', sklearn.metrics.balanced_accuracy_score,
             1, 1, {})
 
         score = scorer(y_true, y_pred)
@@ -89,13 +89,6 @@ class TestScorer(unittest.TestCase):
         y_pred = np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0], [1.0, 1.0]])
         score = scorer(y_true, y_pred)
         self.assertAlmostEqual(score, 0.25)
-
-        scorer = autosklearn.metrics._PredictScorer(
-            'bac', autosklearn.metrics.classification_metrics.balanced_accuracy,
-            1, 1, {})
-
-        score = scorer(y_true, y_pred)
-        self.assertAlmostEqual(score, 0.5)
 
         scorer = autosklearn.metrics._PredictScorer(
             'accuracy', sklearn.metrics.accuracy_score, 1, -1, {})
@@ -292,7 +285,7 @@ class TestMetricsDoNotAlterInput(unittest.TestCase):
             y_pred = np.random.random(200).reshape((-1, 2))
             y_pred = np.array([y_pred[i] / np.sum(y_pred[i])
                                for i in range(100)])
-            
+
             y_true_2 = y_true.copy()
             y_pred_2 = y_pred.copy()
             try:
@@ -343,7 +336,7 @@ class TestMetric(unittest.TestCase):
             # TODO: but its behavior is not right. When y_pred is completely
             # TODO: wrong, it does return 0.5, but when it is not completely
             # TODO: wrong, it returns value smaller than 0.5.
-            if metric in ['average_precision', 'pac_score',
+            if metric in ['average_precision',
                           'precision_samples', 'recall_samples', 'f1_samples']:
                 continue
 
@@ -376,7 +369,7 @@ class TestMetric(unittest.TestCase):
 
         for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
             # Skip functions not applicable for multiclass classification.
-            if metric in ['pac_score', 'roc_auc', 'average_precision',
+            if metric in ['roc_auc', 'average_precision',
                           'precision', 'recall', 'f1','precision_samples',
                           'recall_samples', 'f1_samples']:
                 continue
@@ -410,7 +403,7 @@ class TestMetric(unittest.TestCase):
         for metric, scorer in autosklearn.metrics.CLASSIFICATION_METRICS.items():
             # Skip functions not applicable for multi-label classification.
             if metric in ['roc_auc', 'log_loss',
-                          'pac_score', 'precision', 'recall', 'f1']:
+                          'precision', 'recall', 'f1', 'balanced_accuracy']:
                 continue
             y_true = np.array([[1, 0, 0], [1, 1, 0], [0, 1, 1], [1, 1, 1]])
             y_pred = y_true.copy()
