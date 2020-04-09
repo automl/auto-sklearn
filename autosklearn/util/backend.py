@@ -328,7 +328,6 @@ class Backend(object):
         return os.path.join(self.internals_directory, 'models')
 
     def get_model_path(self, seed, idx, budget):
-        # This should fail if no models directory exists
         return os.path.join(self.get_model_dir(),
                             '%s.%s.%s.model' % (seed, idx, budget))
 
@@ -480,13 +479,9 @@ class Backend(object):
 
     def write_txt_file(self, filepath, data, name):
         with lockfile.LockFile(filepath):
-            if not os.path.exists(filepath):
-                with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
-                        filepath), delete=False) as fh:
-                    fh.write(data)
-                    tempname = fh.name
-                os.rename(tempname, filepath)
-                self.logger.debug('Created %s file %s' % (name, filepath))
-            else:
-                self.logger.debug('%s file already present %s' %
-                                  (name, filepath))
+            with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
+                    filepath), delete=False) as fh:
+                fh.write(data)
+                tempname = fh.name
+            os.rename(tempname, filepath)
+            self.logger.debug('Created %s file %s' % (name, filepath))

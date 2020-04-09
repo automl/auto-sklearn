@@ -371,7 +371,7 @@ class AbstractEvaluator(object):
 
         # Abort if we don't want to output anything.
         # Since disable_file_output can also be a list, we have to explicitly
-        # compare it against True.
+        # compare it with True.
         if self.disable_file_output == True:
             return None, {}
 
@@ -440,7 +440,7 @@ class AbstractEvaluator(object):
                     ))
 
         # We then acquire the locks one by one in a stubborn fashion, i.e. if a file is
-        # already locked, we keep probing it until it is unlocked. This will NOT create
+        # already locked, we keep probing it until it is unlocked. This will NOT create a
         # race condition with _delete_non_candidate_models() since this function doesn't
         # acquire the locks in this stubborn way. The delete function releases all the
         # locks and aborts the acquision process as soon as it finds a locked file.
