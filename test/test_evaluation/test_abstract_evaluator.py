@@ -30,19 +30,15 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
         backend_mock = unittest.mock.Mock()
         backend_mock.get_model_dir.return_value = self.ev_path
-        backend_mock.get_model_path = unittest.mock.Mock(
-            side_effect=dummy_model_files)
-        backend_mock.get_prediction_output_path = unittest.mock.Mock(
-            side_effect=dummy_pred_files)
+        backend_mock.get_model_path.side_effect = dummy_model_files
+        backend_mock.get_prediction_output_path.side_effect = dummy_pred_files
         D = get_multiclass_classification_datamanager()
         backend_mock.load_datamanager.return_value = D
         self.backend_mock = backend_mock
 
-
     def tearDown(self):
         if os.path.exists(self.ev_path):
             os.rmdir(self.ev_path)
-
 
     def test_finish_up_model_predicts_NaN(self):
         '''Tests by handing in predictions which contain NaNs'''
