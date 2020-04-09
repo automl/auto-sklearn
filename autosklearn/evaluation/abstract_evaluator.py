@@ -372,12 +372,12 @@ class AbstractEvaluator(object):
         # Abort if we don't want to output anything.
         # Since disable_file_output can also be a list, we have to explicitly
         # compare it with True.
-        if self.disable_file_output == True:
+        if self.disable_file_output is True:
             return None, {}
 
         # Notice that disable_file_output==False and disable_file_output==[]
         # means the same thing here.
-        if self.disable_file_output == False:
+        if self.disable_file_output is False:
             self.disable_file_output = []
 
         # This file can be written independently of the others down bellow
