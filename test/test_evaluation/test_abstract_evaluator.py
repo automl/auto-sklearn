@@ -43,7 +43,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
     def test_finish_up_model_predicts_NaN(self):
         '''Tests by handing in predictions which contain NaNs'''
         rs = np.random.RandomState(1)
-        D = get_multiclass_classification_datamanager()
 
         queue_mock = unittest.mock.Mock()
         ae = AbstractEvaluator(backend=self.backend_mock,
