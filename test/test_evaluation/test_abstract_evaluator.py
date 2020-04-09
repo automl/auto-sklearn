@@ -20,7 +20,7 @@ class AbstractEvaluatorTest(unittest.TestCase):
 
     def setUp(self):
         """
-        Creates a mock for the backend API
+        Creates a backend mock
         """
         self.ev_path = os.path.join(this_directory, '.tmp_evaluations')
         if not os.path.exists(self.ev_path):
