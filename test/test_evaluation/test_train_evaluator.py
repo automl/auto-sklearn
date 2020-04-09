@@ -1521,13 +1521,23 @@ class FunctionsTest(unittest.TestCase):
         self.data = get_multiclass_classification_datamanager()
         self.tmp_dir = os.path.join(os.path.dirname(__file__),
                                     '.test_holdout_functions')
+        if not os.path.exists(self.tmp_dir):
+            os.mkdir(self.tmp_dir)
         self.n = len(self.data.data['Y_train'])
         self.y = self.data.data['Y_train'].flatten()
         self.backend = unittest.mock.Mock()
-        self.backend.get_model_dir.return_value = 'udiaetzrpduaeirdaetr'
+        self.backend.get_model_dir.return_value = self.tmp_dir
+        dummy_model_files = [os.path.join(self.tmp_dir, str(n)) for n in range(100)]
+        dummy_pred_files = [os.path.join(self.tmp_dir, str(n)) for n in range(100, 200)]
+        self.backend.get_model_path.side_effect = dummy_model_files
+        self.backend.get_prediction_output_path.side_effect = dummy_pred_files
         self.backend.load_datamanager.return_value = self.data
         self.backend.output_directory = 'duapdbaetpdbe'
         self.dataset_name = json.dumps({'task_id': 'test'})
+
+    def tearDown(self):
+        if os.path.exists(self.tmp_dir):
+            os.rmdir(self.tmp_dir)
 
     def test_eval_holdout(self):
         eval_holdout(
