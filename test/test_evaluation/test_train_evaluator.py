@@ -49,6 +49,25 @@ class Dummy(object):
 class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     _multiprocess_can_split_ = True
 
+    def setUp(self):
+        """
+        Creates a backend mock
+        """
+        self.ev_path = os.path.join(this_directory, '.tmp_evaluations')
+        if not os.path.exists(self.ev_path):
+            os.mkdir(self.ev_path)
+        dummy_model_files = [os.path.join(self.ev_path, str(n)) for n in range(100)]
+        dummy_pred_files = [os.path.join(self.ev_path, str(n)) for n in range(100, 200)]
+        backend_mock = unittest.mock.Mock()
+        backend_mock.get_model_dir.return_value = self.ev_path
+        backend_mock.get_model_path.side_effect = dummy_model_files
+        backend_mock.get_prediction_output_path.side_effect = dummy_pred_files
+        self.backend_mock = backend_mock
+
+    def tearDown(self):
+        if os.path.exists(self.ev_path):
+            os.rmdir(self.ev_path)
+
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
     def test_holdout(self, pipeline_mock):
         # Binary iris, contains 69 train samples, 25 validation samples,
@@ -513,18 +532,18 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         # and a total of five calls because of five iterations of fitting
         self.assertEqual(pipeline_mock.predict_proba.call_count, 36)
 
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
     @unittest.mock.patch('os.makedirs')
     @unittest.mock.patch.object(TrainEvaluator, '_loss')
-    def test_file_output(self, loss_mock, makedirs_mock, backend_mock):
+    def test_file_output(self, loss_mock, makedirs_mock):
 
         D = get_regression_datamanager()
         D.name = 'test'
+        self.backend_mock.load_datamanager.return_value = D
         configuration = unittest.mock.Mock(spec=Configuration)
         queue_ = multiprocessing.Queue()
         loss_mock.return_value = None
 
-        evaluator = TrainEvaluator(backend_mock, queue=queue_,
+        evaluator = TrainEvaluator(self.backend_mock, queue=queue_,
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 5},
@@ -532,7 +551,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                    output_y_hat_optimization=True,
                                    metric=accuracy)
 
-        backend_mock.get_model_dir.return_value = True
+        self.backend_mock.get_model_dir.return_value = True
         evaluator.model = 'model'
         evaluator.Y_optimization = D.data['Y_train']
         rval = evaluator.file_output(
@@ -542,10 +561,10 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         )
 
         self.assertEqual(rval, (None, {}))
-        self.assertEqual(backend_mock.save_targets_ensemble.call_count, 1)
-        self.assertEqual(backend_mock.save_predictions_as_npy.call_count, 3)
+        self.assertEqual(self.backend_mock.save_targets_ensemble.call_count, 1)
+        self.assertEqual(self.backend_mock.save_predictions_as_npy.call_count, 3)
         self.assertEqual(makedirs_mock.call_count, 1)
-        self.assertEqual(backend_mock.save_model.call_count, 1)
+        self.assertEqual(self.backend_mock.save_model.call_count, 1)
 
         # Check for not containing NaNs - that the models don't predict nonsense
         # for unseen data
@@ -668,11 +687,10 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                            evaluator.Y_train)
         np.testing.assert_allclose(train_indices6, train_indices)
 
-    @unittest.mock.patch('autosklearn.util.backend.Backend')
     @unittest.mock.patch('autosklearn.pipeline.classification.SimpleClassificationPipeline')
-    def test_predict_proba_binary_classification(self, mock, backend_mock):
+    def test_predict_proba_binary_classification(self, mock):
         D = get_binary_classification_datamanager()
-        backend_mock.load_datamanager.return_value = D
+        self.backend_mock.load_datamanager.return_value = D
         mock.predict_proba.side_effect = lambda y, batch_size: np.array(
             [[0.1, 0.9]] * y.shape[0]
         )
@@ -681,14 +699,14 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         configuration = unittest.mock.Mock(spec=Configuration)
         queue_ = multiprocessing.Queue()
 
-        evaluator = TrainEvaluator(backend_mock, queue_,
+        evaluator = TrainEvaluator(self.backend_mock, queue_,
                                    configuration=configuration,
                                    resampling_strategy='cv',
                                    resampling_strategy_args={'folds': 10},
                                    output_y_hat_optimization=False,
                                    metric=accuracy)
         evaluator.fit_predict_and_loss()
-        Y_optimization_pred = backend_mock.save_predictions_as_npy.call_args_list[0][0][0]
+        Y_optimization_pred = self.backend_mock.save_predictions_as_npy.call_args_list[0][0][0]
 
         for i in range(7):
             self.assertEqual(0.9, Y_optimization_pred[i][1])
@@ -948,20 +966,18 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                                   getter.__name__)
 
             with self.subTest(testname):
-                backend_mock = unittest.mock.Mock(spec=backend.Backend)
-                backend_mock.get_model_dir.return_value = 'dutirapbdxvltcrpbdlcatepdeau'
                 D = getter()
                 D_ = copy.deepcopy(D)
                 y = D.data['Y_train']
                 if len(y.shape) == 2 and y.shape[1] == 1:
                     D_.data['Y_train'] = y.flatten()
-                backend_mock.load_datamanager.return_value = D_
+                self.backend_mock.load_datamanager.return_value = D_
                 queue_ = multiprocessing.Queue()
                 metric_lookup = {MULTILABEL_CLASSIFICATION: f1_macro,
                                  BINARY_CLASSIFICATION: accuracy,
                                  MULTICLASS_CLASSIFICATION: accuracy,
                                  REGRESSION: r2}
-                evaluator = TrainEvaluator(backend_mock, queue_,
+                evaluator = TrainEvaluator(self.backend_mock, queue_,
                                            resampling_strategy='cv',
                                            resampling_strategy_args={'folds': 2},
                                            output_y_hat_optimization=False,
@@ -1560,11 +1576,23 @@ class FunctionsTest(unittest.TestCase):
                                     '.test_holdout_functions')
         self.n = len(self.data.data['Y_train'])
         self.y = self.data.data['Y_train'].flatten()
+
+        self.ev_path = os.path.join(this_directory, '.tmp_evaluations')
+        if not os.path.exists(self.ev_path):
+            os.mkdir(self.ev_path)
         self.backend = unittest.mock.Mock()
-        self.backend.get_model_dir.return_value = 'udiaetzrpduaeirdaetr'
+        self.backend.get_model_dir.return_value = self.ev_path
+        dummy_model_files = [os.path.join(self.ev_path, str(n)) for n in range(100)]
+        dummy_pred_files = [os.path.join(self.ev_path, str(n)) for n in range(100, 200)]
+        self.backend.get_model_path.side_effect = dummy_model_files
+        self.backend.get_prediction_output_path.side_effect = dummy_pred_files
         self.backend.load_datamanager.return_value = self.data
         self.backend.output_directory = 'duapdbaetpdbe'
         self.dataset_name = json.dumps({'task_id': 'test'})
+
+    def tearDown(self):
+        if os.path.exists(self.ev_path):
+            os.rmdir(self.ev_path)
 
     def test_eval_holdout(self):
         eval_holdout(

@@ -274,8 +274,7 @@ class Backend(object):
         except Exception:
             pass
 
-        lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path):
+        with lockfile.LockFile(filepath):
             if os.path.exists(filepath):
                 with open(filepath, 'rb') as fh:
                     existing_targets = np.load(fh, allow_pickle=True)
@@ -296,8 +295,7 @@ class Backend(object):
     def load_targets_ensemble(self):
         filepath = self._get_targets_ensemble_filename()
 
-        lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path):
+        with lockfile.LockFile(filepath):
             with open(filepath, 'rb') as fh:
                 targets = np.load(fh, allow_pickle=True)
 
@@ -310,8 +308,7 @@ class Backend(object):
         self._make_internals_directory()
         filepath = self._get_datamanager_pickle_filename()
 
-        lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path):
+        with lockfile.LockFile(filepath):
             if not os.path.exists(filepath):
                 with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                         filepath), delete=False) as fh:
@@ -323,19 +320,18 @@ class Backend(object):
 
     def load_datamanager(self):
         filepath = self._get_datamanager_pickle_filename()
-        lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path):
+        with lockfile.LockFile(filepath):
             with open(filepath, 'rb') as fh:
                 return pickle.load(fh)
 
     def get_model_dir(self):
         return os.path.join(self.internals_directory, 'models')
 
-    def save_model(self, model, idx, seed, budget):
-        # This should fail if no models directory exists
-        filepath = os.path.join(self.get_model_dir(),
-                                '%s.%s.%s.model' % (seed, idx, budget))
+    def get_model_path(self, seed, idx, budget):
+        return os.path.join(self.get_model_dir(),
+                            '%s.%s.%s.model' % (seed, idx, budget))
 
+    def save_model(self, model, filepath):
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
             pickle.dump(model, fh, -1)
@@ -447,15 +443,16 @@ class Backend(object):
         return os.path.join(self.internals_directory,
                             'predictions_%s' % subset)
 
-    def save_predictions_as_npy(self, predictions, subset, automl_seed, idx, budget):
+    def get_prediction_output_path(self, subset, automl_seed, idx, budget):
         output_dir = self._get_prediction_output_dir(subset)
         # Make sure an output directory exists
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        filepath = os.path.join(output_dir, 'predictions_%s_%s_%s_%s.npy' %
-                                            (subset, automl_seed, str(idx), budget))
+        return os.path.join(output_dir, 'predictions_%s_%s_%s_%s.npy' %
+                            (subset, automl_seed, idx, budget))
 
+    def save_predictions_as_npy(self, predictions, filepath):
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
             pickle.dump(predictions.astype(np.float32), fh, -1)
@@ -481,15 +478,10 @@ class Backend(object):
         os.rename(tempname, filepath)
 
     def write_txt_file(self, filepath, data, name):
-        lock_file = filepath + '.lock'
-        with lockfile.LockFile(lock_file):
-            if not os.path.exists(lock_file):
-                with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
-                        filepath), delete=False) as fh:
-                    fh.write(data)
-                    tempname = fh.name
-                os.rename(tempname, filepath)
-                self.logger.debug('Created %s file %s' % (name, filepath))
-            else:
-                self.logger.debug('%s file already present %s' %
-                                  (name, filepath))
+        with lockfile.LockFile(filepath):
+            with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
+                    filepath), delete=False) as fh:
+                fh.write(data)
+                tempname = fh.name
+            os.rename(tempname, filepath)
+            self.logger.debug('Created %s file %s' % (name, filepath))
