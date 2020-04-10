@@ -817,7 +817,6 @@ class EnsembleBuilder(multiprocessing.Process):
                 # test_delete_non_candidate_models(). Edit with care.
                 try:
                     for path in paths:
-                        print('Removing', path)
                         os.remove(path)
                     self.logger.info(
                         "Deleted files of non-candidate model %s", model_name)
