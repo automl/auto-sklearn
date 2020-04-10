@@ -253,10 +253,12 @@ class EnsembleBuilder(multiprocessing.Process):
             # if valid/test predictions loaded, then reduce candidate models to this set
             candidate_models_set = set(candidate_models)
             if candidate_models_set.intersection(n_sel_test):
-                candidate_models = sorted(list(candidate_models_set.intersection(n_sel_test)))
+                candidate_models = sorted(list(candidate_models_set.intersection(
+                    n_sel_test)))
                 n_sel_test = candidate_models
             elif candidate_models_set.intersection(n_sel_valid):
-                candidate_models = sorted(list(candidate_models_set.intersection(n_sel_valid)))
+                candidate_models = sorted(list(candidate_models_set.intersection(
+                    n_sel_valid)))
                 n_sel_valid = candidate_models
             else:
                 # use candidate_models only defined by ensemble data set
@@ -335,7 +337,8 @@ class EnsembleBuilder(multiprocessing.Process):
 
         n_read_files = 0
         # Now read file wrt to num_run
-        for y_ens_fn, match, _seed, _num_run, _budget in sorted(to_read, key=lambda x: x[3]):
+        for y_ens_fn, match, _seed, _num_run, _budget in \
+                sorted(to_read, key=lambda x: x[3]):
             if self.read_at_most and n_read_files >= self.read_at_most:
                 # limit the number of files that will be read
                 # to limit memory consumption
