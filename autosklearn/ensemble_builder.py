@@ -112,10 +112,22 @@ class EnsembleBuilder(multiprocessing.Process):
         if isinstance(max_keep_best, numbers.Integral) and max_keep_best < 1:
             raise ValueError("Integer max_keep_best has to be larger 1: %s" %
                              max_keep_best)
-        elif not isinstance(max_keep_best, numbers.Integral) \
-                and (max_keep_best < 0 or max_keep_best > 1):
-            raise ValueError("Float max_keep_best best has to be >= 0 and <= 1: %s" %
-                             max_keep_best)
+        elif not isinstance(max_keep_best, numbers.Integral):
+            if max_keep_best < 0 or max_keep_best > 1:
+                raise ValueError(
+                    "Float max_keep_best best has to be >= 0 and <= 1: %s" %
+                    max_keep_best)
+            elif remove_bad_model_files:
+                # These two options currently don't work together. At some point,
+                # the percentage of models will result in the ensemble builder
+                # to consider one additional candidate. However, it previously
+                # deleted all additional candidates, and therefore, this will
+                # not be possible and the code will crash
+                raise ValueError(
+                    'Percentage max_keep_best and remove_bad_model_files cannot be '
+                    'used together.'
+                )
+
         self.max_keep_best = max_keep_best
         self.keep_just_nbest_models = remove_bad_model_files
         self.seed = seed
