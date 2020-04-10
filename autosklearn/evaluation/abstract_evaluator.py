@@ -1,7 +1,9 @@
 import os
 import time
 import warnings
+from collections import namedtuple
 
+import lockfile
 import numpy as np
 from sklearn.dummy import DummyClassifier, DummyRegressor
 from smac.tae.execute_ta_run import StatusType
@@ -27,6 +29,7 @@ __all__ = [
     'AbstractEvaluator'
 ]
 
+WriteTask = namedtuple('WriteTask', ['lock', 'writer', 'args'])
 
 class MyDummyClassifier(DummyClassifier):
     def __init__(self, configuration, random_state, init_params=None):
@@ -142,7 +145,11 @@ class AbstractEvaluator(object):
 
         self.output_y_hat_optimization = output_y_hat_optimization
         self.all_scoring_functions = all_scoring_functions
-        self.disable_file_output = disable_file_output
+
+        if isinstance(disable_file_output, (bool, list)):
+            self.disable_file_output = disable_file_output
+        else:
+            raise ValueError('disable_file_output should be either a bool or a list')
 
         if self.task_type in REGRESSION_TASKS:
             if not isinstance(self.configuration, Configuration):
@@ -328,14 +335,14 @@ class AbstractEvaluator(object):
             Y_valid_pred,
             Y_test_pred
     ):
-        # TODO refactor this function to only output and calculate the loss
-        # for one specific data set - optimization, validation or test!
-        seed = self.seed
-
+        # Abort if self.Y_optimization is None
         # self.Y_optimization can be None if we use partial-cv, then,
         # obviously no output should be saved.
-        if self.Y_optimization is not None and \
-                self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
+        if self.Y_optimization is None:
+            return None, {}
+
+        # Abort in case of shape misalignment
+        if self.Y_optimization.shape[0] != Y_optimization_pred.shape[0]:
             return (
                 1.0,
                 {
@@ -346,6 +353,7 @@ class AbstractEvaluator(object):
                  },
             )
 
+        # Abort if predictions contain NaNs
         for y, s in [
             # Y_train_pred deleted here. Fix unittest accordingly.
             [Y_optimization_pred, 'optimization'],
@@ -361,23 +369,19 @@ class AbstractEvaluator(object):
                     },
                 )
 
-        num_run = str(self.num_run)
+        # Abort if we don't want to output anything.
+        # Since disable_file_output can also be a list, we have to explicitly
+        # compare it with True.
+        if self.disable_file_output is True:
+            return None, {}
 
-        if (
-            self.disable_file_output != True and (
-                not isinstance(self.disable_file_output, list)
-                or 'model' not in self.disable_file_output
-            )
-        ):
-            if os.path.exists(self.backend.get_model_dir()):
-                self.backend.save_model(self.model, self.num_run, seed, self.budget)
+        # Notice that disable_file_output==False and disable_file_output==[]
+        # means the same thing here.
+        if self.disable_file_output is False:
+            self.disable_file_output = []
 
-        if (
-            self.disable_file_output != True and (
-                not isinstance(self.disable_file_output, list)
-                or 'y_optimization' not in self.disable_file_output
-            )
-        ):
+        # This file can be written independently of the others down bellow
+        if ('y_optimization' not in self.disable_file_output):
             if self.output_y_hat_optimization:
                 try:
                     os.makedirs(self.backend.output_directory)
@@ -385,19 +389,79 @@ class AbstractEvaluator(object):
                     pass
                 self.backend.save_targets_ensemble(self.Y_optimization)
 
-            self.backend.save_predictions_as_npy(
-                Y_optimization_pred, 'ensemble', seed, num_run, self.budget,
-            )
+        # The other four files have to be written together, meaning we start
+        # writing them just after acquiring the locks for all of them.
+        # But first we have to check which files have to be written.
+        write_tasks = []
 
+        # File 1 of 4: model
+        if ('model' not in self.disable_file_output):
+            if os.path.exists(self.backend.get_model_dir()):
+                file_path = self.backend.get_model_path(
+                    self.seed, self.num_run, self.budget)
+                write_tasks.append(
+                    WriteTask(
+                        lock=lockfile.LockFile(file_path),
+                        writer=self.backend.save_model,
+                        args=(self.model, file_path)
+                        ))
+
+        # File 2 of 4: predictions
+        if ('y_optimization' not in self.disable_file_output):
+            file_path = self.backend.get_prediction_output_path(
+                'ensemble', self.seed, self.num_run, self.budget)
+            write_tasks.append(
+                WriteTask(
+                    lock=lockfile.LockFile(file_path),
+                    writer=self.backend.save_predictions_as_npy,
+                    args=(Y_optimization_pred, file_path)
+                    ))
+
+        # File 3 of 4: validation predictions
         if Y_valid_pred is not None:
-            if self.disable_file_output != True:
-                self.backend.save_predictions_as_npy(Y_valid_pred, 'valid',
-                                                     seed, num_run, self.budget)
+            file_path = self.backend.get_prediction_output_path(
+                'valid', self.seed, self.num_run, self.budget)
+            write_tasks.append(
+                WriteTask(
+                    lock=lockfile.LockFile(file_path),
+                    writer=self.backend.save_predictions_as_npy,
+                    args=(Y_valid_pred, file_path)
+                    ))
 
+        # File 4 of 4: test predictions
         if Y_test_pred is not None:
-            if self.disable_file_output != True:
-                self.backend.save_predictions_as_npy(Y_test_pred, 'test',
-                                                     seed, num_run, self.budget)
+            file_path = self.backend.get_prediction_output_path(
+                'test', self.seed, self.num_run, self.budget)
+            write_tasks.append(
+                WriteTask(
+                    lock=lockfile.LockFile(file_path),
+                    writer=self.backend.save_predictions_as_npy,
+                    args=(Y_test_pred, file_path)
+                    ))
+
+        # We then acquire the locks one by one in a stubborn fashion, i.e. if a file is
+        # already locked, we keep probing it until it is unlocked. This will NOT create a
+        # race condition with _delete_non_candidate_models() since this function doesn't
+        # acquire the locks in this stubborn way. The delete function releases all the
+        # locks and aborts the acquision process as soon as it finds a locked file.
+        for wt in write_tasks:
+            while True:
+                try:
+                    wt.lock.acquire()
+                    break
+                except lockfile.AlreadyLocked:
+                    time.sleep(.1)
+                    continue
+                except Exception as e:
+                    raise RuntimeError('Failed to lock %s due to %s' % (wt.lock, e))
+
+        # At this point we are good to write the files
+        for wt in write_tasks:
+            wt.writer(*wt.args)
+
+        # And finally release the locks
+        for wt in write_tasks:
+            wt.lock.release()
 
         return None, {}
 

@@ -301,7 +301,8 @@ class EstimatorTest(Base, unittest.TestCase):
         dummy = ArrayReturningDummyPredictor(probas_test)
         context = BackendContext(tmp, output, False, False, True)
         backend = Backend(context)
-        backend.save_model(model=dummy, seed=0, idx=999, budget=0.0)
+        model_path = backend.get_model_path(seed=0, idx=999, budget=0.0)
+        backend.save_model(model=dummy, filepath=model_path)
 
         automl = AutoSklearnClassifier(
             time_left_for_this_task=30,

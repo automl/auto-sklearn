@@ -10,6 +10,7 @@ from typing import Optional, Union
 
 import numpy as np
 import pynisher
+import lockfile
 from sklearn.utils.validation import check_random_state
 
 from autosklearn.util.backend import Backend
@@ -145,7 +146,11 @@ class EnsembleBuilder(multiprocessing.Process):
             '.auto-sklearn',
             'predictions_test',
         )
-
+        self.dir_models = os.path.join(
+            self.backend.temporary_directory,
+            '.auto-sklearn',
+            'models',
+        )
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
         self.logger = get_logger(logger_name)
         if max_keep_best == 1:
@@ -308,15 +313,15 @@ class EnsembleBuilder(multiprocessing.Process):
                 'predictions_ensemble_*_*_*.npy',
             )
 
-        y_ens_files = glob.glob(pred_path)
+        self.y_ens_files = glob.glob(pred_path)
         # no validation predictions so far -- no files
-        if len(y_ens_files) == 0:
+        if len(self.y_ens_files) == 0:
             self.logger.debug("Found no prediction files on ensemble data set:"
                               " %s" % pred_path)
             return False
 
         n_read_files = 0
-        for y_ens_fn in sorted(y_ens_files):
+        for y_ens_fn in sorted(self.y_ens_files):
 
             if self.read_at_most and n_read_files >= self.read_at_most:
                 # limit the number of files that will be read
@@ -340,7 +345,6 @@ class EnsembleBuilder(multiprocessing.Process):
                     "seed": _seed,
                     "num_run": _num_run,
                     "budget": _budget,
-                    "deleted": False,
                     Y_ENSEMBLE: None,
                     Y_VALID: None,
                     Y_TEST: None,
@@ -408,7 +412,7 @@ class EnsembleBuilder(multiprocessing.Process):
             according to score on "ensemble set"
             n: self.ensemble_nbest
 
-            Side effect: delete predictions of non-winning models
+            Side effect: delete predictions of non-candidate models
         """
 
         # Sort by score - higher is better!
@@ -489,7 +493,7 @@ class EnsembleBuilder(multiprocessing.Process):
         # reduce to keys
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
 
-        # remove loaded predictions for non-winning models
+        # remove loaded predictions for non-candidate models
         for k in sorted_keys[ensemble_n_best:]:
             self.read_preds[k][Y_ENSEMBLE] = None
             self.read_preds[k][Y_VALID] = None
@@ -736,25 +740,83 @@ class EnsembleBuilder(multiprocessing.Process):
         # TODO: ADD saving of predictions on "ensemble data"
 
     def _delete_non_candidate_models(self, candidates):
-        candidates = [os.path.split(cand)[1] for cand in candidates]
-        for model_path in self.read_preds.keys():
-            if self.read_preds[model_path]['deleted']:
+        # Loop through the files currently in the directory
+        for pred_path in self.y_ens_files:
+
+            # Do not delete candidates
+            if pred_path in candidates:
                 continue
-            match = self.model_fn_re.search(model_path)
-            _num_run = int(match.group(2))
-            # Do not remove the dummy prediction!
-            if _num_run == 1:
+
+            match = self.model_fn_re.search(pred_path)
+            _full_name = match.group(0)
+            _seed = match.group(1)
+            _num_run = match.group(2)
+            _budget = match.group(3)
+
+            # Do not delete the dummy prediction
+            if int(_num_run) == 1:
                 continue
-            model_file = os.path.split(model_path)[1]
-            if model_file not in candidates:
+
+            # Besides the prediction, we have to take care of three other files: model,
+            # validation and test.
+            model_name = '%s.%s.%s.model' % (_seed, _num_run, _budget)
+            model_path = os.path.join(self.dir_models, model_name)
+            pred_valid_name = 'predictions_valid' + _full_name
+            pred_valid_path = os.path.join(self.dir_valid, pred_valid_name)
+            pred_test_name = 'predictions_test' + _full_name
+            pred_test_path = os.path.join(self.dir_test, pred_test_name)
+
+            paths = [model_path, pred_path]
+            if os.path.exists(pred_valid_path):
+                paths.append(pred_valid_path)
+            if os.path.exists(pred_test_path):
+                paths.append(pred_test_path)
+
+            # Lets lock all the files "at once" to avoid weird race conditions. Also,
+            # we either delete all files of a model (model, prediction, validation
+            # and test), or delete none. This makes it easier to keep track of which
+            # models have indeed been correctly removed.
+            locks = [lockfile.LockFile(path) for path in paths]
+            try:
+                for lock in locks:
+                    lock.acquire()
+            except Exception as e:
+                if isinstance(e, lockfile.AlreadyLocked):
+                    # If the file is already locked, we deal with it later. Not a big deal
+                    self.logger.info(
+                        'Model %s is already locked. Skipping it for now.', model_name)
+                else:
+                    # Other exceptions, however, should not occur.
+                    # The message bellow is asserted in test_delete_non_candidate_models()
+                    self.logger.error(
+                        'Failed to lock model %s files due to error %s', model_name, e)
+                for lock in locks:
+                    if lock.i_am_locking():
+                        lock.release()
+                continue
+
+            # Delete files if model is not a candidate AND prediction is old. We check if
+            # the prediction is old to avoid deleting a model that hasn't been appreciated
+            # by self.get_n_best_preds() yet.
+            original_timestamp = self.read_preds[pred_path]['mtime_ens']
+            current_timestamp = os.path.getmtime(pred_path)
+            if current_timestamp == original_timestamp:
+                # The messages logged here are asserted in
+                # test_delete_non_candidate_models(). Edit with care.
                 try:
-                    os.remove(model_path)
-                    self.logger.info("Deleted file of non-candidate model %s", model_path)
-                    self.read_preds[model_path]['deleted'] = True
+                    for path in paths:
+                        os.remove(path)
+                    self.logger.info(
+                        "Deleted files of non-candidate model %s", model_name)
                 except Exception as e:
                     self.logger.error(
-                        'Failed to delete non-candidate model %s due to error %s',
-                        model_path, e)
+                        "Failed to delete files of non-candidate model %s due"
+                        " to error %s", model_name, e)
+
+            # If we reached this point, all locks were done by this thread. So no need
+            # to check "lock.i_am_locking()" here.
+            for lock in locks:
+                lock.release()
 
     def _read_np_fn(self, fp):
         if self.precision is "16":
