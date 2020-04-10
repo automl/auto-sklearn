@@ -2,6 +2,7 @@
 import numbers
 import multiprocessing
 import glob
+import gzip
 import os
 import re
 import time
@@ -205,10 +206,16 @@ class EnsembleBuilder(multiprocessing.Process):
                     continue
             break
 
-    def main(self):
+    def main(self, return_pred=False):
+        """
+
+        :param return_pred:
+            return tuple with last valid, test predictions
+        :return:
+        """
         self.start_time = time.time()
         iteration = 0
-
+        valid_pred, test_pred = None, None
         while True:
 
             # maximal number of iterations
@@ -255,23 +262,23 @@ class EnsembleBuilder(multiprocessing.Process):
             ensemble = self.fit_ensemble(selected_keys=candidate_models)
 
             if ensemble is not None:
-
-                self.predict(set_="valid",
-                             ensemble=ensemble,
-                             selected_keys=n_sel_valid,
-                             n_preds=len(candidate_models),
-                             index_run=iteration)
+                valid_pred = self.predict(set_="valid",
+                                          ensemble=ensemble,
+                                          selected_keys=n_sel_valid,
+                                          n_preds=len(candidate_models),
+                                          index_run=iteration)
                 # TODO if predictions fails, build the model again during the
                 #  next iteration!
-                self.predict(set_="test",
-                             ensemble=ensemble,
-                             selected_keys=n_sel_test,
-                             n_preds=len(candidate_models),
-                             index_run=iteration)
+                test_pred = self.predict(set_="test",
+                                         ensemble=ensemble,
+                                         selected_keys=n_sel_test,
+                                         n_preds=len(candidate_models),
+                                         index_run=iteration)
                 iteration += 1
-
             else:
                 time.sleep(self.sleep_duration)
+        if return_pred:
+            return valid_pred, test_pred
 
     def read_ensemble_preds(self):
         """
@@ -299,13 +306,13 @@ class EnsembleBuilder(multiprocessing.Process):
         if self.shared_mode is False:
             pred_path = os.path.join(
                 glob.escape(self.dir_ensemble),
-                'predictions_ensemble_%s_*_*.npy' % self.seed,
+                'predictions_ensemble_%s_*_*.npy*' % self.seed,
             )
         # pSMAC
         else:
             pred_path = os.path.join(
                 glob.escape(self.dir_ensemble),
-                'predictions_ensemble_*_*_*.npy',
+                'predictions_ensemble_*_*_*.npy*',
             )
 
         y_ens_files = glob.glob(pred_path)
@@ -315,22 +322,27 @@ class EnsembleBuilder(multiprocessing.Process):
                               " %s" % pred_path)
             return False
 
-        n_read_files = 0
-        for y_ens_fn in sorted(y_ens_files):
+        # First sort files chronologically
+        to_read = []
+        for y_ens_fn in y_ens_files:
+            match = self.model_fn_re.search(y_ens_fn)
+            _seed = int(match.group(1))
+            _num_run = int(match.group(2))
+            _budget = float(match.group(3))
+            to_read.append([y_ens_fn, match, _seed, _num_run, _budget])
 
+        n_read_files = 0
+        # Now read file wrt to num_run
+        for y_ens_fn, match, _seed, _num_run, _budget in sorted(to_read, key=lambda x: x[3]):
             if self.read_at_most and n_read_files >= self.read_at_most:
                 # limit the number of files that will be read
                 # to limit memory consumption
                 break
 
-            if not y_ens_fn.endswith(".npy"):
-                self.logger.info('Error loading file (not .npy): %s', y_ens_fn)
+            if not y_ens_fn.endswith(".npy") and not y_ens_fn.endswith(".npy.gz"):
+                self.logger.info('Error loading file (not .npy or .npy.gz): %s', y_ens_fn)
                 continue
 
-            match = self.model_fn_re.search(y_ens_fn)
-            _seed = int(match.group(1))
-            _num_run = int(match.group(2))
-            _budget = float(match.group(3))
             if not self.read_preds.get(y_ens_fn):
                 self.read_preds[y_ens_fn] = {
                     "ens_score": -1,
@@ -357,7 +369,13 @@ class EnsembleBuilder(multiprocessing.Process):
 
             # actually read the predictions and score them
             try:
-                with open(y_ens_fn, 'rb') as fp:
+                if y_ens_fn.endswith("gz"):
+                    open_method = gzip.open
+                elif y_ens_fn.endswith("npy"):
+                    open_method = open
+                else:
+                    raise ValueError("Unknown filetype %s" % y_ens_fn)
+                with open_method(y_ens_fn, 'rb') as fp:
                     y_ensemble = self._read_np_fn(fp=fp)
                     score = calculate_score(solution=self.y_true_ensemble,
                                             # y_ensemble = y_true for ensemble set
@@ -529,7 +547,7 @@ class EnsembleBuilder(multiprocessing.Process):
             valid_fn = glob.glob(
                 os.path.join(
                     glob.escape(self.dir_valid),
-                    'predictions_valid_%d_%d_%s.npy' % (
+                    'predictions_valid_%d_%d_%s.npy*' % (
                         self.read_preds[k]["seed"],
                         self.read_preds[k]["num_run"],
                         self.read_preds[k]["budget"],
@@ -539,7 +557,7 @@ class EnsembleBuilder(multiprocessing.Process):
             test_fn = glob.glob(
                 os.path.join(
                     glob.escape(self.dir_test),
-                    'predictions_test_%d_%d_%s.npy' % (
+                    'predictions_test_%d_%d_%s.npy*' % (
                         self.read_preds[k]["seed"],
                         self.read_preds[k]["num_run"],
                         self.read_preds[k]["budget"]
@@ -560,7 +578,13 @@ class EnsembleBuilder(multiprocessing.Process):
                     success_keys_valid.append(k)
                     continue
                 try:
-                    with open(valid_fn, 'rb') as fp:
+                    if valid_fn.endswith("gz"):
+                        open_method = gzip.open
+                    elif valid_fn.endswith("npy"):
+                        open_method = open
+                    else:
+                        raise ValueError("Unknown filetype %s" % valid_fn)
+                    with open_method(valid_fn, 'rb') as fp:
                         y_valid = self._read_np_fn(fp)
                         self.read_preds[k][Y_VALID] = y_valid
                         success_keys_valid.append(k)
@@ -582,7 +606,13 @@ class EnsembleBuilder(multiprocessing.Process):
                     success_keys_test.append(k)
                     continue
                 try:
-                    with open(test_fn, 'rb') as fp:
+                    if test_fn.endswith("gz"):
+                        open_method = gzip.open
+                    elif test_fn.endswith("npy"):
+                        open_method = open
+                    else:
+                        raise ValueError("Unknown filetype %s" % test_fn)
+                    with open_method(test_fn, 'rb') as fp:
                         y_test = self._read_np_fn(fp)
                         self.read_preds[k][Y_TEST] = y_test
                         success_keys_test.append(k)
