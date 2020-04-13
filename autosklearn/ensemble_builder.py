@@ -250,23 +250,38 @@ class EnsembleBuilder(multiprocessing.Process):
             n_sel_valid, n_sel_test = self. \
                 get_valid_test_preds(selected_keys=candidate_models)
 
-            # if valid/test predictions loaded, then reduce candidate models to this set
+            # If valid/test predictions loaded, then reduce candidate models to this set
+            if len(n_sel_test) != 0 and len(n_sel_valid) != 0 \
+                    and len(set(n_sel_valid).intersection(set(n_sel_test))) == 0:
+                # Both n_sel_* have entries, but there is no overlap, this is critical
+                raise ValueError("n_sel_valid and n_sel_test are not empty, "
+                                 "but do not overlap")
+
+            # If any of n_sel_* is not empty and overlaps with candidate_models,
+            # then ensure candidate_models AND n_sel_test are sorted the same
             candidate_models_set = set(candidate_models)
-            if candidate_models_set.intersection(n_sel_test):
+            if candidate_models_set.intersection(n_sel_valid).intersection(n_sel_test):
                 candidate_models = sorted(list(candidate_models_set.intersection(
-                    n_sel_test)))
+                    n_sel_valid).intersection(n_sel_test)))
                 n_sel_test = candidate_models
+                n_sel_valid = candidate_models
             elif candidate_models_set.intersection(n_sel_valid):
                 candidate_models = sorted(list(candidate_models_set.intersection(
                     n_sel_valid)))
                 n_sel_valid = candidate_models
+            elif candidate_models_set.intersection(n_sel_test):
+                candidate_models = sorted(list(candidate_models_set.intersection(
+                    n_sel_test)))
+                n_sel_test = candidate_models
             else:
-                # use candidate_models only defined by ensemble data set
-                pass
+                # This has to be the case
+                n_sel_test = []
+                n_sel_valid = []
 
             # train ensemble
             ensemble = self.fit_ensemble(selected_keys=candidate_models)
             if ensemble is not None:
+                # We can't use candidate_models here, as n_sel_* might be empty
                 valid_pred = self.predict(set_="valid",
                                           ensemble=ensemble,
                                           selected_keys=n_sel_valid,
@@ -435,13 +450,17 @@ class EnsembleBuilder(multiprocessing.Process):
         """
 
         # Sort by score - higher is better!
-        sorted_keys = list(reversed(sorted(
+        # First sort by filename
+        sorted_keys = list(sorted(
             [
                 (k, v["ens_score"], v["num_run"])
                 for k, v in self.read_preds.items()
             ],
-            key=lambda x: x[1],
-        )))
+            key=lambda x: x[0],
+        ))
+        # Then by score
+        sorted_keys = list(reversed(sorted(sorted_keys, key=lambda x: x[1])))
+
         # number of models available
         num_keys = len(sorted_keys)
         # remove all that are at most as good as random
@@ -474,7 +493,8 @@ class EnsembleBuilder(multiprocessing.Process):
             keep_nbest = max(1, min(len(sorted_keys),
                                     int(len(sorted_keys) * self.max_keep_best)))
             self.logger.debug(
-                "Library pruning: keeping only top %f percent of the models (%d out of %d)",
+                "Library pruning: keeping only top %f percent of the models "
+                "(%d out of %d)",
                 self.max_keep_best * 100, keep_nbest, len(sorted_keys)
             )
         else:
@@ -510,15 +530,15 @@ class EnsembleBuilder(multiprocessing.Process):
                     # but always keep at least one model
                     current_score = sorted_keys[i][1]
                     if current_score <= min_score:
-                        self.logger.debug("Dynamic library pruning: Further reduce from %d to %d "
-                                          "models", keep_nbest, max(1, i))
+                        self.logger.debug("Dynamic library pruning: "
+                                          "Further reduce from %d to %d models",
+                                          keep_nbest, max(1, i))
                         keep_nbest = max(1, i)
                         break
         ensemble_n_best = keep_nbest
 
         # reduce to keys
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
-
         # remove loaded predictions for non-winning models
         for k in sorted_keys[ensemble_n_best:]:
             self.read_preds[k][Y_ENSEMBLE] = None
@@ -550,7 +570,8 @@ class EnsembleBuilder(multiprocessing.Process):
         Return
         ------
         success_keys:
-            all keys in selected keys for which we could read the valid and test predictions
+            all keys in selected keys for which we could read the valid and
+            test predictions
         """
         success_keys_valid = []
         success_keys_test = []
@@ -601,7 +622,7 @@ class EnsembleBuilder(multiprocessing.Process):
                         self.read_preds[k][Y_VALID] = y_valid
                         success_keys_valid.append(k)
                         self.read_preds[k]["mtime_valid"] = os.path.getmtime(valid_fn)
-                except Exception as e:
+                except Exception:
                     self.logger.warning('Error loading %s: %s',
                                         valid_fn, traceback.format_exc())
 
