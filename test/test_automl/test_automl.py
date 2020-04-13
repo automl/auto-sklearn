@@ -17,7 +17,7 @@ from autosklearn.automl import AutoML
 import autosklearn.automl
 from autosklearn.metrics import accuracy
 import autosklearn.pipeline.util as putil
-from autosklearn.util import setup_logger, get_logger, backend
+from autosklearn.util.logging_ import setup_logger, get_logger
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION
 from autosklearn.smbo import load_data
 from smac.tae.execute_ta_run import StatusType

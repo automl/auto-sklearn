@@ -8,7 +8,6 @@ RE_PATTERN = re.compile(
     r'^(?P<name>[\w\-]+)%s?(,%s)?$' % (SUBPATTERN % (1, 1), SUBPATTERN % (2, 2)))
 
 
-
 def verify_packages(packages):
     if not packages:
         return
@@ -45,7 +44,6 @@ def _verify_package(name, operation, version):
 
     required_version = LooseVersion(version)
 
-
     if operation == '==':
         check = required_version == installed_version
     elif operation == '>':
@@ -71,10 +69,9 @@ class MissingPackageError(Exception):
 
 
 class IncorrectPackageVersionError(Exception):
-    error_message = '\'{name} {installed_version}\' version mismatch ({operation}{required_version})'
+    error_message = "'{name} {installed_version}' version mismatch ({operation}{required_version})"
 
-    def __init__(self, package_name, installed_version, operation,
-                 required_version):
+    def __init__(self, package_name, installed_version, operation, required_version):
         self.package_name = package_name
         self.installed_version = installed_version
         self.operation = operation

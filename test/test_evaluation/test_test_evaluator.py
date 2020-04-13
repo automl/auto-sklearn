@@ -11,16 +11,19 @@ import unittest.mock
 import numpy as np
 from smac.tae.execute_ta_run import StatusType
 
-this_directory = os.path.dirname(__file__)
-sys.path.append(this_directory)
-from evaluation_util import get_dataset_getters, BaseEvaluatorTest, \
-    get_multiclass_classification_datamanager
-from autosklearn.constants import *
+from autosklearn.constants import MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION, \
+    MULTICLASS_CLASSIFICATION, REGRESSION
 from autosklearn.evaluation.test_evaluator import TestEvaluator, eval_t
 from autosklearn.evaluation.util import read_queue
 from autosklearn.util.pipeline import get_configuration_space
-from autosklearn.util import Backend
+from autosklearn.util.backend import Backend
 from autosklearn.metrics import accuracy, r2, f1_macro
+
+this_directory = os.path.dirname(__file__)
+sys.path.append(this_directory)
+from evaluation_util import get_dataset_getters, BaseEvaluatorTest, \
+    get_multiclass_classification_datamanager  # noqa
+
 
 N_TEST_RUNS = 3
 
@@ -86,17 +89,18 @@ class FunctionsTest(unittest.TestCase):
             pass
 
     def test_eval_test(self):
-        eval_t(queue=self.queue,
-               backend=self.backend,
-               config=self.configuration,
-               metric=accuracy,
-               seed=1, num_run=1,
-               all_scoring_functions=False,
-               output_y_hat_optimization=False,
-               include=None,
-               exclude=None,
-               disable_file_output=False,
-               instance=self.dataset_name
+        eval_t(
+            queue=self.queue,
+            backend=self.backend,
+            config=self.configuration,
+            metric=accuracy,
+            seed=1, num_run=1,
+            all_scoring_functions=False,
+            output_y_hat_optimization=False,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)

@@ -2,7 +2,7 @@
 import os
 import unittest
 
-from autosklearn.util import check_pid
+from autosklearn.util.common import check_pid
 
 
 class TestUtilsCommon(unittest.TestCase):

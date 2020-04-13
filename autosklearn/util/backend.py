@@ -69,8 +69,7 @@ class BackendContext(object):
                  shared_mode=False):
 
         # Check that the names of tmp_dir and output_dir is not the same.
-        if temporary_directory == output_directory \
-            and temporary_directory is not None:
+        if temporary_directory == output_directory and temporary_directory is not None:
             raise ValueError("The temporary and the output directory "
                              "must be different.")
 
@@ -122,18 +121,16 @@ class BackendContext(object):
             os.makedirs(self.output_directory)
             self._output_dir_created = True
 
-
     def __del__(self):
         self.delete_directories(force=False)
 
     def delete_directories(self, force=True):
         if self.delete_output_folder_after_terminate or force:
             if self._output_dir_created is False and self.shared_mode is False:
-                raise ValueError("Failed to delete output dir: %s "
-                              "because auto-sklearn did not create it. "
-                              "Please make sure that the specified output "
-                              "dir does not exist when instantiating "
-                              "auto-sklearn." % self.output_directory)
+                raise ValueError("Failed to delete output dir: %s because auto-sklearn did not "
+                                 "create it. Please make sure that the specified output dir does "
+                                 "not exist when instantiating auto-sklearn."
+                                 % self.output_directory)
             try:
                 shutil.rmtree(self.output_directory)
             except Exception:
@@ -146,21 +143,17 @@ class BackendContext(object):
 
         if self.delete_tmp_folder_after_terminate or force:
             if self._tmp_dir_created is False and self.shared_mode is False:
-                raise ValueError("Failed to delete tmp dir: % s "
-                              "because auto-sklearn did not create it. "
-                              "Please make sure that the specified tmp "
-                              "dir does not exist when instantiating "
-                              "auto-sklearn." % self.temporary_directory)
+                raise ValueError("Failed to delete tmp dir: % s because auto-sklearn did not "
+                                 "create it. Please make sure that the specified tmp dir does not "
+                                 "exist when instantiating auto-sklearn."
+                                 % self.temporary_directory)
             try:
                 shutil.rmtree(self.temporary_directory)
             except Exception:
                 if self._logger is not None:
-                    self._logger.warning("Could not delete tmp dir: %s" %
-                                  self.temporary_directory)
-                    pass
+                    self._logger.warning("Could not delete tmp dir: %s" % self.temporary_directory)
                 else:
-                    print("Could not delete tmp dir: %s" %
-                          self.temporary_directory)
+                    print("Could not delete tmp dir: %s" % self.temporary_directory)
 
 
 class Backend(object):
@@ -183,11 +176,9 @@ class Backend(object):
         # This does not have to exist or be specified
         if self.output_directory is not None:
             if not os.path.exists(self.output_directory):
-                raise ValueError("Output directory %s does not exist." %
-                                 self.output_directory)
+                raise ValueError("Output directory %s does not exist." % self.output_directory)
 
-        self.internals_directory = os.path.join(self.temporary_directory,
-                                                ".auto-sklearn")
+        self.internals_directory = os.path.join(self.temporary_directory, ".auto-sklearn")
         self._make_internals_directory()
 
     @property
@@ -216,11 +207,9 @@ class Backend(object):
         filepath = self._get_start_time_filename(seed)
 
         if not isinstance(start_time, float):
-            raise ValueError("Start time must be a float, but is %s." %
-                             type(start_time))
+            raise ValueError("Start time must be a float, but is %s." % type(start_time))
 
-        with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(filepath),
-                delete=False) as fh:
+        with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(filepath), delete=False) as fh:
             fh.write(str(start_time))
             tempname = fh.name
         os.rename(tempname, filepath)
@@ -268,7 +257,7 @@ class Backend(object):
             existing_targets = np.load(filepath, allow_pickle=True)
             if existing_targets.shape[0] > targets.shape[0] or \
                     (existing_targets.shape == targets.shape and
-                         np.allclose(existing_targets, targets)):
+                     np.allclose(existing_targets, targets)):
 
                 return filepath
         except Exception:
@@ -461,9 +450,10 @@ class Backend(object):
 
     def save_predictions_as_txt(self, predictions, subset, idx, precision, prefix=None):
         # Write prediction scores in prescribed format
-        filepath = os.path.join(self.output_directory,
-                                ('%s_' % prefix if prefix else '') +
-                                 '%s_%s.predict' % (subset, str(idx)))
+        filepath = os.path.join(
+            self.output_directory,
+            ('%s_' % prefix if prefix else '') + '%s_%s.predict' % (subset, str(idx)),
+        )
 
         format_string = '{:.%dg} ' % precision
         with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
