@@ -254,8 +254,8 @@ class EnsembleBuilder(multiprocessing.Process):
             if len(n_sel_test) != 0 and len(n_sel_valid) != 0 \
                     and len(set(n_sel_valid).intersection(set(n_sel_test))) == 0:
                 # Both n_sel_* have entries, but there is no overlap, this is critical
-                self.logger.error("n_sel_valid and n_sel_test are not empty, but do"
-                                     " not overlap")
+                self.logger.error("n_sel_valid and n_sel_test are not empty, but do "
+                                  "not overlap")
                 time.sleep(self.sleep_duration)
                 continue
 
