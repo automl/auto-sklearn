@@ -132,7 +132,11 @@ class AutoMLTest(Base, unittest.TestCase):
             time_left_for_this_task=20,
             per_run_time_limit=5,
             ensemble_nbest=3,
-            seed=seed
+            seed=seed,
+            initial_configurations_via_metalearning=0,
+            resampling_strategy='holdout',
+            include_estimators=['sgd'],
+            include_preprocessors=['no_preprocessing']
         )
 
         automl.fit(
