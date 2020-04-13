@@ -55,7 +55,7 @@ class BaseTest(unittest.TestCase):
         # changing the values of the data points
         #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #    print(clause)
-        self.assertEqual(65, len(cs.forbidden_clauses))
+        self.assertEqual(64, len(cs.forbidden_clauses))
 
 
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
@@ -71,19 +71,19 @@ class BaseTest(unittest.TestCase):
                          15)
         #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #    print(clause)
-        self.assertEqual(107, len(cs.forbidden_clauses))
+        self.assertEqual(110, len(cs.forbidden_clauses))
 
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification', 'sparse': True}
         cs = base._get_base_search_space(cs, dataset_properties,
                                          exclude, include, pipeline)
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
-                         11)
+                         12)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
                          15)
         #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #    print(clause)
-        self.assertEqual(343, len(cs.forbidden_clauses))
+        self.assertEqual(419, len(cs.forbidden_clauses))
 
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification',
@@ -92,13 +92,13 @@ class BaseTest(unittest.TestCase):
                                          exclude, include, pipeline)
 
         self.assertEqual(len(cs.get_hyperparameter("p0:__choice__").choices),
-                         11)
+                         12)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
                          15)
         # Data is guaranteed to be positive in cases like densifier,
         # extra_trees_preproc, multinomial_nb -> less constraints
         #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #    print(clause)
-        self.assertEqual(298, len(cs.forbidden_clauses))
+        self.assertEqual(359, len(cs.forbidden_clauses))
 
 

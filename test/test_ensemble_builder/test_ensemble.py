@@ -220,7 +220,7 @@ class EnsembleTest(unittest.TestCase):
         sel_keys = ensbuilder.get_n_best_preds()
         self.assertEqual(len(sel_keys), 1)
         ensbuilder.get_valid_test_preds(selected_keys=sel_keys)
-        print(ensbuilder.read_preds[d1])
+
         # not selected --> should still be None
         self.assertIsNone(ensbuilder.read_preds[d1][Y_VALID])
         self.assertIsNone(ensbuilder.read_preds[d1][Y_TEST])

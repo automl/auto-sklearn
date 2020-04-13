@@ -2,6 +2,7 @@
 import numbers
 import multiprocessing
 import glob
+import gzip
 import os
 import re
 import time
@@ -222,10 +223,16 @@ class EnsembleBuilder(multiprocessing.Process):
                     continue
             break
 
-    def main(self):
+    def main(self, return_pred=False):
+        """
+
+        :param return_pred:
+            return tuple with last valid, test predictions
+        :return:
+        """
         self.start_time = time.time()
         iteration = 0
-
+        valid_pred, test_pred = None, None
         while True:
 
             # maximal number of iterations
@@ -235,6 +242,7 @@ class EnsembleBuilder(multiprocessing.Process):
                                  self.max_iterations,
                                  iteration)
                 break
+            iteration += 1
 
             used_time = time.time() - self.start_time
             self.logger.debug(
@@ -259,36 +267,56 @@ class EnsembleBuilder(multiprocessing.Process):
             n_sel_valid, n_sel_test = self. \
                 get_valid_test_preds(selected_keys=candidate_models)
 
+            # If valid/test predictions loaded, then reduce candidate models to this set
+            if len(n_sel_test) != 0 and len(n_sel_valid) != 0 \
+                    and len(set(n_sel_valid).intersection(set(n_sel_test))) == 0:
+                # Both n_sel_* have entries, but there is no overlap, this is critical
+                self.logger.error("n_sel_valid and n_sel_test are not empty, but do "
+                                  "not overlap")
+                time.sleep(self.sleep_duration)
+                continue
+
+            # If any of n_sel_* is not empty and overlaps with candidate_models,
+            # then ensure candidate_models AND n_sel_test are sorted the same
             candidate_models_set = set(candidate_models)
-            if candidate_models_set.intersection(n_sel_test):
-                candidate_models = list(candidate_models_set.intersection(n_sel_test))
+            if candidate_models_set.intersection(n_sel_valid).intersection(n_sel_test):
+                candidate_models = sorted(list(candidate_models_set.intersection(
+                    n_sel_valid).intersection(n_sel_test)))
+                n_sel_test = candidate_models
+                n_sel_valid = candidate_models
             elif candidate_models_set.intersection(n_sel_valid):
-                candidate_models = list(candidate_models_set.intersection(n_sel_valid))
+                candidate_models = sorted(list(candidate_models_set.intersection(
+                    n_sel_valid)))
+                n_sel_valid = candidate_models
+            elif candidate_models_set.intersection(n_sel_test):
+                candidate_models = sorted(list(candidate_models_set.intersection(
+                    n_sel_test)))
+                n_sel_test = candidate_models
             else:
-                # use candidate_models only defined by ensemble data set
-                pass
+                # This has to be the case
+                n_sel_test = []
+                n_sel_valid = []
 
             # train ensemble
             ensemble = self.fit_ensemble(selected_keys=candidate_models)
-
             if ensemble is not None:
-
-                self.predict(set_="valid",
-                             ensemble=ensemble,
-                             selected_keys=n_sel_valid,
-                             n_preds=len(candidate_models),
-                             index_run=iteration)
+                # We can't use candidate_models here, as n_sel_* might be empty
+                valid_pred = self.predict(set_="valid",
+                                          ensemble=ensemble,
+                                          selected_keys=n_sel_valid,
+                                          n_preds=len(candidate_models),
+                                          index_run=iteration)
                 # TODO if predictions fails, build the model again during the
                 #  next iteration!
-                self.predict(set_="test",
-                             ensemble=ensemble,
-                             selected_keys=n_sel_test,
-                             n_preds=len(candidate_models),
-                             index_run=iteration)
-                iteration += 1
-
+                test_pred = self.predict(set_="test",
+                                         ensemble=ensemble,
+                                         selected_keys=n_sel_test,
+                                         n_preds=len(candidate_models),
+                                         index_run=iteration)
             else:
                 time.sleep(self.sleep_duration)
+        if return_pred:
+            return valid_pred, test_pred
 
     def read_ensemble_preds(self):
         """
@@ -316,13 +344,13 @@ class EnsembleBuilder(multiprocessing.Process):
         if self.shared_mode is False:
             pred_path = os.path.join(
                 glob.escape(self.dir_ensemble),
-                'predictions_ensemble_%s_*_*.npy' % self.seed,
+                'predictions_ensemble_%s_*_*.npy*' % self.seed,
             )
         # pSMAC
         else:
             pred_path = os.path.join(
                 glob.escape(self.dir_ensemble),
-                'predictions_ensemble_*_*_*.npy',
+                'predictions_ensemble_*_*_*.npy*',
             )
 
         self.y_ens_files = glob.glob(pred_path)
@@ -332,22 +360,28 @@ class EnsembleBuilder(multiprocessing.Process):
                               " %s" % pred_path)
             return False
 
-        n_read_files = 0
-        for y_ens_fn in sorted(self.y_ens_files):
+        # First sort files chronologically
+        to_read = []
+        for y_ens_fn in self.y_ens_files:
+            match = self.model_fn_re.search(y_ens_fn)
+            _seed = int(match.group(1))
+            _num_run = int(match.group(2))
+            _budget = float(match.group(3))
+            to_read.append([y_ens_fn, match, _seed, _num_run, _budget])
 
+        n_read_files = 0
+        # Now read file wrt to num_run
+        for y_ens_fn, match, _seed, _num_run, _budget in \
+                sorted(to_read, key=lambda x: x[3]):
             if self.read_at_most and n_read_files >= self.read_at_most:
                 # limit the number of files that will be read
                 # to limit memory consumption
                 break
 
-            if not y_ens_fn.endswith(".npy"):
-                self.logger.info('Error loading file (not .npy): %s', y_ens_fn)
+            if not y_ens_fn.endswith(".npy") and not y_ens_fn.endswith(".npy.gz"):
+                self.logger.info('Error loading file (not .npy or .npy.gz): %s', y_ens_fn)
                 continue
 
-            match = self.model_fn_re.search(y_ens_fn)
-            _seed = int(match.group(1))
-            _num_run = int(match.group(2))
-            _budget = float(match.group(3))
             if not self.read_preds.get(y_ens_fn):
                 self.read_preds[y_ens_fn] = {
                     "ens_score": -1,
@@ -373,7 +407,13 @@ class EnsembleBuilder(multiprocessing.Process):
 
             # actually read the predictions and score them
             try:
-                with open(y_ens_fn, 'rb') as fp:
+                if y_ens_fn.endswith("gz"):
+                    open_method = gzip.open
+                elif y_ens_fn.endswith("npy"):
+                    open_method = open
+                else:
+                    raise ValueError("Unknown filetype %s" % y_ens_fn)
+                with open_method(y_ens_fn, 'rb') as fp:
                     y_ensemble = self._read_np_fn(fp=fp)
                     score = calculate_score(solution=self.y_true_ensemble,
                                             # y_ensemble = y_true for ensemble set
@@ -428,13 +468,17 @@ class EnsembleBuilder(multiprocessing.Process):
         """
 
         # Sort by score - higher is better!
-        sorted_keys = list(reversed(sorted(
+        # First sort by filename
+        sorted_keys = list(sorted(
             [
                 (k, v["ens_score"], v["num_run"])
                 for k, v in self.read_preds.items()
             ],
-            key=lambda x: x[1],
-        )))
+            key=lambda x: x[0],
+        ))
+        # Then by score
+        sorted_keys = list(reversed(sorted(sorted_keys, key=lambda x: x[1])))
+
         # number of models available
         num_keys = len(sorted_keys)
         # remove all that are at most as good as random
@@ -467,7 +511,8 @@ class EnsembleBuilder(multiprocessing.Process):
             keep_nbest = max(1, min(len(sorted_keys),
                                     int(len(sorted_keys) * self.max_keep_best)))
             self.logger.debug(
-                "Library pruning: keeping only top %f percent of the models (%d out of %d)",
+                "Library pruning: keeping only top %f percent of the models "
+                "(%d out of %d)",
                 self.max_keep_best * 100, keep_nbest, len(sorted_keys)
             )
         else:
@@ -478,7 +523,14 @@ class EnsembleBuilder(multiprocessing.Process):
 
         for k, _, _ in sorted_keys[:keep_nbest]:
             if self.read_preds[k][Y_ENSEMBLE] is None:
-                self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(fp=k)
+                if k.endswith("gz"):
+                    open_method = gzip.open
+                elif k.endswith("npy"):
+                    open_method = open
+                else:
+                    raise ValueError("Unknown filetype %s" % k)
+                with open_method(k, 'rb') as fp:
+                    self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(fp=fp)
                 # No need to load valid and test here because they are loaded
                 #  only if the model ends up in the ensemble
             self.read_preds[k]['loaded'] = 1
@@ -496,8 +548,9 @@ class EnsembleBuilder(multiprocessing.Process):
                     # but always keep at least one model
                     current_score = sorted_keys[i][1]
                     if current_score <= min_score:
-                        self.logger.debug("Dynamic library pruning: Further reduce from %d to %d "
-                                          "models", keep_nbest, max(1, i))
+                        self.logger.debug("Dynamic library pruning: "
+                                          "Further reduce from %d to %d models",
+                                          keep_nbest, max(1, i))
                         keep_nbest = max(1, i)
                         break
         ensemble_n_best = keep_nbest
@@ -505,7 +558,7 @@ class EnsembleBuilder(multiprocessing.Process):
         # reduce to keys
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
 
-        # remove loaded predictions for non-candidate models
+        # remove loaded predictions for non-winning models
         for k in sorted_keys[ensemble_n_best:]:
             self.read_preds[k][Y_ENSEMBLE] = None
             self.read_preds[k][Y_VALID] = None
@@ -536,7 +589,8 @@ class EnsembleBuilder(multiprocessing.Process):
         Return
         ------
         success_keys:
-            all keys in selected keys for which we could read the valid and test predictions
+            all keys in selected keys for which we could read the valid and
+            test predictions
         """
         success_keys_valid = []
         success_keys_test = []
@@ -545,7 +599,7 @@ class EnsembleBuilder(multiprocessing.Process):
             valid_fn = glob.glob(
                 os.path.join(
                     glob.escape(self.dir_valid),
-                    'predictions_valid_%d_%d_%s.npy' % (
+                    'predictions_valid_%d_%d_%s.npy*' % (
                         self.read_preds[k]["seed"],
                         self.read_preds[k]["num_run"],
                         self.read_preds[k]["budget"],
@@ -555,7 +609,7 @@ class EnsembleBuilder(multiprocessing.Process):
             test_fn = glob.glob(
                 os.path.join(
                     glob.escape(self.dir_test),
-                    'predictions_test_%d_%d_%s.npy' % (
+                    'predictions_test_%d_%d_%s.npy*' % (
                         self.read_preds[k]["seed"],
                         self.read_preds[k]["num_run"],
                         self.read_preds[k]["budget"]
@@ -576,12 +630,18 @@ class EnsembleBuilder(multiprocessing.Process):
                     success_keys_valid.append(k)
                     continue
                 try:
-                    with open(valid_fn, 'rb') as fp:
+                    if valid_fn.endswith("gz"):
+                        open_method = gzip.open
+                    elif valid_fn.endswith("npy"):
+                        open_method = open
+                    else:
+                        raise ValueError("Unknown filetype %s" % valid_fn)
+                    with open_method(valid_fn, 'rb') as fp:
                         y_valid = self._read_np_fn(fp)
                         self.read_preds[k][Y_VALID] = y_valid
                         success_keys_valid.append(k)
                         self.read_preds[k]["mtime_valid"] = os.path.getmtime(valid_fn)
-                except Exception as e:
+                except Exception:
                     self.logger.warning('Error loading %s: %s',
                                         valid_fn, traceback.format_exc())
 
@@ -598,7 +658,13 @@ class EnsembleBuilder(multiprocessing.Process):
                     success_keys_test.append(k)
                     continue
                 try:
-                    with open(test_fn, 'rb') as fp:
+                    if test_fn.endswith("gz"):
+                        open_method = gzip.open
+                    elif test_fn.endswith("npy"):
+                        open_method = open
+                    else:
+                        raise ValueError("Unknown filetype %s" % test_fn)
+                    with open_method(test_fn, 'rb') as fp:
                         y_test = self._read_np_fn(fp)
                         self.read_preds[k][Y_TEST] = y_test
                         success_keys_test.append(k)
@@ -623,7 +689,6 @@ class EnsembleBuilder(multiprocessing.Process):
             ensemble: EnsembleSelection
                 trained Ensemble
         """
-
         predictions_train = np.array([self.read_preds[k][Y_ENSEMBLE] for k in selected_keys])
         include_num_runs = [
             (
