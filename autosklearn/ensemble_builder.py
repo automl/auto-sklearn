@@ -362,7 +362,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
         # First sort files chronologically
         to_read = []
-        for y_ens_fn in y_ens_files:
+        for y_ens_fn in self.y_ens_files:
             match = self.model_fn_re.search(y_ens_fn)
             _seed = int(match.group(1))
             _num_run = int(match.group(2))
