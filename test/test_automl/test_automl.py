@@ -279,7 +279,7 @@ class AutoMLTest(Base, unittest.TestCase):
 
         fixture = os.listdir(os.path.join(backend_api.temporary_directory,
                                           '.auto-sklearn', 'ensembles'))
-        self.assertIn('100.0000000000.ensemble', fixture)
+        self.assertIn('100.0000000001.ensemble', fixture)
 
         # Start time
         start_time_file_path = os.path.join(backend_api.temporary_directory,
