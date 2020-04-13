@@ -6,7 +6,7 @@ from autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner \
     import MetaLearningOptimizer
 
 from autosklearn.constants import *
-from autosklearn.util import get_logger
+from autosklearn.util.logging_ import get_logger
 
 __all__ = [
     'calc_meta_features',

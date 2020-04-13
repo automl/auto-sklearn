@@ -17,7 +17,7 @@ from autosklearn.automl import AutoML
 import autosklearn.automl
 from autosklearn.metrics import accuracy
 import autosklearn.pipeline.util as putil
-from autosklearn.util import setup_logger, get_logger, backend
+from autosklearn.util.logging_ import setup_logger, get_logger
 from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION
 from autosklearn.smbo import load_data
 from smac.tae.execute_ta_run import StatusType
@@ -121,29 +121,36 @@ class AutoMLTest(Base, unittest.TestCase):
         self._tearDown(backend_api.temporary_directory)
         self._tearDown(backend_api.output_directory)
 
-    def test_delete_non_winning_models(self):
+    def test_delete_non_candidate_models(self):
         backend_api = self._create_backend(
             'test_delete', delete_tmp_folder_after_terminate=False)
 
         seed = 555
-        X_train, Y_train, _, _ = putil.get_dataset('iris')
+        X, Y, _, _ = putil.get_dataset('iris')
         automl = autosklearn.automl.AutoML(
             backend_api,
-            time_left_for_this_task=20,
+            time_left_for_this_task=30,
             per_run_time_limit=5,
             ensemble_nbest=3,
-            seed=seed
+            seed=seed,
+            initial_configurations_via_metalearning=0,
+            resampling_strategy='holdout',
+            include_estimators=['sgd'],
+            include_preprocessors=['no_preprocessing']
         )
 
-        automl.fit(
-            X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
-        )
+        automl.fit(X, Y, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
+                   X_test=X, y_test=Y)
 
-        # Assert at least one model file has been deleted
+        # Assert at least one model file has been deleted and that there were no
+        # deletion errors
         log_file_path = glob.glob(os.path.join(
             backend_api.temporary_directory, 'AutoML(' + str(seed) + '):*.log'))
         with open(log_file_path[0]) as log_file:
-            self.assertIn('Deleted file of non-candidate model', log_file.read())
+            log_content = log_file.read()
+            self.assertIn('Deleted files of non-candidate model', log_content)
+            self.assertNotIn('Failed to delete files of non-candidate model', log_content)
+            self.assertNotIn('Failed to lock model', log_content)
 
         # Assert that the files of the models used by the ensemble weren't deleted
         model_files = backend_api.list_all_models(seed=seed)

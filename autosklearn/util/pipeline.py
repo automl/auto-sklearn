@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
-from autosklearn.constants import *
+from autosklearn.constants import CLASSIFICATION_TASKS, REGRESSION_TASKS, BINARY_CLASSIFICATION, \
+    MULTILABEL_CLASSIFICATION, REGRESSION, MULTICLASS_CLASSIFICATION
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.regression import SimpleRegressionPipeline
 

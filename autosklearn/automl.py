@@ -28,8 +28,9 @@ from autosklearn.evaluation import ExecuteTaFuncWithQueue
 from autosklearn.evaluation.abstract_evaluator import _fit_and_suppress_warnings
 from autosklearn.evaluation.train_evaluator import _fit_with_budget
 from autosklearn.metrics import calculate_score
-from autosklearn.util import StopWatch, get_logger, setup_logger, \
-    pipeline
+from autosklearn.util.stopwatch import StopWatch
+from autosklearn.util.logging_ import get_logger, setup_logger
+from autosklearn.util import pipeline
 from autosklearn.ensemble_builder import EnsembleBuilder
 from autosklearn.smbo import AutoMLSMBO
 from autosklearn.util.hash import hash_array_or_matrix

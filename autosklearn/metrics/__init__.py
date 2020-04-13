@@ -6,7 +6,6 @@ import sklearn.metrics
 from sklearn.utils.multiclass import type_of_target
 
 from autosklearn.constants import *
-from . import classification_metrics
 from .util import *
 
 
@@ -202,7 +201,7 @@ median_absolute_error = make_scorer('median_absolute_error',
 accuracy = make_scorer('accuracy',
                        sklearn.metrics.accuracy_score)
 balanced_accuracy = make_scorer('balanced_accuracy',
-                                classification_metrics.balanced_accuracy)
+                                sklearn.metrics.balanced_accuracy_score)
 f1 = make_scorer('f1',
                  sklearn.metrics.f1_score)
 
@@ -225,10 +224,6 @@ log_loss = make_scorer('log_loss',
                        optimum=0,
                        greater_is_better=False,
                        needs_proba=True)
-pac_score = make_scorer('pac_score',
-                        classification_metrics.pac_score,
-                        greater_is_better=True,
-                        needs_proba=True)
 # TODO what about mathews correlation coefficient etc?
 
 
@@ -240,7 +235,7 @@ for scorer in [r2, mean_squared_error, mean_absolute_error,
 CLASSIFICATION_METRICS = dict()
 
 for scorer in [accuracy, balanced_accuracy, roc_auc, average_precision,
-               log_loss, pac_score]:
+               log_loss]:
     CLASSIFICATION_METRICS[scorer.name] = scorer
 
 for name, metric in [('precision', sklearn.metrics.precision_score),

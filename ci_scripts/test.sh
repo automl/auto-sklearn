@@ -48,6 +48,7 @@ if [[ "$RUN_FLAKE8" ]]; then
     echo 'Running flake8'
     echo '***********************************************************'
     source ci_scripts/flake8_diff.sh
+    source ci_scripts/flake8_full.sh
 fi
 
 if [[ "$SKIP_TESTS" != "true" ]]; then

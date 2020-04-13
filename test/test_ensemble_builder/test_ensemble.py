@@ -83,6 +83,7 @@ class EnsembleTest(unittest.TestCase):
                 limit=-1,  # not used,
                 seed=0,  # important to find the test files
                 max_keep_best=max_keep_best,
+                remove_bad_model_files=False,
             )
 
             ensbuilder.read_ensemble_preds()
@@ -134,9 +135,9 @@ class EnsembleTest(unittest.TestCase):
                 limit=-1,  # not used,
                 seed=0,  # important to find the test files
                 max_keep_best=max_keep_best,
-                performance_range_threshold=performance_range_threshold
+                performance_range_threshold=performance_range_threshold,
+                remove_bad_model_files=False
             )
-            print(performance_range_threshold, max_keep_best, exp)
             ensbuilder.read_preds = {
                 'A': {'ens_score': 1, 'num_run': 1, 0: True, 'loaded': -1, "seed": 1},
                 'B': {'ens_score': 2, 'num_run': 2, 0: True, 'loaded': -1, "seed": 1},

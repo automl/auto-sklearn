@@ -4,7 +4,7 @@ import scipy.sparse
 
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
     import DataPreprocessor
-from autosklearn.util import predict_RAM_usage
+from autosklearn.util.data import predict_RAM_usage
 
 
 def perform_one_hot_encoding(sparse, categorical, data):

@@ -218,8 +218,6 @@ class TrainEvaluator(AbstractEvaluator):
                 if not model.estimator_supports_iterative_fit():
                     self.fit_predict_and_loss(iterative=False)
                     return
-                if self.budget_type not in ('mixed', 'iterations'):
-                    raise NotImplementedError()
 
                 self.partial = False
 
@@ -237,7 +235,7 @@ class TrainEvaluator(AbstractEvaluator):
                 total_n_iterations = [0] * self.num_cv_folds
                 model_max_iter = [model.get_max_iter() for model in models]
 
-                if self.budget > 0:
+                if self.budget_type in ['iterations', 'mixed'] and self.budget > 0:
                     max_n_iter_budget = int(
                         np.ceil(self.budget / 100 * model_max_iter[0]))
                     max_iter = min(model_max_iter[0], max_n_iter_budget)
@@ -402,7 +400,6 @@ class TrainEvaluator(AbstractEvaluator):
                         Y_test_preds = None
 
                     self.Y_optimization = Y_targets
-                    loss = self._loss(Y_targets, Y_optimization_preds)
                     self.Y_actual_train = Y_train_targets
 
                     self.model = self._get_model()
