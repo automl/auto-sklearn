@@ -134,4 +134,4 @@ validated_trajectory_file = os.path.join(tmp_dir,
                                          'run_%d' % seed,
                                          'validation_trajectory.json')
 with open(validated_trajectory_file, 'w') as fh:
-    json.dump(validated_trajectory, fh)
+    json.dump(validated_trajectory, fh, indent=4)

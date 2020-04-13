@@ -29,12 +29,12 @@ class MetaBaseTest(unittest.TestCase):
         runs = self.base.get_all_runs()
         self.assertIsInstance(runs, pd.DataFrame)
         # TODO update this ASAP
-        self.assertEqual((120, 120), runs.shape)
+        self.assertEqual((128, 128), runs.shape)
 
     def test_get_runs(self):
         runs = self.base.get_runs('233')
         # TODO update this ASAP
-        self.assertEqual(120, len(runs))
+        self.assertEqual(128, len(runs))
         self.assertIsInstance(runs, pd.Series)
 
     def test_get_metafeatures_single_dataset(self):
