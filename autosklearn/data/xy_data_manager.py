@@ -3,7 +3,8 @@
 import numpy as np
 from scipy import sparse
 
-from autosklearn.constants import *
+from autosklearn.constants import STRING_TO_TASK_TYPES, REGRESSION, BINARY_CLASSIFICATION, \
+    MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 
 

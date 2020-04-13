@@ -2,11 +2,12 @@ from abc import ABCMeta, abstractmethod
 import copy
 from functools import partial
 
+import numpy as np
 import sklearn.metrics
 from sklearn.utils.multiclass import type_of_target
 
-from autosklearn.constants import *
-from .util import *
+from autosklearn.constants import REGRESSION_TASKS, TASK_TYPES
+from .util import sanitize_array
 
 
 class Scorer(object, metaclass=ABCMeta):

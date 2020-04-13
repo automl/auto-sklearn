@@ -123,7 +123,9 @@ def sparse_file_to_sparse_list(filename):
     # if verbose:
     #     print('Converting {} to sparse list'.format(filename))
 
-    _converter = lambda a_: (int(a_[0]), np.float32(float(a_[1])))
+    def _converter(a_):
+        return (int(a_[0]), np.float32(float(a_[1])))
+
     return [[_converter(data[i][j].rstrip().split(':'))
              for j in range(len(data[i])) if data[i][j] != '\n']
             for i in range(len(data))]
