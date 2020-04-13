@@ -16,10 +16,12 @@ class Run(object):
         return "Run:\nresult: %3.3f\nruntime: %3.3f\n%s" % \
                (self.result, self.runtime, str(self.configuration))
 
+
 class Instance(object):
     def __init__(self, name, features):
         self.name = name
         self.features = features
+
 
 class MetaBase(object):
     def __init__(self, configuration_space, aslib_directory):
@@ -54,9 +56,8 @@ class MetaBase(object):
     def add_dataset(self, name, metafeatures):
         metafeatures.name = name
         if isinstance(metafeatures, DatasetMetafeatures):
-            metafeatures = pd.Series(name=name,
-                data={mf.name: mf.value for mf in
-                      metafeatures.metafeature_values.values()})
+            data_ = {mf.name: mf.value for mf in metafeatures.metafeature_values.values()}
+            metafeatures = pd.Series(name=name, data=data_)
         if name in self.metafeatures.index:
             new_name = name + '_ASKL-metadata'
             self.logger.warning(
@@ -106,10 +107,10 @@ class MetaBase(object):
 
     def get_configuration_from_algorithm_index(self, idx):
         return self.configurations[str(idx)]
-        #configuration = self.configurations[idx]
-        #configuration = Configuration(self.configuration_space,
+        # configuration = self.configurations[idx]
+        # configuration = Configuration(self.configuration_space,
         # **configuration)
-        #return configuration
+        # return configuration
 
     def get_algorithm_index_from_configuration(self, configuration):
         for idx in self.configurations.keys():
