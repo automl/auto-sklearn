@@ -19,7 +19,7 @@ from autosklearn.constants import *
 from autosklearn.evaluation.test_evaluator import TestEvaluator, eval_t
 from autosklearn.evaluation.util import read_queue
 from autosklearn.util.pipeline import get_configuration_space
-from autosklearn.util import Backend
+from autosklearn.util.backend import Backend
 from autosklearn.metrics import accuracy, r2, f1_macro
 
 N_TEST_RUNS = 3
