@@ -1,7 +1,7 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT
 
 
 class NoPreprocessing(AutoSklearnPreprocessingAlgorithm):

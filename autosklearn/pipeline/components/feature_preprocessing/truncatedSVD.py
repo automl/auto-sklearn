@@ -1,10 +1,8 @@
-import numpy as np
-
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformIntegerHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import SPARSE, UNSIGNED_DATA, DENSE, INPUT
 
 
 class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):

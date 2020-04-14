@@ -1,9 +1,11 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import UniformFloatHyperparameter, CategoricalHyperparameter, Constant
+from ConfigSpace.hyperparameters import \
+    UniformFloatHyperparameter, CategoricalHyperparameter, Constant
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.components.feature_preprocessing.select_percentile import SelectPercentileBase
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.components.feature_preprocessing.select_percentile import \
+    SelectPercentileBase
+from autosklearn.pipeline.constants import SPARSE, DENSE, INPUT, UNSIGNED_DATA, SIGNED_DATA
 
 
 class SelectPercentileClassification(SelectPercentileBase,
@@ -36,15 +38,16 @@ class SelectPercentileClassification(SelectPercentileBase,
 
         self.preprocessor = sklearn.feature_selection.SelectPercentile(
             score_func=self.score_func,
-                percentile=self.percentile)
+            percentile=self.percentile,
+            )
 
         # Because the pipeline guarantees that each feature is positive,
         # clip all values below zero to zero
         if self.score_func == sklearn.feature_selection.chi2:
             if scipy.sparse.issparse(X):
-                X.data[X.data<0] = 0.0
+                X.data[X.data < 0] = 0.0
             else:
-                X[X<0] = 0.0
+                X[X < 0] = 0.0
 
         self.preprocessor.fit(X, y)
         return self
@@ -68,7 +71,6 @@ class SelectPercentileClassification(SelectPercentileBase,
             raise ValueError(
                 "%s removed all features." % self.__class__.__name__)
         return Xt
-
 
     @staticmethod
     def get_properties(dataset_properties=None):

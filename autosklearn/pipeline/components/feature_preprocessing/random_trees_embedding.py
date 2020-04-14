@@ -3,8 +3,9 @@ from ConfigSpace.hyperparameters import UniformIntegerHyperparameter, \
     UnParametrizedHyperparameter, Constant, CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, SIGNED_DATA
 from autosklearn.util.common import check_none, check_for_bool
+
 
 class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
 

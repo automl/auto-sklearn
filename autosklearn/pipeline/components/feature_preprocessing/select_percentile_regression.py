@@ -1,10 +1,10 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import UniformFloatHyperparameter,  \
-    CategoricalHyperparameter
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter, CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.components.feature_preprocessing.select_percentile import SelectPercentileBase
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.components.feature_preprocessing.select_percentile import \
+    SelectPercentileBase
+from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT
 
 
 class SelectPercentileRegression(SelectPercentileBase,
