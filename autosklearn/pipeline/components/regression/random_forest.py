@@ -1,16 +1,14 @@
-import numpy as np
-
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter, Constant
+    UniformIntegerHyperparameter, CategoricalHyperparameter, UnParametrizedHyperparameter
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnRegressionAlgorithm,
     IterativeComponent,
 )
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 from autosklearn.util.common import check_for_bool, check_none
+
 
 class RandomForest(
     IterativeComponent,

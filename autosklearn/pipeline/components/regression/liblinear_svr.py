@@ -5,8 +5,9 @@ from ConfigSpace.forbidden import ForbiddenEqualsClause, \
     ForbiddenAndConjunction
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
-from autosklearn.pipeline.constants import *
-from autosklearn.util.common import check_for_bool, check_none
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
+from autosklearn.util.common import check_for_bool
+
 
 class LibLinear_SVR(AutoSklearnRegressionAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
@@ -76,7 +77,7 @@ class LibLinear_SVR(AutoSklearnRegressionAlgorithm):
         # These are set ad-hoc
         tol = UniformFloatHyperparameter(
             "tol", 1e-5, 1e-1, default_value=1e-4, log=True)
-        fit_intercept =Constant("fit_intercept", "True")
+        fit_intercept = Constant("fit_intercept", "True")
         intercept_scaling = Constant("intercept_scaling", 1)
 
         cs.add_hyperparameters([C, loss, epsilon, dual, tol, fit_intercept,
