@@ -53,11 +53,18 @@ automl_arguments = {
     'seed': seed,
     'ml_memory_limit': 3072,
     'resampling_strategy': 'partial-cv',
-    'resampling_strategy_arguments': {'folds': 10},
     'delete_tmp_folder_after_terminate': False,
     'tmp_folder': tmp_dir,
     'disable_evaluator_output': True,
 }
+
+if is_test:
+    automl_arguments['include_estimators'] = ['sgd']
+    automl_arguments['resampling_strategy_arguments'] = {'folds': 3}
+    include = {'classifier': ['sgd']}
+else:
+    automl_arguments['resampling_strategy_arguments'] = {'folds': 10}
+    include = None
 
 X_train, y_train, X_test, y_test, cat = load_task(task_id)
 
@@ -115,6 +122,7 @@ for entry in trajectory:
                                     logger=logger,
                                     stats=stats,
                                     all_scoring_functions=True,
+                                    include=include,
                                     metric=metric)
         status, cost, runtime, additional_run_info = ta.start(
             config=config, instance=None, cutoff=per_run_time_limit*3)
