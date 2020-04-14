@@ -1,5 +1,5 @@
 from scipy import sparse
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling \
     import Rescaling
 from autosklearn.pipeline.components.base import \

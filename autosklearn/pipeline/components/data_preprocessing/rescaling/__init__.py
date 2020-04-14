@@ -1,5 +1,4 @@
 from collections import OrderedDict
-import copy
 import os
 from ...base import AutoSklearnPreprocessingAlgorithm, find_components, \
     ThirdPartyComponents, AutoSklearnChoice
