@@ -4,16 +4,9 @@ import time
 
 from autosklearn.metalearning.optimizers.metalearn_optimizer.metalearner \
     import MetaLearningOptimizer
-
-from autosklearn.constants import *
+from autosklearn.constants \
+    import MULTILABEL_CLASSIFICATION, MULTICLASS_CLASSIFICATION, TASK_TYPES_TO_STRING
 from autosklearn.util.logging_ import get_logger
-
-__all__ = [
-    'calc_meta_features',
-    'calc_meta_features_encoded',
-    'convert_conf2smac_string',
-    'create_metalearning_string_for_smac_call',
-]
 
 
 def suggest_via_metalearning(
