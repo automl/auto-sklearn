@@ -66,11 +66,11 @@ def get_dataset(dataset='iris', make_sparse=False, add_NaNs=False,
         X_train[mask] = np.NaN
 
     if make_sparse:
-        X_train[:,0] = 0
+        X_train[:, 0] = 0
         X_train[rs.random_sample(X_train.shape) > 0.5] = 0
         X_train = scipy.sparse.csc_matrix(X_train)
         X_train.eliminate_zeros()
-        X_test[:,0] = 0
+        X_test[:, 0] = 0
         X_test[rs.random_sample(X_test.shape) > 0.5] = 0
         X_test = scipy.sparse.csc_matrix(X_test)
         X_test.eliminate_zeros()
@@ -199,8 +199,8 @@ class PreprocessingTestCase(unittest.TestCase):
                                     **{hp_name: default[hp_name] for hp_name in
                                        default})
         preprocessor.fit(X_train, Y_train)
-        Xt = preprocessor.transform(X_train)
-        #self.assertEqual(Xt.dtype, np.float32)
+        preprocessor.transform(X_train)
+        # self.assertEqual(Xt.dtype, np.float32)
 
         # np.float64
         X_train, Y_train, X_test, Y_test = get_dataset(dataset, add_NaNs=add_NaNs)
@@ -211,8 +211,8 @@ class PreprocessingTestCase(unittest.TestCase):
                                     **{hp_name: default[hp_name] for hp_name in
                                        default})
         preprocessor.fit(X_train, Y_train)
-        Xt = preprocessor.transform(X_train)
-        #self.assertEqual(Xt.dtype, np.float64)
+        preprocessor.transform(X_train)
+        # self.assertEqual(Xt.dtype, np.float64)
 
         if test_sparse is True:
             # Sparse
@@ -226,8 +226,8 @@ class PreprocessingTestCase(unittest.TestCase):
                                         **{hp_name: default[hp_name] for hp_name
                                            in default})
             preprocessor.fit(X_train, Y_train)
-            Xt = preprocessor.transform(X_train)
-            #self.assertEqual(Xt.dtype, np.float32)
+            preprocessor.transform(X_train)
+            # self.assertEqual(Xt.dtype, np.float32)
 
             # np.float64
             X_train, Y_train, X_test, Y_test = get_dataset(dataset,
@@ -240,8 +240,8 @@ class PreprocessingTestCase(unittest.TestCase):
                                         **{hp_name: default[hp_name] for hp_name
                                            in default})
             preprocessor.fit(X_train, Y_train)
-            Xt = preprocessor.transform(X_train)
-            #self.assertEqual(Xt.dtype, np.float64)
+            # Xt = preprocessor.transform(X_train)
+            # self.assertEqual(Xt.dtype, np.float64)
 
 
 def _test_regressor(Regressor, dataset='diabetes', sparse=False):
@@ -278,8 +278,8 @@ def _test_regressor(Regressor, dataset='diabetes', sparse=False):
 
     predictions = predictor.predict(X_test)
     if X_train_hash != hash(str(X_train)) or \
-                    X_test_hash != hash(str(X_test)) or \
-                    Y_train_hash != hash(str(Y_train)):
+       X_test_hash != hash(str(X_test)) or \
+       Y_train_hash != hash(str(Y_train)):
         raise ValueError("Model modified data")
     return predictions, Y_test, n_calls
 

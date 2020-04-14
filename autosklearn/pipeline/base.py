@@ -1,10 +1,9 @@
 from abc import ABCMeta
-from collections import defaultdict
 
 import numpy as np
 from ConfigSpace import Configuration
 from sklearn.pipeline import Pipeline
-from sklearn.utils.validation import check_random_state, check_is_fitted
+from sklearn.utils.validation import check_random_state
 
 from .components.base import AutoSklearnChoice, AutoSklearnComponent
 import autosklearn.pipeline.create_searchspace_util
@@ -226,7 +225,7 @@ class BasePipeline(Pipeline):
         return self.config_space
 
     def _get_hyperparameter_search_space(self, include=None, exclude=None,
-                                        dataset_properties=None):
+                                         dataset_properties=None):
         """Return the configuration space for the CASH problem.
 
         This method should be called by the method
@@ -320,8 +319,10 @@ class BasePipeline(Pipeline):
             # if the node isn't a choice we can add it immediately because it
             #  must be active (if it wasn't, np.sum(matches) would be zero
             if not is_choice:
-                cs.add_configuration_space(node_name,
-                    node.get_hyperparameter_search_space(dataset_properties))
+                cs.add_configuration_space(
+                    node_name,
+                    node.get_hyperparameter_search_space(dataset_properties),
+                    )
             # If the node is a choice, we have to figure out which of its
             #  choices are actually legal choices
             else:
@@ -356,7 +357,7 @@ class BasePipeline(Pipeline):
         configuration_string = ''.join(
             ['configuration={\n  ',
              ',\n  '.join(["'%s': %s" % (hp_name, repr(configuration[hp_name]))
-                                         for hp_name in sorted(configuration)]),
+                           for hp_name in sorted(configuration)]),
              '}'])
 
         if len(self.dataset_properties) > 0:
@@ -397,4 +398,3 @@ class BasePipeline(Pipeline):
         the optimization algorithm.
         """
         return self._additional_run_info
-

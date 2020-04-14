@@ -152,7 +152,7 @@ class SimpleRegressionPipeline(RegressorMixin, BasePipeline):
 
         if dataset_properties is None or not isinstance(dataset_properties, dict):
             dataset_properties = dict()
-        if not 'target_type' in dataset_properties:
+        if 'target_type' not in dataset_properties:
             dataset_properties['target_type'] = 'regression'
         if dataset_properties['target_type'] != 'regression':
             dataset_properties['target_type'] = 'regression'
