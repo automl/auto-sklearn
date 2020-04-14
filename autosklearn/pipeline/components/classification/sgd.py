@@ -1,16 +1,13 @@
-import numpy as np
-
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    CategoricalHyperparameter, UnParametrizedHyperparameter, \
-    UniformIntegerHyperparameter
+    CategoricalHyperparameter, UnParametrizedHyperparameter
 from ConfigSpace.conditions import EqualsCondition, InCondition
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
     IterativeComponentWithSampleWeight,
 )
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.util.common import check_for_bool
 
@@ -154,9 +151,11 @@ class SGD(
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        loss = CategoricalHyperparameter("loss",
+        loss = CategoricalHyperparameter(
+            "loss",
             ["hinge", "log", "modified_huber", "squared_hinge", "perceptron"],
-            default_value="log")
+            default_value="log",
+            )
         penalty = CategoricalHyperparameter(
             "penalty", ["l1", "l2", "elasticnet"], default_value="l2")
         alpha = UniformFloatHyperparameter(
@@ -197,4 +196,3 @@ class SGD(
                            eta0_in_inv_con])
 
         return cs
-

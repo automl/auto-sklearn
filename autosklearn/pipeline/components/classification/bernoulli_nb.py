@@ -7,7 +7,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
 )
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 from autosklearn.util.common import check_for_bool
 
 
@@ -60,7 +60,7 @@ class BernoulliNB(AutoSklearnClassificationAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
-        
+
         # the smoothing parameter is a non-negative float
         # I will limit it to 1000 and put it on a logarithmic scale. (SF)
         # Please adjust that, if you know a proper range, this is just a guess.
@@ -72,5 +72,5 @@ class BernoulliNB(AutoSklearnClassificationAlgorithm):
                                               default_value="True")
 
         cs.add_hyperparameters([alpha, fit_prior])
-        
+
         return cs

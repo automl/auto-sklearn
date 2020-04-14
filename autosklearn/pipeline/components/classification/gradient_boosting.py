@@ -10,7 +10,7 @@ from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
     IterativeComponent,
 )
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
 from autosklearn.util.common import check_none
 
 
@@ -121,7 +121,9 @@ class GradientBoostingClassifier(
 
         self.estimator.fit(X, y)
 
-        if self.estimator.max_iter >= self.max_iter or self.estimator.max_iter > self.estimator.n_iter_:
+        if self.estimator.max_iter >= self.max_iter \
+           or self.estimator.max_iter > self.estimator.n_iter_:
+
             self.fully_fit_ = True
 
         return self
@@ -195,4 +197,3 @@ class GradientBoostingClassifier(
         cs.add_conditions([n_iter_no_change_cond, validation_fraction_cond])
 
         return cs
-

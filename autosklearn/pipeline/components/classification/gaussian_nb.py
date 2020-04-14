@@ -5,7 +5,7 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
 )
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
 
 
 class GaussianNB(AutoSklearnClassificationAlgorithm):
@@ -57,4 +57,3 @@ class GaussianNB(AutoSklearnClassificationAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
         return cs
-
