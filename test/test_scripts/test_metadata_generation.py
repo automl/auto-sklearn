@@ -49,7 +49,7 @@ class TestMetadataGeneration(unittest.TestCase):
         with open(commands_output_file) as fh:
             while True:
                 cmd = fh.readline()
-                if 'task-id 253' in cmd:
+                if 'task-id 75222' in cmd:
                     break
 
         self.assertIn('time-limit 86400', cmd)
@@ -73,11 +73,11 @@ class TestMetadataGeneration(unittest.TestCase):
         expected_output_directory = os.path.join(self.working_directory,
                                                  'configuration',
                                                  'classification',
-                                                 '253')
+                                                 '75222')
         self.assertTrue(os.path.exists(expected_output_directory))
         smac_log = os.path.join(self.working_directory,
-                                'configuration/classification/253',
-                                'AutoML(1):253.log')
+                                'configuration/classification/75222',
+                                'AutoML(1):75222.log')
         with open(smac_log) as fh:
             smac_output = fh.read()
         self.assertEqual(rval.returncode, 0, msg=str(rval) + '\n' + smac_output)
@@ -111,7 +111,7 @@ class TestMetadataGeneration(unittest.TestCase):
 
         for file in ['algorithm_runs.arff', 'configurations.csv',
                      'description.results.txt']:
-            for metric in ['accuracy', 'balanced_accuracy', 'log_loss']:
+            for metric in ['accuracy', 'balanced_accuracy', 'log_loss', 'roc_auc']:
                 path = os.path.join(
                     self.working_directory,
                     'configuration_results',
@@ -119,15 +119,6 @@ class TestMetadataGeneration(unittest.TestCase):
                     file,
                 )
                 self.assertTrue(os.path.exists(path), msg=path)
-            # 253 is a multiclass classification dataset, therefore,
-            # roc_auc wasn't calculated -> cannot derive roc_auc_binary!
-            path = os.path.join(
-                self.working_directory,
-                'configuration_results',
-                'roc_auc_binary.classification_dense',
-                file,
-            )
-            self.assertFalse(os.path.exists(path), msg=path)
 
         # 6. Calculate metafeatures
         script_filename = os.path.join(scripts_directory, '03_calculate_metafeatures.py')
