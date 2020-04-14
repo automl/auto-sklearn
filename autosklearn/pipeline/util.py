@@ -240,7 +240,7 @@ class PreprocessingTestCase(unittest.TestCase):
                                         **{hp_name: default[hp_name] for hp_name
                                            in default})
             preprocessor.fit(X_train, Y_train)
-            # Xt = preprocessor.transform(X_train)
+            preprocessor.transform(X_train)
             # self.assertEqual(Xt.dtype, np.float64)
 
 
