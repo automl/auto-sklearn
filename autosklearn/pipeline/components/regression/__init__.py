@@ -1,12 +1,10 @@
 from collections import OrderedDict
-import copy
 import os
 
 from ..base import AutoSklearnRegressionAlgorithm, find_components, \
     ThirdPartyComponents, AutoSklearnChoice
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
-from ConfigSpace.conditions import EqualsCondition
 
 regressor_directory = os.path.split(__file__)[0]
 _regressors = find_components(__package__,

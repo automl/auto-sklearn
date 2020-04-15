@@ -6,7 +6,7 @@ from ConfigSpace.forbidden import ForbiddenEqualsClause, \
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.implementations.util import softmax
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 from autosklearn.util.common import check_for_bool, check_none
 
 

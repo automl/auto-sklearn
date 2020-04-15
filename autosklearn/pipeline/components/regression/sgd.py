@@ -1,14 +1,13 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    CategoricalHyperparameter, UnParametrizedHyperparameter, \
-    UniformIntegerHyperparameter
+    CategoricalHyperparameter, UnParametrizedHyperparameter
 from ConfigSpace.conditions import InCondition, EqualsCondition
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnRegressionAlgorithm,
     IterativeComponent,
 )
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 from autosklearn.util.common import check_for_bool
 
 
@@ -143,10 +142,11 @@ class SGD(
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        loss = CategoricalHyperparameter("loss",
-            ["squared_loss", "huber", "epsilon_insensitive",
-             "squared_epsilon_insensitive"],
-            default_value="squared_loss")
+        loss = CategoricalHyperparameter(
+            "loss",
+            ["squared_loss", "huber", "epsilon_insensitive", "squared_epsilon_insensitive"],
+            default_value="squared_loss",
+            )
         penalty = CategoricalHyperparameter(
             "penalty", ["l1", "l2", "elasticnet"], default_value="l2")
         alpha = UniformFloatHyperparameter(
@@ -175,8 +175,11 @@ class SGD(
 
         # TODO add passive/aggressive here, although not properly documented?
         elasticnet = EqualsCondition(l1_ratio, penalty, "elasticnet")
-        epsilon_condition = InCondition(epsilon, loss,
-            ["huber", "epsilon_insensitive", "squared_epsilon_insensitive"])
+        epsilon_condition = InCondition(
+            epsilon,
+            loss,
+            ["huber", "epsilon_insensitive", "squared_epsilon_insensitive"],
+            )
 
         # eta0 is only relevant if learning_rate!='optimal' according to code
         # https://github.com/scikit-learn/scikit-learn/blob/0.19.X/sklearn/

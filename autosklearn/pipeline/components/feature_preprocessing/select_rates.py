@@ -4,7 +4,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import SIGNED_DATA, UNSIGNED_DATA, SPARSE, DENSE, INPUT
 
 
 class SelectRates(AutoSklearnPreprocessingAlgorithm):

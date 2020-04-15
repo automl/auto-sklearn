@@ -5,7 +5,7 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, SIGNED_DATA, INPUT
 
 
 class Balancing(AutoSklearnPreprocessingAlgorithm):
@@ -112,4 +112,3 @@ class Balancing(AutoSklearnPreprocessingAlgorithm):
         cs = ConfigurationSpace()
         cs.add_hyperparameter(strategy)
         return cs
-

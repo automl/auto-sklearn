@@ -5,3 +5,4 @@ flake8 --max-line-length=100 --show-source autosklearn/util
 flake8 --max-line-length=100 --show-source autosklearn/data
 flake8 --max-line-length=100 --show-source autosklearn/metrics
 flake8 --max-line-length=100 --show-source autosklearn/metalearning
+flake8 --max-line-length=100 --show-source autosklearn/pipeline

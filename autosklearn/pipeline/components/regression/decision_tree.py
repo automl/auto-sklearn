@@ -7,8 +7,9 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnRegressionAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 from autosklearn.util.common import check_none
+
 
 class DecisionTree(AutoSklearnRegressionAlgorithm):
     def __init__(self, criterion, max_features, max_depth_factor,

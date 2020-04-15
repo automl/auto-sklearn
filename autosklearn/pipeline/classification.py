@@ -133,14 +133,11 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                 y = np.zeros((X.shape[0], target.shape[1]),
                              dtype=np.float32)
 
-                for k in range(max(1, int(np.ceil(float(X.shape[0]) /
-                        batch_size)))):
+                for k in range(max(1, int(np.ceil(float(X.shape[0]) / batch_size)))):
                     batch_from = k * batch_size
                     batch_to = min([(k + 1) * batch_size, X.shape[0]])
-                    y[batch_from:batch_to] = \
-                        self.predict_proba(X[batch_from:batch_to],
-                                           batch_size=None).\
-                            astype(np.float32)
+                    pred_prob = self.predict_proba(X[batch_from:batch_to], batch_size=None)
+                    y[batch_from:batch_to] = pred_prob.astype(np.float32)
 
                 return y
 
@@ -161,7 +158,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
 
         if dataset_properties is None or not isinstance(dataset_properties, dict):
             dataset_properties = dict()
-        if not 'target_type' in dataset_properties:
+        if 'target_type' not in dataset_properties:
             dataset_properties['target_type'] = 'classification'
         if dataset_properties['target_type'] != 'classification':
             dataset_properties['target_type'] = 'classification'
@@ -232,7 +229,7 @@ class SimpleClassificationPipeline(ClassifierMixin, BasePipeline):
                     break
                 except KeyError:
                     break
-                except ValueError as e:
+                except ValueError:
                     # Change the default and try again
                     try:
                         default = possible_default_classifier.pop()

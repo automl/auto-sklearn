@@ -7,8 +7,8 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from ConfigSpace.conditions import EqualsCondition, InCondition
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
-from autosklearn.pipeline.constants import *
-from autosklearn.util.common import check_none, check_for_bool
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
+from autosklearn.util.common import check_none
 
 
 class GradientBoosting(AutoSklearnRegressionAlgorithm):

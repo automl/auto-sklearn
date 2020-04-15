@@ -5,14 +5,14 @@ from ConfigSpace.conditions import EqualsCondition
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnClassificationAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
 from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.util.common import check_none
 
 
 class LDA(AutoSklearnClassificationAlgorithm):
     def __init__(self, shrinkage, n_components, tol, shrinkage_factor=0.5,
-        random_state=None):
+                 random_state=None):
         self.shrinkage = shrinkage
         self.n_components = n_components
         self.tol = tol

@@ -3,11 +3,10 @@ import numpy as np
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
-from ConfigSpace.conditions import InCondition, EqualsCondition, AndConjunction
+from ConfigSpace.conditions import InCondition, EqualsCondition
 
-from autosklearn.pipeline.components.base import \
-    AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
+from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT, SIGNED_DATA
 
 
 class Nystroem(AutoSklearnPreprocessingAlgorithm):

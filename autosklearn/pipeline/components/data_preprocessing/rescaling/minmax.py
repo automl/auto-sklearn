@@ -1,4 +1,4 @@
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, SIGNED_DATA, INPUT
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling \
     import Rescaling
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
