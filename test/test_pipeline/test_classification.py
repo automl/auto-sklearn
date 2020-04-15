@@ -8,7 +8,6 @@ import unittest.mock
 
 from joblib import Memory
 import numpy as np
-from numpy.testing import assert_array_almost_equal
 
 import sklearn.datasets
 import sklearn.decomposition
@@ -427,20 +426,29 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         )
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
-        self.assertRaisesRegex(AssertionError, "No valid pipeline found.",
-                                SimpleClassificationPipeline,
-                                include={'classifier': ['multinomial_nb'],
-                                         'feature_preprocessor': ['pca']},
-                                dataset_properties={'sparse': True})
+        self.assertRaisesRegex(
+            AssertionError,
+            "No valid pipeline found.",
+            SimpleClassificationPipeline,
+            include={
+                'classifier': ['multinomial_nb'],
+                'feature_preprocessor': ['pca']
+            },
+            dataset_properties={'sparse': True}
+        )
 
         # It must also be catched that no classifiers which can handle sparse
         #  data are located behind the densifier
-        self.assertRaisesRegex(ValueError, "Cannot find a legal default "
-                                            "configuration.",
-                                SimpleClassificationPipeline,
-                                include={'classifier': ['liblinear_svc'],
-                                         'feature_preprocessor': ['densifier']},
-                                dataset_properties={'sparse': True})
+        self.assertRaisesRegex(
+            ValueError,
+            "Cannot find a legal default configuration.",
+            SimpleClassificationPipeline,
+            include={
+                'classifier': ['liblinear_svc'],
+                'feature_preprocessor': ['densifier']
+            },
+            dataset_properties={'sparse': True}
+        )
 
     @unittest.skip("Wait until ConfigSpace is fixed.")
     def test_get_hyperparameter_search_space_dataset_properties(self):
@@ -479,7 +487,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(84, cls_predict.call_count)
-        assert_array_almost_equal(prediction_, prediction)
+        np.testing.assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_batched_sparse(self):
         cls = SimpleClassificationPipeline(dataset_properties={'sparse': True},
@@ -497,7 +505,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(84, cls_predict.call_count)
-        assert_array_almost_equal(prediction_, prediction)
+        np.testing.assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_proba_batched(self):
         # Multiclass
@@ -513,7 +521,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(84, cls_predict.call_count)
-        assert_array_almost_equal(prediction_, prediction)
+        np.testing.assert_array_almost_equal(prediction_, prediction)
 
         # Multilabel
         cls = SimpleClassificationPipeline(include={'classifier': ['lda']})
@@ -529,7 +537,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(84, cls_predict.call_count)
-        assert_array_almost_equal(prediction_, prediction)
+        np.testing.assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_proba_batched_sparse(self):
 
@@ -549,7 +557,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(84, cls_predict.call_count)
-        assert_array_almost_equal(prediction_, prediction)
+        np.testing.assert_array_almost_equal(prediction_, prediction)
 
         # Multilabel
         cls = SimpleClassificationPipeline(
@@ -568,7 +576,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         prediction = cls.predict_proba(X_test, batch_size=20)
         self.assertEqual((1647, 10), prediction.shape)
         self.assertEqual(84, cls_predict.call_count)
-        assert_array_almost_equal(prediction_, prediction)
+        np.testing.assert_array_almost_equal(prediction_, prediction)
 
     def test_set_params(self):
         pass
