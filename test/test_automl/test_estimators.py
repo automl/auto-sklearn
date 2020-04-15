@@ -58,7 +58,7 @@ class EstimatorTest(Base, unittest.TestCase):
     def test_pSMAC_wrong_arguments(self):
         X = np.zeros((100, 100))
         y = np.zeros((100, ))
-        self.assertRaisesRegexp(ValueError,
+        self.assertRaisesRegex(ValueError,
                                 "If shared_mode == True tmp_folder must not "
                                 "be None.",
                                 lambda shared_mode:
@@ -67,7 +67,7 @@ class EstimatorTest(Base, unittest.TestCase):
                                 ).fit(X, y),
                                 shared_mode=True)
 
-        self.assertRaisesRegexp(ValueError,
+        self.assertRaisesRegex(ValueError,
                                 "If shared_mode == True output_folder must not "
                                 "be None.",
                                 lambda shared_mode, tmp_folder:
@@ -82,18 +82,18 @@ class EstimatorTest(Base, unittest.TestCase):
         cls = AutoSklearnClassifier()
         X = np.zeros((100, 100))
         y = np.zeros((100, ))
-        self.assertRaisesRegexp(ValueError,
+        self.assertRaisesRegex(ValueError,
                                 'Array feat_type does not have same number of '
                                 'variables as X has features. 1 vs 100.',
                                 cls.fit,
                                 X=X, y=y, feat_type=[True])
 
-        self.assertRaisesRegexp(ValueError,
+        self.assertRaisesRegex(ValueError,
                                 'Array feat_type must only contain strings.',
                                 cls.fit,
                                 X=X, y=y, feat_type=[True]*100)
 
-        self.assertRaisesRegexp(ValueError,
+        self.assertRaisesRegex(ValueError,
                                 'Only `Categorical` and `Numerical` are '
                                 'valid feature types, you passed `Car`',
                                 cls.fit,
