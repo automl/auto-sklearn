@@ -263,20 +263,28 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         )
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
-        self.assertRaisesRegex(ValueError, "Cannot find a legal default "
-                                            "configuration.",
-                                SimpleRegressionPipeline,
-                                include={'regressor': ['random_forest'],
-                                         'feature_preprocessor': ['kitchen_sinks']})
+        self.assertRaisesRegex(
+            ValueError,
+            "Cannot find a legal default configuration.",
+            SimpleRegressionPipeline,
+            include={
+                'regressor': ['random_forest'],
+                'feature_preprocessor': ['kitchen_sinks']
+            }
+        )
 
         # It must also be catched that no classifiers which can handle sparse
         # data are located behind the densifier
-        self.assertRaisesRegex(ValueError, "Cannot find a legal default "
-                                            "configuration",
-                                SimpleRegressionPipeline,
-                                include={'regressor': ['ridge_regression'],
-                                         'feature_preprocessor': ['densifier']},
-                                dataset_properties={'sparse': True})
+        self.assertRaisesRegex(
+            ValueError,
+            "Cannot find a legal default configuration",
+            SimpleRegressionPipeline,
+            include={
+                'regressor': ['ridge_regression'],
+                'feature_preprocessor': ['densifier']
+            },
+            dataset_properties={'sparse': True}
+        )
 
     @unittest.skip("test_get_hyperparameter_search_space_dataset_properties" +
                    " Not yet Implemented")

@@ -1,6 +1,5 @@
 import unittest
 import numpy as np
-from numpy.testing import assert_array_almost_equal
 
 import scipy.sparse
 
@@ -25,6 +24,6 @@ class MinorityCoalescerTest(unittest.TestCase):
     def test_no_coalescence(self):
         X = np.random.randint(0, 255, (3, 4))
         Y = NoCoalescence().fit_transform(X)
-        assert_array_almost_equal(Y, X)
+        np.testing.assert_array_almost_equal(Y, X)
         # Assert no copies were made
         self.assertEqual(id(X), id(Y))

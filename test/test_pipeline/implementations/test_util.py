@@ -1,7 +1,6 @@
 import unittest
 
 import numpy as np
-from numpy.testing import assert_array_almost_equal
 
 from autosklearn.pipeline.implementations.util import softmax
 
@@ -16,7 +15,7 @@ class UtilTest(unittest.TestCase):
                        -33.10196906, 26.84144377, -36.8569686])
         probas = softmax(df)
         expected = [[1., 0.] if d < 0. else [0., 1.] for d in df]
-        assert_array_almost_equal(expected, probas)
+        np.testing.assert_array_almost_equal(expected, probas)
 
     def test_softmax(self):
         df = np.array([[2.75021367e+10, -8.83772371e-01, -2.20516715e+27],
@@ -33,4 +32,4 @@ class UtilTest(unittest.TestCase):
         probas = softmax(df)
         expected = np.array([[0.25838965, 0.42601251, 0.31559783],
                              [0.28943311, 0.31987306, 0.39069383]])
-        assert_array_almost_equal(expected, probas)
+        np.testing.assert_array_almost_equal(expected, probas)
