@@ -6,7 +6,6 @@ import unittest
 import unittest.mock
 
 import numpy as np
-from numpy.testing import assert_array_almost_equal
 
 import sklearn.datasets
 import sklearn.decomposition
@@ -266,20 +265,28 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         )
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
-        self.assertRaisesRegex(ValueError, "Cannot find a legal default "
-                                            "configuration.",
-                                SimpleRegressionPipeline,
-                                include={'regressor': ['random_forest'],
-                                         'feature_preprocessor': ['kitchen_sinks']})
+        self.assertRaisesRegex(
+            ValueError,
+            "Cannot find a legal default configuration.",
+            SimpleRegressionPipeline,
+            include={
+                'regressor': ['random_forest'],
+                'feature_preprocessor': ['kitchen_sinks']
+            }
+        )
 
         # It must also be catched that no classifiers which can handle sparse
         # data are located behind the densifier
-        self.assertRaisesRegex(ValueError, "Cannot find a legal default "
-                                            "configuration",
-                                SimpleRegressionPipeline,
-                                include={'regressor': ['ridge_regression'],
-                                         'feature_preprocessor': ['densifier']},
-                                dataset_properties={'sparse': True})
+        self.assertRaisesRegex(
+            ValueError,
+            "Cannot find a legal default configuration",
+            SimpleRegressionPipeline,
+            include={
+                'regressor': ['ridge_regression'],
+                'feature_preprocessor': ['densifier']
+            },
+            dataset_properties={'sparse': True}
+        )
 
     @unittest.skip("test_get_hyperparameter_search_space_dataset_properties" +
                    " Not yet Implemented")
@@ -329,7 +336,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         prediction = regressor.predict(X_test, batch_size=20)
         self.assertEqual((356,), prediction.shape)
         self.assertEqual(18, mock_predict.call_count)
-        assert_array_almost_equal(prediction_, prediction)
+        np.testing.assert_array_almost_equal(prediction_, prediction)
 
     def test_predict_batched_sparse(self):
         dataset_properties = {'sparse': True}
@@ -351,7 +358,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         prediction = regressor.predict(X_test, batch_size=20)
         self.assertEqual((356,), prediction.shape)
         self.assertEqual(18, mock_predict.call_count)
-        assert_array_almost_equal(prediction_, prediction)
+        np.testing.assert_array_almost_equal(prediction_, prediction)
 
     @unittest.skip("test_check_random_state Not yet Implemented")
     def test_check_random_state(self):

@@ -1011,9 +1011,10 @@ class TrainEvaluator(AbstractEvaluator):
             elif self.resampling_strategy in ['cv', 'partial-cv',
                                               'partial-cv-iterative-fit']:
                 random_state = 1 if shuffle else None
-                cv = KFold(n_splits=self.resampling_strategy_args['folds'],
-                           shuffle=shuffle,
-                           random_state=random_state,
+                cv = KFold(
+                    n_splits=self.resampling_strategy_args['folds'],
+                    shuffle=shuffle,
+                    random_state=random_state,
                 )
             else:
                 raise ValueError(self.resampling_strategy)
