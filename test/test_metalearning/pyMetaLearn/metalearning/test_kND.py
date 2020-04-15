@@ -1,11 +1,11 @@
 import unittest
 import numpy as np
+from numpy.testing import assert_array_almost_equal
 
 import pandas as pd
 from autosklearn.metalearning.metalearning.kNearestDatasets.kND import KNearestDatasets
 from autosklearn.metalearning.metalearning.metrics.misc import get_random_metric
 from autosklearn.metalearning.metalearning.meta_base import Run
-from sklearn.utils.testing import assert_array_almost_equal
 
 class kNDTest(unittest.TestCase):
     _multiprocess_can_split_ = True
