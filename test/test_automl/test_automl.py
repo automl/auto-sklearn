@@ -12,7 +12,7 @@ import sklearn.datasets
 from smac.scenario.scenario import Scenario
 from smac.facade.roar_facade import ROAR
 
-from autosklearn.util.backend import Backend, BackendContext
+from autosklearn.util.backend import Backend
 from autosklearn.automl import AutoML
 import autosklearn.automl
 from autosklearn.metrics import accuracy
@@ -23,7 +23,7 @@ from autosklearn.smbo import load_data
 from smac.tae.execute_ta_run import StatusType
 
 sys.path.append(os.path.dirname(__file__))
-from base import Base
+from base import Base  # noqa
 
 
 class AutoMLStub(AutoML):
@@ -391,5 +391,5 @@ class AutoMLTest(Base, unittest.TestCase):
         self._tearDown(backend_api.output_directory)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()

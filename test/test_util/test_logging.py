@@ -5,6 +5,7 @@ import logging.config
 import yaml
 from autosklearn.util import logging_
 
+
 class LoggingTest(unittest.TestCase):
 
     def test_setup_logger(self):
@@ -12,8 +13,7 @@ class LoggingTest(unittest.TestCase):
         # according to the given dictionary, and uses the default
         # logging.yaml file if logging_config is not specified.
 
-        with open(os.path.join(os.path.dirname(__file__), \
-                               'example_config.yaml'), 'r') as fh:
+        with open(os.path.join(os.path.dirname(__file__), 'example_config.yaml'), 'r') as fh:
             example_config = yaml.safe_load(fh)
 
         # Configure logger with example_config.yaml.

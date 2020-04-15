@@ -6,13 +6,13 @@ import unittest.mock
 
 import numpy as np
 
+from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
+from autosklearn.metrics import accuracy
+from smac.tae.execute_ta_run import StatusType  # noqa E402
+
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
-from evaluation_util import get_multiclass_classification_datamanager, \
-    get_regression_datamanager
-from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
-from autosklearn.metrics import accuracy, r2, mean_squared_error
-from smac.tae.execute_ta_run import StatusType  # noqa E402
+from evaluation_util import get_multiclass_classification_datamanager  # noqa
 
 
 class AbstractEvaluatorTest(unittest.TestCase):
@@ -49,7 +49,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
                                output_y_hat_optimization=False,
                                queue=queue_mock, metric=accuracy)
         ae.Y_optimization = rs.rand(33, 3)
-        predictions_train = rs.rand(66, 3)
         predictions_ensemble = rs.rand(33, 3)
         predictions_test = rs.rand(25, 3)
         predictions_valid = rs.rand(25, 3)
@@ -125,7 +124,6 @@ class AbstractEvaluatorTest(unittest.TestCase):
             metric=accuracy,
         )
 
-        predictions_train = rs.rand(66, 3)
         predictions_ensemble = rs.rand(33, 3)
         predictions_test = rs.rand(25, 3)
         predictions_valid = rs.rand(25, 3)

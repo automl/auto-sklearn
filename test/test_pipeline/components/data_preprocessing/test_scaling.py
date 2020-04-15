@@ -9,8 +9,10 @@ from autosklearn.pipeline.util import get_dataset
 
 class ScalingComponentTest(unittest.TestCase):
     def _test_helper(self, Preprocessor, dataset=None, make_sparse=False):
-        X_train, Y_train, X_test, Y_test = get_dataset(dataset=dataset,
-                                          make_sparse=make_sparse)
+        X_train, Y_train, X_test, Y_test = get_dataset(
+            dataset=dataset,
+            make_sparse=make_sparse,
+            )
 
         dataset_properties = {'sparse': make_sparse}
 

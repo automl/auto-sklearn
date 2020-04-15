@@ -17,7 +17,6 @@ import sklearn.model_selection
 from smac.tae.execute_ta_run import StatusType, TAEAbortException
 
 from autosklearn.data.abstract_data_manager import AbstractDataManager
-from autosklearn.evaluation import ExecuteTaFuncWithQueue
 from autosklearn.evaluation.util import read_queue
 from autosklearn.evaluation.train_evaluator import TrainEvaluator, \
     eval_holdout, eval_iterative_holdout, eval_cv, eval_partial_cv, subsample_indices
@@ -33,7 +32,7 @@ this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 from evaluation_util import get_regression_datamanager, BaseEvaluatorTest, \
     get_binary_classification_datamanager, get_dataset_getters, \
-    get_multiclass_classification_datamanager
+    get_multiclass_classification_datamanager  # noqa
 
 
 class BackendMock(object):
@@ -75,7 +74,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D = get_binary_classification_datamanager()
         D.name = 'test'
 
-        pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.predict_proba.side_effect = \
+            lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.get_max_iter.return_value = 1
@@ -139,9 +139,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         Xt_fixture = 'Xt_fixture'
         pipeline_mock.estimator_supports_iterative_fit.return_value = True
-        pipeline_mock.configuration_fully_fitted.side_effect = SideEffect().configuration_fully_fitted
+        pipeline_mock.configuration_fully_fitted.side_effect = \
+            SideEffect().configuration_fully_fitted
         pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
-        pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.predict_proba.side_effect = \
+            lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_max_iter.return_value = 512
@@ -236,9 +238,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         Xt_fixture = 'Xt_fixture'
         pipeline_mock.estimator_supports_iterative_fit.return_value = True
-        pipeline_mock.configuration_fully_fitted.side_effect = SideEffect().configuration_fully_fitted
+        pipeline_mock.configuration_fully_fitted.side_effect = \
+            SideEffect().configuration_fully_fitted
         pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
-        pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.predict_proba.side_effect = \
+            lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.get_max_iter.return_value = 512
@@ -310,7 +314,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         Xt_fixture = 'Xt_fixture'
         pipeline_mock.estimator_supports_iterative_fit.return_value = False
         pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
-        pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.predict_proba.side_effect = \
+            lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
         tmp_dir = os.path.join(os.getcwd(), '.tmp_test_iterative_holdout_not_iterative')
@@ -352,7 +357,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     def test_cv(self, pipeline_mock):
         D = get_binary_classification_datamanager()
 
-        pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.predict_proba.side_effect = \
+            lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
         tmp_dir = os.path.join(os.getcwd(), '.tmp_test_cv')
@@ -360,7 +366,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         configuration = unittest.mock.Mock(spec=Configuration)
         backend_api = backend.create(tmp_dir, output_dir)
-        backend_api.load_datamanager = lambda : D
+        backend_api.load_datamanager = lambda: D
         queue_ = multiprocessing.Queue()
 
         evaluator = TrainEvaluator(backend_api, queue_,
@@ -402,7 +408,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     def test_partial_cv(self, pipeline_mock):
         D = get_binary_classification_datamanager()
 
-        pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.predict_proba.side_effect = \
+            lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.get_max_iter.return_value = 1
@@ -461,9 +468,11 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
 
         Xt_fixture = 'Xt_fixture'
         pipeline_mock.estimator_supports_iterative_fit.return_value = True
-        pipeline_mock.configuration_fully_fitted.side_effect = SideEffect().configuration_fully_fitted
+        pipeline_mock.configuration_fully_fitted.side_effect = \
+            SideEffect().configuration_fully_fitted
         pipeline_mock.fit_transformer.return_value = Xt_fixture, {}
-        pipeline_mock.predict_proba.side_effect = lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
+        pipeline_mock.predict_proba.side_effect = \
+            lambda X, batch_size: np.tile([0.6, 0.4], (len(X), 1))
         pipeline_mock.get_additional_run_info.return_value = None
         pipeline_mock.side_effect = lambda **kwargs: pipeline_mock
         pipeline_mock.get_max_iter.return_value = 512
@@ -580,8 +589,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
                 1.0,
                 {
                     'error':
-                     'Model predictions for validation set contains NaNs.'
-                 },
+                    'Model predictions for validation set contains NaNs.'
+                },
             )
         )
         D.data['Y_train'][0] = np.NaN
@@ -755,6 +764,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         class SideEffect(object):
             def __init__(self):
                 self.n_call = 0
+
             def __call__(self, *args, **kwargs):
                 if self.n_call == 0:
                     self.n_call += 1
@@ -801,8 +811,10 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     def test_fit_predict_and_loss_iterative_additional_run_info(
             self, mock, backend_mock, finish_up_mock, loss_mock,
     ):
+
         class Counter:
             counter = 0
+
             def __call__(self):
                 self.counter += 1
                 return False if self.counter <= 1 else True
@@ -878,6 +890,7 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
     ):
         class Counter:
             counter = 0
+
             def __call__(self):
                 self.counter += 1
                 return False if self.counter <= 1 else True
@@ -1112,14 +1125,12 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
         evaluator = TrainEvaluator()
         evaluator.resampling_strategy = GroupKFold
-        evaluator.resampling_strategy_args = {'folds': 2,
-                    'groups': np.array([1, 1, 2, 1, 2, 2])}
+        evaluator.resampling_strategy_args = {'folds': 2, 'groups': np.array([1, 1, 2, 1, 2, 2])}
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, GroupKFold)
-        self.assertEqual(cv.get_n_splits(
-            groups=evaluator.resampling_strategy_args['groups']), 2)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-            , groups=evaluator.resampling_strategy_args['groups']))
+        self.assertEqual(cv.get_n_splits(groups=evaluator.resampling_strategy_args['groups']), 2)
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # GroupKFold, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1141,8 +1152,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             groups=evaluator.resampling_strategy_args['groups']), 4)
         self.assertEqual(cv.shuffle, True)
         self.assertEqual(cv.random_state, 5)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # KFold, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1155,8 +1166,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             groups=evaluator.resampling_strategy_args['groups']), 3)
         self.assertEqual(cv.shuffle, False)
         self.assertIsNone(cv.random_state)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # LeaveOneGroupOut, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1165,8 +1176,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = {'groups': np.array([1, 1, 2, 1, 2, 2])}
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, LeaveOneGroupOut)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # LeaveOneGroupOut, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1185,8 +1196,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, LeavePGroupsOut)
         self.assertEqual(cv.n_groups, 1)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # LeavePGroupsOut, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1203,8 +1214,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = None
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, LeaveOneOut)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # LeavePOut, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1214,8 +1225,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, LeavePOut)
         self.assertEqual(cv.p, 3)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # LeavePOut, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1225,8 +1236,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, LeavePOut)
         self.assertEqual(cv.p, 2)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # PredefinedSplit, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1235,8 +1246,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         evaluator.resampling_strategy_args = {'test_fold': np.array([0, 1, 0, 1, 0, 1])}
         cv = evaluator.get_splitter(D)
         self.assertIsInstance(cv, PredefinedSplit)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # PredefinedSplit, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1258,8 +1269,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             groups=evaluator.resampling_strategy_args['groups']), 4*3)
         self.assertEqual(cv.n_repeats, 3)
         self.assertEqual(cv.random_state, 5)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # RepeatedKFold, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1272,8 +1283,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             groups=evaluator.resampling_strategy_args['groups']), 5*10)
         self.assertEqual(cv.n_repeats, 10)
         self.assertIsNone(cv.random_state)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # RepeatedStratifiedKFold, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1287,8 +1298,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             groups=evaluator.resampling_strategy_args['groups']), 2*3)
         self.assertEqual(cv.n_repeats, 3)
         self.assertEqual(cv.random_state, 5)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # RepeatedStratifiedKFold, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
@@ -1301,8 +1312,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             groups=evaluator.resampling_strategy_args['groups']), 5*10)
         self.assertEqual(cv.n_repeats, 10)
         self.assertIsNone(cv.random_state)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # StratifiedKFold, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1316,8 +1327,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             groups=evaluator.resampling_strategy_args['groups']), 2)
         self.assertEqual(cv.shuffle, True)
         self.assertEqual(cv.random_state, 5)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # StratifiedKFold, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1330,8 +1341,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             groups=evaluator.resampling_strategy_args['groups']), 3)
         self.assertEqual(cv.shuffle, False)
         self.assertIsNone(cv.random_state)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # TimeSeriesSplit, regression with args
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -1344,8 +1355,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 4)
         self.assertEqual(cv.max_train_size, 3)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # TimeSeriesSplit, regression no args
         D.data['Y_train'] = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -1358,8 +1369,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
         self.assertEqual(cv.get_n_splits(
             groups=evaluator.resampling_strategy_args['groups']), 3)
         self.assertIsNone(cv.max_train_size)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # StratifiedKFold, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1372,8 +1383,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             groups=evaluator.resampling_strategy_args['groups']), 3)
         self.assertEqual(cv.shuffle, False)
         self.assertIsNone(cv.random_state)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # GroupShuffleSplit, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1388,8 +1399,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             groups=evaluator.resampling_strategy_args['groups']), 2)
         self.assertEqual(cv.test_size, 0.3)
         self.assertEqual(cv.random_state, 5)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # GroupShuffleSplit, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1411,8 +1422,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             groups=evaluator.resampling_strategy_args['groups']), 2)
         self.assertEqual(cv.test_size, 0.3)
         self.assertEqual(cv.random_state, 5)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # StratifiedShuffleSplit, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1,
@@ -1426,8 +1437,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             groups=evaluator.resampling_strategy_args['groups']), 10)
         self.assertIsNone(cv.test_size)
         self.assertIsNone(cv.random_state)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # ShuffleSplit, classification with args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1441,8 +1452,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             groups=evaluator.resampling_strategy_args['groups']), 2)
         self.assertEqual(cv.test_size, 0.3)
         self.assertEqual(cv.random_state, 5)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
         # ShuffleSplit, classification no args
         D.data['Y_train'] = np.array([0, 0, 0, 1, 1, 1])
@@ -1455,8 +1466,8 @@ class TestTrainEvaluator(BaseEvaluatorTest, unittest.TestCase):
             groups=evaluator.resampling_strategy_args['groups']), 10)
         self.assertIsNone(cv.test_size)
         self.assertIsNone(cv.random_state)
-        next(cv.split(D.data['Y_train'], D.data['Y_train']
-                      , groups=evaluator.resampling_strategy_args['groups']))
+        next(cv.split(D.data['Y_train'], D.data['Y_train'],
+                      groups=evaluator.resampling_strategy_args['groups']))
 
     @unittest.mock.patch.object(TrainEvaluator, "__init__")
     def test_holdout_split_size(self, te_mock):

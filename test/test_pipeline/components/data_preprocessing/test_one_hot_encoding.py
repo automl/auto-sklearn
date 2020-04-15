@@ -1,4 +1,3 @@
-import os
 import unittest
 
 import numpy as np
@@ -16,6 +15,7 @@ def create_X(instances=1000, n_feats=10, categs_per_feat=5, seed=0):
     size = (instances, n_feats)
     X = rs.randint(0, categs_per_feat, size=size)
     return X
+
 
 class OneHotEncoderTest(unittest.TestCase):
 
@@ -38,9 +38,10 @@ class OneHotEncoderTest(unittest.TestCase):
             configuration_space = OneHotEncoder.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
 
-            preprocessor = OneHotEncoder(random_state=1,
-                                         **{hp_name: default[hp_name] for hp_name in
-                                           default if default[hp_name] is not None})
+            preprocessor = OneHotEncoder(
+                random_state=1,
+                **{hp_name: default[hp_name] for hp_name in default if default[hp_name] is not None}
+                )
 
             transformer = preprocessor.fit(self.X_train.copy())
             Xt = transformer.transform(self.X_train.copy())

@@ -13,7 +13,6 @@ from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.components.classification.adaboost import AdaboostClassifier
 from autosklearn.pipeline.components.classification.decision_tree import DecisionTree
 from autosklearn.pipeline.components.classification.extra_trees import ExtraTreesClassifier
-from autosklearn.pipeline.components.classification.gradient_boosting import GradientBoostingClassifier
 from autosklearn.pipeline.components.classification.random_forest import RandomForest
 from autosklearn.pipeline.components.classification.liblinear_svc import LibLinear_SVC
 from autosklearn.pipeline.components.classification.libsvm_svc import LibSVM_SVC
@@ -21,7 +20,8 @@ from autosklearn.pipeline.components.classification.sgd import SGD
 from autosklearn.pipeline.components.classification.passive_aggressive import PassiveAggressive
 from autosklearn.pipeline.components.feature_preprocessing\
     .extra_trees_preproc_for_classification import ExtraTreesPreprocessorClassification
-from autosklearn.pipeline.components.feature_preprocessing.liblinear_svc_preprocessor import LibLinear_Preprocessor
+from autosklearn.pipeline.components.feature_preprocessing.liblinear_svc_preprocessor import \
+    LibLinear_Preprocessor
 
 
 class BalancingComponentTest(unittest.TestCase):
@@ -80,7 +80,7 @@ class BalancingComponentTest(unittest.TestCase):
                  ('liblinear_svc', LibLinear_SVC, 0.762, 0.735, 3),
                  ('passive_aggressive', PassiveAggressive, 0.091, 0.762, 3),
                  ('sgd', SGD, 0.818, 0.567, 2)
-                ]:
+                 ]:
             for strategy, acc in [
                 ('none', acc_no_weighting),
                 ('weighting', acc_weighting)

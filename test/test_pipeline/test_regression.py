@@ -5,7 +5,6 @@ import traceback
 import unittest
 import unittest.mock
 
-import numpy as np
 import sklearn.datasets
 import sklearn.decomposition
 import sklearn.ensemble
@@ -21,7 +20,7 @@ from autosklearn.pipeline.components.base import \
 import autosklearn.pipeline.components.regression as regression_components
 import autosklearn.pipeline.components.feature_preprocessing as preprocessing_components
 from autosklearn.pipeline.util import get_dataset
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import SPARSE, DENSE, SIGNED_DATA, UNSIGNED_DATA, PREDICTIONS
 
 
 class SimpleRegressionPipelineTest(unittest.TestCase):
@@ -58,8 +57,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         for key in regressors:
             if hasattr(regressors[key], 'get_components'):
                 continue
-            self.assertIn(AutoSklearnRegressionAlgorithm,
-                            regressors[key].__bases__)
+            self.assertIn(AutoSklearnRegressionAlgorithm, regressors[key].__bases__)
 
     def test_find_preprocessors(self):
         preprocessors = preprocessing_components._preprocessors
@@ -67,8 +65,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
         for key in preprocessors:
             if hasattr(preprocessors[key], 'get_components'):
                 continue
-            self.assertIn(AutoSklearnPreprocessingAlgorithm,
-                            preprocessors[key].__bases__)
+            self.assertIn(AutoSklearnPreprocessingAlgorithm, preprocessors[key].__bases__)
 
     def test_configurations(self):
         cs = SimpleRegressionPipeline().get_hyperparameter_search_space()
@@ -118,8 +115,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
 
             for restrict_parameter in restrictions:
                 restrict_to = restrictions[restrict_parameter]
-                if restrict_parameter in config and \
-                                config[restrict_parameter] is not None:
+                if restrict_parameter in config and config[restrict_parameter] is not None:
                     config._values[restrict_parameter] = restrict_to
 
             if data is None:
@@ -129,15 +125,15 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
                 X_train = data['X_train'].copy()
                 Y_train = data['Y_train'].copy()
                 X_test = data['X_test'].copy()
-                Y_test = data['Y_test'].copy()
+                data['Y_test'].copy()
 
             cls = SimpleRegressionPipeline(random_state=1,
                                            dataset_properties=dataset_properties)
             cls.set_hyperparameters(config)
             try:
                 cls.fit(X_train, Y_train)
-                predictions = cls.predict(X_test)
-            except MemoryError as e:
+                cls.predict(X_test)
+            except MemoryError:
                 continue
             except ValueError as e:
                 if "Floating-point under-/overflow occurred at epoch" in \
@@ -205,7 +201,7 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
             include={'regressor': ['random_forest'],
                      'feature_preprocessor': ['no_preprocessing']})
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='boston')
-        XT = regressor.fit_transformer(X_train, Y_train)
+        regressor.fit_transformer(X_train, Y_train)
         for i in range(1, 11):
             regressor.iterative_fit(X_train, Y_train)
             self.assertEqual(regressor.steps[-1][-1].choice.estimator.n_estimators,
@@ -227,8 +223,10 @@ class SimpleRegressionPipelineTest(unittest.TestCase):
     def test_get_hyperparameter_search_space_include_exclude_models(self):
         cs = SimpleRegressionPipeline(
             include={'regressor': ['random_forest']}).get_hyperparameter_search_space()
-        self.assertEqual(cs.get_hyperparameter('regressor:__choice__'),
-            CategoricalHyperparameter('regressor:__choice__', ['random_forest']))
+        self.assertEqual(
+            cs.get_hyperparameter('regressor:__choice__'),
+            CategoricalHyperparameter('regressor:__choice__', ['random_forest']),
+            )
 
         # TODO add this test when more than one regressor is present
         cs = SimpleRegressionPipeline(exclude={'regressor': ['random_forest']}).\

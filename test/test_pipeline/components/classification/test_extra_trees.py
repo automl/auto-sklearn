@@ -1,7 +1,6 @@
 import sklearn.ensemble
 
-from autosklearn.pipeline.components.classification.extra_trees import \
-    ExtraTreesClassifier
+from autosklearn.pipeline.components.classification.extra_trees import ExtraTreesClassifier
 
 from .test_base import BaseClassificationComponentTest
 

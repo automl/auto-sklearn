@@ -2,7 +2,7 @@ import unittest
 
 from autosklearn.pipeline.util import _test_classifier, \
     _test_classifier_predict_proba, _test_classifier_iterative_fit
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import SPARSE
 
 import sklearn.metrics
 import numpy as np
@@ -210,8 +210,7 @@ class BaseClassificationComponentTest(unittest.TestCase):
             cls = self.sk_module
             X = np.random.random((10, 10))
             y = np.random.randint(0, 1, size=(10, 10))
-            self.assertRaisesRegexp(ValueError, 'bad input shape \(10, 10\)',
-                                    cls.fit, X, y)
+            self.assertRaisesRegexp(ValueError, r'bad input shape \(10, 10\)', cls.fit, X, y)
         else:
             return
 

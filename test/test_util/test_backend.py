@@ -1,10 +1,7 @@
 # -*- encoding: utf-8 -*-
 import builtins
-import sys
 import unittest
 import unittest.mock
-
-import sklearn.tree
 
 from autosklearn.util.backend import Backend
 
@@ -84,7 +81,8 @@ class BackendModelsTest(unittest.TestCase):
         fileMock = unittest.mock.MagicMock()
         fileMock.__enter__.return_value = file_handler
 
-        openMock.side_effect = lambda path, flag: fileMock if path == model_path and flag == 'rb' else None
+        openMock.side_effect = \
+            lambda path, flag: fileMock if path == model_path and flag == 'rb' else None
         pickleLoadMock.side_effect = lambda fh: expected_model if fh == file_handler else None
 
         return expected_model

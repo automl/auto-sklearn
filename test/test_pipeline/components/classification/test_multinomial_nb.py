@@ -33,7 +33,6 @@ class MultinomialNBComponentTest(BaseClassificationComponentTest):
     def test_default_configuration_negative_values(self):
         # Custon preprocessing test to check if clipping to zero works
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
-        original_X_train = X_train.copy()
         ss = sklearn.preprocessing.StandardScaler()
         X_train = ss.fit_transform(X_train)
         configuration_space = MultinomialNB.get_hyperparameter_search_space()

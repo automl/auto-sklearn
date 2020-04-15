@@ -15,7 +15,7 @@ class Base(unittest.TestCase):
         self.test_dir = os.path.dirname(__file__)
 
         try:
-            travis = os.environ['TRAVIS']
+            os.environ['TRAVIS']
             self.travis = True
         except Exception:
             self.travis = False

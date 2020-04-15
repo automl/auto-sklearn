@@ -12,9 +12,10 @@ from autosklearn.pipeline.components.classification.lda import LDA
 from autosklearn.pipeline.components.feature_preprocessing.pca import PCA
 from autosklearn.pipeline.components.feature_preprocessing.truncatedSVD import TruncatedSVD
 from autosklearn.pipeline.components.feature_preprocessing.no_preprocessing import NoPreprocessing
-from autosklearn.pipeline.components.feature_preprocessing.fast_ica import FastICA
-from autosklearn.pipeline.components.feature_preprocessing.random_trees_embedding import RandomTreesEmbedding
+from autosklearn.pipeline.components.feature_preprocessing.random_trees_embedding \
+    import RandomTreesEmbedding
 import autosklearn.pipeline.create_searchspace_util
+
 
 class TestCreateClassificationSearchspace(unittest.TestCase):
     _multiprocess_can_split_ = True
@@ -26,6 +27,7 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
         classifiers = OrderedDict()
         classifiers['lda'] = LDA
         # Sparse + dense
+
         class Preprocessors(object):
             @classmethod
             def get_available_components(self, *args, **kwargs):
