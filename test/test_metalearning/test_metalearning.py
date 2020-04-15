@@ -4,6 +4,7 @@ import unittest
 from autosklearn.pipeline.util import get_dataset
 from autosklearn.classification import AutoSklearnClassifier
 
+from autosklearn.smbo import _calculate_metafeatures, _calculate_metafeatures_encoded
 from autosklearn.constants import REGRESSION, MULTICLASS_CLASSIFICATION
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.util.pipeline import get_configuration_space
@@ -82,9 +83,9 @@ class Test(unittest.TestCase):
                 X_train, Y_train, X_test, Y_test = get_dataset(dataset_name)
                 categorical = [False] * X_train.shape[1]
 
-                meta_features_label = calc_meta_features(
+                meta_features_label = _calculate_metafeatures(
                     X_train, Y_train, categorical, dataset_name, task)
-                meta_features_encoded_label = calc_meta_features_encoded(
+                meta_features_encoded_label = _calculate_metafeatures_encoded(
                     X_train, Y_train, categorical, dataset_name, task)
 
                 initial_configuration_strings_for_smac = \
