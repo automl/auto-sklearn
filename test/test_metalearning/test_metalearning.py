@@ -4,8 +4,7 @@ import unittest
 from autosklearn.pipeline.util import get_dataset
 from autosklearn.classification import AutoSklearnClassifier
 
-from autosklearn.constants import ACC_METRIC, AUC_METRIC, BAC_METRIC, F1_METRIC, PAC_METRIC, \
-    A_METRIC, R2_METRIC, REGRESSION, MULTICLASS_CLASSIFICATION
+from autosklearn.constants import REGRESSION, MULTICLASS_CLASSIFICATION
 from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.util.pipeline import get_configuration_space
 from sklearn.datasets import load_breast_cancer
