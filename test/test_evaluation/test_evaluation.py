@@ -8,17 +8,16 @@ import unittest.mock
 
 import numpy as np
 
-this_directory = os.path.dirname(__file__)
-sys.path.append(this_directory)
-
 import pynisher
-from smac.tae.execute_ta_run import StatusType, FirstRunCrashedException, \
-    BudgetExhaustedException
+from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException
 from smac.stats.stats import Stats
 
-from evaluation_util import get_multiclass_classification_datamanager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
 from autosklearn.metrics import accuracy
+
+this_directory = os.path.dirname(__file__)
+sys.path.append(this_directory)
+from evaluation_util import get_multiclass_classification_datamanager  # noqa
 
 
 def safe_eval_success_mock(*args, **kwargs):
@@ -49,13 +48,13 @@ class EvaluationTest(unittest.TestCase):
 
         try:
             shutil.rmtree(self.tmp)
-        except:
+        except Exception:
             pass
 
     def tearDown(self):
         try:
             shutil.rmtree(self.tmp)
-        except:
+        except Exception:
             pass
 
     ############################################################################

@@ -173,8 +173,5 @@ class TestMetadataGeneration(unittest.TestCase):
         for i in range(5):
             try:
                 shutil.rmtree(self.working_directory)
-            except:
+            except Exception:
                 pass
-
-
-

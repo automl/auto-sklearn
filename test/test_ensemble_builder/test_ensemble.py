@@ -50,7 +50,7 @@ class EnsembleTest(unittest.TestCase):
         ensbuilder = EnsembleBuilder(
             backend=self.backend,
             dataset_name="TEST",
-            task_type=1,  #Binary Classification
+            task_type=1,  # Binary Classification
             metric=roc_auc,
             limit=-1,  # not used,
             seed=0,  # important to find the test files

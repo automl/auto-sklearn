@@ -1,7 +1,6 @@
-import unittest
-
 from sklearn.ensemble import RandomForestClassifier
-from autosklearn.pipeline.components.feature_preprocessing.feature_agglomeration import FeatureAgglomeration
+from autosklearn.pipeline.components.feature_preprocessing.feature_agglomeration import \
+    FeatureAgglomeration
 from autosklearn.pipeline.util import _test_preprocessing, PreprocessingTestCase, \
     get_dataset
 import sklearn.metrics

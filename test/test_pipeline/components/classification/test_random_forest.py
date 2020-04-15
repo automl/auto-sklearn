@@ -30,4 +30,3 @@ class RandomForestComponentTest(BaseClassificationComponentTest):
         'name': 'n_estimators',
         'value': module.get_max_iter(),
     }
-

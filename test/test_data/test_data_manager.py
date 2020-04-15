@@ -1,4 +1,3 @@
-import os
 import unittest
 
 import numpy as np
@@ -90,7 +89,7 @@ class CompetitionDataManagerTest(unittest.TestCase):
 
     def test_perform1HotEncoding_binary_data_with_missing_values(self):
         # self.D.feat_type = [N, N, N, N, B, B]
-        #self.D.info = {'is_sparse': 0, 'has_missing': 1}
-        #self.D.perform1HotEncoding()
-        #self.assertEqual((3, 8), self.D.data['X_train'].shape)
+        # self.D.info = {'is_sparse': 0, 'has_missing': 1}
+        # self.D.perform1HotEncoding()
+        # self.assertEqual((3, 8), self.D.data['X_train'].shape)
         pass

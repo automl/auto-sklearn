@@ -53,10 +53,9 @@ class BaseTest(unittest.TestCase):
                          1)
         # Mostly combinations of p0 making the data unsigned and p1 not
         # changing the values of the data points
-        #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
+        # for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #    print(clause)
         self.assertEqual(64, len(cs.forbidden_clauses))
-
 
         cs = ConfigSpace.configuration_space.ConfigurationSpace()
         dataset_properties = {'target_type': 'classification', 'signed': True}
@@ -69,7 +68,7 @@ class BaseTest(unittest.TestCase):
                          15)
         self.assertEqual(len(cs.get_hyperparameter("c:__choice__").choices),
                          15)
-        #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
+        # for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #    print(clause)
         self.assertEqual(110, len(cs.forbidden_clauses))
 
@@ -81,7 +80,7 @@ class BaseTest(unittest.TestCase):
                          12)
         self.assertEqual(len(cs.get_hyperparameter("p1:__choice__").choices),
                          15)
-        #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
+        # for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #    print(clause)
         self.assertEqual(419, len(cs.forbidden_clauses))
 
@@ -97,8 +96,6 @@ class BaseTest(unittest.TestCase):
                          15)
         # Data is guaranteed to be positive in cases like densifier,
         # extra_trees_preproc, multinomial_nb -> less constraints
-        #for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
+        # for clause in sorted([str(clause) for clause in cs.forbidden_clauses]):
         #    print(clause)
         self.assertEqual(359, len(cs.forbidden_clauses))
-
-

@@ -1,8 +1,6 @@
 import os
 import unittest
 
-from autosklearn.data.competition_data_manager import CompetitionDataManager
-
 
 class CompetitionDataManagerTest(unittest.TestCase):
     _multiprocess_can_split_ = True

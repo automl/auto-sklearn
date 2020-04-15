@@ -5,7 +5,7 @@ import sklearn.metrics
 
 from autosklearn.pipeline.util import _test_regressor, \
     _test_regressor_iterative_fit
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import SPARSE
 
 
 class BaseRegressionComponentTest(unittest.TestCase):

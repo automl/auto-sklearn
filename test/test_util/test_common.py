@@ -17,5 +17,6 @@ class TestUtilsCommon(unittest.TestCase):
         exists = check_pid(our_pid)
         self.assertFalse(exists)
 
+
 if __name__ == '__main__':
     unittest.main()

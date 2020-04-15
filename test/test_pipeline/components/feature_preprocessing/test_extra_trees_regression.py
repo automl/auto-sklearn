@@ -1,5 +1,3 @@
-import unittest
-
 from sklearn.ensemble import ExtraTreesRegressor
 from autosklearn.pipeline.components.feature_preprocessing.\
     extra_trees_preproc_for_regression import \

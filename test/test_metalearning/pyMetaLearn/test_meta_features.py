@@ -7,11 +7,7 @@ import unittest
 import arff
 from joblib import Memory
 import numpy as np
-import scipy.sparse
-from sklearn.impute import SimpleImputer
 from sklearn.datasets import make_multilabel_classification
-
-from sklearn.preprocessing import StandardScaler
 
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
     import DataPreprocessor
@@ -39,8 +35,8 @@ class MetaFeaturesTest(TestCase):
                             for attribute in self.attribute_types]
 
         data = np.array(dataset['data'], dtype=np.float64)
-        X = data[:,:-1]
-        y = data[:,-1].reshape((-1,))
+        X = data[:, :-1]
+        y = data[:, -1].reshape((-1,))
 
         DPP = DataPreprocessor(categorical_features=self.categorical)
         X_transformed = DPP.fit_transform(X)
@@ -59,20 +55,29 @@ class MetaFeaturesTest(TestCase):
         self.helpers = meta_features.helper_functions
 
         # Precompute some helper functions
-        self.helpers.set_value("PCA", self.helpers["PCA"]
-            (self.X_transformed, self.y))
-        self.helpers.set_value("MissingValues", self.helpers[
-            "MissingValues"](self.X, self.y, self.categorical))
-        self.helpers.set_value("NumSymbols", self.helpers["NumSymbols"](
-            self.X, self.y, self.categorical))
-        self.helpers.set_value("ClassOccurences",
-                               self.helpers["ClassOccurences"](self.X, self.y))
-        self.helpers.set_value("Skewnesses",
-            self.helpers["Skewnesses"](self.X_transformed, self.y,
-                                       self.categorical_transformed))
-        self.helpers.set_value("Kurtosisses",
-            self.helpers["Kurtosisses"](self.X_transformed, self.y,
-                                        self.categorical_transformed))
+        self.helpers.set_value(
+            "PCA", self.helpers["PCA"](self.X_transformed, self.y),
+            )
+        self.helpers.set_value(
+            "MissingValues",
+            self.helpers["MissingValues"](self.X, self.y, self.categorical),
+            )
+        self.helpers.set_value(
+            "NumSymbols",
+            self.helpers["NumSymbols"](self.X, self.y, self.categorical),
+            )
+        self.helpers.set_value(
+            "ClassOccurences",
+            self.helpers["ClassOccurences"](self.X, self.y),
+            )
+        self.helpers.set_value(
+            "Skewnesses",
+            self.helpers["Skewnesses"](self.X_transformed, self.y, self.categorical_transformed),
+            )
+        self.helpers.set_value(
+            "Kurtosisses",
+            self.helpers["Kurtosisses"](self.X_transformed, self.y, self.categorical_transformed),
+            )
 
     def tearDown(self):
         os.chdir(self.cwd)
@@ -123,41 +128,36 @@ class MetaFeaturesTest(TestCase):
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_percentage_of_Instances_with_missing_values(self):
-        self.mf.set_value("NumberOfInstancesWithMissingValues",
-            self.mf["NumberOfInstancesWithMissingValues"](self.X, self.y,
-                                                               self.categorical))
-        mf = self.mf["PercentageOfInstancesWithMissingValues"](self.X, self.y,
-                                                               self.categorical)
+        self.mf.set_value(
+            "NumberOfInstancesWithMissingValues",
+            self.mf["NumberOfInstancesWithMissingValues"](self.X, self.y, self.categorical),
+            )
+        mf = self.mf["PercentageOfInstancesWithMissingValues"](self.X, self.y, self.categorical)
         self.assertAlmostEqual(mf.value, 1.0)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_number_of_features_with_missing_values(self):
-        mf = self.mf["NumberOfFeaturesWithMissingValues"](self.X, self.y,
-                                                          self.categorical)
+        mf = self.mf["NumberOfFeaturesWithMissingValues"](self.X, self.y, self.categorical)
         self.assertEqual(mf.value, 29)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_percentage_of_features_with_missing_values(self):
-        self.mf.set_value("NumberOfFeaturesWithMissingValues",
-            self.mf["NumberOfFeaturesWithMissingValues"](self.X, self.y,
-                                                         self.categorical))
-        mf = self.mf["PercentageOfFeaturesWithMissingValues"](self.X, self.y,
-                                                              self.categorical)
+        self.mf.set_value(
+            "NumberOfFeaturesWithMissingValues",
+            self.mf["NumberOfFeaturesWithMissingValues"](self.X, self.y, self.categorical))
+        mf = self.mf["PercentageOfFeaturesWithMissingValues"](self.X, self.y, self.categorical)
         self.assertAlmostEqual(mf.value, float(29)/float(38))
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_number_of_missing_values(self):
-        mf = self.mf["NumberOfMissingValues"](self.X, self.y,
-                                                 self.categorical)
+        mf = self.mf["NumberOfMissingValues"](self.X, self.y, self.categorical)
         self.assertEqual(mf.value, 22175)
         self.assertIsInstance(mf, MetaFeatureValue)
 
     def test_percentage_missing_values(self):
         self.mf.set_value("NumberOfMissingValues",
-                          self.mf["NumberOfMissingValues"](self.X, self.y,
-                                                           self.categorical))
-        mf = self.mf["PercentageOfMissingValues"](self.X, self.y,
-                                                  self.categorical)
+                          self.mf["NumberOfMissingValues"](self.X, self.y, self.categorical))
+        mf = self.mf["PercentageOfMissingValues"](self.X, self.y, self.categorical)
         self.assertAlmostEqual(mf.value, float(22175)/float((38*898)))
         self.assertIsInstance(mf, MetaFeatureValue)
 
@@ -288,13 +288,13 @@ class MetaFeaturesTest(TestCase):
     def test_symbols_mean(self):
         mf = self.mf["SymbolsMean"](self.X, self.y, self.categorical)
         # Empty looking spaces denote empty attributes
-        symbol_frequency = [2, 1, 7, 1, 2, 4, 1, 1, 4, 2, 1, 1, 1, 2, 1, #
+        symbol_frequency = [2, 1, 7, 1, 2, 4, 1, 1, 4, 2, 1, 1, 1, 2, 1,  #
                             1, 1, 1,   1, 1,    3, 1,           2, 2, 3, 2]
         self.assertAlmostEqual(mf.value, np.mean(symbol_frequency))
 
     def test_symbols_std(self):
         mf = self.mf["SymbolsSTD"](self.X, self.y, self.categorical)
-        symbol_frequency = [2, 1, 7, 1, 2, 4, 1, 1, 4, 2, 1, 1, 1, 2, 1, #
+        symbol_frequency = [2, 1, 7, 1, 2, 4, 1, 1, 4, 2, 1, 1, 1, 2, 1,  #
                             1, 1, 1,   1, 1,    3, 1,           2, 2, 3, 2]
         self.assertAlmostEqual(mf.value, np.std(symbol_frequency))
 
@@ -309,23 +309,19 @@ class MetaFeaturesTest(TestCase):
 
     def test_kurtosis_min(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["KurtosisMin"](self.X_transformed, self.y,
-                                    self.categorical_transformed)
+        self.mf["KurtosisMin"](self.X_transformed, self.y, self.categorical_transformed)
 
     def test_kurtosis_max(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["KurtosisMax"](self.X_transformed, self.y,
-                                    self.categorical_transformed)
+        self.mf["KurtosisMax"](self.X_transformed, self.y, self.categorical_transformed)
 
     def test_kurtosis_mean(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["KurtosisMean"](self.X_transformed, self.y,
-                                     self.categorical_transformed)
+        self.mf["KurtosisMean"](self.X_transformed, self.y, self.categorical_transformed)
 
     def test_kurtosis_std(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["KurtosisSTD"](self.X_transformed, self.y,
-                                    self.categorical_transformed)
+        self.mf["KurtosisSTD"](self.X_transformed, self.y, self.categorical_transformed)
 
     def test_skewnesses(self):
         mf = self.helpers["Skewnesses"](self.X_transformed, self.y,
@@ -334,23 +330,19 @@ class MetaFeaturesTest(TestCase):
 
     def test_skewness_min(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["SkewnessMin"](self.X_transformed, self.y,
-                                    self.categorical_transformed)
+        self.mf["SkewnessMin"](self.X_transformed, self.y, self.categorical_transformed)
 
     def test_skewness_max(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["SkewnessMax"](self.X_transformed, self.y,
-                                    self.categorical_transformed)
+        self.mf["SkewnessMax"](self.X_transformed, self.y, self.categorical_transformed)
 
     def test_skewness_mean(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["SkewnessMean"](self.X_transformed, self.y,
-                                     self.categorical_transformed)
+        self.mf["SkewnessMean"](self.X_transformed, self.y, self.categorical_transformed)
 
     def test_skewness_std(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["SkewnessSTD"](self.X_transformed, self.y,
-                                    self.categorical_transformed)
+        self.mf["SkewnessSTD"](self.X_transformed, self.y, self.categorical_transformed)
 
     def test_class_entropy(self):
         mf = self.mf["ClassEntropy"](self.X, self.y, self.categorical)
@@ -376,7 +368,7 @@ class MetaFeaturesTest(TestCase):
 
     def test_landmark_lda(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["LandmarkLDA"](self.X_transformed, self.y)
+        self.mf["LandmarkLDA"](self.X_transformed, self.y)
 
     def test_landmark_lda_multilabel(self):
         X, y = self.get_multilabel()
@@ -385,7 +377,7 @@ class MetaFeaturesTest(TestCase):
 
     def test_landmark_naive_bayes(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["LandmarkNaiveBayes"](self.X_transformed, self.y)
+        self.mf["LandmarkNaiveBayes"](self.X_transformed, self.y)
 
     def test_landmark_naive_bayes_multilabel(self):
         X, y = self.get_multilabel()
@@ -394,7 +386,7 @@ class MetaFeaturesTest(TestCase):
 
     def test_landmark_decision_tree(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["LandmarkDecisionTree"](self.X_transformed, self.y)
+        self.mf["LandmarkDecisionTree"](self.X_transformed, self.y)
 
     def test_landmark_decision_tree_multilabel(self):
         X, y = self.get_multilabel()
@@ -403,7 +395,7 @@ class MetaFeaturesTest(TestCase):
 
     def test_decision_node(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["LandmarkDecisionNodeLearner"](self.X_transformed, self.y)
+        self.mf["LandmarkDecisionNodeLearner"](self.X_transformed, self.y)
 
     def test_landmark_decision_node_multilabel(self):
         X, y = self.get_multilabel()
@@ -412,7 +404,7 @@ class MetaFeaturesTest(TestCase):
 
     def test_random_node(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["LandmarkRandomNodeLearner"](self.X_transformed, self.y)
+        self.mf["LandmarkRandomNodeLearner"](self.X_transformed, self.y)
 
     def test_landmark_random_node_multilabel(self):
         X, y = self.get_multilabel()
@@ -422,11 +414,11 @@ class MetaFeaturesTest(TestCase):
     @unittest.skip("Currently not implemented!")
     def test_worst_node(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["LandmarkWorstNodeLearner"](self.X_transformed, self.y)
+        self.mf["LandmarkWorstNodeLearner"](self.X_transformed, self.y)
 
     def test_1NN(self):
         # TODO: somehow compute the expected output?
-        mf = self.mf["Landmark1NN"](self.X_transformed, self.y)
+        self.mf["Landmark1NN"](self.X_transformed, self.y)
 
     def test_1NN_multilabel(self):
         X, y = self.get_multilabel()
@@ -434,7 +426,7 @@ class MetaFeaturesTest(TestCase):
         self.assertTrue(np.isfinite(mf.value))
 
     def test_pca(self):
-        hf = self.helpers["PCA"](self.X_transformed, self.y)
+        self.helpers["PCA"](self.X_transformed, self.y)
 
     def test_pca_95percent(self):
         mf = self.mf["PCAFractionOfComponentsFor95PercentVariance"](self.X_transformed, self.y)
@@ -469,8 +461,8 @@ class MetaFeaturesTest(TestCase):
 
 
 if __name__ == "__main__":
-    #suite = unittest.TestLoader().loadTestsFromTestCase(TestMetaFeatures)
-    #unittest.TextTestRunner(verbosity=2).run(suite)
+    # suite = unittest.TestLoader().loadTestsFromTestCase(TestMetaFeatures)
+    # unittest.TextTestRunner(verbosity=2).run(suite)
     t = unittest.TestLoader().loadTestsFromName(
         "pyMetaLearn.metafeatures.test_meta_features.TestMetaFeatures"
         ".test_calculate_all_metafeatures")

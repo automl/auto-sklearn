@@ -5,21 +5,17 @@ from sklearn.utils.testing import assert_array_almost_equal
 
 from autosklearn.pipeline.implementations.util import softmax
 
+
 class UtilTest(unittest.TestCase):
     def test_softmax_binary(self):
-        df = np.array([-40.00643897, 34.69754581, 23.71181359 -29.89724287,
+        df = np.array([-40.00643897, 34.69754581, 23.71181359, -29.89724287,
                        27.06071791, -37.78334103, -40.15812461, 40.16139229,
-                       -27.85887801, 42.67404756, -36.89753589 -36.45148009,
+                       -27.85887801, 42.67404756, -36.89753589, -36.45148009,
                        54.68976306, 19.47886562, -49.99821027, -35.70205302,
                        -40.59639267, 32.96343916, -39.23777841, -37.86535019,
                        -33.10196906, 26.84144377, -36.8569686])
         probas = softmax(df)
-        expected = [[1., 0.], [0., 1.], [0.99794501, 0.00205499],
-                    [0., 1.], [1., 0.], [1., 0.], [0., 1.],
-                    [1., 0.], [0., 1.], [1., 0.], [0., 1.],
-                    [0., 1.], [1., 0.], [1., 0.], [1., 0.],
-                    [0., 1.], [1., 0.], [1., 0.], [1., 0.],
-                    [0., 1.], [1., 0.]]
+        expected = [[1., 0.] if d < 0. else [0., 1.] for d in df]
         assert_array_almost_equal(expected, probas)
 
     def test_softmax(self):
@@ -38,5 +34,3 @@ class UtilTest(unittest.TestCase):
         expected = np.array([[0.25838965, 0.42601251, 0.31559783],
                              [0.28943311, 0.31987306, 0.39069383]])
         assert_array_almost_equal(expected, probas)
-
-

@@ -1,5 +1,3 @@
-import unittest
-
 from sklearn.linear_model import RidgeClassifier
 from autosklearn.pipeline.components.feature_preprocessing.\
     extra_trees_preproc_for_classification import \
