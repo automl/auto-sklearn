@@ -40,7 +40,7 @@ class SGD(
         return 1024
 
     def iterative_fit(self, X, y, n_iter=2, refit=False):
-        from sklearn.linear_model.stochastic_gradient import SGDRegressor
+        from sklearn.linear_model import SGDRegressor
         import sklearn.preprocessing
 
         # Need to fit at least two iterations, otherwise early stopping will not

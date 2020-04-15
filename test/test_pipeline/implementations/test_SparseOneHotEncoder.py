@@ -1,6 +1,8 @@
 import unittest
 
 import numpy as np
+from numpy.testing import assert_array_almost_equal
+
 import scipy.sparse
 import openml
 import sklearn.tree
@@ -9,7 +11,6 @@ import sklearn.model_selection
 import sklearn.pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.utils.testing import assert_array_almost_equal
 
 from autosklearn.pipeline.implementations.SparseOneHotEncoder import SparseOneHotEncoder
 from autosklearn.pipeline.implementations.CategoryShift import CategoryShift

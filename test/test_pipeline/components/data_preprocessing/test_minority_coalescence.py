@@ -1,7 +1,8 @@
 import unittest
 import numpy as np
+from numpy.testing import assert_array_almost_equal
+
 import scipy.sparse
-from sklearn.utils.testing import assert_array_almost_equal
 
 from autosklearn.pipeline.components.data_preprocessing.minority_coalescense\
     .minority_coalescer import MinorityCoalescer

@@ -6,14 +6,15 @@ import traceback
 import unittest
 import unittest.mock
 
+from joblib import Memory
 import numpy as np
+from numpy.testing import assert_array_almost_equal
+
 import sklearn.datasets
 import sklearn.decomposition
 import sklearn.model_selection
 import sklearn.ensemble
 import sklearn.svm
-from sklearn.utils.testing import assert_array_almost_equal
-from sklearn.externals.joblib import Memory
 
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
@@ -426,7 +427,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
         )
 
     def test_get_hyperparameter_search_space_only_forbidden_combinations(self):
-        self.assertRaisesRegexp(AssertionError, "No valid pipeline found.",
+        self.assertRaisesRegex(AssertionError, "No valid pipeline found.",
                                 SimpleClassificationPipeline,
                                 include={'classifier': ['multinomial_nb'],
                                          'feature_preprocessor': ['pca']},
@@ -434,7 +435,7 @@ class SimpleClassificationPipelineTest(unittest.TestCase):
 
         # It must also be catched that no classifiers which can handle sparse
         #  data are located behind the densifier
-        self.assertRaisesRegexp(ValueError, "Cannot find a legal default "
+        self.assertRaisesRegex(ValueError, "Cannot find a legal default "
                                             "configuration.",
                                 SimpleClassificationPipeline,
                                 include={'classifier': ['liblinear_svc'],
