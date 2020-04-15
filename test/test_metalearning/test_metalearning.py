@@ -33,37 +33,37 @@ class Test(unittest.TestCase):
     def test_metalearning(self):
         dataset_name_classification = 'digits'
         initial_challengers_classification = {
-            ACC_METRIC: "--initial-challengers \" "
-                        "-balancing:strategy 'weighting' "
-                        "-classifier:__choice__ 'proj_logit'",
-            AUC_METRIC: "--initial-challengers \" "
-                        "-balancing:strategy 'weighting' "
-                        "-classifier:__choice__ 'liblinear_svc'",
-            BAC_METRIC: "--initial-challengers \" "
-                        "-balancing:strategy 'weighting' "
-                        "-classifier:__choice__ 'proj_logit'",
-            F1_METRIC: "--initial-challengers \" "
-                       "-balancing:strategy 'weighting' "
-                       "-classifier:__choice__ 'proj_logit'",
-            PAC_METRIC: "--initial-challengers \" "
-                        "-balancing:strategy 'none' "
-                        "-classifier:__choice__ 'random_forest'"
+            "ACC_METRIC": "--initial-challengers \" "
+                          "-balancing:strategy 'weighting' "
+                          "-classifier:__choice__ 'proj_logit'",
+            "AUC_METRIC": "--initial-challengers \" "
+                          "-balancing:strategy 'weighting' "
+                          "-classifier:__choice__ 'liblinear_svc'",
+            "BAC_METRIC": "--initial-challengers \" "
+                          "-balancing:strategy 'weighting' "
+                          "-classifier:__choice__ 'proj_logit'",
+            "F1_METRIC": "--initial-challengers \" "
+                         "-balancing:strategy 'weighting' "
+                         "-classifier:__choice__ 'proj_logit'",
+            "PAC_METRIC": "--initial-challengers \" "
+                          "-balancing:strategy 'none' "
+                          "-classifier:__choice__ 'random_forest'"
         }
 
         dataset_name_regression = 'diabetes'
         initial_challengers_regression = {
-            A_METRIC: "--initial-challengers \" "
-                      "-imputation:strategy 'mean' "
-                      "-one_hot_encoding:minimum_fraction '0.01' "
-                      "-one_hot_encoding:use_minimum_fraction 'True' "
-                      "-preprocessor:__choice__ 'no_preprocessing' "
-                      "-regressor:__choice__ 'random_forest'",
-            R2_METRIC: "--initial-challengers \" "
-                       "-imputation:strategy 'mean' "
-                       "-one_hot_encoding:minimum_fraction '0.01' "
-                       "-one_hot_encoding:use_minimum_fraction 'True' "
-                       "-preprocessor:__choice__ 'no_preprocessing' "
-                       "-regressor:__choice__ 'random_forest'",
+            "A_METRIC": "--initial-challengers \" "
+                        "-imputation:strategy 'mean' "
+                        "-one_hot_encoding:minimum_fraction '0.01' "
+                        "-one_hot_encoding:use_minimum_fraction 'True' "
+                        "-preprocessor:__choice__ 'no_preprocessing' "
+                        "-regressor:__choice__ 'random_forest'",
+            "R2_METRIC": "--initial-challengers \" "
+                         "-imputation:strategy 'mean' "
+                         "-one_hot_encoding:minimum_fraction '0.01' "
+                         "-one_hot_encoding:use_minimum_fraction 'True' "
+                         "-preprocessor:__choice__ 'no_preprocessing' "
+                         "-regressor:__choice__ 'random_forest'",
         }
 
         for dataset_name, task, initial_challengers in [
