@@ -59,12 +59,9 @@ class MetaBase(object):
             data_ = {mf.name: mf.value for mf in metafeatures.metafeature_values.values()}
             metafeatures = pd.Series(name=name, data=data_)
         if name in self.metafeatures.index:
-            new_name = name + '_ASKL-metadata'
             self.logger.warning(
-                'Dataset %s already in meta-data. Renaming old occurence of the '
-                'dataset to %s.', name, new_name,
+                'Dataset %s already in meta-data. Removing occurence.', name
             )
-            self.metafeatures.loc[new_name] = self.metafeatures.loc[name]
             self.metafeatures.drop(name, inplace=True)
         self.metafeatures = self.metafeatures.append(metafeatures)
 
