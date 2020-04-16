@@ -353,7 +353,10 @@ class EnsembleBuilder(multiprocessing.Process):
                 'predictions_ensemble_*_*_*.npy*',
             )
 
-        self.y_ens_files = glob.glob(pred_path)
+        y_ens_files = glob.glob(pred_path)
+        y_ens_files = [y_ens_file for y_ens_file in y_ens_files
+                       if y_ens_file.endswith('.npy') or y_ens_file.endswith('.npy.gz')]
+        self.y_ens_files = y_ens_files
         # no validation predictions so far -- no files
         if len(self.y_ens_files) == 0:
             self.logger.debug("Found no prediction files on ensemble data set:"
@@ -606,6 +609,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     )
                 )
             )
+            valid_fn = [vfn for vfn in valid_fn if vfn.endswith('.npy') or vfn.endswith('.npy.gz')]
             test_fn = glob.glob(
                 os.path.join(
                     glob.escape(self.dir_test),
@@ -616,6 +620,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     )
                 )
             )
+            test_fn = [tfn for tfn in test_fn if tfn.endswith('.npy') or tfn.endswith('.npy.gz')]
 
             # TODO don't read valid and test if not changed
             if len(valid_fn) == 0:
