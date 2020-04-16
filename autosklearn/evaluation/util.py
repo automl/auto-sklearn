@@ -35,7 +35,7 @@ def read_queue(queue_):
 def empty_queue(queue_):
     while True:
         try:
-            rval = queue_.get(block=False)
+            queue_.get(block=False)
         except queue.Empty:
             break
 
