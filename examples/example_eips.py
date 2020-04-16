@@ -5,7 +5,7 @@ EIPS
 
 This example demonstrates the usage of a different acquisition function inside SMAC, namely
 `Expected Improvement per Second (EIPS) <https://papers.nips.cc/paper/4522-practical-bayesian-optimization-of-machine-learning-algorithms.html>`_.
-"""  # noqa
+"""  # noqa (links are too long)
 
 import sklearn.model_selection
 import sklearn.datasets

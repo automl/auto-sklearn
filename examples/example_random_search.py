@@ -10,7 +10,7 @@ SMAC, as demonstrated in the example below. Furthermore, the example also demons
 `Random Online Aggressive Racing (ROAR) <http://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_
 as yet another alternative optimizatino strategy.
 Both examples are intended to show how the optimization strategy in *auto-sklearn* can be adapted.
-"""  # noqa
+"""  # noqa (links are too long)
 
 import sklearn.model_selection
 import sklearn.datasets

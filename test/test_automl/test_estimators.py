@@ -23,7 +23,7 @@ from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import BINARY_CLASSIFICATION
 
 sys.path.append(os.path.dirname(__file__))
-from base import Base  # noqa: E402
+from base import Base  # noqa (E402: module level import not at top of file)
 
 
 class ArrayReturningDummyPredictor(object):

@@ -32,7 +32,7 @@ this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 from evaluation_util import get_regression_datamanager, BaseEvaluatorTest, \
     get_binary_classification_datamanager, get_dataset_getters, \
-    get_multiclass_classification_datamanager  # noqa
+    get_multiclass_classification_datamanager  # noqa (E402: module level import not at top of file)
 
 
 class BackendMock(object):

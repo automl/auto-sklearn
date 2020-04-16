@@ -23,7 +23,7 @@ from autosklearn.smbo import load_data
 from smac.tae.execute_ta_run import StatusType
 
 sys.path.append(os.path.dirname(__file__))
-from base import Base  # noqa
+from base import Base  # noqa (E402: module level import not at top of file)
 
 
 class AutoMLStub(AutoML):
