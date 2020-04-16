@@ -572,7 +572,6 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_test_pred = None
 
             self.Y_optimization = Y_targets
-            self._loss(Y_targets, Y_optimization_pred)
             self.Y_actual_train = Y_train_targets
 
             if self.num_cv_folds > 1:

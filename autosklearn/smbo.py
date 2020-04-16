@@ -366,7 +366,6 @@ class AutoMLSMBO(object):
         # first create a scenario
         seed = self.seed
         self.config_space.seed(seed)
-        self.config_space.get_hyperparameters()
         # allocate a run history
         num_run = self.start_num_run
 
