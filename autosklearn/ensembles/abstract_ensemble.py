@@ -59,7 +59,6 @@ class AbstractEnsemble(object):
         array : [(weight_1, model_1), ..., (weight_n, model_n)]
         """
 
-
     @abstractmethod
     def get_selected_model_identifiers(self):
         """Return identifiers of models in the ensemble.
