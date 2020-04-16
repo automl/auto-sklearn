@@ -620,7 +620,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     )
                 )
             )
-            test_fn = [tfn for tfn in test_fn if tfn.endswith('.npy') or tfn.endswith('.nyp.gz')]
+            test_fn = [tfn for tfn in test_fn if tfn.endswith('.npy') or tfn.endswith('.npy.gz')]
 
             # TODO don't read valid and test if not changed
             if len(valid_fn) == 0:
