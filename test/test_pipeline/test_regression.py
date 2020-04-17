@@ -6,6 +6,7 @@ import unittest
 import unittest.mock
 
 import numpy as np
+
 import sklearn.datasets
 import sklearn.decomposition
 import sklearn.ensemble
