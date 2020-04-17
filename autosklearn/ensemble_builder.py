@@ -541,7 +541,7 @@ class EnsembleBuilder(multiprocessing.Process):
         ensemble_n_best = keep_nbest
 
         # One can only read at most max_models_in_disc models
-        if ensemble_n_best > self.max_models_in_disc:
+        if self.max_models_in_disc is not None and ensemble_n_best > self.max_models_in_disc:
             self.logger.debug(
                 "Only {} models are in disc eventhough {} where requested.".format(
                     self.max_models_in_disc,
@@ -569,8 +569,6 @@ class EnsembleBuilder(multiprocessing.Process):
                 self.read_preds[k]['loaded'] = 2
 
         # return best scored keys of self.read_preds
-        for ensemble in sorted_keys[:ensemble_n_best]:
-            print(f"Using for ensemble: {ensemble}")
         return sorted_keys[:ensemble_n_best]
 
     def get_valid_test_preds(self, selected_keys: list):
@@ -817,7 +815,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
     def _get_list_of_sorted_preds(self):
         """
-            Returns a list of sorted predictions in ascending order
+            Returns a list of sorted predictions in descending order
             Predictions are taken from self.read_preds.
 
             Parameters
@@ -852,13 +850,8 @@ class EnsembleBuilder(multiprocessing.Process):
 
         # Obtain a list of sorted pred keys
         sorted_keys = self._get_list_of_sorted_preds()
-        self.logger.debug("The scoreboard looks like:")
-        for i, item in enumerate(sorted_keys):
-            self.logger.debug(item)
-            print(item)
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
 
-        print(f"sorted keys:{len(sorted_keys)}")
         if len(sorted_keys) <= self.max_models_in_disc:
             # Don't waste time if not enough models to delete
             return
@@ -866,16 +859,14 @@ class EnsembleBuilder(multiprocessing.Process):
         # The top self.max_models_in_disc models would be the candidates
         # Any other low performance model will be deleted
         # The list is in ascending order of score
-        candidates = sorted_keys[-self.max_models_in_disc:]
+        candidates = sorted_keys[:self.max_models_in_disc]
 
         # Loop through the files currently in the directory
         for pred_path in self.y_ens_files:
 
             # Do not delete candidates
             if pred_path in candidates:
-                print(f"Keeping model: {pred_path}")
                 continue
-            print(f"Deleting model: {pred_path}")
 
             match = self.model_fn_re.search(pred_path)
             _full_name = match.group(0)
@@ -928,7 +919,6 @@ class EnsembleBuilder(multiprocessing.Process):
             # Delete files if model is not a candidate AND prediction is old. We check if
             # the prediction is old to avoid deleting a model that hasn't been appreciated
             # by self.get_n_best_preds() yet.
-            print(f"Before bug pred_path={pred_path}")
             original_timestamp = self.read_preds[pred_path]['mtime_ens']
             current_timestamp = os.path.getmtime(pred_path)
             if current_timestamp == original_timestamp:
