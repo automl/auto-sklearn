@@ -52,8 +52,10 @@ class TestSparseOneHotEncoder(unittest.TestCase):
         ohe = SparseOneHotEncoder()
         transformation = ohe.fit_transform(input)
         self.assertIsInstance(transformation, scipy.sparse.csr_matrix)
-        np.testing.assert_array_almost_equal(expected.astype(float),
-                                  transformation.todense())
+        np.testing.assert_array_almost_equal(
+            expected.astype(float),
+            transformation.todense()
+        )
         self._check_arrays_equal(input, input_copy)
 
         # Test fit, and afterwards transform

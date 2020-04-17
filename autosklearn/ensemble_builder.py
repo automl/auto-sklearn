@@ -901,11 +901,11 @@ class EnsembleBuilder(multiprocessing.Process):
                 lock.release()
 
     def _read_np_fn(self, fp):
-        if self.precision is "16":
+        if self.precision == "16":
             predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float16)
-        elif self.precision is "32":
+        elif self.precision == "32":
             predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float32)
-        elif self.precision is "64":
+        elif self.precision == "64":
             predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float64)
         else:
             predictions = np.load(fp, allow_pickle=True)
