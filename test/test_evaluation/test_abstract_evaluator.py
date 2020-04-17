@@ -8,11 +8,11 @@ import numpy as np
 
 from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
 from autosklearn.metrics import accuracy
-from smac.tae.execute_ta_run import StatusType  # noqa E402
+from smac.tae.execute_ta_run import StatusType
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
-from evaluation_util import get_multiclass_classification_datamanager  # noqa
+from evaluation_util import get_multiclass_classification_datamanager  # noqa E402
 
 
 class AbstractEvaluatorTest(unittest.TestCase):

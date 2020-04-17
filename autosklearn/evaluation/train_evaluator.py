@@ -51,6 +51,7 @@ __baseCrossValidator_defaults__ = {'GroupKFold': {'n_splits': 3},
                                                     'random_state': None}
                                    }
 
+
 def _get_y_array(y, task_type):
     if task_type in CLASSIFICATION_TASKS and task_type != \
             MULTILABEL_CLASSIFICATION:
@@ -456,7 +457,7 @@ class TrainEvaluator(AbstractEvaluator):
                         valid_pred,
                         test_pred,
                         additional_run_info,
-                    )= (
+                    ) = (
                         self._partial_fit_and_predict_standard(
                             i, train_indices=train_split, test_indices=test_split,
                             add_model_to_self=self.num_cv_folds == 1,
@@ -571,7 +572,6 @@ class TrainEvaluator(AbstractEvaluator):
                 Y_test_pred = None
 
             self.Y_optimization = Y_targets
-            loss = self._loss(Y_targets, Y_optimization_pred)
             self.Y_actual_train = Y_train_targets
 
             if self.num_cv_folds > 1:
@@ -895,9 +895,9 @@ class TrainEvaluator(AbstractEvaluator):
 
         if not isinstance(self.resampling_strategy, str):
 
-            if issubclass(self.resampling_strategy, BaseCrossValidator) or\
-                issubclass(self.resampling_strategy, _RepeatedSplits) or\
-                issubclass(self.resampling_strategy, BaseShuffleSplit):
+            if issubclass(self.resampling_strategy, BaseCrossValidator) or \
+               issubclass(self.resampling_strategy, _RepeatedSplits) or \
+               issubclass(self.resampling_strategy, BaseShuffleSplit):
 
                 class_name = self.resampling_strategy.__name__
                 if class_name not in __baseCrossValidator_defaults__:
@@ -958,8 +958,7 @@ class TrainEvaluator(AbstractEvaluator):
                                                            train_size)
         test_size = float("%.4f" % (1 - train_size))
 
-        if D.info['task'] in CLASSIFICATION_TASKS and \
-                        D.info['task'] != MULTILABEL_CLASSIFICATION:
+        if D.info['task'] in CLASSIFICATION_TASKS and D.info['task'] != MULTILABEL_CLASSIFICATION:
 
             y = y.ravel()
             if self.resampling_strategy in ['holdout',

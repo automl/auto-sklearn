@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 import functools
-import json
 import logging
 import math
 import multiprocessing
@@ -60,14 +59,13 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             eval_function = autosklearn.evaluation.train_evaluator.eval_iterative_holdout
         elif resampling_strategy == 'cv-iterative-fit':
             eval_function = autosklearn.evaluation.train_evaluator.eval_iterative_cv
-        elif resampling_strategy == 'cv' or \
-        (
-            isinstance(resampling_strategy, type) and (
+        elif resampling_strategy == 'cv' or (
+             isinstance(resampling_strategy, type) and (
                 issubclass(resampling_strategy, BaseCrossValidator) or
                 issubclass(resampling_strategy, _RepeatedSplits) or
                 issubclass(resampling_strategy, BaseShuffleSplit)
-            )
-        ):
+                )
+             ):
             eval_function = autosklearn.evaluation.train_evaluator.eval_cv
         elif resampling_strategy == 'partial-cv':
             eval_function = autosklearn.evaluation.train_evaluator.eval_partial_cv
@@ -127,7 +125,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
               cutoff: float = None,
               seed: int = 12345,
               budget: float = 0.0,
-              instance_specific: Optional[str]=None,
+              instance_specific: Optional[str] = None,
               capped: bool = False):
         """
         wrapper function for ExecuteTARun.start() to cap the target algorithm
@@ -169,7 +167,8 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             if budget == 0:
                 budget = 100
             elif budget <= 0 or budget > 100:
-                raise ValueError('Illegal value for budget, must be >0 and <=100, but is %f' % budget)
+                raise ValueError('Illegal value for budget, must be >0 and <=100, but is %f' %
+                                 budget)
             if self.budget_type not in ('subsample', 'iterations', 'mixed'):
                 raise ValueError("Illegal value for budget type, must be one of "
                                  "('subsample', 'iterations', 'mixed'), but is : %s" %
@@ -311,15 +310,15 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             and self.resampling_strategy in ('holdout-iterative-fit', 'cv-iterative-fit')
             and status != StatusType.CRASHED
         ):
-            learning_curve = util.extract_learning_curve(info)
-            learning_curve_runtime = util.extract_learning_curve(
+            learning_curve = autosklearn.evaluation.util.extract_learning_curve(info)
+            learning_curve_runtime = autosklearn.evaluation.util.extract_learning_curve(
                 info, 'duration'
             )
             if len(learning_curve) > 1:
                 additional_run_info['learning_curve'] = learning_curve
                 additional_run_info['learning_curve_runtime'] = learning_curve_runtime
 
-            train_learning_curve = util.extract_learning_curve(
+            train_learning_curve = autosklearn.evaluation.util.extract_learning_curve(
                 info, 'train_loss'
             )
             if len(train_learning_curve) > 1:
@@ -327,7 +326,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 additional_run_info['learning_curve_runtime'] = learning_curve_runtime
 
             if self._get_validation_loss:
-                validation_learning_curve = util.extract_learning_curve(
+                validation_learning_curve = autosklearn.evaluation.util.extract_learning_curve(
                     info, 'validation_loss',
                 )
                 if len(validation_learning_curve) > 1:
@@ -337,7 +336,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                         'learning_curve_runtime'] = learning_curve_runtime
 
             if self._get_test_loss:
-                test_learning_curve = util.extract_learning_curve(
+                test_learning_curve = autosklearn.evaluation.util.extract_learning_curve(
                     info, 'test_loss',
                 )
                 if len(test_learning_curve) > 1:
@@ -357,6 +356,3 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
         autosklearn.evaluation.util.empty_queue(queue)
 
         return status, cost, runtime, additional_run_info
-
-
-

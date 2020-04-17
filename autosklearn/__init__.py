@@ -3,7 +3,7 @@ import os
 import sys
 
 from autosklearn.util import dependencies
-from autosklearn.__version__ import __version__
+from autosklearn.__version__ import __version__  # noqa (imported but unused)
 
 
 __MANDATORY_PACKAGES__ = '''

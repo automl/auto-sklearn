@@ -3,19 +3,18 @@ import os
 import sys
 import unittest
 
+import arff
+import numpy as np
+from scipy import sparse
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
+    import DataPreprocessor
+import autosklearn.metalearning.metafeatures.metafeatures as meta_features
+
 # Make the super class importable
 sys.path.append(os.path.dirname(__file__))
-
-import arff  # noqa: E402
-import numpy as np  # noqa: E402
-from scipy import sparse  # noqa: E402
-from sklearn.impute import SimpleImputer  # noqa: E402
-
-from sklearn.preprocessing import StandardScaler  # noqa: E402
-
-from autosklearn.pipeline.components.data_preprocessing.\
-    data_preprocessing import DataPreprocessor  # noqa: E402
-import autosklearn.metalearning.metafeatures.metafeatures as meta_features  # noqa: E402
 import test_meta_features  # noqa: E402
 
 

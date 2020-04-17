@@ -445,7 +445,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
                     n_read_files += 1
 
-            except:
+            except Exception:
                 self.logger.warning(
                     'Error loading %s: %s',
                     y_ens_fn,
@@ -674,7 +674,7 @@ class EnsembleBuilder(multiprocessing.Process):
                         self.read_preds[k][Y_TEST] = y_test
                         success_keys_test.append(k)
                         self.read_preds[k]["mtime_test"] = os.path.getmtime(test_fn)
-                except Exception as e:
+                except Exception:
                     self.logger.warning('Error loading %s: %s',
                                         test_fn, traceback.format_exc())
 
@@ -745,11 +745,11 @@ class EnsembleBuilder(multiprocessing.Process):
                 ensemble.get_validation_performance(),
             )
 
-        except ValueError as e:
+        except ValueError:
             self.logger.error('Caught ValueError: %s', traceback.format_exc())
             time.sleep(self.sleep_duration)
             return None
-        except IndexError as e:
+        except IndexError:
             self.logger.error('Caught IndexError: %s' + traceback.format_exc())
             time.sleep(self.sleep_duration)
             return None
@@ -901,11 +901,11 @@ class EnsembleBuilder(multiprocessing.Process):
                 lock.release()
 
     def _read_np_fn(self, fp):
-        if self.precision is "16":
+        if self.precision == "16":
             predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float16)
-        elif self.precision is "32":
+        elif self.precision == "32":
             predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float32)
-        elif self.precision is "64":
+        elif self.precision == "64":
             predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float64)
         else:
             predictions = np.load(fp, allow_pickle=True)

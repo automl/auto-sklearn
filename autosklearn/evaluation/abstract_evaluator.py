@@ -6,7 +6,6 @@ from collections import namedtuple
 import lockfile
 import numpy as np
 from sklearn.dummy import DummyClassifier, DummyRegressor
-from smac.tae.execute_ta_run import StatusType
 
 import autosklearn.pipeline.classification
 import autosklearn.pipeline.regression
@@ -24,12 +23,12 @@ from autosklearn.util.logging_ import get_logger
 from ConfigSpace import Configuration
 
 
-
 __all__ = [
     'AbstractEvaluator'
 ]
 
 WriteTask = namedtuple('WriteTask', ['lock', 'writer', 'args'])
+
 
 class MyDummyClassifier(DummyClassifier):
     def __init__(self, configuration, random_state, init_params=None):
@@ -162,10 +161,7 @@ class AbstractEvaluator(object):
             if not isinstance(self.configuration, Configuration):
                 self.model_class = MyDummyClassifier
             else:
-                self.model_class = (
-                    autosklearn.pipeline.classification.
-                        SimpleClassificationPipeline
-                )
+                self.model_class = autosklearn.pipeline.classification.SimpleClassificationPipeline
             self.predict_function = self._predict_proba
 
         categorical_mask = []

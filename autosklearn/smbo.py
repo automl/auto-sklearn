@@ -8,10 +8,8 @@ import numpy as np
 import pynisher
 
 from smac.facade.smac_ac_facade import SMAC4AC
-from smac.runhistory.runhistory import RunHistory
 from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
 from smac.scenario.scenario import Scenario
-from smac.tae.execute_ta_run import StatusType
 from smac.optimizer import pSMAC
 
 
@@ -109,6 +107,7 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
         watcher.wall_elapsed(task_name))
     return result
 
+
 def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
                                     task, logger):
     EXCLUDE_META_FEATURES = EXCLUDE_META_FEATURES_CLASSIFICATION \
@@ -127,6 +126,7 @@ def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
         'Calculating Metafeatures (encoded attributes) took %5.2fsec',
         watcher.wall_elapsed(task_name))
     return result
+
 
 def _get_metalearning_configurations(meta_base, basename, metric,
                                      configuration_space,
@@ -150,6 +150,7 @@ def _get_metalearning_configurations(meta_base, basename, metric,
         metalearning_configurations = []
     watcher.stop_task(task_name)
     return metalearning_configurations
+
 
 def _print_debug_info_of_init_configuration(initial_configurations, basename,
                                             time_for_task, logger, watcher):
@@ -253,9 +254,8 @@ class AutoMLSMBO(object):
         self.smac_scenario_args = smac_scenario_args
         self.get_smac_object_callback = get_smac_object_callback
 
-        logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed,
-                                     ":" + dataset_name if dataset_name is
-                                                           not None else "")
+        dataset_name_ = "" if dataset_name is None else dataset_name
+        logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed, ":" + dataset_name_)
         self.logger = get_logger(logger_name)
 
     def _send_warnings_to_log(self, message, category, filename, lineno,
@@ -366,7 +366,6 @@ class AutoMLSMBO(object):
         # first create a scenario
         seed = self.seed
         self.config_space.seed(seed)
-        num_params = len(self.config_space.get_hyperparameters())
         # allocate a run history
         num_run = self.start_num_run
 
@@ -389,8 +388,7 @@ class AutoMLSMBO(object):
         # into a queue and querying them once the time is over
         exclude = dict()
         include = dict()
-        if self.include_preprocessors is not None and \
-                        self.exclude_preprocessors is not None:
+        if self.include_preprocessors is not None and self.exclude_preprocessors is not None:
             raise ValueError('Cannot specify include_preprocessors and '
                              'exclude_preprocessors.')
         elif self.include_preprocessors is not None:
@@ -398,8 +396,7 @@ class AutoMLSMBO(object):
         elif self.exclude_preprocessors is not None:
             exclude['feature_preprocessor'] = self.exclude_preprocessors
 
-        if self.include_estimators is not None and \
-                        self.exclude_estimators is not None:
+        if self.include_estimators is not None and self.exclude_estimators is not None:
             raise ValueError('Cannot specify include_estimators and '
                              'exclude_estimators.')
         elif self.include_estimators is not None:

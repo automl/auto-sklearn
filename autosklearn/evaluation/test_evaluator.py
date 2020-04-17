@@ -35,7 +35,7 @@ class TestEvaluator(AbstractEvaluator):
             num_run=-1,
             include=include,
             exclude=exclude,
-            disable_file_output= disable_file_output,
+            disable_file_output=disable_file_output,
             init_params=init_params
         )
         self.configuration = configuration
@@ -50,7 +50,7 @@ class TestEvaluator(AbstractEvaluator):
 
     def fit_predict_and_loss(self):
         _fit_and_suppress_warnings(self.logger, self.model, self.X_train, self.Y_train)
-        loss, Y_pred, _, _ =  self.predict_and_loss()
+        loss, Y_pred, _, _ = self.predict_and_loss()
         self.finish_up(
             loss=loss,
             train_loss=None,
@@ -107,5 +107,3 @@ def eval_t(queue, config, backend, metric, seed, num_run, instance,
                               init_params=init_params)
 
     evaluator.fit_predict_and_loss()
-
-

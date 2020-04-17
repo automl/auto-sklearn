@@ -227,7 +227,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
             Not all keys returned by scikit-learn are supported yet.
 
-        """
+        """  # noqa (links are too long)
         # Raise error if the given total time budget is less than 60 seconds.
         if time_left_for_this_task < 30:
             raise ValueError("Time left for this task must be at least "
@@ -285,11 +285,13 @@ class AutoSklearnEstimator(BaseEstimator):
                 raise ValueError("If shared_mode == True output_folder must "
                                  "not be None.")
 
-        backend = create(temporary_directory=tmp_folder,
-                         output_directory=output_folder,
-                         delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
-                         delete_output_folder_after_terminate=self.delete_output_folder_after_terminate,
-                         shared_mode=shared_mode)
+        backend = create(
+            temporary_directory=tmp_folder,
+            output_directory=output_folder,
+            delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
+            delete_output_folder_after_terminate=self.delete_output_folder_after_terminate,
+            shared_mode=shared_mode,
+            )
 
         if smac_scenario_args is None:
             smac_scenario_args = self.smac_scenario_args
@@ -298,8 +300,7 @@ class AutoSklearnEstimator(BaseEstimator):
             backend=backend,
             time_left_for_this_task=self.time_left_for_this_task,
             per_run_time_limit=self.per_run_time_limit,
-            initial_configurations_via_metalearning=
-            initial_configurations_via_metalearning,
+            initial_configurations_via_metalearning=initial_configurations_via_metalearning,
             ensemble_size=ensemble_size,
             ensemble_nbest=self.ensemble_nbest,
             keep_just_nbest_models=self.keep_just_nbest_models,

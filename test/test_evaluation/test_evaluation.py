@@ -17,7 +17,7 @@ from autosklearn.metrics import accuracy
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
-from evaluation_util import get_multiclass_classification_datamanager  # noqa
+from evaluation_util import get_multiclass_classification_datamanager  # noqa E402
 
 
 def safe_eval_success_mock(*args, **kwargs):
