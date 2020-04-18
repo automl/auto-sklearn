@@ -1,8 +1,7 @@
 import unittest
 import numpy as np
-from scipy import sparse
 
-from sklearn.utils.testing import assert_array_almost_equal
+from scipy import sparse
 
 from autosklearn.pipeline.components.data_preprocessing.data_preprocessing_numerical \
     import NumericalPreprocessingPipeline
@@ -36,7 +35,7 @@ class NumericalPreprocessingPipelineTest(unittest.TestCase):
             [ 1/sdev,  1/sdev]])  # noqa : matrix legibility
         # dense input
         Yt = NumericalPreprocessingPipeline().fit_transform(X)
-        assert_array_almost_equal(Yt, Y1)
+        np.testing.assert_array_almost_equal(Yt, Y1)
         # sparse input (uses with_mean=False)
         Y2 = np.array([
             [1., 1.],
@@ -44,7 +43,7 @@ class NumericalPreprocessingPipelineTest(unittest.TestCase):
             [3., 3.]]) / sdev
         X_sparse = sparse.csc_matrix(X)
         Yt = NumericalPreprocessingPipeline().fit_transform(X_sparse)
-        assert_array_almost_equal(Yt.todense(), Y2)
+        np.testing.assert_array_almost_equal(Yt.todense(), Y2)
 
     def test_transform(self):
         X1 = np.array([
@@ -67,4 +66,4 @@ class NumericalPreprocessingPipelineTest(unittest.TestCase):
             [3/sdev, 6/sdev],
             [4/sdev, 7/sdev],
             [5/sdev,     0.]])  # noqa : matrix legibility
-        assert_array_almost_equal(Yt, Y2)
+        np.testing.assert_array_almost_equal(Yt, Y2)

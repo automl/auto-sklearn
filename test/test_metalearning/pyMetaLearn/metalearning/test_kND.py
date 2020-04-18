@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from autosklearn.metalearning.metalearning.kNearestDatasets.kND import KNearestDatasets
 from autosklearn.metalearning.metalearning.metrics.misc import get_random_metric
-from sklearn.utils.testing import assert_array_almost_equal
 
 
 class kNDTest(unittest.TestCase):
@@ -43,21 +42,21 @@ class kNDTest(unittest.TestCase):
         neighbor, distance = kND.kNearestDatasets(self.anneal, 1,
                                                   return_distance=True)
         self.assertEqual([233], neighbor)
-        assert_array_almost_equal([1.82298937], distance)
+        np.testing.assert_array_almost_equal([1.82298937], distance)
 
         neighbors = kND.kNearestDatasets(self.anneal, 2)
         self.assertEqual([233, 234], neighbors)
         neighbors, distance = kND.kNearestDatasets(self.anneal, 2,
                                                    return_distance=True)
         self.assertEqual([233, 234], neighbors)
-        assert_array_almost_equal([1.822989, 2.267919], distance)
+        np.testing.assert_array_almost_equal([1.822989, 2.267919], distance)
 
         neighbors = kND.kNearestDatasets(self.anneal, -1)
         self.assertEqual([233, 234], neighbors)
         neighbors, distance = kND.kNearestDatasets(self.anneal, -1,
                                                    return_distance=True)
         self.assertEqual([233, 234], neighbors)
-        assert_array_almost_equal([1.822989, 2.267919], distance)
+        np.testing.assert_array_almost_equal([1.822989, 2.267919], distance)
 
         self.assertRaises(ValueError, kND.kNearestDatasets, self.anneal, 0)
         self.assertRaises(ValueError, kND.kNearestDatasets, self.anneal, -2)

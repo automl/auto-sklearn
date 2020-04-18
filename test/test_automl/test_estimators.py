@@ -58,46 +58,56 @@ class EstimatorTest(Base, unittest.TestCase):
     def test_pSMAC_wrong_arguments(self):
         X = np.zeros((100, 100))
         y = np.zeros((100, ))
-        self.assertRaisesRegexp(ValueError,
-                                "If shared_mode == True tmp_folder must not "
-                                "be None.",
-                                lambda shared_mode:
-                                AutoSklearnClassifier(
-                                    shared_mode=shared_mode,
-                                ).fit(X, y),
-                                shared_mode=True)
+        self.assertRaisesRegex(
+            ValueError,
+            "If shared_mode == True tmp_folder must not "
+            "be None.",
+            lambda shared_mode:
+            AutoSklearnClassifier(
+                shared_mode=shared_mode,
+            ).fit(X, y),
+            shared_mode=True
+        )
 
-        self.assertRaisesRegexp(ValueError,
-                                "If shared_mode == True output_folder must not "
-                                "be None.",
-                                lambda shared_mode, tmp_folder:
-                                AutoSklearnClassifier(
-                                    shared_mode=shared_mode,
-                                    tmp_folder=tmp_folder,
-                                ).fit(X, y),
-                                shared_mode=True,
-                                tmp_folder='/tmp/duitaredxtvbedb')
+        self.assertRaisesRegex(
+            ValueError,
+            "If shared_mode == True output_folder must not "
+            "be None.",
+            lambda shared_mode, tmp_folder:
+            AutoSklearnClassifier(
+                shared_mode=shared_mode,
+                tmp_folder=tmp_folder,
+            ).fit(X, y),
+            shared_mode=True,
+            tmp_folder='/tmp/duitaredxtvbedb'
+        )
 
     def test_feat_type_wrong_arguments(self):
         cls = AutoSklearnClassifier()
         X = np.zeros((100, 100))
         y = np.zeros((100, ))
-        self.assertRaisesRegexp(ValueError,
-                                'Array feat_type does not have same number of '
-                                'variables as X has features. 1 vs 100.',
-                                cls.fit,
-                                X=X, y=y, feat_type=[True])
+        self.assertRaisesRegex(
+            ValueError,
+            'Array feat_type does not have same number of '
+            'variables as X has features. 1 vs 100.',
+            cls.fit,
+            X=X, y=y, feat_type=[True]
+        )
 
-        self.assertRaisesRegexp(ValueError,
-                                'Array feat_type must only contain strings.',
-                                cls.fit,
-                                X=X, y=y, feat_type=[True]*100)
+        self.assertRaisesRegex(
+            ValueError,
+            'Array feat_type must only contain strings.',
+            cls.fit,
+            X=X, y=y, feat_type=[True]*100
+        )
 
-        self.assertRaisesRegexp(ValueError,
-                                'Only `Categorical` and `Numerical` are '
-                                'valid feature types, you passed `Car`',
-                                cls.fit,
-                                X=X, y=y, feat_type=['Car']*100)
+        self.assertRaisesRegex(
+            ValueError,
+            'Only `Categorical` and `Numerical` are '
+            'valid feature types, you passed `Car`',
+            cls.fit,
+            X=X, y=y, feat_type=['Car']*100
+        )
 
     # Mock AutoSklearnEstimator.fit so the test doesn't actually run fit().
     @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.fit')
@@ -179,29 +189,32 @@ class EstimatorTest(Base, unittest.TestCase):
         reg = AutoSklearnRegressor()
         # Illegal target types for regression: multiclass-multioutput,
         # multilabel-indicator, continuous-multioutput.
-        self.assertRaisesRegex(ValueError,
-                               "regression with data of type"
-                               " multiclass-multioutput is not supported",
-                               reg.fit,
-                               X=X,
-                               y=y_multiclass_multioutput,
-                               )
+        self.assertRaisesRegex(
+            ValueError,
+            "regression with data of type"
+            " multiclass-multioutput is not supported",
+            reg.fit,
+            X=X,
+            y=y_multiclass_multioutput,
+        )
 
-        self.assertRaisesRegex(ValueError,
-                               "regression with data of type"
-                               " multilabel-indicator is not supported",
-                               reg.fit,
-                               X=X,
-                               y=y_multilabel,
-                               )
+        self.assertRaisesRegex(
+            ValueError,
+            "regression with data of type"
+            " multilabel-indicator is not supported",
+            reg.fit,
+            X=X,
+            y=y_multilabel,
+        )
 
-        self.assertRaisesRegex(ValueError,
-                               "regression with data of type"
-                               " continuous-multioutput is not supported",
-                               reg.fit,
-                               X=X,
-                               y=y_continuous_multioutput,
-                               )
+        self.assertRaisesRegex(
+            ValueError,
+            "regression with data of type"
+            " continuous-multioutput is not supported",
+            reg.fit,
+            X=X,
+            y=y_continuous_multioutput,
+        )
         # Legal target types: continuous, binary, multiclass
         try:
             reg.fit(X, y_continuous)

@@ -1,6 +1,7 @@
 import unittest
 
 import numpy as np
+
 import scipy.sparse
 import openml
 import sklearn.tree
@@ -9,7 +10,6 @@ import sklearn.model_selection
 import sklearn.pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.utils.testing import assert_array_almost_equal
 
 from autosklearn.pipeline.implementations.SparseOneHotEncoder import SparseOneHotEncoder
 from autosklearn.pipeline.implementations.CategoryShift import CategoryShift
@@ -52,8 +52,10 @@ class TestSparseOneHotEncoder(unittest.TestCase):
         ohe = SparseOneHotEncoder()
         transformation = ohe.fit_transform(input)
         self.assertIsInstance(transformation, scipy.sparse.csr_matrix)
-        assert_array_almost_equal(expected.astype(float),
-                                  transformation.todense())
+        np.testing.assert_array_almost_equal(
+            expected.astype(float),
+            transformation.todense()
+        )
         self._check_arrays_equal(input, input_copy)
 
         # Test fit, and afterwards transform
@@ -61,7 +63,7 @@ class TestSparseOneHotEncoder(unittest.TestCase):
         ohe2.fit(input)
         transformation = ohe2.transform(input)
         self.assertIsInstance(transformation, scipy.sparse.csr_matrix)
-        assert_array_almost_equal(expected, transformation.todense())
+        np.testing.assert_array_almost_equal(expected, transformation.todense())
         self._check_arrays_equal(input, input_copy)
 
     def _check_arrays_equal(self, a1, a2):
@@ -69,7 +71,7 @@ class TestSparseOneHotEncoder(unittest.TestCase):
             a1 = a1.toarray()
         if scipy.sparse.issparse(a2):
             a2 = a2.toarray()
-        assert_array_almost_equal(a1, a2)
+        np.testing.assert_array_almost_equal(a1, a2)
 
     def test_transform_with_unknown_value(self):
         # fit_data: this is going to be used to fit.

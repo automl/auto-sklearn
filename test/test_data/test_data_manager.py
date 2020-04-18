@@ -1,7 +1,6 @@
 import unittest
 
 import numpy as np
-from sklearn.utils.testing import assert_array_almost_equal
 
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 
@@ -44,9 +43,9 @@ class CompetitionDataManagerTest(unittest.TestCase):
         self.D._info = {'is_sparse': 0, 'has_missing': 0}
         self.D.perform1HotEncoding()
 
-        assert_array_almost_equal(dataset_train, self.D.data['X_train'])
-        assert_array_almost_equal(dataset_valid, self.D.data['X_valid'])
-        assert_array_almost_equal(dataset_test, self.D.data['X_test'])
+        np.testing.assert_array_almost_equal(dataset_train, self.D.data['X_train'])
+        np.testing.assert_array_almost_equal(dataset_valid, self.D.data['X_valid'])
+        np.testing.assert_array_almost_equal(dataset_test, self.D.data['X_test'])
         self.assertIsInstance(self.D.data['X_train'], np.ndarray)
         self.assertIsInstance(self.D.data['X_valid'], np.ndarray)
         self.assertIsInstance(self.D.data['X_test'], np.ndarray)
@@ -57,9 +56,9 @@ class CompetitionDataManagerTest(unittest.TestCase):
         self.D.perform1HotEncoding()
 
         # Nothing should have happened to the array...
-        assert_array_almost_equal(dataset_train, self.D.data['X_train'])
-        assert_array_almost_equal(dataset_valid, self.D.data['X_valid'])
-        assert_array_almost_equal(dataset_test, self.D.data['X_test'])
+        np.testing.assert_array_almost_equal(dataset_train, self.D.data['X_train'])
+        np.testing.assert_array_almost_equal(dataset_valid, self.D.data['X_valid'])
+        np.testing.assert_array_almost_equal(dataset_test, self.D.data['X_test'])
         self.assertIsInstance(self.D.data['X_train'], np.ndarray)
         self.assertIsInstance(self.D.data['X_valid'], np.ndarray)
         self.assertIsInstance(self.D.data['X_test'], np.ndarray)

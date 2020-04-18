@@ -210,7 +210,13 @@ class BaseClassificationComponentTest(unittest.TestCase):
             cls = self.sk_module
             X = np.random.random((10, 10))
             y = np.random.randint(0, 1, size=(10, 10))
-            self.assertRaisesRegexp(ValueError, r'bad input shape \(10, 10\)', cls.fit, X, y)
+            self.assertRaisesRegex(
+                ValueError,
+                'bad input shape \\(10, 10\\)',
+                cls.fit,
+                X,
+                y
+            )
         else:
             return
 

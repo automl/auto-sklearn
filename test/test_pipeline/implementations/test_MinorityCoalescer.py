@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
+
 import scipy.sparse
-from sklearn.utils.testing import assert_array_almost_equal
 
 from autosklearn.pipeline.implementations.MinorityCoalescer import MinorityCoalescer
 
@@ -42,7 +42,7 @@ class MinorityCoalescerTest(unittest.TestCase):
         X = self.X1
         X_copy = np.copy(X)
         Y = MinorityCoalescer().fit_transform(X)
-        assert_array_almost_equal(Y, X_copy)
+        np.testing.assert_array_almost_equal(Y, X_copy)
         # Assert no copies were made
         self.assertEqual(id(X), id(Y))
 
@@ -51,7 +51,7 @@ class MinorityCoalescerTest(unittest.TestCase):
         Y = MinorityCoalescer(minimum_fraction=.1).fit_transform(X)
         for col in range(Y.shape[1]):
             hist = np.histogram(Y[:, col], bins=np.arange(1, 7))
-            assert_array_almost_equal(hist[0], [10, 0, 30, 30, 30])
+            np.testing.assert_array_almost_equal(hist[0], [10, 0, 30, 30, 30])
         # Assert no copies were made
         self.assertEqual(id(X), id(Y))
 
@@ -63,7 +63,7 @@ class MinorityCoalescerTest(unittest.TestCase):
         Y = Y.todense()
         for col in range(Y.shape[1]):
             hist = np.histogram(Y[:, col], bins=np.arange(1, 7))
-            assert_array_almost_equal(hist[0], [10, 0, 30, 30, 30])
+            np.testing.assert_array_almost_equal(hist[0], [10, 0, 30, 30, 30])
 
     def test_invalid_X(self):
         X = self.X1 - 2
@@ -82,4 +82,4 @@ class MinorityCoalescerTest(unittest.TestCase):
         Y = mc.transform(X_transf)
         for col in range(Y.shape[1]):
             hist = np.histogram(Y[:, col], bins=np.arange(1, 7))
-            assert_array_almost_equal(hist[0], [85, 0, 5, 5, 5])
+            np.testing.assert_array_almost_equal(hist[0], [85, 0, 5, 5, 5])
