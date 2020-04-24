@@ -90,7 +90,7 @@ class EnsembleTest(unittest.TestCase):
                 limit=-1,  # not used,
                 seed=0,  # important to find the test files
                 ensemble_nbest=ensemble_nbest,
-                max_models_in_disc=models_in_disc,
+                max_models_on_disc=models_in_disc,
             )
 
             ensbuilder.read_ensemble_preds()
@@ -143,7 +143,7 @@ class EnsembleTest(unittest.TestCase):
                 seed=0,  # important to find the test files
                 ensemble_nbest=ensemble_nbest,
                 performance_range_threshold=performance_range_threshold,
-                max_models_in_disc=None,
+                max_models_on_disc=None,
             )
             ensbuilder.read_preds = {
                 'A': {'ens_score': 1, 'num_run': 1, 0: True, 'loaded': -1, "seed": 1},
@@ -306,7 +306,7 @@ class EnsembleTest(unittest.TestCase):
             seed=0,  # important to find the test files
             ensemble_nbest=2,
             max_iterations=1,  # prevents infinite loop
-            max_models_in_disc=None,
+            max_models_on_disc=None,
             )
         ensbuilder.SAVE2DISC = False
 
