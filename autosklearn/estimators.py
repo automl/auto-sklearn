@@ -25,7 +25,7 @@ class AutoSklearnEstimator(BaseEstimator):
         initial_configurations_via_metalearning=25,
         ensemble_size: int = 50,
         ensemble_nbest=50,
-        max_models_in_disc=50,
+        max_models_on_disc=50,
         ensemble_memory_limit=1024,
         seed=1,
         ml_memory_limit=3072,
@@ -77,7 +77,7 @@ class AutoSklearnEstimator(BaseEstimator):
             Only consider the ``ensemble_nbest`` models when building an
             ensemble.
 
-        max_models_in_disc: int, optional (default=50),
+        max_models_on_disc: int, optional (default=50),
             Defines the maximum number of models that are kept in the disc.
             The additional number of models are permanently deleted. Due to the
             nature of this variable, it sets the upper limit on how many models
@@ -239,7 +239,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.initial_configurations_via_metalearning = initial_configurations_via_metalearning
         self.ensemble_size = ensemble_size
         self.ensemble_nbest = ensemble_nbest
-        self.max_models_in_disc = max_models_in_disc
+        self.max_models_on_disc = max_models_on_disc
         self.ensemble_memory_limit = ensemble_memory_limit
         self.seed = seed
         self.ml_memory_limit = ml_memory_limit
@@ -305,7 +305,7 @@ class AutoSklearnEstimator(BaseEstimator):
             initial_configurations_via_metalearning=initial_configurations_via_metalearning,
             ensemble_size=ensemble_size,
             ensemble_nbest=self.ensemble_nbest,
-            max_models_in_disc=self.max_models_in_disc,
+            max_models_on_disc=self.max_models_on_disc,
             ensemble_memory_limit=self.ensemble_memory_limit,
             seed=seed,
             ml_memory_limit=self.ml_memory_limit,

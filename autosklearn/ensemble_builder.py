@@ -36,7 +36,7 @@ class EnsembleBuilder(multiprocessing.Process):
             limit: int,
             ensemble_size: int = 10,
             ensemble_nbest: int = 100,
-            max_models_in_disc: int = 100,
+            max_models_on_disc: int = 100,
             performance_range_threshold: float = 0,
             seed: int = 1,
             shared_mode: bool = False,
@@ -69,7 +69,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 if float: consider only this fraction of the best models
                 Both wrt to validation predictions
                 If performance_range_threshold > 0, might return less models
-            max_models_in_disc: int
+            max_models_on_disc: int
                Defines the maximum number of models that are kept in the disc.
                If int, it must be greater or equal than 1. If None, feature is disabled.
                It defines an upper bound on the models that can be used in the ensemble.
@@ -78,7 +78,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     dummy + (best - dummy)*performance_range_threshold
                 E.g dummy=2, best=4, thresh=0.5 --> only consider models with score > 3
                 Will at most return the minimum between ensemble_nbest models,
-                and max_models_in_disc. Might return less
+                and max_models_on_disc. Might return less
             seed: int
                 random seed
                 if set to -1, read files with any seed (e.g., for shared model mode)
@@ -118,11 +118,11 @@ class EnsembleBuilder(multiprocessing.Process):
 
         self.ensemble_nbest = ensemble_nbest
 
-        if max_models_in_disc is not None and max_models_in_disc < 1:
+        if max_models_on_disc is not None and max_models_on_disc < 1:
             raise ValueError(
-                "max_models_in_disc has to be a positive number or None"
+                "max_models_on_disc has to be a positive number or None"
             )
-        self.max_models_in_disc = max_models_in_disc
+        self.max_models_on_disc = max_models_on_disc
         self.seed = seed
         self.shared_mode = shared_mode  # pSMAC?
         self.max_iterations = max_iterations
@@ -496,15 +496,24 @@ class EnsembleBuilder(multiprocessing.Process):
             keep_nbest = max(1, min(len(sorted_keys),
                                     int(len(sorted_keys) * self.ensemble_nbest)))
             self.logger.debug(
-                "Using only top %f percent of the models for ensemble "
+                "Library pruning: using only top %f percent of the models for ensemble "
                 "(%d out of %d)",
                 self.ensemble_nbest * 100, keep_nbest, len(sorted_keys)
             )
         else:
             # Keep only at most ensemble_nbest
             keep_nbest = min(self.ensemble_nbest, len(sorted_keys))
-            self.logger.debug("Using for ensemble only "
+            self.logger.debug("Library Pruning: using for ensemble only "
                               " %d (out of %d) models" % (keep_nbest, len(sorted_keys)))
+
+        # One can only read at most max_models_on_disc models
+        if self.max_models_on_disc is not None and keep_nbest > self.max_models_on_disc:
+            self.logger.debug(
+                "Restricting the number of models to %d instead of %d due to argument "
+                "max_models_on_disc",
+                self.max_models_on_disc, keep_nbest,
+            )
+            keep_nbest = self.max_models_on_disc
 
         for k, _, _ in sorted_keys[:keep_nbest]:
             if self.read_preds[k][Y_ENSEMBLE] is None:
@@ -539,16 +548,6 @@ class EnsembleBuilder(multiprocessing.Process):
                         keep_nbest = max(1, i)
                         break
         ensemble_n_best = keep_nbest
-
-        # One can only read at most max_models_in_disc models
-        if self.max_models_in_disc is not None and ensemble_n_best > self.max_models_in_disc:
-            self.logger.debug(
-                "Only {} models are in disc eventhough {} where requested.".format(
-                    self.max_models_in_disc,
-                    ensemble_n_best
-                )
-            )
-            ensemble_n_best = self.max_models_in_disc
 
         # reduce to keys
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
@@ -705,7 +704,7 @@ class EnsembleBuilder(multiprocessing.Process):
             )
 
             # Delete files of non-candidate models
-            if self.max_models_in_disc is not None:
+            if self.max_models_on_disc is not None:
                 self._delete_excess_models()
 
             return None
@@ -747,7 +746,7 @@ class EnsembleBuilder(multiprocessing.Process):
             return None
 
         # Delete files of non-candidate models
-        if self.max_models_in_disc is not None:
+        if self.max_models_on_disc is not None:
             self._delete_excess_models()
 
         return ensemble
@@ -841,10 +840,10 @@ class EnsembleBuilder(multiprocessing.Process):
 
     def _delete_excess_models(self):
         """
-            Deletes models excess models on disc. self.max_models_in_disc
+            Deletes models excess models on disc. self.max_models_on_disc
             defines the upper limit on how many models to keep.
             Any additional model with a worst score than the top
-            self.max_models_in_disc is deleted.
+            self.max_models_on_disc is deleted.
 
         """
 
@@ -852,14 +851,14 @@ class EnsembleBuilder(multiprocessing.Process):
         sorted_keys = self._get_list_of_sorted_preds()
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
 
-        if len(sorted_keys) <= self.max_models_in_disc:
+        if len(sorted_keys) <= self.max_models_on_disc:
             # Don't waste time if not enough models to delete
             return
 
-        # The top self.max_models_in_disc models would be the candidates
+        # The top self.max_models_on_disc models would be the candidates
         # Any other low performance model will be deleted
         # The list is in ascending order of score
-        candidates = sorted_keys[:self.max_models_in_disc]
+        candidates = sorted_keys[:self.max_models_on_disc]
 
         # Loop through the files currently in the directory
         for pred_path in self.y_ens_files:
