@@ -321,7 +321,6 @@ class EstimatorTest(Base, unittest.TestCase):
             output_folder=output,
             tmp_folder=tmp,
             shared_mode=True,
-            keep_just_nbest_models=False,
             seed=3,
             initial_configurations_via_metalearning=0,
             ensemble_size=0,
