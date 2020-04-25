@@ -184,6 +184,11 @@ class EnsembleBuilder(multiprocessing.Process):
         self.y_true_ensemble = None
         self.SAVE2DISC = True
 
+        # hidden feature which can be activated via an environment variable. This keeps all
+        # models and predictions which have ever been a candidate. This is necessary to post-hoc
+        # compute the whole ensemble building trajectory.
+        self._has_been_candidate = set()
+
         self.validation_performance_ = np.inf
 
     def run(self):
@@ -288,6 +293,10 @@ class EnsembleBuilder(multiprocessing.Process):
                 # This has to be the case
                 n_sel_test = []
                 n_sel_valid = []
+
+            if os.environ.get('ENSEMBLE_KEEP_ALL_CANDIDATES'):
+                for candidate in candidate_models:            
+                    self._has_been_candidate.add(candidate)
 
             # train ensemble
             ensemble = self.fit_ensemble(selected_keys=candidate_models)
@@ -826,14 +835,14 @@ class EnsembleBuilder(multiprocessing.Process):
             sorted_keys: list
         """
         # Sort by score - higher is better!
-        # First sort by filename
-        sorted_keys = list(sorted(
+        # First sort by num_run
+        sorted_keys = list(reversed(sorted(
             [
                 (k, v["ens_score"], v["num_run"])
                 for k, v in self.read_preds.items()
             ],
-            key=lambda x: x[0],
-        ))
+            key=lambda x: x[2],
+        )))
         # Then by score
         sorted_keys = list(reversed(sorted(sorted_keys, key=lambda x: x[1])))
         return sorted_keys
@@ -865,6 +874,9 @@ class EnsembleBuilder(multiprocessing.Process):
 
             # Do not delete candidates
             if pred_path in candidates:
+                continue
+
+            if pred_path in self._has_been_candidate:
                 continue
 
             match = self.model_fn_re.search(pred_path)
