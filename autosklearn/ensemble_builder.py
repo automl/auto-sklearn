@@ -295,7 +295,7 @@ class EnsembleBuilder(multiprocessing.Process):
                 n_sel_valid = []
 
             if os.environ.get('ENSEMBLE_KEEP_ALL_CANDIDATES'):
-                for candidate in candidate_models:            
+                for candidate in candidate_models:
                     self._has_been_candidate.add(candidate)
 
             # train ensemble
