@@ -74,7 +74,14 @@ class EnsembleTest(unittest.TestCase):
 
     @unittest.skipIf(sys.version_info[0:2] <= (3, 5), "Only works with Python > 3.5")
     def testNBest(self):
-        for max_keep_best, exp in ((1, 1), (1.0, 2), (0.1, 1), (0.9, 1)):
+        for ensemble_nbest, models_in_disc, exp in (
+                (1, None, 1),
+                (1.0, None, 2),
+                (0.1, None, 1),
+                (0.9, None, 1),
+                (1, 2, 1),
+                (2, 1, 1),
+        ):
             ensbuilder = EnsembleBuilder(
                 backend=self.backend,
                 dataset_name="TEST",
@@ -82,8 +89,8 @@ class EnsembleTest(unittest.TestCase):
                 metric=roc_auc,
                 limit=-1,  # not used,
                 seed=0,  # important to find the test files
-                max_keep_best=max_keep_best,
-                remove_bad_model_files=False,
+                ensemble_nbest=ensemble_nbest,
+                max_models_on_disc=models_in_disc,
             )
 
             ensbuilder.read_ensemble_preds()
@@ -93,7 +100,7 @@ class EnsembleTest(unittest.TestCase):
 
             fixture = os.path.join(
                 self.backend.temporary_directory,
-                ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_100.0.npy"
+                ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_0.0.npy"
             )
             self.assertEqual(sel_keys[0], fixture)
 
@@ -109,7 +116,7 @@ class EnsembleTest(unittest.TestCase):
                 metric=roc_auc,
                 limit=-1,  # not used,
                 seed=0,  # important to find the test files
-                max_keep_best=100,
+                ensemble_nbest=100,
                 performance_range_threshold=performance_range_threshold
             )
             ensbuilder.read_preds = {
@@ -126,7 +133,7 @@ class EnsembleTest(unittest.TestCase):
     def testPerformanceRangeThresholdMaxBest(self):
         to_test = ((0.0, 1, 1), (0.0, 1.0, 4), (0.1, 2, 2), (0.3, 4, 3),
                    (0.5, 1, 1), (0.6, 10, 2), (0.8, 0.5, 1), (1, 1.0, 1))
-        for performance_range_threshold, max_keep_best, exp in to_test:
+        for performance_range_threshold, ensemble_nbest, exp in to_test:
             ensbuilder = EnsembleBuilder(
                 backend=self.backend,
                 dataset_name="TEST",
@@ -134,9 +141,9 @@ class EnsembleTest(unittest.TestCase):
                 metric=roc_auc,
                 limit=-1,  # not used,
                 seed=0,  # important to find the test files
-                max_keep_best=max_keep_best,
+                ensemble_nbest=ensemble_nbest,
                 performance_range_threshold=performance_range_threshold,
-                remove_bad_model_files=False
+                max_models_on_disc=None,
             )
             ensbuilder.read_preds = {
                 'A': {'ens_score': 1, 'num_run': 1, 0: True, 'loaded': -1, "seed": 1},
@@ -158,7 +165,7 @@ class EnsembleTest(unittest.TestCase):
                                      metric=roc_auc,
                                      limit=-1,  # not used,
                                      seed=0,  # important to find the test files
-                                     max_keep_best=1
+                                     ensemble_nbest=1
                                      )
 
         ensbuilder.read_ensemble_preds()
@@ -171,7 +178,7 @@ class EnsembleTest(unittest.TestCase):
 
         filename = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_100.0.npy"
+            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_3_100.0.npy"
         )
         ensbuilder.read_preds[filename]["ens_score"] = -1
 
@@ -199,7 +206,7 @@ class EnsembleTest(unittest.TestCase):
                                      metric=roc_auc,
                                      limit=-1,  # not used,
                                      seed=0,  # important to find the test files
-                                     max_keep_best=1
+                                     ensemble_nbest=1
                                      )
 
         ensbuilder.read_ensemble_preds()
@@ -214,7 +221,7 @@ class EnsembleTest(unittest.TestCase):
         )
         d3 = os.path.join(
             self.backend.temporary_directory,
-            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_2_100.0.npy"
+            ".auto-sklearn/predictions_ensemble/predictions_ensemble_0_3_100.0.npy"
         )
 
         sel_keys = ensbuilder.get_n_best_preds()
@@ -224,12 +231,12 @@ class EnsembleTest(unittest.TestCase):
         # not selected --> should still be None
         self.assertIsNone(ensbuilder.read_preds[d1][Y_VALID])
         self.assertIsNone(ensbuilder.read_preds[d1][Y_TEST])
-        self.assertIsNone(ensbuilder.read_preds[d2][Y_VALID])
-        self.assertIsNone(ensbuilder.read_preds[d2][Y_TEST])
+        self.assertIsNone(ensbuilder.read_preds[d3][Y_VALID])
+        self.assertIsNone(ensbuilder.read_preds[d3][Y_TEST])
 
         # selected --> read valid and test predictions
-        self.assertIsNotNone(ensbuilder.read_preds[d3][Y_VALID])
-        self.assertIsNotNone(ensbuilder.read_preds[d3][Y_TEST])
+        self.assertIsNotNone(ensbuilder.read_preds[d2][Y_VALID])
+        self.assertIsNotNone(ensbuilder.read_preds[d2][Y_TEST])
 
     def testEntireEnsembleBuilder(self):
 
@@ -240,7 +247,7 @@ class EnsembleTest(unittest.TestCase):
             metric=roc_auc,
             limit=-1,  # not used,
             seed=0,  # important to find the test files
-            max_keep_best=2,
+            ensemble_nbest=2,
         )
         ensbuilder.SAVE2DISC = False
 
@@ -297,9 +304,9 @@ class EnsembleTest(unittest.TestCase):
             metric=roc_auc,
             limit=-1,  # not used,
             seed=0,  # important to find the test files
-            max_keep_best=2,
+            ensemble_nbest=2,
             max_iterations=1,  # prevents infinite loop
-            remove_bad_model_files=False,  # Because BackendMock creates no files
+            max_models_on_disc=None,
             )
         ensbuilder.SAVE2DISC = False
 
@@ -316,7 +323,7 @@ class EnsembleTest(unittest.TestCase):
                                             metric=roc_auc,
                                             limit=1000,  # not used,
                                             seed=0,  # important to find the test files
-                                            max_keep_best=10,
+                                            ensemble_nbest=10,
                                             max_iterations=1,  # prevents infinite loop
                                             # small to trigger MemoryException
                                             memory_limit=10
@@ -326,7 +333,7 @@ class EnsembleTest(unittest.TestCase):
         ensbuilder.run()
 
         # it should try to reduce ensemble_nbest until it also failed at 2
-        self.assertEqual(ensbuilder.max_keep_best, 1)
+        self.assertEqual(ensbuilder.ensemble_nbest, 1)
 
 
 class EnsembleSelectionTest(unittest.TestCase):

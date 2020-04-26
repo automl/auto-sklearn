@@ -35,8 +35,8 @@ class EnsembleBuilder(multiprocessing.Process):
             metric: Scorer,
             limit: int,
             ensemble_size: int = 10,
-            max_keep_best: int = 100,
-            remove_bad_model_files: bool = True,
+            ensemble_nbest: int = 100,
+            max_models_on_disc: int = 100,
             performance_range_threshold: float = 0,
             seed: int = 1,
             shared_mode: bool = False,
@@ -64,20 +64,21 @@ class EnsembleBuilder(multiprocessing.Process):
                 time limit in sec
             ensemble_size: int
                 maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
-            max_keep_best: int/float
+            ensemble_nbest: int/float
                 if int: consider only the n best prediction
                 if float: consider only this fraction of the best models
                 Both wrt to validation predictions
                 If performance_range_threshold > 0, might return less models
-            remove_bad_model_files: bool
-                As new models are created, keep the files the n-best models, and
-                delete the others, i.e. the ones not used by the ensemble. Currently, this
-                functionality cannot be used together with shared mode.
+            max_models_on_disc: int
+               Defines the maximum number of models that are kept in the disc.
+               If int, it must be greater or equal than 1. If None, feature is disabled.
+               It defines an upper bound on the models that can be used in the ensemble.
             performance_range_threshold: float
                 Keep only models that are better than:
                     dummy + (best - dummy)*performance_range_threshold
                 E.g dummy=2, best=4, thresh=0.5 --> only consider models with score > 3
-                Will at most return max_keep_best models, might return less
+                Will at most return the minimum between ensemble_nbest models,
+                and max_models_on_disc. Might return less
             seed: int
                 random seed
                 if set to -1, read files with any seed (e.g., for shared model mode)
@@ -96,10 +97,6 @@ class EnsembleBuilder(multiprocessing.Process):
                 read at most n new prediction files in each iteration
         """
 
-        if remove_bad_model_files and shared_mode:
-            raise ValueError("Currently, shared_mode can't be used together with "
-                             "keep_just_nbest_models")
-
         super(EnsembleBuilder, self).__init__()
 
         self.backend = backend  # communication with filesystem
@@ -110,27 +107,22 @@ class EnsembleBuilder(multiprocessing.Process):
         self.ensemble_size = ensemble_size
         self.performance_range_threshold = performance_range_threshold
 
-        if isinstance(max_keep_best, numbers.Integral) and max_keep_best < 1:
-            raise ValueError("Integer max_keep_best has to be larger 1: %s" %
-                             max_keep_best)
-        elif not isinstance(max_keep_best, numbers.Integral):
-            if max_keep_best < 0 or max_keep_best > 1:
+        if isinstance(ensemble_nbest, numbers.Integral) and ensemble_nbest < 1:
+            raise ValueError("Integer ensemble_nbest has to be larger 1: %s" %
+                             ensemble_nbest)
+        elif not isinstance(ensemble_nbest, numbers.Integral):
+            if ensemble_nbest < 0 or ensemble_nbest > 1:
                 raise ValueError(
-                    "Float max_keep_best best has to be >= 0 and <= 1: %s" %
-                    max_keep_best)
-            elif remove_bad_model_files:
-                # These two options currently don't work together. At some point,
-                # the percentage of models will result in the ensemble builder
-                # to consider one additional candidate. However, it previously
-                # deleted all additional candidates, and therefore, this will
-                # not be possible and the code will crash
-                raise ValueError(
-                    'Percentage max_keep_best and remove_bad_model_files cannot be '
-                    'used together.'
-                )
+                    "Float ensemble_nbest best has to be >= 0 and <= 1: %s" %
+                    ensemble_nbest)
 
-        self.max_keep_best = max_keep_best
-        self.keep_just_nbest_models = remove_bad_model_files
+        self.ensemble_nbest = ensemble_nbest
+
+        if max_models_on_disc is not None and max_models_on_disc < 1:
+            raise ValueError(
+                "max_models_on_disc has to be a positive number or None"
+            )
+        self.max_models_on_disc = max_models_on_disc
         self.seed = seed
         self.shared_mode = shared_mode  # pSMAC?
         self.max_iterations = max_iterations
@@ -166,9 +158,9 @@ class EnsembleBuilder(multiprocessing.Process):
         )
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
         self.logger = get_logger(logger_name)
-        if max_keep_best == 1:
-            self.logger.debug("Behaviour depends on int/float: %s, %s (max_keep_best, type)" %
-                              (max_keep_best, type(max_keep_best)))
+        if ensemble_nbest == 1:
+            self.logger.debug("Behaviour depends on int/float: %s, %s (ensemble_nbest, type)" %
+                              (ensemble_nbest, type(ensemble_nbest)))
 
         self.start_time = 0
         self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy')
@@ -192,6 +184,11 @@ class EnsembleBuilder(multiprocessing.Process):
         self.y_true_ensemble = None
         self.SAVE2DISC = True
 
+        # hidden feature which can be activated via an environment variable. This keeps all
+        # models and predictions which have ever been a candidate. This is necessary to post-hoc
+        # compute the whole ensemble building trajectory.
+        self._has_been_candidate = set()
+
         self.validation_performance_ = np.inf
 
     def run(self):
@@ -207,17 +204,17 @@ class EnsembleBuilder(multiprocessing.Process):
             if safe_ensemble_script.exit_status is pynisher.MemorylimitException:
                 # if ensemble script died because of memory error,
                 # reduce nbest to reduce memory consumption and try it again
-                if isinstance(self.max_keep_best, numbers.Integral) and \
-                        self.max_keep_best == 1:
+                if isinstance(self.ensemble_nbest, numbers.Integral) and \
+                        self.ensemble_nbest == 1:
                     self.logger.critical("Memory Exception --"
                                          " Unable to escape from memory exception")
                 else:
-                    if isinstance(self.max_keep_best, numbers.Integral):
-                        self.max_keep_best = int(self.max_keep_best / 2)
+                    if isinstance(self.ensemble_nbest, numbers.Integral):
+                        self.ensemble_nbest = int(self.ensemble_nbest / 2)
                     else:
-                        self.max_keep_best = self.max_keep_best / 2
+                        self.ensemble_nbest = self.ensemble_nbest / 2
                     self.logger.warning("Memory Exception -- restart with "
-                                        "less max_keep_best: %d" % self.max_keep_best)
+                                        "less ensemble_nbest: %d" % self.ensemble_nbest)
                     # ATTENTION: main will start from scratch;
                     # all data structures are empty again
                     continue
@@ -296,6 +293,10 @@ class EnsembleBuilder(multiprocessing.Process):
                 # This has to be the case
                 n_sel_test = []
                 n_sel_valid = []
+
+            if os.environ.get('ENSEMBLE_KEEP_ALL_CANDIDATES'):
+                for candidate in candidate_models:
+                    self._has_been_candidate.add(candidate)
 
             # train ensemble
             ensemble = self.fit_ensemble(selected_keys=candidate_models)
@@ -470,17 +471,7 @@ class EnsembleBuilder(multiprocessing.Process):
             Side effect: delete predictions of non-candidate models
         """
 
-        # Sort by score - higher is better!
-        # First sort by filename
-        sorted_keys = list(sorted(
-            [
-                (k, v["ens_score"], v["num_run"])
-                for k, v in self.read_preds.items()
-            ],
-            key=lambda x: x[0],
-        ))
-        # Then by score
-        sorted_keys = list(reversed(sorted(sorted_keys, key=lambda x: x[1])))
+        sorted_keys = self._get_list_of_sorted_preds()
 
         # number of models available
         num_keys = len(sorted_keys)
@@ -509,20 +500,29 @@ class EnsembleBuilder(multiprocessing.Process):
             ]
         # reload predictions if scores changed over time and a model is
         # considered to be in the top models again!
-        if not isinstance(self.max_keep_best, numbers.Integral):
+        if not isinstance(self.ensemble_nbest, numbers.Integral):
             # Transform to number of models to keep. Keep at least one
             keep_nbest = max(1, min(len(sorted_keys),
-                                    int(len(sorted_keys) * self.max_keep_best)))
+                                    int(len(sorted_keys) * self.ensemble_nbest)))
             self.logger.debug(
-                "Library pruning: keeping only top %f percent of the models "
+                "Library pruning: using only top %f percent of the models for ensemble "
                 "(%d out of %d)",
-                self.max_keep_best * 100, keep_nbest, len(sorted_keys)
+                self.ensemble_nbest * 100, keep_nbest, len(sorted_keys)
             )
         else:
-            # Keep only at most max_keep_best
-            keep_nbest = min(self.max_keep_best, len(sorted_keys))
-            self.logger.debug("Library pruning: cutting down "
-                              "to %d (out of %d) models" % (keep_nbest, len(sorted_keys)))
+            # Keep only at most ensemble_nbest
+            keep_nbest = min(self.ensemble_nbest, len(sorted_keys))
+            self.logger.debug("Library Pruning: using for ensemble only "
+                              " %d (out of %d) models" % (keep_nbest, len(sorted_keys)))
+
+        # One can only read at most max_models_on_disc models
+        if self.max_models_on_disc is not None and keep_nbest > self.max_models_on_disc:
+            self.logger.debug(
+                "Restricting the number of models to %d instead of %d due to argument "
+                "max_models_on_disc",
+                self.max_models_on_disc, keep_nbest,
+            )
+            keep_nbest = self.max_models_on_disc
 
         for k, _, _ in sorted_keys[:keep_nbest]:
             if self.read_preds[k][Y_ENSEMBLE] is None:
@@ -551,7 +551,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     # but always keep at least one model
                     current_score = sorted_keys[i][1]
                     if current_score <= min_score:
-                        self.logger.debug("Dynamic library pruning: "
+                        self.logger.debug("Dynamic Performance range: "
                                           "Further reduce from %d to %d models",
                                           keep_nbest, max(1, i))
                         keep_nbest = max(1, i)
@@ -713,8 +713,8 @@ class EnsembleBuilder(multiprocessing.Process):
             )
 
             # Delete files of non-candidate models
-            if self.keep_just_nbest_models:
-                self._delete_non_candidate_models(selected_keys)
+            if self.max_models_on_disc is not None:
+                self._delete_excess_models()
 
             return None
         self.last_hash = current_hash
@@ -755,8 +755,8 @@ class EnsembleBuilder(multiprocessing.Process):
             return None
 
         # Delete files of non-candidate models
-        if self.keep_just_nbest_models:
-            self._delete_non_candidate_models(selected_keys)
+        if self.max_models_on_disc is not None:
+            self._delete_excess_models()
 
         return ensemble
 
@@ -821,12 +821,62 @@ class EnsembleBuilder(multiprocessing.Process):
             return None
         # TODO: ADD saving of predictions on "ensemble data"
 
-    def _delete_non_candidate_models(self, candidates):
+    def _get_list_of_sorted_preds(self):
+        """
+            Returns a list of sorted predictions in descending order
+            Predictions are taken from self.read_preds.
+
+            Parameters
+            ----------
+            None
+
+            Return
+            ------
+            sorted_keys: list
+        """
+        # Sort by score - higher is better!
+        # First sort by num_run
+        sorted_keys = list(reversed(sorted(
+            [
+                (k, v["ens_score"], v["num_run"])
+                for k, v in self.read_preds.items()
+            ],
+            key=lambda x: x[2],
+        )))
+        # Then by score
+        sorted_keys = list(reversed(sorted(sorted_keys, key=lambda x: x[1])))
+        return sorted_keys
+
+    def _delete_excess_models(self):
+        """
+            Deletes models excess models on disc. self.max_models_on_disc
+            defines the upper limit on how many models to keep.
+            Any additional model with a worst score than the top
+            self.max_models_on_disc is deleted.
+
+        """
+
+        # Obtain a list of sorted pred keys
+        sorted_keys = self._get_list_of_sorted_preds()
+        sorted_keys = list(map(lambda x: x[0], sorted_keys))
+
+        if len(sorted_keys) <= self.max_models_on_disc:
+            # Don't waste time if not enough models to delete
+            return
+
+        # The top self.max_models_on_disc models would be the candidates
+        # Any other low performance model will be deleted
+        # The list is in ascending order of score
+        candidates = sorted_keys[:self.max_models_on_disc]
+
         # Loop through the files currently in the directory
         for pred_path in self.y_ens_files:
 
             # Do not delete candidates
             if pred_path in candidates:
+                continue
+
+            if pred_path in self._has_been_candidate:
                 continue
 
             match = self.model_fn_re.search(pred_path)
@@ -869,7 +919,7 @@ class EnsembleBuilder(multiprocessing.Process):
                         'Model %s is already locked. Skipping it for now.', model_name)
                 else:
                     # Other exceptions, however, should not occur.
-                    # The message bellow is asserted in test_delete_non_candidate_models()
+                    # The message bellow is asserted in test_delete_excess_models()
                     self.logger.error(
                         'Failed to lock model %s files due to error %s', model_name, e)
                 for lock in locks:
@@ -884,7 +934,7 @@ class EnsembleBuilder(multiprocessing.Process):
             current_timestamp = os.path.getmtime(pred_path)
             if current_timestamp == original_timestamp:
                 # The messages logged here are asserted in
-                # test_delete_non_candidate_models(). Edit with care.
+                # test_delete_excess_models(). Edit with care.
                 try:
                     for path in paths:
                         os.remove(path)
