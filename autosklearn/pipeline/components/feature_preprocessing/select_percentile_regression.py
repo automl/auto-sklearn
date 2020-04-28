@@ -10,7 +10,7 @@ from autosklearn.pipeline.constants import *
 class SelectPercentileRegression(SelectPercentileBase,
                                  AutoSklearnPreprocessingAlgorithm):
 
-    def __init__(self, percentile, score_func="f_classif", random_state=None):
+    def __init__(self, percentile, score_func="f_regression", random_state=None):
         """ Parameters:
         random state : ignored
 
