@@ -22,6 +22,7 @@ Version 0.7.0
 * MAINT #774: move from scikit-learn 0.21.X to 0.22.X
 * MAINT #791: move from smac 0.8 to 0.12
 * MAINT #822: make autosklearn modules PEP8 compliant
+* FIX #733: fix for n_jobs=-1
 * FIX #739: remove unnecessary warning
 * FIX ##769: fixed error in calculation of meta features
 * FIX #778: support for python 3.8
