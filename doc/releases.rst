@@ -15,10 +15,10 @@ Version 0.7.0
 =============
 
 * ADD #785: user control to reduce the hard drive memory required to store ensembles
-* ADD #794:	iterative fit for gradient boosting
-* ADD #795:	add successive halving evaluation strategy
-* ADD #814:	new sklearn.metrics.balanced_accuracy_score instead of custom metric
-* ADD #815:	new experimental evaluation mode called iterative_cv
+* ADD #794: iterative fit for gradient boosting
+* ADD #795: add successive halving evaluation strategy
+* ADD #814: new sklearn.metrics.balanced_accuracy_score instead of custom metric
+* ADD #815: new experimental evaluation mode called iterative_cv
 * MAINT #774: move from scikit-learn 0.21.X to 0.22.X
 * MAINT #791: move from smac 0.8 to 0.12
 * MAINT #822: make autosklearn modules PEP8 compliant
