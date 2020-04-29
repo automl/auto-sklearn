@@ -13,7 +13,7 @@ from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException
 from smac.stats.stats import Stats
 
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
-from autosklearn.metrics import accuracy
+from autosklearn.metrics import accuracy, log_loss
 
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
@@ -130,7 +130,8 @@ class EvaluationTest(unittest.TestCase):
         # The following should not fail because abort on first config crashed is false
         info = ta.start(config=None, instance=None, cutoff=60)
         self.assertEqual(info[0], StatusType.CRASHED)
-        self.assertEqual(info[1], 1.0)
+        worst_possible_result = -np.iinfo(np.uint32).max
+        self.assertEqual(info[1], worst_possible_result)
         self.assertIsInstance(info[2], float)
         self.assertEqual(info[3], {'configuration_origin': 'UNKNOWN',
                                    'error': "Result queue is empty"})
@@ -138,7 +139,7 @@ class EvaluationTest(unittest.TestCase):
         self.stats.ta_runs += 1
         info = ta.start(config=None, instance=None, cutoff=30)
         self.assertEqual(info[0], StatusType.CRASHED)
-        self.assertEqual(info[1], 1.0)
+        self.assertEqual(info[1], worst_possible_result)
         self.assertIsInstance(info[2], float)
         self.assertEqual(info[3], {'configuration_origin': 'UNKNOWN',
                                    'error': "Result queue is empty"})
@@ -151,10 +152,11 @@ class EvaluationTest(unittest.TestCase):
                                     logger=self.logger,
                                     stats=self.stats,
                                     memory_limit=3072,
-                                    metric=accuracy)
+                                    metric=log_loss)
         info = ta.start(None, instance=None, cutoff=30)
         self.assertEqual(info[0], StatusType.MEMOUT)
-        self.assertEqual(info[1], 1.0)
+        worst_possible_result = np.iinfo(np.uint32).max
+        self.assertEqual(info[1], worst_possible_result)
         self.assertIsInstance(info[2], float)
 
     @unittest.mock.patch('pynisher.enforce_limits')
@@ -173,7 +175,8 @@ class EvaluationTest(unittest.TestCase):
                                     metric=accuracy)
         info = ta.start(config=None, instance=None, cutoff=30)
         self.assertEqual(info[0], StatusType.TIMEOUT)
-        self.assertEqual(info[1], 1.0)
+        worst_possible_result = -np.iinfo(np.uint32).max
+        self.assertEqual(info[1], worst_possible_result)
         self.assertIsInstance(info[2], float)
 
     @unittest.mock.patch('pynisher.enforce_limits')
@@ -218,7 +221,8 @@ class EvaluationTest(unittest.TestCase):
                                     metric=accuracy)
         info = ta.start(None, instance=None, cutoff=30)
         self.assertEqual(info[0], StatusType.CRASHED)
-        self.assertEqual(info[1], 1.0)
+        worst_possible_result = -np.iinfo(np.uint32).max
+        self.assertEqual(info[1], worst_possible_result)
         self.assertIsInstance(info[2], float)
 
     @unittest.mock.patch('autosklearn.evaluation.train_evaluator.eval_holdout')
@@ -254,7 +258,8 @@ class EvaluationTest(unittest.TestCase):
         self.stats.ta_runs += 1
         info = ta.start(None, instance=None, cutoff=30)
         self.assertEqual(info[0], StatusType.CRASHED)
-        self.assertEqual(info[1], 1.0)
+        worst_possible_result = -np.iinfo(np.uint32).max
+        self.assertEqual(info[1], worst_possible_result)
         self.assertIsInstance(info[2], float)
         self.assertEqual(info[3]['error'], 'ValueError()')
         self.assertIn('traceback', info[3])

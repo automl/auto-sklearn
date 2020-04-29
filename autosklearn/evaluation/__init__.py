@@ -20,10 +20,8 @@ import autosklearn.evaluation.train_evaluator
 import autosklearn.evaluation.test_evaluator
 import autosklearn.evaluation.util
 
-WORST_POSSIBLE_RESULT = 1.0
 
-
-def fit_predict_try_except_decorator(ta, queue, **kwargs):
+def fit_predict_try_except_decorator(ta, queue, cost_for_crash, **kwargs):
 
     try:
         return ta(queue=queue, **kwargs)
@@ -35,7 +33,7 @@ def fit_predict_try_except_decorator(ta, queue, **kwargs):
         exception_traceback = traceback.format_exc()
         error_message = repr(e)
 
-        queue.put({'loss': WORST_POSSIBLE_RESULT,
+        queue.put({'loss': cost_for_crash,
                    'additional_run_info': {'traceback': exception_traceback,
                                            'error': error_message},
                    'status': StatusType.CRASHED,
@@ -78,15 +76,25 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             raise ValueError('Unknown resampling strategy %s' %
                              resampling_strategy)
 
-        eval_function = functools.partial(fit_predict_try_except_decorator,
-                                          ta=eval_function)
+        # Worst possible result depends on the metric
+        # If no metric, assume 1.0 as worst score
+        self.worst_possible_result = 1.0
+        if metric is not None:
+            self.worst_possible_result = np.iinfo(np.uint32).max * -metric._sign
+
+        eval_function = functools.partial(
+            fit_predict_try_except_decorator,
+            ta=eval_function,
+            cost_for_crash=self.worst_possible_result,
+        )
+
         super().__init__(
             ta=eval_function,
             stats=stats,
             runhistory=runhistory,
             run_obj=run_obj,
             par_factor=par_factor,
-            cost_for_crash=WORST_POSSIBLE_RESULT,
+            cost_for_crash=self.worst_possible_result,
         )
 
         self.backend = backend
@@ -250,7 +258,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 if status in [StatusType.SUCCESS, StatusType.DONOTADVANCE]:
                     cost = result
                 else:
-                    cost = WORST_POSSIBLE_RESULT
+                    cost = self.worst_possible_result
 
             except Empty:
                 info = None
@@ -265,12 +273,12 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                     }
                 else:
                     raise ValueError(obj.exit_status)
-                cost = WORST_POSSIBLE_RESULT
+                cost = self.worst_possible_result
 
         elif obj.exit_status is TAEAbortException:
             info = None
             status = StatusType.ABORT
-            cost = WORST_POSSIBLE_RESULT
+            cost = self.worst_possible_result
             additional_run_info = {'error': 'Your configuration of '
                                             'auto-sklearn does not work!'}
 
@@ -285,7 +293,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                     cost = result
                 else:
                     status = StatusType.CRASHED
-                    cost = WORST_POSSIBLE_RESULT
+                    cost = self.worst_possible_result
                     additional_run_info['info'] = 'Run treated as crashed ' \
                                                   'because the pynisher exit ' \
                                                   'status %s is unknown.' % \
@@ -294,7 +302,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
                 info = None
                 additional_run_info = {'error': 'Result queue is empty'}
                 status = StatusType.CRASHED
-                cost = WORST_POSSIBLE_RESULT
+                cost = self.worst_possible_result
 
         if (
             (self.budget_type is None or budget == 0)
