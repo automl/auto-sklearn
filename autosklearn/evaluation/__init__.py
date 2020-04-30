@@ -40,6 +40,21 @@ def fit_predict_try_except_decorator(ta, queue, cost_for_crash, **kwargs):
                    'final_queue_element': True})
 
 
+def get_cost_of_crash(metric):
+
+    # For metrics like accuracy that are bounded to [0,1]
+    # assume 1 as the worst cost as autosklearn works with err
+    worst_possible_result = 1.0
+
+    if metric is not None:
+        # Else, we use the make_scorer info to define the
+        # worst possible result
+        if metric._sign < 0:
+            worst_possible_result = np.iinfo(np.uint32).max
+
+    return worst_possible_result
+
+
 # TODO potentially log all inputs to this class to pickle them in order to do
 # easier debugging of potential crashes
 class ExecuteTaFuncWithQueue(AbstractTAFunc):
@@ -76,11 +91,7 @@ class ExecuteTaFuncWithQueue(AbstractTAFunc):
             raise ValueError('Unknown resampling strategy %s' %
                              resampling_strategy)
 
-        # Worst possible result depends on the metric
-        # If no metric, assume 1.0 as worst score
-        self.worst_possible_result = 1.0
-        if metric is not None:
-            self.worst_possible_result = np.iinfo(np.uint32).max * -metric._sign
+        self.worst_possible_result = get_cost_of_crash(metric)
 
         eval_function = functools.partial(
             fit_predict_try_except_decorator,
