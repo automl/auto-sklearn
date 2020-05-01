@@ -2,7 +2,7 @@ import unittest
 
 from autosklearn.pipeline.util import _test_classifier, \
     _test_classifier_predict_proba, _test_classifier_iterative_fit
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import SPARSE
 
 import sklearn.metrics
 import numpy as np
@@ -20,6 +20,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
     step_hyperparameter = None
 
     def test_default_iris(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         for i in range(2):
             predictions, targets, n_calls = \
                 _test_classifier(dataset="iris",
@@ -33,7 +37,20 @@ class BaseClassificationComponentTest(unittest.TestCase):
             if self.res.get("iris_n_calls"):
                 self.assertEqual(self.res["iris_n_calls"], n_calls)
 
+    def test_get_max_iter(self):
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
+        if not hasattr(self.module, 'iterative_fit'):
+            return
+
+        self.module.get_max_iter()
+
     def test_default_iris_iterative_fit(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         if not hasattr(self.module, 'iterative_fit'):
             return
 
@@ -53,8 +70,11 @@ class BaseClassificationComponentTest(unittest.TestCase):
                     self.step_hyperparameter['value']
                 )
 
-
     def test_default_iris_predict_proba(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         for i in range(2):
             predictions, targets = \
                 _test_classifier_predict_proba(dataset="iris",
@@ -65,6 +85,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                            "default_iris_proba_places", 7))
 
     def test_default_iris_sparse(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         if SPARSE not in self.module.get_properties()["input"]:
             return
 
@@ -80,6 +104,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                            "default_iris_sparse_places", 7))
 
     def test_default_digits_binary(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         for i in range(2):
             predictions, targets, _ = \
                 _test_classifier(classifier=self.module,
@@ -92,6 +120,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                            "default_digits_binary_places", 7))
 
     def test_default_digits(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         for i in range(2):
             predictions, targets, n_calls = \
                 _test_classifier(dataset="digits",
@@ -106,6 +138,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                 self.assertEqual(self.res["digits_n_calls"], n_calls)
 
     def test_default_digits_iterative_fit(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         if not hasattr(self.module, 'iterative_fit'):
             return
 
@@ -126,6 +162,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                 )
 
     def test_default_digits_multilabel(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         if not self.module.get_properties()["handles_multilabel"]:
             return
 
@@ -141,6 +181,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                            "default_digits_multilabel_places", 7))
 
     def test_default_digits_multilabel_predict_proba(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         if not self.module.get_properties()["handles_multilabel"]:
             return
 
@@ -156,18 +200,31 @@ class BaseClassificationComponentTest(unittest.TestCase):
                                            "default_digits_multilabel_proba_places", 7))
 
     def test_target_algorithm_multioutput_multiclass_support(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         if not self.module.get_properties()["handles_multiclass"]:
             return
         elif self.sk_module is not None:
             cls = self.sk_module
             X = np.random.random((10, 10))
             y = np.random.randint(0, 1, size=(10, 10))
-            self.assertRaisesRegexp(ValueError, 'bad input shape \(10, 10\)',
-                                    cls.fit, X, y)
+            self.assertRaisesRegex(
+                ValueError,
+                'bad input shape \\(10, 10\\)',
+                cls.fit,
+                X,
+                y
+            )
         else:
             return
 
     def test_module_idempotent(self):
+
+        if self.__class__ == BaseClassificationComponentTest:
+            return
+
         def check_classifier(cls):
             X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
             y = np.array([0, 1, 1, 0])
@@ -190,6 +247,10 @@ class BaseClassificationComponentTest(unittest.TestCase):
                         continue
                     else:
                         raise e
+                except UnboundLocalError as e:
+                    if "local variable 'raw_predictions_val' referenced before assignment" in \
+                            e.args[0]:
+                        continue
 
                 p = classifier.estimator.get_params()
                 if 'random_state' in p:

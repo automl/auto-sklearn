@@ -1,12 +1,11 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    CategoricalHyperparameter, Constant, UnParametrizedHyperparameter
+    CategoricalHyperparameter, Constant
 from ConfigSpace.forbidden import ForbiddenEqualsClause, \
     ForbiddenAndConjunction
 
-from autosklearn.pipeline.components.base import \
-    AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
+from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT
 from autosklearn.util.common import check_for_bool, check_none
 
 

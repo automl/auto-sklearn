@@ -1,14 +1,12 @@
 __author__ = 'feurerm'
 
 from collections import OrderedDict
-import copy
 import os
 
 from ..base import AutoSklearnClassificationAlgorithm, find_components, \
     ThirdPartyComponents, AutoSklearnChoice
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
-from ConfigSpace.conditions import EqualsCondition
 
 classifier_directory = os.path.split(__file__)[0]
 _classifiers = find_components(__package__,
@@ -61,11 +59,11 @@ class ClassifierChoice(AutoSklearnChoice):
 
             if entry.get_properties()['handles_classification'] is False:
                 continue
-            if dataset_properties.get('multiclass') is True and entry.get_properties()[
-                'handles_multiclass'] is False:
+            if dataset_properties.get('multiclass') is True and \
+               entry.get_properties()['handles_multiclass'] is False:
                 continue
-            if dataset_properties.get('multilabel') is True and available_comp[name]. \
-                    get_properties()['handles_multilabel'] is False:
+            if dataset_properties.get('multilabel') is True and \
+               available_comp[name].get_properties()['handles_multilabel'] is False:
                 continue
             components_dict[name] = entry
 
@@ -127,6 +125,18 @@ class ClassifierChoice(AutoSklearnChoice):
 
     def estimator_supports_iterative_fit(self):
         return hasattr(self.choice, 'iterative_fit')
+
+    def get_max_iter(self):
+        if self.estimator_supports_iterative_fit():
+            return self.choice.get_max_iter()
+        else:
+            raise NotImplementedError()
+
+    def get_current_iter(self):
+        if self.estimator_supports_iterative_fit():
+            return self.choice.get_current_iter()
+        else:
+            raise NotImplementedError()
 
     def iterative_fit(self, X, y, n_iter=1, **fit_params):
         if fit_params is None:

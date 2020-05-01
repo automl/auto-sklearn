@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-from autosklearn.constants import MULTIOUTPUT_REGRESSION
 from autosklearn.constants import *
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.regression import SimpleRegressionPipeline
@@ -23,9 +22,9 @@ def get_configuration_space(info,
         raise ValueError('Cannot specify include_preprocessors and '
                          'exclude_preprocessors.')
     elif include_preprocessors is not None:
-        include['preprocessor'] = include_preprocessors
+        include['feature_preprocessor'] = include_preprocessors
     elif exclude_preprocessors is not None:
-        exclude['preprocessor'] = exclude_preprocessors
+        exclude['feature_preprocessor'] = exclude_preprocessors
 
     if include_estimators is not None and \
             exclude_estimators is not None:

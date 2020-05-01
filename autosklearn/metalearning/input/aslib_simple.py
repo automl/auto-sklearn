@@ -21,9 +21,9 @@ class AlgorithmSelectionProblem(object):
             "algorithm_runs.arff": self._read_algorithm_runs,
             # "feature_costs.arff": self._read_feature_costs,
             "feature_values.arff": self._read_feature_values,
-            #"feature_runstatus.arff": self._read_feature_runstatus,
-            #"ground_truth.arff": self._read_ground_truth,
-            #"cv.arff": self._read_cv,
+            # "feature_runstatus.arff": self._read_feature_runstatus,
+            # "ground_truth.arff": self._read_ground_truth,
+            # "cv.arff": self._read_cv,
             "configurations.csv": self._read_configurations
         }
         self.found_files = []
@@ -37,10 +37,12 @@ class AlgorithmSelectionProblem(object):
             find all expected files in self.dir_
             fills self.found_files
         '''
-        expected = [#"description.txt",
-                    "algorithm_runs.arff",
-                    "feature_values.arff",]
-                    #"feature_runstatus.arff"]
+        expected = [
+            # "description.txt",
+            "algorithm_runs.arff",
+            "feature_values.arff",
+            # "feature_runstatus.arff",
+        ]
         optional = ["ground_truth.arff", "feature_costs.arff", "citation.bib",
                     "cv.arff", "configurations.csv"]
 
@@ -89,10 +91,10 @@ class AlgorithmSelectionProblem(object):
         measure_instance_algorithm_triples = defaultdict(lambda: defaultdict(dict))
         for data in arff_dict["data"]:
             inst_name = str(data[0])
-            repetition = data[1]
+            # repetition = data[1]
             algorithm = str(data[2])
             perf_list = data[3:-1]
-            status = data[-1]
+            # status = data[-1]
 
             for i, performance_measure in enumerate(performance_measures):
                 measure_instance_algorithm_triples[performance_measure][
@@ -113,12 +115,12 @@ class AlgorithmSelectionProblem(object):
         metafeatures = dict()
         for data in arff_dict["data"]:
             inst_name = data[0]
-            repetition = data[1]
+            # repetition = data[1]
             features = data[2:]
 
             metafeatures[inst_name] = {feature[0]: feature_value
-                for feature, feature_value in
-                zip(arff_dict['attributes'][2:], features)}
+                                       for feature, feature_value in
+                                       zip(arff_dict['attributes'][2:], features)}
 
         self.metafeatures = pd.DataFrame(metafeatures).transpose()
 
@@ -136,10 +138,10 @@ class AlgorithmSelectionProblem(object):
 
                     try:
                         value = int(value)
-                    except:
+                    except Exception:
                         try:
                             value = float(value)
-                        except:
+                        except Exception:
                             pass
 
                     configuration[hp_name] = value

@@ -1,12 +1,10 @@
 from collections import OrderedDict
-import copy
 import os
 
 from ..base import AutoSklearnRegressionAlgorithm, find_components, \
     ThirdPartyComponents, AutoSklearnChoice
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
-from ConfigSpace.conditions import EqualsCondition
 
 regressor_directory = os.path.split(__file__)[0]
 _regressors = find_components(__package__,
@@ -116,6 +114,18 @@ class RegressorChoice(AutoSklearnChoice):
 
     def estimator_supports_iterative_fit(self):
         return hasattr(self.choice, 'iterative_fit')
+
+    def get_max_iter(self):
+        if self.estimator_supports_iterative_fit():
+            return self.choice.get_max_iter()
+        else:
+            raise NotImplementedError()
+
+    def get_current_iter(self):
+        if self.estimator_supports_iterative_fit():
+            return self.choice.get_current_iter()
+        else:
+            raise NotImplementedError()
 
     def iterative_fit(self, X, y, n_iter=1, **fit_params):
         if fit_params is None:

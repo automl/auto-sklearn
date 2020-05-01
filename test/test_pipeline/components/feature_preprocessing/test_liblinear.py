@@ -1,5 +1,3 @@
-import unittest
-
 from sklearn.linear_model import RidgeClassifier
 from autosklearn.pipeline.components.feature_preprocessing.liblinear_svc_preprocessor import \
     LibLinear_Preprocessor

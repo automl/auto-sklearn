@@ -6,6 +6,7 @@ from typing import Optional, List, Dict
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
+import joblib
 
 from autosklearn.automl import AutoMLClassifier, AutoMLRegressor, BaseAutoML
 from autosklearn.util.backend import create, get_randomized_directory_names
@@ -24,6 +25,7 @@ class AutoSklearnEstimator(BaseEstimator):
         initial_configurations_via_metalearning=25,
         ensemble_size: int = 50,
         ensemble_nbest=50,
+        max_models_on_disc=50,
         ensemble_memory_limit=1024,
         seed=1,
         ml_memory_limit=3072,
@@ -73,8 +75,15 @@ class AutoSklearnEstimator(BaseEstimator):
 
         ensemble_nbest : int, optional (default=50)
             Only consider the ``ensemble_nbest`` models when building an
-            ensemble. Implements `Model Library Pruning` from `Getting the
-            most out of ensemble selection`.
+            ensemble.
+
+        max_models_on_disc: int, optional (default=50),
+            Defines the maximum number of models that are kept in the disc.
+            The additional number of models are permanently deleted. Due to the
+            nature of this variable, it sets the upper limit on how many models
+            can be used for an ensemble.
+            It must be an integer greater or equal than 1.
+            If set to None, all models are kept on the disc.
 
         ensemble_memory_limit : int, optional (1024)
             Memory limit in MB for the ensemble building process.
@@ -113,6 +122,7 @@ class AutoSklearnEstimator(BaseEstimator):
             * 'holdout-iterative-fit':  67:33 (train:test) split, calls iterative
               fit where possible
             * 'cv': crossvalidation, requires 'folds'
+            * 'cv-iterative-fit': crossvalidation, calls iterative fit where possible
             * 'partial-cv': crossvalidation with intensification, requires
               'folds'
             * BaseCrossValidator object: any BaseCrossValidator class found
@@ -135,6 +145,7 @@ class AutoSklearnEstimator(BaseEstimator):
             * 'holdout': {'train_size': float}
             * 'holdout-iterative-fit':  {'train_size': float}
             * 'cv': {'folds': int}
+            * 'cv-iterative-fit': {'folds': int}
             * 'partial-cv': {'folds': int, 'shuffle': bool}
             * BaseCrossValidator or _RepeatedSplits or BaseShuffleSplit object: all arguments
                 required by chosen class as specified in scikit-learn documentation.
@@ -218,7 +229,7 @@ class AutoSklearnEstimator(BaseEstimator):
 
             Not all keys returned by scikit-learn are supported yet.
 
-        """
+        """  # noqa (links are too long)
         # Raise error if the given total time budget is less than 60 seconds.
         if time_left_for_this_task < 30:
             raise ValueError("Time left for this task must be at least "
@@ -228,6 +239,7 @@ class AutoSklearnEstimator(BaseEstimator):
         self.initial_configurations_via_metalearning = initial_configurations_via_metalearning
         self.ensemble_size = ensemble_size
         self.ensemble_nbest = ensemble_nbest
+        self.max_models_on_disc = max_models_on_disc
         self.ensemble_memory_limit = ensemble_memory_limit
         self.seed = seed
         self.ml_memory_limit = ml_memory_limit
@@ -275,11 +287,13 @@ class AutoSklearnEstimator(BaseEstimator):
                 raise ValueError("If shared_mode == True output_folder must "
                                  "not be None.")
 
-        backend = create(temporary_directory=tmp_folder,
-                         output_directory=output_folder,
-                         delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
-                         delete_output_folder_after_terminate=self.delete_output_folder_after_terminate,
-                         shared_mode=shared_mode)
+        backend = create(
+            temporary_directory=tmp_folder,
+            output_directory=output_folder,
+            delete_tmp_folder_after_terminate=self.delete_tmp_folder_after_terminate,
+            delete_output_folder_after_terminate=self.delete_output_folder_after_terminate,
+            shared_mode=shared_mode,
+            )
 
         if smac_scenario_args is None:
             smac_scenario_args = self.smac_scenario_args
@@ -288,10 +302,10 @@ class AutoSklearnEstimator(BaseEstimator):
             backend=backend,
             time_left_for_this_task=self.time_left_for_this_task,
             per_run_time_limit=self.per_run_time_limit,
-            initial_configurations_via_metalearning=
-            initial_configurations_via_metalearning,
+            initial_configurations_via_metalearning=initial_configurations_via_metalearning,
             ensemble_size=ensemble_size,
             ensemble_nbest=self.ensemble_nbest,
+            max_models_on_disc=self.max_models_on_disc,
             ensemble_memory_limit=self.ensemble_memory_limit,
             seed=seed,
             ml_memory_limit=self.ml_memory_limit,
@@ -341,7 +355,11 @@ class AutoSklearnEstimator(BaseEstimator):
                 output_directory=self.output_folder,
             )
 
-            self._n_jobs = self.n_jobs
+            if self.n_jobs == -1:
+                self._n_jobs = joblib.cpu_count()
+            else:
+                self._n_jobs = self.n_jobs
+
             shared_mode = True
             seeds = set()
             for i in range(self._n_jobs):
@@ -507,7 +525,6 @@ class AutoSklearnEstimator(BaseEstimator):
         """
         self._automl[0].refit(X, y)
         return self
-
 
     def predict(self, X, batch_size=None, n_jobs=1):
         return self._automl[0].predict(X, batch_size=batch_size, n_jobs=n_jobs)

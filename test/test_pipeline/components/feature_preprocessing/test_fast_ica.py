@@ -38,4 +38,3 @@ class FastICAComponentTest(PreprocessingTestCase):
     def test_preprocessing_dtype(self):
         super(FastICAComponentTest,
               self)._test_preprocessing_dtype(FastICA, dataset='diabetes')
-

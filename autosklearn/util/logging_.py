@@ -2,7 +2,6 @@
 import logging
 import logging.config
 import os
-import sys
 
 import yaml
 
@@ -47,7 +46,7 @@ class PickableLoggerAdapter(object):
         Dictionary, representing the object state to be pickled. Ignores
         the self.logger field and only returns the logger name.
         """
-        return { 'name': self.name }
+        return {'name': self.name}
 
     def __setstate__(self, state):
         """

@@ -69,8 +69,7 @@ class BackendContext(object):
                  shared_mode=False):
 
         # Check that the names of tmp_dir and output_dir is not the same.
-        if temporary_directory == output_directory \
-            and temporary_directory is not None:
+        if temporary_directory == output_directory and temporary_directory is not None:
             raise ValueError("The temporary and the output directory "
                              "must be different.")
 
@@ -122,18 +121,16 @@ class BackendContext(object):
             os.makedirs(self.output_directory)
             self._output_dir_created = True
 
-
     def __del__(self):
         self.delete_directories(force=False)
 
     def delete_directories(self, force=True):
         if self.delete_output_folder_after_terminate or force:
             if self._output_dir_created is False and self.shared_mode is False:
-                raise ValueError("Failed to delete output dir: %s "
-                              "because auto-sklearn did not create it. "
-                              "Please make sure that the specified output "
-                              "dir does not exist when instantiating "
-                              "auto-sklearn." % self.output_directory)
+                raise ValueError("Failed to delete output dir: %s because auto-sklearn did not "
+                                 "create it. Please make sure that the specified output dir does "
+                                 "not exist when instantiating auto-sklearn."
+                                 % self.output_directory)
             try:
                 shutil.rmtree(self.output_directory)
             except Exception:
@@ -146,21 +143,17 @@ class BackendContext(object):
 
         if self.delete_tmp_folder_after_terminate or force:
             if self._tmp_dir_created is False and self.shared_mode is False:
-                raise ValueError("Failed to delete tmp dir: % s "
-                              "because auto-sklearn did not create it. "
-                              "Please make sure that the specified tmp "
-                              "dir does not exist when instantiating "
-                              "auto-sklearn." % self.temporary_directory)
+                raise ValueError("Failed to delete tmp dir: % s because auto-sklearn did not "
+                                 "create it. Please make sure that the specified tmp dir does not "
+                                 "exist when instantiating auto-sklearn."
+                                 % self.temporary_directory)
             try:
                 shutil.rmtree(self.temporary_directory)
             except Exception:
                 if self._logger is not None:
-                    self._logger.warning("Could not delete tmp dir: %s" %
-                                  self.temporary_directory)
-                    pass
+                    self._logger.warning("Could not delete tmp dir: %s" % self.temporary_directory)
                 else:
-                    print("Could not delete tmp dir: %s" %
-                          self.temporary_directory)
+                    print("Could not delete tmp dir: %s" % self.temporary_directory)
 
 
 class Backend(object):
@@ -183,11 +176,9 @@ class Backend(object):
         # This does not have to exist or be specified
         if self.output_directory is not None:
             if not os.path.exists(self.output_directory):
-                raise ValueError("Output directory %s does not exist." %
-                                 self.output_directory)
+                raise ValueError("Output directory %s does not exist." % self.output_directory)
 
-        self.internals_directory = os.path.join(self.temporary_directory,
-                                                ".auto-sklearn")
+        self.internals_directory = os.path.join(self.temporary_directory, ".auto-sklearn")
         self._make_internals_directory()
 
     @property
@@ -216,11 +207,9 @@ class Backend(object):
         filepath = self._get_start_time_filename(seed)
 
         if not isinstance(start_time, float):
-            raise ValueError("Start time must be a float, but is %s." %
-                             type(start_time))
+            raise ValueError("Start time must be a float, but is %s." % type(start_time))
 
-        with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(filepath),
-                delete=False) as fh:
+        with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(filepath), delete=False) as fh:
             fh.write(str(start_time))
             tempname = fh.name
         os.rename(tempname, filepath)
@@ -268,14 +257,13 @@ class Backend(object):
             existing_targets = np.load(filepath, allow_pickle=True)
             if existing_targets.shape[0] > targets.shape[0] or \
                     (existing_targets.shape == targets.shape and
-                         np.allclose(existing_targets, targets)):
+                     np.allclose(existing_targets, targets)):
 
                 return filepath
         except Exception:
             pass
 
-        lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path):
+        with lockfile.LockFile(filepath):
             if os.path.exists(filepath):
                 with open(filepath, 'rb') as fh:
                     existing_targets = np.load(fh, allow_pickle=True)
@@ -296,8 +284,7 @@ class Backend(object):
     def load_targets_ensemble(self):
         filepath = self._get_targets_ensemble_filename()
 
-        lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path):
+        with lockfile.LockFile(filepath):
             with open(filepath, 'rb') as fh:
                 targets = np.load(fh, allow_pickle=True)
 
@@ -310,8 +297,7 @@ class Backend(object):
         self._make_internals_directory()
         filepath = self._get_datamanager_pickle_filename()
 
-        lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path):
+        with lockfile.LockFile(filepath):
             if not os.path.exists(filepath):
                 with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                         filepath), delete=False) as fh:
@@ -323,19 +309,18 @@ class Backend(object):
 
     def load_datamanager(self):
         filepath = self._get_datamanager_pickle_filename()
-        lock_path = filepath + '.lock'
-        with lockfile.LockFile(lock_path):
+        with lockfile.LockFile(filepath):
             with open(filepath, 'rb') as fh:
                 return pickle.load(fh)
 
     def get_model_dir(self):
         return os.path.join(self.internals_directory, 'models')
 
-    def save_model(self, model, idx, seed):
-        # This should fail if no models directory exists
-        filepath = os.path.join(self.get_model_dir(),
-                                '%s.%s.model' % (seed, idx))
+    def get_model_path(self, seed, idx, budget):
+        return os.path.join(self.get_model_dir(),
+                            '%s.%s.%s.model' % (seed, idx, budget))
 
+    def save_model(self, model, filepath):
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
             pickle.dump(model, fh, -1)
@@ -347,12 +332,12 @@ class Backend(object):
         model_directory = self.get_model_dir()
         if seed >= 0:
             model_files = glob.glob(
-                os.path.join(glob.escape(model_directory), '%s.*.model' % seed)
+                os.path.join(glob.escape(model_directory), '%s.*.*.model' % seed)
             )
         else:
             model_files = os.listdir(model_directory)
-            model_files = [os.path.join(model_directory, mf)
-                           for mf in model_files]
+            model_files = [os.path.join(model_directory, model_file)
+                           for model_file in model_files]
 
         return model_files
 
@@ -365,7 +350,7 @@ class Backend(object):
         models = dict()
 
         for model_file in model_file_names:
-            # File names are like: {seed}.{index}.model
+            # File names are like: {seed}.{index}.{budget}.model
             if model_file.endswith('/'):
                 model_file = model_file[:-1]
             if not model_file.endswith('.model') and \
@@ -377,8 +362,10 @@ class Backend(object):
             basename_parts = basename.split('.')
             seed = int(basename_parts[0])
             idx = int(basename_parts[1])
+            budget = float(basename_parts[2])
 
-            models[(seed, idx)] = self.load_model_by_seed_and_id(seed, idx)
+            models[(seed, idx, budget)] = self.load_model_by_seed_and_id_and_budget(
+                seed, idx, budget)
 
         return models
 
@@ -386,15 +373,16 @@ class Backend(object):
         models = dict()
 
         for identifier in identifiers:
-            seed, idx = identifier
-            models[identifier] = self.load_model_by_seed_and_id(seed, idx)
+            seed, idx, budget = identifier
+            models[identifier] = self.load_model_by_seed_and_id_and_budget(
+                seed, idx, budget)
 
         return models
 
-    def load_model_by_seed_and_id(self, seed, idx):
+    def load_model_by_seed_and_id_and_budget(self, seed, idx, budget):
         model_directory = self.get_model_dir()
 
-        model_file_name = '%s.%s.model' % (seed, idx)
+        model_file_name = '%s.%s.%s.model' % (seed, idx, budget)
         model_file_path = os.path.join(model_directory, model_file_name)
         with open(model_file_path, 'rb') as fh:
             return pickle.load(fh)
@@ -444,27 +432,28 @@ class Backend(object):
         return os.path.join(self.internals_directory,
                             'predictions_%s' % subset)
 
-    def save_predictions_as_npy(self, predictions, subset, automl_seed, idx):
+    def get_prediction_output_path(self, subset, automl_seed, idx, budget):
         output_dir = self._get_prediction_output_dir(subset)
         # Make sure an output directory exists
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        filepath = os.path.join(output_dir, 'predictions_%s_%s_%s.npy' %
-                                            (subset, automl_seed, str(idx)))
+        return os.path.join(output_dir, 'predictions_%s_%s_%s_%s.npy' %
+                            (subset, automl_seed, idx, budget))
 
+    def save_predictions_as_npy(self, predictions, filepath):
         with tempfile.NamedTemporaryFile('wb', dir=os.path.dirname(
                 filepath), delete=False) as fh:
             pickle.dump(predictions.astype(np.float32), fh, -1)
             tempname = fh.name
         os.rename(tempname, filepath)
 
-    def save_predictions_as_txt(self, predictions, subset, idx, precision,
-                                prefix=None):
+    def save_predictions_as_txt(self, predictions, subset, idx, precision, prefix=None):
         # Write prediction scores in prescribed format
-        filepath = os.path.join(self.output_directory,
-                                ('%s_' % prefix if prefix else '') +
-                                 '%s_%s.predict' % (subset, str(idx)))
+        filepath = os.path.join(
+            self.output_directory,
+            ('%s_' % prefix if prefix else '') + '%s_%s.predict' % (subset, str(idx)),
+        )
 
         format_string = '{:.%dg} ' % precision
         with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
@@ -479,15 +468,10 @@ class Backend(object):
         os.rename(tempname, filepath)
 
     def write_txt_file(self, filepath, data, name):
-        lock_file = filepath + '.lock'
-        with lockfile.LockFile(lock_file):
-            if not os.path.exists(lock_file):
-                with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
-                        filepath), delete=False) as fh:
-                    fh.write(data)
-                    tempname = fh.name
-                os.rename(tempname, filepath)
-                self.logger.debug('Created %s file %s' % (name, filepath))
-            else:
-                self.logger.debug('%s file already present %s' %
-                                  (name, filepath))
+        with lockfile.LockFile(filepath):
+            with tempfile.NamedTemporaryFile('w', dir=os.path.dirname(
+                    filepath), delete=False) as fh:
+                fh.write(data)
+                tempname = fh.name
+            os.rename(tempname, filepath)
+            self.logger.debug('Created %s file %s' % (name, filepath))

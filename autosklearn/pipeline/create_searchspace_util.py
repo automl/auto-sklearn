@@ -5,7 +5,8 @@ import numpy as np
 from ConfigSpace.forbidden import ForbiddenAndConjunction
 from ConfigSpace.forbidden import ForbiddenEqualsClause
 
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import \
+    SIGNED_DATA, UNSIGNED_DATA, PREDICTIONS, INPUT, DENSE, SPARSE
 
 
 def get_match_array(pipeline, dataset_properties,
@@ -68,13 +69,10 @@ def get_match_array(pipeline, dataset_properties,
                 matches[pipeline_instantiation_idxs] = 0
                 break
 
-            if (INPUT in node_output and DENSE not in node_output and
-                        SPARSE not in node_output) or \
-                    PREDICTIONS in node_output or\
-                    (not data_is_sparse and DENSE in node_input and
-                        DENSE in node_output) or \
-                    (data_is_sparse and SPARSE in node_input and
-                        SPARSE in node_output):
+            if (INPUT in node_output and DENSE not in node_output and SPARSE not in node_output) \
+               or PREDICTIONS in node_output \
+               or (not data_is_sparse and DENSE in node_input and DENSE in node_output) \
+               or (data_is_sparse and SPARSE in node_input and SPARSE in node_output):
                 # Don't change the data_is_sparse flag
                 pass
             elif data_is_sparse and DENSE in node_output:
@@ -90,7 +88,7 @@ def get_match_array(pipeline, dataset_properties,
             if PREDICTIONS in node_output:
                 pass
             elif (INPUT in node_output and SIGNED_DATA not in node_output and
-                        UNSIGNED_DATA not in node_output):
+                  UNSIGNED_DATA not in node_output):
                 pass
             elif SIGNED_DATA in node_output:
                 dataset_is_signed = True
@@ -105,8 +103,7 @@ def get_match_array(pipeline, dataset_properties,
     return matches
 
 
-def find_active_choices(matches, node, node_idx, dataset_properties, \
-                        include=None, exclude=None):
+def find_active_choices(matches, node, node_idx, dataset_properties, include=None, exclude=None):
     if not hasattr(node, "get_available_components"):
         raise ValueError()
     available_components = node.get_available_components(dataset_properties,
@@ -118,7 +115,7 @@ def find_active_choices(matches, node, node_idx, dataset_properties, \
     choices = []
     for c_idx, component in enumerate(available_components):
         slices = tuple(slice(None) if idx != node_idx else slice(c_idx, c_idx+1)
-                  for idx in range(len(matches.shape)))
+                       for idx in range(len(matches.shape)))
 
         if np.sum(matches[slices]) > 0:
             choices.append(component)
@@ -232,10 +229,10 @@ def add_forbidden(conf_space, pipeline, matches, dataset_properties,
                         #  was already added
                         continue_ = False
                         for constraint_length in range(2, len(constraint)):
-                            for constraint_start_idx in range(len(constraint)
-                                    - constraint_length + 1):
-                                sub_constraint = constraint[
-                                                     constraint_start_idx:constraint_start_idx + constraint_length]
+                            constr_starts = len(constraint) - constraint_length + 1
+                            for constraint_start_idx in range(constr_starts):
+                                constraint_end_idx = constraint_start_idx + constraint_length
+                                sub_constraint = constraint[constraint_start_idx:constraint_end_idx]
                                 if sub_constraint in constraints:
                                     continue_ = True
                                     break

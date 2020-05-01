@@ -1,7 +1,5 @@
 import unittest
 
-import numpy as np
-
 from autosklearn.pipeline.components.feature_preprocessing.kitchen_sinks import RandomKitchenSinks
 from autosklearn.pipeline.util import _test_preprocessing, PreprocessingTestCase
 

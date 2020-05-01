@@ -71,7 +71,7 @@ def get_dict(task_type="classifier", **kwargs):
     estimator = None
 
     for h in cs.get_hyperparameters():
-        if h.name == "preprocessor:__choice__":
+        if h.name == "feature_preprocessor:__choice__":
             preprocessor = h
         elif h.name == (task_type + ':__choice__'):
             estimator = h
@@ -100,7 +100,7 @@ def get_dict(task_type="classifier", **kwargs):
         preprocessor_dict[i][UN] = 0
 
     for h in cs.get_hyperparameters():
-        if h.name == "preprocessor:__choice__" or \
+        if h.name == "feature_preprocessor:__choice__" or \
                 h.name == (task_type + ':__choice__'):
             continue
         # walk over both dicts
@@ -123,7 +123,7 @@ def get_dict(task_type="classifier", **kwargs):
 
     for h in cs.get_conditions():
         if h.parent.name == (task_type + ':__choice__') or h.parent.name == \
-                "preprocessor:__choice__":
+                "feature_preprocessor:__choice__":
             # ignore this condition
             # print "IGNORE", h
             continue
@@ -200,7 +200,8 @@ def main():
     preproc_table = build_table(preproc_dict)
 
     est_table = table_str % (caption_str % (args.task_type, str(props)), est_table)
-    preproc_table = table_str % (caption_str % ("preprocessor", str(props)), preproc_table)
+    preproc_table = table_str % (caption_str % (
+        "feature_preprocessor", str(props)), preproc_table)
 
     tex_doc = template_string % "\n".join([est_table, preproc_table])
     if args.save is None:

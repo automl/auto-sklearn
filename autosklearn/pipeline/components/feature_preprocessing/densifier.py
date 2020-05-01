@@ -1,8 +1,7 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 
-from autosklearn.pipeline.components.base import \
-    AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
+from autosklearn.pipeline.constants import SPARSE, UNSIGNED_DATA, DENSE, INPUT
 
 
 class Densifier(AutoSklearnPreprocessingAlgorithm):
@@ -35,4 +34,3 @@ class Densifier(AutoSklearnPreprocessingAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
         return cs
-

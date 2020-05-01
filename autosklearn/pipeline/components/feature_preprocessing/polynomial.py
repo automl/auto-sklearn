@@ -4,7 +4,7 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 from autosklearn.util.common import check_for_bool
 
 
@@ -44,7 +44,7 @@ class PolynomialFeatures(AutoSklearnPreprocessingAlgorithm):
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                'input': (DENSE, UNSIGNED_DATA),
+                'input': (DENSE, SPARSE, UNSIGNED_DATA),
                 'output': (INPUT,)}
 
     @staticmethod

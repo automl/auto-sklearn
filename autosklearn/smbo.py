@@ -7,12 +7,9 @@ import warnings
 import numpy as np
 import pynisher
 
-from smac.facade.smac_facade import SMAC
-from smac.optimizer.objective import average_cost
-from smac.runhistory.runhistory import RunHistory
-from smac.runhistory.runhistory2epm import RunHistory2EPM4Cost
+from smac.facade.smac_ac_facade import SMAC4AC
+from smac.runhistory.runhistory2epm import RunHistory2EPM4LogCost
 from smac.scenario.scenario import Scenario
-from smac.tae.execute_ta_run import StatusType
 from smac.optimizer import pSMAC
 
 
@@ -25,7 +22,7 @@ from autosklearn.metalearning.mismbo import suggest_via_metalearning
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue, WORST_POSSIBLE_RESULT
-from autosklearn.util import get_logger
+from autosklearn.util.logging_ import get_logger
 from autosklearn.metalearning.metalearning.meta_base import MetaBase
 from autosklearn.metalearning.metafeatures.metafeatures import \
     calculate_all_metafeatures_with_labels, calculate_all_metafeatures_encoded_labels
@@ -112,6 +109,7 @@ def _calculate_metafeatures(data_feat_type, data_info_task, basename,
         watcher.wall_elapsed(task_name))
     return result
 
+
 def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
                                     task, logger):
     EXCLUDE_META_FEATURES = EXCLUDE_META_FEATURES_CLASSIFICATION \
@@ -130,6 +128,7 @@ def _calculate_metafeatures_encoded(basename, x_train, y_train, watcher,
         'Calculating Metafeatures (encoded attributes) took %5.2fsec',
         watcher.wall_elapsed(task_name))
     return result
+
 
 def _get_metalearning_configurations(meta_base, basename, metric,
                                      configuration_space,
@@ -154,6 +153,7 @@ def _get_metalearning_configurations(meta_base, basename, metric,
     watcher.stop_task(task_name)
     return metalearning_configurations
 
+
 def _print_debug_info_of_init_configuration(initial_configurations, basename,
                                             time_for_task, logger, watcher):
     logger.debug('Initial Configurations: (%d)' % len(initial_configurations))
@@ -170,9 +170,9 @@ def get_smac_object(
     scenario_dict,
     seed,
     ta,
+    ta_kwargs,
     backend,
     metalearning_configurations,
-    runhistory,
 ):
     scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob(
         smac_run_id=seed if not scenario_dict['shared-model'] else '*',
@@ -183,26 +183,14 @@ def get_smac_object(
         initial_configurations = [default_config] + metalearning_configurations
     else:
         initial_configurations = None
-    rh2EPM = RunHistory2EPM4Cost(
-        num_params=len(scenario.cs.get_hyperparameters()),
-        scenario=scenario,
-        success_states=[
-            StatusType.SUCCESS,
-            StatusType.MEMOUT,
-            StatusType.TIMEOUT,
-            # As long as we don't have a model for crashes yet!
-            StatusType.CRASHED,
-        ],
-        impute_censored_data=False,
-        impute_state=None,
-    )
-    return SMAC(
+    rh2EPM = RunHistory2EPM4LogCost
+    return SMAC4AC(
         scenario=scenario,
         rng=seed,
         runhistory2epm=rh2EPM,
         tae_runner=ta,
+        tae_runner_kwargs=ta_kwargs,
         initial_configurations=initial_configurations,
-        runhistory=runhistory,
         run_id=seed,
     )
 
@@ -268,9 +256,8 @@ class AutoMLSMBO(object):
         self.smac_scenario_args = smac_scenario_args
         self.get_smac_object_callback = get_smac_object_callback
 
-        logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed,
-                                     ":" + dataset_name if dataset_name is
-                                                           not None else "")
+        dataset_name_ = "" if dataset_name is None else dataset_name
+        logger_name = '%s(%d):%s' % (self.__class__.__name__, self.seed, ":" + dataset_name_)
         self.logger = get_logger(logger_name)
 
     def _send_warnings_to_log(self, message, category, filename, lineno,
@@ -381,7 +368,6 @@ class AutoMLSMBO(object):
         # first create a scenario
         seed = self.seed
         self.config_space.seed(seed)
-        num_params = len(self.config_space.get_hyperparameters())
         # allocate a run history
         num_run = self.start_num_run
 
@@ -404,17 +390,15 @@ class AutoMLSMBO(object):
         # into a queue and querying them once the time is over
         exclude = dict()
         include = dict()
-        if self.include_preprocessors is not None and \
-                        self.exclude_preprocessors is not None:
+        if self.include_preprocessors is not None and self.exclude_preprocessors is not None:
             raise ValueError('Cannot specify include_preprocessors and '
                              'exclude_preprocessors.')
         elif self.include_preprocessors is not None:
-            include['preprocessor'] = self.include_preprocessors
+            include['feature_preprocessor'] = self.include_preprocessors
         elif self.exclude_preprocessors is not None:
-            exclude['preprocessor'] = self.exclude_preprocessors
+            exclude['feature_preprocessor'] = self.exclude_preprocessors
 
-        if self.include_estimators is not None and \
-                        self.exclude_estimators is not None:
+        if self.include_estimators is not None and self.exclude_estimators is not None:
             raise ValueError('Cannot specify include_estimators and '
                              'exclude_estimators.')
         elif self.include_estimators is not None:
@@ -432,17 +416,20 @@ class AutoMLSMBO(object):
             else:
                 raise ValueError(self.task)
 
-        ta = ExecuteTaFuncWithQueue(backend=self.backend,
-                                    autosklearn_seed=seed,
-                                    resampling_strategy=self.resampling_strategy,
-                                    initial_num_run=num_run,
-                                    logger=self.logger,
-                                    include=include,
-                                    exclude=exclude,
-                                    metric=self.metric,
-                                    memory_limit=self.memory_limit,
-                                    disable_file_output=self.disable_file_output,
-                                    **self.resampling_strategy_args)
+        ta = ExecuteTaFuncWithQueue
+        ta_kwargs = dict(
+            backend=self.backend,
+            autosklearn_seed=seed,
+            resampling_strategy=self.resampling_strategy,
+            initial_num_run=num_run,
+            logger=self.logger,
+            include=include,
+            exclude=exclude,
+            metric=self.metric,
+            memory_limit=self.memory_limit,
+            disable_file_output=self.disable_file_output,
+            **self.resampling_strategy_args
+        )
 
         startup_time = self.watcher.wall_elapsed(self.dataset_name)
         total_walltime_limit = self.total_walltime_limit - startup_time - 5
@@ -453,8 +440,7 @@ class AutoMLSMBO(object):
             'deterministic': 'true',
             'instances': instances,
             'memory_limit': self.memory_limit,
-            'output-dir':
-                self.backend.get_smac_output_directory(),
+            'output-dir': self.backend.get_smac_output_directory(),
             'run_obj': 'quality',
             'shared-model': self.shared_mode,
             'wallclock_limit': total_walltime_limit,
@@ -489,14 +475,13 @@ class AutoMLSMBO(object):
                     )
             scenario_dict.update(self.smac_scenario_args)
 
-        runhistory = RunHistory(aggregate_func=average_cost)
         smac_args = {
             'scenario_dict': scenario_dict,
             'seed': seed,
             'ta': ta,
+            'ta_kwargs': ta_kwargs,
             'backend': self.backend,
             'metalearning_configurations': metalearning_configurations,
-            'runhistory': runhistory,
         }
         if self.get_smac_object_callback is not None:
             smac = self.get_smac_object_callback(**smac_args)
@@ -517,8 +502,9 @@ class AutoMLSMBO(object):
 
         self.runhistory = smac.solver.runhistory
         self.trajectory = smac.solver.intensifier.traj_logger.trajectory
+        self._budget_type = smac.solver.intensifier.tae_runner.budget_type
 
-        return self.runhistory, self.trajectory
+        return self.runhistory, self.trajectory, self._budget_type
 
     def get_metalearning_suggestions(self):
         # == METALEARNING suggestions

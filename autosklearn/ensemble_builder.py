@@ -1,7 +1,8 @@
 # -*- encoding: utf-8 -*-
-
+import numbers
 import multiprocessing
 import glob
+import gzip
 import os
 import re
 import time
@@ -10,6 +11,7 @@ from typing import Optional, Union
 
 import numpy as np
 import pynisher
+import lockfile
 from sklearn.utils.validation import check_random_state
 
 from autosklearn.util.backend import Backend
@@ -32,16 +34,18 @@ class EnsembleBuilder(multiprocessing.Process):
             task_type: int,
             metric: Scorer,
             limit: int,
-            ensemble_size: int=10,
-            ensemble_nbest: int=100,
-            seed: int=1,
-            shared_mode: bool=False,
-            max_iterations: int=None,
-            precision: str="32",
-            sleep_duration: int=2,
-            memory_limit: int=1000,
-            read_at_most: int=5,
-            random_state: Optional[Union[int, np.random.RandomState]]=None,
+            ensemble_size: int = 10,
+            ensemble_nbest: int = 100,
+            max_models_on_disc: int = 100,
+            performance_range_threshold: float = 0,
+            seed: int = 1,
+            shared_mode: bool = False,
+            max_iterations: int = None,
+            precision: str = "32",
+            sleep_duration: int = 2,
+            memory_limit: int = 1000,
+            read_at_most: int = 5,
+            random_state: Optional[Union[int, np.random.RandomState]] = None,
     ):
         """
             Constructor
@@ -60,8 +64,21 @@ class EnsembleBuilder(multiprocessing.Process):
                 time limit in sec
             ensemble_size: int
                 maximal size of ensemble (passed to autosklearn.ensemble.ensemble_selection)
-            ensemble_nbest: int
-                consider only the n best prediction (wrt validation predictions)
+            ensemble_nbest: int/float
+                if int: consider only the n best prediction
+                if float: consider only this fraction of the best models
+                Both wrt to validation predictions
+                If performance_range_threshold > 0, might return less models
+            max_models_on_disc: int
+               Defines the maximum number of models that are kept in the disc.
+               If int, it must be greater or equal than 1. If None, feature is disabled.
+               It defines an upper bound on the models that can be used in the ensemble.
+            performance_range_threshold: float
+                Keep only models that are better than:
+                    dummy + (best - dummy)*performance_range_threshold
+                E.g dummy=2, best=4, thresh=0.5 --> only consider models with score > 3
+                Will at most return the minimum between ensemble_nbest models,
+                and max_models_on_disc. Might return less
             seed: int
                 random seed
                 if set to -1, read files with any seed (e.g., for shared model mode)
@@ -88,7 +105,24 @@ class EnsembleBuilder(multiprocessing.Process):
         self.metric = metric
         self.time_limit = limit  # time limit
         self.ensemble_size = ensemble_size
-        self.ensemble_nbest = ensemble_nbest  # max number of members that will be used for building the ensemble
+        self.performance_range_threshold = performance_range_threshold
+
+        if isinstance(ensemble_nbest, numbers.Integral) and ensemble_nbest < 1:
+            raise ValueError("Integer ensemble_nbest has to be larger 1: %s" %
+                             ensemble_nbest)
+        elif not isinstance(ensemble_nbest, numbers.Integral):
+            if ensemble_nbest < 0 or ensemble_nbest > 1:
+                raise ValueError(
+                    "Float ensemble_nbest best has to be >= 0 and <= 1: %s" %
+                    ensemble_nbest)
+
+        self.ensemble_nbest = ensemble_nbest
+
+        if max_models_on_disc is not None and max_models_on_disc < 1:
+            raise ValueError(
+                "max_models_on_disc has to be a positive number or None"
+            )
+        self.max_models_on_disc = max_models_on_disc
         self.seed = seed
         self.shared_mode = shared_mode  # pSMAC?
         self.max_iterations = max_iterations
@@ -105,7 +139,6 @@ class EnsembleBuilder(multiprocessing.Process):
             '.auto-sklearn',
             'predictions_ensemble',
         )
-
         # validation set (public test set) -- y_true not known
         self.dir_valid = os.path.join(
             self.backend.temporary_directory,
@@ -118,12 +151,19 @@ class EnsembleBuilder(multiprocessing.Process):
             '.auto-sklearn',
             'predictions_test',
         )
-
+        self.dir_models = os.path.join(
+            self.backend.temporary_directory,
+            '.auto-sklearn',
+            'models',
+        )
         logger_name = 'EnsembleBuilder(%d):%s' % (self.seed, self.dataset_name)
         self.logger = get_logger(logger_name)
+        if ensemble_nbest == 1:
+            self.logger.debug("Behaviour depends on int/float: %s, %s (ensemble_nbest, type)" %
+                              (ensemble_nbest, type(ensemble_nbest)))
 
         self.start_time = 0
-        self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)\.npy')
+        self.model_fn_re = re.compile(r'_([0-9]*)_([0-9]*)_([0-9]{1,3}\.[0-9]*)\.npy')
 
         # already read prediction files
         # {"file name": {
@@ -133,14 +173,21 @@ class EnsembleBuilder(multiprocessing.Process):
         #    "mtime_test": str,
         #    "seed": int,
         #    "num_run": int,
+        #    "deleted": bool,
         #    Y_ENSEMBLE: np.ndarray
         #    Y_VALID: np.ndarray
         #    Y_TEST: np.ndarray
+        #    }
         # }
         self.read_preds = {}
         self.last_hash = None  # hash of ensemble training data
         self.y_true_ensemble = None
         self.SAVE2DISC = True
+
+        # hidden feature which can be activated via an environment variable. This keeps all
+        # models and predictions which have ever been a candidate. This is necessary to post-hoc
+        # compute the whole ensemble building trajectory.
+        self._has_been_candidate = set()
 
         self.validation_performance_ = np.inf
 
@@ -157,30 +204,42 @@ class EnsembleBuilder(multiprocessing.Process):
             if safe_ensemble_script.exit_status is pynisher.MemorylimitException:
                 # if ensemble script died because of memory error,
                 # reduce nbest to reduce memory consumption and try it again
-                if self.ensemble_nbest == 1:
-                    self.logger.critical("Memory Exception -- Unable to escape from memory exception")
+                if isinstance(self.ensemble_nbest, numbers.Integral) and \
+                        self.ensemble_nbest == 1:
+                    self.logger.critical("Memory Exception --"
+                                         " Unable to escape from memory exception")
                 else:
-                    self.ensemble_nbest =  int(self.ensemble_nbest/2)
-                    self.logger.warning("Memory Exception -- restart with less ensemle_nbest: %d" %(self.ensemble_nbest ))
+                    if isinstance(self.ensemble_nbest, numbers.Integral):
+                        self.ensemble_nbest = int(self.ensemble_nbest / 2)
+                    else:
+                        self.ensemble_nbest = self.ensemble_nbest / 2
+                    self.logger.warning("Memory Exception -- restart with "
+                                        "less ensemble_nbest: %d" % self.ensemble_nbest)
                     # ATTENTION: main will start from scratch;
                     # all data structures are empty again
                     continue
             break
 
-    def main(self):
+    def main(self, return_pred=False):
+        """
 
+        :param return_pred:
+            return tuple with last valid, test predictions
+        :return:
+        """
         self.start_time = time.time()
         iteration = 0
-
+        valid_pred, test_pred = None, None
         while True:
 
-            #maximal number of iterations
+            # maximal number of iterations
             if (self.max_iterations is not None
                     and 0 < self.max_iterations <= iteration):
                 self.logger.info("Terminate ensemble building because of max iterations: %d of %d",
                                  self.max_iterations,
                                  iteration)
                 break
+            iteration += 1
 
             used_time = time.time() - self.start_time
             self.logger.debug(
@@ -194,50 +253,78 @@ class EnsembleBuilder(multiprocessing.Process):
                 time.sleep(self.sleep_duration)
                 continue
 
-            selected_models = self.get_n_best_preds()
-            if not selected_models:  # nothing selected
+            # Only the models with the n_best predictions are candidates
+            # to be in the ensemble
+            candidate_models = self.get_n_best_preds()
+            if not candidate_models:  # no candidates yet
                 continue
 
             # populates predictions in self.read_preds
             # reduces selected models if file reading failed
-            n_sel_valid, n_sel_test = self.\
-                get_valid_test_preds(selected_keys=selected_models)
+            n_sel_valid, n_sel_test = self. \
+                get_valid_test_preds(selected_keys=candidate_models)
 
-            selected_models_set = set(selected_models)
-            if selected_models_set.intersection(n_sel_test):
-                selected_models = list(selected_models_set.intersection(n_sel_test))
-            elif selected_models_set.intersection(n_sel_valid):
-                selected_models = list(selected_models_set.intersection(n_sel_valid))
+            # If valid/test predictions loaded, then reduce candidate models to this set
+            if len(n_sel_test) != 0 and len(n_sel_valid) != 0 \
+                    and len(set(n_sel_valid).intersection(set(n_sel_test))) == 0:
+                # Both n_sel_* have entries, but there is no overlap, this is critical
+                self.logger.error("n_sel_valid and n_sel_test are not empty, but do "
+                                  "not overlap")
+                time.sleep(self.sleep_duration)
+                continue
+
+            # If any of n_sel_* is not empty and overlaps with candidate_models,
+            # then ensure candidate_models AND n_sel_test are sorted the same
+            candidate_models_set = set(candidate_models)
+            if candidate_models_set.intersection(n_sel_valid).intersection(n_sel_test):
+                candidate_models = sorted(list(candidate_models_set.intersection(
+                    n_sel_valid).intersection(n_sel_test)))
+                n_sel_test = candidate_models
+                n_sel_valid = candidate_models
+            elif candidate_models_set.intersection(n_sel_valid):
+                candidate_models = sorted(list(candidate_models_set.intersection(
+                    n_sel_valid)))
+                n_sel_valid = candidate_models
+            elif candidate_models_set.intersection(n_sel_test):
+                candidate_models = sorted(list(candidate_models_set.intersection(
+                    n_sel_test)))
+                n_sel_test = candidate_models
             else:
-                # use selected_models only defined by ensemble data set
-                pass
+                # This has to be the case
+                n_sel_test = []
+                n_sel_valid = []
+
+            if os.environ.get('ENSEMBLE_KEEP_ALL_CANDIDATES'):
+                for candidate in candidate_models:
+                    self._has_been_candidate.add(candidate)
 
             # train ensemble
-            ensemble = self.fit_ensemble(selected_keys=selected_models)
-
+            ensemble = self.fit_ensemble(selected_keys=candidate_models)
             if ensemble is not None:
-
-                self.predict(set_="valid",
-                             ensemble=ensemble,
-                             selected_keys=n_sel_valid,
-                             n_preds=len(selected_models),
-                             index_run=iteration)
+                # We can't use candidate_models here, as n_sel_* might be empty
+                valid_pred = self.predict(set_="valid",
+                                          ensemble=ensemble,
+                                          selected_keys=n_sel_valid,
+                                          n_preds=len(candidate_models),
+                                          index_run=iteration)
                 # TODO if predictions fails, build the model again during the
                 #  next iteration!
-                self.predict(set_="test",
-                             ensemble=ensemble,
-                             selected_keys=n_sel_test,
-                             n_preds=len(selected_models),
-                             index_run=iteration)
-                iteration += 1
+                test_pred = self.predict(set_="test",
+                                         ensemble=ensemble,
+                                         selected_keys=n_sel_test,
+                                         n_preds=len(candidate_models),
+                                         index_run=iteration)
             else:
                 time.sleep(self.sleep_duration)
+        if return_pred:
+            return valid_pred, test_pred
 
     def read_ensemble_preds(self):
         """
             reading predictions on ensemble building data set;
             populates self.read_preds
         """
+
         self.logger.debug("Read ensemble data set predictions")
 
         if self.y_true_ensemble is None:
@@ -258,37 +345,46 @@ class EnsembleBuilder(multiprocessing.Process):
         if self.shared_mode is False:
             pred_path = os.path.join(
                 glob.escape(self.dir_ensemble),
-                'predictions_ensemble_%s_*.npy' % self.seed,
+                'predictions_ensemble_%s_*_*.npy*' % self.seed,
             )
         # pSMAC
         else:
             pred_path = os.path.join(
                 glob.escape(self.dir_ensemble),
-                'predictions_ensemble_*_*.npy',
+                'predictions_ensemble_*_*_*.npy*',
             )
 
         y_ens_files = glob.glob(pred_path)
+        y_ens_files = [y_ens_file for y_ens_file in y_ens_files
+                       if y_ens_file.endswith('.npy') or y_ens_file.endswith('.npy.gz')]
+        self.y_ens_files = y_ens_files
         # no validation predictions so far -- no files
-        if len(y_ens_files) == 0:
+        if len(self.y_ens_files) == 0:
             self.logger.debug("Found no prediction files on ensemble data set:"
                               " %s" % pred_path)
             return False
 
-        n_read_files = 0
-        for y_ens_fn in y_ens_files:
+        # First sort files chronologically
+        to_read = []
+        for y_ens_fn in self.y_ens_files:
+            match = self.model_fn_re.search(y_ens_fn)
+            _seed = int(match.group(1))
+            _num_run = int(match.group(2))
+            _budget = float(match.group(3))
+            to_read.append([y_ens_fn, match, _seed, _num_run, _budget])
 
+        n_read_files = 0
+        # Now read file wrt to num_run
+        for y_ens_fn, match, _seed, _num_run, _budget in \
+                sorted(to_read, key=lambda x: x[3]):
             if self.read_at_most and n_read_files >= self.read_at_most:
                 # limit the number of files that will be read
                 # to limit memory consumption
                 break
 
-            if not y_ens_fn.endswith(".npy"):
-                self.logger.info('Error loading file (not .npy): %s', y_ens_fn)
+            if not y_ens_fn.endswith(".npy") and not y_ens_fn.endswith(".npy.gz"):
+                self.logger.info('Error loading file (not .npy or .npy.gz): %s', y_ens_fn)
                 continue
-
-            match = self.model_fn_re.search(y_ens_fn)
-            _seed = int(match.group(1))
-            _num_run = int(match.group(2))
 
             if not self.read_preds.get(y_ens_fn):
                 self.read_preds[y_ens_fn] = {
@@ -298,6 +394,7 @@ class EnsembleBuilder(multiprocessing.Process):
                     "mtime_test": 0,
                     "seed": _seed,
                     "num_run": _num_run,
+                    "budget": _budget,
                     Y_ENSEMBLE: None,
                     Y_VALID: None,
                     Y_TEST: None,
@@ -314,9 +411,16 @@ class EnsembleBuilder(multiprocessing.Process):
 
             # actually read the predictions and score them
             try:
-                with open(y_ens_fn, 'rb') as fp:
+                if y_ens_fn.endswith("gz"):
+                    open_method = gzip.open
+                elif y_ens_fn.endswith("npy"):
+                    open_method = open
+                else:
+                    raise ValueError("Unknown filetype %s" % y_ens_fn)
+                with open_method(y_ens_fn, 'rb') as fp:
                     y_ensemble = self._read_np_fn(fp=fp)
-                    score = calculate_score(solution=self.y_true_ensemble,  # y_ensemble = y_true for ensemble set
+                    score = calculate_score(solution=self.y_true_ensemble,
+                                            # y_ensemble = y_true for ensemble set
                                             prediction=y_ensemble,
                                             task_type=self.task_type,
                                             metric=self.metric,
@@ -342,7 +446,7 @@ class EnsembleBuilder(multiprocessing.Process):
 
                     n_read_files += 1
 
-            except:
+            except Exception:
                 self.logger.warning(
                     'Error loading %s: %s',
                     y_ens_fn,
@@ -364,55 +468,95 @@ class EnsembleBuilder(multiprocessing.Process):
             according to score on "ensemble set"
             n: self.ensemble_nbest
 
-            Side effect: delete predictions of non-winning models
+            Side effect: delete predictions of non-candidate models
         """
 
-        # Sort by score - higher is better!
-        sorted_keys = list(reversed(sorted(
-            [
-                (k, v["ens_score"], v["num_run"])
-                for k, v in self.read_preds.items()
-            ],
-            key=lambda x: x[1],
-        )))
+        sorted_keys = self._get_list_of_sorted_preds()
+
+        # number of models available
+        num_keys = len(sorted_keys)
         # remove all that are at most as good as random
-        # note: dummy model must have run_id=1 (there is not run_id=0)
-        dummy_score = list(filter(lambda x: x[2] == 1, sorted_keys))[0]
-        self.logger.debug("Use %f as dummy score" %
-                          dummy_score[1])
+        # note: dummy model must have run_id=1 (there is no run_id=0)
+        dummy_scores = list(filter(lambda x: x[2] == 1, sorted_keys))
+        # number of dummy models
+        num_dummy = len(dummy_scores)
+        dummy_score = dummy_scores[0]
+        self.logger.debug("Use %f as dummy score" % dummy_score[1])
         sorted_keys = filter(lambda x: x[1] > dummy_score[1], sorted_keys)
         # remove Dummy Classifier
         sorted_keys = list(filter(lambda x: x[2] > 1, sorted_keys))
         if not sorted_keys:
             # no model left; try to use dummy score (num_run==0)
-            self.logger.warning("No models better than random - "
-                                "using Dummy Score!")
+            # log warning when there are other models but not better than dummy model
+            if num_keys > num_dummy:
+                self.logger.warning("No models better than random - using Dummy Score!"
+                                    "Number of models besides current dummy model: %d. "
+                                    "Number of dummy models: %d",
+                                    num_keys - 1,
+                                    num_dummy)
             sorted_keys = [
                 (k, v["ens_score"], v["num_run"]) for k, v in self.read_preds.items()
                 if v["seed"] == self.seed and v["num_run"] == 1
             ]
         # reload predictions if scores changed over time and a model is
         # considered to be in the top models again!
-        for k, _, _ in sorted_keys[:self.ensemble_nbest]:
+        if not isinstance(self.ensemble_nbest, numbers.Integral):
+            # Transform to number of models to keep. Keep at least one
+            keep_nbest = max(1, min(len(sorted_keys),
+                                    int(len(sorted_keys) * self.ensemble_nbest)))
+            self.logger.debug(
+                "Library pruning: using only top %f percent of the models for ensemble "
+                "(%d out of %d)",
+                self.ensemble_nbest * 100, keep_nbest, len(sorted_keys)
+            )
+        else:
+            # Keep only at most ensemble_nbest
+            keep_nbest = min(self.ensemble_nbest, len(sorted_keys))
+            self.logger.debug("Library Pruning: using for ensemble only "
+                              " %d (out of %d) models" % (keep_nbest, len(sorted_keys)))
+
+        # One can only read at most max_models_on_disc models
+        if self.max_models_on_disc is not None and keep_nbest > self.max_models_on_disc:
+            self.logger.debug(
+                "Restricting the number of models to %d instead of %d due to argument "
+                "max_models_on_disc",
+                self.max_models_on_disc, keep_nbest,
+            )
+            keep_nbest = self.max_models_on_disc
+
+        for k, _, _ in sorted_keys[:keep_nbest]:
             if self.read_preds[k][Y_ENSEMBLE] is None:
-                self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(fp=k)
+                if k.endswith("gz"):
+                    open_method = gzip.open
+                elif k.endswith("npy"):
+                    open_method = open
+                else:
+                    raise ValueError("Unknown filetype %s" % k)
+                with open_method(k, 'rb') as fp:
+                    self.read_preds[k][Y_ENSEMBLE] = self._read_np_fn(fp=fp)
                 # No need to load valid and test here because they are loaded
                 #  only if the model ends up in the ensemble
             self.read_preds[k]['loaded'] = 1
 
-        # Hack ensemble_nbest to only consider models which are not
-        # significantly worse than the best(and better than random)
-        ensemble_n_best = None
-        # TODO generalize this and re-add
-        # best_loss = 1 - (sorted_keys[0][1] * 2 - 1)
-        # for i in range(1, min(self.ensemble_nbest, len(sorted_keys))):
-        #     current_loss = 1 - (sorted_keys[i][1] * 2 - 1)
-        #     if best_loss * 1.3 < current_loss:
-        #         ensemble_n_best = i
-        #         self.logger.info('Reduce ensemble_nbest to %d!', ensemble_n_best)
-        #         break
-        if ensemble_n_best is None:
-            ensemble_n_best = self.ensemble_nbest
+        # consider performance_range_threshold
+        if self.performance_range_threshold > 0:
+            best_score = sorted_keys[0][1]
+            min_score = dummy_score[1]
+            min_score += (best_score - min_score) * self.performance_range_threshold
+            if sorted_keys[keep_nbest - 1][1] < min_score:
+                # We can further reduce number of models
+                # since worst model is worse than thresh
+                for i in range(0, keep_nbest):
+                    # Look at most at keep_nbest models,
+                    # but always keep at least one model
+                    current_score = sorted_keys[i][1]
+                    if current_score <= min_score:
+                        self.logger.debug("Dynamic Performance range: "
+                                          "Further reduce from %d to %d models",
+                                          keep_nbest, max(1, i))
+                        keep_nbest = max(1, i)
+                        break
+        ensemble_n_best = keep_nbest
 
         # reduce to keys
         sorted_keys = list(map(lambda x: x[0], sorted_keys))
@@ -448,7 +592,8 @@ class EnsembleBuilder(multiprocessing.Process):
         Return
         ------
         success_keys:
-            all keys in selected keys for which we could read the valid and test predictions
+            all keys in selected keys for which we could read the valid and
+            test predictions
         """
         success_keys_valid = []
         success_keys_test = []
@@ -457,19 +602,25 @@ class EnsembleBuilder(multiprocessing.Process):
             valid_fn = glob.glob(
                 os.path.join(
                     glob.escape(self.dir_valid),
-                    'predictions_valid_%d_%d.npy' % (
+                    'predictions_valid_%d_%d_%s.npy*' % (
                         self.read_preds[k]["seed"],
-                        self.read_preds[k]["num_run"])
+                        self.read_preds[k]["num_run"],
+                        self.read_preds[k]["budget"],
+                    )
                 )
             )
+            valid_fn = [vfn for vfn in valid_fn if vfn.endswith('.npy') or vfn.endswith('.npy.gz')]
             test_fn = glob.glob(
                 os.path.join(
                     glob.escape(self.dir_test),
-                    'predictions_test_%d_%d.npy' % (
+                    'predictions_test_%d_%d_%s.npy*' % (
                         self.read_preds[k]["seed"],
-                        self.read_preds[k]["num_run"])
+                        self.read_preds[k]["num_run"],
+                        self.read_preds[k]["budget"]
+                    )
                 )
             )
+            test_fn = [tfn for tfn in test_fn if tfn.endswith('.npy') or tfn.endswith('.npy.gz')]
 
             # TODO don't read valid and test if not changed
             if len(valid_fn) == 0:
@@ -484,12 +635,18 @@ class EnsembleBuilder(multiprocessing.Process):
                     success_keys_valid.append(k)
                     continue
                 try:
-                    with open(valid_fn, 'rb') as fp:
+                    if valid_fn.endswith("gz"):
+                        open_method = gzip.open
+                    elif valid_fn.endswith("npy"):
+                        open_method = open
+                    else:
+                        raise ValueError("Unknown filetype %s" % valid_fn)
+                    with open_method(valid_fn, 'rb') as fp:
                         y_valid = self._read_np_fn(fp)
                         self.read_preds[k][Y_VALID] = y_valid
                         success_keys_valid.append(k)
                         self.read_preds[k]["mtime_valid"] = os.path.getmtime(valid_fn)
-                except Exception as e:
+                except Exception:
                     self.logger.warning('Error loading %s: %s',
                                         valid_fn, traceback.format_exc())
 
@@ -506,18 +663,24 @@ class EnsembleBuilder(multiprocessing.Process):
                     success_keys_test.append(k)
                     continue
                 try:
-                    with open(test_fn, 'rb') as fp:
+                    if test_fn.endswith("gz"):
+                        open_method = gzip.open
+                    elif test_fn.endswith("npy"):
+                        open_method = open
+                    else:
+                        raise ValueError("Unknown filetype %s" % test_fn)
+                    with open_method(test_fn, 'rb') as fp:
                         y_test = self._read_np_fn(fp)
                         self.read_preds[k][Y_TEST] = y_test
                         success_keys_test.append(k)
                         self.read_preds[k]["mtime_test"] = os.path.getmtime(test_fn)
-                except Exception as e:
+                except Exception:
                     self.logger.warning('Error loading %s: %s',
                                         test_fn, traceback.format_exc())
 
         return success_keys_valid, success_keys_test
 
-    def fit_ensemble(self, selected_keys:list):
+    def fit_ensemble(self, selected_keys: list):
         """
             fit ensemble
 
@@ -531,9 +694,14 @@ class EnsembleBuilder(multiprocessing.Process):
             ensemble: EnsembleSelection
                 trained Ensemble
         """
-
         predictions_train = np.array([self.read_preds[k][Y_ENSEMBLE] for k in selected_keys])
-        include_num_runs = [(self.read_preds[k]["seed"], self.read_preds[k]["num_run"]) for k in selected_keys]
+        include_num_runs = [
+            (
+                self.read_preds[k]["seed"],
+                self.read_preds[k]["num_run"],
+                self.read_preds[k]["budget"],
+            )
+            for k in selected_keys]
 
         # check hash if ensemble training data changed
         current_hash = hash(predictions_train.data.tobytes())
@@ -543,6 +711,11 @@ class EnsembleBuilder(multiprocessing.Process):
                 "-- current performance: %f",
                 self.validation_performance_,
             )
+
+            # Delete files of non-candidate models
+            if self.max_models_on_disc is not None:
+                self._delete_excess_models()
+
             return None
         self.last_hash = current_hash
 
@@ -572,22 +745,26 @@ class EnsembleBuilder(multiprocessing.Process):
                 ensemble.get_validation_performance(),
             )
 
-        except ValueError as e:
+        except ValueError:
             self.logger.error('Caught ValueError: %s', traceback.format_exc())
             time.sleep(self.sleep_duration)
             return None
-        except IndexError as e:
+        except IndexError:
             self.logger.error('Caught IndexError: %s' + traceback.format_exc())
             time.sleep(self.sleep_duration)
             return None
+
+        # Delete files of non-candidate models
+        if self.max_models_on_disc is not None:
+            self._delete_excess_models()
 
         return ensemble
 
     def predict(self, set_: str,
                 ensemble: AbstractEnsemble,
                 selected_keys: list,
-                n_preds:int,
-                index_run:int):
+                n_preds: int,
+                index_run: int):
         """
             save preditions on ensemble, validation and test data on disc
 
@@ -623,7 +800,7 @@ class EnsembleBuilder(multiprocessing.Process):
         if n_preds == predictions.shape[0]:
             y = ensemble.predict(predictions)
             if self.task_type == BINARY_CLASSIFICATION:
-                y = y[:,1]
+                y = y[:, 1]
             if self.SAVE2DISC:
                 self.backend.save_predictions_as_txt(
                     predictions=y,
@@ -644,12 +821,141 @@ class EnsembleBuilder(multiprocessing.Process):
             return None
         # TODO: ADD saving of predictions on "ensemble data"
 
+    def _get_list_of_sorted_preds(self):
+        """
+            Returns a list of sorted predictions in descending order
+            Predictions are taken from self.read_preds.
+
+            Parameters
+            ----------
+            None
+
+            Return
+            ------
+            sorted_keys: list
+        """
+        # Sort by score - higher is better!
+        # First sort by num_run
+        sorted_keys = list(reversed(sorted(
+            [
+                (k, v["ens_score"], v["num_run"])
+                for k, v in self.read_preds.items()
+            ],
+            key=lambda x: x[2],
+        )))
+        # Then by score
+        sorted_keys = list(reversed(sorted(sorted_keys, key=lambda x: x[1])))
+        return sorted_keys
+
+    def _delete_excess_models(self):
+        """
+            Deletes models excess models on disc. self.max_models_on_disc
+            defines the upper limit on how many models to keep.
+            Any additional model with a worst score than the top
+            self.max_models_on_disc is deleted.
+
+        """
+
+        # Obtain a list of sorted pred keys
+        sorted_keys = self._get_list_of_sorted_preds()
+        sorted_keys = list(map(lambda x: x[0], sorted_keys))
+
+        if len(sorted_keys) <= self.max_models_on_disc:
+            # Don't waste time if not enough models to delete
+            return
+
+        # The top self.max_models_on_disc models would be the candidates
+        # Any other low performance model will be deleted
+        # The list is in ascending order of score
+        candidates = sorted_keys[:self.max_models_on_disc]
+
+        # Loop through the files currently in the directory
+        for pred_path in self.y_ens_files:
+
+            # Do not delete candidates
+            if pred_path in candidates:
+                continue
+
+            if pred_path in self._has_been_candidate:
+                continue
+
+            match = self.model_fn_re.search(pred_path)
+            _full_name = match.group(0)
+            _seed = match.group(1)
+            _num_run = match.group(2)
+            _budget = match.group(3)
+
+            # Do not delete the dummy prediction
+            if int(_num_run) == 1:
+                continue
+
+            # Besides the prediction, we have to take care of three other files: model,
+            # validation and test.
+            model_name = '%s.%s.%s.model' % (_seed, _num_run, _budget)
+            model_path = os.path.join(self.dir_models, model_name)
+            pred_valid_name = 'predictions_valid' + _full_name
+            pred_valid_path = os.path.join(self.dir_valid, pred_valid_name)
+            pred_test_name = 'predictions_test' + _full_name
+            pred_test_path = os.path.join(self.dir_test, pred_test_name)
+
+            paths = [model_path, pred_path]
+            if os.path.exists(pred_valid_path):
+                paths.append(pred_valid_path)
+            if os.path.exists(pred_test_path):
+                paths.append(pred_test_path)
+
+            # Lets lock all the files "at once" to avoid weird race conditions. Also,
+            # we either delete all files of a model (model, prediction, validation
+            # and test), or delete none. This makes it easier to keep track of which
+            # models have indeed been correctly removed.
+            locks = [lockfile.LockFile(path) for path in paths]
+            try:
+                for lock in locks:
+                    lock.acquire()
+            except Exception as e:
+                if isinstance(e, lockfile.AlreadyLocked):
+                    # If the file is already locked, we deal with it later. Not a big deal
+                    self.logger.info(
+                        'Model %s is already locked. Skipping it for now.', model_name)
+                else:
+                    # Other exceptions, however, should not occur.
+                    # The message bellow is asserted in test_delete_excess_models()
+                    self.logger.error(
+                        'Failed to lock model %s files due to error %s', model_name, e)
+                for lock in locks:
+                    if lock.i_am_locking():
+                        lock.release()
+                continue
+
+            # Delete files if model is not a candidate AND prediction is old. We check if
+            # the prediction is old to avoid deleting a model that hasn't been appreciated
+            # by self.get_n_best_preds() yet.
+            original_timestamp = self.read_preds[pred_path]['mtime_ens']
+            current_timestamp = os.path.getmtime(pred_path)
+            if current_timestamp == original_timestamp:
+                # The messages logged here are asserted in
+                # test_delete_excess_models(). Edit with care.
+                try:
+                    for path in paths:
+                        os.remove(path)
+                    self.logger.info(
+                        "Deleted files of non-candidate model %s", model_name)
+                except Exception as e:
+                    self.logger.error(
+                        "Failed to delete files of non-candidate model %s due"
+                        " to error %s", model_name, e)
+
+            # If we reached this point, all locks were done by this thread. So no need
+            # to check "lock.i_am_locking()" here.
+            for lock in locks:
+                lock.release()
+
     def _read_np_fn(self, fp):
-        if self.precision is "16":
+        if self.precision == "16":
             predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float16)
-        elif self.precision is "32":
+        elif self.precision == "32":
             predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float32)
-        elif self.precision is "64":
+        elif self.precision == "64":
             predictions = np.load(fp, allow_pickle=True).astype(dtype=np.float64)
         else:
             predictions = np.load(fp, allow_pickle=True)

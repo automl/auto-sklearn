@@ -3,15 +3,14 @@
 Random Search
 =============
 
-A crucial feature of *auto-sklearn* is automatically optimizing the hyperparameters
-through SMAC, introduced `here <http://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_.
-Additionally, it is possible to use `random search <http://www.jmlr.org/papers/v13/bergstra12a.html>`_
-instead of SMAC, as demonstrated in the example below.
-Furthermore, the example also demonstrates how to use
+A crucial feature of *auto-sklearn* is automatically optimizing the hyperparameters through SMAC,
+introduced `here <http://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_. Additionally, it
+is possible to use `random search <http://www.jmlr.org/papers/v13/bergstra12a.html>`_ instead of
+SMAC, as demonstrated in the example below. Furthermore, the example also demonstrates how to use
 `Random Online Aggressive Racing (ROAR) <http://ml.informatik.uni-freiburg.de/papers/11-LION5-SMAC.pdf>`_
 as yet another alternative optimizatino strategy.
 Both examples are intended to show how the optimization strategy in *auto-sklearn* can be adapted.
-"""
+"""  # noqa (links are too long)
 
 import sklearn.model_selection
 import sklearn.datasets
@@ -27,9 +26,9 @@ def get_roar_object_callback(
     scenario_dict,
     seed,
     ta,
+    ta_kwargs,
     backend,
     metalearning_configurations,
-    runhistory,
 ):
     """Random online adaptive racing."""
     scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
@@ -38,7 +37,7 @@ def get_roar_object_callback(
         scenario=scenario,
         rng=seed,
         tae_runner=ta,
-        runhistory=runhistory,
+        tae_runner_kwargs=ta_kwargs,
         run_id=seed,
     )
 
@@ -47,9 +46,9 @@ def get_random_search_object_callback(
         scenario_dict,
         seed,
         ta,
+        ta_kwargs,
         backend,
         metalearning_configurations,
-        runhistory,
 ):
     """Random search."""
     scenario_dict['input_psmac_dirs'] = backend.get_smac_output_glob()
@@ -60,7 +59,7 @@ def get_random_search_object_callback(
         scenario=scenario,
         rng=seed,
         tae_runner=ta,
-        runhistory=runhistory,
+        tae_runner_kwargs=ta_kwargs,
         run_id=seed,
     )
 

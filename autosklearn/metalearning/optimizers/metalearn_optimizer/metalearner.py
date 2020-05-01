@@ -34,9 +34,7 @@ class MetaLearningOptimizer(object):
         hp_list = []
         for neighbor in neighbors:
             try:
-                configuration = \
-                    self.meta_base.get_configuration_from_algorithm_index(
-                    neighbor[2])
+                configuration = self.meta_base.get_configuration_from_algorithm_index(neighbor[2])
                 self.logger.info("%s %s %s" % (neighbor[0], neighbor[1], configuration))
             except (KeyError):
                 self.logger.warning("Configuration %s not found" % neighbor[2])
@@ -53,8 +51,7 @@ class MetaLearningOptimizer(object):
 
         history_with_indices = []
         for run in history:
-            history_with_indices.append(\
-                self.meta_base.get_algorithm_index_from_configuration(run))
+            history_with_indices.append(self.meta_base.get_algorithm_index_from_configuration(run))
 
         for idx, neighbor in enumerate(neighbors):
             already_evaluated = False
@@ -68,8 +65,8 @@ class MetaLearningOptimizer(object):
 
             if not already_evaluated:
                 self.logger.info("Nearest dataset with hyperparameters of best value "
-                            "not evaluated yet is %s with a distance of %f" %
-                            (neighbor[0], neighbor[1]))
+                                 "not evaluated yet is %s with a distance of %f" %
+                                 (neighbor[0], neighbor[1]))
                 return self.meta_base.get_configuration_from_algorithm_index(
                     neighbor[2])
         raise StopIteration("No more values available.")
@@ -83,10 +80,10 @@ class MetaLearningOptimizer(object):
         keep = []
         for idx in dataset_metafeatures.index:
             if np.isfinite(dataset_metafeatures.loc[idx]):
-               keep.append(idx)
+                keep.append(idx)
 
         dataset_metafeatures = dataset_metafeatures.loc[keep]
-        all_other_metafeatures = all_other_metafeatures.loc[:,keep]
+        all_other_metafeatures = all_other_metafeatures.loc[:, keep]
 
         # Do mean imputation of all other metafeatures
         all_other_metafeatures = all_other_metafeatures.fillna(
@@ -120,8 +117,11 @@ class MetaLearningOptimizer(object):
 
             kND.fit(all_other_metafeatures, runs)
             self.kND = kND
-        return self.kND.kBestSuggestions(dataset_metafeatures, k=-1,
-            exclude_double_configurations=exclude_double_configurations)
+        return self.kND.kBestSuggestions(
+            dataset_metafeatures,
+            k=-1,
+            exclude_double_configurations=exclude_double_configurations,
+            )
 
     def _split_metafeature_array(self):
         dataset_metafeatures = self.meta_base.get_metafeatures(
