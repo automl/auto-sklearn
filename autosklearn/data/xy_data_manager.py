@@ -26,6 +26,7 @@ class XYDataManager(AbstractDataManager):
         label_num = {
             REGRESSION: 1,
             BINARY_CLASSIFICATION: 2,
+            MULTIOUTPUT_REGRESSION: 5,
             MULTICLASS_CLASSIFICATION: len(np.unique(y)),
             MULTILABEL_CLASSIFICATION: y.shape[-1]
         }

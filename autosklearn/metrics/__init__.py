@@ -57,6 +57,8 @@ class _PredictScorer(Scorer):
         elif type_true == 'multilabel-indicator':
             y_pred[y_pred > 0.5] = 1.0
             y_pred[y_pred <= 0.5] = 0.0
+        elif type_true == 'continuous-multioutput':
+            y_pred = y_pred
         else:
             raise ValueError(type_true)
 
