@@ -922,6 +922,7 @@ class BaseAutoML(AutoML):
 
     def _check_y(self, y):
         y = sklearn.utils.check_array(y, ensure_2d=False)
+        self._n_outputs = y.shape[1]
 
         y = np.atleast_1d(y)
         if y.ndim == 2 and y.shape[1] == 1:
@@ -1115,32 +1116,10 @@ class AutoMLRegressor(BaseAutoML):
             load_models=load_models,
         )
 
-    def fit_ensemble(self, y, task=None, precision=32,
+    def fit_ensemble(self, y, task=None, metric=None, precision='32',
                      dataset_name=None, ensemble_nbest=None,
                      ensemble_size=None):
         y = super()._check_y(y)
-        return super().fit_ensemble(y, task, precision, dataset_name,
-                                    ensemble_nbest, ensemble_size)
 
-    def _process_targets(self, y):
-        y = super()._check_y(y)
-        self._n_outputs = 1 if len(y.shape) == 1 else y.shape[1]
-
-        y = np.copy(y)
-
-        _target = []
-        _n_targets = []
-
-        if self._n_outputs == 1:
-            target_k, y = np.unique(y, return_inverse=True)
-            _target.append(target_k)
-            _n_targets.append(target_k.shape[0])
-        else:
-            for k in range(self._n_outputs):
-                target_k, y[:, k] = np.unique(y[:, k], return_inverse=True)
-                _target.append(target_k)
-                _n_targets.append(target_k.shape[0])
-
-        _n_targets = np.array(_n_targets, dtype=np.int)
-
-        return y, _target, _n_targets
+        return super().fit_ensemble(y, task, metric, precision, dataset_name,
+                                    ensemble_nbest, ensemble_size) 

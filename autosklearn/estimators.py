@@ -791,6 +791,7 @@ class AutoSklearnRegressor(AutoSklearnEstimator):
         # type of data is compatible with auto-sklearn. Legal target
         # types are: continuous, binary, multiclass.
         target_type = type_of_target(y)
+        print(target_type)
         if target_type in ['multilabel-indicator',
                            'unknown',
                            ]:
