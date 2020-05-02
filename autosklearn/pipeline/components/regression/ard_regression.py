@@ -1,11 +1,9 @@
-import numpy as np
-
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UnParametrizedHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
 from autosklearn.util.common import check_for_bool
 
 
@@ -35,7 +33,6 @@ class ARDRegression(AutoSklearnRegressionAlgorithm):
         self.lambda_2 = float(self.lambda_2)
         self.threshold_lambda = float(self.threshold_lambda)
         self.fit_intercept = check_for_bool(self.fit_intercept)
-
 
         self.estimator = sklearn.linear_model.\
             ARDRegression(n_iter=self.n_iter,

@@ -151,6 +151,13 @@ class IterativeComponent(AutoSklearnComponent):
             iteration += 1
         return self
 
+    @staticmethod
+    def get_max_iter():
+        raise NotImplementedError()
+
+    def get_current_iter(self):
+        raise NotImplementedError()
+
 
 class IterativeComponentWithSampleWeight(AutoSklearnComponent):
     def fit(self, X, y, sample_weight=None):
@@ -163,6 +170,13 @@ class IterativeComponentWithSampleWeight(AutoSklearnComponent):
             self.iterative_fit(X, y, n_iter=n_iter, sample_weight=sample_weight)
             iteration += 1
         return self
+
+    @staticmethod
+    def get_max_iter():
+        raise NotImplementedError()
+
+    def get_current_iter(self):
+        raise NotImplementedError()
 
 
 class AutoSklearnClassificationAlgorithm(AutoSklearnComponent):

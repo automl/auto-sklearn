@@ -1,1 +1,1 @@
-from autosklearn.estimators import AutoSklearnRegressor
+from autosklearn.estimators import AutoSklearnRegressor  # noqa (imported but unused)

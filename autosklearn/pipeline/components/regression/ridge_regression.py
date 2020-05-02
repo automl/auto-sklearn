@@ -1,11 +1,8 @@
-import numpy as np
-
 from ConfigSpace.configuration_space import ConfigurationSpace
-from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UnParametrizedHyperparameter
+from ConfigSpace.hyperparameters import UniformFloatHyperparameter, UnParametrizedHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 from autosklearn.util.common import check_for_bool
 
 

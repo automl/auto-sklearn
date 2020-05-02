@@ -1,11 +1,11 @@
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, INPUT, SPARSE
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling \
     import Rescaling
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 
 
 class NoRescalingComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
-    def __init__(self, random_state):
+    def __init__(self, random_state=None):
         pass
 
     def fit(self, X, y=None):
@@ -16,8 +16,8 @@ class NoRescalingComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'MinMaxScaler',
-                'name': 'MinMaxScaler',
+        return {'shortname': 'NoRescaling',
+                'name': 'NoRescaling',
                 'handles_missing_values': False,
                 'handles_nominal_values': False,
                 'handles_numerical_features': True,
@@ -28,7 +28,7 @@ class NoRescalingComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
                 'handles_multiclass': True,
                 'handles_multilabel': True,
                 'is_deterministic': True,
-                # TODO find out of this is right!
+                # TODO find out if this is right!
                 'handles_sparse': True,
                 'handles_dense': True,
                 'input': (SPARSE, DENSE, UNSIGNED_DATA),

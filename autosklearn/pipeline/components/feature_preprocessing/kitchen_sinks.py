@@ -3,7 +3,8 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT
+
 
 class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
 
@@ -12,7 +13,7 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
         gamma: float
                Parameter of the rbf kernel to be approximated exp(-gamma * x^2)
 
-        n_components: int 
+        n_components: int
                Number of components (output dimensionality) used to approximate the kernel
         """
         self.gamma = gamma
@@ -29,7 +30,7 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
             self.gamma, self.n_components, self.random_state)
         self.preprocessor.fit(X)
         return self
-    
+
     def transform(self, X):
         if self.preprocessor is None:
             raise NotImplementedError()

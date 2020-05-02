@@ -1,11 +1,10 @@
 import os
 import unittest
 
-import numpy as np
 import pandas as pd
 
 import autosklearn.pipeline.classification
-from autosklearn.metalearning.metalearning.meta_base import MetaBase, Run
+from autosklearn.metalearning.metalearning.meta_base import MetaBase
 
 
 class MetaBaseTest(unittest.TestCase):
@@ -29,12 +28,12 @@ class MetaBaseTest(unittest.TestCase):
         runs = self.base.get_all_runs()
         self.assertIsInstance(runs, pd.DataFrame)
         # TODO update this ASAP
-        self.assertEqual((120, 120), runs.shape)
+        self.assertEqual((128, 128), runs.shape)
 
     def test_get_runs(self):
         runs = self.base.get_runs('233')
         # TODO update this ASAP
-        self.assertEqual(120, len(runs))
+        self.assertEqual(128, len(runs))
         self.assertIsInstance(runs, pd.Series)
 
     def test_get_metafeatures_single_dataset(self):
@@ -62,4 +61,3 @@ class MetaBaseTest(unittest.TestCase):
                                                   'NumberOfClasses'])
         self.assertIsInstance(mf, pd.DataFrame)
         self.assertEqual(mf.shape, (132, 2))
-

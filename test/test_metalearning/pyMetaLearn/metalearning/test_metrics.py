@@ -1,3 +1,4 @@
+"""
 def test_learned(self):
     kND = KNearestDatasets(metric='learned')
     rf = kND.fit(pd.DataFrame([self.krvskp, self.labor]),
@@ -15,7 +16,7 @@ def test_learned_sparse(self):
     self.assertEqual(kND._learned(self.anneal, self.krvskp), 1.5)
     self.assertEqual(kND._learned(self.anneal, self.labor), 1.5)
 
-"""
+
 def test_feature_selection(self):
     kND = KNearestDatasets(metric='mfs_l1',
                            metric_kwargs={'max_features': 1.0,

@@ -7,7 +7,6 @@ import sklearn.utils
 from ....util.logging_ import get_logger
 
 
-
 class KNearestDatasets(object):
     def __init__(self, metric='l1', random_state=None, metric_params=None):
         self.logger = get_logger(__name__)
@@ -112,7 +111,7 @@ class KNearestDatasets(object):
         assert k == neighbor_indices.shape[1]
 
         rval = [self.metafeatures.index[i]
-                # Neighbor indices is 2d, each row are the indices for one
+                # Neighbor indices is 2d, each row is the indices for one
                 # dataset in x.
                 for i in neighbor_indices[0]]
 
@@ -169,4 +168,3 @@ class KNearestDatasets(object):
         scaled_metafeatures = (scaled_metafeatures - mins) / divisor
         other = (other - mins) / divisor
         return scaled_metafeatures, other
-

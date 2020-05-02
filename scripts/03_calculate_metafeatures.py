@@ -156,7 +156,7 @@ if __name__ == "__main__":
     for idx in metafeature_values.index:
         line = [idx, 1]
         line += [value if np.isfinite(value) else None
-                 for value in metafeature_values.ix[idx, :].values]
+                 for value in metafeature_values.loc[idx, :].values]
         data.append(line)
     arff_object['data'] = data
 

@@ -3,7 +3,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 
 
 class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
@@ -76,4 +76,3 @@ class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
 
         cs.add_hyperparameters([n_estimators, learning_rate, algorithm, max_depth])
         return cs
-

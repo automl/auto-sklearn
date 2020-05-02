@@ -13,7 +13,6 @@ from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.components.classification.adaboost import AdaboostClassifier
 from autosklearn.pipeline.components.classification.decision_tree import DecisionTree
 from autosklearn.pipeline.components.classification.extra_trees import ExtraTreesClassifier
-from autosklearn.pipeline.components.classification.gradient_boosting import GradientBoostingClassifier
 from autosklearn.pipeline.components.classification.random_forest import RandomForest
 from autosklearn.pipeline.components.classification.liblinear_svc import LibLinear_SVC
 from autosklearn.pipeline.components.classification.libsvm_svc import LibSVM_SVC
@@ -21,7 +20,8 @@ from autosklearn.pipeline.components.classification.sgd import SGD
 from autosklearn.pipeline.components.classification.passive_aggressive import PassiveAggressive
 from autosklearn.pipeline.components.feature_preprocessing\
     .extra_trees_preproc_for_classification import ExtraTreesPreprocessorClassification
-from autosklearn.pipeline.components.feature_preprocessing.liblinear_svc_preprocessor import LibLinear_Preprocessor
+from autosklearn.pipeline.components.feature_preprocessing.liblinear_svc_preprocessor import \
+    LibLinear_Preprocessor
 
 
 class BalancingComponentTest(unittest.TestCase):
@@ -62,7 +62,7 @@ class BalancingComponentTest(unittest.TestCase):
                          list(init_params.items())[0])
         init_params, fit_params = balancing.get_weights(
             Y, None, 'liblinear_svc_preprocessor', None, None)
-        self.assertEqual(("preprocessor:class_weight", "balanced"),
+        self.assertEqual(("feature_preprocessor:class_weight", "balanced"),
                          list(init_params.items())[0])
 
     def test_weighting_effect(self):
@@ -75,12 +75,12 @@ class BalancingComponentTest(unittest.TestCase):
                 [('adaboost', AdaboostClassifier, 0.810, 0.735, 3),
                  ('decision_tree', DecisionTree, 0.780, 0.643, 3),
                  ('extra_trees', ExtraTreesClassifier, 0.780, 0.8, 3),
-                 ('random_forest', RandomForest, 0.780, 0.789, 3),
+                 ('random_forest', RandomForest, 0.75, 0.769, 3),
                  ('libsvm_svc', LibSVM_SVC, 0.769, 0.72, 3),
                  ('liblinear_svc', LibLinear_SVC, 0.762, 0.735, 3),
                  ('passive_aggressive', PassiveAggressive, 0.091, 0.762, 3),
                  ('sgd', SGD, 0.818, 0.567, 2)
-                ]:
+                 ]:
             for strategy, acc in [
                 ('none', acc_no_weighting),
                 ('weighting', acc_weighting)
@@ -93,7 +93,7 @@ class BalancingComponentTest(unittest.TestCase):
                 Y_test = data_[1][100:]
 
                 include = {'classifier': [name],
-                           'preprocessor': ['no_preprocessing']}
+                           'feature_preprocessor': ['no_preprocessing']}
                 classifier = SimpleClassificationPipeline(
                     random_state=1, include=include)
                 cs = classifier.get_hyperparameter_search_space()
@@ -137,7 +137,7 @@ class BalancingComponentTest(unittest.TestCase):
                 X_test = data_[0][100:]
                 Y_test = data_[1][100:]
 
-                include = {'classifier': ['sgd'], 'preprocessor': [name]}
+                include = {'classifier': ['sgd'], 'feature_preprocessor': [name]}
 
                 classifier = SimpleClassificationPipeline(
                     random_state=1, include=include)

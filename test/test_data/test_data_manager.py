@@ -1,8 +1,6 @@
-import os
 import unittest
 
 import numpy as np
-from sklearn.utils.testing import assert_array_almost_equal
 
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 
@@ -45,9 +43,9 @@ class CompetitionDataManagerTest(unittest.TestCase):
         self.D._info = {'is_sparse': 0, 'has_missing': 0}
         self.D.perform1HotEncoding()
 
-        assert_array_almost_equal(dataset_train, self.D.data['X_train'])
-        assert_array_almost_equal(dataset_valid, self.D.data['X_valid'])
-        assert_array_almost_equal(dataset_test, self.D.data['X_test'])
+        np.testing.assert_array_almost_equal(dataset_train, self.D.data['X_train'])
+        np.testing.assert_array_almost_equal(dataset_valid, self.D.data['X_valid'])
+        np.testing.assert_array_almost_equal(dataset_test, self.D.data['X_test'])
         self.assertIsInstance(self.D.data['X_train'], np.ndarray)
         self.assertIsInstance(self.D.data['X_valid'], np.ndarray)
         self.assertIsInstance(self.D.data['X_test'], np.ndarray)
@@ -58,9 +56,9 @@ class CompetitionDataManagerTest(unittest.TestCase):
         self.D.perform1HotEncoding()
 
         # Nothing should have happened to the array...
-        assert_array_almost_equal(dataset_train, self.D.data['X_train'])
-        assert_array_almost_equal(dataset_valid, self.D.data['X_valid'])
-        assert_array_almost_equal(dataset_test, self.D.data['X_test'])
+        np.testing.assert_array_almost_equal(dataset_train, self.D.data['X_train'])
+        np.testing.assert_array_almost_equal(dataset_valid, self.D.data['X_valid'])
+        np.testing.assert_array_almost_equal(dataset_test, self.D.data['X_test'])
         self.assertIsInstance(self.D.data['X_train'], np.ndarray)
         self.assertIsInstance(self.D.data['X_valid'], np.ndarray)
         self.assertIsInstance(self.D.data['X_test'], np.ndarray)
@@ -75,19 +73,22 @@ class CompetitionDataManagerTest(unittest.TestCase):
         self.assertIsInstance(self.D.data['X_valid'], np.ndarray)
         self.assertIsInstance(self.D.data['X_test'], np.ndarray)
         # Check if the dimensions are correct
-        self.assertEqual((3, 8), self.D.data['X_train'].shape)
-        self.assertEqual((3, 8), self.D.data['X_valid'].shape)
-        self.assertEqual((3, 8), self.D.data['X_test'].shape)
+        # Two new cols are created (one hot enc.) and one column is dropped
+        # by the variancethreshold
+        self.assertEqual((3, 7), self.D.data['X_train'].shape)
+        self.assertEqual((3, 7), self.D.data['X_valid'].shape)
+        self.assertEqual((3, 7), self.D.data['X_test'].shape)
         # Some tests if encoding works
         self.assertEqual(self.D.data['X_train'][:, :4].max(), 1)
         self.assertEqual(self.D.data['X_valid'][:, :4].min(), 0)
         self.assertEqual(self.D.data['X_test'][:, :4].min(), 0)
         # Test that other stuff is not encoded
-        self.assertEqual(self.D.data['X_train'][0, 4], 2.5)
+        # It was 2.5, but after rescaling it became 1.38
+        self.assertEqual(self.D.data['X_train'][0, 4], 1.3887301496588276)
 
     def test_perform1HotEncoding_binary_data_with_missing_values(self):
         # self.D.feat_type = [N, N, N, N, B, B]
-        #self.D.info = {'is_sparse': 0, 'has_missing': 1}
-        #self.D.perform1HotEncoding()
-        #self.assertEqual((3, 8), self.D.data['X_train'].shape)
+        # self.D.info = {'is_sparse': 0, 'has_missing': 1}
+        # self.D.perform1HotEncoding()
+        # self.assertEqual((3, 8), self.D.data['X_train'].shape)
         pass

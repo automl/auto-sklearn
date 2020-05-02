@@ -20,11 +20,10 @@ class TruncatedSVDComponentTest(PreprocessingTestCase):
                                                            make_sparse=True)
             configuration_space = TruncatedSVD.get_hyperparameter_search_space()
             default = configuration_space.get_default_configuration()
-            preprocessor = TruncatedSVD(random_state=1,
-                                                  **{hp_name: default[hp_name]
-                                                     for hp_name in
-                                                     default if default[
-                                                      hp_name] is not None})
+            preprocessor = TruncatedSVD(
+                random_state=1,
+                **{hp_name: default[hp_name] for hp_name in default if default[hp_name] is not None}
+                )
             preprocessor.fit(X_train, Y_train)
             X_train_trans = preprocessor.transform(X_train)
             X_test_trans = preprocessor.transform(X_test)

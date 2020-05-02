@@ -42,8 +42,7 @@ def create_predict_spearman_rank(metafeatures, experiments, iterator):
             cross_product.append(cross)
     else:
         raise NotImplementedError(iterator)
-    logging.info("Create spearman rank dataset without CV data and %s",
-                iterator)
+    logging.info("Create spearman rank dataset without CV data and %s", iterator)
     logging.info("Using %d datasets", len(dataset_names))
     logging.info("This will results in %d training points", len(cross_product))
 
@@ -80,7 +79,7 @@ def create_predict_spearman_rank(metafeatures, experiments, iterator):
             responses_2[idx] = exp_2.result if np.isfinite(exp_2.result) else 1
 
         rho, p = scipy.stats.spearmanr(responses_1, responses_2)
-        #rho, p = scipy.stats.kendalltau(responses_1, responses_2)
+        # rho, p = scipy.stats.kendalltau(responses_1, responses_2)
         if not np.isfinite(rho):
             rho = 0
 
@@ -129,8 +128,7 @@ def create_predict_spearman_rank_with_cv(cv_metafeatures, cv_experiments,
 
     logging.info("Create spearman rank dataset with CV data %s", iterator)
     logging.info("Using %d datasets", len(dataset_names))
-    logging.info("This will results in %d training points",
-        (len(cross_product) * len(folds_product)))
+    logging.info("This will results in %d training points", len(cross_product) * len(folds_product))
     logging.info("Length of dataset crossproduct %s", len(cross_product))
     logging.info("Length of folds crossproduct %s", len(folds_product))
 
@@ -186,6 +184,7 @@ def create_predict_spearman_rank_with_cv(cv_metafeatures, cv_experiments,
     X = X.iloc[indices]
     Y = Y.iloc[indices]
     return X, Y
+
 
 """
 def create_smac_warmstart_files(context, dataset, output_dir, num_warmstarts):
@@ -351,8 +350,8 @@ if __name__ == "__main__":
     # with the adjustment of Yogotama and Mann
 
     """
-    #X, Y = create_regression_dataset(metafeatures, experiments)
-    #with open("regression_dataset.pkl", "w") as fh:
+    # X, Y = create_regression_dataset(metafeatures, experiments)
+    # with open("regression_dataset.pkl", "w") as fh:
     #    cPickle.dump((X, Y, metafeatures), fh, -1)
 
     """
@@ -390,6 +389,3 @@ if __name__ == "__main__":
     with open(spearman_rank_file, "w") as fh:
         cPickle.dump((X, Y, metafeatures), fh, -1)
     """
-
-
-

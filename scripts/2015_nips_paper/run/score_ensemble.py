@@ -4,8 +4,8 @@ import glob
 import os
 import time
 
+import joblib
 import numpy as np
-import sklearn.externals.joblib as joblib
 
 from autosklearn.ensembles.ensemble_selection import EnsembleSelection
 from autosklearn.metrics import balanced_accuracy

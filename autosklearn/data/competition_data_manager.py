@@ -13,7 +13,7 @@ import scipy.sparse
 from autosklearn.constants import MULTILABEL_CLASSIFICATION, \
     STRING_TO_TASK_TYPES, MULTICLASS_CLASSIFICATION
 from autosklearn.data.abstract_data_manager import AbstractDataManager
-from autosklearn.util import convert_to_num
+from autosklearn.util.data import convert_to_num
 try:
     import autosklearn.data.competition_c_functions as competition_c_functions
 
@@ -123,7 +123,9 @@ def sparse_file_to_sparse_list(filename):
     # if verbose:
     #     print('Converting {} to sparse list'.format(filename))
 
-    _converter = lambda a_: (int(a_[0]), np.float32(float(a_[1])))
+    def _converter(a_):
+        return (int(a_[0]), np.float32(float(a_[1])))
+
     return [[_converter(data[i][j].rstrip().split(':'))
              for j in range(len(data[i])) if data[i][j] != '\n']
             for i in range(len(data))]

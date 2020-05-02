@@ -1,7 +1,10 @@
 # -*- encoding: utf-8 -*-
 from smac.tae.execute_ta_run import StatusType
 
-from autosklearn.evaluation.abstract_evaluator import AbstractEvaluator
+from autosklearn.evaluation.abstract_evaluator import (
+    AbstractEvaluator,
+    _fit_and_suppress_warnings,
+)
 from autosklearn.metrics import calculate_score
 
 
@@ -30,10 +33,9 @@ class TestEvaluator(AbstractEvaluator):
             seed=seed,
             output_y_hat_optimization=False,
             num_run=-1,
-            subsample=None,
             include=include,
             exclude=exclude,
-            disable_file_output= disable_file_output,
+            disable_file_output=disable_file_output,
             init_params=init_params
         )
         self.configuration = configuration
@@ -47,8 +49,8 @@ class TestEvaluator(AbstractEvaluator):
         self.model = self._get_model()
 
     def fit_predict_and_loss(self):
-        self._fit_and_suppress_warnings(self.model, self.X_train, self.Y_train)
-        loss, Y_pred, _, _ =  self.predict_and_loss()
+        _fit_and_suppress_warnings(self.logger, self.model, self.X_train, self.Y_train)
+        loss, Y_pred, _, _ = self.predict_and_loss()
         self.finish_up(
             loss=loss,
             train_loss=None,
@@ -58,6 +60,7 @@ class TestEvaluator(AbstractEvaluator):
             file_output=False,
             final_call=True,
             additional_run_info=None,
+            status=StatusType.SUCCESS,
         )
 
     def predict_and_loss(self, train=False):
@@ -90,10 +93,11 @@ class TestEvaluator(AbstractEvaluator):
 
 
 # create closure for evaluating an algorithm
-# Has a stupid name so nosetests doesn't regard it as a test
+# Has a stupid name so pytest doesn't regard it as a test
 def eval_t(queue, config, backend, metric, seed, num_run, instance,
            all_scoring_functions, output_y_hat_optimization, include,
-           exclude, disable_file_output, init_params=None):
+           exclude, disable_file_output, init_params=None, budget_type=None,
+           budget=None):
     evaluator = TestEvaluator(configuration=config,
                               backend=backend, metric=metric, seed=seed,
                               queue=queue,
@@ -103,5 +107,3 @@ def eval_t(queue, config, backend, metric, seed, num_run, instance,
                               init_params=init_params)
 
     evaluator.fit_predict_and_loss()
-
-

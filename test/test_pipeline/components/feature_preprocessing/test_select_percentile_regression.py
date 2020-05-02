@@ -2,13 +2,17 @@ import unittest
 
 import numpy as np
 
-from autosklearn.pipeline.components.feature_preprocessing.select_percentile_regression import SelectPercentileRegression
+from autosklearn.pipeline.components.feature_preprocessing.select_percentile_regression \
+    import SelectPercentileRegression
 from autosklearn.pipeline.util import _test_preprocessing, get_dataset
 
 
 class SelectPercentileRegressionTest(unittest.TestCase):
     def test_default_configuration(self):
-        transformation, original = _test_preprocessing(dataset="boston", Preprocessor=SelectPercentileRegression)
+        transformation, original = _test_preprocessing(
+            dataset="boston",
+            Preprocessor=SelectPercentileRegression,
+            )
         self.assertEqual(transformation.shape[0], original.shape[0])
         self.assertEqual(transformation.shape[1], int(original.shape[1]/2))
         self.assertFalse((transformation == 0).all())

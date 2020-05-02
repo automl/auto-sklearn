@@ -50,4 +50,3 @@ class KernelPCAComponentTest(PreprocessingTestCase):
     def test_preprocessing_dtype(self):
         super(KernelPCAComponentTest,
               self)._test_preprocessing_dtype(KernelPCA)
-

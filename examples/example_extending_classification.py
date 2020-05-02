@@ -43,8 +43,7 @@ class MLPClassifier(AutoSklearnClassificationAlgorithm):
         self.alpha = float(self.alpha)
 
         from sklearn.neural_network import MLPClassifier
-        hidden_layer_sizes = tuple(self.num_nodes_per_layer \
-                                   for i in range(self.hidden_layer_depth))
+        hidden_layer_sizes = tuple(self.num_nodes_per_layer for i in range(self.hidden_layer_depth))
 
         self.estimator = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes,
                                        activation=self.activation,
@@ -67,7 +66,7 @@ class MLPClassifier(AutoSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname':'MLP Classifier',
+        return {'shortname': 'MLP Classifier',
                 'name': 'MLP CLassifier',
                 'handles_regression': False,
                 'handles_classification': True,

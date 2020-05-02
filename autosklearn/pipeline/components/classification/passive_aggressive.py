@@ -8,9 +8,10 @@ from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
     IterativeComponentWithSampleWeight,
 )
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, PREDICTIONS
 from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.util.common import check_for_bool
+
 
 class PassiveAggressive(
     IterativeComponentWithSampleWeight,
@@ -24,11 +25,18 @@ class PassiveAggressive(
         self.loss = loss
         self.random_state = random_state
         self.estimator = None
+        self.max_iter = self.get_max_iter()
+        self.n_iter_ = None
 
+    @staticmethod
+    def get_max_iter():
+        return 1024
+
+    def get_current_iter(self):
+        return self.n_iter_
 
     def iterative_fit(self, X, y, n_iter=2, refit=False, sample_weight=None):
-        from sklearn.linear_model.passive_aggressive import \
-            PassiveAggressiveClassifier
+        from sklearn.linear_model import PassiveAggressiveClassifier
 
         # Need to fit at least two iterations, otherwise early stopping will not
         # work because we cannot determine whether the algorithm actually
@@ -39,6 +47,7 @@ class PassiveAggressive(
 
         if refit:
             self.estimator = None
+            self.n_iter_ = None
 
         if self.estimator is None:
             self.fully_fit_ = False
@@ -67,7 +76,7 @@ class PassiveAggressive(
         # Fallback for multilabel classification
         if len(y.shape) > 1 and y.shape[1] > 1:
             import sklearn.multiclass
-            self.estimator.max_iter = 50
+            self.estimator.max_iter = self.get_max_iter()
             self.estimator = sklearn.multiclass.OneVsRestClassifier(
                 self.estimator, n_jobs=1)
             self.estimator.fit(X, y)
@@ -75,10 +84,10 @@ class PassiveAggressive(
         else:
             if call_fit:
                 self.estimator.fit(X, y)
+                self.n_iter_ = n_iter
             else:
                 self.estimator.max_iter += n_iter
-                self.estimator.max_iter = min(self.estimator.max_iter,
-                                              1000)
+                self.estimator.max_iter = min(self.estimator.max_iter, self.max_iter)
                 self.estimator._validate_params()
                 lr = "pa1" if self.estimator.loss == "hinge" else "pa2"
                 self.estimator._partial_fit(
@@ -93,9 +102,10 @@ class PassiveAggressive(
                     coef_init=None,
                     intercept_init=None
                 )
+                self.n_iter_ += self.estimator.n_iter_
                 if (
-                    self.estimator.max_iter >= 1000
-                    or n_iter > self.estimator.n_iter_
+                    self.estimator.max_iter >= self.max_iter
+                        or self.estimator.max_iter > self.n_iter_
                 ):
                     self.fully_fit_ = True
 

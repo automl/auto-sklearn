@@ -21,12 +21,12 @@ class TimingTask(object):
 
     def __init__(self, name):
         self._name = name
-        self._cpu_tic = time.clock()
+        self._cpu_tic = time.process_time()
         self._wall_tic = time.time()
 
     def stop(self):
         if not self._cpu_tac:
-            self._cpu_tac = time.clock()
+            self._cpu_tac = time.process_time()
             self._wall_tac = time.time()
             self._cpu_dur = self._cpu_tac - self._cpu_tic
             self._wall_dur = self._wall_tac - self._wall_tic
@@ -96,7 +96,7 @@ class StopWatch:
                 return self._tasks[name].wall_dur
 
     def cpu_elapsed(self, name):
-        tmp = time.clock()
+        tmp = time.process_time()
         if name in self._tasks:
             if not self._tasks[name].cpu_dur:
                 tsk_start = self._tasks[name].cpu_tic

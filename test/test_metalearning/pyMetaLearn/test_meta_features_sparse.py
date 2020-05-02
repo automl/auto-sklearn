@@ -3,19 +3,19 @@ import os
 import sys
 import unittest
 
-# Make the super class importable
-sys.path.append(os.path.dirname(__file__))
-
 import arff
 import numpy as np
 from scipy import sparse
 from sklearn.impute import SimpleImputer
-
-from autosklearn.pipeline.implementations.OneHotEncoder import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 
+from autosklearn.pipeline.components.data_preprocessing.data_preprocessing \
+    import DataPreprocessor
 import autosklearn.metalearning.metafeatures.metafeatures as meta_features
-import test_meta_features
+
+# Make the super class importable
+sys.path.append(os.path.dirname(__file__))
+import test_meta_features  # noqa: E402
 
 
 class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest,
@@ -49,7 +49,7 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest,
         X_sparse[NaNs] = 0
         X_sparse = sparse.csr_matrix(X_sparse)
 
-        ohe = OneHotEncoder(self.categorical)
+        ohe = DataPreprocessor(categorical_features=self.categorical)
         X_transformed = X_sparse.copy()
         X_transformed = ohe.fit_transform(X_transformed)
         imp = SimpleImputer(copy=False)
@@ -71,22 +71,34 @@ class SparseMetaFeaturesTest(test_meta_features.MetaFeaturesTest,
         self.helpers = meta_features.helper_functions
 
         # Precompute some helper functions
-        self.helpers.set_value("PCA", self.helpers["PCA"]
-            (self.X_transformed, self.y))
-        self.helpers.set_value("MissingValues", self.helpers[
-            "MissingValues"](self.X, self.y, self.categorical))
-        self.mf.set_value("NumberOfMissingValues",
-            self.mf["NumberOfMissingValues"](self.X, self.y, self.categorical))
-        self.helpers.set_value("NumSymbols", self.helpers["NumSymbols"](
-            self.X, self.y, self.categorical))
-        self.helpers.set_value("ClassOccurences",
-            self.helpers["ClassOccurences"](self.X, self.y))
-        self.helpers.set_value("Skewnesses",
-            self.helpers["Skewnesses"](self.X_transformed, self.y,
-                                       self.categorical_transformed))
-        self.helpers.set_value("Kurtosisses",
-            self.helpers["Kurtosisses"](self.X_transformed, self.y,
-                                        self.categorical_transformed))
+        self.helpers.set_value(
+            "PCA",
+            self.helpers["PCA"](self.X_transformed, self.y),
+            )
+        self.helpers.set_value(
+            "MissingValues",
+            self.helpers["MissingValues"](self.X, self.y, self.categorical),
+            )
+        self.mf.set_value(
+            "NumberOfMissingValues",
+            self.mf["NumberOfMissingValues"](self.X, self.y, self.categorical),
+            )
+        self.helpers.set_value(
+            "NumSymbols",
+            self.helpers["NumSymbols"](self.X, self.y, self.categorical),
+            )
+        self.helpers.set_value(
+            "ClassOccurences",
+            self.helpers["ClassOccurences"](self.X, self.y),
+            )
+        self.helpers.set_value(
+            "Skewnesses",
+            self.helpers["Skewnesses"](self.X_transformed, self.y, self.categorical_transformed),
+            )
+        self.helpers.set_value(
+            "Kurtosisses",
+            self.helpers["Kurtosisses"](self.X_transformed, self.y, self.categorical_transformed),
+            )
 
     def test_missing_values(self):
         mf = self.helpers["MissingValues"](self.X, self.y, self.categorical)
