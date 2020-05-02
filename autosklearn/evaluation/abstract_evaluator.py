@@ -536,7 +536,7 @@ class AbstractEvaluator(object):
 
     def _ensure_prediction_array_sizes(self, prediction, Y_train):
         num_classes = self.datamanager.info['label_num']
-        multi_type = [MULTICLASS_CLASSIFICATION, MULTIOUTPUT_REGRESSION]
+        multi_type = [MULTICLASS_CLASSIFICATION]
         if self.task_type in multi_type and prediction.shape[1] < num_classes:
             if Y_train is None:
                 raise ValueError('Y_train must not be None!')

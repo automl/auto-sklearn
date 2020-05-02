@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-from autosklearn.constants import MULTIOUTPUT_REGRESSION
 from autosklearn.constants import *
 from autosklearn.pipeline.classification import SimpleClassificationPipeline
 from autosklearn.pipeline.regression import SimpleRegressionPipeline
