@@ -1,14 +1,13 @@
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    CategoricalHyperparameter, UnParametrizedHyperparameter, \
-    UniformIntegerHyperparameter
+    CategoricalHyperparameter, UnParametrizedHyperparameter
 from ConfigSpace.conditions import InCondition, EqualsCondition
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnRegressionAlgorithm,
     IterativeComponent,
 )
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 from autosklearn.util.common import check_for_bool
 
 
@@ -19,6 +18,7 @@ class SGD(
     def __init__(self, loss, penalty, alpha, fit_intercept, tol,
                  learning_rate, l1_ratio=0.15, epsilon=0.1,
                  eta0=0.01, power_t=0.5, average=False, random_state=None):
+        self.max_iter = self.get_max_iter()
         self.loss = loss
         self.penalty = penalty
         self.alpha = alpha
@@ -35,8 +35,12 @@ class SGD(
         self.estimator = None
         self.scaler = None
 
+    @staticmethod
+    def get_max_iter():
+        return 1024
+
     def iterative_fit(self, X, y, n_iter=2, refit=False):
-        from sklearn.linear_model.stochastic_gradient import SGDRegressor
+        from sklearn.linear_model import SGDRegressor
         import sklearn.preprocessing
 
         # Need to fit at least two iterations, otherwise early stopping will not
@@ -86,7 +90,7 @@ class SGD(
             self.estimator.fit(X, Y_scaled)
         else:
             self.estimator.max_iter += n_iter
-            self.estimator.max_iter = min(self.estimator.max_iter, 512)
+            self.estimator.max_iter = min(self.estimator.max_iter, self.max_iter)
             Y_scaled = self.scaler.transform(y.reshape((-1, 1))).ravel()
             self.estimator._validate_params()
             self.estimator._partial_fit(
@@ -101,7 +105,7 @@ class SGD(
                 intercept_init=None
             )
 
-        if self.estimator.max_iter >= 512 or n_iter > self.estimator.n_iter_:
+        if self.estimator.max_iter >= self.max_iter or n_iter > self.estimator.n_iter_:
             self.fully_fit_ = True
 
         return self
@@ -138,10 +142,11 @@ class SGD(
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        loss = CategoricalHyperparameter("loss",
-            ["squared_loss", "huber", "epsilon_insensitive",
-             "squared_epsilon_insensitive"],
-            default_value="squared_loss")
+        loss = CategoricalHyperparameter(
+            "loss",
+            ["squared_loss", "huber", "epsilon_insensitive", "squared_epsilon_insensitive"],
+            default_value="squared_loss",
+            )
         penalty = CategoricalHyperparameter(
             "penalty", ["l1", "l2", "elasticnet"], default_value="l2")
         alpha = UniformFloatHyperparameter(
@@ -170,8 +175,11 @@ class SGD(
 
         # TODO add passive/aggressive here, although not properly documented?
         elasticnet = EqualsCondition(l1_ratio, penalty, "elasticnet")
-        epsilon_condition = InCondition(epsilon, loss,
-            ["huber", "epsilon_insensitive", "squared_epsilon_insensitive"])
+        epsilon_condition = InCondition(
+            epsilon,
+            loss,
+            ["huber", "epsilon_insensitive", "squared_epsilon_insensitive"],
+            )
 
         # eta0 is only relevant if learning_rate!='optimal' according to code
         # https://github.com/scikit-learn/scikit-learn/blob/0.19.X/sklearn/

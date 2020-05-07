@@ -2,9 +2,8 @@ from collections import Counter
 import random
 
 import numpy as np
-from sklearn.utils.validation import check_random_state
 
-from autosklearn.constants import *
+from autosklearn.constants import TASK_TYPES
 from autosklearn.ensembles.abstract_ensemble import AbstractEnsemble
 from autosklearn.metrics import calculate_score
 from autosklearn.metrics import Scorer
@@ -16,10 +15,10 @@ class EnsembleSelection(AbstractEnsemble):
         ensemble_size: int,
         task_type: int,
         metric: Scorer,
-        sorted_initialization: bool=False,
-        bagging: bool=False,
-        mode: str='fast',
-        random_state: np.random.RandomState=None,
+        sorted_initialization: bool = False,
+        bagging: bool = False,
+        mode: str = 'fast',
+        random_state: np.random.RandomState = None,
     ):
         self.ensemble_size = ensemble_size
         self.task_type = task_type
@@ -33,7 +32,7 @@ class EnsembleSelection(AbstractEnsemble):
         self.ensemble_size = int(self.ensemble_size)
         if self.ensemble_size < 1:
             raise ValueError('Ensemble size cannot be less than one!')
-        if not self.task_type in TASK_TYPES:
+        if self.task_type not in TASK_TYPES:
             raise ValueError('Unknown task type %s.' % self.task_type)
         if not isinstance(self.metric, Scorer):
             raise ValueError('Metric must be of type scorer')
@@ -90,14 +89,13 @@ class EnsembleSelection(AbstractEnsemble):
                     ensemble_prediction += pred
                 ensemble_prediction /= s
 
-                weighted_ensemble_prediction = (s / float(s + 1)) * \
-                                               ensemble_prediction
+                weighted_ensemble_prediction = (s / float(s + 1)) * ensemble_prediction
             fant_ensemble_prediction = np.zeros(weighted_ensemble_prediction.shape)
             for j, pred in enumerate(predictions):
                 # TODO: this could potentially be vectorized! - let's profile
                 # the script first!
-                fant_ensemble_prediction[:,:] = weighted_ensemble_prediction + \
-                                             (1. / float(s + 1)) * pred
+                fant_ensemble_prediction[:, :] = \
+                    weighted_ensemble_prediction + (1. / float(s + 1)) * pred
                 scores[j] = self.metric._optimum - calculate_score(
                     solution=labels,
                     prediction=fant_ensemble_prediction,

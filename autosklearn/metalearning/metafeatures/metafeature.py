@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from io import StringIO
 import time
-import types
 
 import arff
 import scipy.sparse
@@ -31,7 +30,7 @@ class AbstractMetaFeature(object):
             else:
                 value = self._calculate(X, y, categorical)
             comment = ""
-        except MemoryError as e:
+        except MemoryError:
             value = None
             comment = "Memory Error"
 
@@ -78,6 +77,7 @@ class MetaFeatureValue(object):
                             [str(self.to_arff_row()[4])] +
                             self.to_arff_row()[5:])
         return repr
+
 
 class DatasetMetafeatures(object):
     def __init__(self, dataset_name, metafeature_values):

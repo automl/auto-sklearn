@@ -8,17 +8,16 @@ import unittest.mock
 
 import numpy as np
 
-this_directory = os.path.dirname(__file__)
-sys.path.append(this_directory)
-
 import pynisher
-from smac.tae.execute_ta_run import StatusType, FirstRunCrashedException, \
-    BudgetExhaustedException
+from smac.tae.execute_ta_run import StatusType, BudgetExhaustedException
 from smac.stats.stats import Stats
 
-from evaluation_util import get_multiclass_classification_datamanager
 from autosklearn.evaluation import ExecuteTaFuncWithQueue
 from autosklearn.metrics import accuracy
+
+this_directory = os.path.dirname(__file__)
+sys.path.append(this_directory)
+from evaluation_util import get_multiclass_classification_datamanager  # noqa E402
 
 
 def safe_eval_success_mock(*args, **kwargs):
@@ -49,13 +48,13 @@ class EvaluationTest(unittest.TestCase):
 
         try:
             shutil.rmtree(self.tmp)
-        except:
+        except Exception:
             pass
 
     def tearDown(self):
         try:
             shutil.rmtree(self.tmp)
-        except:
+        except Exception:
             pass
 
     ############################################################################
@@ -128,13 +127,13 @@ class EvaluationTest(unittest.TestCase):
                                     memory_limit=3072,
                                     metric=accuracy)
 
-        self.assertRaisesRegex(FirstRunCrashedException,
-                               "First run crashed, abort. Please check your "
-                               "setup -- we assume that your "
-                               "defaultconfiguration does not crashes. \(To "
-                               "deactivate this exception, use the SMAC "
-                               "scenario option 'abort_on_first_run_crash'\)",
-                               ta.start, config=None, instance=None, cutoff=30)
+        # The following should not fail because abort on first config crashed is false
+        info = ta.start(config=None, instance=None, cutoff=60)
+        self.assertEqual(info[0], StatusType.CRASHED)
+        self.assertEqual(info[1], 1.0)
+        self.assertIsInstance(info[2], float)
+        self.assertEqual(info[3], {'configuration_origin': 'UNKNOWN',
+                                   'error': "Result queue is empty"})
 
         self.stats.ta_runs += 1
         info = ta.start(config=None, instance=None, cutoff=30)

@@ -4,7 +4,8 @@ import numpy as np
 import scipy.sparse
 import sklearn.preprocessing
 
-from autosklearn.pipeline.components.feature_preprocessing.select_percentile_classification import SelectPercentileClassification
+from autosklearn.pipeline.components.feature_preprocessing.select_percentile_classification \
+   import SelectPercentileClassification
 from autosklearn.pipeline.util import _test_preprocessing, get_dataset
 
 
@@ -15,7 +16,10 @@ class SelectPercentileClassificationTest(unittest.TestCase):
         self.assertEqual(transformation.shape[1], int(original.shape[1]/2))
         self.assertFalse((transformation == 0).all())
 
-        transformation, original = _test_preprocessing(SelectPercentileClassification, make_sparse=True)
+        transformation, original = _test_preprocessing(
+           SelectPercentileClassification,
+           make_sparse=True,
+           )
         self.assertTrue(scipy.sparse.issparse(transformation))
         self.assertEqual(transformation.shape[0], original.shape[0])
         self.assertEqual(transformation.shape[1], int(original.shape[1]/2))
@@ -28,9 +32,10 @@ class SelectPercentileClassificationTest(unittest.TestCase):
         configuration_space = SelectPercentileClassification.get_hyperparameter_search_space()
         default = configuration_space.get_default_configuration()
 
-        preprocessor = SelectPercentileClassification(random_state=1,
-                            **{hp_name: default[hp_name] for hp_name in
-                               default if default[hp_name] is not None})
+        preprocessor = SelectPercentileClassification(
+           random_state=1,
+           **{hp_name: default[hp_name] for hp_name in default if default[hp_name] is not None},
+           )
 
         transformer = preprocessor.fit(X_train, Y_train)
         transformation, original = transformer.transform(X_train), original_X_train

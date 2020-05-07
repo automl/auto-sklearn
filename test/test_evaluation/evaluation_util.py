@@ -1,6 +1,5 @@
 import functools
 import os
-import sys
 import traceback
 import unittest
 
@@ -8,7 +7,8 @@ import numpy as np
 from numpy.linalg import LinAlgError
 import sklearn.datasets
 
-from autosklearn.constants import *
+from autosklearn.constants import \
+    MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION, REGRESSION
 from autosklearn.util.data import convert_to_bin
 from autosklearn.data.competition_data_manager import CompetitionDataManager
 from autosklearn.pipeline.util import get_dataset
@@ -123,13 +123,13 @@ def get_multilabel_classification_datamanager():
     Y_train = Y_train[indices]
 
     Y_train = np.array(convert_to_bin(Y_train, 3))
-    #for i in range(Y_train_.shape[0]):
+    # for i in range(Y_train_.shape[0]):
     #    Y_train_[:, Y_train[i]] = 1
-    #Y_train = Y_train_
+    # Y_train = Y_train_
     Y_test = np.array(convert_to_bin(Y_test, 3))
-    #for i in range(Y_test_.shape[0]):
+    # for i in range(Y_test_.shape[0]):
     #    Y_test_[:, Y_test[i]] = 1
-    #Y_test = Y_test_
+    # Y_test = Y_test_
 
     X_valid = X_test[:25, ]
     Y_valid = Y_test[:25, ]

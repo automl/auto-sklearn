@@ -57,7 +57,7 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
             task_name = entry[-2]
             score = entry[-1].get(str(metric), np.inf)
 
-            if score < best_value:
+            if np.isinf(score) and np.isinf(best_value) or score < best_value:
                 try:
                     best_configuration = Configuration(
                         configuration_space=configuration_space, values=config)
@@ -66,9 +66,11 @@ def retrieve_matadata(validation_directory, metric, configuration_space,
                     pass
 
         if task_name is None:
+            print('Could not find any configuration better than the default configuration!')
             continue
 
         if best_configuration is None:
+            print('Could not find a valid configuration')
             continue
         elif best_configuration in configurations_to_ids:
             config_id = configurations_to_ids[best_configuration]

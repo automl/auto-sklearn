@@ -5,8 +5,9 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA
 from autosklearn.util.common import check_for_bool
+
 
 class PCA(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, keep_variance, whiten, random_state=None):

@@ -3,7 +3,8 @@
 import numpy as np
 from scipy import sparse
 
-from autosklearn.constants import *
+from autosklearn.constants import STRING_TO_TASK_TYPES, REGRESSION, BINARY_CLASSIFICATION, \
+    MULTICLASS_CLASSIFICATION, MULTILABEL_CLASSIFICATION
 from autosklearn.data.abstract_data_manager import AbstractDataManager
 
 
@@ -61,6 +62,6 @@ class XYDataManager(AbstractDataManager):
         if self.feat_type is None:
             self.feat_type = ['Numerical'] * X.shape[1]
         if X.shape[1] != len(self.feat_type):
-            raise ValueError('X and feat type must have the same dimensions, '
+            raise ValueError('X and feat_type must have the same number of columns, '
                              'but are %d and %d.' %
                              (X.shape[1], len(self.feat_type)))

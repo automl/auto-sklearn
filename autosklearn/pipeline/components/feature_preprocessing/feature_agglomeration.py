@@ -8,7 +8,7 @@ from ConfigSpace.forbidden import ForbiddenInClause, \
 
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, INPUT
 
 
 class FeatureAgglomeration(AutoSklearnPreprocessingAlgorithm):
@@ -74,4 +74,3 @@ class FeatureAgglomeration(AutoSklearnPreprocessingAlgorithm):
             ForbiddenEqualsClause(linkage, "ward"))
         cs.add_forbidden_clause(affinity_and_linkage)
         return cs
-

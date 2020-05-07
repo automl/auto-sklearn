@@ -86,5 +86,3 @@ class GMeans(object):
         self.fit(X)
         predictions = self.KMeans.predict(X)
         return predictions
-
-

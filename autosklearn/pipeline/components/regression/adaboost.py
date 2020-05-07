@@ -1,16 +1,13 @@
-import numpy as np
-
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UniformIntegerHyperparameter, CategoricalHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnRegressionAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 
 
 class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
-    def __init__(self, n_estimators, learning_rate, loss, max_depth,
-                 random_state=None):
+    def __init__(self, n_estimators, learning_rate, loss, max_depth, random_state=None):
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
         self.loss = loss
@@ -74,4 +71,3 @@ class AdaboostRegressor(AutoSklearnRegressionAlgorithm):
 
         cs.add_hyperparameters([n_estimators, learning_rate, loss, max_depth])
         return cs
-

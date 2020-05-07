@@ -12,9 +12,10 @@ from autosklearn.pipeline.components.classification.lda import LDA
 from autosklearn.pipeline.components.feature_preprocessing.pca import PCA
 from autosklearn.pipeline.components.feature_preprocessing.truncatedSVD import TruncatedSVD
 from autosklearn.pipeline.components.feature_preprocessing.no_preprocessing import NoPreprocessing
-from autosklearn.pipeline.components.feature_preprocessing.fast_ica import FastICA
-from autosklearn.pipeline.components.feature_preprocessing.random_trees_embedding import RandomTreesEmbedding
+from autosklearn.pipeline.components.feature_preprocessing.random_trees_embedding \
+    import RandomTreesEmbedding
 import autosklearn.pipeline.create_searchspace_util
+
 
 class TestCreateClassificationSearchspace(unittest.TestCase):
     _multiprocess_can_split_ = True
@@ -26,6 +27,7 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
         classifiers = OrderedDict()
         classifiers['lda'] = LDA
         # Sparse + dense
+
         class Preprocessors(object):
             @classmethod
             def get_available_components(self, *args, **kwargs):
@@ -113,7 +115,7 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
         preprocessors_list = ['pa', 'pb']
         classifier_list = ['ca', 'cb', 'cc']
         cs = ConfigurationSpace()
-        preprocessor = CategoricalHyperparameter(name='preprocessor',
+        preprocessor = CategoricalHyperparameter(name='feature_preprocessor',
                                                  choices=preprocessors_list)
         classifier = CategoricalHyperparameter(name='classifier',
                                                choices=classifier_list)
@@ -122,7 +124,7 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
         new_cs = autosklearn.pipeline.create_searchspace_util.add_forbidden(
             conf_space=cs, node_0_list=preprocessors_list,
             node_1_list=classifier_list, matches=m,
-            node_0_name='preprocessor', node_1_name="classifier")
+            node_0_name='feature_preprocessor', node_1_name="classifier")
         self.assertEqual(len(new_cs.forbidden_clauses), 0)
         self.assertIsInstance(new_cs, ConfigurationSpace)
 
@@ -130,7 +132,7 @@ class TestCreateClassificationSearchspace(unittest.TestCase):
         new_cs = autosklearn.pipeline.create_searchspace_util.add_forbidden(
             conf_space=cs, node_0_list=preprocessors_list,
             node_1_list=classifier_list, matches=m,
-            node_0_name='preprocessor', node_1_name="classifier")
+            node_0_name='feature_preprocessor', node_1_name="classifier")
         self.assertEqual(len(new_cs.forbidden_clauses), 1)
         self.assertEqual(new_cs.forbidden_clauses[0].components[0].value, 'cb')
         self.assertEqual(new_cs.forbidden_clauses[0].components[1].value, 'pb')

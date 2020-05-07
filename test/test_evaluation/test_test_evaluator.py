@@ -11,17 +11,19 @@ import unittest.mock
 import numpy as np
 from smac.tae.execute_ta_run import StatusType
 
+from autosklearn.constants import MULTILABEL_CLASSIFICATION, BINARY_CLASSIFICATION, \
+    MULTICLASS_CLASSIFICATION, REGRESSION
+from autosklearn.evaluation.test_evaluator import TestEvaluator, eval_t
+from autosklearn.evaluation.util import read_queue
+from autosklearn.util.pipeline import get_configuration_space
+from autosklearn.util.backend import Backend
+from autosklearn.metrics import accuracy, r2, f1_macro
+
 this_directory = os.path.dirname(__file__)
 sys.path.append(this_directory)
 from evaluation_util import get_dataset_getters, BaseEvaluatorTest, \
-    get_multiclass_classification_datamanager
-from autosklearn.constants import *
-from autosklearn.evaluation.test_evaluator import TestEvaluator, eval_t
-# Otherwise nosetests thinks this is a test to run...
-from autosklearn.evaluation.util import read_queue
-from autosklearn.util.pipeline import get_configuration_space
-from autosklearn.util import Backend
-from autosklearn.metrics import accuracy, r2, f1_macro
+    get_multiclass_classification_datamanager  # noqa (E402: module level import not at top of file)
+
 
 N_TEST_RUNS = 3
 
@@ -87,21 +89,22 @@ class FunctionsTest(unittest.TestCase):
             pass
 
     def test_eval_test(self):
-        eval_t(queue=self.queue,
-               backend=self.backend,
-               config=self.configuration,
-               metric=accuracy,
-               seed=1, num_run=1,
-               all_scoring_functions=False,
-               output_y_hat_optimization=False,
-               include=None,
-               exclude=None,
-               disable_file_output=False,
-               instance=self.dataset_name
+        eval_t(
+            queue=self.queue,
+            backend=self.backend,
+            config=self.configuration,
+            metric=accuracy,
+            seed=1, num_run=1,
+            all_scoring_functions=False,
+            output_y_hat_optimization=False,
+            include=None,
+            exclude=None,
+            disable_file_output=False,
+            instance=self.dataset_name
         )
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
-        self.assertAlmostEqual(rval[0]['loss'], 0.08)
+        self.assertAlmostEqual(rval[0]['loss'], 0.040000000000000036)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)
         self.assertNotIn('bac_metric', rval[0]['additional_run_info'])
 
@@ -122,19 +125,19 @@ class FunctionsTest(unittest.TestCase):
         rval = read_queue(self.queue)
         self.assertEqual(len(rval), 1)
 
-        fixture = {'accuracy': 0.08,
-                   'balanced_accuracy': 0.05555555555555547,
-                   'f1_macro': 0.06734006734006737,
-                   'f1_micro': 0.08,
-                   'f1_weighted': 0.07919191919191915,
-                   'log_loss': 1.128776115477085,
-                   'pac_score': 0.187005982641133,
-                   'precision_macro': 0.06666666666666676,
-                   'precision_micro': 0.08,
-                   'precision_weighted': 0.064,
-                   'recall_macro': 0.05555555555555547,
-                   'recall_micro': 0.08,
-                   'recall_weighted': 0.08,
+        # Note: All metric here should be minimized
+        fixture = {'accuracy': 0.040000000000000036,
+                   'balanced_accuracy': 0.02777777777777779,
+                   'f1_macro': 0.0341005967604433,
+                   'f1_micro': 0.040000000000000036,
+                   'f1_weighted': 0.039693094629155934,
+                   'log_loss': 1.148586485311389,
+                   'precision_macro': 0.03703703703703709,
+                   'precision_micro': 0.040000000000000036,
+                   'precision_weighted': 0.03555555555555556,
+                   'recall_macro': 0.02777777777777779,
+                   'recall_micro': 0.040000000000000036,
+                   'recall_weighted': 0.040000000000000036,
                    'num_run': -1}
 
         additional_run_info = rval[0]['additional_run_info']
@@ -143,5 +146,5 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual(len(additional_run_info), len(fixture) + 1,
                          msg=sorted(additional_run_info.items()))
         self.assertIn('duration', additional_run_info)
-        self.assertAlmostEqual(rval[0]['loss'], 0.08)
+        self.assertAlmostEqual(rval[0]['loss'], 0.040000000000000036)
         self.assertEqual(rval[0]['status'], StatusType.SUCCESS)

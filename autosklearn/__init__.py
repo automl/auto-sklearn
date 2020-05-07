@@ -3,14 +3,14 @@ import os
 import sys
 
 from autosklearn.util import dependencies
-from autosklearn.__version__ import __version__
+from autosklearn.__version__ import __version__  # noqa (imported but unused)
 
 
 __MANDATORY_PACKAGES__ = '''
 numpy>=1.9
-scikit-learn>=0.21.0,<0.22
+scikit-learn>=0.22.0,<0.23
 lockfile>=0.10
-smac>=0.8,<0.9
+smac>=0.12
 pyrfr>=0.6.1,<0.8
 ConfigSpace>=0.4.0,<0.5
 '''

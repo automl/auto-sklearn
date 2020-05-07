@@ -2,7 +2,7 @@
 
 PYTHON ?= python
 CYTHON ?= cython
-NOSETESTS ?= nosetests
+PYTEST ?= python -m pytest
 CTAGS ?= ctags
 
 all: clean inplace test
@@ -21,12 +21,12 @@ doc:
 	cd ..
 
 test-code: in
-	$(NOSETESTS) -s -v test
+	$(PYTEST) -s -v test
 test-doc:
-	$(NOSETESTS) -s -v doc/*.rst
+	$(PYTEST) -s -v doc/*.rst
 
 test-coverage:
 	rm -rf coverage .coverage
-	$(NOSETESTS) -s -v --with-coverage test
+	$(PYTEST) -s -v --with-coverage test
 
 test: test-code test-sphinxext test-doc

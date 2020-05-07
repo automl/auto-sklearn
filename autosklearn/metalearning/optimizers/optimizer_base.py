@@ -5,21 +5,21 @@ import subprocess
 
 
 def _parse_categorical(line):
-# Categorical Lines consist of:
-#
-# <name><w*>{<values>}<w*>[<default>]<*w>#Comment
-# where:
-# <name> - name of parameter.
-# <values> - comma seperated list of values (i.e. a,b,c,d...,z)
-# <default> - default value enclosed in braces.
-# <w*> - zero or more whitespace characters
-    has_comment = False
-    comment = ""
+    # Categorical Lines consist of:
+    #
+    # <name><w*>{<values>}<w*>[<default>]<*w>#Comment
+    # where:
+    # <name> - name of parameter.
+    # <values> - comma seperated list of values (i.e. a,b,c,d...,z)
+    # <default> - default value enclosed in braces.
+    # <w*> - zero or more whitespace characters
+    # has_comment = False
+    # comment = ""
     if "#" in line:
         comment_begins = line.find("#")
         line = line[:comment_begins]
-        comment = line[comment_begins:]
-        has_comment = True
+        # comment = line[comment_begins:]
+        # has_comment = True
 
     if line.count("{") != 1 or line.count("}") != 1:
         raise ValueError("Malformed parameter line %s" % line)
@@ -49,13 +49,13 @@ def parse_hyperparameter_string(param_string):
         # but a little bit more restrictive
         # file: ca.ubc.cs.beta.aclib.configspace.ParamConfigurationSpace.java
         # line 497-546
-        type = ""
+        # type = ""
         if not line.strip():
             continue
         elif line.count("|") == 1:
             pass
-            #print "WARNING: Conditionality is not parsed yet."
-            #od = _parse_conditional(line)
+            # print "WARNING: Conditionality is not parsed yet."
+            # od = _parse_conditional(line)
         elif line.strip()[0] == "{":
             continue
         elif line.count("[") == 2:

@@ -22,7 +22,7 @@ class SelectRatesComponentTest(unittest.TestCase):
         self.assertEqual(transformation.shape[0], original.shape[0])
         self.assertEqual(transformation.shape[1], int(original.shape[1] / 2))
 
-        # Custon preprocessing test to check if clipping to zero works
+        # Custom preprocessing test to check if clipping to zero works
         X_train, Y_train, X_test, Y_test = get_dataset(dataset='digits')
         original_X_train = X_train.copy()
         ss = sklearn.preprocessing.StandardScaler()
@@ -39,7 +39,7 @@ class SelectRatesComponentTest(unittest.TestCase):
         transformation, original = transformer.transform(
             X_train), original_X_train
         self.assertEqual(transformation.shape[0], original.shape[0])
-        # I don't know why its 52 here and not 32 which would be half of the
+        # I don't know why it's 52 here and not 32 which would be half of the
         # number of features. Seems to be related to a runtime warning raised
         #  by sklearn
         self.assertEqual(transformation.shape[1], 52)

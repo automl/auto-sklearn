@@ -35,5 +35,6 @@ class CHelperFunctionTest(unittest.TestCase):
             filename, 670, 20, 0.01)
         self.assertEqual(data.shape, (131, 20))
 
+
 if __name__ == "__main__":
     unittest.main()

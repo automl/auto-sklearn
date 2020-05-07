@@ -1,15 +1,12 @@
-import numpy as np
-
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
-    UniformIntegerHyperparameter, CategoricalHyperparameter, \
-    UnParametrizedHyperparameter, Constant
+    UniformIntegerHyperparameter, CategoricalHyperparameter, UnParametrizedHyperparameter
 
 from autosklearn.pipeline.components.base import (
     AutoSklearnClassificationAlgorithm,
     IterativeComponentWithSampleWeight,
 )
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 from autosklearn.util.common import check_for_bool, check_none
 
@@ -19,14 +16,13 @@ class ExtraTreesClassifier(
     AutoSklearnClassificationAlgorithm,
 ):
 
-    def __init__(self, n_estimators, criterion, min_samples_leaf,
+    def __init__(self, criterion, min_samples_leaf,
                  min_samples_split,  max_features, bootstrap, max_leaf_nodes,
                  max_depth, min_weight_fraction_leaf, min_impurity_decrease,
                  oob_score=False, n_jobs=1, random_state=None, verbose=0,
                  class_weight=None):
 
-        self.n_estimators = int(n_estimators)
-        self.estimator_increment = 10
+        self.n_estimators = self.get_max_iter()
         if criterion not in ("gini", "entropy"):
             raise ValueError("'criterion' is not in ('gini', 'entropy'): "
                              "%s" % criterion)
@@ -53,6 +49,13 @@ class ExtraTreesClassifier(
         self.verbose = int(verbose)
         self.class_weight = class_weight
         self.estimator = None
+
+    @staticmethod
+    def get_max_iter():
+        return 512
+
+    def get_current_iter(self):
+        return self.estimator.n_estimators
 
     def iterative_fit(self, X, y, sample_weight=None, n_iter=1, refit=False):
         from sklearn.ensemble import ExtraTreesClassifier as ETC
@@ -120,7 +123,6 @@ class ExtraTreesClassifier(
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        n_estimators = Constant("n_estimators", 100)
         criterion = CategoricalHyperparameter(
             "criterion", ["gini", "entropy"], default_value="gini")
 
@@ -143,7 +145,7 @@ class ExtraTreesClassifier(
 
         bootstrap = CategoricalHyperparameter(
             "bootstrap", ["True", "False"], default_value="False")
-        cs.add_hyperparameters([n_estimators, criterion, max_features,
+        cs.add_hyperparameters([criterion, max_features,
                                 max_depth, min_samples_split, min_samples_leaf,
                                 min_weight_fraction_leaf, max_leaf_nodes,
                                 min_impurity_decrease, bootstrap])

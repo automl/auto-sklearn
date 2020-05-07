@@ -1,5 +1,4 @@
 import numpy as np
-import unittest
 
 from autosklearn.pipeline.components.feature_preprocessing.no_preprocessing import NoPreprocessing
 from autosklearn.pipeline.util import _test_preprocessing, PreprocessingTestCase
@@ -19,5 +18,3 @@ class NoneComponentTest(PreprocessingTestCase):
 
     def test_preprocessing_dtype(self):
         super(NoneComponentTest, self)._test_preprocessing_dtype(NoPreprocessing)
-
-

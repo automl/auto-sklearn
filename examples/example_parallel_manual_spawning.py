@@ -14,7 +14,7 @@ This example shows how to spawn multiple instances of *Auto-sklearn* which
 share the same output directory and thereby run in parallel. Use this example
 as a starting point to parallelize *Auto-sklearn* across multiple machines.
 To run *Auto-sklearn* on a single machine check out the example
-`Parallel Usage on a single machine`_.
+`Parallel Usage on a single machine <example_parallel_n_jobs.html>`_.
 """
 
 import multiprocessing

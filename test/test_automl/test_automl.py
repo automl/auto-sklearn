@@ -3,6 +3,7 @@ import os
 import pickle
 import sys
 import time
+import glob
 import unittest
 import unittest.mock
 
@@ -11,18 +12,18 @@ import sklearn.datasets
 from smac.scenario.scenario import Scenario
 from smac.facade.roar_facade import ROAR
 
-from autosklearn.util.backend import Backend, BackendContext
+from autosklearn.util.backend import Backend
 from autosklearn.automl import AutoML
 import autosklearn.automl
 from autosklearn.metrics import accuracy
 import autosklearn.pipeline.util as putil
-from autosklearn.util import setup_logger, get_logger, backend
-from autosklearn.constants import *
+from autosklearn.util.logging_ import setup_logger, get_logger
+from autosklearn.constants import MULTICLASS_CLASSIFICATION, BINARY_CLASSIFICATION
 from autosklearn.smbo import load_data
 from smac.tae.execute_ta_run import StatusType
 
 sys.path.append(os.path.dirname(__file__))
-from base import Base
+from base import Base  # noqa (E402: module level import not at top of file)
 
 
 class AutoMLStub(AutoML):
@@ -48,19 +49,25 @@ class AutoMLTest(Base, unittest.TestCase):
 
         failing_model = unittest.mock.Mock()
         failing_model.fit.side_effect = [ValueError(), ValueError(), None]
+        failing_model.fit_transformer.side_effect = [
+            ValueError(), ValueError(), (None, {})]
+        failing_model.get_max_iter.return_value = 100
 
         auto = AutoML(backend_api, 20, 5)
         ensemble_mock = unittest.mock.Mock()
+        ensemble_mock.get_selected_model_identifiers.return_value = [(1, 1, 50.0)]
         auto.ensemble_ = ensemble_mock
-        ensemble_mock.get_selected_model_identifiers.return_value = [1]
+        for budget_type in [None, 'iterations']:
+            auto._budget_type = budget_type
 
-        auto.models_ = {1: failing_model}
+            auto.models_ = {(1, 1, 50.0): failing_model}
 
-        X = np.array([1, 2, 3])
-        y = np.array([1, 2, 3])
-        auto.refit(X, y)
+            X = np.array([1, 2, 3])
+            y = np.array([1, 2, 3])
+            auto.refit(X, y)
 
-        self.assertEqual(failing_model.fit.call_count, 3)
+            self.assertEqual(failing_model.fit.call_count, 3)
+        self.assertEqual(failing_model.fit_transformer.call_count, 3)
 
         del auto
         self._tearDown(backend_api.temporary_directory)
@@ -114,11 +121,57 @@ class AutoMLTest(Base, unittest.TestCase):
         self._tearDown(backend_api.temporary_directory)
         self._tearDown(backend_api.output_directory)
 
+    def test_delete_non_candidate_models(self):
+        backend_api = self._create_backend(
+            'test_delete', delete_tmp_folder_after_terminate=False)
+
+        seed = 555
+        X, Y, _, _ = putil.get_dataset('iris')
+        automl = autosklearn.automl.AutoML(
+            backend_api,
+            time_left_for_this_task=30,
+            per_run_time_limit=5,
+            ensemble_nbest=3,
+            seed=seed,
+            initial_configurations_via_metalearning=0,
+            resampling_strategy='holdout',
+            include_estimators=['sgd'],
+            include_preprocessors=['no_preprocessing']
+        )
+
+        automl.fit(X, Y, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
+                   X_test=X, y_test=Y)
+
+        # Assert at least one model file has been deleted and that there were no
+        # deletion errors
+        log_file_path = glob.glob(os.path.join(
+            backend_api.temporary_directory, 'AutoML(' + str(seed) + '):*.log'))
+        with open(log_file_path[0]) as log_file:
+            log_content = log_file.read()
+            self.assertIn('Deleted files of non-candidate model', log_content)
+            self.assertNotIn('Failed to delete files of non-candidate model', log_content)
+            self.assertNotIn('Failed to lock model', log_content)
+
+        # Assert that the files of the models used by the ensemble weren't deleted
+        model_files = backend_api.list_all_models(seed=seed)
+        model_files_idx = set()
+        for m_file in model_files:
+            # Extract the model identifiers from the filename
+            m_file = os.path.split(m_file)[1].replace('.model', '').split('.', 2)
+            model_files_idx.add((int(m_file[0]), int(m_file[1]), float(m_file[2])))
+        ensemble_members_idx = set(automl.ensemble_.identifiers_)
+        self.assertTrue(ensemble_members_idx.issubset(model_files_idx))
+
+        del automl
+        self._tearDown(backend_api.temporary_directory)
+        self._tearDown(backend_api.output_directory)
+
     def test_fit_roar(self):
         def get_roar_object_callback(
                 scenario_dict,
                 seed,
                 ta,
+                ta_kwargs,
                 **kwargs
         ):
             """Random online adaptive racing.
@@ -129,6 +182,7 @@ class AutoMLTest(Base, unittest.TestCase):
                 scenario=scenario,
                 rng=seed,
                 tae_runner=ta,
+                tae_runner_kwargs=ta_kwargs,
             )
 
         backend_api = self._create_backend('test_fit_roar')
@@ -215,21 +269,21 @@ class AutoMLTest(Base, unittest.TestCase):
 
         # At least one ensemble, one validation, one test prediction and one
         # model and one ensemble
-        fixture = os.listdir(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                          'predictions_ensemble'))
-        self.assertIn('predictions_ensemble_100_1.npy', fixture)
+        fixture = os.listdir(os.path.join(backend_api.temporary_directory,
+                                          '.auto-sklearn', 'predictions_ensemble'))
+        self.assertGreater(len(fixture), 0)
 
-        fixture = os.listdir(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                          'models'))
-        self.assertIn('100.1.model', fixture)
+        fixture = glob.glob(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
+                                         'models', '100.*.model'))
+        self.assertGreater(len(fixture), 0)
 
-        fixture = os.listdir(os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                          'ensembles'))
-        self.assertIn('100.0000000000.ensemble', fixture)
+        fixture = os.listdir(os.path.join(backend_api.temporary_directory,
+                                          '.auto-sklearn', 'ensembles'))
+        self.assertIn('100.0000000001.ensemble', fixture)
 
         # Start time
-        start_time_file_path = os.path.join(backend_api.temporary_directory, '.auto-sklearn',
-                                            "start_time_100")
+        start_time_file_path = os.path.join(backend_api.temporary_directory,
+                                            '.auto-sklearn', "start_time_100")
         with open(start_time_file_path, 'r') as fh:
             start_time = float(fh.read())
         self.assertGreaterEqual(time.time() - start_time, 10)
@@ -260,7 +314,7 @@ class AutoMLTest(Base, unittest.TestCase):
                                                          '.auto-sklearn')))
             self.assertTrue(os.path.exists(os.path.join(
                 backend_api.temporary_directory, '.auto-sklearn', 'predictions_ensemble',
-                'predictions_ensemble_1_1.npy')))
+                'predictions_ensemble_1_1_0.0.npy')))
 
             del auto
             self._tearDown(backend_api.temporary_directory)
@@ -337,5 +391,5 @@ class AutoMLTest(Base, unittest.TestCase):
         self._tearDown(backend_api.output_directory)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()

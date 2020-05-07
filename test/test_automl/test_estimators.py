@@ -5,6 +5,7 @@ import unittest
 import unittest.mock
 
 import sklearn
+import joblib
 
 import numpy as np
 import numpy.ma as npma
@@ -20,9 +21,10 @@ from autosklearn.metrics import accuracy, f1_macro, mean_squared_error
 from autosklearn.automl import AutoMLClassifier, AutoML
 from autosklearn.util.backend import Backend, BackendContext
 from autosklearn.constants import BINARY_CLASSIFICATION
-from base import Base
 
 sys.path.append(os.path.dirname(__file__))
+from base import Base  # noqa (E402: module level import not at top of file)
+
 
 class ArrayReturningDummyPredictor(object):
     def __init__(self, test):
@@ -56,46 +58,56 @@ class EstimatorTest(Base, unittest.TestCase):
     def test_pSMAC_wrong_arguments(self):
         X = np.zeros((100, 100))
         y = np.zeros((100, ))
-        self.assertRaisesRegexp(ValueError,
-                                "If shared_mode == True tmp_folder must not "
-                                "be None.",
-                                lambda shared_mode:
-                                AutoSklearnClassifier(
-                                    shared_mode=shared_mode,
-                                ).fit(X, y),
-                                shared_mode=True)
+        self.assertRaisesRegex(
+            ValueError,
+            "If shared_mode == True tmp_folder must not "
+            "be None.",
+            lambda shared_mode:
+            AutoSklearnClassifier(
+                shared_mode=shared_mode,
+            ).fit(X, y),
+            shared_mode=True
+        )
 
-        self.assertRaisesRegexp(ValueError,
-                                "If shared_mode == True output_folder must not "
-                                "be None.",
-                                lambda shared_mode, tmp_folder:
-                                AutoSklearnClassifier(
-                                    shared_mode=shared_mode,
-                                    tmp_folder=tmp_folder,
-                                ).fit(X, y),
-                                shared_mode=True,
-                                tmp_folder='/tmp/duitaredxtvbedb')
+        self.assertRaisesRegex(
+            ValueError,
+            "If shared_mode == True output_folder must not "
+            "be None.",
+            lambda shared_mode, tmp_folder:
+            AutoSklearnClassifier(
+                shared_mode=shared_mode,
+                tmp_folder=tmp_folder,
+            ).fit(X, y),
+            shared_mode=True,
+            tmp_folder='/tmp/duitaredxtvbedb'
+        )
 
     def test_feat_type_wrong_arguments(self):
         cls = AutoSklearnClassifier()
         X = np.zeros((100, 100))
         y = np.zeros((100, ))
-        self.assertRaisesRegexp(ValueError,
-                                'Array feat_type does not have same number of '
-                                'variables as X has features. 1 vs 100.',
-                                cls.fit,
-                                X=X, y=y, feat_type=[True])
+        self.assertRaisesRegex(
+            ValueError,
+            'Array feat_type does not have same number of '
+            'variables as X has features. 1 vs 100.',
+            cls.fit,
+            X=X, y=y, feat_type=[True]
+        )
 
-        self.assertRaisesRegexp(ValueError,
-                                'Array feat_type must only contain strings.',
-                                cls.fit,
-                                X=X, y=y, feat_type=[True]*100)
+        self.assertRaisesRegex(
+            ValueError,
+            'Array feat_type must only contain strings.',
+            cls.fit,
+            X=X, y=y, feat_type=[True]*100
+        )
 
-        self.assertRaisesRegexp(ValueError,
-                                'Only `Categorical` and `Numerical` are '
-                                'valid feature types, you passed `Car`',
-                                cls.fit,
-                                X=X, y=y, feat_type=['Car']*100)
+        self.assertRaisesRegex(
+            ValueError,
+            'Only `Categorical` and `Numerical` are '
+            'valid feature types, you passed `Car`',
+            cls.fit,
+            X=X, y=y, feat_type=['Car']*100
+        )
 
     # Mock AutoSklearnEstimator.fit so the test doesn't actually run fit().
     @unittest.mock.patch('autosklearn.estimators.AutoSklearnEstimator.fit')
@@ -177,29 +189,32 @@ class EstimatorTest(Base, unittest.TestCase):
         reg = AutoSklearnRegressor()
         # Illegal target types for regression: multiclass-multioutput,
         # multilabel-indicator, continuous-multioutput.
-        self.assertRaisesRegex(ValueError,
-                               "regression with data of type"
-                               " multiclass-multioutput is not supported",
-                               reg.fit,
-                               X=X,
-                               y=y_multiclass_multioutput,
-                               )
+        self.assertRaisesRegex(
+            ValueError,
+            "regression with data of type"
+            " multiclass-multioutput is not supported",
+            reg.fit,
+            X=X,
+            y=y_multiclass_multioutput,
+        )
 
-        self.assertRaisesRegex(ValueError,
-                               "regression with data of type"
-                               " multilabel-indicator is not supported",
-                               reg.fit,
-                               X=X,
-                               y=y_multilabel,
-                               )
+        self.assertRaisesRegex(
+            ValueError,
+            "regression with data of type"
+            " multilabel-indicator is not supported",
+            reg.fit,
+            X=X,
+            y=y_multilabel,
+        )
 
-        self.assertRaisesRegex(ValueError,
-                               "regression with data of type"
-                               " continuous-multioutput is not supported",
-                               reg.fit,
-                               X=X,
-                               y=y_continuous_multioutput,
-                               )
+        self.assertRaisesRegex(
+            ValueError,
+            "regression with data of type"
+            " continuous-multioutput is not supported",
+            reg.fit,
+            X=X,
+            y=y_continuous_multioutput,
+        )
         # Legal target types: continuous, binary, multiclass
         try:
             reg.fit(X, y_continuous)
@@ -285,7 +300,7 @@ class EstimatorTest(Base, unittest.TestCase):
             tmp,
             '.auto-sklearn',
             'predictions_ensemble',
-            'predictions_ensemble_1_00030.npy',
+            'predictions_ensemble_0_999_0.0.npy',
         )
         with open(dummy_predictions_path, 'wb') as fh:
             np.save(fh, probas)
@@ -297,7 +312,8 @@ class EstimatorTest(Base, unittest.TestCase):
         dummy = ArrayReturningDummyPredictor(probas_test)
         context = BackendContext(tmp, output, False, False, True)
         backend = Backend(context)
-        backend.save_model(dummy, 30, 1)
+        model_path = backend.get_model_path(seed=0, idx=999, budget=0.0)
+        backend.save_model(model=dummy, filepath=model_path)
 
         automl = AutoSklearnClassifier(
             time_left_for_this_task=30,
@@ -581,9 +597,9 @@ class AutoMLClassifierTest(Base, unittest.TestCase):
         # Test joblib
         dump_file = os.path.join(output, 'automl.dump.joblib')
 
-        sklearn.externals.joblib.dump(automl, dump_file)
+        joblib.dump(automl, dump_file)
 
-        restored_automl = sklearn.externals.joblib.load(dump_file)
+        restored_automl = joblib.load(dump_file)
 
         restored_predictions = restored_automl.predict(X_test)
         restored_accuracy = sklearn.metrics.accuracy_score(Y_test,

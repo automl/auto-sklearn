@@ -8,7 +8,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
     UnParametrizedHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
-from autosklearn.pipeline.constants import *
+from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.util.common import check_for_bool, check_none
 
@@ -106,10 +106,10 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         decision = self.estimator.decision_function(X)
         return softmax(decision)
 
-
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'LibSVM-SVC',
+        return {
+            'shortname': 'LibSVM-SVC',
             'name': 'LibSVM Support Vector Classification',
             'handles_regression': False,
             'handles_classification': True,
